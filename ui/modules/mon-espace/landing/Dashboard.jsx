@@ -1,7 +1,8 @@
 import React from "react";
-import { Heading, Stack } from "@chakra-ui/react";
-import { SimpleFiltersProvider } from "./common/SimpleFiltersContext.js";
-import IndicateursInfo from "./common/IndicateursInfos.jsx";
+import { Heading, Stack, Text } from "@chakra-ui/react";
+// import { SimpleFiltersProvider } from "./common/SimpleFiltersContext.js";
+// import IndicateursInfo from "./common/IndicateursInfos.jsx";
+import ViewSelection from "./visualiser-les-indicateurs/ViewSelection.jsx";
 
 const Dashboard = () => {
   return (
@@ -10,9 +11,13 @@ const Dashboard = () => {
         Bienvenue sur votre tableau de bord
       </Heading>
 
-      <SimpleFiltersProvider>
+      <Text marginTop="3v" fontSize="gamma" color="grey.800">
+        Quelle vue souhaitez-vous afficher ?
+      </Text>
+      <ViewSelection />
+      {/* <SimpleFiltersProvider>
         <IndicateursInfo />
-      </SimpleFiltersProvider>
+      </SimpleFiltersProvider> */}
     </Stack>
   );
 };
