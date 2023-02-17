@@ -33,7 +33,7 @@ const CfaPrivateViewPage = ({ match }) => {
     // eslint-disable-next-line
   }, [cfaAccessToken]);
 
-  if (pageState === PAGE_STATES.error) return <Redirect to="/404"></Redirect>;
+  if (pageState === PAGE_STATES.error) return <Redirect to="/404" />;
 
   if (pageState === PAGE_STATES.ready) {
     const uai = auth?.sub;

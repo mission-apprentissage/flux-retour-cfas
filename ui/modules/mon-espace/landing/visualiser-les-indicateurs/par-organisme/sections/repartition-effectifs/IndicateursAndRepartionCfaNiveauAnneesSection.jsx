@@ -35,9 +35,9 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
       : mapFiltersToApiFormat(filters);
 
   return (
-    <Section paddingY="4w" marginTop={hasMultipleSirets == false ? "-85px" : ""}>
+    <Section paddingY="4w" marginTop={!hasMultipleSirets ? "-85px" : ""}>
       <Tabs isLazy lazyBehavior="keepMounted">
-        <TabList borderBottom={hasMultipleSirets == false ? "0px" : "1px solid"}>
+        <TabList borderBottom={!hasMultipleSirets ? "0px" : "1px solid"}>
           <Tab fontWeight="bold" fontSize="delta">
             Vue globale
           </Tab>

@@ -14,18 +14,17 @@ const ReseauSelectPanel = ({ onReseauClick, value }) => {
         Sélectionner un réseau
       </Heading>
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-        {reseaux &&
-          reseaux.map((reseau) => (
-            <FilterOption
-              key={reseau.id}
-              onClick={() => {
-                onReseauClick(reseau);
-              }}
-              isSelected={value?.id === reseau.id}
-            >
-              {reseau.nom}
-            </FilterOption>
-          ))}
+        {reseaux?.map((reseau) => (
+          <FilterOption
+            key={reseau.id}
+            onClick={() => {
+              onReseauClick(reseau);
+            }}
+            isSelected={value?.id === reseau.id}
+          >
+            {reseau.nom}
+          </FilterOption>
+        ))}
       </List>
     </div>
   );

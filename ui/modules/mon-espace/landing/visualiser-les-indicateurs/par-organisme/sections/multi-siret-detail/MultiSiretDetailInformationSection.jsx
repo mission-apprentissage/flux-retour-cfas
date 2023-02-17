@@ -18,7 +18,7 @@ const MultiSiretDetailInformationSection = ({ sirets }) => {
   return (
     <Section paddingY="2w">
       <HStack marginBottom="2w">
-        <Box as="i" className="ri-arrow-left-line" marginRight="1w"></Box>
+        <Box as="i" className="ri-arrow-left-line" marginRight="1w" />
         <Link
           onClick={() => {
             filtersContext.setters.setSousEtablissement(null);
