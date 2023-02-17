@@ -102,6 +102,7 @@ export const REGIONS = [
     code: "00",
   },
 ];
+
 export const REGIONS_BY_ID = REGIONS.reduce((acc, region) => {
   acc[region.code] = region;
   return acc;
