@@ -1,8 +1,8 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
-import { fetchEffectifsNational } from "../api/tableauDeBord";
-import { QUERY_KEYS } from "../constants/queryKeys";
-import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
+import { fetchEffectifsNational } from "@/common/api/tableauDeBord";
+import { QUERY_KEYS } from "@/common/constants/queryKeys";
+import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 
 const useFetchEffectifsNational = (date) => {
   const requestFilters = mapFiltersToApiFormat({ date });

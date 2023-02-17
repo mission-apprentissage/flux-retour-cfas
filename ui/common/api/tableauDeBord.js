@@ -55,7 +55,27 @@ export const fetchSearchCfas = async (filters) => {
   return await _post("/api/cfas/search", filters);
 };
 
+/* Formations Search */
+export const fetchSearchFormations = async (filters) => {
+  return await _post("/api/formations/search", filters);
+};
+
 /* Utilisateurs */
 export const fetchUsers = async () => {
   return await _get("/api/v1/admin/users");
+};
+
+export const fetchTotalOrganismes = (filters) => {
+  return _get(`/api/effectifs/total-organismes?${stringify(filters)}`);
+};
+
+/* Formations */
+export const fetchFormation = (formationCfd) => {
+  return _get(`/api/formations/${formationCfd}`);
+};
+
+/* CFAs */
+export const fetchCfa = (cfaUai) => {
+  const url = `/api/cfas/${cfaUai}`;
+  return _get(url);
 };

@@ -2,9 +2,9 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsParAnneeFormation } from "../../../api/tableauDeBord";
-import { QUERY_KEYS } from "../../../constants/queryKeys";
+import { QUERY_KEYS } from "../@/common/constants/queryKeys";
 import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
 import { pick } from "../../../utils/pick";
 import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";

@@ -2,7 +2,7 @@ import { Tbody, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../modules/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../../common/utils/dateUtils";
 import NumberValueCell from "../NumberValueCell";
 import Table from "../Table";

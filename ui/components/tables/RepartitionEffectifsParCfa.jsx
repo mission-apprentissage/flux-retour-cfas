@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-import { useFiltersContext } from "../../modules/visualiser-les-indicateurs/FiltersContext";
-import { mapNatureOrganismeDeFormation } from "../../modules/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
-import { isDateFuture } from "../../common/utils/dateUtils";
-import { navigateToOrganismePage } from "../../common/utils/routing";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import { mapNatureOrganismeDeFormation } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
+import { isDateFuture } from "@/common/utils/dateUtils";
+import { navigateToOrganismePage } from "@/common/utils/routing";
 import NatureOrganismeDeFormationWarning from "../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";

@@ -2,7 +2,7 @@ import { Box, Link, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../modules/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { mapNatureOrganismeDeFormation } from "../../../modules/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
 import { isDateFuture } from "../../../common/utils/dateUtils";
 import NatureOrganismeDeFormationWarning from "../../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";

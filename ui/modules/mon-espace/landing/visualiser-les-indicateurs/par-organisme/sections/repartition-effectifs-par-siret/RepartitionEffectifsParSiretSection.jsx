@@ -12,7 +12,10 @@ import useAuth from "@/hooks/useAuth";
 import useFetchEffectifsParSiret from "@/hooks/useFetchEffectifsParSiret";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import { InfoLine } from "../../../../../../theme/components/icons";
-import { filtersPropTypes, useFiltersContext } from "../../../../../app/visualiser-les-indicateurs/FiltersContext";
+import {
+  filtersPropTypes,
+  useFiltersContext,
+} from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 
 const RepartitionEffectifsParSiretSection = ({ filters, namedDataDownloadMode = false }) => {
   const { data, loading, error } = useFetchEffectifsParSiret(filters);

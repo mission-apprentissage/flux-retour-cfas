@@ -3,7 +3,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useHistory } from "react-router-dom";
 
-import { useFiltersContext } from "../../../modules/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsParCfa } from "../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
