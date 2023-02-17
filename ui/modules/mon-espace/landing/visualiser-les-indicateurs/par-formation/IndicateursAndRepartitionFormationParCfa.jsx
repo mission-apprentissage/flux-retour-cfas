@@ -2,13 +2,13 @@ import { Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react
 import PropTypes from "prop-types";
 import React from "react";
 
-import { fetchEffectifsDataListCsvExport } from "../../../../common/api/tableauDeBord";
-import { Section } from "../../../../common/components";
-import DownloadBlock from "../../../../common/components/DownloadBlock/DownloadBlock";
-import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
-import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
-import useFetchOrganismesCount from "../../../../common/hooks/useFetchOrganismesCount";
-import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { fetchEffectifsDataListCsvExport } from "@/common/api/tableauDeBord";
+import Section from "@/components/Section/Section";
+import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
+import RepartitionEffectifsParCfa from "@/components/tables/RepartitionEffectifsParCfa";
+import useFetchEffectifsParCfa from "@/hooks/useFetchEffectifsParCfa";
+import useFetchOrganismesCount from "@/hooks/useFetchOrganismesCount";
+import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";

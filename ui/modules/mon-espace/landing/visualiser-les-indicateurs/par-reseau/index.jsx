@@ -1,7 +1,7 @@
 import React from "react";
 
-import { getAuthUserNetwork, getAuthUserRole } from "../../../../common/auth/auth";
-import { roles } from "../../../../common/auth/roles";
+import { getAuthUserNetwork, getAuthUserRole } from "@/common/auth/auth";
+import { roles } from "@/common/auth/roles";
 import { FiltersProvider, getDefaultState } from "../FiltersContext";
 import IndicateursVueReseauPage from "./IndicateursVueReseauPage";
 

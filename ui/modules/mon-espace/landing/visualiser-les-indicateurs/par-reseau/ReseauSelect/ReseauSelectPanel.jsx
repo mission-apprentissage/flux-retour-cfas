@@ -2,7 +2,7 @@ import { Heading, List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { FilterOption } from "../../../../../common/components";
+import FilterOption from "@/components/FilterOption/FilterOption";
 import useReseauxData from "./useReseauxData";
 
 const ReseauSelectPanel = ({ onReseauClick, value }) => {

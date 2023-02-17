@@ -1,9 +1,13 @@
 import { Box, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
-import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
-import useEffectifs from "../../../../common/hooks/useEffectifs";
+import BreadcrumbNav from "@/components/BreadcrumbNav/BreadcrumbNav";
+import FormationFilter from "@/components/FormationFilter/FormationFilter";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import TerritoireFilter from "@/components/TerritoireFilter/TerritoireFilter";
+import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
+import useEffectifs from "@/hooks/useEffectifs";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import IndicateursAndRepartitionEffectifsTerritoire from "./IndicateursAndRepartitionEffectifsTerritoire";

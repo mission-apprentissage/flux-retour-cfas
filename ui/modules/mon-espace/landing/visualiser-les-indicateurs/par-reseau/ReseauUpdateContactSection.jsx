@@ -1,8 +1,8 @@
 import { Link, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { Section } from "../../../../common/components";
-import { CONTACT_ADDRESS } from "../../../../common/constants/product";
+import Section from "@/components/Section/Section";
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 
 const ReseauUpdateContactSection = () => {
   return (

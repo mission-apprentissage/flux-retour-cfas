@@ -3,11 +3,11 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { fetchEffectifsDataListCsvExport } from "../../../../common/api/tableauDeBord";
-import { Section } from "../../../../common/components";
-import DownloadBlock from "../../../../common/components/DownloadBlock/DownloadBlock";
-import useFetchOrganismesCount from "../../../../common/hooks/useFetchOrganismesCount";
-import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { fetchEffectifsDataListCsvExport } from "@/common/api/tableauDeBord";
+import Section from "@/components/Section/Section";
+import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
+import useFetchOrganismesCount from "@/hooks/useFetchOrganismesCount";
+import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";

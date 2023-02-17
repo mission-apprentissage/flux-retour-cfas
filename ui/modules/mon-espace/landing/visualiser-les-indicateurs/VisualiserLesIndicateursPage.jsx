@@ -1,8 +1,10 @@
 import { Heading, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../../common/components";
-import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
+import BreadcrumbNav from "@/components/BreadcrumbNav/BreadcrumbNav";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import ViewSelection from "./ViewSelection";
 
 const VisualiserLesIndicateursPage = () => {

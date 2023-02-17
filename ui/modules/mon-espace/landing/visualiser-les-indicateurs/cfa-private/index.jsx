@@ -2,8 +2,8 @@ import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { Redirect } from "react-router";
 
-import useAuth from "../../../../common/hooks/useAuth";
-import { _post } from "../../../../common/httpClient";
+import useAuth from "@/hooks/useAuth";
+import { _post } from "@/common/httpClient";
 import { FiltersProvider, getDefaultState } from "../../../app/visualiser-les-indicateurs/FiltersContext";
 import CfaPrivateView from "./CfaPrivateView";
 

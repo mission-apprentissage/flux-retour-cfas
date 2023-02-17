@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import useEffectifs from "../../../../common/hooks/useEffectifs";
+import useEffectifs from "@/hooks/useEffectifs";
 import { filtersPropTypes } from "../FiltersContext";
 import { infosCfaPropType } from "./propTypes";
 import {

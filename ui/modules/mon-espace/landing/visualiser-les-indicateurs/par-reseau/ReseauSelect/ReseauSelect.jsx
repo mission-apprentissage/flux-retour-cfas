@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { OverlayMenu, PrimarySelectButton } from "../../../../../common/components";
+import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
+import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
 import ReseauSelectPanel from "./ReseauSelectPanel";
 
 const ReseauSelect = ({ onReseauChange, value }) => {

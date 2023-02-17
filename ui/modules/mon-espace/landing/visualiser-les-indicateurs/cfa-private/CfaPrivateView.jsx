@@ -2,9 +2,10 @@ import { Heading } from "@chakra-ui/layout";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Page, Section } from "../../../../common/components";
-import useEffectifs from "../../../../common/hooks/useEffectifs";
-import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import useEffectifs from "@/hooks/useEffectifs";
+import useFetchCfaInfo from "@/hooks/useFetchCfaInfo";
 import { useFiltersContext } from "../FiltersContext";
 import {
   CfaInformationSection,

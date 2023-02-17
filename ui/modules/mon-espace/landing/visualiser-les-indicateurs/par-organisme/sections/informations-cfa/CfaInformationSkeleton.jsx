@@ -1,7 +1,7 @@
 import { Skeleton } from "@chakra-ui/react";
 import React from "react";
 
-import { Section } from "../../../../../../common/components";
+import Section from "@/components/Section/Section";
 
 const CfaInformationSkeleton = () => {
   return (
