@@ -1,26 +1,40 @@
-import qs from "query-string";
+import { stringify } from "query-string";
 
 import { _delete, _get, _post } from "../httpClient";
+import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
-// TODO Rename & Refacto
+// FIXME les routes ont été renommées effectifs -> indicateurs
+
+export const fetchEffectifs = (filters) => {
+  return _get(`/api/indicateurs?${stringify(stringify(mapFiltersToApiFormat(filters)))}`);
+};
+
 export const fetchEffectifsParCfa = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs/cfa?${queryParameters}`;
-  return _get(url);
+  return _get(`/api/indicateurs/cfa?${stringify(filters)}`);
 };
 
-// TODO Rename & Refacto
+export const fetchEffectifsParSiret = (filters) => {
+  return _get(`/api/indicateurs/siret?${stringify(filters)}`);
+};
+
 export const fetchEffectifsParFormation = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs/formation?${queryParameters}`;
-  return _get(url);
+  return _get(`/api/indicateurs/formation?${stringify(filters)}`);
 };
 
-// TODO Rename & Refacto
+export const fetchEffectifsParNiveauFormation = (filters) => {
+  return _get(`/api/indicateurs/niveau-formation?${stringify(filters)}`);
+};
+
 export const fetchEffectifsParAnneeFormation = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs/annee-formation?${queryParameters}`;
-  return _get(url);
+  return _get(`/api/indicateurs/annee-formation?${stringify(filters)}`);
+};
+
+export const fetchEffectifsParDepartement = (filters) => {
+  return _get(`/api/indicateurs/departement?${stringify(filters)}`);
+};
+
+export const fetchEffectifsNational = (filters) => {
+  return _get(`/api/indicateurs-national?${stringify(filters)}`);
 };
 
 export const postCreateReseauCfa = (body) => {
