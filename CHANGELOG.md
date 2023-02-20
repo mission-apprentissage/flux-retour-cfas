@@ -1,3 +1,30 @@
+# [3.9.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.8.0...v3.9.0) (2023-02-20)
+
+
+### Bug Fixes
+
+* afficher les effectifs apres premiere transmission ([#2586](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2586)) ([5da4d55](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5da4d55f26e354c0a097abe007ba9b581ec85fa2))
+* bug mineurs dans la UI ([#2596](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2596)) ([acd8d6d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/acd8d6d9695e4b92f3378d3a4820b3694ec0a51d))
+* fix les liens ERPS qui sont cassés ([#2610](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2610)) ([39daf32](https://github.com/mission-apprentissage/flux-retour-cfas/commit/39daf32aabea9733536183f56a7a9a2a9cd33337))
+* fix shimataro/ssh-key-action version ([#2585](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2585)) ([97b5943](https://github.com/mission-apprentissage/flux-retour-cfas/commit/97b59432d0f8966ddaea4f83ffbc57cb96a25500))
+* focus sur l'utilisateur crée ([#2574](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2574)) ([05a6315](https://github.com/mission-apprentissage/flux-retour-cfas/commit/05a6315cd68abf0cbf2d43d4af9713f2fbf208f3))
+* mot de passe perdu devrait etre case insensitive ([#2582](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2582)) ([69ac038](https://github.com/mission-apprentissage/flux-retour-cfas/commit/69ac038cadc2e6a0c9d039c94d710df7b674d5c3))
+* remise en place du cron pour import en recette ([#2522](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2522)) ([197d6ce](https://github.com/mission-apprentissage/flux-retour-cfas/commit/197d6ce9a09956972b47371394f05899bcbf2818))
+* **server:** changement de la méthode de calcul du nb d'organismes transmettant au tdb ([#2602](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2602)) ([058d5a5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/058d5a508db62edc9e59ee061d7f8c54a5cf088a))
+* **server:** correction des migrations en filtrant sur les organismes avec siret ([#2601](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2601)) ([73f29e7](https://github.com/mission-apprentissage/flux-retour-cfas/commit/73f29e73ba4ef7130db371cfcff938aec647ed3e))
+* **server:** hydrate organisme job & fiabilisation reseaux ([#2584](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2584)) ([8cadeb5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8cadeb5f2db7a83d9e7dd1f0025083e07591f32a))
+* **server:** maj du csv de réseaux aden en supprimant les entrées CCI ([#2616](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2616)) ([03949dc](https://github.com/mission-apprentissage/flux-retour-cfas/commit/03949dc699999243049f26efbec4c228173b9eea))
+* **server:** migration drop useless collection if exists ([#2609](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2609)) ([585bd1d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/585bd1d47323f968a05790fdade88998b5b728b4))
+* **server:** modification & simplification des création / maj d'organismes ([#2598](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2598)) ([0701e80](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0701e80de85fd28f93391678dce3d426549f8d7a))
+
+
+### Features
+
+* affichage des régions dans l'email de validation de l'admin ([#2575](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2575)) ([0279b3a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0279b3a5f55c1ce31069a08cf276192c4215bb03))
+* affichage des régions dans l'email de validation de l'admin ([#2597](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2597)) ([c7c8a4b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c7c8a4b387f8a44c59150c203d873146ce246982))
+* ajout info progression upload ([#2565](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2565)) ([632d6ce](https://github.com/mission-apprentissage/flux-retour-cfas/commit/632d6ce574adc6c5a83988dfbfab9ca010f52cea))
+* **server:** ajout de typescript ([#2604](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2604)) ([f0eb9a4](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f0eb9a4e364b0561cdeaca582312cd7a24c57562))
+
 # [3.8.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.2...v3.8.0) (2023-02-13)
 
 
