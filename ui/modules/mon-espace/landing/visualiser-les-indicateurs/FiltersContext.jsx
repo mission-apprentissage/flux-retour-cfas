@@ -82,7 +82,7 @@ const isStateValid = (state) => {
 
 export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }) => {
   const router = useRouter();
-  const currentQueryString = typeof window !== "undefined" ? window.history?.location?.search?.slice(1) : ""; // not available in ssr
+  const currentQueryString = typeof window !== "undefined" ? window.location?.search?.slice(1) : ""; // not available in ssr
 
   const updateUrlWithState = (state) => {
     // in some cases, we want some fields in the state to never change (network for a network user for example)
