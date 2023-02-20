@@ -93,7 +93,7 @@ export default ({ cfas }) => {
           domainesMetiers: cfaFound.metiers,
           uai: cfaFound.uai,
           nature: cfaFound.nature,
-          natureValidityWarning: cfaFound.nature_validity_warning,
+          nature_validity_warning: cfaFound.nature_validity_warning,
           sousEtablissements,
           adresse: cfaFound.adresse,
         });

@@ -32,14 +32,14 @@ const CfasRows = ({ departementCode }) => {
   return (
     <>
       {sortAlphabeticallyBy("nom_etablissement", data).map(
-        ({ uai_etablissement, siret_etablissement, nom_etablissement, nature, natureValidityWarning, effectifs }) => {
+        ({ uai_etablissement, siret_etablissement, nom_etablissement, nature, nature_validity_warning, effectifs }) => {
           return (
             <CfaRow
               uai_etablissement={uai_etablissement}
               nom_etablissement={nom_etablissement}
               siret_etablissement={siret_etablissement}
               nature={nature}
-              natureValidityWarning={natureValidityWarning}
+              nature_validity_warning={nature_validity_warning}
               effectifs={effectifs}
               key={uai_etablissement}
               onCfaClick={() => {

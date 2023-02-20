@@ -42,7 +42,7 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
   }
 
   if (infosCfa) {
-    const { uai, sousEtablissements, nature, natureValidityWarning, reseaux, adresse, domainesMetiers } = infosCfa;
+    const { uai, sousEtablissements, nature, nature_validity_warning, reseaux, adresse, domainesMetiers } = infosCfa;
     const multipleSirets = sousEtablissements.length > 1;
     const siretToDisplay = sousEtablissements[0]?.siret_etablissement
       ? formatSiretSplitted(sousEtablissements[0]?.siret_etablissement)
@@ -85,7 +85,7 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
               >
                 {mapNatureOrganismeDeFormation(nature)}
               </Badge>
-              {natureValidityWarning && <NatureOrganismeDeFormationWarning />}
+              {nature_validity_warning && <NatureOrganismeDeFormationWarning />}
             </HStack>
           </HStack>
           <OrganismeDeFormationReseauAndAdresse

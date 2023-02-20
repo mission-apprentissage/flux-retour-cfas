@@ -34,7 +34,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
             nom_etablissement,
             siret_etablissement,
             nature,
-            natureValidityWarning,
+            nature_validity_warning,
             effectifs,
           } = item;
           return (
@@ -56,7 +56,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
               </Td>
               <Td color="grey.800">
                 {mapNatureOrganismeDeFormation(nature)}{" "}
-                {natureValidityWarning && (
+                {nature_validity_warning && (
                   <span style={{ verticalAlign: "middle" }}>
                     <NatureOrganismeDeFormationWarning />
                   </span>

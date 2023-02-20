@@ -19,7 +19,7 @@ const CfaRow = ({
   siret_etablissement,
   nom_etablissement,
   nature,
-  natureValidityWarning,
+  nature_validity_warning,
   effectifs,
   onCfaClick,
 }) => {
@@ -40,7 +40,7 @@ const CfaRow = ({
       </Td>
       <Td color="grey.800" whiteSpace="nowrap">
         {mapNatureOrganismeDeFormation(nature)}{" "}
-        {natureValidityWarning && (
+        {nature_validity_warning && (
           <span style={{ verticalAlign: "middle" }}>
             <NatureOrganismeDeFormationWarning />
           </span>
@@ -63,7 +63,7 @@ CfaRow.propTypes = {
   nom_etablissement: PropTypes.string.isRequired,
   siret_etablissement: PropTypes.arrayOf(PropTypes.string).isRequired,
   nature: PropTypes.string.isRequired,
-  natureValidityWarning: PropTypes.bool.isRequired,
+  nature_validity_warning: PropTypes.bool.isRequired,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     inscritsSansContrat: PropTypes.number.isRequired,

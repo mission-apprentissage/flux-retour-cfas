@@ -92,7 +92,7 @@ export default function OrganismeInfo({ isMine }) {
     _id: organismeId,
     uai,
     nature,
-    natureValidityWarning,
+    nature_validity_warning,
     siret,
     ferme,
     enseigne,
@@ -162,7 +162,7 @@ export default function OrganismeInfo({ isMine }) {
                   />
                 </Tooltip>
               )}
-              {natureValidityWarning && <NatureOrganismeDeFormationWarning />}
+              {nature_validity_warning && <NatureOrganismeDeFormationWarning />}
             </HStack>
           </HStack>
 
