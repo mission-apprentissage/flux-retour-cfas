@@ -50,8 +50,8 @@ const RepartitionEffectifsParDepartement = ({ effectifs, loading, error }) => {
 RepartitionEffectifsParDepartement.propTypes = {
   effectifs: PropTypes.arrayOf(
     PropTypes.shape({
-      uai_etablissement: PropTypes.string,
-      nom_etablissement: PropTypes.string.isRequired,
+      etablissement_nom_departement: PropTypes.string.isRequired,
+      etablissement_num_departement: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
         inscritsSansContrat: PropTypes.number.isRequired,
