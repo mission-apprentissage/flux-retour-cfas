@@ -61,7 +61,7 @@ const CfaRow = ({
 CfaRow.propTypes = {
   uai_etablissement: PropTypes.string,
   nom_etablissement: PropTypes.string.isRequired,
-  siret_etablissement: PropTypes.arrayOf(PropTypes.string).isRequired,
+  siret_etablissement: PropTypes.string.isRequired,
   nature: PropTypes.string.isRequired,
   nature_validity_warning: PropTypes.bool.isRequired,
   effectifs: PropTypes.shape({

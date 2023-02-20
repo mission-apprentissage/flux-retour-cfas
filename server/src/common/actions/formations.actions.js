@@ -1,7 +1,7 @@
 import { validateCfd } from "../utils/validationsUtils/cfd.js";
 import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
-import { formationsDb, dossiersApprenantsMigrationDb } from "../model/collections.js";
+import { formationsDb, dossiersApprenantsMigrationDb, effectifsDb } from "../model/collections.js";
 import { validateFormation } from "../model/formations.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { ObjectId } from "mongodb";
@@ -164,14 +164,14 @@ export const updateFormation = async (id, { cfd, duree = null, annee = null, ...
 };
 
 /**
- * Returns list of formations whose matching search criteria
- * @param {Object} searchCriteria
+ * Returns list of formations that match the search criteria
+ * @param {import("./formations.actions.js").FormationsSearch} searchCriteria
  * @return {Promise<Object[]>} Array of formations
  */
 export const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
 
-  const eligibleCfds = await dossiersApprenantsMigrationDb().distinct("formation_cfd", otherFilters);
+  const eligibleCfds = await effectifsDb().distinct("formation.cfd", otherFilters); // FIXME: use effectifs or formations ?
 
   const matchStage = searchTerm
     ? {
