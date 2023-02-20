@@ -186,25 +186,33 @@ export default () => {
         "organisme.uai": 1,
         "organisme.siret": 1,
         "organisme.nom": 1,
+        "organisme.nature": 1,
+        "organisme.nature_validity_warning": 1,
       },
       groupedBy: {
         _id: { $first: "$organisme.uai" },
         // we will send information about the organisme along with the grouped effectifs so we project it
         nom_etablissement: { $first: { $first: "$organisme.nom" } },
         siret_etablissement: { $first: { $first: "$organisme.siret" } },
+        nature: { $first: { $first: "$organisme.nature" } },
+        nature_validity_warning: { $first: { $first: "$organisme.nature_validity_warning" } },
       },
     });
-    return effectifsCountByCfa.map(({ _id: uai, nom_etablissement, siret_etablissement, ...effectifs }) => ({
-      uai_etablissement: uai,
-      siret_etablissement,
-      nom_etablissement,
-      effectifs: {
-        apprentis: effectifs.apprentis || 0,
-        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-        rupturants: effectifs.rupturants || 0,
-        abandons: effectifs.abandons || 0,
-      },
-    }));
+    return effectifsCountByCfa.map(
+      ({ _id: uai, nom_etablissement, siret_etablissement, nature, nature_validity_warning, ...effectifs }) => ({
+        uai_etablissement: uai,
+        siret_etablissement,
+        nom_etablissement,
+        nature,
+        nature_validity_warning,
+        effectifs: {
+          apprentis: effectifs.apprentis || 0,
+          inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+          rupturants: effectifs.rupturants || 0,
+          abandons: effectifs.abandons || 0,
+        },
+      })
+    );
   };
 
   /**
