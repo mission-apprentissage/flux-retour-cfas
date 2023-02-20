@@ -2,7 +2,6 @@ import { Box, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import BreadcrumbNav from "@/components/BreadcrumbNav/BreadcrumbNav";
 import FormationFilter from "@/components/FormationFilter/FormationFilter";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
@@ -13,6 +12,7 @@ import SwitchViewButton from "../SwitchViewButton";
 import ReseauSelect from "./ReseauSelect/ReseauSelect";
 import ReseauSelectPanel from "./ReseauSelect/ReseauSelectPanel";
 import ReseauViewContent from "./ReseauViewContent";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
@@ -22,9 +22,7 @@ const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
   return (
     <Page>
       <Section paddingY="3w">
-        <BreadcrumbNav
-          links={[NAVIGATION_PAGES.VisualiserLesIndicateurs, NAVIGATION_PAGES.VisualiserLesIndicateursParReseau]}
-        />
+        <Breadcrumb pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParReseau]} />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
           <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.title}</Heading>
           <SwitchViewButton />

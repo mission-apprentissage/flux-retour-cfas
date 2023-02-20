@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowDropRightLine } from "../../theme/components/icons";
 import { BreadcrumbItem, BreadcrumbLink, Breadcrumb as ChakraBreadcrumb } from "@chakra-ui/react";
 import NavLink from "next/link";
+import PropTypes from "prop-types";
 
 export const PAGES = {
   monEspace: () => ({ title: "Mon espace", to: "/mon-espace/mon-organisme" }),
@@ -17,7 +18,7 @@ const Breadcrumb = ({ pages }) => {
       color={"grey.800"}
     >
       {pages?.map((page, index) => {
-        if (index === pages.length - 1 || !page.to) {
+        if (index === pages.length - 1 || !(page.to || page.path)) {
           return (
             <BreadcrumbItem key={page.title} isCurrentPage>
               <BreadcrumbLink textDecoration="none" _hover={{ textDecoration: "none" }} cursor="default">
@@ -30,7 +31,7 @@ const Breadcrumb = ({ pages }) => {
             <BreadcrumbItem key={page.title}>
               <BreadcrumbLink
                 as={NavLink}
-                href={page.to}
+                href={page.to || page.path}
                 color={"grey.600"}
                 textDecoration="underline"
                 _focus={{ boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" }}
@@ -46,4 +47,13 @@ const Breadcrumb = ({ pages }) => {
   );
 };
 
+Breadcrumb.propTypes = {
+  pages: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      path: PropTypes.string, // FIXME
+      to: PropTypes.string, // FIXME revoir toute la navigation et harmoniser path et to
+    }).isRequired
+  ).isRequired,
+};
 export default Breadcrumb;

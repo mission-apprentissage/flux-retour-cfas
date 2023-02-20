@@ -1,7 +1,6 @@
 import { Box, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
-import BreadcrumbNav from "@/components/BreadcrumbNav/BreadcrumbNav";
 import FormationFilter from "@/components/FormationFilter/FormationFilter";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
@@ -13,6 +12,7 @@ import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import IndicateursAndRepartitionFormationParCfa from "./IndicateursAndRepartitionFormationParCfa";
 import InfosFormationSection from "./InfosFormationSection";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 const IndicateursVueFormationPage = () => {
   const filtersContext = useFiltersContext();
@@ -23,8 +23,8 @@ const IndicateursVueFormationPage = () => {
   return (
     <Page>
       <Section paddingY="3w">
-        <BreadcrumbNav
-          links={[NAVIGATION_PAGES.VisualiserLesIndicateurs, NAVIGATION_PAGES.VisualiserLesIndicateursParFormation]}
+        <Breadcrumb
+          pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParFormation]}
         />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
           <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.title}</Heading>

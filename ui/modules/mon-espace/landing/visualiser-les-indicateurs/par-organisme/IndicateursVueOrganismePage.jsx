@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { hasUserRoles, roles } from "@/common/auth/roles";
-import BreadcrumbNav from "@/components/BreadcrumbNav/BreadcrumbNav";
 import CfasFilter from "@/components/CfasFilter/CfasFilter";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
@@ -15,6 +14,7 @@ import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import OrganismeViewContent from "./OrganismeViewContent";
 import CopyCfaPrivateLinkButton from "./sections/actions/CopyCfaPrivateLinkButton";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
@@ -32,8 +32,8 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   return (
     <Page>
       <Section paddingY="3w">
-        <BreadcrumbNav
-          links={[NAVIGATION_PAGES.VisualiserLesIndicateurs, NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme]}
+        <Breadcrumb
+          pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme]}
         />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
           <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.title}</Heading>

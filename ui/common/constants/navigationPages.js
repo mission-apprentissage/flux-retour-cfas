@@ -87,6 +87,11 @@ export const NAVIGATION_PAGES = {
     path: "/explorer-les-indicateurs",
     title: "Visualiser les indicateurs en temps réel",
   },
+  // FIXME: harmoniser mon espace / mon tableau de bord / visualiser les indicateurs
+  MonTableauDeBord: {
+    path: "/mon-espace/mon-organisme",
+    title: "Mon tableau de bord",
+  },
   VisualiserLesIndicateurs: {
     path: "/mon-espace/mon-organisme/",
     title: "Visualiser les indicateurs en temps réel",
