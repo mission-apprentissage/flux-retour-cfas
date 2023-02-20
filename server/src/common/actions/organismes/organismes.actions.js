@@ -306,11 +306,9 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, roleName
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
-      $set: validateOrganisme({
-        uai: organisme.uai,
-        siret: organisme.siret,
+      $set: {
         updated_at: new Date(),
-      }),
+      },
       $addToSet: {
         contributeurs: userEmail.toLowerCase(),
       },
