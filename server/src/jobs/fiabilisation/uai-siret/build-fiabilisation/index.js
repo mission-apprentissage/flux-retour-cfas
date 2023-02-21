@@ -1,5 +1,5 @@
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
-import { FIABILISATION_TYPES } from "../../../../common/constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
 import {
   dossiersApprenantsMigrationDb,
@@ -70,7 +70,7 @@ export const buildFiabilisationUaiSiret = async () => {
 
   logger.info(allCouplesUaiSiretTdb.length, "couples UAI/SIRET trouvés en db");
   const alreadyAFiabiliserCount = await fiabilisationUaiSiretDb().countDocuments({
-    type: FIABILISATION_TYPES.A_FIABILISER,
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
   });
 
   let nbCouplesNonFiabilisables = 0;
@@ -88,7 +88,7 @@ export const buildFiabilisationUaiSiret = async () => {
       await insertInFiabilisationIfNotExist({
         uai: coupleUaiSiretTdb.uai,
         siret: coupleUaiSiretTdb.siret,
-        type: FIABILISATION_TYPES.DEJA_FIABLE,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.DEJA_FIABLE,
       });
       nbCouplesFiablesFound++;
       return;
@@ -120,7 +120,7 @@ export const buildFiabilisationUaiSiret = async () => {
         siret: coupleUaiSiretTdb.siret,
         uai_fiable: coupleUaiSiretTdb.uai,
         siret_fiable: organismeUniqueFoundInReferentielViaUai.siret,
-        type: FIABILISATION_TYPES.A_FIABILISER,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       });
       if (result) {
         fiabilisationMappingInsertedCount++;
@@ -146,7 +146,7 @@ export const buildFiabilisationUaiSiret = async () => {
         siret: coupleUaiSiretTdb.siret,
         uai_fiable: organismeFoundInReferentielViaSiret.uai,
         siret_fiable: coupleUaiSiretTdb.siret,
-        type: FIABILISATION_TYPES.A_FIABILISER,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       });
 
       if (result) {
@@ -158,7 +158,7 @@ export const buildFiabilisationUaiSiret = async () => {
     await insertInFiabilisationIfNotExist({
       uai: coupleUaiSiretTdb.uai,
       siret: coupleUaiSiretTdb.siret,
-      type: FIABILISATION_TYPES.NON_FIABILISABLE,
+      type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING,
     });
     nbCouplesNonFiabilisables++;
   });

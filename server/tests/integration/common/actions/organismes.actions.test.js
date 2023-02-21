@@ -10,7 +10,7 @@ import { buildTokenizedString } from "../../../../src/common/utils/buildTokenize
 import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
 import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/mapping.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
-import { FIABILISATION_TYPES } from "../../../../src/common/constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../src/common/constants/fiabilisationConstants.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
 import { SAMPLES_ETABLISSEMENTS_API_ENTREPRISE } from "../../../data/entreprise.api.gouv.fr/sampleDataApiEntreprise.js";
 import { DEPARTEMENTS } from "../../../../src/common/constants/territoiresConstants.js";
@@ -411,7 +411,7 @@ describe("Test des actions Organismes", () => {
         siret: sampleSiret,
         uai_fiable: sampleUaiFiable,
         siret_fiable: sampleSiretFiable,
-        type: FIABILISATION_TYPES.A_FIABILISER,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       });
 
       const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
@@ -434,7 +434,7 @@ describe("Test des actions Organismes", () => {
         siret: sampleSiret,
         uai_fiable: sampleUaiFiable,
         siret_fiable: sampleSiretFiable,
-        type: FIABILISATION_TYPES.A_FIABILISER,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       });
 
       const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
@@ -457,7 +457,7 @@ describe("Test des actions Organismes", () => {
         siret: sampleSiret,
         uai_fiable: sampleUaiFiable,
         siret_fiable: sampleSiretFiable,
-        type: FIABILISATION_TYPES.A_FIABILISER,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       });
 
       const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
