@@ -1,3 +1,10 @@
+## [3.9.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.9.0...v3.9.1) (2023-02-21)
+
+
+### Bug Fixes
+
+* correction de bugs liés à l'UAI manquant à la finalisation des comptes ([#2626](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2626)) ([e3baad6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e3baad6d94411b1adab3ff509ab3245e8cf41ac0))
+
 # [3.9.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.8.0...v3.9.0) (2023-02-20)
 
 
