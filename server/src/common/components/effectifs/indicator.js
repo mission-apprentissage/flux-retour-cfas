@@ -137,11 +137,6 @@ export class Indicator {
     ];
   }
 
-  async getExportFormattedListAtDate(_searchDate, _filters, _indicateur) {
-    // TODO Not implemented
-    return [];
-  }
-
   /**
    * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
    * @param {*} searchDate
