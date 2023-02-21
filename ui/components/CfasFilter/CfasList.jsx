@@ -37,7 +37,9 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
                 borderLeft={isRowSelected ? "solid 2px" : "none"}
                 key={`${cfa.uai_etablissement}_${index}`}
               >
-                <Td fontWeight="bold">{cfa.nom_etablissement}</Td>
+                <Td fontWeight="bold" whiteSpace={"pre-line"}>
+                  {cfa.nom_etablissement}
+                </Td>
                 <Td>{mapNatureOrganismeDeFormation(cfa.nature)}</Td>
                 <Td>{cfa.uai_etablissement}</Td>
                 {cfa.sirets_etablissement?.length > 0 ? (
