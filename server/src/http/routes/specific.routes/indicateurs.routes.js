@@ -21,7 +21,7 @@ const commonEffectifsFiltersSchema = {
  * @param {*} req
  * @returns {Promise<import("../../../common/components/filters.js").EffectifsFilters>}
  */
-async function buildEffectifsFiltersFromRequest(req) {
+export async function buildEffectifsFiltersFromRequest(req) {
   /** @type {import("../../../common/components/filters.js").EffectifsFilters} */
   const filters = await validateFullObjectSchema(req.query, commonEffectifsFiltersSchema);
 

@@ -133,7 +133,7 @@ export default async (services) => {
     // FRONT
     "/api/v1/indicateurs-export",
     checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
     indicateursExportRouter(services)
   );
 

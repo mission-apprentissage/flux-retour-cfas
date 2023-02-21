@@ -295,32 +295,32 @@ export default () => {
 
   /**
    * Récupération des effectifs anonymisés à une date donnée
-   * @param {*} searchDate
    * @param {*} filters
    * @returns
    */
-  const getDataListEffectifsAtDate = async (searchDate, filters = {}) => {
+  const getDataListEffectifsAtDate = async (filters = {}) => {
+    const filterStages = buildMongoPipelineFilterStages(filters);
     const apprentisAnonymous = await apprentisIndicator.getFullExportFormattedListAtDate(
-      searchDate,
-      filters,
+      filters.date,
+      filterStages,
       EFFECTIF_INDICATOR_NAMES.apprentis
     );
 
     const inscritsSansContratAnonymous = await inscritsSansContratsIndicator.getFullExportFormattedListAtDate(
-      searchDate,
-      filters,
+      filters.date,
+      filterStages,
       EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
     );
 
     const rupturantsAnonymous = await rupturantsIndicator.getFullExportFormattedListAtDate(
-      searchDate,
-      filters,
+      filters.date,
+      filterStages,
       EFFECTIF_INDICATOR_NAMES.rupturants
     );
 
     const abandonsAnonymous = await abandonsIndicator.getFullExportFormattedListAtDate(
-      searchDate,
-      filters,
+      filters.date,
+      filterStages,
       EFFECTIF_INDICATOR_NAMES.abandons
     );
 

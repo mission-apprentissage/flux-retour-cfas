@@ -37,6 +37,11 @@ export const fetchEffectifsNational = (filters) => {
   return _get(`/api/indicateurs-national?${stringify(filters)}`);
 };
 
+/* CSV export of effectifs anonymized data list  */
+export const fetchEffectifsDataListCsvExport = (filters) => {
+  return _get(`/api/v1/indicateurs-export?${stringify(filters)}`, { jsonResponse: false });
+};
+
 export const postCreateReseauCfa = (body) => {
   return _post("/api/v1/admin/reseaux-cfas", body);
 };
