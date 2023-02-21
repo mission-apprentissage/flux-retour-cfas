@@ -47,6 +47,10 @@ const filtersConfigurations = {
     matchKey: "organisme.adresse.region",
     preliminaryLookup: organismeLookup,
   },
+  etablissement_reseaux: {
+    matchKey: "organisme.reseaux",
+    preliminaryLookup: organismeLookup,
+  },
   siret_etablissement: {
     matchKey: "organisme.siret",
     preliminaryLookup: organismeLookup,
