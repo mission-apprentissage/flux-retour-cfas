@@ -7,6 +7,7 @@ import {
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { organismesDb, organismesReferentielDb } from "../../../common/model/collections.js";
+import { STATUT_FIABILISATION_ORGANISME } from "../../../common/constants/fiabilisationConstants.js";
 
 const JOB_NAME = "hydrate-organismes";
 
@@ -57,7 +58,10 @@ export const hydrateOrganismesFromReferentiel = async () => {
  */
 const resetOrganismesReferentielPresence = async () => {
   logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
-  await organismesDb().updateMany({ siret: { $exists: true } }, { $set: { est_dans_le_referentiel: false } });
+  await organismesDb().updateMany(
+    { siret: { $exists: true } },
+    { $set: { est_dans_le_referentiel: false, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU } }
+  );
 };
 
 /**
