@@ -49,7 +49,7 @@ function useOrganismesEffectifs(organismeId) {
 }
 
 const DownloadButton = ({ title, fileName, getFile }) => {
-  const [onClick, isLoading] = useDownloadClick(getFile, fileName);
+  const { onClick, isLoading } = useDownloadClick(getFile, fileName);
 
   return (
     <Button size="md" onClick={onClick} variant="secondary">
