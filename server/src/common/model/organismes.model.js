@@ -4,7 +4,7 @@ import { RESEAUX_CFAS } from "../constants/networksConstants.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature.js";
 import { schemaValidation } from "../utils/schemaUtils.js";
 import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
-import { FIABILISATION_TYPES } from "../constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConstants.js";
 
 export const collectionName = "organismes";
 
@@ -111,8 +111,10 @@ export const schema = object(
     // TODO [tech] TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
     api_key: string({ description: "API key pour envoi de données" }),
-    // TODO [tech] Ajouter enum
-    fiabilisation_statut: string({ description: "Statut de fiabilisation de l'organisme" }),
+    fiabilisation_statut: string({
+      description: "Statut de fiabilisation de l'organisme",
+      enum: Object.values(STATUT_FIABILISATION_ORGANISME),
+    }),
     mode_de_transmission: string({
       description: "Mode de transmission des effectifs",
       enum: ["API", "MANUEL"],
@@ -136,7 +138,7 @@ export function defaultValuesOrganisme() {
     erps: [],
     formations: [],
     contributeurs: [],
-    fiabilisation_statut: FIABILISATION_TYPES.INCONNU,
+    fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
     created_at: new Date(),
     updated_at: new Date(),
   };

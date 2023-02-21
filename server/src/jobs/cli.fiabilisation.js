@@ -5,18 +5,6 @@ import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiers
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
 import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
 
-// /**
-//  * Job de suppression des organismes non fiables et déplacement des contributeurs & effectifs liés
-//  */
-// cli
-//   .command("clean:organismes-non-fiables")
-//   .description("Suppression des organismes non fiables et déplacement des contributeurs & effectifs liés")
-//   .action(() => {
-//     runScript(async () => {
-//       return cleanOrganismesNonFiables();
-//     }, "fiabilisation-clean-organismes-non-fiables");
-//   });
-
 /**
  * Job de création de la collection fiabilisation UAI SIRET
  */
@@ -25,7 +13,9 @@ cli
   .description("Création de la collection pour fiabilisation des UAI SIRET")
   .action(() => {
     runScript(async () => {
-      return buildFiabilisationUaiSiret();
+      // On lance séquentiellement 2 fois la construction de la table de fiabilisation - nécessaire pour prendre en compte tous les cas
+      await buildFiabilisationUaiSiret();
+      await buildFiabilisationUaiSiret();
     }, "build-fiabilisation-uai-siret");
   });
 
