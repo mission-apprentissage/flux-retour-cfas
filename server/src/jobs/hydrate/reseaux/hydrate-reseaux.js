@@ -10,7 +10,6 @@ import {
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { arraysContainSameValues } from "../../../common/utils/miscUtils.js";
 import { organismesDb } from "../../../common/model/collections.js";
-import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",
@@ -22,16 +21,25 @@ const RESEAUX_LIST_SEPARATOR = "|";
 
 const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
 
+/**
+ * Tri des fichiers réseaux à traiter pour appliquer les réseaux multiples sans erreurs
+ */
 const INPUT_FILES = [
-  "assets/referentiel-reseau-aden.csv",
-  "assets/referentiel-reseau-aftral.csv",
-  "assets/referentiel-reseau-agri.csv",
-  "assets/referentiel-reseau-compagnons-du-devoir.csv",
-  "assets/referentiel-reseau-cr-normandie.csv",
-  "assets/referentiel-reseau-excellence-pro.csv",
-  "assets/referentiel-reseau-greta-pdl.csv",
-  "assets/referentiel-reseau-mfr.csv",
-  "assets/referentiel-reseau-uimm.csv",
+  "assets/referentiel-reseau-excellence-pro.csv", // CFA_EC
+  "assets/referentiel-reseau-mfr.csv", // MFR
+  "assets/referentiel-reseau-cr-normandie.csv", // CR Normandie
+  "assets/referentiel-reseau-aftral.csv", // AFTRAL
+  // "assets/referentiel-reseau-cci.csv", // TODO CCI Fichier non fourni pour l'instant
+  "assets/referentiel-reseau-cma.csv",
+  "assets/referentiel-reseau-aden.csv", // ADEN
+  "assets/referentiel-reseau-agri.csv", // AGRI
+  // "assets/referentiel-reseau-anasup.csv", // TODO Fichier non fourni pour l'instant
+  // "assets/referentiel-reseau-dgesip.csv", // TODO Fichier non fourni pour l'instant
+  // "assets/referentiel-reseau-dgesco.csv", // TODO Fichier non fourni pour l'instant
+  "assets/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
+  "assets/referentiel-reseau-uimm.csv", // UIMM
+  "assets/referentiel-reseau-greta-pdl.csv", // GRETA
+  // "assets/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
 ];
 
 /**
@@ -73,7 +81,10 @@ const clearReseauxInOrganismes = async () => {
  */
 export const hydrateReseaux = async () => {
   await clearReseauxInOrganismes();
-  await PromisePool.for(INPUT_FILES).process(hydrateReseauFile);
+
+  for (const currentReseauFile of INPUT_FILES) {
+    await hydrateReseauFile(currentReseauFile);
+  }
 };
 
 /**
