@@ -32,8 +32,8 @@ const useCfaSearch = (searchTerm, filters) => {
   );
 
   return {
-    data: data?.map(({ uai, nom, departement, nature, sirets }) => {
-      return { uai_etablissement: uai, nom_etablissement: nom, departement, nature, sirets_etablissement: sirets };
+    data: data?.map(({ uai, nom, departement, nature, siret }) => {
+      return { uai_etablissement: uai, nom_etablissement: nom, departement, nature, siret_etablissement: siret };
     }),
     loading: isLoading,
   };

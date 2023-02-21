@@ -1,18 +1,22 @@
 import { ObjectId } from "mongodb";
 
 import { getMetiersBySiret } from "../../apis/apiLba.js";
-import { organismesDb, permissionsDb } from "../../model/collections.js";
+import { organismesDb, effectifsDb, permissionsDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { generateKey } from "../../utils/cryptoUtils.js";
-import { buildAdresseFromUai } from "../../utils/uaiUtils.js";
+import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
 import { siretSchema } from "../../utils/validationUtils.js";
 import { createPermission, removePermissions } from "../permissions.actions.js";
 import { structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
 import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
+import { escapeRegExp } from "../../utils/regexUtils.js";
+import { buildMongoPipelineFilterStages } from "../../components/filters.js";
+
+const SEARCH_RESULTS_LIMIT = 50;
 
 /**
  * Méthode de création d'un organisme
@@ -450,4 +454,72 @@ export const buildAdresseForOrganisme = async ({ uai, siret }) => {
   }
 
   return adresseForOrganisme;
+};
+
+/**
+ * Returns sous-établissements by siret for an uai
+ * @param {string} uai
+ * @returns {Promise<Array<{siret_etablissement: string, nom_etablissement: string}>>}
+ */
+export const getSousEtablissementsForUai = async (uai) => {
+  return await organismesDb()
+    .aggregate([
+      { $match: { uai, siret: { $ne: null } } },
+      { $group: { _id: "$siret", nom: { $first: "$nom" } } },
+      { $project: { _id: 0, siret: "$_id", nom: "$nom" } },
+    ])
+    .toArray();
+};
+
+/**
+ * Retourne la liste des organismes correspondant aux critères de recherche
+ * @param {import("./organismes.actions.js").OrganismesSearch} searchCriteria
+ * @return {Promise<{ uai: string; nom: string; }[]>} Array of CFA information
+ */
+export const searchOrganismes = async (searchCriteria) => {
+  const matchStage = {};
+  if (searchCriteria.searchTerm) {
+    matchStage.$or = [
+      { $text: { $search: searchCriteria.searchTerm } },
+      { uai: new RegExp(escapeRegExp(searchCriteria.searchTerm), "g") },
+      { siret: new RegExp(escapeRegExp(searchCriteria.searchTerm), "g") },
+    ];
+  }
+
+  // if other criteria have been provided, find the list of uai matching those criteria in the DossierApprenant collection
+  if (
+    searchCriteria.etablissement_num_departement ||
+    searchCriteria.etablissement_num_region ||
+    searchCriteria.etablissement_reseaux
+  ) {
+    let start = Date.now();
+    const eligibleUais = (
+      await effectifsDb()
+        .aggregate([...buildMongoPipelineFilterStages(searchCriteria), { $group: { _id: "$organisme.uai" } }])
+        .toArray()
+    ).map((row) => row._id);
+    logger.info({ elapsted: Date.now() - start, eligibleUais: eligibleUais.length }, "searchFormations_eligibleUais");
+    matchStage.uai = { $in: eligibleUais };
+  }
+
+  const sortStage = searchCriteria.searchTerm
+    ? {
+        score: { $meta: "textScore" },
+        "organisme.nom": 1,
+      }
+    : { "organisme.nom": 1 };
+
+  const found = await organismesDb()
+    .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
+    .toArray();
+
+  return found.map((organisme) => {
+    return {
+      uai: organisme.uai,
+      siret: organisme.siret,
+      nom: organisme.nom,
+      nature: organisme.nature,
+      departement: organisme.uai ? getDepartementCodeFromUai(organisme.uai) : null,
+    };
+  });
 };

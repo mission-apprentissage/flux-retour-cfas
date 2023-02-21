@@ -157,9 +157,9 @@ export default async (services) => {
   ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
 
   app.use("/api/formations", formationRouter()); // FRONT
+  app.use("/api/cfas", cfasRouter()); // FRONT
 
   // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
-  app.use("/api/cfas", cfasRouter(services)); // FRONT
   app.use("/api/referentiel", referentielRouter()); // FRONT
 
   // The error handler must be before any other error middleware and after all controllers

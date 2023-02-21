@@ -7,6 +7,10 @@ import { DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoi
 
 const TERRITOIRES_DATA = { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED };
 
+function cellElseNotAvailable(value) {
+  return value ? <Td>{value}</Td> : <Td fontStyle="italic">non-renseigné</Td>;
+}
+
 const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
   const data = TERRITOIRES_DATA;
 
@@ -41,12 +45,8 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
                   {cfa.nom_etablissement}
                 </Td>
                 <Td>{mapNatureOrganismeDeFormation(cfa.nature)}</Td>
-                <Td>{cfa.uai_etablissement}</Td>
-                {cfa.sirets_etablissement?.length > 0 ? (
-                  <Td>{cfa.sirets_etablissement.join(", ")}</Td>
-                ) : (
-                  <Td fontStyle="italic">non-renseigné</Td>
-                )}
+                {cellElseNotAvailable(cfa.uai_etablissement)}
+                {cellElseNotAvailable(cfa.siret_etablissement)}
                 <Td>{departementFormatted}</Td>
               </Tr>
             );
