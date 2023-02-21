@@ -132,7 +132,7 @@ const updateOrganismeAndDossiersApprenantForCoupleFiabilise = async ({ uai, uai_
 };
 
 /**
- * TODO Méthode de maj d'un dossier apprenant unitaire
+ * Méthode de maj unitaire d'un dossier apprenant avec un couple uai siret fiable
  * @param {*} currentDossierApprenantToUpdate
  * @param {*} uai_fiable
  * @param {*} siret_fiable

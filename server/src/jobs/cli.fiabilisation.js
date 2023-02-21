@@ -15,7 +15,7 @@ cli
     runScript(async () => {
       // On lance séquentiellement 2 fois la construction de la table de fiabilisation - nécessaire pour prendre en compte tous les cas
       await buildFiabilisationUaiSiret();
-      return buildFiabilisationUaiSiret();
+      await buildFiabilisationUaiSiret();
     }, "build-fiabilisation-uai-siret");
   });
 
