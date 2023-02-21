@@ -102,11 +102,86 @@ describe("Filtres Indicateurs", () => {
         },
       ]);
     });
+    it("Gère le filtre etablissement_reseaux", () => {
+      const stages = buildMongoPipelineFilterStages({
+        date: currentDate,
+        etablissement_reseaux: "AGRI",
+      });
+      assert.deepStrictEqual(stages, [
+        {
+          $lookup: {
+            from: "organismes",
+            localField: "organisme_id",
+            foreignField: "_id",
+            as: "organisme",
+          },
+        },
+        {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+            "organisme.reseaux": "AGRI",
+          },
+        },
+      ]);
+    });
+    it("Gère le filtre siret_etablissement", () => {
+      const stages = buildMongoPipelineFilterStages({
+        date: currentDate,
+        siret_etablissement: "84412312300008",
+      });
+      assert.deepStrictEqual(stages, [
+        {
+          $lookup: {
+            from: "organismes",
+            localField: "organisme_id",
+            foreignField: "_id",
+            as: "organisme",
+          },
+        },
+        {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+            "organisme.siret": "84412312300008",
+          },
+        },
+      ]);
+    });
+    it("Gère le filtre uai_etablissement", () => {
+      const stages = buildMongoPipelineFilterStages({
+        date: currentDate,
+        uai_etablissement: "0112233A",
+      });
+      assert.deepStrictEqual(stages, [
+        {
+          $lookup: {
+            from: "organismes",
+            localField: "organisme_id",
+            foreignField: "_id",
+            as: "organisme",
+          },
+        },
+        {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+            "organisme.uai": "0112233A",
+          },
+        },
+      ]);
+    });
     it("Gère tous les filtres en même temps", () => {
       const stages = buildMongoPipelineFilterStages({
         date: currentDate,
         etablissement_num_region: "25",
         etablissement_num_departement: "56",
+        etablissement_reseaux: "AGRI",
+        siret_etablissement: "84412312300008",
+        uai_etablissement: "0112233A",
         organisme_id: "635acdad5e798f12bd919863", // overridden by organisme_ids
         organisme_ids: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
       });
@@ -126,6 +201,9 @@ describe("Filtres Indicateurs", () => {
             },
             "organisme.adresse.region": "25",
             "organisme.adresse.departement": "56",
+            "organisme.siret": "84412312300008",
+            "organisme.uai": "0112233A",
+            "organisme.reseaux": "AGRI",
             organisme_id: {
               $in: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
             },
