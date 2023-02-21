@@ -47,6 +47,14 @@ const filtersConfigurations = {
     matchKey: "organisme.adresse.region",
     preliminaryLookup: organismeLookup,
   },
+  siret_etablissement: {
+    matchKey: "organisme.siret",
+    preliminaryLookup: organismeLookup,
+  },
+  uai_etablissement: {
+    matchKey: "organisme.uai",
+    preliminaryLookup: organismeLookup,
+  },
   formation_cfd: {
     matchKey: "formation.cfd",
   },

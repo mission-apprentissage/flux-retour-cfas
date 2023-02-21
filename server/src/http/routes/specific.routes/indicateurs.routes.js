@@ -12,9 +12,8 @@ const commonEffectifsFiltersSchema = {
   etablissement_num_departement: Joi.string().allow(null, ""),
   etablissement_num_region: Joi.string().allow(null, ""),
   niveau_formation: Joi.string().allow(null, ""),
-  // FIXME peut-être à gérer
-  // siret_etablissement: Joi.string().allow(null, ""),
-  // uai_etablissement: Joi.string().allow(null, ""),
+  siret_etablissement: Joi.string().allow(null, ""),
+  uai_etablissement: Joi.string().allow(null, ""),
 };
 
 /**

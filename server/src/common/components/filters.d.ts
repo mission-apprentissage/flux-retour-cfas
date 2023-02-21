@@ -7,5 +7,7 @@ export type EffectifsFilters = {
   etablissement_num_departement?: string
   etablissement_num_region?: string
   niveau_formation?: string
+  siret_etablissement?: string
+  uai_etablissement?: string
 };
 
