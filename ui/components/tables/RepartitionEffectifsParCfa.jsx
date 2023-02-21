@@ -11,12 +11,6 @@ import NatureOrganismeDeFormationWarning from "../NatureOrganismeDeFormationWarn
 import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";
 
-const getSiretText = (sirets) => {
-  if (!sirets || sirets.length === 0) return "N/A";
-  if (sirets.length === 1) return sirets[0];
-  return `${sirets.length} SIRET transmis`;
-};
-
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
   const filtersContext = useFiltersContext();
@@ -51,7 +45,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                   {nom_etablissement}
                 </Link>
                 <Box fontSize="omega">
-                  UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
+                  UAI : {uai_etablissement} - SIRET : {siret_etablissement || "N/A"}
                 </Box>
               </Td>
               <Td color="grey.800">
