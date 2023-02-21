@@ -1,3 +1,10 @@
+## [3.9.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.9.1...v3.9.2) (2023-02-21)
+
+
+### Bug Fixes
+
+* **server:** resetOrganismesReferentielPresence add fiabilisation statut ([#2629](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2629)) ([c46448a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c46448a1c65d0738d23a91e8807b6d3502837b9d))
+
 ## [3.9.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.9.0...v3.9.1) (2023-02-21)
 
 
