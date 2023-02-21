@@ -34,7 +34,7 @@ const FormationsList = ({ formations, onFormationClick, selectedValue }) => {
                   {formation.libelle || "N/A"}
                 </Td>
                 <Td>{formation.cfd}</Td>
-                <Td>{formation.rncps?.join(", ") || "N/A"}</Td>
+                <Td whiteSpace={"pre-line"}>{formation.rncps?.join(", ") || "N/A"}</Td>
                 {cfdStartDate && cfdEndDate ? (
                   <Td>{`Du ${cfdStartDate} au ${cfdEndDate}`}</Td>
                 ) : (
