@@ -300,31 +300,25 @@ export default () => {
    */
   const getDataListEffectifsAtDate = async (filters = {}) => {
     const filterStages = buildMongoPipelineFilterStages(filters);
-    const apprentisAnonymous = await apprentisIndicator.getFullExportFormattedListAtDate(
-      filters.date,
-      filterStages,
-      EFFECTIF_INDICATOR_NAMES.apprentis
-    );
-
-    const inscritsSansContratAnonymous = await inscritsSansContratsIndicator.getFullExportFormattedListAtDate(
-      filters.date,
-      filterStages,
-      EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
-    );
-
-    const rupturantsAnonymous = await rupturantsIndicator.getFullExportFormattedListAtDate(
-      filters.date,
-      filterStages,
-      EFFECTIF_INDICATOR_NAMES.rupturants
-    );
-
-    const abandonsAnonymous = await abandonsIndicator.getFullExportFormattedListAtDate(
-      filters.date,
-      filterStages,
-      EFFECTIF_INDICATOR_NAMES.abandons
-    );
-
-    return [...apprentisAnonymous, ...inscritsSansContratAnonymous, ...rupturantsAnonymous, ...abandonsAnonymous];
+    const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
+      apprentisIndicator.getFullExportFormattedListAtDate(
+        filters.date,
+        filterStages,
+        EFFECTIF_INDICATOR_NAMES.apprentis
+      ),
+      inscritsSansContratsIndicator.getFullExportFormattedListAtDate(
+        filters.date,
+        filterStages,
+        EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
+      ),
+      rupturantsIndicator.getFullExportFormattedListAtDate(
+        filters.date,
+        filterStages,
+        EFFECTIF_INDICATOR_NAMES.rupturants
+      ),
+      abandonsIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.abandons),
+    ]);
+    return [...apprentis, ...inscritsSansContrat, ...rupturants, ...abandons];
   };
 
   return {
