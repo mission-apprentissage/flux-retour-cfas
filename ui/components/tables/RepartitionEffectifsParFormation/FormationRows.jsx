@@ -38,7 +38,13 @@ const FormationRows = ({ niveauFormation }) => {
     <>
       {sortAlphabeticallyBy("intitule", data).map(({ formation_cfd, intitule, effectifs }) => {
         return (
-          <FormationRow formationCfd={formation_cfd} intitule={intitule} effectifs={effectifs} key={formation_cfd} />
+          <FormationRow
+            formationCfd={formation_cfd}
+            intitule={intitule}
+            effectifs={effectifs}
+            niveauFormation={niveauFormation}
+            key={formation_cfd}
+          />
         );
       })}
     </>

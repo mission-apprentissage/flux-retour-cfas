@@ -7,7 +7,7 @@ import { isDateFuture } from "@/common/utils/dateUtils";
 import NumberValueCell from "../NumberValueCell";
 import AnneeFormationRows from "./AnneeFormationRows";
 
-const FormationRow = ({ formationCfd, intitule, effectifs }) => {
+const FormationRow = ({ formationCfd, intitule, effectifs, niveauFormation }) => {
   const [isOpen, setIsOpen] = useState();
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
@@ -38,7 +38,7 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
           </>
         )}
       </Tr>
-      {isOpen && <AnneeFormationRows formationCfd={formationCfd} />}
+      {isOpen && <AnneeFormationRows formationCfd={formationCfd} niveauFormation={niveauFormation} />}
     </>
   );
 };
@@ -46,6 +46,7 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
 FormationRow.propTypes = {
   formationCfd: PropTypes.string.isRequired,
   intitule: PropTypes.string.isRequired,
+  niveauFormation: PropTypes.string,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     inscritsSansContrat: PropTypes.number.isRequired,

@@ -10,10 +10,11 @@ import { pick } from "@/common/utils/pick";
 import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 import AnneeFormationRow from "./AnneeFormationRow";
 
-const AnneeFormationRows = ({ formationCfd }) => {
+const AnneeFormationRows = ({ formationCfd, niveauFormation }) => {
   const { state: filters } = useFiltersContext();
   const requestFilters = {
     formation_cfd: formationCfd,
+    ...(niveauFormation ? { niveau_formation: niveauFormation } : {}),
     ...pick(mapFiltersToApiFormat(filters), [
       "date",
       "uai_etablissement",
@@ -39,6 +40,7 @@ const AnneeFormationRows = ({ formationCfd }) => {
 
 AnneeFormationRows.propTypes = {
   formationCfd: PropTypes.string.isRequired,
+  niveauFormation: PropTypes.string,
 };
 
 export default AnneeFormationRows;
