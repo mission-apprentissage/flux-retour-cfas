@@ -30,7 +30,7 @@ const INPUT_FILES = [
   "assets/referentiel-reseau-cr-normandie.csv", // CR Normandie
   "assets/referentiel-reseau-aftral.csv", // AFTRAL
   // "assets/referentiel-reseau-cci.csv", // TODO CCI Fichier non fourni pour l'instant
-  // "assets/referentiel-reseau-cma.csv", // TODO CMA Fichier non fourni pour l'instant
+  "assets/referentiel-reseau-cma.csv",
   "assets/referentiel-reseau-aden.csv", // ADEN
   "assets/referentiel-reseau-agri.csv", // AGRI
   // "assets/referentiel-reseau-anasup.csv", // TODO Fichier non fourni pour l'instant
