@@ -8,12 +8,6 @@ import { isDateFuture } from "@/common/utils/dateUtils";
 import NatureOrganismeDeFormationWarning from "../../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import NumberValueCell from "../NumberValueCell";
 
-const getSiretText = (sirets) => {
-  if (!sirets || sirets.length === 0) return "N/A";
-  if (sirets.length === 1) return sirets[0];
-  return `${sirets.length} SIRET transmis`;
-};
-
 const CfaRow = ({
   uai_etablissement,
   siret_etablissement,
@@ -35,7 +29,7 @@ const CfaRow = ({
           </Link>
         </div>
         <Box fontSize="omega">
-          UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
+          UAI : {uai_etablissement || "N/A"} - SIRET : {siret_etablissement || "N/A"}
         </Box>
       </Td>
       <Td color="grey.800" whiteSpace="nowrap">
@@ -61,9 +55,9 @@ const CfaRow = ({
 CfaRow.propTypes = {
   uai_etablissement: PropTypes.string,
   nom_etablissement: PropTypes.string.isRequired,
-  siret_etablissement: PropTypes.string.isRequired,
-  nature: PropTypes.string.isRequired,
-  nature_validity_warning: PropTypes.bool.isRequired,
+  siret_etablissement: PropTypes.string,
+  nature: PropTypes.string,
+  nature_validity_warning: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     inscritsSansContrat: PropTypes.number.isRequired,
@@ -71,6 +65,13 @@ CfaRow.propTypes = {
     abandons: PropTypes.number.isRequired,
   }).isRequired,
   onCfaClick: PropTypes.func.isRequired,
+  uaiOrSiretContraint(props, _, componentName) {
+    if (!props.uai_etablissement && !props.siret_etablissement) {
+      return new Error(
+        `One of 'uai_etablissement' or 'siret_etablissement' is required by '${componentName}' component.`
+      );
+    }
+  },
 };
 
 export default CfaRow;
