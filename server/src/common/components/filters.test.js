@@ -174,6 +174,38 @@ describe("Filtres Indicateurs", () => {
         },
       ]);
     });
+    it("Gère le filtre formation_cfd", () => {
+      const stages = buildMongoPipelineFilterStages({
+        date: currentDate,
+        formation_cfd: "25021000",
+      });
+      assert.deepStrictEqual(stages, [
+        {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+            "formation.cfd": "25021000",
+          },
+        },
+      ]);
+    });
+    it("Gère le filtre niveau_formation", () => {
+      const stages = buildMongoPipelineFilterStages({
+        date: currentDate,
+        niveau_formation: "2",
+      });
+      assert.deepStrictEqual(stages, [
+        {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+            "formation.niveau": "2",
+          },
+        },
+      ]);
+    });
     it("Gère tous les filtres en même temps", () => {
       const stages = buildMongoPipelineFilterStages({
         date: currentDate,
@@ -184,6 +216,8 @@ describe("Filtres Indicateurs", () => {
         uai_etablissement: "0112233A",
         organisme_id: "635acdad5e798f12bd919863", // overridden by organisme_ids
         organisme_ids: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
+        formation_cfd: "25021000",
+        niveau_formation: "2",
       });
       assert.deepStrictEqual(stages, [
         {
@@ -207,6 +241,8 @@ describe("Filtres Indicateurs", () => {
             organisme_id: {
               $in: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
             },
+            "formation.cfd": "25021000",
+            "formation.niveau": "2",
           },
         },
       ]);

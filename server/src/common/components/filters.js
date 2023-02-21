@@ -62,6 +62,9 @@ const filtersConfigurations = {
   formation_cfd: {
     matchKey: "formation.cfd",
   },
+  niveau_formation: {
+    matchKey: "formation.niveau",
+  },
 };
 
 /**
