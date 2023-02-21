@@ -14,12 +14,12 @@ const OrganismeDeFormationReseauAndAdresse = ({ reseaux, adresse, multipleSirets
               et du réseau <strong>{item}</strong>
             </>
           ))}
-          . {adresse ? `Sa domiciliation est ${adresse}.` : ""}
+          . {adresse?.complete ? `Sa domiciliation est ${adresse.complete}.` : ""}
         </>
       );
     } else {
-      if (adresse) {
-        return <>La domiciliation de cet organisme est {adresse}</>;
+      if (adresse?.complete) {
+        return <>La domiciliation de cet organisme est {adresse.complete}</>;
       }
       return null;
     }
@@ -35,7 +35,15 @@ const OrganismeDeFormationReseauAndAdresse = ({ reseaux, adresse, multipleSirets
 
 OrganismeDeFormationReseauAndAdresse.propTypes = {
   reseaux: PropTypes.array,
-  adresse: PropTypes.string,
+  adresse: PropTypes.shape({
+    academie: PropTypes.string,
+    code_insee: PropTypes.string,
+    code_postal: PropTypes.string,
+    commune: PropTypes.string,
+    complete: PropTypes.string,
+    departement: PropTypes.string,
+    region: PropTypes.string,
+  }),
   multipleSirets: PropTypes.bool,
   nbEtablissements: PropTypes.number,
 };

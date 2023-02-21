@@ -13,5 +13,13 @@ export const infosCfaPropType = PropTypes.shape({
   libelleLong: PropTypes.string.isRequired,
   reseaux: PropTypes.arrayOf(PropTypes.string).isRequired,
   domainesMetiers: PropTypes.arrayOf(PropTypes.string),
-  adresse: PropTypes.string,
+  adresse: PropTypes.shape({
+    academie: PropTypes.string,
+    code_insee: PropTypes.string,
+    code_postal: PropTypes.string,
+    commune: PropTypes.string,
+    complete: PropTypes.string,
+    departement: PropTypes.string,
+    region: PropTypes.string,
+  }),
 });
