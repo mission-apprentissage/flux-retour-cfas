@@ -10,9 +10,9 @@ const OrganismeDeFormationReseauAndAdresse = ({ reseaux, adresse, multipleSirets
         <>
           Cet organisme fait partie du réseau <strong>{reseaux[0]}</strong>{" "}
           {reseaux.slice(1, reseaux.length)?.map((item) => (
-            <>
+            <React.Fragment key="{item}">
               et du réseau <strong>{item}</strong>
-            </>
+            </React.Fragment>
           ))}
           . {adresse?.complete ? `Sa domiciliation est ${adresse.complete}.` : ""}
         </>
