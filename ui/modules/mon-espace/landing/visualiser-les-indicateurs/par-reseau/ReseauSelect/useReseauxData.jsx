@@ -5,8 +5,8 @@ import { QUERY_KEYS } from "@/common/constants/queryKeys";
 import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 const useReseauxData = () => {
-  // reseaux are very unlikely during the user's session, thus the infinite staleTime
-  const { data } = useQuery(QUERY_KEYS.RESEAUX, () => fetchReseaux(), { staleTime: Infinity });
+  // reseaux are very unlikely to change during the user's session, thus the infinite staleTime
+  const { data } = useQuery([QUERY_KEYS.RESEAUX], () => fetchReseaux(), { staleTime: Infinity });
 
   const reseauxSorted = sortAlphabeticallyBy("nom", data || []);
 
