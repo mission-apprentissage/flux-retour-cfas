@@ -30,7 +30,7 @@ const FormationsList = ({ formations, onFormationClick, selectedValue }) => {
                 borderLeft={isRowSelected ? "solid 2px" : "none"}
                 key={formation.cfd}
               >
-                <Td maxWidth="550px" overflow="scroll">
+                <Td maxWidth="550px" whiteSpace={"pre-line"}>
                   {formation.libelle || "N/A"}
                 </Td>
                 <Td>{formation.cfd}</Td>
