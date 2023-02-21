@@ -40,7 +40,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                     window.scrollTo(0, 0);
                   }}
                   color="bluefrance"
-                  whiteSpace="nowrap"
+                  whiteSpace="pre-line"
                 >
                   {nom_etablissement}
                 </Link>
