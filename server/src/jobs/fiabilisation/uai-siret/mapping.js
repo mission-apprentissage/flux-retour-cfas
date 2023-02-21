@@ -1,4 +1,4 @@
-import { STATUT_FIABILISATION_ORGANISME } from "../../../common/constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../common/constants/fiabilisationConstants.js";
 
 export const FIABILISATION_MAPPINGS = [
   {
@@ -6,6 +6,6 @@ export const FIABILISATION_MAPPINGS = [
     siret: null,
     uai_fiable: "0922672E",
     siret_fiable: "78370584100063",
-    type: STATUT_FIABILISATION_ORGANISME.A_FIABILISER,
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
   },
 ];

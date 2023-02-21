@@ -1,5 +1,9 @@
+import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
-import { FIABILISATION_TYPES } from "../../../../common/constants/fiabilisationConstants.js";
+import {
+  STATUT_FIABILISATION_COUPLES_UAI_SIRET,
+  STATUT_FIABILISATION_ORGANISME,
+} from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
 import {
   dossiersApprenantsMigrationDb,
@@ -13,111 +17,182 @@ const filters = {
   annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },
 };
 
+let nbOrganismesFiables = 0;
+let nbOrganismesFiabilises = 0;
+let nbDossiersApprenantsFiabilises = 0;
+let nbOrganismesNonFiabilisablesMapping = 0;
+let nbOrganismesNonFiabilisablesUaiNonValidees = 0;
+
 /**
  * Méthode d'application de la fiabilisation pour les 3 cas :
  *  Données à fiabiliser (depuis les couples construits) : MAJ des dossiersApprenantsMigration ainsi que le champ fiabilisation_statut des organismes concernés
  *  Données déja identifiées comme fiables : MAJ le champ fiabilisation_statut des organismes concernés
  *  Données identifiées comme non fiabilisables : MAJ le champ fiabilisation_statut des organismes concernés
- * TODO : optim query lookup possibles & promise.all
  *
  */
 export const applyFiabilisationUaiSiret = async () => {
-  await updateDossiersApprenantAndOrganismesAFiabiliser();
-  await updateOrganismesFiabilisationStatut(FIABILISATION_TYPES.DEJA_FIABLE);
-  await updateOrganismesFiabilisationStatut(FIABILISATION_TYPES.NON_FIABILISABLE);
+  await createJobEvent({
+    jobname: JOB_NAME,
+    date: new Date(),
+    action: "beginning",
+  });
+
+  // Reset des statuts de fiabilisation des organismes
+  await resetStatutFiabilisation();
+
+  // Traitement // de l'identification des différents statuts de fiabilisation
+  await Promise.all([
+    updateOrganismesFiables(),
+    updateDossiersApprenantAndOrganismesFiabilise(),
+    updateOrganismesNonFiabilisablesMapping(),
+    updateOrganismesNonFiabilisablesUaiNonValidees(),
+  ]);
+
+  // Log
+  logger.info(nbOrganismesFiables, "organismes mis à jour en tant que fiables");
+  logger.info(nbDossiersApprenantsFiabilises, "dossiers apprenants mis à jour en tant que fiabilisés");
+  logger.info(nbOrganismesFiabilises, "organismes mis à jour en tant que fiabilisés");
+  logger.info(nbOrganismesNonFiabilisablesMapping, "organismes mis à jour en tant que non fiabilisables (mapping)");
+  logger.info(
+    nbOrganismesNonFiabilisablesUaiNonValidees,
+    "organismes mis à jour en tant que non fiabilisables (uai non validée dans le référentiel)"
+  );
+
+  await createJobEvent({
+    jobname: JOB_NAME,
+    date: new Date(),
+    action: "finishing",
+    data: {
+      nbOrganismesFiables,
+      nbDossiersApprenantsFiabilises,
+      nbOrganismesFiabilises,
+      nbOrganismesNonFiabilisablesMapping,
+      nbOrganismesNonFiabilisablesUaiNonValidees,
+    },
+  });
 };
 
 /**
- * Méthode de maj des dossiersApprenants pour prise en compte de la fiabilisation UAI SIRET
+ * On marque par défaut le statut de fiabilisation des organismes comme étant INCONNU
  */
-const updateDossiersApprenantAndOrganismesAFiabiliser = async () => {
-  const allCouplesAFiabiliser = await fiabilisationUaiSiretDb()
-    .find({ type: FIABILISATION_TYPES.A_FIABILISER })
+const resetStatutFiabilisation = async () =>
+  await organismesDb().updateMany(
+    { siret: { $exists: true } },
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU } }
+  );
+
+/**
+ * Méthode maj des statuts de fiabilisation à FIABLE pour les organismes avec UAI & présents dans le référentiel
+ */
+const updateOrganismesFiables = async () => {
+  logger.info("Identification des organismes fiables ...");
+
+  const { modifiedCount } = await organismesDb().updateMany(
+    { uai: { $exists: true }, est_dans_le_referentiel: true },
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
+  );
+  nbOrganismesFiables += modifiedCount;
+};
+
+/**
+ * Méthode de MAJ des organismes et dossiersApprenantsMigration pour les cas ou l'on bien fiabilisé la donnée
+ */
+const updateDossiersApprenantAndOrganismesFiabilise = async () => {
+  logger.info("Identification des dossiersApprenants et organismes fiabilisés ...");
+  const couplesAFiabiliser = await fiabilisationUaiSiretDb()
+    .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER })
     .toArray();
 
-  let dossiersApprenantAfiabiliserModifiedCount = 0;
-  let organismesAFiabiliserModifiedCount = 0;
-
-  for (const fiabilisation of allCouplesAFiabiliser) {
-    try {
-      // Update de tous les dossiersApprenantsMigration qui étaient sur le mauvais couple UAI-SIRET
-      const { modifiedCount: dossiersApprenantModifiedCount } = await dossiersApprenantsMigrationDb().updateMany(
-        { ...filters, uai_etablissement: fiabilisation.uai, siret_etablissement: fiabilisation.siret },
-        {
-          $set: {
-            uai_etablissement: fiabilisation.uai_fiable,
-            siret_etablissement: fiabilisation.siret_fiable,
-          },
-        }
-      );
-      dossiersApprenantAfiabiliserModifiedCount += dossiersApprenantModifiedCount;
-
-      // Update de l'organisme lié à un couple UAI-SIRET marqué comme A_FIABILISER en FIABILISE
-      const { modifiedCount: organismesModifiedCount } = await organismesDb().update(
-        { uai: fiabilisation.uai_fiable, siret: fiabilisation.siret_fiable },
-        { $set: { fiabilisation_statut: FIABILISATION_TYPES.FIABILISE } }
-      );
-      organismesAFiabiliserModifiedCount += organismesModifiedCount;
-    } catch (err) {
-      // TODO Fixer l'erreur de duplicate key sur l'id_erp_apprenant
-      logger.error(err);
-      await createJobEvent({
-        jobname: JOB_NAME,
-        date: new Date(),
-        action: "updateDossiersApprenantAndOrganismesAFiabiliser",
-        data: {
-          uai: fiabilisation.uai,
-          uai_fiable: fiabilisation.uai_fiable,
-          siret: fiabilisation.siret,
-          siret_fiable: fiabilisation.siret_fiable,
-          err,
-        },
-      });
-    }
-  }
-
-  await createJobEvent({
-    jobname: JOB_NAME,
-    date: new Date(),
-    action: "updateDossiersApprenantAndOrganismesAFiabiliser",
-    data: {
-      dossiersApprenantAfiabiliserModifiedCount,
-      organismesAFiabiliserModifiedCount,
-    },
-  });
-
-  logger.info(dossiersApprenantAfiabiliserModifiedCount, "dossiers apprenants a fiabiliser mis à jour");
-  logger.info(organismesAFiabiliserModifiedCount, "organismes a fiabiliser  mis à jour");
+  await PromisePool.for(couplesAFiabiliser).process(updateOrganismeAndDossiersApprenantForCoupleFiabilise);
 };
 
 /**
- *
- * @param {*} fiabilisationType
+ * Méthode de MAJ unitaire d'un organisme et de ses dossiersApprenantsMigration pour les cas ou l'on bien fiabilisé la donnée
+ * Pour chaque couple identifié on va mettre à jour les dossiers apprenants (uai et siret)
+ * Ensuite on va mettre à jour l'organisme en question comme étant FIABILISE
+ * @param {*} currentFiabilisationCouple
  */
-const updateOrganismesFiabilisationStatut = async (fiabilisationType) => {
-  const allFiabilisationCouples = await fiabilisationUaiSiretDb().find({ type: fiabilisationType }).toArray();
+const updateOrganismeAndDossiersApprenantForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret_fiable }) => {
+  // Update de tous les dossiersApprenantsMigration qui étaient sur le mauvais couple UAI-SIRET
+  const dossiersApprenantsMigrationForFiabilisationCouple = await dossiersApprenantsMigrationDb()
+    .find({ ...filters, uai_etablissement: uai, siret_etablissement: siret })
+    .toArray();
 
-  let organismesUpdatedCount = 0;
-
-  for (const fiabilisation of allFiabilisationCouples) {
-    try {
-      const { modifiedCount } = await organismesDb().updateMany(
-        { uai: fiabilisation.uai, siret: fiabilisation.siret },
-        { $set: { fiabilisation_statut: fiabilisationType } }
-      );
-      organismesUpdatedCount += modifiedCount;
-    } catch (err) {
-      logger.error(err);
-    }
+  // Update via For Of pour limiter les appels //
+  for (const currentDossierToUpdate of dossiersApprenantsMigrationForFiabilisationCouple) {
+    await updateDossierApprenantMigrationForUaiSiretFiable(currentDossierToUpdate, uai_fiable, siret_fiable);
   }
 
-  await createJobEvent({
-    jobname: JOB_NAME,
-    date: new Date(),
-    action: "updateOrganismesFiabilisationStatut",
-    data: {
-      organismesUpdatedCount,
-    },
+  // Update de l'organisme lié à un couple UAI-SIRET marqué comme A_FIABILISER en FIABILISE
+  const { modifiedCount: organismesModifiedCount } = await organismesDb().updateOne(
+    { uai: uai_fiable, siret: siret_fiable },
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABILISE } }
+  );
+  nbOrganismesFiabilises += organismesModifiedCount;
+};
+
+/**
+ * TODO Méthode de maj d'un dossier apprenant unitaire
+ * @param {*} currentDossierApprenantToUpdate
+ * @param {*} uai_fiable
+ * @param {*} siret_fiable
+ */
+const updateDossierApprenantMigrationForUaiSiretFiable = async (
+  currentDossierApprenantToUpdate,
+  uai_fiable,
+  siret_fiable
+) => {
+  // Si aucun dossierApprenant en doublon (via index id_erp_apprenant/uai_etablissement/annee_scolaire) on fait la MAJ
+  const countDossierApprenantForUaiSiretFiable = await dossiersApprenantsMigrationDb().countDocuments({
+    id_erp_apprenant: currentDossierApprenantToUpdate.id_erp_apprenant,
+    uai_etablissement: uai_fiable,
+    siret_etablissement: siret_fiable,
+    annee_scolaire: currentDossierApprenantToUpdate.annee_scolaire,
   });
-  logger.info(`${organismesUpdatedCount} organismes mis à jour pour le type de fiabilisation : ${fiabilisationType}`);
+
+  if (countDossierApprenantForUaiSiretFiable === 0) {
+    await dossiersApprenantsMigrationDb().updateOne(
+      { _id: currentDossierApprenantToUpdate._id },
+      { $set: { uai_etablissement: uai_fiable, siret_etablissement: siret_fiable } }
+    );
+    nbDossiersApprenantsFiabilises++;
+  }
+};
+
+/**
+ * Méthode de MAJ de tous les couples non fiabilisable en utilisant le mapping >> NON_FIABILISABLE_MAPPING
+ */
+const updateOrganismesNonFiabilisablesMapping = async () => {
+  logger.info("Identification des organismes non fiabilisables via mapping ...");
+
+  const couplesNonFiabilisablesMapping = await fiabilisationUaiSiretDb()
+    .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING })
+    .toArray();
+
+  await PromisePool.for(couplesNonFiabilisablesMapping).process(updateOrganismeForCurrentCoupleNonFiabilisableMapping);
+};
+
+/**
+ * Méthode de MAJ unitaire d'un organisme comme étant non fiabilisable en utilisant le mapping >> NON_FIABILISABLE_MAPPING
+ * @param {*} currentFiabilisationCouple
+ */
+const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (currentFiabilisationCouple) => {
+  const { modifiedCount } = await organismesDb().updateMany(
+    { uai: currentFiabilisationCouple.uai, siret: currentFiabilisationCouple.siret },
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING } }
+  );
+  nbOrganismesNonFiabilisablesMapping += modifiedCount;
+};
+
+/**
+ * Méthode de MAJ de tous les organismes non fiabilisables car présents dans le référentiel mais sans UAI >> NON_FIABILISABLE_UAI_NON_VALIDEE
+ */
+const updateOrganismesNonFiabilisablesUaiNonValidees = async () => {
+  logger.info("Identification des organismes non fiabilisables avec uai non validée ...");
+
+  const { modifiedCount } = await organismesDb().updateMany(
+    { uai: { $exists: false }, est_dans_le_referentiel: true },
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE } }
+  );
+  nbOrganismesNonFiabilisablesUaiNonValidees += modifiedCount;
 };
