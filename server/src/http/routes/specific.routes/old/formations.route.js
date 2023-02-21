@@ -1,5 +1,6 @@
 import express from "express";
 import Joi from "joi";
+import { getFormationWithCfd, searchFormations } from "../../../../common/actions/formations.actions.js";
 import { validateFullObjectSchema } from "../../../../common/utils/validationUtils.js";
 import { returnResult } from "../../../middlewares/helpers.js";
 
@@ -10,21 +11,21 @@ const formationsSearchSchema = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
-export default ({ formations }) => {
+export default () => {
   const router = express.Router();
 
   router.post(
     "/search",
     returnResult(async (req) => {
       const formationSearch = await validateFullObjectSchema(req.body, formationsSearchSchema);
-      return await formations.searchFormations(formationSearch);
+      return await searchFormations(formationSearch);
     })
   );
 
   router.get(
     "/:cfd",
     returnResult(async (req) => {
-      return formations.getFormationWithCfd(req.params.cfd);
+      return await getFormationWithCfd(req.params.cfd);
     })
   );
 

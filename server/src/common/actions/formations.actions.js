@@ -1,10 +1,12 @@
 import { validateCfd } from "../utils/validationsUtils/cfd.js";
 import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
-import { formationsDb, dossiersApprenantsMigrationDb, effectifsDb } from "../model/collections.js";
+import { formationsDb, effectifsDb } from "../model/collections.js";
 import { validateFormation } from "../model/formations.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { ObjectId } from "mongodb";
+import logger from "../logger.js";
+import { buildMongoPipelineFilterStages } from "../components/filters.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -19,7 +21,6 @@ export const existsFormation = async (cfd) => {
 };
 
 /**
- * TODO : missing unit test (really useful ?)
  * Returns formation if found with given CFD
  * @param {string} cfd
  * @return {Promise<Object | null>} Found formation
@@ -169,29 +170,37 @@ export const updateFormation = async (id, { cfd, duree = null, annee = null, ...
  * @return {Promise<Object[]>} Array of formations
  */
 export const searchFormations = async (searchCriteria) => {
-  const { searchTerm, ...otherFilters } = searchCriteria;
+  let start = Date.now();
+  const eligibleCfds = (
+    await effectifsDb()
+      .aggregate([...buildMongoPipelineFilterStages(searchCriteria), { $group: { _id: "$formation.cfd" } }])
+      .toArray()
+  ).map((row) => row._id);
+  logger.info({ elapsted: Date.now() - start, eligibleCfds: eligibleCfds.length }, "searchFormations_eligibleCfds");
 
-  const eligibleCfds = await effectifsDb().distinct("formation.cfd", otherFilters); // FIXME: use effectifs or formations ?
-
-  const matchStage = searchTerm
+  const matchStage = searchCriteria.searchTerm
     ? {
         $or: [
-          { $text: { $search: searchTerm } },
-          { cfd: new RegExp(escapeRegExp(searchTerm), "g") },
-          { rncps: new RegExp(escapeRegExp(searchTerm), "gi") },
+          { $text: { $search: searchCriteria.searchTerm } },
+          { cfd: new RegExp(escapeRegExp(searchCriteria.searchTerm), "g") },
+          { rncps: new RegExp(escapeRegExp(searchCriteria.searchTerm), "gi") },
         ],
         cfd: { $in: eligibleCfds },
       }
     : { cfd: { $in: eligibleCfds } };
 
-  const sortStage = searchTerm
+  const sortStage = searchCriteria.searchTerm
     ? {
         score: { $meta: "textScore" },
         libelle: 1,
       }
     : { libelle: 1 };
 
-  return await formationsDb()
+  start = Date.now();
+  const formations = await formationsDb()
     .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
     .toArray();
+
+  logger.info({ elapsted: Date.now() - start, formations: formations.length }, "searchFormations_formations");
+  return formations;
 };

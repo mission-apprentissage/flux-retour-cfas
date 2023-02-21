@@ -156,8 +156,7 @@ export default async (services) => {
     organismesRouter()
   ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
 
-  // TODO : Route à corriger / transformer pour le filtre par formations
-  app.use("/api/formations", formationRouter(services)); // FRONT
+  app.use("/api/formations", formationRouter()); // FRONT
 
   // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
   app.use("/api/cfas", cfasRouter(services)); // FRONT

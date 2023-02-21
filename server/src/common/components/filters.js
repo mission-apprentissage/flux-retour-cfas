@@ -47,6 +47,9 @@ const filtersConfigurations = {
     matchKey: "organisme.adresse.region",
     preliminaryLookup: organismeLookup,
   },
+  formation_cfd: {
+    matchKey: "formation.cfd",
+  },
 };
 
 /**
@@ -58,7 +61,8 @@ export function buildMongoPipelineFilterStages(filters = {}) {
   for (const [filterName, filterValue] of Object.entries(filters)) {
     const filterConfiguration = filtersConfigurations[filterName];
     if (!filterConfiguration) {
-      throw new Error(`Missing filter configuration for '${filterName}'`);
+      // allow unknown fields, we only care about those we know
+      continue;
     }
 
     matchFilters[filterConfiguration.matchKey] = filterConfiguration.transformValue?.(filterValue) ?? filterValue;
