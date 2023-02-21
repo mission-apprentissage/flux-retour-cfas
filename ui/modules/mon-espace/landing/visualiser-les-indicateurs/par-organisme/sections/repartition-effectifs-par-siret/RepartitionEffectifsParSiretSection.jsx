@@ -11,7 +11,7 @@ import RepartitionEffectifsParSiret from "@/components/tables/RepartitionEffecti
 import useAuth from "@/hooks/useAuth";
 import useFetchEffectifsParSiret from "@/hooks/useFetchEffectifsParSiret";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
-import { InfoLine } from "../../../../../../theme/components/icons";
+import { InfoLine } from "@/theme/components/icons";
 import {
   filtersPropTypes,
   useFiltersContext,

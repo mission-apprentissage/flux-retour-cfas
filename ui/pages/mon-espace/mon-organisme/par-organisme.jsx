@@ -1,9 +1,12 @@
 import React from "react";
 
 import { roles } from "@/common/auth/roles";
-import { FiltersProvider, getDefaultState } from "../FiltersContext";
-import IndicateursVueOrganismePage from "./IndicateursVueOrganismePage";
+import IndicateursVueOrganismePage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/IndicateursVueOrganismePage";
 import useAuth from "@/hooks/useAuth";
+import {
+  FiltersProvider,
+  getDefaultState,
+} from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 
 const IndicateursVueOrganismePageContainer = () => {
   const [auth] = useAuth();

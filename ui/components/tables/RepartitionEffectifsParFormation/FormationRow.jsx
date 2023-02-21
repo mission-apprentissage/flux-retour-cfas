@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import { isDateFuture } from "../../../utils/dateUtils";
+import { isDateFuture } from "@/common/utils/dateUtils";
 import NumberValueCell from "../NumberValueCell";
 import AnneeFormationRows from "./AnneeFormationRows";
 
