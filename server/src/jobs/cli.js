@@ -15,6 +15,19 @@ import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
+import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index.js";
+
+/**
+ * Job (temporaire) de suppression des organismes sans siret & sans effectifs
+ */
+cli
+  .command("patches:remove-organismes-sansSiret-sansEffectifs")
+  .description("Suppression des organismes sans siret & sans effectifs")
+  .action(async () => {
+    runScript(async () => {
+      return removeOrganismesSansSiretSansEffectifs();
+    }, "remove-organismes-sansSiret-sansEffectifs");
+  });
 
 /**
  * Job d'initialisation de données de test
