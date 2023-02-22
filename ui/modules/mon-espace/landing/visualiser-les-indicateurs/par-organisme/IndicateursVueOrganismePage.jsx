@@ -14,6 +14,7 @@ import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import OrganismeViewContent from "./OrganismeViewContent";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Head from "next/head";
 
 const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
@@ -28,6 +29,9 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
 
   return (
     <Page>
+      <Head>
+        <title>{NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.title}</title>
+      </Head>
       <Section paddingY="3w">
         <Breadcrumb
           pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme]}

@@ -13,6 +13,7 @@ import SwitchViewButton from "../SwitchViewButton";
 import IndicateursAndRepartitionFormationParCfa from "./IndicateursAndRepartitionFormationParCfa";
 import InfosFormationSection from "./InfosFormationSection";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Head from "next/head";
 
 const IndicateursVueFormationPage = () => {
   const filtersContext = useFiltersContext();
@@ -22,6 +23,9 @@ const IndicateursVueFormationPage = () => {
 
   return (
     <Page>
+      <Head>
+        <title>{NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.title}</title>
+      </Head>
       <Section paddingY="3w">
         <Breadcrumb
           pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParFormation]}

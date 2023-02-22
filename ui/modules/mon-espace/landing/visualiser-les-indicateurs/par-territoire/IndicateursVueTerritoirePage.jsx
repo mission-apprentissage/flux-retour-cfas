@@ -11,6 +11,7 @@ import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import IndicateursAndRepartitionEffectifsTerritoire from "./IndicateursAndRepartitionEffectifsTerritoire";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Head from "next/head";
 
 const IndicateursVueTerritoirePage = () => {
   const filtersContext = useFiltersContext();
@@ -18,6 +19,9 @@ const IndicateursVueTerritoirePage = () => {
 
   return (
     <Page>
+      <Head>
+        <title>{NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.title}</title>
+      </Head>
       <Section paddingY="3w">
         <Breadcrumb
           pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire]}

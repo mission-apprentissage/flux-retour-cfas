@@ -13,6 +13,7 @@ import ReseauSelect from "./ReseauSelect/ReseauSelect";
 import ReseauSelectPanel from "./ReseauSelect/ReseauSelectPanel";
 import ReseauViewContent from "./ReseauViewContent";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Head from "next/head";
 
 const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
@@ -21,6 +22,9 @@ const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
 
   return (
     <Page>
+      <Head>
+        <title>{NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.title}</title>
+      </Head>
       <Section paddingY="3w">
         <Breadcrumb pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParReseau]} />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
