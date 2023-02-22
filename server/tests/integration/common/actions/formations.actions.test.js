@@ -3,7 +3,6 @@ import omit from "lodash.omit";
 import nock from "nock";
 
 import { nockGetCfdInfo } from "../../../utils/nockApis/nock-tablesCorrespondances.js";
-import { asyncForEach } from "../../../../src/common/utils/asyncUtils.js";
 import { dataForGetCfdInfo } from "../../../data/apiTablesDeCorrespondances.js";
 import { nockGetMetiersByCfd } from "../../../utils/nockApis/nock-Lba.js";
 import { formationsDb, effectifsDb, organismesDb } from "../../../../src/common/model/collections.js";
