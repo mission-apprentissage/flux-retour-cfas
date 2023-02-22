@@ -2,13 +2,11 @@ import { Box, Flex, Heading, HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { hasUserRoles, roles } from "@/common/auth/roles";
 import CfasFilter from "@/components/CfasFilter/CfasFilter";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import CfaPanel from "@/components/CfasFilter/CfasPanel";
 import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
-import useAuth from "@/hooks/useAuth";
 import useFetchCfaInfo from "@/hooks/useFetchCfaInfo";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
@@ -20,7 +18,6 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
 
   const { data: infosCfa, loading, error } = useFetchCfaInfo(filtersContext?.state?.cfa?.uai_etablissement);
-  const [auth] = useAuth();
 
   const currentOrganisme = filtersContext.state.cfa;
   const organismeFilterLabel = userLoggedAsReseau
