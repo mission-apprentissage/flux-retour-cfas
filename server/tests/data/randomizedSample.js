@@ -104,6 +104,39 @@ export const createRandomEffectifApprenant = (params = {}) => {
   };
 };
 
+export const createSampleEffectif = (params = {}) => {
+  const annee_scolaire = getRandomAnneeScolaire();
+  return {
+    apprenant: {
+      ine_apprenant: getRandomIne(),
+      nom: faker.name.lastName().toUpperCase(),
+      prenom: faker.name.firstName(),
+      email_contact: faker.internet.email(),
+      date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
+      ...params?.apprenant,
+    },
+    formation: {
+      annee_formation: getRandomAnneeFormation(),
+      cfd: getRandomFormationCfd(),
+      periode: getRandomPeriodeFormation(annee_scolaire),
+      rncp: getRandomRncpFormation(),
+      libelle_long: faker.helpers.arrayElement(sampleLibelles).intitule_long,
+      niveau: "5",
+      niveau_libelle: "5 (BTS, DUT...)",
+      annee: getRandomAnneeFormation(),
+      ...params?.formation,
+    },
+    validation_errors: [],
+    created_at: new Date(),
+    updated_at: new Date(),
+    id_erp_apprenant: faker.datatype.uuid(),
+    source: faker.random.word(),
+    annee_scolaire,
+    organisme_id: null,
+    ...params,
+  };
+};
+
 // random DossierApprenant shaped along our REST API schema
 export const createRandomDossierApprenantApiInput = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
