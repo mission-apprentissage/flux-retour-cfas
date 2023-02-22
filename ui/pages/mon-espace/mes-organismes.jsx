@@ -13,6 +13,7 @@ import { useEspace } from "@/hooks/useEspace";
 import Link from "@/components/Links/Link";
 import Table from "@/components/Table/Table";
 import withAuth from "@/components/withAuth";
+import { formatDateDayMonthYear } from "@/common/utils/dateUtils.js";
 
 function useEspaceOrganismes() {
   const {
@@ -174,12 +175,12 @@ function MesOrganismes() {
                   transmission: {
                     size: 120,
                     header: () => {
-                      return <Box textAlign="left">Transmission au tableau de bord</Box>;
+                      return <Box textAlign="left">Dernière transmission au tdb</Box>;
                     },
                     cell: ({ row }) => {
-                      const { first_transmission_date } = organismes[row.id];
-                      return first_transmission_date ? (
-                        <Text color="green">Transmet</Text>
+                      const { last_transmission_date } = organismes[row.id];
+                      return last_transmission_date ? (
+                        <Text color="green">Le {formatDateDayMonthYear(last_transmission_date)}</Text>
                       ) : (
                         <Text color="tomato">Ne transmet pas</Text>
                       );

@@ -1,7 +1,7 @@
 export const FIABILISATION_LABEL = {
-  A_FIABILISER: "à fiabiliser",
-  FIABILISE: "fiabilisé",
-  DEJA_FIABLE: "déja fiable",
-  NON_FIABILISABLE: "non fiabilisable",
-  INCONNU: "inconnu",
+  FIABLE: "Fiable",
+  FIABILISE: "Fiabilisé",
+  NON_FIABILISABLE_UAI_NON_VALIDEE: "Non fiabilisable (uai non validée)",
+  NON_FIABILISABLE_MAPPING: "Non fiabilisable (mapping)",
+  INCONNU: "Inconnu",
 };

@@ -24,6 +24,7 @@ export default () => {
         siret: 1,
         uai: 1,
         first_transmission_date: 1,
+        last_transmission_date: 1,
         fiabilisation_statut: 1,
       });
 
