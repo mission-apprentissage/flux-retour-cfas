@@ -24,12 +24,6 @@ const PageMonOrganisme = () => {
         <Container maxW="xl" px={0}>
           <Breadcrumb pages={[PAGES.monEspace()]} />
 
-          <Stack spacing="2w">
-            <Heading textStyle="h2" color="grey.800">
-              Bienvenue sur votre tableau de bord
-            </Heading>
-          </Stack>
-
           {/* TODO: s'assurer qu'on est sur le bon écran selon le profil utilisateur */}
           {myOrganisme ? (
             hasContextAccessTo(myOrganisme, "organisme/tableau_de_bord") && (
