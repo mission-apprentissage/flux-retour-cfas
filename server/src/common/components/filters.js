@@ -8,24 +8,7 @@ export const organismeLookup = {
   as: "organisme",
 };
 
-/*
-interface FilterConfiguration {
-  matchKey: string
-
-  // optional transformer
-  transformValue?: (value: any) => any
-
-  // some filters need a preliminary lookup with another collection
-  preliminaryLookup?: {
-    from: string
-    localField: string
-    foreignField: string
-    as: string
-  }
-}
-*/
-
-// {[key: string]: FilterConfiguration}
+/** @type {import("./filters.js").FilterConfigurations} */
 const filtersConfigurations = {
   date: {
     matchKey: "annee_scolaire",

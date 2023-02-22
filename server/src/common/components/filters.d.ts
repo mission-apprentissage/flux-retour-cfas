@@ -11,3 +11,19 @@ export type EffectifsFilters = {
   uai_etablissement?: string
 };
 
+export interface FilterConfiguration {
+  matchKey: string
+
+  // optional transformer
+  transformValue?: (value: any) => any
+
+  // some filters need a preliminary lookup with another collection
+  preliminaryLookup?: {
+    from: string
+    localField: string
+    foreignField: string
+    as: string
+  }
+}
+
+export type FilterConfigurations = {[key in EffectifsFilters]: FilterConfiguration}
