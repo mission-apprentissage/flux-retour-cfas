@@ -1,18 +1,15 @@
-import { EffectifsApprentis } from "./effectifs/apprentis.js";
-import { EffectifsAbandons } from "./effectifs/abandons.js";
-import { EffectifsInscritsSansContrats } from "./effectifs/inscrits-sans-contrats.js";
-import { EffectifsRupturants } from "./effectifs/rupturants.js";
 import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
 import { buildMongoPipelineFilterStages, organismeLookup } from "./filters.js";
 import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
 import { DEPARTEMENTS_BY_ID } from "../constants/territoiresConstants.js";
+import {
+  abandonsIndicator,
+  apprentisIndicator,
+  inscritsSansContratsIndicator,
+  rupturantsIndicator,
+} from "./effectifs/indicators.js";
 
 export default () => {
-  const apprentisIndicator = new EffectifsApprentis();
-  const abandonsIndicator = new EffectifsAbandons();
-  const inscritsSansContratsIndicator = new EffectifsInscritsSansContrats();
-  const rupturantsIndicator = new EffectifsRupturants();
-
   // FIXME peut-être à supprimer pour conserver getEffectifsCountAtDate
   async function getIndicateurs(filters) {
     const filterStages = buildMongoPipelineFilterStages(filters);

@@ -3,16 +3,21 @@ import { organismeLookup } from "../filters.js";
 import { exportedMongoFieldsProjection } from "./export.js";
 
 export class Indicator {
+  constructor(config) {
+    this.config = config;
+  }
   /**
    *
-   * @param {*} _searchDate
-   * @param {*} _filters
-   * @param {*} _options
+   * @param {*} searchDate
+   * @param {*} options
    * @returns {any[]}
    */
-  getAtDateAggregationPipeline(_searchDate, _filters = {}, _options = {}) {
-    // fonction implémentée dans les classes filles
-    return [];
+  getAtDateAggregationPipeline(searchDate, options = {}) {
+    return [
+      ...this.config.preStages,
+      ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
+      ...this.config.postStages,
+    ];
   }
 
   /**
@@ -106,11 +111,6 @@ export class Indicator {
     ];
   }
 
-  // implemented by children
-  formatRow(item) {
-    return item;
-  }
-
   /**
    * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
    * @param {*} searchDate
@@ -123,11 +123,9 @@ export class Indicator {
       projection: exportedMongoFieldsProjection,
     });
     return exportList.map((item) => ({
-      ...this.formatRow(item),
+      ...this.config.formatRow(item),
       indicateur,
-      // @ts-ignore
       date_debut_formation: item.formation.periode ? item.formation.periode[0] : null,
-      // @ts-ignore
       date_fin_formation: item.formation.periode ? item.formation.periode[1] : null,
     }));
   }
