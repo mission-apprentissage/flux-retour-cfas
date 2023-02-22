@@ -185,14 +185,28 @@ const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (currentFiab
 };
 
 /**
- * Méthode de MAJ de tous les organismes non fiabilisables car présents dans le référentiel mais sans UAI >> NON_FIABILISABLE_UAI_NON_VALIDEE
+ * Méthode de MAJ de tous les organismes non fiabilisables sans UAI dans le référentiel >> NON_FIABILISABLE_UAI_NON_VALIDEE
  */
 const updateOrganismesNonFiabilisablesUaiNonValidees = async () => {
-  logger.info("Identification des organismes non fiabilisables avec uai non validée ...");
+  logger.info("Identification des organismes non fiabilisables car uai non validée ...");
 
+  const couplesNonFiabilisablesUaiNonValidees = await fiabilisationUaiSiretDb()
+    .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE })
+    .toArray();
+
+  await PromisePool.for(couplesNonFiabilisablesUaiNonValidees).process(
+    updateOrganismeForCurrentCoupleNonFiabilisableUaiNonValidee
+  );
+};
+
+/**
+ * Méthode de MAJ unitaire d'un organisme comme étant non fiabilisable sans UAI dans le référentiel >> NON_FIABILISABLE_UAI_NON_VALIDEE
+ * @param {*} currentFiabilisationCouple
+ */
+const updateOrganismeForCurrentCoupleNonFiabilisableUaiNonValidee = async (currentFiabilisationCouple) => {
   const { modifiedCount } = await organismesDb().updateMany(
-    { uai: { $exists: false }, est_dans_le_referentiel: true },
-    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE } }
+    { uai: currentFiabilisationCouple.uai, siret: currentFiabilisationCouple.siret },
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE } }
   );
   nbOrganismesNonFiabilisablesUaiNonValidees += modifiedCount;
 };
