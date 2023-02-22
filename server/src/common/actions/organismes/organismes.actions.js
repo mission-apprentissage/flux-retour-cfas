@@ -136,6 +136,7 @@ export const structureOrganismeFromDossierApprenant = async (dossierApprenant) =
     ...defaultValuesOrganisme(),
     uai: uai_etablissement,
     siret: siret_etablissement,
+    last_transmission_date: new Date(),
     ...adresseForOrganisme,
     ...(nom_etablissement
       ? { nom: nom_etablissement.trim(), nom_tokenized: buildTokenizedString(nom_etablissement.trim(), 4) }
@@ -436,27 +437,37 @@ export const updateOrganismeApiKey = async (id) => {
   return key;
 };
 
-export const setOrganismeFirstDateTransmissionIfNeeded = async (id) => {
+/**
+ * Méthode de maj des dates de transmission d'un organisme
+ * @param {*} id
+ * @returns
+ */
+export const setOrganismeTransmissionDates = async (id) => {
   const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${_id.toString()}`);
-  }
-  if (organisme.first_transmission_date) return organisme.first_transmission_date;
+  if (!organisme) throw new Error(`Unable to find organisme ${_id.toString()}`);
 
-  const first_transmission_date = new Date();
-  await organismesDb().findOneAndUpdate(
-    { _id: organisme._id },
-    {
-      $set: {
-        first_transmission_date,
-        updated_at: new Date(),
-      },
-    }
-  );
-  return first_transmission_date;
+  // Si l'organisme n'a jamais transmis on set first_transmission_date et last_transmission_date
+  if (!organisme.first_transmission_date) {
+    await organismesDb().findOneAndUpdate(
+      { _id: organisme._id },
+      {
+        $set: {
+          first_transmission_date: new Date(),
+          last_transmission_date: new Date(),
+          updated_at: new Date(),
+        },
+      }
+    );
+  } else {
+    // Si l'organisme a déja transmis on update uniquement last_transmission_date
+    await organismesDb().findOneAndUpdate(
+      { _id: organisme._id },
+      { $set: { last_transmission_date: new Date(), updated_at: new Date() } }
+    );
+  }
 };
 
 /**
