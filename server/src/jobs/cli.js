@@ -16,6 +16,7 @@ import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index.js";
+import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
 
 /**
  * Job (temporaire) de suppression des organismes sans siret & sans effectifs
@@ -27,6 +28,18 @@ cli
     runScript(async () => {
       return removeOrganismesSansSiretSansEffectifs();
     }, "remove-organismes-sansSiret-sansEffectifs");
+  });
+
+/**
+ * Job (temporaire) de MAJ des date de dernières transmission des effectifs
+ */
+cli
+  .command("patches:update-lastTransmissionDate-organismes")
+  .description("Suppression des organismes sans siret & sans effectifs")
+  .action(async () => {
+    runScript(async () => {
+      return updateLastTransmissionDateForOrganismes();
+    }, "update-lastTransmissionDate-organismes");
   });
 
 /**
