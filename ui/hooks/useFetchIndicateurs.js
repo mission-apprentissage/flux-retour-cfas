@@ -23,9 +23,11 @@ const useFetchIndicateurs = () => {
   const { filtersValues } = useSimpleFiltersContext();
   const requestFilters = mapSimpleFiltersToApiFormat(filtersValues);
 
-  const { status, indicateurs, error } = useQuery(["indicateurs", requestFilters], () =>
-    _get("/api/indicateurs", { params: requestFilters })
-  );
+  const {
+    status,
+    data: indicateurs,
+    error,
+  } = useQuery(["indicateurs", requestFilters], () => _get("/api/indicateurs", { params: requestFilters }));
 
   const loading = status === "loading";
   return [indicateurs, loading, error];
