@@ -4,6 +4,7 @@ import pick from "lodash.pick";
 import {
   createOrganisme,
   findOrganismeById,
+  setOrganismeTransmissionDates,
   updateOrganisme,
 } from "../../../../src/common/actions/organismes/organismes.actions.js";
 import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
@@ -14,6 +15,7 @@ import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../src/common/c
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
 import { SAMPLES_ETABLISSEMENTS_API_ENTREPRISE } from "../../../data/entreprise.api.gouv.fr/sampleDataApiEntreprise.js";
 import { DEPARTEMENTS } from "../../../../src/common/constants/territoiresConstants.js";
+import { subDays } from "date-fns";
 
 describe("Test des actions Organismes", () => {
   // Construction de l'adresse nockée via API Entreprise pour un fichier de sample
@@ -466,6 +468,73 @@ describe("Test des actions Organismes", () => {
       });
       assert.equal(cleanUai, sampleUaiFiable);
       assert.equal(cleanSiret, sampleSiretFiable);
+    });
+  });
+
+  describe("setOrganismeTransmissionDates", () => {
+    it("mets à jour les dates first_transmission_date et last_transmission_date pour un organisme sans first_transmission_date", async () => {
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+
+      // Création de l'organisme sans les appels API
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
+
+      // Vérification de la création sans first_transmission_date
+      const created = await findOrganismeById(_id);
+      assert.deepStrictEqual(created.first_transmission_date, undefined);
+
+      // MAJ de l'organisme et vérification de l'ajout de first_transmission_date
+      await setOrganismeTransmissionDates(_id);
+      const updated = await findOrganismeById(_id);
+      assert.notDeepStrictEqual(updated.first_transmission_date, undefined);
+      assert.notDeepStrictEqual(updated.last_transmission_date, undefined);
+    });
+
+    it("mets à jour la date last_transmission_date pour un organisme avec first_transmission_date", async () => {
+      const first_transmission_date = subDays(new Date(), 10);
+
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        first_transmission_date,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+
+      // Création de l'organisme sans les appels API
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
+
+      // Vérification de la création avec first_transmission_date
+      const created = await findOrganismeById(_id);
+      assert.deepStrictEqual(created.first_transmission_date, first_transmission_date);
+
+      // MAJ de l'organisme et vérification de l'ajout de last_transmission_date
+      await setOrganismeTransmissionDates(_id);
+      const updated = await findOrganismeById(_id);
+      assert.deepStrictEqual(updated.first_transmission_date, first_transmission_date);
+      assert.notDeepStrictEqual(updated.last_transmission_date, undefined);
     });
   });
 });

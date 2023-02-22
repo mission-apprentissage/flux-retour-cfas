@@ -32,7 +32,7 @@ import {
   getFormationWithRNCP,
   findFormationById,
 } from "../../../../common/actions/formations.actions.js";
-import { setOrganismeFirstDateTransmissionIfNeeded } from "../../../../common/actions/organismes/organismes.actions.js";
+import { setOrganismeTransmissionDates } from "../../../../common/actions/organismes/organismes.actions.js";
 import { sendServerEventsForUser } from "../server-events.routes.js";
 
 const mappingModel = {
@@ -947,7 +947,7 @@ export default ({ clamav }) => {
         confirm: true,
       });
 
-      if (uploads.last_snapshot_effectifs.length > 0) await setOrganismeFirstDateTransmissionIfNeeded(organisme_id);
+      if (uploads.last_snapshot_effectifs.length > 0) await setOrganismeTransmissionDates(organisme_id);
 
       return res.json({});
     })

@@ -104,6 +104,7 @@ export const schema = object(
 
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
+    last_transmission_date: date({ description: "Date de la dernière transmission de données" }),
     date_derniere_transmission: date({ description: "Date de la dernière transmission de données" }),
     est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
     ferme: boolean({ description: "Le siret est fermé" }),
