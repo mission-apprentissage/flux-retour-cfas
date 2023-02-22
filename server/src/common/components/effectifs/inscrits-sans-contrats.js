@@ -1,6 +1,7 @@
 import { addMonths } from "date-fns";
-import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
 import { SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS } from "../../utils/validationsUtils/effectif.js";
+import { mapMongoObjectToCSVObject } from "./export.js";
 import { Indicator } from "./indicator.js";
 
 export class EffectifsInscritsSansContrats extends Indicator {
@@ -28,17 +29,10 @@ export class EffectifsInscritsSansContrats extends Indicator {
    * @param {*} item
    * @returns
    */
-  async formatRow(item) {
+  formatRow(item) {
     return {
-      ...item,
-      statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+      ...mapMongoObjectToCSVObject(item),
       date_inscription: item.statut_apprenant_at_date.date_statut, // Specific for inscrits sans contrats indicateur
-      historique_statut_apprenant: JSON.stringify(
-        item.apprenant.historique_statut.map((item) => ({
-          date: item.date_statut,
-          statut: getStatutApprenantNameFromCode(item.valeur_statut),
-        }))
-      ),
       dans_le_statut_depuis:
         addMonths(
           new Date(item.statut_apprenant_at_date.date_statut),

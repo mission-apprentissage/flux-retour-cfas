@@ -1,6 +1,7 @@
 import { addMonths } from "date-fns";
-import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
 import { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } from "../../utils/validationsUtils/effectif.js";
+import { mapMongoObjectToCSVObject } from "./export.js";
 import { Indicator } from "./indicator.js";
 
 export class EffectifsRupturants extends Indicator {
@@ -37,16 +38,9 @@ export class EffectifsRupturants extends Indicator {
    * @param {*} item
    * @returns
    */
-  async formatRow(item) {
+  formatRow(item) {
     return {
-      ...item,
-      statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
-      historique_statut_apprenant: JSON.stringify(
-        item.apprenant.historique_statut.map((item) => ({
-          date: item.date_statut,
-          statut: getStatutApprenantNameFromCode(item.valeur_statut),
-        }))
-      ),
+      ...mapMongoObjectToCSVObject(item),
       dans_le_statut_depuis:
         addMonths(new Date(item.statut_apprenant_at_date.date_statut), SEUIL_ALERTE_NB_MOIS_RUPTURANTS).getTime() >
         Date.now()

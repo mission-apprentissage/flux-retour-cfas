@@ -1,4 +1,5 @@
-import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
+import { mapMongoObjectToCSVObject } from "./export.js";
 import { Indicator } from "./indicator.js";
 
 export class EffectifsApprentis extends Indicator {
@@ -23,16 +24,7 @@ export class EffectifsApprentis extends Indicator {
    * @param {*} item
    * @returns
    */
-  async formatRow(item) {
-    return {
-      ...item,
-      statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
-      historique_statut_apprenant: JSON.stringify(
-        item.apprenant.historique_statut.map((item) => ({
-          date: item.date_statut,
-          statut: getStatutApprenantNameFromCode(item.valeur_statut),
-        }))
-      ),
-    };
+  formatRow(item) {
+    return mapMongoObjectToCSVObject(item);
   }
 }

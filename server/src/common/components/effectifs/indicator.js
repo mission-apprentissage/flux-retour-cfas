@@ -1,39 +1,8 @@
 import { effectifsDb } from "../../model/collections.js";
+import { organismeLookup } from "../filters.js";
+import { exportedMongoFieldsProjection } from "./export.js";
 
 export class Indicator {
-  /**
-   * Constructeur avec définition d'une projection d'export par défaut
-   */
-  constructor() {
-    this.exportProjection = {
-      organisme_id: 1,
-
-      "apprenant.nom": 1,
-      "apprenant.prenom": 1,
-      "apprenant.date_de_naissance": 1,
-      "apprenant.historique_statut": 1,
-      "apprenant.contrats.date_debut": 1,
-      "apprenant.contrats.date_fin": 1,
-      "apprenant.contrats.date_rupture": 1,
-
-      "formation.cfd": 1,
-      "formation.rncp": 1,
-      "formation.libelle_long": 1,
-      "formation.annee": 1,
-      "formation.periode": 1,
-
-      "organisme.uai": 1,
-      "organisme.siret": 1,
-      "organisme.nom": 1,
-      "organisme.adresse.departement": 1,
-      "organisme.adresse.region": 1,
-
-      annee_scolaire: 1,
-
-      statut_apprenant_at_date: 1,
-    };
-  }
-
   /**
    *
    * @param {*} _searchDate
@@ -137,6 +106,11 @@ export class Indicator {
     ];
   }
 
+  // implemented by children
+  formatRow(item) {
+    return item;
+  }
+
   /**
    * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
    * @param {*} searchDate
@@ -145,9 +119,10 @@ export class Indicator {
    * @returns
    */
   async getFullExportFormattedListAtDate(searchDate, filterStages = [], indicateur) {
-    const projection = this.exportProjection;
-    return (await this.getListAtDate(searchDate, filterStages, { projection })).map((item) => ({
-      // @ts-ignore
+    const exportList = await this.getListAtDate(searchDate, [...filterStages, { $lookup: organismeLookup }], {
+      projection: exportedMongoFieldsProjection,
+    });
+    return exportList.map((item) => ({
       ...this.formatRow(item),
       indicateur,
       // @ts-ignore

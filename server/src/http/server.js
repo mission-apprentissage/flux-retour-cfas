@@ -12,7 +12,6 @@ import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
 import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
-import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
