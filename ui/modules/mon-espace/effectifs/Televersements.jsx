@@ -30,7 +30,6 @@ import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
 import EffectifsTable from "./engine/EffectifsTable";
 import { effectifsStateAtom } from "./engine/atoms";
-import Ribbons from "../../../components/Ribbons/Ribbons";
 import { sortByNormalizedLabels } from "@/common/utils/array";
 
 const Televersements = () => {
