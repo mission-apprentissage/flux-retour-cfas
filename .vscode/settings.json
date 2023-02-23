@@ -57,12 +57,14 @@
   },
   "files.watcherExclude": {
     "**/*/lib": true,
+    "**/*/coverage": true,
     "**/*/dist": true,
     "**/*/build": true,
     "**/.webpack": true
   },
   "search.exclude": {
     "**/*/lib": true,
+    "**/*/coverage": true,
     "**/*/dist": true,
     "**/*/build": true,
     "**/.webpack": true
