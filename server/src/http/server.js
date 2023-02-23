@@ -44,6 +44,7 @@ import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import maintenancesRoutes from "./routes/maintenances.routes.js";
 import config from "../config.js";
+import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMiddleware.js";
 
 export default async (services) => {
   const app = express();
@@ -120,8 +121,7 @@ export default async (services) => {
     // FRONT
     ["/api/indicateurs"],
     checkJwtToken,
-    // FIXME organisme_id est requis pourtant, on devrait pouvoir exporter sans indiquer d'organisme (dreets ?)
-    // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord, organisme.statsonly"]),
     indicateursRouter()
   );
 
@@ -131,7 +131,7 @@ export default async (services) => {
     // FRONT
     "/api/v1/indicateurs-export",
     checkJwtToken,
-    // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord, organisme.statsonly"]),
     indicateursExportRouter()
   );
 
