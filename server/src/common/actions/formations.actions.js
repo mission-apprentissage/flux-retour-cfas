@@ -6,7 +6,7 @@ import { validateFormation } from "../model/formations.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { ObjectId } from "mongodb";
 import logger from "../logger.js";
-import { buildMongoPipelineFilterStages } from "../components/filters.js";
+import { buildMongoPipelineFilterStages } from "./helpers/filters.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 

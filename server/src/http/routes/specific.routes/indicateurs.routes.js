@@ -1,6 +1,15 @@
 import express from "express";
 import Joi from "joi";
 import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
+import {
+  getEffectifsCountByAnneeFormationAtDate,
+  getEffectifsCountByCfaAtDate,
+  getEffectifsCountByDepartementAtDate,
+  getEffectifsCountByFormationAtDate,
+  getEffectifsCountByNiveauFormationAtDate,
+  getEffectifsCountBySiretAtDate,
+  getIndicateurs,
+} from "../../../common/actions/effectifs/effectifs.actions.js";
 import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
 
@@ -19,10 +28,10 @@ const commonEffectifsFiltersSchema = {
 /**
  * Build filters from the request
  * @param {*} req
- * @returns {Promise<import("../../../common/components/filters.js").EffectifsFilters>}
+ * @returns {Promise<import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters>}
  */
 export async function buildEffectifsFiltersFromRequest(req) {
-  /** @type {import("../../../common/components/filters.js").EffectifsFilters} */
+  /** @type {import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters} */
   const filters = await validateFullObjectSchema(req.query, commonEffectifsFiltersSchema);
 
   // restriction aux organismes de l'utilisateur si pas de filtre par organisme
@@ -32,7 +41,7 @@ export async function buildEffectifsFiltersFromRequest(req) {
   return filters;
 }
 
-export default ({ effectifs }) => {
+export default () => {
   const router = express.Router();
 
   /**
@@ -56,7 +65,7 @@ export default ({ effectifs }) => {
     "/",
     returnResult(async (req) => {
       const filters = await buildEffectifsFiltersFromRequest(req);
-      return await effectifs.getIndicateurs(filters);
+      return await getIndicateurs(filters);
     })
   );
 
@@ -67,7 +76,7 @@ export default ({ effectifs }) => {
     "/niveau-formation",
     returnResult(async (req) => {
       const filters = await buildEffectifsFiltersFromRequest(req);
-      return await effectifs.getEffectifsCountByNiveauFormationAtDate(filters);
+      return await getEffectifsCountByNiveauFormationAtDate(filters);
     })
   );
 
@@ -78,7 +87,7 @@ export default ({ effectifs }) => {
     "/formation",
     returnResult(async (req) => {
       const filters = await buildEffectifsFiltersFromRequest(req);
-      return await effectifs.getEffectifsCountByFormationAtDate(filters);
+      return await getEffectifsCountByFormationAtDate(filters);
     })
   );
 
@@ -89,7 +98,7 @@ export default ({ effectifs }) => {
     "/annee-formation",
     returnResult(async (req) => {
       const filters = await buildEffectifsFiltersFromRequest(req);
-      return await effectifs.getEffectifsCountByAnneeFormationAtDate(filters);
+      return await getEffectifsCountByAnneeFormationAtDate(filters);
     })
   );
 
@@ -100,7 +109,7 @@ export default ({ effectifs }) => {
     "/cfa",
     returnResult(async (req) => {
       const filters = await buildEffectifsFiltersFromRequest(req);
-      return await effectifs.getEffectifsCountByCfaAtDate(filters);
+      return await getEffectifsCountByCfaAtDate(filters);
     })
   );
 
@@ -111,8 +120,7 @@ export default ({ effectifs }) => {
     "/siret",
     returnResult(async (req) => {
       const filters = await buildEffectifsFiltersFromRequest(req);
-      // console.log('organismes', filters.)
-      return await effectifs.getEffectifsCountBySiretAtDate(filters);
+      return await getEffectifsCountBySiretAtDate(filters);
     })
   );
 
@@ -123,7 +131,7 @@ export default ({ effectifs }) => {
     "/departement",
     returnResult(async (req) => {
       const filters = await buildEffectifsFiltersFromRequest(req);
-      return await effectifs.getEffectifsCountByDepartementAtDate(filters);
+      return await getEffectifsCountByDepartementAtDate(filters);
     })
   );
 

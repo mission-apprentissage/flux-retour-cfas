@@ -5,8 +5,9 @@ import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolai
 import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
 import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import { returnResult, tryCachedExecution } from "../../middlewares/helpers.js";
+import { getIndicateurs } from "../../../common/actions/effectifs/effectifs.actions.js";
 
-export default ({ effectifs, cache }) => {
+export default ({ cache }) => {
   const router = express.Router();
   router.get(
     "/",
@@ -18,7 +19,7 @@ export default ({ effectifs, cache }) => {
       const cacheKey = `${req.baseUrl}${req.path}:${format(date, "yyyy-MM-dd")}`;
       return tryCachedExecution(cache, cacheKey, async () => {
         const [indicateurs, totalOrganismes] = await Promise.all([
-          effectifs.getIndicateurs({ date }),
+          getIndicateurs({ date }),
           getNbDistinctOrganismes(filters), // reads from dossiersApprenantsMigration, does not use EffectifsFilters yet
         ]);
         indicateurs.totalOrganismes = totalOrganismes;

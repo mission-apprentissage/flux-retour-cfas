@@ -1,5 +1,4 @@
 import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb } from "../common/mongodb.js";
-import createComponents from "../common/components/components.js";
 import logger from "../common/logger.js";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { jobEventStatuts } from "../common/constants/jobsConstants.js";
@@ -50,12 +49,11 @@ export const runScript = async (job, jobName) => {
     await connectToMongodb(config.mongodb.uri);
     await configureDbSchemaValidation(modelDescriptors);
 
-    const components = await createComponents();
     const services = await createServices();
     redisClient = services.cache;
 
     await createJobEvent({ jobname: jobName, action: jobEventStatuts.started });
-    await job({ ...components, ...services });
+    await job(services);
 
     const endDate = new Date();
     const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));

@@ -122,7 +122,7 @@ export default async (services) => {
     checkJwtToken,
     // FIXME organisme_id est requis pourtant, on devrait pouvoir exporter sans indiquer d'organisme (dreets ?)
     // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    indicateursRouter(services)
+    indicateursRouter()
   );
 
   app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
@@ -132,7 +132,7 @@ export default async (services) => {
     "/api/v1/indicateurs-export",
     checkJwtToken,
     // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    indicateursExportRouter(services)
+    indicateursExportRouter()
   );
 
   app.use("/api/healthcheck", healthcheckRouter());

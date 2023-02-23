@@ -1,5 +1,4 @@
 import axiosist from "axiosist";
-import createComponents from "../../src/common/components/components.js";
 import server from "../../src/http/server.js";
 import { configureDbSchemaValidation } from "../../src/common/mongodb.js";
 import redisFakeClient from "./redisClientMock.js";
@@ -8,9 +7,8 @@ import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.a
 import { createUser } from "../../src/common/actions/users.actions.js";
 
 export const startServer = async () => {
-  const components = await createComponents();
   const services = { cache: redisFakeClient };
-  const app = await server({ ...components, ...services });
+  const app = await server(services);
 
   const httpClient = axiosist(app);
 
@@ -18,7 +16,6 @@ export const startServer = async () => {
 
   return {
     httpClient,
-    components,
     // Legacy auth jwt
     createAndLogUserLegacy: async (username, password, options) => {
       await createUserLegacy({ username, password, ...options });

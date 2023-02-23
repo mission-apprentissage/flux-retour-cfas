@@ -7,7 +7,8 @@ import {
 } from "../../../common/constants/userEventsConstants.js";
 import { createUserEvent } from "../../../common/actions/userEvents.actions.js";
 import { buildEffectifsFiltersFromRequest } from "./indicateurs.routes.js";
-import { exportedFields } from "../../../common/components/effectifs/export.js";
+import { exportedFields } from "../../../common/actions/effectifs/export.js";
+import { getDataListEffectifsAtDate } from "../../../common/actions/effectifs/effectifs.actions.js";
 
 // Parse to french localized CSV with specific fields order & labels (; as delimiter and UTF8 using withBOM)
 const CSV_DEFAULT_FIELDS = [
@@ -21,7 +22,7 @@ const CSV_DEFAULT_FIELDS = [
   })),
 ];
 
-export default ({ effectifs }) => {
+export default () => {
   const router = express.Router();
 
   /**
@@ -39,7 +40,7 @@ export default ({ effectifs }) => {
         data: req.query,
       });
 
-      const dataList = await effectifs.getDataListEffectifsAtDate(filters);
+      const dataList = await getDataListEffectifsAtDate(filters);
 
       const json2csvParser = new Parser({
         fields: CSV_DEFAULT_FIELDS,

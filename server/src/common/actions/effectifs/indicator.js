@@ -1,5 +1,5 @@
 import { effectifsDb } from "../../model/collections.js";
-import { organismeLookup } from "../filters.js";
+import { organismeLookup } from "../helpers/filters.js";
 import { exportedMongoFieldsProjection } from "./export.js";
 
 export class Indicator {

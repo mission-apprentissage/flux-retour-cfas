@@ -14,7 +14,7 @@ import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.j
 import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
-import { buildMongoPipelineFilterStages } from "../../components/filters.js";
+import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
