@@ -166,7 +166,7 @@ export const updateFormation = async (id, { cfd, duree = null, annee = null, ...
 
 /**
  * Returns list of formations that match the search criteria
- * @param {import("./formations.actions.js").FormationsSearch} searchCriteria
+ * @param {import("./formations.actions-struct.js").FormationsSearch} searchCriteria
  * @return {Promise<Object[]>} Array of formations
  */
 export const searchFormations = async (searchCriteria) => {

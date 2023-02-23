@@ -473,7 +473,7 @@ export const getSousEtablissementsForUai = async (uai) => {
 
 /**
  * Retourne la liste des organismes correspondant aux critères de recherche
- * @param {import("./organismes.actions.js").OrganismesSearch} searchCriteria
+ * @param {import("./organismes.actions-struct.js").OrganismesSearch} searchCriteria
  * @return {Promise<{ uai: string; nom: string; }[]>} Array of CFA information
  */
 export const searchOrganismes = async (searchCriteria) => {
