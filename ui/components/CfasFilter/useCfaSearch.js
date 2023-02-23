@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchSearchCfas } from "@/common/api/tableauDeBord";
+import { fetchSearchOrganismes } from "@/common/api/tableauDeBord";
 import { QUERY_KEYS } from "@/common/constants/queryKeys";
 import useDebounce from "@/hooks/useDebounce";
 import { omitNullishValues } from "@/common/utils/omitNullishValues";
@@ -8,7 +8,7 @@ import { omitNullishValues } from "@/common/utils/omitNullishValues";
 export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 4;
 const SEARCH_DEBOUNCE_TIME = 300;
 
-const useCfaSearch = (searchTerm, filters) => {
+const useOrganismeSearch = (searchTerm, filters) => {
   const debouncedSearchTerm = useDebounce(searchTerm, SEARCH_DEBOUNCE_TIME);
 
   // perform search if user has entered at least 4 chars or none
@@ -25,7 +25,7 @@ const useCfaSearch = (searchTerm, filters) => {
 
   const { data, isLoading } = useQuery(
     [QUERY_KEYS.SEARCH_CFAS, requestFilters],
-    () => fetchSearchCfas(requestFilters),
+    () => fetchSearchOrganismes(requestFilters),
     {
       enabled: searchEnabled,
     }
@@ -39,4 +39,4 @@ const useCfaSearch = (searchTerm, filters) => {
   };
 };
 
-export default useCfaSearch;
+export default useOrganismeSearch;

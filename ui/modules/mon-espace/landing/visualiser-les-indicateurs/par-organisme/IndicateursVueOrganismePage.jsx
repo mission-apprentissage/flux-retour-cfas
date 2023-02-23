@@ -7,7 +7,7 @@ import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import CfaPanel from "@/components/CfasFilter/CfasPanel";
 import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
-import useFetchCfaInfo from "@/hooks/useFetchCfaInfo";
+import useFetchOrganismeInfo from "@/hooks/useFetchOrganismeInfo";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import OrganismeViewContent from "./OrganismeViewContent";
@@ -17,7 +17,7 @@ import Head from "next/head";
 const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
 
-  const { data: infosCfa, loading, error } = useFetchCfaInfo(filtersContext?.state?.cfa?.uai_etablissement);
+  const { data: infosCfa, loading, error } = useFetchOrganismeInfo(filtersContext?.state?.cfa?.uai_etablissement);
 
   const currentOrganisme = filtersContext.state.cfa;
   const organismeFilterLabel = userLoggedAsReseau

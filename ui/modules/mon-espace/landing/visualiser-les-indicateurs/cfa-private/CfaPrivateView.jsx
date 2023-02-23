@@ -5,7 +5,7 @@ import React from "react";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import useEffectifs from "@/hooks/useEffectifs";
-import useFetchCfaInfo from "@/hooks/useFetchCfaInfo";
+import useFetchOrganismeInfo from "@/hooks/useFetchOrganismeInfo";
 import { useFiltersContext } from "../FiltersContext";
 import {
   CfaInformationSection,
@@ -16,7 +16,7 @@ import {
 
 const CfaPrivateView = ({ cfaUai }) => {
   const [effectifs, effectifsLoading] = useEffectifs();
-  const { data: infosCfa, loading: infosCfaLoading, error: infosCfaError } = useFetchCfaInfo(cfaUai);
+  const { data: infosCfa, loading: infosCfaLoading, error: infosCfaError } = useFetchOrganismeInfo(cfaUai);
   const { state: filters } = useFiltersContext();
   const hasMultipleSirets = infosCfa?.sousEtablissements?.length > 1;
   const sirets = infosCfa?.sousEtablissements?.map((item) => item.siret_etablissement);

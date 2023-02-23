@@ -2,7 +2,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { Box, Button, HStack, Input, Text } from "@chakra-ui/react";
 
-import { fetchSearchCfas } from "@/common/api/tableauDeBord";
+import { fetchSearchOrganismes } from "@/common/api/tableauDeBord";
 import { QUERY_KEYS } from "@/common/constants/queryKeys";
 import { validateSiret } from "@/common/domain/siret";
 import { validateUai } from "@/common/domain/uai";
@@ -21,7 +21,7 @@ const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => 
       return;
     }
 
-    const data = await queryClient.fetchQuery(QUERY_KEYS.SEARCH_CFAS, () => fetchSearchCfas({ searchTerm }));
+    const data = await queryClient.fetchQuery(QUERY_KEYS.SEARCH_CFAS, () => fetchSearchOrganismes({ searchTerm }));
 
     if (data?.[0]) {
       setOrganismeFound();

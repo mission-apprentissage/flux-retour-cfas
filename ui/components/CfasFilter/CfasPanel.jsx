@@ -8,11 +8,11 @@ import Loading from "@/components/Loading/Loading";
 import NoResults from "@/components/NoResults/NoResults";
 import SearchInput from "@/components/SearchInput/SearchInput";
 import CfasList from "./CfasList";
-import useCfaSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useCfaSearch";
+import useOrganismeSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useCfaSearch";
 
 const CfaPanel = ({ value, onCfaClick, filters }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: searchResults, loading } = useCfaSearch(searchTerm, filters);
+  const { data: searchResults, loading } = useOrganismeSearch(searchTerm, filters);
 
   return (
     <div>

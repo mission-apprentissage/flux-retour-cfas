@@ -55,9 +55,14 @@ export const fetchReseaux = () => {
   return _get("/api/referentiel/networks");
 };
 
-/* CFA Search */
-export const fetchSearchCfas = async (filters) => {
-  return await _post("/api/cfas/search", filters);
+/* Organisme */
+export const fetchOrganismeByUai = (cfaUai) => {
+  return _get(`/api/v1/organisme/${cfaUai}`);
+};
+
+/* Organisme Search */
+export const fetchSearchOrganismes = async (filters) => {
+  return await _post("/api/v1/organisme/search", filters);
 };
 
 /* Formations Search */
@@ -77,10 +82,4 @@ export const fetchTotalOrganismes = (filters) => {
 /* Formations */
 export const fetchFormation = (formationCfd) => {
   return _get(`/api/formations/${formationCfd}`);
-};
-
-/* CFAs */
-export const fetchCfa = (cfaUai) => {
-  const url = `/api/cfas/${cfaUai}`;
-  return _get(url);
 };
