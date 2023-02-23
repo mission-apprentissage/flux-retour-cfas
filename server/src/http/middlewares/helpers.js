@@ -8,3 +8,15 @@ export function returnResult(serviceFunc) {
     res.send(result);
   });
 }
+
+// would be simpler to put this helper function into the cache structure
+export async function tryCachedExecution(cache, cacheKey, serviceFunc) {
+  const cachedResult = await cache.get(cacheKey);
+  if (cachedResult) {
+    return JSON.parse(cachedResult);
+  } else {
+    const result = await serviceFunc();
+    await cache.set(cacheKey, JSON.stringify(result));
+    return result;
+  }
+}

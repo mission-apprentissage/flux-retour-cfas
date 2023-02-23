@@ -4,19 +4,7 @@ import Joi from "joi";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
 import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
 import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
-import { returnResult } from "../../middlewares/helpers.js";
-
-// would be simpler to put this helper function into the cache structure
-async function tryCachedExecution(cache, cacheKey, serviceFunc) {
-  const cachedResult = await cache.get(cacheKey);
-  if (cachedResult) {
-    return JSON.parse(cachedResult);
-  } else {
-    const result = await serviceFunc();
-    await cache.set(cacheKey, JSON.stringify(result));
-    return result;
-  }
-}
+import { returnResult, tryCachedExecution } from "../../middlewares/helpers.js";
 
 export default ({ effectifs, cache }) => {
   const router = express.Router();
