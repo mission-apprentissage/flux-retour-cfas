@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
@@ -11,6 +11,7 @@ import {
   DEPARTEMENTS_SORTED,
   DEPARTEMENTS_BY_ID,
   TERRITOIRE_TYPE,
+  REGIONS_BY_ID,
 } from "@/common/constants/territoiresConstants";
 import useAuth from "@/hooks/useAuth";
 
@@ -42,7 +43,6 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
       // régions du département de l'utilisateur (exemple si DDETS)
       ...user.codes_departement.map((codeDepartement) => DEPARTEMENTS_BY_ID[codeDepartement].region.code),
     ];
-    // TODO filtre par académie à venir
     return codesRegionsAccessibles.length > 0
       ? {
           regions: REGIONS_SORTED.filter((region) => codesRegionsAccessibles.includes(region.code)),
@@ -52,6 +52,15 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
         }
       : { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED };
   }, [user]);
+
+  // filtre initial positionné sur la région / département de l'utilisateur
+  useEffect(() => {
+    if (user.codes_region[0]) {
+      onRegionChange(REGIONS_BY_ID[user.codes_region[0]]);
+    } else if (user.codes_departement[0]) {
+      onDepartementChange(DEPARTEMENTS_BY_ID[user.codes_departement[0]]);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
