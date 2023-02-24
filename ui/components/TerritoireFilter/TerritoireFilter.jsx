@@ -1,17 +1,22 @@
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import TerritoiresList from "./TerritoireList";
 import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import { DEPARTEMENTS_SORTED, REGIONS_SORTED, TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
-
-const TERRITOIRES_DATA = { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED };
+import {
+  REGIONS_SORTED,
+  DEPARTEMENTS_SORTED,
+  DEPARTEMENTS_BY_ID,
+  TERRITOIRE_TYPE,
+} from "@/common/constants/territoiresConstants";
+import useAuth from "@/hooks/useAuth";
 
 const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerritoireReset, variant = "primary" }) => {
   const [isOpen, setIsOpen] = useState(false);
+  let [user] = useAuth();
 
   const onTerritoireClick = (territoire) => {
     if (!territoire) {
@@ -27,6 +32,26 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
   const value = filters.region || filters.departement;
   const buttonLabel = value?.nom || "En France";
   const onButtonClick = () => setIsOpen(!isOpen);
+
+  // affiche seulement les régions et départements accessibles à l'utilisateur
+  // l'accès à un département donne également accès à la région (DDETS)
+  const territoiresData = useMemo(() => {
+    const codesRegionsAccessibles = [
+      // région de l'utilisateur (exemple si DREETS)
+      ...user.codes_region,
+      // régions du département de l'utilisateur (exemple si DDETS)
+      ...user.codes_departement.map((codeDepartement) => DEPARTEMENTS_BY_ID[codeDepartement].region.code),
+    ];
+    // TODO filtre par académie à venir
+    return codesRegionsAccessibles.length > 0
+      ? {
+          regions: REGIONS_SORTED.filter((region) => codesRegionsAccessibles.includes(region.code)),
+          departements: DEPARTEMENTS_SORTED.filter((departement) =>
+            codesRegionsAccessibles.includes(departement.region.code)
+          ),
+        }
+      : { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED };
+  }, [user]);
 
   return (
     <div>
@@ -48,7 +73,7 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <TerritoiresList
-            data={TERRITOIRES_DATA}
+            data={territoiresData}
             onTerritoireClick={onTerritoireClick}
             currentFilter={filters.region}
           />
