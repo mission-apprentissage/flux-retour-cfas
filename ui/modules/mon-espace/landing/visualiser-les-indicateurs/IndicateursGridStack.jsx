@@ -5,7 +5,6 @@ import React from "react";
 import EffectifCard from "@/components/EffectifCard/EffectifCard";
 import { isDateFuture } from "@/common/utils/dateUtils";
 import { pluralize } from "@/common/utils/stringUtils";
-import OrganismesCountCard from "./OrganismesCountCard";
 import { indicateursEffectifsSchema } from "./indicateursEffectifsSchema";
 
 const GRID_TEMPLATE_COLUMNS = ["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"];
@@ -23,7 +22,7 @@ const IndicateursGridStack = ({ effectifs, effectifsDate, organismesCount, loadi
     );
   }
 
-  if (effectifs && !loading) {
+  if (effectifs && organismesCount !== undefined && !loading) {
     const shouldWarnAboutDateAvailability = isDateFuture(effectifsDate);
     const infoTextAboutDateAvailability = (
       <span>
@@ -33,7 +32,20 @@ const IndicateursGridStack = ({ effectifs, effectifsDate, organismesCount, loadi
 
     return (
       <Grid gridGap="2w" gridTemplateColumns={GRID_TEMPLATE_COLUMNS}>
-        {showOrganismesCount && <OrganismesCountCard count={organismesCount} />}
+        {showOrganismesCount && (
+          <EffectifCard
+            count={organismesCount}
+            label="organismes de formation"
+            tooltipLabel={
+              <div>
+                Nombre d’organismes de formation qui transmettent leurs données au Tableau de bord de l’apprentissage.
+                Un organisme est identifié par un UAI utilisant 1 ou plusieurs numéro(s) SIRET.
+              </div>
+            }
+            iconClassName="ri-home-6-fill"
+            accentColor="#417DC4"
+          />
+        )}
         <EffectifCard
           count={effectifs.apprentis}
           label={pluralize("apprenti", effectifs.apprentis)}
