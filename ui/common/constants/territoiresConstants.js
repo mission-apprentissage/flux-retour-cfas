@@ -1579,6 +1579,6 @@ export const REGIONS_SORTED = sortAlphabeticallyBy("nom", REGIONS).map((region) 
   return { ...region, type: TERRITOIRE_TYPE.REGION };
 });
 
-export const DEPARTEMENTS_SORTED = sortAlphabeticallyBy("nom", DEPARTEMENTS).map((departement) => {
+export const DEPARTEMENTS_SORTED = sortAlphabeticallyBy("code", DEPARTEMENTS).map((departement) => {
   return { ...departement, type: TERRITOIRE_TYPE.DEPARTEMENT };
 });
