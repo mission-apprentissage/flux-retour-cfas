@@ -92,3 +92,25 @@ export default (acls) =>
 
     next();
   });
+
+// vérification pour les routes des indicateurs
+// actuellement: OF n'y accède pas, le reste oui (admin + pilot + reseau_of)
+// Note: mis à côté du monstre plus haut pour une éventuelle adaptation future :D
+export function indicateursPermissions() {
+  return tryCatch(async (req, res, next) => {
+    const user = req.user;
+    ensureValidUser(user);
+
+    if (!(user.permissions.is_admin || user.permissions.is_cross_organismes)) {
+      throw Boom.unauthorized("Accès non autorisé");
+    }
+    next();
+  });
+}
+
+// helpers
+export function ensureValidUser(user) {
+  if (user.account_status !== USER_ACCOUNT_STATUS.CONFIRMED) {
+    throw Boom.unauthorized("Accès non autorisé");
+  }
+}
