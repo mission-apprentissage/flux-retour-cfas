@@ -100,8 +100,7 @@ export function indicateursPermissions() {
   return tryCatch(async (req, res, next) => {
     const user = req.user;
     ensureValidUser(user);
-
-    if (!(user.permissions.is_admin || user.permissions.is_cross_organismes)) {
+    if (!(user.permissions.is_admin || user.permissions.is_cross_organismes || user.roles.includes("reseau_of"))) {
       throw Boom.unauthorized("Accès non autorisé");
     }
     next();
