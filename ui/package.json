@@ -47,6 +47,7 @@
     "lodash.uniq": "4.5.0",
     "luxon": "3.0.4",
     "next": "13.0.1",
+    "next-plausible": "3.7.2",
     "query-string": "7.1.1",
     "react": "18.2.0",
     "react-datepicker": "4.8.0",
