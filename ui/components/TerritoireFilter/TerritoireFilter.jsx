@@ -39,9 +39,9 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
   const territoiresData = useMemo(() => {
     const codesRegionsAccessibles = [
       // région de l'utilisateur (exemple si DREETS)
-      ...user.codes_region,
+      ...(user.codes_region ?? []),
       // régions du département de l'utilisateur (exemple si DDETS)
-      ...user.codes_departement.map((codeDepartement) => DEPARTEMENTS_BY_ID[codeDepartement].region.code),
+      ...(user.codes_departement?.map((codeDepartement) => DEPARTEMENTS_BY_ID[codeDepartement].region.code) ?? []),
     ];
     return codesRegionsAccessibles.length > 0
       ? {
@@ -55,9 +55,9 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
 
   // filtre initial positionné sur la région / département de l'utilisateur
   useEffect(() => {
-    if (user.codes_region[0]) {
+    if (user.codes_region?.[0]) {
       onRegionChange(REGIONS_BY_ID[user.codes_region[0]]);
-    } else if (user.codes_departement[0]) {
+    } else if (user.codes_departement?.[0]) {
       onDepartementChange(DEPARTEMENTS_BY_ID[user.codes_departement[0]]);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
