@@ -1,7 +1,6 @@
 import React from "react";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-// import DashboardContainer from "@/modules/mon-espace/landing/DashboardContainer";
 import {
   FiltersProvider,
   getDefaultState,
@@ -9,6 +8,7 @@ import {
 import useAuth from "@/hooks/useAuth";
 import IndicateursVueReseauPage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-reseau/IndicateursVueReseauPage";
 import { roles } from "@/common/auth/roles";
+import withAuth from "@/components/withAuth";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -32,4 +32,4 @@ const IndicateursVueReseauPageContainer = () => {
   );
 };
 
-export default IndicateursVueReseauPageContainer;
+export default withAuth(IndicateursVueReseauPageContainer);

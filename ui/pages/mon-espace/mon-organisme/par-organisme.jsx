@@ -7,6 +7,7 @@ import {
   FiltersProvider,
   getDefaultState,
 } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import withAuth from "@/components/withAuth";
 
 const IndicateursVueOrganismePageContainer = () => {
   const [auth] = useAuth();
@@ -28,4 +29,4 @@ const IndicateursVueOrganismePageContainer = () => {
   );
 };
 
-export default IndicateursVueOrganismePageContainer;
+export default withAuth(IndicateursVueOrganismePageContainer);

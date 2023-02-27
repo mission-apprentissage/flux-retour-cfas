@@ -9,6 +9,7 @@ import ViewSelection from "@/modules/mon-espace/landing/visualiser-les-indicateu
 import Page from "@/components/Page/Page";
 import Head from "next/head";
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import withAuth from "@/components/withAuth";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -59,4 +60,4 @@ const PageMonOrganisme = () => {
   );
 };
 
-export default PageMonOrganisme;
+export default withAuth(PageMonOrganisme);
