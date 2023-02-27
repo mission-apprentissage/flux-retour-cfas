@@ -1,6 +1,6 @@
 import express from "express";
 import Joi from "joi";
-import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
+import { getNbDistinctOrganismes } from "../../../common/actions/effectifs.actions.js";
 import {
   getEffectifsCountByAnneeFormationAtDate,
   getEffectifsCountByCfaAtDate,
@@ -52,9 +52,8 @@ export default () => {
     "/total-organismes",
     returnResult(async (req) => {
       const filters = await buildEffectifsFiltersFromRequest(req);
-      const nbOrganismes = await getNbDistinctOrganismes(filters); // FIXME: fetch from effectifs collection?
       return {
-        nbOrganismes,
+        nbOrganismes: await getNbDistinctOrganismes(filters),
       };
     })
   );
