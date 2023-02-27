@@ -3,8 +3,6 @@ import { stringify } from "query-string";
 import { _delete, _get, _post } from "../httpClient";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
-// FIXME les routes ont été renommées effectifs -> indicateurs
-
 export const fetchEffectifs = (filters) => {
   return _get(`/api/indicateurs?${stringify(mapFiltersToApiFormat(filters))}`);
 };

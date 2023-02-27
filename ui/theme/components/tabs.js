@@ -1,24 +1,5 @@
 const Tabs = {
   parts: ["tablist", "tab", "tabpanel"],
-  baseStyle: {
-    // FIXME: is it needed?
-    // tablist: {
-    //   px: [0, 24],
-    //   border: "none",
-    //   bg: "secondaryBackground",
-    //   color: "grey.750",
-    // },
-    // tabpanel: {
-    //   px: [8, 24],
-    //   color: "grey.100",
-    //   h: 1000,
-    // },
-    // tab: {
-    //   color: "grey.500",
-    //   _focus: { boxShadow: "none", outlineColor: "none" },
-    //   _focusVisible: { boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" },
-    // },
-  },
   variants: {
     line: {
       tab: {
