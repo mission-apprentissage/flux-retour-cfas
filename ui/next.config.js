@@ -1,5 +1,6 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
+const { withPlausibleProxy } = require("next-plausible");
 
 function inline(value) {
   return value.replace(/\s{2,}/g, " ").trim();
@@ -62,10 +63,8 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
-
 module.exports = withSentryConfig(
-  module.exports,
+  withPlausibleProxy(nextConfig),
   { silent: true, dryRun: !process.env.NEXT_PUBLIC_SENTRY_DSN },
   { hideSourcemaps: true }
 );
