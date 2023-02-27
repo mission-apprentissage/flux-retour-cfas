@@ -2,7 +2,7 @@ import { HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { hasUserRoles, roles } from "@/common/auth/roles";
+import { hasUserRoles } from "@/common/auth/roles";
 import LinkCard from "@/components/LinkCard/LinkCard";
 import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import useAuth from "@/hooks/useAuth";
@@ -24,13 +24,12 @@ ViewOptionCard.propTypes = {
 
 const ViewSelection = () => {
   const [auth] = useAuth();
-  const isUserANetwork = hasUserRoles(auth, roles.network);
+  const isUserANetwork = hasUserRoles(auth, "reseau_of");
   const userViewOptions = isUserANetwork
     ? [
         {
           path: NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path,
-          // FIXME retrieve the user network
-          title: "Vue du réseau [FIXME] NOM RESEAU",
+          title: `Vue du réseau ${auth.reseau}`,
         },
         {
           path: NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path,

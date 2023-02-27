@@ -1,6 +1,5 @@
 import React from "react";
 
-import { roles } from "@/common/auth/roles";
 import IndicateursVueOrganismePage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/IndicateursVueOrganismePage";
 import useAuth from "@/hooks/useAuth";
 import {
@@ -11,9 +10,8 @@ import withAuth from "@/components/withAuth";
 
 const IndicateursVueOrganismePageContainer = () => {
   const [auth] = useAuth();
-  if (auth?.roles?.includes(roles.network)) {
-    // FIXME retrieve the user network
-    const fixedFiltersState = { reseau: { nom: "[FIXME] NOM RESEAU" } };
+  if (auth?.roles?.includes("reseau_of")) {
+    const fixedFiltersState = { reseau: { nom: auth.reseau } };
     const defaultFiltersState = { ...getDefaultState(), ...fixedFiltersState };
     return (
       <FiltersProvider defaultState={defaultFiltersState} fixedState={fixedFiltersState}>
