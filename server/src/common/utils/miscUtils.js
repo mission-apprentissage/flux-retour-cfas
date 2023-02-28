@@ -41,3 +41,10 @@ export const getPercentage = (count = 0, total = 0) => {
   if (total === 0) return 0;
   return Math.round((count * 100) / total);
 };
+
+/**
+ * Debug helper to pretty print an object
+ */
+export const debug = (label, object) => {
+  console.log(label, JSON.stringify(object, null, 2));
+};
