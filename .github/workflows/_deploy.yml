@@ -51,3 +51,24 @@ jobs:
       - name: Run playbook
         run: |
           bash .infra/scripts/deploy-app.sh ${{ inputs.environment }}
+
+      - name: Notify failure on Slack
+        uses: ravsamhq/notify-slack-action@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notification_title: "Le déploiement en ${{ inputs.environment }} a échoué"
+          notify_when: "failure"
+          mention_groups: "!channel"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify success on Slack
+        uses: ravsamhq/notify-slack-action@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notification_title: "Déploiement en ${{ inputs.environment }} terminé avec succès"
+          notify_when: "success"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

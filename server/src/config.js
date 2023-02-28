@@ -36,7 +36,6 @@ export const config = {
     level: env.get("FLUX_RETOUR_CFAS_LOG_LEVEL").default("info").asString(),
     streams: env.get("FLUX_RETOUR_CFAS_LOG_STREAMS").default([]).asArray(),
   },
-  slackWebhookUrl: env.get("FLUX_RETOUR_CFAS_SLACK_WEBHOOK_URL").asString(),
   users: {
     defaultAdmin: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
