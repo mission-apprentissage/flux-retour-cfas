@@ -34,7 +34,7 @@ services:
       - /opt/flux-retour-cfas/data/redis:/data
 
   metabase:
-    image: metabase/metabase:v0.45.2
+    image: metabase/metabase:v0.45.3
     mem_limit: 2g
     container_name: flux_retour_cfas_metabase
     volumes:
