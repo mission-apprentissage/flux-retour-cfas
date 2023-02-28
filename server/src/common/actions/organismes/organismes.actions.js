@@ -314,7 +314,10 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, roleName
         contributeurs: userEmail.toLowerCase(),
       },
     },
-    { returnDocument: "after" }
+    {
+      returnDocument: "after",
+      bypassDocumentValidation: true, // ajouté temporairement pour autoriser la maj des organismes sans siret
+    }
   );
 
   return updated.value;
