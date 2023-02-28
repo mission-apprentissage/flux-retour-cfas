@@ -21,6 +21,9 @@ on:
       SSH_KNOWN_HOSTS:
         description: SSH known hosts list
         required: true
+      SLACK_WEBHOOK_URL:
+        description: Slack webhook URL
+        required: true
     outputs:
       status:
         description: Whether deployment succeeded or not
