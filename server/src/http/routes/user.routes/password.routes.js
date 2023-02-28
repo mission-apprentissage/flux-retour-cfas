@@ -6,7 +6,12 @@ import { passwordSchema } from "../../../common/utils/validationUtils.js";
 import passport from "passport";
 import { createResetPasswordToken, createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { Strategy, ExtractJwt } from "passport-jwt";
-import { changePassword, getUser, loggedInUser, structureUser } from "../../../common/actions/users.actions.js";
+import {
+  changePassword,
+  getUser,
+  updateUserLastConnection,
+  structureUser,
+} from "../../../common/actions/users.actions.js";
 import * as sessions from "../../../common/actions/sessions.actions.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 
@@ -78,7 +83,7 @@ export default ({ mailer }) => {
 
       const payload = await structureUser(updatedUser);
 
-      await loggedInUser(payload.email);
+      await updateUserLastConnection(payload.email);
 
       const token = createUserTokenSimple({ payload: { email: payload.email } });
       await sessions.addJwt(token);

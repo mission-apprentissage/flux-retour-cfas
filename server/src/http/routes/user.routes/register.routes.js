@@ -8,7 +8,7 @@ import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import {
   getUser,
   authenticate,
-  loggedInUser,
+  updateUserLastConnection,
   structureUser,
   activateUser,
   createUser,
@@ -227,7 +227,7 @@ export default ({ mailer }) => {
 
       const payload = await structureUser(updatedUser);
 
-      await loggedInUser(payload.email);
+      await updateUserLastConnection(payload.email);
 
       const token = createUserTokenSimple({ payload: { email: payload.email } });
       await sessions.addJwt(token);
@@ -304,7 +304,7 @@ export default ({ mailer }) => {
 
       const payload = await structureUser(updateUser);
 
-      await loggedInUser(payload.email);
+      await updateUserLastConnection(payload.email);
 
       const token = createUserTokenSimple({ payload: { email: payload.email } });
 
@@ -349,7 +349,7 @@ export default ({ mailer }) => {
 
       const payload = await structureUser(updateUser);
 
-      await loggedInUser(payload.email);
+      await updateUserLastConnection(payload.email);
 
       const token = createUserTokenSimple({ payload: { email: payload.email } });
 

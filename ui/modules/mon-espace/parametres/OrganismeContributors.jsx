@@ -44,14 +44,16 @@ function useOrganismeAcces() {
     defaultRoleName: roles?.length > 0 ? roles[0].name : "",
     isLoading: isLoadingContributors || isLoadingRoles || isFetchingRoles || isFetchingContributors,
     refetchContributors,
+    canDeletePermissions: organisme?.acl?.includes("organisme/page_parametres/gestion_acces/supprimer_contributeur"),
   };
 }
 
 const OrganismeContributors = ({ size = "md" }) => {
   let [auth] = useAuth();
-  const { toastSuccess, toastError } = useToaster(); // TODO Really useful to have a separate Hook ?
+  const { toastSuccess, toastError } = useToaster();
   const organisme = useRecoilValue(organismeAtom);
-  const { organismeContributors, roles, isLoading, defaultRoleName, refetchContributors } = useOrganismeAcces();
+  const { organismeContributors, roles, isLoading, defaultRoleName, refetchContributors, canDeletePermissions } =
+    useOrganismeAcces();
 
   const { mutateAsync: addContributor } = useMutation(({ userEmail, roleName }) =>
     _post("/api/v1/organisme/contributors", {
@@ -223,8 +225,8 @@ const OrganismeContributors = ({ size = "md" }) => {
                   width: 120,
                   cell: (info) => {
                     const user = info.row.original.user;
-                    const you = auth.email === user.email;
-                    const hasAccount = user.prenom && user.nom;
+                    const you = auth.email === user?.email;
+                    const hasAccount = user?.prenom && user?.nom;
                     const username = hasAccount ? `${user.prenom} ${user.nom}` : "Invité non vérifié";
                     return (
                       <HStack>
@@ -233,7 +235,7 @@ const OrganismeContributors = ({ size = "md" }) => {
                           {username}
                           {you ? " (vous)" : ""}
                         </Text>
-                        {user.type && <Text fontWeight="bold">{`(${user.type})`}</Text>}
+                        {user?.type && <Text fontWeight="bold">{`(${user.type})`}</Text>}
                       </HStack>
                     );
                   },
@@ -246,13 +248,13 @@ const OrganismeContributors = ({ size = "md" }) => {
                   cell: ({ row }) => {
                     const { user } = row.original;
                     const ORGANISMES_APPARTENANCE = {
-                      TETE_DE_RESEAU: `TÊTE DE RÉSEAU: ${user.reseau}`,
+                      TETE_DE_RESEAU: `TÊTE DE RÉSEAU: ${user?.reseau}`,
                       ACADEMIE: "ACADÉMIE",
                       DRAAF: "DRAAF",
                       CARIF_OREF: "CARIF OREF",
                       DREETS: "DREETS",
                       CONSEIL_REGIONAL: "CONSEIL RÉGIONAL",
-                      ERP: user.erp,
+                      ERP: user?.erp,
                       AUTRE: "AUTRE",
                       POLE_EMPLOI: "PÔLE EMPLOI",
                       MISSION_LOCALE: "MISSION LOCALE",
@@ -261,12 +263,12 @@ const OrganismeContributors = ({ size = "md" }) => {
                     };
                     return (
                       <Text fontSize="1rem">
-                        {ORGANISMES_APPARTENANCE[user.organisation]?.toLowerCase() || user.organisation}
+                        {ORGANISMES_APPARTENANCE[user?.organisation]?.toLowerCase() || user?.organisation}
                       </Text>
                     );
                   },
                 },
-                "user.email": {
+                userEmail: {
                   header: () => {
                     return <Box textAlign="left">Courriel</Box>;
                   },
@@ -281,26 +283,22 @@ const OrganismeContributors = ({ size = "md" }) => {
                   },
                   width: 100,
                   cell: (info) => {
-                    const { user, permission } = info.row.original;
+                    const { user, userEmail, role } = info.row.original;
+                    const you = auth.email === user?.email;
                     return (
                       <HStack w="full">
                         <Select
                           size="sm"
                           onClick={(e) => e.stopPropagation()}
-                          onChange={async (e) => {
-                            const roleName = e.target.value;
-                            if (roleName === "custom") {
-                              // TODO ??? TO DELETE ? HERE IT MAKES NO SENSE
-                            } else {
-                              return onChangeContributor({
-                                userEmail: user.email,
-                                roleName,
-                              });
-                            }
-                          }}
-                          iconColor={"gray.800"}
-                          data-testid={"actions-select"}
-                          value={permission.name}
+                          disabled={!!you}
+                          onChange={async (e) =>
+                            onChangeContributor({
+                              userEmail: user?.email || userEmail,
+                              roleName: e.target.value,
+                            })
+                          }
+                          iconColor="gray.800"
+                          value={role.name}
                         >
                           {roles.map((role) => (
                             <option key={role.name} value={role.name}>
@@ -318,19 +316,16 @@ const OrganismeContributors = ({ size = "md" }) => {
                   },
                   width: 40,
                   cell: (info) => {
-                    const { user } = info.row.original;
-                    const isAnOverheadUser = true;
-                    // user.roles.some((role) => ["reseau_of", "pilot", "erp"].includes(role));
-                    // TODO should not be able to remove pilot ["TETE_DE_RESEAU", "ERP"].includes(user.organisation);
-                    // TODO edit: can only remove the ones invited to join by someone in the current organisme
+                    const { user, userEmail } = info.row.original;
+                    const isAnOverheadUser = ["TETE_DE_RESEAU", "ERP"].includes(user?.organisation);
 
-                    const you = auth.email === user.email;
+                    const you = auth.email === user?.email;
                     return (
                       <Center>
-                        {!(you || isAnOverheadUser) && (
+                        {canDeletePermissions && !(you || isAnOverheadUser) && (
                           <CloseIcon
                             color="bluefrance"
-                            data-email={info.row.original.user.email}
+                            data-email={user?.email || userEmail}
                             onClick={onDeleteContributor}
                             cursor="pointer"
                           />

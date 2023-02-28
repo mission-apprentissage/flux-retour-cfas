@@ -1,7 +1,12 @@
 import express from "express";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { getUser, authenticate, loggedInUser, structureUser } from "../../../common/actions/users.actions.js";
+import {
+  getUser,
+  authenticate,
+  updateUserLastConnection,
+  structureUser,
+} from "../../../common/actions/users.actions.js";
 import * as sessions from "../../../common/actions/sessions.actions.js";
 import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
@@ -36,7 +41,7 @@ export default () => {
 
       const payload = await structureUser(user);
 
-      await loggedInUser(payload.email);
+      await updateUserLastConnection(payload.email);
 
       const token = createUserTokenSimple({ payload: { email: payload.email } });
 

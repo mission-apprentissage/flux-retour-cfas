@@ -1,16 +1,15 @@
 import { ObjectId } from "mongodb";
 
 import { getMetiersBySiret } from "../../apis/apiLba.js";
-import { organismesDb } from "../../model/collections.js";
+import { organismesDb, permissionsDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { generateKey } from "../../utils/cryptoUtils.js";
 import { buildAdresseFromUai } from "../../utils/uaiUtils.js";
 import { siretSchema } from "../../utils/validationUtils.js";
-import { createPermission, hasPermission, removePermissions } from "../permissions.actions.js";
-import { findRolePermissionById } from "../roles.actions.js";
-import { getUser, structureUser } from "../users.actions.js";
+import { createPermission, removePermissions } from "../permissions.actions.js";
+import { structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
 import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
@@ -303,24 +302,6 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, roleName
     custom_acl,
     pending,
   });
-
-  const updated = await organismesDb().findOneAndUpdate(
-    { _id: organisme._id },
-    {
-      $set: {
-        updated_at: new Date(),
-      },
-      $addToSet: {
-        contributeurs: userEmail.toLowerCase(),
-      },
-    },
-    {
-      returnDocument: "after",
-      bypassDocumentValidation: true, // ajouté temporairement pour autoriser la maj des organismes sans siret
-    }
-  );
-
-  return updated.value;
 };
 
 /**
@@ -339,18 +320,6 @@ export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
   }
 
   await removePermissions({ organisme_id: organisme._id, userEmail });
-
-  const updated = await organismesDb().findOneAndUpdate(
-    { _id: organisme._id },
-    {
-      $pull: {
-        contributeurs: userEmail.toLowerCase(),
-      },
-    },
-    { returnDocument: "after" }
-  );
-
-  return updated.value;
 };
 
 /**
@@ -368,46 +337,38 @@ export const getContributeurs = async (organismeId) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  const buildContributeursResult = async (contributeurEmail, orgId) => {
-    const permSelectFields = { pending: 1, created_at: 1, role: 1, custom_acl: 1 };
-    const roleSelectFields = { name: 1, description: 1, title: 1, _id: 1 };
-
-    const currentUser = (await getUser(contributeurEmail)) || {
-      email: contributeurEmail,
-      nom: "",
-      prenom: "",
-    };
-
-    const currentUserPerm = await hasPermission(
-      { organisme_id: new ObjectId(orgId), userEmail: contributeurEmail },
-      permSelectFields
-    );
-
-    if (!currentUserPerm) {
-      logger.error(`Contributor ${contributeurEmail} has no permission for organisme ${orgId}. This should not happen`);
-      return null;
-    }
-    const currentUserRole = await findRolePermissionById(currentUserPerm.role, roleSelectFields);
-    if (!currentUserRole) {
-      throw new Error("Something went wrong");
-    }
-    return {
-      user: await structureUser(currentUser),
-      permission: {
-        permId: currentUserPerm._id,
-        created_at: currentUserPerm.created_at,
-        customAcl: currentUserPerm.custom_acl,
-        ...currentUserRole,
+  const permissionsWithUserAndRole = await permissionsDb()
+    .aggregate([
+      { $match: { organisme_id: organisme._id } },
+      // lookup user
+      {
+        $lookup: {
+          from: "usersMigration",
+          localField: "userEmail",
+          foreignField: "email",
+          as: "user",
+        },
       },
-    };
-  };
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+      // lookup role
+      {
+        $lookup: {
+          from: "roles",
+          localField: "role",
+          foreignField: "_id",
+          as: "role",
+        },
+      },
+      { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
+    ])
+    .toArray();
 
-  const contributeurs = [];
-  for (const contributeur of organisme.contributeurs) {
-    contributeurs.push(await buildContributeursResult(contributeur, organismeId));
-  }
-
-  return contributeurs.filter((o) => o);
+  return Promise.all(
+    permissionsWithUserAndRole.map(async (perm) => ({
+      ...perm,
+      user: perm.user ? await structureUser(perm.user) : null,
+    }))
+  );
 };
 
 /**
