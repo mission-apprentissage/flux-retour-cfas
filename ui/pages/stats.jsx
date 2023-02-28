@@ -39,7 +39,7 @@ const StatistiquesPage = () => {
                 <iframe
                   // plausible-embed
                   style={{ height: "250vh", width: "100%" }}
-                  src="https://plausible.io/share/cfas.apprentissage.beta.gouv.fr%2Ftableau-de-bord?auth=Cbkf2yaD7CW-rs_lkiyJ-&embed=true&theme=light&background=transparent” scrolling=“no” frameborder=“0” loading=“lazy” style=“width: 100%; min-width: 100%; height: 1600px;"
+                  src="https://plausible.io/share/cfas.apprentissage.beta.gouv.fr?auth=64Z3Ad2odIm3NERPEZbiq&embed=true&theme=light&background=transparent” scrolling=“no” frameborder=“0” loading=“lazy” style=“width: 100%; min-width: 100%; height: 1600px;"
                 />
               </TabPanel>
               <TabPanel>
