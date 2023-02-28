@@ -64,7 +64,7 @@ const nextConfig = {
 };
 
 module.exports = withSentryConfig(
-  withPlausibleProxy(nextConfig),
+  withPlausibleProxy()(nextConfig),
   { silent: true, dryRun: !process.env.NEXT_PUBLIC_SENTRY_DSN },
   { hideSourcemaps: true }
 );
