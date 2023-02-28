@@ -1,3 +1,16 @@
+# [3.10.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.9.2...v3.10.0) (2023-02-28)
+
+
+### Bug Fixes
+
+* **ui:** remplace email support-contrat par tableau-de-bord ([#2648](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2648)) ([7e97cce](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7e97cce9aa3d7f8abb84aa8bb613fb972a6c4b74))
+
+
+### Features
+
+* **ui:** ajout de storybook ([#2424](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2424)) ([713bab5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/713bab50d1b1441504281064440e0e3baf339536))
+* **ui:** mise en place de plausible ([#2646](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2646)) ([e9f31e5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e9f31e5588841f318622e2cb5a6fa556430958c9))
+
 ## [3.9.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.9.1...v3.9.2) (2023-02-21)
 
 
