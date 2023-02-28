@@ -1,3 +1,10 @@
+## [3.10.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.10.0...v3.10.1) (2023-02-28)
+
+
+### Bug Fixes
+
+* fix plausible next config ([a9bc9e9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a9bc9e9a0feb0db9cd3330ca39887c3e99ac4316))
+
 # [3.10.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.9.2...v3.10.0) (2023-02-28)
 
 
