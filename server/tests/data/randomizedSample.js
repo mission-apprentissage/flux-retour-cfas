@@ -4,6 +4,7 @@ import { sampleLibelles } from "./sampleLibelles.js";
 import { subMonths, addYears } from "date-fns";
 import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
 import sampleEtablissements from "./sampleEtablissements.js";
+import { omit } from "../../src/common/utils/miscUtils.js";
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -113,6 +114,7 @@ export const createSampleEffectif = (params = {}) => {
       prenom: faker.name.firstName(),
       email_contact: faker.internet.email(),
       date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
+      historique_statut: [],
       ...params?.apprenant,
     },
     formation: {
@@ -133,7 +135,7 @@ export const createSampleEffectif = (params = {}) => {
     source: faker.random.word(),
     annee_scolaire,
     organisme_id: null,
-    ...params,
+    ...omit(params, ["apprenant", "formation"]),
   };
 };
 

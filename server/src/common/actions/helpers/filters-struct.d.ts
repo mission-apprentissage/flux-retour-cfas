@@ -26,4 +26,4 @@ export interface FilterConfiguration {
   }
 }
 
-export type FilterConfigurations = {[key in EffectifsFilters]: FilterConfiguration}
+export type FilterConfigurations = {[key in keyof EffectifsFilters]: FilterConfiguration}

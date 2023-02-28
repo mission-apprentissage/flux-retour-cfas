@@ -18,6 +18,9 @@ describe("Filtres Indicateurs", () => {
             },
           },
         },
+        {
+          $match: {},
+        },
       ]);
     });
     it("Gère le filtre organisme_id", () => {
@@ -28,11 +31,18 @@ describe("Filtres Indicateurs", () => {
       assert.deepStrictEqual(stages, [
         {
           $match: {
+            organisme_id: new ObjectId("635acdad5e798f12bd919861"),
+          },
+        },
+        {
+          $match: {
             annee_scolaire: {
               $in: ["2022-2022", "2022-2023"],
             },
-            organisme_id: new ObjectId("635acdad5e798f12bd919861"),
           },
+        },
+        {
+          $match: {},
         },
       ]);
     });
@@ -52,6 +62,9 @@ describe("Filtres Indicateurs", () => {
             },
           },
         },
+        {
+          $match: {},
+        },
       ]);
     });
     it("Gère le filtre etablissement_num_departement", () => {
@@ -60,6 +73,13 @@ describe("Filtres Indicateurs", () => {
         etablissement_num_departement: "56",
       });
       assert.deepStrictEqual(stages, [
+        {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+          },
+        },
         {
           $lookup: {
             from: "organismes",
@@ -70,9 +90,6 @@ describe("Filtres Indicateurs", () => {
         },
         {
           $match: {
-            annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
-            },
             "organisme.adresse.departement": "56",
           },
         },
@@ -85,6 +102,13 @@ describe("Filtres Indicateurs", () => {
       });
       assert.deepStrictEqual(stages, [
         {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+          },
+        },
+        {
           $lookup: {
             from: "organismes",
             localField: "organisme_id",
@@ -94,9 +118,6 @@ describe("Filtres Indicateurs", () => {
         },
         {
           $match: {
-            annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
-            },
             "organisme.adresse.region": "25",
           },
         },
@@ -109,6 +130,13 @@ describe("Filtres Indicateurs", () => {
       });
       assert.deepStrictEqual(stages, [
         {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+          },
+        },
+        {
           $lookup: {
             from: "organismes",
             localField: "organisme_id",
@@ -118,9 +146,6 @@ describe("Filtres Indicateurs", () => {
         },
         {
           $match: {
-            annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
-            },
             "organisme.reseaux": "AGRI",
           },
         },
@@ -133,6 +158,13 @@ describe("Filtres Indicateurs", () => {
       });
       assert.deepStrictEqual(stages, [
         {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+          },
+        },
+        {
           $lookup: {
             from: "organismes",
             localField: "organisme_id",
@@ -142,9 +174,6 @@ describe("Filtres Indicateurs", () => {
         },
         {
           $match: {
-            annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
-            },
             "organisme.siret": "84412312300008",
           },
         },
@@ -157,6 +186,13 @@ describe("Filtres Indicateurs", () => {
       });
       assert.deepStrictEqual(stages, [
         {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+          },
+        },
+        {
           $lookup: {
             from: "organismes",
             localField: "organisme_id",
@@ -166,9 +202,6 @@ describe("Filtres Indicateurs", () => {
         },
         {
           $match: {
-            annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
-            },
             "organisme.uai": "0112233A",
           },
         },
@@ -188,6 +221,9 @@ describe("Filtres Indicateurs", () => {
             "formation.cfd": "25021000",
           },
         },
+        {
+          $match: {},
+        },
       ]);
     });
     it("Gère le filtre niveau_formation", () => {
@@ -203,6 +239,9 @@ describe("Filtres Indicateurs", () => {
             },
             "formation.niveau": "2",
           },
+        },
+        {
+          $match: {},
         },
       ]);
     });
@@ -221,6 +260,23 @@ describe("Filtres Indicateurs", () => {
       });
       assert.deepStrictEqual(stages, [
         {
+          $match: {
+            organisme_id: new ObjectId("635acdad5e798f12bd919863"),
+          },
+        },
+        {
+          $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
+            organisme_id: {
+              $in: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
+            },
+            "formation.cfd": "25021000",
+            "formation.niveau": "2",
+          },
+        },
+        {
           $lookup: {
             from: "organismes",
             localField: "organisme_id",
@@ -230,19 +286,11 @@ describe("Filtres Indicateurs", () => {
         },
         {
           $match: {
-            annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
-            },
             "organisme.adresse.region": "25",
             "organisme.adresse.departement": "56",
             "organisme.siret": "84412312300008",
             "organisme.uai": "0112233A",
             "organisme.reseaux": "AGRI",
-            organisme_id: {
-              $in: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
-            },
-            "formation.cfd": "25021000",
-            "formation.niveau": "2",
           },
         },
       ]);

@@ -14,10 +14,7 @@ const filtersConfigurations = {
     matchKey: "annee_scolaire",
     transformValue: (date) => ({ $in: getAnneesScolaireListFromDate(date) }),
   },
-  organisme_id: {
-    matchKey: "organisme_id",
-    transformValue: (organismeId) => new ObjectId(organismeId),
-  },
+  // filter used to ensure access permissions between the user and organismes (if not admin)
   organisme_ids: {
     matchKey: "organisme_id",
     transformValue: (organismeIds) => ({ $in: organismeIds }),
@@ -55,6 +52,7 @@ const filtersConfigurations = {
  */
 export function buildMongoPipelineFilterStages(filters = {}) {
   const matchFilters = {};
+  const afterLookupsMatchFilters = {};
   const preliminaryLookups = [];
   for (const [filterName, filterValue] of Object.entries(filters)) {
     const filterConfiguration = filtersConfigurations[filterName];
@@ -63,7 +61,9 @@ export function buildMongoPipelineFilterStages(filters = {}) {
       continue;
     }
 
-    matchFilters[filterConfiguration.matchKey] = filterConfiguration.transformValue?.(filterValue) ?? filterValue;
+    const targetMatch = filterConfiguration.preliminaryLookup !== undefined ? afterLookupsMatchFilters : matchFilters;
+    targetMatch[filterConfiguration.matchKey] = filterConfiguration.transformValue?.(filterValue) ?? filterValue;
+
     if (
       filterConfiguration.preliminaryLookup !== undefined &&
       !preliminaryLookups.includes(filterConfiguration.preliminaryLookup)
@@ -72,12 +72,25 @@ export function buildMongoPipelineFilterStages(filters = {}) {
     }
   }
 
+  // note: empty match stages are noop with MongoDB
   return [
+    ...(filters.organisme_id !== undefined
+      ? [
+          {
+            $match: {
+              organisme_id: new ObjectId(filters.organisme_id),
+            },
+          },
+        ]
+      : []),
+    {
+      $match: matchFilters,
+    },
     ...preliminaryLookups.map((lookupConf) => ({
       $lookup: lookupConf,
     })),
     {
-      $match: matchFilters,
+      $match: afterLookupsMatchFilters,
     },
   ];
 }

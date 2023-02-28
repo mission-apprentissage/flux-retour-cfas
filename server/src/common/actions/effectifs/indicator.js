@@ -2,6 +2,95 @@ import { effectifsDb } from "../../model/collections.js";
 import { organismeLookup } from "../helpers/filters.js";
 import { exportedMongoFieldsProjection } from "./export.js";
 
+/**
+  Indicator s'occupe de construire un pipeline d'aggrégation pour obtenir un indicateur
+  spécifique sur les effectifs selon certains filtres.
+
+  Exemple de pipeline exécuté :
+[
+  {
+    "$match": {
+      "annee_scolaire": {
+        "$in": [
+          "2022-2022",
+          "2022-2023"
+        ]
+      },
+      "organisme_id": {
+        "$in": [
+          "635acdad5e798f12bd919861"
+        ]
+      }
+    }
+  },
+  {
+    "$match": {}
+  },
+  {
+    "$match": {
+      "apprenant.historique_statut.valeur_statut": 3
+    }
+  },
+  {
+    "$project": {
+      "apprenant.historique_statut": {
+        "$filter": {
+          "input": "$apprenant.historique_statut",
+          "as": "result",
+          "cond": {
+            "$lte": [
+              "$$result.date_statut",
+              "2023-02-28T13:45:22.978Z"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "$match": {
+      "apprenant.historique_statut": {
+        "$not": {
+          "$size": 0
+        }
+      }
+    }
+  },
+  {
+    "$project": {
+      "apprenant.historique_statut": {
+        "$sortArray": {
+          "input": "$apprenant.historique_statut",
+          "sortBy": {
+            "date_statut": 1,
+            "date_reception": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "$addFields": {
+      "statut_apprenant_at_date": {
+        "$last": "$apprenant.historique_statut"
+      }
+    }
+  },
+  {
+    "$match": {
+      "statut_apprenant_at_date.valeur_statut": 3
+    }
+  },
+  {
+    "$group": {
+      "_id": null,
+      "count": {
+        "$sum": 1
+      }
+    }
+  }
+]
+ */
 export class Indicator {
   constructor(config) {
     this.config = config;
