@@ -21,7 +21,7 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
 
   const currentOrganisme = filtersContext.state.cfa;
   const organismeFilterLabel = userLoggedAsReseau
-    ? `Sélectionner un organisme du réseau ${filtersContext.state.reseau.nom}`
+    ? `Sélectionner un organisme du réseau ${filtersContext.state.reseau?.nom}`
     : "Sélectionner un organisme";
 
   return (
