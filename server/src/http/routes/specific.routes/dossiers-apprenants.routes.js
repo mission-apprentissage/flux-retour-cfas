@@ -126,7 +126,8 @@ export default () => {
             await dossiersApprenantsApiErrorsDb().insert({
               erp: user.username,
               created_at: new Date(),
-              ...prettyValidationError,
+              data: currentDossierApprenant,
+              errors: prettyValidationError.errors,
             });
             logger.warn(`Could not validate item from ${user.username} at index ${index}`, prettyValidationError);
           } else {
