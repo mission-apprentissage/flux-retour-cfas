@@ -492,13 +492,13 @@ export const searchOrganismes = async (searchCriteria) => {
     searchCriteria.etablissement_num_region ||
     searchCriteria.etablissement_reseaux
   ) {
-    let start = Date.now();
+    const start = Date.now();
     const eligibleUais = (
       await effectifsDb()
         .aggregate([...buildMongoPipelineFilterStages(searchCriteria), { $group: { _id: "$organisme.uai" } }])
         .toArray()
-    ).map((row) => row._id);
-    logger.info({ elapsted: Date.now() - start, eligibleUais: eligibleUais.length }, "searchFormations_eligibleUais");
+    ).map((row) => row._id[0]);
+    logger.info({ elapsted: Date.now() - start, eligibleUais: eligibleUais.length }, "searchOrganismes_eligibleUais");
     matchStage.uai = { $in: eligibleUais };
   }
 
@@ -509,11 +509,13 @@ export const searchOrganismes = async (searchCriteria) => {
       }
     : { "organisme.nom": 1 };
 
-  const found = await organismesDb()
+  const start = Date.now();
+  const organismes = await organismesDb()
     .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
     .toArray();
+  logger.info({ elapsted: Date.now() - start, organismes: organismes.length }, "searchOrganismes_organismes");
 
-  return found.map((organisme) => {
+  return organismes.map((organisme) => {
     return {
       uai: organisme.uai,
       siret: organisme.siret,
