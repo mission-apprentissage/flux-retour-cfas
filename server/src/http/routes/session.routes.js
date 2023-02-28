@@ -1,6 +1,6 @@
 import express from "express";
 import tryCatch from "../middlewares/tryCatchMiddleware.js";
-import { loggedInUser, structureUser } from "../../common/actions/users.actions.js";
+import { updateUserLastConnection, structureUser } from "../../common/actions/users.actions.js";
 
 export default () => {
   const router = express.Router();
@@ -9,7 +9,7 @@ export default () => {
     "/current",
     tryCatch(async (req, res) => {
       if (req.user) {
-        await loggedInUser(req.user.email);
+        await updateUserLastConnection(req.user.email);
         return res.status(200).json({
           ...req.user,
           loggedIn: true,

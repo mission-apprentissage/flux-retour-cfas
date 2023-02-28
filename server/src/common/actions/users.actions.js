@@ -303,7 +303,7 @@ export const structureUser = async (user) => {
   };
 };
 
-export const loggedInUser = async (email) => {
+export const updateUserLastConnection = async (email) => {
   await usersMigrationDb().findOneAndUpdate(
     { email },
     {
