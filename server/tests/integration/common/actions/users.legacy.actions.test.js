@@ -107,8 +107,8 @@ describe("Components Users Test", () => {
         password: "password",
       });
       const user = await authenticateLegacy("user", "password");
-
-      assert.equal(user.username, "user");
+      assert.strictEqual(user.username, "user");
+      assert.strictEqual(!!user.last_connection, true);
     });
 
     it("Vérifie que le mot de passe est invalide", async () => {
