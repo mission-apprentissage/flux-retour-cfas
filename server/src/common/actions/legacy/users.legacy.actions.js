@@ -64,14 +64,6 @@ export const getUserLegacyById = async (id) => {
 };
 
 /**
- * Récupération de la liste des tous les utilisateurs
- * @returns
- */
-export const getAllLegacy = async () => {
-  return await usersDb().find().toArray();
-};
-
-/**
  * Création d'un utilisateur depuis props
  * @param {*} userProps
  * @returns
