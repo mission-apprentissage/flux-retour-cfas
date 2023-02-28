@@ -1,3 +1,22 @@
+# [3.11.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.10.1...v3.11.0) (2023-02-28)
+
+
+### Bug Fixes
+
+* ajout du champ dossiersApprenantsApiError.data ([#2660](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2660)) ([2ae723c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/2ae723c580844746ae7b915ac4949d4680dcf41f))
+* correction des permissions sur organisme sans siret ([#2649](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2649)) ([e92656a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e92656ac44f2448d5b165e2bea2f707af12290ec))
+* fix plausible iframe url ([c7c6a72](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c7c6a72dbca4c2d46be47c64b43968e04aa5b4d4))
+* notification slack apres deploiement ([#2657](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2657)) ([9a5026a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9a5026a437ad76bfdf0b2c38468c4b97fb7e59c2))
+* script de migration pour supprimer le reseau CCI des organismes ([#2652](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2652)) ([252d357](https://github.com/mission-apprentissage/flux-retour-cfas/commit/252d357bbf7e9e0534766e06b4453cd395e4b68e))
+* un gestionnaire peut supprimer un contributeur ([#2658](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2658)) ([2b47b58](https://github.com/mission-apprentissage/flux-retour-cfas/commit/2b47b5827ed86410b89336f547dc2b6e74754f6a))
+
+
+### Features
+
+* ajout champ user.last_connection ([#2659](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2659)) ([b0de50b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b0de50b4078b2e0c1ed01c9f7b98bc59be3a5785))
+* notification slack apres deploiement ([#2656](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2656)) ([8202830](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8202830923b143febd7f8c81decbbc9a7cc36765))
+* **ui:** ajout typescript ([#2650](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2650)) ([41cffa5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/41cffa5bac14f4730d7c2885795cce6dd4c8ca34))
+
 ## [3.10.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.10.0...v3.10.1) (2023-02-28)
 
 
