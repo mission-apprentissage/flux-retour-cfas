@@ -31,10 +31,17 @@ export const authenticateLegacy = async (username, password) => {
 
   const current = user.password;
   if (compare(password, current)) {
-    if (isTooWeak(current)) {
-      await usersDb().updateOne({ _id: user._id }, { password: hash(password) });
-    }
-    return user;
+    const { value: updatedUser } = await usersDb().findOneAndUpdate(
+      { _id: user._id },
+      {
+        $set: {
+          last_connection: new Date(),
+          ...(isTooWeak(current) ? { password: hash(password) } : {}),
+        },
+      },
+      { returnDocument: "after" }
+    );
+    return updatedUser;
   }
   return null;
 };
@@ -61,14 +68,6 @@ export const getUserLegacyById = async (id) => {
     throw new Error("Unable to find user");
   }
   return user;
-};
-
-/**
- * Récupération de la liste des tous les utilisateurs
- * @returns
- */
-export const getAllLegacy = async () => {
-  return await usersDb().find().toArray();
 };
 
 /**

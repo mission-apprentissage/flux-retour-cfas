@@ -23,6 +23,7 @@ const schema = object(
       description: "Date d'expiration du token généré afin de sécuriser le changement de mot de passe",
     }),
     permissions: arrayOf(string()),
+    last_connection: date({ description: "Date de dernière connexion" }),
     network: stringOrNull({ description: "Le réseau de CFA de l'utilisateur s'il est précisé" }),
     region: stringOrNull({ description: "La région de l'utilisateur s'il est précisé" }),
     organisme: stringOrNull({ description: "L'organisme d'appartenance de l'utilisateur s'il est précisé" }),
