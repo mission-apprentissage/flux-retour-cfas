@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 import { Box, Flex, Heading, HStack, Image, Text } from "@chakra-ui/react";
 import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
-import { PRODUCT_NAME } from "@/common/constants/product";
+import { PRODUCT_NAME_TITLE, PRODUCT_NAME } from "@/common/constants/product";
 import ApercuDesDonneesSection from "@/components/Home/sections/ApercuDesDonneesSection";
 import RgpdSection from "@/components/Home/sections/RgpdSection";
 
@@ -11,7 +11,7 @@ import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 
 export default function Home() {
-  const title = PRODUCT_NAME;
+  const title = PRODUCT_NAME_TITLE;
   return (
     <Page>
       <Head>
