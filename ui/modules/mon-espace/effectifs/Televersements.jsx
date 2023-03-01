@@ -30,6 +30,7 @@ import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
 import EffectifsTable from "./engine/EffectifsTable";
 import { effectifsStateAtom } from "./engine/atoms";
+import { sortByNormalizedLabels } from "@/common/utils/array";
 
 const Televersements = () => {
   const { documents, uploads, onDocumentsChanged } = useDocuments();
@@ -144,7 +145,10 @@ const Televersements = () => {
     setStep("mapping");
     const response = await _get(`/api/v1/upload/analyse?organisme_id=${organisme._id}`);
 
-    let currentAvailableKeys = { in: Object.values(response.inputKeys), out: Object.values(response.outputKeys) };
+    let currentAvailableKeys = {
+      in: sortByNormalizedLabels(Object.values(response.inputKeys)),
+      out: sortByNormalizedLabels(Object.values(response.outputKeys)),
+    };
 
     let initLines = [];
     // TODO REFACTOR THIS BELOW :vomit:

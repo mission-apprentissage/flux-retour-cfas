@@ -1,26 +1,43 @@
-import qs from "query-string";
+import { stringify } from "query-string";
 
 import { _delete, _get, _post } from "../httpClient";
+import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
-// TODO Rename & Refacto
+export const fetchEffectifs = (filters) => {
+  return _get(`/api/indicateurs?${stringify(mapFiltersToApiFormat(filters))}`);
+};
+
 export const fetchEffectifsParCfa = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs/cfa?${queryParameters}`;
-  return _get(url);
+  return _get(`/api/indicateurs/cfa?${stringify(filters)}`);
 };
 
-// TODO Rename & Refacto
+export const fetchEffectifsParSiret = (filters) => {
+  return _get(`/api/indicateurs/siret?${stringify(filters)}`);
+};
+
 export const fetchEffectifsParFormation = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs/formation?${queryParameters}`;
-  return _get(url);
+  return _get(`/api/indicateurs/formation?${stringify(filters)}`);
 };
 
-// TODO Rename & Refacto
+export const fetchEffectifsParNiveauFormation = (filters) => {
+  return _get(`/api/indicateurs/niveau-formation?${stringify(filters)}`);
+};
+
 export const fetchEffectifsParAnneeFormation = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs/annee-formation?${queryParameters}`;
-  return _get(url);
+  return _get(`/api/indicateurs/annee-formation?${stringify(filters)}`);
+};
+
+export const fetchEffectifsParDepartement = (filters) => {
+  return _get(`/api/indicateurs/departement?${stringify(filters)}`);
+};
+
+export const fetchEffectifsNational = (filters) => {
+  return _get(`/api/indicateurs-national?${stringify(filters)}`);
+};
+
+/* CSV export of effectifs anonymized data list  */
+export const fetchEffectifsDataListCsvExport = (filters) => {
+  return _get(`/api/v1/indicateurs-export?${stringify(filters)}`, { jsonResponse: false });
 };
 
 export const postCreateReseauCfa = (body) => {
@@ -36,12 +53,31 @@ export const fetchReseaux = () => {
   return _get("/api/referentiel/networks");
 };
 
-/* CFA Search */
-export const fetchSearchCfas = async (filters) => {
-  return await _post("/api/cfas/search", filters);
+/* Organisme */
+export const fetchOrganismeByUai = (cfaUai) => {
+  return _get(`/api/v1/organisme/${cfaUai}`);
+};
+
+/* Organisme Search */
+export const fetchSearchOrganismes = async (filters) => {
+  return await _post("/api/v1/organisme/search", filters);
+};
+
+/* Formations Search */
+export const fetchSearchFormations = async (filters) => {
+  return await _post("/api/formations/search", filters);
 };
 
 /* Utilisateurs */
 export const fetchUsers = async () => {
   return await _get("/api/v1/admin/users");
+};
+
+export const fetchTotalOrganismes = (filters) => {
+  return _get(`/api/indicateurs/total-organismes?${stringify(filters)}`);
+};
+
+/* Formations */
+export const fetchFormation = (formationCfd) => {
+  return _get(`/api/formations/${formationCfd}`);
 };

@@ -92,3 +92,17 @@ export default (acls) =>
 
     next();
   });
+
+export function indicateursPermissions() {
+  return tryCatch(async (req, _, next) => {
+    ensureValidUser(req.user);
+    next();
+  });
+}
+
+// helpers
+export function ensureValidUser(user) {
+  if (user.account_status !== USER_ACCOUNT_STATUS.CONFIRMED) {
+    throw Boom.unauthorized("Accès non autorisé");
+  }
+}

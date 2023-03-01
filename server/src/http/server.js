@@ -12,7 +12,6 @@ import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
 import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
-import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
@@ -20,7 +19,6 @@ import indicateursExportRouter from "./routes/specific.routes/indicateurs-export
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
-import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
@@ -46,6 +44,7 @@ import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import maintenancesRoutes from "./routes/maintenances.routes.js";
 import config from "../config.js";
+import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
 
 export default async (services) => {
   const app = express();
@@ -122,8 +121,8 @@ export default async (services) => {
     // FRONT
     ["/api/indicateurs"],
     checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    indicateursRouter(services)
+    indicateursPermissions(),
+    indicateursRouter()
   );
 
   app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
@@ -132,8 +131,8 @@ export default async (services) => {
     // FRONT
     "/api/v1/indicateurs-export",
     checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    indicateursExportRouter(services)
+    indicateursPermissions(),
+    indicateursExportRouter()
   );
 
   app.use("/api/healthcheck", healthcheckRouter());
@@ -155,11 +154,7 @@ export default async (services) => {
     organismesRouter()
   ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
 
-  // TODO : Route à corriger / transformer pour le filtre par formations
-  app.use("/api/formations", formationRouter(services)); // FRONT
-
-  // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
-  app.use("/api/cfas", cfasRouter(services)); // FRONT
+  app.use("/api/formations", formationRouter()); // FRONT
   app.use("/api/referentiel", referentielRouter()); // FRONT
 
   // The error handler must be before any other error middleware and after all controllers

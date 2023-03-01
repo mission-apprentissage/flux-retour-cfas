@@ -7,7 +7,7 @@ export const QUERY_KEYS = {
   SEARCH_CFAS: "search-cfas",
   SEARCH_FORMATIONS: "search-formations",
   CFAS: "cfas",
-  DEPARTEMENT: "departement",
+  DEPARTEMENTS: "departements",
   REGIONS: "regions",
   ORGANISMES_APPARTENANCE: "organismes-appartenance",
   RESEAUX: "reseaux",

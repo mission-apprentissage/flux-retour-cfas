@@ -15,136 +15,162 @@ import { seedRoles } from "../../../src/jobs/seed/start/index.js";
 import { createUser } from "../../../src/common/actions/users.actions.js";
 import { userAfterCreate } from "../../../src/common/actions/users.afterCreate.actions.js";
 import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
+import { createSampleEffectif } from "../../data/randomizedSample.js";
+import { effectifsDb } from "../../../src/common/model/collections.js";
+import { ObjectId } from "mongodb";
+import { historySequenceInscritToApprenti } from "../../data/historySequenceSamples.js";
 
 // const createRandomDossierApprenantWithHistorique = async (props) => {
 //   const { _id } = await dossiersApprenants().createDossierApprenant(createRandomDossierApprenant());
 //   await dossiersApprenantsMigrationDb().updateOne({ _id }, { $set: props });
 // };
 
+/**
+ * Helper function to return an authenticated client to the API
+ * @param {import("axiosist").AxiosInstance} httpClient
+ */
+async function createAndAuthenticateUser(httpClient, userInfos) {
+  // create the user with its permissions
+  const email = "of@test.fr";
+  const password = "Secret!Password1";
+  const userOf = await createUser(
+    { email, password },
+    {
+      nom: "of",
+      prenom: "test",
+      description: "Aden formation Caen - direction",
+      account_status: "CONFIRMED",
+      organisation: "ORGANISME_FORMATION",
+      historique_statut: [""],
+      ...userInfos,
+    }
+  );
+  await userAfterCreate({ user: userOf, pending: false, notify: false });
+
+  // authenticate the user
+  const response = await httpClient.post("/api/v1/auth/login", { email, password });
+  const cookie = response.headers["set-cookie"].join(";");
+
+  return async (method, url, params, body = null) => {
+    return await httpClient.request({
+      method,
+      url,
+      data: body,
+      params,
+      headers: { cookie },
+    });
+  };
+}
+
+let httpClient;
+let apiClient;
+
+const organismes = [
+  // owner
+  {
+    _id: new ObjectId("000000000000000000000001"),
+    uai: "0142321X",
+    siret: "41461021200014",
+    adresse: {
+      departement: "14",
+      region: "28",
+      academie: "70",
+    },
+    reseaux: ["CCI"],
+    erps: ["YMAG"],
+    nature: "responsable_formateur",
+    nom: "ADEN Formations (Caen)",
+  },
+  // other
+  {
+    _id: new ObjectId("000000000000000000000002"),
+    uai: "0142322X",
+    siret: "77568013501089",
+    adresse: {
+      departement: "14",
+      region: "28",
+      academie: "70",
+    },
+    reseaux: ["CCI"],
+    erps: ["YMAG"],
+    nature: "responsable_formateur",
+    nom: "ADEN Formations (Caen)",
+  },
+];
+
 describe("Effectifs Route", () => {
   describe("/api/indicateurs route", () => {
     beforeEach(async () => {
       await seedRoles();
+      const app = await startServer();
+      httpClient = app.httpClient;
+
+      await Promise.all(organismes.map((organisme) => createOrganisme(organisme)));
+
+      apiClient = await createAndAuthenticateUser(httpClient, {
+        siret: "44492238900010",
+        uai: organismes[0].uai,
+      });
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-      const { httpClient } = await startServer();
-
       const response = await httpClient.get("/api/indicateurs", {
         params: { date: "2020-10-10T00:00:00.000Z" },
       });
 
-      assert.equal(response.status, 401);
-    });
-
-    it("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
-      const { httpClient, logUser } = await startServer();
-
-      // Création de son organisme
-      await createOrganisme({
-        uai: "0142321X",
-        siret: "41461021200014",
-        adresse: {
-          departement: "14",
-          region: "28",
-          academie: "70",
-        },
-        reseaux: ["CCI"],
-        erps: ["YMAG"],
-        nature: "responsable_formateur",
-        nom: "ADEN Formations (Caen)",
-      });
-
-      const otherOrganisme = await createOrganisme({
-        uai: "0142322X",
-        siret: "77568013501089",
-        adresse: {
-          departement: "14",
-          region: "28",
-          academie: "70",
-        },
-        reseaux: ["CCI"],
-        erps: ["YMAG"],
-        nature: "responsable_formateur",
-        nom: "ADEN Formations (Caen)",
-      });
-
-      // Create user & afterCreate actions
-      const userOf = await createUser(
-        { email: "of@test.fr", password: "Secret!Password1" },
-        {
-          nom: "of",
-          prenom: "test",
-          description: "Aden formation Caen - direction",
-          account_status: "CONFIRMED",
-          siret: "44492238900010",
-          uai: "0142321X",
-          organisation: "ORGANISME_FORMATION",
-        }
-      );
-      await userAfterCreate({ user: userOf, pending: false, notify: false });
-
-      // Log user
-      const { cookie } = await logUser("of@test.fr", "Secret!Password1");
-
-      // Get effectifs
-      const response = await httpClient.get("/api/indicateurs", {
-        params: { date: "2022-10-10T00:00:00.000Z", organisme_id: otherOrganisme._id.toString() },
-        headers: { cookie },
-      });
-
-      assert.equal(response.status, 401);
-      assert.equal(response.data.message, "Accès non autorisé");
+      assert.strictEqual(response.status, 401);
     });
 
     it("Vérifie qu'on peut accéder aux effectifs de son organisme", async () => {
-      const { httpClient, logUser } = await startServer();
-
-      // Création de son organisme
-      const createdOrganisme = await createOrganisme({
-        uai: "0142321X",
-        siret: "41461021200014",
-        adresse: {
-          departement: "14",
-          region: "28",
-          academie: "70",
-        },
-        reseaux: ["CCI"],
-        erps: ["YMAG"],
-        nature: "responsable_formateur",
-        nom: "ADEN Formations (Caen)",
-      });
-
-      // Create user & afterCreate actions
-      const userOf = await createUser(
-        { email: "of@test.fr", password: "Secret!Password1" },
-        {
-          nom: "of",
-          prenom: "test",
-          description: "Aden formation Caen - direction",
-          account_status: "CONFIRMED",
-          siret: "44492238900010",
-          uai: "0142321X",
-          organisation: "ORGANISME_FORMATION",
-        }
+      await effectifsDb().insertOne(
+        createSampleEffectif({
+          organisme_id: organismes[0]._id,
+          annee_scolaire: "2022-2023",
+          apprenant: {
+            historique_statut: historySequenceInscritToApprenti,
+          },
+        })
       );
-      await userAfterCreate({ user: userOf, pending: false, notify: false });
 
-      // Log user
-      const { cookie } = await logUser("of@test.fr", "Secret!Password1");
-
-      // Get effectifs
-      const response = await httpClient.get("/api/indicateurs", {
-        params: { date: "2022-10-10T00:00:00.000Z", organisme_id: createdOrganisme._id.toString() },
-        headers: { cookie },
+      const response = await apiClient("get", "/api/indicateurs", {
+        date: "2022-10-10T00:00:00.000Z",
+        organisme_id: organismes[0]._id.toString(),
       });
 
-      assert.equal(response.status, 200);
-      const indices = response.data;
-      assert.deepEqual(indices.apprentis, 0);
-      assert.deepEqual(indices.abandons, 0);
-      assert.deepEqual(indices.rupturants, 0);
-      assert.deepEqual(indices.inscritsSansContrat, 0);
+      assert.strictEqual(response.status, 200);
+      assert.deepStrictEqual(response.data, {
+        date: "2022-10-10T00:00:00.000Z",
+        apprentis: 1,
+        inscritsSansContrat: 0,
+        rupturants: 0,
+        abandons: 0,
+      });
+    });
+
+    it("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
+      await effectifsDb().insertOne(
+        createSampleEffectif({
+          organisme_id: organismes[1]._id,
+          annee_scolaire: "2022-2023",
+          apprenant: {
+            historique_statut: historySequenceInscritToApprenti,
+          },
+        })
+      );
+
+      const response = await apiClient("get", "/api/indicateurs", {
+        date: "2022-10-10T00:00:00.000Z",
+        organisme_id: organismes[1]._id.toString(),
+      });
+
+      assert.strictEqual(response.status, 200);
+      assert.deepStrictEqual(response.data, {
+        date: "2022-10-10T00:00:00.000Z",
+        apprentis: 0,
+        inscritsSansContrat: 0,
+        rupturants: 0,
+        abandons: 0,
+      });
     });
 
     // it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts sans filtres", async () => {

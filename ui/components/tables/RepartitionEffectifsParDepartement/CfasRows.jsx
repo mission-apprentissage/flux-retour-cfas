@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useHistory } from "react-router-dom";
+import { useRouter } from "next/router";
 
-import { useFiltersContext } from "../../../modules/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsParCfa } from "../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
@@ -14,7 +14,7 @@ import CfaRow from "./CfaRow";
 
 const CfasRows = ({ departementCode }) => {
   const filtersContext = useFiltersContext();
-  const history = useHistory();
+  const router = useRouter();
   const requestFilters = {
     ...mapFiltersToApiFormat(filtersContext.state),
     etablissement_num_departement: departementCode,
@@ -32,18 +32,18 @@ const CfasRows = ({ departementCode }) => {
   return (
     <>
       {sortAlphabeticallyBy("nom_etablissement", data).map(
-        ({ uai_etablissement, siret_etablissement, nom_etablissement, nature, natureValidityWarning, effectifs }) => {
+        ({ uai_etablissement, siret_etablissement, nom_etablissement, nature, nature_validity_warning, effectifs }) => {
           return (
             <CfaRow
               uai_etablissement={uai_etablissement}
               nom_etablissement={nom_etablissement}
               siret_etablissement={siret_etablissement}
               nature={nature}
-              natureValidityWarning={natureValidityWarning}
+              nature_validity_warning={nature_validity_warning}
               effectifs={effectifs}
               key={uai_etablissement}
               onCfaClick={() => {
-                navigateToOrganismePage(history, { uai_etablissement, nom_etablissement });
+                navigateToOrganismePage(router, { uai_etablissement, nom_etablissement });
                 window.scrollTo(0, 0);
               }}
             />

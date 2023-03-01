@@ -1,26 +1,20 @@
 import { Box, Link, Tbody, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { useRouter } from "next/router";
 
-import { useFiltersContext } from "../../modules/visualiser-les-indicateurs/FiltersContext";
-import { mapNatureOrganismeDeFormation } from "../../modules/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
-import { isDateFuture } from "../../common/utils/dateUtils";
-import { navigateToOrganismePage } from "../../common/utils/routing";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import { mapNatureOrganismeDeFormation } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
+import { isDateFuture } from "@/common/utils/dateUtils";
+import { navigateToOrganismePage } from "@/common/utils/routing";
 import NatureOrganismeDeFormationWarning from "../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";
 
-const getSiretText = (sirets) => {
-  if (!sirets || sirets.length === 0) return "N/A";
-  if (sirets.length === 1) return sirets[0];
-  return `${sirets.length} SIRET transmis`;
-};
-
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
   const filtersContext = useFiltersContext();
-  const history = useHistory();
+  const router = useRouter();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
     ? ["Nom de l'organisme de formation", "Nature", "apprentis", "inscrits sans contrat"]
@@ -34,7 +28,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
             nom_etablissement,
             siret_etablissement,
             nature,
-            natureValidityWarning,
+            nature_validity_warning,
             effectifs,
           } = item;
           return (
@@ -42,21 +36,21 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
               <Td color="grey.800">
                 <Link
                   onClick={() => {
-                    navigateToOrganismePage(history, { uai_etablissement, nom_etablissement });
+                    navigateToOrganismePage(router, { uai_etablissement, nom_etablissement });
                     window.scrollTo(0, 0);
                   }}
                   color="bluefrance"
-                  whiteSpace="nowrap"
+                  whiteSpace="pre-line"
                 >
                   {nom_etablissement}
                 </Link>
                 <Box fontSize="omega">
-                  UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
+                  UAI : {uai_etablissement} - SIRET : {siret_etablissement || "N/A"}
                 </Box>
               </Td>
               <Td color="grey.800">
                 {mapNatureOrganismeDeFormation(nature)}{" "}
-                {natureValidityWarning && (
+                {nature_validity_warning && (
                   <span style={{ verticalAlign: "middle" }}>
                     <NatureOrganismeDeFormationWarning />
                   </span>

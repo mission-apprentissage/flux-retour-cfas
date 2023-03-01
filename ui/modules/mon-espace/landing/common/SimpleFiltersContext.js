@@ -10,7 +10,7 @@ const SimpleFiltersContext = createContext();
 export const SimpleFiltersProvider = ({ children, initialState = null }) => {
   // TODO Check all filters needed
   const [date, setDate] = useState(new Date());
-  const [organismeId, setOrganismeId] = useState("");
+  const [organismeId, setOrganismeId] = useState(null);
 
   // Handle initial state
   useEffect(() => {

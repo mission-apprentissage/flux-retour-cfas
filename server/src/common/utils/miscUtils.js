@@ -41,3 +41,20 @@ export const getPercentage = (count = 0, total = 0) => {
   if (total === 0) return 0;
   return Math.round((count * 100) / total);
 };
+
+/**
+ * Debug helper to pretty print an object
+ */
+export const debug = (label, object) => {
+  console.log(label, JSON.stringify(object, null, 2));
+};
+
+/**
+ * Creates an object composed of the own and inherited enumerable property paths
+ * of *object* that are not omitted.
+ */
+export const omit = (object, props) => {
+  const copy = { ...object };
+  props.forEach((prop) => delete copy[prop]);
+  return copy;
+};

@@ -5,7 +5,7 @@ import React from "react";
 import useDownloadClick from "../../hooks/useDownloadClick";
 
 const DownloadBlock = ({ title, description, fileName, getFile }) => {
-  const [onClick, isLoading] = useDownloadClick(getFile, fileName);
+  const { onClick, isLoading, error } = useDownloadClick(getFile, fileName);
 
   return (
     <Box
@@ -21,6 +21,8 @@ const DownloadBlock = ({ title, description, fileName, getFile }) => {
         <Center>
           <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
         </Center>
+      ) : error ? (
+        <Box>Une erreur est survenue : {error.message}</Box>
       ) : (
         <Box onClick={onClick} cursor="pointer">
           <Text color="black" marginBottom="2w">

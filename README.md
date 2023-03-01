@@ -223,11 +223,6 @@ Il vous faudra créer une application dans Slack et récupérer le lien de la We
 
 Certains modules utilitaires sont présents dans `/server/src/common/utils`
 
-### Composants injectables
-
-Un module permettant de contenir des composants "communs" et injectable dans les routes est proposé dans le fichier `/server/src/common/components/components.js`
-
-Vous pouvez ajouter dans ce fichier des élements communs à réexploiter dans l'API.
 
 ## Debugger sous VSCode
 

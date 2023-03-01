@@ -1,7 +1,7 @@
-import { stateToQueryString } from "../../modules/visualiser-les-indicateurs/FiltersContext";
+import { stateToQueryString } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { NAVIGATION_PAGES } from "../constants/navigationPages";
 
-export const navigateToOrganismePage = (history, organisme) => {
+export const navigateToOrganismePage = (router, organisme) => {
   const { nom_etablissement, uai_etablissement } = organisme;
   const queryString = stateToQueryString({
     date: new Date(),
@@ -10,7 +10,7 @@ export const navigateToOrganismePage = (history, organisme) => {
       uai_etablissement,
     },
   });
-  history.push({
+  router.push({
     pathname: NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path,
     search: queryString,
   });

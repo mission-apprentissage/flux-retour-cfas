@@ -18,7 +18,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import * as Yup from "yup";
 
-import { fetchSearchCfas } from "../../common/api/tableauDeBord";
+import { fetchSearchOrganismes } from "../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../common/constants/queryKeys";
 import { siretRegex, validateSiret } from "../../common/domain/siret";
 import { uaiRegex, validateUai } from "../../common/domain/uai";
@@ -47,7 +47,7 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
   const searchEnabled = validateUai(values.uai) || validateSiret(values.siret);
   const uaiOrSiret = validateUai(values.uai) ? values.uai : values.siret;
 
-  useQuery([QUERY_KEYS.CFAS, uaiOrSiret], () => fetchSearchCfas({ searchTerm: uaiOrSiret }), {
+  useQuery([QUERY_KEYS.CFAS, uaiOrSiret], () => fetchSearchOrganismes({ searchTerm: uaiOrSiret }), {
     enabled: searchEnabled,
     onSuccess: (data) => {
       setFieldValue("nom_etablissement", data[0]?.nom);

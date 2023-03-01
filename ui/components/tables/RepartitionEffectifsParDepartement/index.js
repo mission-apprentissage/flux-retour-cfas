@@ -2,7 +2,7 @@ import { Tbody } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../modules/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../../common/utils/dateUtils";
 import Table from "../Table";
 import DepartementRow from "./DepartementRow";
@@ -50,8 +50,8 @@ const RepartitionEffectifsParDepartement = ({ effectifs, loading, error }) => {
 RepartitionEffectifsParDepartement.propTypes = {
   effectifs: PropTypes.arrayOf(
     PropTypes.shape({
-      uai_etablissement: PropTypes.string,
-      nom_etablissement: PropTypes.string.isRequired,
+      etablissement_nom_departement: PropTypes.string.isRequired,
+      etablissement_num_departement: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
         inscritsSansContrat: PropTypes.number.isRequired,

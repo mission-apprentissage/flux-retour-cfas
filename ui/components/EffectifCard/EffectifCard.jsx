@@ -2,7 +2,7 @@ import { Box, HStack, Text, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { formatNumber } from "../../common/utils/stringUtils";
+import { formatNumber } from "@/common/utils/stringUtils";
 
 const EffectifCard = ({
   label,

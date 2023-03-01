@@ -9,7 +9,7 @@ import { Cgu, cguVersion } from "../legal/Cgu";
 import AcknowledgeModal from "../../components/Modals/AcknowledgeModal";
 import { anonymous } from "../../common/anonymous";
 import { emitter } from "../../common/emitter";
-import { isUserAdmin } from "../../common/utils/rolesUtils";
+import { isUserAdmin } from "@/common/utils/rolesUtils";
 
 const AccountWrapper = ({ children }) => {
   let [auth] = useAuth();

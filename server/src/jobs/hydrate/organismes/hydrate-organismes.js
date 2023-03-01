@@ -114,7 +114,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       nature: nature,
       adresse: adresseFormatted,
       ferme: isFerme,
-      natureValidityWarning: false,
+      nature_validity_warning: false,
       est_dans_le_referentiel: true,
     };
     try {

@@ -1,17 +1,48 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { ObjectId } from "mongodb";
-import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
+import { getNbDistinctOrganismes } from "../../../common/actions/effectifs.actions.js";
+import {
+  getEffectifsCountByAnneeFormationAtDate,
+  getEffectifsCountByCfaAtDate,
+  getEffectifsCountByDepartementAtDate,
+  getEffectifsCountByFormationAtDate,
+  getEffectifsCountByNiveauFormationAtDate,
+  getEffectifsCountBySiretAtDate,
+  getIndicateurs,
+} from "../../../common/actions/effectifs/effectifs.actions.js";
+import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
+import { returnResult } from "../../middlewares/helpers.js";
 
-const commonEffectifsFilters = {
+const commonEffectifsFiltersSchema = {
+  date: Joi.date().required(),
   organisme_id: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().allow(null, ""),
   etablissement_reseaux: Joi.string().allow(null, ""),
+  etablissement_num_departement: Joi.string().allow(null, ""),
+  etablissement_num_region: Joi.string().allow(null, ""),
+  niveau_formation: Joi.string().allow(null, ""),
+  siret_etablissement: Joi.string().allow(null, ""),
+  uai_etablissement: Joi.string().allow(null, ""),
 };
 
-export default ({ effectifs }) => {
+/**
+ * Build filters from the request
+ * @param {*} req
+ * @returns {Promise<import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters>}
+ */
+export async function buildEffectifsFiltersFromRequest(req) {
+  /** @type {import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters} */
+  const filters = await validateFullObjectSchema(req.query, commonEffectifsFiltersSchema);
+
+  // restriction aux organismes accessibles par l'utilisateur sauf pour un admin
+  if (!req.user.permissions.is_admin) {
+    filters.organisme_ids = req.user.organisme_ids;
+  }
+
+  return filters;
+}
+
+export default () => {
   const router = express.Router();
 
   /**
@@ -19,23 +50,11 @@ export default ({ effectifs }) => {
    */
   router.get(
     "/total-organismes",
-    tryCatch(async (req, res) => {
-      const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
-        date: Joi.date().required(),
-        ...commonEffectifsFilters,
-      }).validateAsync(req.query, { abortEarly: false });
-
-      const date = new Date(dateFromQuery);
-      const filters = {
-        ...filtersFromBody,
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return {
+        nbOrganismes: await getNbDistinctOrganismes(filters),
       };
-
-      const nbOrganismes = await getNbDistinctOrganismes(filters);
-
-      return res.json({
-        nbOrganismes,
-      });
     })
   );
 
@@ -44,272 +63,77 @@ export default ({ effectifs }) => {
    */
   router.get(
     "/",
-    tryCatch(async (req, res) => {
-      const {
-        date: dateFromParams,
-        organisme_id,
-        ...filtersFromBody
-      } = await Joi.object({
-        date: Joi.date().required(),
-        ...commonEffectifsFilters,
-      }).validateAsync(req.query, { abortEarly: false });
-
-      const { organisme_ids } = req.user;
-
-      const date = new Date(dateFromParams);
-
-      const filters = {
-        ...filtersFromBody,
-        // Gestion des filtres sur un ou plusieurs organismes id
-        ...(organisme_ids.length > 0 ? { organisme_id: { $in: organisme_ids } } : {}),
-        ...(organisme_id ? { organisme_id: new ObjectId(organisme_id) } : {}),
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-      };
-
-      const response = {
-        date,
-        apprentis: await effectifs.apprentis.getCountAtDate(date, filters),
-        rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
-        inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
-        abandons: await effectifs.abandons.getCountAtDate(date, filters),
-      };
-
-      return res.json(response);
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getIndicateurs(filters);
     })
   );
 
   /**
    * Get effectifs details by niveau_formation
    */
-  // router.get(
-  //   "/niveau-formation",
-  //   tryCatch(async (req, res) => {
-  //     const {
-  //       date: dateFromParams, // eslint-disable-next-line no-unused-vars
-  //       organisme_id,
-  //       ...filtersFromBody
-  //     } = await Joi.object({
-  //       date: Joi.date().required(),
-  //       ...commonEffectifsFilters,
-  //     }).validateAsync(req.query, { abortEarly: false });
-
-  //     const date = new Date(dateFromParams);
-  //     const filters = {
-  //       ...filtersFromBody,
-  //       annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-  //     };
-
-  //     // try to retrieve from cache
-  //     const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
-  //       date: format(date, "yyyy-MM-dd"),
-  //       filters,
-  //     });
-  //     const fromCache = await cache.get(cacheKey);
-
-  //     if (fromCache) {
-  //       return res.json(JSON.parse(fromCache));
-  //     } else {
-  //       const effectifsParNiveauFormation = await effectifs.getEffectifsCountByNiveauFormationAtDate(date, filters);
-  //       await cache.set(cacheKey, JSON.stringify(effectifsParNiveauFormation));
-  //       return res.json(effectifsParNiveauFormation);
-  //     }
-  //   })
-  // );
+  router.get(
+    "/niveau-formation",
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getEffectifsCountByNiveauFormationAtDate(filters);
+    })
+  );
 
   /**
    * Get effectifs details by formation_cfd
    */
-  // router.get(
-  //   "/formation",
-  //   tryCatch(async (req, res) => {
-  //     const {
-  //       date: dateFromParams, // eslint-disable-next-line no-unused-vars
-  //       organisme_id,
-  //       ...filtersFromBody
-  //     } = await Joi.object({
-  //       date: Joi.date().required(),
-  //       niveau_formation: Joi.string().allow(null, ""),
-  //       ...commonEffectifsFilters,
-  //     }).validateAsync(req.query, { abortEarly: false });
-
-  //     const date = new Date(dateFromParams);
-  //     const filters = {
-  //       ...filtersFromBody,
-  //       annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-  //     };
-
-  //     // try to retrieve from cache
-  //     const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
-  //       date: format(date, "yyyy-MM-dd"),
-  //       filters,
-  //     });
-  //     const fromCache = await cache.get(cacheKey);
-
-  //     if (fromCache) {
-  //       return res.json(JSON.parse(fromCache));
-  //     } else {
-  //       const effectifsParFormation = await effectifs.getEffectifsCountByFormationAtDate(date, filters);
-  //       await cache.set(cacheKey, JSON.stringify(effectifsParFormation));
-  //       return res.json(effectifsParFormation);
-  //     }
-  //   })
-  // );
+  router.get(
+    "/formation",
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getEffectifsCountByFormationAtDate(filters);
+    })
+  );
 
   /**
    * Get effectifs details by annee_formation
    */
-  // router.get(
-  //   "/annee-formation",
-  //   tryCatch(async (req, res) => {
-  //     const {
-  //       date: dateFromParams, // eslint-disable-next-line no-unused-vars
-  //       organisme_id,
-  //       ...filtersFromBody
-  //     } = await Joi.object({
-  //       date: Joi.date().required(),
-  //       niveau_formation: Joi.string().allow(null, ""),
-  //       ...commonEffectifsFilters,
-  //     }).validateAsync(req.query, { abortEarly: false });
-
-  //     const date = new Date(dateFromParams);
-  //     const filters = {
-  //       ...filtersFromBody,
-  //       annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-  //     };
-
-  //     // try to retrieve from cache
-  //     const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
-  //       date: format(date, "yyyy-MM-dd"),
-  //       filters,
-  //     });
-  //     const fromCache = await cache.get(cacheKey);
-
-  //     if (fromCache) {
-  //       return res.json(JSON.parse(fromCache));
-  //     } else {
-  //       const effectifsParAnneeFormation = await effectifs.getEffectifsCountByAnneeFormationAtDate(date, filters);
-  //       await cache.set(cacheKey, JSON.stringify(effectifsParAnneeFormation));
-
-  //       return res.json(effectifsParAnneeFormation);
-  //     }
-  //   })
-  // );
+  router.get(
+    "/annee-formation",
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getEffectifsCountByAnneeFormationAtDate(filters);
+    })
+  );
 
   /**
    * Get effectifs details by cfa
    */
-  // router.get(
-  //   "/cfa",
-  //   tryCatch(async (req, res) => {
-  //     const {
-  //       date: dateFromQuery, // eslint-disable-next-line no-unused-vars
-  //       organisme_id,
-  //       ...filtersFromBody
-  //     } = await Joi.object({
-  //       date: Joi.date().required(),
-  //       ...commonEffectifsFilters,
-  //     }).validateAsync(req.query, { abortEarly: false });
-
-  //     const date = new Date(dateFromQuery);
-  //     const filters = {
-  //       ...filtersFromBody,
-  //       annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-  //     };
-
-  //     // try to retrieve from cache
-  //     const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
-  //       date: format(date, "yyyy-MM-dd"),
-  //       filters,
-  //     });
-  //     const fromCache = await cache.get(cacheKey);
-
-  //     if (fromCache) {
-  //       return res.json(JSON.parse(fromCache));
-  //     } else {
-  //       const effectifsByCfaAtDate = await effectifs.getEffectifsCountByCfaAtDate(date, filters);
-  //       await cache.set(cacheKey, JSON.stringify(effectifsByCfaAtDate));
-
-  //       return res.json(effectifsByCfaAtDate);
-  //     }
-  //   })
-  // );
+  router.get(
+    "/cfa",
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getEffectifsCountByCfaAtDate(filters);
+    })
+  );
 
   /**
    * Get effectifs details by siret
    */
-  // router.get(
-  //   "/siret",
-  //   tryCatch(async (req, res) => {
-  //     const {
-  //       date: dateFromQuery, // eslint-disable-next-line no-unused-vars
-  //       organisme_id,
-  //       ...filtersFromBody
-  //     } = await Joi.object({
-  //       date: Joi.date().required(),
-  //       ...commonEffectifsFilters,
-  //     }).validateAsync(req.query, { abortEarly: false });
-
-  //     const date = new Date(dateFromQuery);
-  //     const filters = {
-  //       ...filtersFromBody,
-  //       annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-  //     };
-
-  //     // try to retrieve from cache
-  //     const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
-  //       date: format(date, "yyyy-MM-dd"),
-  //       filters,
-  //     });
-  //     const fromCache = await cache.get(cacheKey);
-
-  //     if (fromCache) {
-  //       return res.json(JSON.parse(fromCache));
-  //     } else {
-  //       const effectifsBySiretAtDate = await effectifs.getEffectifsCountBySiretAtDate(date, filters);
-  //       await cache.set(cacheKey, JSON.stringify(effectifsBySiretAtDate));
-
-  //       return res.json(effectifsBySiretAtDate);
-  //     }
-  //   })
-  // );
+  router.get(
+    "/siret",
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getEffectifsCountBySiretAtDate(filters);
+    })
+  );
 
   /**
    * Get effectifs details by departement
    */
-  // router.get(
-  //   "/departement",
-  //   tryCatch(async (req, res) => {
-  //     const {
-  //       date: dateFromQuery, // eslint-disable-next-line no-unused-vars
-  //       organisme_id,
-  //       ...filtersFromBody
-  //     } = await Joi.object({
-  //       date: Joi.date().required(),
-  //       ...commonEffectifsFilters,
-  //     }).validateAsync(req.query, { abortEarly: false });
-
-  //     const date = new Date(dateFromQuery);
-  //     const filters = {
-  //       ...filtersFromBody,
-  //       annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-  //     };
-
-  //     // try to retrieve from cache
-  //     const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
-  //       date: format(date, "yyyy-MM-dd"),
-  //       filters,
-  //     });
-  //     const fromCache = await cache.get(cacheKey);
-
-  //     if (fromCache) {
-  //       return res.json(JSON.parse(fromCache));
-  //     } else {
-  //       const effectifsByDepartementAtDate = await effectifs.getEffectifsCountByDepartementAtDate(date, filters);
-  //       await cache.set(cacheKey, JSON.stringify(effectifsByDepartementAtDate));
-  //       return res.json(effectifsByDepartementAtDate);
-  //     }
-  //   })
-  // );
+  router.get(
+    "/departement",
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getEffectifsCountByDepartementAtDate(filters);
+    })
+  );
 
   return router;
 };

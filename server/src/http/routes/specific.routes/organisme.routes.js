@@ -11,6 +11,9 @@ import {
   addContributeurOrganisme,
   removeContributeurOrganisme,
   updateOrganisme,
+  searchOrganismes,
+  findOrganismeByUai,
+  getSousEtablissementsForUai,
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { findRolePermission } from "../../../common/actions/roles.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
@@ -21,6 +24,8 @@ import {
   updatePermissionsPending,
 } from "../../../common/actions/permissions.actions.js";
 import { getUser } from "../../../common/actions/users.actions.js";
+import { uaiSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
+import { returnResult } from "../../middlewares/helpers.js";
 
 export default ({ mailer }) => {
   const router = express.Router();
@@ -246,6 +251,49 @@ export default ({ mailer }) => {
       }
 
       return res.json({ ok: true });
+    })
+  );
+
+  const organismeSearchSchema = {
+    searchTerm: Joi.string().min(3),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
+  };
+  router.post(
+    "/search",
+    returnResult(async (req) => {
+      const search = await validateFullObjectSchema(req.body, organismeSearchSchema);
+      return await searchOrganismes(search);
+    })
+  );
+
+  const getByUaiSchema = {
+    uai: uaiSchema(),
+  };
+  /**
+   * Gets the dashboard data for cfa
+   */
+  router.get(
+    "/:uai",
+    tryCatch(async (req, res) => {
+      const { uai } = await validateFullObjectSchema(req.params, getByUaiSchema);
+      const organisme = await findOrganismeByUai(uai);
+      if (!organisme) {
+        return res.status(404).json({ message: `No cfa found for UAI ${uai}` });
+      }
+
+      const sousEtablissements = await getSousEtablissementsForUai(uai);
+      return res.json({
+        libelleLong: organisme.nom,
+        reseaux: organisme.reseaux,
+        domainesMetiers: organisme.metiers,
+        uai: organisme.uai,
+        nature: organisme.nature,
+        nature_validity_warning: organisme.nature_validity_warning,
+        adresse: organisme.adresse,
+        sousEtablissements,
+      });
     })
   );
 

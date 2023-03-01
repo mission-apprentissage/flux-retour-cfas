@@ -5,6 +5,9 @@ import MonthSelect from "../MonthSelect/MonthSelect.jsx";
 import { InfoLine } from "@/theme/components/icons/InfoLine.js";
 import { useSimpleFiltersContext } from "@/modules/mon-espace/landing/common/SimpleFiltersContext.js";
 
+// Nouvelle version de ui/modules/mon-espace/landing/visualiser-les-indicateurs/DateWithTooltipSelector.jsx
+// avec useSimpleFiltersContext
+// FIXME: à valider pour voir si obsolète
 const DateWithTooltipSelector = ({ ...props }) => {
   const { filtersValues, filtersSetters } = useSimpleFiltersContext();
 

@@ -2,24 +2,18 @@ import { Box, Link, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../modules/visualiser-les-indicateurs/FiltersContext";
-import { mapNatureOrganismeDeFormation } from "../../../modules/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
-import { isDateFuture } from "../../../common/utils/dateUtils";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import { mapNatureOrganismeDeFormation } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
+import { isDateFuture } from "@/common/utils/dateUtils";
 import NatureOrganismeDeFormationWarning from "../../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import NumberValueCell from "../NumberValueCell";
-
-const getSiretText = (sirets) => {
-  if (!sirets || sirets.length === 0) return "N/A";
-  if (sirets.length === 1) return sirets[0];
-  return `${sirets.length} SIRET transmis`;
-};
 
 const CfaRow = ({
   uai_etablissement,
   siret_etablissement,
   nom_etablissement,
   nature,
-  natureValidityWarning,
+  nature_validity_warning,
   effectifs,
   onCfaClick,
 }) => {
@@ -35,12 +29,12 @@ const CfaRow = ({
           </Link>
         </div>
         <Box fontSize="omega">
-          UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
+          UAI : {uai_etablissement || "N/A"} - SIRET : {siret_etablissement || "N/A"}
         </Box>
       </Td>
       <Td color="grey.800" whiteSpace="nowrap">
         {mapNatureOrganismeDeFormation(nature)}{" "}
-        {natureValidityWarning && (
+        {nature_validity_warning && (
           <span style={{ verticalAlign: "middle" }}>
             <NatureOrganismeDeFormationWarning />
           </span>
@@ -61,9 +55,9 @@ const CfaRow = ({
 CfaRow.propTypes = {
   uai_etablissement: PropTypes.string,
   nom_etablissement: PropTypes.string.isRequired,
-  siret_etablissement: PropTypes.arrayOf(PropTypes.string).isRequired,
-  nature: PropTypes.string.isRequired,
-  natureValidityWarning: PropTypes.bool.isRequired,
+  siret_etablissement: PropTypes.string,
+  nature: PropTypes.string,
+  nature_validity_warning: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     inscritsSansContrat: PropTypes.number.isRequired,
@@ -71,6 +65,13 @@ CfaRow.propTypes = {
     abandons: PropTypes.number.isRequired,
   }).isRequired,
   onCfaClick: PropTypes.func.isRequired,
+  uaiOrSiretContraint(props, _, componentName) {
+    if (!props.uai_etablissement && !props.siret_etablissement) {
+      return new Error(
+        `One of 'uai_etablissement' or 'siret_etablissement' is required by '${componentName}' component.`
+      );
+    }
+  },
 };
 
 export default CfaRow;

@@ -4,6 +4,7 @@ import { sampleLibelles } from "./sampleLibelles.js";
 import { subMonths, addYears } from "date-fns";
 import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
 import sampleEtablissements from "./sampleEtablissements.js";
+import { omit } from "../../src/common/utils/miscUtils.js";
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -101,6 +102,40 @@ export const createRandomEffectifApprenant = (params = {}) => {
     formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
 
     ...params,
+  };
+};
+
+export const createSampleEffectif = (params = {}) => {
+  const annee_scolaire = getRandomAnneeScolaire();
+  return {
+    apprenant: {
+      ine_apprenant: getRandomIne(),
+      nom: faker.name.lastName().toUpperCase(),
+      prenom: faker.name.firstName(),
+      email_contact: faker.internet.email(),
+      date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
+      historique_statut: [],
+      ...params?.apprenant,
+    },
+    formation: {
+      annee_formation: getRandomAnneeFormation(),
+      cfd: getRandomFormationCfd(),
+      periode: getRandomPeriodeFormation(annee_scolaire),
+      rncp: getRandomRncpFormation(),
+      libelle_long: faker.helpers.arrayElement(sampleLibelles).intitule_long,
+      niveau: "5",
+      niveau_libelle: "5 (BTS, DUT...)",
+      annee: getRandomAnneeFormation(),
+      ...params?.formation,
+    },
+    validation_errors: [],
+    created_at: new Date(),
+    updated_at: new Date(),
+    id_erp_apprenant: faker.datatype.uuid(),
+    source: faker.random.word(),
+    annee_scolaire,
+    organisme_id: null,
+    ...omit(params, ["apprenant", "formation"]),
   };
 };
 

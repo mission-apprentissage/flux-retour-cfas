@@ -54,6 +54,6 @@ export function arrayOf(itemSchema = Joi.string()) {
   return customJoi.arrayOf().items(itemSchema).single();
 }
 
-export function validate(obj, validators) {
-  return Joi.object(validators).validateAsync(obj, { abortEarly: false });
+export async function validateFullObjectSchema(object, schema) {
+  return await Joi.object(schema).validateAsync(object, { abortEarly: false });
 }

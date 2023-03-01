@@ -1,3 +1,6 @@
+// données à synchroniser avec /ui/common/constants/territoiresConstants.js
+// en attendant un import partagé
+
 /**
  * Liste des régions du territoire national
  * TODO : Rationaliser la liste des régions (point transverse tech ?)
@@ -1558,7 +1561,7 @@ export const ACADEMIES = {
   43: { nom: "Mayotte", code: 43 },
   70: { nom: "Normandie", code: 70 },
   77: { nom: "Saint-Barthélemy", code: 77 },
-  78: { nom: "Saint Martin", code: 78 },
+  78: { nom: "Saint-Martin", code: 78 },
 };
 
 export const ACADEMIES_BY_ID = Object.values(ACADEMIES).reduce((acc, academie) => {

@@ -3,11 +3,9 @@ import omit from "lodash.omit";
 import nock from "nock";
 
 import { nockGetCfdInfo } from "../../../utils/nockApis/nock-tablesCorrespondances.js";
-import { asyncForEach } from "../../../../src/common/utils/asyncUtils.js";
 import { dataForGetCfdInfo } from "../../../data/apiTablesDeCorrespondances.js";
-import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 import { nockGetMetiersByCfd } from "../../../utils/nockApis/nock-Lba.js";
-import { formationsDb, dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
+import { formationsDb, effectifsDb, organismesDb } from "../../../../src/common/model/collections.js";
 import {
   createFormation,
   existsFormation,
@@ -16,6 +14,8 @@ import {
   getNiveauFormationFromLibelle,
   searchFormations,
 } from "../../../../src/common/actions/formations.actions.js";
+import { createSampleEffectif } from "../../../data/randomizedSample.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
 
 describe("Tests des actions Formations", () => {
   describe("existsFormation", () => {
@@ -154,14 +154,20 @@ describe("Tests des actions Formations", () => {
           .pop()
       );
 
-      await asyncForEach(formationsSeed, async ({ cfd }) => {
-        await createFormation({ cfd });
-
-        await dossiersApprenantsMigrationDb().insertOne({
-          ...createRandomDossierApprenant(),
-          formation_cfd: cfd,
-        });
-      });
+      await Promise.all(
+        formationsSeed.map(async ({ cfd }) => {
+          await Promise.all([
+            createFormation({ cfd }),
+            effectifsDb().insertOne(
+              createSampleEffectif({
+                formation: {
+                  cfd: cfd,
+                },
+              })
+            ),
+          ]);
+        })
+      );
     });
 
     const validCases = [
@@ -233,17 +239,38 @@ describe("Tests des actions Formations", () => {
       assert.ok(results.find((formation) => formation.cfd === formationsSeed[5].cfd));
     });
 
+    const organisme = {
+      uai: "0040533H",
+      siret: "19040492100016",
+      nom: "LYCEE POLYVALENT LES ISCLES",
+      nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+      adresse: {
+        academie: "2",
+        code_insee: "04112",
+        code_postal: "04100",
+        commune: "MANOSQUE",
+        complete: "LYCEE POLYVALENT LES ISCLES\r\n" + "116 AV REGIS RYCKEBUSH\r\n" + "04100 MANOSQUE\r\n" + "FRANCE",
+        departement: "04",
+        numero: 116,
+        region: "93",
+        voie: "AVREGIS RYCKEBUSH",
+      },
+      reseaux: ["AGRI"],
+    };
     it("returns results matching libelle and etablissement_num_region", async () => {
       const searchTerm = "decoration";
-      const etablissement_num_region = "28";
 
-      await dossiersApprenantsMigrationDb().insertOne({
-        ...createRandomDossierApprenant(),
-        etablissement_num_region,
-        formation_cfd: formationsSeed[2].cfd,
-      });
+      const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
+      await effectifsDb().insertOne(
+        createSampleEffectif({
+          formation: {
+            cfd: formationsSeed[2].cfd,
+          },
+          organisme_id,
+        })
+      );
 
-      const results = await searchFormations({ searchTerm, etablissement_num_region });
+      const results = await searchFormations({ searchTerm, etablissement_num_region: organisme.adresse.region });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
@@ -251,15 +278,21 @@ describe("Tests des actions Formations", () => {
 
     it("returns results matching libelle and etablissement_num_departement", async () => {
       const searchTerm = "decoration";
-      const etablissement_num_departement = "77";
 
-      await dossiersApprenantsMigrationDb().insertOne({
-        ...createRandomDossierApprenant(),
-        etablissement_num_departement,
-        formation_cfd: formationsSeed[2].cfd,
+      const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
+      await effectifsDb().insertOne(
+        createSampleEffectif({
+          formation: {
+            cfd: formationsSeed[2].cfd,
+          },
+          organisme_id,
+        })
+      );
+
+      const results = await searchFormations({
+        searchTerm,
+        etablissement_num_departement: organisme.adresse.departement,
       });
-
-      const results = await searchFormations({ searchTerm, etablissement_num_departement });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
@@ -267,15 +300,18 @@ describe("Tests des actions Formations", () => {
 
     it("returns results matching libelle and etablissement_reseau", async () => {
       const searchTerm = "decoration";
-      const etablissement_reseaux = "RESEAU_TEST";
 
-      await dossiersApprenantsMigrationDb().insertOne({
-        ...createRandomDossierApprenant(),
-        etablissement_reseaux: [etablissement_reseaux],
-        formation_cfd: formationsSeed[2].cfd,
-      });
+      const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
+      await effectifsDb().insertOne(
+        createSampleEffectif({
+          formation: {
+            cfd: formationsSeed[2].cfd,
+          },
+          organisme_id,
+        })
+      );
 
-      const results = await searchFormations({ searchTerm, etablissement_reseaux });
+      const results = await searchFormations({ searchTerm, etablissement_reseaux: organisme.reseaux[0] });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
@@ -283,15 +319,18 @@ describe("Tests des actions Formations", () => {
 
     it("returns results matching libelle and uai_etablissement", async () => {
       const searchTerm = "decoration";
-      const uai_etablissement = "0762232N";
 
-      await dossiersApprenantsMigrationDb().insertOne({
-        ...createRandomDossierApprenant(),
-        uai_etablissement,
-        formation_cfd: formationsSeed[2].cfd,
-      });
+      const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
+      await effectifsDb().insertOne(
+        createSampleEffectif({
+          formation: {
+            cfd: formationsSeed[2].cfd,
+          },
+          organisme_id,
+        })
+      );
 
-      const results = await searchFormations({ searchTerm, uai_etablissement });
+      const results = await searchFormations({ searchTerm, uai_etablissement: organisme.uai });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
