@@ -38,15 +38,10 @@ export const updateOrganismesWithApis = async () => {
   logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour`);
   logger.info(`---> ${nbOrganismeNotUpdated} organismes non mis à jour (erreur)`);
 
-  await createJobEvent({
-    jobname: JOB_NAME,
-    date: new Date(),
-    action: "finishing",
-    data: {
-      nbOrganismesMaj: nbOrganismeUpdated,
-      nbOrganismesNonMajErreur: nbOrganismeNotUpdated,
-    },
-  });
+  return {
+    nbOrganismesMaj: nbOrganismeUpdated,
+    nbOrganismesNonMajErreur: nbOrganismeNotUpdated,
+  };
 };
 
 /**

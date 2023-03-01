@@ -1,19 +1,28 @@
 import { jobEventsDb } from "../model/collections.js";
 
 /**
- * Création d'un user event
- * @param {*} param0
+ * Création d'un job event
+ * @param {*} data
  * @returns
  */
 export const createJobEvent = async ({ jobname, action, data, date = new Date() }) => {
-  await jobEventsDb().insertOne({
+  const { insertedId } = await jobEventsDb().insertOne({
     jobname,
     action,
     ...(data ? { data } : {}),
     date,
   });
+  return insertedId;
+};
 
-  return;
+/**
+ * Mise à jour d'un job event
+ * @param {*} _id
+ * @param {Object} data
+ * @returns
+ */
+export const updateJobEvent = async (_id, data) => {
+  return jobEventsDb().updateOne({ _id }, { $set: data });
 };
 
 /**

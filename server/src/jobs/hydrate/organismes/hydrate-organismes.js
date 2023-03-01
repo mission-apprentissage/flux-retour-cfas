@@ -40,17 +40,12 @@ export const hydrateOrganismesFromReferentiel = async () => {
   logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour`);
   logger.info(`---> ${nbOrganismeNotUpdated} organismes non mis à jour depuis le référentiel (erreur)`);
 
-  await createJobEvent({
-    jobname: JOB_NAME,
-    date: new Date(),
-    action: "finishing",
-    data: {
-      nbOrganismesCrees: nbOrganismeCreated,
-      nbOrganismesNonCreesErreur: nbOrganismeNotCreated,
-      nbOrganismesMaj: nbOrganismeUpdated,
-      nbOrganismesNonMajErreur: nbOrganismeNotUpdated,
-    },
-  });
+  return {
+    nbOrganismesCrees: nbOrganismeCreated,
+    nbOrganismesNonCreesErreur: nbOrganismeNotCreated,
+    nbOrganismesMaj: nbOrganismeUpdated,
+    nbOrganismesNonMajErreur: nbOrganismeNotUpdated,
+  };
 };
 
 /**

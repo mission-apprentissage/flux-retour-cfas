@@ -1,5 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
-import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
+
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
@@ -10,8 +10,6 @@ import {
   fiabilisationUaiSiretDb,
   organismesDb,
 } from "../../../../common/model/collections.js";
-
-const JOB_NAME = "apply-fiabilisation-uai-siret";
 
 const filters = {
   annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },
@@ -31,12 +29,6 @@ let nbOrganismesNonFiabilisablesUaiNonValidees = 0;
  *
  */
 export const applyFiabilisationUaiSiret = async () => {
-  await createJobEvent({
-    jobname: JOB_NAME,
-    date: new Date(),
-    action: "beginning",
-  });
-
   // Reset des statuts de fiabilisation des organismes
   await resetStatutFiabilisation();
 
@@ -58,18 +50,13 @@ export const applyFiabilisationUaiSiret = async () => {
     "organismes mis à jour en tant que non fiabilisables (uai non validée dans le référentiel)"
   );
 
-  await createJobEvent({
-    jobname: JOB_NAME,
-    date: new Date(),
-    action: "finishing",
-    data: {
-      nbOrganismesFiables,
-      nbDossiersApprenantsFiabilises,
-      nbOrganismesFiabilises,
-      nbOrganismesNonFiabilisablesMapping,
-      nbOrganismesNonFiabilisablesUaiNonValidees,
-    },
-  });
+  return {
+    nbOrganismesFiables,
+    nbDossiersApprenantsFiabilises,
+    nbOrganismesFiabilises,
+    nbOrganismesNonFiabilisablesMapping,
+    nbOrganismesNonFiabilisablesUaiNonValidees,
+  };
 };
 
 /**

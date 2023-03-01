@@ -12,7 +12,7 @@ let nbOrganismeNotCreated = 0;
  * Script qui initialise les organismes du référentiel dans la collection organismesReferentiel
  */
 export const hydrateOrganismesReferentiel = async () => {
-  logger.info(`Clear des organismes du référentiel...`);
+  logger.info("Clear des organismes du référentiel...");
   await organismesReferentielDb().deleteMany({});
 
   // On récupère l'intégralité des organismes depuis le référentiel
@@ -26,15 +26,10 @@ export const hydrateOrganismesReferentiel = async () => {
   logger.info(`--> ${nbOrganismeCreated} organismesReferentiel créés depuis le référentiel`);
   logger.info(`--> ${nbOrganismeNotCreated} organismesReferentiel non créés depuis le référentiel (erreur)`);
 
-  await createJobEvent({
-    jobname: JOB_NAME,
-    date: new Date(),
-    action: "finishing",
-    data: {
-      nbOrganismesCrees: nbOrganismeCreated,
-      nbOrganismesNonCreesErreur: nbOrganismeNotCreated,
-    },
-  });
+  return {
+    nbOrganismesCrees: nbOrganismeCreated,
+    nbOrganismesNonCreesErreur: nbOrganismeNotCreated,
+  };
 };
 
 /**

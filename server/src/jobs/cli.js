@@ -1,5 +1,6 @@
 import "dotenv/config.js";
 import { Option, program as cli } from "commander";
+
 import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
 import { clear, clearRoles, clearUsers } from "./clear/clear-all.js";
@@ -24,11 +25,11 @@ import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTr
 cli
   .command("patches:remove-organismes-sansSiret-sansEffectifs")
   .description("Suppression des organismes sans siret & sans effectifs")
-  .action(async () => {
+  .action(async (_, options) =>
     runScript(async () => {
       return removeOrganismesSansSiretSansEffectifs();
-    }, "remove-organismes-sansSiret-sansEffectifs");
-  });
+    }, options._name)
+  );
 
 /**
  * Job (temporaire) de MAJ des date de dernières transmission des effectifs
@@ -36,11 +37,11 @@ cli
 cli
   .command("patches:update-lastTransmissionDate-organismes")
   .description("Suppression des organismes sans siret & sans effectifs")
-  .action(async () => {
+  .action(async (_, options) =>
     runScript(async () => {
       return updateLastTransmissionDateForOrganismes();
-    }, "update-lastTransmissionDate-organismes");
-  });
+    }, options._name)
+  );
 
 /**
  * Job d'initialisation de données de test
@@ -49,12 +50,12 @@ cli
   .command("seed")
   .description("Seed global data")
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .action(async ({ email }) => {
+  .action(async ({ email }, options) =>
     runScript(async () => {
       await seedRoles();
       return seedAdmin({ adminEmail: email?.toLowerCase() });
-    }, "Seed-admin");
-  });
+    }, options._name)
+  );
 
 /**
  * Job d'initialisation de données de test
@@ -62,11 +63,11 @@ cli
 cli
   .command("seed:sample")
   .description("Seed sample data")
-  .action(async () => {
+  .action(async (_, options) =>
     runScript(async () => {
       return seedSample();
-    }, "Seed sample");
-  });
+    }, options._name)
+  );
 
 /**
  * Job d'initialisation des roles
@@ -75,11 +76,11 @@ cli
 cli
   .command("seed:roles")
   .description("Seed roles")
-  .action(async () => {
+  .action(async (_, options) =>
     runScript(async () => {
       return seedRoles();
-    }, "Seed-roles");
-  });
+    }, options._name)
+  );
 
 /**
  * Job d'initialisation d'un user admin
@@ -89,11 +90,11 @@ cli
   .command("seed:admin")
   .description("Seed user admin")
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .action(async ({ email }) => {
+  .action(async ({ email }, options) =>
     runScript(async () => {
       return seedAdmin({ adminEmail: email?.toLowerCase() });
-    }, "Seed-admin");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de nettoyage de db
@@ -102,29 +103,29 @@ cli
   .command("clear")
   .description("Clear projet")
   .option("-a, --all", "Tout supprimer")
-  .action(({ all }) => {
+  .action(({ all }, options) =>
     runScript(async () => {
       return clear({ clearAll: all });
-    }, "Clear");
-  });
+    }, options._name)
+  );
 
 cli
   .command("clear:users")
   .description("Clear users")
-  .action(() => {
+  .action((_, options) =>
     runScript(async () => {
       return clearUsers();
-    }, "Clear");
-  });
+    }, options._name)
+  );
 
 cli
   .command("clear:roles")
   .description("Clear roles")
-  .action(() => {
+  .action((_, options) =>
     runScript(async () => {
       return clearRoles();
-    }, "Clear");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de remplissage des organismes du référentiel
@@ -132,11 +133,11 @@ cli
 cli
   .command("hydrate:organismes-referentiel")
   .description("Remplissage des organismes du référentiel")
-  .action(async () => {
+  .action(async (_, options) =>
     runScript(async () => {
       return hydrateOrganismesReferentiel();
-    }, "hydrate-organismes-referentiel");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de remplissage des organismes en allant ajouter / maj aux organismes existants (issus de la transmission)
@@ -145,11 +146,11 @@ cli
 cli
   .command("hydrate:organismes")
   .description("Remplissage des organismes via le référentiel")
-  .action(async () => {
+  .action(async (_, options) =>
     runScript(async () => {
       return hydrateOrganismesFromReferentiel();
-    }, "hydrate-organismes");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de mise à jour des organismes en allant appeler des API externes pour remplir
@@ -160,11 +161,11 @@ cli
 cli
   .command("update:organismes-with-apis")
   .description("Mise à jour des organismes via API externes")
-  .action(async () => {
+  .action(async (_, options) =>
     runScript(async () => {
       return updateOrganismesWithApis();
-    }, "update-organismes-with-apis");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de remplissage & maj des d'organismes / dossiersApprenants pour les réseaux avec le nouveau format
@@ -172,11 +173,11 @@ cli
 cli
   .command("hydrate:reseaux")
   .description("Remplissage des réseaux pour les organismes et dossiersApprenants")
-  .action(async () => {
+  .action(async (_, options) =>
     runScript(async () => {
       return hydrateReseaux();
-    }, "hydrate-reseaux");
-  });
+    }, options._name)
+  );
 
 /**
  * Job d'archivage des dossiers apprenants et des effectifs
@@ -185,11 +186,11 @@ cli
   .command("archive:dossiersApprenantsEffectifs")
   .description("Archivage des dossiers apprenants")
   .option("--limit <int>", "Année limite d'archivage")
-  .action(async ({ limit }) => {
+  .action(async ({ limit }, options) =>
     runScript(async () => {
       return hydrateArchivesDossiersApprenantsAndEffectifs(limit);
-    }, "hydrate-archive-dossiersApprenants-effectifs");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de purge des events
@@ -198,11 +199,11 @@ cli
   .command("purge:events")
   .description("Purge des logs inutiles")
   .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
-  .action(async ({ nbDaysToKeep }) => {
+  .action(async ({ nbDaysToKeep }, options) =>
     runScript(async () => {
       return purgeEvents(nbDaysToKeep);
-    }, "purge-events");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de création d'un utilisateur
@@ -215,7 +216,7 @@ cli
   .option("--nom <string>", "Nom de l'utilisateur")
   .option("--isAdmin <bool>", "Indique s'il est administrateur")
   .option("--isCrossOrganismes <bool>", "Indique s'il est cross organismes")
-  .action(async ({ email, prenom, nom, isAdmin, isCrossOrganismes }) => {
+  .action(async ({ email, prenom, nom, isAdmin, isCrossOrganismes }, options) =>
     runScript(async () => {
       return createUserAccount({
         email,
@@ -223,8 +224,8 @@ cli
         nom,
         permissions: { is_admin: isAdmin, is_cross_organismes: isCrossOrganismes },
       });
-    }, "create-user");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de génération d'un token de MAJ de mot de passe pour un utilisateur
@@ -233,11 +234,11 @@ cli
   .command("generate:password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur")
   .requiredOption("--email <string>", "Email de l'utilisateur")
-  .action(async ({ email }) => {
+  .action(async ({ email }, options) =>
     runScript(async () => {
       return generatePasswordUpdateTokenForUser(email);
-    }, "generate-password-update-token");
-  });
+    }, options._name)
+  );
 
 /**
  * Job de génération d'un token de MAJ de mot de passe pour un utilisateur legacy (ancien modèle)
@@ -246,11 +247,11 @@ cli
   .command("generate-legacy:password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur legacy")
   .requiredOption("--username <string>", "username de l'utilisateur")
-  .action(async ({ username }) => {
+  .action(async ({ username }, options) =>
     runScript(async () => {
       return generatePasswordUpdateTokenForUserLegacy(username);
-    }, "generate-password-update-token-legacy");
-  });
+    }, options._name)
+  );
 
 /**
  * TEMPORAIRE
@@ -261,11 +262,11 @@ cli
   .command("users:update-apiSeeders")
   .description("Modification des utilisateurs fournisseurs de données")
   .addOption(new Option("--mode <mode>", "Mode de mise à jour").choices(["active", "inactive"]).makeOptionMandatory())
-  .action(async ({ mode }) => {
+  .action(async ({ mode }, options) =>
     runScript(async () => {
       return updateUsersApiSeeders(mode);
-    }, "users:update-apiSeeders");
-  });
+    }, options._name)
+  );
 
 cli;
 
