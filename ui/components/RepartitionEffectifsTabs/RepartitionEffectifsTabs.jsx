@@ -13,7 +13,7 @@ const RepartitionEffectifsTabs = ({ children }) => {
           Effectifs par organismes
         </Tab>
         <Tab fontWeight="bold" fontSize="delta">
-          Effectifs par formations
+          Effectifs par niveau
         </Tab>
       </TabList>
       <TabPanels>{children}</TabPanels>
