@@ -804,7 +804,7 @@ const Televersements = () => {
                     </Text>
                     <Text color="grey.800" textStyle="sm">
                       importation terminée, vous pourrez : importer un nouveau fichier corrigé ou les corriger sur votre
-                      Tableau de bord
+                      tableau de bord
                       <br />
                     </Text>
                   </Box>

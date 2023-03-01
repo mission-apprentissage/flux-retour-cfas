@@ -1,1 +1,1 @@
-export const SEARCH_CFAS = "Tableau de bord de l'apprentissage";
+export const SEARCH_CFAS = "tableau de bord de l'apprentissage";

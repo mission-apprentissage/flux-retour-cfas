@@ -10,7 +10,7 @@ const CfaTransmissionNotFound = () => {
       <Box>
         <Text color="grey.800" fontWeight="bold" fontSize="beta" marginTop="1w">
           Votre organisme ne transmet pas de données <br />
-          au Tableau de bord de l’apprentissage.
+          au tableau de bord de l’apprentissage.
         </Text>
         <Button
           variant="primary"

@@ -41,7 +41,7 @@ export default function CommentConsulterEtVerifierLesDonnees() {
                   Comment consulter et vérifier les données que vous transmettez ?
                 </Heading>
                 <Text marginTop="3w">
-                  Vous pouvez accéder sur le Tableau de bord de l’apprentissage, à
+                  Vous pouvez accéder sur le tableau de bord de l’apprentissage, à
                   <strong>
                     {" "}
                     une page dédiée à votre organisme de formation via une URL unique disponible dans votre ERP (ou

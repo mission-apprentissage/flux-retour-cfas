@@ -51,7 +51,7 @@ const DonneesPersonnelles = () => {
               Protection des données à caractère personnel
             </Heading>
             <Text fontSize="gamma" color="black">
-              Le Tableau de Bord de l’Apprentissage est{" "}
+              Le tableau de bord de l’apprentissage est{" "}
               <strong>
                 construit dans le respect de la vie privée des personnes et applique les standards de sécurité de
                 l&apos;État.

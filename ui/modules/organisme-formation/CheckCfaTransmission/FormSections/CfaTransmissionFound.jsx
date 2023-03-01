@@ -16,7 +16,7 @@ const CfaTransmissionFound = () => {
       />
       <Box>
         <Text color="grey.800" fontWeight="bold" fontSize="beta" marginTop="1w">
-          Votre organisme transmet bien des données <br /> au Tableau de bord de l’apprentissage.
+          Votre organisme transmet bien des données <br /> au tableau de bord de l’apprentissage.
         </Text>
         <Text marginTop="4w" color="#000000" fontSize="epsilon">
           Utiliser votre URL unique disponible dans votre ERP pour consulter votre page

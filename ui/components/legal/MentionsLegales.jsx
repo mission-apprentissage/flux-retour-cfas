@@ -50,7 +50,7 @@ const MentionsLegales = () => {
           <Heading textStyle="h2" color="grey.800" mt={5}>
             Mentions légales
           </Heading>
-          <Text>Mentions légales du site « Tableau de bord de l’apprentissage »</Text>
+          <Text>Mentions légales du site « tableau de bord de l’apprentissage »</Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.EditeurDuSite}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
@@ -89,7 +89,7 @@ const MentionsLegales = () => {
             <br />
             <br />
             La conception et la réalisation du site sont effectuée par La Mission Interministérielle pour
-            l’Apprentissage, située à l’adresse suivante :
+            l’apprentissage, située à l’adresse suivante :
             <br />
             Beta.gouv
             <br />

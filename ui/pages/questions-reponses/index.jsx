@@ -33,7 +33,7 @@ export default function QuestionsReponses() {
             <Box as={Link} href={"/questions-reponses/qu-est-ce-que-le-tableau-de-bord"}>
               <DataVisualisation width="80px" height="80px" marginX="auto" display="block" />
               <Text marginTop="2w" color="#161616" fontWeight="700" textAlign="center">
-                Qu’est-ce que le Tableau de bord de l’apprentissage ?
+                Qu’est-ce que le tableau de bord de l’apprentissage ?
               </Text>
             </Box>
           </Tuile>
@@ -41,7 +41,7 @@ export default function QuestionsReponses() {
             <Box as={Link} href={"/questions-reponses/comment-fonctionne-le-tableau-de-bord"}>
               <TechnicalError width="80px" height="80px" marginX="auto" display="block" />
               <Text marginTop="2w" color="#161616" fontWeight="700" textAlign="center">
-                Comment fonctionne le Tableau de bord ?
+                Comment fonctionne le tableau de bord ?
               </Text>
             </Box>
           </Tuile>
@@ -49,7 +49,7 @@ export default function QuestionsReponses() {
             <Box as={Link} href={"/questions-reponses/contacter-l-equipe"}>
               <Notification width="80px" height="80px" marginX="auto" display="block" />
               <Text marginTop="2w" color="#161616" fontWeight="700" textAlign="center">
-                Contacter l’équipe du Tableau de bord
+                Contacter l’équipe du tableau de bord
               </Text>
             </Box>
           </Tuile>
@@ -61,11 +61,11 @@ export default function QuestionsReponses() {
           <BaseAccordionGroup
             AccordionItemsDetailList={[
               {
-                title: "Pourquoi transmettre les données de votre organisme au Tableau de bord ?",
+                title: "Pourquoi transmettre les données de votre organisme au tableau de bord ?",
                 content: (
                   <Box>
                     Différentes institutions (Conseil Régional, DREETS, DRAAF, Carif Oref, Académie, DGEFP) consultent
-                    le Tableau de Bord de l&apos;Apprentissage quotidiennement pour suivre l’évolution des effectifs.
+                    le tableau de bord de l&apos;apprentissage quotidiennement pour suivre l’évolution des effectifs.
                     Ces données les éclairent notamment pour attribuer des subventions, pour mettre en place des plans
                     d’actions d’accompagnement des jeunes sans contrat ou pour définir les politiques publiques d’aide à
                     l’apprentissage.
@@ -73,15 +73,15 @@ export default function QuestionsReponses() {
                 ),
               },
               {
-                title: "Pour quels usages et quels utilisateurs a été conçu le Tableau de bord ?",
+                title: "Pour quels usages et quels utilisateurs a été conçu le tableau de bord ?",
                 content: (
                   <Box>
                     <Text>
-                      Le Tableau de bord de l’apprentissage a été conçu pour répondre aux besoins du ministère du
+                      Le tableau de bord de l’apprentissage a été conçu pour répondre aux besoins du ministère du
                       Travail et du ministère de l’Éducation Nationale, de l’Enseignement supérieur et de la
                       Transformation publique, en terme de visibilité sur les chiffres clés de l’apprentissage. <br />{" "}
                       <br />
-                      Pour en savoir plus sur les utilisateurs du Tableau de bord de l’apprentissage, consultez{" "}
+                      Pour en savoir plus sur les utilisateurs du tableau de bord de l’apprentissage, consultez{" "}
                       <Link href="/organisme-formation/aide" color="bluefrance" textDecoration="underLine">
                         Qui peut consulter les données de votre organisme ? <Box as="i" className="ri-links-line" />{" "}
                       </Link>
@@ -90,11 +90,11 @@ export default function QuestionsReponses() {
                 ),
               },
               {
-                title: "Quelles institutions ont accès aux données du Tableau de bord ?",
+                title: "Quelles institutions ont accès aux données du tableau de bord ?",
                 content: (
                   <Box>
                     <Text>
-                      Des institutions qui pilotent l’Apprentissage nationalement ou territorialement comme la DREETS,
+                      Des institutions qui pilotent l’apprentissage nationalement ou territorialement comme la DREETS,
                       la DRAAF, le Conseil Régional, l’Académie et le Carif Oref par exemple.
                     </Text>
                   </Box>
@@ -107,7 +107,7 @@ export default function QuestionsReponses() {
                     <UnorderedList>
                       <ListItem>
                         Si vous utilisez les ERP suivants : Gesti, Ymag, SC Form, Formasup, FCA Manager ou Auriga, un
-                        simple paramétrage suffit pour vous brancher au Tableau de Bord. La démarche n’est à faire
+                        simple paramétrage suffit pour vous brancher au tableau de bord. La démarche n’est à faire
                         qu’une seule fois et est estimée à 10 minutes. Pour ce faire, [sélectionner l’ERP que vous
                         utilisez] et
                         <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
@@ -139,11 +139,11 @@ export default function QuestionsReponses() {
                 ),
               },
               {
-                title: "La transmission des données au Tableau de bord remplace-t-elle l'enquête SIFA ?",
+                title: "La transmission des données au tableau de bord remplace-t-elle l'enquête SIFA ?",
                 content: (
                   <Box>
                     <Text>
-                      À ce jour, transmettre vos données au Tableau de bord ne vous dispense pas de remplir l’enquête
+                      À ce jour, transmettre vos données au tableau de bord ne vous dispense pas de remplir l’enquête
                       SIFA.
                       <br />
                       <br />
