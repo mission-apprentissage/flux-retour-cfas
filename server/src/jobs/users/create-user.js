@@ -1,4 +1,3 @@
-import { createJobEvent } from "../../common/actions/jobEvents.actions.js";
 import { createUser } from "../../common/actions/users.actions.js";
 import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
 import logger from "../../common/logger.js";
@@ -20,13 +19,7 @@ export const createUserAccount = async ({ email, nom, prenom, permissions = {} }
       account_status: USER_ACCOUNT_STATUS.FIRST_FORCE_RESET_PASSWORD,
     }
   );
-
-  await createJobEvent({
-    jobname: "create-user",
-    date: new Date(),
-    action: "create-user",
-    data: { email },
-  });
-
   logger.info(`User ${email} successfully created`);
+
+  return { email };
 };

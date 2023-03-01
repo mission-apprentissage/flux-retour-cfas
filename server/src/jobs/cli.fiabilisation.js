@@ -11,13 +11,13 @@ import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiab
 cli
   .command("build:fiabilisation-uai-siret")
   .description("Création de la collection pour fiabilisation des UAI SIRET")
-  .action(() => {
+  .action((_, options) =>
     runScript(async () => {
       // On lance séquentiellement 2 fois la construction de la table de fiabilisation - nécessaire pour prendre en compte tous les cas
       await buildFiabilisationUaiSiret();
       await buildFiabilisationUaiSiret();
-    }, "build-fiabilisation-uai-siret");
-  });
+    }, options._name)
+  );
 
 /**
  * Job d'application de la fiabilisation UAI SIRET
@@ -25,11 +25,11 @@ cli
 cli
   .command("apply:fiabilisation-uai-siret")
   .description("Application du mapping de fiabilisation des UAI SIRET")
-  .action(() => {
+  .action((_, options) =>
     runScript(async () => {
       return applyFiabilisationUaiSiret();
-    }, "apply-fiabilisation-uai-siret");
-  });
+    }, options._name)
+  );
 
 /**
  * Job d'analyse de la fiabilité des dossiersApprenants reçus
@@ -37,10 +37,10 @@ cli
 cli
   .command("analyse:dossiersApprenants-recus")
   .description("Analyse de la fiabilité des dossiersApprenants reçus")
-  .action(() => {
+  .action((_, options) =>
     runScript(async () => {
       return analyseFiabiliteDossierApprenantsRecus();
-    }, "analyse-dossiersApprenants-recus");
-  });
+    }, options._name)
+  );
 
 cli.parse(process.argv);
