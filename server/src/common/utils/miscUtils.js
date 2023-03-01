@@ -1,7 +1,5 @@
 import crypto from "crypto";
 
-export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /**
  * Generates a random password with a fixed length and made of characters belonging to a specified wishlist
  * @param {*} length

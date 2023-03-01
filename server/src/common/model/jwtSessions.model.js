@@ -1,8 +1,8 @@
 import { object, string, objectId } from "./json-schema/jsonSchemaTypes.js";
 
-export const collectionName = "jwtSessions";
+const collectionName = "jwtSessions";
 
-export function indexes() {
+function indexes() {
   return [[{ jwt: 1 }, { unique: true }]];
 }
 

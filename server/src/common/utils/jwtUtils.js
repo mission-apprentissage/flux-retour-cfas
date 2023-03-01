@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
+
 import config from "../../config.js";
-import { pick } from "lodash-es";
 
 const createToken = (type, subject = null, options = {}) => {
   const defaults = config.auth[type];
@@ -24,18 +24,6 @@ export function createResetPasswordToken(username, options = {}) {
 
 export function createActivationToken(subject, options = {}) {
   return createToken("activation", subject, options);
-}
-
-// les tokens actions sont par exemple notification, unsubscribe...
-export function createActionToken(subject, options = {}) {
-  return createToken("actionToken", subject, options);
-}
-
-export function createApiToken(user, options = {}) {
-  return createToken("apiToken", user.username, {
-    payload: { type: user.type, permissions: pick(user, ["is_admin"]) },
-    ...options,
-  });
 }
 
 export function createUserTokenSimple(options = {}) {

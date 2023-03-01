@@ -5,9 +5,9 @@ import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
 import { CODES_STATUT_APPRENANT } from "../constants/dossierApprenantConstants.js";
 import { REGIONS } from "../constants/territoiresConstants.js";
 
-export const collectionName = "dossiersApprenantsMigration";
+const collectionName = "dossiersApprenantsMigration";
 
-export const indexes = () => {
+const indexes = () => {
   return [
     [
       { id_erp_apprenant: 1, uai_etablissement: 1, annee_scolaire: 1 },
@@ -24,7 +24,7 @@ export const indexes = () => {
   ];
 };
 
-export const schema = object(
+const schema = object(
   {
     _id: objectId(),
     organisme_id: objectId({

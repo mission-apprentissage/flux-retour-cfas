@@ -26,28 +26,6 @@ export const getCfdInfo = async (cfd) => {
 
 /**
  *
- * @param {string} rncp
- * @returns {Promise<import("./@types/TabCoRncpInfo.js").default|null>}
- */
-export const getRncpInfo = async (rncp) => {
-  const url = `${API_ENDPOINT}/rncp`;
-  try {
-    const { data } = await axios.post(url, {
-      rncp,
-    });
-    return data.result;
-  } catch (/** @type {any}*/ error) {
-    logger.error(
-      `getRncpInfo: something went wrong while requesting ${url}`,
-      `${error.message} for rncp=${rncp}`,
-      error.code || error.response?.status
-    );
-    return null;
-  }
-};
-
-/**
- *
  * @param {string} codePostal
  * @returns {Promise<import("./@types/TabCoCodePostalInfo.js").default|null>}
  */

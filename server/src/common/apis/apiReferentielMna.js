@@ -6,6 +6,20 @@ import config from "../../config.js";
 
 const API_ENDPOINT = config.mnaReferentielApi.endpoint;
 
+const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
+  "adresse",
+  "enseigne",
+  "etat_administratif",
+  "forme_juridique",
+  "nature",
+  "numero_declaration_activite",
+  "qualiopi",
+  "raison_sociale",
+  "siret",
+  "siege_social",
+  "uai",
+];
+
 /**
  * Récupération des organismes du référentiel
  * Par défaut on récupère 10000 éléments par page et tous les champs définis dans DEFAULT_REFERENTIEL_FIELDS_TO_FETCH
@@ -52,17 +66,3 @@ export const fetchOrganismesWithUai = async (uai) => {
     return null;
   }
 };
-
-export const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
-  "adresse",
-  "enseigne",
-  "etat_administratif",
-  "forme_juridique",
-  "nature",
-  "numero_declaration_activite",
-  "qualiopi",
-  "raison_sociale",
-  "siret",
-  "siege_social",
-  "uai",
-];

@@ -10,9 +10,9 @@ import {
   arrayOfOrNull,
 } from "./json-schema/jsonSchemaTypes.js";
 
-export const collectionName = "formations";
+const collectionName = "formations";
 
-export const indexes = () => {
+const indexes = () => {
   return [
     [
       { libelle: "text", tokenized_libelle: "text" },
@@ -25,7 +25,7 @@ export const indexes = () => {
 };
 
 // TODO utiliser formationEffectifSchema ?
-export const schema = object(
+const schema = object(
   {
     _id: objectId(),
     cfd: string({ description: "Code cfd de l'établissement" }),

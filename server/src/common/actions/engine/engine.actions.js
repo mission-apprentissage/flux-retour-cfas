@@ -10,7 +10,6 @@ import {
   findEffectifById,
   findEffectifByQuery,
   insertEffectif,
-  updateEffectif,
   updateEffectifAndLock,
   validateEffectifObject,
 } from "../effectifs.actions.js";
@@ -217,7 +216,7 @@ export const hydrateEffectif = async (effectifData, options) => {
  * TODO Contrôle base ACCESS à ajouter ici
  * @param {*} organisme
  */
-export const hydrateOrganisme = async (organisme) => {
+const hydrateOrganisme = async (organisme) => {
   let organismeToCreate = null;
   let organismeFoundId = null;
   let organismeFoundError = null;
@@ -288,7 +287,7 @@ export const hydrateOrganisme = async (organisme) => {
  *
  * @param {*} dossiersApprenants
  */
-export const runEngine = async ({ effectifData, lockEffectif = true }, organismeData) => {
+export const runEngine = async ({ effectifData }, organismeData) => {
   let organismeCreatedId = null;
   let organismeFoundId = null;
 
@@ -338,19 +337,6 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
       checkIfExist: true,
     });
 
-    if (!found) {
-      effectifCreatedId = await insertEffectif(effectif);
-
-      // Lock des champs API si option active
-      if (lockEffectif) {
-        const effectifCreated = await findEffectifById(effectifCreatedId);
-        await updateEffectifAndLock(effectifCreatedId, {
-          apprenant: effectifCreated.apprenant,
-          formation: effectifCreated.formation,
-        });
-      }
-    }
-
     // Gestion des maj d'effectif
     if (found) {
       effectifUpdatedId = found._id;
@@ -362,11 +348,14 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
         effectifData.apprenant?.historique_statut[0]?.date_statut
       );
 
-      if (lockEffectif) {
-        await updateEffectifAndLock(effectifUpdatedId, effectif);
-      } else {
-        await updateEffectif(effectifUpdatedId, effectif);
-      }
+      await updateEffectifAndLock(effectifUpdatedId, effectif);
+    } else {
+      effectifCreatedId = await insertEffectif(effectif);
+      const effectifCreated = await findEffectifById(effectifCreatedId);
+      await updateEffectifAndLock(effectifCreatedId, {
+        apprenant: effectifCreated.apprenant,
+        formation: effectifCreated.formation,
+      });
     }
   }
 

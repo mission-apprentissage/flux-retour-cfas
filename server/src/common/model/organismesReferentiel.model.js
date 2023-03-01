@@ -1,8 +1,8 @@
 import { object, objectId, string, boolean, number, array } from "./json-schema/jsonSchemaTypes.js";
 
-export const collectionName = "organismesReferentiel";
+const collectionName = "organismesReferentiel";
 
-export const indexes = () => {
+const indexes = () => {
   return [
     [{ siret: 1 }, { unique: true }],
     [{ uai: 1 }],
@@ -24,7 +24,7 @@ export const indexes = () => {
   ];
 };
 
-export const schema = object(
+const schema = object(
   {
     _id: objectId(),
     siret: string(),

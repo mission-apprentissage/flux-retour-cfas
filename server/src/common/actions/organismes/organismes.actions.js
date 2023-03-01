@@ -5,7 +5,6 @@ import { organismesDb, effectifsDb, permissionsDb } from "../../model/collection
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
-import { generateKey } from "../../utils/cryptoUtils.js";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
 import { siretSchema } from "../../utils/validationUtils.js";
 import { createPermission, removePermissions } from "../permissions.actions.js";
@@ -17,6 +16,24 @@ import { escapeRegExp } from "../../utils/regexUtils.js";
 import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
+
+/**
+ * Méthode de récupération de l'adresse pour un organisme via ses props
+ * Par défaut l'adresse est construite depuis l'UAI
+ * Si l'organisme a un siret valide alors on récupère l'adresse depuis l'API Entreprise
+ * @param {*} cfaProps
+ */
+const buildAdresseForOrganisme = async ({ uai, siret }) => {
+  let adresseForOrganisme = buildAdresseFromUai(uai);
+
+  // Si siret est valide on récupère l'adresse via l'API Entreprise
+  const validSiret = siretSchema().validate(siret);
+  if (!validSiret.error) {
+    adresseForOrganisme = await buildAdresseFromApiEntreprise(siret);
+  }
+
+  return adresseForOrganisme;
+};
 
 /**
  * Méthode de création d'un organisme
@@ -86,7 +103,7 @@ const getMetiersFromLba = async (siret) => {
  * @param {*} siret
  * @returns Object
  */
-export const getOrganismeInfosFromSiret = async (siret) => {
+const getOrganismeInfosFromSiret = async (siret) => {
   let organismeInfos = {};
 
   if (siret) {
@@ -199,16 +216,6 @@ export const findOrganismeByUaiAndSiret = async (uai, siret, projection = {}) =>
 export const findOrganismeById = async (id, projection = {}) => {
   const found = await organismesDb().findOne({ _id: new ObjectId(id) }, { projection });
   return found;
-};
-
-/**
- * Méthode de récupération d'un organisme versatile par query
- * @param {*} query
- * @param {*} projection
- * @returns
- */
-export const findOrganismeByQuery = async (query, projection = {}) => {
-  return await organismesDb().findOne(query, { projection });
 };
 
 /**
@@ -376,36 +383,6 @@ export const getContributeurs = async (organismeId) => {
 };
 
 /**
- * TODO add to unit tests
- * Méthode de maj de l'api key d'un organisme
- * @param {*} id
- * @returns
- */
-export const updateOrganismeApiKey = async (id) => {
-  const _id = typeof id === "string" ? new ObjectId(id) : id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${_id.toString()}`);
-  }
-
-  const key = generateKey();
-  // const secretHash = generateSecretHash(key); // TODO [metier/tech] Should be like this but users are not ready yet
-
-  await organismesDb().findOneAndUpdate(
-    { _id: organisme._id },
-    {
-      $set: {
-        api_key: key,
-      },
-    }
-  );
-
-  return key;
-};
-
-/**
  * Méthode de maj des dates de transmission d'un organisme
  * @param {*} id
  * @returns
@@ -436,24 +413,6 @@ export const setOrganismeTransmissionDates = async (id) => {
       { $set: { last_transmission_date: new Date(), updated_at: new Date() } }
     );
   }
-};
-
-/**
- * Méthode de récupération de l'adresse pour un organisme via ses props
- * Par défaut l'adresse est construite depuis l'UAI
- * Si l'organisme a un siret valide alors on récupère l'adresse depuis l'API Entreprise
- * @param {*} cfaProps
- */
-export const buildAdresseForOrganisme = async ({ uai, siret }) => {
-  let adresseForOrganisme = buildAdresseFromUai(uai);
-
-  // Si siret est valide on récupère l'adresse via l'API Entreprise
-  const validSiret = siretSchema().validate(siret);
-  if (!validSiret.error) {
-    adresseForOrganisme = await buildAdresseFromApiEntreprise(siret);
-  }
-
-  return adresseForOrganisme;
 };
 
 /**

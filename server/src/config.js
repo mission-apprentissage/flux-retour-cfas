@@ -1,6 +1,6 @@
 import env from "env-var";
 
-export const config = {
+const config = {
   email: env.get("FLUX_RETOUR_CFAS_EMAIL").default("tableau-de-bord@apprentissage.beta.gouv.fr").asString(),
   appName: env.get("FLUX_RETOUR_CFAS_NAME").default("Flux Retour Cfas").asString(),
   env: env.get("FLUX_RETOUR_CFAS_ENV").required().asString(),

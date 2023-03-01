@@ -34,10 +34,3 @@ export const postDossiersApprenants = async ({ httpClient, token, data: dossierA
   );
   return { status, data };
 };
-
-export default {
-  getHttpClient,
-  getJwtForUser,
-  postDossiersApprenantsTest,
-  postDossiersApprenants,
-};

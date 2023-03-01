@@ -5,7 +5,6 @@ import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
 } from "../model/dossiersApprenantsMigration.model.js";
-import { escapeRegExp } from "../utils/regexUtils.js";
 import { findOrganismeById } from "./organismes/organismes.actions.js";
 
 /**
@@ -34,15 +33,6 @@ export const structureDossierApprenant = async ({
   siret_etablissement,
   ...data
 }) => {
-  // TODO Gestion de l'historique des statuts cf. createDossierApprenantLegacy
-  // [
-  //   {
-  //     valeur_statut: itemToCreate.statut_apprenant,
-  //     date_statut: new Date(itemToCreate.date_metier_mise_a_jour_statut),
-  //     date_reception: new Date(),
-  //   },
-  // ],
-
   // Si on nous fourni un organisme_id existant on récupère le siret pour la structure
   if (organisme_id) {
     const organismeExistant = await findOrganismeById(organisme_id);
@@ -89,39 +79,6 @@ export const structureDossierApprenant = async ({
 export const findDossierApprenantByQuery = async (query, projection = {}) => {
   return await dossiersApprenantsMigrationDb().findOne(query, { projection });
 };
-
-/**
- * Méthode de récupération de dossierApprennants versatile par query
- * @param {*} query
- * @param {*} projection
- * @returns
- */
-export const findDossierApprenantsByQuery = async (query, projection = {}) => {
-  return await dossiersApprenantsMigrationDb().find(query, { projection }).toArray();
-};
-
-/**
- * Méthode de récupération d'un dossierApprennant par apprenant info et autres
- * @param {*} apprenantFieldsAndQuery
- * @returns
- */
-export function findDossierApprenantByApprenant({
-  nom_apprenant,
-  prenom_apprenant,
-  date_de_naissance_apprenant,
-  ...query
-}) {
-  const nomApprenantRegexp = new RegExp(`^${escapeRegExp(nom_apprenant.trim())}$`, "i");
-  const prenomApprenantRegexp = new RegExp(`^${escapeRegExp(prenom_apprenant.trim())}$`, "i");
-
-  return dossiersApprenantsMigrationDb().findOne({
-    nom_apprenant: { $regex: nomApprenantRegexp },
-    prenom_apprenant: { $regex: prenomApprenantRegexp },
-    date_de_naissance_apprenant:
-      date_de_naissance_apprenant instanceof Date ? date_de_naissance_apprenant : new Date(date_de_naissance_apprenant),
-    ...query,
-  });
-}
 
 /**
  * Méthode de mise à jour d'un dossierApprennant depuis son id
@@ -257,40 +214,4 @@ export const buildNewHistoriqueStatutApprenant = (
 export const getNbDistinctOrganismes = async (filters = {}) => {
   const distinctOrganismes = await dossiersApprenantsMigrationDb().distinct("organisme_id", filters);
   return distinctOrganismes ? distinctOrganismes.length : 0;
-};
-
-/**
- * TODO add to unit tests
- * Returns the first date of dossierApprenant transmission for a UAI
- * @param {*} uai
- * @returns
- */
-export const getCfaFirstTransmissionDateFromUai = async (uai) => {
-  const historiqueDatesDossierApprenantWithUai = await dossiersApprenantsMigrationDb()
-    .find({ uai_etablissement: uai })
-    .sort("created_at")
-    .limit(1)
-    .toArray();
-
-  return historiqueDatesDossierApprenantWithUai.length > 0
-    ? historiqueDatesDossierApprenantWithUai[0].created_at
-    : null;
-};
-
-/**
- * TODO add to unit tests
- * Returns the first date of dossierApprenant transmission for a SIRET
- * @param {string} siret
- * @returns {Promise<Date|null>}
- */
-export const getCfaFirstTransmissionDateFromSiret = async (siret) => {
-  const historiqueDatesDossiersApprenantsWithSiret = await dossiersApprenantsMigrationDb()
-    .find({ siret_etablissement: siret })
-    .sort("created_at")
-    .limit(1)
-    .toArray();
-
-  return historiqueDatesDossiersApprenantsWithSiret.length > 0
-    ? historiqueDatesDossiersApprenantsWithSiret[0].created_at
-    : null;
 };

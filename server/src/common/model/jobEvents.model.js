@@ -1,8 +1,8 @@
 import { object, string, date, objectId } from "./json-schema/jsonSchemaTypes.js";
 
-export const collectionName = "jobEvents";
+const collectionName = "jobEvents";
 
-export const schema = object(
+const schema = object(
   {
     _id: objectId(),
     jobname: string({ description: "Le nom du job" }),

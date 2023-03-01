@@ -2,15 +2,7 @@ import { parse as parseUrl } from "url"; // eslint-disable-line node/no-deprecat
 import https from "https";
 import { oleoduc, compose, transformIntoJSON } from "oleoduc";
 import logger from "../logger.js";
-import config from "../../config.js";
 import { COOKIE_NAME } from "../constants/cookieName.js";
-
-const IS_OFFLINE = Boolean(config.isOffline);
-
-export const sendJsonStream = (stream, res) => {
-  res.setHeader("Content-Type", "application/json");
-  oleoduc(stream, res);
-};
 
 export const sendTransformedPaginatedJsonStream = (stream, arrayPropertyName, pagination, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -62,9 +54,9 @@ export function createUploadStream(url, httpOptions = {}) {
 export function responseWithCookie({ res, token }) {
   return res.cookie(COOKIE_NAME, token, {
     maxAge: 30 * 24 * 3600000,
-    httpOnly: !IS_OFFLINE,
+    httpOnly: true,
     sameSite: "lax",
-    secure: !IS_OFFLINE,
+    secure: true,
   });
 }
 

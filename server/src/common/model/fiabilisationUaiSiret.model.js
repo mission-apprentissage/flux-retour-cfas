@@ -1,7 +1,7 @@
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../constants/fiabilisationConstants.js";
 import { object, date, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes.js";
 
-export const collectionName = "fiabilisationUaiSiret";
+const collectionName = "fiabilisationUaiSiret";
 
 const schema = object({
   _id: objectId(),

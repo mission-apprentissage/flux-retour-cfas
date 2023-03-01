@@ -13,7 +13,7 @@ const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
  * @param {*} user
  * @returns
  */
-export const isUserLegacyPasswordUpdatedTokenValid = (user) => {
+const isUserLegacyPasswordUpdatedTokenValid = (user) => {
   return Boolean(user.password_update_token_expiry) && isBefore(new Date(), user.password_update_token_expiry);
 };
 
