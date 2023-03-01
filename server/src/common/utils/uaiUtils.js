@@ -5,6 +5,18 @@ import { DEPARTEMENTS } from "../constants/territoiresConstants.js";
 const SPECIFIC_UAI_CODES_CORSE1 = { code: "2A", uaiCode: "620" };
 const SPECIFIC_UAI_CODES_CORSE2 = { code: "2B", uaiCode: "720" };
 
+const getLocalisationInfoFromUai = (uai) => {
+  const infoCodeFromUai = getDepartementCodeFromUai(uai);
+
+  // TODO [tech] : gérer proprement les cas de la corse
+  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE1.uaiCode)
+    return find(DEPARTEMENTS, (departement) => departement.code === SPECIFIC_UAI_CODES_CORSE1.code);
+  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE2.uaiCode)
+    return find(DEPARTEMENTS, (departement) => departement.code === SPECIFIC_UAI_CODES_CORSE2.code);
+
+  return find(DEPARTEMENTS, (departement) => departement.code === infoCodeFromUai);
+};
+
 export const buildAdresseFromUai = (uai) => {
   const localisationInfo = getLocalisationInfoFromUai(uai);
   if (!localisationInfo) return {};
@@ -15,18 +27,6 @@ export const buildAdresseFromUai = (uai) => {
       academie: localisationInfo.academie.code.toString(),
     },
   };
-};
-
-export const getLocalisationInfoFromUai = (uai) => {
-  const infoCodeFromUai = getDepartementCodeFromUai(uai);
-
-  // TODO [tech] : gérer proprement les cas de la corse
-  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE1.uaiCode)
-    return find(DEPARTEMENTS, (departement) => departement.code === SPECIFIC_UAI_CODES_CORSE1.code);
-  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE2.uaiCode)
-    return find(DEPARTEMENTS, (departement) => departement.code === SPECIFIC_UAI_CODES_CORSE2.code);
-
-  return find(DEPARTEMENTS, (departement) => departement.code === infoCodeFromUai);
 };
 
 export const getDepartementCodeFromUai = (uai) => {

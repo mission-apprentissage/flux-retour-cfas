@@ -7,7 +7,7 @@ import Joi from "joi";
 */
 const FRENCH_TELEPHONE_NUMBER_REGEX = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
 
-export const schema = Joi.string().pattern(FRENCH_TELEPHONE_NUMBER_REGEX);
+const schema = Joi.string().pattern(FRENCH_TELEPHONE_NUMBER_REGEX);
 
 export const validateFrenchTelephoneNumber = (value) => {
   return schema.validate(value);

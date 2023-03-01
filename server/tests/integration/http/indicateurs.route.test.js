@@ -1,29 +1,14 @@
 import { strict as assert } from "assert";
+import { ObjectId } from "mongodb";
+
 import { startServer } from "../../utils/testUtils.js";
-// import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
-// import { apiRoles } from "../../../src/common/roles.js";
-
-// import {
-//   historySequenceInscritToApprentiToAbandon,
-//   historySequenceApprenti,
-//   historySequenceInscritToApprenti,
-// } from "../../data/historySequenceSamples.js";
-
-// import { dossiersApprenantsMigrationDb } from "../../../src/common/model/collections.js";
-// import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
 import { seedRoles } from "../../../src/jobs/seed/start/index.js";
 import { createUser } from "../../../src/common/actions/users.actions.js";
 import { userAfterCreate } from "../../../src/common/actions/users.afterCreate.actions.js";
 import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
 import { createSampleEffectif } from "../../data/randomizedSample.js";
 import { effectifsDb } from "../../../src/common/model/collections.js";
-import { ObjectId } from "mongodb";
 import { historySequenceInscritToApprenti } from "../../data/historySequenceSamples.js";
-
-// const createRandomDossierApprenantWithHistorique = async (props) => {
-//   const { _id } = await dossiersApprenants().createDossierApprenant(createRandomDossierApprenant());
-//   await dossiersApprenantsMigrationDb().updateOne({ _id }, { $set: props });
-// };
 
 /**
  * Helper function to return an authenticated client to the API

@@ -7,35 +7,6 @@ import config from "../../config.js";
 export const API_ENDPOINT = config.mnaCatalogApi.endpoint;
 
 /**
- * getFormations
- * @param {Object} options
- * @returns {Promise<import("./@types/CatalogueFormation").default[]|null>}
- */
-export const getFormations = async (options) => {
-  const url = `${API_ENDPOINT}/entity/formations`;
-  try {
-    // @ts-ignore
-    let { page, allFormations, limit, query, select } = { page: 1, allFormations: [], limit: 1050, ...options };
-
-    let params = { page, limit, query, select };
-    logger.debug(`Requesting ${url}`, params);
-    const response = await axios.get(url, { params });
-
-    const { formations, pagination } = response.data;
-    allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
-
-    if (page < pagination.nombre_de_page) {
-      return getFormations({ page: page + 1, allFormations, limit });
-    } else {
-      return allFormations;
-    }
-  } catch (/** @type {any}*/ err) {
-    logger.error(`getFormations: something went wrong while requesting ${url}`, err.response?.data, err.message);
-    return null;
-  }
-};
-
-/**
  * TODO : Optim fetching & pagination récupération
  * Méthode de récupération depuis l'API Catalogue des formations lié à un UAI d'organisme
  * @param {string} uai

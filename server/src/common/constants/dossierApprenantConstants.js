@@ -10,7 +10,7 @@ export const CODES_STATUT_APPRENANT = {
 /**
  * Nom des statuts
  */
-export const LABELS_STATUT_APPRENANT = [
+const LABELS_STATUT_APPRENANT = [
   { code: CODES_STATUT_APPRENANT.abandon, name: "abandon" },
   { code: CODES_STATUT_APPRENANT.inscrit, name: "inscrit" },
   { code: CODES_STATUT_APPRENANT.apprenti, name: "apprenti" },

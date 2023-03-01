@@ -45,18 +45,6 @@ async function requestObjectAccess(path, options = {}) {
   };
 }
 
-export const listStorage = async () => {
-  let { url, token } = await requestObjectAccess("/");
-  let response = await axios.get(url, {
-    headers: {
-      "X-Auth-Token": token,
-      Accept: "application/json",
-    },
-  });
-
-  return response.data;
-};
-
 export const getFromStorage = async (path, options = {}) => {
   let { url, token } = await requestObjectAccess(path, options);
   return createRequestStream(url, {

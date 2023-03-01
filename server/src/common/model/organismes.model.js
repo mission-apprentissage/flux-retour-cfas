@@ -6,9 +6,9 @@ import { schemaValidation } from "../utils/schemaUtils.js";
 import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
 import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConstants.js";
 
-export const collectionName = "organismes";
+const collectionName = "organismes";
 
-export const indexes = () => {
+const indexes = () => {
   return [
     [
       { uai: 1, siret: 1 },
@@ -26,7 +26,7 @@ export const indexes = () => {
 };
 
 // Si contributeurs = [] et !first_transmission_date Alors Organisme en stock "Non actif"
-export const schema = object(
+const schema = object(
   {
     _id: objectId(),
     uai: string({

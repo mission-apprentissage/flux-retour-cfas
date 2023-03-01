@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { usersMigrationDb } from "../model/collections.js";
 import { generateHtml } from "../utils/emailsUtils.js";
 
-export function addEmail(userEmail, token, templateName, payload) {
+function addEmail(userEmail, token, templateName, payload) {
   return usersMigrationDb().findOneAndUpdate(
     { email: userEmail },
     {
@@ -19,7 +19,7 @@ export function addEmail(userEmail, token, templateName, payload) {
   );
 }
 
-export function addEmailMessageId(token, messageId) {
+function addEmailMessageId(token, messageId) {
   return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
@@ -34,7 +34,7 @@ export function addEmailMessageId(token, messageId) {
   );
 }
 
-export function addEmailError(token, e) {
+function addEmailError(token, e) {
   return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
@@ -49,7 +49,7 @@ export function addEmailError(token, e) {
   );
 }
 
-export function addEmailSendDate(token, templateName) {
+function addEmailSendDate(token, templateName) {
   return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
@@ -96,18 +96,6 @@ export async function markEmailAsOpened(token) {
     {
       $set: {
         "emails.$.openDate": new Date(),
-      },
-    },
-    { returnDocument: "after" }
-  );
-}
-
-export async function cancelUnsubscription(email) {
-  return usersMigrationDb().findOneAndUpdate(
-    { email },
-    {
-      $set: {
-        unsubscribe: false,
       },
     },
     { returnDocument: "after" }

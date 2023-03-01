@@ -2,13 +2,13 @@ import { preDefinedModels } from "../../constants/models/upload.models.part.js";
 import { object, objectId, array, date, arrayOf, any, string, boolean } from "../json-schema/jsonSchemaTypes.js";
 import { documentSchema } from "./parts/document.part.js";
 
-export const collectionName = "uploads";
+const collectionName = "uploads";
 
-export function indexes() {
+function indexes() {
   return [[{ organisme_id: 1 }, { unique: true }]];
 }
 
-export const schema = object(
+const schema = object(
   {
     _id: objectId(),
     organisme_id: objectId({

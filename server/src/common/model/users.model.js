@@ -1,8 +1,8 @@
 import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } from "./json-schema/jsonSchemaTypes.js";
 
-export const collectionName = "users";
+const collectionName = "users";
 
-export const indexes = () => {
+const indexes = () => {
   return [
     [{ username: 1 }, { name: "username" }],
     [{ email: 1 }, { name: "email" }],

@@ -10,9 +10,9 @@ import {
   validateFormationEffectif,
 } from "./parts/formation.effectif.part.js";
 
-export const collectionName = "effectifs";
+const collectionName = "effectifs";
 
-export const indexes = () => {
+const indexes = () => {
   return [
     [
       {

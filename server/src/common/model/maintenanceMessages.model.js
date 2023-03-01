@@ -1,12 +1,12 @@
 import { object, objectId, string, date, boolean } from "./json-schema/jsonSchemaTypes.js";
 
-export const collectionName = "maintenanceMessages";
+const collectionName = "maintenanceMessages";
 
-export function indexes() {
+function indexes() {
   return [];
 }
 
-export const schema = object(
+const schema = object(
   {
     _id: objectId(),
     msg: string({ description: "Message de maintenance" }),

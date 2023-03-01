@@ -130,21 +130,6 @@ export function notify_access_rejected({ payload }, token, options = {}) {
   };
 }
 
-// TODO [metier]
-// export function notification(cfa, token, options = {}) {
-//   const prefix = options.resend ? "[Rappel] " : "";
-//   return {
-//     subject: `${prefix}Notification`,
-//     templateFile: getTemplateFile("notification"),
-//     data: {
-//       email: config.email,
-//       cfa,
-//       token,
-//       actionToken: createActionToken(cfa.username),
-//     },
-//   };
-// }
-
 export function reset_password({ payload }, token) {
   return {
     subject: "Réinitialisation du mot de passe",
