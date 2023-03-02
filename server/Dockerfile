@@ -1,14 +1,22 @@
 FROM node:16.15.0-stretch
 
-#Install and cache node_modules
-COPY package.json yarn.lock /tmp/
-RUN cd /tmp && \
-    yarn install --frozen-lockfile && \
-    mkdir -p /app && \
-    mv /tmp/node_modules /app/
+WORKDIR /shared
+COPY shared/package.json shared/yarn.lock ./
+RUN yarn install --frozen-lockfile
 
-COPY ./ /app
+#Install and cache node_modules
+WORKDIR /tmp
+COPY package.json yarn.lock .
+RUN yarn install --frozen-lockfile && \
+    mkdir -p /app && \
+    mv node_modules /app/
+
+WORKDIR /shared
+COPY shared .
+RUN yarn build
+
 WORKDIR /app
+COPY server .
 
 VOLUME /data
 EXPOSE 5000

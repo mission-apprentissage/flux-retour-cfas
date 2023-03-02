@@ -48,7 +48,8 @@ services:
     image: flux_retour_cfas_server
     container_name: flux_retour_cfas_server
     build:
-      context: server
+      context: .
+      dockerfile: server/Dockerfile
     mem_limit: 1g
     restart: unless-stopped
     networks:
