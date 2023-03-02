@@ -1,6 +1,6 @@
 import { _post, _put } from "../../../../../common/httpClient";
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const saveCerfa = async ({ organisme_id, effectifId, data, inputNames }) => {
   try {
     return await _put(`/api/v1/effectif/${effectifId}`, {

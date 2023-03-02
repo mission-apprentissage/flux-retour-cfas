@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { Box, HStack } from "@chakra-ui/react";
 import { InputController } from "../../../formEngine/components/Input/InputController";
 
-// eslint-disable-next-line react/display-name, no-unused-vars
+// eslint-disable-next-line react/display-name, @typescript-eslint/no-unused-vars
 export const EffectifFormation = memo(() => {
   return (
     <Box my={9}>

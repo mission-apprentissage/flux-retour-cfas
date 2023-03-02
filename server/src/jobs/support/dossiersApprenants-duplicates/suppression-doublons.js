@@ -40,7 +40,7 @@ runScript(async () => {
       return a.updated_at - b.updated_at;
     });
     // on garde le statut avec date de réception ou de création le plus récent, on supprime les autres
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_toKeep, ...toDelete] = sortedByUpdatedAtDate.slice().reverse();
     logger.info("Va supprimer", toDelete.length, "doublons avec info d'unicité", duplicateGroup._id);
     await asyncForEach(toDelete, async (dossierToDelete) => {

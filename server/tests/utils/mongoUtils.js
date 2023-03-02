@@ -1,4 +1,3 @@
-// eslint-disable-next-line node/no-unpublished-require
 import { MongoMemoryServer } from "mongodb-memory-server";
 
 import { connectToMongodb, closeMongodbConnection } from "../../src/common/mongodb.js";

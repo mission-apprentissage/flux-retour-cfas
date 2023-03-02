@@ -33,13 +33,13 @@ type TabCoRncpInfo = {
     last_update_at: string;
     __v: number;
     rncp_outdated: boolean;
-    cfd: {};
-    mefs: {};
+    cfd: any;
+    mefs: any;
   };
   messages: {
     code_rncp: string;
-    cfd: {};
-    mefs: {};
+    cfd: any;
+    mefs: any;
   };
 };
 

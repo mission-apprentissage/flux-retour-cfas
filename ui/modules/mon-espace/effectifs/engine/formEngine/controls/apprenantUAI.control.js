@@ -7,7 +7,7 @@ export const apprenantDernierOrganismeUaiControl = [
     process: async ({ values, organisme, signal }) => {
       const userUai = values.apprenant.dernier_organisme_uai;
       if (uaiRegex.test(userUai)) {
-        // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { uai, error } = await apiService.fetchUAI({
           uai: userUai,
           organisme_id: organisme._id,

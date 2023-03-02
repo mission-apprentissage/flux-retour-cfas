@@ -1,4 +1,4 @@
-import "dotenv/config.js";
+import "dotenv/config";
 import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";

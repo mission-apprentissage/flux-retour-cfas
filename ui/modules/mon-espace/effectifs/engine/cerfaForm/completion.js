@@ -36,7 +36,7 @@ export const getFormStatus = ({ fields, values }) => {
   };
 };
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getContratCompletion = (fields, values, formErrors) => {
   const requiredFieldNames = getRequiredFieldNames(Object.keys(contratSchema), fields);
   const invalidFields = getInvalidFields(requiredFieldNames, fields);

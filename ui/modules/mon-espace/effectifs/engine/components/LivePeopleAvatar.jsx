@@ -35,7 +35,7 @@ const useWebSocketSubscription = () => {
 
     socket.on("dossier:live_users", async (payload) => {
       // console.log("event received", payload); // Received once
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       queryClient.setQueryData("dossier:live_users", (oldData) => payload);
     });
 

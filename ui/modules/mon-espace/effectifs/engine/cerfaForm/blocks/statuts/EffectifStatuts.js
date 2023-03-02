@@ -6,7 +6,7 @@ import { fieldSelector } from "../../../formEngine/atoms";
 import { InputController } from "../../../formEngine/components/Input/InputController";
 import { useCerfaController } from "../../../formEngine/CerfaControllerContext";
 
-// eslint-disable-next-line react/display-name, no-unused-vars
+// eslint-disable-next-line react/display-name, @typescript-eslint/no-unused-vars
 const EffectifStatuts = memo(({ values, modeSifa = false }) => {
   const nouveaStatutField = useRecoilValue(fieldSelector("apprenant.nouveau_statut"));
   const cerfaController = useCerfaController();
