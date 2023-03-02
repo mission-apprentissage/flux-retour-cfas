@@ -33,7 +33,8 @@ const nextConfig = {
   swcMinify: true,
   output: "standalone",
   experimental: {
-    appDir: false,
+    appDir: true,
+    typedRoutes: true,
   },
   webpack: (config) => {
     config.plugins.push(new CaseSensitivePathsPlugin());
