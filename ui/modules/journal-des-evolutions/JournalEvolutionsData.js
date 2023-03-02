@@ -8,7 +8,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Affichage de la nature d’un établissement",
     explication:
-      "Les utilisateurs connectés en tant que pilotes du Tableau de bord (DREETS, Administration centrale, DRAAF, Académie, Carif Oref, Conseil Régional), accèdent à l’information de la nature de l’établissement consulté : “formateur”, “responsable”, “responsable et formateur”, “inconnue”. Ces natures sont collectées via l’API référentiel de l’apprentissage.",
+      "Les utilisateurs connectés en tant que pilotes du tableau de bord (DREETS, Administration centrale, DRAAF, Académie, Carif Oref, Conseil Régional), accèdent à l’information de la nature de l’établissement consulté : “formateur”, “responsable”, “responsable et formateur”, “inconnue”. Ces natures sont collectées via l’API référentiel de l’apprentissage.",
     correctif: "Oui",
     date: "2022/09/01",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -16,7 +16,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Affichage des chiffres publics",
     explication:
-      "Les données clefs globales de l’apprentissage sont mise à jour tous les 1er du mois sur la page publique du Tableau de bord",
+      "Les données clefs globales de l’apprentissage sont mise à jour tous les 1er du mois sur la page publique du tableau de bord",
     correctif: "Oui",
     date: "2022/09/01",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -30,7 +30,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   },
   {
     title: "Mise en ligne des Mentions Légales",
-    explication: "Mentions Légales mise à jour et disponibles sur le Site du Tableau de bord de l’apprentissage",
+    explication: "Mentions Légales mise à jour et disponibles sur le site du tableau de bord de l’apprentissage",
     correctif: "Non",
     date: "2022/09/02",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -61,7 +61,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Ajout des codes INSEE de la Corse",
     explication:
-      "Afin de corriger les bug d’affichage et de localisation des organismes Corses : résolution de bug en lien avec l’API INSEE. A présent les organismes corses transmettant au Tableau de bord sont visibles sur la itoriale.",
+      "Afin de corriger les bug d’affichage et de localisation des organismes Corses : résolution de bug en lien avec l’API INSEE. A présent les organismes corses transmettant au tableau de bord sont visibles sur la itoriale.",
     correctif: "Oui",
     date: "2022/07/04",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
@@ -76,7 +76,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   },
   {
     title:
-      "Ateliers de recherche utilisateurs pour la solution de déclaration au Tableau de bord des organismes n’utilisant pas d’ERP",
+      "Ateliers de recherche utilisateurs pour la solution de déclaration au tableau de bord des organismes n’utilisant pas d’ERP",
     explication:
       "Recherche préalable afin de développer une solution pour les organismes de formation n’utilisant pas un ERP sur le marché. Pour être informé de la suite de ces travaux, vous pouvez vous inscrire ici : https://cfas.apprentissage.beta.gouv.fr/organisme-formation/transmettre",
     correctif: "Non",
@@ -92,7 +92,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   },
   {
     title: "Déploiement en Corse",
-    explication: "Présentation du Tableau de Bord au CREFOP et aux organismes du territoire.",
+    explication: "Présentation du tableau de bord au CREFOP et aux organismes du territoire.",
     correctif: "Non",
     date: "2022/05/18",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
@@ -121,7 +121,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
   },
   {
-    title: "Déploiement du Tableau de bord en Martinique",
+    title: "Déploiement du tableau de bord en Martinique",
     explication: "Présentation au CREFOP puis au organismes de formation",
     correctif: "Non",
     date: "2022/07/11",
@@ -130,7 +130,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Avancée des travaux de collecte de données via Auriga",
     explication:
-      "Les organismes de formation de l’apprentissage demandent le branchement d’Auriga avec le Tableau de bord.",
+      "Les organismes de formation de l’apprentissage demandent le branchement d’Auriga avec le tableau de bord.",
     correctif: "Non",
     date: "2022/06/27",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
@@ -138,7 +138,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Avancée des travaux de collecte de données via FCA Manager",
     explication:
-      "Les organismes de formation de l’enseignement supérieur demandent région par région le branchement de FCA Manager avec le Tableau de bord.",
+      "Les organismes de formation de l’enseignement supérieur demandent région par région le branchement de FCA Manager avec le tableau de bord.",
     correctif: "Non",
     date: "2022/07/11",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
@@ -154,7 +154,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Création automatisée des réseaux",
     explication:
-      "Dans le but de faciliter les usages des utilisateurs réseaux : création d’une fonctionnalité interne, afin de créer des accès et vue réseaux, création et modification des réseaux possibles par les membres de l’équipe du Tableau de bord sans nécessité de nouveaux développement. ",
+      "Dans le but de faciliter les usages des utilisateurs réseaux : création d’une fonctionnalité interne, afin de créer des accès et vue réseaux, création et modification des réseaux possibles par les membres de l’équipe du tableau de bord sans nécessité de nouveaux développement. ",
     correctif: "Non",
     date: "2022/04/25",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -162,7 +162,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Aide à l’identification des décrocheurs en Pays de la Loire",
     explication:
-      "Une expérimentation avec le Conseil Régional Pays de la Loire est lancée afin de permettre l’identification des décrocheurs et de les accompagner. Le Tableau de bord, dans le strict respect des règles RGPD, met à disposition des référents départementaux en charge de l’aide aux décrocheurs, les informations utiles.",
+      "Une expérimentation avec le Conseil Régional Pays de la Loire est lancée afin de permettre l’identification des décrocheurs et de les accompagner. Le tableau de bord, dans le strict respect des règles RGPD, met à disposition des référents départementaux en charge de l’aide aux décrocheurs, les informations utiles.",
     correctif: "Non",
     date: "2022/04/26",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -179,7 +179,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Mise en ligne d’une page d’aide",
     explication:
-      "L’équipe du Tableau de bord a listé  les questions récurrentes auxquelles vous trouverez plus facilement des réponses. ",
+      "L’équipe du tableau de bord a listé  les questions récurrentes auxquelles vous trouverez plus facilement des réponses. ",
     correctif: "Non",
     date: "2022/04/25",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -187,7 +187,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Newsletter à destination des utilisateurs pilotes",
     explication:
-      "Pour accompagner et informer sur le déploiement et des nouvelles fonctionnalités du Tableau de bord, mise en place d’une lettre d’information à destination des utilisateurs pilotes.",
+      "Pour accompagner et informer sur le déploiement et des nouvelles fonctionnalités du tableau de bord, mise en place d’une lettre d’information à destination des utilisateurs pilotes.",
     correctif: "Non",
     date: "2022/04/25",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -203,7 +203,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Révision du workflow de contact",
     explication:
-      "Modification du parcours pour contacter l’équipe du Tableau de bord, en améliorant la qualification des demandes avec des formulaires, pour obtenir une réponse plus rapidement. ",
+      "Modification du parcours pour contacter l’équipe du tableau de bord, en améliorant la qualification des demandes avec des formulaires, pour obtenir une réponse plus rapidement. ",
     correctif: "Non",
     date: "2022/04/25",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -211,7 +211,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Inscription pour être informé de la transmission sans ERP",
     explication:
-      "Afin de rendre la transmission des données au Tableau de bord accessible à tous les organismes de formation, l’équipe du Tableau de bord lance des ateliers de recherches des usages actuels. Mise en place d’un formulaire pour être informé lorsque la fonctionnalité sera mise en ligne et également pour participer aux ateliers préalables.",
+      "Afin de rendre la transmission des données au tableau de bord accessible à tous les organismes de formation, l’équipe du tableau de bord lance des ateliers de recherches des usages actuels. Mise en place d’un formulaire pour être informé lorsque la fonctionnalité sera mise en ligne et également pour participer aux ateliers préalables.",
     correctif: "Non",
     date: "2022/04/25",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -219,7 +219,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Déploiement en Guadeloupe et à Mayotte",
     explication:
-      "En coordination avec les référents apprentissages des DREETS ou DDETS, déploiement du Tableau de bord sur les territoires : Guadeloupe, Mayotte. Webinaire Guadeloupe le 06/04/2022, Webinaire Mayotte le 22/04/2022.",
+      "En coordination avec les référents apprentissages des DREETS ou DDETS, déploiement du tableau de bord sur les territoires : Guadeloupe, Mayotte. Webinaire Guadeloupe le 06/04/2022, Webinaire Mayotte le 22/04/2022.",
     correctif: "Non",
     date: "2022/04/18",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
@@ -227,7 +227,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Déploiement en Corse",
     explication:
-      "En coordination avec la référente apprentissage de la DREETS : accès aux pilote et déploiement du Tableau de bord.",
+      "En coordination avec la référente apprentissage de la DREETS : accès aux pilote et déploiement du tableau de bord.",
     correctif: "Non",
     date: "2022/04/18",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
@@ -243,7 +243,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Déploiement auprès des directeurs de CFA de la FNADIR",
     explication:
-      "Présentation du Tableau de bord, de son usage et du paramétrage pour transmettre durant le webinaire organisé par la FNADIR à destination des membres de son réseau le 15 avril 2022.",
+      "Présentation du tableau de bord, de son usage et du paramétrage pour transmettre durant le webinaire organisé par la FNADIR à destination des membres de son réseau le 15 avril 2022.",
     correctif: "Non",
     date: "2022/04/15",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
@@ -251,7 +251,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Mise en ligne de la page statistiques",
     explication:
-      "En toute transparence l’équipe mesure l’impact du Tableau de bord et restitue ces indicateurs sur les pages publiques du site. Ces indicateurs sont en cours de construction et d’évolution.",
+      "En toute transparence l’équipe mesure l’impact du tableau de bord et restitue ces indicateurs sur les pages publiques du site. Ces indicateurs sont en cours de construction et d’évolution.",
     correctif: "Non",
     date: "2022/03/21",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
@@ -259,7 +259,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Déploiement en région PACA",
     explication:
-      "À l’initiative de la DREETS PACA, organisation d’un Webinaire à destination des centres de formation de la région, pour présenter le Tableau de bord de l’apprentissage.",
+      "À l’initiative de la DREETS PACA, organisation d’un Webinaire à destination des centres de formation de la région, pour présenter le tableau de bord de l’apprentissage.",
     correctif: "Non",
     date: "2022/03/10",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
@@ -283,7 +283,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Mise en place du support",
     explication:
-      "Tous les vendredi, vous pouvez contacter l’équipe du Tableau de bord, par chat ou réserver un créneau de visio afin d’échanger en direct.",
+      "Tous les vendredi, vous pouvez contacter l’équipe du tableau de bord, par chat ou réserver un créneau de visio afin d’échanger en direct.",
     correctif: "Non",
     date: "2022/02/18",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,

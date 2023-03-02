@@ -44,7 +44,7 @@ const IndicateursGridStack = ({
             label="organismes de formation"
             tooltipLabel={
               <div>
-                Nombre d’organismes de formation qui transmettent leurs données au Tableau de bord de l’apprentissage.
+                Nombre d’organismes de formation qui transmettent leurs données au tableau de bord de l’apprentissage.
                 Un organisme est identifié par un numéro UAI et un numéro SIRET.
               </div>
             }

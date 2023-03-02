@@ -52,11 +52,11 @@ export default function CommentFonctionneLeTdb() {
             <BaseAccordionGroup
               AccordionItemsDetailList={[
                 {
-                  title: "Fonctionnement général du Tableau de bord de l’apprentissage",
+                  title: "Fonctionnement général du tableau de bord de l’apprentissage",
                   content: (
                     <Box>
                       <Text>
-                        Le Tableau de bord permet de visualiser en temps réel la situation de l’apprentissage sur un
+                        Le tableau de bord permet de visualiser en temps réel la situation de l’apprentissage sur un
                         territoire grâce à l’agrégation quotidienne de données des CFA (centres de formation de
                         l’apprentissage, qui sont en charge de transmission des contrats à l’OPCO) et auprès des OF
                         (organisme de formation, qui assurent dans leurs locaux les formations en apprentissage).
@@ -70,7 +70,7 @@ export default function CommentFonctionneLeTdb() {
                     <Box>
                       <Text>
                         Pour simplifier les démarches de collecte de données, qui étaient auparavant effectuées par
-                        chacune des administrations (Académie, DREETS, DRAAF, Carif Oref, etc), le Tableau de bord
+                        chacune des administrations (Académie, DREETS, DRAAF, Carif Oref, etc), le tableau de bord
                         agrège les données depuis les ERP des établissements de formation. les données utiles
                         directement via l’ERP de l’établissement.
                         <br />
@@ -79,14 +79,14 @@ export default function CommentFonctionneLeTdb() {
                         d’apprenties et d’apprentis.
                         <br />
                         <br />
-                        L’équipe du Tableau de bord travaille à une solution pour que les établissements non équipés
+                        L’équipe du tableau de bord travaille à une solution pour que les établissements non équipés
                         d’un ERP interfaçable, puissent déposer les données utiles. Cette solution sera disponible
-                        gratuitement sur le site du Tableau de bord, au quatrième trimestre 2022.
+                        gratuitement sur le site du tableau de bord, au quatrième trimestre 2022.
                         <br />
                         <br />
                         Pour en savoir plus, consultez{" "}
                         <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
-                          Comment transmettre les données de mon organisme au Tableau de bord de l’apprentissage ?
+                          Comment transmettre les données de mon organisme au tableau de bord de l’apprentissage ?
                           <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -99,7 +99,7 @@ export default function CommentFonctionneLeTdb() {
                     <Box>
                       <Text>
                         Nous collectons les données permettant d’identifier une apprenante ou un apprenant, ces données
-                        personnelle ne sont pas restituées dans le Tableau de bord.
+                        personnelle ne sont pas restituées dans le tableau de bord.
                         <br />
                         <br />
                         Les données collectées sont liées à l’organisme, à la formation, et au statut de l’apprenant
@@ -114,7 +114,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         <br />
                         L’AIPD (Analyse d’Impact Relative à la Protection des Données) est disponible sur simple demande
-                        à l’équipe du Tableau de bord :{" "}
+                        à l’équipe du tableau de bord :{" "}
                         <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
                           {CONTACT_ADDRESS}
                         </Link>
@@ -127,7 +127,7 @@ export default function CommentFonctionneLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        L’équipe du Tableau de bord récolte des données permettant d’identifier, de fiabiliser et de
+                        L’équipe du tableau de bord récolte des données permettant d’identifier, de fiabiliser et de
                         contrôler les données concernant les apprenantes et apprenants, les formations, les contrats et
                         les organismes de formation.
                         <br />
@@ -152,7 +152,7 @@ export default function CommentFonctionneLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        L’équipe du Tableau de bord récolte des données permettant d’identifier, de fiabiliser et de
+                        L’équipe du tableau de bord récolte des données permettant d’identifier, de fiabiliser et de
                         contrôler les données concernant les apprenantes et apprenants, les formations, les contrats et
                         les organismes de formation.
                         <br />
@@ -173,16 +173,16 @@ export default function CommentFonctionneLeTdb() {
                   ),
                 },
                 {
-                  title: "Comment se construit le Tableau de bord ? Puis-je y participer ?",
+                  title: "Comment se construit le tableau de bord ? Puis-je y participer ?",
                   content: (
                     <Box>
                       <Text>
-                        Le Tableau de bord est un produit de la Mission Nationale pour le développement de
-                        l’Apprentissage, qui est incubée au sein de beta.gouv.
+                        Le tableau de bord est un produit de la Mission Nationale pour le développement de
+                        l’apprentissage, qui est incubée au sein de beta.gouv.
                         <br />
                         <br />
-                        L’équipe du Tableau de bord est organisée selon les principes de l’Agilité, elle fait évoluer le
-                        produit Tableau de bord en fonction des besoins des utilisateurs par cycles courts, elle délivre
+                        L’équipe du tableau de bord est organisée selon les principes de l’Agilité, elle fait évoluer le
+                        produit tableau de bord en fonction des besoins des utilisateurs par cycles courts, elle délivre
                         de la valeur ou de nouvelles fonctionnalités à chaque itération. Cela permet de rester aligné
                         avec les besoins réels de visibilité sur les chiffres clés de l’apprentissage, des usages des
                         organismes de formation et la capacité de développement.
@@ -209,17 +209,17 @@ export default function CommentFonctionneLeTdb() {
             <BaseAccordionGroup
               AccordionItemsDetailList={[
                 {
-                  title: "Comment transmettre les données de mon organisme au Tableau de bord de l’apprentissage ?",
+                  title: "Comment transmettre les données de mon organisme au tableau de bord de l’apprentissage ?",
                   content: (
                     <Box>
                       <UnorderedList marginLeft="3w">
                         <ListItem>
                           Si vous utilisez les ERP suivants : Gesti, Ymag, SC Form, Formasup, FCA Manager ou Auriga, un
-                          simple paramétrage suffit pour vous brancher au Tableau de Bord. La démarche n’est à faire
+                          simple paramétrage suffit pour vous brancher au tableau de bord. La démarche n’est à faire
                           qu’une seule fois et est estimée à 10 minutes. Pour ce faire, [sélectionner l’ERP que vous
                           utilisez] et téléchargez le pas à pas correspondant :{" "}
                           <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
-                            Comment transmettre les données de mon organisme au Tableau de bord de l’apprentissage ?
+                            Comment transmettre les données de mon organisme au tableau de bord de l’apprentissage ?
                             <Box as="i" className="ri-links-line" />
                           </Link>
                         </ListItem>
@@ -248,7 +248,7 @@ export default function CommentFonctionneLeTdb() {
                 },
                 {
                   title:
-                    "Comment paramétrer mon logiciel de gestion pour qu’il transmette automatiquement au Tableau de bord ? Combien de temps cela prend-t-il ?",
+                    "Comment paramétrer mon logiciel de gestion pour qu’il transmette automatiquement au tableau de bord ? Combien de temps cela prend-t-il ?",
                   content: (
                     <Box>
                       <Text>
@@ -258,7 +258,7 @@ export default function CommentFonctionneLeTdb() {
                         </Link>
                         <br />
                         <br />
-                        Si vous avez un ERP interfaçé avec le Tableau de bord, le paramétrage prend une dizaine de
+                        Si vous avez un ERP interfaçé avec le tableau de bord, le paramétrage prend une dizaine de
                         minutes, vous n’avez pas à renouveler l’opération, sauf si vous changez d’UAI, de SIRET ou
                         d’ERP. Pour en savoir plus, consultez{" "}
                       </Text>
@@ -270,7 +270,7 @@ export default function CommentFonctionneLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        Les données personnelles ne sont jamais exposées sur le Tableau de bord et seules les
+                        Les données personnelles ne sont jamais exposées sur le tableau de bord et seules les
                         institutions publiques ont accès aux données. Dans le cadre de la mission publique que vous
                         exercez en administrant la formation en apprentissage, vous avez une obligation légale de donner
                         de la visibilité aux administrations concernées.
@@ -347,11 +347,11 @@ export default function CommentFonctionneLeTdb() {
                   ),
                 },
                 {
-                  title: "Quelles institutions ont accès aux données du Tableau de bord ?",
+                  title: "Quelles institutions ont accès aux données du tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
-                        Des institutions qui pilotent l’Apprentissage nationalement ou territorialement comme la DREETS,
+                        Des institutions qui pilotent l’apprentissage nationalement ou territorialement comme la DREETS,
                         la DRAAF, le Conseil Régional, l’Académie et le Carif Oref par exemple.
                       </Text>
                     </Box>
@@ -370,18 +370,18 @@ export default function CommentFonctionneLeTdb() {
                   ),
                 },
                 {
-                  title: "Est-ce que les données de votre organisme s’affichent sur le Tableau de bord ?",
+                  title: "Est-ce que les données de votre organisme s’affichent sur le tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
                         Les données de votre organisme s’affichent si vous avez autorisé votre ERP (ou logiciel de
-                        gestion) à transmettre vos données au Tableau de bord de l’apprentissage ou si vous avez
+                        gestion) à transmettre vos données au tableau de bord de l’apprentissage ou si vous avez
                         transmis via le service partage simplifié.
                         <br />
                         <br />
                         Pour en savoir plus consulter{" "}
                         <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
-                          Comment transmettre les données de mon organisme au Tableau de bord de l’apprentissage ?
+                          Comment transmettre les données de mon organisme au tableau de bord de l’apprentissage ?
                           <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
@@ -400,11 +400,11 @@ export default function CommentFonctionneLeTdb() {
                   ),
                 },
                 {
-                  title: "Comment puis-je participer à l’amélioration du Tableau de bord ?",
+                  title: "Comment puis-je participer à l’amélioration du tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
-                        Nous avons actuellement plusieurs travaux et recherches en cours afin d’améliorer le Tableau de
+                        Nous avons actuellement plusieurs travaux et recherches en cours afin d’améliorer le tableau de
                         bord et les fonctionnalités à disposition. Si vous souhaitez y participer ou nous faire un
                         retour, vous pouvez nous écrire à{" "}
                         <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
@@ -437,18 +437,18 @@ export default function CommentFonctionneLeTdb() {
                   ),
                 },
                 {
-                  title: "Comment consulter ses données sur le Tableau de bord ?",
+                  title: "Comment consulter ses données sur le tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
                         Vous pouvez consultez vos données via une URL privée dont le lien se trouve directement dans
-                        votre ERP. Pour les utilisateurs de Partage Simplifié (le service du Tableau de bord vous
+                        votre ERP. Pour les utilisateurs de Partage Simplifié (le service du tableau de bord vous
                         permettant de transmettre vos données sans utiliser un ERP) cette URL vous sera communiquée
                         après la première transmission d’un fichier.
                         <br />
                         <br />
                         Si toutefois vous n’aviez pas reçu ou n’aviez pas accès à cette URL, vous pouvez en faire la
-                        demande en contactant l’équipe du Tableau de bord par courriel :{" "}
+                        demande en contactant l’équipe du tableau de bord par courriel :{" "}
                         <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
                           {CONTACT_ADDRESS}
                         </Link>{" "}
@@ -466,7 +466,7 @@ export default function CommentFonctionneLeTdb() {
             <BaseAccordionGroup
               AccordionItemsDetailList={[
                 {
-                  title: "Quelles sont les données affichées dans le Tableau de bord ?",
+                  title: "Quelles sont les données affichées dans le tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
@@ -490,14 +490,14 @@ export default function CommentFonctionneLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        Toutes les données auxquelles vous avez accès sur le Tableau de bord sont téléchargeables en XLS
+                        Toutes les données auxquelles vous avez accès sur le tableau de bord sont téléchargeables en XLS
                         afin d’en faciliter le traitement.
                       </Text>
                     </Box>
                   ),
                 },
                 {
-                  title: "Qui sont les utilisateurs du Tableau de bord de l’apprentissage",
+                  title: "Qui sont les utilisateurs du tableau de bord de l’apprentissage",
                   content: (
                     <Box>
                       Nous avons à ce jour 4 types d’utilisateurs :
@@ -515,7 +515,7 @@ export default function CommentFonctionneLeTdb() {
                           acteurs locaux et nationaux de l’apprentissage;
                         </ListItem>
                         <ListItem>
-                          L’équipe du Tableau de bord, dont les membres sont des utilisateurs administrateurs afin de
+                          L’équipe du tableau de bord, dont les membres sont des utilisateurs administrateurs afin de
                           faire évoluer la plateforme et de vous accompagner dans son utilisation.
                         </ListItem>
                       </UnorderedList>
@@ -527,9 +527,9 @@ export default function CommentFonctionneLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        L’équipe du Tableau de bord travaille par courtes itérations pour fournir régulièrement aux
+                        L’équipe du tableau de bord travaille par courtes itérations pour fournir régulièrement aux
                         utilisateurs de nouvelles fonctionnalités. Cela permet également de définir les usages réels du
-                        produit. À ce jour, outre les chiffres clés de l’apprentissage, le Tableau de bord est en
+                        produit. À ce jour, outre les chiffres clés de l’apprentissage, le tableau de bord est en
                         capacité de fournir aux institutions publiques un certain nombre de données sur l’apprentissage.
                         Plusieurs régions ont entamé des expérimentations afin d’accompagner les jeunes en situation de
                         décrochage scolaire à partir des données fournie par le {PRODUCT_NAME} .
@@ -538,18 +538,18 @@ export default function CommentFonctionneLeTdb() {
                   ),
                 },
                 {
-                  title: "Comment puis-je participer à l’amélioration du Tableau de bord ?",
+                  title: "Comment puis-je participer à l’amélioration du tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
-                        Le Tableau de bord est dans un processus d’amélioration continue. Nous menons des travaux de
+                        Le tableau de bord est dans un processus d’amélioration continue. Nous menons des travaux de
                         fiabilisation des données et et travaillons en collaboration avec les pilotes de l’apprentissage
                         pour nous accompagner dans cette démarche : redressement de données, lien avec les organismes de
                         formation qui ne transmettent pas encore leurs données au tableau de bord, suggestion
                         d’amélioration, etc.
                         <br />
                         <br />
-                        En parallèle, l’équipe Tableau de bord développe actuellement une interface pour vous permettre
+                        En parallèle, l’équipe tableau de bord développe actuellement une interface pour vous permettre
                         de nous remonter facilement vos demandes d’évolutions, corrections. Grâce à votre expertise de
                         terrain, vous pourrez ainsi directement nous accompagner à la fiabilisation de la donnée.
                       </Text>

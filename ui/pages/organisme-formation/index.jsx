@@ -27,7 +27,7 @@ export default function OrganismeFormation() {
       </Section>
       <Section>
         <Text fontSize="gamma" marginTop="1w">
-          Le Tableau de bord de l’Apprentissage expose automatiquement les données <br />
+          Le tableau de bord de l’apprentissage expose automatiquement les données <br />
           provenant de votre logiciel de gestion une fois que vous en avez donné <br />
           l’autorisation.
         </Text>
@@ -60,8 +60,8 @@ export default function OrganismeFormation() {
         </Heading>
         <Text color="grey.800" marginTop="3w">
           <strong>
-            L&apos;équipe du Tableau de bord travaille conjointement avec les acteurs publics locaux des politiques de
-            l&apos;apprentissage pour faire connaître le Tableau de bord de l’apprentissage sur l&apos;ensemble du
+            L&apos;équipe du tableau de bord travaille conjointement avec les acteurs publics locaux des politiques de
+            l&apos;apprentissage pour faire connaître le tableau de bord de l’apprentissage sur l&apos;ensemble du
             territoire.
           </strong>
           <br />

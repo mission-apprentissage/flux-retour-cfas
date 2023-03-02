@@ -76,7 +76,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             Article 1 – Champ d’application
           </Heading>
           <Text>
-            Le Tableau de bord est d’accès libre et gratuit à tout Utilisateur. La simple visite du Tableau de bord
+            Le tableau de bord est d’accès libre et gratuit à tout Utilisateur. La simple visite du tableau de bord
             suppose l’acceptation par tout Utilisateur des présentes conditions générales d’utilisation.
           </Text>
         </Section>
@@ -85,7 +85,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             Article 2 – Objet
           </Heading>
           <Text>
-            Le Tableau de bord a pour objectif de mettre à disposition des différents acteurs les données clés de
+            Le tableau de bord a pour objectif de mettre à disposition des différents acteurs les données clés de
             l’apprentissage en temps réel.
           </Text>
         </Section>
@@ -97,14 +97,14 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             Les termes ci-dessous définis ont entre les parties la signification suivante :
             <br />
             <br />
-            <strong>« Utilisateur »</strong> : toute personne ayant accès aux services du Tableau de bord
+            <strong>« Utilisateur »</strong> : toute personne ayant accès aux services du tableau de bord
             <br />
             <br />
             <strong>« Authentification » </strong> : fonctionnalité qui permet aux utilisateurs titulaires d&apos;un
-            compte d&apos;accéder aux services proposés sur le Tableau de bord.
+            compte d&apos;accéder aux services proposés sur le tableau de bord.
             <br />
             <br />
-            <strong>« Services »</strong> : ensemble des prestations proposées sur le Tableau de bord. Elles sont les
+            <strong>« Services »</strong> : ensemble des prestations proposées sur le tableau de bord. Elles sont les
             suivantes : création d&apos;un compte utilisateur, consultation des données, export des données, saisie de
             données, accès à la documentation.
             <br />
@@ -120,7 +120,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             Article 4 – Fonctionnalités liées aux comptes des utilisateurs
           </Heading>
           <Text>
-            L&apos;accès à certaines données du Tableau de bord est restreint à une inscription à un compte :
+            L&apos;accès à certaines données du tableau de bord est restreint à une inscription à un compte :
             <Link color="primary" href="https://cfas.apprentissage.beta.gouv.fr/login">
               https://cfas.apprentissage.beta.gouv.fr/login
             </Link>
@@ -149,7 +149,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             <br />
             <br />
             En cas d&apos;oubli de son mot de passe ou de compromission, l’utilisateur utilise la fonctionnalité « oubli
-            de mot de passe » et suit les instructions fournies par le Tableau de bord.
+            de mot de passe » et suit les instructions fournies par le tableau de bord.
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.PresentationDesServices}>
@@ -157,32 +157,32 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             Article 5 – Présentation des services
           </Heading>
           <Text>
-            Le Tableau de bord permet aux utilisateurs :
+            Le tableau de bord permet aux utilisateurs :
             <br />
             <br />
             - de consulter des données de l’apprentissage à des fins de pilotage ;
             <br />
             - d’exporter des fichiers de données de l’apprentissage ;
             <br />
-            - de s’informer sur les données de l’apprentissage exposées sur le Tableau de bord ;
+            - de s’informer sur les données de l’apprentissage exposées sur le tableau de bord ;
             <br />
             - de consulter des listes nominatives d’apprentis en situation de rupture ou d’abandon à des fins
             d’accompagnement ;
             <br />
-            - de déposer des fichiers de données pour alimenter les chiffres du Tableau de bord ;
+            - de déposer des fichiers de données pour alimenter les chiffres du tableau de bord ;
             <br />
             - d’exposer certaines données sur leurs interfaces à l’aide d’une API dont la documentation est mise à
             disposition par la Mission interministérielle de l’apprentissage ;
             <br />
-            - d’exposer leurs données sur le Tableau de bord à l’aide d’une API dont la documentation est mise à
+            - d’exposer leurs données sur le tableau de bord à l’aide d’une API dont la documentation est mise à
             disposition par la Mission interministérielle de l’apprentissage.
             <br />
             <br />
-            Le Tableau de bord est, en principe, accessible en permanence.
+            Le tableau de bord est, en principe, accessible en permanence.
             <br />
             <br />
             La Mission interministérielle de l’apprentissage se réserve le droit, sans préavis, ni indemnité, de fermer
-            temporairement l&apos;accès à un ou plusieurs services du Tableau de bord pour effectuer une mise à jour,
+            temporairement l&apos;accès à un ou plusieurs services du tableau de bord pour effectuer une mise à jour,
             des modifications ou changements sur les méthodes opérationnelles, les serveurs et les heures
             d&apos;accessibilité. Cette liste n&apos;est pas limitative.
             <br />
@@ -196,14 +196,14 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             Article 6 - Sécurité
           </Heading>
           <Text>
-            Le Tableau de bord comporte un accès sécurisé qui permet de consulter certaines données. Tout accès
+            Le tableau de bord comporte un accès sécurisé qui permet de consulter certaines données. Tout accès
             frauduleux est interdit et sanctionné pénalement. Il en est de même pour toute entrave ou altération du
             fonctionnement de ce système, ou en cas d&apos;introduction, de suppression ou de modification des données
             qui y sont contenues.
             <br />
             <br />
             L&apos;utilisateur s&apos;engage à ne pas perturber le bon fonctionnement de ce système. Il veille notamment
-            à ne pas introduire de virus ou toute autre technologie nuisible au Tableau de bord.
+            à ne pas introduire de virus ou toute autre technologie nuisible au tableau de bord.
             <br />
             <br />
             La Mission interministérielle de l’apprentissage fait ses meilleurs efforts, conformément aux règles de
@@ -216,7 +216,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Heading>
           <Text>
             La Mission interministérielle de l’apprentissage se réserve la possibilité de mettre en place des hyperliens
-            sur le Tableau de bord donnant accès à des pages internet autres que celles de son interface.
+            sur le tableau de bord donnant accès à des pages internet autres que celles de son interface.
             <br />
             <br />
             Les utilisateurs sont formellement informés que les sites auxquels ils peuvent accéder par
@@ -225,7 +225,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             <br />
             <br />
             La Mission interministérielle de l’apprentissage ne saurait être responsable de l&apos;accès par les
-            utilisateurs par les liens hypertextes mis en place dans le cadre du Tableau de bord à d&apos;autres
+            utilisateurs par les liens hypertextes mis en place dans le cadre du tableau de bord à d&apos;autres
             ressources présentes sur le réseau.
             <br />
             <br />
@@ -247,8 +247,8 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             <br />
             <br />
             L&apos;utilisateur reste en toute circonstance responsable de l&apos;utilisation qu&apos;il fait des
-            services du Tableau de bord. La Mission interministérielle de l’apprentissage ne saurait être responsable de
-            l&apos;impossibilité d&apos;utiliser le Tableau de bord et les services.
+            services du tableau de bord. La Mission interministérielle de l’apprentissage ne saurait être responsable de
+            l&apos;impossibilité d&apos;utiliser le tableau de bord et les services.
             <br />
             <br />
             La Mission interministérielle de l’apprentissage ne saurait être responsable des atteintes à la sécurité
@@ -265,11 +265,11 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             <br />
             <br />
             La responsabilité de la Mission interministérielle de l’apprentissage ne peut être engagée en cas de
-            dommages directs ou indirects résultant de l&apos;utilisation du Tableau de bord.
+            dommages directs ou indirects résultant de l&apos;utilisation du tableau de bord.
             <br />
             <br />
             La responsabilité de la Mission interministérielle de l’apprentissage ne pourra être recherchée ni retenue
-            en cas d&apos;indisponibilité temporaire ou totale de tout ou partie de l&apos;accès au Tableau de bord,
+            en cas d&apos;indisponibilité temporaire ou totale de tout ou partie de l&apos;accès au tableau de bord,
             d&apos;une difficulté liée au temps de réponse et d&apos;une manière générale, d&apos;un défaut de
             performance quelconque.
           </Text>
@@ -279,7 +279,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
           <Text>
             <br />
-            L&apos;utilisateur s&apos;engage à utiliser le Tableau de bord et les services, ainsi que l&apos;ensemble
+            L&apos;utilisateur s&apos;engage à utiliser le tableau de bord et les services, ainsi que l&apos;ensemble
             des informations auxquelles il pourra avoir accès en conformité avec les stipulations des présentes
             conditions générales d&apos;utilisation.
             <br />
@@ -305,8 +305,8 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             <br />
             <br />
             L&apos;utilisateur s&apos;engage à ne pas perturber l&apos;usage que pourraient faire les autres
-            utilisateurs du Tableau de bord, de ne pas accéder aux comptes membres tiers et de ne pas accéder à des
-            parties du Tableau de bord dont l&apos;accès est réservé.
+            utilisateurs du tableau de bord, de ne pas accéder aux comptes membres tiers et de ne pas accéder à des
+            parties du tableau de bord dont l&apos;accès est réservé.
             <br />
             <br />
             L&apos;utilisateur s&apos;engage à utiliser le service ainsi que l&apos;ensemble des informations auxquelles
@@ -317,7 +317,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             de la Mission interministérielle de l’apprentissage ou des autres utilisateurs.
             <br />
             <br />
-            L&apos;utilisateur s&apos;engage à ne pas interférer ou interrompre le fonctionnement normal du Tableau de
+            L&apos;utilisateur s&apos;engage à ne pas interférer ou interrompre le fonctionnement normal du tableau de
             bord.
             <br />
             <br />
@@ -325,7 +325,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             données personnelles des autres utilisateurs.
             <br />
             <br />
-            Toute utilisation frauduleuse ou hors usage initial du Tableau de bord est interdite.
+            Toute utilisation frauduleuse ou hors usage initial du tableau de bord est interdite.
             <br />
             <br />
             L&apos;Utilisateur s&apos;engage à ne pas commercialiser les données reçues et à ne pas les communiquer à
@@ -334,7 +334,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             <br />
             L&apos;Utilisateur s&apos;engage à ne pas mettre en ligne des contenus ou informations contraires aux
             dispositions légales et réglementaires en vigueur susceptibles de mettre en péril le fonctionnement du
-            Tableau de bord.
+            tableau de bord.
             <br />
             <br />
             Toute tentative d&apos;accès non autorisé aux services, à d&apos;autres comptes, aux systèmes informatiques

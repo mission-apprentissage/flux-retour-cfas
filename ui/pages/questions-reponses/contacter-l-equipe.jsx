@@ -90,7 +90,7 @@ export default function ContacterLequipeDuTdb() {
                   ),
                 },
                 {
-                  title: "Je souhaite contacter l’équipe du Tableau de bord",
+                  title: "Je souhaite contacter l’équipe du tableau de bord",
                   content: (
                     <Box>
                       <Text>

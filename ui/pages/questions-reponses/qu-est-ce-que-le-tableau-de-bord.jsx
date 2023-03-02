@@ -56,7 +56,7 @@ export default function QuestCeQueLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        Le {PRODUCT_NAME} est un produit créé par la Mission Interministérielle pour l’Apprentissage.{" "}
+                        Le {PRODUCT_NAME} est un produit créé par la Mission Interministérielle pour l’apprentissage.{" "}
                         <br />
                         Il permet de visualiser en temps réel les effectifs d’apprentis dans les centres de formation et
                         les organismes de formation, permettant aux pouvoirs publics de piloter au mieux la politique de
@@ -98,7 +98,7 @@ export default function QuestCeQueLeTdb() {
                   ),
                 },
                 {
-                  title: "Pour quels usages et quels utilisateurs a été conçu le Tableau de bord ?",
+                  title: "Pour quels usages et quels utilisateurs a été conçu le tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
@@ -115,11 +115,11 @@ export default function QuestCeQueLeTdb() {
                   ),
                 },
                 {
-                  title: "Quel est l’objectif du Tableau de bord ?",
+                  title: "Quel est l’objectif du tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
-                        Le Tableau de bord doit permettre aux pouvoir publics locaux et nationaux de piloter la
+                        Le tableau de bord doit permettre aux pouvoir publics locaux et nationaux de piloter la
                         politique de l’apprentissage au plus juste de la réalité du terrain. Pour cela il doit fournir
                         des chiffres-clés de l’apprentissage exhaustifs, fiables et en temps réel pour représenter au
                         mieux la situation des organismes de formation, ainsi que celle des apprenantes et apprenants.
@@ -132,7 +132,7 @@ export default function QuestCeQueLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        L’équipe du Tableau de bord récolte des données permettant d’identifier, de fiabiliser et de
+                        L’équipe du tableau de bord récolte des données permettant d’identifier, de fiabiliser et de
                         contrôler les données concernant les apprenantes et apprenants, les formations, les contrats et
                         les organismes de formation.
                         <br />
@@ -153,16 +153,16 @@ export default function QuestCeQueLeTdb() {
                   ),
                 },
                 {
-                  title: "Comment se construit le Tableau de bord ? Puis-je y participer ?",
+                  title: "Comment se construit le tableau de bord ? Puis-je y participer ?",
                   content: (
                     <Box>
                       <Text>
-                        Le Tableau de bord est un produit de la Mission Nationale pour le développement de
-                        l’Apprentissage, qui est incubée au sein de beta.gouv.
+                        Le tableau de bord est un produit de la Mission Nationale pour le développement de
+                        l’apprentissage, qui est incubée au sein de beta.gouv.
                         <br />
                         <br />
-                        L’équipe du Tableau de bord est organisée selon les principes de l’Agilité, elle fait évoluer le
-                        produit Tableau de bord en fonction des besoins des utilisateurs par cycles courts, elle délivre
+                        L’équipe du tableau de bord est organisée selon les principes de l’Agilité, elle fait évoluer le
+                        produit tableau de bord en fonction des besoins des utilisateurs par cycles courts, elle délivre
                         de la valeur ou de nouvelles fonctionnalités à chaque itération. Cela permet de rester aligné
                         avec les besoins réels de visibilité sur les chiffres clés de l’apprentissage, des usages des
                         organismes de formation et la capacité de développement.
@@ -189,7 +189,7 @@ export default function QuestCeQueLeTdb() {
             <BaseAccordionGroup
               AccordionItemsDetailList={[
                 {
-                  title: "Pourquoi transmettre les données de votre organisme au Tableau de bord ?",
+                  title: "Pourquoi transmettre les données de votre organisme au tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
@@ -203,7 +203,7 @@ export default function QuestCeQueLeTdb() {
                   ),
                 },
                 {
-                  title: "La transmission des données au Tableau de bord est-elle obligatoire ?",
+                  title: "La transmission des données au tableau de bord est-elle obligatoire ?",
                   content: (
                     <Box>
                       <Text>
@@ -221,11 +221,11 @@ export default function QuestCeQueLeTdb() {
                   ),
                 },
                 {
-                  title: "La transmission des données au Tableau de bord remplace-t-elle l’enquête SIFA ?",
+                  title: "La transmission des données au tableau de bord remplace-t-elle l’enquête SIFA ?",
                   content: (
                     <Box>
                       <Text>
-                        À ce jour, transmettre vos données au Tableau de bord ne vous dispense pas de remplir l’enquête
+                        À ce jour, transmettre vos données au tableau de bord ne vous dispense pas de remplir l’enquête
                         SIFA.
                         <br />
                         <br />
@@ -246,11 +246,11 @@ export default function QuestCeQueLeTdb() {
             <BaseAccordionGroup
               AccordionItemsDetailList={[
                 {
-                  title: "Quelles institutions ont accès aux données du Tableau de bord ?",
+                  title: "Quelles institutions ont accès aux données du tableau de bord ?",
                   content: (
                     <Box>
                       <Text>
-                        Des institutions qui pilotent l’Apprentissage nationalement ou territorialement comme la DREETS,
+                        Des institutions qui pilotent l’apprentissage nationalement ou territorialement comme la DREETS,
                         la DRAAF, le Conseil Régional, l’Académie et le Carif Oref par exemple.
                       </Text>
                     </Box>

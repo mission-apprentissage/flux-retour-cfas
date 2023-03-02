@@ -69,7 +69,7 @@ const PolitiqueDeConfidentialite = () => {
             Traitement des données à caractère personnel
           </Heading>
           <Text>
-            Le Tableau de bord de l’apprentissage est développé par la Mission nationale pour l’Apprentissage, mandatée
+            Le tableau de bord de l’apprentissage est développé par la Mission nationale pour l’apprentissage, mandatée
             par le ministère du Travail.
           </Text>
         </Section>
@@ -95,7 +95,9 @@ const PolitiqueDeConfidentialite = () => {
               Produire les données nécessaires aux organismes de formation pour répondre aux enquêtes (notamment SIFA) ;
             </ListItem>
             <ListItem>Créer un compte pour accéder ou fournir des données;</ListItem>
-            <ListItem>Suivre et piloter l&apos;usage du Tableau par l&apos;équipe Mission apprentissage ;</ListItem>
+            <ListItem>
+              Suivre et piloter l&apos;usage du tableau de bord par l&apos;équipe Mission apprentissage ;
+            </ListItem>
             <ListItem>Identifier les organismes de formation et leurs réseaux (référentiel).</ListItem>
           </UnorderedList>
         </Section>
@@ -129,7 +131,7 @@ const PolitiqueDeConfidentialite = () => {
             Nous sommes autorisés à traiter vos données dans le cadre d’une mission d’intérêt public ou relevant de
             l’exercice de l’autorité publique dont est investi le responsable de traitement au sens de l’article 6-e du
             RPGD. Cette mission est notamment précisée dans la lettre de Mission de la Mission nationale pour
-            l’Apprentissage du 10 septembre 2019 et décision gouvernementale du 26 novembre 2019.
+            l’apprentissage du 10 septembre 2019 et décision gouvernementale du 26 novembre 2019.
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.DureeDeConservation}>

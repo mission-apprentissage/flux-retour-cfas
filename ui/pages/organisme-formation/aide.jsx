@@ -55,7 +55,7 @@ export default function Aide() {
                 Vous ne trouvez pas la réponse à votre question ou vous avez besoin de contacter notre équipe ?
               </Text>
               <a href={`mailto:${CONTACT_ADDRESS}`}>
-                <Button variant="primary">Contactez le support du Tableau de bord de l&apos;apprentissage</Button>
+                <Button variant="primary">Contactez le support du tableau de bord de l&apos;apprentissage</Button>
               </a>
             </Container>
           </Box>

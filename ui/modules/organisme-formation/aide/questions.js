@@ -5,22 +5,22 @@ import Link from "../../../components/Links/Link";
 
 export const questions = [
   {
-    question: "Est-ce que les données de votre organisme s'affichent sur le Tableau de bord ?",
+    question: "Est-ce que les données de votre organisme s'affichent sur le tableau de bord ?",
     answer: (
       <Text>
         Les données de votre organisme s&apos;affichent si vous avez autorisé votre ERP (ou logiciel de gestion) à
-        transmettre vos données au Tableau de bord de l&apos;apprentissage. Ceci concerne les clients de SC Form, Ymag,
+        transmettre vos données au tableau de bord de l&apos;apprentissage. Ceci concerne les clients de SC Form, Ymag,
         Gestibase ou FCA Manager.
       </Text>
     ),
   },
   {
-    question: "Comment accéder votre page organisme de formation sur le Tableau de bord ?",
+    question: "Comment accéder votre page organisme de formation sur le tableau de bord ?",
     answer: (
       <Stack id="ConsulterDonneesCFA" spacing="2w">
         <Text>
-          Si vous transmettez des données au Tableau de bord de l&apos;apprentissage, vous pouvez les consulter et les
-          vérifier directement sur le Tableau de bord de l&apos;apprentissage. Le lien vous permettant d&apos;accéder à
+          Si vous transmettez des données au tableau de bord de l&apos;apprentissage, vous pouvez les consulter et les
+          vérifier directement sur le tableau de bord de l&apos;apprentissage. Le lien vous permettant d&apos;accéder à
           votre page organisme de formation, est disponible directement dans votre ERP.
         </Text>
         <Text as="em">
@@ -50,12 +50,12 @@ export const questions = [
     ),
   },
   {
-    question: "Pourquoi transmettre les données de votre organisme au Tableau de bord ?",
+    question: "Pourquoi transmettre les données de votre organisme au tableau de bord ?",
     answer: (
       <Stack>
         <Text>
-          Différentes institutions (Conseil régional, DREETS, Opco, Carif Oref, Académie, DGEFP) consultent le Tableau
-          de Bord de l&apos;Apprentissage quotidiennement pour suivre l&apos;évolution des effectifs.&nbsp;
+          Différentes institutions (Conseil régional, DREETS, Opco, Carif Oref, Académie, DGEFP) consultent le tableau
+          de bord de l&apos;apprentissage quotidiennement pour suivre l&apos;évolution des effectifs.&nbsp;
         </Text>
         <Text fontWeight="700">
           Ces données les éclairent notamment pour attribuer des subventions, pour mettre en place des plans
@@ -66,7 +66,7 @@ export const questions = [
     ),
   },
   {
-    question: "Comment consulter ces données sur le Tableau de bord ?",
+    question: "Comment consulter ces données sur le tableau de bord ?",
     answer: (
       <Stack>
         <Text>
@@ -83,7 +83,7 @@ export const questions = [
           Si toutefois, l&apos;URL n&apos;est pas encore intégrée dans votre interface de gestion, vous pouvez en faire
           la demande en&nbsp;
           <Link href={NAVIGATION_PAGES.OrganismeFormation.consulter.path} color="bluefrance">
-            contactant l&apos;équipe du Tableau de bord
+            contactant l&apos;équipe du tableau de bord
           </Link>
           .
         </Text>
@@ -91,11 +91,11 @@ export const questions = [
     ),
   },
   {
-    question: "Comment transmettre les données de mon organisme au Tableau de bord de l'apprentissage ?",
+    question: "Comment transmettre les données de mon organisme au tableau de bord de l'apprentissage ?",
     answer: (
       <Stack>
         <Text>
-          Pour transmettre les données de votre ERP vers le Tableau de bod, vous devez en effectuer le paramétrage. Ce
+          Pour transmettre les données de votre ERP vers le tableau de bod, vous devez en effectuer le paramétrage. Ce
           paramétrage à faire une seule fois est estimé à 10 minutes.
         </Text>
         <Text>
@@ -168,11 +168,11 @@ export const questions = [
       <Stack>
         <Text>
           A ce jour, si vous utilisez Ypaéro, Gesti, SC Form ou FCA Manager, vous pouvez transmettre vos données au
-          Tableau de bord (cf pas à pas) Si vous utilisez un autre ERP, n&apos;hésitez pas à les contacter pour les
+          tableau de bord (cf pas à pas) Si vous utilisez un autre ERP, n&apos;hésitez pas à les contacter pour les
           inviter à faire les développements nécessaires.
         </Text>
         <Text>
-          Si vous n&apos;utilisez pas d&apos;ERP, vous ne pouvez pas transmettre vos données au Tableau de bord.
+          Si vous n&apos;utilisez pas d&apos;ERP, vous ne pouvez pas transmettre vos données au tableau de bord.
           Cependant, l&apos;équipe projet travaille à une évolution qui vous permettra de communiquer vos données via
           des feuilles de calcul. Si vous souhaitez être informé lorsque cette fonctionnalité sera possible,&nbsp;
           <Link
@@ -202,7 +202,7 @@ export const questions = [
     ),
   },
   {
-    question: "Comment le Tableau de bord définit un “inscrit sans contrat” ? et un apprenant en situation d'abandon ?",
+    question: "Comment le tableau de bord définit un “inscrit sans contrat” ? et un apprenant en situation d'abandon ?",
     answer: (
       <Text>
         Les apprentis sont les apprenants avec un contrat d&apos;apprentissage, les inscrits sans contrat sont les
@@ -249,7 +249,7 @@ export const questions = [
     ),
   },
   {
-    question: "La transmission des données au Tableau de bord est-elle obligatoire ?",
+    question: "La transmission des données au tableau de bord est-elle obligatoire ?",
     answer: (
       <Stack>
         <Text>
@@ -257,7 +257,7 @@ export const questions = [
           premier article de la loi pour une République numérique.
         </Text>
         <Text>
-          Le Tableau de bord de l&apos;apprentissage va devenir l&apos;outil de référence des pouvoirs publics. À ce
+          Le tableau de bord de l&apos;apprentissage va devenir l&apos;outil de référence des pouvoirs publics. À ce
           titre, certaines régions utilisent déjà cet outil pour attribuer les aides aux centres de formation. Il est
           porté par la DGEFP comme le futur outil de pilotage des politiques publiques de l&apos;apprentissage. En ne
           transmettant pas vos données, vous ne donnerez donc aucune visibilité sur votre réalité et sur vos besoins en
@@ -267,11 +267,11 @@ export const questions = [
     ),
   },
   {
-    question: "La transmission des données au Tableau de bord remplace-t'elle l'enquête SIFA ?",
+    question: "La transmission des données au tableau de bord remplace-t'elle l'enquête SIFA ?",
     answer: (
       <Stack>
         <Text>
-          À ce jour, transmettre vos données au Tableau de bord ne vous dispense pas de remplir l&apos;enquête SIFA.
+          À ce jour, transmettre vos données au tableau de bord ne vous dispense pas de remplir l&apos;enquête SIFA.
         </Text>
         <Text>
           Une fois les objectifs d&apos;acquisition et de qualité des données seront atteints, de nouveaux usages des

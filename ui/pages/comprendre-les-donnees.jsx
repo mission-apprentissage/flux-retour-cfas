@@ -106,7 +106,7 @@ const ComprendreLesDonneesPage = () => {
                 Pourquoi ne peut-on pas avoir accès aux données sur toutes les régions ?
               </Text>
               <Text>
-                ‌Le Tableau de bord est déployé en version Bêta, c&apos;est-à-dire que nous continuons à travailler sur
+                ‌Le tableau de bord est déployé en version Bêta, c&apos;est-à-dire que nous continuons à travailler sur
                 les données exposées avec les utilisateurs. Nous conduisons pour cela un déploiement incrémental qui
                 démarre par les Régions : Normandie, Centre-Val de Loire, Pays de la Loire, Bretagne et Auvergne-Rhône
                 Alpes. Lorsque nous aurons achevé la première phase de validation des données, nous étendrons le

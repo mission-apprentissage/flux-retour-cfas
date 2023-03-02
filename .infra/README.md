@@ -54,7 +54,7 @@ de la mission apprentissage, vous devez publier votre clé :
 gpg --send-key <identifiant>
 ```
 
-Il est conseillé de publier votre clé sur l'un des serveurs suivants : (elles pourront être récupérées par le reste de l'équipe via une commandé spécifique)  
+Il est conseillé de publier votre clé sur l'un des serveurs suivants : (elles pourront être récupérées par le reste de l'équipe via une commandé spécifique)
 
 ```bash
 gpg --keyserver keyserver.ubuntu.com --send-keys <GPG_KEY>
@@ -211,7 +211,7 @@ Pour ce faire, lancez la commande suivante :
 
 Cette commande va créer le fichier `ansible/.vault-password.gpg`, vous devez le commiter.
 
-En cas d'erreur du type `gpg: keyserver receive failed: No data` essayez d'importer localement des clés GPG de chaque utilisateur via : 
+En cas d'erreur du type `gpg: keyserver receive failed: No data` essayez d'importer localement des clés GPG de chaque utilisateur via :
 
 ```bash
   gpg --keyserver keys.gnupg.net --recv-keys <GPG_KEY_1> <GPG_KEY_2> ...
@@ -365,7 +365,7 @@ Puis on vous redemandera le BECOME PASSWORD[defaults to SSH password] qui est le
 Attention si vous voulez lancer le playbook avec un utilisateur autre que celui par défaut, utilisez --ask-become-pass
 
 ```
-ssh-keyscan <ip> >> ~/.ssh/known_hosts 
+ssh-keyscan <ip> >> ~/.ssh/known_hosts
 bash setup-vm.sh <nom_environnement> --user <nom_utilisateur> --ask-become-pass
 ```
 
@@ -443,7 +443,7 @@ bash scripts/ovh/create-backup-partition.sh <nom de l'environnement>
 
 Lors de l'exécution de ce script, vous serez redirigé vers une page web vous demandant de vous authentifier afin de
 générer un jeton d'api. Vous devez donc avoir un compte OVH ayant le droit de gérer les instances de la Mission
-Apprentissage. Une fois authentifié, le script utilisera automatiquement ce jeton.
+apprentissage. Une fois authentifié, le script utilisera automatiquement ce jeton.
 
 Quand le script est terminé, vous pouvez aller sur l'interface
 OVH [https://www.ovh.com/manager/dedicated/#/nasha/zpool-128310/partitions](https://www.ovh.com/manager/dedicated/#/nasha/zpool-128310/partitions)

@@ -3,11 +3,11 @@ import { Box, Heading, Text, Flex, HStack, Link } from "@chakra-ui/react";
 import Sommaire from "../Sommaire/Sommaire";
 import Section from "../Section/Section";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import { PRODUCT_NAME } from "../../common/constants/product";
+import { PRODUCT_NAME_TITLE } from "../../common/constants/product";
 
 const DonneesPersonnelles = () => {
   const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
-  const title = PRODUCT_NAME;
+  const title = PRODUCT_NAME_TITLE;
 
   return (
     <Box pt="4w" pb={16}>
@@ -51,7 +51,7 @@ const DonneesPersonnelles = () => {
               Protection des données à caractère personnel
             </Heading>
             <Text fontSize="gamma" color="black">
-              Le Tableau de Bord de l’Apprentissage est{" "}
+              Le tableau de bord de l’apprentissage est{" "}
               <strong>
                 construit dans le respect de la vie privée des personnes et applique les standards de sécurité de
                 l&apos;État.
