@@ -1,5 +1,5 @@
 import "dotenv/config.js";
-import { Option, program as cli } from "commander";
+import { Option, program } from "commander";
 
 import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
@@ -18,13 +18,33 @@ import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organ
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index.js";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
+import { createIndexes, dropIndexes } from "../common/model/indexes/index.js";
+import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
+import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
+import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
+
+program
+  .configureHelp({
+    sortSubcommands: true,
+  })
+  .command("indexes:create")
+  .description("Creation des indexes mongo")
+  .action(async (_, options) =>
+    runScript(async () => {
+      console.info("Drop all existing indexes...");
+      await dropIndexes();
+      console.info("Create all indexes...");
+      await createIndexes();
+      console.info("All indexes successfully created !");
+    }, options._name)
+  );
 
 /**
  * Job (temporaire) de suppression des organismes sans siret & sans effectifs
  */
-cli
-  .command("patches:remove-organismes-sansSiret-sansEffectifs")
-  .description("Suppression des organismes sans siret & sans effectifs")
+program
+  .command("tmp:patches:remove-organismes-sansSiret-sansEffectifs")
+  .description("[TEMPORAIRE] Suppression des organismes sans siret & sans effectifs")
   .action(async (_, options) =>
     runScript(async () => {
       return removeOrganismesSansSiretSansEffectifs();
@@ -34,9 +54,9 @@ cli
 /**
  * Job (temporaire) de MAJ des date de dernières transmission des effectifs
  */
-cli
-  .command("patches:update-lastTransmissionDate-organismes")
-  .description("Suppression des organismes sans siret & sans effectifs")
+program
+  .command("tmp:patches:update-lastTransmissionDate-organismes")
+  .description("[TEMPORAIRE] Mise à jour des date de dernières transmissions d'un organisme à partir de ses effectifs")
   .action(async (_, options) =>
     runScript(async () => {
       return updateLastTransmissionDateForOrganismes();
@@ -46,7 +66,7 @@ cli
 /**
  * Job d'initialisation de données de test
  */
-cli
+program
   .command("seed")
   .description("Seed global data")
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
@@ -60,7 +80,7 @@ cli
 /**
  * Job d'initialisation de données de test
  */
-cli
+program
   .command("seed:sample")
   .description("Seed sample data")
   .action(async (_, options) =>
@@ -73,7 +93,7 @@ cli
  * Job d'initialisation des roles
  * Pas nécessaire de l'exécuter si on créé un admin
  */
-cli
+program
   .command("seed:roles")
   .description("Seed roles")
   .action(async (_, options) =>
@@ -86,7 +106,7 @@ cli
  * Job d'initialisation d'un user admin
  * Va initialiser les roles par défaut en plus
  */
-cli
+program
   .command("seed:admin")
   .description("Seed user admin")
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
@@ -99,7 +119,7 @@ cli
 /**
  * Job de nettoyage de db
  */
-cli
+program
   .command("clear")
   .description("Clear projet")
   .option("-a, --all", "Tout supprimer")
@@ -109,7 +129,7 @@ cli
     }, options._name)
   );
 
-cli
+program
   .command("clear:users")
   .description("Clear users")
   .action((_, options) =>
@@ -118,7 +138,7 @@ cli
     }, options._name)
   );
 
-cli
+program
   .command("clear:roles")
   .description("Clear roles")
   .action((_, options) =>
@@ -130,7 +150,7 @@ cli
 /**
  * Job de remplissage des organismes du référentiel
  */
-cli
+program
   .command("hydrate:organismes-referentiel")
   .description("Remplissage des organismes du référentiel")
   .action(async (_, options) =>
@@ -143,7 +163,7 @@ cli
  * Job de remplissage des organismes en allant ajouter / maj aux organismes existants (issus de la transmission)
  * tous les organismes du référentiel
  */
-cli
+program
   .command("hydrate:organismes")
   .description("Remplissage des organismes via le référentiel")
   .action(async (_, options) =>
@@ -158,7 +178,7 @@ cli
  * - L'arbre des formations (API Catalogue)
  * - Les métiers liés (API LBA)
  */
-cli
+program
   .command("update:organismes-with-apis")
   .description("Mise à jour des organismes via API externes")
   .action(async (_, options) =>
@@ -170,7 +190,7 @@ cli
 /**
  * Job de remplissage & maj des d'organismes / dossiersApprenants pour les réseaux avec le nouveau format
  */
-cli
+program
   .command("hydrate:reseaux")
   .description("Remplissage des réseaux pour les organismes et dossiersApprenants")
   .action(async (_, options) =>
@@ -182,7 +202,7 @@ cli
 /**
  * Job d'archivage des dossiers apprenants et des effectifs
  */
-cli
+program
   .command("archive:dossiersApprenantsEffectifs")
   .description("Archivage des dossiers apprenants")
   .option("--limit <int>", "Année limite d'archivage")
@@ -195,7 +215,7 @@ cli
 /**
  * Job de purge des events
  */
-cli
+program
   .command("purge:events")
   .description("Purge des logs inutiles")
   .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
@@ -208,7 +228,7 @@ cli
 /**
  * Job de création d'un utilisateur
  */
-cli
+program
   .command("create:user")
   .description("Création d'un utilisateur")
   .requiredOption("--email <string>", "Email de l'utilisateur")
@@ -230,7 +250,7 @@ cli
 /**
  * Job de génération d'un token de MAJ de mot de passe pour un utilisateur
  */
-cli
+program
   .command("generate:password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur")
   .requiredOption("--email <string>", "Email de l'utilisateur")
@@ -243,7 +263,7 @@ cli
 /**
  * Job de génération d'un token de MAJ de mot de passe pour un utilisateur legacy (ancien modèle)
  */
-cli
+program
   .command("generate-legacy:password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur legacy")
   .requiredOption("--username <string>", "username de l'utilisateur")
@@ -258,9 +278,9 @@ cli
  * Job de mise à jour des utilisateurs fournisseurs de données
  * Va modifier leur permission en mode actif / inactif pour temporairement bloquer l'envoi des données
  */
-cli
-  .command("users:update-apiSeeders")
-  .description("Modification des utilisateurs fournisseurs de données")
+program
+  .command("tmp:users:update-apiSeeders")
+  .description("[TEMPORAIRE] Modification des utilisateurs fournisseurs de données")
   .addOption(new Option("--mode <mode>", "Mode de mise à jour").choices(["active", "inactive"]).makeOptionMandatory())
   .action(async ({ mode }, options) =>
     runScript(async () => {
@@ -268,6 +288,42 @@ cli
     }, options._name)
   );
 
-cli;
+/**
+ * Job de création de la collection fiabilisation UAI SIRET
+ */
+program
+  .command("fiabilisation:uai-siret:build")
+  .description("Création de la collection pour fiabilisation des UAI SIRET")
+  .action((_, options) =>
+    runScript(async () => {
+      // On lance séquentiellement 2 fois la construction de la table de fiabilisation - nécessaire pour prendre en compte tous les cas
+      await buildFiabilisationUaiSiret();
+      await buildFiabilisationUaiSiret();
+    }, options._name)
+  );
 
-cli.parse(process.argv);
+/**
+ * Job d'application de la fiabilisation UAI SIRET
+ */
+program
+  .command("fiabilisation:uai-siret:apply")
+  .description("Application du mapping de fiabilisation des UAI SIRET")
+  .action((_, options) =>
+    runScript(async () => {
+      return applyFiabilisationUaiSiret();
+    }, options._name)
+  );
+
+/**
+ * Job d'analyse de la fiabilité des dossiersApprenants reçus
+ */
+program
+  .command("fiabilisation:analyse:dossiersApprenants-recus")
+  .description("Analyse de la fiabilité des dossiersApprenants reçus")
+  .action((_, options) =>
+    runScript(async () => {
+      return analyseFiabiliteDossierApprenantsRecus();
+    }, options._name)
+  );
+
+program.parse(process.argv);

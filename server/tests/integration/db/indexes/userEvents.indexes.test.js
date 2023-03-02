@@ -17,7 +17,7 @@ describe("UserEvents Indexes", () => {
       date: new Date(),
     });
 
-    // Re-créé les indexs après l'ajout d'une entrée en base & récupère les indexes
+    // Re-créé les index après l'ajout d'une entrée en base & récupère les index
     await dropIndexes();
     await createIndexes();
     indexes = await getDbCollectionIndexes(userEventsModelDescriptor.collectionName);

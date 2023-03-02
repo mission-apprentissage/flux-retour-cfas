@@ -15,13 +15,7 @@
     "test": "cross-env DOTENV_CONFIG_PATH=.env.example c8 --check-coverage mocha --config=mocharc.json tests/integration",
     "test:single": "cross-env DOTENV_CONFIG_PATH=.env.example mocha --config=mocharc.json",
     "lint": "eslint src/ tests/",
-    "docker:start": "cd .. && docker-compose up -d --build --force-recreate",
-    "docker:stop": "docker-compose down",
-    "docker:clean": "docker-compose kill && docker system prune --force --volumes",
     "cli": "node src/jobs/cli.js",
-    "cli:migration": "node src/jobs/cli.migration.js",
-    "cli:fiabilisation": "node src/jobs/cli.fiabilisation.js",
-    "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down"

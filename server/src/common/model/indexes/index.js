@@ -10,7 +10,7 @@ export class BaseIndexer {
    *
    * @param {object} options
    * @param {string} options.collectionName - Nom de la collection
-   * @param {function} options.indexesList - Liste des indexs à créer
+   * @param {function} options.indexesList - Liste des index à créer
    */
   constructor({ collectionName, indexesList }) {
     this.indexesList = indexesList;
@@ -18,9 +18,9 @@ export class BaseIndexer {
   }
 
   /**
-   * Méthode de création des indexs
+   * Méthode de création des index
    */
-  async createIndexs() {
+  async createIndexes() {
     const isCollectionInDb = await doesCollectionExistInDb(this.collectionName);
     const collection = getDbCollection(this.collectionName);
 
@@ -34,9 +34,9 @@ export class BaseIndexer {
   }
 
   /**
-   * Méthode de destruction des indexs
+   * Méthode de destruction des index
    */
-  async dropIndexs() {
+  async dropIndexes() {
     const isCollectionInDb = await doesCollectionExistInDb(this.collectionName);
     if (isCollectionInDb === true) {
       getDbCollection(this.collectionName).dropIndexes();
@@ -50,7 +50,7 @@ export const createIndexes = async () => {
       await new BaseIndexer({
         collectionName: descriptor.collectionName,
         indexesList: descriptor.indexes,
-      }).createIndexs();
+      }).createIndexes();
     }
   }
 };
@@ -61,7 +61,7 @@ export const dropIndexes = async () => {
       await new BaseIndexer({
         collectionName: descriptor.collectionName,
         indexesList: descriptor.indexes,
-      }).dropIndexs();
+      }).dropIndexes();
     }
   }
 };

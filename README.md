@@ -223,7 +223,6 @@ Il vous faudra créer une application dans Slack et récupérer le lien de la We
 
 Certains modules utilitaires sont présents dans `/server/src/common/utils`
 
-
 ## Debugger sous VSCode
 
 Il est possible de débugger facilement le serveur Express contenu dans le Docker local **sous VSCode** en utilisant la configuration suivante \_a placer dans le fichier `/.vscode/launch.json` :
@@ -360,7 +359,7 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
 
 3. Run des migration 'yarn migration:up' si non fait par Ansible
 
-4. Création des indexs 'yarn indexes:create' si non fait par Ansible
+4. Création des index 'yarn cli indexes:create' si non fait par Ansible
 
 5. Lancement des jobs :
    5.1 - Création du référentiel des cfas :
