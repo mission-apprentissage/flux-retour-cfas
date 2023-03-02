@@ -1,3 +1,12 @@
+## [3.11.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.11.0...v3.11.1) (2023-03-02)
+
+
+### Bug Fixes
+
+* corrections mineures liées aux filtres indicateurs ([#2665](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2665)) ([56fd9d6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/56fd9d6c006d3713a7b01763fc95c9c2ca6252d2))
+* mise à jour casse des labels tableau de bord ([#2666](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2666)) ([a5008f8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a5008f858e91937eb1a613971c25af9347fa6d5b))
+* restauration des filtres indicateurs ([#2615](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2615)) ([13a8b0d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/13a8b0d94a4a2dc3a3f4bcfc39af066819b5c682))
+
 # [3.11.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.10.1...v3.11.0) (2023-02-28)
 
 
