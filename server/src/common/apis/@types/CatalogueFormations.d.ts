@@ -1,4 +1,4 @@
-import CatalogueFormation from "./CatalogueFormation";
+import CatalogueFormation from "./CatalogueFormation.d.ts";
 
 type CatalogueFormations = {
   formations: Array<CatalogueFormation>;

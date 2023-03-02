@@ -323,10 +323,10 @@ export default ({ mailer }) => {
   router.post(
     "/finalize",
     authMiddleware(),
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     tryCatch(async ({ body, user }, res) => {
       // TODO [tech]
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       // const { compte, siret } = await Joi.object({
       //   compte: Joi.string().required(),
       //   siret: Joi.string().required(),

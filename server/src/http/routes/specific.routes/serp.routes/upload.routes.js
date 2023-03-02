@@ -318,7 +318,7 @@ export default ({ clamav }) => {
 
       sendServerEventsForUser(req.user._id, "Fichier en cours d'analyse...");
 
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { headers: rawHeaders, rawFileJson } = await getUnconfirmedDocumentContent(organisme_id);
       // const dataJson = [];
       // for (const rawData of rawFileJson) {
@@ -633,7 +633,7 @@ export default ({ clamav }) => {
 
       const { rawFileJson, unconfirmedDocument: document } = await getUnconfirmedDocumentContent(organisme_id);
 
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { annee_scolaire, typeCodeDiplome, ...mapping } = userMapping;
 
       await updateDocument(organisme_id, {

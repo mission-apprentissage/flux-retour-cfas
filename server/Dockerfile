@@ -7,8 +7,8 @@ RUN cd /tmp && \
     mkdir -p /app && \
     mv /tmp/node_modules /app/
 
-COPY ./ /app
 WORKDIR /app
+COPY ./ .
 
 VOLUME /data
 EXPOSE 5000

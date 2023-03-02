@@ -12,10 +12,9 @@ services:
     volumes:
       - ./ui:/app:z
       - /app/.next
-      - /app/node_modules
+      - ./shared:/shared:z
     build:
-      context: ui
-      dockerfile: Dockerfile.dev
+      dockerfile: ui/Dockerfile.dev
       args:
         - NEXT_PUBLIC_ENV=dev
         - NEXT_PUBLIC_BASE_URL=http://localhost
@@ -34,6 +33,7 @@ services:
       - "127.0.0.1:9229:9229" # Allows remote debugging
     volumes:
       - ./server:/app:z # Allows source folders to be watched
+      - ./shared:/shared:z
       - flux_retour_cfas_server_data:/data:z
     environment:
       - FLUX_RETOUR_CFAS_ENV=dev

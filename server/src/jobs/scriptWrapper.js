@@ -25,12 +25,10 @@ const exit = async (rawError) => {
 
   setTimeout(() => {
     //Waiting logger to flush all logs (MongoDB)
-    closeMongodbConnection()
-      .then(() => {})
-      .catch((closeError) => {
-        error = closeError;
-        console.error(error);
-      });
+    closeMongodbConnection().catch((closeError) => {
+      error = closeError;
+      console.error(error);
+    });
   }, 500);
 
   await redisClient.quit();

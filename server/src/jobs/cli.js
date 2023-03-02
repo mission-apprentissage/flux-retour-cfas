@@ -1,4 +1,4 @@
-import "dotenv/config.js";
+import "dotenv/config";
 import { Option, program } from "commander";
 
 import { runScript } from "./scriptWrapper.js";

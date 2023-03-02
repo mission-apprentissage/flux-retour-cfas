@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { getMetiersBySiret } from "../../apis/apiLba.js";
 import { organismesDb, effectifsDb, permissionsDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
+
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
