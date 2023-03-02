@@ -19,7 +19,7 @@ describe("Users Indexes", () => {
       }
     );
 
-    // Re-créé les indexs après l'ajout d'une entrée en base & récupère les indexes
+    // Re-créé les index après l'ajout d'une entrée en base & récupère les index
     await dropIndexes();
     await createIndexes();
     dbIndexes = await getDbCollectionIndexes(usersModelDescriptor.collectionName);

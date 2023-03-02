@@ -6,7 +6,7 @@
   shell: "sudo /opt/flux-retour-cfas/run-migrations.sh"
   register: output
 
-- name: "Création des indexs de la base mongoDb"
+- name: "Création des index de la base mongoDb"
   shell: "sudo /opt/flux-retour-cfas/run-indexes-creation.sh"
   register: output
 
