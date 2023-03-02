@@ -18,6 +18,20 @@ import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organ
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index.js";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
+import { createIndexes, dropIndexes } from "../common/model/indexes/index.js";
+
+cli
+  .command("indexes:create")
+  .description("Creation des indexes mongo")
+  .action(async (_, options) =>
+    runScript(async () => {
+      console.info("Drop all existing indexes...");
+      await dropIndexes();
+      console.info("Create all indexes...");
+      await createIndexes();
+      console.info("All indexes successfully created !");
+    }, options._name)
+  );
 
 /**
  * Job (temporaire) de suppression des organismes sans siret & sans effectifs
@@ -267,7 +281,5 @@ cli
       return updateUsersApiSeeders(mode);
     }, options._name)
   );
-
-cli;
 
 cli.parse(process.argv);
