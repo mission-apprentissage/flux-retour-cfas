@@ -16,7 +16,7 @@ import { queryClient } from "@/common/queryClient";
 
 function MyApp({ Component, pageProps }) {
   return (
-    <PlausibleProvider domain={process.env.NEXT_PUBLIC_BASE_HOST} trackLocalhost={false}>
+    <PlausibleProvider domain={process.env.NEXT_PUBLIC_BASE_HOST!} trackLocalhost={false}>
       <RecoilRoot>
         <ChakraProvider theme={theme} resetCSS>
           <Fonts />
