@@ -43,7 +43,7 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
             Vue globale
           </Tab>
           <Tab fontWeight="bold" fontSize="delta">
-            Effectifs par formations
+            Effectifs par niveau
           </Tab>
         </TabList>
         <TabPanels>

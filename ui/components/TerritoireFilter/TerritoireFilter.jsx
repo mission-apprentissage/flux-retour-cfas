@@ -36,21 +36,32 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
 
   // affiche seulement les régions et départements accessibles à l'utilisateur
   // l'accès à un département donne également accès à la région (DDETS)
-  const territoiresData = useMemo(() => {
+  const territoiresConfig = useMemo(() => {
+    // FIXME: temporaire en attendant un fix des permissions DDETS: une DDETS n'accède qu'à son département
     const codesRegionsAccessibles = [
       // région de l'utilisateur (exemple si DREETS)
       ...(user.codes_region ?? []),
       // régions du département de l'utilisateur (exemple si DDETS)
-      ...(user.codes_departement?.map((codeDepartement) => DEPARTEMENTS_BY_ID[codeDepartement].region.code) ?? []),
+      // ...(user.codes_departement?.map((codeDepartement) => DEPARTEMENTS_BY_ID[codeDepartement].region.code) ?? []),
     ];
-    return codesRegionsAccessibles.length > 0
+    // return codesRegionsAccessibles.length > 0
+    //   ? {
+    //       regions: REGIONS_SORTED.filter((region) => codesRegionsAccessibles.includes(region.code)),
+    //       departements: DEPARTEMENTS_SORTED.filter((departement) =>
+    //         codesRegionsAccessibles.includes(departement.region.code)
+    //       ),
+    //     }
+    const codesDepartementAccessibles = user.codes_departement ?? [];
+    return codesRegionsAccessibles.length > 0 || codesDepartementAccessibles.length > 0
       ? {
           regions: REGIONS_SORTED.filter((region) => codesRegionsAccessibles.includes(region.code)),
-          departements: DEPARTEMENTS_SORTED.filter((departement) =>
-            codesRegionsAccessibles.includes(departement.region.code)
-          ),
+          departements: [
+            ...DEPARTEMENTS_SORTED.filter((departement) => codesRegionsAccessibles.includes(departement.region.code)),
+            ...DEPARTEMENTS_SORTED.filter((departement) => codesDepartementAccessibles.includes(departement.code)),
+          ],
+          showAllOption: false,
         }
-      : { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED };
+      : { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED, showAllOption: true };
   }, [user]);
 
   // filtre initial positionné sur la région / département de l'utilisateur
@@ -82,7 +93,7 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <TerritoiresList
-            data={territoiresData}
+            config={territoiresConfig}
             onTerritoireClick={onTerritoireClick}
             currentFilter={filters.region}
           />
