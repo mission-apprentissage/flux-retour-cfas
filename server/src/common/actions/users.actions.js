@@ -390,18 +390,11 @@ export const changePassword = async (email, newPassword) => {
     throw new Error("Password must be valid");
   }
 
-  let account_status = user.account_status;
-  if (user.account_status === "FIRST_FORCE_RESET_PASSWORD") {
-    account_status = "FORCE_COMPLETE_PROFILE_STEP1";
-  } else if (user.account_status === "FORCE_RESET_PASSWORD") {
-    account_status = "CONFIRMED";
-  }
-
   const updated = await usersMigrationDb().findOneAndUpdate(
     { _id: user._id },
     {
       $set: {
-        account_status,
+        account_status: getNextAccountStatus(user),
         password: hashUtil(newPassword),
         password_updated_at: new Date(),
       },
@@ -464,3 +457,18 @@ export const generatePasswordUpdateToken = async (email) => {
 
   return token;
 };
+
+/**
+ * Renvoie le statut du compte après réinitialisation du mot de passe.
+ * Uniquement utile lors de l'inscription.
+ */
+function getNextAccountStatus(user) {
+  switch (user.account_status) {
+    case "FIRST_FORCE_RESET_PASSWORD":
+      return user.is_admin ? "CONFIRMED" : "FORCE_COMPLETE_PROFILE_STEP1";
+    case "FORCE_RESET_PASSWORD":
+      return "CONFIRMED";
+    default:
+      return user.account_status;
+  }
+}
