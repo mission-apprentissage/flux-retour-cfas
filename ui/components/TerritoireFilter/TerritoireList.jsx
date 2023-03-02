@@ -8,11 +8,11 @@ import SearchInput from "@/components/SearchInput/SearchInput";
 import TouteLaFranceOption from "./TouteLaFranceOption";
 import { TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
 
-const findTerritoire = (data) => (searchTerm) => {
-  const regionMatches = data.regions.filter((region) => {
+const findTerritoire = (config) => (searchTerm) => {
+  const regionMatches = config.regions.filter((region) => {
     return stringContains(region.nom, searchTerm) || stringEqualsCaseInsensitive(region.shortName, searchTerm);
   });
-  const departementMatches = data.departements.filter((departement) => {
+  const departementMatches = config.departements.filter((departement) => {
     return stringContains(departement.nom, searchTerm) || searchTerm === departement.code;
   });
 
@@ -27,10 +27,12 @@ const NoResults = () => {
   );
 };
 
-const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
+const TerritoireList = ({ config, onTerritoireClick, currentFilter }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredTerritoires = searchTerm ? findTerritoire(data)(searchTerm) : [...data.regions, ...data.departements];
+  const filteredTerritoires = searchTerm
+    ? findTerritoire(config)(searchTerm)
+    : [...config.regions, ...config.departements];
 
   return (
     <>
@@ -40,7 +42,7 @@ const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
         onChange={setSearchTerm}
       />
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-        {!searchTerm && <TouteLaFranceOption onClick={() => onTerritoireClick()} />}
+        {config.showAllOption && !searchTerm && <TouteLaFranceOption onClick={() => onTerritoireClick()} />}
         {filteredTerritoires.map((territoire) => (
           <FilterOption
             key={territoire.type + territoire.code + territoire.nom}
@@ -59,7 +61,7 @@ const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
 };
 
 TerritoireList.propTypes = {
-  data: PropTypes.shape({
+  config: PropTypes.shape({
     regions: PropTypes.arrayOf(
       PropTypes.shape({
         nom: PropTypes.string.isRequired,
@@ -73,6 +75,7 @@ TerritoireList.propTypes = {
         code: PropTypes.string.isRequired,
       }).isRequired
     ).isRequired,
+    showAllOption: PropTypes.bool.isRequired,
   }).isRequired,
   onTerritoireClick: PropTypes.func.isRequired,
   currentFilter: PropTypes.shape({
