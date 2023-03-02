@@ -9,32 +9,23 @@ const config = {
     uri: env.get("FLUX_RETOUR_CFAS_MONGODB_URI").required().asString(),
   },
   auth: {
-    passwordHashRounds: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS").asInt(),
+    passwordHashRounds: 10000,
     user: {
       jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET").required().asString(),
-      expiresIn: env.get("FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET_EXPIRES").default("24h").asString(),
+      expiresIn: "7d",
     },
     activation: {
       jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET").asString(),
       expiresIn: "96h",
     },
-    actionToken: {
-      jwtSecret: env.get("FLUX_RETOUR_CFAS__AUTH_ACTION_TOKEN_JWT_SECRET").asString(),
-      expiresIn: "90 days",
-    },
     resetPasswordToken: {
       jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET").asString(),
       expiresIn: "1h",
-    },
-    apiToken: {
-      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_API_TOKEN_JWT_SECRET").asString(),
-      expiresIn: "24h",
     },
   },
   log: {
     type: env.get("FLUX_RETOUR_CFAS_LOG_TYPE").default("console").asString(),
     level: env.get("FLUX_RETOUR_CFAS_LOG_LEVEL").default("info").asString(),
-    streams: env.get("FLUX_RETOUR_CFAS_LOG_STREAMS").default([]).asArray(),
   },
   users: {
     defaultAdmin: {
@@ -44,16 +35,16 @@ const config = {
     },
   },
   tablesCorrespondances: {
-    endpoint: env.get("FLUX_RETOUR_CFAS_TABLES_CORRESPONDANCES_ENDPOINT_URL").required().asString(),
+    endpoint: "https://tables-correspondances.apprentissage.beta.gouv.fr/api",
   },
   mnaCatalogApi: {
-    endpoint: env.get("FLUX_RETOUR_CFAS_MNA_CATALOG_ENDPOINT_URL").required().asString(),
+    endpoint: "https://catalogue.apprentissage.beta.gouv.fr/api",
   },
   lbaApi: {
-    endpoint: env.get("FLUX_RETOUR_CFAS_LBA_ENDPOINT_URL").required().asString(),
+    endpoint: "http://labonnealternance.apprentissage.beta.gouv.fr/api",
   },
   mnaReferentielApi: {
-    endpoint: env.get("FLUX_RETOUR_CFAS_MNA_REFERENTIEL_ENDPOINT_URL").required().asString(),
+    endpoint: "https://referentiel.apprentissage.onisep.fr/api/v1",
   },
   smtp: {
     host: env.get("FLUX_RETOUR_CFAS_SMTP_HOST").asString(),
@@ -69,9 +60,9 @@ const config = {
   ovhStorage: {
     username: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_USERNAME").required().asString(),
     password: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_PASSWORD").required().asString(),
-    authURL: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_AUTH_URL").required().asString(),
+    authURL: "https://auth.cloud.ovh.net/v3/auth",
     tenantId: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_TENANT_ID").required().asString(),
-    region: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_REGION").required().asString(),
+    region: "GRA",
     containerName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").required().asString(),
     encryptionKey: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_ENCRYPTION_KEY").required().asString(),
   },
