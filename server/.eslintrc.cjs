@@ -23,7 +23,14 @@ module.exports = {
     "import/no-unresolved": 2,
     "node/no-missing-import": 0, // duplicated with import/no-unresolved
     "import/no-commonjs": 2,
-    "import/extensions": [2, "ignorePackages"],
+    "import/extensions": [
+      2,
+      "ignorePackages",
+      {
+        js: "always",
+        ts: "never",
+      },
+    ],
   },
   env: {
     es2021: true,

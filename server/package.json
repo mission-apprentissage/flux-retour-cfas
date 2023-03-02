@@ -9,9 +9,9 @@
   "exports": "./src/index.js",
   "type": "module",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/index.js",
+    "start": "ts-node-esm -r tsconfig-paths/register src/index.js",
     "build": "tsc --project tsconfig.json",
-    "start:dev": "nodemon --inspect=0.0.0.0 --signal SIGINT --ignore tests/ src/index.js",
+    "start:dev": "nodemon --inspect=0.0.0.0 --signal SIGINT --ignore tests/ --exec yarn start",
     "test": "cross-env DOTENV_CONFIG_PATH=.env.example c8 --check-coverage mocha --config=mocharc.json tests/integration",
     "test:single": "cross-env DOTENV_CONFIG_PATH=.env.example mocha --config=mocharc.json",
     "lint": "eslint src/ tests/",
