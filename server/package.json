@@ -16,7 +16,6 @@
     "test:single": "cross-env DOTENV_CONFIG_PATH=.env.example mocha --config=mocharc.json",
     "lint": "eslint src/ tests/",
     "cli": "node src/jobs/cli.js",
-    "cli:fiabilisation": "node src/jobs/cli.fiabilisation.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down"
