@@ -1,8 +1,7 @@
 import express from "express";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
 import config from "../../../config.js";
-import { passwordSchema } from "../../../common/utils/validationUtils.js";
+import { passwordSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import passport from "passport";
 import { createResetPasswordToken, createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { Strategy, ExtractJwt } from "passport-jwt";
@@ -14,6 +13,7 @@ import {
 } from "../../../common/actions/users.actions.js";
 import * as sessions from "../../../common/actions/sessions.actions.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
+import { returnResult } from "../../middlewares/helpers.js";
 
 const checkPasswordToken = () => {
   passport.use(
@@ -44,39 +44,39 @@ export default ({ mailer }) => {
 
   router.post(
     "/forgotten-password",
-    tryCatch(async (req, res) => {
-      const { email, noEmail } = await Joi.object({
+    returnResult(async (req) => {
+      const { email, noEmail } = await validateFullObjectSchema(req.body, {
         email: Joi.string().email().required().lowercase().trim(),
         noEmail: Joi.boolean(),
-      }).validateAsync(req.body, { abortEarly: false });
+      });
 
       const user = await getUser(email);
       if (!user) {
-        return res.json({});
+        return {};
       }
 
       const token = createResetPasswordToken(user.email);
 
       if (noEmail) {
-        return res.json({ token });
+        return { token };
       }
 
       await mailer.sendEmail({ to: user.email, payload: user }, "reset_password");
 
-      return res.json({});
+      return {};
     })
   );
 
   router.post(
     "/reset-password",
     checkPasswordToken(),
-    tryCatch(async (req, res) => {
+    returnResult(async (req, res) => {
       const user = req.user;
 
-      const { newPassword } = await Joi.object({
+      const { newPassword } = await validateFullObjectSchema(req.body, {
         passwordToken: Joi.string().required(),
         newPassword: passwordSchema(user.is_admin).required(),
-      }).validateAsync(req.body, { abortEarly: false });
+      });
       // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
 
       const updatedUser = await changePassword(user.email, newPassword);
@@ -88,10 +88,11 @@ export default ({ mailer }) => {
       const token = createUserTokenSimple({ payload: { email: payload.email } });
       await sessions.addJwt(token);
 
-      responseWithCookie({ res, token }).status(200).json({
+      responseWithCookie({ res, token });
+      return {
         loggedIn: true,
         token,
-      });
+      };
     })
   );
 
