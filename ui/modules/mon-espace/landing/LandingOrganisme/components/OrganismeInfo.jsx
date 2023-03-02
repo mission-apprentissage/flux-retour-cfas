@@ -17,7 +17,7 @@ import Section from "@/components/Section/Section";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import NatureOrganismeDeFormationWarning from "./NatureOrganismeDeFormationWarning";
 import { organismeAtom } from "@/hooks/organismeAtoms";
-import { getReseauDisplayNameFromKey } from "@/common/constants/networksConstants.js";
+import { getReseauDisplayNameFromKey } from "@shared/constants/networksConstants";
 import IndicateursInfo from "../../common/IndicateursInfos.jsx";
 import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
 

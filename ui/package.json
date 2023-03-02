@@ -7,7 +7,6 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "docker-dev": "yarn install && yarn dev",
     "dev": "cross-env NEXT_PUBLIC_VERSION=$npm_package_version next dev",
     "build": "cross-env NEXT_PUBLIC_VERSION=$npm_package_version next build",
     "start": "cross-env NEXT_PUBLIC_VERSION=$npm_package_version next start",

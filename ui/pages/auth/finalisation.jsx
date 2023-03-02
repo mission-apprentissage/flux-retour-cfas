@@ -23,7 +23,6 @@ import Head from "next/head";
 import uniq from "lodash.uniq";
 
 import Page from "@/components/Page/Page";
-
 import useToken from "@/hooks/useToken";
 import useAuth from "@/hooks/useAuth";
 import { _get, _post } from "@/common/httpClient";
@@ -33,7 +32,7 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "@/common/constants/territoiresConstants";
 import { Check } from "../../theme/components/icons";
-import { RESEAUX_CFAS } from "@/common/constants/networksConstants";
+import { RESEAUX_CFAS } from "@shared/constants/networksConstants";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 const ACADEMIES_SORTED = Object.values(ACADEMIES).sort((a, b) => Number(a.code) - Number(b.code));

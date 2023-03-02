@@ -33,7 +33,8 @@ services:
     image: flux_retour_cfas_ui
     container_name: flux_retour_cfas_ui
     build:
-      context: ui
+      context: .
+      dockerfile: ui/Dockerfile
     mem_limit: 256m
     networks:
       - flux_retour_cfas_network
@@ -78,7 +79,7 @@ services:
     networks:
       - flux_retour_cfas_network
     healthcheck:
-      test: [ "CMD", "/usr/local/bin/clamdcheck.sh" ]
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
       interval: 60s
       retries: 3
       start_period: 120s

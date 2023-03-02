@@ -12,10 +12,9 @@ services:
     volumes:
       - ./ui:/app:z
       - /app/.next
-      - /app/node_modules
+      - ./shared:/shared:z
     build:
-      context: ui
-      dockerfile: Dockerfile.dev
+      dockerfile: ui/Dockerfile.dev
       args:
         - NEXT_PUBLIC_ENV=dev
         - NEXT_PUBLIC_BASE_URL=http://localhost
