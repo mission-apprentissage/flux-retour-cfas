@@ -9,9 +9,9 @@
   "exports": "./src/index.js",
   "type": "module",
   "scripts": {
-    "start": "ts-node-esm -r tsconfig-paths/register src/index.js",
-    "build": "tsc --project tsconfig.json",
-    "start:dev": "nodemon --inspect=0.0.0.0 --signal SIGINT --ignore tests/ --exec yarn start",
+    "start": "tsx src/index.js",
+    "build": "tsc --build tsconfig.json",
+    "start:dev": "tsx watch --inspect=0.0.0.0:9229 --ignore tests/ src/index.js",
     "test": "cross-env DOTENV_CONFIG_PATH=.env.example c8 --check-coverage mocha --config=mocharc.json tests/integration",
     "test:single": "cross-env DOTENV_CONFIG_PATH=.env.example mocha --config=mocharc.json",
     "lint": "eslint src/ tests/",
@@ -84,8 +84,6 @@
     "safe-stable-stringify": "2.4.1",
     "sha512crypt-node": "1.0.2",
     "tcp-port-used": "1.0.2",
-    "ts-node": "10.9.1",
-    "tsconfig-paths": "3.14.2",
     "uuid": "8.3.2",
     "xlsx": "0.18.5"
   },
@@ -127,8 +125,8 @@
     "mockdate": "3.0.5",
     "mongodb-memory-server": "8.5.2",
     "nock": "13.2.4",
-    "nodemon": "2.0.16",
     "prettier": "2.6.2",
+    "tsx": "3.12.3",
     "typescript": "4.9.4"
   }
 }
