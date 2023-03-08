@@ -34,7 +34,9 @@ const insertInFiabilisationIfNotExist = async (fiabilisation) => {
  * TODO : optims upsert
  */
 export const buildFiabilisationUaiSiret = async () => {
-  await clearFiabilisationUaiSiret();
+  logger.info("Clear de la table fiabilisation Uai Siret...");
+  await fiabilisationUaiSiretDb().deleteMany({});
+
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
 
   // on récupère tous les couples UAI/SIRET depuis les dossiers apprenants (migration)
@@ -229,12 +231,4 @@ const insertManualMappingsFromFile = async () => {
   });
 
   return nbInserted;
-};
-
-/**
- * Suppression des éléments de la table fiabilisation uai siret
- */
-const clearFiabilisationUaiSiret = async () => {
-  logger.info("Clear de la table fiabilisation Uai Siret...");
-  await fiabilisationUaiSiretDb().deleteMany({});
 };
