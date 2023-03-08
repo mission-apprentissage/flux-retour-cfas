@@ -7,7 +7,7 @@ module.exports = {
     "plugin:node/recommended-module",
     "plugin:prettier/recommended",
   ],
-  plugins: ["mocha", "import", "@typescript-eslint"],
+  plugins: ["jest", "import", "@typescript-eslint"],
   rules: {
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/ban-ts-comment": 0,
@@ -40,7 +40,7 @@ module.exports = {
   env: {
     es2021: true,
     node: true,
-    mocha: true,
+    jest: true,
   },
   parserOptions: {
     ecmaVersion: 2020,

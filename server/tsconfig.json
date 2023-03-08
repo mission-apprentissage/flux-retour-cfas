@@ -102,7 +102,8 @@
   },
   "include": [
     "./**/*.ts",
-    "./**/*.js"
+    "./**/*.js",
+     "jest.config.cjs",
   ],
   "exclude": [
     "./node_modules",
