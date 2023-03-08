@@ -156,11 +156,45 @@ export const getUserByEmail = async (email) => {
  * @returns
  */
 export const getUserById = async (_id, projection = {}) => {
-  const user = await usersMigrationDb().findOne({ _id: new ObjectId(_id) }, { projection });
-
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
+  const user = await usersMigrationDb()
+    .aggregate(
+      [
+        { $match: { _id: new ObjectId(_id) } },
+        {
+          $lookup: {
+            from: "organismes",
+            localField: "main_organisme_id",
+            foreignField: "_id",
+            as: "main_organisme",
+          },
+        },
+        { $unwind: { path: "$main_organisme", preserveNullAndEmptyArrays: true } },
+        // retrieve user permissions
+        {
+          $lookup: {
+            from: "permissions",
+            localField: "email",
+            foreignField: "userEmail",
+            as: "permissions",
+            pipeline: [
+              { $project: { organisme_id: 1, role: 1, pending: 1, created_at: 1 } },
+              {
+                $lookup: {
+                  from: "organismes",
+                  localField: "organisme_id",
+                  foreignField: "_id",
+                  as: "organisme",
+                  pipeline: [{ $project: { siret: 1, nom: 1, created_at: 1, uai: 1 } }],
+                },
+              },
+              { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
+            ],
+          },
+        },
+      ],
+      { projection }
+    )
+    .next();
 
   return user;
 };
@@ -170,11 +204,56 @@ export const getUserById = async (_id, projection = {}) => {
  * @param {*} query
  * @returns
  */
-export const getAllUsers = async (query = {}) =>
-  await usersMigrationDb()
-    .find(query, { projection: { password: 0, __v: 0 } })
-    .toArray();
+export const getAllUsers = async (query = {}, { page, limit, sort }) => {
+  const result = await usersMigrationDb()
+    .aggregate([
+      { $match: query },
+      { $sort: sort },
+      { $project: { password: 0 } },
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "main_organisme_id",
+          foreignField: "_id",
+          as: "main_organisme",
+        },
+      },
+      { $unwind: { path: "$main_organisme", preserveNullAndEmptyArrays: true } },
+      // retrieve permissions on main organisme
+      {
+        $lookup: {
+          from: "permissions",
+          as: "permission",
+          let: {
+            organisme_id: "$main_organisme_id",
+            user_id: "$_id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["organisme_id", "$$organisme_id"] }, { $eq: ["$user", "$$user_id"] }],
+                },
+              },
+            },
+            { $project: { role: 1, pending: 1, created_at: 1 } },
+          ],
+        },
+      },
+      { $unwind: { path: "$main_organisme", preserveNullAndEmptyArrays: true } },
+      {
+        $facet: {
+          pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
+          data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+        },
+      },
+      { $unwind: { path: "$pagination" } },
+    ])
+    .next();
 
+  result.pagination.lastPage = Math.ceil(result.pagination.total / limit);
+  return result;
+};
 /**
  * Méthode de suppression d'un user depuis son id
  * @param {string} _idStr
@@ -353,27 +432,6 @@ export const changePassword = async (email, newPassword) => {
   );
 
   return updated.value;
-};
-
-/**
- * Méthode de recherche d'utilisateurs selon plusieurs critères
- * @param {*} searchTerm
- * @returns
- */
-export const searchUsers = async (searchTerm) => {
-  const matchStage = {};
-  if (searchTerm) {
-    matchStage.$or = [
-      { email: new RegExp(escapeRegExp(searchTerm), "i") },
-      { nom: new RegExp(escapeRegExp(searchTerm), "i") },
-    ];
-  }
-
-  const sortStage = { nom: 1 };
-
-  const found = await usersMigrationDb().aggregate([{ $match: matchStage }, { $sort: sortStage }]);
-
-  return found.toArray();
 };
 
 /**

@@ -24,6 +24,7 @@ const colors = {
   galt: "#f9f8f6",
   galt_hover: "#eceae3",
   galt2: "#F6F6F6",
+  galtDark: "#ECEAE3",
   mgalt: "#666666",
   dgalt: "#E5E5E5",
   disablegrey: "#929292",

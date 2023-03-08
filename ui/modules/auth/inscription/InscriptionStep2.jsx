@@ -2,7 +2,6 @@ import React from "react";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import * as Yup from "yup";
-import generator from "generate-password-browser";
 import {
   Box,
   Button,
@@ -55,14 +54,7 @@ const InscriptionStep2 = ({ onSucceeded, type, uai, organismesAppartenance, etab
     onSubmit: async (values) => {
       // eslint-disable-next-line no-undef, no-async-promise-executor
       try {
-        const newTmpPassword = generator.generate({
-          length: 12,
-          numbers: true,
-          lowercase: true,
-          uppercase: true,
-          strict: true,
-        });
-        const result = await _post("/api/v1/auth/register", { ...values, password: newTmpPassword });
+        const result = await _post("/api/v1/auth/register", values);
         if (result.succeeded) {
           onSucceeded();
         }

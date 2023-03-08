@@ -18,6 +18,7 @@ module.exports = {
       resolve: {
         ...config.resolve,
         fallback: {
+          crypto: false,
           https: false,
           path: false,
         },

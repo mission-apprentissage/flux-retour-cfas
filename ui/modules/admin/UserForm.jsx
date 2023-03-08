@@ -1,26 +1,19 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import { useRouter } from "next/router";
-import { useQuery } from "@tanstack/react-query";
-import Head from "next/head";
-import generator from "generate-password-browser";
 import {
   Accordion,
   AccordionButton,
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
-  Badge,
   Box,
   Button,
   Checkbox,
-  Flex,
   FormControl,
   FormLabel,
-  Heading,
+  Grid,
   HStack,
   Input,
-  Stack,
   Table,
   Td,
   Text,
@@ -29,13 +22,11 @@ import {
 } from "@chakra-ui/react";
 
 import { _delete, _get, _post, _put } from "@/common/httpClient";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
-import Page from "@/components/Page/Page";
-import withAuth from "@/components/withAuth";
-import Acl from "@/components/Acl";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { Check } from "@/theme/components/icons";
 import useToaster from "@/hooks/useToaster";
+import { DEPARTEMENTS_BY_ID, REGIONS_BY_ID, ACADEMIES_BY_ID } from "@/common/constants/territoiresConstants";
+import { getUserOrganisationLabel } from "@/common/constants/usersConstants";
+import Link from "next/link";
 
 const buildRolesAcl = (newRoles, roles) => {
   let acl = [];
@@ -50,9 +41,10 @@ const buildRolesAcl = (newRoles, roles) => {
   return acl;
 };
 
-const UserLine = ({ user, roles, afterSubmit }) => {
+export const UserForm = ({ user, roles, afterSubmit }) => {
   const [, setRolesAcl] = useState(buildRolesAcl(user?.roles || [], roles));
   const { toastSuccess, toastError } = useToaster();
+  const rolesById = roles?.reduce((acc, role) => ({ ...acc, [role._id]: role }), {});
 
   useEffect(() => {
     async function run() {
@@ -61,29 +53,20 @@ const UserLine = ({ user, roles, afterSubmit }) => {
     run();
   }, [roles, user]);
 
-  const newTmpPassword = generator.generate({
-    length: 10,
-    numbers: true,
-    lowercase: true,
-    uppercase: true,
-    strict: true,
-  });
-
   const { values, handleSubmit, handleChange, setFieldValue, resetForm } = useFormik({
     initialValues: {
       accessAllCheckbox: user?.is_admin ? ["on"] : [],
       roles: user?.roles || [],
-      acl: user?.custom_acl || [],
       newNom: user?.nom || "",
       newPrenom: user?.prenom || "",
       newEmail: user?.email || "",
-      newTmpPassword,
     },
-    onSubmit: async (
-      { accessAllCheckbox, newNom, newPrenom, newEmail, newTmpPassword, roles, acl },
-      { setSubmitting }
-    ) => {
+    onSubmit: async ({ accessAllCheckbox, newNom, newPrenom, newEmail, roles, acl }, { setSubmitting }) => {
       const accessAll = accessAllCheckbox.includes("on");
+
+      let result;
+      let error;
+
       try {
         if (user) {
           const body = {
@@ -98,7 +81,7 @@ const UserLine = ({ user, roles, afterSubmit }) => {
               },
             },
           };
-          const result = await _put(`/api/v1/admin/user/${user._id}`, body);
+          result = await _put(`/api/v1/admin/users/${user._id}`, body);
           if (result?.ok) {
             toastSuccess("Utilisateur mis à jour");
           } else {
@@ -108,7 +91,6 @@ const UserLine = ({ user, roles, afterSubmit }) => {
           }
         } else {
           const body = {
-            password: newTmpPassword,
             options: {
               prenom: newPrenom,
               nom: newNom,
@@ -120,7 +102,7 @@ const UserLine = ({ user, roles, afterSubmit }) => {
               },
             },
           };
-          const result = await _post("/api/v1/admin/user/", body).catch((err) => {
+          result = await _post("/api/v1/admin/user/", body).catch((err) => {
             if (err.statusCode === 409) {
               return { error: "Cet utilisateur existe déjà" };
             }
@@ -129,20 +111,22 @@ const UserLine = ({ user, roles, afterSubmit }) => {
             toastSuccess("Utilisateur créé");
             resetForm();
           } else if (result?.error) {
-            toastError(result.error);
+            error = toastError(result.error);
           } else {
-            toastError("Erreur lors de la création de l'utilisateur.", {
+            error = "Erreur lors de la création de l'utilisateur.";
+            toastError(error, {
               description: " Merci de réessayer plus tard",
             });
           }
         }
       } catch (e) {
+        error = e;
         console.error(e);
         const response = await (e?.json ?? {});
         const message = response?.message ?? e?.message;
         toastError(message);
       }
-      await afterSubmit();
+      await afterSubmit(result, error);
       setSubmitting(false);
     },
   });
@@ -150,7 +134,7 @@ const UserLine = ({ user, roles, afterSubmit }) => {
   const onDeleteClicked = async (e) => {
     e.preventDefault();
     if (confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) {
-      const result = await _delete(`/api/v1/admin/user/${user._id}`);
+      const result = await _delete(`/api/v1/admin/users/${user._id}`);
       if (result?.ok) {
         toastSuccess("Utilisateur supprimé");
       } else {
@@ -199,72 +183,39 @@ const UserLine = ({ user, roles, afterSubmit }) => {
   };
 
   const handleRoleChange = (roleName) => {
-    let oldRolesAcl = [];
-    oldRolesAcl = buildRolesAcl(values.roles, roles);
-
-    let customAcl = [];
-    for (let i = 0; i < values.acl.length; i++) {
-      const currentAcl = values.acl[i];
-      if (!oldRolesAcl.includes(currentAcl)) {
-        customAcl.push(currentAcl);
-      }
-    }
-
-    let newRolesAcl = [];
     let newRoles = [];
     if (values.roles.includes(roleName)) {
       newRoles = values.roles.filter((r) => r !== roleName);
-      newRolesAcl = buildRolesAcl(newRoles, roles);
     } else {
       newRoles = [...values.roles, roleName];
-      newRolesAcl = buildRolesAcl(newRoles, roles);
     }
-
-    setFieldValue("acl", customAcl);
+    console.log({ newRoles });
     setFieldValue("roles", newRoles);
-
-    setRolesAcl(newRolesAcl);
   };
-
-  const onAclChanged = useCallback(
-    (newAcl) => {
-      setFieldValue("acl", newAcl);
-    },
-    [setFieldValue]
-  );
 
   return (
     <form onSubmit={handleSubmit}>
-      <Text>Compte créé sur: {user?.orign_register}</Text>
-      <Box flex={1}>
-        <Text>Statut : {user?.account_status}</Text>
-      </Box>
-      <FormControl py={2}>
-        <FormLabel>Nom</FormLabel>
-        <Input type="text" id="newNom" name="newNom" value={values.newNom} onChange={handleChange} required />
-      </FormControl>
-      <FormControl py={2}>
-        <FormLabel>Prenom</FormLabel>
-        <Input type="text" id="newPrenom" name="newPrenom" value={values.newPrenom} onChange={handleChange} required />
-      </FormControl>
-
-      <FormControl py={2}>
-        <FormLabel>Email</FormLabel>
-        <Input type="email" id="newEmail" name="newEmail" value={values.newEmail} onChange={handleChange} required />
-      </FormControl>
-
-      {!user && (
+      <Grid gridTemplateColumns="repeat(2, 2fr)" gridGap="2w">
         <FormControl py={2}>
-          <FormLabel>Mot de passe temporaire</FormLabel>
+          <FormLabel>Nom</FormLabel>
+          <Input type="text" id="newNom" name="newNom" value={values.newNom} onChange={handleChange} required />
+        </FormControl>
+        <FormControl py={2}>
+          <FormLabel>Prenom</FormLabel>
           <Input
             type="text"
-            id="newTmpPassword"
-            name="newTmpPassword"
-            value={values.newTmpPassword}
+            id="newPrenom"
+            name="newPrenom"
+            value={values.newPrenom}
             onChange={handleChange}
+            required
           />
         </FormControl>
-      )}
+        <FormControl py={2}>
+          <FormLabel>Email</FormLabel>
+          <Input type="email" id="newEmail" name="newEmail" value={values.newEmail} onChange={handleChange} required />
+        </FormControl>
+      </Grid>
 
       <FormControl py={2} mt={3}>
         <Checkbox
@@ -286,14 +237,14 @@ const UserLine = ({ user, roles, afterSubmit }) => {
         <HStack spacing={5}>
           {roles
             .filter((role) => role.type === "user")
-            .map((role, i) => {
+            .map((role) => {
               return (
                 <Checkbox
                   name="roles"
-                  key={i}
+                  key={role._id}
                   onChange={() => handleRoleChange(role.name)}
                   value={role.name}
-                  isChecked={values.roles.includes(role.name)}
+                  isChecked={values.roles.includes(role._id)}
                   icon={<Check />}
                 >
                   {role.name}
@@ -302,7 +253,50 @@ const UserLine = ({ user, roles, afterSubmit }) => {
             })}
         </HStack>
       </FormControl>
-
+      {user && (
+        <VStack gap={2} alignItems="baseline">
+          {user.main_organisme && (
+            <HStack gap={2}>
+              <span>Établissement :</span>
+              <Text as="span" bgColor="galtDark" px={2}>
+                <Link href={`/mon-espace/organisme/${user.main_organisme._id}`}>
+                  {user.main_organisme.nom || getUserOrganisationLabel(user)}
+                </Link>
+              </Text>
+            </HStack>
+          )}
+          <HStack gap={2}>
+            <span>Territoire(s) :</span>
+            <HStack gap={2}>
+              {!user.codes_region?.length && !user.codes_academie?.length && !user.codes_departement?.length && "Aucun"}
+              {user.codes_region?.map((code) => (
+                <Text bgColor="galtDark" key={code} px={2}>
+                  Région {REGIONS_BY_ID[code]?.nom || code}
+                </Text>
+              ))}
+              {user.codes_academie?.map((code) => (
+                <Text bgColor="galtDark" key={code} px={2}>
+                  Académie {ACADEMIES_BY_ID[code].nom}
+                </Text>
+              ))}
+              {user.codes_departement?.map((code) => (
+                <Text bgColor="galtDark" key={code} px={2}>
+                  {DEPARTEMENTS_BY_ID[code].nom} ({code})
+                </Text>
+              ))}
+            </HStack>
+          </HStack>
+          <p>Droit associé au compte : </p>
+          {user.account_status && (
+            <p>
+              Statut du compte :{" "}
+              <Text as="span" bgColor="galt2">
+                {user.account_status}
+              </Text>
+            </p>
+          )}
+        </VStack>
+      )}
       {user?.permissions?.length > 0 && (
         <Accordion bg="white" mt={3} allowToggle>
           <AccordionItem>
@@ -388,10 +382,8 @@ const UserLine = ({ user, roles, afterSubmit }) => {
         </Accordion>
       )}
 
-      <Acl acl={values.acl} title=" Droits d'accès Supplémentaire" onChanged={onAclChanged} />
-
-      {user && (
-        <Box>
+      {user ? (
+        <Box marginTop={10}>
           <Button type="submit" variant="primary" mr={5}>
             Enregistrer
           </Button>
@@ -399,8 +391,7 @@ const UserLine = ({ user, roles, afterSubmit }) => {
             Supprimer l&apos;utilisateur
           </Button>
         </Box>
-      )}
-      {!user && (
+      ) : (
         <Button type="submit" variant="primary">
           Créer l&apos;utilisateur
         </Button>
@@ -409,110 +400,4 @@ const UserLine = ({ user, roles, afterSubmit }) => {
   );
 };
 
-export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
-
-const Users = () => {
-  const { data: roles } = useQuery(["roles"], () => _get("/api/v1/admin/roles/"));
-  const router = useRouter();
-
-  const tabIndex = parseInt(new URL(`http://domain/${router.asPath}`)?.hash.replace("#", "") ?? -1, 10) ?? -1;
-  const { data: users, refetch: refetchUsers } = useQuery(["users"], () => _get("/api/v1/admin/users/"));
-
-  const title = "Gestion des utilisateurs";
-
-  return (
-    <Page>
-      <Head>
-        <title>{title}</title>
-      </Head>
-
-      <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
-
-      <Heading as="h1" mb={8} mt={6}>
-        {title}
-      </Heading>
-      <Stack spacing={2}>
-        <Accordion
-          defaultIndex={tabIndex}
-          index={tabIndex}
-          bg="white"
-          allowToggle
-          onChange={(value) => router.push(`#${value}`, null, { shallow: false, scroll: false })}
-        >
-          {roles && (
-            <AccordionItem mb={12}>
-              <AccordionButton bg="bluefrance" color="white" _hover={{ bg: "blue.700" }}>
-                <Box flex="1" textAlign="left" fontSize="gamma">
-                  Créer un utilisateur
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <AccordionPanel pb={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
-                <UserLine
-                  user={null}
-                  roles={roles}
-                  afterSubmit={async () => {
-                    await refetchUsers();
-                  }}
-                />
-              </AccordionPanel>
-            </AccordionItem>
-          )}
-
-          {roles &&
-            users?.map((user, idx) => {
-              const pendingPermissionsCount = user?.permissions?.filter((p) => p.pending).length;
-              return (
-                <AccordionItem key={user.email}>
-                  {({ isExpanded }) => (
-                    <>
-                      <AccordionButton _expanded={{ bg: "grey.200" }} border={"1px solid"} borderColor={"bluefrance"}>
-                        <Flex
-                          fontSize="gamma"
-                          flexGrow={1}
-                          justifyContent="space-between"
-                          alignItems="center"
-                          id={idx + 1 /* anchor */}
-                        >
-                          <Text>
-                            {user.email} - {user.prenom} {user.nom}
-                          </Text>
-                          <VStack alignItems="flex-end" spacing={0}>
-                            <Badge
-                              color="white"
-                              backgroundColor={user?.account_status === "CONFIRMED" ? "flatsuccess" : "warning"}
-                            >
-                              {user?.account_status}
-                            </Badge>
-                            {pendingPermissionsCount > 0 && (
-                              <Text fontSize={"sm"}>
-                                {pendingPermissionsCount} permission(s) en attente de validation
-                              </Text>
-                            )}
-                          </VStack>
-                        </Flex>
-                        <AccordionIcon />
-                      </AccordionButton>
-                      <AccordionPanel pb={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
-                        {isExpanded && (
-                          <UserLine
-                            user={user}
-                            roles={roles}
-                            afterSubmit={async () => {
-                              await refetchUsers();
-                            }}
-                          />
-                        )}
-                      </AccordionPanel>
-                    </>
-                  )}
-                </AccordionItem>
-              );
-            })}
-        </Accordion>
-      </Stack>
-    </Page>
-  );
-};
-
-export default withAuth(Users, "admin/page_gestion_utilisateurs");
+export default UserForm;

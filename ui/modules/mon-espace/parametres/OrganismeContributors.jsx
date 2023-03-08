@@ -7,12 +7,13 @@ import { useRecoilValue } from "recoil";
 import { useQueries, useMutation } from "@tanstack/react-query";
 import NavLink from "next/link";
 
-import { Question } from "../../../theme/components/icons";
-import { _get, _post, _put, _delete } from "../../../common/httpClient";
-import Table from "../../../components/Table/Table";
-import { organismeAtom } from "../../../hooks/organismeAtoms";
-import useToaster from "../../../hooks/useToaster";
-import useAuth from "../../../hooks/useAuth";
+import { Question } from "@/theme/components/icons";
+import { _get, _post, _put, _delete } from "@/common/httpClient";
+import Table from "@/components/Table/Table";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import useToaster from "@/hooks/useToaster";
+import useAuth from "@/hooks/useAuth";
+import { getUserOrganisationLabel } from "@/common/constants/usersConstants";
 
 function useOrganismeAcces() {
   const organisme = useRecoilValue(organismeAtom);
@@ -245,25 +246,8 @@ const OrganismeContributors = ({ size = "md" }) => {
                   width: 100,
                   cell: ({ row }) => {
                     const { user } = row.original;
-                    const ORGANISMES_APPARTENANCE = {
-                      TETE_DE_RESEAU: `TÊTE DE RÉSEAU: ${user?.reseau}`,
-                      ACADEMIE: "ACADÉMIE",
-                      DRAAF: "DRAAF",
-                      CARIF_OREF: "CARIF OREF",
-                      DREETS: "DREETS",
-                      CONSEIL_REGIONAL: "CONSEIL RÉGIONAL",
-                      ERP: user?.erp,
-                      AUTRE: "AUTRE",
-                      POLE_EMPLOI: "PÔLE EMPLOI",
-                      MISSION_LOCALE: "MISSION LOCALE",
-                      CELLULE_APPRENTISSAGE: "CELLULE APPRENTISSAGE",
-                      ORGANISME_FORMATION: "ORGANISME DE FORMATION",
-                    };
-                    return (
-                      <Text fontSize="1rem">
-                        {ORGANISMES_APPARTENANCE[user?.organisation]?.toLowerCase() || user?.organisation}
-                      </Text>
-                    );
+
+                    return <Text fontSize="1rem">{getUserOrganisationLabel(user?.organisation)}</Text>;
                   },
                 },
                 userEmail: {

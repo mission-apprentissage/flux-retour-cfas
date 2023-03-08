@@ -28,6 +28,8 @@ import logger from "../../../common/logger.js";
 import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
 import { uniq } from "lodash-es";
 import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions.js";
+import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
+import registrationSchema from "../../../common/validation/registrationSchema.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -58,30 +60,11 @@ export default ({ mailer }) => {
 
   router.post(
     "/register",
+    validateRequestMiddleware({
+      body: registrationSchema().strict(),
+    }),
     tryCatch(async ({ body }, res) => {
-      const {
-        type,
-        email,
-        password,
-        siret,
-        uai: userUai,
-        nom,
-        prenom,
-        civility,
-        organismes_appartenance,
-      } = await Joi.object({
-        type: Joi.string().valid("pilot", "of", "reseau_of").required(),
-        email: Joi.string().required(),
-        password: Joi.string().required(),
-        siret: Joi.string().required(),
-        uai: Joi.string().allow(null, ""),
-        nom: Joi.string().required(),
-        prenom: Joi.string().required(),
-        civility: Joi.string().required(),
-        organismes_appartenance: Joi.string()
-          .valid(...Object.keys(ORGANISMES_APPARTENANCE))
-          .required(),
-      }).validateAsync(body, { abortEarly: false });
+      const { type, email, password, siret, uai: userUai, nom, prenom, civility, organismes_appartenance } = body;
 
       const alreadyExists = await getUserByEmail(email.toLowerCase());
       if (alreadyExists) {

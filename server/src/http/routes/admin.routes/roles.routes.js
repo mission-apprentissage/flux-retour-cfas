@@ -1,6 +1,7 @@
 import express from "express";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
+
+import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { rolesDb } from "../../../common/model/collections.js";
 import { createRole, findRoleById } from "../../../common/actions/roles.actions.js";
 
