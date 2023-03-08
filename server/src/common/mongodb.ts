@@ -98,7 +98,7 @@ export const configureDbSchemaValidation = async (modelDescriptors) => {
  * @returns
  */
 export const clearAllCollections = async () => {
-  let collections = await getDatabase().collections();
+  const collections = await getDatabase().collections();
   return Promise.all(collections.map((c) => c.deleteMany({})));
 };
 

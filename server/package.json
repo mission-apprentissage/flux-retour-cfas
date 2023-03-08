@@ -11,7 +11,7 @@
   "scripts": {
     "start": "node .build/src/index.js",
     "build": "tsc --project tsconfig.json",
-    "start:dev": "tsx watch --inspect=0.0.0.0:9229 --ignore tests/ src/index.js",
+    "start:dev": "tsx watch --inspect=0.0.0.0:9229 --ignore tests/ src/index.ts",
     "test": "cross-env DOTENV_CONFIG_PATH=.env.example c8 --check-coverage mocha --config=mocharc.json tests/integration",
     "test:single": "cross-env DOTENV_CONFIG_PATH=.env.example mocha --config=mocharc.json",
     "lint": "eslint --cache --ext .ts,.js .",
