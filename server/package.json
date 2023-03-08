@@ -80,7 +80,9 @@
     "sha512crypt-node": "1.0.2",
     "tcp-port-used": "1.0.2",
     "uuid": "8.3.2",
-    "xlsx": "0.18.5"
+    "xlsx": "0.18.5",
+    "zod": "3.21.4",
+    "zod-express-middleware": "1.4.0"
   },
   "engines": {
     "node": ">=16.0.0"

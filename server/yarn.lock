@@ -5811,3 +5811,13 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+zod-express-middleware@1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/zod-express-middleware/-/zod-express-middleware-1.4.0.tgz#6ee1e5854d6f339c3bd3d562ab523d281621bc56"
+  integrity sha512-C1pBbwbuotitG1L3I1cr9QD/nuepHAdZEUbVn7y1o2cJq0oaUuS7gTVGby1+DGHL4t2P4eEZKCX0QQDv6hEs3A==
+
+zod@3.21.4:
+  version "3.21.4"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.21.4.tgz#10882231d992519f0a10b5dd58a38c9dabbb64db"
+  integrity sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==
