@@ -31,6 +31,11 @@ module.exports = {
         ts: "never",
       },
     ],
+
+    // désactivé temporairement pour éviter trop de changements
+    // le temps de la migration complète vers typescript
+    "prefer-const": 0,
+    "no-var": 0,
   },
   env: {
     es2021: true,
@@ -43,7 +48,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: "tests/**/*.js",
+      files: "tests/**/*.ts",
       rules: {
         "node/no-unpublished-import": 0,
       },
