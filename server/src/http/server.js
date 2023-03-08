@@ -71,8 +71,6 @@ export default async (services) => {
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
 
-  const requireJwtAuthentication = requireJwtAuthenticationMiddleware();
-
   const checkJwtToken = authMiddleware();
 
   app.use(bodyParser.json());
@@ -143,7 +141,7 @@ export default async (services) => {
   // @deprecated to /dossiers-apprenants
   app.use(
     ["/api/statut-candidats", "/api/dossiers-apprenants"],
-    requireJwtAuthentication,
+    requireJwtAuthenticationMiddleware(),
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     dossierApprenantRouter()
   );
