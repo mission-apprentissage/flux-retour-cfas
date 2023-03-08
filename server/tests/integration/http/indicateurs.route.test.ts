@@ -30,7 +30,7 @@ async function createAndAuthenticateUser(httpClient, userInfos) {
       ...userInfos,
     }
   );
-  await userAfterCreate({ user: userOf, pending: false, notify: false });
+  await userAfterCreate({ user: userOf, pending: false, notify: false, mailer: null });
 
   // authenticate the user
   const response = await httpClient.post("/api/v1/auth/login", { email, password });
@@ -90,7 +90,7 @@ describe("Effectifs Route", () => {
       const app = await startServer();
       httpClient = app.httpClient;
 
-      await Promise.all(organismes.map((organisme) => createOrganisme(organisme)));
+      await Promise.all(organismes.map((organisme) => createOrganisme(organisme as any)));
 
       apiClient = await createAndAuthenticateUser(httpClient, {
         siret: "44492238900010",
