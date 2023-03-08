@@ -2,10 +2,7 @@ import React from "react";
 import NavLink from "next/link";
 import { Box, Button, Container, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 
-import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../../common/constants/product";
-
-const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
 
 const RgpdSection = (props) => {
   return (
@@ -20,9 +17,9 @@ const RgpdSection = (props) => {
         >
           <Box flex="1">
             <Heading as="h2" fontSize="1.9em">
-              {currentPage.title}
+              Protection des données à caractère personnel
             </Heading>
-            <Button variant="secondary" href={NAVIGATION_PAGES.DonneesPersonnelles.path} marginTop="2w" as={NavLink}>
+            <Button variant="secondary" href="/donnees-personnelles" marginTop="2w" as={NavLink}>
               En savoir plus
             </Button>
           </Box>

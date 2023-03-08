@@ -1,5 +1,6 @@
 import React from "react";
 import { Stack, Heading, Text, Box, Container } from "@chakra-ui/react";
+import Head from "next/head";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useEspace } from "@/hooks/useEspace";
@@ -7,7 +8,6 @@ import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/compone
 import { hasContextAccessTo } from "@/common/utils/rolesUtils";
 import ViewSelection from "@/modules/mon-espace/landing/visualiser-les-indicateurs/ViewSelection";
 import Page from "@/components/Page/Page";
-import Head from "next/head";
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import withAuth from "@/components/withAuth";
 

@@ -4,7 +4,7 @@ import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
 
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Link from "@/components/Links/Link";
 import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 import CheckCfaTransmissionContent from "@/modules/organisme-formation/CheckCfaTransmission/CheckCfaTransmissionContent";
@@ -19,9 +19,9 @@ export default function CommentConsulterEtVerifierLesDonnees() {
       <Section>
         <Breadcrumb
           pages={[
-            { title: "Accueil", to: "/" },
+            PAGES.homepage(),
             { title: "Vous êtes un organisme de formation", to: "/organisme-formation" },
-            { title: title },
+            { title },
           ]}
         />
         <Box paddingTop="5w" marginBottom="10w">

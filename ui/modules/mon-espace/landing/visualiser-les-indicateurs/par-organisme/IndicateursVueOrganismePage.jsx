@@ -1,22 +1,21 @@
 import { Box, Flex, Heading, HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
+import Head from "next/head";
 
 import CfasFilter from "@/components/CfasFilter/CfasFilter";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import CfaPanel from "@/components/CfasFilter/CfasPanel";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import useFetchOrganismeInfo from "@/hooks/useFetchOrganismeInfo";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import OrganismeViewContent from "./OrganismeViewContent";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
-import Head from "next/head";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
-
+  const page = PAGES.visualiserLesIndicateursParOrganisme();
   const { data: infosCfa, loading, error } = useFetchOrganismeInfo(filtersContext?.state?.cfa?.uai_etablissement);
 
   const currentOrganisme = filtersContext.state.cfa;
@@ -27,14 +26,12 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   return (
     <Page>
       <Head>
-        <title>{NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.title}</title>
+        <title>{page.title}</title>
       </Head>
       <Section paddingY="3w">
-        <Breadcrumb
-          pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme]}
-        />
+        <Breadcrumb pages={[PAGES.monTableauDeBord(), page]} />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
-          <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.title}</Heading>
+          <Heading as="h1">{page.title}</Heading>
           <SwitchViewButton />
         </HStack>
         {currentOrganisme ? (

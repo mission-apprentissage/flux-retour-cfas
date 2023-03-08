@@ -1,34 +1,33 @@
 import { Box, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
+import Head from "next/head";
 
 import FormationFilter from "@/components/FormationFilter/FormationFilter";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import TerritoireFilter from "@/components/TerritoireFilter/TerritoireFilter";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import ReseauSelect from "./ReseauSelect/ReseauSelect";
 import ReseauSelectPanel from "./ReseauSelect/ReseauSelectPanel";
 import ReseauViewContent from "./ReseauViewContent";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
-import Head from "next/head";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
-
+  const page = PAGES.visualiserLesIndicateursParReseau();
   const currentReseau = filtersContext.state.reseau;
 
   return (
     <Page>
       <Head>
-        <title>{NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.title}</title>
+        <title>{page.title}</title>
       </Head>
       <Section paddingY="3w">
-        <Breadcrumb pages={[NAVIGATION_PAGES.MonTableauDeBord, NAVIGATION_PAGES.VisualiserLesIndicateursParReseau]} />
+        <Breadcrumb pages={[PAGES.monTableauDeBord(), page]} />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
-          <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.title}</Heading>
+          <Heading as="h1">{page.title}</Heading>
           <SwitchViewButton />
         </HStack>
         {currentReseau ? (

@@ -3,10 +3,9 @@ import { Badge, Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-
 import { format, formatISO } from "date-fns";
 import fr from "date-fns/locale/fr";
 
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import Sommaire from "@/components/Sommaire/Sommaire";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import { getUniquesMonthAndYearFromDatesList } from "@/common/utils/dateUtils";
 import { capitalize } from "@/common/utils/stringUtils";
 import { groupEvolutionsByDate } from "@/modules/journal-des-evolutions/groupEvolutionsByDate";
@@ -37,11 +36,11 @@ const JournalDesEvolutions = () => {
         <title>{title}</title>
       </Head>
       <Section paddingTop="3w">
-        <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
+        <Breadcrumb pages={[PAGES.homepage(), { title }]} />
       </Section>
       <Section marginTop="5w">
         <Heading as="h1" mb="2w">
-          {NAVIGATION_PAGES.JournalDesEvolutions.title}
+          Journal des évolutions
         </Heading>
         <HStack
           spacing={["0", "0", "4w", "2w"]}

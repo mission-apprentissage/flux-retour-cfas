@@ -5,9 +5,46 @@ import NavLink from "next/link";
 import PropTypes from "prop-types";
 
 export const PAGES = {
-  monEspace: () => ({ title: "Mon espace", to: "/mon-espace/mon-organisme" }),
-  mesEffectifs: () => ({ title: "Mes effectifs", to: "/mon-espace/mon-organisme/effectifs" }),
-  sesEffectifs: (organismeId) => ({ title: "Ses effectifs", to: `/mon-espace/organisme/${organismeId}/effectifs` }),
+  homepage: () => ({
+    title: "Accueil",
+    path: "/",
+  }),
+  monEspace: () => ({
+    title: "Mon espace",
+    path: "/mon-espace/mon-organisme",
+  }),
+  monTableauDeBord: () => ({
+    title: "Mon tableau de bord",
+    path: "/mon-espace/mon-organisme",
+  }),
+  mesEffectifs: () => ({
+    title: "Mes effectifs",
+    path: "/mon-espace/mon-organisme/effectifs",
+  }),
+  sesEffectifs: (organismeId) => ({
+    title: "Ses effectifs",
+    path: `/mon-espace/organisme/${organismeId}/effectifs`,
+  }),
+  visualiserLesIndicateurs: () => ({
+    title: "Visualiser les indicateurs en temps réel",
+    path: "/mon-espace/mon-organisme/",
+  }),
+  visualiserLesIndicateursParTerritoire: () => ({
+    title: "Vue territoriale",
+    path: "/mon-espace/mon-organisme/par-territoire",
+  }),
+  visualiserLesIndicateursParReseau: () => ({
+    title: "Vue par réseau",
+    path: "/mon-espace/mon-organisme/par-reseau",
+  }),
+  visualiserLesIndicateursParOrganisme: () => ({
+    title: "Vue par organisme de formation",
+    path: "/mon-espace/mon-organisme/par-organisme",
+  }),
+  visualiserLesIndicateursParFormation: () => ({
+    title: "Vue par formation",
+    path: "/mon-espace/mon-organisme/par-formation",
+  }),
 };
 
 const Breadcrumb = ({ pages }) => {
@@ -18,7 +55,7 @@ const Breadcrumb = ({ pages }) => {
       color={"grey.800"}
     >
       {pages?.map((page, index) => {
-        if (index === pages.length - 1 || !(page.to || page.path)) {
+        if (index === pages.length - 1 || !page.path) {
           return (
             <BreadcrumbItem key={page.title} isCurrentPage>
               <BreadcrumbLink textDecoration="none" _hover={{ textDecoration: "none" }} cursor="default">
@@ -31,7 +68,7 @@ const Breadcrumb = ({ pages }) => {
             <BreadcrumbItem key={page.title}>
               <BreadcrumbLink
                 as={NavLink}
-                href={page.to || page.path}
+                href={page.path}
                 color={"grey.600"}
                 textDecoration="underline"
                 _focus={{ boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" }}
@@ -51,8 +88,7 @@ Breadcrumb.propTypes = {
   pages: PropTypes.arrayOf(
     PropTypes.shape({
       title: PropTypes.string.isRequired,
-      path: PropTypes.string, // FIXME
-      to: PropTypes.string, // FIXME revoir toute la navigation et harmoniser path et to
+      path: PropTypes.string,
     }).isRequired
   ).isRequired,
 };

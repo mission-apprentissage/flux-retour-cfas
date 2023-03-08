@@ -4,8 +4,8 @@ import React from "react";
 
 import { hasUserRoles } from "@/common/auth/roles";
 import LinkCard from "@/components/LinkCard/LinkCard";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import useAuth from "@/hooks/useAuth";
+import { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const ViewOptionCard = ({ navigationPageData }) => {
   return (
@@ -28,19 +28,19 @@ const ViewSelection = () => {
   const userViewOptions = isUserANetwork
     ? [
         {
-          path: NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path,
+          path: "/mon-espace/mon-organisme/par-reseau",
           title: `Vue du réseau ${auth.reseau}`,
         },
         {
-          path: NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path,
+          path: PAGES.visualiserLesIndicateursParOrganisme().path,
           title: "Vue par organisme de formation du réseau",
         },
       ]
     : [
-        NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire,
-        NAVIGATION_PAGES.VisualiserLesIndicateursParReseau,
-        NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme,
-        NAVIGATION_PAGES.VisualiserLesIndicateursParFormation,
+        PAGES.visualiserLesIndicateursParTerritoire(),
+        PAGES.visualiserLesIndicateursParReseau(),
+        PAGES.visualiserLesIndicateursParOrganisme(),
+        PAGES.visualiserLesIndicateursParFormation(),
       ];
   return (
     <HStack marginTop="3w" spacing="3w">

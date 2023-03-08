@@ -1,7 +1,6 @@
 import React from "react";
 import Head from "next/head";
 import { Box, Flex, Heading, HStack, Image, Text } from "@chakra-ui/react";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import { PRODUCT_NAME_TITLE, PRODUCT_NAME } from "@/common/constants/product";
 import ApercuDesDonneesSection from "@/components/Home/sections/ApercuDesDonneesSection";
 import RgpdSection from "@/components/Home/sections/RgpdSection";
@@ -42,7 +41,7 @@ export default function Home() {
           alignItems={["normal", "normal", "normal", "normal", "center"]}
           mt={["2w", "2w", "2w", "2w", "0"]}
         >
-          <LinkCard linkHref={NAVIGATION_PAGES.Login.path} mb={["2w", "2w", "2w", "2w", "0"]}>
+          <LinkCard linkHref="/auth/connexion" mb={["2w", "2w", "2w", "2w", "0"]}>
             Vous êtes une{" "}
             <strong>
               institution ou une organisation <br />
@@ -50,7 +49,7 @@ export default function Home() {
             </strong>
             (OPCO, branche, etc...)
           </LinkCard>
-          <LinkCard linkHref={NAVIGATION_PAGES.Login.path}>
+          <LinkCard linkHref="/auth/connexion">
             Vous êtes un{" "}
             <strong>
               organisme de formation <br />

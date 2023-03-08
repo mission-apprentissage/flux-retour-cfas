@@ -4,10 +4,9 @@ import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
 
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 import DemandeBranchementErpFormBlock from "@/modules/organisme-formation/DemandeBranchementErp/DemandeBranchementErpFormBlock";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const CommentTransmettreVosDonneesPage = () => {
   const title = "Comment transmettre les données de votre organisme ?";
@@ -19,9 +18,9 @@ const CommentTransmettreVosDonneesPage = () => {
       <Section>
         <Breadcrumb
           pages={[
-            { title: "Accueil", to: "/" },
+            PAGES.homepage(),
             { title: "Vous êtes un organisme de formation", to: "/organisme-formation" },
-            { title: title },
+            { title },
           ]}
         />
 
@@ -39,7 +38,7 @@ const CommentTransmettreVosDonneesPage = () => {
             <Box alignSelf="start" marginLeft={["0", "0", "0", "0", "5w"]}>
               <Box color="grey.800" fontSize="gamma" marginY={["4w", "4w", "4w", "4w", "0"]}>
                 <Heading as="h1" fontSize="alpha">
-                  {NAVIGATION_PAGES.OrganismeFormation.transmettre.title}
+                  Comment transmettre les données de votre organisme ?
                 </Heading>
                 <Text marginBottom="2w" color="black">
                   Afin de mieux vous guider, merci de renseigner le formulaire ci dessous :
