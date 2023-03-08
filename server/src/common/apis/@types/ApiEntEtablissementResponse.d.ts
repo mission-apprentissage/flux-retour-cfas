@@ -1,4 +1,4 @@
-import ApiEntEtablissement from "./ApiEntEtablissement.d.ts";
+import ApiEntEtablissement from "./ApiEntEtablissement";
 
 type ApiEntEtablissementResponse = {
   etablissement: ApiEntEtablissement;

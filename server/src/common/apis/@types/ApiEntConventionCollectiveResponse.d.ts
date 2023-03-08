@@ -1,4 +1,4 @@
-import ApiEntConventionCollective from "./ApiEntConventionCollective.d.ts";
+import ApiEntConventionCollective from "./ApiEntConventionCollective";
 
 type ApiEntConventionCollectiveResponse = {
   siret: string;
