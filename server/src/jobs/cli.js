@@ -6,7 +6,7 @@ import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
 import { clear, clearRoles, clearUsers } from "./clear/clear-all.js";
 import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
-import { createUserAccount } from "./users/create-user.js";
+import { createErpUserLegacy, createUserAccount } from "./users/create-user.js";
 import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
@@ -22,6 +22,7 @@ import { createIndexes, dropIndexes } from "../common/model/indexes/index.js";
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
 import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
+import { updateUserPassword } from "./users/update-user-password.js";
 
 program
   .configureHelp({
@@ -248,6 +249,19 @@ program
   );
 
 /**
+ * Job de création d'un utilisateur ERP legacy
+ */
+program
+  .command("create:erp-user-legacy")
+  .description("Création d'un utilisateur ERP legacy")
+  .requiredOption("--username <string>", "Nom de l'utilisateur")
+  .action(async ({ username }, options) =>
+    runScript(async () => {
+      return createErpUserLegacy(username);
+    }, options._name)
+  );
+
+/**
  * Job de génération d'un token de MAJ de mot de passe pour un utilisateur
  */
 program
@@ -270,6 +284,20 @@ program
   .action(async ({ username }, options) =>
     runScript(async () => {
       return generatePasswordUpdateTokenForUserLegacy(username);
+    }, options._name)
+  );
+
+/**
+ * Job de de MAJ de mot de passe pour un utilisateur legacy (ancien modèle) via son token
+ */
+program
+  .command("update:user-legacy:password")
+  .description("Modification du mot de passe d'un utilisateur legacy via son token de MAJ ")
+  .requiredOption("--token <string>", "token d'update de password")
+  .requiredOption("--password <string>", "nouveau mot de passe")
+  .action(async ({ token, password }, options) =>
+    runScript(async () => {
+      return updateUserPassword(token, password);
     }, options._name)
   );
 
