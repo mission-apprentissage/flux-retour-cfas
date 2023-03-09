@@ -1,3 +1,11 @@
+## [3.11.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.11.1...v3.11.2) (2023-03-09)
+
+
+### Bug Fixes
+
+* fix admin account workflow ([#2670](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2670)) ([0c7bf38](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0c7bf3801ad574069d045d1844532bec1c23eb30))
+* **server:** clear fiabilisationUaiSiret before build ([#2680](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2680)) ([001aa8b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/001aa8b8e529b887e54c6410598424f72f78c14c))
+
 ## [3.11.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.11.0...v3.11.1) (2023-03-02)
 
 
