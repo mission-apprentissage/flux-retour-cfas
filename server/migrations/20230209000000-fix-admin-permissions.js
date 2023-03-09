@@ -42,7 +42,6 @@ export const up = async (db) => {
   if (usersWithoutPermissions.length > 0) {
     await db.collection("permissions").insertMany(
       usersWithoutPermissions.map((user) => ({
-        custom_acl: [],
         created_at: new Date(),
         updated_at: new Date(),
         role: adminRole._id,

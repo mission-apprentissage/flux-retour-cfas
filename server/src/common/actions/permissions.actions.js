@@ -8,13 +8,7 @@ import { findRoleByName } from "./roles.actions.js";
  * @param {*} permissionProps
  * @returns
  */
-export const createPermission = async ({
-  organisme_id = null,
-  userEmail,
-  roleName,
-  pending = true,
-  custom_acl = [],
-}) => {
+export const createPermission = async ({ organisme_id = null, userEmail, roleName, pending = true }) => {
   const roleDb = await findRoleByName(roleName);
   if (!roleDb) {
     throw new Error("Role doesn't exist");
@@ -26,7 +20,6 @@ export const createPermission = async ({
       organisme_id,
       userEmail: userEmail.toLowerCase(),
       role: roleDb._id,
-      custom_acl,
       pending,
     })
   );
@@ -126,7 +119,7 @@ export const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName
  * @param {*} permissionProps
  * @returns
  */
-export const updatePermission = async ({ organisme_id, userEmail, roleName, custom_acl = [] }) => {
+export const updatePermission = async ({ organisme_id, userEmail, roleName }) => {
   const roleDb = await findRoleByName(roleName);
   if (!roleDb) {
     throw new Error("Role doesn't exist");
@@ -142,7 +135,6 @@ export const updatePermission = async ({ organisme_id, userEmail, roleName, cust
     {
       $set: {
         role: roleDb._id,
-        custom_acl,
         updated_at: new Date(),
       },
     },

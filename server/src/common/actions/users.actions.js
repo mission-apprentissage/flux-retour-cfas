@@ -31,8 +31,6 @@ export const createUser = async ({ email, password }, options = {}) => {
     siret,
     uai,
     organisation,
-    custom_acl,
-    orign_register,
     roles,
     description,
     reseau,
@@ -75,9 +73,7 @@ export const createUser = async ({ email, password }, options = {}) => {
       ...(siret ? { siret } : {}),
       ...(uai ? { uai } : {}),
       ...(account_status ? { account_status } : {}),
-      ...(custom_acl ? { custom_acl } : {}),
       ...(roles ? { roles: rolesMatchIds } : {}),
-      ...(orign_register ? { orign_register } : {}),
       ...(description ? { description } : {}),
       ...(organisation ? { organisation } : {}),
       ...(reseau ? { reseau } : {}),
@@ -298,8 +294,7 @@ export const structureUser = async (user) => {
     codes_departement: user.codes_departement, // TODO [tech] send full department
     account_status: user.account_status,
     roles: rolesList.map(({ name }) => name),
-    acl: uniq([...rolesAcl, ...(user?.custom_acl ? user.custom_acl : []), ...specialAcl]),
-    orign_register: user.orign_register,
+    acl: uniq([...rolesAcl, ...specialAcl]),
     has_accept_cgu_version: user.has_accept_cgu_version,
   };
 };
