@@ -113,7 +113,7 @@ export const schema = object(
 // Default value
 export function defaultValuesUser() {
   return {
-    account_status: "NOT_CONFIRMED",
+    account_status: "PENDING_EMAIL_VALIDATION",
     orign_register: "ORIGIN",
     has_accept_cgu_version: "",
     is_cross_organismes: false,

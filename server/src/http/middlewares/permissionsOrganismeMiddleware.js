@@ -16,8 +16,8 @@ const hasRightsTo = async (role, acls) => {
 export default (acls) =>
   tryCatch(async ({ method, body, query, user, baseUrl, route }, res, next) => {
     const validAccountStatus = [
-      USER_ACCOUNT_STATUS.FORCE_COMPLETE_PROFILE_STEP1,
-      USER_ACCOUNT_STATUS.FORCE_COMPLETE_PROFILE_STEP2,
+      USER_ACCOUNT_STATUS.PENDING_PERMISSIONS_SETUP,
+      USER_ACCOUNT_STATUS.PENDING_ADMIN_VALIDATION,
       USER_ACCOUNT_STATUS.CONFIRMED,
     ];
     if (!validAccountStatus.includes(user.account_status)) {

@@ -18,13 +18,14 @@ const AccountWrapper = ({ children }) => {
   useEffect(() => {
     (async () => {
       if (auth.sub !== "anonymous") {
-        if (auth.account_status === "NOT_CONFIRMED") {
+        if (auth.account_status === "PENDING_EMAIL_VALIDATION") {
           if (router.pathname !== "/auth/en-attente-confirmation" && router.pathname !== "/auth/confirmation") {
             router.push("/auth/en-attente-confirmation");
           }
         } else {
           if (
-            (auth.account_status === "FIRST_FORCE_RESET_PASSWORD" || auth.account_status === "FORCE_RESET_PASSWORD") &&
+            (auth.account_status === "PENDING_PASSWORD_SETUP" ||
+              auth.account_status === "DIRECT_PENDING_PASSWORD_SETUP") &&
             router.pathname !== "/auth/modifier-mot-de-passe" &&
             router.asPath !== "/en-maintenance"
           ) {

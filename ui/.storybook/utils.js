@@ -13,12 +13,12 @@ export const authArgTypes = {
     name: "Account status",
     control: "select",
     options: [
-      "NOT_CONFIRMED",
-      "FIRST_FORCE_RESET_PASSWORD",
-      "FORCE_COMPLETE_PROFILE_STEP1",
-      "FORCE_COMPLETE_PROFILE_STEP2",
+      "PENDING_EMAIL_VALIDATION",
+      "PENDING_PASSWORD_SETUP",
+      "PENDING_PERMISSIONS_SETUP",
+      "PENDING_ADMIN_VALIDATION",
       "CONFIRMED",
-      "FORCE_RESET_PASSWORD",
+      "DIRECT_PENDING_PASSWORD_SETUP",
     ],
   },
   auth__organisation: {

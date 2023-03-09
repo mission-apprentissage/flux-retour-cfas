@@ -13,7 +13,7 @@ export const PasswordCreation = Template.bind({});
 PasswordCreation.storyName = "Création du mot de passe";
 PasswordCreation.parameters = {
   mockAuth: {
-    account_status: "FIRST_FORCE_RESET_PASSWORD",
+    account_status: "PENDING_PASSWORD_SETUP",
   },
 };
 

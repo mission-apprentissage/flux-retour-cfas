@@ -17,7 +17,7 @@ PageWithArgs.args = {
   auth__roles: ["of"],
   auth__hasAtLeastOneUserToValidate: false,
   auth__isInPendingValidation: true,
-  auth__account_status: "FORCE_COMPLETE_PROFILE_STEP1",
+  auth__account_status: "PENDING_PERMISSIONS_SETUP",
   auth__organisation: "",
 };
 
@@ -26,7 +26,7 @@ DemandeAccesOF.storyName = "Demande d'acces OF (step1)";
 DemandeAccesOF.parameters = {
   mockAuth: {
     isInPendingValidation: true,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP1",
+    account_status: "PENDING_PERMISSIONS_SETUP",
     roles: ["of"],
   },
 };
@@ -36,7 +36,7 @@ DemandeAccesReseauOF.storyName = "Demande d'acces OFR (step1)";
 DemandeAccesReseauOF.parameters = {
   mockAuth: {
     isInPendingValidation: true,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP1",
+    account_status: "PENDING_PERMISSIONS_SETUP",
     roles: ["reseau_of"],
   },
 };
@@ -46,7 +46,7 @@ DemandeAccesReseauPilot.storyName = "Demande d'acces reseau pilot (step1)";
 DemandeAccesReseauPilot.parameters = {
   mockAuth: {
     isInPendingValidation: true,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP1",
+    account_status: "PENDING_PERMISSIONS_SETUP",
     roles: ["pilot"],
   },
 };
@@ -56,7 +56,7 @@ DemandeAccesReseauStep2.storyName = "Demande d'acces OF, OFR, pilot, ... (step2)
 DemandeAccesReseauStep2.parameters = {
   mockAuth: {
     isInPendingValidation: true,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP2",
+    account_status: "PENDING_ADMIN_VALIDATION",
     roles: ["of"],
   },
 };
@@ -67,7 +67,7 @@ DemandeAccesEnAttenteDeValidation1.parameters = {
   mockAuth: {
     isInPendingValidation: true,
     hasAtLeastOneUserToValidate: false,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP2",
+    account_status: "PENDING_ADMIN_VALIDATION",
     roles: ["of"],
   },
 };
@@ -78,7 +78,7 @@ DemandeAccesEnAttenteDeValidation2.parameters = {
   mockAuth: {
     isInPendingValidation: true,
     hasAtLeastOneUserToValidate: true,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP2",
+    account_status: "PENDING_ADMIN_VALIDATION",
     roles: ["of"],
   },
 };

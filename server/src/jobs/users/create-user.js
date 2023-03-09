@@ -18,7 +18,7 @@ export const createUserAccount = async ({ email, nom, prenom, permissions = {} }
       nom,
       prenom,
       permissions,
-      account_status: USER_ACCOUNT_STATUS.FIRST_FORCE_RESET_PASSWORD,
+      account_status: USER_ACCOUNT_STATUS.PENDING_PASSWORD_SETUP,
     }
   );
   logger.info(`User ${email} successfully created`);

@@ -14,7 +14,7 @@ Inscription.storyName = "Processus d'inscription";
 Inscription.parameters = {
   mockAuth: {
     isInPendingValidation: true,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP1",
+    account_status: "PENDING_PERMISSIONS_SETUP",
     roles: ["of"],
   },
 };
