@@ -40,7 +40,7 @@ const ResetPasswordPage = () => {
 
   const minLength = auth.permissions.is_admin ? 20 : 12;
 
-  const isFirstSetPassword = auth.account_status === "FIRST_FORCE_RESET_PASSWORD";
+  const isFirstSetPassword = auth.account_status === "PENDING_PASSWORD_SETUP";
 
   const [conditions, setConditions] = useState({
     min: "unknown",

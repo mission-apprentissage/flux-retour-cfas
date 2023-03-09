@@ -6,7 +6,7 @@ export const up = async (db) => {
     {
       is_admin: true,
       account_status: {
-        $in: ["FORCE_COMPLETE_PROFILE_STEP1", "FORCE_COMPLETE_PROFILE_STEP2"],
+        $in: ["PENDING_PERMISSIONS_SETUP", "PENDING_ADMIN_VALIDATION"],
       },
     },
     {

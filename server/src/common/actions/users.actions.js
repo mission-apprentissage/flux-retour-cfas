@@ -20,7 +20,7 @@ export const createUser = async ({ email, password }, options = {}) => {
   const permissions = options.permissions || {};
   // bypass profile completion for admins
   const account_status = permissions.is_admin
-    ? options.account_status || USER_ACCOUNT_STATUS.FORCE_RESET_PASSWORD
+    ? options.account_status || USER_ACCOUNT_STATUS.DIRECT_PENDING_PASSWORD_SETUP
     : options.account_status;
 
   const {
@@ -327,7 +327,7 @@ export const activateUser = async (email) => {
     { _id: user._id },
     {
       $set: {
-        account_status: "FIRST_FORCE_RESET_PASSWORD",
+        account_status: "PENDING_PASSWORD_SETUP",
       },
     },
     { returnDocument: "after" }
@@ -346,7 +346,7 @@ export const userHasAskAccess = async (email, data) => {
     { _id: user._id },
     {
       $set: {
-        account_status: "FORCE_COMPLETE_PROFILE_STEP2",
+        account_status: "PENDING_ADMIN_VALIDATION",
         ...data,
       },
     },
@@ -466,9 +466,9 @@ export const generatePasswordUpdateToken = async (email) => {
  */
 function getNextAccountStatus(user) {
   switch (user.account_status) {
-    case "FIRST_FORCE_RESET_PASSWORD":
-      return user.is_admin ? "CONFIRMED" : "FORCE_COMPLETE_PROFILE_STEP1";
-    case "FORCE_RESET_PASSWORD":
+    case "PENDING_PASSWORD_SETUP":
+      return user.is_admin ? "CONFIRMED" : "PENDING_PERMISSIONS_SETUP";
+    case "DIRECT_PENDING_PASSWORD_SETUP":
       return "CONFIRMED";
     default:
       return user.account_status;

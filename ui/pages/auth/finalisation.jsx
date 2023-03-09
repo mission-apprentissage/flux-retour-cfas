@@ -181,7 +181,7 @@ const Finalize = () => {
         </Heading>
         <Box mt={5}>
           {auth.isInPendingValidation &&
-            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            auth.account_status === "PENDING_PERMISSIONS_SETUP" &&
             auth.roles.includes("of") && (
               <Box w="50%">
                 <FormControl py={2} isRequired isInvalid={errors.type && touched.type}>
@@ -242,7 +242,7 @@ const Finalize = () => {
             )}
 
           {auth.isInPendingValidation &&
-            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            auth.account_status === "PENDING_PERMISSIONS_SETUP" &&
             auth.roles.includes("reseau_of") && (
               <>
                 <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
@@ -279,7 +279,7 @@ const Finalize = () => {
               </>
             )}
           {auth.isInPendingValidation &&
-            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            auth.account_status === "PENDING_PERMISSIONS_SETUP" &&
             auth.roles.includes("pilot") && (
               <>
                 {auth.organisation === "DDETS" && (
@@ -352,7 +352,7 @@ const Finalize = () => {
 
           {auth.isInPendingValidation &&
             !auth.hasAtLeastOneUserToValidate &&
-            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
+            auth.account_status === "PENDING_ADMIN_VALIDATION" && (
               <Ribbons variant="info" mt="0.5rem">
                 <Box ml={3}>
                   <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
@@ -369,7 +369,7 @@ const Finalize = () => {
             )}
           {auth.isInPendingValidation &&
             auth.hasAtLeastOneUserToValidate &&
-            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
+            auth.account_status === "PENDING_ADMIN_VALIDATION" && (
               <Ribbons variant="info" mt="0.5rem">
                 <Box ml={3}>
                   <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">

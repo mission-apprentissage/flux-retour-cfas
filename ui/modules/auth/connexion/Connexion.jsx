@@ -39,7 +39,7 @@ const Login = (props) => {
         const user = await _get("/api/v1/session/current");
         setAuth(user);
         setToken(result.token);
-        if (!user.account_status === "NOT_CONFIRMED") {
+        if (!user.account_status === "PENDING_EMAIL_VALIDATION") {
           router.push("/auth/en-attente-confirmation");
         } else {
           router.push("/auth/redirection");
