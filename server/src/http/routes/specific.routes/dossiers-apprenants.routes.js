@@ -123,7 +123,7 @@ export default () => {
           if (dossierApprenantValidation.error) {
             const prettyValidationError = buildPrettyValidationError(dossierApprenantValidation.error);
             validationErrors.push(prettyValidationError);
-            await dossiersApprenantsApiErrorsDb().insert({
+            await dossiersApprenantsApiErrorsDb().insertOne({
               erp: user.username,
               created_at: new Date(),
               data: currentDossierApprenant,

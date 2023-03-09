@@ -6,6 +6,7 @@ function addEmail(userEmail, token, templateName, payload) {
   return usersMigrationDb().findOneAndUpdate(
     { email: userEmail },
     {
+      // @ts-ignore
       $push: {
         emails: {
           token,
@@ -56,6 +57,7 @@ function addEmailSendDate(token, templateName) {
       $set: {
         "emails.$.templateName": templateName,
       },
+      // @ts-ignore
       $push: {
         "emails.$.sendDates": new Date(),
       },
@@ -115,6 +117,7 @@ export async function unsubscribeUser(id) {
 }
 
 export async function renderEmail({ templates }, token) {
+  /** @type {any} */
   const user = await usersMigrationDb().findOne({ "emails.token": token });
   const { templateName, payload } = user.emails.find((e) => e.token === token);
   const template = templates[templateName]({ to: user.email, payload }, token);
@@ -150,6 +153,9 @@ export const createMailer = (mailerService) => {
     },
     async resendEmail(token, options = {}) {
       const user = await usersMigrationDb().findOne({ "emails.token": token });
+      if (!user) {
+        throw new Error("user not found");
+      }
       const previous = user.emails.find((e) => e.token === token);
 
       const nextTemplateName = options.newTemplateName || previous.templateName;

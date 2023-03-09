@@ -78,7 +78,9 @@ export const createOrganisme = async (
     })
   );
 
-  return await organismesDb().findOne({ _id: insertedId });
+  return {
+    _id: insertedId,
+  };
 };
 
 /**
@@ -418,7 +420,7 @@ export const setOrganismeTransmissionDates = async (id) => {
 /**
  * Returns sous-établissements by siret for an uai
  * @param {string} uai
- * @returns {Promise<Array<{siret_etablissement: string, nom_etablissement: string}>>}
+ * @returns {Promise<Array<any>>}
  */
 export const getSousEtablissementsForUai = async (uai) => {
   return await organismesDb()

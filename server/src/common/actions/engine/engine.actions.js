@@ -351,6 +351,7 @@ export const runEngine = async ({ effectifData }, organismeData) => {
       await updateEffectifAndLock(effectifUpdatedId, effectif);
     } else {
       effectifCreatedId = await insertEffectif(effectif);
+      /** @type {import("mongodb").WithId<any>} */
       const effectifCreated = await findEffectifById(effectifCreatedId);
       await updateEffectifAndLock(effectifCreatedId, {
         apprenant: effectifCreated.apprenant,

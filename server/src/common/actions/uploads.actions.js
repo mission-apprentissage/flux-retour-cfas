@@ -48,6 +48,7 @@ export const addDocument = async (
   organisme_id,
   { nom_fichier, chemin_fichier, taille_fichier, ext_fichier, hash_fichier, userEmail }
 ) => {
+  /** @type {any} */
   let found = null;
   try {
     found = await getUploadEntryByOrgaId(organisme_id);
@@ -95,6 +96,7 @@ export const addDocument = async (
 
 // TODO DIRTY update, to clean
 export const updateDocument = async (organisme_id, { nom_fichier, taille_fichier, ...data }) => {
+  /** @type {any} */
   let found = null;
   try {
     found = await getUploadEntryByOrgaId(organisme_id);
@@ -125,6 +127,9 @@ export const updateDocument = async (organisme_id, { nom_fichier, taille_fichier
   return updated.value;
 };
 
+/**
+ * @returns {Promise<any>}
+ */
 export const removeDocument = async (organismeId, { nom_fichier, chemin_fichier, taille_fichier }) => {
   const found = await getUploadEntryByOrgaId(organismeId);
 
