@@ -23,7 +23,5 @@ export const generatePasswordUpdateTokenForUser = async (email) => {
 export const generatePasswordUpdateTokenForUserLegacy = async (username) => {
   logger.info(`Génération d'un lien de MAJ de mot de passe pour un ancien user ${username}`);
   const token = await generatePasswordUpdateTokenLegacy(username);
-
   logger.info(`Token pour ${username} créé avec succès -> ${token}`);
-  logger.info(`Lien de changement de mot de passe -> ${config.publicUrl}/modifier-mot-de-passe?token=${token}`);
 };
