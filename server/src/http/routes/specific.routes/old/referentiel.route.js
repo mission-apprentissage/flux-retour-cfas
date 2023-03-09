@@ -9,7 +9,11 @@ export default () => {
   router.get(
     "/networks",
     tryCatch(async (req, res) => {
-      const networks = Object.keys(RESEAUX_CFAS).map((id) => ({ id, nom: RESEAUX_CFAS[id].nomReseau }));
+      // TODO : TMP on ne renvoie que les réseaux fiabilisés pour l'instant - débloquer le reste quand ce sera fiable
+      const RESEAUX_CFAS_INVALID = ["ANASUP", "GRETA_VAUCLUSE", "CCI", "BTP_CFA"];
+      const networks = Object.keys(RESEAUX_CFAS)
+        .filter((item) => !RESEAUX_CFAS_INVALID.includes(item))
+        .map((id) => ({ id, nom: RESEAUX_CFAS[id].nomReseau }));
       return res.json(networks);
     })
   );
