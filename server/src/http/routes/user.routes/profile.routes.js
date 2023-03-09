@@ -2,7 +2,7 @@ import express from "express";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
 import Boom from "boom";
-import { getUser, structureUser, updateUser } from "../../../common/actions/users.actions.js";
+import { getUserByEmail, structureUser, updateUser } from "../../../common/actions/users.actions.js";
 
 export default () => {
   const router = express.Router();
@@ -22,7 +22,7 @@ export default () => {
         throw Boom.badRequest("Accès non autorisé");
       }
 
-      const userDb = await getUser(user.email);
+      const userDb = await getUserByEmail(user.email);
       if (!userDb) {
         throw Boom.badRequest("Something went wrong");
       }
@@ -45,7 +45,7 @@ export default () => {
         has_accept_cgu_version: Joi.string().required(),
       }).validateAsync(body, { abortEarly: false });
 
-      const userDb = await getUser(user.email);
+      const userDb = await getUserByEmail(user.email);
       if (!userDb) {
         throw Boom.badRequest("Something went wrong");
       }

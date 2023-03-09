@@ -139,7 +139,7 @@ export const authenticate = async (email, password) => {
  * @param {*} email
  * @returns
  */
-export const getUser = async (email) => {
+export const getUserByEmail = async (email) => {
   const user = await usersMigrationDb().findOne(
     { email },
     {

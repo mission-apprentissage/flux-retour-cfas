@@ -7,7 +7,7 @@ import { findOrganismeById } from "../../../common/actions/organismes/organismes
 import {
   createUser,
   getAllUsers,
-  getUser,
+  getUserByEmail,
   getUserById,
   removeUser,
   searchUsers,
@@ -84,7 +84,7 @@ export default ({ mailer }) => {
         validate: Joi.boolean().required(),
       }).validateAsync(query, { abortEarly: false });
 
-      const user = await getUser(userEmail);
+      const user = await getUserByEmail(userEmail);
       if (!user) {
         Boom.notFound(`User ${userEmail} not found`);
       }
@@ -124,7 +124,7 @@ export default ({ mailer }) => {
         }).unknown(),
       }).validateAsync(body, { abortEarly: false });
 
-      const alreadyExists = await getUser(options.email);
+      const alreadyExists = await getUserByEmail(options.email);
       if (alreadyExists) {
         throw Boom.conflict(`Unable to create, user ${options.email} already exists`);
       }

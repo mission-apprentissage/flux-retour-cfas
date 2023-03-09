@@ -7,7 +7,7 @@ import { createResetPasswordToken, createUserTokenSimple } from "../../../common
 import { Strategy, ExtractJwt } from "passport-jwt";
 import {
   changePassword,
-  getUser,
+  getUserByEmail,
   updateUserLastConnection,
   structureUser,
 } from "../../../common/actions/users.actions.js";
@@ -24,7 +24,7 @@ const checkPasswordToken = () => {
         secretOrKey: config.auth.resetPasswordToken.jwtSecret,
       },
       (jwt_payload, done) => {
-        return getUser(jwt_payload.sub)
+        return getUserByEmail(jwt_payload.sub)
           .then((user) => {
             if (!user) {
               return done(null, false);
@@ -50,7 +50,7 @@ export default ({ mailer }) => {
         noEmail: Joi.boolean(),
       });
 
-      const user = await getUser(email);
+      const user = await getUserByEmail(email);
       if (!user) {
         return {};
       }

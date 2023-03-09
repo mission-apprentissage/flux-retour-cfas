@@ -3,7 +3,7 @@ import passport from "passport";
 import { Strategy as JWTStrategy } from "passport-jwt";
 import { compose } from "compose-middleware";
 
-import { getUser, updateUser, structureUser } from "../../common/actions/users.actions.js";
+import { getUserByEmail, updateUser, structureUser } from "../../common/actions/users.actions.js";
 import * as sessions from "../../common/actions/sessions.actions.js";
 import { COOKIE_NAME } from "../../common/constants/cookieName.js";
 
@@ -32,7 +32,7 @@ export const authMiddleware = () => {
           done(new Error("Unauthorized"), false);
         }
 
-        return getUser(jwtPayload.email)
+        return getUserByEmail(jwtPayload.email)
           .then(async (user) => {
             if (!user) {
               return done(new Error("Unauthorized"), false);

@@ -2,7 +2,7 @@ import express from "express";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import {
-  getUser,
+  getUserByEmail,
   authenticate,
   updateUserLastConnection,
   structureUser,
@@ -30,7 +30,7 @@ export default () => {
       }
       const { value: email } = Joi.string().email().validate(emailOrUsername, { abortEarly: false });
 
-      const user = await getUser(email.toLowerCase());
+      const user = await getUserByEmail(email.toLowerCase());
       if (!user) {
         return res.status(401).json({ message: "Accès non autorisé" });
       }

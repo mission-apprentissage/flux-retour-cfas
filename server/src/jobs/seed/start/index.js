@@ -1,5 +1,5 @@
 import logger from "../../../common/logger.js";
-import { createUser, getUser } from "../../../common/actions/users.actions.js";
+import { createUser, getUserByEmail } from "../../../common/actions/users.actions.js";
 import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
 import { createRole, findRoleByName } from "../../../common/actions/roles.actions.js";
 import {
@@ -152,7 +152,7 @@ const seedSampleUsers = async () => {
   await seedRoles();
 
   // Create user Pilot
-  if (!(await getUser("pilot@test.fr"))) {
+  if (!(await getUserByEmail("pilot@test.fr"))) {
     const userPilot = await createUser(
       { email: "pilot@test.fr", password: "Secret!Password1" },
       {
@@ -172,7 +172,7 @@ const seedSampleUsers = async () => {
   }
 
   // Create user OF
-  if (!(await getUser("of@test.fr"))) {
+  if (!(await getUserByEmail("of@test.fr"))) {
     const userOf = await createUser(
       { email: "of@test.fr", password: "Secret!Password1" },
       {
@@ -191,7 +191,7 @@ const seedSampleUsers = async () => {
   }
 
   // Create user OFR
-  if (!(await getUser("ofr@test.fr"))) {
+  if (!(await getUserByEmail("ofr@test.fr"))) {
     const userOfR = await createUser(
       { email: "ofr@test.fr", password: "Secret!Password1" },
       {
@@ -213,7 +213,7 @@ const seedSampleUsers = async () => {
   }
 
   // Create user Reseau
-  if (!(await getUser("reseau@test.fr"))) {
+  if (!(await getUserByEmail("reseau@test.fr"))) {
     const userReseau = await createUser(
       { email: "reseau@test.fr", password: "Secret!Password1" },
       {
@@ -232,7 +232,7 @@ const seedSampleUsers = async () => {
   }
 
   // Create user ERP
-  if (!(await getUser("erp@test.fr"))) {
+  if (!(await getUserByEmail("erp@test.fr"))) {
     const userErp = await createUser(
       { email: "erp@test.fr", password: "Secret!Password1" },
       {

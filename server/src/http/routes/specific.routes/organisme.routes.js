@@ -23,7 +23,7 @@ import {
   updatePermission,
   updatePermissionsPending,
 } from "../../../common/actions/permissions.actions.js";
-import { getUser } from "../../../common/actions/users.actions.js";
+import { getUserByEmail } from "../../../common/actions/users.actions.js";
 import { uaiSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
 
@@ -239,7 +239,7 @@ export default ({ mailer }) => {
         validate: Joi.boolean().required(),
       }).validateAsync(query, { abortEarly: false });
 
-      const user = await getUser(userEmail);
+      const user = await getUserByEmail(userEmail);
       const organisme = await findOrganismeById(organisme_id);
 
       if (validate) {

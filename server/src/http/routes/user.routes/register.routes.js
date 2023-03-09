@@ -6,7 +6,7 @@ import { Strategy, ExtractJwt } from "passport-jwt";
 import config from "../../../config.js";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import {
-  getUser,
+  getUserByEmail,
   authenticate,
   updateUserLastConnection,
   structureUser,
@@ -38,7 +38,7 @@ const checkActivationToken = () => {
         secretOrKey: config.auth.activation.jwtSecret,
       },
       (jwt_payload, done) => {
-        return getUser(jwt_payload.sub)
+        return getUserByEmail(jwt_payload.sub)
           .then((user) => {
             if (!user) {
               return done(null, false);
@@ -83,7 +83,7 @@ export default ({ mailer }) => {
           .required(),
       }).validateAsync(body, { abortEarly: false });
 
-      const alreadyExists = await getUser(email.toLowerCase());
+      const alreadyExists = await getUserByEmail(email.toLowerCase());
       if (alreadyExists) {
         throw Boom.conflict("email already in use", { message: "email already in use" });
       }
@@ -259,7 +259,7 @@ export default ({ mailer }) => {
         reseau: Joi.string().allow(null, ""),
       }).validateAsync(body, { abortEarly: false });
 
-      const userDb = await getUser(user.email.toLowerCase());
+      const userDb = await getUserByEmail(user.email.toLowerCase());
       if (!userDb) {
         throw Boom.conflict("Unable to retrieve user");
       }
@@ -334,7 +334,7 @@ export default ({ mailer }) => {
       //   siret: Joi.string().required(),
       // }).validateAsync(body, { abortEarly: false });
 
-      const userDb = await getUser(user.email);
+      const userDb = await getUserByEmail(user.email);
       if (!userDb) {
         throw Boom.conflict("Unable to retrieve user");
       }
