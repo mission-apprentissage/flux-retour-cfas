@@ -19,9 +19,9 @@ describe("Components Users Test", () => {
     it("Permet de créer un utilisateur avec mot de passe", async () => {
       const createdId = await createUserLegacy({ username: "user", password: "password" });
       const found = await usersDb().findOne({ _id: createdId });
-      assert.equal(found.username, "user");
-      assert.equal(found.permissions.length, 0);
-      assert.equal(found.password.startsWith("$6$rounds="), true);
+      assert.equal(found?.username, "user");
+      assert.equal(found?.permissions.length, 0);
+      assert.equal(found?.password.startsWith("$6$rounds="), true);
     });
 
     it("Renvoie une erreur lorsqu'un utilisateur avec le même username existe en base", async () => {
@@ -36,9 +36,9 @@ describe("Components Users Test", () => {
     it("Crée un utilisateur avec mot de passe random quand pas de mot de passe fourni", async () => {
       const createdId = await createUserLegacy({ username: "user" });
       const found = await usersDb().findOne({ _id: createdId });
-      assert.equal(found.username, "user");
-      assert.equal(found.permissions.length, 0);
-      assert.equal(found.password.startsWith("$6$rounds="), true);
+      assert.equal(found?.username, "user");
+      assert.equal(found?.permissions.length, 0);
+      assert.equal(found?.password.startsWith("$6$rounds="), true);
     });
 
     it("Permet de créer un utilisateur avec les droits d'admin", async () => {
@@ -48,7 +48,7 @@ describe("Components Users Test", () => {
         permissions: [apiRoles.administrator],
       });
       const found = await usersDb().findOne({ _id: createdId });
-      assert.equal(found.permissions.includes(apiRoles.administrator), true);
+      assert.equal(found?.permissions.includes(apiRoles.administrator), true);
     });
 
     it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
@@ -61,9 +61,9 @@ describe("Components Users Test", () => {
       });
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "email@test.fr", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "email@test.fr", true);
     });
 
     it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau, une région et un organisme", async () => {
@@ -78,11 +78,11 @@ describe("Components Users Test", () => {
       });
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.region === "REGION", true);
-      assert.equal(found.organisme === "ORGANISME", true);
-      assert.equal(found.email === "email@test.fr", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.region === "REGION", true);
+      assert.equal(found?.organisme === "ORGANISME", true);
+      assert.equal(found?.email === "email@test.fr", true);
     });
   });
 
@@ -107,8 +107,8 @@ describe("Components Users Test", () => {
         password: "password",
       });
       const user = await authenticateLegacy("user", "password");
-      assert.strictEqual(user.username, "user");
-      assert.strictEqual(!!user.last_connection, true);
+      assert.strictEqual(user?.username, "user");
+      assert.strictEqual(!!user?.last_connection, true);
     });
 
     it("Vérifie que le mot de passe est invalide", async () => {
@@ -130,13 +130,13 @@ describe("Components Users Test", () => {
       const token = await generatePasswordUpdateTokenLegacy("user");
       const userInDb = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(userInDb.password_update_token, token);
+      assert.equal(userInDb?.password_update_token, token);
       // password token should expire in 48h ~ 2880 minutes, ±1 seconds tolerance
-      const diffSeconds = differenceInSeconds(userInDb.password_update_token_expiry, new Date());
+      const diffSeconds = differenceInSeconds(userInDb?.password_update_token_expiry, new Date());
       const _48hoursInSeconds = 48 * 60 * 60;
       assert.equal(_48hoursInSeconds - diffSeconds <= 1, true);
       assert.equal(_48hoursInSeconds - diffSeconds >= 0, true);
-      assert.equal(differenceInCalendarDays(userInDb.password_update_token_expiry, new Date()), 2);
+      assert.equal(differenceInCalendarDays(userInDb?.password_update_token_expiry, new Date()), 2);
     });
 
     it("renvoie une erreur quand le user n'est pas trouvé", async () => {
@@ -165,9 +165,9 @@ describe("Components Users Test", () => {
       await updatePasswordLegacy(token, "new-password-strong");
       const foundAfterUpdate = await usersDb().findOne({ _id: createdId });
 
-      assert.notEqual(foundAfterUpdate.password, foundBeforeUpdate.password);
-      assert.equal(foundAfterUpdate.password_update_token, null);
-      assert.equal(foundAfterUpdate.password_update_token_expiry, null);
+      assert.notEqual(foundAfterUpdate?.password, foundBeforeUpdate?.password);
+      assert.equal(foundAfterUpdate?.password_update_token, null);
+      assert.equal(foundAfterUpdate?.password_update_token_expiry, null);
     });
 
     it("renvoie une erreur quand le token passé ne permet pas de retrouver le user", async () => {
@@ -211,7 +211,7 @@ describe("Components Users Test", () => {
       const user = await usersDb().findOne({ _id: createdId });
 
       await usersDb().updateOne(
-        { _id: user._id },
+        { _id: user?._id },
         { $set: { password_update_token_expiry: subMinutes(new Date(), 10) } }
       );
 
@@ -276,14 +276,14 @@ describe("Components Users Test", () => {
       const createdId = await createUserLegacy(userProps);
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
       assert.equal(results.length, 1);
-      assert.ok(results[0].username, found.username);
+      assert.ok(results[0].username, found?.username);
     });
 
     it("returns results matching username case insensitive", async () => {
@@ -302,9 +302,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -328,9 +328,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -353,9 +353,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -379,9 +379,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -405,9 +405,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -430,9 +430,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -456,9 +456,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -482,9 +482,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -507,9 +507,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -533,9 +533,9 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === "test", true);
-      assert.equal(found.email === "havertz@rma.es", true);
+      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.network === "test", true);
+      assert.equal(found?.email === "havertz@rma.es", true);
 
       const results = await searchUsersLegacy({ searchTerm });
 
@@ -553,8 +553,8 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found.username === usernameTest, true);
-      assert.equal(found._id !== null, true);
+      assert.equal(found?.username === usernameTest, true);
+      assert.equal(found?._id !== null, true);
 
       // update user with bad id
       const objectId = new mongodb.ObjectId();
@@ -569,16 +569,16 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found.username === usernameTest, true);
-      assert.equal(found._id !== null, true);
+      assert.equal(found?.username === usernameTest, true);
+      assert.equal(found?._id !== null, true);
 
       // update user
       const updatedUserName = "UPDATED";
-      await updateUserLegacy(found._id, { username: updatedUserName });
+      await updateUserLegacy(found?._id, { username: updatedUserName });
 
       // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-      assert.equal(foundAfterUpdate.username === updatedUserName, true);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
+      assert.equal(foundAfterUpdate?.username === updatedUserName, true);
     });
 
     it("Permets la MAJ d'un utilisateur pour son email", async () => {
@@ -589,16 +589,16 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found.email === "test@test.fr", true);
-      assert.equal(found._id !== null, true);
+      assert.equal(found?.email === "test@test.fr", true);
+      assert.equal(found?._id !== null, true);
 
       // update user
       const updateValue = "UPDATED@test.fr";
-      await updateUserLegacy(found._id, { email: updateValue });
+      await updateUserLegacy(found?._id, { email: updateValue });
 
       // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-      assert.equal(foundAfterUpdate.email === updateValue, true);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
+      assert.equal(foundAfterUpdate?.email === updateValue, true);
     });
 
     it("Permets la MAJ d'un utilisateur pour son réseau", async () => {
@@ -609,16 +609,16 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found._id !== null, true);
-      assert.equal(found.network === "TEST_RESEAU", true);
+      assert.equal(found?._id !== null, true);
+      assert.equal(found?.network === "TEST_RESEAU", true);
 
       // update user
       const updateValue = "UPDATED_NETWORK";
-      await updateUserLegacy(found._id, { network: updateValue });
+      await updateUserLegacy(found?._id, { network: updateValue });
 
       // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-      assert.equal(foundAfterUpdate.network === updateValue, true);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
+      assert.equal(foundAfterUpdate?.network === updateValue, true);
     });
 
     it("Permets la MAJ d'un utilisateur pour sa région", async () => {
@@ -629,16 +629,16 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found._id !== null, true);
-      assert.equal(found.region === "TEST_REGION", true);
+      assert.equal(found?._id !== null, true);
+      assert.equal(found?.region === "TEST_REGION", true);
 
       // update user
       const updateValue = "UPDATED_REGION";
-      await updateUserLegacy(found._id, { region: updateValue });
+      await updateUserLegacy(found?._id, { region: updateValue });
 
       // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-      assert.equal(foundAfterUpdate.region === updateValue, true);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
+      assert.equal(foundAfterUpdate?.region === updateValue, true);
     });
 
     it("Permets la MAJ d'un utilisateur pour son organisme", async () => {
@@ -649,16 +649,16 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found._id !== null, true);
-      assert.equal(found.organisme === "TEST_ORGANISME", true);
+      assert.equal(found?._id !== null, true);
+      assert.equal(found?.organisme === "TEST_ORGANISME", true);
 
       // update user
       const updateValue = "UPDATED_ORGANISME";
-      await updateUserLegacy(found._id, { organisme: updateValue });
+      await updateUserLegacy(found?._id, { organisme: updateValue });
 
       // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-      assert.equal(foundAfterUpdate.organisme === updateValue, true);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
+      assert.equal(foundAfterUpdate?.organisme === updateValue, true);
     });
   });
 
@@ -671,8 +671,8 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found.username === usernameTest, true);
-      assert.equal(found._id !== null, true);
+      assert.equal(found?.username === usernameTest, true);
+      assert.equal(found?._id !== null, true);
 
       // get user with bad id
       const objectId = "^pkazd^pkazd";
@@ -687,11 +687,11 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found.username === usernameTest, true);
+      assert.equal(found?.username === usernameTest, true);
 
       // get user with id
-      const gettedUser = await getUserLegacyById(found._id);
-      assert.equal(gettedUser.username === found.username, true);
+      const gettedUser = await getUserLegacyById(found?._id);
+      assert.equal(gettedUser.username === found?.username, true);
     });
   });
 });

@@ -121,7 +121,7 @@ describe("Dossiers Apprenants Route", () => {
       const userWithoutPermission = await usersDb().findOne({ _id: createdId });
 
       const { data } = await httpClient.post("/api/login", {
-        username: userWithoutPermission.username,
+        username: userWithoutPermission?.username,
         password: "password",
       });
 
@@ -505,10 +505,10 @@ describe("Dossiers Apprenants Route", () => {
         permissions: [],
       });
       const userWithoutPermission = await usersDb().findOne({ _id: createdId });
-      assert.deepEqual(userWithoutPermission.permissions.length, 0);
+      assert.deepEqual(userWithoutPermission?.permissions.length, 0);
 
       const { data } = await httpClient.post("/api/login", {
-        username: userWithoutPermission.username,
+        username: userWithoutPermission?.username,
         password: "password",
       });
 

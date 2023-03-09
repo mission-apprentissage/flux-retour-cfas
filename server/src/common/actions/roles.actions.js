@@ -66,7 +66,7 @@ export const findRoleById = async (id, projection = {}) => {
 };
 
 export const hasAclsByRoleId = async (id, acl) => {
-  const roleDb = await rolesDb().findOne({ _id: new ObjectId(id) }, { acl: 1 });
+  const roleDb = await rolesDb().findOne({ _id: new ObjectId(id) }, { projection: { acl: 1 } });
   if (!roleDb) {
     throw new Error("Role doesn't exist");
   }

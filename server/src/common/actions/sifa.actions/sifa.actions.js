@@ -41,6 +41,9 @@ export const isEligibleSIFA = ({ historique_statut }) => {
  */
 export const generateSifa = async (organisme_id) => {
   const organisme = await findOrganismeById(organisme_id);
+  if (!organisme) {
+    throw new Error("organisme not found");
+  }
   const effectifsDb = await findEffectifs(organisme_id);
   let effectifs = [];
   for (const effectif of effectifsDb) {

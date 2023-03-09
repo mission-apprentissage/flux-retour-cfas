@@ -664,8 +664,8 @@ export default ({ clamav }) => {
           `Vérification en cours: ${index + 1} sur ${convertedData.length} effectifs`
         );
         if (typeCodeDiplome === "RNCP" && data.formation?.rncp) {
-          const { cfd } = (await getFormationWithRNCP(data.formation?.rncp, { cfd: 1 })) || {};
-          data.formation.cfd = cfd ?? "Erreur";
+          const formation = await getFormationWithRNCP(data.formation?.rncp, { cfd: 1 });
+          data.formation.cfd = formation?.cfd ?? "Erreur";
         } else {
           const { rncps } = (await getFormationWithCfd(data.formation.cfd, { rncps: 1 })) || { rncps: [] };
           data.formation.rncp = rncps[0] ?? data.formation?.rncp;
@@ -709,8 +709,8 @@ export default ({ clamav }) => {
 
             const formationDb = await findFormationById(organismeFormation.formation_id);
             data.formation.formation_id = organismeFormation.formation_id;
-            data.formation.annee = formationDb.annee;
-            data.formation.libelle_long = formationDb.libelle;
+            data.formation.annee = formationDb?.annee;
+            data.formation.libelle_long = formationDb?.libelle;
             const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
               {
                 organisme_id,

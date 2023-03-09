@@ -3,6 +3,7 @@ import omitDeep from "omit-deep";
 import logger from "./logger.js";
 import { asyncForEach } from "./utils/asyncUtils.js";
 
+/** @type {MongoClient} */
 let mongodbClient;
 
 const ensureInitialization = () => {
@@ -74,7 +75,7 @@ export const collectionExistInDb = (collectionsInDb, collectionName) =>
  */
 export const configureDbSchemaValidation = async (modelDescriptors) => {
   const db = getDatabase();
-  await ensureInitialization();
+  ensureInitialization();
   await asyncForEach(modelDescriptors, async ({ collectionName, schema }) => {
     await createCollectionIfDoesNotExist(collectionName);
 
@@ -104,15 +105,11 @@ export const clearAllCollections = async () => {
 
 /**
  * Clear d'une collection
- * @param {*} name
+ * @param {string} name
  * @returns
  */
-export function clearCollection(name) {
+export async function clearCollection(name) {
   logger.warn(`Suppression des données de la collection ${name}...`);
   ensureInitialization();
-  return mongodbClient
-    .db()
-    .collection(name)
-    .deleteMany({})
-    .then((res) => res.deletedCount);
+  await getDatabase().collection(name).deleteMany({});
 }

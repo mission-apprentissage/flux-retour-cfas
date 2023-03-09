@@ -85,11 +85,11 @@ describe("Test des actions Organismes", () => {
       });
 
       // Vérification des autres champs
-      assert.equal(created.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
+      assert.equal(created?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
+      assert.equal(created?.private_url !== null, true);
+      assert.equal(created?.accessToken !== null, true);
+      assert.equal(created?.created_at !== null, true);
+      assert.equal(created?.updated_at !== null, true);
     });
 
     it("returns created organisme when valid with SIRET and no UAI & no API Calls", async () => {
@@ -119,11 +119,11 @@ describe("Test des actions Organismes", () => {
       });
 
       // Vérification des autres champs
-      assert.equal(created.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
+      assert.equal(created?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
+      assert.equal(created?.private_url !== null, true);
+      assert.equal(created?.accessToken !== null, true);
+      assert.equal(created?.created_at !== null, true);
+      assert.equal(created?.updated_at !== null, true);
     });
 
     it("returns created organisme when valid with UAI & SIRET & API Calls", async () => {
@@ -149,18 +149,18 @@ describe("Test des actions Organismes", () => {
       });
 
       assert.deepEqual(
-        created.adresse,
+        created?.adresse,
         buildAdresseFromApiEntreprise(SAMPLES_ETABLISSEMENTS_API_ENTREPRISE.sample41461021200014.etablissement)
       );
 
       // TODO Tester les API pour les formations tree et les metiers LBA
 
       // Vérification des autres champs
-      assert.equal(created.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
+      assert.equal(created?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
+      assert.equal(created?.private_url !== null, true);
+      assert.equal(created?.accessToken !== null, true);
+      assert.equal(created?.created_at !== null, true);
+      assert.equal(created?.updated_at !== null, true);
     });
 
     it("returns created organisme when valid with SIRET & no UAI & API Calls", async () => {
@@ -198,14 +198,14 @@ describe("Test des actions Organismes", () => {
         voie: `${adresse?.type_voie}${adresse.nom_voie}`,
       };
 
-      assert.deepEqual(created.adresse, adresseBuildFromApiEntreprise);
+      assert.deepEqual(created?.adresse, adresseBuildFromApiEntreprise);
 
       // Vérification des autres champs
-      assert.equal(created.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
+      assert.equal(created?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
+      assert.equal(created?.private_url !== null, true);
+      assert.equal(created?.accessToken !== null, true);
+      assert.equal(created?.created_at !== null, true);
+      assert.equal(created?.updated_at !== null, true);
     });
   });
 
@@ -247,18 +247,18 @@ describe("Test des actions Organismes", () => {
       });
 
       assert.deepEqual(pick(updatedOrganisme, ["uai", "siret", "nom", "adresse", "nature"]), {
-        uai: updatedOrganisme.uai,
-        siret: updatedOrganisme.siret,
+        uai: updatedOrganisme?.uai,
+        siret: updatedOrganisme?.siret,
         nom: "UPDATED",
-        adresse: updatedOrganisme.adresse,
-        nature: updatedOrganisme.nature,
+        adresse: updatedOrganisme?.adresse,
+        nature: updatedOrganisme?.nature,
       });
 
-      assert.equal(updatedOrganisme.nom_tokenized, buildTokenizedString("UPDATED", 4));
-      assert.equal(updatedOrganisme.private_url !== null, true);
-      assert.equal(updatedOrganisme.accessToken !== null, true);
-      assert.equal(updatedOrganisme.created_at !== null, true);
-      assert.equal(updatedOrganisme.updated_at !== null, true);
+      assert.equal(updatedOrganisme?.nom_tokenized, buildTokenizedString("UPDATED", 4));
+      assert.equal(updatedOrganisme?.private_url !== null, true);
+      assert.equal(updatedOrganisme?.accessToken !== null, true);
+      assert.equal(updatedOrganisme?.created_at !== null, true);
+      assert.equal(updatedOrganisme?.updated_at !== null, true);
     });
 
     it("returns updated organisme when id valid and API Calls", async () => {
@@ -279,10 +279,10 @@ describe("Test des actions Organismes", () => {
       const updatedOrganisme = await updateOrganisme(_id, toUpdateOrganisme);
 
       assert.deepEqual(pick(updatedOrganisme, ["uai", "siret", "api_key", "nature"]), {
-        uai: updatedOrganisme.uai,
-        siret: updatedOrganisme.siret,
+        uai: updatedOrganisme?.uai,
+        siret: updatedOrganisme?.siret,
         api_key: "UPDATED",
-        nature: updatedOrganisme.nature,
+        nature: updatedOrganisme?.nature,
       });
 
       // Vérification de l'adresse construite depuis l'appel API Entreprise
@@ -300,14 +300,14 @@ describe("Test des actions Organismes", () => {
         voie: `${adresse?.type_voie}${adresse.nom_voie}`,
       };
 
-      assert.deepEqual(updatedOrganisme.adresse, adresseBuildFromApiEntreprise);
+      assert.deepEqual(updatedOrganisme?.adresse, adresseBuildFromApiEntreprise);
       // TODO Tester les API pour les formations tree et les metiers LBA
 
-      assert.equal(updatedOrganisme.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(updatedOrganisme.private_url !== null, true);
-      assert.equal(updatedOrganisme.accessToken !== null, true);
-      assert.equal(updatedOrganisme.created_at !== null, true);
-      assert.equal(updatedOrganisme.updated_at !== null, true);
+      assert.equal(updatedOrganisme?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
+      assert.equal(updatedOrganisme?.private_url !== null, true);
+      assert.equal(updatedOrganisme?.accessToken !== null, true);
+      assert.equal(updatedOrganisme?.created_at !== null, true);
+      assert.equal(updatedOrganisme?.updated_at !== null, true);
     });
 
     it("returns updated organisme & update ferme field to false when id valid and no API Calls", async () => {
@@ -331,7 +331,7 @@ describe("Test des actions Organismes", () => {
         { buildFormationTree: false, buildInfosFromSiret: false, callLbaApi: false }
       );
 
-      assert.equal(updatedOrganisme.ferme, false);
+      assert.equal(updatedOrganisme?.ferme, false);
     });
 
     it("returns updated organisme & does not update ferme field when id valid and no API Calls", async () => {
@@ -355,7 +355,7 @@ describe("Test des actions Organismes", () => {
         { buildFormationTree: false, buildInfosFromSiret: false, callLbaApi: false }
       );
 
-      assert.equal(updatedOrganisme.ferme, true);
+      assert.equal(updatedOrganisme?.ferme, true);
     });
 
     it("returns updated organisme & update ferme field from API", async () => {
@@ -375,7 +375,7 @@ describe("Test des actions Organismes", () => {
       const { _id } = await createOrganisme(sampleOrganisme);
       const updatedOrganisme = await updateOrganisme(_id, { ...sampleOrganisme });
 
-      assert.equal(updatedOrganisme.ferme, false);
+      assert.equal(updatedOrganisme?.ferme, false);
     });
   });
 
@@ -494,13 +494,13 @@ describe("Test des actions Organismes", () => {
 
       // Vérification de la création sans first_transmission_date
       const created = await findOrganismeById(_id);
-      assert.deepStrictEqual(created.first_transmission_date, undefined);
+      assert.deepStrictEqual(created?.first_transmission_date, undefined);
 
       // MAJ de l'organisme et vérification de l'ajout de first_transmission_date
       await setOrganismeTransmissionDates(_id);
       const updated = await findOrganismeById(_id);
-      assert.notDeepStrictEqual(updated.first_transmission_date, undefined);
-      assert.notDeepStrictEqual(updated.last_transmission_date, undefined);
+      assert.notDeepStrictEqual(updated?.first_transmission_date, undefined);
+      assert.notDeepStrictEqual(updated?.last_transmission_date, undefined);
     });
 
     it("mets à jour la date last_transmission_date pour un organisme avec first_transmission_date", async () => {
@@ -528,13 +528,13 @@ describe("Test des actions Organismes", () => {
 
       // Vérification de la création avec first_transmission_date
       const created = await findOrganismeById(_id);
-      assert.deepStrictEqual(created.first_transmission_date, first_transmission_date);
+      assert.deepStrictEqual(created?.first_transmission_date, first_transmission_date);
 
       // MAJ de l'organisme et vérification de l'ajout de last_transmission_date
       await setOrganismeTransmissionDates(_id);
       const updated = await findOrganismeById(_id);
-      assert.deepStrictEqual(updated.first_transmission_date, first_transmission_date);
-      assert.notDeepStrictEqual(updated.last_transmission_date, undefined);
+      assert.deepStrictEqual(updated?.first_transmission_date, first_transmission_date);
+      assert.notDeepStrictEqual(updated?.last_transmission_date, undefined);
     });
   });
 });

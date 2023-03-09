@@ -154,24 +154,26 @@ export const updatePermission = async ({ organisme_id, userEmail, roleName, cust
 
 /**
  * Méthode de mise à jour d'activation d'accès
- * @param {*} permissionProps
+ * @param {Object} options
+ * @param {string} options.userEmail
+ * @param {boolean} options.pending
+ * @param {string|undefined|ObjectId} options.organisme_id
  * @returns
  */
 export const updatePermissionsPending = async ({ userEmail, pending, organisme_id }) => {
   const permissions = await findPermissionsByUserEmail(organisme_id, userEmail, { _id: 1 });
-  if (!permissions && !permissions.length) {
+  if (!permissions || !permissions.length) {
     throw new Error(`Unable to find permissions for userEmail ${userEmail.toLowerCase()}`);
   }
 
-  return permissionsDb().updateMany(
+  await permissionsDb().updateMany(
     { _id: { $in: permissions.map(({ _id }) => _id) } },
     {
       $set: {
         pending,
         updated_at: new Date(),
       },
-    },
-    { returnDocument: "after" }
+    }
   );
 };
 
@@ -179,12 +181,12 @@ export const updatePermissionsPending = async ({ userEmail, pending, organisme_i
  * Méthode de suppression de permissions
  * @param {Object} options
  * @param {string} options.userEmail
- * @param {string|null|ObjectId} options.organisme_id
+ * @param {string|undefined|ObjectId} options.organisme_id
  * @returns
  */
 export const removePermissions = async ({ userEmail, organisme_id }) => {
   const permissions = await findPermissionsByUserEmail(organisme_id, userEmail, { _id: 1 });
-  if (!permissions && !permissions.length) {
+  if (!permissions || !permissions.length) {
     throw new Error(
       `Unable to find permissions for userEmail ${userEmail.toLowerCase()} and organisme ${organisme_id}`
     );

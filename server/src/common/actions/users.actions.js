@@ -13,7 +13,7 @@ import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } fro
 /**
  * Méthode de création d'un utilisateur
  * @param {*} userProps
- * @returns
+ * @returns {Promise<import("mongodb").WithId<any>>}
  */
 export const createUser = async ({ email, password }, options = {}) => {
   const passwordHash = options.hash || hashUtil(password);
@@ -127,7 +127,7 @@ export const authenticate = async (email, password) => {
   const current = user.password;
   if (compare(password, current)) {
     if (isTooWeak(current)) {
-      await rehashPassword(user, password);
+      await rehashPassword(user._id, password);
     }
     return user;
   }
@@ -251,6 +251,7 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
 };
 
 export const structureUser = async (user) => {
+  /** @type {import("mongodb").WithId<any>[]} */
   const rolesList = user.roles?.length
     ? await rolesDb()
         .find({ _id: { $in: user.roles } })
@@ -310,6 +311,7 @@ export const updateUserLastConnection = async (email) => {
       $set: {
         last_connection: new Date(),
       },
+      // @ts-ignore
       $push: { connection_history: new Date() },
     }
   );

@@ -208,7 +208,7 @@ export const buildNewHistoriqueStatutApprenant = (
 /**
  * Récupération du nb distinct d'organismes
  * On récupère le nombre distinct d'organismes id dans la collection dossiersApprenantsMigrationDb
- * @param {*} filters
+ * @param {import("mongodb").Filter<any>} filters
  * @returns
  */
 export const getNbDistinctOrganismes = async (filters = {}) => {

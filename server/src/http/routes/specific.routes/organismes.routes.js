@@ -25,6 +25,7 @@ export default () => {
       const limit = Number(params.limit ?? 50);
       const skip = (page - 1) * limit;
 
+      /** @type {import("mongodb").Filter<any>} */
       const jsonQuery = JSON.parse(query);
       const allData = await organismesDb().find(jsonQuery).skip(skip).limit(limit).toArray();
       const count = await organismesDb().countDocuments(jsonQuery);

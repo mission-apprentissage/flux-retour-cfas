@@ -41,6 +41,7 @@ const hydrateArchivesDossiersApprenants = async (ANNEE_SCOLAIRE_START_LIMIT = 20
 
   const cursor = dossiersApprenantsMigrationDb().find(query);
   while (await cursor.hasNext()) {
+    /** @type {import("mongodb").WithId<any>} */
     const dossierApprenantToArchive = await cursor.next();
 
     try {

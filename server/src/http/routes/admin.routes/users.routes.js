@@ -31,7 +31,10 @@ export default ({ mailer }) => {
     "/users",
     tryCatch(async (req, res) => {
       let usersList = await getAllUsers();
-      let roleNamesById = (await getAllRoles()).reduce((acc, role) => ({ ...acc, [role._id]: role.name }), {});
+      let roleNamesById = (await getAllRoles()).reduce(
+        (acc, role) => ({ ...acc, [role._id.toString()]: role.name }),
+        {}
+      );
       let permissionsByEmail = (await getAllPermissions()).reduce(
         (acc, permission) => ({
           ...acc,
@@ -144,8 +147,7 @@ export default ({ mailer }) => {
     tryCatch(async ({ body, params }, res) => {
       const userid = params.userid;
 
-      let rolesId = await findRolesByNames(body.options.roles, { _id: 1 });
-      rolesId = rolesId.map(({ _id }) => _id);
+      const rolesId = (await findRolesByNames(body.options.roles, { _id: 1 })).map(({ _id }) => _id);
 
       const options = body.options;
 

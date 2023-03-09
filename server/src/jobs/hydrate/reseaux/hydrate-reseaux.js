@@ -117,6 +117,7 @@ const hydrateReseauFile = async (filename) => {
         1 - Add réseau information to organisme in TDB, if found unique
       */
     // try to retrieve organisme in our database with UAI and SIRET if UAI is provided
+    /** @type {(import("mongodb").WithId<any>)[]} */
     const organismeInTdb = organismeParsedFromFile.uai
       ? [await findOrganismeByUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)].filter((o) => o)
       : await findOrganismesBySiret(organismeParsedFromFile.siret);
