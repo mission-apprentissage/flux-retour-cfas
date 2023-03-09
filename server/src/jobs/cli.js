@@ -16,13 +16,14 @@ import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
-import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index.js";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
 import { createIndexes, dropIndexes } from "../common/model/indexes/index.js";
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
 import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
 import { updateUserPassword } from "./users/update-user-password.js";
+import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs copy/index.js";
+import { removeOrganismeAndEffectifsAndDossiersApprenantsMigration } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
 
 program
   .configureHelp({
@@ -37,6 +38,20 @@ program
       console.info("Create all indexes...");
       await createIndexes();
       console.info("All indexes successfully created !");
+    }, options._name)
+  );
+
+/**
+ * Job (temporaire) de suppression d'un organisme et de ses effectifs / dossiersApprenantsMigration liés
+ */
+program
+  .command("tmp:patches:remove-organisme-effectifs-dossiersApprenantsMigration")
+  .description("[TEMPORAIRE] Suppression d'un organisme avec ses effectifs & dossiersApprenantsMigration liés")
+  .requiredOption("--uai <string>", "Uai de l'organisme")
+  .requiredOption("--siret <string>", "Siret de l'organisme")
+  .action(async ({ uai, siret }, options) =>
+    runScript(async () => {
+      return removeOrganismeAndEffectifsAndDossiersApprenantsMigration({ uai, siret });
     }, options._name)
   );
 
