@@ -46,6 +46,9 @@ import maintenancesRoutes from "./routes/maintenances.routes.js";
 import config from "../config.js";
 import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
 
+// catch all unhandled promise rejections and call the error middleware
+import "express-async-errors";
+
 export default async (services) => {
   const app = express();
 
