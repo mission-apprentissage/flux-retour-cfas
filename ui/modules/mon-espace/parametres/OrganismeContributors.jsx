@@ -219,9 +219,7 @@ const OrganismeContributors = ({ size = "md" }) => {
               data={organismeContributors}
               columns={{
                 "user.name": {
-                  header: () => {
-                    return <Box textAlign="left">Utilisateur</Box>;
-                  },
+                  header: () => "Utilisateur",
                   width: 120,
                   cell: (info) => {
                     const user = info.row.original.user;
@@ -269,13 +267,9 @@ const OrganismeContributors = ({ size = "md" }) => {
                   },
                 },
                 userEmail: {
-                  header: () => {
-                    return <Box textAlign="left">Courriel</Box>;
-                  },
+                  header: () => "Courriel",
                   width: 100,
-                  cell: (info) => {
-                    return <Text fontSize="1rem">{info.getValue()}</Text>;
-                  },
+                  cell: (info) => <Text fontSize="1rem">{info.getValue()}</Text>,
                 },
                 role: {
                   header: () => {
@@ -311,9 +305,7 @@ const OrganismeContributors = ({ size = "md" }) => {
                   },
                 },
                 actions: {
-                  header: () => {
-                    return <Box textAlign="center">Retirer l&rsquo;accès</Box>;
-                  },
+                  header: () => "Retirer l&rsquo;accès",
                   width: 40,
                   cell: (info) => {
                     const { user, userEmail } = info.row.original;
