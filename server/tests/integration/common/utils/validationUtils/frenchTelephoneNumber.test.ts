@@ -2,7 +2,7 @@ import { strict as assert } from "assert";
 import {
   telephoneConverter,
   validateFrenchTelephoneNumber,
-} from "../../../../../src/common/utils/validationsUtils/frenchTelephoneNumber.js";
+} from "../../../../../src/common/utils/validationsUtils/frenchTelephoneNumber";
 
 describe("Domain French Telephone Number", () => {
   describe("validateFrenchTelephoneNumber", () => {

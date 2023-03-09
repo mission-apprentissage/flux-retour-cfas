@@ -1,4 +1,4 @@
-import { jwtSessionsDb } from "../model/collections.js";
+import { jwtSessionsDb } from "../model/collections";
 
 /**
  * Méthode d'ajout de session

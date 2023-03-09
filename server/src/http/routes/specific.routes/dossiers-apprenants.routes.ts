@@ -1,30 +1,30 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { schema as anneeScolaireSchema } from "../../../common/utils/validationsUtils/anneeScolaire.js";
-import { schema as ISO8601DateSchema } from "../../../common/utils/validationsUtils/date.js";
-import { schema as statutApprenantSchema } from "../../../common/utils/validationsUtils/apprenant/statutApprenant.js";
-import { uaiSchema } from "../../../common/utils/validationUtils.js";
-import { schema as cfdSchema } from "../../../common/utils/validationsUtils/cfd.js";
-import { schema as nomApprenantSchema } from "../../../common/utils/validationsUtils/apprenant/nomApprenant.js";
-import { schema as prenomApprenantSchema } from "../../../common/utils/validationsUtils/apprenant/prenomApprenant.js";
-import { schema as siretSchema } from "../../../common/utils/validationsUtils/siret.js";
-import { findAndPaginate } from "../../../common/utils/dbUtils.js";
-import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../common/constants/userEventsConstants.js";
-import { dossiersApprenantsApiErrorsDb, dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
-import { sendTransformedPaginatedJsonStream } from "../../../common/utils/httpUtils.js";
-import { createUserEvent } from "../../../common/actions/userEvents.actions.js";
-import { runEngine } from "../../../common/actions/engine/engine.actions.js";
-import { structureEffectifFromDossierApprenant } from "../../../common/actions/effectifs.actions.js";
-import { structureOrganismeFromDossierApprenant } from "../../../common/actions/organismes/organismes.actions.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
+import logger from "../../../common/logger";
+import { asyncForEach } from "../../../common/utils/asyncUtils";
+import { schema as anneeScolaireSchema } from "../../../common/utils/validationsUtils/anneeScolaire";
+import { schema as ISO8601DateSchema } from "../../../common/utils/validationsUtils/date";
+import { schema as statutApprenantSchema } from "../../../common/utils/validationsUtils/apprenant/statutApprenant";
+import { uaiSchema } from "../../../common/utils/validationUtils";
+import { schema as cfdSchema } from "../../../common/utils/validationsUtils/cfd";
+import { schema as nomApprenantSchema } from "../../../common/utils/validationsUtils/apprenant/nomApprenant";
+import { schema as prenomApprenantSchema } from "../../../common/utils/validationsUtils/apprenant/prenomApprenant";
+import { schema as siretSchema } from "../../../common/utils/validationsUtils/siret";
+import { findAndPaginate } from "../../../common/utils/dbUtils";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../common/constants/userEventsConstants";
+import { dossiersApprenantsApiErrorsDb, dossiersApprenantsMigrationDb } from "../../../common/model/collections";
+import { sendTransformedPaginatedJsonStream } from "../../../common/utils/httpUtils";
+import { createUserEvent } from "../../../common/actions/userEvents.actions";
+import { runEngine } from "../../../common/actions/engine/engine.actions";
+import { structureEffectifFromDossierApprenant } from "../../../common/actions/effectifs.actions";
+import { structureOrganismeFromDossierApprenant } from "../../../common/actions/organismes/organismes.actions";
 import {
   findDossierApprenantByQuery,
   insertDossierApprenant,
   structureDossierApprenant,
   updateDossierApprenant,
-} from "../../../common/actions/dossiersApprenants.actions.js";
+} from "../../../common/actions/dossiersApprenants.actions";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 

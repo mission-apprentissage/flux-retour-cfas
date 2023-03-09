@@ -1,7 +1,7 @@
 import express from "express";
 
-import tryCatch from "../middlewares/tryCatchMiddleware.js";
-import { findMaintenanceMessages } from "../../common/actions/maintenances.actions.js";
+import tryCatch from "../middlewares/tryCatchMiddleware";
+import { findMaintenanceMessages } from "../../common/actions/maintenances.actions";
 
 export default () => {
   const router = express.Router();

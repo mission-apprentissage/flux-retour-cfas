@@ -1,6 +1,6 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 
-import { connectToMongodb, closeMongodbConnection } from "../../src/common/mongodb.js";
+import { connectToMongodb, closeMongodbConnection } from "../../src/common/mongodb";
 
 let mongoInMemory;
 

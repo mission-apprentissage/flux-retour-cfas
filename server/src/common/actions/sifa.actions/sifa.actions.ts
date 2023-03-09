@@ -1,11 +1,11 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
-import { findEffectifs } from "../effectifs.actions.js";
-import { findFormationById, getFormationWithCfd } from "../formations.actions.js";
-import { findOrganismeById } from "../organismes/organismes.actions.js";
-import { SIFA_FIELDS } from "./sifaCsvFields.js";
-import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
-import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
+import { findEffectifs } from "../effectifs.actions";
+import { findFormationById, getFormationWithCfd } from "../formations.actions";
+import { findOrganismeById } from "../organismes/organismes.actions";
+import { SIFA_FIELDS } from "./sifaCsvFields";
+import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances";
+import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants";
 
 export const isEligibleSIFA = ({ historique_statut }) => {
   const filtered = historique_statut.filter(({ date_statut }) => {

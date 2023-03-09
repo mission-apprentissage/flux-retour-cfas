@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
-import config from "../../../src/config.js";
-import { startServer } from "../../utils/testUtils.js";
+import config from "../../../src/config";
+import { startServer } from "../../utils/testUtils";
 
 describe("Healthcheck route", () => {
   it("Vérifie que le server fonctionne", async () => {

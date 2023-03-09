@@ -4,8 +4,8 @@ import {
   createMaintenanceMessage,
   updateMaintenanceMessage,
   removeMaintenanceMessage,
-} from "../../../common/actions/maintenances.actions.js";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+} from "../../../common/actions/maintenances.actions";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
 
 export default () => {
   const router = express.Router();

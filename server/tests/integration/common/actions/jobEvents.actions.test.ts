@@ -1,8 +1,8 @@
 import { strict as assert } from "assert";
 import { addMinutes } from "date-fns";
 
-import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.js";
-import { createJobEvent, isJobInAction } from "../../../../src/common/actions/jobEvents.actions.js";
+import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants";
+import { createJobEvent, isJobInAction } from "../../../../src/common/actions/jobEvents.actions";
 
 describe("Test des actions JobEvents", () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {

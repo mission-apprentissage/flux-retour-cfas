@@ -1,27 +1,27 @@
 import "dotenv/config";
 import { Option, program } from "commander";
 
-import { runScript } from "./scriptWrapper.js";
-import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
-import { clear, clearRoles, clearUsers } from "./clear/clear-all.js";
-import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
-import { purgeEvents } from "./clear/purge-events.js";
-import { createUserAccount } from "./users/create-user.js";
+import { runScript } from "./scriptWrapper";
+import { seedSample, seedAdmin, seedRoles } from "./seed/start/index";
+import { clear, clearRoles, clearUsers } from "./clear/clear-all";
+import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants";
+import { purgeEvents } from "./clear/purge-events";
+import { createUserAccount } from "./users/create-user";
 import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
-} from "./users/generate-password-update-token.js";
-import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes.js";
-import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
-import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
-import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
-import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
-import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index.js";
-import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
-import { createIndexes, dropIndexes } from "../common/model/indexes/index.js";
-import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
-import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
-import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
+} from "./users/generate-password-update-token";
+import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
+import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
+import { updateUsersApiSeeders } from "./users/update-apiSeeders";
+import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
+import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis";
+import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index";
+import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index";
+import { createIndexes, dropIndexes } from "../common/model/indexes/index";
+import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus";
+import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index";
+import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index";
 
 program
   .configureHelp({

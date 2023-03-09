@@ -1,9 +1,9 @@
 import Joi from "joi";
-import { object, string, objectId, date, integer, arrayOf, boolean } from "./json-schema/jsonSchemaTypes.js";
-import { schemaValidation } from "../utils/schemaUtils.js";
-import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
-import { CODES_STATUT_APPRENANT } from "../constants/dossierApprenantConstants.js";
-import { REGIONS } from "../constants/territoiresConstants.js";
+import { object, string, objectId, date, integer, arrayOf, boolean } from "./json-schema/jsonSchemaTypes";
+import { schemaValidation } from "../utils/schemaUtils";
+import { siretSchema, uaiSchema } from "../utils/validationUtils";
+import { CODES_STATUT_APPRENANT } from "../constants/dossierApprenantConstants";
+import { REGIONS } from "../constants/territoiresConstants";
 
 const collectionName = "dossiersApprenantsMigration";
 
@@ -60,8 +60,8 @@ const schema = object(
     email_contact: string({ description: "Adresse mail de contact de l'apprenant" }),
     date_de_naissance_apprenant: date({ description: "Date de naissance de l'apprenant" }),
     telephone_apprenant: string({
-      description: `Dans le cas d'un numéro français, il n'est pas 
-        nécessaire de saisir le "0" car l'indicateur pays est 
+      description: `Dans le cas d'un numéro français, il n'est pas
+        nécessaire de saisir le "0" car l'indicateur pays est
         pré-renseigné.
         Il doit contenir 9 chiffres après l'indicatif.`,
       example: "+33908070605",

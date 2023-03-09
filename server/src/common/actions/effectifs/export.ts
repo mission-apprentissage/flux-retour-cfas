@@ -1,4 +1,4 @@
-import { getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants";
 
 /** @type import("./export-struct").FieldExport[] */
 export const exportedFields = [

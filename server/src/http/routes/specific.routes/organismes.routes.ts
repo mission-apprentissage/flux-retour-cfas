@@ -1,8 +1,8 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
 import pick from "lodash.pick";
-import { organismesDb } from "../../../common/model/collections.js";
+import { organismesDb } from "../../../common/model/collections";
 
 export default () => {
   const router = express.Router();

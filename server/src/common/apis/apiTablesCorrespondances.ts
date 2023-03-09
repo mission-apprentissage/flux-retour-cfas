@@ -1,6 +1,6 @@
 import axios from "axios";
-import logger from "../../common/logger.js";
-import config from "../../config.js";
+import logger from "../../common/logger";
+import config from "../../config";
 
 // Cf Documentation : https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
 
@@ -9,7 +9,7 @@ export const API_ENDPOINT = config.tablesCorrespondances.endpoint;
 /**
  *
  * @param {string} cfd
- * @returns {Promise<(import("./@types/TabCoCfdInfo.js").default)['result']|null>}
+ * @returns {Promise<(import("./@types/TabCoCfdInfo").default)['result']|null>}
  */
 export const getCfdInfo = async (cfd) => {
   const url = `${API_ENDPOINT}/cfd`;
@@ -27,7 +27,7 @@ export const getCfdInfo = async (cfd) => {
 /**
  *
  * @param {string} codePostal
- * @returns {Promise<import("./@types/TabCoCodePostalInfo.js").default|null>}
+ * @returns {Promise<import("./@types/TabCoCodePostalInfo").default|null>}
  */
 export const getCodePostalInfo = async (codePostal) => {
   const url = `${API_ENDPOINT}/code-postal`;

@@ -1,6 +1,6 @@
 import axios from "axios";
-import logger from "../logger.js";
-import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
+import logger from "../logger";
+import { ApiError, apiRateLimiter } from "../utils/apiUtils";
 
 // Cf Documentation : https://www.cfadock.fr/Home/ApiDescription
 const executeWithRateLimiting = apiRateLimiter("apiCfaDock", {

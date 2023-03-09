@@ -1,10 +1,10 @@
 import axiosist from "axiosist";
-import server from "../../src/http/server.js";
-import { configureDbSchemaValidation } from "../../src/common/mongodb.js";
-import redisFakeClient from "./redisClientMock.js";
-import { modelDescriptors } from "../../src/common/model/collections.js";
-import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.actions.js";
-import { createUser } from "../../src/common/actions/users.actions.js";
+import server from "../../src/http/server";
+import { configureDbSchemaValidation } from "../../src/common/mongodb";
+import redisFakeClient from "./redisClientMock";
+import { modelDescriptors } from "../../src/common/model/collections";
+import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.actions";
+import { createUser } from "../../src/common/actions/users.actions";
 
 export const startServer = async () => {
   const services = { cache: redisFakeClient };

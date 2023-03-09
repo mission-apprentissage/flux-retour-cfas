@@ -1,14 +1,14 @@
 import express from "express";
 import { Parser } from "json2csv";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
 import {
   getExportAnonymizedEventNameFromFilters,
   USER_EVENTS_TYPES,
-} from "../../../common/constants/userEventsConstants.js";
-import { createUserEvent } from "../../../common/actions/userEvents.actions.js";
-import { buildEffectifsFiltersFromRequest } from "./indicateurs.routes.js";
-import { exportedFields } from "../../../common/actions/effectifs/export.js";
-import { getDataListEffectifsAtDate } from "../../../common/actions/effectifs/effectifs.actions.js";
+} from "../../../common/constants/userEventsConstants";
+import { createUserEvent } from "../../../common/actions/userEvents.actions";
+import { buildEffectifsFiltersFromRequest } from "./indicateurs.routes";
+import { exportedFields } from "../../../common/actions/effectifs/export";
+import { getDataListEffectifsAtDate } from "../../../common/actions/effectifs/effectifs.actions";
 
 // Parse to french localized CSV with specific fields order & labels (; as delimiter and UTF8 using withBOM)
 const CSV_DEFAULT_FIELDS = [

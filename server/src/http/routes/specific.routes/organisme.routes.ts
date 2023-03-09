@@ -3,8 +3,8 @@ import Joi from "joi";
 import { compact, get } from "lodash-es";
 import Boom from "boom";
 
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
+import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware";
 import {
   findOrganismeById,
   getContributeurs,
@@ -14,18 +14,18 @@ import {
   searchOrganismes,
   findOrganismeByUai,
   getSousEtablissementsForUai,
-} from "../../../common/actions/organismes/organismes.actions.js";
-import { findRolePermission } from "../../../common/actions/roles.actions.js";
-import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
-import { generateSifa, isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
+} from "../../../common/actions/organismes/organismes.actions";
+import { findRolePermission } from "../../../common/actions/roles.actions";
+import { findEffectifs } from "../../../common/actions/effectifs.actions";
+import { generateSifa, isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions";
 import {
   removePermissions,
   updatePermission,
   updatePermissionsPending,
-} from "../../../common/actions/permissions.actions.js";
-import { getUser } from "../../../common/actions/users.actions.js";
-import { uaiSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
-import { returnResult } from "../../middlewares/helpers.js";
+} from "../../../common/actions/permissions.actions";
+import { getUser } from "../../../common/actions/users.actions";
+import { uaiSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils";
+import { returnResult } from "../../middlewares/helpers";
 
 export default ({ mailer }) => {
   const router = express.Router();

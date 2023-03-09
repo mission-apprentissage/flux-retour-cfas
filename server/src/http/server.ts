@@ -5,46 +5,46 @@ import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 
-import { apiRoles } from "../common/roles.js";
+import { apiRoles } from "../common/roles";
 
-import logMiddleware from "./middlewares/logMiddleware.js";
-import errorMiddleware from "./middlewares/errorMiddleware.js";
-import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
-import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
-import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
-import { authMiddleware } from "./middlewares/authMiddleware.js";
-import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
+import logMiddleware from "./middlewares/logMiddleware";
+import errorMiddleware from "./middlewares/errorMiddleware";
+import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
+import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
+import permissionsMiddleware from "./middlewares/permissionsMiddleware";
+import { authMiddleware } from "./middlewares/authMiddleware";
+import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware";
 
-import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes.js";
-import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
-import loginRouter from "./routes/specific.routes/old/login.route.js";
-import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
-import organismesRouter from "./routes/specific.routes/organismes.routes.js";
-import formationRouter from "./routes/specific.routes/old/formations.route.js";
-import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
-import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
-import serverEvents from "./routes/specific.routes/server-events.routes.js";
+import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes";
+import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
+import loginRouter from "./routes/specific.routes/old/login.route";
+import referentielRouter from "./routes/specific.routes/old/referentiel.route";
+import organismesRouter from "./routes/specific.routes/organismes.routes";
+import formationRouter from "./routes/specific.routes/old/formations.route";
+import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes";
+import indicateursRouter from "./routes/specific.routes/indicateurs.routes";
+import serverEvents from "./routes/specific.routes/server-events.routes";
 
-import emails from "./routes/emails.routes.js";
-import session from "./routes/session.routes.js";
-import healthcheckRouter from "./routes/healthcheck.route.js";
+import emails from "./routes/emails.routes";
+import session from "./routes/session.routes";
+import healthcheckRouter from "./routes/healthcheck.route";
 
-import auth from "./routes/user.routes/auth.routes.js";
-import register from "./routes/user.routes/register.routes.js";
-import password from "./routes/user.routes/password.routes.js";
-import profile from "./routes/user.routes/profile.routes.js";
+import auth from "./routes/user.routes/auth.routes";
+import register from "./routes/user.routes/register.routes";
+import password from "./routes/user.routes/password.routes";
+import profile from "./routes/user.routes/profile.routes";
 
-import organisme from "./routes/specific.routes/organisme.routes.js";
-import effectif from "./routes/specific.routes/effectif.routes.js";
-import espace from "./routes/specific.routes/espace.routes.js";
-import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
+import organisme from "./routes/specific.routes/organisme.routes";
+import effectif from "./routes/specific.routes/effectif.routes";
+import espace from "./routes/specific.routes/espace.routes";
+import upload from "./routes/specific.routes/serp.routes/upload.routes";
 
-import usersAdmin from "./routes/admin.routes/users.routes.js";
-import rolesAdmin from "./routes/admin.routes/roles.routes.js";
-import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
-import maintenancesRoutes from "./routes/maintenances.routes.js";
-import config from "../config.js";
-import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
+import usersAdmin from "./routes/admin.routes/users.routes";
+import rolesAdmin from "./routes/admin.routes/roles.routes";
+import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
+import maintenancesRoutes from "./routes/maintenances.routes";
+import config from "../config";
+import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware";
 
 export default async (services) => {
   const app = express();

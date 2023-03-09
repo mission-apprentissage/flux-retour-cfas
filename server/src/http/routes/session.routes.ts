@@ -1,6 +1,6 @@
 import express from "express";
-import tryCatch from "../middlewares/tryCatchMiddleware.js";
-import { updateUserLastConnection, structureUser } from "../../common/actions/users.actions.js";
+import tryCatch from "../middlewares/tryCatchMiddleware";
+import { updateUserLastConnection, structureUser } from "../../common/actions/users.actions";
 
 export default () => {
   const router = express.Router();

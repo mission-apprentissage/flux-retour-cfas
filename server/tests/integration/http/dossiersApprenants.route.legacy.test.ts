@@ -1,18 +1,18 @@
 import { strict as assert } from "assert";
 import nock from "nock";
 
-import { startServer } from "../../utils/testUtils.js";
-import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
+import { startServer } from "../../utils/testUtils";
+import { apiRoles, tdbRoles } from "../../../src/common/roles";
 import {
   createRandomDossierApprenantApiInput,
   createRandomDossierApprenant,
   createRandomOrganisme,
-} from "../../data/randomizedSample.js";
-import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd.js";
-import { dossiersApprenantsMigrationDb, usersDb } from "../../../src/common/model/collections.js";
-import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
-import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
-import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";
+} from "../../data/randomizedSample";
+import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd";
+import { dossiersApprenantsMigrationDb, usersDb } from "../../../src/common/model/collections";
+import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions";
+import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions";
+import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions";
 
 const user = {
   name: "userApi",

@@ -1,8 +1,8 @@
 import express from "express";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
 import Joi from "joi";
-import { rolesDb } from "../../../common/model/collections.js";
-import { createRole, findRoleById } from "../../../common/actions/roles.actions.js";
+import { rolesDb } from "../../../common/model/collections";
+import { createRole, findRoleById } from "../../../common/actions/roles.actions";
 
 // TODO [tech]
 export default () => {

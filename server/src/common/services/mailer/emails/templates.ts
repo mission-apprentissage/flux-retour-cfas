@@ -1,8 +1,8 @@
 import path from "path";
-import config from "../../../../config.js";
-import { createResetPasswordToken, createActivationToken } from "../../../utils/jwtUtils.js";
-import { __dirname } from "../../../utils/esmUtils.js";
-import { ACADEMIES_BY_ID, REGIONS_BY_ID, DEPARTEMENTS_BY_ID } from "../../../constants/territoiresConstants.js";
+import config from "../../../../config";
+import { createResetPasswordToken, createActivationToken } from "../../../utils/jwtUtils";
+import { __dirname } from "../../../utils/esmUtils";
+import { ACADEMIES_BY_ID, REGIONS_BY_ID, DEPARTEMENTS_BY_ID } from "../../../constants/territoiresConstants";
 
 function getTemplateFile(name) {
   return path.join(__dirname(import.meta.url), `${name}.mjml.ejs`);

@@ -1,4 +1,4 @@
-import { object, objectId, string, boolean, number, array } from "./json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, boolean, number, array } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismesReferentiel";
 

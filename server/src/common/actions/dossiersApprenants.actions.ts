@@ -1,11 +1,11 @@
 import { ObjectId } from "mongodb";
 import { isEqual } from "date-fns";
-import { dossiersApprenantsMigrationDb } from "../model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../model/collections";
 import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
-} from "../model/dossiersApprenantsMigration.model.js";
-import { findOrganismeById } from "./organismes/organismes.actions.js";
+} from "../model/dossiersApprenantsMigration.model";
+import { findOrganismeById } from "./organismes/organismes.actions";
 
 /**
  * Méthode qui ajoute un dossierApprenant en base

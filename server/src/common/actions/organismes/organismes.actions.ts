@@ -1,20 +1,20 @@
 import { ObjectId } from "mongodb";
 
-import { getMetiersBySiret } from "../../apis/apiLba.js";
-import { organismesDb, effectifsDb, permissionsDb } from "../../model/collections.js";
-import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
+import { getMetiersBySiret } from "../../apis/apiLba";
+import { organismesDb, effectifsDb, permissionsDb } from "../../model/collections";
+import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model";
 
-import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
-import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
-import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
-import { siretSchema } from "../../utils/validationUtils.js";
-import { createPermission, removePermissions } from "../permissions.actions.js";
-import { structureUser } from "../users.actions.js";
-import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
-import { findDataFromSiret } from "../infoSiret.actions.js";
-import logger from "../../logger.js";
-import { escapeRegExp } from "../../utils/regexUtils.js";
-import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
+import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils";
+import { buildTokenizedString } from "../../utils/buildTokenizedString";
+import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils";
+import { siretSchema } from "../../utils/validationUtils";
+import { createPermission, removePermissions } from "../permissions.actions";
+import { structureUser } from "../users.actions";
+import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
+import { findDataFromSiret } from "../infoSiret.actions";
+import logger from "../../logger";
+import { escapeRegExp } from "../../utils/regexUtils";
+import { buildMongoPipelineFilterStages } from "../helpers/filters";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -433,7 +433,7 @@ export const getSousEtablissementsForUai = async (uai) => {
 
 /**
  * Retourne la liste des organismes correspondant aux critères de recherche
- * @param {import("./organismes.actions-struct.js").OrganismesSearch} searchCriteria
+ * @param {import("./organismes.actions-struct").OrganismesSearch} searchCriteria
  * @return {Promise<{ uai: string; nom: string; }[]>} Array of CFA information
  */
 export const searchOrganismes = async (searchCriteria) => {

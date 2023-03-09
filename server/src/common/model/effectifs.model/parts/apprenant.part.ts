@@ -1,11 +1,11 @@
 import Joi from "joi";
 import { flattenDeep } from "lodash-es";
 
-import { CODES_STATUT_APPRENANT } from "../../../constants/dossierApprenantConstants.js";
-import { schemaValidation } from "../../../utils/schemaUtils.js";
-import { siretSchema } from "../../../utils/validationUtils.js";
-import { adresseSchema } from "../../json-schema/adresseSchema.js";
-import { object, string, date, integer, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes.js";
+import { CODES_STATUT_APPRENANT } from "../../../constants/dossierApprenantConstants";
+import { schemaValidation } from "../../../utils/schemaUtils";
+import { siretSchema } from "../../../utils/validationUtils";
+import { adresseSchema } from "../../json-schema/adresseSchema";
+import { object, string, date, integer, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes";
 
 export const apprenantSchema = object(
   {
@@ -46,8 +46,8 @@ export const apprenantSchema = object(
     }),
     courriel: string({ description: "Adresse mail de contact de l'apprenant" }),
     telephone: string({
-      description: `Dans le cas d'un numéro français, il n'est pas 
-      nécessaire de saisir le "0" car l'indicateur pays est 
+      description: `Dans le cas d'un numéro français, il n'est pas
+      nécessaire de saisir le "0" car l'indicateur pays est
       pré-renseigné.
       Il doit contenir 9 chiffres après l'indicatif.`,
       example: "+33908070605",
@@ -148,8 +148,8 @@ export const apprenantSchema = object(
       },
       courriel: string({ description: "Adresse mail de contact du representant légal" }),
       telephone: string({
-        description: `Dans le cas d'un numéro français, il n'est pas 
-      nécessaire de saisir le "0" car l'indicateur pays est 
+        description: `Dans le cas d'un numéro français, il n'est pas
+      nécessaire de saisir le "0" car l'indicateur pays est
       pré-renseigné.
       Il doit contenir 9 chiffres après l'indicatif.`,
         example: "+33908070605",

@@ -1,9 +1,9 @@
 // import { strict as assert } from "assert";
 // import { subMinutes, differenceInCalendarDays, differenceInSeconds } from "date-fns";
 // import mongodb from "mongodb";
-// import users from "../../../../src/common/components/users.js";
-// import { usersDb } from "../../../../src/common/model/collections.js";
-// import { apiRoles, tdbRoles } from "../../../../src/common/roles.js";
+// import users from "../../../../src/common/components/users";
+// import { usersDb } from "../../../../src/common/model/collections";
+// import { apiRoles, tdbRoles } from "../../../../src/common/roles";
 
 // describe("Components Users Test", () => {
 //   describe("createUser", () => {

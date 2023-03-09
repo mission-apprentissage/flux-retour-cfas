@@ -1,15 +1,15 @@
 import path from "path";
 
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
-import { __dirname } from "../../../common/utils/esmUtils.js";
+import logger from "../../../common/logger";
+import { asyncForEach } from "../../../common/utils/asyncUtils";
+import { readJsonFromCsvFile } from "../../../common/utils/fileUtils";
+import { __dirname } from "../../../common/utils/esmUtils";
 import {
   findOrganismeByUaiAndSiret,
   findOrganismesBySiret,
-} from "../../../common/actions/organismes/organismes.actions.js";
-import { arraysContainSameValues } from "../../../common/utils/miscUtils.js";
-import { organismesDb } from "../../../common/model/collections.js";
+} from "../../../common/actions/organismes/organismes.actions";
+import { arraysContainSameValues } from "../../../common/utils/miscUtils";
+import { organismesDb } from "../../../common/model/collections";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",

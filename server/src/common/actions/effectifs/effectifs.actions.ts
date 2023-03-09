@@ -1,13 +1,13 @@
-import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenantConstants.js";
-import { buildMongoPipelineFilterStages, organismeLookup } from "../helpers/filters.js";
-import { mergeObjectsBy } from "../../utils/mergeObjectsBy.js";
-import { DEPARTEMENTS_BY_ID } from "../../constants/territoiresConstants.js";
+import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenantConstants";
+import { buildMongoPipelineFilterStages, organismeLookup } from "../helpers/filters";
+import { mergeObjectsBy } from "../../utils/mergeObjectsBy";
+import { DEPARTEMENTS_BY_ID } from "../../constants/territoiresConstants";
 import {
   abandonsIndicator,
   apprentisIndicator,
   inscritsSansContratsIndicator,
   rupturantsIndicator,
-} from "./indicators.js";
+} from "./indicators";
 
 export const getIndicateurs = async (filters) => {
   const filterStages = buildMongoPipelineFilterStages(filters);

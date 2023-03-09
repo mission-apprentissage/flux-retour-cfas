@@ -1,7 +1,7 @@
-import logger from "../../common/logger.js";
+import logger from "../../common/logger";
 import { subDays } from "date-fns";
-import { jobEventsDb, userEventsDb } from "../../common/model/collections.js";
-import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
+import { jobEventsDb, userEventsDb } from "../../common/model/collections";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants";
 
 /**
  * Ce script de purger des données inutiles : les jobEvents et les usersEvents de post de dossiers

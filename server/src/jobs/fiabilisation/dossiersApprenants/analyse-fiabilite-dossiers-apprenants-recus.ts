@@ -2,25 +2,25 @@ import { v4 as uuid } from "uuid";
 import {
   validateNomApprenant,
   normalizeNomApprenant,
-} from "../../../common/utils/validationsUtils/apprenant/nomApprenant.js";
+} from "../../../common/utils/validationsUtils/apprenant/nomApprenant";
 import {
   validatePrenomApprenant,
   normalizePrenomApprenant,
-} from "../../../common/utils/validationsUtils/apprenant/prenomApprenant.js";
-import { USER_EVENTS_ACTIONS } from "../../../common/constants/userEventsConstants.js";
-import { validateIneApprenant } from "../../../common/utils/validationsUtils/apprenant/ineApprenant.js";
-import { validateDateDeNaissanceApprenant } from "../../../common/utils/validationsUtils/apprenant/dateDeNaissanceApprenant.js";
-import { validateCodeCommune } from "../../../common/utils/validationsUtils/codeCommune.js";
-import { validateFrenchTelephoneNumber } from "../../../common/utils/validationsUtils/frenchTelephoneNumber.js";
-import { validateEmail } from "../../../common/utils/validationsUtils/email.js";
-import { validateUai } from "../../../common/utils/validationUtils.js";
-import { validateSiret } from "../../../common/utils/validationsUtils/siret.js";
-import logger from "../../../common/logger.js";
-import { userEventsDb } from "../../../common/model/collections.js";
-import { getDbCollection } from "../../../common/mongodb.js";
-import { fetchOrganismesWithUai, fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna.js";
-import { createDossierApprenantApiInputFiabilite } from "./factories/dossierApprenantApiInputFiabilite.js";
-import { createDossierApprenantApiInputFiabiliteReport } from "./factories/dossierApprenantApiInputFiabiliteReport.js";
+} from "../../../common/utils/validationsUtils/apprenant/prenomApprenant";
+import { USER_EVENTS_ACTIONS } from "../../../common/constants/userEventsConstants";
+import { validateIneApprenant } from "../../../common/utils/validationsUtils/apprenant/ineApprenant";
+import { validateDateDeNaissanceApprenant } from "../../../common/utils/validationsUtils/apprenant/dateDeNaissanceApprenant";
+import { validateCodeCommune } from "../../../common/utils/validationsUtils/codeCommune";
+import { validateFrenchTelephoneNumber } from "../../../common/utils/validationsUtils/frenchTelephoneNumber";
+import { validateEmail } from "../../../common/utils/validationsUtils/email";
+import { validateUai } from "../../../common/utils/validationUtils";
+import { validateSiret } from "../../../common/utils/validationsUtils/siret";
+import logger from "../../../common/logger";
+import { userEventsDb } from "../../../common/model/collections";
+import { getDbCollection } from "../../../common/mongodb";
+import { fetchOrganismesWithUai, fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna";
+import { createDossierApprenantApiInputFiabilite } from "./factories/dossierApprenantApiInputFiabilite";
+import { createDossierApprenantApiInputFiabiliteReport } from "./factories/dossierApprenantApiInputFiabiliteReport";
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";

@@ -1,15 +1,15 @@
-import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
+import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool";
 
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
-} from "../../../../common/constants/fiabilisationConstants.js";
-import logger from "../../../../common/logger.js";
+} from "../../../../common/constants/fiabilisationConstants";
+import logger from "../../../../common/logger";
 import {
   dossiersApprenantsMigrationDb,
   fiabilisationUaiSiretDb,
   organismesDb,
-} from "../../../../common/model/collections.js";
+} from "../../../../common/model/collections";
 
 const filters = {
   annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },

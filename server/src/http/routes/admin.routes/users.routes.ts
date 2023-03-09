@@ -2,8 +2,8 @@ import express from "express";
 import Joi from "joi";
 import Boom from "boom";
 
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { findOrganismeById } from "../../../common/actions/organismes/organismes.actions.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
+import { findOrganismeById } from "../../../common/actions/organismes/organismes.actions";
 import {
   createUser,
   getAllUsers,
@@ -13,14 +13,14 @@ import {
   searchUsers,
   structureUser,
   updateUser,
-} from "../../../common/actions/users.actions.js";
-import { getAllRoles, findRolesByNames } from "../../../common/actions/roles.actions.js";
+} from "../../../common/actions/users.actions";
+import { getAllRoles, findRolesByNames } from "../../../common/actions/roles.actions";
 import {
   getAllPermissions,
   updatePermissionsPending,
   removePermissions,
-} from "../../../common/actions/permissions.actions.js";
-import { refreshUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
+} from "../../../common/actions/permissions.actions";
+import { refreshUserPermissions } from "../../../common/actions/users.afterCreate.actions";
 
 // TODO [tech]
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

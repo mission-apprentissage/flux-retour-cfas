@@ -3,8 +3,8 @@ import Boom from "boom";
 import Joi from "joi";
 import passport from "passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
-import config from "../../../config.js";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import config from "../../../config";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
 import {
   getUser,
   authenticate,
@@ -14,20 +14,20 @@ import {
   createUser,
   finalizeUser,
   userHasAskAccess,
-} from "../../../common/actions/users.actions.js";
-import * as sessions from "../../../common/actions/sessions.actions.js";
-import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
-import { responseWithCookie } from "../../../common/utils/httpUtils.js";
-import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
-import { authMiddleware } from "../../middlewares/authMiddleware.js";
-import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
-import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
-import { siretSchema } from "../../../common/utils/validationUtils.js";
-import { algoUAI } from "../../../common/utils/uaiUtils.js";
-import logger from "../../../common/logger.js";
-import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
+} from "../../../common/actions/users.actions";
+import * as sessions from "../../../common/actions/sessions.actions";
+import { createUserTokenSimple } from "../../../common/utils/jwtUtils";
+import { responseWithCookie } from "../../../common/utils/httpUtils";
+import { findDataFromSiret } from "../../../common/actions/infoSiret.actions";
+import { authMiddleware } from "../../middlewares/authMiddleware";
+import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions";
+import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna";
+import { siretSchema } from "../../../common/utils/validationUtils";
+import { algoUAI } from "../../../common/utils/uaiUtils";
+import logger from "../../../common/logger";
+import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants";
 import { uniq } from "lodash-es";
-import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions.js";
+import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions";
 
 const checkActivationToken = () => {
   passport.use(

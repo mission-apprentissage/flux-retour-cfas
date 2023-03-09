@@ -1,9 +1,9 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import config from "../../config.js";
-import { tdbRoles } from "../../common/roles.js";
-import { getUserLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
-import { findOrganismeByUai } from "../../common/actions/organismes/organismes.actions.js";
+import config from "../../config";
+import { tdbRoles } from "../../common/roles";
+import { getUserLegacy } from "../../common/actions/legacy/users.legacy.actions";
+import { findOrganismeByUai } from "../../common/actions/organismes/organismes.actions";
 
 export default () => {
   const findUserOrCfa = async (usernameOrUai) => {

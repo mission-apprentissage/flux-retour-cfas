@@ -1,13 +1,13 @@
 import assert from "assert";
 import { format } from "date-fns";
 
-import { createRandomDossierApprenantApiInput } from "../../../data/randomizedSample.js";
+import { createRandomDossierApprenantApiInput } from "../../../data/randomizedSample";
 import {
   getJwtForUser,
   getHttpClient,
   postDossiersApprenantsTest,
   postDossiersApprenants,
-} from "../../../utils/api.js";
+} from "../../../utils/api";
 
 /**
  * Ce script permet d'envoyer des dossiers apprenants de tests toutes les nuits

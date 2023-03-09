@@ -1,7 +1,7 @@
 import express from "express";
-import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
-import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
-import { ORGANISMES_APPARTENANCE } from "../../../../common/constants/usersConstants.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware";
+import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants";
+import { ORGANISMES_APPARTENANCE } from "../../../../common/constants/usersConstants";
 
 export default () => {
   const router = express.Router();

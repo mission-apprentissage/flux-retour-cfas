@@ -1,4 +1,4 @@
-import tryCatch from "./tryCatchMiddleware.js";
+import tryCatch from "./tryCatchMiddleware";
 
 // catch errors and return the result of the request handler
 export function returnResult(serviceFunc) {

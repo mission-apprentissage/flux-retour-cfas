@@ -1,4 +1,4 @@
-import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
+import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants";
 
 export const historySequenceApprenti = [
   {

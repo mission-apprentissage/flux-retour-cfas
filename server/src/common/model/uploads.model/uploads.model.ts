@@ -1,6 +1,6 @@
-import { preDefinedModels } from "../../constants/models/upload.models.part.js";
-import { object, objectId, array, date, arrayOf, any, string, boolean } from "../json-schema/jsonSchemaTypes.js";
-import { documentSchema } from "./parts/document.part.js";
+import { preDefinedModels } from "../../constants/models/upload.models.part";
+import { object, objectId, array, date, arrayOf, any, string, boolean } from "../json-schema/jsonSchemaTypes";
+import { documentSchema } from "./parts/document.part";
 
 const collectionName = "uploads";
 

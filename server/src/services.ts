@@ -1,9 +1,9 @@
-import config from "./config.js";
-import { createClamav } from "./common/services/clamav.js";
-import { createMailerService } from "./common/services/mailer/mailer.js";
-import { createMailer } from "./common/actions/emails.actions.js";
-import { createRedis } from "./common/services/redis.js";
-import logger from "./common/logger.js";
+import config from "./config";
+import { createClamav } from "./common/services/clamav";
+import { createMailerService } from "./common/services/mailer/mailer";
+import { createMailer } from "./common/actions/emails.actions";
+import { createRedis } from "./common/services/redis";
+import logger from "./common/logger";
 
 const createServices = async (options = {}) => {
   return {

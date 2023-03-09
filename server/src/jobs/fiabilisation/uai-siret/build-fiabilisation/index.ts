@@ -1,13 +1,13 @@
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants.js";
-import logger from "../../../../common/logger.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants";
+import logger from "../../../../common/logger";
 import {
   dossiersApprenantsMigrationDb,
   fiabilisationUaiSiretDb,
   organismesReferentielDb,
-} from "../../../../common/model/collections.js";
-import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
-import { getPercentage } from "../../../../common/utils/miscUtils.js";
-import { FIABILISATION_MAPPINGS as manualMapping } from "../mapping.js";
+} from "../../../../common/model/collections";
+import { asyncForEach } from "../../../../common/utils/asyncUtils";
+import { getPercentage } from "../../../../common/utils/miscUtils";
+import { FIABILISATION_MAPPINGS as manualMapping } from "../mapping";
 
 // Filtres année scolaire pour récupération des couples UAI-SIRET des dossiersApprenants
 const filters = {

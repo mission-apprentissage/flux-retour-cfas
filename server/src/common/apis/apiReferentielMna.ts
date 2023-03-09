@@ -1,6 +1,6 @@
 import axios from "axios";
-import logger from "../logger.js";
-import config from "../../config.js";
+import logger from "../logger";
+import config from "../../config";
 
 // Cf Documentation : https://referentiel.apprentissage.onisep.fr/api/v1/doc/#/
 
@@ -40,7 +40,7 @@ export const fetchOrganismes = async () => {
 
 /**
  * @param {*} siret
- * @returns {Promise<import("./@types/MnaOrganisme.js").default|null>}
+ * @returns {Promise<import("./@types/MnaOrganisme").default|null>}
  */
 export const fetchOrganismeWithSiret = async (siret) => {
   const url = `${API_ENDPOINT}/organismes/${siret}`;

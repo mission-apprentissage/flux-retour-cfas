@@ -1,6 +1,6 @@
-import * as apiEntreprise from "../apis/ApiEntreprise.js";
-import * as apiCfaDock from "../apis/ApiCfaDock.js";
-import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "../utils/adresseUtils.js";
+import * as apiEntreprise from "../apis/ApiEntreprise";
+import * as apiCfaDock from "../apis/ApiCfaDock";
+import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "../utils/adresseUtils";
 
 export const findDataFromSiret = async (providedSiret, non_diffusables = true, getConventionCollective = true) => {
   if (!providedSiret || !/^[0-9]{14}$/g.test(providedSiret.trim())) {

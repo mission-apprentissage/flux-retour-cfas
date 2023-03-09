@@ -1,8 +1,8 @@
 import express from "express";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
 import Joi from "joi";
 import Boom from "boom";
-import { getUser, structureUser, updateUser } from "../../../common/actions/users.actions.js";
+import { getUser, structureUser, updateUser } from "../../../common/actions/users.actions";
 
 export default () => {
   const router = express.Router();

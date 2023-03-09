@@ -1,15 +1,15 @@
-import logger from "../../../common/logger.js";
-import { createUser, getUser } from "../../../common/actions/users.actions.js";
-import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
-import { createRole, findRoleByName } from "../../../common/actions/roles.actions.js";
+import logger from "../../../common/logger";
+import { createUser, getUser } from "../../../common/actions/users.actions";
+import defaultRolesAcls from "./fixtures/defaultRolesAcls";
+import { createRole, findRoleByName } from "../../../common/actions/roles.actions";
 import {
   addContributeurOrganisme,
   createOrganisme,
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
-} from "../../../common/actions/organismes/organismes.actions.js";
-import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
-import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
+} from "../../../common/actions/organismes/organismes.actions";
+import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions";
+import { buildAdresseFromUai } from "../../../common/utils/uaiUtils";
 
 export const seedRoles = async () => {
   for (const key of Object.keys(defaultRolesAcls)) {

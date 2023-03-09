@@ -1,6 +1,6 @@
-import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
-import logger from "../../../common/logger.js";
-import { effectifsDb, organismesDb } from "../../../common/model/collections.js";
+import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool";
+import logger from "../../../common/logger";
+import { effectifsDb, organismesDb } from "../../../common/model/collections";
 
 let nbOrganismesUpdated = 0;
 

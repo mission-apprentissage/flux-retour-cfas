@@ -1,13 +1,13 @@
 import { ObjectId } from "mongodb";
 
-import { validateCfd } from "../utils/validationsUtils/cfd.js";
-import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
-import { escapeRegExp } from "../utils/regexUtils.js";
-import { formationsDb, effectifsDb } from "../model/collections.js";
-import { validateFormation } from "../model/formations.model.js";
-import { buildTokenizedString } from "../utils/buildTokenizedString.js";
-import logger from "../logger.js";
-import { buildMongoPipelineFilterStages } from "./helpers/filters.js";
+import { validateCfd } from "../utils/validationsUtils/cfd";
+import { getCfdInfo } from "../apis/apiTablesCorrespondances";
+import { escapeRegExp } from "../utils/regexUtils";
+import { formationsDb, effectifsDb } from "../model/collections";
+import { validateFormation } from "../model/formations.model";
+import { buildTokenizedString } from "../utils/buildTokenizedString";
+import logger from "../logger";
+import { buildMongoPipelineFilterStages } from "./helpers/filters";
 
 const SEARCH_RESULTS_LIMIT = 50;
 

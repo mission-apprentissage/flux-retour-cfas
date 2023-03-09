@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
-import { startServer } from "../../utils/testUtils.js";
-import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants.js";
+import { startServer } from "../../utils/testUtils";
+import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants";
 
 describe("Referentiel Route", () => {
   it("Vérifie qu'on peut récupérer les réseaux référentiels via API", async () => {

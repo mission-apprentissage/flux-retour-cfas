@@ -1,11 +1,11 @@
 import { faker } from "@faker-js/faker/locale/fr";
 import RandExp from "randexp";
-import { sampleLibelles } from "./sampleLibelles.js";
+import { sampleLibelles } from "./sampleLibelles";
 import { subMonths, addYears } from "date-fns";
 
-import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
-import sampleEtablissements from "./sampleEtablissements.js";
-import { omit } from "../../src/common/utils/miscUtils.js";
+import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants";
+import sampleEtablissements from "./sampleEtablissements";
+import { omit } from "../../src/common/utils/miscUtils";
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();

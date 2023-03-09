@@ -1,4 +1,4 @@
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../common/constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../common/constants/fiabilisationConstants";
 
 export const FIABILISATION_MAPPINGS = [
   {

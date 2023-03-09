@@ -1,5 +1,5 @@
 import express from "express";
-import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware";
 import Joi from "joi";
 import { createWriteStream } from "fs";
 import { ObjectId } from "mongodb";
@@ -10,9 +10,9 @@ import multiparty from "multiparty";
 import { EventEmitter } from "events";
 import { PassThrough } from "stream";
 import { cloneDeep, find, get, set, uniqBy } from "lodash-es";
-import { getFromStorage, uploadToStorage, deleteFromStorage } from "../../../../common/utils/ovhUtils.js";
-import logger from "../../../../common/logger.js";
-import * as crypto from "../../../../common/utils/cryptoUtils.js";
+import { getFromStorage, uploadToStorage, deleteFromStorage } from "../../../../common/utils/ovhUtils";
+import logger from "../../../../common/logger";
+import * as crypto from "../../../../common/utils/cryptoUtils";
 import {
   addDocument,
   createUpload,
@@ -20,20 +20,20 @@ import {
   getUploadEntryByOrgaId,
   removeDocument,
   updateDocument,
-} from "../../../../common/actions/uploads.actions.js";
-import { getJsonFromXlsxData } from "../../../../common/utils/xlsxUtils.js";
-import { hydrateEffectif } from "../../../../common/actions/engine/engine.actions.js";
-import { uploadsDb } from "../../../../common/model/collections.js";
-import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
-import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
-import { findOrganismeFormationByCfd } from "../../../../common/actions/organismes/organismes.formations.actions.js";
+} from "../../../../common/actions/uploads.actions";
+import { getJsonFromXlsxData } from "../../../../common/utils/xlsxUtils";
+import { hydrateEffectif } from "../../../../common/actions/engine/engine.actions";
+import { uploadsDb } from "../../../../common/model/collections";
+import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions";
+import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware";
+import { findOrganismeFormationByCfd } from "../../../../common/actions/organismes/organismes.formations.actions";
 import {
   getFormationWithCfd,
   getFormationWithRNCP,
   findFormationById,
-} from "../../../../common/actions/formations.actions.js";
-import { setOrganismeTransmissionDates } from "../../../../common/actions/organismes/organismes.actions.js";
-import { sendServerEventsForUser } from "../server-events.routes.js";
+} from "../../../../common/actions/formations.actions";
+import { setOrganismeTransmissionDates } from "../../../../common/actions/organismes/organismes.actions";
+import { sendServerEventsForUser } from "../server-events.routes";
 
 const mappingModel = {
   annee_scolaire: "annee_scolaire",

@@ -1,6 +1,6 @@
-import { object, string, integer } from "./jsonSchemaTypes.js";
-import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
-import { PAYS } from "../../constants/paysConstant.js";
+import { object, string, integer } from "./jsonSchemaTypes";
+import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../../constants/territoiresConstants";
+import { PAYS } from "../../constants/paysConstant";
 
 export const adresseSchema = object({
   numero: integer({

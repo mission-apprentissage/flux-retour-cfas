@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 
-import { startServer, createAdminUser, createSimpleUser } from "../../utils/testUtils.js";
+import { startServer, createAdminUser, createSimpleUser } from "../../utils/testUtils";
 
 const ADMIN_MAINTENANCE_ENDPOINT = "/api/v1/admin/maintenanceMessages";
 const PUBLIC_MAINTENANCE_ENDPOINT = "/api/v1/maintenanceMessages";

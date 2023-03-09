@@ -1,10 +1,10 @@
 import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
-import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
-import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
-import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
-import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
-import { buildNewHistoriqueStatutApprenant } from "../dossiersApprenants.actions.js";
+import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances";
+import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants";
+import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils";
+import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber";
+import { buildNewHistoriqueStatutApprenant } from "../dossiersApprenants.actions";
 import {
   buildEffectif,
   findEffectifById,
@@ -12,15 +12,15 @@ import {
   insertEffectif,
   updateEffectifAndLock,
   validateEffectifObject,
-} from "../effectifs.actions.js";
+} from "../effectifs.actions";
 import {
   createOrganisme,
   findOrganismeBySiret,
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
   setOrganismeTransmissionDates,
-} from "../organismes/organismes.actions.js";
-import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
+} from "../organismes/organismes.actions";
+import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils";
 
 /**
  * Fonction de remplissage d'un effectif à créer ou à mettre à jour

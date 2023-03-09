@@ -2,15 +2,15 @@ import express from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { schema } from "../../../common/model/effectifs.model/effectifs.model.js";
-import { effectifsDb } from "../../../common/model/collections.js";
-import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
-import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
-import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
-import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
-import { algoUAI } from "../../../common/utils/uaiUtils.js";
-import { getCodePostalInfo } from "../../../common/apis/apiTablesCorrespondances.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
+import { schema } from "../../../common/model/effectifs.model/effectifs.model";
+import { effectifsDb } from "../../../common/model/collections";
+import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions";
+import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware";
+import { findDataFromSiret } from "../../../common/actions/infoSiret.actions";
+import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions";
+import { algoUAI } from "../../../common/utils/uaiUtils";
+import { getCodePostalInfo } from "../../../common/apis/apiTablesCorrespondances";
 
 const flattenKeys = (obj, path = []) =>
   !isObject(obj)

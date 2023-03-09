@@ -1,9 +1,9 @@
 import path from "path";
 import fs from "fs-extra";
 
-import logger from "../../common/logger.js";
-import { runScript } from "../scriptWrapper.js";
-import { __dirname } from "../../common/utils/esmUtils.js";
+import logger from "../../common/logger";
+import { runScript } from "../scriptWrapper";
+import { __dirname } from "../../common/utils/esmUtils";
 
 /**
  * Script qui vide le dossier assets du job seed

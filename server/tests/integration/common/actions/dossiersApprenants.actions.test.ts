@@ -1,8 +1,8 @@
 // import { strict as assert } from "assert";
-// import { buildDossierApprenant } from "../../../../src/common/actions/dossiersApprenants.actions.js";
-// import { createOrganisme, findOrganismeById } from "../../../../src/common/actions/organismes.actions.js";
-// import { dossiersApprenantsMigrationDb, effectifsDb, organismesDb } from "../../../../src/common/model/collections.js";
-// import { createRandomDossierApprenant, createRandomOrganisme } from "../../../data/randomizedSample.js";
+// import { buildDossierApprenant } from "../../../../src/common/actions/dossiersApprenants.actions";
+// import { createOrganisme, findOrganismeById } from "../../../../src/common/actions/organismes.actions";
+// import { dossiersApprenantsMigrationDb, effectifsDb, organismesDb } from "../../../../src/common/model/collections";
+// import { createRandomDossierApprenant, createRandomOrganisme } from "../../../data/randomizedSample";
 
 describe("Tests des actions DossiersApprenants", () => {
   // describe("buildDossierApprenant", () => {

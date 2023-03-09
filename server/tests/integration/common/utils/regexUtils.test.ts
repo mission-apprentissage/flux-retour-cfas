@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { escapeRegExp } from "../../../../src/common/utils/regexUtils.js";
+import { escapeRegExp } from "../../../../src/common/utils/regexUtils";
 
 describe("escapeRegExp", () => {
   it("returns string with ambiguous chars escaped", () => {

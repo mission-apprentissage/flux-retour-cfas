@@ -1,19 +1,19 @@
 import express from "express";
 import Joi from "joi";
-import config from "../../../config.js";
-import { passwordSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
+import config from "../../../config";
+import { passwordSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils";
 import passport from "passport";
-import { createResetPasswordToken, createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
+import { createResetPasswordToken, createUserTokenSimple } from "../../../common/utils/jwtUtils";
 import { Strategy, ExtractJwt } from "passport-jwt";
 import {
   changePassword,
   getUser,
   updateUserLastConnection,
   structureUser,
-} from "../../../common/actions/users.actions.js";
-import * as sessions from "../../../common/actions/sessions.actions.js";
-import { responseWithCookie } from "../../../common/utils/httpUtils.js";
-import { returnResult } from "../../middlewares/helpers.js";
+} from "../../../common/actions/users.actions";
+import * as sessions from "../../../common/actions/sessions.actions";
+import { responseWithCookie } from "../../../common/utils/httpUtils";
+import { returnResult } from "../../middlewares/helpers";
 
 const checkPasswordToken = () => {
   passport.use(

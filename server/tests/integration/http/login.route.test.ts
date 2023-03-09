@@ -1,8 +1,8 @@
 import { strict as assert } from "assert";
-import config from "../../../src/config.js";
-import { startServer } from "../../utils/testUtils.js";
+import config from "../../../src/config";
+import { startServer } from "../../utils/testUtils";
 import jwt from "jsonwebtoken";
-import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
+import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions";
 
 describe("Login Route", () => {
   it("Vérifie qu'on peut se connecter", async () => {

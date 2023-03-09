@@ -1,7 +1,7 @@
 import express from "express";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { findOrganismesByQuery } from "../../../common/actions/organismes/organismes.actions.js";
-import { pageAccessMiddleware } from "../../middlewares/pageAccessMiddleware.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
+import { findOrganismesByQuery } from "../../../common/actions/organismes/organismes.actions";
+import { pageAccessMiddleware } from "../../middlewares/pageAccessMiddleware";
 
 export default () => {
   const router = express.Router();

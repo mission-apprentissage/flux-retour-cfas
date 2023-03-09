@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import omitDeep from "omit-deep";
-import logger from "./logger.js";
-import { asyncForEach } from "./utils/asyncUtils.js";
+import logger from "./logger";
+import { asyncForEach } from "./utils/asyncUtils";
 
 let mongodbClient;
 

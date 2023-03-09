@@ -1,11 +1,11 @@
-import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes.js";
-import { adresseSchema } from "./json-schema/adresseSchema.js";
-import { RESEAUX_CFAS } from "../constants/networksConstants.js";
+import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes";
+import { adresseSchema } from "./json-schema/adresseSchema";
+import { RESEAUX_CFAS } from "../constants/networksConstants";
 
-import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature.js";
-import { schemaValidation } from "../utils/schemaUtils.js";
-import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
-import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConstants.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature";
+import { schemaValidation } from "../utils/schemaUtils";
+import { siretSchema, uaiSchema } from "../utils/validationUtils";
+import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConstants";
 
 const collectionName = "organismes";
 

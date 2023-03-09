@@ -1,10 +1,10 @@
 import Joi from "joi";
 import Boom from "boom";
-import tryCatch from "./tryCatchMiddleware.js";
-import { findRolePermissionById, hasAclsByRoleId } from "../../common/actions/roles.actions.js";
-import { hasPermission } from "../../common/actions/permissions.actions.js";
-import { findOrganismeById } from "../../common/actions/organismes/organismes.actions.js";
-import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
+import tryCatch from "./tryCatchMiddleware";
+import { findRolePermissionById, hasAclsByRoleId } from "../../common/actions/roles.actions";
+import { hasPermission } from "../../common/actions/permissions.actions";
+import { findOrganismeById } from "../../common/actions/organismes/organismes.actions";
+import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants";
 
 const hasRightsTo = async (role, acls) => {
   const hasRight = await hasAclsByRoleId(role, acls);

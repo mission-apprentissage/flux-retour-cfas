@@ -1,18 +1,18 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware";
 import {
   getUser,
   authenticate,
   updateUserLastConnection,
   structureUser,
-} from "../../../common/actions/users.actions.js";
-import * as sessions from "../../../common/actions/sessions.actions.js";
-import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
-import { responseWithCookie } from "../../../common/utils/httpUtils.js";
-import { COOKIE_NAME } from "../../../common/constants/cookieName.js";
+} from "../../../common/actions/users.actions";
+import * as sessions from "../../../common/actions/sessions.actions";
+import { createUserTokenSimple } from "../../../common/utils/jwtUtils";
+import { responseWithCookie } from "../../../common/utils/httpUtils";
+import { COOKIE_NAME } from "../../../common/constants/cookieName";
 
-import { USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION } from "../../../common/constants/usersToForceAccountCreation.js";
+import { USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION } from "../../../common/constants/usersToForceAccountCreation";
 
 export default () => {
   const router = express.Router();

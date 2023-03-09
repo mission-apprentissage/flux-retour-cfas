@@ -3,13 +3,13 @@
 // // eslint-disable-next-line node/no-unpublished-require
 // import MockDate from "mockdate";
 
-// import { startServer } from "../../utils/testUtils.js";
-// import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
+// import { startServer } from "../../utils/testUtils";
+// import { apiRoles, tdbRoles } from "../../../src/common/roles";
 // import { differenceInCalendarDays } from "date-fns";
-// import config from "../../../src/config.js";
-// import { ORGANISMES_APPARTENANCE } from "../../../src/common/constants/usersConstants.js";
+// import config from "../../../src/config";
+// import { ORGANISMES_APPARTENANCE } from "../../../src/common/constants/usersConstants";
 // import omit from "lodash.omit";
-// import { usersDb } from "../../../src/common/model/collections.js";
+// import { usersDb } from "../../../src/common/model/collections";
 
 // describe("Users Route", () => {
 //   afterEach(() => {

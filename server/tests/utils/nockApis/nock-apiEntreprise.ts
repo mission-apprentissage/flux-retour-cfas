@@ -1,7 +1,7 @@
 import nock from "nock";
 import { readdirSync, readFileSync } from "fs";
 
-import { API_ENDPOINT } from "../../../src/common/apis/ApiEntreprise.js";
+import { API_ENDPOINT } from "../../../src/common/apis/ApiEntreprise";
 
 const jsonEtablissementDataDir = `${process.cwd()}/tests/data/entreprise.api.gouv.fr/etablissements`;
 const realEtablissementDataBySiret = readdirSync(jsonEtablissementDataDir).reduce((acc, jsonFilename) => {

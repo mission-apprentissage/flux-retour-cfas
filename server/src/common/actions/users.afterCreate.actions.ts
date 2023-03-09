@@ -3,18 +3,18 @@ import {
   findOrganismeBySiret,
   findOrganismeByUai,
   findOrganismesByQuery,
-} from "./organismes/organismes.actions.js";
+} from "./organismes/organismes.actions";
 import {
   createPermission,
   findActivePermissionsByRoleName,
   hasAtLeastOneContributeurNotPending,
-} from "./permissions.actions.js";
-import { updateMainOrganismeUser } from "./users.actions.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature.js";
+} from "./permissions.actions";
+import { updateMainOrganismeUser } from "./users.actions";
+import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature";
 import { uniq } from "lodash-es";
-import { permissionsDb } from "../model/collections.js";
-import { getRoleByName } from "./roles.actions.js";
-import { defaultValuesPermission, validatePermission } from "../model/permissions.model.js";
+import { permissionsDb } from "../model/collections";
+import { getRoleByName } from "./roles.actions";
+import { defaultValuesPermission, validatePermission } from "../model/permissions.model";
 
 /**
  * Méthode d'ajouts des permissions en fonction de l'utilisateur

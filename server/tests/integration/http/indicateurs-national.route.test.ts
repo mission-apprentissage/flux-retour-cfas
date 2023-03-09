@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { startServer } from "../../utils/testUtils.js";
+import { startServer } from "../../utils/testUtils";
 
 describe("EffectifsNational Route", () => {
   it("Verifie si la route fonctionne et verifie si l'objet renvoyé est correct", async () => {

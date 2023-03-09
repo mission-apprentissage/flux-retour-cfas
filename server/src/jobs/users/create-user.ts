@@ -1,7 +1,7 @@
-import { createUser } from "../../common/actions/users.actions.js";
-import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
-import logger from "../../common/logger.js";
-import { generateRandomAlphanumericPhrase } from "../../common/utils/miscUtils.js";
+import { createUser } from "../../common/actions/users.actions";
+import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants";
+import logger from "../../common/logger";
+import { generateRandomAlphanumericPhrase } from "../../common/utils/miscUtils";
 
 /**
  * Fonction de création d'un compte utilisateur

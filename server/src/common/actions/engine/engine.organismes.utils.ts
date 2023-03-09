@@ -1,6 +1,6 @@
-import { FIABILISATION_MAPPINGS } from "../../../jobs/fiabilisation/uai-siret/mapping.js";
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../constants/fiabilisationConstants.js";
-import { fiabilisationUaiSiretDb } from "../../model/collections.js";
+import { FIABILISATION_MAPPINGS } from "../../../jobs/fiabilisation/uai-siret/mapping";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../constants/fiabilisationConstants";
+import { fiabilisationUaiSiretDb } from "../../model/collections";
 
 /**
  * Renvoi le couple UAI-SIRET fiabilisé si présent dans le fichier de fiabilisation

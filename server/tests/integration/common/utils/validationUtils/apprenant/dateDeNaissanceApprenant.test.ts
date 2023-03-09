@@ -1,4 +1,4 @@
-import { validateDateDeNaissanceApprenant } from "../../../../../../src/common/utils/validationsUtils/apprenant/dateDeNaissanceApprenant.js";
+import { validateDateDeNaissanceApprenant } from "../../../../../../src/common/utils/validationsUtils/apprenant/dateDeNaissanceApprenant";
 import { strict as assert } from "assert";
 
 describe("Domain date de naissance apprenant", () => {

@@ -1,14 +1,14 @@
 import { strict as assert } from "assert";
 import { ObjectId } from "mongodb";
 
-import { startServer } from "../../utils/testUtils.js";
-import { seedRoles } from "../../../src/jobs/seed/start/index.js";
-import { createUser } from "../../../src/common/actions/users.actions.js";
-import { userAfterCreate } from "../../../src/common/actions/users.afterCreate.actions.js";
-import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
-import { createSampleEffectif } from "../../data/randomizedSample.js";
-import { effectifsDb } from "../../../src/common/model/collections.js";
-import { historySequenceInscritToApprenti } from "../../data/historySequenceSamples.js";
+import { startServer } from "../../utils/testUtils";
+import { seedRoles } from "../../../src/jobs/seed/start/index";
+import { createUser } from "../../../src/common/actions/users.actions";
+import { userAfterCreate } from "../../../src/common/actions/users.afterCreate.actions";
+import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions";
+import { createSampleEffectif } from "../../data/randomizedSample";
+import { effectifsDb } from "../../../src/common/model/collections";
+import { historySequenceInscritToApprenti } from "../../data/historySequenceSamples";
 
 /**
  * Helper function to return an authenticated client to the API

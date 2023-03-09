@@ -1,8 +1,8 @@
 import express from "express";
 import Joi from "joi";
-import { getFormationWithCfd, searchFormations } from "../../../../common/actions/formations.actions.js";
-import { validateFullObjectSchema } from "../../../../common/utils/validationUtils.js";
-import { returnResult } from "../../../middlewares/helpers.js";
+import { getFormationWithCfd, searchFormations } from "../../../../common/actions/formations.actions";
+import { validateFullObjectSchema } from "../../../../common/utils/validationUtils";
+import { returnResult } from "../../../middlewares/helpers";
 
 const formationsSearchSchema = {
   searchTerm: Joi.string().min(3),

@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
-import { createUserEvent } from "../../../../src/common/actions/userEvents.actions.js";
-import { userEventsDb } from "../../../../src/common/model/collections.js";
+import { createUserEvent } from "../../../../src/common/actions/userEvents.actions";
+import { userEventsDb } from "../../../../src/common/model/collections";
 
 describe("Tests des actions UserEvents", () => {
   describe("createUserEvent", () => {

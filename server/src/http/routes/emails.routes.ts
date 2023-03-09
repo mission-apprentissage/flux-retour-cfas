@@ -1,11 +1,11 @@
 import express from "express";
-import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../middlewares/tryCatchMiddleware";
 import Joi from "joi";
 import passport from "passport";
-import config from "../../config.js";
+import config from "../../config";
 import Boom from "boom";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";
-import { sendHTML } from "../../common/utils/httpUtils.js";
+import { sendHTML } from "../../common/utils/httpUtils";
 
 import {
   checkIfEmailExists,
@@ -14,7 +14,7 @@ import {
   markEmailAsFailed,
   markEmailAsDelivered,
   renderEmail,
-} from "../../common/actions/emails.actions.js";
+} from "../../common/actions/emails.actions";
 
 function checkWebhookKey() {
   passport.use(

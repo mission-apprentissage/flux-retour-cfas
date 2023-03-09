@@ -1,6 +1,6 @@
-import logger from "../../common/logger.js";
-import { usersDb } from "../../common/model/collections.js";
-import { apiRoles } from "../../common/roles.js";
+import logger from "../../common/logger";
+import { usersDb } from "../../common/model/collections";
+import { apiRoles } from "../../common/roles";
 
 const activePermission = apiRoles.apiStatutsSeeder;
 const inactivePermission = `${apiRoles.apiStatutsSeeder}_INACTIVE`;

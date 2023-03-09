@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { getAnneesScolaireListFromDate } from "../../../../../src/common/utils/anneeScolaireUtils.js";
+import { getAnneesScolaireListFromDate } from "../../../../../src/common/utils/anneeScolaireUtils";
 
 describe("anneeScolaireUtils", () => {
   describe("getAnneesScolaireListFromDate", () => {

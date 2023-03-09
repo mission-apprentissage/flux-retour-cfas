@@ -1,4 +1,4 @@
-import { integer, object, objectId, string, arrayOf } from "./json-schema/jsonSchemaTypes.js";
+import { integer, object, objectId, string, arrayOf } from "./json-schema/jsonSchemaTypes";
 
 export const collectionName = "roles";
 

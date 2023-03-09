@@ -10,9 +10,9 @@ import {
   searchUsersLegacy,
   updatePasswordLegacy,
   updateUserLegacy,
-} from "../../../../src/common/actions/legacy/users.legacy.actions.js";
-import { usersDb } from "../../../../src/common/model/collections.js";
-import { apiRoles, tdbRoles } from "../../../../src/common/roles.js";
+} from "../../../../src/common/actions/legacy/users.legacy.actions";
+import { usersDb } from "../../../../src/common/model/collections";
+import { apiRoles, tdbRoles } from "../../../../src/common/roles";
 
 describe("Components Users Test", () => {
   describe("createUserLegacy", () => {

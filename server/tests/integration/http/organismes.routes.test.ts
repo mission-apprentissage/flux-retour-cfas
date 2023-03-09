@@ -1,9 +1,9 @@
 import { strict as assert } from "assert";
 // import { pick } from "lodash-es";
-// import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
-import config from "../../../src/config.js";
-// import { createRandomOrganisme } from "../../data/randomizedSample.js";
-import { startServer } from "../../utils/testUtils.js";
+// import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions";
+import config from "../../../src/config";
+// import { createRandomOrganisme } from "../../data/randomizedSample";
+import { startServer } from "../../utils/testUtils";
 
 describe("Routes Organismes", () => {
   it("Vérifie que la route /organismes renvoie une 401 si aucune apiKey n'est fournie", async () => {

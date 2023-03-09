@@ -1,8 +1,8 @@
 import { strict as assert } from "assert";
-import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
-import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
-import usersModelDescriptor from "../../../../src/common/model/users.model.js";
-import { createUser } from "../../../../src/common/actions/users.actions.js";
+import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index";
+import { getDbCollectionIndexes } from "../../../../src/common/mongodb";
+import usersModelDescriptor from "../../../../src/common/model/users.model";
+import { createUser } from "../../../../src/common/actions/users.actions";
 
 describe("Users Indexes", () => {
   let dbIndexes = [];

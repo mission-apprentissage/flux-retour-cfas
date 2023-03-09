@@ -1,10 +1,10 @@
 import { strict as assert } from "assert";
-import { createJobEvent } from "../../../../src/common/actions/jobEvents.actions.js";
-import { createUserEvent } from "../../../../src/common/actions/userEvents.actions.js";
-import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.js";
-import { jobEventsDb, userEventsDb } from "../../../../src/common/model/collections.js";
-import { clearAllCollections, clearCollection } from "../../../../src/common/mongodb.js";
-import jobEventsModelDescriptor from "../../../../src/common/model/jobEvents.model.js";
+import { createJobEvent } from "../../../../src/common/actions/jobEvents.actions";
+import { createUserEvent } from "../../../../src/common/actions/userEvents.actions";
+import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants";
+import { jobEventsDb, userEventsDb } from "../../../../src/common/model/collections";
+import { clearAllCollections, clearCollection } from "../../../../src/common/mongodb";
+import jobEventsModelDescriptor from "../../../../src/common/model/jobEvents.model";
 
 describe("Mongodb Tests", () => {
   describe("clearAllCollections", () => {

@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
-import { permissionsDb } from "../model/collections.js";
-import { defaultValuesPermission, validatePermission } from "../model/permissions.model.js";
-import { findRoleByName } from "./roles.actions.js";
+import { permissionsDb } from "../model/collections";
+import { defaultValuesPermission, validatePermission } from "../model/permissions.model";
+import { findRoleByName } from "./roles.actions";
 
 /**
  * Méthode de création d'une permission

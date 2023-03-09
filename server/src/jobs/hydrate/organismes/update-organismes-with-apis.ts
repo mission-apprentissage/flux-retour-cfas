@@ -1,7 +1,7 @@
-import logger from "../../../common/logger.js";
-import { updateOrganisme } from "../../../common/actions/organismes/organismes.actions.js";
-import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
-import { organismesDb } from "../../../common/model/collections.js";
+import logger from "../../../common/logger";
+import { updateOrganisme } from "../../../common/actions/organismes/organismes.actions";
+import { createJobEvent } from "../../../common/actions/jobEvents.actions";
+import { organismesDb } from "../../../common/model/collections";
 
 const JOB_NAME = "update-organismes-with-apis";
 

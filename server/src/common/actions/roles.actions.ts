@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
-import { rolesDb } from "../model/collections.js";
-import { defaultValuesRole } from "../model/roles.model.js";
+import { rolesDb } from "../model/collections";
+import { defaultValuesRole } from "../model/roles.model";
 
 /**
  * Méthode de création d'un rôle

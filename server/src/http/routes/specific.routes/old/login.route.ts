@@ -1,9 +1,9 @@
 import express from "express";
-import { authenticateLegacy } from "../../../../common/actions/legacy/users.legacy.actions.js";
-import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
-import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../../common/constants/userEventsConstants.js";
-import { createUserToken } from "../../../../common/utils/jwtUtils.js";
-import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
+import { authenticateLegacy } from "../../../../common/actions/legacy/users.legacy.actions";
+import { createUserEvent } from "../../../../common/actions/userEvents.actions";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../../common/constants/userEventsConstants";
+import { createUserToken } from "../../../../common/utils/jwtUtils";
+import tryCatch from "../../../middlewares/tryCatchMiddleware";
 
 export default () => {
   const router = express.Router(); // eslint-disable-line new-cap

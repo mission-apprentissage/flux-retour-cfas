@@ -1,8 +1,8 @@
-import { clearAllCollections, clearCollection } from "../../common/mongodb.js";
-import logger from "../../common/logger.js";
-import * as RolesModelDescriptor from "../../common/model/roles.model.js";
-import * as PermissionsDescriptor from "../../common/model/permissions.model.js";
-import * as usersMigrationModelDescriptor from "../../common/model/usersMigration.model.js";
+import { clearAllCollections, clearCollection } from "../../common/mongodb";
+import logger from "../../common/logger";
+import * as RolesModelDescriptor from "../../common/model/roles.model";
+import * as PermissionsDescriptor from "../../common/model/permissions.model";
+import * as usersMigrationModelDescriptor from "../../common/model/usersMigration.model";
 
 export const clearRoles = async () => {
   await clearCollection(RolesModelDescriptor.collectionName);

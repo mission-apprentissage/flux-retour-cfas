@@ -1,11 +1,11 @@
-import config from "../../config.js";
+import config from "../../config";
 import passport from "passport";
 import { Strategy as JWTStrategy } from "passport-jwt";
 import { compose } from "compose-middleware";
 
-import { getUser, updateUser, structureUser } from "../../common/actions/users.actions.js";
-import * as sessions from "../../common/actions/sessions.actions.js";
-import { COOKIE_NAME } from "../../common/constants/cookieName.js";
+import { getUser, updateUser, structureUser } from "../../common/actions/users.actions";
+import * as sessions from "../../common/actions/sessions.actions";
+import { COOKIE_NAME } from "../../common/constants/cookieName";
 
 const cookieExtractor = (req) => {
   let jwt = null;

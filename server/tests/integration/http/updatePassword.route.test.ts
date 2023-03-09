@@ -1,5 +1,5 @@
 // import { strict as assert } from "assert";
-// import { startServer } from "../../utils/testUtils.js";
+// import { startServer } from "../../utils/testUtils";
 
 // describe("Update Password route", () => {
 //   describe("POST /update-password", () => {

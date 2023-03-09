@@ -1,11 +1,11 @@
 import express from "express";
 import { format } from "date-fns";
 import Joi from "joi";
-import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
-import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
-import { returnResult, tryCachedExecution } from "../../middlewares/helpers.js";
-import { getIndicateurs } from "../../../common/actions/effectifs/effectifs.actions.js";
+import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils";
+import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions";
+import { validateFullObjectSchema } from "../../../common/utils/validationUtils";
+import { returnResult, tryCachedExecution } from "../../middlewares/helpers";
+import { getIndicateurs } from "../../../common/actions/effectifs/effectifs.actions";
 
 export default ({ cache }) => {
   const router = express.Router();

@@ -1,7 +1,7 @@
-import { runScript } from "../../scriptWrapper.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import logger from "../../../common/logger.js";
-import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
+import { runScript } from "../../scriptWrapper";
+import { asyncForEach } from "../../../common/utils/asyncUtils";
+import logger from "../../../common/logger";
+import { dossiersApprenantsMigrationDb } from "../../../common/model/collections";
 
 runScript(async () => {
   const idErpApprenantNotNullStage = {

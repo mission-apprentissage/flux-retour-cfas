@@ -1,9 +1,9 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
 
-import config from "../../config.js";
-import logger from "../logger.js";
-import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
+import config from "../../config";
+import logger from "../logger";
+import { ApiError, apiRateLimiter } from "../utils/apiUtils";
 
 export const API_ENDPOINT = config.apiEntreprise.endpoint;
 

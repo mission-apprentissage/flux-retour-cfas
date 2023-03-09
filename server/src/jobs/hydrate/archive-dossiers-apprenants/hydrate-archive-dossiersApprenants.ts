@@ -1,7 +1,7 @@
-import { validateAnneeScolaire } from "../../../common/utils/validationsUtils/anneeScolaire.js";
-import logger from "../../../common/logger.js";
-import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
-import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
+import { validateAnneeScolaire } from "../../../common/utils/validationsUtils/anneeScolaire";
+import logger from "../../../common/logger";
+import { dossiersApprenantsMigrationDb } from "../../../common/model/collections";
+import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions";
 
 /**
  * Fonction principale d'archivage des dossiersApprenants et des effectifs

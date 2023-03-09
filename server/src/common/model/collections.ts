@@ -1,20 +1,20 @@
-import { getDbCollection } from "../mongodb.js";
-import usersModelDescriptor from "./users.model.js";
-import userEventsModelDescriptor from "./userEvents.model.js";
-import formationsModelDescriptor from "./formations.model.js";
-import jobEventsModelDescriptor from "./jobEvents.model.js";
-import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
-import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model.js";
-import usersMigrationModelDescriptor from "./usersMigration.model.js";
-import JwtSessionsModelDescriptor from "./jwtSessions.model.js";
-import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model.js";
-import RolesModelDescriptor from "./roles.model.js";
-import PermissionsDescriptor from "./permissions.model.js";
-import OrganismesModelDescriptor from "./organismes.model.js";
-import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model.js";
-import dossiersApprenantsMigrationModelDescriptor from "./dossiersApprenantsMigration.model.js";
-import effectifsModelDescriptor from "./effectifs.model/effectifs.model.js";
-import uploadsModelDescriptor from "./uploads.model/uploads.model.js";
+import { getDbCollection } from "../mongodb";
+import usersModelDescriptor from "./users.model";
+import userEventsModelDescriptor from "./userEvents.model";
+import formationsModelDescriptor from "./formations.model";
+import jobEventsModelDescriptor from "./jobEvents.model";
+import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model";
+import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
+import usersMigrationModelDescriptor from "./usersMigration.model";
+import JwtSessionsModelDescriptor from "./jwtSessions.model";
+import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model";
+import RolesModelDescriptor from "./roles.model";
+import PermissionsDescriptor from "./permissions.model";
+import OrganismesModelDescriptor from "./organismes.model";
+import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
+import dossiersApprenantsMigrationModelDescriptor from "./dossiersApprenantsMigration.model";
+import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
+import uploadsModelDescriptor from "./uploads.model/uploads.model";
 
 export const modelDescriptors = [
   usersModelDescriptor,

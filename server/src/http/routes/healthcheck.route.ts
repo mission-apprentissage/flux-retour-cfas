@@ -1,9 +1,9 @@
 import express from "express";
-import logger from "../../common/logger.js";
-import config from "../../config.js";
-import tryCatch from "../middlewares/tryCatchMiddleware.js";
-import { packageJson } from "../../common/utils/esmUtils.js";
-import { jobEventsDb } from "../../common/model/collections.js";
+import logger from "../../common/logger";
+import config from "../../config";
+import tryCatch from "../middlewares/tryCatchMiddleware";
+import { packageJson } from "../../common/utils/esmUtils";
+import { jobEventsDb } from "../../common/model/collections";
 
 export default () => {
   const router = express.Router();

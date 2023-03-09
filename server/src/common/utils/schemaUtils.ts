@@ -1,4 +1,4 @@
-import logger from "../logger.js";
+import logger from "../logger";
 import Joi from "joi";
 import Enjoi from "enjoi";
 

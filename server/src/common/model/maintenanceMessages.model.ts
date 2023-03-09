@@ -1,4 +1,4 @@
-import { object, objectId, string, date, boolean } from "./json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, date, boolean } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "maintenanceMessages";
 

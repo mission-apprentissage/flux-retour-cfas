@@ -1,14 +1,14 @@
 import { addHours } from "date-fns";
 import { uniq } from "lodash-es";
 import { ObjectId } from "mongodb";
-import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
-import { rolesDb, usersMigrationDb } from "../model/collections.js";
-import { defaultValuesUser, validateUser } from "../model/usersMigration.model.js";
-import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
-import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
-import { escapeRegExp } from "../utils/regexUtils.js";
-import { passwordSchema } from "../utils/validationUtils.js";
-import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } from "./permissions.actions.js";
+import { USER_ACCOUNT_STATUS } from "../constants/usersConstants";
+import { rolesDb, usersMigrationDb } from "../model/collections";
+import { defaultValuesUser, validateUser } from "../model/usersMigration.model";
+import { generateRandomAlphanumericPhrase } from "../utils/miscUtils";
+import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils";
+import { escapeRegExp } from "../utils/regexUtils";
+import { passwordSchema } from "../utils/validationUtils";
+import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } from "./permissions.actions";
 
 /**
  * Méthode de création d'un utilisateur

@@ -1,11 +1,11 @@
 import { cloneDeep, isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
-import { effectifsDb } from "../model/collections.js";
-import { defaultValuesEffectif, validateEffectif } from "../model/effectifs.model/effectifs.model.js";
-import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant.part.js";
-import { defaultValuesFormationEffectif } from "../model/effectifs.model/parts/formation.effectif.part.js";
-import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber.js";
-import { buildMongoPipelineFilterStages } from "./helpers/filters.js";
+import { effectifsDb } from "../model/collections";
+import { defaultValuesEffectif, validateEffectif } from "../model/effectifs.model/effectifs.model";
+import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant.part";
+import { defaultValuesFormationEffectif } from "../model/effectifs.model/parts/formation.effectif.part";
+import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber";
+import { buildMongoPipelineFilterStages } from "./helpers/filters";
 
 /**
  * Méthode de build d'un effectif

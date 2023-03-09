@@ -1,14 +1,14 @@
 import { uniqBy } from "lodash-es";
-import { schemaValidation } from "../../utils/schemaUtils.js";
-import { object, objectId, string, date, boolean, arrayOf } from "../json-schema/jsonSchemaTypes.js";
-import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part.js";
+import { schemaValidation } from "../../utils/schemaUtils";
+import { object, objectId, string, date, boolean, arrayOf } from "../json-schema/jsonSchemaTypes";
+import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part";
 
-import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part.js";
+import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
 import {
   defaultValuesFormationEffectif,
   formationEffectifSchema,
   validateFormationEffectif,
-} from "./parts/formation.effectif.part.js";
+} from "./parts/formation.effectif.part";
 
 const collectionName = "effectifs";
 

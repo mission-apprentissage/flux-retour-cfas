@@ -1,6 +1,6 @@
 import express from "express";
 import Joi from "joi";
-import { getNbDistinctOrganismes } from "../../../common/actions/effectifs.actions.js";
+import { getNbDistinctOrganismes } from "../../../common/actions/effectifs.actions";
 import {
   getEffectifsCountByAnneeFormationAtDate,
   getEffectifsCountByCfaAtDate,
@@ -9,9 +9,9 @@ import {
   getEffectifsCountByNiveauFormationAtDate,
   getEffectifsCountBySiretAtDate,
   getIndicateurs,
-} from "../../../common/actions/effectifs/effectifs.actions.js";
-import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
-import { returnResult } from "../../middlewares/helpers.js";
+} from "../../../common/actions/effectifs/effectifs.actions";
+import { validateFullObjectSchema } from "../../../common/utils/validationUtils";
+import { returnResult } from "../../middlewares/helpers";
 
 const commonEffectifsFiltersSchema = {
   date: Joi.date().required(),
@@ -28,10 +28,10 @@ const commonEffectifsFiltersSchema = {
 /**
  * Build filters from the request
  * @param {*} req
- * @returns {Promise<import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters>}
+ * @returns {Promise<import("../../../common/actions/helpers/filters-struct").EffectifsFilters>}
  */
 export async function buildEffectifsFiltersFromRequest(req) {
-  /** @type {import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters} */
+  /** @type {import("../../../common/actions/helpers/filters-struct").EffectifsFilters} */
   const filters = await validateFullObjectSchema(req.query, commonEffectifsFiltersSchema);
 
   // restriction aux organismes accessibles par l'utilisateur sauf pour un admin

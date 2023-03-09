@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
+import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils";
 
 export const organismeLookup = {
   from: "organismes",
@@ -8,7 +8,7 @@ export const organismeLookup = {
   as: "organisme",
 };
 
-/** @type {import("./filters-struct.js").FilterConfigurations} */
+/** @type {import("./filters-struct").FilterConfigurations} */
 const filtersConfigurations = {
   date: {
     matchKey: "annee_scolaire",
@@ -48,7 +48,7 @@ const filtersConfigurations = {
 };
 
 /**
- * @param {Partial<import("./filters-struct.js").EffectifsFilters>} filters
+ * @param {Partial<import("./filters-struct").EffectifsFilters>} filters
  */
 export function buildMongoPipelineFilterStages(filters = {}) {
   const matchFilters = {};

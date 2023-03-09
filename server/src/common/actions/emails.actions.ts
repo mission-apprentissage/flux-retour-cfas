@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
-import { usersMigrationDb } from "../model/collections.js";
-import { generateHtml } from "../utils/emailsUtils.js";
+import { usersMigrationDb } from "../model/collections";
+import { generateHtml } from "../utils/emailsUtils";
 
 function addEmail(userEmail, token, templateName, payload) {
   return usersMigrationDb().findOneAndUpdate(
