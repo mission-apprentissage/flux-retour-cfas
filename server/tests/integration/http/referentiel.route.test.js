@@ -9,7 +9,8 @@ describe("Referentiel Route", () => {
     const response = await httpClient.get("/api/referentiel/networks");
 
     assert.deepStrictEqual(response.status, 200);
-    assert.deepEqual(response.data.length, Object.values(RESEAUX_CFAS).length);
-    assert.deepEqual(response.data[0].nom, RESEAUX_CFAS.ADEN.nomReseau);
+    const RESEAUX_CFAS_INVALID = ["ANASUP", "GRETA_VAUCLUSE", "CCI", "BTP_CFA"];
+    assert.deepStrictEqual(response.data.length, Object.values(RESEAUX_CFAS).length - RESEAUX_CFAS_INVALID.length);
+    assert.deepStrictEqual(response.data[0].nom, RESEAUX_CFAS.ADEN.nomReseau);
   });
 });
