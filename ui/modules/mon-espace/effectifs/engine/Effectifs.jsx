@@ -164,10 +164,10 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
             <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
               {isMine
                 ? `Vous n'avez pas encore ajouté d'effectifs`
-                : `Aucuns effectifs n'ont encore été ajoutés pour cet organisme.`}
+                : `Aucun effectif n'a été transmis pour cet organisme.`}
             </Text>
             <Text color="grey.800" mt={4} textStyle="sm">
-              Vous pouvez ajouter des effectifs à l&rsquo;aide du bouton ci-dessus.
+              Vous pouvez ajouter des effectifs à l&rsquo;aide du bouton &quot;Ajouter&quot; ci-dessus.
               <br />
             </Text>
           </Box>
@@ -177,7 +177,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
         <Ribbons variant="info" mt={5}>
           <Box ml={3}>
             <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-              Aucuns effectifs n&rsquo;ont encore été reçus depuis votre ERP.
+              Aucun effectif n&rsquo;a été transmis depuis votre ERP.
             </Text>
             <Text color="grey.800" mt={4} textStyle="sm">
               Merci de revenir ultérieurement. Si vous venez de configurer votre ERP, la transmission de vos effectifs
