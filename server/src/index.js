@@ -10,11 +10,17 @@ process.on("unhandledRejection", (e) => logger.error("An unexpected error occurr
 process.on("uncaughtException", (e) => logger.error("An unexpected error occurred", e));
 
 (async function () {
-  await connectToMongodb(config.mongodb.uri);
-  await configureDbSchemaValidation(modelDescriptors);
+  try {
+    logger.warn("Starting application");
+    await connectToMongodb(config.mongodb.uri);
+    await configureDbSchemaValidation(modelDescriptors);
 
-  const services = await createServices();
+    const services = await createServices();
 
-  const http = await server(services);
-  http.listen(5000, () => logger.info(`${config.appName} - Server ready and listening on port ${5000}`));
+    const http = await server(services);
+    http.listen(5000, () => logger.info(`Server ready and listening on port ${5000}`));
+  } catch (err) {
+    logger.error(err, "Startup error");
+    process.exit(1); // eslint-disable-line no-process-exit
+  }
 })();

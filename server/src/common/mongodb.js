@@ -22,6 +22,7 @@ export const connectToMongodb = async (uri) => {
 
   await client.connect();
   mongodbClient = client;
+  logger.info("Connected to MongoDB");
 
   return client;
 };
