@@ -205,7 +205,7 @@ const PolitiqueDeConfidentialite = () => {
             <ListItem>Les réseaux d’organismes de formation ;</ListItem>
             <ListItem>Les Régions ;</ListItem>
             <ListItem>
-              Les personnes autorisées au seins des Rectorats, dans le cadre de leurs missions de service public ;
+              Les personnes autorisées au sein des Rectorats, dans le cadre de leurs missions de service public ;
             </ListItem>
             <ListItem>
               Les personnes autorisées au sein des Académies, dans le cadre de leurs missions de service public ;
@@ -283,7 +283,7 @@ const PolitiqueDeConfidentialite = () => {
             <Flex flexDirection={"column"}>
               <Flex border="1px solid" borderBottomWidth={0} p={5}>
                 <strong>
-                  Garenties <br />
+                  Garanties <br />
                   <br />
                 </strong>
               </Flex>
