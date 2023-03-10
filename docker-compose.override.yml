@@ -7,7 +7,7 @@ services:
       - ./reverse_proxy/dev/includes:/etc/nginx/templates/includes/env
 
   ui:
-    mem_limit: 1g
+    mem_limit: 1.5g
     stdin_open: true
     volumes:
       - ./ui:/app:z
