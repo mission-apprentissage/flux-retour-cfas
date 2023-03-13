@@ -1,4 +1,6 @@
 import axiosist from "axiosist";
+import sinon from "sinon";
+
 import server from "../../src/http/server.js";
 import { configureDbSchemaValidation } from "../../src/common/mongodb.js";
 import redisFakeClient from "./redisClientMock.js";
@@ -7,7 +9,9 @@ import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.a
 import { createUser } from "../../src/common/actions/users.actions.js";
 
 export const startServer = async () => {
-  const services = { cache: redisFakeClient };
+  const mailer = { sendEmail: sinon.spy() };
+
+  const services = { cache: redisFakeClient, mailer, clamav: { scan: () => {} } };
   const app = await server(services);
 
   const httpClient = axiosist(app);
@@ -16,6 +20,7 @@ export const startServer = async () => {
 
   return {
     httpClient,
+    mailer,
     // Legacy auth jwt
     createAndLogUserLegacy: async (username, password, options) => {
       await createUserLegacy({ username, password, ...options });

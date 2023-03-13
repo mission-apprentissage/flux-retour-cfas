@@ -49,6 +49,15 @@ import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddle
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
+/**
+ * Create the express app
+ * @param {Object} services - Services
+ * @param {Object} services.cache - Redis cache
+ * @param {Object} services.clamav - clamav antivirus
+ * @param {Object} services.mailer - Mailer
+ *
+ * @returns {Promise<Object>} Express app
+ */
 export default async (services) => {
   const app = express();
 

@@ -1,6 +1,6 @@
-import MockDate from "mockdate";
 import { strict as assert } from "assert";
 import { ObjectId } from "mongodb";
+import sinon from "sinon";
 
 import { startServer, createAdminUser, createSimpleUser } from "../../utils/testUtils.js";
 import { createUser } from "../../../src/common/actions/users.actions.js";
@@ -19,10 +19,6 @@ describe("Users Route", () => {
         account_status: "FORCE_RESET_PASSWORD",
       }
     );
-  });
-
-  afterEach(() => {
-    MockDate.reset();
   });
 
   describe("GET /users", () => {
@@ -82,6 +78,18 @@ describe("GET /users/[id]", () => {
     const response = await httpClient.get(`${ADMIN_USERS_ENDPOINT}/invalidUserId`, { headers: { cookie } });
 
     assert.strictEqual(response.status, 400);
+    assert.deepStrictEqual(response.data, {
+      error: "Bad Request",
+      message: "Erreur de validation",
+      details: [
+        {
+          code: "custom",
+          fatal: true,
+          message: "Input not instance of ObjectId",
+          path: ["id"],
+        },
+      ],
+    });
   });
 
   it("sends a 404 HTTP response if user not found", async () => {
@@ -104,7 +112,7 @@ describe("GET /users/[id]", () => {
   });
 });
 
-describe.only("POST /users", () => {
+describe("POST /users", () => {
   it("sends a 401 HTTP response when user is not authenticated", async () => {
     const { httpClient } = await startServer();
     const response = await httpClient.post(ADMIN_USERS_ENDPOINT, {});
@@ -122,22 +130,68 @@ describe.only("POST /users", () => {
     assert.strictEqual(response.status, 403);
   });
 
-  it.only("sends a 400 HTTP response if invalid data", async () => {
+  it("sends a 400 HTTP response if invalid data", async () => {
     const { httpClient, logUser } = await startServer();
     const { email, password } = await createAdminUser();
     const { cookie } = await logUser(email, password);
 
     const response = await httpClient.post(ADMIN_USERS_ENDPOINT, { is_admin: true }, { headers: { cookie } });
-
     assert.strictEqual(response.status, 400);
+    assert.deepStrictEqual(response.data, {
+      error: "Bad Request",
+      message: "Erreur de validation",
+      details: [
+        {
+          code: "invalid_type",
+          expected: "string",
+          received: "undefined",
+          path: ["prenom"],
+          message: "Required",
+        },
+        {
+          code: "invalid_type",
+          expected: "string",
+          received: "undefined",
+          path: ["nom"],
+          message: "Required",
+        },
+        {
+          code: "invalid_type",
+          expected: "string",
+          received: "undefined",
+          path: ["email"],
+          message: "Required",
+        },
+        {
+          code: "invalid_type",
+          expected: "array",
+          received: "undefined",
+          path: ["roles"],
+          message: "Required",
+        },
+      ],
+    });
   });
 
   it("sends a 200 HTTP response if valid data", async () => {
-    const { httpClient, logUser } = await startServer();
+    const { httpClient, logUser, mailer } = await startServer();
     const { _id, email, password } = await createAdminUser();
     const { cookie } = await logUser(email, password);
 
-    const response = await httpClient.post(ADMIN_USERS_ENDPOINT, {}, { headers: { cookie } });
+    const response = await httpClient.post(
+      ADMIN_USERS_ENDPOINT,
+      {
+        prenom: "prenom",
+        nom: "nom",
+        email: "test@beta.gouv.fr",
+        roles: ["of"],
+      },
+      { headers: { cookie } }
+    );
     assert.strictEqual(response.status, 200);
+    assert.strictEqual(
+      mailer.sendEmail.calledWith(sinon.match.has("to", "test@beta.gouv.fr"), "activation_user"),
+      true
+    );
   });
 });
