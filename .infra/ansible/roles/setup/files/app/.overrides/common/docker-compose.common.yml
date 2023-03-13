@@ -19,7 +19,7 @@ services:
       - /opt/flux-retour-cfas/data/server:/data
 
   mongodb:
-    # command: mongod --auth
+    command: mongod --auth
     volumes:
       - /opt/flux-retour-cfas/data/mongodb/db:/data/db
       - /opt/flux-retour-cfas/data/mongodb/configdb:/data/configdb
