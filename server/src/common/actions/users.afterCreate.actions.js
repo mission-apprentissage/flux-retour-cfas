@@ -128,11 +128,11 @@ export const createUserPermissions = async ({
         }
       };
 
-      const hasAtLeastOneUserToValidate = await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin");
+      const isOrganismeAdmin = await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin");
 
       await giveAccessToSubOrganismes(organisme);
 
-      if (!hasAtLeastOneUserToValidate && asRole === "organisme.admin") {
+      if (!isOrganismeAdmin && asRole === "organisme.admin") {
         // is the first user on this organisme
         await addContributeurOrganisme(organisme._id, userEmail, "organisme.admin", pending);
         await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
@@ -154,7 +154,7 @@ export const createUserPermissions = async ({
             "organisme.readonly": "Lecteur",
           };
 
-          if (!hasAtLeastOneUserToValidate) {
+          if (!isOrganismeAdmin) {
             await mailer.sendEmail(
               {
                 to: "tableau-de-bord@apprentissage.beta.gouv.fr",

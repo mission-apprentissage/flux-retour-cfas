@@ -360,7 +360,7 @@ export const structureUser = async (user) => {
 
   const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
   const isInPendingValidation = !organisme_ids.length && !activePermissions.length;
-  const hasAtLeastOneUserToValidate = user.main_organisme_id
+  const isOrganismeAdmin = user.main_organisme_id
     ? await hasAtLeastOneContributeurNotPending(user.main_organisme_id, "organisme.admin")
     : false;
 
@@ -375,7 +375,7 @@ export const structureUser = async (user) => {
     is_admin: user.is_admin,
     is_cross_organismes: user.is_cross_organismes || user.is_admin,
     isInPendingValidation,
-    hasAtLeastOneUserToValidate,
+    isOrganismeAdmin,
     email: user.email,
     civility: user.civility,
     nom: user.nom,

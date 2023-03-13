@@ -351,8 +351,13 @@ const Finalize = () => {
             )}
 
           {auth.isInPendingValidation &&
+<<<<<<< HEAD
             !auth.hasAtLeastOneUserToValidate &&
             auth.account_status === "PENDING_ADMIN_VALIDATION" && (
+=======
+            !auth.isOrganismeAdmin &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
+>>>>>>> 120deab6 (refactor: rename hasAtLeastOneUserToValidate to isOrganismeAdmin)
               <Ribbons variant="info" mt="0.5rem">
                 <Box ml={3}>
                   <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
@@ -368,8 +373,13 @@ const Finalize = () => {
               </Ribbons>
             )}
           {auth.isInPendingValidation &&
+<<<<<<< HEAD
             auth.hasAtLeastOneUserToValidate &&
             auth.account_status === "PENDING_ADMIN_VALIDATION" && (
+=======
+            auth.isOrganismeAdmin &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
+>>>>>>> 120deab6 (refactor: rename hasAtLeastOneUserToValidate to isOrganismeAdmin)
               <Ribbons variant="info" mt="0.5rem">
                 <Box ml={3}>
                   <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">

@@ -65,7 +65,7 @@ const EffectifsPage = ({ isMine }) => {
 
   const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
 
-  if (auth.hasAtLeastOneUserToValidate || isUserAdmin(auth)) {
+  if (auth.isOrganismeAdmin || isUserAdmin(auth)) {
     if (!organisme.mode_de_transmission) {
       return <ChoixTransmission />;
     } else if (organisme.mode_de_transmission === "API") {

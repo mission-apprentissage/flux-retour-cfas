@@ -15,7 +15,7 @@ PageWithArgs.storyName = "Page Parametrable";
 PageWithArgs.argTypes = authArgTypes;
 PageWithArgs.args = {
   auth__roles: ["of"],
-  auth__hasAtLeastOneUserToValidate: false,
+  auth__isOrganismeAdmin: false,
   auth__isInPendingValidation: true,
   auth__account_status: "PENDING_PERMISSIONS_SETUP",
   auth__organisation: "",
@@ -66,8 +66,13 @@ DemandeAccesEnAttenteDeValidation1.storyName = "Demande d'acces en attente de va
 DemandeAccesEnAttenteDeValidation1.parameters = {
   mockAuth: {
     isInPendingValidation: true,
+<<<<<<< HEAD
     hasAtLeastOneUserToValidate: false,
     account_status: "PENDING_ADMIN_VALIDATION",
+=======
+    isOrganismeAdmin: false,
+    account_status: "FORCE_COMPLETE_PROFILE_STEP2",
+>>>>>>> 120deab6 (refactor: rename hasAtLeastOneUserToValidate to isOrganismeAdmin)
     roles: ["of"],
   },
 };
@@ -77,8 +82,13 @@ DemandeAccesEnAttenteDeValidation2.storyName = "Demande d'acces en attente de va
 DemandeAccesEnAttenteDeValidation2.parameters = {
   mockAuth: {
     isInPendingValidation: true,
+<<<<<<< HEAD
     hasAtLeastOneUserToValidate: true,
     account_status: "PENDING_ADMIN_VALIDATION",
+=======
+    isOrganismeAdmin: true,
+    account_status: "FORCE_COMPLETE_PROFILE_STEP2",
+>>>>>>> 120deab6 (refactor: rename hasAtLeastOneUserToValidate to isOrganismeAdmin)
     roles: ["of"],
   },
 };
