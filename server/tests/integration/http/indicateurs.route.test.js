@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { startServer } from "../../utils/testUtils.js";
 import { seedRoles } from "../../../src/jobs/seed/start/index.js";
 import { createUser } from "../../../src/common/actions/users.actions.js";
-import { userAfterCreate } from "../../../src/common/actions/users.afterCreate.actions.js";
+import { createUserPermissions } from "../../../src/common/actions/users.afterCreate.actions.js";
 import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
 import { createSampleEffectif } from "../../data/randomizedSample.js";
 import { effectifsDb } from "../../../src/common/model/collections.js";
@@ -30,7 +30,7 @@ async function createAndAuthenticateUser(httpClient, userInfos) {
       ...userInfos,
     }
   );
-  await userAfterCreate({ user: userOf, pending: false, notify: false });
+  await createUserPermissions({ user: userOf, pending: false, notify: false });
 
   // authenticate the user
   const response = await httpClient.post("/api/v1/auth/login", { email, password });

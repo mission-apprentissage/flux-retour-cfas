@@ -185,6 +185,9 @@ export const findOrganismesBySiret = async (siret, projection = {}) => {
  * @returns
  */
 export const findOrganismeByUai = async (uai, projection = {}) => {
+  if (!uai) {
+    throw Error("missing parameter `uai`");
+  }
   return await organismesDb().findOne({ uai }, { projection });
 };
 
@@ -195,6 +198,9 @@ export const findOrganismeByUai = async (uai, projection = {}) => {
  * @returns
  */
 export const findOrganismeBySiret = async (siret, projection = {}) => {
+  if (!siret) {
+    throw Error("missing parameter `siret`");
+  }
   return await organismesDb().findOne({ siret }, { projection });
 };
 

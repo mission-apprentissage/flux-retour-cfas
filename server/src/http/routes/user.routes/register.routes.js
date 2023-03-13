@@ -20,7 +20,7 @@ import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { authMiddleware } from "../../middlewares/authMiddleware.js";
-import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
+import { createUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
@@ -281,7 +281,9 @@ export default ({ mailer }) => {
       }
 
       if (!is_cross_organismes && !wantedReseau) {
-        let organisme = (await findOrganismeByUai(userDb.uai)) || (await findOrganismeBySiret(userDb.siret));
+        const organisme =
+          (userDb.uai && (await findOrganismeByUai(userDb.uai))) ||
+          (userDb.siret && (await findOrganismeBySiret(userDb.siret)));
         if (!organisme) {
           logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
           throw Boom.badRequest("No organisme found");
@@ -300,7 +302,7 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      await userAfterCreate({ user: updateUser, mailer, asRole: type });
+      await createUserPermissions({ user: updateUser, mailer, asRole: type });
 
       const payload = await structureUser(updateUser);
 
@@ -332,7 +334,7 @@ export default ({ mailer }) => {
       //   siret: Joi.string().required(),
       // }).validateAsync(body, { abortEarly: false });
 
-      const userDb = await getUser(user.email.toLowerCase());
+      const userDb = await getUser(user.email);
       if (!userDb) {
         throw Boom.conflict("Unable to retrieve user");
       }
@@ -341,8 +343,7 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      // TODO [tech]
-      const updateUser = await finalizeUser(userDb.email, {});
+      const updateUser = await finalizeUser(userDb.email);
       if (!updateUser) {
         throw Boom.badRequest("Something went wrong");
       }
