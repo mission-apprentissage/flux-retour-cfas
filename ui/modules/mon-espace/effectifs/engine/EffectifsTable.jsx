@@ -351,15 +351,15 @@ const EffectifsTable = ({
                   cell: ({ row }) => {
                     const { source } = organismesEffectifs[row.id];
                     const sources = {
-                      TDB_MANUEL: "Saisie maunelle",
-                      TDB_FILE: "Depuis un fichier",
-                      ymag: "Transmis depuis Ypareo",
-                      gesti: "Transmis depuis Gesti",
-                      scform: "Transmis depuis SC form",
+                      TDB_MANUEL: "Saisie manuelle",
+                      TDB_FILE: "Fichier",
+                      ymag: "Ypareo",
+                      gesti: "Gesti",
+                      scform: "SC form",
                     };
                     return (
                       <HStack textAlign="left">
-                        <Text fontSize="1rem">{sources[source] ?? "Depuis un fichier"}</Text>
+                        <Text fontSize="1rem">{sources[source] ?? "Fichier"}</Text>
                       </HStack>
                     );
                   },
