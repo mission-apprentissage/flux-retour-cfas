@@ -332,7 +332,7 @@ export default ({ mailer }) => {
       //   siret: Joi.string().required(),
       // }).validateAsync(body, { abortEarly: false });
 
-      const userDb = await getUser(user.email.toLowerCase());
+      const userDb = await getUser(user.email);
       if (!userDb) {
         throw Boom.conflict("Unable to retrieve user");
       }
@@ -341,8 +341,7 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      // TODO [tech]
-      const updateUser = await finalizeUser(userDb.email, {});
+      const updateUser = await finalizeUser(userDb.email);
       if (!updateUser) {
         throw Boom.badRequest("Something went wrong");
       }

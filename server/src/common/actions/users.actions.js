@@ -318,62 +318,15 @@ export const updateUserLastConnection = async (email) => {
 };
 
 export const activateUser = async (email) => {
-  const user = await usersMigrationDb().findOne({ email });
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
-
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id: user._id },
-    {
-      $set: {
-        account_status: "PENDING_PASSWORD_SETUP",
-      },
-    },
-    { returnDocument: "after" }
-  );
-
-  return updated.value;
+  return await updateUserStatus(email, USER_ACCOUNT_STATUS.PENDING_PASSWORD_SETUP);
 };
 
 export const userHasAskAccess = async (email, data) => {
-  const user = await usersMigrationDb().findOne({ email });
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
-
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id: user._id },
-    {
-      $set: {
-        account_status: "PENDING_ADMIN_VALIDATION",
-        ...data,
-      },
-    },
-    { returnDocument: "after" }
-  );
-
-  return updated.value;
+  return await updateUserStatus(email, USER_ACCOUNT_STATUS.PENDING_ADMIN_VALIDATION, data);
 };
 
-export const finalizeUser = async (email, data) => {
-  const user = await usersMigrationDb().findOne({ email });
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
-
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id: user._id },
-    {
-      $set: {
-        account_status: "CONFIRMED",
-        ...data,
-      },
-    },
-    { returnDocument: "after" }
-  );
-
-  return updated.value;
+export const finalizeUser = async (email) => {
+  return await updateUserStatus(email, USER_ACCOUNT_STATUS.CONFIRMED);
 };
 
 /**
@@ -473,4 +426,29 @@ function getNextAccountStatus(user) {
     default:
       return user.account_status;
   }
+}
+
+/**
+ * @param {string} email
+ * @param {string} newStatus
+ * @param {any=} data
+ */
+async function updateUserStatus(email, newStatus, data) {
+  const user = await usersMigrationDb().findOne({ email });
+  if (!user) {
+    throw new Error("Unable to find user");
+  }
+
+  const updated = await usersMigrationDb().findOneAndUpdate(
+    { _id: user._id },
+    {
+      $set: {
+        account_status: newStatus,
+        ...data,
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
 }
