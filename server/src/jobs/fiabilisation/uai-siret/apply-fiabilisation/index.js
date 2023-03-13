@@ -1,4 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
+import { MongoServerError } from "mongodb";
 
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
@@ -7,6 +8,7 @@ import {
 import logger from "../../../../common/logger.js";
 import {
   dossiersApprenantsMigrationDb,
+  effectifsDb,
   fiabilisationUaiSiretDb,
   organismesDb,
 } from "../../../../common/model/collections.js";
@@ -19,6 +21,9 @@ let nbOrganismesFiables = 0;
 let nbOrganismesFiabilises = 0;
 let nbDossiersApprenantsFiabilises = 0;
 let nbOrganismesNonFiabilisablesMapping = 0;
+let nbOrganismesNonFiabilisablesMappingFixEffectifs = 0;
+let nbEffectifsFixedOrganismesNonFiabilisablesMapping = 0;
+let nbEffectifsDuplicateOrganismesNonFiabilisablesMapping = 0;
 let nbOrganismesNonFiabilisablesUaiNonValidees = 0;
 
 /**
@@ -48,6 +53,18 @@ export const applyFiabilisationUaiSiret = async () => {
   logger.info(
     nbOrganismesNonFiabilisablesUaiNonValidees,
     "organismes mis à jour en tant que non fiabilisables (uai non validée dans le référentiel)"
+  );
+  logger.info(
+    nbOrganismesNonFiabilisablesMappingFixEffectifs,
+    "organismes non fiabilisables (mapping) dont on a corrigé les effectifs sur un organisme fiable lié"
+  );
+  logger.info(
+    nbEffectifsFixedOrganismesNonFiabilisablesMapping,
+    "Effectifs sur organismes non fiabilisables (mapping) corrigés sur un organisme fiable lié"
+  );
+  logger.info(
+    nbEffectifsDuplicateOrganismesNonFiabilisablesMapping,
+    "Effectifs en doublons sur organismes non fiabilisables (mapping) en tentative de correction sur un organisme fiable lié"
   );
 
   return {
@@ -147,7 +164,7 @@ const updateDossierApprenantMigrationForUaiSiretFiable = async (
 };
 
 /**
- * Méthode de MAJ de tous les couples non fiabilisable en utilisant le mapping >> NON_FIABILISABLE_MAPPING
+ * Méthode de MAJ de tous les couples non fiabilisables en utilisant le mapping >> NON_FIABILISABLE_MAPPING
  */
 const updateOrganismesNonFiabilisablesMapping = async () => {
   logger.info("Identification des organismes non fiabilisables via mapping ...");
@@ -157,6 +174,15 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
     .toArray();
 
   await PromisePool.for(couplesNonFiabilisablesMapping).process(updateOrganismeForCurrentCoupleNonFiabilisableMapping);
+
+  // Une fois tous les couples ayant permis de maj les organismes on va rattacher les effectifs de chacun des organismes NON_FIABILISABLE_MAPPING
+  const organismesNonFiabilisablesMapping = await organismesDb()
+    .find({ fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING })
+    .toArray();
+
+  await PromisePool.for(organismesNonFiabilisablesMapping).process(
+    updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable
+  );
 };
 
 /**
@@ -169,6 +195,43 @@ const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (currentFiab
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING } }
   );
   nbOrganismesNonFiabilisablesMapping += modifiedCount;
+};
+
+/**
+ * Méthode de MAJ unitaire d'un organisme NON_FIABILISABLE_MAPPING en rattachant ses effectifs liés au bon organisme FIABLE s'il en existe un seul
+ * @param {*} currentOrganismeNonFiabilisableMapping
+ */
+const updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable = async ({ _id, uai }) => {
+  // Recherche d'un unique organisme fiable lié à l'UAI de l'organisme NON_FIABILISABLE_MAPPING
+  const organismeFiableForUai = await organismesDb()
+    .find({ uai, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
+    .toArray();
+
+  if (organismeFiableForUai.length === 1) {
+    const effectifsForOrganismeNonFiabilisableToFix = await effectifsDb().find({ organisme_id: _id }).toArray();
+    const organismeFiableId = organismeFiableForUai[0]._id;
+
+    // Update de chaque effectif via For Of pour limiter les appels //
+    for (const currentEffectifToUpdate of effectifsForOrganismeNonFiabilisableToFix) {
+      try {
+        const { modifiedCount } = await effectifsDb().updateOne(
+          { _id: currentEffectifToUpdate._id },
+          { $set: { organisme_id: organismeFiableId } }
+        );
+        nbEffectifsFixedOrganismesNonFiabilisablesMapping += modifiedCount;
+      } catch (error) {
+        if (error instanceof MongoServerError) {
+          if (error.message.includes("duplicate key error")) {
+            // On décompte les effectifs en doublon - pas de rattachement nécessaire vu que l'effectif existe déja
+            // Remarque : on pilote les doublons d'effectifs via Metabase cela nous permettra de vérifier que la correction s'applique bien aux effectifs non déja présents
+            nbEffectifsDuplicateOrganismesNonFiabilisablesMapping++;
+          }
+        }
+      }
+    }
+
+    if (nbEffectifsFixedOrganismesNonFiabilisablesMapping > 0) nbOrganismesNonFiabilisablesMappingFixEffectifs++;
+  }
 };
 
 /**
