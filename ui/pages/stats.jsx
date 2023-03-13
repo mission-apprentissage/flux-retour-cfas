@@ -33,6 +33,8 @@ const StatistiquesPage = () => {
               <Tab>Visites</Tab>
               <Tab>Profils utilisateur</Tab>
               <Tab>Acquisition</Tab>
+              <Tab>Qualité des données</Tab>
+              <Tab>Couverture</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
@@ -53,6 +55,20 @@ const StatistiquesPage = () => {
                 <iframe
                   src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/3725a628-f37b-4220-8e55-b63241835b13"
                   style={{ height: "1000px", width: "100%" }}
+                  allowtransparency={"true"}
+                />
+              </TabPanel>
+              <TabPanel>
+                <iframe
+                  src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/78bc775c-1be5-4e61-b81c-3fe4679e480b"
+                  style={{ height: "1450px", width: "100%" }}
+                  allowtransparency={"true"}
+                />
+              </TabPanel>
+              <TabPanel>
+                <iframe
+                  src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/9808c918-2d2f-4ae5-b0e7-5e1d982e3e66"
+                  style={{ height: "1450px", width: "100%" }}
                   allowtransparency={"true"}
                 />
               </TabPanel>
