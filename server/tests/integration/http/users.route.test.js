@@ -16,7 +16,7 @@ describe("Users Route", () => {
         nom: "of",
         prenom: "test",
         roles: ["of"],
-        account_status: "FORCE_RESET_PASSWORD",
+        account_status: "DIRECT_PENDING_PASSWORD_SETUP",
       }
     );
   });

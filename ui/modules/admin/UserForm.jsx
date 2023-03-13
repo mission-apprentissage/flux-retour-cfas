@@ -56,7 +56,7 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
   const { values, handleSubmit, handleChange, setFieldValue, resetForm } = useFormik({
     initialValues: {
       accessAllCheckbox: user?.is_admin ? ["on"] : [],
-      roles: user?.roles || [],
+      roles: roles.filter((role) => user?.roles.includes(role._id)).map((role) => role.name) || [],
       nom: user?.nom || "",
       prenom: user?.prenom || "",
       email: user?.email || "",
@@ -224,10 +224,10 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
               return (
                 <Checkbox
                   name="roles"
-                  key={role._id}
+                  key={role.name}
                   onChange={() => handleRoleChange(role.name)}
-                  value={role._id}
-                  isChecked={values.roles.includes(role._id)}
+                  value={role.name}
+                  isChecked={values.roles.includes(role.name)}
                   icon={<Check />}
                 >
                   {role.name}

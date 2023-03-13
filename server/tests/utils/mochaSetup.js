@@ -4,6 +4,7 @@ import { nockExternalApis } from "./nockApis/index.js";
 import redisFakeClient from "./redisClientMock.js";
 import { createIndexes } from "../../src/common/model/indexes/index.js";
 import { clearAllCollections } from "../../src/common/mongodb.js";
+import { seedRoles } from "../../src/jobs/seed/start/index.js";
 
 const LOCAL_HOST = "127.0.0.1";
 const MONGODB_MEMORY_SERVER_DL_HOST = "fastdl.mongodb.org";
@@ -22,8 +23,9 @@ export const mochaGlobalSetup = async () => {
 
 // hooks that will be used in every test suite
 export const mochaHooks = {
-  beforeEach: () => {
+  beforeEach: async () => {
     nockExternalApis();
+    await seedRoles();
   },
   afterEach: async () => {
     nock.cleanAll();

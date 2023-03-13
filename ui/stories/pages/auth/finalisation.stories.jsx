@@ -66,13 +66,8 @@ DemandeAccesEnAttenteDeValidation1.storyName = "Demande d'acces en attente de va
 DemandeAccesEnAttenteDeValidation1.parameters = {
   mockAuth: {
     isInPendingValidation: true,
-<<<<<<< HEAD
-    hasAtLeastOneUserToValidate: false,
-    account_status: "PENDING_ADMIN_VALIDATION",
-=======
     isOrganismeAdmin: false,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP2",
->>>>>>> 120deab6 (refactor: rename hasAtLeastOneUserToValidate to isOrganismeAdmin)
+    account_status: "PENDING_ADMIN_VALIDATION",
     roles: ["of"],
   },
 };
@@ -82,13 +77,8 @@ DemandeAccesEnAttenteDeValidation2.storyName = "Demande d'acces en attente de va
 DemandeAccesEnAttenteDeValidation2.parameters = {
   mockAuth: {
     isInPendingValidation: true,
-<<<<<<< HEAD
-    hasAtLeastOneUserToValidate: true,
-    account_status: "PENDING_ADMIN_VALIDATION",
-=======
     isOrganismeAdmin: true,
-    account_status: "FORCE_COMPLETE_PROFILE_STEP2",
->>>>>>> 120deab6 (refactor: rename hasAtLeastOneUserToValidate to isOrganismeAdmin)
+    account_status: "PENDING_ADMIN_VALIDATION",
     roles: ["of"],
   },
 };

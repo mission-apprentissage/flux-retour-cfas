@@ -7,7 +7,6 @@ import redisFakeClient from "./redisClientMock.js";
 import { modelDescriptors } from "../../src/common/model/collections.js";
 import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.actions.js";
 import { createUser } from "../../src/common/actions/users.actions.js";
-import { seedRoles } from "../../src/jobs/seed/start/index.js";
 
 export const startServer = async () => {
   const mailer = { sendEmail: sinon.spy() };
@@ -18,7 +17,6 @@ export const startServer = async () => {
   const httpClient = axiosist(app);
 
   await configureDbSchemaValidation(modelDescriptors);
-  await seedRoles();
 
   return {
     httpClient,

@@ -3,6 +3,8 @@ import Boom from "boom";
 import Joi from "joi";
 import passport from "passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
+import { uniq } from "lodash-es";
+
 import config from "../../../config.js";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import {
@@ -25,8 +27,6 @@ import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import logger from "../../../common/logger.js";
-import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
-import { uniq } from "lodash-es";
 import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
 import registrationSchema from "../../../common/validation/registrationSchema.js";

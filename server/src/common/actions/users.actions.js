@@ -59,7 +59,7 @@ export const createUser = async ({ email, password }, options = {}) => {
 
   // bypass profile completion for admins
   // bypass profile completion for admins
-  const account_status = permissions.is_admin
+  const account_status = is_admin
     ? options.account_status || USER_ACCOUNT_STATUS.DIRECT_PENDING_PASSWORD_SETUP
     : options.account_status;
 
