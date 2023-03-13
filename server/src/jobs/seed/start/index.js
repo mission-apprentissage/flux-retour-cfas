@@ -30,7 +30,8 @@ export const seedAdmin = async ({ adminEmail }) => {
     {
       nom: "Admin",
       prenom: "test",
-      permissions: { is_admin: true, is_cross_organismes: true },
+      is_admin: true,
+      is_cross_organismes: true,
       account_status: "DIRECT_PENDING_PASSWORD_SETUP",
       siret: "13002526500013", // Siret Dinum
     }
@@ -159,7 +160,7 @@ const seedSampleUsers = async () => {
         nom: "pilot",
         prenom: "test",
         description: "DREETS AUVERGNE-RHONES-ALPES",
-        permissions: { is_cross_organismes: true },
+        is_cross_organismes: true,
         roles: ["pilot"],
         account_status: "DIRECT_PENDING_PASSWORD_SETUP",
         siret: "13000992100011",

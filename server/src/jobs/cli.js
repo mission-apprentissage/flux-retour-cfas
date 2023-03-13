@@ -258,7 +258,8 @@ program
         email,
         prenom,
         nom,
-        permissions: { is_admin: isAdmin, is_cross_organismes: isCrossOrganismes },
+        is_admin: isAdmin,
+        is_cross_organismes: isCrossOrganismes,
       });
     }, options._name)
   );

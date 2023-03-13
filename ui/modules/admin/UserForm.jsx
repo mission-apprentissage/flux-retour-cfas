@@ -57,11 +57,11 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
     initialValues: {
       accessAllCheckbox: user?.is_admin ? ["on"] : [],
       roles: user?.roles || [],
-      newNom: user?.nom || "",
-      newPrenom: user?.prenom || "",
-      newEmail: user?.email || "",
+      nom: user?.nom || "",
+      prenom: user?.prenom || "",
+      email: user?.email || "",
     },
-    onSubmit: async ({ accessAllCheckbox, newNom, newPrenom, newEmail, roles, acl }, { setSubmitting }) => {
+    onSubmit: async ({ accessAllCheckbox, nom, prenom, email, roles }, { setSubmitting }) => {
       const accessAll = accessAllCheckbox.includes("on");
 
       let result;
@@ -70,16 +70,11 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
       try {
         if (user) {
           const body = {
-            options: {
-              prenom: newPrenom,
-              nom: newNom,
-              email: newEmail,
-              roles,
-              acl,
-              permissions: {
-                is_admin: accessAll,
-              },
-            },
+            prenom,
+            nom,
+            email,
+            roles,
+            is_admin: accessAll,
           };
           result = await _put(`/api/v1/admin/users/${user._id}`, body);
           if (result?.ok) {
@@ -91,18 +86,13 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
           }
         } else {
           const body = {
-            options: {
-              prenom: newPrenom,
-              nom: newNom,
-              email: newEmail,
-              roles,
-              acl,
-              permissions: {
-                is_admin: accessAll,
-              },
-            },
+            prenom: prenom,
+            nom: nom,
+            email: email,
+            roles,
+            is_admin: accessAll,
           };
-          result = await _post("/api/v1/admin/user/", body).catch((err) => {
+          result = await _post("/api/v1/admin/users", body).catch((err) => {
             if (err.statusCode === 409) {
               return { error: "Cet utilisateur existe déjà" };
             }
@@ -198,22 +188,15 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
       <Grid gridTemplateColumns="repeat(2, 2fr)" gridGap="2w">
         <FormControl py={2}>
           <FormLabel>Nom</FormLabel>
-          <Input type="text" id="newNom" name="newNom" value={values.newNom} onChange={handleChange} required />
+          <Input type="text" id="nom" name="nom" value={values.nom} onChange={handleChange} required />
         </FormControl>
         <FormControl py={2}>
           <FormLabel>Prenom</FormLabel>
-          <Input
-            type="text"
-            id="newPrenom"
-            name="newPrenom"
-            value={values.newPrenom}
-            onChange={handleChange}
-            required
-          />
+          <Input type="text" id="prenom" name="prenom" value={values.prenom} onChange={handleChange} required />
         </FormControl>
         <FormControl py={2}>
           <FormLabel>Email</FormLabel>
-          <Input type="email" id="newEmail" name="newEmail" value={values.newEmail} onChange={handleChange} required />
+          <Input type="email" id="email" name="email" value={values.email} onChange={handleChange} required />
         </FormControl>
       </Grid>
 
@@ -236,14 +219,14 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
         <FormLabel>Type de compte</FormLabel>
         <HStack spacing={5}>
           {roles
-            .filter((role) => role.type === "user")
+            ?.filter((role) => role.type === "user")
             .map((role) => {
               return (
                 <Checkbox
                   name="roles"
                   key={role._id}
                   onChange={() => handleRoleChange(role.name)}
-                  value={role.name}
+                  value={role._id}
                   isChecked={values.roles.includes(role._id)}
                   icon={<Check />}
                 >

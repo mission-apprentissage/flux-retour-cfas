@@ -7,9 +7,15 @@ import { generateRandomAlphanumericPhrase } from "../../common/utils/miscUtils.j
 
 /**
  * Fonction de création d'un compte utilisateur
- * @param {*} param0
+ *
+ * @param {Object} options
+ * @param {string} options.email - Email
+ * @param {string} options.nom - Nom
+ * @param {string} options.prenom - Prenom
+ * @param {boolean} options.is_admin - Is an admin
+ * @param {boolean} options.is_cross_organismes - Is cross organismes
  */
-export const createUserAccount = async ({ email, nom, prenom, permissions = {} }) => {
+export const createUserAccount = async ({ email, nom, prenom, is_admin, is_cross_organismes }) => {
   logger.info(`Création de l'utilisateur ${email}`);
 
   await createUser(
@@ -17,7 +23,8 @@ export const createUserAccount = async ({ email, nom, prenom, permissions = {} }
     {
       nom,
       prenom,
-      permissions,
+      is_admin,
+      is_cross_organismes,
       account_status: USER_ACCOUNT_STATUS.PENDING_PASSWORD_SETUP,
     }
   );

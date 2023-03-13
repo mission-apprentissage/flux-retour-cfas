@@ -31,8 +31,8 @@ export default (acls) =>
         : body;
 
     const isTransverseUser =
-      user.permissions.is_admin ||
-      (user.permissions.is_cross_organismes &&
+      user.is_admin ||
+      (user.is_cross_organismes &&
         !user.codes_region.length &&
         !user.codes_academie.length &&
         !user.codes_departement.length);
@@ -54,7 +54,7 @@ export default (acls) =>
         throw Boom.unauthorized("Accès non autorisé");
       }
 
-      if (user.permissions.is_cross_organismes) {
+      if (user.is_cross_organismes) {
         if (
           !user.codes_region.includes(organisme.adresse.region) &&
           !user.codes_academie.includes(organisme.adresse.academie) &&

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { object, objectId, objectIdOrNull, string, date, arrayOf, boolean } from "./json-schema/jsonSchemaTypes.js";
+import { object, objectId, objectIdOrNull, string, date, boolean } from "./json-schema/jsonSchemaTypes.js";
 import { schemaValidation } from "../utils/schemaUtils.js";
 
 export const collectionName = "permissions";

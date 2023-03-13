@@ -31,6 +31,10 @@ export function createUserTokenSimple(options = {}) {
 }
 
 export const createUserToken = (user, options = {}) => {
-  const payload = { permissions: user.permissions, network: user.network };
+  const payload = {
+    is_admin: user.is_admin,
+    is_cross_organismes: user.permissions.is_cross_organismes,
+    network: user.network,
+  };
   return createToken("user", user.username, { payload, ...options });
 };

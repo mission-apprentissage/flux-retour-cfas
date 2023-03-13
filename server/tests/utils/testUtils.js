@@ -45,7 +45,8 @@ export const startServer = async () => {
 export const createSimpleUser = async () => {
   const data = { email: "test@test.beta.gouv.fr", password: "password" };
   const createdUser = await createUser(data, {
-    permissions: { is_admin: false, is_cross_organismes: true },
+    is_admin: false,
+    is_cross_organismes: true,
   });
   return { ...createdUser, ...data };
 };
@@ -53,7 +54,8 @@ export const createSimpleUser = async () => {
 export const createAdminUser = async () => {
   const data = { email: "admin@test.beta.gouv.fr", password: "password" };
   const createdUser = await createUser(data, {
-    permissions: { is_admin: true, is_cross_organismes: true },
+    is_admin: true,
+    is_cross_organismes: true,
   });
 
   return { ...createdUser, ...data };
