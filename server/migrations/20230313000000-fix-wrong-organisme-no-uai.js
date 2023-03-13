@@ -47,17 +47,21 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
           },
         }
       );
-      await db.collection("permissions").updateOne(
-        {
-          userEmail: user.email,
-          organisme_id: user.main_organisme._id,
-        },
-        {
-          $set: {
-            organisme_id: organisme._id,
+
+      // si après étape de demande des permissions
+      if (user.main_organisme_id) {
+        await db.collection("permissions").updateOne(
+          {
+            userEmail: user.email,
+            organisme_id: user.main_organisme_id,
           },
-        }
-      );
+          {
+            $set: {
+              organisme_id: organisme._id,
+            },
+          }
+        );
+      }
     })
   );
 };
