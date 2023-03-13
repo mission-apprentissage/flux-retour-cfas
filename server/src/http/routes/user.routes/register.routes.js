@@ -281,7 +281,9 @@ export default ({ mailer }) => {
       }
 
       if (!is_cross_organismes && !wantedReseau) {
-        let organisme = (await findOrganismeByUai(userDb.uai)) || (await findOrganismeBySiret(userDb.siret));
+        const organisme =
+          (userDb.uai && (await findOrganismeByUai(userDb.uai))) ||
+          (userDb.siret && (await findOrganismeBySiret(userDb.siret)));
         if (!organisme) {
           logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
           throw Boom.badRequest("No organisme found");

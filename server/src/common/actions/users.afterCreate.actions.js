@@ -99,7 +99,7 @@ export const createUserPermissions = async ({
       // TODO [metier] VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
     } else {
       // user is NOT cross_organismes and NOT scoped -> example OF
-      const organisme = (await findOrganismeByUai(uai)) || (await findOrganismeBySiret(siret));
+      const organisme = (uai && (await findOrganismeByUai(uai))) || (siret && (await findOrganismeBySiret(siret)));
       if (!organisme) {
         throw new Error(`No organisme found for this UAI/SIRET ${uai}/${siret}`);
       }
