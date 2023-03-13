@@ -27,7 +27,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   await Promise.all(
     users.map(async (user) => {
       console.log(
-        `Correction utilisateur ${user._id}, main_organisme.siret=${user.main_organisme.siret} => siret=${user.siret}`
+        `Correction utilisateur ${user._id}, main_organisme.siret=${user.main_organisme?.siret} => siret=${user.siret}`
       );
       const organisme = await db.collection("organismes").findOne({
         siret: user.siret,
