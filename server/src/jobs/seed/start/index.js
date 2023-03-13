@@ -8,7 +8,7 @@ import {
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
 } from "../../../common/actions/organismes/organismes.actions.js";
-import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
+import { createUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
 
 export const seedRoles = async () => {
@@ -35,7 +35,7 @@ export const seedAdmin = async ({ adminEmail }) => {
       siret: "13002526500013", // Siret Dinum
     }
   );
-  await userAfterCreate({ user: userAdmin, pending: false, notify: false });
+  await createUserPermissions({ user: userAdmin, pending: false, notify: false });
   logger.info(`User ${aEmail} with password 'Secret!Password1' and admin is successfully created `);
 
   logger.info("Seed admin created");
@@ -167,7 +167,7 @@ const seedSampleUsers = async () => {
         organisation: "DREETS",
       }
     );
-    await userAfterCreate({ user: userPilot, pending: false, notify: false });
+    await createUserPermissions({ user: userPilot, pending: false, notify: false });
     logger.info("User pilot created");
   }
 
@@ -186,7 +186,7 @@ const seedSampleUsers = async () => {
         organisation: "ORGANISME_FORMATION",
       }
     );
-    await userAfterCreate({ user: userOf, pending: false, notify: false, asRole: "organisme.admin" });
+    await createUserPermissions({ user: userOf, pending: false, notify: false, asRole: "organisme.admin" });
     logger.info("User off created");
   }
 
@@ -205,7 +205,7 @@ const seedSampleUsers = async () => {
         organisation: "ORGANISME_FORMATION",
       }
     );
-    await userAfterCreate({ user: userOfR, pending: false, notify: false, asRole: "organisme.admin" });
+    await createUserPermissions({ user: userOfR, pending: false, notify: false, asRole: "organisme.admin" });
     // Get organisme id for user
     const organismeOff = await findOrganismeByUai("0142321X");
     await addContributeurOrganisme(organismeOff?._id, userOfR?.email, "organisme.statsonly", false);
@@ -227,7 +227,7 @@ const seedSampleUsers = async () => {
         organisation: "TETE_DE_RESEAU",
       }
     );
-    await userAfterCreate({ user: userReseau, pending: false, notify: false });
+    await createUserPermissions({ user: userReseau, pending: false, notify: false });
     logger.info("User reseau created");
   }
 
@@ -246,7 +246,7 @@ const seedSampleUsers = async () => {
         organisation: "ERP",
       }
     );
-    await userAfterCreate({ user: userErp, pending: false, notify: false });
+    await createUserPermissions({ user: userErp, pending: false, notify: false });
     logger.info("User erp created");
   }
 };

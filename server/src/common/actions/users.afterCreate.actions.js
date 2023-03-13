@@ -21,7 +21,7 @@ import { defaultValuesPermission, validatePermission } from "../model/permission
  * @param {*} user
  * @returns
  */
-export const userAfterCreate = async ({
+export const createUserPermissions = async ({
   user,
   pending = true,
   notify = true,

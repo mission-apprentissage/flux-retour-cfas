@@ -20,7 +20,7 @@ import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { authMiddleware } from "../../middlewares/authMiddleware.js";
-import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
+import { createUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
@@ -300,7 +300,7 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      await userAfterCreate({ user: updateUser, mailer, asRole: type });
+      await createUserPermissions({ user: updateUser, mailer, asRole: type });
 
       const payload = await structureUser(updateUser);
 
