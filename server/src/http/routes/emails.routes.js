@@ -1,10 +1,10 @@
 import express from "express";
-import tryCatch from "../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
 import passport from "passport";
-import config from "../../config.js";
 import Boom from "boom";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";
+
+import config from "../../config.js";
 import { sendHTML } from "../../common/utils/httpUtils.js";
 
 import {
@@ -43,62 +43,48 @@ export default ({ mailer }) => {
     next();
   }
 
-  router.get(
-    "/:token/preview",
-    checkEmailToken,
-    tryCatch(async (req, res) => {
-      const { token } = req.params;
+  router.get("/:token/preview", checkEmailToken, async (req, res) => {
+    const { token } = req.params;
 
-      const html = await renderEmail(mailer, token);
+    const html = await renderEmail(mailer, token);
 
-      return sendHTML(html, res);
+    return sendHTML(html, res);
+  });
+
+  router.get("/:token/markAsOpened", async (req, res) => {
+    const { token } = req.params;
+
+    markEmailAsOpened(token);
+
+    res.writeHead(200, { "Content-Type": "image/gif" });
+    res.end(Buffer.from("R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==", "base64"), "binary");
+  });
+
+  router.post("/webhook", checkWebhookKey(), async (req, res) => {
+    const parameters = await Joi.object({
+      event: Joi.string().required(), //https://developers.sendinblue.com/docs/transactional-webhooks
+      "message-id": Joi.string().required(),
     })
-  );
+      .unknown()
+      .validateAsync(req.body, { abortEarly: false });
 
-  router.get(
-    "/:token/markAsOpened",
-    tryCatch(async (req, res) => {
-      const { token } = req.params;
+    if (parameters.event === "delivered") {
+      markEmailAsDelivered(parameters["message-id"]);
+    } else {
+      markEmailAsFailed(parameters["message-id"], parameters.event);
+    }
 
-      markEmailAsOpened(token);
+    return res.json({});
+  });
 
-      res.writeHead(200, { "Content-Type": "image/gif" });
-      res.end(Buffer.from("R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==", "base64"), "binary");
-    })
-  );
+  router.get("/:token/unsubscribe", checkEmailToken, async (req, res) => {
+    const { token } = req.params;
 
-  router.post(
-    "/webhook",
-    checkWebhookKey(),
-    tryCatch(async (req, res) => {
-      const parameters = await Joi.object({
-        event: Joi.string().required(), //https://developers.sendinblue.com/docs/transactional-webhooks
-        "message-id": Joi.string().required(),
-      })
-        .unknown()
-        .validateAsync(req.body, { abortEarly: false });
+    await unsubscribeUser(token);
 
-      if (parameters.event === "delivered") {
-        markEmailAsDelivered(parameters["message-id"]);
-      } else {
-        markEmailAsFailed(parameters["message-id"], parameters.event);
-      }
-
-      return res.json({});
-    })
-  );
-
-  router.get(
-    "/:token/unsubscribe",
-    checkEmailToken,
-    tryCatch(async (req, res) => {
-      const { token } = req.params;
-
-      await unsubscribeUser(token);
-
-      res.set("Content-Type", "text/html");
-      res.send(
-        Buffer.from(`<!DOCTYPE html>
+    res.set("Content-Type", "text/html");
+    res.send(
+      Buffer.from(`<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -117,9 +103,8 @@ export default ({ mailer }) => {
     </body>
 </html>
 `)
-      );
-    })
-  );
+    );
+  });
 
   return router;
 };

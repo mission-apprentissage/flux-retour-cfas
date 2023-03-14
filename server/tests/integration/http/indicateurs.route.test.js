@@ -2,7 +2,6 @@ import { strict as assert } from "assert";
 import { ObjectId } from "mongodb";
 
 import { startServer } from "../../utils/testUtils.js";
-import { seedRoles } from "../../../src/jobs/seed/start/index.js";
 import { createUser } from "../../../src/common/actions/users.actions.js";
 import { createUserPermissions } from "../../../src/common/actions/users.afterCreate.actions.js";
 import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
@@ -86,7 +85,6 @@ const organismes = [
 describe("Effectifs Route", () => {
   describe("/api/indicateurs route", () => {
     beforeEach(async () => {
-      await seedRoles();
       const app = await startServer();
       httpClient = app.httpClient;
 

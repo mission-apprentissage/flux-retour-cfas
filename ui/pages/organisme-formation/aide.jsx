@@ -8,15 +8,7 @@ import { CONTACT_ADDRESS } from "@/common/constants/product";
 import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 import Question from "@/modules/organisme-formation/aide/Question";
 import { questions } from "@/modules/organisme-formation/aide/questions";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
-
-// OrganismeFormation: {
-//   path: "/organisme-formation",
-//   title: "Vous êtes un organisme de formation",
-//   transmettre: {
-//     path: "/organisme-formation/transmettre",
-//     title: "Comment transmettre les données de votre organisme ?",
-//   },
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 export default function Aide() {
   const title = "Page d'aide";
@@ -28,9 +20,9 @@ export default function Aide() {
       <Section>
         <Breadcrumb
           pages={[
-            { title: "Accueil", to: "/" },
+            PAGES.homepage(),
             { title: "Vous êtes un organisme de formation", to: "/organisme-formation" },
-            { title: title },
+            { title },
           ]}
         />
         <Heading textStyle="h2" color="grey.800" mt={5}>

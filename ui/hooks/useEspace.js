@@ -99,7 +99,7 @@ export function useEspace() {
                     },
                   }
                 : {}),
-              ...(!hasAccessToOnlyOneOrganisme || auth.permissions.is_cross_organismes
+              ...(!hasAccessToOnlyOneOrganisme || auth.is_cross_organismes
                 ? {
                     mesOrganismes: {
                       pageTitle: mesOrganismesNames[whoIs] ?? mesOrganismesNames.global,
@@ -169,7 +169,7 @@ export function useEspace() {
     auth.isInPendingValidation,
     auth.account_status,
     isTeleversementPage,
-    auth.permissions.is_cross_organismes,
+    auth.is_cross_organismes,
   ]);
 
   if (error !== null) {

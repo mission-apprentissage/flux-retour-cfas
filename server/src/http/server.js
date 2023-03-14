@@ -46,6 +46,18 @@ import maintenancesRoutes from "./routes/maintenances.routes.js";
 import config from "../config.js";
 import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
 
+// catch all unhandled promise rejections and call the error middleware
+import "express-async-errors";
+
+/**
+ * Create the express app
+ * @param {Object} services - Services
+ * @param {Object} services.cache - Redis cache
+ * @param {Object} services.clamav - clamav antivirus
+ * @param {Object} services.mailer - Mailer
+ *
+ * @returns {Promise<Object>} Express app
+ */
 export default async (services) => {
   const app = express();
 
@@ -70,8 +82,6 @@ export default async (services) => {
   app.use(Sentry.Handlers.requestHandler());
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
-
-  const requireJwtAuthentication = requireJwtAuthenticationMiddleware();
 
   const checkJwtToken = authMiddleware();
 
@@ -143,7 +153,7 @@ export default async (services) => {
   // @deprecated to /dossiers-apprenants
   app.use(
     ["/api/statut-candidats", "/api/dossiers-apprenants"],
-    requireJwtAuthentication,
+    requireJwtAuthenticationMiddleware(),
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     dossierApprenantRouter()
   );

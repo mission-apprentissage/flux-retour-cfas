@@ -32,7 +32,6 @@ describe("Maintenances Route", () => {
       const response = await httpClient.post(ADMIN_MAINTENANCE_ENDPOINT, {}, { headers: { cookie } });
 
       assert.deepEqual(response.data, {
-        statusCode: 400,
         error: "Bad Request",
         message: "Erreur de validation",
         details: [

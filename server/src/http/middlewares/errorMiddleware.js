@@ -5,20 +5,26 @@ export default () => {
   return (rawError, req, res, next) => {
     req.err = rawError;
 
-    let error;
+    let boomError;
+
     if (rawError.isBoom) {
-      error = rawError;
+      boomError = rawError;
+    } else if (rawError?.[0]?.errors?.name === "ZodError") {
+      //This is a Zod validation error
+      boomError = Boom.badRequest("Erreur de validation");
+      boomError.output.payload.details = rawError?.[0].errors.issues;
     } else if (rawError.name === "ValidationError") {
       //This is a joi validation error
-      error = Boom.badRequest("Erreur de validation");
-      error.output.payload.details = rawError.details;
+      boomError = Boom.badRequest("Erreur de validation");
+      boomError.output.payload.details = rawError.details;
     } else {
-      error = Boom.boomify(rawError, {
+      boomError = Boom.boomify(rawError, {
         statusCode: rawError.status || 500,
         ...(!rawError.message ? { message: "Une erreur est survenue" } : {}),
       });
     }
 
-    return res.status(error.output.statusCode).send(error.output.payload);
+    const { error, message, details } = boomError.output.payload;
+    return res.status(boomError.output.statusCode).send({ error, message, details });
   };
 };

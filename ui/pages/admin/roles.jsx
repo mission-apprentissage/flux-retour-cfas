@@ -15,7 +15,7 @@ import {
   Input,
   Stack,
 } from "@chakra-ui/react";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import Head from "next/head";
 import withAuth from "@/components/withAuth";
@@ -106,7 +106,7 @@ const Roles = () => {
       <Head>
         <title>Gestion des rôles</title>
       </Head>
-      <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
+      <Breadcrumb pages={[PAGES.homepage(), { title }]} />
 
       <Heading as="h1" mb={8} mt={6}>
         {title}

@@ -1,8 +1,6 @@
 import { Box, Button, HStack, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
 
-import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
-
 const CfaTransmissionNotFound = () => {
   return (
     <HStack marginTop="2w">
@@ -12,12 +10,7 @@ const CfaTransmissionNotFound = () => {
           Votre organisme ne transmet pas de données <br />
           au tableau de bord de l’apprentissage.
         </Text>
-        <Button
-          variant="primary"
-          marginTop="2w"
-          as={NavLink}
-          href={NAVIGATION_PAGES.OrganismeFormation.transmettre.path}
-        >
+        <Button variant="primary" marginTop="2w" as={NavLink} href="/organisme-formation/transmettre">
           Voir comment paramétrer la transmission des données
         </Button>
       </Box>

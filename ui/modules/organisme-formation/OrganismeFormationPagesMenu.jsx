@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import { Flex, Link, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-
 const OrganismeFormationPagesMenu = (props) => {
   return (
     <NavBarContainer {...props}>
@@ -42,17 +40,13 @@ NavItem.propTypes = {
 const NavLinks = () => {
   return (
     <Flex flexDirection="column">
-      <NavItem to={NAVIGATION_PAGES.OrganismeFormation.transmettre.path}>
-        Comment transmettre les données de votre organisme ?
-      </NavItem>
+      <NavItem to="/organisme-formation/transmettre">Comment transmettre les données de votre organisme ?</NavItem>
       <br />
-      <NavItem to={NAVIGATION_PAGES.OrganismeFormation.consulter.path}>
+      <NavItem to="/organisme-formation/consulter">
         Comment consulter et vérifier les données que vous transmettez ?
       </NavItem>
       <br />
-      <NavItem to={NAVIGATION_PAGES.QuestionsReponses.path}>
-        Une question ? Besoin d’aide ? Consulter la page d’aide
-      </NavItem>
+      <NavItem to="/questions-reponses">Une question ? Besoin d’aide ? Consulter la page d’aide</NavItem>
     </Flex>
   );
 };

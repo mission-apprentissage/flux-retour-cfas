@@ -1,6 +1,5 @@
 import { Box, Flex, HStack, Text } from "@chakra-ui/react";
 
-import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import Link from "../../../../components/Links/Link";
 
 const CfaTransmissionFound = () => {
@@ -21,7 +20,7 @@ const CfaTransmissionFound = () => {
         <Text marginTop="4w" color="#000000" fontSize="epsilon">
           Utiliser votre URL unique disponible dans votre ERP pour consulter votre page
         </Text>
-        <Link variant="underline" href={NAVIGATION_PAGES.QuestionsReponses.path} marginTop="2w">
+        <Link variant="underline" href="/questions-reponses" marginTop="2w">
           En savoir plus
           <Box as="i" className="ri-arrow-right-line" marginLeft="3v" />
         </Link>

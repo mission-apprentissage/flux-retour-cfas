@@ -1,7 +1,8 @@
+import jwt from "jsonwebtoken";
+
 import { strict as assert } from "assert";
 import config from "../../../src/config.js";
 import { startServer } from "../../utils/testUtils.js";
-import jwt from "jsonwebtoken";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
 
 describe("Login Route", () => {
@@ -20,7 +21,6 @@ describe("Login Route", () => {
     assert.ok(decoded.exp);
     assert.equal(decoded.sub, "user");
     assert.equal(decoded.iss, config.appName);
-    assert.deepEqual(decoded.permissions, []);
   });
 
   it("Vérifie qu'un mot de passe invalide est rejeté", async () => {

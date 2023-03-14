@@ -1,6 +1,6 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+
 import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { schema as anneeScolaireSchema } from "../../../common/utils/validationsUtils/anneeScolaire.js";
@@ -94,173 +94,164 @@ export default () => {
   /**
    * Route post for DossierApprenant
    */
-  router.post(
-    "/",
-    tryCatch(async ({ user, body }, res) => {
-      const dataIn = await Joi.array()
-        .max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)
-        .validateAsync(body, { abortEarly: false });
+  router.post("/", async ({ user, body }, res) => {
+    const dataIn = await Joi.array()
+      .max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)
+      .validateAsync(body, { abortEarly: false });
 
-      try {
-        let nbItemsValid = 0;
-        let validationErrors = [];
+    try {
+      let nbItemsValid = 0;
+      let validationErrors = [];
 
-        // Add user event
-        await createUserEvent({
-          username: user.username,
-          type: USER_EVENTS_TYPES.POST,
-          action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
-          data: dataIn,
+      // Add user event
+      await createUserEvent({
+        username: user.username,
+        type: USER_EVENTS_TYPES.POST,
+        action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
+        data: dataIn,
+      });
+
+      // Validate items one by one
+      await asyncForEach(dataIn, async (currentDossierApprenant, index) => {
+        const dossierApprenantValidation = dossierApprenantItemSchema.validate(currentDossierApprenant, {
+          stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
+          abortEarly: false, // make sure every invalid field will be communicated to the caller
         });
 
-        // Validate items one by one
-        await asyncForEach(dataIn, async (currentDossierApprenant, index) => {
-          const dossierApprenantValidation = dossierApprenantItemSchema.validate(currentDossierApprenant, {
-            stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
-            abortEarly: false, // make sure every invalid field will be communicated to the caller
+        if (dossierApprenantValidation.error) {
+          const prettyValidationError = buildPrettyValidationError(dossierApprenantValidation.error);
+          validationErrors.push(prettyValidationError);
+          await dossiersApprenantsApiErrorsDb().insertOne({
+            erp: user.username,
+            created_at: new Date(),
+            data: currentDossierApprenant,
+            errors: prettyValidationError.errors,
           });
+          logger.warn(`Could not validate item from ${user.username} at index ${index}`, prettyValidationError);
+        } else {
+          nbItemsValid++;
+          // Build item & map input fields
+          const dossierApprenantItem = {
+            ...currentDossierApprenant,
+            formation_cfd: currentDossierApprenant.id_formation,
+            // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
+            periode_formation: currentDossierApprenant.periode_formation
+              ? currentDossierApprenant.periode_formation.split("-").map(Number)
+              : [],
+            source: user.username,
+            historique_statut_apprenant: [
+              {
+                valeur_statut: currentDossierApprenant.statut_apprenant,
+                date_statut: new Date(currentDossierApprenant.date_metier_mise_a_jour_statut),
+                date_reception: new Date(),
+              },
+            ],
+          };
 
-          if (dossierApprenantValidation.error) {
-            const prettyValidationError = buildPrettyValidationError(dossierApprenantValidation.error);
-            validationErrors.push(prettyValidationError);
-            await dossiersApprenantsApiErrorsDb().insertOne({
-              erp: user.username,
-              created_at: new Date(),
-              data: currentDossierApprenant,
-              errors: prettyValidationError.errors,
+          // Construction d'un historique à partir du statut et de la date_metier_mise_a_jour_statut
+          const effectifData = structureEffectifFromDossierApprenant(dossierApprenantItem);
+          const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenantItem);
+
+          // Call runEngine -> va créer les données nécessaires (effectifs + organismes)
+          const { organisme } = await runEngine({ effectifData }, organismeData);
+
+          // POST Engine création du dossierApprenantMigration avec organisme lié
+          // TODO à supprimer une fois que la collection DossierApprenantMigration sera useless
+          // TODO Store userEvents
+          if (organisme.createdId || organisme.foundId) {
+            const structuredDossierApprenant = await structureDossierApprenant({
+              ...dossierApprenantItem,
+              organisme_id: organisme.createdId || organisme.foundId, // Update sur l'organisme ajouté ou maj,
             });
-            logger.warn(`Could not validate item from ${user.username} at index ${index}`, prettyValidationError);
-          } else {
-            nbItemsValid++;
-            // Build item & map input fields
-            const dossierApprenantItem = {
-              ...currentDossierApprenant,
-              formation_cfd: currentDossierApprenant.id_formation,
-              // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
-              periode_formation: currentDossierApprenant.periode_formation
-                ? currentDossierApprenant.periode_formation.split("-").map(Number)
-                : [],
-              source: user.username,
-              historique_statut_apprenant: [
-                {
-                  valeur_statut: currentDossierApprenant.statut_apprenant,
-                  date_statut: new Date(currentDossierApprenant.date_metier_mise_a_jour_statut),
-                  date_reception: new Date(),
-                },
-              ],
-            };
 
-            // Construction d'un historique à partir du statut et de la date_metier_mise_a_jour_statut
-            const effectifData = structureEffectifFromDossierApprenant(dossierApprenantItem);
-            const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenantItem);
+            // Recherche du dossier via sa clé d'unicité
+            const foundDossierWithUnicityFields = await findDossierApprenantByQuery(
+              {
+                id_erp_apprenant: structuredDossierApprenant.id_erp_apprenant,
+                uai_etablissement: structuredDossierApprenant.uai_etablissement,
+                annee_scolaire: structuredDossierApprenant.annee_scolaire,
+              },
+              { _id: 1 }
+            );
 
-            // Call runEngine -> va créer les données nécessaires (effectifs + organismes)
-            const { organisme } = await runEngine({ effectifData }, organismeData);
-
-            // POST Engine création du dossierApprenantMigration avec organisme lié
-            // TODO à supprimer une fois que la collection DossierApprenantMigration sera useless
-            // TODO Store userEvents
-            if (organisme.createdId || organisme.foundId) {
-              const structuredDossierApprenant = await structureDossierApprenant({
-                ...dossierApprenantItem,
-                organisme_id: organisme.createdId || organisme.foundId, // Update sur l'organisme ajouté ou maj,
-              });
-
-              // Recherche du dossier via sa clé d'unicité
-              const foundDossierWithUnicityFields = await findDossierApprenantByQuery(
-                {
-                  id_erp_apprenant: structuredDossierApprenant.id_erp_apprenant,
-                  uai_etablissement: structuredDossierApprenant.uai_etablissement,
-                  annee_scolaire: structuredDossierApprenant.annee_scolaire,
-                },
-                { _id: 1 }
-              );
-
-              // Création ou update
-              if (!foundDossierWithUnicityFields) {
-                await insertDossierApprenant(structuredDossierApprenant);
-              } else {
-                await updateDossierApprenant(foundDossierWithUnicityFields?._id, structuredDossierApprenant);
-              }
+            // Création ou update
+            if (!foundDossierWithUnicityFields) {
+              await insertDossierApprenant(structuredDossierApprenant);
+            } else {
+              await updateDossierApprenant(foundDossierWithUnicityFields?._id, structuredDossierApprenant);
             }
           }
-        });
+        }
+      });
 
-        res.json({
-          status: validationErrors.length > 0 ? "WARNING" : "OK",
-          message: validationErrors.length > 0 ? `Warning : ${validationErrors.length} items not valid` : "Success",
-          ok: nbItemsValid,
-          ko: validationErrors.length,
-          validationErrors,
-        });
-      } catch (/** @type {any}*/ err) {
-        logger.error(`POST /dossiers-apprenants error : ${err}`);
-        res.status(400).json({
-          status: "ERROR",
-          message: err.message,
-          error: err, // TEMP ajout temporaire pour debug ?
-        });
-      }
-    })
-  );
+      res.json({
+        status: validationErrors.length > 0 ? "WARNING" : "OK",
+        message: validationErrors.length > 0 ? `Warning : ${validationErrors.length} items not valid` : "Success",
+        ok: nbItemsValid,
+        ko: validationErrors.length,
+        validationErrors,
+      });
+    } catch (/** @type {any}*/ err) {
+      logger.error(`POST /dossiers-apprenants error : ${err}`);
+      res.status(400).json({
+        status: "ERROR",
+        message: err.message,
+        error: err, // TEMP ajout temporaire pour debug ?
+      });
+    }
+  });
 
   /**
    * Route get for DossierApprenant
    */
-  router.get(
-    "/",
-    tryCatch(async (req, res) => {
-      const {
-        page: reqPage,
-        limit: reqLimit,
-        ...filtersFromBody
-      } = await Joi.object({
-        page: Joi.number(),
-        limit: Joi.number(),
-        ...commonDossiersApprenantsFilters,
-      }).validateAsync(req.query, { abortEarly: false });
+  router.get("/", async (req, res) => {
+    const {
+      page: reqPage,
+      limit: reqLimit,
+      ...filtersFromBody
+    } = await Joi.object({
+      page: Joi.number(),
+      limit: Joi.number(),
+      ...commonDossiersApprenantsFilters,
+    }).validateAsync(req.query, { abortEarly: false });
 
-      const page = Number(reqPage ?? 1);
-      const limit = Number(reqLimit ?? 1000);
+    const page = Number(reqPage ?? 1);
+    const limit = Number(reqLimit ?? 1000);
 
-      try {
-        // Add user event
-        await createUserEvent({
-          username: req.user.username,
-          type: USER_EVENTS_TYPES.GET,
-          action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
-          data: req.body,
-        });
+    try {
+      // Add user event
+      await createUserEvent({
+        username: req.user.username,
+        type: USER_EVENTS_TYPES.GET,
+        action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
+        data: req.body,
+      });
 
-        // Gets paginated data filtered on source mapped to username
-        const { find, pagination } = await findAndPaginate(
-          dossiersApprenantsMigrationDb(),
-          { ...filtersFromBody, source: req.user.username },
-          { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
-        );
+      // Gets paginated data filtered on source mapped to username
+      const { find, pagination } = await findAndPaginate(
+        dossiersApprenantsMigrationDb(),
+        { ...filtersFromBody, source: req.user.username },
+        { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
+      );
 
-        // Return JSON transformed Stream
-        return sendTransformedPaginatedJsonStream(find.stream(), "dossiersApprenants", pagination, res);
-      } catch (err) {
-        logger.error(`GET DossierApprenants error : ${err}`);
-        res.status(500).json({
-          status: "ERROR",
-          // @ts-ignore
-          message: err.message,
-        });
-      }
-    })
-  );
+      // Return JSON transformed Stream
+      return sendTransformedPaginatedJsonStream(find.stream(), "dossiersApprenants", pagination, res);
+    } catch (err) {
+      logger.error(`GET DossierApprenants error : ${err}`);
+      res.status(500).json({
+        status: "ERROR",
+        // @ts-ignore
+        message: err.message,
+      });
+    }
+  });
 
   /**
    * Test route for dossiers-apprenants
    */
-  router.post(
-    "/test",
-    tryCatch(async (_req, res) => {
-      return res.json({ msg: "ok" });
-    })
-  );
+  router.post("/test", async (_req, res) => {
+    return res.json({ msg: "ok" });
+  });
 
   return router;
 };

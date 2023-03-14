@@ -4,7 +4,7 @@ import { Box, Container, Heading, Text } from "@chakra-ui/react";
 
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Link from "@/components/Links/Link";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
@@ -23,11 +23,7 @@ export default function ContacterLequipeDuTdb() {
       <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]}>
         <Container maxW="xl">
           <Breadcrumb
-            pages={[
-              { title: "Accueil", to: "/" },
-              { title: "Questions & réponses", to: "/questions-reponses" },
-              { title: title },
-            ]}
+            pages={[PAGES.homepage(), { title: "Questions & réponses", to: "/questions-reponses" }, { title }]}
           />
           <Heading textStyle="h2" color="grey.800" mt={5}>
             Une question ? Quelques éléments de réponse.

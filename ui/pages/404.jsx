@@ -3,7 +3,6 @@ import React from "react";
 import Head from "next/head";
 
 import Page from "@/components/Page/Page";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import { NotFound } from "@/theme/components/icons";
 
 const Page404 = () => {
@@ -27,7 +26,7 @@ const Page404 = () => {
                 </Text>
 
                 <Link
-                  href={NAVIGATION_PAGES.Accueil.path}
+                  href="/"
                   _hover={{ textDecoration: "none", color: "grey.800", background: "galt" }}
                   color="bluefrance"
                 >

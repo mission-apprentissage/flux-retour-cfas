@@ -15,6 +15,22 @@ import Table from "@/components/Table/Table";
 import withAuth from "@/components/withAuth";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils.js";
 
+const natures = {
+  responsable: "Responsable",
+  formateur: "Formateur",
+  responsable_formateur: "Responsable Formateur",
+  lieu_formation: "Lieu de formation",
+  inconnue: "Inconnue",
+};
+
+const headerTitle = {
+  pilot: "Les organismes sur mon territoire",
+  erp: "Les organismes connectés de mon erp",
+  of: "Mes organismes",
+  reseau_of: "Les organismes de mon réseau",
+  global: "Tous les organismes",
+};
+
 function useEspaceOrganismes() {
   const {
     data: organismes,
@@ -33,14 +49,6 @@ function MesOrganismes() {
 
   const { whoIs } = useEspace();
 
-  const headerTitle = {
-    pilot: "Les organismes sur mon territoire",
-    erp: "Les organismes connectés de mon erp",
-    of: "Mes organismes",
-    reseau_of: "Les organismes de mon réseau",
-    global: "Tous les organismes",
-  };
-
   const [searchValue, setSearchValue] = useState("");
 
   return (
@@ -50,7 +58,7 @@ function MesOrganismes() {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 4, 4]} mb={16}>
         <Container maxW="xl">
-          <Breadcrumb pages={[PAGES.monEspace(), { title: title }]} />
+          <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
             {headerTitle[whoIs ?? "global"]}
           </Heading>
@@ -100,13 +108,7 @@ function MesOrganismes() {
                     },
                     cell: ({ row }) => {
                       const { nature } = organismes[row.id];
-                      const natures = {
-                        responsable: "Responsable",
-                        formateur: "Formateur",
-                        responsable_formateur: "Responsable Formateur",
-                        lieu_formation: "Lieu de formation",
-                        inconnue: "Inconnue",
-                      };
+
                       return <Text fontSize="1rem">{natures[nature] ?? "Inconnue"}</Text>;
                     },
                   },

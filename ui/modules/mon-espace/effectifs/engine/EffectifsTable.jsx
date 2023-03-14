@@ -78,9 +78,7 @@ const EffectifsTable = ({
             ? {
                 expander: {
                   size: 25,
-                  header: () => {
-                    return <Box>&nbsp;</Box>;
-                  },
+                  header: () => " ",
                   cell: ({ row, table }) => {
                     return row.getCanExpand() ? (
                       <Button
@@ -105,16 +103,14 @@ const EffectifsTable = ({
             ? {
                 annee_scolaire: {
                   size: 100,
-                  header: () => {
-                    return (
-                      <Box textAlign="left">
-                        Année scolaire{" "}
-                        <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-                          *
-                        </Box>
+                  header: () => (
+                    <>
+                      Année scolaire{" "}
+                      <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
+                        *
                       </Box>
-                    );
-                  },
+                    </>
+                  ),
                   cell: ({ row, getValue }) => {
                     if (show === "errorInCell") {
                       return (
@@ -134,16 +130,14 @@ const EffectifsTable = ({
             ? {
                 cfd: {
                   size: 120,
-                  header: () => {
-                    return (
-                      <Box textAlign="left">
-                        Code Formation Diplôme
-                        <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-                          *
-                        </Box>
+                  header: () => (
+                    <>
+                      Code Formation Diplôme
+                      <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
+                        *
                       </Box>
-                    );
-                  },
+                    </>
+                  ),
                   cell: ({ row, getValue }) => {
                     if (show === "errorInCell") {
                       return (
@@ -163,9 +157,7 @@ const EffectifsTable = ({
             ? {
                 rncp: {
                   size: 70,
-                  header: () => {
-                    return <Box textAlign="left">Code RNCP</Box>;
-                  },
+                  header: () => "Code RNCP",
                   cell: ({ row, getValue }) => {
                     if (show === "errorInCell") {
                       return (
@@ -185,9 +177,7 @@ const EffectifsTable = ({
             ? {
                 statut_courant: {
                   size: 170,
-                  header: () => {
-                    return <Box textAlign="left">Statut courant apprenant(e)</Box>;
-                  },
+                  header: () => "Statut courant apprenant(e)",
                   cell: ({ row }) => {
                     const { historique_statut } = organismesEffectifs[row.id];
 
@@ -226,26 +216,24 @@ const EffectifsTable = ({
           ...(columns.includes("nom")
             ? {
                 nom: {
-                  header: () => {
-                    return (
-                      <Box textAlign="left">
-                        <Tooltip
-                          label={<Text>Donnée obligatoire</Text>}
-                          aria-label="A tooltip"
-                          background="bluefrance"
-                          color="white"
-                          padding="2w"
-                        >
-                          <Box>
-                            Nom
-                            <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-                              *
-                            </Box>
+                  header: () => (
+                    <>
+                      <Tooltip
+                        label={<Text>Donnée obligatoire</Text>}
+                        aria-label="A tooltip"
+                        background="bluefrance"
+                        color="white"
+                        padding="2w"
+                      >
+                        <Box>
+                          Nom
+                          <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
+                            *
                           </Box>
-                        </Tooltip>
-                      </Box>
-                    );
-                  },
+                        </Box>
+                      </Tooltip>
+                    </>
+                  ),
                   cell: ({ row, getValue }) => {
                     if (show === "errorInCell") {
                       return (
@@ -265,26 +253,24 @@ const EffectifsTable = ({
             ? {
                 prenom: {
                   size: 110,
-                  header: () => {
-                    return (
-                      <Box textAlign="left">
-                        <Tooltip
-                          label={<Text>Donnée obligatoire</Text>}
-                          aria-label="A tooltip"
-                          background="bluefrance"
-                          color="white"
-                          padding="2w"
-                        >
-                          <Box>
-                            Prénom
-                            <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-                              *
-                            </Box>
+                  header: () => (
+                    <>
+                      <Tooltip
+                        label={<Text>Donnée obligatoire</Text>}
+                        aria-label="A tooltip"
+                        background="bluefrance"
+                        color="white"
+                        padding="2w"
+                      >
+                        <Box>
+                          Prénom
+                          <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
+                            *
                           </Box>
-                        </Tooltip>
-                      </Box>
-                    );
-                  },
+                        </Box>
+                      </Tooltip>
+                    </>
+                  ),
                   cell: ({ row, getValue }) => {
                     if (show === "errorInCell") {
                       return (
@@ -305,20 +291,16 @@ const EffectifsTable = ({
                 separator: {
                   size: 15,
                   minSize: 15,
-                  header: () => {
-                    return (
-                      <Box bgColor="bluefrance" w="1px">
-                        &nbsp;
-                      </Box>
-                    );
-                  },
-                  cell: () => {
-                    return (
-                      <Box bgColor="bluefrance" w="1px">
-                        &nbsp;
-                      </Box>
-                    );
-                  },
+                  header: () => (
+                    <Box bgColor="bluefrance" w="1px">
+                      &nbsp;
+                    </Box>
+                  ),
+                  cell: () => (
+                    <Box bgColor="bluefrance" w="1px">
+                      &nbsp;
+                    </Box>
+                  ),
                 },
               }
             : {}),
@@ -326,28 +308,26 @@ const EffectifsTable = ({
             ? {
                 source: {
                   size: 130,
-                  header: () => {
-                    return (
-                      <Box textAlign="left">
-                        <Tooltip
-                          label={
-                            <Text>D&rsquo;où vient la donnée? Exemple la transmission a été faite depuis un ERP</Text>
-                          }
-                          aria-label="A tooltip"
-                          background="bluefrance"
-                          color="white"
-                          padding="2w"
-                        >
-                          <Box>
-                            Source
-                            <Text as="span" ml={1}>
-                              <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
-                            </Text>
-                          </Box>
-                        </Tooltip>
-                      </Box>
-                    );
-                  },
+                  header: () => (
+                    <>
+                      <Tooltip
+                        label={
+                          <Text>D&rsquo;où vient la donnée? Exemple la transmission a été faite depuis un ERP</Text>
+                        }
+                        aria-label="A tooltip"
+                        background="bluefrance"
+                        color="white"
+                        padding="2w"
+                      >
+                        <Box>
+                          Source
+                          <Text as="span" ml={1}>
+                            <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
+                          </Text>
+                        </Box>
+                      </Tooltip>
+                    </>
+                  ),
                   cell: ({ row }) => {
                     const { source } = organismesEffectifs[row.id];
                     const sources = {
@@ -370,26 +350,24 @@ const EffectifsTable = ({
             ? {
                 action: {
                   size: 90,
-                  header: () => {
-                    return (
-                      <Box textAlign="left">
-                        <Tooltip
-                          label={<Text>Action à faire</Text>}
-                          aria-label="A tooltip"
-                          background="bluefrance"
-                          color="white"
-                          padding="2w"
-                        >
-                          <Box>
-                            Action
-                            <Text as="span" ml={1}>
-                              <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
-                            </Text>
-                          </Box>
-                        </Tooltip>
-                      </Box>
-                    );
-                  },
+                  header: () => (
+                    <>
+                      <Tooltip
+                        label={<Text>Action à faire</Text>}
+                        aria-label="A tooltip"
+                        background="bluefrance"
+                        color="white"
+                        padding="2w"
+                      >
+                        <Box>
+                          Action
+                          <Text as="span" ml={1}>
+                            <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
+                          </Text>
+                        </Box>
+                      </Tooltip>
+                    </>
+                  ),
                   cell: ({ row }) => {
                     const { toUpdate } = organismesEffectifs[row.id];
 
@@ -406,29 +384,25 @@ const EffectifsTable = ({
             ? {
                 errorState: {
                   size: 120,
-                  header: () => {
-                    return (
-                      <Box textAlign="left">
-                        <Tooltip
-                          label={<Text>Détails</Text>}
-                          aria-label="A tooltip"
-                          background="bluefrance"
-                          color="white"
-                          padding="2w"
-                        >
-                          <Box>
-                            Erreur(s) sur la donnée
-                            <Text as="span" ml={1}>
-                              <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
-                            </Text>
-                          </Box>
-                        </Tooltip>
-                      </Box>
-                    );
-                  },
-                  cell: ({ row }) => {
-                    return RenderErrorImport(organismesEffectifs[row.id]);
-                  },
+                  header: () => (
+                    <>
+                      <Tooltip
+                        label={<Text>Détails</Text>}
+                        aria-label="A tooltip"
+                        background="bluefrance"
+                        color="white"
+                        padding="2w"
+                      >
+                        <Box>
+                          Erreur(s) sur la donnée
+                          <Text as="span" ml={1}>
+                            <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
+                          </Text>
+                        </Box>
+                      </Tooltip>
+                    </>
+                  ),
+                  cell: ({ row }) => RenderErrorImport(organismesEffectifs[row.id]),
                 },
               }
             : {}),
@@ -436,32 +410,30 @@ const EffectifsTable = ({
             ? {
                 state: {
                   size: 200,
-                  header: () => {
-                    return (
-                      <Box textAlign="left">
-                        <Tooltip
-                          label={
-                            <Text>
-                              {modeSifa
-                                ? "Si les données sont suffissantes pour SIFA"
-                                : "les données contiennent elles des erreurs"}
-                            </Text>
-                          }
-                          aria-label="A tooltip"
-                          background="bluefrance"
-                          color="white"
-                          padding="2w"
-                        >
-                          <Box pl={5}>
-                            État de la donnée
-                            <Text as="span" ml={1}>
-                              <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
-                            </Text>
-                          </Box>
-                        </Tooltip>
-                      </Box>
-                    );
-                  },
+                  header: () => (
+                    <>
+                      <Tooltip
+                        label={
+                          <Text>
+                            {modeSifa
+                              ? "Si les données sont suffissantes pour SIFA"
+                              : "les données contiennent elles des erreurs"}
+                          </Text>
+                        }
+                        aria-label="A tooltip"
+                        background="bluefrance"
+                        color="white"
+                        padding="2w"
+                      >
+                        <Box pl={5}>
+                          État de la donnée
+                          <Text as="span" ml={1}>
+                            <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
+                          </Text>
+                        </Box>
+                      </Tooltip>
+                    </>
+                  ),
                   cell: ({ row }) => {
                     const { id } = organismesEffectifs[row.id];
                     // eslint-disable-next-line react-hooks/rules-of-hooks

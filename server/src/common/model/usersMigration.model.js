@@ -9,7 +9,11 @@ import { ORGANISMES_APPARTENANCE, USER_ACCOUNT_STATUS } from "../constants/users
 export const collectionName = "usersMigration";
 
 export function indexes() {
-  return [[{ email: 1 }, { unique: true }], [{ "emails.token": 1 }]];
+  return [
+    [{ email: 1 }, { unique: true }],
+    [{ "emails.token": 1 }],
+    [{ email: "text", nom: "text", prenom: "text", siret: "text", uai: "text" }],
+  ];
 }
 
 export const schema = object(
@@ -21,7 +25,6 @@ export const schema = object(
     nom: string({ description: "Le nom de l'utilisateur" }),
     prenom: string({ description: "Le prénom de l'utilisateur" }),
     telephone: string({ description: "Le téléphone de l'utilisateur" }),
-    description: string({ description: "Description de l'utilisateur" }),
     siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
     uai: string({
       description: "Code UAI de l'organisme (seulement pour les utilisateurs OF)",
@@ -73,10 +76,8 @@ export const schema = object(
       enum: Object.keys(USER_ACCOUNT_STATUS),
     }),
     has_accept_cgu_version: string({ description: "Version des cgu accepté par l'utilisateur" }),
-    orign_register: string({ description: "Origine de l'inscription", enum: ["ORIGIN"] }),
     is_admin: boolean({ description: "true si l'utilisateur est administrateur" }),
     roles: arrayOf(objectId(), { description: "Roles de l'utilisateur" }),
-    custom_acl: arrayOf(string(), { description: "Custom Access control level array" }),
     created_at: date({ description: "Date de création du compte" }),
     last_connection: date({ description: "Date de dernière connexion" }),
     connection_history: arrayOf(date(), { description: "Historique des dates de connexion" }),
@@ -104,7 +105,6 @@ export const schema = object(
       )
     ),
     unsubscribe: boolean({ description: "unsubscribe email" }),
-    tour_guide: boolean({ description: "true si le tour guide est actif" }),
     v: integer(),
   },
   { required: ["email"], additionalProperties: true }
@@ -114,7 +114,6 @@ export const schema = object(
 export function defaultValuesUser() {
   return {
     account_status: "PENDING_EMAIL_VALIDATION",
-    orign_register: "ORIGIN",
     has_accept_cgu_version: "",
     is_cross_organismes: false,
     is_admin: false,
@@ -122,8 +121,6 @@ export function defaultValuesUser() {
     codes_region: [],
     codes_academie: [],
     codes_departement: [],
-    custom_acl: [],
-    tour_guide: true,
     invalided_token: false,
     password_updated_at: new Date(),
     connection_history: [],

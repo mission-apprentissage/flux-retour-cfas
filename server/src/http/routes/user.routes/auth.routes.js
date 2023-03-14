@@ -1,8 +1,8 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+
 import {
-  getUser,
+  getUserByEmail,
   authenticate,
   updateUserLastConnection,
   structureUser,
@@ -17,61 +17,55 @@ import { USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION } from "../../../common/co
 export default () => {
   const router = express.Router();
 
-  router.post(
-    "/login",
-    tryCatch(async (req, res) => {
-      const { email: emailOrUsername, password } = await Joi.object({
-        email: Joi.string().required(),
-        password: Joi.string().required(),
-      }).validateAsync(req.body, { abortEarly: false });
+  router.post("/login", async (req, res) => {
+    const { email: emailOrUsername, password } = await Joi.object({
+      email: Joi.string().required(),
+      password: Joi.string().required(),
+    }).validateAsync(req.body, { abortEarly: false });
 
-      if (USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION.includes(emailOrUsername)) {
-        return res.status(200).redirect("/reinscription");
-      }
-      const { value: email } = Joi.string().email().validate(emailOrUsername, { abortEarly: false });
+    if (USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION.includes(emailOrUsername)) {
+      return res.status(200).redirect("/reinscription");
+    }
+    const { value: email } = Joi.string().email().validate(emailOrUsername, { abortEarly: false });
 
-      const user = await getUser(email.toLowerCase());
-      if (!user) {
-        return res.status(401).json({ message: "Accès non autorisé" });
-      }
+    const user = await getUserByEmail(email.toLowerCase());
+    if (!user) {
+      return res.status(401).json({ message: "Accès non autorisé" });
+    }
 
-      const auth = await authenticate(user.email, password);
+    const auth = await authenticate(user.email, password);
 
-      if (!auth) return res.status(401).json({ message: "Accès non autorisé" });
+    if (!auth) return res.status(401).json({ message: "Accès non autorisé" });
 
-      const payload = await structureUser(user);
+    const payload = await structureUser(user);
 
-      await updateUserLastConnection(payload.email);
+    await updateUserLastConnection(payload.email);
 
-      const token = createUserTokenSimple({ payload: { email: payload.email } });
+    const token = createUserTokenSimple({ payload: { email: payload.email } });
 
-      if (await sessions.findJwt(token)) {
-        await sessions.removeJwt(token);
-      }
-      await sessions.addJwt(token);
+    if (await sessions.findJwt(token)) {
+      await sessions.removeJwt(token);
+    }
+    await sessions.addJwt(token);
 
-      responseWithCookie({ res, token }).status(200).json({
-        loggedIn: true,
-        token,
+    responseWithCookie({ res, token }).status(200).json({
+      loggedIn: true,
+      token,
+    });
+  });
+
+  router.get("/logout", async (req, res) => {
+    if (req.cookies[COOKIE_NAME]) {
+      await sessions.removeJwt(req.cookies[COOKIE_NAME]);
+      res.clearCookie(COOKIE_NAME).status(200).json({
+        loggedOut: true,
       });
-    })
-  );
-
-  router.get(
-    "/logout",
-    tryCatch(async (req, res) => {
-      if (req.cookies[COOKIE_NAME]) {
-        await sessions.removeJwt(req.cookies[COOKIE_NAME]);
-        res.clearCookie(COOKIE_NAME).status(200).json({
-          loggedOut: true,
-        });
-      } else {
-        res.status(401).json({
-          error: "Invalid jwt",
-        });
-      }
-    })
-  );
+    } else {
+      res.status(401).json({
+        error: "Invalid jwt",
+      });
+    }
+  });
 
   return router;
 };

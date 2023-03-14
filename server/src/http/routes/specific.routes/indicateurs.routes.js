@@ -35,7 +35,7 @@ export async function buildEffectifsFiltersFromRequest(req) {
   const filters = await validateFullObjectSchema(req.query, commonEffectifsFiltersSchema);
 
   // restriction aux organismes accessibles par l'utilisateur sauf pour un admin
-  if (!req.user.permissions.is_admin) {
+  if (!req.user.is_admin) {
     filters.organisme_ids = req.user.organisme_ids;
   }
 

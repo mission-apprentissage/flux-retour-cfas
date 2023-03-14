@@ -351,7 +351,7 @@ const Finalize = () => {
             )}
 
           {auth.isInPendingValidation &&
-            !auth.hasAtLeastOneUserToValidate &&
+            !auth.isOrganismeAdmin &&
             auth.account_status === "PENDING_ADMIN_VALIDATION" && (
               <Ribbons variant="info" mt="0.5rem">
                 <Box ml={3}>
@@ -368,7 +368,7 @@ const Finalize = () => {
               </Ribbons>
             )}
           {auth.isInPendingValidation &&
-            auth.hasAtLeastOneUserToValidate &&
+            auth.isOrganismeAdmin &&
             auth.account_status === "PENDING_ADMIN_VALIDATION" && (
               <Ribbons variant="info" mt="0.5rem">
                 <Box ml={3}>

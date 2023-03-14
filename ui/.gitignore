@@ -38,3 +38,6 @@ yarn-error.log*
 
 # Sentry
 next.config.original.js
+
+# generated file
+next-env.d.ts

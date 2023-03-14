@@ -5,7 +5,7 @@ import { Flex, Spinner } from "@chakra-ui/react";
 import Page from "@/components/Page/Page";
 import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import InscriptionStep2 from "@/modules/auth/inscription/InscriptionStep2";
 import { useRouter } from "next/router";
 import useFetchEtablissements from "@/hooks/useFetchEtablissements";
@@ -43,7 +43,7 @@ const PageFormulaire = () => {
       <Head>
         <title>Inscription</title>
       </Head>
-      <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
+      <Breadcrumb pages={[PAGES.homepage(), { title }]} />
       <Flex w="100%" mt={8} minH="40vh" direction={{ base: "column", md: "row" }}>
         {isFetching ? (
           <Spinner />

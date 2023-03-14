@@ -1,6 +1,5 @@
 import { Box, Img, Stack, Text } from "@chakra-ui/react";
 
-import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import Link from "../../../components/Links/Link";
 
 export const questions = [
@@ -82,7 +81,7 @@ export const questions = [
           </a>
           Si toutefois, l&apos;URL n&apos;est pas encore intégrée dans votre interface de gestion, vous pouvez en faire
           la demande en&nbsp;
-          <Link href={NAVIGATION_PAGES.OrganismeFormation.consulter.path} color="bluefrance">
+          <Link href="/organisme-formation/consulter" color="bluefrance">
             contactant l&apos;équipe du tableau de bord
           </Link>
           .
@@ -100,7 +99,7 @@ export const questions = [
         </Text>
         <Text>
           Pour ce faire,&nbsp;
-          <Link href={NAVIGATION_PAGES.OrganismeFormation.transmettre.path} color="bluefrance">
+          <Link href="/organisme-formation/transmettre" color="bluefrance">
             sélectionnez l&apos;ERP que vous utilisez
           </Link>
           , téléchargez le pas à pas correspondant et suivez les étapes une à une.
@@ -108,25 +107,6 @@ export const questions = [
       </Stack>
     ),
   },
-  // Encore en discussion
-  // {
-  //   question: "Le paramétrage est-il complexe ? Doit-on renouveler l'opération de paramétrage ?",
-  //   answer: (
-  //     <Stack>
-  //       <Text>
-  //         Une fois votre paramétrage effectué, vous n&apos;avez pas à renouveler l&apos;opération, sauf si vous changez
-  //         d&apos;UAI, de SIRET ou d&apos;ERP.
-  //       </Text>
-  //       <Text>
-  //         Ce paramétrage demande une dizaine de minutes,&nbsp;
-  //         <Link to={NAVIGATION_PAGES.TransmettreVosDonnees.path} as={NavLink} color="bluefrance">
-  //             sélectionnez l&apos;ERP que vous utilisez
-  //         </Link>{" "}
-  //         pour télécharger le pas à pas correspondant à votre ERP.
-  //       </Text>
-  //     </Stack>
-  //   ),
-  // },
   {
     question:
       "Qu'est-ce qu'un UAI ? Comment retrouver l'UAI de votre organisme ? Vous avez plusieurs UAI, lequel devez-vous renseigner ?",
@@ -238,7 +218,7 @@ export const questions = [
       <Stack>
         <Text>
           Cela provient d&apos;un mauvais paramétrage dans votre ERP, vous pouvez&nbsp;
-          <Link color="bluefrance" href={NAVIGATION_PAGES.OrganismeFormation.transmettre.path}>
+          <Link color="bluefrance" href="/organisme-formation/transmettre">
             consulter les pas à pas
           </Link>
           &nbsp;pour le modifier.

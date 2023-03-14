@@ -98,7 +98,7 @@ export default {
   reseau_of: {
     name: "reseau_of",
     type: "user",
-    title: "réseau OF",
+    title: "Réseau OF",
     description: "Rôle utilisateur Réseau d'Organismes de Formation",
     acl: [],
   },

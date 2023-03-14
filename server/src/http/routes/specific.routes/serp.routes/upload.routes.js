@@ -1,5 +1,4 @@
 import express from "express";
-import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
 import { createWriteStream } from "fs";
 import { ObjectId } from "mongodb";
@@ -10,6 +9,7 @@ import multiparty from "multiparty";
 import { EventEmitter } from "events";
 import { PassThrough } from "stream";
 import { cloneDeep, find, get, set, uniqBy } from "lodash-es";
+
 import { getFromStorage, uploadToStorage, deleteFromStorage } from "../../../../common/utils/ovhUtils.js";
 import logger from "../../../../common/logger.js";
 import * as crypto from "../../../../common/utils/cryptoUtils.js";
@@ -166,7 +166,7 @@ export default ({ clamav }) => {
   router.post(
     "/",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       sendServerEventsForUser(req.user._id, "Fichier en cours de téléversement...");
 
       let { organisme_id } = await Joi.object({
@@ -221,13 +221,13 @@ export default ({ clamav }) => {
         });
         sendServerEventsForUser(req.user._id, "Fichier téléversé avec succès");
       });
-    })
+    }
   );
 
   router.get(
     "/get",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
       })
@@ -242,13 +242,13 @@ export default ({ clamav }) => {
         }
       }
       return res.json(upload);
-    })
+    }
   );
 
   router.post(
     "/setDocumentType",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       let { organisme_id, type_document, nom_fichier, taille_fichier } = await Joi.object({
         organisme_id: Joi.string().required(),
         type_document: Joi.string().required(),
@@ -265,7 +265,7 @@ export default ({ clamav }) => {
       });
 
       return res.json(upload);
-    })
+    }
   );
 
   const getUnconfirmedDocumentContent = async (organisme_id) => {
@@ -301,7 +301,7 @@ export default ({ clamav }) => {
   router.get(
     "/analyse",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
       })
@@ -585,13 +585,13 @@ export default ({ clamav }) => {
         numberOfNotRequiredInputKeys <= Object.keys(mapping.outputKeys).length ? "in" : "out";
 
       return res.json(mapping);
-    })
+    }
   );
 
   router.post(
     "/setModel",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       let {
         organisme_id,
         type_document,
@@ -617,13 +617,13 @@ export default ({ clamav }) => {
       );
 
       return res.json(upload);
-    })
+    }
   );
 
   router.post(
     "/pre-import",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       let { organisme_id, mapping: userMapping } = await Joi.object({
         organisme_id: Joi.string().required(),
         mapping: Joi.object().required(),
@@ -887,13 +887,13 @@ export default ({ clamav }) => {
         canBeImportEffectifs: effectifsTable,
         canNotBeImportEffectifs,
       });
-    })
+    }
   );
 
   router.post(
     "/import",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
       })
@@ -950,13 +950,13 @@ export default ({ clamav }) => {
       if (uploads.last_snapshot_effectifs.length > 0) await setOrganismeTransmissionDates(organisme_id);
 
       return res.json({});
-    })
+    }
   );
 
   router.get(
     "/",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       let { organisme_id, path, name } = await Joi.object({
         organisme_id: Joi.string().required(),
         path: Joi.string().required(),
@@ -980,13 +980,13 @@ export default ({ clamav }) => {
       res.type(document.ext_fichier);
 
       await oleoduc(stream, crypto.isCipherAvailable() ? crypto.decipher(organisme_id) : noop(), res);
-    })
+    }
   );
 
   router.delete(
     "/",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       let { organisme_id, nom_fichier, chemin_fichier, taille_fichier } = await Joi.object({
         organisme_id: Joi.string().required(),
         taille_fichier: Joi.number().required(),
@@ -1005,7 +1005,7 @@ export default ({ clamav }) => {
       await deleteFromStorage(chemin_fichier);
 
       return res.json({ documents });
-    })
+    }
   );
 
   return router;

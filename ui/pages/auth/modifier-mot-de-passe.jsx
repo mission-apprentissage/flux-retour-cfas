@@ -38,7 +38,7 @@ const ResetPasswordPage = () => {
   const [show, setShow] = React.useState(false);
   const onShowPassword = () => setShow(!show);
 
-  const minLength = auth.permissions.is_admin ? 20 : 12;
+  const minLength = auth.is_admin ? 20 : 12;
 
   const isFirstSetPassword = auth.account_status === "PENDING_PASSWORD_SETUP";
 

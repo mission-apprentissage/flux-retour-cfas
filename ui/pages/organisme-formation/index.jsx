@@ -3,12 +3,11 @@ import Head from "next/head";
 import { Box, Heading, HStack, Link, Text } from "@chakra-ui/react";
 
 import { ERPS } from "@/common/constants/erps";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import LinkCard from "@/components/LinkCard/LinkCard";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import { Checkbox } from "@/theme/components/icons";
 import AcquisitionCfaBarGraph from "@/modules/organisme-formation/AcquisitionCfaBarGraph";
 
@@ -20,7 +19,7 @@ export default function OrganismeFormation() {
         <title>{title}</title>
       </Head>
       <Section>
-        <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
+        <Breadcrumb pages={[PAGES.homepage(), { title }]} />
         <Heading textStyle="h2" color="grey.800" mt={5}>
           Vous êtes un organisme de formation
         </Heading>
@@ -36,18 +35,18 @@ export default function OrganismeFormation() {
           flexDirection={["column", "column", "column", "column", "row"]}
           marginTop="2w"
         >
-          <LinkCard variant="white" linkHref={NAVIGATION_PAGES.OrganismeFormation.transmettre.path}>
+          <LinkCard variant="white" linkHref="/organisme-formation/transmettre">
             Comment transmettre les <br />
             données de votre organisme ?
           </LinkCard>
           <LinkCard
             my={["2w !important", "2w !important", "2w !important", "2w !important", "0"]}
             variant="white"
-            linkHref={NAVIGATION_PAGES.OrganismeFormation.consulter.path}
+            linkHref="/organisme-formation/consulter"
           >
             Comment consulter et vérifier les données que vous transmettez ?
           </LinkCard>
-          <LinkCard variant="white" linkHref={NAVIGATION_PAGES.QuestionsReponses.path}>
+          <LinkCard variant="white" linkHref="/questions-reponses">
             Une question ? Besoin d’aide ? <br />
             Consulter la page d’aide
           </LinkCard>

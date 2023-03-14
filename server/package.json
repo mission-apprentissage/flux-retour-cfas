@@ -47,6 +47,7 @@
     "enjoi": "9.0.1",
     "env-var": "7.1.1",
     "express": "4.18.1",
+    "express-async-errors": "3.1.1",
     "fs-extra": "10.1.0",
     "iconv-lite": "0.6.3",
     "joi": "17.6.0",
@@ -78,9 +79,12 @@
     "redis": "4.1.0",
     "safe-stable-stringify": "2.4.1",
     "sha512crypt-node": "1.0.2",
+    "sinon": "15.0.2",
     "tcp-port-used": "1.0.2",
     "uuid": "8.3.2",
-    "xlsx": "0.18.5"
+    "xlsx": "0.18.5",
+    "zod": "3.21.4",
+    "zod-express-middleware": "1.4.0"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -114,7 +118,6 @@
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-prettier": "3.4.0",
     "mocha": "10.0.0",
-    "mockdate": "3.0.5",
     "mongodb-memory-server": "8.5.2",
     "nock": "13.2.4",
     "nodemon": "2.0.16",

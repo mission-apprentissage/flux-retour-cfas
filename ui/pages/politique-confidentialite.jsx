@@ -3,7 +3,7 @@ import Head from "next/head";
 
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import PolitiqueDeConfidentialite from "@/components/legal/PolitiqueDeConfidentialite";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
@@ -17,7 +17,7 @@ const PolitiqueDeConfidentialitePage = () => {
         <title>{title}</title>
       </Head>
       <Section>
-        <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
+        <Breadcrumb pages={[PAGES.homepage(), { title }]} />
         <PolitiqueDeConfidentialite />
       </Section>
     </Page>

@@ -11,7 +11,6 @@ import {
 } from "@tanstack/react-table";
 import { Box, Button, Divider, HStack, Text } from "@chakra-ui/react";
 import { rankItem } from "@tanstack/match-sorter-utils";
-import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
   // Rank the item
@@ -33,7 +32,9 @@ export default function Table({
   renderSubComponent,
   getRowCanExpand,
   searchValue,
-  pageSize = 5,
+  manualPagination = false,
+  onPaginationChange = null,
+  pagination,
   onCountItemsChange = () => {},
   ...props
 }) {
@@ -59,21 +60,34 @@ export default function Table({
     data,
     columns,
     getRowCanExpand,
+    manualPagination,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: fuzzyFilter,
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    globalFilterFn: fuzzyFilter,
+    onGlobalFilterChange: setGlobalFilter,
+    pageCount: pagination?.total || data?.length,
+    onPaginationChange: onPaginationChange
+      ? (updater) => {
+          const oldState = table.getState().pagination;
+          const newState = updater(oldState);
+          onPaginationChange({ page: newState.pageIndex + 1, limit: newState.pageSize });
+        }
+      : null,
     state: {
       globalFilter,
+      ...(pagination
+        ? {
+            pagination: {
+              pageSize: pagination?.limit || 10,
+              pageIndex: (pagination?.page || 1) - 1,
+            },
+          }
+        : {}),
     },
-    initialState: {
-      pagination: {
-        pageSize,
-      },
-    },
+    // initialState: {},
   });
 
   useEffect(() => {
@@ -152,65 +166,40 @@ export default function Table({
         <>
           {" "}
           <Divider my={2} />
-          <HStack spacing={3} justifyContent="center">
-            <Button variant="unstyled" onClick={() => table.setPageIndex(0)} isDisabled={!table.getCanPreviousPage()}>
-              <Box className="ri-skip-back-fill" mt="0.250rem !important" />
-            </Button>
-            <Button variant="unstyled" onClick={() => table.previousPage()} isDisabled={!table.getCanPreviousPage()}>
-              <HStack>
-                <Box as="i" className="ri-arrow-left-s-line" mt="0.250rem !important" />
-                <Text>Page précédente </Text>
-              </HStack>
-            </Button>
-
-            <Box px={5}>
-              <Button {...{ bg: "bluefrance", color: "white", pointerEvents: "none" }}>
-                {table.getState().pagination.pageIndex + 1}
+          <HStack spacing={3} justifyContent="space-between">
+            <HStack spacing={3}>
+              <Button variant="unstyled" onClick={() => table.setPageIndex(0)} isDisabled={!table.getCanPreviousPage()}>
+                <Box className="ri-skip-back-fill" mt="0.250rem !important" />
               </Button>
-            </Box>
+              <Button variant="unstyled" onClick={() => table.previousPage()} isDisabled={!table.getCanPreviousPage()}>
+                <HStack>
+                  <Box as="i" className="ri-arrow-left-s-line" mt="0.250rem !important" />
+                  <Text>Page précédente </Text>
+                </HStack>
+              </Button>
 
-            <Button variant="unstyled" onClick={() => table.nextPage()} isDisabled={!table.getCanNextPage()}>
-              <HStack>
-                <Text>Page suivante </Text>
-                <Box as="i" className="ri-arrow-right-s-line" mt="0.250rem !important" />
-              </HStack>
-            </Button>
-            <Button
-              variant="unstyled"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              isDisabled={!table.getCanNextPage()}
-            >
-              <Box className="ri-skip-forward-fill" mt="0.250rem !important" />
-            </Button>
-            <HStack flex="1">
-              <div>Page</div>
-              <strong>
-                {table.getState().pagination.pageIndex + 1} sur {table.getPageCount() || 1}
-              </strong>
+              <Box px={5}>
+                <Button {...{ bg: "bluefrance", color: "white", pointerEvents: "none" }}>
+                  {table.getState().pagination.pageIndex + 1}
+                </Button>
+              </Box>
+
+              <Button variant="unstyled" onClick={() => table.nextPage()} isDisabled={!table.getCanNextPage()}>
+                <HStack>
+                  <Text>Page suivante </Text>
+                  <Box as="i" className="ri-arrow-right-s-line" mt="0.250rem !important" />
+                </HStack>
+              </Button>
+              <Button
+                variant="unstyled"
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                isDisabled={!table.getCanNextPage()}
+              >
+                <Box className="ri-skip-forward-fill" mt="0.250rem !important" />
+              </Button>
             </HStack>
 
             <HStack spacing={3} justifyContent="flex-end">
-              {table.getPageCount() > 1 && (
-                <HStack>
-                  <Box pt={2}>Aller à la page</Box>
-                  <Input
-                    {...{
-                      name: "page",
-                      fieldType: "numberStepper",
-                      placeholder: "Aller à la page",
-                      precision: 0,
-                      max: table.getPageCount(),
-                      min: 1,
-                    }}
-                    onSubmit={(value) => {
-                      const page = value ? Number(value) - 1 : 0;
-                      table.setPageIndex(page);
-                    }}
-                    w="80px"
-                    value={table.getState().pagination.pageIndex + 1}
-                  />
-                </HStack>
-              )}
               <Box pt={2}>
                 <select
                   value={table.getState().pagination.pageSize}

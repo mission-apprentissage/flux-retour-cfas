@@ -3,8 +3,7 @@ import Head from "next/head";
 import { Box, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 
 import Page from "@/components/Page/Page";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
-import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const StatistiquesPage = () => {
   const title = "Statistiques";
@@ -17,13 +16,13 @@ const StatistiquesPage = () => {
       <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} backgroundColor="galt" paddingY="8w">
         <Container maxW="xl">
           <Heading as="h1" variant="h1" marginBottom="1w">
-            {NAVIGATION_PAGES.Statistiques.title}
+            Statistiques
           </Heading>
         </Container>
       </Box>
       <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} paddingTop="3w">
         <Container maxW="xl">
-          <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
+          <Breadcrumb pages={[PAGES.homepage(), { title }]} />
         </Container>
       </Box>
       <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} paddingY="4w">

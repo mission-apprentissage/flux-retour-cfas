@@ -3,7 +3,7 @@ import Head from "next/head";
 
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import DonneesPersonnelles from "@/components/legal/DonneesPersonnelles";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
@@ -19,7 +19,7 @@ const DonneesPersonnellesPage = () => {
         <title>{title}</title>
       </Head>
       <Section>
-        <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
+        <Breadcrumb pages={[PAGES.homepage(), { title }]} />
         <DonneesPersonnelles />
       </Section>
     </Page>

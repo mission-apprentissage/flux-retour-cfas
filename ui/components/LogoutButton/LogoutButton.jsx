@@ -1,8 +1,7 @@
-import { Box, Link } from "@chakra-ui/react";
 import React from "react";
+import { Box, Link } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import useAuth from "../../hooks/useAuth";
 
 const LogoutButton = () => {
@@ -11,7 +10,7 @@ const LogoutButton = () => {
 
   const logout = () => {
     resetAuthState();
-    router.push(NAVIGATION_PAGES.Accueil.path);
+    router.push("/");
   };
 
   return (

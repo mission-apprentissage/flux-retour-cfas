@@ -1,38 +1,49 @@
 import React, { useEffect } from "react";
 import { Box, HStack, Heading, Text, Link, Flex } from "@chakra-ui/react";
+
 import Sommaire from "../Sommaire/Sommaire.jsx";
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages.js";
 import Section from "../Section/Section.jsx";
 
 export const cguVersion = () => {
   return "v0.1";
 };
 
+const anchors = {
+  ChampApplication: "champ-application",
+  Objet: "objet",
+  Definition: "definition",
+  FonctionnaliteLieesAuxComptesDesUtilisateurs: "fonctionnalite-liees-aux-comptes-des-utilisateurs",
+  PresentationDesServices: "presentation-des-services",
+  Securite: "securite",
+  Hyperliens: "hyperliens",
+  Responsabilites: "responsabilites",
+  MiseAjourDesConditionsUtilisation: "mise-a-jour-des-conditions-utilisation",
+};
+
+const SommaireData = [
+  { anchorTitle: "Article 1", anchorName: "Champ d’application", anchorLink: "champ-application" },
+  { anchorTitle: "Article 2", anchorName: "Objet", anchorLink: "objet" },
+  { anchorTitle: "Article 3", anchorName: "Définitions", anchorLink: "definition" },
+  {
+    anchorTitle: "Article 4",
+    anchorName: "Fonctionnalités liées aux comptes des utilisateurs",
+    anchorLink: "fonctionnalite-liees-aux-comptes-des-utilisateurs",
+  },
+  { anchorTitle: "Article 5", anchorName: "Présentation des services", anchorLink: "presentation-des-services" },
+  { anchorTitle: "Article 6", anchorName: "Sécurité", anchorLink: "securite" },
+  { anchorTitle: "Article 7", anchorName: "Hyperliens", anchorLink: "hyperliens" },
+  { anchorTitle: "Article 8", anchorName: "Responsabilités", anchorLink: "responsabilites" },
+  {
+    anchorTitle: "Article 9",
+    anchorName: "Mise à jour des conditions d'utilisation",
+    anchorLink: "mise-a-jour-des-conditions-utilisation",
+  },
+];
+
 export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
   useEffect(() => {
     onLoad();
   }, [onLoad]);
-  const currentPage = NAVIGATION_PAGES.CGU;
-
-  const SommaireData = [
-    { anchorTitle: "Article 1", anchorName: "Champ d’application", anchorLink: "champ-application" },
-    { anchorTitle: "Article 2", anchorName: "Objet", anchorLink: "objet" },
-    { anchorTitle: "Article 3", anchorName: "Définitions", anchorLink: "definition" },
-    {
-      anchorTitle: "Article 4",
-      anchorName: "Fonctionnalités liées aux comptes des utilisateurs",
-      anchorLink: "fonctionnalite-liees-aux-comptes-des-utilisateurs",
-    },
-    { anchorTitle: "Article 5", anchorName: "Présentation des services", anchorLink: "presentation-des-services" },
-    { anchorTitle: "Article 6", anchorName: "Sécurité", anchorLink: "securite" },
-    { anchorTitle: "Article 7", anchorName: "Hyperliens", anchorLink: "hyperliens" },
-    { anchorTitle: "Article 8", anchorName: "Responsabilités", anchorLink: "responsabilites" },
-    {
-      anchorTitle: "Article 9",
-      anchorName: "Mise à jour des conditions d'utilisation",
-      anchorLink: "mise-a-jour-des-conditions-utilisation",
-    },
-  ];
 
   return (
     <HStack
@@ -71,7 +82,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             d’utilisation des Services par l’Utilisateur.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.ChampApplication}>
+        <Section mt={4} id={anchors.ChampApplication}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 1 – Champ d’application
           </Heading>
@@ -80,7 +91,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             suppose l’acceptation par tout Utilisateur des présentes conditions générales d’utilisation.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.Objet}>
+        <Section mt={4} id={anchors.Objet}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 2 – Objet
           </Heading>
@@ -89,7 +100,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             l’apprentissage en temps réel.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.Definition}>
+        <Section mt={4} id={anchors.Definition}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 3 – Définitions
           </Heading>
@@ -115,7 +126,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             <br />
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.FonctionnaliteLieesAuxComptesDesUtilisateurs}>
+        <Section mt={4} id={anchors.FonctionnaliteLieesAuxComptesDesUtilisateurs}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 4 – Fonctionnalités liées aux comptes des utilisateurs
           </Heading>
@@ -152,7 +163,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             de mot de passe » et suit les instructions fournies par le tableau de bord.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.PresentationDesServices}>
+        <Section mt={4} id={anchors.PresentationDesServices}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 5 – Présentation des services
           </Heading>
@@ -191,7 +202,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             compte ou d&apos;accessibilité à un ou plusieurs services.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.Securite}>
+        <Section mt={4} id={anchors.Securite}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 6 - Sécurité
           </Heading>
@@ -210,7 +221,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             l&apos;art, pour sécuriser le service eu égard à la complexité de l&apos;internet.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.Hyperliens}>
+        <Section mt={4} id={anchors.Hyperliens}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 7 – Hyperliens
           </Heading>
@@ -234,7 +245,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             hypertextes.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.Responsabilites}>
+        <Section mt={4} id={anchors.Responsabilites}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 8 – Responsabilités
           </Heading>
@@ -342,7 +353,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             interdite.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.MiseAjourDesConditionsUtilisation}>
+        <Section mt={4} id={anchors.MiseAjourDesConditionsUtilisation}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 9 – Mise à jour des conditions d’utilisation
           </Heading>

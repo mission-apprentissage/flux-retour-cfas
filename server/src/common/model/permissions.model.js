@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { object, objectId, objectIdOrNull, string, date, arrayOf, boolean } from "./json-schema/jsonSchemaTypes.js";
+import { object, objectId, objectIdOrNull, string, date, boolean } from "./json-schema/jsonSchemaTypes.js";
 import { schemaValidation } from "../utils/schemaUtils.js";
 
 export const collectionName = "permissions";
@@ -22,7 +22,6 @@ export const schema = object(
     }),
     userEmail: string({ description: "Email utilisateur" }),
     role: objectId({ description: "Roles id" }),
-    custom_acl: arrayOf(string(), { description: "Custom access control level array" }),
     pending: boolean({ description: "En attente d'acceptation" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout de la permission" }),
@@ -33,7 +32,6 @@ export const schema = object(
 // Default value
 export function defaultValuesPermission() {
   return {
-    custom_acl: [],
     created_at: new Date(),
     updated_at: new Date(),
   };

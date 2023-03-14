@@ -1,24 +1,29 @@
 import React from "react";
 import { Box, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import Section from "../Section/Section.jsx";
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages.js";
 import Sommaire from "../Sommaire/Sommaire.jsx";
 
+const anchors = {
+  EditeurDuSite: "editeur-du-site",
+  DirecteurDeLaPublication: "directeur-de-la-publication",
+  HebergementDuSite: "hebergement-du-site",
+  Accessibilite: "accessibilite",
+  SignalerUnDyfonctionnement: "signaler-un-dyfonctionnement",
+};
+
+const SommaireData = [
+  { anchorTitle: "1", anchorName: "Éditeur du site", anchorLink: "editeur-du-site" },
+  { anchorTitle: "2", anchorName: "Directeur de la publication", anchorLink: "directeur-de-la-publication" },
+  { anchorTitle: "3", anchorName: "Hébergement du site", anchorLink: "hebergement-du-site" },
+  {
+    anchorTitle: "4",
+    anchorName: "Accessibilité",
+    anchorLink: "accessibilite",
+  },
+  { anchorTitle: "5", anchorName: "Signaler un dysfonctionnement", anchorLink: "signaler-un-dyfonctionnement" },
+];
+
 const MentionsLegales = () => {
-  const currentPage = NAVIGATION_PAGES.MentionsLegales;
-
-  const SommaireData = [
-    { anchorTitle: "1", anchorName: "Éditeur du site", anchorLink: "editeur-du-site" },
-    { anchorTitle: "2", anchorName: "Directeur de la publication", anchorLink: "directeur-de-la-publication" },
-    { anchorTitle: "3", anchorName: "Hébergement du site", anchorLink: "hebergement-du-site" },
-    {
-      anchorTitle: "4",
-      anchorName: "Accessibilité",
-      anchorLink: "accessibilite",
-    },
-    { anchorTitle: "5", anchorName: "Signaler un dysfonctionnement", anchorLink: "signaler-un-dyfonctionnement" },
-  ];
-
   return (
     <HStack
       mt="4w"
@@ -52,7 +57,7 @@ const MentionsLegales = () => {
           </Heading>
           <Text>Mentions légales du site « tableau de bord de l’apprentissage »</Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.EditeurDuSite}>
+        <Section mt={4} id={anchors.EditeurDuSite}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Éditeur du site
           </Heading>
@@ -65,7 +70,7 @@ const MentionsLegales = () => {
             <br /> 75015 Paris
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.DirecteurDeLaPublication}>
+        <Section mt={4} id={anchors.DirecteurDeLaPublication}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Directeur de la publication
           </Heading>
@@ -74,7 +79,7 @@ const MentionsLegales = () => {
             Professionnelle.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.HebergementDuSite}>
+        <Section mt={4} id={anchors.HebergementDuSite}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Hébergement du site
           </Heading>
@@ -98,7 +103,7 @@ const MentionsLegales = () => {
             75007 Paris
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.Accessibilite}>
+        <Section mt={4} id={anchors.Accessibilite}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Accessibilité
           </Heading>
@@ -107,7 +112,7 @@ const MentionsLegales = () => {
             site accessible à toutes et à tous.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.SignalerUnDyfonctionnement}>
+        <Section mt={4} id={anchors.SignalerUnDyfonctionnement}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Signaler un dysfonctionnement
           </Heading>

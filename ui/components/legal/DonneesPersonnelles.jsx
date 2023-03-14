@@ -2,11 +2,9 @@ import React from "react";
 import { Box, Heading, Text, Flex, HStack, Link } from "@chakra-ui/react";
 import Sommaire from "../Sommaire/Sommaire";
 import Section from "../Section/Section";
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { PRODUCT_NAME_TITLE } from "../../common/constants/product";
 
 const DonneesPersonnelles = () => {
-  const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
   const title = PRODUCT_NAME_TITLE;
 
   return (
@@ -58,7 +56,7 @@ const DonneesPersonnelles = () => {
               </strong>
             </Text>
           </Section>
-          <Section id={currentPage.anchors.missionInteretPublic} marginTop="5w">
+          <Section id="mission-interet-public" marginTop="5w">
             <Box color="#009081">
               <Text fontSize="gamma" fontWeight="700">
                 Base légale
@@ -93,7 +91,7 @@ const DonneesPersonnelles = () => {
             </Box>
           </Section>
           {/* Block Faciliter le pilotage */}
-          <Section id={currentPage.anchors.faciliterPilotage} mt="10w">
+          <Section id="faciliter-pilotage-operationnel" mt="10w">
             <Box color="#009099">
               <Text fontSize="gamma" fontWeight="700" id="finalite">
                 Finalité
@@ -127,7 +125,7 @@ const DonneesPersonnelles = () => {
           </Section>
 
           {/* Block Minimisation des données */}
-          <Section id={currentPage.anchors.minimisationDonnees} mt="10w">
+          <Section id="minimisation-donnees" mt="10w">
             <Box color="#465F9D">
               <Text fontSize="gamma" fontWeight="700">
                 Données collectées

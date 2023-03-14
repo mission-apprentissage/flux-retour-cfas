@@ -1,41 +1,37 @@
 import { strict as assert } from "assert";
+
 import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
 import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
 import formationsModelDescriptor from "../../../../src/common/model/formations.model.js";
 import { formationsDb } from "../../../../src/common/model/collections.js";
 
 describe("Formations Indexes", () => {
-  let indexes = [];
-
-  beforeEach(async () => {
+  it("Vérifie l'existence des indexes", async () => {
     // Crée une entrée en base
     await formationsDb().insertOne({ cfd: "0123456G" });
 
     // Re-créé les index après l'ajout d'une entrée en base & récupère les index
     await dropIndexes();
     await createIndexes();
-    indexes = await getDbCollectionIndexes(formationsModelDescriptor.collectionName);
-  });
+    const dbIndexes = await getDbCollectionIndexes(formationsModelDescriptor.collectionName);
 
-  it("Vérifie l'existence d'un index sur le champ libelle_text_tokenized_libelle_text", async () => {
-    assert.equal(
-      indexes.some((item) => item.name === "libelle_text_tokenized_libelle_text"),
-      true
-    );
-  });
-
-  it("Vérifie l'existence d'un index sur le champ cfd", async () => {
-    assert.equal(
-      indexes.some((item) => item.name === "cfd"),
-      true
-    );
-    assert.equal(indexes.find((item) => item.name === "cfd")?.unique, true);
-  });
-
-  it("Vérifie l'existence d'un index sur le champ rncps", async () => {
-    assert.equal(
-      indexes.some((item) => item.name === "rncps"),
-      true
+    assert.deepStrictEqual(
+      // @ts-ignore
+      dbIndexes.sort((a, b) => (a.name > b.name ? 1 : -1)),
+      [
+        { v: 2, key: { _id: 1 }, name: "_id_" },
+        { v: 2, key: { cfd: 1 }, name: "cfd", unique: true },
+        {
+          v: 2,
+          key: { _fts: "text", _ftsx: 1 },
+          name: "libelle_text_tokenized_libelle_text",
+          weights: { libelle: 1, tokenized_libelle: 1 },
+          default_language: "french",
+          language_override: "language",
+          textIndexVersion: 3,
+        },
+        { v: 2, key: { rncps: 1 }, name: "rncps" },
+      ]
     );
   });
 });

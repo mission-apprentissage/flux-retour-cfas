@@ -8,7 +8,7 @@ export const authArgTypes = {
   },
   auth__permissions: { name: "permissions", control: "select", options: ["page/mes-organismes"] },
   auth__isInPendingValidation: { name: "is Pending validation", control: "boolean" },
-  auth__hasAtLeastOneUserToValidate: { name: "has At Least One User To Validate", control: "boolean" },
+  auth__isOrganismeAdmin: { name: "has At Least One User To Validate", control: "boolean" },
   auth__account_status: {
     name: "Account status",
     control: "select",

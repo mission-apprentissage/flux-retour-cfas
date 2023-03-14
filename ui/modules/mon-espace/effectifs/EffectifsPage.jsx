@@ -65,7 +65,7 @@ const EffectifsPage = ({ isMine }) => {
 
   const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
 
-  if (auth.hasAtLeastOneUserToValidate || isUserAdmin(auth)) {
+  if (auth.isOrganismeAdmin || isUserAdmin(auth)) {
     if (!organisme.mode_de_transmission) {
       return <ChoixTransmission />;
     } else if (organisme.mode_de_transmission === "API") {
@@ -88,7 +88,7 @@ const EffectifsPage = ({ isMine }) => {
           <Box ml={3}>
             <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
               {isMine
-                ? 'Vous ne nous transmettez pas encore vos effectifs. Veuillez cliquer dans l’onglet "Mes effectifs" pour démarrer l’import.'
+                ? "Vous ne nous transmettez pas encore vos effectifs."
                 : " Cet organisme ne nous transmet pas encore ses effectifs."}
             </Text>
             <Text color="grey.800" fontSize="0.9rem">

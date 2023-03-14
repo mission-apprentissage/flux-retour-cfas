@@ -2,38 +2,46 @@ import React from "react";
 import { Box, Flex, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import Link from "../Links/Link";
 import Sommaire from "../Sommaire/Sommaire.jsx";
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages.js";
 import Section from "../Section/Section.jsx";
 import { CONTACT_ADDRESS } from "../../common/constants/product";
 
-const PolitiqueDeConfidentialite = () => {
-  const currentPage = NAVIGATION_PAGES.PolitiqueDeConfidentialite;
+const anchors = {
+  Finalite: "finalite",
+  DonneesACaracterePersonelTraitees: "donnees-a-caractere-personel-traitees",
+  BaseJuridiqueDuTraitementDeDonnees: "base-juridique-du-traitement-de-donnees",
+  DureeDeConservation: "duree-de-conservation",
+  DroitDesPersonnesConcernees: "droit-des-personnes-concernees",
+  DestinatairesDesDonnees: "destinataires-des-donnees",
+  SecuriteEtConfidentialiteDesDonnees: "securite-et-confidentialite-des-donnees",
+};
 
-  const SommaireData = [
-    { anchorTitle: "1", anchorName: "Finalité", anchorLink: "finalite" },
-    {
-      anchorTitle: "2",
-      anchorName: "Données à caractère personnel traitées",
-      anchorLink: "donnees-a-caractere-personel-traitees",
-    },
-    {
-      anchorTitle: "3",
-      anchorName: "Base juridique du traitement de données",
-      anchorLink: "base-juridique-du-traitement-de-donnees",
-    },
-    {
-      anchorTitle: "4",
-      anchorName: "Durée de conservation",
-      anchorLink: "duree-de-conservation",
-    },
-    { anchorTitle: "5", anchorName: "Droit des personnes concernées", anchorLink: "droit-des-personnes-concernees" },
-    { anchorTitle: "6", anchorName: "Destinataires des données", anchorLink: "destinataires-des-donnees" },
-    {
-      anchorTitle: "7",
-      anchorName: "Sécurité et confidentialité des données",
-      anchorLink: "securite-et-confidentialite-des-donnees",
-    },
-  ];
+const SommaireData = [
+  { anchorTitle: "1", anchorName: "Finalité", anchorLink: "finalite" },
+  {
+    anchorTitle: "2",
+    anchorName: "Données à caractère personnel traitées",
+    anchorLink: "donnees-a-caractere-personel-traitees",
+  },
+  {
+    anchorTitle: "3",
+    anchorName: "Base juridique du traitement de données",
+    anchorLink: "base-juridique-du-traitement-de-donnees",
+  },
+  {
+    anchorTitle: "4",
+    anchorName: "Durée de conservation",
+    anchorLink: "duree-de-conservation",
+  },
+  { anchorTitle: "5", anchorName: "Droit des personnes concernées", anchorLink: "droit-des-personnes-concernees" },
+  { anchorTitle: "6", anchorName: "Destinataires des données", anchorLink: "destinataires-des-donnees" },
+  {
+    anchorTitle: "7",
+    anchorName: "Sécurité et confidentialité des données",
+    anchorLink: "securite-et-confidentialite-des-donnees",
+  },
+];
+
+const PolitiqueDeConfidentialite = () => {
   return (
     <HStack
       mt="4w"
@@ -73,7 +81,7 @@ const PolitiqueDeConfidentialite = () => {
             par le ministère du Travail.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.Finalite}>
+        <Section mt={4} id={anchors.Finalite}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Finalités
           </Heading>
@@ -101,7 +109,7 @@ const PolitiqueDeConfidentialite = () => {
             <ListItem>Identifier les organismes de formation et leurs réseaux (référentiel).</ListItem>
           </UnorderedList>
         </Section>
-        <Section mt={4} id={currentPage.anchors.DonneesACaracterePersonelTraitees}>
+        <Section mt={4} id={anchors.DonneesACaracterePersonelTraitees}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Données à caractère personnel traitées
           </Heading>
@@ -123,7 +131,7 @@ const PolitiqueDeConfidentialite = () => {
             <ListItem>Données de contact des entreprises (adresse e-mail).</ListItem>
           </UnorderedList>
         </Section>
-        <Section mt={4} id={currentPage.anchors.BaseJuridiqueDuTraitementDeDonnees}>
+        <Section mt={4} id={anchors.BaseJuridiqueDuTraitementDeDonnees}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Base juridique du traitement de données
           </Heading>
@@ -134,7 +142,7 @@ const PolitiqueDeConfidentialite = () => {
             l’apprentissage du 10 septembre 2019 et décision gouvernementale du 26 novembre 2019.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.DureeDeConservation}>
+        <Section mt={4} id={anchors.DureeDeConservation}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Durée de conservation
           </Heading>
@@ -143,7 +151,7 @@ const PolitiqueDeConfidentialite = () => {
             informations sur un candidat.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.DroitDesPersonnesConcernees}>
+        <Section mt={4} id={anchors.DroitDesPersonnesConcernees}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Droit des personnes concernées
           </Heading>
@@ -189,7 +197,7 @@ const PolitiqueDeConfidentialite = () => {
             compter de la réception de votre demande.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.DestinatairesDesDonnees}>
+        <Section mt={4} id={anchors.DestinatairesDesDonnees}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Destinataires des données
           </Heading>
@@ -220,7 +228,7 @@ const PolitiqueDeConfidentialite = () => {
             </ListItem>
           </UnorderedList>
         </Section>
-        <Section mt={4} id={currentPage.anchors.SecuriteEtConfidentialiteDesDonnees}>
+        <Section mt={4} id={anchors.SecuriteEtConfidentialiteDesDonnees}>
           <Heading as={"h3"} textStyle="h6" mb={2}>
             Sécurité et confidentialité des données
           </Heading>
