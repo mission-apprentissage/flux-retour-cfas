@@ -1,5 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 import { MongoServerError } from "mongodb";
+import { deleteOrganismeAndEffectifsAndDossiersApprenantsMigration } from "../../../../common/actions/organismes/organismes.actions.js";
 
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
@@ -21,6 +22,8 @@ let nbOrganismesFiables = 0;
 let nbOrganismesFiabilises = 0;
 let nbDossiersApprenantsFiabilises = 0;
 let nbOrganismesNonFiabilisablesMapping = 0;
+let nbOrganismesNonFiabilisablesMappingSupprimes = 0;
+
 let nbOrganismesNonFiabilisablesMappingFixEffectifs = 0;
 let nbEffectifsFixedOrganismesNonFiabilisablesMapping = 0;
 let nbEffectifsDuplicateOrganismesNonFiabilisablesMapping = 0;
@@ -66,6 +69,7 @@ export const applyFiabilisationUaiSiret = async () => {
     nbEffectifsDuplicateOrganismesNonFiabilisablesMapping,
     "Effectifs en doublons sur organismes non fiabilisables (mapping) en tentative de correction sur un organisme fiable lié"
   );
+  logger.info(nbOrganismesNonFiabilisablesMappingSupprimes, "organismes non fiabilisables (mapping) supprimés");
 
   return {
     nbOrganismesFiables,
@@ -167,7 +171,7 @@ const updateDossierApprenantMigrationForUaiSiretFiable = async (
  * Méthode de MAJ de tous les couples non fiabilisables en utilisant le mapping >> NON_FIABILISABLE_MAPPING
  */
 const updateOrganismesNonFiabilisablesMapping = async () => {
-  logger.info("Identification des organismes non fiabilisables via mapping ...");
+  logger.info("Traitement des organismes non fiabilisables via mapping ...");
 
   const couplesNonFiabilisablesMapping = await fiabilisationUaiSiretDb()
     .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING })
@@ -183,6 +187,12 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
   await PromisePool.for(organismesNonFiabilisablesMapping).process(
     updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable
   );
+
+  // Enfin on va supprimer les organismes NON_FIABILISABLE_MAPPING et leurs effectifs / dossiersApprenantsMigration
+  await PromisePool.for(organismesNonFiabilisablesMapping).process(async ({ _id }) => {
+    await deleteOrganismeAndEffectifsAndDossiersApprenantsMigration(_id);
+    nbOrganismesNonFiabilisablesMappingSupprimes++;
+  });
 };
 
 /**
