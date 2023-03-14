@@ -3,7 +3,6 @@ import Joi from "joi";
 import { compact, get } from "lodash-es";
 import Boom from "boom";
 
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import {
   findOrganismeById,
@@ -33,34 +32,34 @@ export default ({ mailer }) => {
   router.get(
     "/entity/:id",
     permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    tryCatch(async ({ params, user }, res) => {
+    async ({ params, user }, res) => {
       const organisme = await findOrganismeById(params.id);
 
       res.json({
         ...organisme,
         acl: user.currentPermissionAcl,
       });
-    })
+    }
   );
 
   router.put(
     "/entity/:id",
     permissionsOrganismeMiddleware(["organisme/page_parametres"]),
     // eslint-disable-next-line no-unused-vars
-    tryCatch(async ({ body: { organisme_id, ...data }, params, user }, res) => {
+    async ({ body: { organisme_id, ...data }, params, user }, res) => {
       // TODO JOI
       const updatedOrganisme = await updateOrganisme(params.id, data);
       return res.json({
         ...updatedOrganisme,
         acl: user.currentPermissionAcl,
       });
-    })
+    }
   );
 
   router.get(
     "/effectifs",
     permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
-    tryCatch(async ({ query: { organisme_id, sifa } }, res) => {
+    async ({ query: { organisme_id, sifa } }, res) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
       const effectifs = [];
@@ -123,33 +122,33 @@ export default ({ mailer }) => {
       }
 
       return res.json(effectifs);
-    })
+    }
   );
 
   router.get(
     "/sifa/export-csv-list",
     permissionsOrganismeMiddleware(["organisme/page_sifa/telecharger"]),
-    tryCatch(async ({ query: { organisme_id } }, res) => {
+    async ({ query: { organisme_id } }, res) => {
       const sifaCsv = await generateSifa(organisme_id);
 
       return res.attachment(`tdb-données-sifa-${organisme_id}.csv`).send(sifaCsv);
-    })
+    }
   );
 
   router.get(
     "/contributors",
     permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    tryCatch(async ({ query: { organisme_id } }, res) => {
+    async ({ query: { organisme_id } }, res) => {
       const contributors = await getContributeurs(organisme_id);
 
       return res.json(contributors);
-    })
+    }
   );
 
   router.post(
     "/contributors",
     permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       const { userEmail, roleName, organisme_id } = await Joi.object({
         userEmail: Joi.string().email().required(),
         organisme_id: Joi.string().required(),
@@ -168,13 +167,13 @@ export default ({ mailer }) => {
       await addContributeurOrganisme(organisme_id, userEmail, roleName);
 
       return res.json({ ok: true });
-    })
+    }
   );
 
   router.put(
     "/contributors",
     permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       const { userEmail, roleName, organisme_id } = await Joi.object({
         userEmail: Joi.string().email().required(),
         organisme_id: Joi.string().required(),
@@ -193,13 +192,13 @@ export default ({ mailer }) => {
       await updatePermission({ organisme_id: organisme._id, userEmail, roleName });
 
       return res.json({ ok: true });
-    })
+    }
   );
 
   router.delete(
     "/contributors",
     permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    tryCatch(async (req, res) => {
+    async (req, res) => {
       const { userEmail, organisme_id } = await Joi.object({
         userEmail: Joi.string().email().required(),
         organisme_id: Joi.string().required(),
@@ -217,22 +216,22 @@ export default ({ mailer }) => {
       await removeContributeurOrganisme(organisme_id, userEmail);
 
       return res.json({ ok: true });
-    })
+    }
   );
 
   router.get(
     "/roles_list",
     permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    tryCatch(async (_req, res) => {
+    async (_req, res) => {
       const roles = await findRolePermission({}, { description: 1, title: 1, name: 1 });
       return res.json(roles);
-    })
+    }
   );
 
   router.get(
     "/contributors/confirm-access",
     permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    tryCatch(async ({ query }, res) => {
+    async ({ query }, res) => {
       const { userEmail, organisme_id, validate } = await Joi.object({
         userEmail: Joi.string().email().required(),
         organisme_id: Joi.string().required(),
@@ -251,7 +250,7 @@ export default ({ mailer }) => {
       }
 
       return res.json({ ok: true });
-    })
+    }
   );
 
   const organismeSearchSchema = {
@@ -274,28 +273,25 @@ export default ({ mailer }) => {
   /**
    * Gets the dashboard data for cfa
    */
-  router.get(
-    "/:uai",
-    tryCatch(async (req, res) => {
-      const { uai } = await validateFullObjectSchema(req.params, getByUaiSchema);
-      const organisme = await findOrganismeByUai(uai);
-      if (!organisme) {
-        return res.status(404).json({ message: `No cfa found for UAI ${uai}` });
-      }
+  router.get("/:uai", async (req, res) => {
+    const { uai } = await validateFullObjectSchema(req.params, getByUaiSchema);
+    const organisme = await findOrganismeByUai(uai);
+    if (!organisme) {
+      return res.status(404).json({ message: `No cfa found for UAI ${uai}` });
+    }
 
-      const sousEtablissements = await getSousEtablissementsForUai(uai);
-      return res.json({
-        libelleLong: organisme.nom,
-        reseaux: organisme.reseaux,
-        domainesMetiers: organisme.metiers,
-        uai: organisme.uai,
-        nature: organisme.nature,
-        nature_validity_warning: organisme.nature_validity_warning,
-        adresse: organisme.adresse,
-        sousEtablissements,
-      });
-    })
-  );
+    const sousEtablissements = await getSousEtablissementsForUai(uai);
+    return res.json({
+      libelleLong: organisme.nom,
+      reseaux: organisme.reseaux,
+      domainesMetiers: organisme.metiers,
+      uai: organisme.uai,
+      nature: organisme.nature,
+      nature_validity_warning: organisme.nature_validity_warning,
+      adresse: organisme.adresse,
+      sousEtablissements,
+    });
+  });
 
   return router;
 };

@@ -1,7 +1,6 @@
 import express from "express";
 import Joi from "joi";
 
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { rolesDb } from "../../../common/model/collections.js";
 import { createRole, findRoleById } from "../../../common/actions/roles.actions.js";
 
@@ -9,31 +8,26 @@ import { createRole, findRoleById } from "../../../common/actions/roles.actions.
 export default () => {
   const router = express.Router();
 
-  router.get(
-    "/roles",
-    tryCatch(async (req, res) => {
-      const rolesList = await rolesDb().find({}).toArray();
-      return res.json(rolesList || []);
-    })
-  );
-  router.post(
-    "/role",
-    tryCatch(async ({ body }, res) => {
-      const { name, acl } = await Joi.object({
-        name: Joi.string().required(),
-        acl: Joi.array().required(),
-      }).validateAsync(body, { abortEarly: false });
+  router.get("/roles", async (req, res) => {
+    const rolesList = await rolesDb().find({}).toArray();
+    return res.json(rolesList || []);
+  });
 
-      const roleId = await createRole({
-        name,
-        acl,
-      });
+  router.post("/role", async ({ body }, res) => {
+    const { name, acl } = await Joi.object({
+      name: Joi.string().required(),
+      acl: Joi.array().required(),
+    }).validateAsync(body, { abortEarly: false });
 
-      const role = await findRoleById(roleId);
+    const roleId = await createRole({
+      name,
+      acl,
+    });
 
-      return res.json(role);
-    })
-  );
+    const role = await findRoleById(roleId);
+
+    return res.json(role);
+  });
 
   // router.put(
   //   "/role/:name",

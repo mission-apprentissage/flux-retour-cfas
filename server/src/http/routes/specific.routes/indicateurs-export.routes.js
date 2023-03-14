@@ -1,6 +1,6 @@
 import express from "express";
 import { Parser } from "json2csv";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+
 import {
   getExportAnonymizedEventNameFromFilters,
   USER_EVENTS_TYPES,
@@ -28,29 +28,26 @@ export default () => {
   /**
    * Export the anonymized effectifs lists for input period & query
    */
-  router.get(
-    "/",
-    tryCatch(async (req, res) => {
-      const filters = await buildEffectifsFiltersFromRequest(req);
+  router.get("/", async (req, res) => {
+    const filters = await buildEffectifsFiltersFromRequest(req);
 
-      await createUserEvent({
-        type: USER_EVENTS_TYPES.EXPORT_CSV,
-        action: getExportAnonymizedEventNameFromFilters(filters),
-        username: req.user.username,
-        data: req.query,
-      });
+    await createUserEvent({
+      type: USER_EVENTS_TYPES.EXPORT_CSV,
+      action: getExportAnonymizedEventNameFromFilters(filters),
+      username: req.user.username,
+      data: req.query,
+    });
 
-      const dataList = await getDataListEffectifsAtDate(filters);
+    const dataList = await getDataListEffectifsAtDate(filters);
 
-      const json2csvParser = new Parser({
-        fields: CSV_DEFAULT_FIELDS,
-        delimiter: ";",
-        withBOM: true,
-      });
-      const csv = await json2csvParser.parse(dataList);
-      return res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
-    })
-  );
+    const json2csvParser = new Parser({
+      fields: CSV_DEFAULT_FIELDS,
+      delimiter: ";",
+      withBOM: true,
+    });
+    const csv = await json2csvParser.parse(dataList);
+    return res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
+  });
 
   return router;
 };

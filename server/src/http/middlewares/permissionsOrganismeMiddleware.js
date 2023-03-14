@@ -1,6 +1,6 @@
 import Joi from "joi";
 import Boom from "boom";
-import tryCatch from "./tryCatchMiddleware.js";
+
 import { findRolePermissionById, hasAclsByRoleId } from "../../common/actions/roles.actions.js";
 import { hasPermission } from "../../common/actions/permissions.actions.js";
 import { findOrganismeById } from "../../common/actions/organismes/organismes.actions.js";
@@ -14,7 +14,7 @@ const hasRightsTo = async (role, acls) => {
 };
 
 export default (acls) =>
-  tryCatch(async ({ method, body, query, user, baseUrl, route }, res, next) => {
+  async ({ method, body, query, user, baseUrl, route }, res, next) => {
     const validAccountStatus = [
       USER_ACCOUNT_STATUS.PENDING_PERMISSIONS_SETUP,
       USER_ACCOUNT_STATUS.PENDING_ADMIN_VALIDATION,
@@ -91,13 +91,13 @@ export default (acls) =>
     user.currentPermissionAcl = currentPermissionRole.acl;
 
     next();
-  });
+  };
 
 export function indicateursPermissions() {
-  return tryCatch(async (req, _, next) => {
+  return async (req, _, next) => {
     ensureValidUser(req.user);
     next();
-  });
+  };
 }
 
 // helpers
