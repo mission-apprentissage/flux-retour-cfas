@@ -1,3 +1,21 @@
+# [3.12.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.11.2...v3.12.0) (2023-03-14)
+
+
+### Bug Fixes
+
+* corrige la mauvaise association à l'organisme si pas d'UAI ([#2716](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2716)) ([1bb210f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1bb210fdb89c63c68dac7f456379b49e2a686e07))
+* hotfix migration utilisateurs sans main_organisme ([6b25777](https://github.com/mission-apprentissage/flux-retour-cfas/commit/6b257776ae4df5fed488e1082f15160eda905bdd))
+* hotfix migration utilisateurs sans main_organisme bis ([fe13472](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fe13472451e6eaaabe94c55c678f465603c96030))
+* hotfix UI du workflow suite au changements des statuts [#2687](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2687) ([9cb8a45](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9cb8a45d74007d793354dfd9d037bc1cfef4d93b))
+* require mongodb authentication ([#2709](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2709)) ([286faf2](https://github.com/mission-apprentissage/flux-retour-cfas/commit/286faf249999ce83418157f7388e90151e2e7508))
+* **server:** rapatriement des effectifs sur organismes fiable depuis organismes non fiabilisable mapping ([#2722](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2722)) ([d247913](https://github.com/mission-apprentissage/flux-retour-cfas/commit/d24791350595b4f332e9bd37530692a1a6056c5f))
+
+
+### Features
+
+* ajout onglets page stats ([#2697](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2697)) ([af741ad](https://github.com/mission-apprentissage/flux-retour-cfas/commit/af741ad8356eacc6da35b6ac88cfb8e6131cbfdc))
+* simplification du nommage des statuts ([#2687](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2687)) ([1b905a9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1b905a9169924fd2648a2b8c61ca65dd8154d8e1))
+
 ## [3.11.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.11.1...v3.11.2) (2023-03-09)
 
 
