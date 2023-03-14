@@ -84,7 +84,9 @@ const Footer = () => {
                 <Link href={"/stats"}>Statistiques</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/questions-reponses"}>Page d&rsquo;aide</Link>
+                <Link href="https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0">
+                  Page d&rsquo;aide
+                </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href={"/politique-confidentialite"}>Politique de confidentialité</Link>
