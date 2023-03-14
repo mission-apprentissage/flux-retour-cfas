@@ -289,7 +289,7 @@ const OrganismeContributors = ({ size = "md" }) => {
                   },
                 },
                 actions: {
-                  header: () => "Retirer l&rsquo;accès",
+                  header: () => "Retirer l'accès",
                   width: 40,
                   cell: (info) => {
                     const { user, userEmail } = info.row.original;
