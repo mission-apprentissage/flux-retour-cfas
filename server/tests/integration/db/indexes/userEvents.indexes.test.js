@@ -1,13 +1,12 @@
 import { strict as assert } from "assert";
+
 import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
 import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
 import userEventsModelDescriptor from "../../../../src/common/model/userEvents.model.js";
 import { createUserEvent } from "../../../../src/common/actions/userEvents.actions.js";
 
 describe("UserEvents Indexes", () => {
-  let indexes = [];
-
-  beforeEach(async () => {
+  it("Vérifie l'existence des indexes", async () => {
     // Crée une entrée en base
     await createUserEvent({
       username: "admin",
@@ -20,27 +19,17 @@ describe("UserEvents Indexes", () => {
     // Re-créé les index après l'ajout d'une entrée en base & récupère les index
     await dropIndexes();
     await createIndexes();
-    indexes = await getDbCollectionIndexes(userEventsModelDescriptor.collectionName);
-  });
+    const dbIndexes = await getDbCollectionIndexes(userEventsModelDescriptor.collectionName);
 
-  it("Vérifie l'existence d'un index sur le champ username", async () => {
-    assert.equal(
-      indexes.some((item) => item.name === "username"),
-      true
-    );
-  });
-
-  it("Vérifie l'existence d'un index sur le champ action", async () => {
-    assert.equal(
-      indexes.some((item) => item.name === "action"),
-      true
-    );
-  });
-
-  it("Vérifie l'existence d'un index sur le champ user_email", async () => {
-    assert.equal(
-      indexes.some((item) => item.name === "user_email"),
-      true
+    assert.deepStrictEqual(
+      // @ts-ignore
+      dbIndexes.sort((a, b) => (a.name > b.name ? 1 : -1)),
+      [
+        { v: 2, key: { _id: 1 }, name: "_id_" },
+        { v: 2, key: { action: 1 }, name: "action" },
+        { v: 2, key: { user_email: 1 }, name: "user_email" },
+        { v: 2, key: { username: 1 }, name: "username" },
+      ]
     );
   });
 });

@@ -7,7 +7,7 @@ axios
   .get("http://localhost:5000/api/healthcheck")
   .then((response) => {
     if (response.status === 200 && Object.values(response.data.healthcheck).every(isTrue)) {
-      console.log("healthcheck passed!");
+      console.info("healthcheck passed!");
       process.exit(0);
     }
     console.error("Status code was", response.status);

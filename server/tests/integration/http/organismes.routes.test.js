@@ -7,23 +7,21 @@ import { startServer } from "../../utils/testUtils.js";
 
 describe("Routes Organismes", () => {
   it("Vérifie que la route /organismes renvoie une 401 si aucune apiKey n'est fournie", async () => {
-    const apiKeyValue = process.env.FLUX_RETOUR_CFAS_ORGANISMES_CONSULTATION_API_KEY;
-    console.log(apiKeyValue);
     const { httpClient } = await startServer();
     const response = await httpClient.post("/api/organismes");
-    assert.deepEqual(response.status, 401);
+    assert.strictEqual(response.status, 401);
   });
 
   it("Vérifie que la route /organismes renvoie une 401 si une mauvaise apiKey est fournie", async () => {
     const { httpClient } = await startServer();
     const response = await httpClient.post("/api/organismes", { apiKey: "BAD_API_KEY" });
-    assert.deepEqual(response.status, 401);
+    assert.strictEqual(response.status, 401);
   });
 
   it("Vérifie que la route /organismes renvoie une 200 avec des données si une bonne apiKey est fournie", async () => {
     const { httpClient } = await startServer();
     const response = await httpClient.post("/api/organismes", { apiKey: config.organismesConsultationApiKey });
-    assert.deepEqual(response.status, 200);
+    assert.strictEqual(response.status, 200);
 
     // TODO Tester la création d'un organisme + nock des API Entreprise & Catalog
     // const randomOrganisme = createRandomOrganisme();
@@ -43,11 +41,11 @@ describe("Routes Organismes", () => {
     //   "ferme",
     // ]);
 
-    // assert.deepEqual(response.data.organismes.length, 1);
-    // assert.deepEqual(response.data.organismes, expected);
-    // assert.deepEqual(response.data.pagination.nombre_de_page, 1);
-    // assert.deepEqual(response.data.pagination.page, 1);
-    // assert.deepEqual(response.data.pagination.resultats_par_page, 100);
-    // assert.deepEqual(response.data.pagination.total, 1);
+    // assert.strictEqual(response.data.organismes.length, 1);
+    // assert.strictEqual(response.data.organismes, expected);
+    // assert.strictEqual(response.data.pagination.nombre_de_page, 1);
+    // assert.strictEqual(response.data.pagination.page, 1);
+    // assert.strictEqual(response.data.pagination.resultats_par_page, 100);
+    // assert.strictEqual(response.data.pagination.total, 1);
   });
 });

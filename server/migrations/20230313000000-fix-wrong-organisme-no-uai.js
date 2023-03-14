@@ -26,14 +26,14 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
 
   await Promise.all(
     users.map(async (user) => {
-      console.log(
+      console.info(
         `Correction utilisateur ${user._id}, main_organisme.siret=${user.main_organisme?.siret} => siret=${user.siret}`
       );
       const organisme = await db.collection("organismes").findOne({
         siret: user.siret,
       });
       if (!organisme) {
-        console.log(`Organisme non trouvé pour le siret ${user.siret}`);
+        console.info(`Organisme non trouvé pour le siret ${user.siret}`);
         return;
       }
 
