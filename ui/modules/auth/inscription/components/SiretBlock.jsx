@@ -40,7 +40,7 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
   const isValidEtablissement = etablissement && !etablissement.ferme;
 
   useEffect(() => {
-    etablissement?.siret && onSiretFetched(etablissement);
+    etablissement?.siret && !etablissement?.ferme && onSiretFetched(etablissement);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [etablissement?.siret]);
 
@@ -104,7 +104,7 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
               </VStack>
               {etablissement.ferme && (
                 <Box color="error" my={2}>
-                  Le Siret ${values.siret} est un établissement fermé.
+                  Le Siret {values.siret} est un établissement fermé.
                 </Box>
               )}
             </>

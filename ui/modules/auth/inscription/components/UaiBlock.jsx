@@ -108,7 +108,7 @@ export const UaiBlock = ({ uai, onUaiFetched }) => {
 
   useEffect(() => {
     if (etablissements?.length === 1) {
-      etablissements[0].siret && onUaiFetched(etablissements[0]);
+      etablissements[0].siret && !etablissements[0].ferme && onUaiFetched(etablissements[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [etablissements?.[0].siret]);
