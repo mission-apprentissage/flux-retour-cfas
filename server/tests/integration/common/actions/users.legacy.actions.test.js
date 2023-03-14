@@ -662,8 +662,8 @@ describe("Components Users Test", () => {
     });
   });
 
-  describe("getUserById", () => {
-    it("renvoie une erreur quand l'id passé pour le getUserById n'est pas valide", async () => {
+  describe("getDetailedUserById", () => {
+    it("renvoie une erreur quand l'id passé pour le getDetailedUserById n'est pas valide", async () => {
       const usernameTest = "userTest";
 
       // create user
@@ -679,7 +679,7 @@ describe("Components Users Test", () => {
       await assert.rejects(getUserLegacyById(objectId), { message: "Unable to find user" });
     });
 
-    it("renvoie le bon utilisateur quand l'id passé pour le getUserById est valide", async () => {
+    it("renvoie le bon utilisateur quand l'id passé pour le getDetailedUserById est valide", async () => {
       const usernameTest = "userTest";
 
       // create user

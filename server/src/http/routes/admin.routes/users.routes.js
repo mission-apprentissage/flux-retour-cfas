@@ -7,7 +7,7 @@ import {
   createUser,
   getAllUsers,
   getUserByEmail,
-  getUserById,
+  getDetailedUserById,
   removeUser,
   updateUser,
 } from "../../../common/actions/users.actions.js";
@@ -116,7 +116,7 @@ export default ({ mailer }) => {
         roles: rolesId,
         invalided_token: true,
       });
-      const user = await getUserById(id);
+      const user = await getDetailedUserById(id);
       if (!user) {
         throw Boom.notFound(`User with id ${id} not found`);
       }
@@ -134,7 +134,7 @@ export default ({ mailer }) => {
     }),
     async ({ params }, res) => {
       const { id } = params;
-      const user = await getUserById(id);
+      const user = await getDetailedUserById(id);
       if (!user) {
         throw Boom.notFound(`User with id ${id} not found`);
       }

@@ -58,7 +58,6 @@ export const createUser = async ({ email, password }, options = {}) => {
   } = options || {};
 
   // bypass profile completion for admins
-  // bypass profile completion for admins
   const account_status = is_admin
     ? options.account_status || USER_ACCOUNT_STATUS.DIRECT_PENDING_PASSWORD_SETUP
     : options.account_status;
@@ -176,45 +175,42 @@ export const getUserByEmail = async (email) => {
  * @param {*} _id
  * @returns
  */
-export const getUserById = async (_id, projection = {}) => {
+export const getDetailedUserById = async (_id) => {
   const user = await usersMigrationDb()
-    .aggregate(
-      [
-        { $match: { _id: new ObjectId(_id) } },
-        {
-          $lookup: {
-            from: "organismes",
-            localField: "main_organisme_id",
-            foreignField: "_id",
-            as: "main_organisme",
-          },
+    .aggregate([
+      { $match: { _id: new ObjectId(_id) } },
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "main_organisme_id",
+          foreignField: "_id",
+          as: "main_organisme",
         },
-        { $unwind: { path: "$main_organisme", preserveNullAndEmptyArrays: true } },
-        // retrieve user permissions
-        {
-          $lookup: {
-            from: "permissions",
-            localField: "email",
-            foreignField: "userEmail",
-            as: "permissions",
-            pipeline: [
-              { $project: { organisme_id: 1, role: 1, pending: 1, created_at: 1 } },
-              {
-                $lookup: {
-                  from: "organismes",
-                  localField: "organisme_id",
-                  foreignField: "_id",
-                  as: "organisme",
-                  pipeline: [{ $project: { siret: 1, nom: 1, created_at: 1, uai: 1 } }],
-                },
+      },
+      { $unwind: { path: "$main_organisme", preserveNullAndEmptyArrays: true } },
+      // retrieve user permissions
+      {
+        $lookup: {
+          from: "permissions",
+          localField: "email",
+          foreignField: "userEmail",
+          as: "permissions",
+          pipeline: [
+            { $project: { organisme_id: 1, role: 1, pending: 1, created_at: 1 } },
+            {
+              $lookup: {
+                from: "organismes",
+                localField: "organisme_id",
+                foreignField: "_id",
+                as: "organisme",
+                pipeline: [{ $project: { siret: 1, nom: 1, created_at: 1, uai: 1 } }],
               },
-              { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
-            ],
-          },
+            },
+            { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
+          ],
         },
-      ],
-      { projection }
-    )
+      },
+    ])
     .next();
 
   return user;
@@ -272,7 +268,9 @@ export const getAllUsers = async (query = {}, { page, limit, sort }) => {
     ])
     .next();
 
-  result.pagination.lastPage = Math.ceil(result.pagination.total / limit);
+  if (result?.pagination) {
+    result.pagination.lastPage = Math.ceil(result.pagination.total / limit);
+  }
   return result;
 };
 /**

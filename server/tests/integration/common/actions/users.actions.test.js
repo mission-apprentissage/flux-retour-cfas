@@ -679,10 +679,10 @@
 //     });
 //   });
 
-//   describe("getUserById", () => {
-//     const { createUser, getUserById } = users();
+//   describe("getDetailedUserById", () => {
+//     const { createUser, getDetailedUserById } = users();
 
-//     it("renvoie une erreur quand l'id passé pour le getUserById n'est pas valide", async () => {
+//     it("renvoie une erreur quand l'id passé pour le getDetailedUserById n'est pas valide", async () => {
 //       const usernameTest = "userTest";
 
 //       // create user
@@ -695,10 +695,10 @@
 
 //       // get user with bad id
 //       const objectId = "^pkazd^pkazd";
-//       await assert.rejects(getUserById(objectId), { message: "Unable to find user" });
+//       await assert.rejects(getDetailedUserById(objectId), { message: "Unable to find user" });
 //     });
 
-//     it("renvoie le bon utilisateur quand l'id passé pour le getUserById est valide", async () => {
+//     it("renvoie le bon utilisateur quand l'id passé pour le getDetailedUserById est valide", async () => {
 //       const usernameTest = "userTest";
 
 //       // create user
@@ -709,7 +709,7 @@
 //       assert.equal(found.username === usernameTest, true);
 
 //       // get user with id
-//       const gettedUser = await getUserById(found._id);
+//       const gettedUser = await getDetailedUserById(found._id);
 //       assert.equal(gettedUser.username === found.username, true);
 //     });
 //   });
