@@ -45,7 +45,8 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
           $set: {
             main_organisme_id: organisme._id,
           },
-        }
+        },
+        { bypassDocumentValidation: true }
       );
 
       // si après étape de demande des permissions
@@ -59,7 +60,8 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
             $set: {
               organisme_id: organisme._id,
             },
-          }
+          },
+          { bypassDocumentValidation: true }
         );
       }
     })

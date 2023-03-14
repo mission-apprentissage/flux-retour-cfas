@@ -20,7 +20,8 @@ export const up = async (db) => {
           $set: {
             account_status: newStatus,
           },
-        }
+        },
+        { bypassDocumentValidation: true }
       );
     })
   );
