@@ -88,7 +88,15 @@ describe("Effectifs Route", () => {
       const app = await startServer();
       httpClient = app.httpClient;
 
-      await Promise.all(organismes.map((organisme) => createOrganisme(organisme)));
+      await Promise.all(
+        organismes.map((organisme) =>
+          createOrganisme(organisme, {
+            buildFormationTree: false,
+            buildInfosFromSiret: false,
+            callLbaApi: false,
+          })
+        )
+      );
 
       apiClient = await createAndAuthenticateUser(httpClient, {
         siret: "44492238900010",

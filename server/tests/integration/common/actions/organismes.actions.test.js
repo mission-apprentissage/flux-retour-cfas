@@ -38,7 +38,11 @@ describe("Test des actions Organismes", () => {
   describe("createOrganisme", () => {
     it("throws when given organisme is null", async () => {
       try {
-        await createOrganisme(null);
+        await createOrganisme(null, {
+          buildFormationTree: false,
+          buildInfosFromSiret: false,
+          callLbaApi: false,
+        });
       } catch (err) {
         assert.notEqual(err, undefined);
       }
@@ -47,10 +51,24 @@ describe("Test des actions Organismes", () => {
     it("throws when cfa with given uai already exists", async () => {
       const uai = "0802004U";
       const randomOrganisme = createRandomOrganisme();
-      await createOrganisme({ ...randomOrganisme, uai });
+      await createOrganisme(
+        { ...randomOrganisme, uai },
+        {
+          buildFormationTree: false,
+          buildInfosFromSiret: false,
+          callLbaApi: false,
+        }
+      );
 
       try {
-        await createOrganisme({ ...randomOrganisme, uai });
+        await createOrganisme(
+          { ...randomOrganisme, uai },
+          {
+            buildFormationTree: false,
+            buildInfosFromSiret: false,
+            callLbaApi: false,
+          }
+        );
       } catch (err) {
         assert.notEqual(err, undefined);
       }
@@ -138,7 +156,11 @@ describe("Test des actions Organismes", () => {
           academie: "10",
         },
       };
-      const { _id } = await createOrganisme(sampleOrganisme);
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: true,
+        buildInfosFromSiret: true,
+        callLbaApi: true,
+      });
       const created = await findOrganismeById(_id);
 
       assert.deepEqual(pick(created, ["uai", "siret", "nom", "nature"]), {
@@ -174,7 +196,11 @@ describe("Test des actions Organismes", () => {
           academie: "10",
         },
       };
-      const { _id } = await createOrganisme(sampleOrganisme);
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: true,
+        buildInfosFromSiret: true,
+        callLbaApi: true,
+      });
       const created = await findOrganismeById(_id);
 
       assert.deepEqual(pick(created, ["siret", "nom", "nature"]), {
@@ -238,7 +264,11 @@ describe("Test des actions Organismes", () => {
           academie: "10",
         },
       };
-      const { _id } = await createOrganisme(sampleOrganisme);
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
       const toUpdateOrganisme = { ...sampleOrganisme, nom: "UPDATED" };
       const updatedOrganisme = await updateOrganisme(_id, toUpdateOrganisme, {
         buildFormationTree: false,
@@ -273,7 +303,11 @@ describe("Test des actions Organismes", () => {
           academie: "10",
         },
       };
-      const { _id } = await createOrganisme(sampleOrganisme);
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
       // Test d'update sur le champ api_key
       const toUpdateOrganisme = { ...sampleOrganisme, api_key: "UPDATED" };
       const updatedOrganisme = await updateOrganisme(_id, toUpdateOrganisme);
@@ -324,7 +358,11 @@ describe("Test des actions Organismes", () => {
         },
       };
 
-      const { _id } = await createOrganisme(sampleOrganisme);
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
       const updatedOrganisme = await updateOrganisme(
         _id,
         { ...sampleOrganisme, ferme: false },
@@ -348,7 +386,11 @@ describe("Test des actions Organismes", () => {
         },
       };
 
-      const { _id } = await createOrganisme(sampleOrganisme);
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
       const updatedOrganisme = await updateOrganisme(
         _id,
         { ...sampleOrganisme },
@@ -372,7 +414,11 @@ describe("Test des actions Organismes", () => {
         },
       };
 
-      const { _id } = await createOrganisme(sampleOrganisme);
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
       const updatedOrganisme = await updateOrganisme(_id, { ...sampleOrganisme });
 
       assert.equal(updatedOrganisme?.ferme, false);
