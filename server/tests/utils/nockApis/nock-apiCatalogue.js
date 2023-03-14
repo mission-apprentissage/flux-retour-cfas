@@ -1,9 +1,9 @@
 import nock from "nock";
 
-import { API_ENDPOINT } from "../../../src/common/apis/apiCatalogueMna.js";
+import config from "../../../src/config.js";
 
 export const nockGetFormations = (callback) => {
-  nock(API_ENDPOINT)
+  nock(config.mnaCatalogApi.endpoint)
     .persist()
     .get(new RegExp("\\/entity\\/formations.*"))
     .reply(200, () => {

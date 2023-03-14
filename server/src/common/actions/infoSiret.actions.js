@@ -7,7 +7,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
     return {
       result: {},
       messages: {
-        error: `Le Siret ${providedSiret} n'est pas valide, un Siret doit être définit et au format 14 caractères`,
+        error: `Le Siret ${providedSiret} n'est pas valide, un Siret doit être défini et au format 14 caractères`,
       },
     };
   }

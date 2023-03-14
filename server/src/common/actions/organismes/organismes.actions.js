@@ -45,7 +45,7 @@ export const createOrganisme = async (
   { uai, siret, nom: nomIn, adresse: adresseIn, ferme: fermeIn, ...data },
   options = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
 ) => {
-  if (await organismesDb().countDocuments({ uai, siret })) {
+  if ((await organismesDb().countDocuments({ uai, siret })) > 0) {
     throw new Error(`Un organisme avec l'UAI ${uai} et le siret ${siret} existe déjà`);
   }
 
