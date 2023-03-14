@@ -47,15 +47,6 @@ export const findFormationById = async (id, projection = {}) => {
 };
 
 /**
- * Construction du libelle de la formation depuis TCO
- * @param {*} formationFromTCO
- * @returns
- */
-const buildFormationLibelle = (formationFromTCO) => {
-  return formationFromTCO.intitule_long || "";
-};
-
-/**
  * Méthode d'extraction du niveau depuis le libelle de la formation
  * @param {*} niveauFormationLibelle
  * @returns
@@ -90,7 +81,7 @@ export const createFormation = async ({ cfd, duree = null, annee = null }) => {
   const formationInfo = await getCfdInfo(cfd);
 
   // Libelle
-  const libelleFormationBuilt = buildFormationLibelle(formationInfo);
+  const libelleFormationBuilt = formationInfo?.intitule_long || "";
   const tokenizedLibelle = buildTokenizedString(libelleFormationBuilt || "", 3);
 
   const { insertedId } = await formationsDb().insertOne(
