@@ -28,7 +28,7 @@ import ModalClosingButton from "@/components/ModalClosingButton/ModalClosingButt
 import Table from "@/components/Table/Table";
 import UserForm from "@/modules/admin/UserForm";
 import { ArrowRightLine } from "@/theme/components/icons";
-import { getUserOrganisationLabel } from "@/common/constants/usersConstants";
+import { getUserOrganisationLabel, USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -171,17 +171,24 @@ const Users = () => {
                 account_status: {
                   size: 70,
                   header: () => "Statut du compte",
-                  cell: ({ getValue }) => <Text fontSize="md">{getValue()}</Text>,
+                  cell: ({ getValue }) => (
+                    <Text fontSize="md" whiteSpace="nowrap">
+                      {USER_STATUS_LABELS[getValue()] ?? getValue()}
+                    </Text>
+                  ),
                 },
                 roles: {
                   size: 60,
                   header: () => "Role",
-                  cell: ({ getValue, row }) =>
-                    getValue().length
-                      ? getValue().map((roleId) => rolesById?.[roleId]?.title || roleId)
-                      : row.original.is_admin
-                      ? "Admin"
-                      : "",
+                  cell: ({ getValue, row }) => (
+                    <Text fontSize="md" whiteSpace="nowrap">
+                      {getValue().length
+                        ? getValue().map((roleId) => rolesById?.[roleId]?.title || roleId)
+                        : row.original.is_admin
+                        ? "Admin"
+                        : ""}
+                    </Text>
+                  ),
                 },
                 actions: {
                   size: 25,

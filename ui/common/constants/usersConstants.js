@@ -27,3 +27,12 @@ export function getUserOrganisationLabel(user) {
   };
   return labels[user?.organisation] || user?.organisation;
 }
+
+export const USER_STATUS_LABELS = {
+  PENDING_EMAIL_VALIDATION: "en attente de validation utilisateur",
+  PENDING_PASSWORD_SETUP: "création mdp en cours",
+  PENDING_PERMISSIONS_SETUP: "en attente configuration permissions",
+  PENDING_ADMIN_VALIDATION: "en attente validation admin + connexion",
+  DIRECT_PENDING_PASSWORD_SETUP: "direct - mdp à définir",
+  CONFIRMED: "accès confirmé",
+};
