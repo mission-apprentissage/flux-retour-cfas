@@ -34,18 +34,6 @@ const config = {
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS").default([]).asArray(),
     },
   },
-  tablesCorrespondances: {
-    endpoint: "https://tables-correspondances.apprentissage.beta.gouv.fr/api",
-  },
-  mnaCatalogApi: {
-    endpoint: "https://catalogue.apprentissage.beta.gouv.fr/api",
-  },
-  lbaApi: {
-    endpoint: "https://labonnealternance.apprentissage.beta.gouv.fr/api",
-  },
-  mnaReferentielApi: {
-    endpoint: "https://referentiel.apprentissage.onisep.fr/api/v1",
-  },
   smtp: {
     host: env.get("FLUX_RETOUR_CFAS_SMTP_HOST").asString(),
     port: env.get("FLUX_RETOUR_CFAS_SMTP_PORT").asString(),
@@ -79,11 +67,28 @@ const config = {
   sentry: {
     dsn: env.get("FLUX_RETOUR_CFAS_SENTRY_DSN").asString(),
   },
-  apiEntreprise: {
-    key: env.get("FLUX_RETOUR_CFAS_API_ENTREPRISE_KEY").asString(),
-    endpoint: "https://entreprise.api.gouv.fr/v2",
-  },
   organismesConsultationApiKey: env.get("FLUX_RETOUR_CFAS_ORGANISMES_CONSULTATION_API_KEY").asString(),
+
+  // API métiers externes
+  tablesCorrespondances: {
+    endpoint: "https://tables-correspondances.apprentissage.beta.gouv.fr/api",
+  },
+  mnaCatalogApi: {
+    endpoint: "https://catalogue.apprentissage.beta.gouv.fr/api",
+  },
+  lbaApi: {
+    endpoint: "https://labonnealternance.apprentissage.beta.gouv.fr/api",
+  },
+  mnaReferentielApi: {
+    endpoint: "https://referentiel.apprentissage.onisep.fr/api/v1",
+  },
+  cfadockApi: {
+    endpoint: "https://www.cfadock.fr/api",
+  },
+  apiEntreprise: {
+    endpoint: "https://entreprise.api.gouv.fr/v2",
+    key: env.get("FLUX_RETOUR_CFAS_API_ENTREPRISE_KEY").asString(),
+  },
 };
 
 export default config;
