@@ -81,13 +81,19 @@ export const applyFiabilisationUaiSiret = async () => {
 };
 
 /**
- * On marque par défaut le statut de fiabilisation des organismes comme étant INCONNU
+ * On marque par défaut le statut de fiabilisation des organismes comme étant INCONNU ou SANS_SIRET
  */
-const resetStatutFiabilisation = async () =>
+const resetStatutFiabilisation = async () => {
   await organismesDb().updateMany(
     { siret: { $exists: true } },
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU } }
   );
+
+  await organismesDb().updateMany(
+    { siret: { $exists: false } },
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.SANS_SIRET } }
+  );
+};
 
 /**
  * Méthode maj des statuts de fiabilisation à FIABLE pour les organismes avec UAI & présents dans le référentiel
