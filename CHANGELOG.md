@@ -1,3 +1,17 @@
+# [3.13.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.12.0...v3.13.0) (2023-03-15)
+
+
+### Bug Fixes
+
+* bloquer l'inscription pour les sirets fermés ([#2731](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2731)) ([2145499](https://github.com/mission-apprentissage/flux-retour-cfas/commit/21454994d50a8827e19cbb510fc75530840ceaa0))
+* maj du lien d'aide dans le footer ([#2732](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2732)) ([89f5938](https://github.com/mission-apprentissage/flux-retour-cfas/commit/89f59386d8ec2a4722c3f650c2bbea85d2eb8213))
+* **server:** bypass validation on migrations ([#2728](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2728)) ([ddc9329](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ddc93298acd9148440174f5a26aaad1353937a5c))
+
+
+### Features
+
+* label des statuts utilisateurs ([036c3da](https://github.com/mission-apprentissage/flux-retour-cfas/commit/036c3da594c9608c02121e8a9f383e49778436ed))
+
 # [3.12.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.11.2...v3.12.0) (2023-03-14)
 
 
