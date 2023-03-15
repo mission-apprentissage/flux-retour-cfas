@@ -15,7 +15,7 @@ import { useRecoilValue } from "recoil";
 
 import Section from "@/components/Section/Section";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import NatureOrganismeDeFormationWarning from "./NatureOrganismeDeFormationWarning";
+import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { getReseauDisplayNameFromKey } from "@/common/constants/networksConstants.js";
 import IndicateursInfo from "../../common/IndicateursInfos.jsx";
