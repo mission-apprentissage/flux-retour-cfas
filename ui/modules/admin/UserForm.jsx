@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
+import { toFormikValidationSchema } from "zod-formik-adapter";
 import {
   Accordion,
   AccordionButton,
@@ -11,6 +12,7 @@ import {
   Checkbox,
   FormControl,
   FormLabel,
+  FormErrorMessage,
   Grid,
   HStack,
   Input,
@@ -27,6 +29,7 @@ import useToaster from "@/hooks/useToaster";
 import { DEPARTEMENTS_BY_ID, REGIONS_BY_ID, ACADEMIES_BY_ID } from "@/common/constants/territoiresConstants";
 import { getUserOrganisationLabel } from "@/common/constants/usersConstants";
 import Link from "next/link";
+import userSchema from "./userSchema";
 
 const buildRolesAcl = (newRoles, roles) => {
   let acl = [];
@@ -44,7 +47,6 @@ const buildRolesAcl = (newRoles, roles) => {
 export const UserForm = ({ user, roles, afterSubmit }) => {
   const [, setRolesAcl] = useState(buildRolesAcl(user?.roles || [], roles));
   const { toastSuccess, toastError } = useToaster();
-  const rolesById = roles?.reduce((acc, role) => ({ ...acc, [role._id]: role }), {});
 
   useEffect(() => {
     async function run() {
@@ -53,10 +55,11 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
     run();
   }, [roles, user]);
 
-  const { values, handleSubmit, handleChange, setFieldValue, resetForm } = useFormik({
+  const { values, errors, touched, handleSubmit, handleChange, setFieldValue, resetForm } = useFormik({
+    validationSchema: toFormikValidationSchema(userSchema()),
     initialValues: {
       accessAllCheckbox: user?.is_admin ? ["on"] : [],
-      roles: roles.filter((role) => user?.roles.includes(role._id)).map((role) => role.name) || [],
+      roles: roles?.filter((role) => user?.roles.includes(role._id)).map((role) => role.name) || [],
       nom: user?.nom || "",
       prenom: user?.prenom || "",
       email: user?.email || "",
@@ -186,17 +189,20 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
   return (
     <form onSubmit={handleSubmit}>
       <Grid gridTemplateColumns="repeat(2, 2fr)" gridGap="2w">
-        <FormControl py={2}>
+        <FormControl py={2} isInvalid={errors.nom}>
           <FormLabel>Nom</FormLabel>
-          <Input type="text" id="nom" name="nom" value={values.nom} onChange={handleChange} required />
+          <Input type="text" id="nom" name="nom" value={values.nom} onChange={handleChange} />
+          {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
         </FormControl>
-        <FormControl py={2}>
+        <FormControl py={2} isInvalid={errors.email}>
           <FormLabel>Prenom</FormLabel>
-          <Input type="text" id="prenom" name="prenom" value={values.prenom} onChange={handleChange} required />
+          <Input type="text" id="prenom" name="prenom" value={values.prenom} onChange={handleChange} />
+          {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
         </FormControl>
-        <FormControl py={2}>
+        <FormControl py={2} isInvalid={errors.email}>
           <FormLabel>Email</FormLabel>
-          <Input type="email" id="email" name="email" value={values.email} onChange={handleChange} required />
+          <Input type="email" id="email" name="email" value={values.email} onChange={handleChange} />
+          {errors.email && touched.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
         </FormControl>
       </Grid>
 
