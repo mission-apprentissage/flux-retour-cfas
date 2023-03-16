@@ -33,6 +33,15 @@ jobs:
     name: Deploy on ${{ inputs.environment }}
     runs-on: ubuntu-latest
     steps:
+      - name: Notify new deployment on Slack
+        uses: ravsamhq/notify-slack-action@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notification_title: "Déploiement en ${{ inputs.environment }} initié..."
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Checkout project
         uses: actions/checkout@v3
         with:
