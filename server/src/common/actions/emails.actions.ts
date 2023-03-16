@@ -144,14 +144,14 @@ export const createMailer = (mailerService) => {
         await addEmail(to, token, templateName, payload);
         const messageId = await mailerService.sendEmailMessage(to, template);
         await addEmailMessageId(token, messageId);
-      } catch (e) {
+      } catch (e: any) {
         console.error(`Error sending email template "${templateName}"`, e);
         await addEmailError(token, e);
       }
 
       return token;
     },
-    async resendEmail(token, options = {}) {
+    async resendEmail(token, options: any = {}) {
       const user = await usersMigrationDb().findOne({ "emails.token": token });
       if (!user) {
         throw new Error("user not found");
@@ -165,7 +165,7 @@ export const createMailer = (mailerService) => {
         await addEmailSendDate(token, nextTemplateName);
         const messageId = await mailerService.sendEmailMessage(user.email, template);
         await addEmailMessageId(token, messageId);
-      } catch (e) {
+      } catch (e: any) {
         console.error(`Error resending email with token "${token}"`, e);
         await addEmailError(token, e);
       }

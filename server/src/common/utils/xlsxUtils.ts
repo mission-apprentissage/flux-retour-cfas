@@ -6,9 +6,9 @@ const readXLSXData = (data, readOpt = { codepage: 65001, cellDates: true, dateNF
 };
 
 export const getJsonFromXlsxData = (
-  data,
-  opt = { raw: false },
-  readOpt = { codepage: 65001, cellDates: true, dateNF: "dd/MM/yyyy" }
+  data: any,
+  opt: any = { raw: false },
+  readOpt: any = { codepage: 65001, cellDates: true, dateNF: "dd/MM/yyyy" }
 ) => {
   try {
     const { sheet_name_list, workbook } = readXLSXData(data, readOpt);

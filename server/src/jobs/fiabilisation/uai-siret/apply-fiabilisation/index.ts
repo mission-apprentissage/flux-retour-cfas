@@ -126,7 +126,7 @@ const updateDossiersApprenantAndOrganismesFiabilise = async () => {
  * Ensuite on va mettre à jour l'organisme en question comme étant FIABILISE
  * @param {*} currentFiabilisationCouple
  */
-const updateOrganismeAndDossiersApprenantForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret_fiable }) => {
+const updateOrganismeAndDossiersApprenantForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret_fiable }: any) => {
   // Update de tous les dossiersApprenantsMigration qui étaient sur le mauvais couple UAI-SIRET
   const dossiersApprenantsMigrationForFiabilisationCouple = await dossiersApprenantsMigrationDb()
     .find({ ...filters, uai_etablissement: uai, siret_etablissement: siret })
@@ -195,7 +195,7 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
   );
 
   // Enfin on va supprimer les organismes NON_FIABILISABLE_MAPPING et leurs effectifs / dossiersApprenantsMigration
-  await PromisePool.for(organismesNonFiabilisablesMapping).process(async ({ _id }) => {
+  await PromisePool.for(organismesNonFiabilisablesMapping).process(async ({ _id }: any) => {
     await deleteOrganismeAndEffectifsAndDossiersApprenantsMigration(_id);
     nbOrganismesNonFiabilisablesMappingSupprimes++;
   });
@@ -217,7 +217,7 @@ const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (currentFiab
  * Méthode de MAJ unitaire d'un organisme NON_FIABILISABLE_MAPPING en rattachant ses effectifs liés au bon organisme FIABLE s'il en existe un seul
  * @param {*} currentOrganismeNonFiabilisableMapping
  */
-const updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable = async ({ _id, uai }) => {
+const updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable = async ({ _id, uai }: any) => {
   // Recherche d'un unique organisme fiable lié à l'UAI de l'organisme NON_FIABILISABLE_MAPPING
   const organismeFiableForUai = await organismesDb()
     .find({ uai, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })

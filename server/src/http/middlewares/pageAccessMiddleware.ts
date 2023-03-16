@@ -1,4 +1,4 @@
-export const pageAccessMiddleware = (acl = []) => {
+export const pageAccessMiddleware = (acl: string[] = []) => {
   return ({ user }, res, next) => {
     if (user?.is_admin || acl.every((page) => user?.acl.includes(page))) {
       return next();

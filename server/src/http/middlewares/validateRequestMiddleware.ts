@@ -7,7 +7,7 @@
  */
 export default function validateRequestMiddleware(schemas) {
   return (req, res, next) => {
-    const errors = [];
+    const errors: any[] = [];
     if (schemas.params) {
       const parsed = schemas.params.safeParse(req.params);
       if (parsed.success) {

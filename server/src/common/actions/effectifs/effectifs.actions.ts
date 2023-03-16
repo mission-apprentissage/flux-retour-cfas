@@ -9,7 +9,7 @@ import {
   rupturantsIndicator,
 } from "./indicators.js";
 
-export const getIndicateurs = async (filters) => {
+export const getIndicateurs = async (filters: any) => {
   const filterStages = buildMongoPipelineFilterStages(filters);
   const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
     apprentisIndicator.getCountAtDate(filters.date, filterStages),
@@ -23,6 +23,7 @@ export const getIndicateurs = async (filters) => {
     inscritsSansContrat,
     rupturants,
     abandons,
+    totalOrganismes: 0,
   };
 };
 
@@ -32,8 +33,11 @@ export const getIndicateurs = async (filters) => {
  * @param {*} options
  * @returns
  */
-export const getEffectifsCountAtDate = async (filters, { additionalFilterStages = [], groupedBy, projection }) => {
-  const filterStages = [...buildMongoPipelineFilterStages(filters), ...additionalFilterStages];
+export const getEffectifsCountAtDate = async (
+  filters: any,
+  { additionalFilterStages = [], groupedBy, projection }: any
+) => {
+  const filterStages: any = [...buildMongoPipelineFilterStages(filters), ...additionalFilterStages];
   // compute number of apprentis, abandons, inscrits sans contrat and rupturants
   const [apprentis, rupturants, inscritsSansContrat, abandons] = await Promise.all([
     apprentisIndicator.getCountAtDate(filters.date, filterStages, {
@@ -72,7 +76,7 @@ export const getEffectifsCountAtDate = async (filters, { additionalFilterStages 
  *  }
  * }]
  */
-export const getEffectifsCountByNiveauFormationAtDate = async (filters) => {
+export const getEffectifsCountByNiveauFormationAtDate = async (filters: any) => {
   // compute number of apprentis, abandons, inscrits sans contrat and rupturants
   const effectifsByNiveauFormation = await getEffectifsCountAtDate(filters, {
     additionalFilterStages: [{ $match: { "formation.niveau": { $ne: null } } }],
@@ -80,7 +84,7 @@ export const getEffectifsCountByNiveauFormationAtDate = async (filters) => {
     groupedBy: { _id: "$formation.niveau", niveau_libelle: { $first: "$formation.niveau_libelle" } },
   });
 
-  return effectifsByNiveauFormation.map(({ _id: niveauFormation, niveau_libelle, ...effectifs }) => ({
+  return effectifsByNiveauFormation.map(({ _id: niveauFormation, niveau_libelle, ...effectifs }: any) => ({
     niveau_formation: niveauFormation,
     niveau_formation_libelle: niveau_libelle,
     effectifs: {
@@ -106,7 +110,7 @@ export const getEffectifsCountByNiveauFormationAtDate = async (filters) => {
  *  }
  * }]
  */
-export const getEffectifsCountByFormationAtDate = async (filters) => {
+export const getEffectifsCountByFormationAtDate = async (filters: any) => {
   const effectifsByFormation = await getEffectifsCountAtDate(filters, {
     projection: { "formation.cfd": 1, "formation.libelle_long": 1 },
     groupedBy: {
@@ -116,7 +120,7 @@ export const getEffectifsCountByFormationAtDate = async (filters) => {
     },
   });
 
-  return effectifsByFormation.map(({ _id: cfd, libelle_long_formation, ...effectifs }) => ({
+  return effectifsByFormation.map(({ _id: cfd, libelle_long_formation, ...effectifs }: any) => ({
     formation_cfd: cfd,
     intitule: libelle_long_formation,
     effectifs: {
@@ -147,7 +151,7 @@ export const getEffectifsCountByAnneeFormationAtDate = async (filters) => {
     groupedBy: { _id: "$formation.annee" },
   });
 
-  return effectifsByAnneeFormation.map(({ _id: anneeFormation, ...effectifs }) => ({
+  return effectifsByAnneeFormation.map(({ _id: anneeFormation, ...effectifs }: any) => ({
     annee_formation: anneeFormation,
     effectifs: {
       apprentis: effectifs.apprentis || 0,
@@ -194,7 +198,7 @@ export const getEffectifsCountByCfaAtDate = async (filters) => {
     },
   });
   return effectifsCountByCfa.map(
-    ({ _id: uai, nom_etablissement, siret_etablissement, nature, nature_validity_warning, ...effectifs }) => ({
+    ({ _id: uai, nom_etablissement, siret_etablissement, nature, nature_validity_warning, ...effectifs }: any) => ({
       uai_etablissement: uai,
       siret_etablissement,
       nom_etablissement,
@@ -239,7 +243,7 @@ export const getEffectifsCountBySiretAtDate = async (filters) => {
     },
   });
 
-  return effectifsCountByCfa.map(({ _id: siret, nom_etablissement, ...effectifs }) => ({
+  return effectifsCountByCfa.map(({ _id: siret, nom_etablissement, ...effectifs }: any) => ({
     siret_etablissement: siret,
     nom_etablissement,
     effectifs: {
@@ -265,7 +269,7 @@ export const getEffectifsCountBySiretAtDate = async (filters) => {
  *  }
  * }]
  */
-export const getEffectifsCountByDepartementAtDate = async (filters) => {
+export const getEffectifsCountByDepartementAtDate = async (filters: any) => {
   const effectifsCountByDepartement = await getEffectifsCountAtDate(filters, {
     additionalFilterStages: [{ $lookup: organismeLookup }],
     projection: {
@@ -276,7 +280,7 @@ export const getEffectifsCountByDepartementAtDate = async (filters) => {
     },
   });
 
-  return effectifsCountByDepartement.map(({ _id: codeDepartement, ...effectifs }) => ({
+  return effectifsCountByDepartement.map(({ _id: codeDepartement, ...effectifs }: any) => ({
     etablissement_num_departement: codeDepartement,
     etablissement_nom_departement: DEPARTEMENTS_BY_ID[codeDepartement]?.nom || "Inconnu",
     effectifs: {
@@ -293,7 +297,7 @@ export const getEffectifsCountByDepartementAtDate = async (filters) => {
  * @param {*} filters
  * @returns
  */
-export const getDataListEffectifsAtDate = async (filters = {}) => {
+export const getDataListEffectifsAtDate = async (filters: any = {}) => {
   const filterStages = buildMongoPipelineFilterStages(filters);
   const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
     apprentisIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.apprentis),

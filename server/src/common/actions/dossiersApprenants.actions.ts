@@ -32,7 +32,7 @@ export const structureDossierApprenant = async ({
   uai_etablissement,
   siret_etablissement,
   ...data
-}) => {
+}: any) => {
   // Si on nous fourni un organisme_id existant on récupère le siret pour la structure
   if (organisme_id) {
     const organismeExistant = await findOrganismeById(organisme_id);

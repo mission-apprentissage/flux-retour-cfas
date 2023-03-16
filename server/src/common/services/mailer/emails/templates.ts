@@ -23,7 +23,7 @@ function getAcademyAsString(code) {
   return academie ? `${academie.nom} (${academie.code})` : code;
 }
 
-export function activation_user({ payload }, token, options = {}) {
+export function activation_user({ payload }: any, token: string, options: any = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   return {
     subject: `${prefix}Activation de votre compte`,
@@ -42,7 +42,7 @@ export function activation_user({ payload }, token, options = {}) {
   };
 }
 
-export function validation_first_organisme_user_by_tdb_team({ payload }, token, options = {}) {
+export function validation_first_organisme_user_by_tdb_team({ payload }: any, token: string, options: any = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   const region_as_string = getRegionAsString(payload.organisme.adresse.region);
   const departement_as_string = getDepartementAsString(payload.organisme.adresse.departement);
@@ -63,7 +63,7 @@ export function validation_first_organisme_user_by_tdb_team({ payload }, token, 
   };
 }
 
-export function validation_user_by_tdb_team({ payload }, token, options = {}) {
+export function validation_user_by_tdb_team({ payload }: any, token: string, options: any = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   const regions_as_string = payload.user.codes_region.map(getRegionAsString).join(", ");
   const departements_as_string = payload.user.codes_departement.map(getDepartementAsString).join(", ");
@@ -83,7 +83,7 @@ export function validation_user_by_tdb_team({ payload }, token, options = {}) {
   };
 }
 
-export function validation_user_by_orga_admin({ payload }, token, options = {}) {
+export function validation_user_by_orga_admin({ payload }: any, token: string, options: any = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   const region_as_string = getRegionAsString(payload.organisme.adresse.region);
   const departement_as_string = getDepartementAsString(payload.organisme.adresse.departement);
@@ -104,7 +104,7 @@ export function validation_user_by_orga_admin({ payload }, token, options = {}) 
   };
 }
 
-export function notify_access_granted({ payload }, token, options = {}) {
+export function notify_access_granted({ payload }: any, token: string, options: any = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   return {
     subject: `${prefix} Votre demande d'accès a été acceptée`,
@@ -117,7 +117,7 @@ export function notify_access_granted({ payload }, token, options = {}) {
   };
 }
 
-export function notify_access_rejected({ payload }, token, options = {}) {
+export function notify_access_rejected({ payload }: any, token: string, options: any = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   return {
     subject: `${prefix} Votre demande d'accès a été refusée`,

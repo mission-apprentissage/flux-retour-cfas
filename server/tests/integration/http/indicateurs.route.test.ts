@@ -135,6 +135,7 @@ describe("Effectifs Route", () => {
         inscritsSansContrat: 0,
         rupturants: 0,
         abandons: 0,
+        totalOrganismes: 0,
       });
     });
 
@@ -161,6 +162,7 @@ describe("Effectifs Route", () => {
         inscritsSansContrat: 0,
         rupturants: 0,
         abandons: 0,
+        totalOrganismes: 0,
       });
     });
 

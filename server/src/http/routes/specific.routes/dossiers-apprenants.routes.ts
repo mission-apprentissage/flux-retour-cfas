@@ -101,7 +101,7 @@ export default () => {
 
     try {
       let nbItemsValid = 0;
-      let validationErrors = [];
+      let validationErrors: any[] = [];
 
       // Add user event
       await createUserEvent({
@@ -191,7 +191,7 @@ export default () => {
         ko: validationErrors.length,
         validationErrors,
       });
-    } catch (/** @type {any}*/ err) {
+    } catch (/** @type {any}*/ err: any) {
       logger.error(`POST /dossiers-apprenants error : ${err}`);
       res.status(400).json({
         status: "ERROR",

@@ -42,7 +42,7 @@ export const getEntreprise = (siren, non_diffusables = true) => {
         throw new ApiError("Api Entreprise", "No entreprise data received");
       }
       return response.data.entreprise;
-    } catch (/** @type {any}*/ e) {
+    } catch (/** @type {any}*/ e: any) {
       if (e.message.includes("timeout")) {
         return null;
       }
@@ -73,7 +73,7 @@ export const getEtablissement = async (siret, non_diffusables = true) => {
         throw new ApiError("Api Entreprise", "No etablissement data received");
       }
       return response.data.etablissement;
-    } catch (/** @type {any}*/ e) {
+    } catch (/** @type {any}*/ e: any) {
       throw new ApiError("Api Entreprise getEtablissement", e.message, e.code || e.response?.status);
     }
   });
@@ -97,7 +97,7 @@ export const getConventionCollective = async (siret, non_diffusables = true) => 
         throw new ApiError("Api Entreprise", "error getConventionCollective");
       }
       return response.data.conventions[0];
-    } catch (/** @type {any}*/ e) {
+    } catch (/** @type {any}*/ e: any) {
       if (e.response?.status === 404) {
         return null;
       } else {

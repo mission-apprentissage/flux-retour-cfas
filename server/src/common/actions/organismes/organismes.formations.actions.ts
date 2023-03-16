@@ -23,7 +23,7 @@ export const getFormationsTreeForOrganisme = async (uai) => {
   const catalogFormationsForOrganisme = await getCatalogFormationsForOrganisme(uai);
 
   // Construction d'une liste de formations pour cet organisme
-  let formationsForOrganismeArray = [];
+  let formationsForOrganismeArray: any[] = [];
   let nbFormationsCreatedForOrganisme = 0;
   let nbFormationsNotCreatedForOrganisme = 0;
 
@@ -79,7 +79,7 @@ export const getFormationsTreeForOrganisme = async (uai) => {
  * @returns
  */
 const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => {
-  let organismesLinkedToFormation = [];
+  let organismesLinkedToFormation: any[] = [];
 
   // Récupération du responsable (gestionnaire)
   if (formationCatalog.etablissement_gestionnaire_uai) {
@@ -162,7 +162,7 @@ const getOrganismeNature = (defaultNature, formationCatalog, organismesLinkedToF
  * @param {string} cfd
  * @returns
  */
-export const findOrganismeFormationByCfd = async (organisme_id, cfd) => {
+export const findOrganismeFormationByCfd = async (organisme_id: string, cfd: string) => {
   const organisme = await organismesDb().findOne({ _id: new ObjectId(organisme_id) });
   if (!organisme) {
     throw new Error("organisme not found");
@@ -172,7 +172,7 @@ export const findOrganismeFormationByCfd = async (organisme_id, cfd) => {
   if (!formationFound) return null;
   const formationId = formationFound._id;
 
-  let found = null;
+  let found: any = null;
   for (const formation of organisme.formations) {
     if (formation.formation_id.toString() === formationId.toString()) {
       found = { ...formation };

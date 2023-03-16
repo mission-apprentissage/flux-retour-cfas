@@ -4,7 +4,7 @@ import { z } from "zod";
 const objectIdSchema = (idField) =>
   z.object({
     [idField]: z.preprocess(
-      (/** @type {any}*/ v) => (ObjectId.isValid(v) ? new ObjectId(v) : v),
+      (/** @type {any}*/ v: any) => (ObjectId.isValid(v) ? new ObjectId(v) : v),
       z.instanceof(ObjectId)
     ),
   });

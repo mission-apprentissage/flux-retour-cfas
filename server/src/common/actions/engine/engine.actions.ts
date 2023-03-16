@@ -29,7 +29,7 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
  * @param {*} effectifData
  * @param {*} [options]
  */
-export const hydrateEffectif = async (effectifData, options) => {
+export const hydrateEffectif = async (effectifData: any, options?: any) => {
   const queryKeys = options?.queryKeys ?? ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"];
   const checkIfExist = options?.checkIfExist ?? false;
 
@@ -196,7 +196,7 @@ export const hydrateEffectif = async (effectifData, options) => {
 
   const validatedEffectif = validateEffectifObject(effectif);
 
-  let found = null;
+  let found: any = null;
   if (checkIfExist) {
     // Recherche de l'effectif via sa clé d'unicité
     const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
@@ -216,10 +216,10 @@ export const hydrateEffectif = async (effectifData, options) => {
  * TODO Contrôle base ACCESS à ajouter ici
  * @param {*} organisme
  */
-const hydrateOrganisme = async (organisme) => {
+const hydrateOrganisme = async (organisme: any) => {
   let organismeToCreate = null;
   let organismeFoundId = null;
-  let organismeFoundError = null;
+  let organismeFoundError: string | null = null;
 
   // Applique le mapping de fiabilisation
   const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
@@ -288,15 +288,15 @@ const hydrateOrganisme = async (organisme) => {
  * @param {*} dossiersApprenants
  */
 export const runEngine = async ({ effectifData }, organismeData) => {
-  let organismeCreatedId = null;
-  let organismeFoundId = null;
+  let organismeCreatedId: any = null;
+  let organismeFoundId: any = null;
 
-  let effectifCreatedId = null;
-  let effectifUpdatedId = null;
+  let effectifCreatedId: any = null;
+  let effectifUpdatedId: any = null;
 
   // Gestion de l'organisme : hydrate et ensuite create or update
   if (organismeData) {
-    const { organismeToCreate, organismeFound } = await hydrateOrganisme(organismeData);
+    const { organismeToCreate, organismeFound }: any = await hydrateOrganisme(organismeData);
 
     // Organisme existant avec erreur on throw
     if (organismeFound?.error) {

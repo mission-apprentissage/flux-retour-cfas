@@ -19,7 +19,7 @@ const realEnterpriseDataBySiret = readdirSync(jsonEntrepriseDataDir).reduce((acc
   return acc;
 }, {});
 
-export const nockGetEtablissement = (callback) => {
+export const nockGetEtablissement = (callback?: any) => {
   nock(API_ENDPOINT)
     .persist()
     .get(/\/etablissements\/.*/)
@@ -29,7 +29,7 @@ export const nockGetEtablissement = (callback) => {
     });
 };
 
-export const nockGetEntreprise = (callback) => {
+export const nockGetEntreprise = (callback?: any) => {
   nock(API_ENDPOINT)
     .persist()
     .get(/\/entreprises\/.*/)

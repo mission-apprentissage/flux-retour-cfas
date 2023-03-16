@@ -7,7 +7,7 @@ import { getDatabase } from "../mongodb.js";
  * @param {*} options
  * @returns
  */
-export const findAndPaginate = async (collection, query, options = {}) => {
+export const findAndPaginate = async (collection, query, options: any = {}) => {
   let page = options.page || 1;
   let limit = options.limit || 10;
   let skip = (page - 1) * limit;

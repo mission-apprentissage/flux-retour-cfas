@@ -5,7 +5,7 @@ import { jobEventsDb } from "../model/collections.js";
  * @param {*} data
  * @returns
  */
-export const createJobEvent = async ({ jobname, action, data, date = new Date() }) => {
+export const createJobEvent = async ({ jobname, action, data, date = new Date() }: any) => {
   const { insertedId } = await jobEventsDb().insertOne({
     jobname,
     action,

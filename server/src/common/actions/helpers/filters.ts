@@ -50,10 +50,10 @@ const filtersConfigurations = {
 /**
  * @param {Partial<import("./filters-struct.js").EffectifsFilters>} filters
  */
-export function buildMongoPipelineFilterStages(filters = {}) {
+export function buildMongoPipelineFilterStages(filters: any = {}) {
   const matchFilters = {};
   const afterLookupsMatchFilters = {};
-  const preliminaryLookups = [];
+  const preliminaryLookups: any[] = [];
   for (const [filterName, filterValue] of Object.entries(filters)) {
     const filterConfiguration = filtersConfigurations[filterName];
     if (!filterConfiguration) {

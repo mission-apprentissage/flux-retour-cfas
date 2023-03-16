@@ -1,4 +1,4 @@
-export default (permissions = {}) =>
+export default (permissions: any = {}) =>
   (req, res, next) => {
     const { user } = req;
     if (user?.permissions.some((item) => permissions.includes(item))) {

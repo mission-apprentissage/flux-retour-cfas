@@ -28,7 +28,7 @@ export const getOpcoData = (siret) => {
         opco_siren: response.data.opcoSiren,
         status: response.data.searchStatus,
       };
-    } catch (/** @type {any}*/ e) {
+    } catch (/** @type {any}*/ e: any) {
       throw new ApiError("Api CFAdock", `${e.message} for siret=${siret}`, e.code || e.response?.status);
     }
   });

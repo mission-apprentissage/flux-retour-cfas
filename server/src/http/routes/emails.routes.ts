@@ -23,7 +23,7 @@ function checkWebhookKey() {
         apiKeyField: "webhookKey",
       },
       async (apiKey, done) => {
-        return done(null, config.smtp.webhookKey === apiKey ? { apiKey } : false);
+        return done(null, (config.smtp as any).webhookKey === apiKey ? { apiKey } : false);
       }
     )
   );

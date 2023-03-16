@@ -162,7 +162,7 @@ export default ({ mailer }) => {
           return res.json([{ uai, siret: null, result: [], messages: { error: `L'uai ${uai} n'a pas été retrouvé` } }]);
 
         const organismes = organismesResp.map(({ siret, uai }) => ({ siret, uai }));
-        const result = [];
+        const result: any[] = [];
         for (const organisme of organismes) {
           const responseFromApiEntreprise = await findDataFromSiret(organisme.siret, false);
           result.push(
@@ -245,7 +245,7 @@ export default ({ mailer }) => {
     let codes_academie = wantedAcademnie?.split(",") ?? null;
     let codes_departement = wantedDepartements?.split(",") ?? null;
 
-    let is_cross_organismes = null;
+    let is_cross_organismes = false;
     if (codes_region || codes_academie || codes_departement) {
       is_cross_organismes = true;
     }

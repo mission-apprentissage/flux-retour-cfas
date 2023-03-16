@@ -51,7 +51,7 @@ describe("Dossiers Apprenants Route", () => {
         callLbaApi: false,
       });
       createdOrganisme = await findOrganismeById(_id);
-    } catch (/** @type {any}*/ err) {
+    } catch (/** @type {any}*/ err: any) {
       console.error("Error with the following randomOrganisme", randomOrganisme);
       throw new Error(err);
     }
@@ -272,7 +272,7 @@ describe("Dossiers Apprenants Route", () => {
       const nbItemsToTest = 20;
 
       // Create input list with uai / siret for organisme created
-      let inputList = [];
+      let inputList: any[] = [];
       for (let index = 0; index < nbItemsToTest; index++) {
         const dossier = createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret });
         inputList.push(dossier);
@@ -303,7 +303,7 @@ describe("Dossiers Apprenants Route", () => {
       const nbItemsToTest = 200;
 
       // Create input list with uai / siret for organisme created
-      let inputList = [];
+      let inputList: any[] = [];
       for (let index = 0; index < nbItemsToTest; index++) {
         inputList.push(createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret }));
       }
@@ -330,7 +330,7 @@ describe("Dossiers Apprenants Route", () => {
       const nbValidItems = 10;
 
       // Create valid & invalid list
-      let validData = [];
+      let validData: any[] = [];
       for (let index = 0; index < nbValidItems; index++) {
         validData.push(createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret }));
       }

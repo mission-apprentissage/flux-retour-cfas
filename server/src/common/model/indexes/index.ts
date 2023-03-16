@@ -6,6 +6,9 @@ import { modelDescriptors } from "../collections.js";
  * Classe BaseIndexer de base
  */
 export class BaseIndexer {
+  collectionName: string;
+  indexesList: any;
+
   /**
    *
    * @param {object} options
@@ -46,10 +49,10 @@ export class BaseIndexer {
 
 export const createIndexes = async () => {
   for (const descriptor of modelDescriptors) {
-    if (descriptor.indexes) {
+    if ((descriptor as any).indexes) {
       await new BaseIndexer({
         collectionName: descriptor.collectionName,
-        indexesList: descriptor.indexes,
+        indexesList: (descriptor as any).indexes,
       }).createIndexes();
     }
   }
@@ -57,10 +60,10 @@ export const createIndexes = async () => {
 
 export const dropIndexes = async () => {
   for (const descriptor of modelDescriptors) {
-    if (descriptor.indexes) {
+    if ((descriptor as any).indexes) {
       await new BaseIndexer({
         collectionName: descriptor.collectionName,
-        indexesList: descriptor.indexes,
+        indexesList: (descriptor as any).indexes,
       }).dropIndexes();
     }
   }

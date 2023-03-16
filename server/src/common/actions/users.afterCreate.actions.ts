@@ -27,7 +27,7 @@ export const createUserPermissions = async ({
   notify = true,
   mailer,
   asRole = "organisme.statsonly",
-}) => {
+}: any) => {
   // TODO [metier/tech] For invite Check if user has already permissions
 
   const {
@@ -54,7 +54,7 @@ export const createUserPermissions = async ({
       });
     } else {
       // user is cross_organismes and scoped
-      let queryScoped = null;
+      let queryScoped: any = null;
       if (codes_region.length) {
         queryScoped = { "adresse.region": { $in: codes_region } };
       }
@@ -105,7 +105,7 @@ export const createUserPermissions = async ({
       }
 
       const giveAccessToSubOrganismes = async (organisme) => {
-        let subOrganismesIds = [];
+        let subOrganismesIds: any[] = [];
         if (
           organisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
           organisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR

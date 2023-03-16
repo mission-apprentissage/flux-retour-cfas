@@ -13,7 +13,7 @@ export default () => {
     try {
       await jobEventsDb();
       mongodbStatus = true;
-    } catch (e) {
+    } catch (e: any) {
       logger.error("Healthcheck failed", e);
     }
 

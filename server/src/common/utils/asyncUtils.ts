@@ -34,7 +34,7 @@ export function timeout(promise, millis) {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timeout));
 }
 
-// export function retry(callback, options = {}) {
+// export function retry(callback, options: any = {}) {
 //   return new Promise((resolve, reject) => {
 //     let retries = 0;
 
@@ -42,7 +42,7 @@ export function timeout(promise, millis) {
 //       try {
 //         let res = await callback();
 //         resolve(res);
-//       } catch (e) {
+//       } catch (e: any) {
 //         if (retries++ > maxRetries) {
 //           reject(e);
 //         } else {

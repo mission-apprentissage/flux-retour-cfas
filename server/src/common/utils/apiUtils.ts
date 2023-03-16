@@ -1,7 +1,7 @@
 import { RateLimiterMemory, RateLimiterQueue } from "rate-limiter-flexible";
 import { timeout } from "./asyncUtils.js";
 
-export const apiRateLimiter = (name, options = {}) => {
+export const apiRateLimiter = (name, options: any = {}) => {
   let rateLimiter = new RateLimiterMemory({
     keyPrefix: name,
     points: options.nbRequests || 1,
@@ -19,7 +19,11 @@ export const apiRateLimiter = (name, options = {}) => {
 };
 
 export class ApiError extends Error {
-  constructor(apiName, message, reason) {
+  apiName: string;
+  message: string;
+  reason: string | undefined;
+
+  constructor(apiName: string, message: string, reason?: string) {
     super();
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;

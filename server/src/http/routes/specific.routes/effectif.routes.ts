@@ -12,7 +12,7 @@ import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import { getCodePostalInfo } from "../../../common/apis/apiTablesCorrespondances.js";
 
-const flattenKeys = (obj, path = []) =>
+const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
     ? { [path.join(".")]: obj }
     : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
@@ -253,7 +253,7 @@ export default () => {
         dataToUpdate.apprenant.contrats.push(nouveau_contrat);
       }
 
-      let validation_errors = [];
+      let validation_errors: any[] = [];
       for (const validation_error of dataToUpdate.validation_errors) {
         if (!inputNames.includes(validation_error.fieldName)) {
           validation_errors.push(validation_error);

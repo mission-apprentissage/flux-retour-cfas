@@ -35,7 +35,7 @@ async function authenticate(uri) {
   return { baseUrl, token };
 }
 
-async function requestObjectAccess(path, options = {}) {
+async function requestObjectAccess(path, options: any = {}) {
   let storage = options.storage || config.ovh.storage.storageName;
   let { baseUrl, token } = await authenticate(config.ovh.storage.uri);
 
@@ -45,7 +45,7 @@ async function requestObjectAccess(path, options = {}) {
   };
 }
 
-export const getFromStorage = async (path, options = {}) => {
+export const getFromStorage = async (path, options: any = {}) => {
   let { url, token } = await requestObjectAccess(path, options);
   return createRequestStream(url, {
     method: "GET",
@@ -56,7 +56,7 @@ export const getFromStorage = async (path, options = {}) => {
   });
 };
 
-export const uploadToStorage = async (path, options = {}) => {
+export const uploadToStorage = async (path, options: any = {}) => {
   let { url, token } = await requestObjectAccess(path, options);
   return createUploadStream(url, {
     headers: {
@@ -67,7 +67,7 @@ export const uploadToStorage = async (path, options = {}) => {
   });
 };
 
-export const deleteFromStorage = async (path, options = {}) => {
+export const deleteFromStorage = async (path, options: any = {}) => {
   let { url, token } = await requestObjectAccess(path, options);
   return createRequestStream(url, {
     method: "DELETE",

@@ -42,8 +42,8 @@ const buildAdresseForOrganisme = async ({ uai, siret }) => {
  * @returns
  */
 export const createOrganisme = async (
-  { uai, siret, nom: nomIn, adresse: adresseIn, ferme: fermeIn, ...data },
-  options = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
+  { uai, siret, nom: nomIn, adresse: adresseIn, ferme: fermeIn, ...data }: any,
+  options: any = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
 ) => {
   if ((await organismesDb().countDocuments({ uai, siret })) > 0) {
     throw new Error(`Un organisme avec l'UAI ${uai} et le siret ${siret} existe déjà`);
@@ -89,7 +89,7 @@ export const createOrganisme = async (
  * @returns
  */
 const getMetiersFromLba = async (siret) => {
-  let metiers = [];
+  let metiers: any[] = [];
 
   try {
     metiers = await getMetiersBySiret(siret);
@@ -105,8 +105,8 @@ const getMetiersFromLba = async (siret) => {
  * @param {*} siret
  * @returns Object
  */
-const getOrganismeInfosFromSiret = async (siret) => {
-  let organismeInfos = {};
+const getOrganismeInfosFromSiret = async (siret: any) => {
+  let organismeInfos: any = {};
 
   if (siret) {
     const dataSiret = await findDataFromSiret(siret, true, false);
@@ -244,9 +244,9 @@ export const findOrganismesByQuery = async (query, projection = {}) => {
  * @returns
  */
 export const updateOrganisme = async (
-  id,
-  { nom: nomIn, adresse: adresseIn, ferme: fermeIn, siret, ...data },
-  options = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
+  id: string | ObjectId,
+  { nom: nomIn, adresse: adresseIn, ferme: fermeIn, siret, ...data }: any,
+  options: any = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
 ) => {
   const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
@@ -443,7 +443,7 @@ export const getSousEtablissementsForUai = async (uai) => {
  * @return {Promise<{ uai: string; nom: string; }[]>} Array of CFA information
  */
 export const searchOrganismes = async (searchCriteria) => {
-  const matchStage = {};
+  const matchStage: any = {};
   if (searchCriteria.searchTerm) {
     matchStage.$or = [
       { $text: { $search: searchCriteria.searchTerm } },

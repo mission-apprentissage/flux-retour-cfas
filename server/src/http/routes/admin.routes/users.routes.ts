@@ -55,7 +55,7 @@ export default ({ mailer }) => {
       throw Boom.notFound(`User ${userEmail} not found`);
     }
 
-    let organisme = null;
+    let organisme: any = null;
     if (organisme_id !== "all") {
       organisme = await findOrganismeById(organisme_id);
       if (organisme_id && !organisme) {

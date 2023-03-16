@@ -17,7 +17,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   let etablissementApiInfo;
   try {
     etablissementApiInfo = await apiEntreprise.getEtablissement(siret, non_diffusables);
-  } catch (/** @type {any}*/ e) {
+  } catch (/** @type {any}*/ e: any) {
     console.error(e);
     if (e.reason === 451) {
       return {
@@ -79,7 +79,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   if (getConventionCollective) {
     try {
       conventionCollective = await apiCfaDock.getOpcoData(siret);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
     }
   }
@@ -88,7 +88,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   let entrepriseApiInfo;
   try {
     entrepriseApiInfo = await apiEntreprise.getEntreprise(siren, non_diffusables);
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
     return {
       result: {},
@@ -101,7 +101,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   if (getConventionCollective && conventionCollective.status === "ERROR") {
     try {
       conventionCollective = await apiCfaDock.getOpcoData(siren);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       conventionCollective = {
         idcc: null,
@@ -117,7 +117,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
     try {
       complement_conventionCollective = (await apiEntreprise.getConventionCollective(siret, non_diffusables)) || {};
       conventionCollective = { ...conventionCollective, ...complement_conventionCollective };
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
     }
   }

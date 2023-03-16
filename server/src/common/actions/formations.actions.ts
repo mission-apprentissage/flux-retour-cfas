@@ -26,7 +26,7 @@ export const existsFormation = async (cfd) => {
  * @param {string} cfd
  * @return {Promise<Object | null>} Found formation
  */
-export const getFormationWithCfd = async (cfd, projection = {}) => {
+export const getFormationWithCfd = async (cfd: string, projection: any = {}) => {
   return await formationsDb().findOne({ cfd }, { projection });
 };
 

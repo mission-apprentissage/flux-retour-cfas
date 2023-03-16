@@ -11,7 +11,7 @@ const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
 const getRandomFormationCfd = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
-const getRandomEtablissement = (siret) =>
+const getRandomEtablissement = (siret?: any) =>
   siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
 
@@ -36,7 +36,7 @@ const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1)
 const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
-export const createRandomOrganisme = (params = {}) => {
+export const createRandomOrganisme = (params: any = {}) => {
   const { ...etablissement } = getRandomEtablissement(params?.siret);
   return {
     ...etablissement,
@@ -81,7 +81,7 @@ export const createRandomDossierApprenant = (params = {}) => {
   };
 };
 
-export const createSampleEffectif = (params = {}) => {
+export const createSampleEffectif = (params: any = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   return {
     apprenant: {
@@ -116,7 +116,7 @@ export const createSampleEffectif = (params = {}) => {
 };
 
 // random DossierApprenant shaped along our REST API schema
-export const createRandomDossierApprenantApiInput = (params = {}) => {
+export const createRandomDossierApprenantApiInput = (params: any = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
   const isStudentPresent = isPresent();

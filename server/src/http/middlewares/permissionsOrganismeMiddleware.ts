@@ -37,7 +37,7 @@ export default (acls) =>
         !user.codes_academie.length &&
         !user.codes_departement.length);
 
-    let permission = null;
+    let permission: any = null;
     if (isTransverseUser) {
       // TODO [tech] HANDLE specific permission given (by the organisme.admin); find if other perms exist
       // for instance => support or help a of

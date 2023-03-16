@@ -45,12 +45,12 @@ export const generateSifa = async (organisme_id) => {
     throw new Error("organisme not found");
   }
   const effectifsDb = await findEffectifs(organisme_id);
-  let effectifs = [];
+  let effectifs: any[] = [];
   for (const effectif of effectifsDb) {
     if (isEligibleSIFA({ historique_statut: effectif.apprenant.historique_statut })) effectifs.push(effectif);
   }
 
-  const items = [];
+  const items: any[] = [];
   for (const effectif of effectifs) {
     const formationBcn =
       (await findFormationById(effectif.formation.formation_id)) || (await getFormationWithCfd(effectif.formation.cfd));

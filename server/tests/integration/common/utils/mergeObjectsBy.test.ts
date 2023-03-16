@@ -3,15 +3,15 @@ import { mergeObjectsBy } from "../../../../src/common/utils/mergeObjectsBy.js";
 
 describe("mergeObjectsBy", () => {
   it("returns an empty array when given an empty array", async () => {
-    const input = [];
-    const expectedResult = [];
+    const input: any[] = [];
+    const expectedResult: any[] = [];
     const result = mergeObjectsBy(input, "id");
 
     assert.deepEqual(result, expectedResult);
   });
 
   it("returns an array of objects merged by given key", async () => {
-    const input = [
+    const input: any = [
       { id: 123, apples: 10 },
       { id: 123, oranges: 3 },
       { id: 456, apples: 0 },

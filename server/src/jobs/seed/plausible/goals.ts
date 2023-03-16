@@ -63,7 +63,7 @@ export const seedPlausibleGoals = async () => {
         console.info(` - goal ${goal} created/updated`);
       }
     }
-  } catch (/** @type {any}*/ error) {
+  } catch (/** @type {any}*/ error: any) {
     console.error(error?.response?.data);
   }
 };

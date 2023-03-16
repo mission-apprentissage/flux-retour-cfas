@@ -2,7 +2,7 @@ import nock from "nock";
 
 import config from "../../../src/config.js";
 
-export const nockGetFormations = (callback) => {
+export const nockGetFormations = (callback?: any) => {
   nock(config.mnaCatalogApi.endpoint)
     .persist()
     .get(new RegExp("\\/entity\\/formations.*"))

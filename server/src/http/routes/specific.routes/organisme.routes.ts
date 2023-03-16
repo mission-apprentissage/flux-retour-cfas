@@ -62,7 +62,7 @@ export default ({ mailer }) => {
     async ({ query: { organisme_id, sifa } }, res) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
-      const effectifs = [];
+      const effectifs: any[] = [];
 
       let requiredFieldsSifa = [
         "apprenant.nom",

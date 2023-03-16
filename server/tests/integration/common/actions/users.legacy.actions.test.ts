@@ -145,7 +145,7 @@ describe("Components Users Test", () => {
 
       await assert.rejects(
         () => generatePasswordUpdateTokenLegacy("user"),
-        (/** @type {Error} */ err) => {
+        (/** @type {Error} */ err: any) => {
           assert.equal(err.message, "User not found");
           return true;
         }
@@ -178,7 +178,7 @@ describe("Components Users Test", () => {
 
       await assert.rejects(
         () => updatePasswordLegacy("wrong token", "new-password-strong"),
-        (/** @type {Error} */ err) => {
+        (/** @type {Error} */ err: any) => {
           assert.equal(err.message, "User not found");
           return true;
         }
@@ -195,7 +195,7 @@ describe("Components Users Test", () => {
 
       await assert.rejects(
         () => updatePasswordLegacy(token, shortPassword),
-        (/** @type {Error} */ err) => {
+        (/** @type {Error} */ err: any) => {
           assert.equal(err.message, "Password must be valid (at least 16 characters)");
           return true;
         }
@@ -217,7 +217,7 @@ describe("Components Users Test", () => {
 
       await assert.rejects(
         () => updatePasswordLegacy(token, "super-long-strong-password"),
-        (/** @type {Error} */ err) => {
+        (/** @type {Error} */ err: any) => {
           assert.equal(err.message, "Password update token has expired");
           return true;
         }
@@ -230,7 +230,7 @@ describe("Components Users Test", () => {
 
       await assert.rejects(
         () => updatePasswordLegacy(null, "super-long-strong-password"),
-        (/** @type {Error} */ err) => {
+        (/** @type {Error} */ err: any) => {
           assert.equal(err.message, "User not found");
           return true;
         }
@@ -250,7 +250,7 @@ describe("Components Users Test", () => {
       // try again
       await assert.rejects(
         () => updatePasswordLegacy(token, "super-long-strong-password"),
-        (/** @type {Error} */ err) => {
+        (/** @type {Error} */ err: any) => {
           assert.equal(err.message, "User not found");
           return true;
         }

@@ -36,7 +36,7 @@ import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } fro
  * @param {string} [options.account_status] - account status
  * @returns {Promise<import("mongodb").WithId<any>>}
  */
-export const createUser = async ({ email, password }, options = {}) => {
+export const createUser = async ({ email, password }, options: any = {}) => {
   const passwordHash = hashUtil(password);
   const {
     civility,
@@ -62,7 +62,7 @@ export const createUser = async ({ email, password }, options = {}) => {
     ? options.account_status || USER_ACCOUNT_STATUS.DIRECT_PENDING_PASSWORD_SETUP
     : options.account_status;
 
-  let rolesMatchIds = [];
+  let rolesMatchIds: any[] = [];
   if (roles && roles.length > 0) {
     rolesMatchIds = (
       await rolesDb()
@@ -362,7 +362,7 @@ export const structureUser = async (user) => {
     ? await hasAtLeastOneContributeurNotPending(user.main_organisme_id, "organisme.admin")
     : false;
 
-  let specialAcl = [];
+  let specialAcl: any[] = [];
   if (!hasAccessToOnlyOneOrganisme || user.is_cross_organismes || user.is_admin) {
     specialAcl = ["page/mes-organismes"];
   }
@@ -416,7 +416,7 @@ export const userHasAskAccess = async (email, data) => {
   return await updateUserStatus(email, USER_ACCOUNT_STATUS.PENDING_ADMIN_VALIDATION, data);
 };
 
-export const finalizeUser = async (email) => {
+export const finalizeUser = async (email: string) => {
   return await updateUserStatus(email, USER_ACCOUNT_STATUS.CONFIRMED);
 };
 
@@ -426,7 +426,7 @@ export const finalizeUser = async (email) => {
  * @param {string} newPassword
  * @returns
  */
-export const changePassword = async (email, newPassword) => {
+export const changePassword = async (email: string, newPassword: string) => {
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
     throw new Error("Unable to find user");
@@ -456,7 +456,7 @@ export const changePassword = async (email, newPassword) => {
  * @param {*} email
  * @returns
  */
-export const generatePasswordUpdateToken = async (email) => {
+export const generatePasswordUpdateToken = async (email: string) => {
   const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
 
   const user = await usersMigrationDb().findOne({ email });
@@ -487,7 +487,7 @@ export const generatePasswordUpdateToken = async (email) => {
  * Renvoie le statut du compte après réinitialisation du mot de passe.
  * Uniquement utile lors de l'inscription.
  */
-function getNextAccountStatus(user) {
+function getNextAccountStatus(user: any) {
   switch (user.account_status) {
     case "PENDING_PASSWORD_SETUP":
       return user.is_admin ? "CONFIRMED" : "PENDING_PERMISSIONS_SETUP";
@@ -503,7 +503,7 @@ function getNextAccountStatus(user) {
  * @param {string} newStatus
  * @param {any=} data
  */
-async function updateUserStatus(email, newStatus, data) {
+async function updateUserStatus(email: any, newStatus: any, data?: any) {
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
     throw new Error("Unable to find user");

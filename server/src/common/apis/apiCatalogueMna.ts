@@ -38,7 +38,7 @@ export const getCatalogFormationsForOrganisme = async (uai, page = 1) => {
       logger.debug({ uai, nbFormations: pagination.total }, "getCatalogFormationsForOrganisme");
     }
     return formations;
-  } catch (/** @type {any}*/ err) {
+  } catch (/** @type {any}*/ err: any) {
     logger.error("getFormationsForOrganisme error", err.response?.data || err.message);
     return [];
   }

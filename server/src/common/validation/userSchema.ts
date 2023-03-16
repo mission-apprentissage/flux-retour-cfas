@@ -6,7 +6,7 @@ const userSchema = ({ isNew }) =>
   z.object({
     ...(isNew
       ? {
-          password: z.preprocess((/** @type {any}*/ v) => v || generateRandomAlphanumericPhrase(), z.string()),
+          password: z.preprocess((/** @type {any}*/ v: any) => v || generateRandomAlphanumericPhrase(), z.string()),
         }
       : {}),
     prenom: z.string(),

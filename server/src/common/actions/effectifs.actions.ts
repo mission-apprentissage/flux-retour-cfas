@@ -303,7 +303,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation, validati
 
   // Lock field
   let newLocker = { ...effectif.is_lock };
-  const flattenKeys = (obj, path = []) =>
+  const flattenKeys = (obj: any, path: any = []) =>
     !isObject(obj)
       ? { [path.join(".")]: obj }
       : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});

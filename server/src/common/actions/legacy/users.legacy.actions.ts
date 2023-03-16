@@ -191,7 +191,7 @@ export const removeUserLegacy = async (username) => {
 export const searchUsersLegacy = async (searchCriteria) => {
   const { searchTerm } = searchCriteria;
 
-  const matchStage = {};
+  const matchStage: any = {};
   if (searchTerm) {
     matchStage.$or = [
       { username: new RegExp(escapeRegExp(searchTerm), "i") },
@@ -226,7 +226,7 @@ export const searchUsersLegacy = async (searchCriteria) => {
  * @param {*} id
  * @param {*} param1
  */
-export const updateUserLegacy = async (id, { username, email, network, region, organisme }) => {
+export const updateUserLegacy = async (id: any, { username, email, network, region, organisme }: any) => {
   const _id = new ObjectId(id);
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 

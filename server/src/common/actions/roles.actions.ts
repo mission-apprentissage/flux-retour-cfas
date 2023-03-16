@@ -8,7 +8,7 @@ import { defaultValuesRole } from "../model/roles.model.js";
  * @param {*} roleProps
  * @returns
  */
-export const createRole = async ({ name, type, acl, title, description }) => {
+export const createRole = async ({ name, type, acl, title, description }: any) => {
   const { insertedId } = await rolesDb().insertOne({
     ...defaultValuesRole(),
     type,
@@ -27,7 +27,7 @@ export const createRole = async ({ name, type, acl, title, description }) => {
  * @param {*} query
  * @returns
  */
-export const getAllRoles = async (query = {}) =>
+export const getAllRoles = async (query: any = {}) =>
   await rolesDb()
     .find(query, { projection: { __v: 0 } })
     .toArray();

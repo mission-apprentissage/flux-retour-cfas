@@ -236,7 +236,7 @@ export default ({ clamav }) => {
       let upload = null;
       try {
         upload = await getUploadEntryByOrgaId(organisme_id, { last_snapshot_effectifs: 0 });
-      } catch (/** @type {any}*/ error) {
+      } catch (/** @type {any}*/ error: any) {
         if (error.message.includes("Unable to find uploadEntry")) {
           upload = await createUpload({ organisme_id });
         }
@@ -272,8 +272,8 @@ export default ({ clamav }) => {
     const uploads = await getUploadEntryByOrgaId(organisme_id);
     const unconfirmed = uploads.documents.filter((d) => !d.confirm);
     const stream = await getFromStorage(unconfirmed[0].chemin_fichier);
-    let headers = [];
-    let rawFileJson = [];
+    let headers: any = [];
+    let rawFileJson: any[] = [];
     await oleoduc(
       stream,
       crypto.isCipherAvailable() ? crypto.decipher(organisme_id) : noop(),
@@ -320,7 +320,7 @@ export default ({ clamav }) => {
 
       // eslint-disable-next-line no-unused-vars
       const { headers: rawHeaders, rawFileJson } = await getUnconfirmedDocumentContent(organisme_id);
-      // const dataJson = [];
+      // const dataJson:any[] = [];
       // for (const rawData of rawFileJson) {
       //   dataJson.push({ ...headers, ...rawData });
       // }
@@ -655,9 +655,9 @@ export default ({ clamav }) => {
         Object.entries(obj).reduce((acc, [key, value]) => set(acc, key, value), {})
       );
 
-      const canNotBeImportEffectifs = [];
-      const canBeImportEffectifs = [];
-      const canBeImportEffectifsIds = [];
+      const canNotBeImportEffectifs: any[] = [];
+      const canBeImportEffectifs: any[] = [];
+      const canBeImportEffectifsIds: any[] = [];
       for (let [index, data] of convertedData.entries()) {
         sendServerEventsForUser(
           req.user._id,
@@ -725,13 +725,13 @@ export default ({ clamav }) => {
             let effectifToSave = canBeImportEffectif;
             if (foundInDb) {
               const fieldsToImportTmp = Object.values(mapping)
-                .filter((fieldName) => !["CFD", "nom", "prenom"].includes(fieldName))
-                .map((fN) => mappingModel[fN]);
+                .filter((fieldName: any) => !["CFD", "nom", "prenom"].includes(fieldName))
+                .map((fN: any) => mappingModel[fN]);
               effectifToSave = cloneDeep(foundInDb);
-              let tmpContrat = {};
-              let tmpHistoryStatut = {};
+              let tmpContrat: any = {};
+              let tmpHistoryStatut: any = {};
 
-              const fieldsToImport = [];
+              const fieldsToImport: any[] = [];
               for (const fieldToImport of fieldsToImportTmp) {
                 const isLocked = get(effectifToSave.is_lock, fieldToImport);
                 if (!isLocked && fieldToImport) {
@@ -744,7 +744,7 @@ export default ({ clamav }) => {
                 let value = newValue;
                 if (fieldName === "validation_errors") {
                   const buildDiffValidationErrors = (validationErrorsOnFieldsToImport, found) => {
-                    let cleanedUpErrors = [];
+                    let cleanedUpErrors: any[] = [];
                     for (const currentError of validationErrorsOnFieldsToImport) {
                       const prevValue = get(found, currentError.fieldName);
                       if (
@@ -854,7 +854,7 @@ export default ({ clamav }) => {
         { returnDocument: "after" }
       );
 
-      const effectifsTable = [];
+      const effectifsTable: any[] = [];
 
       for (const {
         _id,

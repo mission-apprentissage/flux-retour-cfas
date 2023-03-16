@@ -5,7 +5,7 @@ import { userEventsDb } from "../model/collections.js";
  * @param {*} param0
  * @returns
  */
-export const createUserEvent = async ({ username, user_email, type, action, data }) => {
+export const createUserEvent = async ({ username, user_email, type, action, data }: any) => {
   await userEventsDb().insertOne({
     username, // Todo remove une fois migration faite
     user_email,

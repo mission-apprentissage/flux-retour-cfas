@@ -104,7 +104,7 @@ const findPermissionsByUserEmail = async (organisme_id, userEmail, projection = 
     .toArray();
 };
 
-export const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName = "organisme.admin") => {
+export const hasAtLeastOneContributeurNotPending = async (organisme_id: string, roleName = "organisme.admin") => {
   const roleDb = await findRoleByName(roleName, { _id: 1 });
   if (!roleDb) {
     throw new Error("Role doesn't exist");
@@ -119,7 +119,7 @@ export const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName
  * @param {*} permissionProps
  * @returns
  */
-export const updatePermission = async ({ organisme_id, userEmail, roleName }) => {
+export const updatePermission = async ({ organisme_id, userEmail, roleName }: any) => {
   const roleDb = await findRoleByName(roleName);
   if (!roleDb) {
     throw new Error("Role doesn't exist");
@@ -152,7 +152,7 @@ export const updatePermission = async ({ organisme_id, userEmail, roleName }) =>
  * @param {string|undefined|ObjectId} options.organisme_id
  * @returns
  */
-export const updatePermissionsPending = async ({ userEmail, pending, organisme_id }) => {
+export const updatePermissionsPending = async ({ userEmail, pending, organisme_id }: any) => {
   const permissions = await findPermissionsByUserEmail(organisme_id, userEmail, { _id: 1 });
   if (!permissions || !permissions.length) {
     throw new Error(`Unable to find permissions for userEmail ${userEmail.toLowerCase()}`);
@@ -176,7 +176,7 @@ export const updatePermissionsPending = async ({ userEmail, pending, organisme_i
  * @param {string|undefined|ObjectId} options.organisme_id
  * @returns
  */
-export const removePermissions = async ({ userEmail, organisme_id }) => {
+export const removePermissions = async ({ userEmail, organisme_id }: any) => {
   const permissions = await findPermissionsByUserEmail(organisme_id, userEmail, { _id: 1 });
   if (!permissions || !permissions.length) {
     throw new Error(

@@ -92,6 +92,8 @@ import { exportedMongoFieldsProjection } from "./export.js";
 ]
  */
 export class Indicator {
+  config: any;
+
   constructor(config) {
     this.config = config;
   }
@@ -101,7 +103,7 @@ export class Indicator {
    * @param {*} options
    * @returns {any[]}
    */
-  getAtDateAggregationPipeline(searchDate, options = {}) {
+  getAtDateAggregationPipeline(searchDate, options: any = {}) {
     return [
       ...this.config.preStages,
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
@@ -116,7 +118,7 @@ export class Indicator {
    * @param {*} options Options de regroupement / projection optionnelles
    * @returns
    */
-  async getCountAtDate(searchDate, filterStages = [], options = {}) {
+  async getCountAtDate(searchDate, filterStages: any = [], options: any = {}) {
     const result = await effectifsDb()
       .aggregate([
         ...filterStages,
@@ -138,7 +140,7 @@ export class Indicator {
    * @param {*} options Options de regroupement / projection optionnelles
    * @returns
    */
-  async getListAtDate(searchDate, filterStages = [], options = {}) {
+  async getListAtDate(searchDate: any, filterStages: any[] = [], options: any = {}) {
     const result = await effectifsDb()
       .aggregate([...filterStages, ...this.getAtDateAggregationPipeline(searchDate, options)])
       .toArray();
@@ -207,7 +209,7 @@ export class Indicator {
    * @param {*} indicateur
    * @returns
    */
-  async getFullExportFormattedListAtDate(searchDate, filterStages = [], indicateur) {
+  async getFullExportFormattedListAtDate(searchDate: any, filterStages: any[] = [], indicateur: any) {
     const exportList = await this.getListAtDate(searchDate, [...filterStages, { $lookup: organismeLookup }], {
       projection: exportedMongoFieldsProjection,
     });

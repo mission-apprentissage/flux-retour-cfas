@@ -5,7 +5,7 @@ import { createMailer } from "./common/actions/emails.actions.js";
 import { createRedis } from "./common/services/redis.js";
 import logger from "./common/logger.js";
 
-const createServices = async (options = {}) => {
+const createServices = async (options: any = {}) => {
   return {
     mailer: createMailer(options.mailerService || createMailerService()),
     clamav: options.clamav || (await createClamav(config.clamav.uri)),

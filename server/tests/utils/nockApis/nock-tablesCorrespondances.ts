@@ -4,7 +4,7 @@ import { API_ENDPOINT } from "../../../src/common/apis/apiTablesCorrespondances.
 import { dataForGetCfdInfo, dataForGetSiretInfo } from "../../data/apiTablesDeCorrespondances.js";
 import { DEPARTEMENTS } from "../../../src/common/constants/territoiresConstants.js";
 
-export const nockGetCfdInfo = (callback) => {
+export const nockGetCfdInfo = (callback?: any) => {
   nock(API_ENDPOINT)
     .persist()
     .post("/cfd")
