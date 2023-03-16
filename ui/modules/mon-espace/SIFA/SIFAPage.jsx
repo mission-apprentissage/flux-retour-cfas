@@ -4,17 +4,18 @@ import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue, useSetRecoilState } from "recoil";
+import { usePlausible } from "next-plausible";
 
-import { useEspace } from "../../../hooks/useEspace";
-import { organismeAtom } from "../../../hooks/organismeAtoms";
-import { _get, _getBlob } from "../../../common/httpClient";
-import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
-import useDownloadClick from "../../../hooks/useDownloadClick";
-import { DownloadLine } from "../../../theme/components/icons";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import { _get, _getBlob } from "@/common/httpClient";
+import { hasContextAccessTo } from "@/common/utils/rolesUtils";
+import useDownloadClick from "@/hooks/useDownloadClick";
+import { DownloadLine } from "@/theme/components/icons";
+import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
+
 import EffectifsTable from "../effectifs/engine/EffectifsTable";
 import { effectifsStateAtom } from "../effectifs/engine/atoms";
 import { Input } from "../effectifs/engine/formEngine/components/Input/Input";
-import { DoubleChevrons } from "../../../theme/components/icons/DoubleChevrons";
 
 function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -50,9 +51,17 @@ function useOrganismesEffectifs(organismeId) {
 
 const DownloadButton = ({ title, fileName, getFile }) => {
   const { onClick, isLoading } = useDownloadClick(getFile, fileName);
+  const plausible = usePlausible();
 
   return (
-    <Button size="md" onClick={onClick} variant="secondary">
+    <Button
+      size="md"
+      onClick={(e) => {
+        plausible("telechargement_sifa");
+        return onClick(e);
+      }}
+      variant="secondary"
+    >
       {isLoading && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
       {!isLoading && <DownloadLine />}
       <Text as="span" ml={2}>
