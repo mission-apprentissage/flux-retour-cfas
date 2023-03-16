@@ -25,15 +25,14 @@ export const getFormationsTreeForOrganisme = async (uai) => {
   // Construction d'une liste de formations pour cet organisme
   let formationsForOrganismeArray = [];
   let nbFormationsCreatedForOrganisme = 0;
-  // let nbFormationsUpdatedForOrganisme = 0;
   let nbFormationsNotCreatedForOrganisme = 0;
 
   if (catalogFormationsForOrganisme?.length) {
     await asyncForEach(catalogFormationsForOrganisme, async (currentFormation) => {
       let currentFormationId;
 
-      // Récupération de la formation du catalogue dans le TDB, si pas présente on la créé
-      // On count les formations créés / non crées (erreur)
+      // Récupération de la formation du catalogue dans le TDB, si pas présente on la crée
+      // On compte les formations créées / non créées (erreur)
       const formationFoundInTdb = await getFormationWithCfd(currentFormation.cfd);
       if (!formationFoundInTdb) {
         try {

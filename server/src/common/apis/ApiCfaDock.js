@@ -1,4 +1,5 @@
 import axios from "axios";
+import config from "../../config.js";
 import logger from "../logger.js";
 import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
 
@@ -8,7 +9,7 @@ const executeWithRateLimiting = apiRateLimiter("apiCfaDock", {
   nbRequests: 2,
   durationInSeconds: 1,
   client: axios.create({
-    baseURL: "https://www.cfadock.fr/api",
+    baseURL: config.cfadockApi.endpoint,
     timeout: 5000,
   }),
 });

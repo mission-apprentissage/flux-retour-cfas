@@ -31,5 +31,6 @@ const createStreams = () => {
 export default bunyan.createLogger({
   name: config.appName,
   serializers: bunyan.stdSerializers,
+  /** @ts-expect-error */
   streams: createStreams(),
 });

@@ -25,7 +25,11 @@ describe("Routes Organismes", () => {
 
     // TODO Tester la création d'un organisme + nock des API Entreprise & Catalog
     // const randomOrganisme = createRandomOrganisme();
-    // const { _id } = await createOrganisme(randomOrganisme);
+    // const { _id } = await createOrganisme(randomOrganisme, {
+    //   buildFormationTree: false,
+    //   buildInfosFromSiret: false,
+    //   callLbaApi: false,
+    // });
     // const created = await findOrganismeById(_id);
 
     // const expected = pick(created, [
