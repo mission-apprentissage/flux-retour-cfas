@@ -24,6 +24,7 @@ import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiab
 import { updateUserPassword } from "./users/update-user-password.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs copy/index.js";
 import { removeOrganismeAndEffectifsAndDossiersApprenantsMigration } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
+import { seedPlausibleGoals } from "./seed/plausible/goals.js";
 
 program
   .configureHelp({
@@ -129,6 +130,19 @@ program
   .action(async ({ email }, options) =>
     runScript(async () => {
       return seedAdmin({ adminEmail: email?.toLowerCase() });
+    }, options._name)
+  );
+
+/**
+ * Job de seed des goals dans plausible,
+ * sur les envs de dev, recette et production
+ */
+program
+  .command("seed:plausible:goals")
+  .description("Seed plausible goals")
+  .action(async (_, options) =>
+    runScript(async () => {
+      return seedPlausibleGoals();
     }, options._name)
   );
 

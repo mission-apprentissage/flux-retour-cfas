@@ -1,5 +1,7 @@
 import React from "react";
 import { Box, Container, Flex, List, ListItem, Text } from "@chakra-ui/react";
+import { usePlausible } from "next-plausible";
+
 import { ExternalLinkLine } from "../../../theme/components/icons";
 import LogoFooter from "./LogoFooter";
 import Link from "../../Links/Link";
@@ -7,6 +9,8 @@ import Link from "../../Links/Link";
 const APP_VERSION = process.env.NEXT_PUBLIC_VERSION;
 
 const Footer = () => {
+  const plausible = usePlausible();
+
   return (
     <Box borderTop="1px solid" borderColor="bluefrance" color="#1E1E1E" fontSize="zeta" w="full">
       <Container maxW="xl" my={["0", "0", "0", "-2.5rem"]} pb={["4w", "4w", "2w", "0"]}>
@@ -81,7 +85,9 @@ const Footer = () => {
                 <Link href={"/donnees-personnelles"}>Données personnelles</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/stats"}>Statistiques</Link>
+                <Link href="/stats" onClick={() => plausible("clic_statistiques")}>
+                  Statistiques
+                </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link
