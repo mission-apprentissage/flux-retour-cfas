@@ -4,6 +4,6 @@
   "timeout": 5000,
   "require": [
     "dotenv/config",
-    "tests/utils/mochaSetup.js"
+    "tests/utils/mochaSetup.ts"
   ]
 }
