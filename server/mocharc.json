@@ -1,9 +1,0 @@
-{
-  "recursive": true,
-  "exit": true,
-  "timeout": 5000,
-  "require": [
-    "dotenv/config",
-    "tests/utils/mochaSetup.js"
-  ]
-}
