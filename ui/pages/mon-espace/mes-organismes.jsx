@@ -36,9 +36,7 @@ function useEspaceOrganismes() {
     data: organismes,
     isLoading,
     isFetching,
-  } = useQuery(["espace/organismes"], () => _get("/api/v1/espace/organismes"), {
-    refetchOnWindowFocus: false,
-  });
+  } = useQuery(["espace/organismes"], () => _get("/api/v1/espace/organismes"));
 
   return { isLoading: isFetching || isLoading, organismes };
 }
