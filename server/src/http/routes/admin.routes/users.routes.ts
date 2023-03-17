@@ -21,7 +21,7 @@ import userSchema from "../../../common/validation/userSchema.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
 import logger from "../../../common/logger.js";
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default ({ mailer }) => {
   const router = express.Router();
 

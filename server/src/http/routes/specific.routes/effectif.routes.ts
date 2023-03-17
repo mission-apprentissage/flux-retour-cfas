@@ -214,7 +214,7 @@ export default () => {
     "/:id",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/edition"]),
     async ({ body, params }, res) => {
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)
 
       const effectifDb = await effectifsDb().findOne({ _id: new ObjectId(params.id) });
@@ -222,13 +222,13 @@ export default () => {
         throw new Error(`Unable to find effectif ${params.id}`);
       }
 
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { is_lock, nouveau_statut, nouveau_contrat, ...restData } = data;
 
       // TODO CHECK IS LOCK IF COMING FROM API
       // organisme
 
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
         merge(effectifDb, {
           ...compactObject(restData),
@@ -278,7 +278,7 @@ export default () => {
     permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
     async ({ body }, res) => {
       // TODO organismeFormation
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { siret, organismeFormation } = await Joi.object({
         siret: Joi.string().required(),
         organismeFormation: Joi.boolean(),

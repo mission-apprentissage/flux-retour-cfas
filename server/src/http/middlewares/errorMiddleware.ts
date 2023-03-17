@@ -1,7 +1,7 @@
 import Boom from "boom";
 
 export default () => {
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (rawError, req, res, next) => {
     req.err = rawError;
 

@@ -1,5 +1,5 @@
-import ApiEntEntreprise from "./ApiEntEntreprise";
-import ApiEntEtablissement from "./ApiEntEtablissement";
+import ApiEntEntreprise from "./ApiEntEntreprise.js";
+import ApiEntEtablissement from "./ApiEntEtablissement.js";
 
 type ApiEntEntrepriseResponse = {
   entreprise: ApiEntEntreprise;

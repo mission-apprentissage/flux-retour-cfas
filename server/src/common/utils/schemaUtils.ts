@@ -2,7 +2,7 @@ import logger from "../logger.js";
 import Joi from "joi";
 import Enjoi from "enjoi";
 
-const applySchemaValidation = (entity: any, schema: any, extensions: any = [], abortEarly: boolean = true) => {
+const applySchemaValidation = (entity: any, schema: any, extensions: any = [], abortEarly = true) => {
   let schemaDesc = JSON.parse(JSON.stringify(schema).replaceAll("bsonType", "type"));
 
   const ext = extensions.map(({ name, ...extension }) => {

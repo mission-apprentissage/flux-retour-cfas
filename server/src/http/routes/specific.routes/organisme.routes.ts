@@ -45,7 +45,7 @@ export default ({ mailer }) => {
   router.put(
     "/entity/:id",
     permissionsOrganismeMiddleware(["organisme/page_parametres"]),
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async ({ body: { organisme_id, ...data }, params, user }, res) => {
       // TODO JOI
       const updatedOrganisme = await updateOrganisme(params.id, data);
