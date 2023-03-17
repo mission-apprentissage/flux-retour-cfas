@@ -69,13 +69,15 @@ export default function Table({
     globalFilterFn: fuzzyFilter,
     onGlobalFilterChange: setGlobalFilter,
     pageCount: pagination?.total || data?.length,
-    onPaginationChange: onPaginationChange
-      ? (updater) => {
-          const oldState = table.getState().pagination;
-          const newState = updater(oldState);
-          onPaginationChange({ page: newState.pageIndex + 1, limit: newState.pageSize });
+    ...(onPaginationChange
+      ? {
+          onPaginationChange: (updater) => {
+            const oldState = table.getState().pagination;
+            const newState = updater(oldState);
+            onPaginationChange({ page: newState.pageIndex + 1, limit: newState.pageSize });
+          },
         }
-      : null,
+      : {}),
     state: {
       globalFilter,
       ...(pagination
