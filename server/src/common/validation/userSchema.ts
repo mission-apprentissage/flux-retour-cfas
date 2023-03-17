@@ -11,7 +11,7 @@ const userSchema = ({ isNew }) =>
       : {}),
     prenom: z.string(),
     nom: z.string(),
-    email: z.string(),
+    email: z.string().email(),
     roles: z.string().array(),
     is_admin: z.boolean().optional(),
   });

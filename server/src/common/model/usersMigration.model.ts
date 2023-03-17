@@ -149,7 +149,7 @@ export function validateUser(props) {
     extensions: [
       {
         name: "email",
-        base: Joi.string().email(),
+        base: Joi.string(),
       },
       {
         name: "password",
