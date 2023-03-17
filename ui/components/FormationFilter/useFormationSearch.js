@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchSearchFormations } from "@/common/api/tableauDeBord";
-import { QUERY_KEYS } from "@/common/constants/queryKeys";
 import useDebounce from "@/hooks/useDebounce";
 import { omitNullishValues } from "@/common/utils/omitNullishValues";
+import { _post } from "@/common/httpClient";
 
 export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;
 const SEARCH_DEBOUNCE_TIME = 300;
@@ -24,8 +23,8 @@ const useFormationSearch = (searchTerm, filters) => {
   });
 
   const { data, isLoading } = useQuery(
-    [QUERY_KEYS.SEARCH_FORMATIONS, requestFilters],
-    () => fetchSearchFormations(requestFilters),
+    ["search-formations", requestFilters],
+    () => _post("/api/formations/search", requestFilters),
     {
       enabled: searchEnabled,
     }

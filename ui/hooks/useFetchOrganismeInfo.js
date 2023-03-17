@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchOrganismeByUai } from "@/common/api/tableauDeBord";
+import { _get } from "@/common/httpClient";
 import { QUERY_KEYS } from "@/common/constants/queryKeys";
 
 const useFetchOrganismeInfo = (cfaUai) => {
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.CFAS, cfaUai], () => fetchOrganismeByUai(cfaUai), {
+  const { data, isLoading, error } = useQuery([QUERY_KEYS.CFAS, cfaUai], () => _get(`/api/v1/organisme/${cfaUai}`), {
     enabled: !!cfaUai,
   });
 

@@ -1,14 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchEffectifsParSiret } from "@/common/api/tableauDeBord";
-import { QUERY_KEYS } from "@/common/constants/queryKeys";
+import { _get } from "@/common/httpClient";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 const useFetchEffectifsParSiret = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.EFFECTIF_PAR.SIRET, requestFilters], () =>
-    fetchEffectifsParSiret(requestFilters)
+  const { data, isLoading, error } = useQuery(["/api/indicateurs/siret", requestFilters], () =>
+    _get("/api/indicateurs/siret", { params: requestFilters })
   );
   const effectifs = data ? sortAlphabeticallyBy("nom_etablissement", data) : [];
 

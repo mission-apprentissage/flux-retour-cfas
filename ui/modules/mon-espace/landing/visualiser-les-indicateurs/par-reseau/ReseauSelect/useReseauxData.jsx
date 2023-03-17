@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchReseaux } from "@/common/api/tableauDeBord";
-import { QUERY_KEYS } from "@/common/constants/queryKeys";
+import { _get } from "@/common/httpClient";
 import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 const useReseauxData = () => {
   // reseaux are very unlikely to change during the user's session, thus the infinite staleTime
-  const { data } = useQuery([QUERY_KEYS.RESEAUX], () => fetchReseaux(), { staleTime: Infinity });
+  const { data } = useQuery(["reseaux"], () => _get("/api/referentiel/networks"), { staleTime: Infinity });
 
   const reseauxSorted = sortAlphabeticallyBy("nom", data || []);
 
