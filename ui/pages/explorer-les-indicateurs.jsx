@@ -28,22 +28,6 @@ const ExplorerLesIndicateursPage = () => {
           <Heading textStyle="h2" color="grey.800" mt={5}>
             {title}
           </Heading>
-          <HStack fontSize="epsilon" spacing="2w" paddingY="2w">
-            <Box>
-              <Padlock color="bluefrance" marginTop="-1w" flex="1" width="18px" height="20px" />
-              <Text as="span" marginLeft="1w">
-                Merci de vous connecter pour consulter l’intégralité des données.
-              </Text>
-            </Box>
-            <Box color="bluefrance" flex="2">
-              <Link href="/auth/connexion" variant="link" fontSize="epsilon">
-                <Box as="span" verticalAlign="middle">
-                  Connexion
-                </Box>
-                <Box as="i" className="ri-arrow-right-line" marginLeft="1w" verticalAlign="middle" />
-              </Link>
-            </Box>
-          </HStack>
         </Container>
       </Box>
       <Section paddingY="4w" color="grey.800" marginBottom="15w">
