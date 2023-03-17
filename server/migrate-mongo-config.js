@@ -1,11 +1,10 @@
 // In this file you can configure migrate-mongo
 // eslint-disable-next-line node/no-unpublished-import
 import "dotenv/config.js";
-import appConfig from "./src/config.js";
 
 const config = {
   mongodb: {
-    url: appConfig.mongodb.uri,
+    url: process.env.FLUX_RETOUR_CFAS_MONGODB_URI,
     databaseName: "",
     options: {
       useNewUrlParser: true, // removes a deprecation warning when connecting
