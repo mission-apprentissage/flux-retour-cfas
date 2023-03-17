@@ -16,7 +16,7 @@
     "test:coverage": "c8 --check-coverage yarn test",
     "test:cmd": "NODE_ENV=test cross-env DOTENV_CONFIG_PATH=.env.test ts-mocha -n loader=ts-node/esm",
     "lint": "eslint --cache . --ext .ts",
-    "cli": "node src/jobs/cli.js",
+    "cli": "ts-node src/jobs/cli.ts",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down"
