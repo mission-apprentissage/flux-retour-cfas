@@ -18,6 +18,7 @@ const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
   "siret",
   "siege_social",
   "uai",
+  "lieux_de_formation",
 ];
 
 /**
