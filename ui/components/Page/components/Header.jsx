@@ -99,6 +99,11 @@ const UserMenu = () => {
                       Gestion des utilisateurs
                     </MenuItem>
                   )}
+                  {hasPageAccessTo(auth, "admin/page_gestion_organismes") && (
+                    <MenuItem href="/admin/organismes" icon={<Parametre boxSize={4} />}>
+                      Gestion des organismes
+                    </MenuItem>
+                  )}
                   {hasPageAccessTo(auth, "admin/page_gestion_roles") && (
                     <MenuItem href="/admin/roles" icon={<Parametre boxSize={4} />}>
                       Gestion des rôles

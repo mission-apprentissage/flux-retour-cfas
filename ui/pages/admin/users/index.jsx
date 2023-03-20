@@ -36,28 +36,32 @@ const Users = () => {
   const title = "Gestion des utilisateurs";
   const router = useRouter();
   const page = parseInt(router.query.page, 10) || 1;
+  const limit = parseInt(router.query.limit, 10) || 10;
+
   const searchValue = router.query.q;
   const {
     data: roles,
     isLoading: isLoadingRoles,
-    error: errorsRoles,
-  } = useQuery(["roles"], () => _get("/api/v1/admin/roles/"));
+    error: errorRoles,
+  } = useQuery(["admin/roles"], () => _get("/api/v1/admin/roles/"));
   const {
     data: users,
     refetch: refetchUsers,
     isLoading: isLoadingUsers,
-    error: errorsUsers,
-  } = useQuery(["users", page, searchValue], () => _get("/api/v1/admin/users/", { params: { page, q: searchValue } }));
+    error: errorUsers,
+  } = useQuery(["admin/users", page, limit, limit, searchValue], () =>
+    _get("/api/v1/admin/users/", { params: { page, q: searchValue } })
+  );
   // prefetch next page
   useQuery(
-    ["users", page + 1, searchValue],
-    () => _get("/api/v1/admin/users/", { params: { page: page + 1, q: searchValue } }),
+    ["users", page + 1, limit, searchValue],
+    () => _get("/api/v1/admin/users/", { params: { page: page + 1, limit, q: searchValue } }),
     { enabled: !!(users?.pagination && page + 1 < users?.pagination?.lastPage) }
   );
 
   const rolesById = roles?.reduce((acc, role) => ({ ...acc, [role._id]: role }), {});
   const isLoading = isLoadingUsers || isLoadingRoles;
-  const error = errorsUsers || errorsRoles;
+  const error = errorUsers || errorRoles;
 
   const closeModal = () => router.push("/admin/users", undefined, { shallow: true });
 
@@ -156,7 +160,7 @@ const Users = () => {
                   size: 100,
                   header: () => "Etablissement",
                   cell: ({ getValue }) => (
-                    <NavLink href={`/mon-espace/organisme/${getValue()?._id}`} flexGrow={1}>
+                    <NavLink href={`/admin/organismes/${getValue()?._id}`} flexGrow={1}>
                       <Text isTruncated maxWidth={400}>
                         {getValue()?.nom}
                       </Text>

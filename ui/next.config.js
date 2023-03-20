@@ -33,7 +33,7 @@ const nextConfig = {
   swcMinify: true,
   output: "standalone",
   experimental: {
-    appDir: true,
+    appDir: false,
     typedRoutes: true,
   },
   webpack: (config) => {
