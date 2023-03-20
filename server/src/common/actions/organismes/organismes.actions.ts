@@ -315,7 +315,7 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, roleName
   }
 
   await createPermission({
-    organisme_id: organisme._id,
+    organisme_id: organisme._id as any,
     userEmail: userEmail.toLowerCase(),
     roleName,
     pending,

@@ -1,6 +1,6 @@
 import { addHours } from "date-fns";
 import { uniq } from "lodash-es";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
@@ -34,9 +34,8 @@ import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } fro
  * @param {boolean} [options.is_admin] - Is an admin
  * @param {boolean} [options.is_cross_organismes] - Is cross organismes
  * @param {string} [options.account_status] - account status
- * @returns {Promise<import("mongodb").WithId<any>>}
  */
-export const createUser = async ({ email, password }, options: any = {}) => {
+export const createUser = async ({ email, password }, options: any = {}): Promise<WithId<any>> => {
   const passwordHash = hashUtil(password);
   const {
     civility,
@@ -345,8 +344,7 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
 };
 
 export const structureUser = async (user) => {
-  /** @type {import("mongodb").WithId<any>[]} */
-  const rolesList = user.roles?.length
+  const rolesList: WithId<any>[] = user.roles?.length
     ? await rolesDb()
         .find({ _id: { $in: user.roles } })
         .toArray()
