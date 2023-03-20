@@ -1,3 +1,12 @@
+## [3.14.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.14.1...v3.14.2) (2023-03-20)
+
+
+### Bug Fixes
+
+* ajout filtre reseau CCI ([#2756](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2756)) ([5a8bb03](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5a8bb039eec6ba2ce94accbc00f444a1ed2f362f))
+* **server:** fiabilisation : récupération des couples UAI-SIRET depuis les effectifs lookup organismes ([#2763](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2763)) ([04c1d8b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/04c1d8b2baff2271665a2dc77a89ed752f664e32))
+* **server:** replacement de getNbDistinctOrganismes en se basant sur la collection effectifs ([#2758](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2758)) ([7e16a57](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7e16a57298ed4efde7a2935544997541df9fbfe4))
+
 ## [3.14.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.14.0...v3.14.1) (2023-03-20)
 
 
