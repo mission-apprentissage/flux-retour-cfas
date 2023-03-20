@@ -88,11 +88,6 @@ const resetStatutFiabilisation = async () => {
     { siret: { $exists: true } },
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU } }
   );
-
-  await organismesDb().updateMany(
-    { siret: { $exists: false } },
-    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.SANS_SIRET } }
-  );
 };
 
 /**
