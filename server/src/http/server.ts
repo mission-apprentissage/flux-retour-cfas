@@ -27,7 +27,6 @@ import serverEvents from "./routes/specific.routes/server-events.routes.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
-import healthcheckRouter from "./routes/healthcheck.route.js";
 
 import auth from "./routes/user.routes/auth.routes.js";
 import register from "./routes/user.routes/register.routes.js";
@@ -44,12 +43,16 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes.js";
 import statsAdmin from "./routes/admin.routes/stats.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
-import maintenancesRoutes from "./routes/maintenances.routes.js";
 import config from "../config.js";
 import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
 
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
+import { returnResult } from "./middlewares/helpers.js";
+import { jobEventsDb } from "../common/model/collections.js";
+import { packageJson } from "../common/utils/esmUtils.js";
+import logger from "../common/logger.js";
+import { findMaintenanceMessages } from "../common/actions/maintenances.actions.js";
 
 /**
  * Create the express app
@@ -92,12 +95,49 @@ export default async (services) => {
   app.use(cookieParser());
   app.use(passport.initialize());
 
+  app.get(
+    "/api",
+    returnResult(async () => {
+      return {
+        name: "TDB Apprentissage API",
+        version: packageJson.version,
+        env: config.env,
+      };
+    })
+  );
+  app.get(
+    "/api/healthcheck",
+    returnResult(async () => {
+      let mongodbHealthy = false;
+      try {
+        await jobEventsDb().findOne({});
+        mongodbHealthy = true;
+      } catch (err) {
+        logger.error({ err }, "healthcheck failed");
+      }
+
+      return {
+        name: "TDB Apprentissage API",
+        version: packageJson.version,
+        env: config.env,
+        healthcheck: {
+          mongodb: mongodbHealthy,
+        },
+      };
+    })
+  );
+
   // public access
   app.use("/api/emails", emails(services)); // No versionning to be sure emails links are always working
   app.use("/api/v1/auth", auth());
   app.use("/api/v1/auth", register(services));
   app.use("/api/v1/password", password(services));
-  app.use("/api/v1/maintenanceMessages", maintenancesRoutes());
+  app.use(
+    "/api/v1/maintenanceMessages",
+    returnResult(async () => {
+      return await findMaintenanceMessages();
+    })
+  );
 
   // private access
   app.use("/api/v1/session", checkJwtToken, session());
@@ -148,8 +188,6 @@ export default async (services) => {
     indicateursPermissions(),
     indicateursExportRouter()
   );
-
-  app.use("/api/healthcheck", healthcheckRouter());
 
   // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
   app.use("/api/login", loginRouter());
