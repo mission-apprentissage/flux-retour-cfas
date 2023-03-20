@@ -400,7 +400,7 @@ program
   );
 
 /**
- * Job d'analyse de la fiabilité des dossiersApprenants reçus
+ * Job d'affichage des stats fiabilisation
  */
 program
   .command("fiabilisation:stats")

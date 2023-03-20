@@ -1,8 +1,9 @@
 import React from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
-import { Box, Button, Heading, HStack, Input, Stack, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Heading, HStack, Input, Stack, Spinner, Text, VStack, CloseButton } from "@chakra-ui/react";
 
 import { _get } from "@/common/httpClient";
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
@@ -12,13 +13,14 @@ import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import OrganismesList from "@/modules/admin/OrganismesList";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
+const DEFAULT_LIMIT = 100;
 
 const Organismes = () => {
   const title = "Gestion des organismes";
   const router = useRouter();
   let { page, limit, sort, q: searchValue, ...filter } = router.query;
   page = parseInt(page, 10) || 1;
-  limit = parseInt(limit, 10) || 10;
+  limit = parseInt(limit, 10) || DEFAULT_LIMIT;
   filter = filter || undefined;
 
   const {
@@ -85,9 +87,39 @@ const Organismes = () => {
                 </Button>
               </HStack>
             </form>
+
             <Text fontSize="1rem">
               {organismes?.pagination?.total} {organismes?.pagination?.total > 1 ? "organismes" : "organisme"}
             </Text>
+
+            {Object.entries(filter).length > 0 && (
+              <HStack alignItems="baseline" width="100%">
+                <Text>Filtres :</Text>
+                {Object.entries(filter).map(([key, value]) => {
+                  // eslint-disable-next-line no-unused-vars
+                  const { [key]: _val, ...query } = router.query;
+                  return (
+                    <HStack
+                      as={Link}
+                      key={key}
+                      href={{ query }}
+                      px={2}
+                      color="white"
+                      backgroundColor="bluefrance"
+                      height="30px"
+                      borderRadius="40px"
+                      fontSize="zeta"
+                    >
+                      <Text>
+                        {key}: {value}
+                      </Text>
+                      <CloseButton />
+                    </HStack>
+                  );
+                })}
+              </HStack>
+            )}
+
             <OrganismesList
               mt={4}
               data={organismes?.data || []}

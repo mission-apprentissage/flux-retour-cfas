@@ -42,7 +42,15 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
         nature: {
           size: 100,
           header: () => "Nature",
-          cell: ({ getValue }) => <Text fontSize="1rem">{getValue()}</Text>,
+          cell: ({ getValue }) => (
+            <Text
+              as={getValue() ? Link : "p"}
+              fontSize="1rem"
+              href={{ query: { ...router.query, nature: getValue() } }}
+            >
+              {getValue()}
+            </Text>
+          ),
         },
         adresse: {
           size: 100,
@@ -53,8 +61,13 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
           size: 70,
           header: () => "SIRET",
           cell: ({ getValue }) => (
-            <Text fontSize="0.9rem" variant={getValue() === highlight?.siret ? "highlight" : undefined}>
-              {getValue() || "SIRET INCONNU"}
+            <Text
+              as={getValue() ? Link : "p"}
+              fontSize="0.9rem"
+              variant={getValue() === highlight?.siret ? "highlight" : undefined}
+              href={{ query: { ...router.query, siret: getValue() } }}
+            >
+              {getValue() || ""}
             </Text>
           ),
         },
@@ -62,31 +75,39 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
           size: 60,
           header: () => "Numéro UAI",
           cell: ({ getValue }) => (
-            <Text fontSize="0.9rem" variant={getValue() === highlight?.uai ? "highlight" : undefined}>
-              {getValue()}
+            <Text
+              as={getValue() ? Link : "p"}
+              href={{ query: { ...router.query, uai: getValue() } }}
+              fontSize="0.9rem"
+              variant={getValue() && getValue() === highlight?.uai ? "highlight" : undefined}
+            >
+              {getValue() || ""}
             </Text>
           ),
         },
         ferme: {
           size: 60,
           header: () => "État",
-          cell: ({ getValue }) => {
-            if (getValue()) {
-              return (
-                <Text fontSize="1rem" color="redmarianne" fontWeight="bold">
-                  Fermé
-                </Text>
-              );
-            }
-            return <Text fontSize="1rem">Actif</Text>;
-          },
+          cell: ({ getValue }) => (
+            <Link href={{ query: { ...router.query, ferme: getValue() } }}>
+              <Text fontSize="1rem" {...(getValue() ? { color: "redmarianne", fontWeight: "bold" } : {})}>
+                {getValue() ? "Fermé" : "Actif"}
+              </Text>
+            </Link>
+          ),
         },
         reseaux: {
           size: 60,
           header: () => "Réseaux",
           cell: ({ getValue }) => (
             <Text fontSize="1rem" whiteSpace="nowrap">
-              {getValue().length ? getValue().join(", ") : ""}
+              {getValue().length
+                ? getValue().map((reseau) => (
+                    <Link key={reseau} href={{ query: { ...router.query, reseaux: reseau } }}>
+                      {reseau}
+                    </Link>
+                  ))
+                : ""}
             </Text>
           ),
         },
