@@ -40,6 +40,7 @@ import espace from "./routes/specific.routes/espace.routes.js";
 import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
+import statsAdmin from "./routes/admin.routes/stats.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import maintenancesRoutes from "./routes/maintenances.routes.js";
@@ -113,6 +114,7 @@ export default async (services) => {
     pageAccessMiddleware(["admin/page_gestion_utilisateurs"]),
     usersAdmin(services)
   );
+  app.use("/api/v1/admin", checkJwtToken, pageAccessMiddleware(["admin/page_gestion_organismes"]), statsAdmin());
   app.use(
     "/api/v1/admin",
     checkJwtToken,

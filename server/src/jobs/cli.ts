@@ -25,6 +25,7 @@ import { updateUserPassword } from "./users/update-user-password.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs copy/index.js";
 import { removeOrganismeAndEffectifsAndDossiersApprenantsMigration } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
 import { seedPlausibleGoals } from "./seed/plausible/goals.js";
+import { getStats } from "./fiabilisation/stats.js";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count.js";
 
 program
@@ -395,6 +396,18 @@ program
   .action((_, options) =>
     runScript(async () => {
       return analyseFiabiliteDossierApprenantsRecus();
+    }, options._name)
+  );
+
+/**
+ * Job d'analyse de la fiabilité des dossiersApprenants reçus
+ */
+program
+  .command("fiabilisation:stats")
+  .description("Affichage de stats sur le service")
+  .action((_, options) =>
+    runScript(async () => {
+      await getStats();
     }, options._name)
   );
 
