@@ -1,3 +1,20 @@
+# [3.14.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.13.0...v3.14.0) (2023-03-20)
+
+
+### Bug Fixes
+
+* fix de la pagination sur la page organisme ([#2754](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2754)) ([664a97f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/664a97f875bc871280ec3cf3d1e2b66d08244fec))
+* fix mauvais lien plausible sur les stats ([#2741](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2741)) ([b86ad20](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b86ad20190166ff526e55cc2e277842ea7ca5d12))
+* **frontend:** amélioration de la gestion des erreurs de validation à la création de l'utilisateur ([71087d4](https://github.com/mission-apprentissage/flux-retour-cfas/commit/71087d41fd5003498fce373b02598c28b6d20226))
+
+
+### Features
+
+* ajout d'une notification slack quand un déploiement commence ([#2746](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2746)) ([45cfba6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/45cfba61193c3228b7dd703dff3233d1f4b47bc2))
+* ajout goals plausible sur page de stats ([#2744](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2744)) ([19b683c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/19b683c70654b2370054ce6009730d6acc4e657e))
+* ajout tracking plausible telechargement SIFA ([#2725](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2725)) ([ac62553](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ac62553abae2ea178a790a6a0db9eeef17d5289b))
+* **server:** migration vers typescript ([#2753](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2753)) ([fa38e01](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fa38e0106722cc25c1e959243cd4fc3083b7edf7))
+
 # [3.13.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.12.0...v3.13.0) (2023-03-15)
 
 
