@@ -16,6 +16,7 @@ const indexes = () => {
     ],
     [{ uai: 1 }, { name: "uai" }],
     [{ siret: 1 }, { name: "siret" }],
+    [{ effectifs_count: 1 }, { name: "effectifs_count" }],
     [
       { nom: "text", nom_tokenized: "text" },
       { name: "nom_tokenized_text", default_language: "french" },
@@ -45,7 +46,7 @@ const schema = object(
         description: "ERPs rattachés au CFA, s'ils existent",
       }
     ),
-
+    effectifs_count: integer({ description: "Compteur sur le nombre d'effectifs de l'organisme" }),
     nature: string({
       description: "Nature de l'organisme de formation",
       enum: Object.values(NATURE_ORGANISME_DE_FORMATION),

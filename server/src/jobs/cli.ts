@@ -25,6 +25,7 @@ import { updateUserPassword } from "./users/update-user-password.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs copy/index.js";
 import { removeOrganismeAndEffectifsAndDossiersApprenantsMigration } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
 import { seedPlausibleGoals } from "./seed/plausible/goals.js";
+import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count.js";
 
 program
   .configureHelp({
@@ -199,6 +200,19 @@ program
   .action(async (_, options) =>
     runScript(async () => {
       return hydrateOrganismesFromReferentiel();
+    }, options._name)
+  );
+
+/**
+ * Job de remplissage des organismes en allant ajouter / maj aux organismes existants (issus de la transmission)
+ * tous les organismes du référentiel
+ */
+program
+  .command("hydrate:organismes-effectifs-count")
+  .description("Mise à jour des organismes avec le nombre d'effectifs")
+  .action(async (_, options) =>
+    runScript(async () => {
+      return hydrateOrganismesEffectifsCount();
     }, options._name)
   );
 
