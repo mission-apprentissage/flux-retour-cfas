@@ -1,14 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchEffectifsParDepartement } from "@/common/api/tableauDeBord";
-import { QUERY_KEYS } from "@/common/constants/queryKeys";
+import { _get } from "@/common/httpClient";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 const useFetchEffectifsParDepartement = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.EFFECTIF_PAR.DEPARTEMENT, requestFilters], () =>
-    fetchEffectifsParDepartement(requestFilters)
+  const { data, isLoading, error } = useQuery(["/api/indicateurs/departement", requestFilters], () =>
+    _get("/api/indicateurs/departement", { params: filters })
   );
   const effectifs = data ? sortAlphabeticallyBy("etablissement_nom_departement", data) : [];
 

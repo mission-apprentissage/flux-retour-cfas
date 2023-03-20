@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchEffectifsParNiveauFormation } from "@/common/api/tableauDeBord";
-import { QUERY_KEYS } from "@/common/constants/queryKeys";
+import { _get } from "@/common/httpClient";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 
 const useFetchEffectifsParNiveauFormation = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.EFFECTIF_PAR.NIVEAU_FORMATION, requestFilters], () =>
-    fetchEffectifsParNiveauFormation(requestFilters)
+  const { data, isLoading, error } = useQuery(["/api/indicateurs/niveau-formation", requestFilters], () =>
+    _get("/api/indicateurs/niveau-formation", { params: requestFilters })
   );
 
   const repartitionEffectifs = data?.map((repartition) => {
