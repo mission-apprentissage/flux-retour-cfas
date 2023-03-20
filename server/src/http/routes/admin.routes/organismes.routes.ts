@@ -26,7 +26,9 @@ export default () => {
         query.$text = { $search: q };
       }
       const result = await getAllOrganismes(query, { page, limit, sort });
-      result.filter = filter;
+      if (result) {
+        result.filter = filter;
+      }
       return res.json(result);
     }
   );
