@@ -8,6 +8,7 @@ import {
   inscritsSansContratsIndicator,
   rupturantsIndicator,
 } from "./indicators.js";
+import { effectifsDb } from "../../model/collections.js";
 
 export const getIndicateurs = async (filters: any) => {
   const filterStages = buildMongoPipelineFilterStages(filters);
@@ -314,4 +315,14 @@ export const getDataListEffectifsAtDate = async (filters: any = {}) => {
     abandonsIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.abandons),
   ]);
   return [...apprentis, ...inscritsSansContrat, ...rupturants, ...abandons];
+};
+
+/**
+ * Récupération du nb distinct d'organismes transmettant des effectifs (distinct organisme_id dans la collection effectifs)
+ * @param {import("mongodb").Filter<any>} filters
+ * @returns
+ */
+export const getNbDistinctOrganismes = async (filters = {}) => {
+  const distinctOrganismes = await effectifsDb().distinct("organisme_id", filters);
+  return distinctOrganismes ? distinctOrganismes.length : 0;
 };

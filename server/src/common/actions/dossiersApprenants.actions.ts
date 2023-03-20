@@ -204,14 +204,3 @@ export const buildNewHistoriqueStatutApprenant = (
 
   return newHistoriqueStatutApprenant;
 };
-
-/**
- * Récupération du nb distinct d'organismes
- * On récupère le nombre distinct d'organismes id dans la collection dossiersApprenantsMigrationDb
- * @param {import("mongodb").Filter<any>} filters
- * @returns
- */
-export const getNbDistinctOrganismes = async (filters = {}) => {
-  const distinctOrganismes = await dossiersApprenantsMigrationDb().distinct("organisme_id", filters);
-  return distinctOrganismes ? distinctOrganismes.length : 0;
-};

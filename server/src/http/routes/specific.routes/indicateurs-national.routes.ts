@@ -2,10 +2,9 @@ import express from "express";
 import { format } from "date-fns";
 import Joi from "joi";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
 import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import { returnResult, tryCachedExecution } from "../../middlewares/helpers.js";
-import { getIndicateurs } from "../../../common/actions/effectifs/effectifs.actions.js";
+import { getIndicateurs, getNbDistinctOrganismes } from "../../../common/actions/effectifs/effectifs.actions.js";
 
 export default ({ cache }) => {
   const router = express.Router();
@@ -20,7 +19,7 @@ export default ({ cache }) => {
       return tryCachedExecution(cache, cacheKey, async () => {
         const [indicateurs, totalOrganismes] = await Promise.all([
           getIndicateurs({ date }),
-          getNbDistinctOrganismes(filters), // reads from dossiersApprenantsMigration, does not use EffectifsFilters yet
+          getNbDistinctOrganismes(filters),
         ]);
         indicateurs.totalOrganismes = totalOrganismes;
         return indicateurs;
