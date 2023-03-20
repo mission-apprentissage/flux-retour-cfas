@@ -14,7 +14,7 @@ function getUploads(response) {
 }
 
 const Story = {
-  title: "Modules / mon-espace / Televersements",
+  title: "Modules / Effectifs / Televersements",
   component: Component,
   parameters: {
     mockData: getUploads([]),

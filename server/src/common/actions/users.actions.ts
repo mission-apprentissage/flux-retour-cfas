@@ -1,148 +1,61 @@
+import Boom from "boom";
 import { addHours } from "date-fns";
-import { uniq } from "lodash-es";
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId } from "mongodb";
+import { UsersMigration } from "../model/@types/UsersMigration.js";
 
-import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
-import { rolesDb, usersMigrationDb } from "../model/collections.js";
-import { defaultValuesUser, validateUser } from "../model/usersMigration.model.js";
+import { usersMigrationDb } from "../model/collections.js";
+import { AuthContext } from "../model/internal/AuthContext.js";
+import { validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
-import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
-import { passwordSchema } from "../utils/validationUtils.js";
-import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } from "./permissions.actions.js";
+import { hash, compare, isTooWeak } from "../utils/passwordUtils.js";
+import { getOrganisationLabel } from "../model/organisations.model.js";
 
-/**
- * Méthode de création d'un utilisateur
- *
- * @param {object} requiredFields
- * @param {object} requiredFields.email - Email
- * @param {object} requiredFields.password - Password
- * @param {object} [options]
- * @param {string} [options.civility] - Civility
- * @param {string} [options.nom] - Nom
- * @param {string} [options.prenom] - Prenom
- * @param {string} [options.telephone] - Telephone
- * @param {string} [options.siret] - Siret
- * @param {string} [options.uai] - Uai
- * @param {string} [options.organisation] - Organisation
- * @param {string[]} [options.roles] - Roles
- * @param {string} [options.description] - Description
- * @param {string} [options.reseau] - Reseau
- * @param {string} [options.erp] - Erp
- * @param {string[]} [options.codes_region] - Codes region
- * @param {string[]} [options.codes_academie] - Codes academie
- * @param {string[]} [options.codes_departement] - Codes departement
- * @param {boolean} [options.is_admin] - Is an admin
- * @param {boolean} [options.is_cross_organismes] - Is cross organismes
- * @param {string} [options.account_status] - account status
- */
-export const createUser = async ({ email, password }, options: any = {}): Promise<WithId<any>> => {
-  const passwordHash = hashUtil(password);
-  const {
-    civility,
-    nom,
-    prenom,
-    telephone,
-    siret,
-    uai,
-    organisation,
-    roles,
-    description,
-    reseau,
-    erp,
-    codes_region,
-    codes_academie,
-    codes_departement,
-    is_admin,
-    is_cross_organismes,
-  } = options || {};
+interface UserRegistration {
+  email: string;
+  nom: string;
+  prenom: string;
+  civility: "Madame" | "Monsieur";
+  fonction: string;
+  telephone: string;
+  password: string;
+  has_accept_cgu_version: string;
+}
 
-  // bypass profile completion for admins
-  const account_status = is_admin
-    ? options.account_status || USER_ACCOUNT_STATUS.DIRECT_PENDING_PASSWORD_SETUP
-    : options.account_status;
+export const createUser = async (user: UserRegistration, organisationId: ObjectId): Promise<ObjectId> => {
+  const { insertedId } = await usersMigrationDb().insertOne({
+    account_status: "PENDING_EMAIL_VALIDATION",
+    invalided_token: false,
+    password_updated_at: new Date(),
+    connection_history: [],
+    emails: [],
+    created_at: new Date(),
+    ...user,
+    password: hash(user.password),
+    organisation_id: organisationId,
+  });
 
-  let rolesMatchIds: any[] = [];
-  if (roles && roles.length > 0) {
-    rolesMatchIds = (
-      await rolesDb()
-        .find({ name: { $in: roles } }, { projection: { _id: 1 } })
-        .toArray()
-    ).map(({ _id }) => _id);
-
-    if (rolesMatchIds.length === 0) {
-      throw new Error(`Roles ${roles.join(",")} don't exist`);
-    }
-  }
-
-  // Vérification de l'existence de l'email - même si on a un index unique
-  const existingUserEmail = await usersMigrationDb().findOne({ email });
-  if (existingUserEmail) throw new Error("User with this email already exists");
-
-  const { insertedId } = await usersMigrationDb().insertOne(
-    validateUser({
-      ...defaultValuesUser(),
-      email: email.toLowerCase(),
-      password: passwordHash,
-      is_admin: !!is_admin,
-      is_cross_organismes: is_cross_organismes !== undefined ? !!is_cross_organismes : !!is_admin,
-      ...(civility ? { civility } : {}),
-      ...(nom ? { nom } : {}),
-      ...(prenom ? { prenom } : {}),
-      ...(telephone ? { telephone } : {}),
-      ...(siret ? { siret } : {}),
-      ...(uai ? { uai } : {}),
-      ...(account_status ? { account_status } : {}),
-      ...(roles ? { roles: rolesMatchIds } : {}),
-      ...(description ? { description } : {}),
-      ...(organisation ? { organisation } : {}),
-      ...(reseau ? { reseau } : {}),
-      ...(erp ? { erp } : {}),
-      ...(codes_region ? { codes_region } : {}),
-      ...(codes_academie ? { codes_academie } : {}),
-      ...(codes_departement ? { codes_departement } : {}),
-    })
-  );
-
-  return await usersMigrationDb().findOne({ _id: insertedId });
+  return insertedId;
 };
 
-/**
- * Méthode de rehash du password de l'utilisateur
- * @param {ObjectId} _id
- * @param {*} password
- * @returns
- */
-const rehashPassword = async (_id, password) => {
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id },
+const updateUserPassword = async (userId: ObjectId, password: string) => {
+  await usersMigrationDb().findOneAndUpdate(
+    { _id: userId },
     {
       $set: {
-        password: hashUtil(password),
+        password: hash(password),
       },
-    },
-    { returnDocument: "after" }
+    }
   );
-
-  return updated.value;
 };
 
-/**
- * Méthode d'authentification de l'utilisateur
- * compare les hash des mots de passe
- * @param {*} email
- * @param {*} password
- * @returns
- */
-export const authenticate = async (email, password) => {
+export const authenticate = async (email: string, password: string) => {
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
     return null;
   }
-
-  const current = user.password;
-  if (compare(password, current)) {
-    if (isTooWeak(current)) {
-      await rehashPassword(user._id, password);
+  if (compare(password, user.password)) {
+    if (isTooWeak(user.password)) {
+      await updateUserPassword(user._id, password);
     }
     return user;
   }
@@ -162,7 +75,6 @@ export const getUserByEmail = async (email) => {
         emails: 0,
         connection_history: 0,
         password: 0,
-        __v: 0,
       },
     }
   );
@@ -180,37 +92,68 @@ export const getDetailedUserById = async (_id) => {
       { $match: { _id: new ObjectId(_id) } },
       {
         $lookup: {
-          from: "organismes",
-          localField: "main_organisme_id",
+          from: "organisations",
+          localField: "organisation_id",
           foreignField: "_id",
-          as: "main_organisme",
-        },
-      },
-      { $unwind: { path: "$main_organisme", preserveNullAndEmptyArrays: true } },
-      // retrieve user permissions
-      {
-        $lookup: {
-          from: "permissions",
-          localField: "email",
-          foreignField: "userEmail",
-          as: "permissions",
+          as: "organisation",
           pipeline: [
-            { $project: { organisme_id: 1, role: 1, pending: 1, created_at: 1 } },
             {
               $lookup: {
                 from: "organismes",
-                localField: "organisme_id",
-                foreignField: "_id",
                 as: "organisme",
-                pipeline: [{ $project: { siret: 1, nom: 1, created_at: 1, uai: 1 } }],
+                let: {
+                  uai: "$uai",
+                  siret: "$siret",
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }],
+                      },
+                    },
+                  },
+                ],
               },
             },
             { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
+
+            // lookup other email domains (used to compare user email domain with organisation domain)
+            {
+              $lookup: {
+                from: usersMigrationDb().collectionName,
+                localField: "_id",
+                foreignField: "organisation_id",
+                as: "domains",
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ["$account_status", "CONFIRMED"],
+                      },
+                    },
+                  },
+                  { $project: { splittedEmail: { $split: ["$email", "@"] } } },
+                  { $addFields: { domain: { $last: "$splittedEmail" } } },
+                  { $group: { _id: null, domains: { $addToSet: "$domain" } } },
+                ],
+              },
+            },
           ],
         },
       },
+      { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } },
+
+      { $project: { password: 0, emails: 0, organisation_id: 0 } },
     ])
     .next();
+  if (user?.organisation?.domains?.[0]?.domains) {
+    user.organisation.domains = user.organisation.domains[0].domains;
+  }
+
+  if (user?.organisation) {
+    user.organisation.label = getOrganisationLabel(user.organisation);
+  }
 
   return user;
 };
@@ -225,38 +168,39 @@ export const getAllUsers = async (query = {}, { page, limit, sort }) => {
     .aggregate([
       { $match: query },
       { $sort: sort },
-      { $project: { password: 0 } },
+      { $project: { password: 0, emails: 0, connection_history: 0, invalided_token: 0 } },
       {
         $lookup: {
-          from: "organismes",
-          localField: "main_organisme_id",
+          from: "organisations",
+          localField: "organisation_id",
           foreignField: "_id",
-          as: "main_organisme",
-        },
-      },
-      { $unwind: { path: "$main_organisme", preserveNullAndEmptyArrays: true } },
-      // retrieve permissions on main organisme
-      {
-        $lookup: {
-          from: "permissions",
-          as: "permission",
-          let: {
-            organisme_id: "$main_organisme_id",
-            user_id: "$_id",
-          },
+          as: "organisation",
           pipeline: [
             {
-              $match: {
-                $expr: {
-                  $and: [{ $eq: ["organisme_id", "$$organisme_id"] }, { $eq: ["$user", "$$user_id"] }],
+              $lookup: {
+                from: "organismes",
+                as: "organisme",
+                let: {
+                  uai: "$uai",
+                  siret: "$siret",
                 },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }],
+                      },
+                    },
+                  },
+                  { $project: { type: 1, nom: 1, raison_sociale: 1, reseaux: 1, nature: 1 } },
+                ],
               },
             },
-            { $project: { role: 1, pending: 1, created_at: 1 } },
+            { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
           ],
         },
       },
-      { $unwind: { path: "$main_organisme", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } },
       {
         $facet: {
           pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
@@ -266,6 +210,12 @@ export const getAllUsers = async (query = {}, { page, limit, sort }) => {
       { $unwind: { path: "$pagination" } },
     ])
     .next();
+
+  result?.data?.map((user) => {
+    if (user?.organisation) {
+      user.organisation.label = getOrganisationLabel(user.organisation);
+    }
+  });
 
   if (result?.pagination) {
     result.pagination.lastPage = Math.ceil(result.pagination.total / limit);
@@ -294,7 +244,7 @@ export const removeUser = async (_idStr) => {
  * @param {*} _id
  * @returns
  */
-export const updateUser = async (_id, data) => {
+export const updateUser = async (_id, data: Partial<UsersMigration>) => {
   const user = await usersMigrationDb().findOne({ _id: new ObjectId(_id) });
 
   if (!user) {
@@ -306,7 +256,6 @@ export const updateUser = async (_id, data) => {
     {
       $set: validateUser({
         email: user.email,
-        is_cross_organismes: user.is_cross_organismes,
         ...data,
       }),
     },
@@ -321,82 +270,32 @@ export const updateUser = async (_id, data) => {
  * @param {*} permissionProps
  * @returns
  */
-export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
-  const user = await usersMigrationDb().findOne({ email: userEmail });
+// export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
+//   const user = await usersMigrationDb().findOne({ email: userEmail });
 
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
+//   if (!user) {
+//     throw new Error("Unable to find user");
+//   }
 
-  const main_organisme_id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
-  if (!ObjectId.isValid(main_organisme_id)) throw new Error("Invalid id passed");
+//   const main_organisme_id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
+//   if (!ObjectId.isValid(main_organisme_id)) throw new Error("Invalid id passed");
 
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id: user._id },
-    {
-      $set: {
-        main_organisme_id,
-      },
-    },
-    { returnDocument: "after" }
-  );
+//   const updated = await usersMigrationDb().findOneAndUpdate(
+//     { _id: user._id },
+//     {
+//       $set: {
+//         main_organisme_id,
+//       },
+//     },
+//     { returnDocument: "after" }
+//   );
 
-  return updated.value;
-};
+//   return updated.value;
+// };
 
-export const structureUser = async (user) => {
-  const rolesList: WithId<any>[] = user.roles?.length
-    ? await rolesDb()
-        .find({ _id: { $in: user.roles } })
-        .toArray()
-    : [];
-  const rolesAcl = rolesList.reduce((acc, { acl }) => [...acc, ...acl], []);
-
-  const activePermissions = await findActivePermissionsForUser({ userEmail: user.email }, { organisme_id: 1, _id: 0 });
-  const organisme_ids = activePermissions.map(({ organisme_id }) => organisme_id).filter((v) => !!v);
-
-  const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
-  const isInPendingValidation = !organisme_ids.length && !activePermissions.length;
-  const isOrganismeAdmin = user.main_organisme_id
-    ? await hasAtLeastOneContributeurNotPending(user.main_organisme_id, "organisme.admin")
-    : false;
-
-  let specialAcl: any[] = [];
-  if (!hasAccessToOnlyOneOrganisme || user.is_cross_organismes || user.is_admin) {
-    specialAcl = ["page/mes-organismes"];
-  }
-
-  return {
-    organisme_ids,
-    main_organisme_id: user.main_organisme_id,
-    is_admin: user.is_admin,
-    is_cross_organismes: user.is_cross_organismes || user.is_admin,
-    isInPendingValidation,
-    isOrganismeAdmin,
-    email: user.email,
-    civility: user.civility,
-    nom: user.nom,
-    prenom: user.prenom,
-    telephone: user.telephone,
-    siret: user.siret,
-    uai: user.uai,
-    description: user.description,
-    organisation: user.organisation,
-    reseau: user?.reseau,
-    erp: user?.erp,
-    codes_region: user.codes_region, // TODO [tech] send full regions
-    codes_academie: user.codes_academie, // TODO [tech] send full académie
-    codes_departement: user.codes_departement, // TODO [tech] send full department
-    account_status: user.account_status,
-    roles: rolesList.map(({ name }) => name),
-    acl: uniq([...rolesAcl, ...specialAcl]),
-    has_accept_cgu_version: user.has_accept_cgu_version,
-  };
-};
-
-export const updateUserLastConnection = async (email) => {
+export const updateUserLastConnection = async (userId: ObjectId) => {
   await usersMigrationDb().findOneAndUpdate(
-    { email },
+    { _id: userId },
     {
       $set: {
         last_connection: new Date(),
@@ -407,48 +306,20 @@ export const updateUserLastConnection = async (email) => {
   );
 };
 
-export const activateUser = async (email) => {
-  return await updateUserStatus(email, USER_ACCOUNT_STATUS.PENDING_PASSWORD_SETUP);
-};
-
-export const userHasAskAccess = async (email, data) => {
-  return await updateUserStatus(email, USER_ACCOUNT_STATUS.PENDING_ADMIN_VALIDATION, data);
-};
-
-export const finalizeUser = async (email: string) => {
-  return await updateUserStatus(email, USER_ACCOUNT_STATUS.CONFIRMED);
-};
-
 /**
  * Méthode de mise à jour du mot de passe d'un user
- * @param {string} email
- * @param {string} newPassword
- * @returns
  */
-export const changePassword = async (email: string, newPassword: string) => {
-  const user = await usersMigrationDb().findOne({ email });
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
-
-  if (passwordSchema(user.is_admin).required().validate(newPassword).error) {
-    throw new Error("Password must be valid");
-  }
-
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id: user._id },
+export async function changePassword(authContext: AuthContext, password: string) {
+  await usersMigrationDb().findOneAndUpdate(
+    { _id: authContext._id },
     {
       $set: {
-        account_status: getNextAccountStatus(user),
-        password: hashUtil(newPassword),
+        password: hash(password),
         password_updated_at: new Date(),
       },
-    },
-    { returnDocument: "after" }
+    }
   );
-
-  return updated.value;
-};
+}
 
 /**
  * Génération d'un token d'update de mot de passe
@@ -482,42 +353,19 @@ export const generatePasswordUpdateToken = async (email: string) => {
   return token;
 };
 
-/**
- * Renvoie le statut du compte après réinitialisation du mot de passe.
- * Uniquement utile lors de l'inscription.
- */
-function getNextAccountStatus(user: any) {
-  switch (user.account_status) {
-    case "PENDING_PASSWORD_SETUP":
-      return user.is_admin ? "CONFIRMED" : "PENDING_PERMISSIONS_SETUP";
-    case "DIRECT_PENDING_PASSWORD_SETUP":
-      return "CONFIRMED";
-    default:
-      return user.account_status;
-  }
+export async function updateUserProfile(ctx: AuthContext, infos: any) {
+  await usersMigrationDb().findOneAndUpdate(
+    { _id: ctx._id },
+    {
+      $set: infos,
+    }
+  );
 }
 
-/**
- * @param {string} email
- * @param {string} newStatus
- * @param {any=} data
- */
-async function updateUserStatus(email: any, newStatus: any, data?: any) {
-  const user = await usersMigrationDb().findOne({ email });
+export async function getUserById(userId: ObjectId): Promise<UsersMigration> {
+  const user = await usersMigrationDb().findOne({ _id: userId });
   if (!user) {
-    throw new Error("Unable to find user");
+    throw Boom.notFound(`missing user ${userId}`);
   }
-
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id: user._id },
-    {
-      $set: {
-        account_status: newStatus,
-        ...data,
-      },
-    },
-    { returnDocument: "after" }
-  );
-
-  return updated.value;
+  return user;
 }

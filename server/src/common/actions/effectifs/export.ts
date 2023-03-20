@@ -1,7 +1,13 @@
 import { getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
 
-/** @type import("./export-struct").FieldExport[] */
-export const exportedFields = [
+export type FieldExport = {
+  label: string;
+  csvField: string;
+  projectedMongoField?: string;
+  valueGetter: (item: any) => any;
+};
+
+export const exportedFields: FieldExport[] = [
   {
     label: "Intitulé de la formation",
     csvField: "formation_libelle_long",

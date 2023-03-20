@@ -3,6 +3,7 @@ import https from "https";
 import { oleoduc, compose, transformIntoJSON } from "oleoduc";
 import logger from "../logger.js";
 import { COOKIE_NAME } from "../constants/cookieName.js";
+import { Response } from "express";
 
 export const sendTransformedPaginatedJsonStream = (stream, arrayPropertyName, pagination, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -51,16 +52,11 @@ export function createUploadStream(url, httpOptions = {}) {
   return https.request(options);
 }
 
-export function responseWithCookie({ res, token }) {
+export function responseWithCookie(res: Response, token: string) {
   return res.cookie(COOKIE_NAME, token, {
     maxAge: 6 * 24 * 60 * 60 * 1000, // 6 jours (unité en millisecondes)
     httpOnly: true,
     sameSite: "lax",
     secure: true,
   });
-}
-
-export function sendHTML(html, res) {
-  res.set("Content-Type", "text/html");
-  res.send(Buffer.from(html));
 }

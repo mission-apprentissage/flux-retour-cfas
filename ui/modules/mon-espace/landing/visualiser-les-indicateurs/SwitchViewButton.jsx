@@ -32,16 +32,16 @@ const SwitchViewButton = () => {
       {isOpen && (
         <OverlayMenu width="558px" fixedHorizon={true} onClose={() => setIsOpen(false)}>
           <List spacing="2w" marginTop="1w" textAlign="left">
-            <NavLink href="/mon-espace/mon-organisme/par-territoire" onClick={() => setIsOpen(false)}>
+            <NavLink href="/par-territoire" onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par territoire</FilterOption>
             </NavLink>
-            <NavLink href="/mon-espace/mon-organisme/par-reseau" onClick={() => setIsOpen(false)}>
+            <NavLink href="/par-reseau" onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par réseau</FilterOption>
             </NavLink>
-            <NavLink href="/mon-espace/mon-organisme/par-organisme" onClick={() => setIsOpen(false)}>
+            <NavLink href="/par-organisme" onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par organisme de formation</FilterOption>
             </NavLink>
-            <NavLink href="/mon-espace/mon-organisme/par-formation" onClick={() => setIsOpen(false)}>
+            <NavLink href="/par-formation" onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par formation</FilterOption>
             </NavLink>
           </List>

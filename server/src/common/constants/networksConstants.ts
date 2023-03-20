@@ -1,47 +1,66 @@
 /**
  * Noms des réseaux de CFAS
  */
-export const RESEAUX_CFAS = {
-  ADEN: {
-    nomReseau: "ADEN",
+export const TETE_DE_RESEAUX = [
+  {
+    nom: "ADEN",
+    key: "ADEN",
   },
-  CMA: {
-    nomReseau: "CMA",
+  {
+    nom: "CMA",
+    key: "CMA",
   },
-  AGRI: {
-    nomReseau: "AGRI",
+  {
+    nom: "AGRI",
+    key: "AGRI",
   },
-  ANASUP: {
-    nomReseau: "ANASUP",
+  {
+    nom: "ANASUP",
+    key: "ANASUP",
   },
-  CCI: {
-    nomReseau: "CCI",
+  {
+    nom: "CCI",
+    key: "CCI",
   },
-  CFA_EC: {
-    nomReseau: "CFA EC",
+  {
+    nom: "EXCELLENCE PRO",
+    key: "CFA_EC",
   },
-  COMP_DU_DEVOIR: {
-    nomReseau: "Compagnons du devoir",
+  {
+    nom: "COMPAGNONS DU DEVOIR",
+    key: "COMP_DU_DEVOIR",
   },
-  GRETA: {
-    nomReseau: "GRETA",
+  {
+    nom: "GRETA",
+    key: "GRETA",
   },
-  UIMM: {
-    nomReseau: "UIMM",
+  {
+    nom: "UIMM",
+    key: "UIMM",
   },
-  BTP_CFA: {
-    nomReseau: "BTP CFA",
+  {
+    nom: "BTP CFA",
+    key: "BTP_CFA",
   },
-  MFR: {
-    nomReseau: "MFR",
+  {
+    nom: "MFR",
+    key: "MFR",
   },
-  AFTRAL: {
-    nomReseau: "AFTRAL",
+  {
+    nom: "AFTRAL",
+    key: "AFTRAL",
   },
-  GRETA_VAUCLUSE: {
-    nomReseau: "GRETA VAUCLUSE",
+  {
+    nom: "GRETA VAUCLUSE",
+    key: "GRETA_VAUCLUSE",
   },
-  CFA_SAT: {
-    nomReseau: "CFA SAT",
+  {
+    nom: "CFA SAT",
+    key: "CFA_SAT",
   },
-};
+];
+
+export const TETE_DE_RESEAUX_BY_ID = TETE_DE_RESEAUX.reduce((acc, reseau) => {
+  acc[reseau.key] = reseau;
+  return acc;
+}, {});

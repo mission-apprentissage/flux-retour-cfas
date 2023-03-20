@@ -8,37 +8,31 @@ import { _get } from "../../../../../../common/httpClient";
 
 export function useFetchUploads(organismeId) {
   const [, setUploads] = useRecoilState(uploadsAtom);
-  const { isLoading, isFetching } = useQuery(
-    ["fetchDocuments", organismeId],
-    async () => {
-      if (!organismeId) {
-        return;
-      }
-      const uploads = await _get(`/api/v1/upload/get?organisme_id=${organismeId}`);
-      if (uploads.documents.length) {
-        setUploads({
-          ...uploads,
-          documents: {
-            confirmed: uploads.documents.filter((d) => d.confirm),
-            unconfirmed: uploads.documents.filter((d) => !d.confirm),
-          },
-        });
-      } else {
-        setUploads({
-          ...uploads,
-          documents: {
-            confirmed: [],
-            unconfirmed: [],
-          },
-        });
-      }
-
-      return uploads;
-    },
-    {
-      refetchOnWindowFocus: false,
+  const { isLoading, isFetching } = useQuery(["fetchDocuments", organismeId], async () => {
+    if (!organismeId) {
+      return;
     }
-  );
+    const uploads = await _get(`/api/v1/upload/get?organisme_id=${organismeId}`);
+    if (uploads.documents.length) {
+      setUploads({
+        ...uploads,
+        documents: {
+          confirmed: uploads.documents.filter((d) => d.confirm),
+          unconfirmed: uploads.documents.filter((d) => !d.confirm),
+        },
+      });
+    } else {
+      setUploads({
+        ...uploads,
+        documents: {
+          confirmed: [],
+          unconfirmed: [],
+        },
+      });
+    }
+
+    return uploads;
+  });
 
   return { isLoading: isFetching || isLoading };
 }

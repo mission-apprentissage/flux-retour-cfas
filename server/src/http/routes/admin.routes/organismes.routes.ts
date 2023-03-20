@@ -28,9 +28,11 @@ export default () => {
       const { page, limit, sort, q, filter } = req.query as any;
       const query: any = filter || {};
       if (q) {
-        query.$text = { $search: q };
+        // FIXME propager le type zod. Possible ?
+        (query as any).$text = { $search: q };
       }
-      const result = await getAllOrganismes(query, { page, limit, sort });
+      // FIXME propager le type zod. Possible ?
+      const result = await getAllOrganismes(query, { page, limit, sort } as any);
       if (result) {
         result.filter = filter;
       }

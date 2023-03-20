@@ -4,14 +4,12 @@ import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb }
 import logger from "../common/logger.js";
 import { jobEventStatuts } from "../common/constants/jobsConstants.js";
 import { modelDescriptors } from "../common/model/collections.js";
-import createServices from "../services.js";
+import createGlobalServices, { cache } from "../services.js";
 import config from "../config.js";
 import { createJobEvent, updateJobEvent } from "../common/actions/jobEvents.actions.js";
 
 process.on("unhandledRejection", (e) => console.error(e));
 process.on("uncaughtException", (e) => console.error(e));
-
-let redisClient;
 
 /**
  * Fonction de sortie du script
@@ -31,7 +29,7 @@ const exit = async (rawError) => {
     });
   }, 500);
 
-  await redisClient.quit();
+  await cache.quit();
 
   process.exitCode = error ? 1 : 0;
 };
@@ -50,8 +48,7 @@ export const runScript = async (job, jobName) => {
   let error = undefined;
   let result = undefined;
   try {
-    const services = await createServices();
-    redisClient = services.cache;
+    const services = await createGlobalServices();
     result = await job(services);
   } catch (e: any) {
     console.error(e);

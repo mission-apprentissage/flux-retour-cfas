@@ -4,49 +4,6 @@ import { BreadcrumbItem, BreadcrumbLink, Breadcrumb as ChakraBreadcrumb } from "
 import NavLink from "next/link";
 import PropTypes from "prop-types";
 
-export const PAGES = {
-  homepage: () => ({
-    title: "Accueil",
-    path: "/",
-  }),
-  monEspace: () => ({
-    title: "Mon espace",
-    path: "/mon-espace/mon-organisme",
-  }),
-  monTableauDeBord: () => ({
-    title: "Mon tableau de bord",
-    path: "/mon-espace/mon-organisme",
-  }),
-  mesEffectifs: () => ({
-    title: "Mes effectifs",
-    path: "/mon-espace/mon-organisme/effectifs",
-  }),
-  sesEffectifs: (organismeId) => ({
-    title: "Ses effectifs",
-    path: `/mon-espace/organisme/${organismeId}/effectifs`,
-  }),
-  visualiserLesIndicateurs: () => ({
-    title: "Visualiser les indicateurs en temps réel",
-    path: "/mon-espace/mon-organisme/",
-  }),
-  visualiserLesIndicateursParTerritoire: () => ({
-    title: "Vue territoriale",
-    path: "/mon-espace/mon-organisme/par-territoire",
-  }),
-  visualiserLesIndicateursParReseau: () => ({
-    title: "Vue par réseau",
-    path: "/mon-espace/mon-organisme/par-reseau",
-  }),
-  visualiserLesIndicateursParOrganisme: () => ({
-    title: "Vue par organisme de formation",
-    path: "/mon-espace/mon-organisme/par-organisme",
-  }),
-  visualiserLesIndicateursParFormation: () => ({
-    title: "Vue par formation",
-    path: "/mon-espace/mon-organisme/par-formation",
-  }),
-};
-
 const Breadcrumb = ({ pages }) => {
   return (
     <ChakraBreadcrumb

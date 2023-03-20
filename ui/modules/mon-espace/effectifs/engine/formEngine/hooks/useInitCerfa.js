@@ -26,7 +26,6 @@ export const useInitCerfa = ({ controller, modeSifa, canEdit, effectifsSnapshot 
       return cerfa;
     },
     {
-      refetchOnWindowFocus: false,
       refetchOnMount: false,
     }
   );

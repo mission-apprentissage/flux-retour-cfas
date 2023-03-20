@@ -17,7 +17,7 @@ const PAGE_STATES = {
 };
 
 const CfaPrivateViewPage = ({ match }) => {
-  const [auth, setAuth] = useAuth();
+  const { auth, setAuth } = useAuth();
   const [pageState, setPageState] = useState(PAGE_STATES.loading);
   const cfaAccessToken = match.params.accessToken;
 

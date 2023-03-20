@@ -6,22 +6,16 @@ import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
 import ContactSection from "../ContactSection/ContactSection";
 import Section from "../Section/Section";
-import { useEspace } from "../../hooks/useEspace";
 import { Interrogation } from "../../theme/components/icons";
 import Link from "../Links/Link";
 
 function Page({ children, ...rest }) {
-  let { isloaded, isReloaded, isMonOrganismePages, isOrganismePages, isMesOrganismesPages } = useEspace();
-
-  const espaceContextisLoading =
-    (!isloaded || !isReloaded) && (isMonOrganismePages || isOrganismePages || isMesOrganismesPages);
-
   return (
     <Container maxW="full" minH="100vh" d="flex" flexDirection="column" p={0} {...rest}>
-      <Header espaceContextisLoading={espaceContextisLoading} />
-      <NavigationMenu espaceContextisLoading={espaceContextisLoading} />
+      <Header />
+      <NavigationMenu />
       <Box minH={"40vh"} flexGrow="1">
-        <Section>{!espaceContextisLoading && children}</Section>
+        <Section>{children}</Section>
       </Box>
       <Link
         isExternal

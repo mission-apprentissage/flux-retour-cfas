@@ -6,66 +6,94 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
+import Boom from "boom";
 import swaggerUi from "swagger-ui-express";
 
 import { apiRoles } from "../common/roles.js";
 
-import logMiddleware from "./middlewares/logMiddleware.js";
+import { logMiddleware } from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
-import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
+import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
-import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
-import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes.js";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
-import loginRouter from "./routes/specific.routes/old/login.route.js";
-import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
-import formationRouter from "./routes/specific.routes/old/formations.route.js";
-import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
-import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
-import serverEvents from "./routes/specific.routes/server-events.routes.js";
+import indicateursRouter, { buildEffectifsFiltersFromRequest } from "./routes/specific.routes/indicateurs.routes.js";
+import { serverEventsHandler } from "./routes/specific.routes/server-events.routes.js";
 
 import emails from "./routes/emails.routes.js";
-import session from "./routes/session.routes.js";
-import healthcheckRouter from "./routes/healthcheck.route.js";
 
 import auth from "./routes/user.routes/auth.routes.js";
-import register from "./routes/user.routes/register.routes.js";
-import password from "./routes/user.routes/password.routes.js";
-import profile from "./routes/user.routes/profile.routes.js";
 
 import organisme from "./routes/specific.routes/organisme.routes.js";
 import effectif from "./routes/specific.routes/effectif.routes.js";
-import espace from "./routes/specific.routes/espace.routes.js";
 import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import organismesAdmin from "./routes/admin.routes/organismes.routes.js";
 import statsAdmin from "./routes/admin.routes/stats.routes.js";
-import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
-import maintenancesRoutes from "./routes/maintenances.routes.js";
 import config from "../config.js";
-import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
 
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
+import { requireAdministrator, returnResult } from "./middlewares/helpers.js";
+import { jobEventsDb, usersMigrationDb } from "../common/model/collections.js";
+import { packageJson } from "../common/utils/esmUtils.js";
+import logger from "../common/logger.js";
+import { findMaintenanceMessages } from "../common/actions/maintenances.actions.js";
+import {
+  findUserOrganismes,
+  getOrganisme,
+  OrganismesSearch,
+  searchOrganismes,
+  findOrganismesByUAI,
+  findOrganismesBySIRET,
+  getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
+} from "../common/actions/organismes/organismes.actions.js";
+import {
+  passwordSchema,
+  validateFullObjectSchema,
+  validateFullZodObjectSchema,
+} from "../common/utils/validationUtils.js";
+import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
+import Joi from "joi";
+import { authenticateLegacy } from "../common/actions/legacy/users.legacy.actions.js";
+import { createUserToken } from "../common/utils/jwtUtils.js";
+import { exportAnonymizedEffectifsAsCSV } from "../common/actions/effectifs/effectifs-export.actions.js";
+import { Application } from "express-serve-static-core";
+import {
+  cancelInvitation,
+  configureOrganismeERP,
+  getInvitationByToken,
+  getOrganisationOrganisme,
+  inviteUserToOrganisation,
+  listOrganisationMembers,
+  listOrganisationPendingInvitations,
+  rejectMembre,
+  removeUserFromOrganisation,
+  resendInvitationEmail,
+  validateMembre,
+} from "../common/actions/organisations.actions.js";
+import { getIndicateursNational, getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
+import { changePassword, updateUserProfile } from "../common/actions/users.actions.js";
+import { registrationSchema } from "../common/validation/registrationSchema.js";
+import { z } from "zod";
+import { sendForgotPasswordRequest, register, activateUser } from "../common/actions/account.actions.js";
+import { TETE_DE_RESEAUX } from "../common/constants/networksConstants.js";
+import { checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers.js";
+import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
+import loginSchemaLegacy from "../common/validation/loginSchemaLegacy.js";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 
 /**
  * Create the express app
- * @param {Object} services - Services
- * @param {Object} services.cache - Redis cache
- * @param {Object} services.clamav - clamav antivirus
- * @param {Object} services.mailer - Mailer
- *
  * @returns {Promise<Object>} Express app
  */
-export default async (services) => {
+export default async () => {
   const app = express();
 
   // Configure Sentry
@@ -90,95 +118,12 @@ export default async (services) => {
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
 
-  const checkJwtToken = authMiddleware();
-
   app.use(bodyParser.json());
-  app.use(logMiddleware());
+  app.use(logMiddleware);
   app.use(cookieParser());
   app.use(passport.initialize());
 
-  // public access
-  app.use("/api/emails", emails(services)); // No versionning to be sure emails links are always working
-  app.use("/api/v1/auth", auth());
-  app.use("/api/v1/auth", register(services));
-  app.use("/api/v1/password", password(services));
-  app.use("/api/v1/maintenanceMessages", maintenancesRoutes());
-
-  // private access
-  app.use("/api/v1/session", checkJwtToken, session());
-  app.use("/api/v1/profile", checkJwtToken, profile());
-  app.use("/api/v1/espace", checkJwtToken, espace());
-  app.use("/api/v1/organisme", checkJwtToken, organisme(services));
-  app.use("/api/v1/effectif", checkJwtToken, effectif());
-  app.use("/api/v1/upload", checkJwtToken, upload(services));
-  app.use("/api/v1/server-events", checkJwtToken, serverEvents());
-
-  // private admin access
-  app.use(
-    "/api/v1/admin",
-    checkJwtToken,
-    pageAccessMiddleware(["admin/page_gestion_utilisateurs"]),
-    usersAdmin(services)
-  );
-  app.use("/api/v1/admin", checkJwtToken, pageAccessMiddleware(["admin/page_gestion_organismes"]), organismesAdmin());
-  app.use("/api/v1/admin", checkJwtToken, pageAccessMiddleware(["admin/page_gestion_organismes"]), statsAdmin());
-  app.use(
-    "/api/v1/admin",
-    checkJwtToken,
-    pageAccessMiddleware(["admin/page_gestion_utilisateurs", "admin/page_gestion_roles"]),
-    rolesAdmin()
-  );
-  app.use(
-    "/api/v1/admin/maintenanceMessages",
-    checkJwtToken,
-    pageAccessMiddleware(["admin/page_message_maintenance"]),
-    maintenancesAdmin()
-  );
-
-  // Routes de calcul & export des indicateurs
-  app.use(
-    // FRONT
-    ["/api/indicateurs"],
-    checkJwtToken,
-    indicateursPermissions(),
-    indicateursRouter()
-  );
-
-  app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
-
-  app.use(
-    // FRONT
-    "/api/v1/indicateurs-export",
-    checkJwtToken,
-    indicateursPermissions(),
-    indicateursExportRouter()
-  );
-
-  app.use("/api/healthcheck", healthcheckRouter());
-
-  // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
-  app.use("/api/login", loginRouter());
-
-  app.use(
-    [
-      "/api/statut-candidats", // @deprecated to /dossiers-apprenants
-      "/api/dossiers-apprenants",
-    ],
-    requireJwtAuthenticationMiddleware(),
-    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    dossierApprenantRouter()
-  );
-
-  app.use(
-    "/api/organismes",
-    requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
-    organismesRouter()
-  ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
-
-  app.use("/api/formations", formationRouter()); // FRONT
-  app.use("/api/referentiel", referentielRouter()); // FRONT
-
-  app.use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs));
+  setupRoutes(app);
 
   // The error handler must be before any other error middleware and after all controllers
   app.use(Sentry.Handlers.errorHandler());
@@ -187,3 +132,385 @@ export default async (services) => {
 
   return app;
 };
+
+function setupRoutes(app: Application) {
+  /********************************
+   * Anonymous routes             *
+   ********************************/
+  app.get(
+    "/api",
+    returnResult(async () => {
+      return {
+        name: "TDB Apprentissage API",
+        version: packageJson.version,
+        env: config.env,
+      };
+    })
+  );
+  app.get(
+    "/api/healthcheck",
+    returnResult(async () => {
+      let mongodbHealthy = false;
+      try {
+        await jobEventsDb().findOne({});
+        mongodbHealthy = true;
+      } catch (err) {
+        logger.error({ err }, "healthcheck failed");
+      }
+
+      return {
+        name: "TDB Apprentissage API",
+        version: packageJson.version,
+        env: config.env,
+        healthcheck: {
+          mongodb: mongodbHealthy,
+        },
+      };
+    })
+  );
+  app.use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs));
+  app.post(
+    "/api/v1/organismes/search-by-siret",
+    returnResult(async (req) => {
+      const { siret } = await validateFullObjectSchema(req.body, {
+        siret: Joi.string().required(),
+      });
+      return await findOrganismesBySIRET(siret);
+    })
+  );
+  app.post(
+    "/api/v1/organismes/search-by-uai",
+    returnResult(async (req) => {
+      const { uai } = await validateFullObjectSchema(req.body, {
+        uai: Joi.string().required().uppercase(),
+      });
+      return await findOrganismesByUAI(uai);
+    })
+  );
+  app.post(
+    "/api/v1/organismes/get-by-uai-siret",
+    returnResult(async (req) => {
+      const { uai, siret } = await validateFullZodObjectSchema(req.body, {
+        uai: z.string().nullable(),
+        siret: z.string(),
+      });
+      return await getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(uai, siret);
+    })
+  );
+
+  app.use("/api/emails", emails()); // No versionning to be sure emails links are always working
+  app.use("/api/v1/auth", auth());
+
+  app.post(
+    "/api/v1/auth/register",
+    returnResult(async (req) => {
+      const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
+      registration.user.email = registration.user.email.toLowerCase();
+      await register(registration);
+    })
+  );
+  app.post(
+    "/api/v1/auth/activation",
+    // l'utilisateur est authentifié par JWT envoyé par email
+    checkActivationToken(),
+    returnResult(async (req) => {
+      // tant que l'utilisateur n'est pas confirmé
+      if (req.user.account_status === "PENDING_EMAIL_VALIDATION") {
+        await activateUser(req.user.email);
+      }
+      // renvoi du statut du compte pour rediriger l'utilisateur si son statut change
+      return await usersMigrationDb().findOne(
+        { email: req.user.email },
+        {
+          projection: {
+            _id: 0,
+            account_status: 1,
+          },
+        }
+      );
+    })
+  );
+  app.post(
+    "/api/v1/password/forgotten-password",
+    returnResult(async (req) => {
+      const { email } = await validateFullObjectSchema(req.body, {
+        email: Joi.string().email().required().lowercase().trim(),
+      });
+      await sendForgotPasswordRequest(email);
+    })
+  );
+  app.post(
+    "/api/v1/password/reset-password",
+    // l'utilisateur est authentifié par JWT envoyé par email
+    checkPasswordToken(),
+    returnResult(async (req) => {
+      // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
+      const { password } = await validateFullObjectSchema(req.body, {
+        passwordToken: Joi.string().required(),
+        password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
+      });
+      await changePassword(req.user, password);
+    })
+  );
+  app.get(
+    "/api/v1/maintenanceMessages",
+    returnResult(async () => {
+      return await findMaintenanceMessages();
+    })
+  );
+  app.use(
+    "/api/indicateurs-national",
+    returnResult(async (req) => {
+      const { date } = await validateFullObjectSchema(req.query, {
+        date: Joi.date().required(),
+      });
+      return await getIndicateursNational(date);
+    })
+  );
+
+  app.get(
+    "/api/v1/invitations/:token",
+    returnResult(async (req) => {
+      return await getInvitationByToken(req.params.token);
+    })
+  );
+
+  /*****************************************************************************
+   * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *
+   *****************************************************************************/
+  app.post(
+    "/api/login",
+    validateRequestMiddleware({
+      body: loginSchemaLegacy.strict(),
+    }),
+    returnResult(async (req) => {
+      const { username, password } = req.body;
+      const authenticatedUser = await authenticateLegacy(username, password);
+      if (!authenticatedUser) {
+        throw Boom.unauthorized();
+      }
+      return { access_token: createUserToken(authenticatedUser) };
+    })
+  );
+
+  app.use(
+    [
+      "/api/statut-candidats", // @deprecated to /dossiers-apprenants
+      "/api/dossiers-apprenants",
+    ],
+    requireJwtAuthenticationMiddleware(),
+    legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    dossierApprenantRouter()
+  );
+
+  /*********************************************************
+   * API authentifié par clé utilisé pour le réferentiel   *
+   *********************************************************/
+  app.use(
+    "/api/organismes",
+    requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
+    organismesRouter()
+  );
+
+  /********************************
+   * Authenticated routes         *
+   ********************************/
+  const authRouter = express.Router();
+  authRouter.use(authMiddleware());
+
+  authRouter.get(
+    "/api/v1/session",
+    returnResult(async (req) => {
+      return req.user;
+    })
+  );
+  const userProfileUpdateSchema = {
+    prenom: Joi.string().default("").allow(""),
+    nom: Joi.string().default("").allow(""),
+    telephone: Joi.string().default("").allow(""),
+    civility: Joi.string().default("").allow(""),
+  };
+  authRouter.put(
+    "/api/v1/profile/user",
+    returnResult(async (req) => {
+      const infos = await validateFullObjectSchema(req.body, userProfileUpdateSchema);
+      await updateUserProfile(req.user, infos);
+    })
+  );
+
+  const userCGUUpdateSchema = {
+    has_accept_cgu_version: Joi.string().required(),
+  };
+  authRouter.put(
+    "/api/v1/profile/cgu",
+    returnResult(async (req) => {
+      const infos = await validateFullObjectSchema(req.body, userCGUUpdateSchema);
+      await updateUserProfile(req.user, infos);
+    })
+  );
+  authRouter.get(
+    "/api/v1/organismes/:id",
+    returnResult(async (req) => {
+      return await getOrganisme(req.user, req.params.id);
+    })
+  );
+  authRouter.get(
+    "/api/v1/organismes/:id/indicateurs",
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getOrganismeIndicateurs(req.user, req.params.id, filters);
+    })
+  );
+
+  const organismeSearchSchema = {
+    searchTerm: Joi.string().min(3),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
+  };
+  authRouter.post(
+    "/api/v1/organismes/search",
+    returnResult(async (req) => {
+      const search = await validateFullObjectSchema<OrganismesSearch>(req.body, organismeSearchSchema);
+      return await searchOrganismes(req.user, search);
+    })
+  );
+
+  authRouter.use("/api/v1/organisme", organisme());
+  authRouter.use("/api/v1/effectif", effectif());
+  authRouter.use("/api/v1/upload", upload());
+  authRouter.get("/api/v1/server-events", serverEventsHandler);
+  authRouter.use("/api/indicateurs", indicateursRouter());
+  authRouter.get("/api/v1/indicateurs-export", async (req, res) => {
+    const filters = await buildEffectifsFiltersFromRequest(req);
+    const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
+    res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
+  });
+
+  /*
+   * formations
+   */
+  const formationsSearchSchema = {
+    searchTerm: Joi.string().min(3),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
+  };
+  authRouter.post(
+    "/api/formations/search",
+    returnResult(async (req) => {
+      const formationSearch = await validateFullObjectSchema(req.body, formationsSearchSchema);
+      return await searchFormations(formationSearch);
+    })
+  );
+
+  authRouter.get(
+    "/api/formations/:cfd",
+    returnResult(async (req) => {
+      return await getFormationWithCfd(req.params.cfd);
+    })
+  );
+
+  /*
+   * referentiel
+   */
+  authRouter.get(
+    "/api/referentiel/networks",
+    returnResult(() => {
+      // TODO : TMP on ne renvoie que les réseaux fiabilisés pour l'instant - débloquer le reste quand ce sera fiable
+      const RESEAUX_CFAS_INVALID = ["ANASUP", "GRETA_VAUCLUSE", "BTP_CFA"];
+      return TETE_DE_RESEAUX.filter((reseau) => !RESEAUX_CFAS_INVALID.includes(reseau.key)).map((reseau) => ({
+        id: reseau.key,
+        nom: reseau.nom,
+      }));
+    })
+  );
+
+  authRouter.get(
+    "/api/v1/organisation/organismes",
+    returnResult(async (req) => {
+      return await findUserOrganismes(req.user);
+    })
+  );
+  authRouter.get(
+    "/api/v1/organisation/organisme",
+    returnResult(async (req) => {
+      return await getOrganisationOrganisme(req.user);
+    })
+  );
+  authRouter.post(
+    "/api/v1/organisation/configure-erp",
+    returnResult(async (req) => {
+      await configureOrganismeERP(req.user, req.body.email.toLowerCase());
+    })
+  );
+
+  authRouter.get(
+    "/api/v1/organisation/membres",
+    returnResult(async (req) => {
+      return await listOrganisationMembers(req.user);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/organisation/membres",
+    returnResult(async (req) => {
+      await inviteUserToOrganisation(req.user, req.body.email.toLowerCase());
+    })
+  );
+
+  authRouter.delete(
+    "/api/v1/organisation/membres/:userId",
+    returnResult(async (req) => {
+      await removeUserFromOrganisation(req.user, req.params.userId);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/organisation/membres/:userId/validate",
+    returnResult(async (req) => {
+      await validateMembre(req.user, req.params.userId);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/organisation/membres/:userId/reject",
+    returnResult(async (req) => {
+      await rejectMembre(req.user, req.params.userId);
+    })
+  );
+
+  authRouter.get(
+    "/api/v1/organisation/invitations",
+    returnResult(async (req) => {
+      return await listOrganisationPendingInvitations(req.user);
+    })
+  );
+
+  authRouter.delete(
+    "/api/v1/organisation/invitations/:invitationId",
+    returnResult(async (req) => {
+      await cancelInvitation(req.user, req.params.invitationId);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/organisation/invitations/:invitationId/resend",
+    returnResult(async (req) => {
+      await resendInvitationEmail(req.user, req.params.invitationId);
+    })
+  );
+
+  /********************************
+   * API droits administrateurs   *
+   ********************************/
+  const adminRouter = express.Router();
+  adminRouter.use(requireAdministrator);
+  adminRouter.use("/api/v1/admin", usersAdmin());
+  adminRouter.use("/api/v1/admin", organismesAdmin());
+  adminRouter.use("/api/v1/admin", statsAdmin());
+  adminRouter.use("/api/v1/admin/maintenanceMessages", maintenancesAdmin());
+  authRouter.use(adminRouter);
+
+  app.use(authRouter);
+}

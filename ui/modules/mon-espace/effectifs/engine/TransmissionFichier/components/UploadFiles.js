@@ -18,7 +18,6 @@ import { useRecoilValue } from "recoil";
 import queryString from "query-string";
 
 import { _delete, _postFile } from "@/common/httpClient";
-import { hasContextAccessTo } from "@/common/utils/rolesUtils";
 import { Bin, DownloadLine, File } from "@/theme/components/icons";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import useServerEvents from "@/hooks/useServerEvents";
@@ -111,21 +110,18 @@ const UploadFiles = ({ title }) => {
 
   const onDeleteClicked = async (file) => {
     resetServerEvent();
-    if (hasContextAccessTo(organisme, "organisme/page_effectifs/supprimer_un_document")) {
-      // eslint-disable-next-line no-restricted-globals
-      const remove = confirm("Voulez-vous vraiment supprimer ce document ?");
-      if (remove) {
-        setIsSubmitting(true);
-        try {
-          let data = file;
-          const { documents } = await _delete(
-            `${endpoint}/v1/upload?organisme_id=${organisme._id}&${queryString.stringify(data)}`
-          );
-          onDocumentsChanged(documents);
-          setIsSubmitting(false);
-        } catch (e) {
-          console.error(e);
-        }
+    const remove = confirm("Voulez-vous vraiment supprimer ce document ?");
+    if (remove) {
+      setIsSubmitting(true);
+      try {
+        let data = file;
+        const { documents } = await _delete(
+          `${endpoint}/v1/upload?organisme_id=${organisme._id}&${queryString.stringify(data)}`
+        );
+        onDocumentsChanged(documents);
+        setIsSubmitting(false);
+      } catch (e) {
+        console.error(e);
       }
     }
   };
@@ -164,7 +160,7 @@ const UploadFiles = ({ title }) => {
         </Text>
         <UnorderedList>
           <li>Code Formation Diplôme ou RNCP</li>
-          <li>Année scolaire sur laquelle l'apprenant est positionné</li>
+          <li>Année scolaire sur laquelle l’apprenant est positionné</li>
           <li>Nom de l’apprenant</li>
           <li>Prénom de l’apprenant</li>
         </UnorderedList>

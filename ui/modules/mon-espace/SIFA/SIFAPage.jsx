@@ -8,7 +8,6 @@ import { usePlausible } from "next-plausible";
 
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { _get, _getBlob } from "@/common/httpClient";
-import { hasContextAccessTo } from "@/common/utils/rolesUtils";
 import useDownloadClick from "@/hooks/useDownloadClick";
 import { DownloadLine } from "@/theme/components/icons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
@@ -25,26 +24,21 @@ function useOrganismesEffectifs(organismeId) {
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
       prevOrganismeId.current = organismeId;
-      queryClient.resetQueries("organismesEffectifs", { exact: true });
+      // FIXME, reset toutes les queries ?!
+      // queryClient.resetQueries("organismesEffectifs", { exact: true });
     }
   }, [queryClient, organismeId]);
 
-  const { data, isLoading, isFetching } = useQuery(
-    ["organismesEffectifs"],
-    async () => {
-      const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organismeId}&sifa=true`);
-      // eslint-disable-next-line no-undef
-      const newEffectifsState = new Map();
-      for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
-        newEffectifsState.set(id, { validation_errors, requiredSifa });
-      }
-      setCurrentEffectifsState(newEffectifsState);
-      return organismesEffectifs;
-    },
-    {
-      refetchOnWindowFocus: false,
+  const { data, isLoading, isFetching } = useQuery(["organismesEffectifs"], async () => {
+    const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organismeId}&sifa=true`);
+    // eslint-disable-next-line no-undef
+    const newEffectifsState = new Map();
+    for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
+      newEffectifsState.set(id, { validation_errors, requiredSifa });
     }
-  );
+    setCurrentEffectifsState(newEffectifsState);
+    return organismesEffectifs;
+  });
 
   return { isLoading: isFetching || isLoading, organismesEffectifs: data || [] };
 }
@@ -101,7 +95,6 @@ const SIFAPage = ({ isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
-  const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
   const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
   const [searchValue, setSearchValue] = useState("");
@@ -128,29 +121,23 @@ const SIFAPage = ({ isMine }) => {
           {isMine ? "Mon Enquête SIFA" : "Son Enquête SIFA"}
         </Heading>
         <HStack spacing={4}>
-          {hasContextAccessTo(organisme, "organisme/page_sifa/telecharger") && (
-            <DownloadButton
-              fileName={exportSifaFilename}
-              getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
-              title="Télécharger SIFA"
-            />
-          )}
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/televersement_document") && (
-            <>
-              <Button
-                size="md"
-                fontSize={{ base: "sm", md: "md" }}
-                p={{ base: 2, md: 4 }}
-                h={{ base: 8, md: 10 }}
-                onClick={() => {
-                  router.push(`${router.asPath.replace("/enquete-SIFA", "/effectifs/televersement")}`);
-                }}
-                variant="secondary"
-              >
-                <Text as="span">+ Ajouter</Text>
-              </Button>
-            </>
-          )}
+          <DownloadButton
+            fileName={exportSifaFilename}
+            getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
+            title="Télécharger SIFA"
+          />
+          <Button
+            size="md"
+            fontSize={{ base: "sm", md: "md" }}
+            p={{ base: 2, md: 4 }}
+            h={{ base: 8, md: 10 }}
+            onClick={() => {
+              router.push(`${router.asPath.replace("/enquete-sifa", "/effectifs/televersement")}`);
+            }}
+            variant="secondary"
+          >
+            <Text as="span">+ Ajouter</Text>
+          </Button>
         </HStack>
       </Flex>
 
@@ -217,7 +204,7 @@ const SIFAPage = ({ isMine }) => {
                   return (
                     <EffectifsTableContainer
                       key={anneSco + cfd}
-                      canEdit={canEdit}
+                      canEdit={true} // FIXME organisation liée à l'organisme uniquement ?
                       effectifs={effectifs}
                       formation={formation}
                       searchValue={searchValue}

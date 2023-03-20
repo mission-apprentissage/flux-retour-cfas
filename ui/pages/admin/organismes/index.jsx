@@ -6,7 +6,6 @@ import Head from "next/head";
 import { Box, Button, Heading, HStack, Input, Stack, Spinner, Text, VStack, CloseButton } from "@chakra-ui/react";
 
 import { _get } from "@/common/httpClient";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -48,8 +47,6 @@ const Organismes = () => {
       <Head>
         <title>{title}</title>
       </Head>
-
-      <Breadcrumb pages={[PAGES.homepage(), { title }]} />
 
       <VStack alignItems="baseline" width="100%">
         <HStack justifyContent="space-between" alignItems="baseline" width="100%">
@@ -134,4 +131,4 @@ const Organismes = () => {
   );
 };
 
-export default withAuth(Organismes, "admin/page_gestion_organismes");
+export default withAuth(Organismes, ["ADMINISTRATEUR"]);

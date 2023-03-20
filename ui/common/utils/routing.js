@@ -10,7 +10,7 @@ export const navigateToOrganismePage = (router, organisme) => {
     },
   });
   router.push({
-    pathname: "/mon-espace/mon-organisme/par-organisme",
+    pathname: "/par-organisme",
     search: queryString,
   });
 };

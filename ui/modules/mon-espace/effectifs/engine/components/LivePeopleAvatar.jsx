@@ -16,9 +16,7 @@ const useWebSocketSubscription = () => {
   const dossierIdParam = slug?.[slug.length - 2];
 
   // eslint-disable-next-line no-undef
-  const { data: liveUsers } = useQuery(["dossier:live_users"], () => Promise.resolve([]), {
-    refetchOnWindowFocus: false,
-  });
+  const { data: liveUsers } = useQuery(["dossier:live_users"], () => Promise.resolve([]));
 
   useEffect(() => {
     const socket = io("/dossier");

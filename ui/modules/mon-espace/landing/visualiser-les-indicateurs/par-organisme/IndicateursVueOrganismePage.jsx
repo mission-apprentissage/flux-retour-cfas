@@ -11,11 +11,10 @@ import useFetchOrganismeInfo from "@/hooks/useFetchOrganismeInfo";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import OrganismeViewContent from "./OrganismeViewContent";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
-  const page = PAGES.visualiserLesIndicateursParOrganisme();
+  const title = "Vue par organisme de formation";
   const { data: infosCfa, loading, error } = useFetchOrganismeInfo(filtersContext?.state?.cfa?.uai_etablissement);
 
   const currentOrganisme = filtersContext.state.cfa;
@@ -26,12 +25,11 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   return (
     <Page>
       <Head>
-        <title>{page.title}</title>
+        <title>{title}</title>
       </Head>
       <Section paddingY="3w">
-        <Breadcrumb pages={[PAGES.monTableauDeBord(), page]} />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
-          <Heading as="h1">{page.title}</Heading>
+          <Heading as="h1">{title}</Heading>
           <SwitchViewButton />
         </HStack>
         {currentOrganisme ? (

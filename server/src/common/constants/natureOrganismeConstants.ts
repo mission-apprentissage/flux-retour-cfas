@@ -1,3 +1,4 @@
+// FIXME plutôt utiliser un type avec des strings car const !== string
 export const NATURE_ORGANISME_DE_FORMATION = {
   RESPONSABLE: "responsable" as const,
   FORMATEUR: "formateur" as const,

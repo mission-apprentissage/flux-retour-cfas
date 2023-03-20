@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import { usePlausible } from "next-plausible";
 
 import Page from "@/components/Page/Page";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 // note: les noms de tab doivent correspondre aux noms des goals dans plausible (avec prefixe "clic_stats_")
 const tabs = ["visites", "profils-utilisateur", "acquisition", "qualite", "couverture"];
@@ -28,11 +27,6 @@ const StatistiquesPage = () => {
           <Heading as="h1" variant="h1" marginBottom="1w">
             Statistiques
           </Heading>
-        </Container>
-      </Box>
-      <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} paddingTop="3w">
-        <Container maxW="xl">
-          <Breadcrumb pages={[PAGES.homepage(), { title }]} />
         </Container>
       </Box>
       <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} paddingY="4w">
