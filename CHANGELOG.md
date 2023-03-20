@@ -1,3 +1,17 @@
+# [3.15.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.14.2...v3.15.0) (2023-03-20)
+
+
+### Bug Fixes
+
+* fix compilation ts sur admin/organismes.routes.ts ([e1c0976](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e1c097633ce26456bc87e407ddd9cf9def26bc60))
+* restauration typage client mongo ([#2774](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2774)) ([aee2e06](https://github.com/mission-apprentissage/flux-retour-cfas/commit/aee2e0673669b9d6f7648773ccfdab14d91fc3c0))
+* **server:** suppression du statut de fiab sans siret ([#2778](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2778)) ([760b7ad](https://github.com/mission-apprentissage/flux-retour-cfas/commit/760b7ad6d125d009788597c16daa0c137b6f923e))
+
+
+### Features
+
+* ajout page gestion des organismes ([#2771](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2771)) ([f18a6ea](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f18a6ea155f959674cb95c934c1ac2e9123782f7))
+
 ## [3.14.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.14.1...v3.14.2) (2023-03-20)
 
 
