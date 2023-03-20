@@ -1,4 +1,4 @@
-import { object, objectId, string, boolean, number, array } from "./json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, boolean, number, array, arrayOf } from "./json-schema/jsonSchemaTypes.js";
 
 const collectionName = "organismesReferentiel";
 
@@ -90,8 +90,9 @@ const schema = object(
       { required: ["code", "label"] }
     ),
     qualiopi: boolean(),
+    lieux_de_formation: arrayOf(object({ uai: string() }, { additionalProperties: true })),
   },
-  { required: ["siret", "nature"] }
+  { required: ["siret", "nature", "lieux_de_formation"] }
 );
 
 export default { schema, indexes, collectionName };
