@@ -1,12 +1,6 @@
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
-import {
-  dossiersApprenantsMigrationDb,
-  effectifsDb,
-  fiabilisationUaiSiretDb,
-  organismesDb,
-  organismesReferentielDb,
-} from "../../../../common/model/collections.js";
+import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { getPercentage } from "../../../../common/utils/miscUtils.js";
 import { FIABILISATION_MAPPINGS as manualMapping } from "../mapping.js";
