@@ -1,10 +1,6 @@
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
-import {
-  dossiersApprenantsMigrationDb,
-  fiabilisationUaiSiretDb,
-  organismesReferentielDb,
-} from "../../../../common/model/collections.js";
+import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { getPercentage } from "../../../../common/utils/miscUtils.js";
 import { FIABILISATION_MAPPINGS as manualMapping } from "../mapping.js";
@@ -39,26 +35,22 @@ export const buildFiabilisationUaiSiret = async () => {
 
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
 
-  // on récupère tous les couples UAI/SIRET depuis les dossiers apprenants (migration)
-  const allCouplesUaiSiretTdb = await dossiersApprenantsMigrationDb()
+  // on récupère tous les couples UAI/SIRET depuis les effectifs en faisant un lookup effectifs - organismes
+  const allCouplesUaiSiretTdb = await effectifsDb()
     .aggregate([
+      { $match: filters },
       {
-        $match: filters,
-      },
-      {
-        $group: {
-          _id: {
-            uai: "$uai_etablissement",
-            siret: "$siret_etablissement",
-          },
+        $lookup: {
+          from: "organismes",
+          localField: "organisme_id",
+          foreignField: "_id",
+          as: "organismes_info",
         },
       },
-      {
-        $project: {
-          uai: "$_id.uai",
-          siret: "$_id.siret",
-        },
-      },
+      { $unwind: "$organismes_info" },
+      { $project: { organisme_uai: "$organismes_info.uai", organisme_siret: "$organismes_info.siret" } },
+      { $group: { _id: { uai: "$organisme_uai", siret: "$organisme_siret" } } },
+      { $project: { _id: 0, uai: "$_id.uai", siret: "$_id.siret" } },
     ])
     .toArray();
 
