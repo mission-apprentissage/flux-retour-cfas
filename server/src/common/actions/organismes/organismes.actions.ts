@@ -515,3 +515,150 @@ export const deleteOrganismeAndEffectifsAndDossiersApprenantsMigration = async (
 
   return { deletedDossiersApprenantsMigration, deletedEffectifs, deletedOrganisme };
 };
+
+/**
+ * Méthode de récupération de la liste des organismes en base
+ * @param {*} query
+ * @returns
+ */
+export const getAllOrganismes = async (
+  query = {},
+  { page, limit, sort } = { page: 1, limit: 10, sort: { createdAt: -1 } }
+) => {
+  const result = await organismesDb()
+    .aggregate([
+      { $match: query },
+      { $sort: sort },
+      {
+        $facet: {
+          pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
+          data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+        },
+      },
+      { $unwind: { path: "$pagination" } },
+    ])
+    .next();
+
+  if (result?.pagination) {
+    result.pagination.lastPage = Math.ceil(result.pagination.total / limit);
+  }
+  return result;
+};
+
+/**
+ * Méthode de récupération d'un organisme et de ses détails depuis son id
+ * @param {*} _id
+ * @returns
+ */
+export const getDetailedOrganismeById = async (_id) => {
+  const organisme = await organismesDb()
+    .aggregate([
+      { $match: { _id: new ObjectId(_id) } },
+      {
+        $lookup: {
+          from: "organismesReferentiel",
+          as: "organismesReferentiel",
+          let: {
+            siret: "$siret",
+            uai: "$uai",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $and: [{ $gt: ["$siret", null] }, { $eq: ["$siret", "$$siret"] }] },
+                    { $and: [{ $gt: ["$uai", null] }, { $eq: ["$uai", "$$uai"] }] },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "organismes",
+          as: "organismesDoublon",
+          let: {
+            id: "$_id",
+            siret: "$siret",
+            uai: "$uai",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $not: { $eq: ["$_id", "$$id"] } },
+                    {
+                      $or: [
+                        { $and: [{ $gt: ["$siret", null] }, { $eq: ["$siret", "$$siret"] }] },
+                        { $and: [{ $gt: ["$uai", null] }, { $eq: ["$uai", "$$uai"] }] },
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    ])
+    .next();
+
+  return organisme;
+};
+
+/**
+ * Met à jour le nombre d'effectifs d'un organisme
+ * @param {*} _id
+ * @returns
+ */
+export const updateEffectifsCount = async (organisme_id) => {
+  const total = await effectifsDb().count({ organisme_id });
+  return organismesDb().findOneAndUpdate({ _id: organisme_id }, { $set: { effectifs_count: total } });
+};
+
+/**
+ * Méthode de récupération des stats sur la table organisme
+ * @param {*} _id
+ * @returns
+ */
+export const getStatOrganismes = async () => {
+  const stats = await organismesDb()
+    .aggregate([
+      {
+        $group: {
+          _id: {
+            statut_fiabilisation: "$fiabilisation_statut",
+          },
+          count: {
+            $addToSet: "$_id",
+          },
+        },
+      },
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+      {
+        $project: {
+          _id: false,
+          statut_fiabilisation: "$_id.statut_fiabilisation",
+          count: {
+            $size: "$count",
+          },
+        },
+      },
+      {
+        $sort: {
+          statut_fiabilisation: 1,
+        },
+      },
+    ])
+    .toArray();
+
+  return stats;
+};

@@ -248,7 +248,7 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
             <HStack gap={2}>
               <span>Établissement :</span>
               <Text as="span" bgColor="galtDark" px={2}>
-                <Link href={`/mon-espace/organisme/${user.main_organisme._id}`}>
+                <Link href={`/admin/organismes/${user.main_organisme._id}`}>
                   {user.main_organisme.nom || getUserOrganisationLabel(user)}
                 </Link>
               </Text>

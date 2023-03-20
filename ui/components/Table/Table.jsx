@@ -32,10 +32,17 @@ export default function Table({
   renderSubComponent,
   getRowCanExpand,
   searchValue,
+  onCountItemsChange = () => {},
+  // pagination
   manualPagination = false,
   onPaginationChange = null,
   pagination,
-  onCountItemsChange = () => {},
+  // sorting
+  manualSorting = false,
+  enableSorting,
+  onSortingChange = null,
+  sorting,
+  pageSizes = [5, 10, 20, 30, 40, 50],
   ...props
 }) {
   const data = useMemo(() => defaultData, [defaultData]); // TODO TO CHECK RE-RENDERER WITH [defaultData] instead of []
@@ -60,7 +67,35 @@ export default function Table({
     data,
     columns,
     getRowCanExpand,
+    // pagination
     manualPagination,
+    pageCount: pagination?.total || data?.length,
+    ...(onPaginationChange
+      ? {
+          onPaginationChange: (updater) => {
+            const oldState = table.getState();
+            const newState = updater(oldState.pagination);
+            onPaginationChange({ page: newState.pageIndex + 1, limit: newState.pageSize });
+          },
+        }
+      : {}),
+    // sorting
+    enableSorting,
+    manualSorting,
+    onSortingChange,
+    ...(onSortingChange
+      ? {
+          onSortingChange: (updater) => {
+            const oldState = table.getState();
+            const newState = updater(oldState.sorting);
+            // weird behaviour: sometimes newState is empty so we rollback to oldState
+            newState.length > 0
+              ? onSortingChange({ field: newState[0].id, direction: newState[0].desc ? "-1" : "1" })
+              : onSortingChange({ field: oldState.sorting[0].id, direction: oldState.sorting[0].desc ? "1" : "-1" });
+          },
+        }
+      : {}),
+    // general
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -68,16 +103,6 @@ export default function Table({
     getPaginationRowModel: getPaginationRowModel(),
     globalFilterFn: fuzzyFilter,
     onGlobalFilterChange: setGlobalFilter,
-    pageCount: pagination?.total || data?.length,
-    ...(onPaginationChange
-      ? {
-          onPaginationChange: (updater) => {
-            const oldState = table.getState().pagination;
-            const newState = updater(oldState);
-            onPaginationChange({ page: newState.pageIndex + 1, limit: newState.pageSize });
-          },
-        }
-      : {}),
     state: {
       globalFilter,
       ...(pagination
@@ -88,6 +113,7 @@ export default function Table({
             },
           }
         : {}),
+      ...(sorting ? { sorting } : {}),
     },
     // initialState: {},
   });
@@ -124,7 +150,20 @@ export default function Table({
                       },
                     }}
                   >
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder ? null : (
+                      <div
+                        {...{
+                          className: header.column.getCanSort() ? "cursor-pointer select-none" : "",
+                          onClick: header.column.getToggleSortingHandler(),
+                        }}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {{
+                          asc: " 🔼",
+                          desc: " 🔽",
+                        }[header.column.getIsSorted()] ?? null}
+                      </div>
+                    )}
                   </Box>
                 );
               })}
@@ -209,7 +248,7 @@ export default function Table({
                     table.setPageSize(Number(e.target.value));
                   }}
                 >
-                  {[5, 10, 20, 30, 40, 50].map((pageSize) => (
+                  {pageSizes.map((pageSize) => (
                     <option key={pageSize} value={pageSize}>
                       Voir par {pageSize}
                     </option>

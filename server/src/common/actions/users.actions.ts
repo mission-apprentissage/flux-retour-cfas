@@ -170,7 +170,7 @@ export const getUserByEmail = async (email) => {
 };
 
 /**
- * Méthode de récupération d'un user depuis son id
+ * Méthode de récupération d'un utilisateur et de ses détails depuis son id
  * @param {*} _id
  * @returns
  */
@@ -272,6 +272,7 @@ export const getAllUsers = async (query = {}, { page, limit, sort }) => {
   }
   return result;
 };
+
 /**
  * Méthode de suppression d'un user depuis son id
  * @param {string} _idStr

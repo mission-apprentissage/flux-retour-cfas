@@ -75,7 +75,7 @@ async function createFirewall(client, ip) {
   let ipBlock = asIpBlock(ip);
 
   if (await firewallExists(client, ip)) {
-    console.log("Firewall already created");
+    console.info("Firewall already created");
     return;
   }
   console.log(`Creating firewall for ip '${ip}'...`);
@@ -120,18 +120,18 @@ async function closeService(client, ip) {
     await removeRule(client, ip, rules.allowTcpOnPort(443, 2));
     await removeRule(client, ip, rules.allowTcpOnPort(80, 3));
   } else {
-    console.log("Firewall does not exist, can't close service on port 443/80 !");
+    console.warn("Firewall does not exist, can't close service on port 443/80 !");
   }
 }
 
 async function activateMitigation(client, ip) {
   let ipBlock = asIpBlock(ip);
   if (await mitigationActivated(client, ip)) {
-    console.log("Mitigation already activated");
+    console.info("Mitigation already activated");
     return;
   }
 
-  console.log(`Activating permanent mitigation...`);
+  console.info("Activating permanent mitigation...");
   await client.request("POST", `/ip/${ipBlock}/mitigation`, { ipOnMitigation: ip });
 }
 

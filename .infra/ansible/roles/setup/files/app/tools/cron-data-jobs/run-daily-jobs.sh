@@ -26,6 +26,9 @@ call_daily_jobs_with_logs(){
 
   # Purge des données inutiles
   docker exec flux_retour_cfas_server bash -c "yarn cli purge:events" || true
+
+  # Mise a jour du nb d'effectifs
+  docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes-effectifs-count" || true
 } 
 
 call_daily_jobs_with_logs >> ${LOG_FILEPATH}

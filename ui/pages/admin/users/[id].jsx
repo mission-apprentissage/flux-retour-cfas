@@ -13,7 +13,7 @@ import UserForm from "@/modules/admin/UserForm";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const Users = () => {
+const User = () => {
   const router = useRouter();
   const id = router.query.id;
   const {
@@ -78,4 +78,4 @@ const Users = () => {
   );
 };
 
-export default withAuth(Users, "admin/page_gestion_utilisateurs");
+export default withAuth(User, "admin/page_gestion_utilisateurs");

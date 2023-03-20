@@ -14,6 +14,10 @@ import UserWrapper from "@/components/UserWrapper/UserWrapper";
 import AlertMessage from "@/components/AlertMessage/AlertMessage";
 import { queryClient } from "@/common/queryClient";
 
+import fr from "date-fns/locale/fr";
+import setDefaultOptions from "date-fns/setDefaultOptions";
+setDefaultOptions({ locale: fr });
+
 function MyApp({ Component, pageProps }) {
   return (
     <PlausibleProvider domain={process.env.NEXT_PUBLIC_BASE_HOST!} trackLocalhost={false}>

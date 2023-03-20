@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import { Box, Center, Container, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 
 import { _get } from "@/common/httpClient";
@@ -91,106 +91,61 @@ function MesOrganismes() {
                 columns={{
                   nom: {
                     size: 200,
-                    header: () => {
-                      return <Box textAlign="left">Nom de l&rsquo;organisme</Box>;
-                    },
-                    cell: ({ row }) => {
-                      const { nomOrga, nom } = organismes[row.id];
-                      return <Text fontSize="1rem">{nomOrga ?? nom}</Text>;
-                    },
+                    header: () => "Nom de l'organisme",
+                    cell: ({ row }) => <Text fontSize="1rem">{row.original.nomOrga ?? row.original.nom}</Text>,
                   },
                   nature: {
                     size: 100,
-                    header: () => {
-                      return <Box textAlign="left">Nature</Box>;
-                    },
-                    cell: ({ row }) => {
-                      const { nature } = organismes[row.id];
-
-                      return <Text fontSize="1rem">{natures[nature] ?? "Inconnue"}</Text>;
-                    },
+                    header: () => "Nature",
+                    cell: ({ getValue }) => <Text fontSize="1rem">{natures[getValue()] ?? "Inconnue"}</Text>,
                   },
-                  localisation: {
+                  adresse: {
                     size: 100,
-                    header: () => {
-                      return <Box textAlign="left">Localisation</Box>;
-                    },
-                    cell: ({ row }) => {
-                      const { adresse } = organismes[row.id];
-                      return <Text fontSize="1rem">{adresse?.commune}</Text>;
-                    },
+                    header: () => "Localisation",
+                    cell: ({ getValue }) => <Text fontSize="1rem">{getValue()?.commune}</Text>,
                   },
                   siret: {
                     size: 70,
-                    header: () => {
-                      return <Box textAlign="left">SIRET</Box>;
-                    },
-                    cell: ({ row }) => {
-                      const { siret } = organismes[row.id];
-
-                      return (
-                        <VStack alignItems="flex-start">
-                          <Text>{siret || "SIRET INCONNU"}</Text>
-                        </VStack>
-                      );
-                    },
+                    header: () => "SIRET",
+                    cell: ({ getValue }) => getValue() || "SIRET INCONNU",
                   },
                   uai: {
                     size: 60,
-                    header: () => {
-                      return <Box textAlign="left">Numéro UAI</Box>;
-                    },
-                    cell: ({ row }) => {
-                      const { uai } = organismes[row.id];
-                      return <Text fontSize="1rem">{uai}</Text>;
-                    },
+                    header: () => "Numéro UAI",
+                    cell: ({ getValue }) => <Text fontSize="1rem">{getValue()}</Text>,
                   },
-                  state: {
+                  ferme: {
                     size: 60,
-                    header: () => {
-                      return <Box textAlign="left">État</Box>;
-                    },
-                    cell: ({ row }) => {
-                      const { ferme } = organismes[row.id];
-                      if (ferme) {
-                        return (
-                          <Text fontSize="1rem" color="redmarianne" fontWeight="bold">
-                            Fermé
-                          </Text>
-                        );
-                      }
-                      return <Text fontSize="1rem">Actif</Text>;
-                    },
+                    header: () => "État",
+                    cell: ({ getValue }) =>
+                      getValue() ? (
+                        <Text fontSize="1rem" color="redmarianne" fontWeight="bold">
+                          Fermé
+                        </Text>
+                      ) : (
+                        <Text fontSize="1rem">Actif</Text>
+                      ),
                   },
-                  fiabilisation: {
+                  fiabilisation_statut: {
                     size: 120,
-                    header: () => {
-                      return <Box textAlign="left">Fiabilisation</Box>;
-                    },
-                    cell: ({ row }) => {
-                      const { fiabilisation_statut } = organismes[row.id];
-                      return <Text>{FIABILISATION_LABEL[fiabilisation_statut] || FIABILISATION_LABEL.INCONNUE}</Text>;
-                    },
+                    header: () => "Fiabilisation",
+                    cell: ({ getValue }) => (
+                      <Text>{FIABILISATION_LABEL[getValue()] || FIABILISATION_LABEL.INCONNUE}</Text>
+                    ),
                   },
-                  transmission: {
+                  last_transmission_date: {
                     size: 120,
-                    header: () => {
-                      return <Box textAlign="left">Dernière transmission au tdb</Box>;
-                    },
-                    cell: ({ row }) => {
-                      const { last_transmission_date } = organismes[row.id];
-                      return last_transmission_date ? (
-                        <Text color="green">Le {formatDateDayMonthYear(last_transmission_date)}</Text>
+                    header: () => "Dernière transmission au tdb",
+                    cell: ({ getValue }) =>
+                      getValue() ? (
+                        <Text color="green">Le {formatDateDayMonthYear(getValue())}</Text>
                       ) : (
                         <Text color="tomato">Ne transmet pas</Text>
-                      );
-                    },
+                      ),
                   },
                   goTo: {
                     size: 25,
-                    header: () => {
-                      return <Box>&nbsp;</Box>;
-                    },
+                    header: () => " ",
                     cell: ({ row }) => {
                       return (
                         <Link href={`/mon-espace/organisme/${organismes[row.id]._id}`} flexGrow={1}>
