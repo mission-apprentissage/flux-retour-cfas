@@ -49,7 +49,7 @@ export const fetchOrganismeWithSiret = async (siret) => {
     const { data } = await axios.get(url);
 
     return data;
-  } catch (/** @type {any}*/ err: any) {
+  } catch (err: any) {
     const errorMessage = err.response?.data || err.code;
     logger.error("API REFERENTIEL fetchOrganismeWithSiret something went wrong:", errorMessage);
     return null;
@@ -61,7 +61,7 @@ export const fetchOrganismesWithUai = async (uai) => {
   try {
     const { data } = await axios.get(url, { params: { uais: uai } });
     return data;
-  } catch (/** @type {any}*/ err: any) {
+  } catch (err: any) {
     const errorMessage = err.response?.data || err.code;
     logger.error("API REFERENTIEL fetchOrganismesWithUai something went wrong:", errorMessage);
     return null;

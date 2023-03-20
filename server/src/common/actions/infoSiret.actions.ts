@@ -17,7 +17,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   let etablissementApiInfo;
   try {
     etablissementApiInfo = await apiEntreprise.getEtablissement(siret, non_diffusables);
-  } catch (/** @type {any}*/ e: any) {
+  } catch (e: any) {
     console.error(e);
     if (e.reason === 451) {
       return {

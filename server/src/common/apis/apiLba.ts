@@ -30,7 +30,7 @@ export const getMetiersBySiret = async (siret) => {
   try {
     const metiers = await fetchMetiersBySiret(siret);
     return metiers;
-  } catch (/** @type {any}*/ err: any) {
+  } catch (err: any) {
     // 500 with specific message on this route means no métiers were found for those SIRET
     if (err.response?.status === 500 && err.response?.data?.error === NO_METIERS_FOUND_ERROR_MSG) {
       return [];

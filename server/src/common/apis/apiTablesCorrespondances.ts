@@ -18,7 +18,7 @@ export const getCfdInfo = async (cfd) => {
       cfd,
     });
     return data.result;
-  } catch (/** @type {any}*/ error: any) {
+  } catch (error: any) {
     logger.error(`getCfdInfo: something went wrong while requesting ${url}`, error.response?.data || error.message);
     return null;
   }
@@ -36,7 +36,7 @@ export const getCodePostalInfo = async (codePostal) => {
       codePostal,
     });
     return data;
-  } catch (/** @type {any}*/ error: any) {
+  } catch (error: any) {
     logger.error(
       `getCodePostalInfo: something went wrong while requesting ${url}`,
       `${error.message} for code=${codePostal}`,

@@ -52,7 +52,7 @@ export const addDocument = async (
   let found: any = null;
   try {
     found = await getUploadEntryByOrgaId(organisme_id);
-  } catch (/** @type {any}*/ error: any) {
+  } catch (error: any) {
     if (error.message.includes("Unable to find uploadEntry")) {
       found = await createUpload({ organisme_id });
     }
@@ -100,7 +100,7 @@ export const updateDocument = async (organisme_id, { nom_fichier, taille_fichier
   let found: any = null;
   try {
     found = await getUploadEntryByOrgaId(organisme_id);
-  } catch (/** @type {any}*/ error: any) {
+  } catch (error: any) {
     if (error.message.includes("Unable to find uploadEntry")) {
       found = await createUpload({ organisme_id });
     }
