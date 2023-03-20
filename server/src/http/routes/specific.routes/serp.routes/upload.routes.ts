@@ -25,13 +25,13 @@ import { getJsonFromXlsxData } from "../../../../common/utils/xlsxUtils.js";
 import { hydrateEffectif } from "../../../../common/actions/engine/engine.actions.js";
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
-import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
 import { getFormationWithCfd, getFormationWithRNCP } from "../../../../common/actions/formations.actions.js";
 import {
   findOrganismeById,
   setOrganismeTransmissionDates,
 } from "../../../../common/actions/organismes/organismes.actions.js";
 import { sendServerEventsForUser } from "../server-events.routes.js";
+import { clamav } from "../../../../services.js";
 
 const mappingModel = {
   annee_scolaire: "annee_scolaire",
@@ -103,7 +103,7 @@ function noop() {
   return new PassThrough();
 }
 
-export default ({ clamav }) => {
+export default () => {
   const router = express.Router();
 
   function handleMultipartForm(req, res, organisme_id, callback) {
@@ -163,7 +163,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       sendServerEventsForUser(req.user._id, "Fichier en cours de téléversement...");
 
@@ -224,7 +224,7 @@ export default ({ clamav }) => {
 
   router.get(
     "/get",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -245,7 +245,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/setDocumentType",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       let { organisme_id, type_document, nom_fichier, taille_fichier } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -298,7 +298,7 @@ export default ({ clamav }) => {
 
   router.get(
     "/analyse",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -588,7 +588,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/setModel",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       let {
         organisme_id,
@@ -620,7 +620,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/pre-import",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       let { organisme_id, mapping: userMapping } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -902,7 +902,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/import",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -974,7 +974,7 @@ export default ({ clamav }) => {
 
   router.get(
     "/",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       let { organisme_id, path, name } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -1004,7 +1004,7 @@ export default ({ clamav }) => {
 
   router.delete(
     "/",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     async (req, res) => {
       let { organisme_id, nom_fichier, chemin_fichier, taille_fichier } = await Joi.object({
         organisme_id: Joi.string().required(),

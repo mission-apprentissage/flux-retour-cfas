@@ -9,8 +9,7 @@ export function getPublicUrl(path) {
   return `${config.publicUrl}${path}`;
 }
 
-export async function generateHtml(to, template) {
-  const { subject, templateFile, data } = template;
+export async function generateHtml(to: string, { subject, templateFile, data }) {
   const buffer = await renderFile(templateFile, {
     to,
     subject,

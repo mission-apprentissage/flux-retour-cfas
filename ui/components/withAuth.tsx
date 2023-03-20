@@ -1,0 +1,31 @@
+import { useRouter } from "next/router";
+import useAuth from "@/hooks/useAuth";
+import { OrganisationType } from "@/common/internal/Organisation";
+
+const withAuth = (Component: any, authorizedOrganisationTypes: OrganisationType[] = []) => {
+  const AuthenticatedPage = (props) => {
+    const router = useRouter();
+    const { auth, organisationType } = useAuth();
+    // FIXME probablement lever une erreur si le compte n'est confirmé
+    if (!auth) {
+      if (typeof window !== "undefined") {
+        router.push("/auth/connexion");
+      }
+      return <></>;
+    }
+
+    if (authorizedOrganisationTypes.length > 0 && !authorizedOrganisationTypes.includes(organisationType)) {
+      if (typeof window !== "undefined") {
+        console.error(`Vous n'avez pas les droits pour accéder à cette page`);
+        router.push("/auth/connexion");
+      }
+      return <></>;
+    }
+
+    return <Component {...props} />;
+  };
+
+  return AuthenticatedPage;
+};
+
+export default withAuth;

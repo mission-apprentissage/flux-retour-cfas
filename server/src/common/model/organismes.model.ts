@@ -2,7 +2,7 @@ import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes.js";
 import { adresseSchema } from "./json-schema/adresseSchema.js";
-import { RESEAUX_CFAS } from "../constants/networksConstants.js";
+import { TETE_DE_RESEAUX } from "../constants/networksConstants.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/natureOrganismeConstants.js";
 import { schemaValidation } from "../utils/schemaUtils.js";
 import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
@@ -41,7 +41,9 @@ const schema = object(
       minLength: 8,
     }),
     siret: string({ description: "N° SIRET fiabilisé", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
-    reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS) }), { description: "Réseaux du CFA, s'ils existent" }),
+    reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) }), {
+      description: "Réseaux du CFA, s'ils existent",
+    }),
     erps: arrayOf(
       string(),
       // TODO because legacy

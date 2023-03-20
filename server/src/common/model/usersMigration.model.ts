@@ -1,10 +1,7 @@
 import Joi from "joi";
-import { integer, object, objectId, string, boolean, any, arrayOf, date } from "./json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, boolean, any, arrayOf, date } from "./json-schema/jsonSchemaTypes.js";
 import { schemaValidation } from "../utils/schemaUtils.js";
-import { siretSchema, passwordSchema, uaiSchema } from "../utils/validationUtils.js";
-import { RESEAUX_CFAS } from "../constants/networksConstants.js";
-import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../constants/territoiresConstants.js";
-import { ORGANISMES_APPARTENANCE, USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
+import { passwordSchema } from "../utils/validationUtils.js";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 export const collectionName = "usersMigration";
@@ -12,7 +9,7 @@ export const collectionName = "usersMigration";
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ email: 1 }, { unique: true }],
   [{ "emails.token": 1 }, {}],
-  [{ email: "text", nom: "text", prenom: "text", siret: "text", uai: "text" }, {}],
+  [{ email: "text", nom: "text", prenom: "text" }, {}],
 ];
 
 export const schema = object(
@@ -24,59 +21,17 @@ export const schema = object(
     nom: string({ description: "Le nom de l'utilisateur" }),
     prenom: string({ description: "Le prénom de l'utilisateur" }),
     telephone: string({ description: "Le téléphone de l'utilisateur" }),
-    siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
-    uai: string({
-      description: "Code UAI de l'organisme (seulement pour les utilisateurs OF)",
-      pattern: "^[0-9]{7}[a-zA-Z]$",
-      maxLength: 8,
-      minLength: 8,
+    fonction: string({ description: "La fonction de l'utilisateur" }),
+    organisation_id: objectId({
+      description: "Organisation à laquelle appartient l'utilisateur",
     }),
-    organisation: string({
-      description: "Appartenance à une organisation (exemple DREETS, MISSION_LOCALE..)",
-      enum: Object.keys(ORGANISMES_APPARTENANCE),
-    }),
-    main_organisme_id: objectId({
-      description: "Organisme principe id",
-    }),
-
-    // Scoping
-    reseau: string({
-      description: "Si l'utilisateur est scopé à un réseau, le quel ?",
-      enum: Object.keys(RESEAUX_CFAS),
-    }),
-    erp: string({ description: "Si l'utilisateur est scopé à un erp, le quel ?" }),
-    codes_region: arrayOf(
-      string({
-        enum: REGIONS.map(({ code }) => code),
-      }),
-      { description: "Si l'utilisateur est scopé à une ou des région(s), lesquelles ?" }
-    ),
-    codes_academie: arrayOf(
-      string({
-        enum: Object.values(ACADEMIES).map(({ code }) => `${code}`),
-      }),
-      { description: "Si l'utilisateur est scopé à une ou des académie(s), lesquelles ?" }
-    ),
-    codes_departement: arrayOf(
-      string({
-        example: "1 Ain, 99 Étranger",
-        pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
-        enum: DEPARTEMENTS.map(({ code }) => code),
-        maxLength: 3,
-        minLength: 1,
-      }),
-      { description: "Si l'utilisateur est scopé à un ou des département(s), lesquels ?" }
-    ),
-    is_cross_organismes: boolean({ description: "true si l'utilisateur est transverse à tous les organismes" }),
 
     // Internal
     account_status: string({
       description: "Statut du compte",
-      enum: Object.keys(USER_ACCOUNT_STATUS),
+      enum: ["PENDING_EMAIL_VALIDATION", "PENDING_ADMIN_VALIDATION", "CONFIRMED"],
     }),
     has_accept_cgu_version: string({ description: "Version des cgu accepté par l'utilisateur" }),
-    is_admin: boolean({ description: "true si l'utilisateur est administrateur" }),
-    roles: arrayOf(objectId(), { description: "Roles de l'utilisateur" }),
     created_at: date({ description: "Date de création du compte" }),
     last_connection: date({ description: "Date de dernière connexion" }),
     connection_history: arrayOf(date(), { description: "Historique des dates de connexion" }),
@@ -104,44 +59,12 @@ export const schema = object(
       )
     ),
     unsubscribe: boolean({ description: "unsubscribe email" }),
-    v: integer(),
   },
   { required: ["email"], additionalProperties: true }
 );
 
-// Default value
-export function defaultValuesUser() {
-  return {
-    account_status: "PENDING_EMAIL_VALIDATION",
-    has_accept_cgu_version: "",
-    is_cross_organismes: false,
-    is_admin: false,
-    roles: [],
-    codes_region: [],
-    codes_academie: [],
-    codes_departement: [],
-    invalided_token: false,
-    password_updated_at: new Date(),
-    connection_history: [],
-    emails: [],
-    created_at: new Date(),
-  };
-}
-
 // Extra validation
 export function validateUser(props) {
-  const { codes_region, codes_academie, codes_departement, reseau, erp } = props;
-
-  // Check if only one settled
-  const scopeTerritoire = [codes_region?.length, codes_academie?.length, codes_departement?.length];
-  if (scopeTerritoire.length - scopeTerritoire.filter((v) => !!v).length < 2) {
-    throw new Error("schema not valid : codes_region, codes_academie, codes_departement ONLY ONE OF THEM CAN BE SET");
-  }
-
-  if (reseau && erp) {
-    throw new Error("schema not valid : reseau, erp ONLY ONE OF THEM CAN BE SET");
-  }
-
   return schemaValidation({
     entity: props,
     schema,
@@ -153,14 +76,6 @@ export function validateUser(props) {
       {
         name: "password",
         base: passwordSchema(),
-      },
-      {
-        name: "siret",
-        base: siretSchema(),
-      },
-      {
-        name: "uai",
-        base: uaiSchema(),
       },
     ],
   });

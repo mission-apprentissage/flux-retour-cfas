@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Center, Flex, Link, Spinner, Text } from "@chakra-ui/react";
+import { Center, Spinner } from "@chakra-ui/react";
 import Effectifs from "./engine/Effectifs.jsx";
 
 import { organismeAtom } from "../../../hooks/organismeAtoms";
@@ -10,10 +10,7 @@ import ChoixTransmission from "./ChoixTransmission";
 import TransmissionAPI from "./TransmissionAPI";
 import Televersements from "./Televersements";
 import { effectifsStateAtom } from "./engine/atoms.js";
-import { hasContextAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
-import useAuth from "../../../hooks/useAuth.js";
-import Ribbons from "../../../components/Ribbons/Ribbons.jsx";
-import { CONTACT_ADDRESS } from "../../../common/constants/product.js";
+import useAuth from "../../../hooks/useAuth";
 
 function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -51,7 +48,7 @@ function useOrganismesEffectifs(organismeId) {
 }
 
 const EffectifsPage = ({ isMine }) => {
-  let [auth] = useAuth();
+  const { auth, organisationType } = useAuth();
   const organisme = useRecoilValue(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
 
@@ -63,9 +60,7 @@ const EffectifsPage = ({ isMine }) => {
     );
   }
 
-  const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
-
-  if (auth.isOrganismeAdmin || isUserAdmin(auth)) {
+  if (auth.isOrganismeAdmin || organisationType === "ADMINISTRATEUR") {
     if (!organisme.mode_de_transmission) {
       return <ChoixTransmission />;
     } else if (organisme.mode_de_transmission === "API") {
@@ -79,34 +74,34 @@ const EffectifsPage = ({ isMine }) => {
     } else {
       return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} organisme={organisme} />;
     }
-  } else if (canEdit) {
-    return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} organisme={organisme} />;
   } else {
-    return (
-      <Box mt={12}>
-        <Ribbons variant="warning" mt="0.5rem">
-          <Box ml={3}>
-            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-              {isMine
-                ? "Vous ne nous transmettez pas encore vos effectifs."
-                : " Cet organisme ne nous transmet pas encore ses effectifs."}
-            </Text>
-            <Text color="grey.800" fontSize="0.9rem">
-              Veuillez vous rapprocher d&rsquo;un collaborateur qui aurait des droits de gestion ou d&rsquo;écriture
-              dans {isMine ? "votre " : "cet "} organisme
-            </Text>
-          </Box>
-        </Ribbons>
-        <Flex flexGrow={1} alignItems="end" mt={2}>
-          <Text mt={8} fontSize="1rem">
-            Vous rencontrez des difficultés à passer cette étape ?{" "}
-            <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" ml={3}>
-              Contacter l&apos;assistance
-            </Link>
-          </Text>
-        </Flex>
-      </Box>
-    );
+    return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} organisme={organisme} />;
+    // } else {
+    //   return (
+    //     <Box mt={12}>
+    //       <Ribbons variant="warning" mt="0.5rem">
+    //         <Box ml={3}>
+    //           <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+    //             {isMine
+    //               ? "Vous ne nous transmettez pas encore vos effectifs."
+    //               : " Cet organisme ne nous transmet pas encore ses effectifs."}
+    //           </Text>
+    //           <Text color="grey.800" fontSize="0.9rem">
+    //             Veuillez vous rapprocher d&rsquo;un collaborateur qui aurait des droits de gestion ou d&rsquo;écriture
+    //             dans {isMine ? "votre " : "cet "} organisme
+    //           </Text>
+    //         </Box>
+    //       </Ribbons>
+    //       <Flex flexGrow={1} alignItems="end" mt={2}>
+    //         <Text mt={8} fontSize="1rem">
+    //           Vous rencontrez des difficultés à passer cette étape ?{" "}
+    //           <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" ml={3}>
+    //             Contacter l&apos;assistance
+    //           </Link>
+    //         </Text>
+    //       </Flex>
+    //     </Box>
+    //   );
   }
 };
 

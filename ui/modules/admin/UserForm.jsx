@@ -1,83 +1,50 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useFormik } from "formik";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
   Box,
   Button,
-  Checkbox,
   FormControl,
   FormLabel,
   FormErrorMessage,
   Grid,
   HStack,
   Input,
-  Table,
-  Td,
+  RadioGroup,
+  Radio,
   Text,
-  Tr,
   VStack,
 } from "@chakra-ui/react";
 
-import { _delete, _get, _post, _put } from "@/common/httpClient";
-import { Check } from "@/theme/components/icons";
+import { _delete, _put, _post } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
-import { DEPARTEMENTS_BY_ID, REGIONS_BY_ID, ACADEMIES_BY_ID } from "@/common/constants/territoiresConstants";
-import { getUserOrganisationLabel } from "@/common/constants/usersConstants";
-import Link from "next/link";
+import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
+
 import userSchema from "./userSchema";
 
-const buildRolesAcl = (newRoles, roles) => {
-  let acl = [];
-  for (let i = 0; i < newRoles.length; i++) {
-    const selectedRole = newRoles[i];
-    const selectedRoleAcl = roles.reduce((acc, curr) => {
-      if (selectedRole === curr.name) return [...acc, ...curr.acl];
-      return acc;
-    }, []);
-    acl = [...acl, ...selectedRoleAcl];
-  }
-  return acl;
-};
-
-export const UserForm = ({ user, roles, afterSubmit }) => {
-  const [, setRolesAcl] = useState(buildRolesAcl(user?.roles || [], roles));
+export const UserForm = ({ user, onCreate, onDelete, onUpdate }) => {
   const { toastSuccess, toastError } = useToaster();
 
-  useEffect(() => {
-    async function run() {
-      setRolesAcl(buildRolesAcl(user?.roles || [], roles));
-    }
-    run();
-  }, [roles, user]);
-
-  const { values, errors, touched, handleSubmit, handleChange, setFieldValue, resetForm } = useFormik({
+  const { values, errors, touched, dirty, handleSubmit, handleChange } = useFormik({
     validationSchema: toFormikValidationSchema(userSchema()),
     initialValues: {
-      accessAllCheckbox: user?.is_admin ? ["on"] : [],
-      roles: roles?.filter((role) => user?.roles.includes(role._id)).map((role) => role.name) || [],
+      civility: user?.civility || "",
       nom: user?.nom || "",
       prenom: user?.prenom || "",
       email: user?.email || "",
     },
-    onSubmit: async ({ accessAllCheckbox, nom, prenom, email, roles }, { setSubmitting }) => {
-      const accessAll = accessAllCheckbox.includes("on");
-
+    enableReinitialize: true,
+    onSubmit: async ({ civility, nom, prenom, email }, { setSubmitting }) => {
       let result;
       let error;
 
       try {
         if (user) {
           const body = {
+            civility,
             prenom,
             nom,
             email,
-            roles,
-            is_admin: accessAll,
           };
           result = await _put(`/api/v1/admin/users/${user._id}`, body);
           if (result?.ok) {
@@ -89,11 +56,10 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
           }
         } else {
           const body = {
-            prenom: prenom,
-            nom: nom,
-            email: email,
-            roles,
-            is_admin: accessAll,
+            civility,
+            prenom,
+            nom,
+            email,
           };
           result = await _post("/api/v1/admin/users", body).catch((err) => {
             if (err.statusCode === 409) {
@@ -102,7 +68,7 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
           });
           if (result?._id) {
             toastSuccess("Utilisateur créé");
-            resetForm();
+            onCreate?.(result);
           } else if (result?.error) {
             error = toastError(result.error);
           } else {
@@ -119,7 +85,6 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
         const message = response?.message ?? e?.message;
         toastError(message);
       }
-      await afterSubmit(result, error);
       setSubmitting(false);
     },
   });
@@ -135,256 +100,140 @@ export const UserForm = ({ user, roles, afterSubmit }) => {
           description: " Merci de réessayer plus tard",
         });
       }
-      return afterSubmit();
+
+      return onDelete?.();
     }
   };
 
-  const onConfirmUserPermission = async ({ currentTarget }) => {
-    const organismeId = currentTarget.getAttribute("data-organisme-id");
-    const organismeName = currentTarget.getAttribute("data-organisme-name");
-    const validate = currentTarget.getAttribute("data-validate");
-
-    const actionStr = validate === "true" ? "valider" : "rejeter";
-
+  const confirmUserAccess = async (validate) => {
     if (
-      (organismeId !== "all" &&
-        !confirm(`Voulez-vous vraiment ${actionStr} l'accès de cet utilisateur sur l'organisme ${organismeName}? ?`)) ||
-      (organismeId === "all" && !confirm(`Voulez-vous vraiment ${actionStr} toutes les permissions ?`))
+      !confirm(
+        `Voulez-vous vraiment ${validate ? "valider" : "rejeter"} l'accès de cet utilisateur sur l'organisation ${
+          user.organisation.label
+        }? ?`
+      )
     ) {
       return;
     }
     try {
-      const result = await _get(
-        `/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(
-          user.email
-        )}&organisme_id=${organismeId}&validate=${validate}`
-      );
-      if (result?.ok) {
-        toastSuccess(`Accès ${validate === "true" ? "validé" : "rejeté"}`);
-      } else {
-        toastError("Erreur lors de la validation de l'accès.", {
-          description: " Merci de réessayer plus tard",
-        });
-      }
-      return afterSubmit();
+      await _put(`/api/v1/admin/users/${user._id}/${validate ? "validate" : "reject"}`);
+      toastSuccess(`L'utilisateur a été ${validate ? "validé" : "rejeté"}.`);
+      validate ? onUpdate?.() : onDelete?.();
     } catch (e) {
       console.error(e);
       toastError("Erreur lors de la validation de l'accès.", {
-        description: " Merci de réessayer plus tard",
+        description: "Merci de réessayer plus tard",
       });
     }
   };
 
-  const handleRoleChange = (roleName) => {
-    let newRoles = [];
-    if (values.roles.includes(roleName)) {
-      newRoles = values.roles.filter((r) => r !== roleName);
-    } else {
-      newRoles = [...values.roles, roleName];
-    }
-    console.log({ newRoles });
-    setFieldValue("roles", newRoles);
-  };
-
   return (
     <form onSubmit={handleSubmit}>
-      <Grid gridTemplateColumns="repeat(2, 2fr)" gridGap="2w">
-        <FormControl py={2} isInvalid={errors.nom}>
-          <FormLabel>Nom</FormLabel>
-          <Input type="text" id="nom" name="nom" value={values.nom} onChange={handleChange} />
-          {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
-        </FormControl>
-        <FormControl py={2} isInvalid={errors.email}>
-          <FormLabel>Prenom</FormLabel>
-          <Input type="text" id="prenom" name="prenom" value={values.prenom} onChange={handleChange} />
-          {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
-        </FormControl>
-        <FormControl py={2} isInvalid={errors.email}>
-          <FormLabel>Email</FormLabel>
-          <Input type="email" id="email" name="email" value={values.email} onChange={handleChange} />
-          {errors.email && touched.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
-        </FormControl>
-      </Grid>
-
-      <FormControl py={2} mt={3}>
-        <Checkbox
-          name="accessAllCheckbox"
-          id="accessAllCheckbox"
-          isChecked={values.accessAllCheckbox.length > 0}
-          onChange={handleChange}
-          value="on"
-          fontWeight={values.accessAllCheckbox.length > 0 ? "bold" : "normal"}
-          color={"bluefrance"}
-          icon={<Check />}
-        >
-          Admin
-        </Checkbox>
-      </FormControl>
-
-      <FormControl py={2}>
-        <FormLabel>Type de compte</FormLabel>
-        <HStack spacing={5}>
-          {roles
-            ?.filter((role) => role.type === "user")
-            .map((role) => {
-              return (
-                <Checkbox
-                  name="roles"
-                  key={role.name}
-                  onChange={() => handleRoleChange(role.name)}
-                  value={role.name}
-                  isChecked={values.roles.includes(role.name)}
-                  icon={<Check />}
+      <VStack gap={2} alignItems="baseline" my={8}>
+        <Grid gridTemplateColumns="repeat(2, 2fr)" gridGap="2w">
+          <FormControl py={2} isInvalid={errors.nom}>
+            <FormLabel>Nom</FormLabel>
+            <Input type="text" id="nom" name="nom" value={values.nom} onChange={handleChange} />
+            {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
+          </FormControl>
+          <FormControl py={2} isInvalid={errors.prenom}>
+            <FormLabel>Prénom</FormLabel>
+            <Input type="text" id="prenom" name="prenom" value={values.prenom} onChange={handleChange} />
+            {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
+          </FormControl>
+          <FormControl isRequired isInvalid={errors.civility}>
+            <FormLabel>Civilité</FormLabel>
+            <RadioGroup value={values.civility}>
+              <HStack>
+                <Radio
+                  type="radio"
+                  name="civility"
+                  value="Monsieur"
+                  checked={values.civility !== "Madame"}
+                  onChange={handleChange}
                 >
-                  {role.name}
-                </Checkbox>
-              );
-            })}
-        </HStack>
-      </FormControl>
-      {user && (
-        <VStack gap={2} alignItems="baseline">
-          {user.main_organisme && (
-            <HStack gap={2}>
-              <span>Établissement :</span>
-              <Text as="span" bgColor="galtDark" px={2}>
-                <Link href={`/admin/organismes/${user.main_organisme._id}`}>
-                  {user.main_organisme.nom || getUserOrganisationLabel(user)}
-                </Link>
-              </Text>
-            </HStack>
-          )}
-          <HStack gap={2}>
-            <span>Territoire(s) :</span>
-            <HStack gap={2}>
-              {!user.codes_region?.length && !user.codes_academie?.length && !user.codes_departement?.length && "Aucun"}
-              {user.codes_region?.map((code) => (
-                <Text bgColor="galtDark" key={code} px={2}>
-                  Région {REGIONS_BY_ID[code]?.nom || code}
-                </Text>
-              ))}
-              {user.codes_academie?.map((code) => (
-                <Text bgColor="galtDark" key={code} px={2}>
-                  Académie {ACADEMIES_BY_ID[code].nom}
-                </Text>
-              ))}
-              {user.codes_departement?.map((code) => (
-                <Text bgColor="galtDark" key={code} px={2}>
-                  {DEPARTEMENTS_BY_ID[code].nom} ({code})
-                </Text>
-              ))}
-            </HStack>
-          </HStack>
-          <p>Droit associé au compte : </p>
-          {user.account_status && (
-            <p>
-              Statut du compte :{" "}
-              <Text as="span" bgColor="galt2">
-                {user.account_status}
-              </Text>
-            </p>
-          )}
-        </VStack>
-      )}
-      {user?.permissions?.length > 0 && (
-        <Accordion bg="white" mt={3} allowToggle>
-          <AccordionItem>
-            <AccordionButton _expanded={{ bg: "grey.200" }} border={"none"}>
-              <Box flex="1" textAlign="left" fontSize="sm">
-                Permissions organismes ({user?.permissions?.length})
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel pb={4} border={"none"} bg="grey.100">
-              <VStack spacing={5}>
-                <Table>
-                  {user?.permissions?.map((permission) => {
-                    return (
-                      <Tr key={permission._id}>
-                        <Td>{permission.name}</Td>
-                        <Td>
-                          Organisme :<b>{permission.organisme?.nom}</b>
-                          <Text fontSize="xs" color="gray.600">
-                            UAI : <b>{permission.organisme?.uai}</b>
-                          </Text>
-                          <Text fontSize="xs" color="gray.600">
-                            SIRET : <b>{permission.organisme?.siret}</b>
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text mb={2}>{permission?.pending ? "En attente de validation" : "Accès validé"}</Text>
-                          {permission?.pending && (
-                            <HStack spacing={8}>
-                              <Button
-                                type="button"
-                                variant="primary"
-                                onClick={onConfirmUserPermission}
-                                data-organisme-id={permission.organisme?._id}
-                                data-organisme-name={permission.organisme?.nom}
-                                data-validate="true"
-                              >
-                                Confirmer l&rsquo;accès
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={onConfirmUserPermission}
-                                data-organisme-id={permission.organisme?._id}
-                                data-organisme-name={permission.organisme?.nom}
-                                data-validate="false"
-                              >
-                                Rejeter l&rsquo;accès
-                              </Button>
-                            </HStack>
-                          )}
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Table>
+                  Monsieur
+                </Radio>
+                <Radio
+                  type="radio"
+                  name="civility"
+                  value="Madame"
+                  checked={values.civility === "Madame"}
+                  onChange={handleChange}
+                >
+                  Madame
+                </Radio>
+              </HStack>
+            </RadioGroup>
+            {errors.civility && touched.civility && <FormErrorMessage>{errors.civility}</FormErrorMessage>}
+          </FormControl>
+          <FormControl py={2} isInvalid={errors.email}>
+            <FormLabel>Email</FormLabel>
+            <Input type="email" id="email" name="email" value={values.email} onChange={handleChange} />
+            {errors.email && touched.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
+          </FormControl>
+        </Grid>
 
-                {user?.permissions?.some((permission) => permission.pending) && (
+        {user && (
+          <>
+            <HStack spacing={5}>
+              <Text as="span">Fonction</Text>
+              <Text as="span" bgColor="galtDark" px={2}>
+                {user.fonction || "Non renseigné"}
+              </Text>
+            </HStack>
+
+            <HStack spacing={5}>
+              <Text as="span">Téléphone</Text>
+              <Text as="span" bgColor="galtDark" px={2}>
+                {user.telephone || "Non renseigné"}
+              </Text>
+            </HStack>
+
+            <HStack spacing={5}>
+              <Text as="span">Statut du compte</Text>
+              <Text as="span" bgColor="galt2">
+                {USER_STATUS_LABELS[user.account_status] || user.account_status}
+              </Text>
+            </HStack>
+
+            <HStack spacing={5}>
+              <Text as="span">Type de compte</Text>
+              <Text as="span" bgColor="galtDark" px={2}>
+                {user.organisation.label}
+              </Text>
+
+              <HStack spacing={5}>
+                {user.account_status === "PENDING_ADMIN_VALIDATION" && (
                   <HStack spacing={8} alignSelf="start">
-                    <Button
-                      type="button"
-                      variant="primary"
-                      onClick={onConfirmUserPermission}
-                      data-organisme-id="all"
-                      data-validate="true"
-                    >
-                      Confirmer tous les accès en attente
+                    <Button type="button" variant="primary" onClick={() => confirmUserAccess(true)}>
+                      Confirmer
                     </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={onConfirmUserPermission}
-                      data-organisme-id="all"
-                      data-validate="false"
-                    >
-                      Rejeter tous les accès en attente
+                    <Button type="button" variant="secondary" onClick={() => confirmUserAccess(false)}>
+                      Rejeter
                     </Button>
                   </HStack>
                 )}
-              </VStack>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-      )}
+              </HStack>
+            </HStack>
+          </>
+        )}
 
-      {user ? (
-        <Box marginTop={10}>
-          <Button type="submit" variant="primary" mr={5}>
-            Enregistrer
+        {user ? (
+          <Box paddingTop={10}>
+            <Button type="submit" variant="primary" mr={5} isDisabled={!dirty}>
+              Enregistrer
+            </Button>
+            <Button variant="outline" colorScheme="red" borderRadius="none" onClick={onDeleteClicked}>
+              Supprimer l&apos;utilisateur
+            </Button>
+          </Box>
+        ) : (
+          <Button type="submit" variant="primary">
+            Créer l&apos;utilisateur
           </Button>
-          <Button variant="outline" colorScheme="red" borderRadius="none" onClick={onDeleteClicked}>
-            Supprimer l&apos;utilisateur
-          </Button>
-        </Box>
-      ) : (
-        <Button type="submit" variant="primary">
-          Créer l&apos;utilisateur
-        </Button>
-      )}
+        )}
+      </VStack>
     </form>
   );
 };

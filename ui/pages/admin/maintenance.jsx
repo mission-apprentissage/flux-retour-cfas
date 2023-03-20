@@ -38,7 +38,7 @@ const ADMIN_MAINTENANCE_ENDPOINT = "/api/v1/admin/maintenanceMessages";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const Message = () => {
+const MaintenancePage = () => {
   const {
     messages,
     messageMaintenance,
@@ -300,4 +300,4 @@ const Message = () => {
   );
 };
 
-export default withAuth(Message, "admin/page_message_maintenance");
+export default withAuth(MaintenancePage, ["ADMINISTRATEUR"]);

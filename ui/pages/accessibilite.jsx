@@ -3,7 +3,6 @@ import Head from "next/head";
 import { Box, Container, Heading } from "@chakra-ui/react";
 
 import Page from "@/components/Page/Page";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Accessibilite from "@/components/legal/Accessibilite";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
@@ -18,7 +17,6 @@ const AccessibilitePage = () => {
       </Head>
       <Box w="100%" pt={[4, 8]} px={[1, 1, 12, 24]}>
         <Container maxW="xl">
-          <Breadcrumb pages={[PAGES.homepage(), { title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
             {title}
           </Heading>

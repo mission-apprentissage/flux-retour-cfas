@@ -1,6 +1,5 @@
 import { createUser } from "../../common/actions/users.actions.js";
 import { createUserLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
-import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
 import logger from "../../common/logger.js";
 import { apiRoles } from "../../common/roles.js";
 import { generateRandomAlphanumericPhrase } from "../../common/utils/miscUtils.js";
@@ -25,7 +24,7 @@ export const createUserAccount = async ({ email, nom, prenom, is_admin, is_cross
       prenom,
       is_admin,
       is_cross_organismes,
-      account_status: USER_ACCOUNT_STATUS.PENDING_PASSWORD_SETUP,
+      account_status: "PENDING_PASSWORD_SETUP",
     }
   );
   logger.info(`User ${email} successfully created`);

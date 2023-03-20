@@ -9,11 +9,10 @@ const userSchema = ({ isNew }) =>
           password: z.preprocess((v: any) => v || generateRandomAlphanumericPhrase(), z.string()),
         }
       : {}),
+    civility: z.string(),
     prenom: z.string(),
     nom: z.string(),
     email: z.string().email(),
-    roles: z.string().array(),
-    is_admin: z.boolean().optional(),
   });
 
 export default userSchema;

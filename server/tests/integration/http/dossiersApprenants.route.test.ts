@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 
 import { startServer } from "../../utils/testUtils.js";
-import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
+import { apiRoles } from "../../../src/common/roles.js";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "../../data/randomizedSample.js";
 import { effectifsQueueDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
@@ -107,7 +107,7 @@ describe("Dossiers Apprenants Route", () => {
       const createdId = await createUserLegacy({
         username: "normal-user",
         password: "password",
-        permissions: [tdbRoles.cfa, tdbRoles.network, tdbRoles.pilot],
+        permissions: ["cfa", "network", "pilot"],
       });
 
       const userWithoutPermission = await usersDb().findOne({ _id: createdId });

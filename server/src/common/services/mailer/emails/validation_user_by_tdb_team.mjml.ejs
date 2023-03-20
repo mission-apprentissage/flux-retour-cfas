@@ -6,52 +6,21 @@
         <mj-wrapper padding="10px 20px">
           <mj-section background-color="#ffffff" padding-top="0">
             <mj-column>
-              <mj-text> Bonjour, </mj-text>
               <mj-text>
-                <div>
-                  <br />
-                  L'utilisateur <strong>
-                    <%= data.user.email %>
-                  </strong> demande un accès <strong>
-                    <%= data.type %>
-                  </strong> :
-                </div>
-                <ul>
-                  <li>
-                    <%= data.user.nom %>
-                      <%= data.user.prenom %>
-                  </li>
-                  <li>Organisation : <%= data.user.organisation %>
-                  </li>
-                  <li>Siret : <%= data.user.siret %>
-                  </li>
-                  <li>RESEAU : <%= data.user.reseau %>
-                  </li>
-                  <li>
-                    TERRITOIRES :
-                    <ul>
-                      <li>Region(s) : <%= data.regions_as_string %>
-                      </li>
-                      <li>Academie(s) : <%= data.academies_as_string %>
-                      </li>
-                      <li>Departement(s): <%= data.departements_as_string %>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                Bonjour,
               </mj-text>
-              <mj-button
-                href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(data.user.email)}&organisme_id=all&validate=true`) %>"
-                background-color="#0e4194" color="white">
-                Ok je confirme cet utilisateur
+              <mj-text>
+                L'utilisateur <strong><%= data.user.civility %> <%= data.user.prenom %> <%= data.user.nom %> (<%= data.user.email %>)</strong> souhaite accéder à l'organisation <%= data.organisationLabel %>.
+              </mj-text>
+
+              <mj-button href="<%= utils.getPublicUrl(`/admin/users/${data.user._id}`) %>" background-color="#0e4194" color="white">
+                Voir la fiche de l'utilisateur
               </mj-button>
-              <mj-button
-                href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(data.user.email)}&organisme_id=all&validate=false`) %>"
-                background-color="#ff0000" color="white">
-                Cet utilisateur n'a pas le droit d'accéder à cet organisme
-              </mj-button>
+
+              <%- include('./common/signature.ejs'); %>
             </mj-column>
           </mj-section>
         </mj-wrapper>
+      <%- include('./common/footer.ejs'); %>
     </mj-body>
 </mjml>

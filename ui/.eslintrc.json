@@ -1,4 +1,8 @@
 {
   "root": true,
-  "extends": ["eslint:recommended", "next", "next/core-web-vitals", "plugin:prettier/recommended"]
+  "extends": ["eslint:recommended", "next", "next/core-web-vitals", "plugin:prettier/recommended"],
+  "rules":{
+    // désactivé car souvent non précis
+    "react-hooks/exhaustive-deps": 0
+  }
 }

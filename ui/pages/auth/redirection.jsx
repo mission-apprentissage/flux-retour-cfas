@@ -24,7 +24,7 @@ const RedirectionPage = () => {
   useEffect(() => {
     if (timeLeft <= 0) {
       clearInterval(intervalRef.current);
-      router.push("/mon-espace/mon-organisme");
+      router.push("/");
     }
   }, [router, timeLeft]);
 
@@ -45,7 +45,7 @@ const RedirectionPage = () => {
             <Text>
               Cliquez sur le bouton “Accéder à mon Espace” si vous n’êtes pas redirigé dans les [{timeLeft}] secondes.
             </Text>
-            <Button as={NavLink} href="/mon-espace/mon-organisme" mt="4w" variant="secondary">
+            <Button as={NavLink} href="/" mt="4w" variant="secondary">
               Accéder à mon Espace
             </Button>
           </Box>

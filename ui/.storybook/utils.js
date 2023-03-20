@@ -14,11 +14,8 @@ export const authArgTypes = {
     control: "select",
     options: [
       "PENDING_EMAIL_VALIDATION",
-      "PENDING_PASSWORD_SETUP",
-      "PENDING_PERMISSIONS_SETUP",
       "PENDING_ADMIN_VALIDATION",
       "CONFIRMED",
-      "DIRECT_PENDING_PASSWORD_SETUP",
     ],
   },
   auth__organisation: {

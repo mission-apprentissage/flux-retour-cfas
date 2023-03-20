@@ -3,7 +3,6 @@ import { Badge, Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-
 import { format, formatISO } from "date-fns";
 import fr from "date-fns/locale/fr";
 
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import Sommaire from "@/components/Sommaire/Sommaire";
 import { getUniquesMonthAndYearFromDatesList } from "@/common/utils/dateUtils";
@@ -35,10 +34,7 @@ const JournalDesEvolutions = () => {
       <Head>
         <title>{title}</title>
       </Head>
-      <Section paddingTop="3w">
-        <Breadcrumb pages={[PAGES.homepage(), { title }]} />
-      </Section>
-      <Section marginTop="5w">
+      <Section>
         <Heading as="h1" mb="2w">
           Journal des évolutions
         </Heading>

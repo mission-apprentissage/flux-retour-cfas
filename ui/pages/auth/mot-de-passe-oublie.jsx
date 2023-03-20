@@ -67,12 +67,12 @@ const ForgottenPasswordPage = () => {
                   }}
                 </Field>
                 {status.error && (
-                  <Text color="error" mt={2}>
+                  <Text color="error" my={2}>
                     {status.error}
                   </Text>
                 )}
                 {status.message && (
-                  <Text color="info" mt={2}>
+                  <Text color="info" my={2}>
                     {status.message}
                   </Text>
                 )}

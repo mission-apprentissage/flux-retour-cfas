@@ -17,7 +17,6 @@ import { useRecoilValue } from "recoil";
 import groupBy from "lodash.groupby";
 
 import { DownloadLine } from "../../../../theme/components/icons";
-import { hasContextAccessTo } from "../../../../common/utils/rolesUtils";
 import { organismeAtom } from "../../../../hooks/organismeAtoms";
 import AjoutApprenantModal from "./AjoutApprenantModal";
 import EffectifsTable from "./EffectifsTable";
@@ -84,7 +83,6 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
-  const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
   const exportFilename = `tdb-données-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
   const [searchValue, setSearchValue] = useState("");
 
@@ -102,7 +100,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
           {isMine ? "Mes effectifs" : "Ses effectifs"}
         </Heading>
         <HStack spacing={4}>
-          {organismesEffectifs.length > 0 && hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
+          {organismesEffectifs.length > 0 && (
             <DownloadButton
               fileName={exportFilename}
               getFile={() => _getBlob(`/api/v1/indicateurs-export?organisme_id=${organisme._id}&date=${Date.now()}`)}
@@ -110,27 +108,25 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
             />
           )}
 
-          {!(organisme.mode_de_transmission === "API" && organismesEffectifs.length === 0) &&
-            hasContextAccessTo(organisme, "organisme/page_effectifs/televersement_document") && (
-              <>
-                <Button
-                  size="md"
-                  fontSize={{ base: "sm", md: "md" }}
-                  p={{ base: 2, md: 4 }}
-                  h={{ base: 8, md: 10 }}
-                  onClick={() => {
-                    router.push(`${router.asPath}/televersement`);
-                  }}
-                  variant="secondary"
-                >
-                  <Text as="span">+ Ajouter</Text>
-                </Button>
-              </>
-            )}
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
-            organisme.mode_de_transmission !== "API" && (
-              <>
-                {/* TODO TMP <Button
+          {!(organisme.mode_de_transmission === "API" && organismesEffectifs.length === 0) && (
+            <>
+              <Button
+                size="md"
+                fontSize={{ base: "sm", md: "md" }}
+                p={{ base: 2, md: 4 }}
+                h={{ base: 8, md: 10 }}
+                onClick={() => {
+                  router.push(`${router.asPath}/televersement`);
+                }}
+                variant="secondary"
+              >
+                <Text as="span">+ Ajouter</Text>
+              </Button>
+            </>
+          )}
+          {organisme.mode_de_transmission !== "API" && (
+            <>
+              {/* TODO TMP <Button
                   size="md"
                   fontSize={{ base: "sm", md: "md" }}
                   p={{ base: 2, md: 4 }}
@@ -140,9 +136,9 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
                 >
                   + Nouvelle·au apprenant(e)
                 </Button> */}
-                <AjoutApprenantModal size="md" isOpen={ajoutModal.isOpen} onClose={ajoutModal.onClose} />
-              </>
-            )}
+              <AjoutApprenantModal size="md" isOpen={ajoutModal.isOpen} onClose={ajoutModal.onClose} />
+            </>
+          )}
         </HStack>
 
         <Ribbons variant="info" mb={6}>
@@ -151,7 +147,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
               Service d’import de vos effectifs en version bêta.
             </Text>
             <Text color="grey.800" mt={4} textStyle="sm">
-              Nous listons actuellement toutes les informations qui peuvent empêcher l'import de fichier afin de
+              Nous listons actuellement toutes les informations qui peuvent empêcher l{"'"}import de fichier afin de
               permettre par la suite une meilleure prise en charge de tout type de fichier.
             </Text>
           </Box>
@@ -264,7 +260,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
                   return (
                     <EffectifsTableContainer
                       key={anneSco + cfd}
-                      canEdit={canEdit}
+                      canEdit={true} // FIXME organisation liée à l'organisme uniquement ?
                       effectifs={effectifs}
                       formation={formation}
                       searchValue={searchValue}

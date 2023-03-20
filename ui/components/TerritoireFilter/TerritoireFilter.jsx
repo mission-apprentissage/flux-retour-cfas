@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
@@ -17,7 +17,7 @@ import useAuth from "@/hooks/useAuth";
 
 const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerritoireReset, variant = "primary" }) => {
   const [isOpen, setIsOpen] = useState(false);
-  let [user] = useAuth();
+  let { auth } = useAuth();
 
   const onTerritoireClick = (territoire) => {
     if (!territoire) {
@@ -36,40 +36,17 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
 
   // affiche seulement les régions et départements accessibles à l'utilisateur
   // l'accès à un département donne également accès à la région (DDETS)
-  const territoiresConfig = useMemo(() => {
-    // FIXME: temporaire en attendant un fix des permissions DDETS: une DDETS n'accède qu'à son département
-    const codesRegionsAccessibles = [
-      // région de l'utilisateur (exemple si DREETS)
-      ...(user.codes_region ?? []),
-      // régions du département de l'utilisateur (exemple si DDETS)
-      // ...(user.codes_departement?.map((codeDepartement) => DEPARTEMENTS_BY_ID[codeDepartement].region.code) ?? []),
-    ];
-    // return codesRegionsAccessibles.length > 0
-    //   ? {
-    //       regions: REGIONS_SORTED.filter((region) => codesRegionsAccessibles.includes(region.code)),
-    //       departements: DEPARTEMENTS_SORTED.filter((departement) =>
-    //         codesRegionsAccessibles.includes(departement.region.code)
-    //       ),
-    //     }
-    const codesDepartementAccessibles = user.codes_departement ?? [];
-    return codesRegionsAccessibles.length > 0 || codesDepartementAccessibles.length > 0
-      ? {
-          regions: REGIONS_SORTED.filter((region) => codesRegionsAccessibles.includes(region.code)),
-          departements: [
-            ...DEPARTEMENTS_SORTED.filter((departement) => codesRegionsAccessibles.includes(departement.region.code)),
-            ...DEPARTEMENTS_SORTED.filter((departement) => codesDepartementAccessibles.includes(departement.code)),
-          ],
-          showAllOption: false,
-        }
-      : { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED, showAllOption: true };
-  }, [user]);
+  const territoiresConfig = { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED, showAllOption: true };
 
   // filtre initial positionné sur la région / département de l'utilisateur
   useEffect(() => {
-    if (user.codes_region?.[0]) {
-      onRegionChange(REGIONS_BY_ID[user.codes_region[0]]);
-    } else if (user.codes_departement?.[0]) {
-      onDepartementChange(DEPARTEMENTS_BY_ID[user.codes_departement[0]]);
+    if (auth.organisation.code_region) {
+      onRegionChange(REGIONS_BY_ID[auth.organisation.code_region]);
+    } else if (auth.organisation.code_departement) {
+      onDepartementChange(DEPARTEMENTS_BY_ID[auth.organisation.code_departement]);
+      // TODO
+      // } else if (auth.organisation.code_academie) {
+      //   onAcademieChange(ACADEMIES_BY_ID[auth.organisation.code_academie]);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

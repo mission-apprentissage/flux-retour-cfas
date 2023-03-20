@@ -1,0 +1,24 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+    <mj-body background-color="#f9fafc">
+      <%- include('./common/header.ejs'); %>
+        <mj-wrapper padding="10px 20px">
+          <mj-section background-color="#ffffff" padding-top="0">
+            <mj-column>
+              <mj-text>
+                Bonjour <strong><%= data.recipient.civility %> <%= data.recipient.prenom %> <%= data.recipient.nom %></strong>,
+              </mj-text>
+              <mj-text>
+                L'utilisateur <strong><%= data.user.civility %> <%= data.user.prenom %> <%= data.user.nom %> (<%= data.user.email %>)</strong> souhaite accéder à votre organisation <%= data.organisationLabel %>.
+              </mj-text>
+              <mj-button href="<%= utils.getPublicUrl(`/organisation/membres`) %>" background-color="#0e4194" color="white">
+                Accéder à Rôles et habilitations
+              </mj-button>
+              <%- include('./common/signature.ejs'); %>
+            </mj-column>
+          </mj-section>
+        </mj-wrapper>
+      <%- include('./common/footer.ejs'); %>
+    </mj-body>
+</mjml>

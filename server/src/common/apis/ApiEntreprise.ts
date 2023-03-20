@@ -3,6 +3,8 @@ import axiosRetry from "axios-retry";
 import config from "../../config.js";
 import logger from "../logger.js";
 import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
+import ApiEntEntreprise from "./@types/ApiEntEntreprise.js";
+import ApiEntEtablissement from "./@types/ApiEntEtablissement.js";
 import getApiClient from "./client.js";
 
 export const API_ENDPOINT = config.apiEntreprise.endpoint;
@@ -27,13 +29,7 @@ const apiParams = {
   non_diffusables: true,
 };
 
-/**
- * getEntreprise
- * @param {string} siren
- * @param {boolean} non_diffusables
- * @returns {Promise<import("./@types/ApiEntEntreprise").default|null>}
- */
-export const getEntreprise = (siren, non_diffusables = true) => {
+export const getEntreprise = (siren: string, non_diffusables = true): Promise<ApiEntEntreprise | null> => {
   return executeWithRateLimiting(async (client) => {
     try {
       let response = await client.get(`entreprises/${siren}`, {
@@ -56,13 +52,7 @@ export const getEntreprise = (siren, non_diffusables = true) => {
   });
 };
 
-/**
- * getEtablissement
- * @param {string} siret
- * @param {boolean} non_diffusables
- * @returns {Promise<import("./@types/ApiEntEtablissement").default>}
- */
-export const getEtablissement = async (siret, non_diffusables = true) => {
+export const getEtablissement = async (siret: string, non_diffusables = true): Promise<ApiEntEtablissement> => {
   return executeWithRateLimiting(async (client) => {
     axiosRetry(client, { retries: 3 });
 

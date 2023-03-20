@@ -1,63 +1,43 @@
-import omitBy from "lodash.omitby";
+import { NextFunction, Request, Response } from "express";
 import logger from "../../common/logger.js";
 
-export default () => {
-  return (req, res, next) => {
-    const relativeUrl = (req.baseUrl || "") + (req.url || "");
-    const startTime = new Date().getTime();
-    const withoutSensibleFields = (obj) => {
-      return omitBy(obj, (value, key) => {
-        const lower = key.toLowerCase();
-        return lower.indexOf("token") !== -1 || ["authorization", "password"].includes(lower);
-      });
-    };
+export function logMiddleware(req: Request, res: Response, next: NextFunction) {
+  const startTime = new Date().getTime();
 
-    const log = () => {
-      try {
-        const error = req.err;
-        const statusCode = res.statusCode;
-        const data = {
-          type: "http",
-          elapsedTime: new Date().getTime() - startTime,
-          request: {
-            requestId: req.requestId,
-            method: req.method,
-            headers: {
-              ...withoutSensibleFields(req.headers),
-            },
-            url: {
-              relative: relativeUrl,
-              path: (req.baseUrl || "") + (req.path || ""),
-              parameters: withoutSensibleFields(req.query),
-            },
-          },
-          response: {
-            statusCode,
-            headers: res.getHeaders(),
-          },
-          ...(!error
-            ? {}
-            : {
-                error: {
-                  ...error,
-                  message: error.message,
-                  stack: error.stack,
-                },
-              }),
-        };
+  const onResponseFinished = () => {
+    try {
+      const error = req.err;
+      const statusCode = res.statusCode;
+      const logInfos = {
+        type: "http",
+        responseTime: new Date().getTime() - startTime,
+        method: req.method,
+        url: req.url,
+        statusCode: res.statusCode,
+        requestId: (req as any).requestId,
+        // via error serializer
+        // err: error,
+        // detailed error
+        error: error && {
+          ...error,
+          message: error.message,
+          stack: error.stack,
+        },
+      };
 
-        const level = error || (statusCode >= 400 && statusCode < 600) ? "error" : "info";
-
-        logger[level](data, `Http Request ${level === "error" ? "KO" : "OK"}`);
-      } finally {
-        res.removeListener("finish", log);
-        res.removeListener("close", log);
+      if (error || (statusCode >= 400 && statusCode < 600)) {
+        logger.error(logInfos, "request errored");
+      } else {
+        logger.info(logInfos, "request completed");
       }
-    };
-
-    res.on("close", log);
-    res.on("finish", log);
-
-    next();
+    } finally {
+      res.removeListener("finish", onResponseFinished);
+      res.removeListener("close", onResponseFinished);
+    }
   };
-};
+
+  res.on("close", onResponseFinished);
+  res.on("finish", onResponseFinished);
+
+  next();
+}
