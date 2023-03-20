@@ -1,3 +1,10 @@
+## [3.14.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.14.0...v3.14.1) (2023-03-20)
+
+
+### Bug Fixes
+
+* fix plausible auth token sur la page stats ([e39b1c8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e39b1c8d625a701da518ab2bfdd3ba70fbd69460))
+
 # [3.14.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.13.0...v3.14.0) (2023-03-20)
 
 
