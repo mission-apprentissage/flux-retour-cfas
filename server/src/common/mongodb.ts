@@ -3,8 +3,7 @@ import omitDeep from "omit-deep";
 import logger from "./logger.js";
 import { asyncForEach } from "./utils/asyncUtils.js";
 
-/** @type {MongoClient} */
-let mongodbClient;
+let mongodbClient: MongoClient;
 
 const ensureInitialization = () => {
   if (!mongodbClient) {

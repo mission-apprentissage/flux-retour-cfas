@@ -10,6 +10,7 @@ import {
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { arraysContainSameValues } from "../../../common/utils/miscUtils.js";
 import { organismesDb } from "../../../common/model/collections.js";
+import { WithId } from "mongodb";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",
@@ -140,7 +141,7 @@ const hydrateReseauFile = async (filename) => {
     // and update our organisme with the updated list of reseaux
     if (foundUnique) {
       foundUniqueCount++;
-      const uniqueOrganismeFromTdb = organismeInTdb[0];
+      const uniqueOrganismeFromTdb: WithId<any> = organismeInTdb[0];
 
       const reseauxFromDb = uniqueOrganismeFromTdb.reseaux || [];
       const reseauxFromFile = organismeParsedFromFile.reseaux || [];

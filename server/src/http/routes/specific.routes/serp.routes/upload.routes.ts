@@ -1,7 +1,7 @@
 import express from "express";
 import Joi from "joi";
 import { createWriteStream } from "fs";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import { DateTime } from "luxon";
 import csvToJson from "convert-csv-to-json";
 import { accumulateData, oleoduc, writeData } from "oleoduc";
@@ -233,7 +233,7 @@ export default ({ clamav }) => {
       })
         .unknown()
         .validateAsync(req.query, { abortEarly: false });
-      let upload = null;
+      let upload: WithId<any> = null;
       try {
         upload = await getUploadEntryByOrgaId(organisme_id, { last_snapshot_effectifs: 0 });
       } catch (/** @type {any}*/ error: any) {

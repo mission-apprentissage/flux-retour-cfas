@@ -16,6 +16,7 @@ import {
 } from "../../../../src/common/actions/formations.actions.js";
 import { createSampleEffectif } from "../../../data/randomizedSample.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
+import { WithId } from "mongodb";
 
 describe("Tests des actions Formations", () => {
   describe("existsFormation", () => {
@@ -53,7 +54,7 @@ describe("Tests des actions Formations", () => {
       const cfd = "2502000D";
       const { insertedId } = await formationsDb().insertOne({ cfd });
 
-      const found = await getFormationWithCfd(cfd);
+      const found: WithId<any> = await getFormationWithCfd(cfd);
       assert.equal(insertedId.equals(found._id), true);
     });
   });

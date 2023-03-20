@@ -1,6 +1,7 @@
 import express from "express";
 import Joi from "joi";
 import pick from "lodash.pick";
+import { Filter } from "mongodb";
 
 import { organismesDb } from "../../../common/model/collections.js";
 
@@ -23,8 +24,7 @@ export default () => {
     const limit = Number(params.limit ?? 50);
     const skip = (page - 1) * limit;
 
-    /** @type {import("mongodb").Filter<any>} */
-    const jsonQuery = JSON.parse(query);
+    const jsonQuery: Filter<any> = JSON.parse(query);
     const allData = await organismesDb().find(jsonQuery).skip(skip).limit(limit).toArray();
     const count = await organismesDb().countDocuments(jsonQuery);
     const omittedData = allData.map((item) =>

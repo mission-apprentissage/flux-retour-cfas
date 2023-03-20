@@ -1,5 +1,5 @@
 import { uploadsDb } from "../model/collections.js";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import { find, findIndex } from "lodash-es";
 import { defaultValuesUpload } from "../model/uploads.model/uploads.model.js";
 
@@ -127,10 +127,10 @@ export const updateDocument = async (organisme_id, { nom_fichier, taille_fichier
   return updated.value;
 };
 
-/**
- * @returns {Promise<any>}
- */
-export const removeDocument = async (organismeId, { nom_fichier, chemin_fichier, taille_fichier }) => {
+export const removeDocument = async (
+  organismeId,
+  { nom_fichier, chemin_fichier, taille_fichier }
+): Promise<WithId<any>> => {
   const found = await getUploadEntryByOrgaId(organismeId);
 
   let newDocuments = [...found.documents];

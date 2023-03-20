@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
+import { ObjectId, WithId } from "mongodb";
 import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
@@ -218,7 +219,7 @@ export const hydrateEffectif = async (effectifData: any, options?: any) => {
  */
 const hydrateOrganisme = async (organisme: any) => {
   let organismeToCreate = null;
-  let organismeFoundId = null;
+  let organismeFoundId: ObjectId | null = null;
   let organismeFoundError: string | null = null;
 
   // Applique le mapping de fiabilisation
@@ -351,8 +352,7 @@ export const runEngine = async ({ effectifData }, organismeData) => {
       await updateEffectifAndLock(effectifUpdatedId, effectif);
     } else {
       effectifCreatedId = await insertEffectif(effectif);
-      /** @type {import("mongodb").WithId<any>} */
-      const effectifCreated = await findEffectifById(effectifCreatedId);
+      const effectifCreated: WithId<any> = await findEffectifById(effectifCreatedId);
       await updateEffectifAndLock(effectifCreatedId, {
         apprenant: effectifCreated.apprenant,
         formation: effectifCreated.formation,

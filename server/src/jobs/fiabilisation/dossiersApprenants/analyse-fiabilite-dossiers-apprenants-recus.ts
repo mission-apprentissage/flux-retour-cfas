@@ -73,8 +73,7 @@ export const analyseFiabiliteDossierApprenantsRecus = async () => {
   // iterate over data and create an entry for each dossier apprenant sent with fiabilité metadata
   logger.info("Iterating over all dossiers apprenants received in the last 24h to analyse their data");
   while (await latestReceivedDossiersApprenantsCursor.hasNext()) {
-    /** @type {any} */
-    const { data, username, date } = await latestReceivedDossiersApprenantsCursor.next();
+    const { data, username, date }: any = await latestReceivedDossiersApprenantsCursor.next();
     latestReceivedDossiersApprenantsCount++;
 
     const newDossierApprenantApiInputFiabiliteEntry = createDossierApprenantApiInputFiabilite({

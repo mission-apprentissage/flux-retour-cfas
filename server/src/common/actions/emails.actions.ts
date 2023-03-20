@@ -117,8 +117,7 @@ export async function unsubscribeUser(id) {
 }
 
 export async function renderEmail({ templates }, token) {
-  /** @type {any} */
-  const user = await usersMigrationDb().findOne({ "emails.token": token });
+  const user: any = await usersMigrationDb().findOne({ "emails.token": token });
   const { templateName, payload } = user.emails.find((e) => e.token === token);
   const template = templates[templateName]({ to: user.email, payload }, token);
 

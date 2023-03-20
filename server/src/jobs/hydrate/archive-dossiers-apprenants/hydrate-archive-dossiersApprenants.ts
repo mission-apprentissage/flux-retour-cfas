@@ -2,6 +2,7 @@ import { validateAnneeScolaire } from "../../../common/utils/validationsUtils/an
 import logger from "../../../common/logger.js";
 import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
 import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
+import { WithId } from "mongodb";
 
 /**
  * Fonction principale d'archivage des dossiersApprenants et des effectifs
@@ -41,8 +42,7 @@ const hydrateArchivesDossiersApprenants = async (ANNEE_SCOLAIRE_START_LIMIT = 20
 
   const cursor = dossiersApprenantsMigrationDb().find(query);
   while (await cursor.hasNext()) {
-    /** @type {import("mongodb").WithId<any>} */
-    const dossierApprenantToArchive = await cursor.next();
+    const dossierApprenantToArchive: WithId<any> = await cursor.next();
 
     try {
       await updateDossierApprenant(dossierApprenantToArchive._id, { ...dossierApprenantToArchive, archive: true });
