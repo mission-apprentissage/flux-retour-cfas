@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { CollectionInfo, MongoClient } from "mongodb";
 import omitDeep from "omit-deep";
 import logger from "./logger.js";
 import { asyncForEach } from "./utils/asyncUtils.js";
@@ -39,6 +39,12 @@ export const getDatabase = () => {
 export const getDbCollection = (name) => {
   ensureInitialization();
   return mongodbClient.db().collection(name);
+};
+
+export const getDbCollectionSchema = async (name) => {
+  ensureInitialization();
+  const collectionInfo: CollectionInfo | null = await mongodbClient.db().listCollections({ name }).next();
+  return collectionInfo?.options?.validator;
 };
 
 export const getDbCollectionIndexes = async (name) => {

@@ -16,7 +16,11 @@ const indexes = () => {
     ],
     [{ uai: 1 }, { name: "uai" }],
     [{ siret: 1 }, { name: "siret" }],
+    [{ ferme: 1 }, { name: "ferme" }],
+    [{ est_dans_le_referentiel: 1 }, { name: "est_dans_le_referentiel" }],
     [{ effectifs_count: 1 }, { name: "effectifs_count" }],
+    [{ fiabilisation_statut: 1 }, { name: "fiabilisation_statut" }],
+    [{ nature: 1 }, { name: "nature" }],
     [
       { nom: "text", nom_tokenized: "text", siret: "text", uai: "text" },
       { name: "nom_tokenized_text", default_language: "french" },

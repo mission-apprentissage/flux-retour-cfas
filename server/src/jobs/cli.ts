@@ -17,7 +17,6 @@ import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
-import { createIndexes, dropIndexes } from "../common/model/indexes/index.js";
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
 import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
@@ -27,22 +26,31 @@ import { removeOrganismeAndEffectifsAndDossiersApprenantsMigration } from "./pat
 import { seedPlausibleGoals } from "./seed/plausible/goals.js";
 import { getStats } from "./fiabilisation/stats.js";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count.js";
+import { recreateIndexes } from "./db/recreateIndexes.js";
+import { findInvalidDocuments } from "./db/findInvalidDocuments.js";
+
+program.configureHelp({
+  sortSubcommands: true,
+});
 
 program
-  .configureHelp({
-    sortSubcommands: true,
-  })
   .command("indexes:create")
   .description("Creation des indexes mongo")
   .action(async (_, options) =>
     runScript(async () => {
-      console.info("Drop all existing indexes...");
-      await dropIndexes();
-      console.info("Create all indexes...");
-      await createIndexes();
-      console.info("All indexes successfully created !");
+      await recreateIndexes();
     }, options._name)
   );
+
+program
+  .command("db:find-invalid-documents")
+  .argument("<collectionName>", "collection to search for invalid documents")
+  .description("Recherche des documents invalides")
+  .action(async (collectionName, _, options) => {
+    return runScript(async () => {
+      await findInvalidDocuments(collectionName);
+    }, options._name);
+  });
 
 /**
  * Job (temporaire) de suppression d'un organisme et de ses effectifs / dossiersApprenantsMigration liés

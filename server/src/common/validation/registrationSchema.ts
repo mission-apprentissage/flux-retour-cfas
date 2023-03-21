@@ -5,7 +5,7 @@ import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 
 const registrationSchema = () =>
   z.object({
-    password: z.preprocess((/** @type {any}*/ v: any) => v || generateRandomAlphanumericPhrase(), z.string()),
+    password: z.preprocess((v: any) => v || generateRandomAlphanumericPhrase(), z.string()),
     prenom: z.string(),
     nom: z.string(),
     email: z.string(),

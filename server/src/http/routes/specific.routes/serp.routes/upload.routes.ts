@@ -236,7 +236,7 @@ export default ({ clamav }) => {
       let upload: WithId<any> = null;
       try {
         upload = await getUploadEntryByOrgaId(organisme_id, { last_snapshot_effectifs: 0 });
-      } catch (/** @type {any}*/ error: any) {
+      } catch (error: any) {
         if (error.message.includes("Unable to find uploadEntry")) {
           upload = await createUpload({ organisme_id });
         }

@@ -191,7 +191,7 @@ export default () => {
         ko: validationErrors.length,
         validationErrors,
       });
-    } catch (/** @type {any}*/ err: any) {
+    } catch (err: any) {
       logger.error(`POST /dossiers-apprenants error : ${err}`);
       res.status(400).json({
         status: "ERROR",

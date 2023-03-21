@@ -51,7 +51,7 @@ describe("Dossiers Apprenants Route", () => {
         callLbaApi: false,
       });
       createdOrganisme = await findOrganismeById(_id);
-    } catch (/** @type {any}*/ err: any) {
+    } catch (err: any) {
       console.error("Error with the following randomOrganisme", randomOrganisme);
       throw new Error(err);
     }
