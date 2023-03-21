@@ -4,12 +4,50 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
 
   /*
   Création des organisations avec les membres, récupérés via champ usersMigration.organisation avec :
-    - si OF : siret
+    - si OF : siret+uai
     - si réseau : réseau
     - si dreets/deets/draaf/conseil régional : codes_region[0]
     - si ddets : codes_departement[0]
     - si académie : codes_academie[0]
   */
+
+  // on crée une organisation seulement pour les organismes fiables
+  async function findFirstOrganismeFiable(siret, uai) {
+    let organisme;
+    if (siret && uai) {
+      organisme = await db.collection("organismes").findOne({
+        siret: siret,
+        uai: uai,
+        fiabilisation_statut: "FIABLE",
+      });
+      if (organisme) {
+        console.log(`organisme fiable trouvé pour SIRET/UAI ${siret}/${uai}`);
+        return organisme;
+      }
+    }
+    if (siret) {
+      organisme = await db.collection("organismes").findOne({
+        siret: siret,
+        fiabilisation_statut: "FIABLE",
+      });
+      if (organisme) {
+        console.log(`organisme fiable trouvé pour SIRET ${siret}`);
+        return organisme;
+      }
+    }
+    if (uai) {
+      organisme = await db.collection("organismes").findOne({
+        uai: uai,
+        fiabilisation_statut: "FIABLE",
+      });
+      if (organisme) {
+        console.log(`organisme fiable trouvé pour UAI ${uai}`);
+        return organisme;
+      }
+    }
+    return null;
+  }
+
   {
     console.log("MAJ ORGANISME_FORMATION");
     const users = await db
@@ -19,36 +57,47 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
       })
       .toArray();
 
-    const organisations = users.reduce((organisations, user) => {
-      let organisation = organisations[user.siret];
+    const usersWithoutOrganisation = [];
+    const organisations = {};
+    for (const user of users) {
+      const organisme = await findFirstOrganismeFiable(user.siret, user.uai);
+      if (!organisme) {
+        usersWithoutOrganisation.push(user);
+        continue;
+      }
+      console.log(
+        `Affectation ${user.email} ${user.siret}/${user.uai} à l'organisation ${organisme.siret}/${organisme.uai}`
+      );
+      let organisation = organisations[`${organisme.siret}/${organisme.uai}`];
       if (!organisation) {
-        organisation = organisations[user.siret] = {
-          siret: user.siret,
+        organisation = organisations[`${organisme.siret}/${organisme.uai}`] = {
+          siret: organisme.siret,
+          uai: organisme.uai,
+          nature: organisme?.nature ?? "inconnue",
           membres: [],
         };
       }
       organisation.membres.push(user._id);
-      return organisations;
-    }, {});
+    }
+    usersWithoutOrganisation.forEach((user) => {
+      console.log(`Aucun organisme fiable trouvé pour ${user.email} (SIRET/UAI=${user.siret}/${user.uai})`);
+    });
 
     await Promise.all(
       Object.values(organisations).map(async (organisation) => {
-        const organisme = await db.collection("organismes").findOne({
-          siret: organisation.siret,
-        });
-        if (!organisme) {
-          console.log(`organisme ${organisation.siret} non trouvé`);
-          // on continue quand même la création des organisations, sans la nature
-        }
-        const { insertedId } = await db.collection("organisations").insertOne({
-          type: "ORGANISME_FORMATION",
-          siret: organisation.siret,
-          nature: organisme?.nature ?? "inconnue",
-        });
+        const { insertedId } = await db.collection("organisations").insertOne(
+          stripUndefinedFields({
+            type: "ORGANISME_FORMATION",
+            siret: organisation.siret,
+            uai: organisation.uai,
+            nature: organisation.nature,
+          })
+        );
         await db.collection("usersMigration").updateMany(
           {
-            organisation: "ORGANISME_FORMATION",
-            siret: organisation.siret,
+            _id: {
+              $in: organisation.membres,
+            },
           },
           {
             $set: {
@@ -410,3 +459,12 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     .toArray();
   console.log(`Utilisateurs non migrés: ${users.length}`);
 };
+
+function stripUndefinedFields(object) {
+  return Object.entries(object).reduce((acc, [key, value]) => {
+    if (typeof value !== "undefined") {
+      acc[key] = value?.constructor?.name === "Object" ? stripUndefinedFields(value) : value;
+    }
+    return acc;
+  }, {});
+}
