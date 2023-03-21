@@ -25,13 +25,12 @@ export const insertManualMappingsFromFile = async () => {
   let nbInserted = 0;
 
   await asyncForEach(manualMapping, async (mapping) => {
-    const alreadyExists = await fiabilisationUaiSiretDb().findOne({ uai: mapping.uai, siret: mapping.siret });
-    if (alreadyExists) {
-      await fiabilisationUaiSiretDb().updateOne({ uai: mapping.uai, siret: mapping.siret }, { $set: mapping });
-    } else {
-      await fiabilisationUaiSiretDb().insertOne({ ...mapping, created_at: new Date() });
-      nbInserted++;
-    }
+    await fiabilisationUaiSiretDb().updateOne(
+      { uai: mapping.uai, siret: mapping.siret },
+      { $set: mapping },
+      { upsert: true }
+    );
+    nbInserted++;
   });
 
   return nbInserted;
