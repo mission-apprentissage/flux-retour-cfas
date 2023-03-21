@@ -377,8 +377,6 @@ program
   .description("Création de la collection pour fiabilisation des UAI SIRET")
   .action((_, options) =>
     runScript(async () => {
-      // On lance séquentiellement 2 fois la construction de la table de fiabilisation - nécessaire pour prendre en compte tous les cas
-      await buildFiabilisationUaiSiret();
       await buildFiabilisationUaiSiret();
     }, options._name)
   );

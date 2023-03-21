@@ -1,38 +1,28 @@
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
 import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { getPercentage } from "../../../../common/utils/miscUtils.js";
-import { FIABILISATION_MAPPINGS as manualMapping } from "../mapping.js";
+import { insertInFiabilisationIfNotExist, insertManualMappingsFromFile } from "./utils.js";
 
 // Filtres année scolaire pour récupération des couples UAI-SIRET des dossiersApprenants
-const filters = {
-  annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },
-};
+const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] } };
 
-/**
- * Méthode d'ajout à la collection fiabilisation si non existant
- * @param {*} fiabilisation
- * @returns
- */
-const insertInFiabilisationIfNotExist = async (fiabilisation) => {
-  const coupleFromDb = await fiabilisationUaiSiretDb().findOne({
-    uai: fiabilisation.uai,
-    siret: fiabilisation.siret,
-    type: fiabilisation.type,
-  });
-  if (coupleFromDb) return;
-  return await fiabilisationUaiSiretDb().insertOne({ created_at: new Date(), ...fiabilisation });
-};
-
-/**
- * Méthode de création de la collection pour fiabilisation couples UAI SIRET
- * TODO : optims upsert
- */
 export const buildFiabilisationUaiSiret = async () => {
   logger.info("Clear de la table fiabilisation Uai Siret...");
   await fiabilisationUaiSiretDb().deleteMany({});
 
+  // On lance séquentiellement 2 fois la construction de la table de fiabilisation - nécessaire pour prendre en compte tous les cas
+  logger.info("Execution du script de fiabilisation sur tous les couples UAI SIRET...");
+  await runFiabilisationOnUaiSiretCouples();
+  await runFiabilisationOnUaiSiretCouples();
+};
+
+/**
+ * Méthode de création de la collection pour fiabilisation couples UAI SIRET
+ */
+export const runFiabilisationOnUaiSiretCouples = async () => {
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
 
   // on récupère tous les couples UAI/SIRET depuis les effectifs en faisant un lookup effectifs - organismes
@@ -55,14 +45,6 @@ export const buildFiabilisationUaiSiret = async () => {
     .toArray();
 
   logger.info(allCouplesUaiSiretTdb.length, "couples UAI/SIRET trouvés en db");
-  const alreadyAFiabiliserCount = await fiabilisationUaiSiretDb().countDocuments({
-    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-  });
-
-  let nbCouplesNonFiabilisablesMapping = 0;
-  let nbCouplesNonFiabilisablesUaiNonValidee = 0;
-  let nbCouplesFiablesFound = 0;
-  let fiabilisationMappingInsertedCount = 0;
 
   await asyncForEach(allCouplesUaiSiretTdb, async (coupleUaiSiretTdb) => {
     const organismeFoundInReferentielViaSiret = organismesFromReferentiel.find(
@@ -77,7 +59,6 @@ export const buildFiabilisationUaiSiret = async () => {
         siret: coupleUaiSiretTdb.siret,
         type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.DEJA_FIABLE,
       });
-      nbCouplesFiablesFound++;
       return;
     }
 
@@ -102,16 +83,14 @@ export const buildFiabilisationUaiSiret = async () => {
       }).length === 1;
 
     if (siretIsSubjectToUpdate && !!organismeUniqueFoundInReferentielViaUai && uaiUniqueAmongAllCouplesTdb) {
-      const result = await insertInFiabilisationIfNotExist({
+      await insertInFiabilisationIfNotExist({
         uai: coupleUaiSiretTdb.uai,
         siret: coupleUaiSiretTdb.siret,
         uai_fiable: coupleUaiSiretTdb.uai,
         siret_fiable: organismeUniqueFoundInReferentielViaUai.siret,
         type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       });
-      if (result) {
-        fiabilisationMappingInsertedCount++;
-      }
+
       return;
     }
 
@@ -128,7 +107,7 @@ export const buildFiabilisationUaiSiret = async () => {
       organismeFoundInReferentielViaSiret.uai !== coupleUaiSiretTdb.uai &&
       siretUniqueAmongAllCouplesTdb
     ) {
-      const result = await insertInFiabilisationIfNotExist({
+      await insertInFiabilisationIfNotExist({
         uai: coupleUaiSiretTdb.uai,
         siret: coupleUaiSiretTdb.siret,
         uai_fiable: organismeFoundInReferentielViaSiret.uai,
@@ -136,9 +115,6 @@ export const buildFiabilisationUaiSiret = async () => {
         type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       });
 
-      if (result) {
-        fiabilisationMappingInsertedCount++;
-      }
       return;
     }
 
@@ -154,73 +130,69 @@ export const buildFiabilisationUaiSiret = async () => {
         { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING } },
         { upsert: true }
       );
-      nbCouplesNonFiabilisablesMapping++;
     } else {
       await fiabilisationUaiSiretDb().updateOne(
         { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
         { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE } },
         { upsert: true }
       );
-      nbCouplesNonFiabilisablesUaiNonValidee++;
     }
   });
 
   // on insère les mapping de fiabilisation présents dans le fichier JSON créé à la main
   // cette source est prioritaire par rapport à l'analyse faite plus haut
   // on remplace donc la fiabilisation à faire si déjà existante
-  const nbManualMappingInserted = await insertManualMappingsFromFile();
-  fiabilisationMappingInsertedCount += nbManualMappingInserted;
+  await insertManualMappingsFromFile();
+
+  // Stats & log / info
+  const nbCouplesFiablesFound = await fiabilisationUaiSiretDb().countDocuments({
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.DEJA_FIABLE,
+  });
+  const nbCouplesAFiabiliser = await fiabilisationUaiSiretDb().countDocuments({
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+  });
+  const nbCouplesNonFiabilisablesUaiNonValidee = await fiabilisationUaiSiretDb().countDocuments({
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
+  });
+  const nbCouplesNonFiabilisablesMapping = await fiabilisationUaiSiretDb().countDocuments({
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING,
+  });
 
   logger.info(
-    ` ${nbCouplesFiablesFound} couples déjà fiables (${getPercentage(
+    ` -> ${nbCouplesFiablesFound} couples déjà fiables (${getPercentage(
       nbCouplesFiablesFound,
       allCouplesUaiSiretTdb.length
     )}%)`
   );
-  logger.info(` ${alreadyAFiabiliserCount} couples déja identifiés à fiabiliser`);
-  logger.info(` ${fiabilisationMappingInsertedCount} nouveaux couples à fiabiliser`);
+  logger.info(` -> ${nbCouplesAFiabiliser} nouveaux couples à fiabiliser`);
   logger.info(
-    ` ${
+    ` -> ${
       nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping
     } couples ne peuvent pas être fiabilisés automatiquement (${getPercentage(
       nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping,
       allCouplesUaiSiretTdb.length
-    )}%) dont ${nbCouplesNonFiabilisablesUaiNonValidee} non fiabilisables car UAI non validée dans le Référentiel et ${nbCouplesNonFiabilisablesMapping} non fiabilisable à cause du mapping.`
+    )}%)`
   );
+  logger.info(
+    ` -> dont ${nbCouplesNonFiabilisablesUaiNonValidee} non fiabilisables car UAI non validée dans le Référentiel`
+  );
+  logger.info(` -> dont ${nbCouplesNonFiabilisablesMapping} non fiabilisables à cause du mapping.`);
 
-  return {
-    nbCouplesDejaFiables: nbCouplesFiablesFound,
-    nbCouplesDejaFiablesPercentage: getPercentage(nbCouplesFiablesFound, allCouplesUaiSiretTdb.length),
-    nbCouplesExistantsAFiabiliser: alreadyAFiabiliserCount,
-    nbNouveauxCouplesAFiabiliser: fiabilisationMappingInsertedCount,
-    nbCouplesNonFiabilisablesUaiNonValidee,
-    nbCouplesNonFiabilisablesMapping,
-    nbCouplesNonFiabilisables: nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping,
-    nbCouplesNonFiabilisablesPercentage: getPercentage(
-      nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping,
-      allCouplesUaiSiretTdb.length
-    ),
-  };
-};
-
-/**
- * Insertion des mapping manuels depuis fichier
- * cette source est prioritaire par rapport à l'analyse faite plus haut
- * on remplace donc la fiabilisation à faire si déjà existante
- * @returns
- */
-const insertManualMappingsFromFile = async () => {
-  let nbInserted = 0;
-
-  await asyncForEach(manualMapping, async (mapping) => {
-    const alreadyExists = await fiabilisationUaiSiretDb().findOne({ uai: mapping.uai, siret: mapping.siret });
-    if (alreadyExists) {
-      await fiabilisationUaiSiretDb().updateOne({ uai: mapping.uai, siret: mapping.siret }, { $set: mapping });
-    } else {
-      await fiabilisationUaiSiretDb().insertOne({ ...mapping, created_at: new Date() });
-      nbInserted++;
-    }
+  await createJobEvent({
+    jobname: "fiabilisation:uai-siret:build",
+    date: new Date(),
+    action: "ending",
+    data: {
+      nbCouplesDejaFiables: nbCouplesFiablesFound,
+      nbCouplesDejaFiablesPercentage: getPercentage(nbCouplesFiablesFound, allCouplesUaiSiretTdb.length),
+      nbNouveauxCouplesAFiabiliser: nbCouplesAFiabiliser,
+      nbCouplesNonFiabilisablesUaiNonValidee,
+      nbCouplesNonFiabilisablesMapping,
+      nbCouplesNonFiabilisables: nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping,
+      nbCouplesNonFiabilisablesPercentage: getPercentage(
+        nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping,
+        allCouplesUaiSiretTdb.length
+      ),
+    },
   });
-
-  return nbInserted;
 };
