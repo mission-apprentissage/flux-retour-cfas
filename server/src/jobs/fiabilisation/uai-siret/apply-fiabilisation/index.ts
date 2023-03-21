@@ -209,7 +209,8 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
 const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (currentFiabilisationCouple) => {
   const { modifiedCount } = await organismesDb().updateMany(
     { uai: currentFiabilisationCouple.uai, siret: currentFiabilisationCouple.siret },
-    { $set: { fiabilisation_statut: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING } }
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING } },
+    { bypassDocumentValidation: true }
   );
   nbOrganismesNonFiabilisablesMapping += modifiedCount;
 };
