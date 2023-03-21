@@ -14,6 +14,7 @@ import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
 import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
+import { Organismes } from "../../model/@types/Organismes.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -502,6 +503,7 @@ export const deleteOrganismeAndEffectifsAndDossiersApprenantsMigration = async (
 
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) throw new Error(`Unable to find organisme ${_id.toString()}`);
+  if (!organisme.uai) throw new Error(`Organisme ${_id.toString()} doesn't have any UAI`);
 
   // Suppression des dossiersApprenants liés sur la base du couple uai siret
   const { deletedCount: deletedDossiersApprenantsMigration } = await dossiersApprenantsMigrationDb().deleteMany({

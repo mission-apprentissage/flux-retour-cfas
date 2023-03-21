@@ -20,8 +20,8 @@ describe("Components Users Test", () => {
       const createdId = await createUserLegacy({ username: "user", password: "password" });
       const found = await usersDb().findOne({ _id: createdId });
       assert.equal(found?.username, "user");
-      assert.equal(found?.permissions.length, 0);
-      assert.equal(found?.password.startsWith("$6$rounds="), true);
+      assert.equal(found?.permissions?.length, 0);
+      assert.equal(found?.password?.startsWith("$6$rounds="), true);
     });
 
     it("Renvoie une erreur lorsqu'un utilisateur avec le même username existe en base", async () => {
@@ -37,8 +37,8 @@ describe("Components Users Test", () => {
       const createdId = await createUserLegacy({ username: "user" });
       const found = await usersDb().findOne({ _id: createdId });
       assert.equal(found?.username, "user");
-      assert.equal(found?.permissions.length, 0);
-      assert.equal(found?.password.startsWith("$6$rounds="), true);
+      assert.equal(found?.permissions?.length, 0);
+      assert.equal(found?.password?.startsWith("$6$rounds="), true);
     });
 
     it("Permet de créer un utilisateur avec les droits d'admin", async () => {
@@ -48,7 +48,7 @@ describe("Components Users Test", () => {
         permissions: [apiRoles.administrator],
       });
       const found = await usersDb().findOne({ _id: createdId });
-      assert.equal(found?.permissions.includes(apiRoles.administrator), true);
+      assert.equal(found?.permissions?.includes(apiRoles.administrator), true);
     });
 
     it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
@@ -61,7 +61,7 @@ describe("Components Users Test", () => {
       });
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "email@test.fr", true);
     });
@@ -78,7 +78,7 @@ describe("Components Users Test", () => {
       });
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.region === "REGION", true);
       assert.equal(found?.organisme === "ORGANISME", true);
@@ -132,10 +132,12 @@ describe("Components Users Test", () => {
 
       assert.equal(userInDb?.password_update_token, token);
       // password token should expire in 48h ~ 2880 minutes, ±1 seconds tolerance
+      // @ts-ignore
       const diffSeconds = differenceInSeconds(userInDb?.password_update_token_expiry, new Date());
       const _48hoursInSeconds = 48 * 60 * 60;
       assert.equal(_48hoursInSeconds - diffSeconds <= 1, true);
       assert.equal(_48hoursInSeconds - diffSeconds >= 0, true);
+      // @ts-ignore
       assert.equal(differenceInCalendarDays(userInDb?.password_update_token_expiry, new Date()), 2);
     });
 
@@ -145,7 +147,7 @@ describe("Components Users Test", () => {
 
       await assert.rejects(
         () => generatePasswordUpdateTokenLegacy("user"),
-        (/** @type {Error} */ err: any) => {
+        (err: any) => {
           assert.equal(err.message, "User not found");
           return true;
         }
@@ -276,7 +278,7 @@ describe("Components Users Test", () => {
       const createdId = await createUserLegacy(userProps);
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -302,7 +304,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -328,7 +330,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -353,7 +355,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -379,7 +381,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -405,7 +407,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -430,7 +432,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -456,7 +458,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -482,7 +484,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -507,7 +509,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 
@@ -533,7 +535,7 @@ describe("Components Users Test", () => {
 
       const found = await usersDb().findOne({ _id: createdId });
 
-      assert.equal(found?.permissions.includes(tdbRoles.network), true);
+      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
       assert.equal(found?.network === "test", true);
       assert.equal(found?.email === "havertz@rma.es", true);
 

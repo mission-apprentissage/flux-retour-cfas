@@ -15,6 +15,23 @@ import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model.
 import dossiersApprenantsMigrationModelDescriptor from "./dossiersApprenantsMigration.model.js";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model.js";
 import uploadsModelDescriptor from "./uploads.model/uploads.model.js";
+import {
+  DossiersApprenantsMigration,
+  Effectifs,
+  FiabilisationUaiSiret,
+  Formations,
+  JobEvents,
+  JwtSessions,
+  MaintenanceMessages,
+  Organismes,
+  OrganismesReferentiel,
+  Permissions,
+  Roles,
+  Uploads,
+  UserEvents,
+  Users,
+  UsersMigration,
+} from "./@types";
 
 export const modelDescriptors = [
   usersModelDescriptor,
@@ -31,70 +48,29 @@ export const modelDescriptors = [
   OrganismesReferentielModelDescriptor,
   dossiersApprenantsMigrationModelDescriptor,
   effectifsModelDescriptor,
+  effectifsQueueModelDescriptor,
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
 ];
 
-export const formationsDb = () => {
-  return getDbCollection(formationsModelDescriptor.collectionName);
-};
-
-export const usersDb = () => {
-  return getDbCollection(usersModelDescriptor.collectionName);
-};
-
-export const userEventsDb = () => {
-  return getDbCollection(userEventsModelDescriptor.collectionName);
-};
-
-export const jobEventsDb = () => {
-  return getDbCollection(jobEventsModelDescriptor.collectionName);
-};
-
-export const usersMigrationDb = () => {
-  return getDbCollection(usersMigrationModelDescriptor.collectionName);
-};
-
-export const rolesDb = () => {
-  return getDbCollection(RolesModelDescriptor.collectionName);
-};
-
-export const jwtSessionsDb = () => {
-  return getDbCollection(JwtSessionsModelDescriptor.collectionName);
-};
-
-export function organismesDb() {
-  return getDbCollection(OrganismesModelDescriptor.collectionName);
-}
-
-export function organismesReferentielDb() {
-  return getDbCollection(OrganismesReferentielModelDescriptor.collectionName);
-}
-
-export function permissionsDb() {
-  return getDbCollection(PermissionsDescriptor.collectionName);
-}
-
-export function maintenanceMessageDb() {
-  return getDbCollection(MaintenanceMessagesModelDescriptor.collectionName);
-}
-
-export function dossiersApprenantsMigrationDb() {
-  return getDbCollection(dossiersApprenantsMigrationModelDescriptor.collectionName);
-}
-
-export function effectifsDb() {
-  return getDbCollection(effectifsModelDescriptor.collectionName);
-}
-
-export function uploadsDb() {
-  return getDbCollection(uploadsModelDescriptor.collectionName);
-}
-
-export const dossiersApprenantsApiErrorsDb = () => {
-  return getDbCollection(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
-};
-
-export const fiabilisationUaiSiretDb = () => {
-  return getDbCollection(fiabilisationUaiSiretModelDescriptor.collectionName);
-};
+export const formationsDb = () => getDbCollection<Formations>(formationsModelDescriptor.collectionName);
+export const usersDb = () => getDbCollection<Users>(usersModelDescriptor.collectionName);
+export const userEventsDb = () => getDbCollection<UserEvents>(userEventsModelDescriptor.collectionName);
+export const jobEventsDb = () => getDbCollection<JobEvents>(jobEventsModelDescriptor.collectionName);
+export const usersMigrationDb = () => getDbCollection<UsersMigration>(usersMigrationModelDescriptor.collectionName);
+export const rolesDb = () => getDbCollection<Roles>(RolesModelDescriptor.collectionName);
+export const jwtSessionsDb = () => getDbCollection<JwtSessions>(JwtSessionsModelDescriptor.collectionName);
+export const organismesDb = () => getDbCollection<Organismes>(OrganismesModelDescriptor.collectionName);
+export const dossiersApprenantsApiErrorsDb = () =>
+  getDbCollection<any>(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
+export const organismesReferentielDb = () =>
+  getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
+export const permissionsDb = () => getDbCollection<Permissions>(PermissionsDescriptor.collectionName);
+export const maintenanceMessageDb = () =>
+  getDbCollection<MaintenanceMessages>(MaintenanceMessagesModelDescriptor.collectionName);
+export const dossiersApprenantsMigrationDb = () =>
+  getDbCollection<DossiersApprenantsMigration>(dossiersApprenantsMigrationModelDescriptor.collectionName);
+export const effectifsDb = () => getDbCollection<Effectifs>(effectifsModelDescriptor.collectionName);
+export const uploadsDb = () => getDbCollection<Uploads>(uploadsModelDescriptor.collectionName);
+export const fiabilisationUaiSiretDb = () =>
+  getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);

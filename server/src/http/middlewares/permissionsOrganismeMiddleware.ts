@@ -56,17 +56,17 @@ export default (acls) =>
 
       if (user.is_cross_organismes) {
         if (
-          !user.codes_region.includes(organisme.adresse.region) &&
-          !user.codes_academie.includes(organisme.adresse.academie) &&
-          !user.codes_departement.includes(organisme.adresse.departement)
+          !user.codes_region?.includes(organisme.adresse?.region) &&
+          !user.codes_academie?.includes(organisme.adresse?.academie) &&
+          !user.codes_departement?.includes(organisme.adresse?.departement)
         ) {
           throw Boom.unauthorized("Accès non autorisé");
         }
       } else {
-        if (user.reseau && !organisme.reseaux.includes(user.reseau)) {
+        if (user.reseau && !organisme.reseaux?.includes(user.reseau)) {
           throw Boom.unauthorized("Accès non autorisé");
         }
-        if (user.erp && !organisme.erps.includes(user.erp)) {
+        if (user.erp && !organisme.erps?.includes(user.erp)) {
           throw Boom.unauthorized("Accès non autorisé");
         }
       }

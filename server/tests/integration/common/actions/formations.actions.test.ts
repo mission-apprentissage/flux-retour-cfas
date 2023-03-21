@@ -16,7 +16,8 @@ import {
 } from "../../../../src/common/actions/formations.actions.js";
 import { createSampleEffectif } from "../../../data/randomizedSample.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
-import { WithId } from "mongodb";
+import { OptionalId, OptionalUnlessRequiredId, WithId } from "mongodb";
+import { Organismes } from "@/src/common/model/@types/Organismes.js";
 
 describe("Tests des actions Formations", () => {
   describe("existsFormation", () => {
@@ -240,7 +241,7 @@ describe("Tests des actions Formations", () => {
       assert.ok(results.find((formation) => formation.cfd === formationsSeed[5].cfd));
     });
 
-    const organisme = {
+    const organisme: Organismes = {
       uai: "0040533H",
       siret: "19040492100016",
       nom: "LYCEE POLYVALENT LES ISCLES",
@@ -271,7 +272,7 @@ describe("Tests des actions Formations", () => {
         })
       );
 
-      const results = await searchFormations({ searchTerm, etablissement_num_region: organisme.adresse.region });
+      const results = await searchFormations({ searchTerm, etablissement_num_region: organisme.adresse?.region });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
@@ -292,7 +293,7 @@ describe("Tests des actions Formations", () => {
 
       const results = await searchFormations({
         searchTerm,
-        etablissement_num_departement: organisme.adresse.departement,
+        etablissement_num_departement: organisme.adresse?.departement,
       });
 
       assert.equal(results.length, 1);
@@ -312,7 +313,7 @@ describe("Tests des actions Formations", () => {
         })
       );
 
-      const results = await searchFormations({ searchTerm, etablissement_reseaux: organisme.reseaux[0] });
+      const results = await searchFormations({ searchTerm, etablissement_reseaux: organisme.reseaux?.[0] });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
