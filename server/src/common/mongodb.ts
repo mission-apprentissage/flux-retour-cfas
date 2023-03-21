@@ -94,7 +94,7 @@ export const configureDbSchemaValidation = async (modelDescriptors) => {
       validationLevel: "strict",
       validationAction: "error",
       validator: {
-        $jsonSchema: { title: `${collectionName} validation schema`, ...omitDeep(schema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
+        $jsonSchema: { title: collectionName, ...omitDeep(schema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
       },
     });
   });
