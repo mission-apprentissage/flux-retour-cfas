@@ -37,12 +37,10 @@ let nbOrganismesNonFiabilisablesUaiNonValidees = 0;
  *
  */
 export const applyFiabilisationUaiSiret = async () => {
-  // Reset des statuts de fiabilisation des organismes
-  await resetStatutFiabilisation();
-
   // Traitement // de l'identification des différents statuts de fiabilisation
   await Promise.all([
-    updateOrganismesFiables(),
+    updateOrganismesReferentielFiables(),
+    updateOrganismesCouplesFiables(),
     updateDossiersApprenantAndOrganismesFiabilise(),
     updateOrganismesNonFiabilisablesMapping(),
     updateOrganismesNonFiabilisablesUaiNonValidees(),
@@ -81,26 +79,34 @@ export const applyFiabilisationUaiSiret = async () => {
 };
 
 /**
- * On marque par défaut le statut de fiabilisation des organismes comme étant INCONNU ou SANS_SIRET
- */
-const resetStatutFiabilisation = async () => {
-  await organismesDb().updateMany(
-    { siret: { $exists: true } },
-    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU } }
-  );
-};
-
-/**
  * Méthode maj des statuts de fiabilisation à FIABLE pour les organismes avec UAI & présents dans le référentiel
  */
-const updateOrganismesFiables = async () => {
-  logger.info("Identification des organismes fiables ...");
+const updateOrganismesReferentielFiables = async () => {
+  logger.info("Identification des organismes du référentiel comme fiables ...");
 
   const { modifiedCount } = await organismesDb().updateMany(
     { uai: { $exists: true }, est_dans_le_referentiel: true },
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
   );
   nbOrganismesFiables += modifiedCount;
+};
+
+/**
+ * Méthode maj des statuts de fiabilisation à FIABLE pour les organismes avec UAI & présents dans le référentiel
+ */
+const updateOrganismesCouplesFiables = async () => {
+  logger.info("Identification des organismes liés à des couples fiables ...");
+  const couplesFiables = await fiabilisationUaiSiretDb()
+    .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE })
+    .toArray();
+
+  await PromisePool.for(couplesFiables).process(async ({ siret, uai }) => {
+    const { modifiedCount } = await organismesDb().updateMany(
+      { uai: uai, siret: siret },
+      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
+    );
+    nbOrganismesFiables += modifiedCount;
+  });
 };
 
 /**
