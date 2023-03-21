@@ -18,6 +18,7 @@ export const findInvalidDocuments = async (name) => {
   for (let i = 0; i < documents.length; i++) {
     const document = documents[i];
     try {
+      // trick to update the document, trigger the schema validation and get the error (and finally not update the doc)
       await getDbCollection(name).updateOne({ _id: document._id }, { $set: { invalidDoc: true } });
     } catch (error: any) {
       logger.info(
