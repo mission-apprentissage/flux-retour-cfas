@@ -305,6 +305,7 @@ export interface UsersMigration {
   emails?: {
     token: string;
     templateName: string;
+    payload?: unknown;
     sendDates: Date[];
     openDate?: Date;
     messageIds?: string[];

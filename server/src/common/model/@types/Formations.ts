@@ -22,7 +22,7 @@ export interface Formations {
   /**
    * Liste des codes RNCPs de la formation récupéré depuis Tables de Correspondances
    */
-  rncps?: null;
+  rncps?: string[];
   /**
    * Niveau de formation récupéré via Tables de Correspondances
    */
@@ -38,7 +38,7 @@ export interface Formations {
   /**
    * Les domaines métiers rattachés à la formation
    */
-  metiers?: null;
+  metiers?: string[];
   /**
    * Durée de la formation théorique
    */
