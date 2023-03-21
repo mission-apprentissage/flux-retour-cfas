@@ -83,14 +83,19 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
       console.log(`Aucun organisme fiable trouvé pour ${user.email} (SIRET/UAI=${user.siret}/${user.uai})`);
     });
 
+    const natureOFToOrganisationType = {
+      responsable_formateur: "RESPONSABLE_FORMATEUR",
+      responsable: "REPONSABLE",
+      formateur: "FORMATEUR",
+      inconnue: "FORMATEUR",
+    };
     await Promise.all(
       Object.values(organisations).map(async (organisation) => {
         const { insertedId } = await db.collection("organisations").insertOne(
           stripUndefinedFields({
-            type: "ORGANISME_FORMATION",
+            type: `ORGANISME_FORMATION_${natureOFToOrganisationType[organisation.nature] || "FORMATEUR"}`,
             siret: organisation.siret,
             uai: organisation.uai,
-            nature: organisation.nature,
           })
         );
         await db.collection("usersMigration").updateMany(
