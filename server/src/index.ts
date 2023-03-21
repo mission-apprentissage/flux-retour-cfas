@@ -6,8 +6,8 @@ import createServices from "./services.js";
 import { connectToMongodb, configureDbSchemaValidation } from "./common/mongodb.js";
 import { modelDescriptors } from "./common/model/collections.js";
 
-process.on("unhandledRejection", (e) => logger.error("An unexpected error occurred", e));
-process.on("uncaughtException", (e) => logger.error("An unexpected error occurred", e));
+process.on("unhandledRejection", (err) => logger.error(err, "unhandledRejection"));
+process.on("uncaughtException", (err) => logger.error(err, "uncaughtException"));
 
 (async function () {
   try {
