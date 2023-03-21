@@ -14,7 +14,6 @@ import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
 import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
-import { Organismes } from "../../model/@types/Organismes.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 

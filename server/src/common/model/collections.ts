@@ -48,7 +48,6 @@ export const modelDescriptors = [
   OrganismesReferentielModelDescriptor,
   dossiersApprenantsMigrationModelDescriptor,
   effectifsModelDescriptor,
-  effectifsQueueModelDescriptor,
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
 ];
