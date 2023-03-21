@@ -57,7 +57,7 @@ export const runFiabilisationOnUaiSiretCouples = async () => {
       await insertInFiabilisationIfNotExist({
         uai: coupleUaiSiretTdb.uai,
         siret: coupleUaiSiretTdb.siret,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.DEJA_FIABLE,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE,
       });
       return;
     }
@@ -146,7 +146,7 @@ export const runFiabilisationOnUaiSiretCouples = async () => {
 
   // Stats & log / info
   const nbCouplesFiablesFound = await fiabilisationUaiSiretDb().countDocuments({
-    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.DEJA_FIABLE,
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE,
   });
   const nbCouplesAFiabiliser = await fiabilisationUaiSiretDb().countDocuments({
     type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,

@@ -135,7 +135,7 @@ const updateOrganismeAndDossiersApprenantForCoupleFiabilise = async ({ uai, uai_
   // Update de l'organisme lié à un couple UAI-SIRET marqué comme A_FIABILISER en FIABILISE
   const { modifiedCount: organismesModifiedCount } = await organismesDb().updateOne(
     { uai: uai_fiable, siret: siret_fiable },
-    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABILISE } }
+    { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
   );
   nbOrganismesFiabilises += organismesModifiedCount;
 };
