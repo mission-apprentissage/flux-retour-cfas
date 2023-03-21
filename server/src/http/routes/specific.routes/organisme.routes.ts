@@ -3,7 +3,6 @@ import Joi from "joi";
 import { compact, get } from "lodash-es";
 import Boom from "boom";
 
-import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import {
   findOrganismeById,
   getContributeurs,
@@ -14,14 +13,8 @@ import {
   findOrganismeByUai,
   getSousEtablissementsForUai,
 } from "../../../common/actions/organismes/organismes.actions.js";
-import { findRolePermission } from "../../../common/actions/roles.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa, isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
-import {
-  removePermissions,
-  updatePermission,
-  updatePermissionsPending,
-} from "../../../common/actions/permissions.actions.js";
 import { getUserByEmail } from "../../../common/actions/users.actions.js";
 import { uaiSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
@@ -31,40 +24,35 @@ export default ({ mailer }) => {
 
   router.get(
     "/entity/:id",
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    async ({ params, user }, res) => {
+    // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    returnResult(async ({ params }) => {
       const organisme = await findOrganismeById(params.id);
-
-      res.json({
-        ...organisme,
-        acl: user.currentPermissionAcl,
-      });
-    }
+      return organisme;
+    })
   );
 
   router.put(
     "/entity/:id",
-    permissionsOrganismeMiddleware(["organisme/page_parametres"]),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async ({ body: { organisme_id, ...data }, params, user }, res) => {
+    // permissionsOrganismeMiddleware(["organisme/page_parametres"]),
+    async (req, res) => {
       // TODO JOI
-      const updatedOrganisme = await updateOrganisme(params.id, data);
+      const updatedOrganisme = await updateOrganisme(req.params.id, req.body);
       return res.json({
         ...updatedOrganisme,
-        acl: user.currentPermissionAcl,
+        // acl: user.currentPermissionAcl,
       });
     }
   );
 
   router.get(
     "/effectifs",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
     async ({ query: { organisme_id, sifa } }, res) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
       const effectifs: any[] = [];
 
-      let requiredFieldsSifa = [
+      const requiredFieldsSifa = [
         "apprenant.nom",
         "apprenant.prenom",
         "apprenant.date_de_naissance",
@@ -127,7 +115,7 @@ export default ({ mailer }) => {
 
   router.get(
     "/sifa/export-csv-list",
-    permissionsOrganismeMiddleware(["organisme/page_sifa/telecharger"]),
+    // permissionsOrganismeMiddleware(["organisme/page_sifa/telecharger"]),
     async ({ query: { organisme_id } }, res) => {
       const sifaCsv = await generateSifa(organisme_id);
 
@@ -137,7 +125,7 @@ export default ({ mailer }) => {
 
   router.get(
     "/contributors",
-    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
     async ({ query: { organisme_id } }, res) => {
       const contributors = await getContributeurs(organisme_id);
 
@@ -147,7 +135,7 @@ export default ({ mailer }) => {
 
   router.post(
     "/contributors",
-    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
     async (req, res) => {
       const { userEmail, roleName, organisme_id } = await Joi.object({
         userEmail: Joi.string().email().required(),
@@ -172,7 +160,7 @@ export default ({ mailer }) => {
 
   router.put(
     "/contributors",
-    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
     async (req, res) => {
       const { userEmail, roleName, organisme_id } = await Joi.object({
         userEmail: Joi.string().email().required(),
@@ -189,7 +177,7 @@ export default ({ mailer }) => {
         throw Boom.unauthorized("Accès non autorisé");
       }
 
-      await updatePermission({ organisme_id: organisme._id, userEmail, roleName });
+      // await updatePermission({ organisme_id: organisme._id, userEmail, roleName });
 
       return res.json({ ok: true });
     }
@@ -197,7 +185,7 @@ export default ({ mailer }) => {
 
   router.delete(
     "/contributors",
-    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
     async (req, res) => {
       const { userEmail, organisme_id } = await Joi.object({
         userEmail: Joi.string().email().required(),
@@ -219,18 +207,18 @@ export default ({ mailer }) => {
     }
   );
 
-  router.get(
-    "/roles_list",
-    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    async (_req, res) => {
-      const roles = await findRolePermission({}, { description: 1, title: 1, name: 1 });
-      return res.json(roles);
-    }
-  );
+  // router.get(
+  //   "/roles_list",
+  //   // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+  //   async (_req, res) => {
+  //     const roles = await findRolePermission({}, { description: 1, title: 1, name: 1 });
+  //     return res.json(roles);
+  //   }
+  // );
 
   router.get(
     "/contributors/confirm-access",
-    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
     async ({ query }, res) => {
       const { userEmail, organisme_id, validate } = await Joi.object({
         userEmail: Joi.string().email().required(),
@@ -242,10 +230,10 @@ export default ({ mailer }) => {
       const organisme = await findOrganismeById(organisme_id);
 
       if (validate) {
-        await updatePermissionsPending({ userEmail, organisme_id, pending: false });
+        // await updatePermissionsPending({ userEmail, organisme_id, pending: false });
         await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_granted");
       } else {
-        await removePermissions({ organisme_id: organisme_id, userEmail });
+        // await removePermissions({ organisme_id: organisme_id, userEmail });
         await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_rejected");
       }
 

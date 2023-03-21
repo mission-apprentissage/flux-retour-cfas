@@ -21,6 +21,34 @@ const fetchMyOrganisme = async (my_organisme_id, accountIsNotReady = false) => {
   }
 };
 
+function getMesOrganismesLabelFromOrganisationType(type) {
+  switch (type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_REPONSABLE":
+    case "ORGANISME_FORMATION_REPONSABLE_FORMATEUR":
+      return "Mes organismes";
+
+    case "TETE_DE_RESEAU":
+      return "Mon réseau";
+
+    case "DREETS":
+    case "DEETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+      return "Sur mon territoire";
+
+    case "DGEFP":
+    case "ADMINISTRATEUR":
+      return "Tous les organismes";
+
+    default:
+    // FIXME undefined en attendant la répération de la session...
+    //throw new Error(`Type '${type}' inconnu`);
+  }
+}
+
 export function useEspace() {
   const router = useRouter();
   let [auth] = useAuth();
@@ -45,12 +73,11 @@ export function useEspace() {
   const isSIFAPage = slug.includes("enquete-SIFA");
   const isParametresPage = slug.includes("parametres");
   const contextNav = isOrganismePages ? "organisme" : "user";
-  const whoIs = auth.roles.find((role) => ["pilot", "erp", "of", "reseau_of"].includes(role));
-
+  const organisationType = auth?.organisation?.type;
   const organisme_id = isOrganismePages
     ? slug?.[slug.length - (isTeleversementPage ? 3 : isEffectifsPage || isSIFAPage || isParametresPage ? 2 : 1)]
     : null;
-  const hasAccessToOnlyOneOrganisme = auth.organisme_ids.length === 1;
+  // const hasAccessToOnlyOneOrganisme = auth.organisme_ids.length === 1;
   const userIsAnOrganisme = !!auth.main_organisme_id;
 
   useEffect(() => {
@@ -60,14 +87,6 @@ export function useEspace() {
     fetchMyOrganisme(auth.main_organisme_id, auth.account_status !== "CONFIRMED" || auth.isInPendingValidation)
       .then(({ myOrganisme }) => {
         if (!abortController.signal.aborted) {
-          const mesOrganismesNames = {
-            pilot: "Sur mon territoire",
-            erp: "Les organismes connectés",
-            of: "Mes organismes",
-            reseau_of: "Mon réseau",
-            ...(hasAccessToOnlyOneOrganisme ? {} : { global: "Tous les organismes" }),
-          };
-
           const navigation = {
             user: {
               landingEspace: {
@@ -99,15 +118,13 @@ export function useEspace() {
                     },
                   }
                 : {}),
-              ...(!hasAccessToOnlyOneOrganisme || auth.is_cross_organismes
-                ? {
-                    mesOrganismes: {
-                      pageTitle: mesOrganismesNames[whoIs] ?? mesOrganismesNames.global,
-                      navTitle: mesOrganismesNames[whoIs] ?? mesOrganismesNames.global,
-                      path: "/mon-espace/mes-organismes",
-                    },
-                  }
-                : {}),
+              ...{
+                mesOrganismes: {
+                  pageTitle: getMesOrganismesLabelFromOrganisationType(organisationType),
+                  navTitle: getMesOrganismesLabelFromOrganisationType(organisationType),
+                  path: "/mon-espace/mes-organismes",
+                },
+              },
             },
             organisme: {
               landingEspace: {
@@ -157,7 +174,6 @@ export function useEspace() {
   }, [
     auth.main_organisme_id,
     contextNav,
-    hasAccessToOnlyOneOrganisme,
     isEffectifsPage,
     isParametresPage,
     isSIFAPage,
@@ -165,7 +181,7 @@ export function useEspace() {
     setNavigation,
     setMyOrganisme,
     userIsAnOrganisme,
-    whoIs,
+    organisationType,
     auth.isInPendingValidation,
     auth.account_status,
     isTeleversementPage,
@@ -178,7 +194,7 @@ export function useEspace() {
 
   return {
     organisme_id,
-    whoIs,
+    organisationType,
     navigation: navigation || {},
     isloaded,
     isReloaded,

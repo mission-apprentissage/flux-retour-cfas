@@ -12,8 +12,6 @@ import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { COOKIE_NAME } from "../../../common/constants/cookieName.js";
 
-import { USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION } from "../../../common/constants/usersToForceAccountCreation.js";
-
 export default () => {
   const router = express.Router();
 
@@ -23,9 +21,6 @@ export default () => {
       password: Joi.string().required(),
     }).validateAsync(req.body, { abortEarly: false });
 
-    if (USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION.includes(emailOrUsername)) {
-      return res.status(200).redirect("/reinscription");
-    }
     const { value: email } = Joi.string().email().validate(emailOrUsername, { abortEarly: false });
 
     const user = await getUserByEmail(email.toLowerCase());

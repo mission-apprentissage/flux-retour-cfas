@@ -44,3 +44,12 @@ export function validateUai(uai) {
 export async function validateFullObjectSchema(object, schema) {
   return await Joi.object(schema).validateAsync(object, { abortEarly: false });
 }
+
+export function stripEmptyFields(object) {
+  return Object.entries(object).reduce((acc, [key, value]) => {
+    if (typeof value !== "undefined" && value !== null) {
+      acc[key] = value?.constructor?.name === "Object" ? stripEmptyFields(value) : value;
+    }
+    return acc;
+  }, {});
+}

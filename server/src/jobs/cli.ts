@@ -2,8 +2,8 @@ import "dotenv/config.js";
 import { Option, program } from "commander";
 
 import { runScript } from "./scriptWrapper.js";
-import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
-import { clear, clearRoles, clearUsers } from "./clear/clear-all.js";
+import { seedSample, seedAdmin } from "./seed/start/index.js";
+import { clear, clearUsers } from "./clear/clear-all.js";
 import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
 import { createErpUserLegacy, createUserAccount } from "./users/create-user.js";
@@ -111,7 +111,6 @@ program
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
   .action(async ({ email }, options) =>
     runScript(async () => {
-      await seedRoles();
       return seedAdmin({ adminEmail: email?.toLowerCase() });
     }, options._name)
   );
@@ -125,19 +124,6 @@ program
   .action(async (_, options) =>
     runScript(async () => {
       return seedSample();
-    }, options._name)
-  );
-
-/**
- * Job d'initialisation des roles
- * Pas nécessaire de l'exécuter si on créé un admin
- */
-program
-  .command("seed:roles")
-  .description("Seed roles")
-  .action(async (_, options) =>
-    runScript(async () => {
-      return seedRoles();
     }, options._name)
   );
 
@@ -187,15 +173,6 @@ program
   .action((_, options) =>
     runScript(async () => {
       return clearUsers();
-    }, options._name)
-  );
-
-program
-  .command("clear:roles")
-  .description("Clear roles")
-  .action((_, options) =>
-    runScript(async () => {
-      return clearRoles();
     }, options._name)
   );
 

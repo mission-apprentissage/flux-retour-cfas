@@ -23,13 +23,32 @@ const natures = {
   inconnue: "Inconnue",
 };
 
-const headerTitle = {
-  pilot: "Les organismes sur mon territoire",
-  erp: "Les organismes connectés de mon erp",
-  of: "Mes organismes",
-  reseau_of: "Les organismes de mon réseau",
-  global: "Tous les organismes",
-};
+function getHeaderTitleFromOrganisationType(type) {
+  switch (type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_REPONSABLE":
+    case "ORGANISME_FORMATION_REPONSABLE_FORMATEUR":
+      return "Mes organismes";
+
+    case "TETE_DE_RESEAU":
+      return "Les organismes de mon réseau";
+
+    case "DREETS":
+    case "DEETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+      return "Les organismes sur mon territoire";
+
+    case "DGEFP":
+    case "ADMINISTRATEUR":
+      return "Tous les organismes";
+
+    default:
+      throw new Error(`Type '${type}' inconnu`);
+  }
+}
 
 function useEspaceOrganismes() {
   const {
@@ -45,7 +64,7 @@ function MesOrganismes() {
   const title = "Mes organismes";
   const { isLoading, organismes } = useEspaceOrganismes();
 
-  const { whoIs } = useEspace();
+  const { organisationType } = useEspace();
 
   const [searchValue, setSearchValue] = useState("");
 
@@ -58,7 +77,7 @@ function MesOrganismes() {
         <Container maxW="xl">
           <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
-            {headerTitle[whoIs ?? "global"]}
+            {getHeaderTitleFromOrganisationType(organisationType)}
           </Heading>
 
           {isLoading && !organismes && (

@@ -1,7 +1,6 @@
 import logger from "../../../common/logger.js";
 import { createUser, getUserByEmail } from "../../../common/actions/users.actions.js";
 import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
-import { createRole, findRoleByName } from "../../../common/actions/roles.actions.js";
 import {
   addContributeurOrganisme,
   createOrganisme,
@@ -10,17 +9,6 @@ import {
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { createUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
-
-export const seedRoles = async () => {
-  for (const key of Object.keys(defaultRolesAcls)) {
-    if (!(await findRoleByName(defaultRolesAcls[key].name))) {
-      await createRole(defaultRolesAcls[key]);
-      logger.info(`Role ${key} created`);
-    } else {
-      logger.info(`Role ${key} already existant`);
-    }
-  }
-};
 
 export const seedAdmin = async ({ adminEmail }) => {
   // Create user Admin
@@ -150,8 +138,6 @@ const seedSampleOrganismes = async () => {
 
 const seedSampleUsers = async () => {
   // Création des roles si nécessaire
-  await seedRoles();
-
   // Create user Pilot
   if (!(await getUserByEmail("pilot@test.fr"))) {
     const userPilot = await createUser(

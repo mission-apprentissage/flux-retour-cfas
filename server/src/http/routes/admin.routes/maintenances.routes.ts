@@ -1,3 +1,4 @@
+import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import express from "express";
 import Joi from "joi";
 import {
@@ -5,17 +6,19 @@ import {
   updateMaintenanceMessage,
   removeMaintenanceMessage,
 } from "../../../common/actions/maintenances.actions.js";
+import { requireAdministrator } from "../../middlewares/helpers.js";
 
 export default () => {
   const router = express.Router();
 
-  router.post("/", async ({ body, user }, res) => {
-    let { msg, type, enabled, context } = await Joi.object({
+  router.post("/", async (req, res) => {
+    requireAdministrator(req);
+    const { msg, type, enabled, context } = await validateFullObjectSchema(req.body, {
       msg: Joi.string().required(),
       type: Joi.string().required(),
       enabled: Joi.boolean().required(),
       context: Joi.string().required(),
-    }).validateAsync(body, { abortEarly: false });
+    });
 
     if (!msg || enabled === undefined) {
       return res.status(400).send({ error: "Erreur avec le message ou enabled" });
@@ -23,7 +26,7 @@ export default () => {
     const newMaintenanceMessage = await createMaintenanceMessage({
       type,
       context,
-      name: user.email,
+      name: req.user.email,
       // TODO quick bypass https://github.com/coreruleset/coreruleset/blob/v4.1/dev/rules/REQUEST-949-BLOCKING-EVALUATION.conf
       msg: msg.replace(/(\[.*?\])\(##(.*?)\)/gim, "$1($2)"),
       enabled,

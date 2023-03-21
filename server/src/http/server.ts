@@ -4,29 +4,25 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
-
+import Boom from "boom";
+Boom.unauthorized();
 import { apiRoles } from "../common/roles.js";
 
 import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
-import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
+import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
-import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
 import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes.js";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
-import loginRouter from "./routes/specific.routes/old/login.route.js";
-import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
-import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
 import serverEvents from "./routes/specific.routes/server-events.routes.js";
 
 import emails from "./routes/emails.routes.js";
-import session from "./routes/session.routes.js";
 
 import auth from "./routes/user.routes/auth.routes.js";
 import register from "./routes/user.routes/register.routes.js";
@@ -35,16 +31,13 @@ import profile from "./routes/user.routes/profile.routes.js";
 
 import organisme from "./routes/specific.routes/organisme.routes.js";
 import effectif from "./routes/specific.routes/effectif.routes.js";
-import espace from "./routes/specific.routes/espace.routes.js";
 import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import organismesAdmin from "./routes/admin.routes/organismes.routes.js";
 import statsAdmin from "./routes/admin.routes/stats.routes.js";
-import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import config from "../config.js";
-import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
 
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
@@ -53,6 +46,17 @@ import { jobEventsDb } from "../common/model/collections.js";
 import { packageJson } from "../common/utils/esmUtils.js";
 import logger from "../common/logger.js";
 import { findMaintenanceMessages } from "../common/actions/maintenances.actions.js";
+import { findUserOrganismes } from "../common/actions/organismes/organismes.actions.js";
+import { validateFullObjectSchema } from "../common/utils/validationUtils.js";
+import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
+import Joi from "joi";
+import { RESEAUX_CFAS } from "../common/constants/networksConstants.js";
+import { ORGANISMES_APPARTENANCE } from "../common/constants/usersConstants.js";
+import { authenticateLegacy } from "../common/actions/legacy/users.legacy.actions.js";
+import { createUserToken } from "../common/utils/jwtUtils.js";
+import { createUserEvent } from "../common/actions/userEvents.actions.js";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../common/constants/userEventsConstants.js";
+import { updateUserLastConnection, structureUser } from "../common/actions/users.actions.js";
 
 /**
  * Create the express app
@@ -140,9 +144,22 @@ export default async (services) => {
   );
 
   // private access
-  app.use("/api/v1/session", checkJwtToken, session());
+  app.get(
+    "/api/v1/session/current",
+    checkJwtToken,
+    returnResult(async (req) => {
+      return req.user;
+    })
+  );
   app.use("/api/v1/profile", checkJwtToken, profile());
-  app.use("/api/v1/espace", checkJwtToken, espace());
+
+  app.get(
+    "/api/v1/espace/organismes",
+    checkJwtToken,
+    returnResult(async (req) => {
+      return findUserOrganismes(req.user);
+    })
+  );
   app.use("/api/v1/organisme", checkJwtToken, organisme(services));
   app.use("/api/v1/effectif", checkJwtToken, effectif());
   app.use("/api/v1/upload", checkJwtToken, upload(services));
@@ -152,21 +169,15 @@ export default async (services) => {
   app.use(
     "/api/v1/admin",
     checkJwtToken,
-    pageAccessMiddleware(["admin/page_gestion_utilisateurs"]),
+    // pageAccessMiddleware(["admin/page_gestion_utilisateurs"]),
     usersAdmin(services)
   );
-  app.use("/api/v1/admin", checkJwtToken, pageAccessMiddleware(["admin/page_gestion_organismes"]), organismesAdmin());
-  app.use("/api/v1/admin", checkJwtToken, pageAccessMiddleware(["admin/page_gestion_organismes"]), statsAdmin());
-  app.use(
-    "/api/v1/admin",
-    checkJwtToken,
-    pageAccessMiddleware(["admin/page_gestion_utilisateurs", "admin/page_gestion_roles"]),
-    rolesAdmin()
-  );
+  app.use("/api/v1/admin", checkJwtToken, organismesAdmin());
+  app.use("/api/v1/admin", checkJwtToken, statsAdmin());
   app.use(
     "/api/v1/admin/maintenanceMessages",
     checkJwtToken,
-    pageAccessMiddleware(["admin/page_message_maintenance"]),
+    // pageAccessMiddleware(["admin/page_message_maintenance"]),
     maintenancesAdmin()
   );
 
@@ -175,7 +186,7 @@ export default async (services) => {
     // FRONT
     ["/api/indicateurs"],
     checkJwtToken,
-    indicateursPermissions(),
+    // indicateursPermissions(),
     indicateursRouter()
   );
 
@@ -185,12 +196,23 @@ export default async (services) => {
     // FRONT
     "/api/v1/indicateurs-export",
     checkJwtToken,
-    indicateursPermissions(),
+    // indicateursPermissions(),
     indicateursExportRouter()
   );
 
   // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
-  app.use("/api/login", loginRouter());
+  app.post(
+    "/api/login",
+    returnResult(async (req) => {
+      const { username, password } = req.body;
+      const authenticatedUser = await authenticateLegacy(username, password);
+      if (!authenticatedUser) {
+        throw Boom.unauthorized();
+      }
+      await createUserEvent({ username, type: USER_EVENTS_TYPES.POST, action: USER_EVENTS_ACTIONS.LOGIN });
+      return { access_token: createUserToken(authenticatedUser) };
+    })
+  );
 
   app.use(
     [
@@ -198,7 +220,7 @@ export default async (services) => {
       "/api/dossiers-apprenants",
     ],
     requireJwtAuthenticationMiddleware(),
-    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
     dossierApprenantRouter()
   );
 
@@ -208,8 +230,52 @@ export default async (services) => {
     organismesRouter()
   ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
 
-  app.use("/api/formations", formationRouter()); // FRONT
-  app.use("/api/referentiel", referentielRouter()); // FRONT
+  /*
+   * formations
+   */
+  const formationsSearchSchema = {
+    searchTerm: Joi.string().min(3),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
+  };
+  app.post(
+    "/api/formations/search",
+    returnResult(async (req) => {
+      const formationSearch = await validateFullObjectSchema(req.body, formationsSearchSchema);
+      return await searchFormations(formationSearch);
+    })
+  );
+
+  app.get(
+    "/api/formations/:cfd",
+    returnResult(async (req) => {
+      return await getFormationWithCfd(req.params.cfd);
+    })
+  );
+
+  /*
+   * referentiel
+   */
+  app.get(
+    "/api/referentiel/networks",
+    returnResult(() => {
+      // TODO : TMP on ne renvoie que les réseaux fiabilisés pour l'instant - débloquer le reste quand ce sera fiable
+      const RESEAUX_CFAS_INVALID = ["ANASUP", "GRETA_VAUCLUSE", "BTP_CFA"];
+      const networks = Object.keys(RESEAUX_CFAS)
+        .filter((item) => !RESEAUX_CFAS_INVALID.includes(item))
+        .map((id) => ({ id, nom: RESEAUX_CFAS[id].nomReseau }));
+      return networks;
+    })
+  );
+
+  app.get(
+    "/api/referentiel/organismes-appartenance",
+    returnResult(() => {
+      const organismes = Object.keys(ORGANISMES_APPARTENANCE).map((id) => ({ id, nom: ORGANISMES_APPARTENANCE[id] }));
+      return organismes;
+    })
+  );
 
   // The error handler must be before any other error middleware and after all controllers
   app.use(Sentry.Handlers.errorHandler());

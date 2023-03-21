@@ -6,7 +6,7 @@ import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
 import { schema } from "../../../common/model/effectifs.model/effectifs.model.js";
 import { effectifsDb } from "../../../common/model/collections.js";
 import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
-import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
+// import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
@@ -129,20 +129,24 @@ export default () => {
     };
   };
 
-  router.get("/:id", permissionsOrganismeMiddleware(["organisme/page_effectifs"]), async ({ params }, res) => {
-    let { id } = await Joi.object({
-      id: Joi.string().required(),
-    })
-      .unknown()
-      .validateAsync(params, { abortEarly: false });
+  router.get(
+    "/:id",
+    //permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    async ({ params }, res) => {
+      let { id } = await Joi.object({
+        id: Joi.string().required(),
+      })
+        .unknown()
+        .validateAsync(params, { abortEarly: false });
 
-    const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
-    return res.json(buildEffectifResult(effectif));
-  });
+      const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
+      return res.json(buildEffectifResult(effectif));
+    }
+  );
 
   router.get(
     "/:id/snapshot",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
     async ({ params, query }, res) => {
       let { id, organisme_id } = await Joi.object({
         id: Joi.string().required(),
@@ -165,7 +169,7 @@ export default () => {
 
   router.post(
     "/",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/ajout_apprenant"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/ajout_apprenant"]),
     async ({ body }, res) => {
       const { organisme_id, annee_scolaire, source, apprenant, formation } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -212,7 +216,7 @@ export default () => {
 
   router.put(
     "/:id",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/edition"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs/edition"]),
     async ({ body, params }, res) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)
@@ -275,7 +279,7 @@ export default () => {
 
   router.post(
     "/recherche-siret",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
     async ({ body }, res) => {
       // TODO organismeFormation
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -292,30 +296,34 @@ export default () => {
     }
   );
 
-  router.post("/recherche-uai", permissionsOrganismeMiddleware(["organisme/page_effectifs"]), async ({ body }, res) => {
-    const { uai: userUai } = await Joi.object({
-      uai: Joi.string(),
-    })
-      .unknown()
-      .validateAsync(body, { abortEarly: false });
+  router.post(
+    "/recherche-uai",
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    async ({ body }, res) => {
+      const { uai: userUai } = await Joi.object({
+        uai: Joi.string(),
+      })
+        .unknown()
+        .validateAsync(body, { abortEarly: false });
 
-    let uai = null;
-    if (userUai) {
-      if (!algoUAI(userUai)) return res.json({ uai, error: `L'UAI ${userUai} n'est pas valide` });
-      uai = userUai;
+      let uai = null;
+      if (userUai) {
+        if (!algoUAI(userUai)) return res.json({ uai, error: `L'UAI ${userUai} n'est pas valide` });
+        uai = userUai;
+      }
+
+      // if (uai) {
+      //   const { organismes: organismesResp } = await fetchOrganismesWithUai(uai);
+      //   if (!organismesResp.length) return res.json({ uai, error: `L'uai ${uai} n'a pas été retrouvé` });
+      // }
+
+      return res.json({ uai });
     }
-
-    // if (uai) {
-    //   const { organismes: organismesResp } = await fetchOrganismesWithUai(uai);
-    //   if (!organismesResp.length) return res.json({ uai, error: `L'uai ${uai} n'a pas été retrouvé` });
-    // }
-
-    return res.json({ uai });
-  });
+  );
 
   router.post(
     "/recherche-code-postal",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
     async ({ body }, res) => {
       const { codePostal } = await Joi.object({
         codePostal: Joi.string().pattern(new RegExp("^[0-9]{5}$")),

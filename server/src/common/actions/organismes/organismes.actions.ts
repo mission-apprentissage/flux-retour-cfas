@@ -1,14 +1,12 @@
 import { ObjectId } from "mongodb";
 
 import { getMetiersBySiret } from "../../apis/apiLba.js";
-import { organismesDb, effectifsDb, permissionsDb, dossiersApprenantsMigrationDb } from "../../model/collections.js";
+import { organismesDb, effectifsDb, dossiersApprenantsMigrationDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
 import { siretSchema } from "../../utils/validationUtils.js";
-import { createPermission, removePermissions } from "../permissions.actions.js";
-import { structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
 import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
@@ -314,12 +312,12 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, roleName
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  await createPermission({
-    organisme_id: organisme._id as any,
-    userEmail: userEmail.toLowerCase(),
-    roleName,
-    pending,
-  });
+  // await createPermission({
+  //   organisme_id: organisme._id as any,
+  //   userEmail: userEmail.toLowerCase(),
+  //   roleName,
+  //   pending,
+  // });
 };
 
 /**
@@ -337,7 +335,7 @@ export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  await removePermissions({ organisme_id: organisme._id, userEmail });
+  // await removePermissions({ organisme_id: organisme._id, userEmail });
 };
 
 /**
@@ -355,38 +353,38 @@ export const getContributeurs = async (organismeId) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  const permissionsWithUserAndRole = await permissionsDb()
-    .aggregate([
-      { $match: { organisme_id: organisme._id } },
-      // lookup user
-      {
-        $lookup: {
-          from: "usersMigration",
-          localField: "userEmail",
-          foreignField: "email",
-          as: "user",
-        },
-      },
-      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
-      // lookup role
-      {
-        $lookup: {
-          from: "roles",
-          localField: "role",
-          foreignField: "_id",
-          as: "role",
-        },
-      },
-      { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
-    ])
-    .toArray();
+  // const permissionsWithUserAndRole = await permissionsDb()
+  //   .aggregate([
+  //     { $match: { organisme_id: organisme._id } },
+  //     // lookup user
+  //     {
+  //       $lookup: {
+  //         from: "usersMigration",
+  //         localField: "userEmail",
+  //         foreignField: "email",
+  //         as: "user",
+  //       },
+  //     },
+  //     { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+  //     // lookup role
+  //     {
+  //       $lookup: {
+  //         from: "roles",
+  //         localField: "role",
+  //         foreignField: "_id",
+  //         as: "role",
+  //       },
+  //     },
+  //     { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
+  //   ])
+  //   .toArray();
 
-  return Promise.all(
-    permissionsWithUserAndRole.map(async (perm) => ({
-      ...perm,
-      user: perm.user ? await structureUser(perm.user) : null,
-    }))
-  );
+  // return Promise.all(
+  //   permissionsWithUserAndRole.map(async (perm) => ({
+  //     ...perm,
+  //     user: perm.user ? await structureUser(perm.user) : null,
+  //   }))
+  // );
 };
 
 /**
@@ -421,12 +419,17 @@ export const getSousEtablissementsForUai = async (uai) => {
     .toArray();
 };
 
+export type OrganismesSearch = {
+  searchTerm: string;
+  etablissement_num_region: string;
+  etablissement_num_departement: string;
+  etablissement_reseaux: string;
+};
+
 /**
  * Retourne la liste des organismes correspondant aux critères de recherche
- * @param {import("./organismes.actions-struct.js").OrganismesSearch} searchCriteria
- * @return {Promise<{ uai: string; nom: string; }[]>} Array of CFA information
  */
-export const searchOrganismes = async (searchCriteria) => {
+export const searchOrganismes = async (searchCriteria: OrganismesSearch) => {
   const matchStage: any = {};
   if (searchCriteria.searchTerm) {
     matchStage.$or = [
@@ -651,3 +654,42 @@ export const getStatOrganismes = async () => {
 
   return stats;
 };
+
+export async function findUserOrganismes(user) {
+  // const query = !user.organisme_ids.length
+  //   ? {}
+  //   : { _id: { $in: user.organisme_ids.filter((id) => id.toString() !== user.main_organisme_id?.toString()) } };
+  // FIXME filtrer selon type d'organisation
+  const organismes = await organismesDb()
+    .find(
+      {},
+      {
+        projection: {
+          _id: 1,
+          nom: 1,
+          enseigne: 1,
+          raison_sociale: 1,
+          ferme: 1,
+          nature: 1,
+          adresse: 1,
+          siret: 1,
+          uai: 1,
+          first_transmission_date: 1,
+          last_transmission_date: 1,
+          fiabilisation_statut: 1,
+        },
+      }
+    )
+    .toArray();
+
+  return organismes.map((organisme) => ({
+    ...organisme,
+    nomOrga: organisme.enseigne || organisme.raison_sociale,
+  }));
+}
+
+export async function getOrganisme(organismeId: string) {
+  // TODO check permissions
+  const found = await organismesDb().findOne({ _id: new ObjectId(organismeId) });
+  return found;
+}

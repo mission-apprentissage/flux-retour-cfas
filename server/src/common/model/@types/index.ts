@@ -5,6 +5,7 @@ export { Formation } from "./Formation.js";
 export { JobEvent } from "./JobEvent.js";
 export { JwtSession } from "./JwtSession.js";
 export { MaintenanceMessage } from "./MaintenanceMessage.js";
+// FIXME ajouter le type de l'organisation
 export { Organisme } from "./Organisme.js";
 export { OrganismesReferentiel } from "./OrganismesReferentiel.js";
 export { Permission } from "./Permission.js";

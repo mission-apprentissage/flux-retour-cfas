@@ -1,8 +1,73 @@
 import { date, object, objectId, string } from "./json-schema/jsonSchemaTypes.js";
 import { RESEAUX_CFAS } from "../constants/networksConstants.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature.js";
 import { REGIONS, DEPARTEMENTS, ACADEMIES } from "../constants/territoiresConstants.js";
-import { ORGANISMES_APPARTENANCE } from "../constants/usersConstants.js";
+import { WithId } from "mongodb";
+
+export const organisationTypes = [
+  "ORGANISME_FORMATION_FORMATEUR",
+  "ORGANISME_FORMATION_REPONSABLE",
+  "ORGANISME_FORMATION_REPONSABLE_FORMATEUR",
+  "TETE_DE_RESEAU",
+  "DGEFP",
+  "DREETS",
+  "DEETS",
+  "DRAAF",
+  "CONSEIL_REGIONAL",
+  "DDETS",
+  "ACADEMIE",
+  "ADMINISTRATEUR",
+] as const;
+
+export type Organisation = WithId<
+  | OrganisationOrganismeFormation
+  | OrganisationTeteReseau
+  | OrganisationOperateurPublicRegion
+  | OrganisationOperateurPublicDepartement
+  | OrganisationOperateurPublicAcademie
+  | OrganisationOperateurPublicNational
+  | OrganisationAdministrateur
+>;
+
+interface AbstractOrganisation {
+  type: typeof organisationTypes[number];
+  created_at: Date;
+}
+
+// OFRF, OFR, OFF
+export interface OrganisationOrganismeFormation extends AbstractOrganisation {
+  type: "ORGANISME_FORMATION_FORMATEUR" | "ORGANISME_FORMATION_REPONSABLE" | "ORGANISME_FORMATION_REPONSABLE_FORMATEUR";
+  siret: string;
+  uai: string;
+  nature: string;
+}
+
+export interface OrganisationTeteReseau extends AbstractOrganisation {
+  type: "TETE_DE_RESEAU";
+  reseau: string;
+}
+
+export interface OrganisationOperateurPublicNational extends AbstractOrganisation {
+  type: "DGEFP";
+}
+
+export interface OrganisationOperateurPublicRegion extends AbstractOrganisation {
+  type: "DREETS" | "DEETS" | "DRAAF" | "CONSEIL_REGIONAL";
+  code_region: string;
+}
+
+export interface OrganisationOperateurPublicDepartement extends AbstractOrganisation {
+  type: "DDETS";
+  code_departement: string;
+}
+
+export interface OrganisationOperateurPublicAcademie extends AbstractOrganisation {
+  type: "ACADEMIE";
+  code_academie: string;
+}
+
+export interface OrganisationAdministrateur extends AbstractOrganisation {
+  type: "ADMINISTRATEUR";
+}
 
 const collectionName = "organisations";
 
@@ -16,8 +81,8 @@ const schema = object(
     _id: objectId(),
 
     type: string({
-      description: "Type d'organisation (exemple DREETS, OF, etc)",
-      enum: Object.keys(ORGANISMES_APPARTENANCE),
+      description: "Type d'organisation (exemple DREETS, ACADEMIE, etc)",
+      enum: organisationTypes,
     }),
 
     // si OFRF, OFR, OFF
@@ -27,10 +92,6 @@ const schema = object(
       pattern: "^[0-9]{7}[a-zA-Z]$",
       maxLength: 8,
       minLength: 8,
-    }),
-    nature: string({
-      description: "Nature de l'organisme de formation",
-      enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
     }),
 
     // si tête de réseau

@@ -4,17 +4,9 @@ import {
   findOrganismeByUai,
   findOrganismesByQuery,
 } from "./organismes/organismes.actions.js";
-import {
-  createPermission,
-  findActivePermissionsByRoleName,
-  hasAtLeastOneContributeurNotPending,
-} from "./permissions.actions.js";
 import { updateMainOrganismeUser } from "./users.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/natureOrganismeConstants.js";
 import { uniq } from "lodash-es";
-import { permissionsDb } from "../model/collections.js";
-import { getRoleByName } from "./roles.actions.js";
-import { defaultValuesPermission, validatePermission } from "../model/permissions.model.js";
 
 /**
  * Méthode d'ajouts des permissions en fonction de l'utilisateur
@@ -46,12 +38,12 @@ export const createUserPermissions = async ({
   if (is_cross_organismes) {
     if (!codes_region.length && !codes_academie.length && !codes_departement.length) {
       // user is cross_organismes and Non scoped = National ("Tranverse viewer")
-      await createPermission({
-        organisme_id: null,
-        userEmail,
-        roleName: "organisme.admin",
-        pending: false,
-      });
+      // await createPermission({
+      //   organisme_id: null,
+      //   userEmail,
+      //   roleName: "organisme.admin",
+      //   pending: false,
+      // });
     } else {
       // user is cross_organismes and scoped
       let queryScoped: any = null;
@@ -128,8 +120,8 @@ export const createUserPermissions = async ({
         }
       };
 
-      const isOrganismeAdmin = await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin");
-
+      // const isOrganismeAdmin = await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin");
+      const isOrganismeAdmin = true;
       await giveAccessToSubOrganismes(organisme);
 
       if (!isOrganismeAdmin && asRole === "organisme.admin") {
@@ -163,46 +155,19 @@ export const createUserPermissions = async ({
               "validation_first_organisme_user_by_tdb_team"
             ); // Notif TDB_admin or whatever who
           } else {
-            const usersToNotify = (
-              await findActivePermissionsByRoleName(organisme._id, "organisme.admin", { userEmail: 1 })
-            ).map(({ userEmail }) => userEmail);
-            for (const userToNotify of usersToNotify) {
-              await mailer.sendEmail(
-                { to: userToNotify, payload: { user, organisme, type: accessType[asRole] } },
-                "validation_user_by_orga_admin"
-              );
-            }
+            // FIXME
+            // const usersToNotify = (
+            //   await findActivePermissionsByRoleName(organisme._id, "organisme.admin", { userEmail: 1 })
+            // ).map(({ userEmail }) => userEmail);
+            // for (const userToNotify of usersToNotify) {
+            //   await mailer.sendEmail(
+            //     { to: userToNotify, payload: { user, organisme, type: accessType[asRole] } },
+            //     "validation_user_by_orga_admin"
+            //   );
+            // }
           }
         }
       }
     }
-  }
-};
-
-/**
- * Met à jour la permission `organisme.admin` d'un utilisateur selon qu'il est admin ou non.
- *
- * @param {*} user
- * @returns
- */
-export const refreshUserPermissions = async (user) => {
-  const adminRole = await getRoleByName("organisme.admin");
-
-  if (user.is_admin) {
-    await permissionsDb().insertOne(
-      validatePermission({
-        ...defaultValuesPermission(),
-        organisme_id: null,
-        userEmail: user.email.toLowerCase(),
-        role: adminRole._id,
-        pending: false,
-      })
-    );
-  } else {
-    await permissionsDb().deleteOne({
-      organisme_id: null,
-      userEmail: user.email,
-      role: adminRole._id,
-    });
   }
 };

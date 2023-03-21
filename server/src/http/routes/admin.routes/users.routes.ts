@@ -11,9 +11,6 @@ import {
   removeUser,
   updateUser,
 } from "../../../common/actions/users.actions.js";
-import { findRolesByNames } from "../../../common/actions/roles.actions.js";
-import { updatePermissionsPending, removePermissions } from "../../../common/actions/permissions.actions.js";
-import { refreshUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 import paginationShema from "../../../common/validation/paginationSchema.js";
 import searchShema from "../../../common/validation/searchSchema.js";
 import objectIdSchema from "../../../common/validation/objectIdSchema.js";
@@ -63,10 +60,10 @@ export default ({ mailer }) => {
     }
 
     if (validate) {
-      await updatePermissionsPending({ userEmail, organisme_id: organisme?._id, pending: false });
+      // await updatePermissionsPending({ userEmail, organisme_id: organisme?._id, pending: false });
       await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_granted");
     } else {
-      await removePermissions({ organisme_id: organisme?._id, userEmail });
+      // await removePermissions({ organisme_id: organisme?._id, userEmail });
       await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_rejected");
     }
     return res.json({ ok: true });
@@ -84,7 +81,6 @@ export default ({ mailer }) => {
         throw Boom.conflict(`Unable to create, user ${email} already exists`);
       }
       const user = await createUser({ email, password }, data);
-      await refreshUserPermissions(user);
       try {
         await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
         return res.json(user);
@@ -105,14 +101,12 @@ export default ({ mailer }) => {
     async ({ body, params }, res) => {
       const { id } = params;
 
-      const rolesId = (await findRolesByNames(body.roles, { _id: 1 })).map(({ _id }) => _id);
-
+      // FIXME : mise à jour de l'organisation ?
       await updateUser(id, {
         is_admin: body.is_admin,
         email: body.email,
         prenom: body.prenom,
         nom: body.nom,
-        roles: rolesId,
         invalided_token: true,
       });
       const user = await getDetailedUserById(id);
@@ -120,7 +114,7 @@ export default ({ mailer }) => {
         throw Boom.notFound(`User with id ${id} not found`);
       }
 
-      refreshUserPermissions(user);
+      // refreshUserPermissions(user);
 
       res.json({ ok: true, message: `User ${id} updated !` });
     }

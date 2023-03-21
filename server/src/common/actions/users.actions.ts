@@ -1,14 +1,12 @@
 import { addHours } from "date-fns";
-import { uniq } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
 
 import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
-import { rolesDb, usersMigrationDb } from "../model/collections.js";
+import { usersMigrationDb } from "../model/collections.js";
 import { defaultValuesUser, validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { passwordSchema } from "../utils/validationUtils.js";
-import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } from "./permissions.actions.js";
 
 /**
  * Méthode de création d'un utilisateur
@@ -21,85 +19,26 @@ import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } fro
  * @param {string} [options.nom] - Nom
  * @param {string} [options.prenom] - Prenom
  * @param {string} [options.telephone] - Telephone
- * @param {string} [options.siret] - Siret
- * @param {string} [options.uai] - Uai
- * @param {string} [options.organisation] - Organisation
- * @param {string[]} [options.roles] - Roles
- * @param {string} [options.description] - Description
- * @param {string} [options.reseau] - Reseau
- * @param {string} [options.erp] - Erp
- * @param {string[]} [options.codes_region] - Codes region
- * @param {string[]} [options.codes_academie] - Codes academie
- * @param {string[]} [options.codes_departement] - Codes departement
- * @param {boolean} [options.is_admin] - Is an admin
- * @param {boolean} [options.is_cross_organismes] - Is cross organismes
- * @param {string} [options.account_status] - account status
  */
 export const createUser = async ({ email, password }, options: any = {}): Promise<WithId<any>> => {
   const passwordHash = hashUtil(password);
-  const {
-    civility,
-    nom,
-    prenom,
-    telephone,
-    siret,
-    uai,
-    organisation,
-    roles,
-    description,
-    reseau,
-    erp,
-    codes_region,
-    codes_academie,
-    codes_departement,
-    is_admin,
-    is_cross_organismes,
-  } = options || {};
-
-  // bypass profile completion for admins
-  const account_status = is_admin
-    ? options.account_status || USER_ACCOUNT_STATUS.DIRECT_PENDING_PASSWORD_SETUP
-    : options.account_status;
-
-  let rolesMatchIds: any[] = [];
-  if (roles && roles.length > 0) {
-    rolesMatchIds = (
-      await rolesDb()
-        .find({ name: { $in: roles } }, { projection: { _id: 1 } })
-        .toArray()
-    ).map(({ _id }) => _id);
-
-    if (rolesMatchIds.length === 0) {
-      throw new Error(`Roles ${roles.join(",")} don't exist`);
-    }
-  }
+  const { civility, nom, prenom, telephone } = options || {};
 
   // Vérification de l'existence de l'email - même si on a un index unique
   const existingUserEmail = await usersMigrationDb().findOne({ email });
-  if (existingUserEmail) throw new Error("User with this email already exists");
+  if (existingUserEmail) {
+    throw new Error("User with this email already exists");
+  }
 
   const { insertedId } = await usersMigrationDb().insertOne(
     validateUser({
       ...defaultValuesUser(),
       email: email.toLowerCase(),
       password: passwordHash,
-      is_admin: !!is_admin,
-      is_cross_organismes: is_cross_organismes !== undefined ? !!is_cross_organismes : !!is_admin,
       ...(civility ? { civility } : {}),
       ...(nom ? { nom } : {}),
       ...(prenom ? { prenom } : {}),
       ...(telephone ? { telephone } : {}),
-      ...(siret ? { siret } : {}),
-      ...(uai ? { uai } : {}),
-      ...(account_status ? { account_status } : {}),
-      ...(roles ? { roles: rolesMatchIds } : {}),
-      ...(description ? { description } : {}),
-      ...(organisation ? { organisation } : {}),
-      ...(reseau ? { reseau } : {}),
-      ...(erp ? { erp } : {}),
-      ...(codes_region ? { codes_region } : {}),
-      ...(codes_academie ? { codes_academie } : {}),
-      ...(codes_departement ? { codes_departement } : {}),
     })
   );
 
@@ -306,7 +245,6 @@ export const updateUser = async (_id, data) => {
     {
       $set: validateUser({
         email: user.email,
-        is_cross_organismes: user.is_cross_organismes,
         ...data,
       }),
     },
@@ -345,51 +283,15 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
 };
 
 export const structureUser = async (user) => {
-  const rolesList: WithId<any>[] = user.roles?.length
-    ? await rolesDb()
-        .find({ _id: { $in: user.roles } })
-        .toArray()
-    : [];
-  const rolesAcl = rolesList.reduce((acc, { acl }) => [...acc, ...acl], []);
-
-  const activePermissions = await findActivePermissionsForUser({ userEmail: user.email }, { organisme_id: 1, _id: 0 });
-  const organisme_ids = activePermissions.map(({ organisme_id }) => organisme_id).filter((v) => !!v);
-
-  const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
-  const isInPendingValidation = !organisme_ids.length && !activePermissions.length;
-  const isOrganismeAdmin = user.main_organisme_id
-    ? await hasAtLeastOneContributeurNotPending(user.main_organisme_id, "organisme.admin")
-    : false;
-
-  let specialAcl: any[] = [];
-  if (!hasAccessToOnlyOneOrganisme || user.is_cross_organismes || user.is_admin) {
-    specialAcl = ["page/mes-organismes"];
-  }
-
   return {
-    organisme_ids,
-    main_organisme_id: user.main_organisme_id,
-    is_admin: user.is_admin,
-    is_cross_organismes: user.is_cross_organismes || user.is_admin,
-    isInPendingValidation,
-    isOrganismeAdmin,
+    _id: user._id,
+    organisation_id: user.organisation_id,
     email: user.email,
     civility: user.civility,
     nom: user.nom,
     prenom: user.prenom,
     telephone: user.telephone,
-    siret: user.siret,
-    uai: user.uai,
-    description: user.description,
-    organisation: user.organisation,
-    reseau: user?.reseau,
-    erp: user?.erp,
-    codes_region: user.codes_region, // TODO [tech] send full regions
-    codes_academie: user.codes_academie, // TODO [tech] send full académie
-    codes_departement: user.codes_departement, // TODO [tech] send full department
     account_status: user.account_status,
-    roles: rolesList.map(({ name }) => name),
-    acl: uniq([...rolesAcl, ...specialAcl]),
     has_accept_cgu_version: user.has_accept_cgu_version,
   };
 };

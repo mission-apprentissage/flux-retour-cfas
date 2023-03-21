@@ -1,3 +1,8 @@
+import Boom from "boom";
+import { Request } from "express";
+
+import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
+
 // catch errors and return the result of the request handler
 export function returnResult(serviceFunc) {
   return async (req, res, next) => {
@@ -16,5 +21,26 @@ export async function tryCachedExecution(cache, cacheKey, serviceFunc) {
     const result = await serviceFunc();
     await cache.set(cacheKey, JSON.stringify(result));
     return result;
+  }
+}
+
+export function indicateursPermissions() {
+  return async (req, _, next) => {
+    ensureValidUser(req.user);
+    next();
+  };
+}
+
+// helpers
+export function ensureValidUser(user) {
+  if (user.account_status !== USER_ACCOUNT_STATUS.CONFIRMED) {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+}
+
+export function requireAdministrator(req: Request) {
+  ensureValidUser(req.user);
+  if (req.user.organisation.type !== "ADMINISTRATEUR") {
+    throw Boom.forbidden("Accès non autorisé");
   }
 }

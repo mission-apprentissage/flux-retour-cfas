@@ -36,10 +36,8 @@ const UserMenu = () => {
   const router = useRouter();
 
   let logout = async () => {
-    const { loggedOut } = await _get("/api/v1/auth/logout");
-    if (loggedOut) {
-      window.location.href = "/";
-    }
+    await _get("/api/v1/auth/logout");
+    window.location.href = "/";
   };
 
   const myWks =
