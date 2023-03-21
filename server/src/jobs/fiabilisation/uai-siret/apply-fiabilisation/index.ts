@@ -79,7 +79,7 @@ export const applyFiabilisationUaiSiret = async () => {
 };
 
 /**
- * Méthode maj des statuts de fiabilisation à FIABLE pour les organismes avec UAI & présents dans le référentiel
+ * Méthode maj des statuts de fiabilisation FIABLE pour les organismes avec UAI & présents dans le référentiel
  */
 const updateOrganismesReferentielFiables = async () => {
   logger.info("Identification des organismes du référentiel comme fiables ...");
@@ -92,7 +92,7 @@ const updateOrganismesReferentielFiables = async () => {
 };
 
 /**
- * Méthode maj des statuts de fiabilisation à FIABLE pour les organismes avec UAI & présents dans le référentiel
+ * Méthode maj des statuts de fiabilisation FIABLE pour les organismes liés à des couples fiables
  */
 const updateOrganismesCouplesFiables = async () => {
   logger.info("Identification des organismes liés à des couples fiables ...");
