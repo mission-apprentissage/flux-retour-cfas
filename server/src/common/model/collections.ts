@@ -34,6 +34,7 @@ import {
   UsersMigration,
 } from "./@types";
 import { EffectifsQueue } from "./@types/EffectifsQueue.js";
+import organisationsModelDescriptor from "./organisations.model.js";
 
 export const modelDescriptors: { schema?: any; indexes?: any[][]; collectionName: string }[] = [
   usersModelDescriptor,
@@ -44,6 +45,7 @@ export const modelDescriptors: { schema?: any; indexes?: any[][]; collectionName
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
   MaintenanceMessagesModelDescriptor,
+  organisationsModelDescriptor,
   RolesModelDescriptor,
   PermissionsDescriptor,
   OrganismesModelDescriptor,
