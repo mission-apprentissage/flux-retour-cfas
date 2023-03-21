@@ -617,7 +617,11 @@ export const getDetailedOrganismeById = async (_id) => {
  */
 export const updateEffectifsCount = async (organisme_id) => {
   const total = await effectifsDb().count({ organisme_id });
-  return organismesDb().findOneAndUpdate({ _id: organisme_id }, { $set: { effectifs_count: total } });
+  return organismesDb().findOneAndUpdate(
+    { _id: organisme_id },
+    { $set: { effectifs_count: total } },
+    { bypassDocumentValidation: true }
+  );
 };
 
 /**
