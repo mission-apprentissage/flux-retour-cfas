@@ -1,6 +1,8 @@
 import { strict as assert } from "assert";
-import { createRandomOrganisme } from "../../../data/randomizedSample.js";
 import pick from "lodash.pick";
+import { subDays } from "date-fns";
+
+import { createRandomOrganisme } from "../../../data/randomizedSample.js";
 import {
   createOrganisme,
   findOrganismeById,
@@ -15,7 +17,6 @@ import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../src/common/c
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/natureOrganismeConstants.js";
 import { SAMPLES_ETABLISSEMENTS_API_ENTREPRISE } from "../../../data/entreprise.api.gouv.fr/sampleDataApiEntreprise.js";
 import { DEPARTEMENTS } from "../../../../src/common/constants/territoiresConstants.js";
-import { subDays } from "date-fns";
 
 describe("Test des actions Organismes", () => {
   // Construction de l'adresse nockée via API Entreprise pour un fichier de sample
@@ -534,10 +535,11 @@ describe("Test des actions Organismes", () => {
 
       // Vérification de la création sans first_transmission_date
       const created = await findOrganismeById(_id);
-      assert.deepStrictEqual(created?.first_transmission_date, undefined);
+      assert(created);
+      assert.deepStrictEqual(created.first_transmission_date, undefined);
 
       // MAJ de l'organisme et vérification de l'ajout de first_transmission_date
-      await setOrganismeTransmissionDates(_id);
+      await setOrganismeTransmissionDates(created);
       const updated = await findOrganismeById(_id);
       assert.notDeepStrictEqual(updated?.first_transmission_date, undefined);
       assert.notDeepStrictEqual(updated?.last_transmission_date, undefined);
@@ -568,10 +570,11 @@ describe("Test des actions Organismes", () => {
 
       // Vérification de la création avec first_transmission_date
       const created = await findOrganismeById(_id);
-      assert.deepStrictEqual(created?.first_transmission_date, first_transmission_date);
+      assert(created);
+      assert.deepStrictEqual(created.first_transmission_date, first_transmission_date);
 
       // MAJ de l'organisme et vérification de l'ajout de last_transmission_date
-      await setOrganismeTransmissionDates(_id);
+      await setOrganismeTransmissionDates(created);
       const updated = await findOrganismeById(_id);
       assert.deepStrictEqual(updated?.first_transmission_date, first_transmission_date);
       assert.notDeepStrictEqual(updated?.last_transmission_date, undefined);
