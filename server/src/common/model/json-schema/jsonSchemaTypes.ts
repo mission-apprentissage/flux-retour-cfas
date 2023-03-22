@@ -66,5 +66,7 @@ export function object(properties, custom = {}) {
 export function any(custom = {}) {
   return {
     ...custom,
+    bsonType: ["number", "string", "bool", "object", "array", "null"],
+    additionalProperties: true,
   };
 }

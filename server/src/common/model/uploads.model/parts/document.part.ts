@@ -7,7 +7,6 @@ export const documentSchema = object(
     }),
     mapping_column: any({
       description: "Mapping des colonnes du fichier",
-      additionalProperties: true,
     }),
     type_document: string({
       description: "Le type de document (exemple: SIFA-2021, gabarit-tableau-de-bord)",

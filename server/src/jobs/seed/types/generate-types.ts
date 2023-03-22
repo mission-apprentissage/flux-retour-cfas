@@ -6,6 +6,8 @@ import { upperFirst } from "lodash-es";
 import prettier from "prettier";
 // eslint-disable-next-line node/no-unpublished-import
 import { compileBSON, getDatabaseSchemas } from "bson-schema-to-typescript";
+// eslint-disable-next-line node/no-unpublished-import
+import traverse from "json-schema-traverse";
 
 import config from "../../../config.js";
 
@@ -72,6 +74,13 @@ export const generateTypes = async () => {
     } else if (!title) {
       logs.push("No schema title, skipping");
     } else {
+      // trick to replace any bson type by any TS
+      traverse(schema, (node) => {
+        if (Array.isArray(node?.bsonType) && node?.bsonType?.length > 5) {
+          node.bsonType = "any";
+        }
+      });
+
       const output = await compileBSON(
         { ...schema, title },
         {
