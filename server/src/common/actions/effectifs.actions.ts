@@ -5,7 +5,7 @@ import { defaultValuesEffectif, validateEffectif } from "../model/effectifs.mode
 import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../model/effectifs.model/parts/formation.effectif.part.js";
 import { transformToInternationalNumber } from "../validation/utils/frenchTelephoneNumber.js";
-import { buildMongoPipelineFilterStages } from "./helpers/filters.js";
+import { buildMongoPipelineFilterStages, EffectifsFilters } from "./helpers/filters.js";
 
 /**
  * Méthode de build d'un effectif
@@ -342,7 +342,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation, validati
   return updated.value;
 };
 
-export const getNbDistinctOrganismes = async (filters = {}) => {
+export const getNbDistinctOrganismes = async (filters: EffectifsFilters) => {
   const filterStages = buildMongoPipelineFilterStages(filters);
   const distinctOrganismes = await effectifsDb()
     .aggregate([

@@ -24,7 +24,6 @@ export const authMiddleware = () => {
           return;
         }
 
-        // FIXME get organisation
         try {
           const user = await getUserByEmail(jwtPayload.email);
           if (!user) {

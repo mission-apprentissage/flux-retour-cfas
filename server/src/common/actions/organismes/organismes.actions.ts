@@ -11,8 +11,8 @@ import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.j
 import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
-import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
 import { Organisme } from "../../model/@types/Organisme.js";
+import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -448,7 +448,10 @@ export const searchOrganismes = async (searchCriteria: OrganismesSearch) => {
     const start = Date.now();
     const eligibleUais = (
       await effectifsDb()
-        .aggregate([...buildMongoPipelineFilterStages(searchCriteria), { $group: { _id: "$organisme.uai" } }])
+        .aggregate([
+          ...buildMongoPipelineFilterStages(searchCriteria as unknown as EffectifsFilters),
+          { $group: { _id: "$organisme.uai" } },
+        ])
         .toArray()
     ).map((row) => row._id[0]);
     logger.info({ elapsted: Date.now() - start, eligibleUais: eligibleUais.length }, "searchOrganismes_eligibleUais");

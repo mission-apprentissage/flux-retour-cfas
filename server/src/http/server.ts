@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import Boom from "boom";
-Boom.unauthorized();
+
 import { apiRoles } from "../common/roles.js";
 
 import logMiddleware from "./middlewares/logMiddleware.js";
@@ -15,7 +15,7 @@ import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAu
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 
-import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes.js";
+import { indicateursExport } from "./routes/specific.routes/indicateurs-export.routes.js";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
@@ -130,75 +130,6 @@ export default async (services) => {
     })
   );
 
-  // public access
-  app.use("/api/emails", emails(services)); // No versionning to be sure emails links are always working
-  app.use("/api/v1/auth", auth());
-  app.use("/api/v1/auth", register(services));
-  app.use("/api/v1/password", password(services));
-  app.use(
-    "/api/v1/maintenanceMessages",
-    returnResult(async () => {
-      return await findMaintenanceMessages();
-    })
-  );
-
-  // private access
-  app.get(
-    "/api/v1/session/current",
-    checkJwtToken,
-    returnResult(async (req) => {
-      return req.user;
-    })
-  );
-  app.use("/api/v1/profile", checkJwtToken, profile());
-
-  app.get(
-    "/api/v1/espace/organismes",
-    checkJwtToken,
-    returnResult(async (req) => {
-      return findUserOrganismes(req.user);
-    })
-  );
-  app.use("/api/v1/organisme", checkJwtToken, organisme(services));
-  app.use("/api/v1/effectif", checkJwtToken, effectif());
-  app.use("/api/v1/upload", checkJwtToken, upload(services));
-  app.use("/api/v1/server-events", checkJwtToken, serverEvents());
-
-  // private admin access
-  app.use(
-    "/api/v1/admin",
-    checkJwtToken,
-    // pageAccessMiddleware(["admin/page_gestion_utilisateurs"]),
-    usersAdmin(services)
-  );
-  app.use("/api/v1/admin", checkJwtToken, organismesAdmin());
-  app.use("/api/v1/admin", checkJwtToken, statsAdmin());
-  app.use(
-    "/api/v1/admin/maintenanceMessages",
-    checkJwtToken,
-    // pageAccessMiddleware(["admin/page_message_maintenance"]),
-    maintenancesAdmin()
-  );
-
-  // Routes de calcul & export des indicateurs
-  app.use(
-    // FRONT
-    ["/api/indicateurs"],
-    checkJwtToken,
-    // indicateursPermissions(),
-    indicateursRouter()
-  );
-
-  app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
-
-  app.use(
-    // FRONT
-    "/api/v1/indicateurs-export",
-    checkJwtToken,
-    // indicateursPermissions(),
-    indicateursExportRouter()
-  );
-
   // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
   app.post(
     "/api/login",
@@ -223,11 +154,58 @@ export default async (services) => {
     dossierApprenantRouter()
   );
 
+  // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
   app.use(
     "/api/organismes",
     requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
     organismesRouter()
-  ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
+  );
+
+  /********************************
+   * Anonymous routes             *
+   ********************************/
+  app.use("/api/emails", emails(services)); // No versionning to be sure emails links are always working
+  app.use("/api/v1/auth", auth());
+  app.use("/api/v1/auth", register(services));
+  app.use("/api/v1/password", password(services));
+  app.use(
+    "/api/v1/maintenanceMessages",
+    returnResult(async () => {
+      return await findMaintenanceMessages();
+    })
+  );
+  app.use("/api/indicateurs-national", indicateursNationalRouter(services));
+
+  /********************************
+   * Authenticated routes         *
+   ********************************/
+  const authRouter = express.Router();
+  authRouter.use(checkJwtToken);
+
+  authRouter.get(
+    "/api/v1/session/current",
+    returnResult(async (req) => {
+      return req.user;
+    })
+  );
+  authRouter.use("/api/v1/profile", profile());
+
+  authRouter.get(
+    "/api/v1/espace/organismes",
+    returnResult(async (req) => {
+      return findUserOrganismes(req.user);
+    })
+  );
+  authRouter.use("/api/v1/organisme", organisme(services));
+  authRouter.use("/api/v1/effectif", effectif());
+  authRouter.use("/api/v1/upload", upload(services));
+  authRouter.use("/api/v1/server-events", serverEvents());
+  authRouter.use("/api/v1/admin", usersAdmin(services));
+  authRouter.use("/api/v1/admin", organismesAdmin());
+  authRouter.use("/api/v1/admin", statsAdmin());
+  authRouter.use("/api/v1/admin/maintenanceMessages", maintenancesAdmin());
+  authRouter.use("/api/indicateurs", indicateursRouter());
+  authRouter.get("/api/v1/indicateurs-export", indicateursExport);
 
   /*
    * formations
@@ -238,7 +216,7 @@ export default async (services) => {
     etablissement_num_departement: Joi.string().allow(null, ""),
     etablissement_reseaux: Joi.string().allow(null, ""),
   };
-  app.post(
+  authRouter.post(
     "/api/formations/search",
     returnResult(async (req) => {
       const formationSearch = await validateFullObjectSchema(req.body, formationsSearchSchema);
@@ -246,7 +224,7 @@ export default async (services) => {
     })
   );
 
-  app.get(
+  authRouter.get(
     "/api/formations/:cfd",
     returnResult(async (req) => {
       return await getFormationWithCfd(req.params.cfd);
@@ -256,7 +234,7 @@ export default async (services) => {
   /*
    * referentiel
    */
-  app.get(
+  authRouter.get(
     "/api/referentiel/networks",
     returnResult(() => {
       // TODO : TMP on ne renvoie que les réseaux fiabilisés pour l'instant - débloquer le reste quand ce sera fiable
@@ -268,13 +246,15 @@ export default async (services) => {
     })
   );
 
-  app.get(
+  authRouter.get(
     "/api/referentiel/organismes-appartenance",
     returnResult(() => {
       const organismes = Object.keys(ORGANISMES_APPARTENANCE).map((id) => ({ id, nom: ORGANISMES_APPARTENANCE[id] }));
       return organismes;
     })
   );
+
+  app.use(authRouter);
 
   // The error handler must be before any other error middleware and after all controllers
   app.use(Sentry.Handlers.errorHandler());
