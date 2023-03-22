@@ -7,22 +7,20 @@ import { REGIONS } from "../constants/territoiresConstants.js";
 
 const collectionName = "dossiersApprenantsMigration";
 
-const indexes = () => {
-  return [
-    [
-      { id_erp_apprenant: 1, uai_etablissement: 1, annee_scolaire: 1 },
-      { name: "uai_id_erp_annee_scolaire", unique: true },
-    ],
-    [{ organisme_id: 1 }, { name: "organisme_id" }],
-    [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
+const indexes = [
+  [
+    { id_erp_apprenant: 1, uai_etablissement: 1, annee_scolaire: 1 },
+    { name: "uai_id_erp_annee_scolaire", unique: true },
+  ],
+  [{ organisme_id: 1 }, { name: "organisme_id" }],
+  [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
 
-    [{ formation_cfd: 1 }, { name: "formation_cfd" }],
-    [{ etablissement_num_region: 1 }, { name: "etablissement_num_region" }],
-    [{ etablissement_num_departement: 1 }, { name: "etablissement_num_departement" }],
-    [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
-    [{ etablissement_reseaux: 1 }, { name: "etablissement_reseaux" }],
-  ];
-};
+  [{ formation_cfd: 1 }, { name: "formation_cfd" }],
+  [{ etablissement_num_region: 1 }, { name: "etablissement_num_region" }],
+  [{ etablissement_num_departement: 1 }, { name: "etablissement_num_departement" }],
+  [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
+  [{ etablissement_reseaux: 1 }, { name: "etablissement_reseaux" }],
+];
 
 const schema = object(
   {

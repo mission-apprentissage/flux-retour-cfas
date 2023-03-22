@@ -4,9 +4,7 @@ import { schemaValidation } from "../utils/schemaUtils.js";
 
 export const collectionName = "permissions";
 
-export function indexes() {
-  return [[{ organisme_id: 1, userEmail: 1, role: 1 }, { unique: true }]];
-}
+const indexes = [[{ organisme_id: 1, userEmail: 1, role: 1 }, { unique: true }]];
 
 // OF: 1_1 organisme_id userEmail
 // Reseau: 1_* organisme_id userEmail

@@ -36,6 +36,10 @@ export const getDatabase = () => {
   return mongodbClient.db();
 };
 
+export const getCollectionList = () => {
+  return mongodbClient.db().listCollections().toArray();
+};
+
 export const getDbCollection = <TSchema extends Document>(name) => {
   ensureInitialization();
   return mongodbClient.db().collection<TSchema>(name);

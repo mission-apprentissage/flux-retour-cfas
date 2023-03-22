@@ -2,10 +2,6 @@ import { object, objectId, string, date, boolean } from "./json-schema/jsonSchem
 
 const collectionName = "maintenanceMessages";
 
-function indexes() {
-  return [];
-}
-
 const schema = object(
   {
     _id: objectId(),
@@ -26,4 +22,4 @@ export function defaultValuesMaintenanceMessage() {
   };
 }
 
-export default { schema, indexes, collectionName };
+export default { schema, indexes: [], collectionName };

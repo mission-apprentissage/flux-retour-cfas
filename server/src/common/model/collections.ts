@@ -35,7 +35,7 @@ import {
 } from "./@types";
 import { EffectifsQueue } from "./@types/EffectifsQueue.js";
 
-export const modelDescriptors = [
+export const modelDescriptors: { schema?: any; indexes?: any[][]; collectionName: string }[] = [
   usersModelDescriptor,
   userEventsModelDescriptor,
   formationsModelDescriptor,

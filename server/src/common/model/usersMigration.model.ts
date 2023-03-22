@@ -8,13 +8,11 @@ import { ORGANISMES_APPARTENANCE, USER_ACCOUNT_STATUS } from "../constants/users
 
 export const collectionName = "usersMigration";
 
-export function indexes() {
-  return [
-    [{ email: 1 }, { unique: true }],
-    [{ "emails.token": 1 }],
-    [{ email: "text", nom: "text", prenom: "text", siret: "text", uai: "text" }],
-  ];
-}
+const indexes = [
+  [{ email: 1 }, { unique: true }],
+  [{ "emails.token": 1 }],
+  [{ email: "text", nom: "text", prenom: "text", siret: "text", uai: "text" }],
+];
 
 export const schema = object(
   {

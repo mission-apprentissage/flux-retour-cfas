@@ -2,9 +2,7 @@ import { integer, object, objectId, string, arrayOf } from "./json-schema/jsonSc
 
 export const collectionName = "roles";
 
-export function indexes() {
-  return [[{ name: 1 }, { unique: true }]];
-}
+const indexes = [[{ name: 1 }, { unique: true }]];
 
 export const schema = object(
   {

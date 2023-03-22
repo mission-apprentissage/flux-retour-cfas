@@ -2,27 +2,25 @@ import { object, objectId, string, boolean, number, array, arrayOf } from "./jso
 
 const collectionName = "organismesReferentiel";
 
-const indexes = () => {
-  return [
-    [{ siret: 1 }, { unique: true }],
-    [{ uai: 1 }],
-    [{ "uai_potentiels.uai": 1 }],
-    [{ numero_declaration_activite: 1 }],
-    [{ nature: 1 }],
-    [{ referentiels: 1 }],
-    [{ "adresse.departement.code": 1 }],
-    [{ "adresse.region.code": 1 }],
-    [{ "adresse.academie.code": 1 }],
-    [{ "relations.type": 1 }],
-    [{ etat_administratif: 1 }],
-    [{ qualiopi: 1 }],
-    [{ "adresse.geojson.geometry": "2dsphere" }],
-    [
-      { siret: "text", uai: "text", raison_sociale: "text" },
-      { name: "fulltext", default_language: "french" },
-    ],
-  ];
-};
+const indexes = [
+  [{ siret: 1 }, { unique: true }],
+  [{ uai: 1 }],
+  [{ "uai_potentiels.uai": 1 }],
+  [{ numero_declaration_activite: 1 }],
+  [{ nature: 1 }],
+  [{ referentiels: 1 }],
+  [{ "adresse.departement.code": 1 }],
+  [{ "adresse.region.code": 1 }],
+  [{ "adresse.academie.code": 1 }],
+  [{ "relations.type": 1 }],
+  [{ etat_administratif: 1 }],
+  [{ qualiopi: 1 }],
+  [{ "adresse.geojson.geometry": "2dsphere" }],
+  [
+    { siret: "text", uai: "text", raison_sociale: "text" },
+    { name: "fulltext", default_language: "french" },
+  ],
+];
 
 const schema = object(
   {
