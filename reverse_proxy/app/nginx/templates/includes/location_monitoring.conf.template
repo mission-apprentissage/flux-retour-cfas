@@ -1,0 +1,8 @@
+location /_monitoring/cadvisor {
+    set $upstream http://cadvisor:8080/;
+    include includes/proxy.conf;
+}
+location /_monitoring/nodeexporter {
+    set $upstream http://nodeexporter:9100/;
+    include includes/proxy.conf;
+}
