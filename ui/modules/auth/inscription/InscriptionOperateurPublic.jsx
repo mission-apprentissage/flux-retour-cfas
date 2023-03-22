@@ -28,9 +28,9 @@ const options = [
   },
 ];
 
-export const InscriptionPilot = ({ onEtablissementSelected }) => {
+export const InscriptionOperateurPublic = ({ onEtablissementSelected }) => {
   const router = useRouter();
-  const { organismesAppartenance } = router.query;
+  const { typeOrganisation } = router.query;
 
   return (
     <>
@@ -41,12 +41,11 @@ export const InscriptionPilot = ({ onEtablissementSelected }) => {
           fieldType="select"
           placeholder="Sélectionner un opérateur public"
           options={options}
-          value={organismesAppartenance}
+          value={typeOrganisation}
           onChange={(value) => router.push(`/auth/inscription/${value}`)}
           w="100%"
         />
-
-        {organismesAppartenance !== "pilot" && <SiretBlock onSiretFetched={onEtablissementSelected} />}
+        <SiretBlock onSiretFetched={onEtablissementSelected} />
       </Box>
     </>
   );

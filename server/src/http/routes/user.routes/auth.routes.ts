@@ -11,6 +11,8 @@ import * as sessions from "../../../common/actions/sessions.actions.js";
 import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { COOKIE_NAME } from "../../../common/constants/cookieName.js";
+import { returnResult } from "../../middlewares/helpers.js";
+import Boom from "boom";
 
 export default () => {
   const router = express.Router();
@@ -49,18 +51,19 @@ export default () => {
     });
   });
 
-  router.get("/logout", async (req, res) => {
-    if (req.cookies[COOKIE_NAME]) {
+  router.post(
+    "/logout",
+    returnResult(async (req, res) => {
+      if (!req.cookies[COOKIE_NAME]) {
+        throw Boom.unauthorized("invalid jwt");
+      }
       await sessions.removeJwt(req.cookies[COOKIE_NAME]);
-      res.clearCookie(COOKIE_NAME).status(200).json({
-        loggedOut: true,
-      });
-    } else {
-      res.status(401).json({
-        error: "Invalid jwt",
-      });
-    }
-  });
+      res.clearCookie(COOKIE_NAME);
+      return {
+        message: "successfully logged out",
+      };
+    })
+  );
 
   return router;
 };

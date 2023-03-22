@@ -64,7 +64,7 @@ export default ({ mailer }) => {
       body: registrationSchema().strict(),
     }),
     async ({ body }, res) => {
-      const { type, email, password, siret, uai: userUai, nom, prenom, civility, organismes_appartenance } = body;
+      const { type, email, password, siret, uai: userUai, nom, prenom, civility, type_organisation } = body;
 
       const alreadyExists = await getUserByEmail(email.toLowerCase());
       if (alreadyExists) {
@@ -88,6 +88,7 @@ export default ({ mailer }) => {
         uai = userUai;
       }
 
+      // FIXME
       const user = await createUser(
         { email, password },
         {
@@ -96,7 +97,7 @@ export default ({ mailer }) => {
           nom,
           prenom,
           civility,
-          organisation: organismes_appartenance,
+          organisation: type_organisation,
           ...(uai ? { uai } : {}),
         }
       );

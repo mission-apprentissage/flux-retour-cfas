@@ -51,7 +51,7 @@ function getMesOrganismesLabelFromOrganisationType(type) {
 
 export function useEspace() {
   const router = useRouter();
-  const { auth } = useAuth();
+  const { auth, organisationType } = useAuth();
 
   const [isloaded, setIsLoaded] = useState(false);
   const [isReloaded, setIsReloaded] = useState(false);
@@ -73,18 +73,20 @@ export function useEspace() {
   const isSIFAPage = slug.includes("enquete-SIFA");
   const isParametresPage = slug.includes("parametres");
   const contextNav = isOrganismePages ? "organisme" : "user";
-  const organisationType = auth?.organisation?.type;
   const organisme_id = isOrganismePages
     ? slug?.[slug.length - (isTeleversementPage ? 3 : isEffectifsPage || isSIFAPage || isParametresPage ? 2 : 1)]
     : null;
   // const hasAccessToOnlyOneOrganisme = auth.organisme_ids.length === 1;
-  const userIsAnOrganisme = !!auth.main_organisme_id;
 
   useEffect(() => {
     const abortController = new AbortController();
     setIsReloaded(false);
 
-    fetchMyOrganisme(auth.main_organisme_id, auth.account_status !== "CONFIRMED" || auth.isInPendingValidation)
+    // FIXME, récupérer mon organisme ???
+    fetchMyOrganisme(
+      auth?.main_organisme_id,
+      auth?.account_status !== "CONFIRMED" || auth?.isInPendingValidation || true
+    )
       .then(({ myOrganisme }) => {
         if (!abortController.signal.aborted) {
           const navigation = {
@@ -94,7 +96,11 @@ export function useEspace() {
                 navTitle: "Mon tableau de bord",
                 path: "/mon-espace/mon-organisme",
               },
-              ...(userIsAnOrganisme
+              ...([
+                "ORGANISME_FORMATION_FORMATEUR",
+                "ORGANISME_FORMATION_REPONSABLE",
+                "ORGANISME_FORMATION_REPONSABLE_FORMATEUR",
+              ].includes(organisationType)
                 ? {
                     effectifs: {
                       pageTitle: "Mes effectifs",
@@ -172,7 +178,7 @@ export function useEspace() {
       abortController.abort();
     };
   }, [
-    auth.main_organisme_id,
+    auth?.main_organisme_id,
     contextNav,
     isEffectifsPage,
     isParametresPage,
@@ -180,12 +186,11 @@ export function useEspace() {
     organisme_id,
     setNavigation,
     setMyOrganisme,
-    userIsAnOrganisme,
     organisationType,
-    auth.isInPendingValidation,
-    auth.account_status,
+    auth?.isInPendingValidation,
+    auth?.account_status,
     isTeleversementPage,
-    auth.is_cross_organismes,
+    auth?.is_cross_organismes,
   ]);
 
   if (error !== null) {

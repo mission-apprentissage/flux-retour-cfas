@@ -56,7 +56,6 @@ import { authenticateLegacy } from "../common/actions/legacy/users.legacy.action
 import { createUserToken } from "../common/utils/jwtUtils.js";
 import { createUserEvent } from "../common/actions/userEvents.actions.js";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../common/constants/userEventsConstants.js";
-import { updateUserLastConnection, structureUser } from "../common/actions/users.actions.js";
 
 /**
  * Create the express app

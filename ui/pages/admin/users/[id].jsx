@@ -78,4 +78,4 @@ const User = () => {
   );
 };
 
-export default withAuth(User, "admin/page_gestion_utilisateurs");
+export default withAuth(User, ["ADMINISTRATEUR"]);

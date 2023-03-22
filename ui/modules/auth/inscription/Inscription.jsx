@@ -4,10 +4,10 @@ import { Box, Button, HStack, Link, Text, Heading } from "@chakra-ui/react";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { InscriptionOF } from "./InscriptionOF";
-import { InscriptionPilot } from "./InscriptionPilot";
+import { InscriptionOperateurPublic } from "./InscriptionOperateurPublic";
 import { InscriptionReseau } from "./InscriptionReseau";
 
-const Inscription = ({ organismesAppartenance, ...props }) => {
+const Inscription = ({ typeOrganisation, ...props }) => {
   const router = useRouter();
   const [siret, setSiret] = useState(null);
   return (
@@ -17,7 +17,7 @@ const Inscription = ({ organismesAppartenance, ...props }) => {
       </Heading>
       <Box>
         <Box>
-          {organismesAppartenance === "autre" && (
+          {typeOrganisation === "autre" && (
             <HStack ml="4w" mt="2w">
               <Box p="2" h="7vh" borderLeft="4px solid bluefrances.525" />
               <Box>
@@ -28,13 +28,13 @@ const Inscription = ({ organismesAppartenance, ...props }) => {
               </Box>
             </HStack>
           )}
-          {organismesAppartenance === "organisme_formation" && (
+          {typeOrganisation === "organisme_formation" && (
             <InscriptionOF onEtablissementSelected={({ siret }) => setSiret(siret)} />
           )}
-          {["pilot", "dreets", "ddets", "draaf", "academie", "conseil_regional"].includes(organismesAppartenance) && (
-            <InscriptionPilot onEtablissementSelected={({ siret }) => setSiret(siret)} />
-          )}
-          {organismesAppartenance === "tete_de_reseau" && (
+          {["operateur_public", "dreets", "ddets", "draaf", "academie", "conseil_regional"].includes(
+            typeOrganisation
+          ) && <InscriptionOperateurPublic onEtablissementSelected={({ siret }) => setSiret(siret)} />}
+          {typeOrganisation === "tete_de_reseau" && (
             <InscriptionReseau onEtablissementSelected={({ siret }) => setSiret(siret)} />
           )}
         </Box>
@@ -55,7 +55,7 @@ const Inscription = ({ organismesAppartenance, ...props }) => {
             variant="primary"
             onClick={() =>
               router.push({
-                pathname: `/auth/inscription/${organismesAppartenance}/${siret}`,
+                pathname: `/auth/inscription/${typeOrganisation}/${siret}`,
                 query: router.query.uai
                   ? {
                       uai: router.query.uai,

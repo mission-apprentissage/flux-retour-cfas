@@ -154,4 +154,4 @@ const Users = () => {
   );
 };
 
-export default withAuth(Users, "admin/page_gestion_utilisateurs");
+export default withAuth(Users, ["ADMINISTRATEUR"]);

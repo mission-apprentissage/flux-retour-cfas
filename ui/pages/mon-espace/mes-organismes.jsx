@@ -184,4 +184,4 @@ function MesOrganismes() {
   );
 }
 
-export default withAuth(MesOrganismes, "page/mes-organismes");
+export default withAuth(MesOrganismes);

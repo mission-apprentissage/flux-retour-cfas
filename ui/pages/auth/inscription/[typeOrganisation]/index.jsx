@@ -14,8 +14,8 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 const RegisterPage = () => {
   const router = useRouter();
   const title = "Créer un compte";
-  const { organismesAppartenance } = router.query;
-
+  const { typeOrganisation } = router.query;
+  console.log(typeOrganisation, router.query);
   return (
     <Page>
       <Head>
@@ -26,7 +26,7 @@ const RegisterPage = () => {
         <Inscription
           flexDirection="column"
           border="1px solid"
-          organismesAppartenance={organismesAppartenance}
+          typeOrganisation={typeOrganisation}
           h="100%"
           flexGrow={1}
           borderColor="openbluefrance"

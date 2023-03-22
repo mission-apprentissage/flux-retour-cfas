@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ORGANISMES_APPARTENANCE } from "../constants/usersConstants.js";
+import { organisationTypes } from "../model/organisations.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 
 const registrationSchema = () =>
@@ -13,8 +13,8 @@ const registrationSchema = () =>
     siret: z.string(),
     uai: z.string().nullable().optional(),
     civility: z.string(),
-    // @ts-ignore
-    organismes_appartenance: z.enum(Object.keys(ORGANISMES_APPARTENANCE)),
+    // @ts-expect-error
+    type_organisation: z.enum(organisationTypes.filter((v) => v !== "ADMINISTRATEUR")),
   });
 
 export default registrationSchema;

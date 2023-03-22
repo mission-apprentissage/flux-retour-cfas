@@ -7,7 +7,6 @@ import useAuth from "../../hooks/useAuth";
 import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
 import { Cgu, cguVersion } from "../legal/Cgu";
 import AcknowledgeModal from "../../components/Modals/AcknowledgeModal";
-import { anonymous } from "../../common/anonymous";
 import { emitter } from "../../common/emitter";
 import { isUserAdmin } from "@/common/utils/rolesUtils";
 
@@ -17,7 +16,7 @@ const AccountWrapper = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      if (auth.sub !== "anonymous") {
+      if (auth) {
         if (auth.account_status === "PENDING_EMAIL_VALIDATION") {
           if (router.pathname !== "/auth/en-attente-confirmation" && router.pathname !== "/auth/confirmation") {
             router.push("/auth/en-attente-confirmation");
@@ -63,7 +62,7 @@ const ForceAcceptCGU = ({ children }) => {
 
   return (
     <>
-      {auth.sub !== "anonymous" && auth.account_status === "CONFIRMED" && (
+      {auth && auth.account_status === "CONFIRMED" && (
         <AcknowledgeModal
           title="Conditions générales d'utilisation"
           acknowledgeText="Accepter"
@@ -109,7 +108,7 @@ export const AuthenticationContext = createContext({});
 
 const UserWrapper = ({ children, ssrAuth }) => {
   const [token, setToken] = useState();
-  const [auth, setAuth] = useState(ssrAuth ?? anonymous);
+  const [auth, setAuth] = useState(ssrAuth);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(!ssrAuth);
   const { messageMaintenance } = useMaintenanceMessages();
@@ -135,7 +134,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
           setAuth(user);
         }
       } catch (error) {
-        setAuth(anonymous);
+        setAuth(null);
       }
       setIsLoading(false);
     }
@@ -148,7 +147,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
     const handler = (response) => {
       if (response.status === 401) {
         //Auto logout user when token is invalid
-        setAuth(anonymous);
+        setAuth(null);
       }
     };
     emitter.on("http:error", handler);

@@ -12,31 +12,25 @@ import useFetchEtablissements from "@/hooks/useFetchEtablissements";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-export const mappingOrganismeAppartenanceToType = {
+export const mappingTypeOrganisationToType = {
   tete_de_reseau: "reseau_of",
-  academie: "pilot",
-  draaf: "pilot",
-  carif_oref: "pilot",
-  dreets: "pilot",
-  deets: "pilot",
-  ddets: "pilot",
-  conseil_regional: "pilot",
-  opco: "pilot",
-  erp: "pilot",
-  pole_emploi: "pilot",
-  mission_locale: "pilot",
-  cellule_apprentissage: "pilot",
+  academie: "operateur_public",
+  draaf: "operateur_public",
+  dreets: "operateur_public",
+  deets: "operateur_public",
+  ddets: "operateur_public",
+  conseil_regional: "operateur_public",
   organisme_formation: "of",
 };
 
 const PageFormulaire = () => {
   const router = useRouter();
   const title = "Créer un compte";
-  const { organismesAppartenance, siret, uai } = router.query;
+  const { typeOrganisation, siret, uai } = router.query;
   const { data: etablissements, isFetching } = useFetchEtablissements({ siret });
   const etablissement = etablissements?.[0];
 
-  const type = mappingOrganismeAppartenanceToType[organismesAppartenance];
+  const type = mappingTypeOrganisationToType[typeOrganisation];
 
   return (
     <Page>
@@ -49,7 +43,7 @@ const PageFormulaire = () => {
           <Spinner />
         ) : (
           etablissement &&
-          organismesAppartenance && (
+          typeOrganisation && (
             <InscriptionStep2
               flexDirection="column"
               border="1px solid"
@@ -57,7 +51,7 @@ const PageFormulaire = () => {
               flexGrow={1}
               borderColor="openbluefrance"
               etablissement={etablissement}
-              organismesAppartenance={organismesAppartenance}
+              typeOrganisation={typeOrganisation}
               type={type}
               uai={uai}
               onSucceeded={() => router.push("/auth/inscription/bravo")}

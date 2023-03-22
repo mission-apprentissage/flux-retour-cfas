@@ -24,27 +24,26 @@ import { PRODUCT_NAME } from "../../../common/constants/product";
 import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
 import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
 import useAuth from "../../../hooks/useAuth.js";
-import { hasPageAccessTo } from "../../../common/utils/rolesUtils.js";
-import { _get } from "../../../common/httpClient.js";
+import { _post } from "../../../common/httpClient.js";
 import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
 import { Settings4Fill, UserFill } from "../../../theme/components/icons";
 
 const UserMenu = () => {
-  const { auth } = useAuth();
+  const { auth, organisationType } = useAuth();
   const router = useRouter();
 
   const logout = async () => {
-    await _get("/api/v1/auth/logout");
+    await _post("/api/v1/auth/logout");
     window.location.href = "/";
   };
 
-  const myWks =
-    (router.pathname.includes("/mon-espace") || router.pathname.includes("/organisme")) && auth?.sub !== "anonymous";
+  // my workspace ?
+  const myWks = (router.pathname.includes("/mon-espace") || router.pathname.includes("/organisme")) && auth;
 
   return (
     <>
-      {auth?.sub === "anonymous" && (
+      {!auth && (
         <HStack>
           <Link href="/auth/inscription" variant="pill" px={3} py={1}>
             <Text lineHeight={6}>
@@ -60,7 +59,7 @@ const UserMenu = () => {
           </Link>
         </HStack>
       )}
-      {auth?.sub !== "anonymous" && (
+      {auth && (
         <Flex w="full">
           <Link
             href="/mon-espace/mon-organisme"
@@ -88,28 +87,20 @@ const UserMenu = () => {
               <MenuItem href="/mon-compte" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
                 Mon compte
               </MenuItem>
-              {hasPageAccessTo(auth, "admin") && (
+              {organisationType === "ADMINISTRATEUR" && (
                 <MenuGroup title="Administration">
-                  {hasPageAccessTo(auth, "admin/page_gestion_utilisateurs") && (
-                    <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
-                      Gestion des utilisateurs
-                    </MenuItem>
-                  )}
-                  {hasPageAccessTo(auth, "admin/page_gestion_organismes") && (
-                    <MenuItem href="/admin/organismes" icon={<Parametre boxSize={4} />}>
-                      Gestion des organismes
-                    </MenuItem>
-                  )}
-                  {hasPageAccessTo(auth, "admin/page_gestion_roles") && (
-                    <MenuItem href="/admin/roles" icon={<Parametre boxSize={4} />}>
-                      Gestion des rôles
-                    </MenuItem>
-                  )}
-                  {hasPageAccessTo(auth, "admin/page_message_maintenance") && (
-                    <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
-                      Message de maintenance
-                    </MenuItem>
-                  )}
+                  <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
+                    Gestion des utilisateurs
+                  </MenuItem>
+                  <MenuItem href="/admin/organismes" icon={<Parametre boxSize={4} />}>
+                    Gestion des organismes
+                  </MenuItem>
+                  <MenuItem href="/admin/roles" icon={<Parametre boxSize={4} />}>
+                    Gestion des rôles
+                  </MenuItem>
+                  <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
+                    Message de maintenance
+                  </MenuItem>
                 </MenuGroup>
               )}
               <MenuDivider />

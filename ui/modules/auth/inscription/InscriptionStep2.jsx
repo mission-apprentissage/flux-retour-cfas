@@ -20,7 +20,7 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import { SIRET_REGEX } from "@/common/domain/siret";
 import useToaster from "@/hooks/useToaster";
 
-const InscriptionStep2 = ({ onSucceeded, type, uai, organismesAppartenance, etablissement, ...props }) => {
+const InscriptionStep2 = ({ onSucceeded, uai, typeOrganisation, etablissement, ...props }) => {
   const { toastError } = useToaster();
   const router = useRouter();
   const uaiToDisplay = etablissement.uai || uai || undefined;
@@ -31,13 +31,11 @@ const InscriptionStep2 = ({ onSucceeded, type, uai, organismesAppartenance, etab
       nom: "",
       civility: "",
       prenom: "",
-      type,
-      organismes_appartenance: organismesAppartenance.toUpperCase(),
+      type_organisation: typeOrganisation.toUpperCase(),
       siret: etablissement.siret,
       uai,
     },
     validationSchema: Yup.object().shape({
-      type: Yup.string().required("Requis"),
       email: Yup.string().email("Format d'email invalide").required("Votre email est obligatoire"),
       siret: Yup.string()
         .matches(SIRET_REGEX, {
@@ -46,13 +44,12 @@ const InscriptionStep2 = ({ onSucceeded, type, uai, organismesAppartenance, etab
         })
         .required("Le siret est obligatoire"),
       uai: Yup.string(),
-      organismes_appartenance: Yup.string().required("organismes_appartenance obligatoire"),
-      nom: Yup.string().required("Votre nom est obligatoire"),
+      type_organisation: Yup.string().required("type_organisation obligatoire"),
       civility: Yup.string().required("Votre civilité est obligatoire"),
+      nom: Yup.string().required("Votre nom est obligatoire"),
       prenom: Yup.string().required("Votre prénom est obligatoire"),
     }),
     onSubmit: async (values) => {
-      // eslint-disable-next-line no-undef, no-async-promise-executor
       try {
         const result = await _post("/api/v1/auth/register", values);
         if (result.succeeded) {
@@ -81,7 +78,7 @@ const InscriptionStep2 = ({ onSucceeded, type, uai, organismesAppartenance, etab
               <Text fontSize="20px" fontWeight="bold">
                 {etablissement.enseigne || etablissement.entreprise_raison_sociale}
               </Text>
-              {values.type === "of" && (
+              {values.type_organisation === "of" && (
                 <Text>
                   Uai : {uaiToDisplay} - SIRET : {etablissement.siret} (en activité)
                 </Text>
@@ -142,8 +139,9 @@ const InscriptionStep2 = ({ onSucceeded, type, uai, organismesAppartenance, etab
           </HStack>
         </Box>
         <HStack gap="24px" mt={5}>
+          {/* FIXME ne fonctionne pas si on rentre un siret */}
           <Button
-            onClick={() => router.push({ pathname: `/auth/inscription/${organismesAppartenance}`, query: { uai } })}
+            onClick={() => router.push({ pathname: `/auth/inscription/${typeOrganisation}`, query: { uai } })}
             color="bluefrance"
             variant="secondary"
           >

@@ -75,7 +75,7 @@ export default ({ mailer }) => {
 
       const { newPassword } = await validateFullObjectSchema(req.body, {
         passwordToken: Joi.string().required(),
-        newPassword: passwordSchema(user.is_admin).required(),
+        newPassword: passwordSchema(user.organisation.type === "ADMINISTRATEUR").required(),
       });
       // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
 
