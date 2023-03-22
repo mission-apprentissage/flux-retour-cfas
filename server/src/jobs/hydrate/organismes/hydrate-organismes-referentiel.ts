@@ -40,6 +40,7 @@ export const hydrateOrganismesReferentiel = async () => {
 const insertOrganismeReferentiel = async (organismeReferentiel) => {
   const {
     adresse,
+    contacts,
     enseigne,
     etat_administratif,
     forme_juridique,
@@ -52,11 +53,11 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
     uai,
     lieux_de_formation,
   } = organismeReferentiel;
-
   // Ajout de l'organisme dans la collection
   try {
     await organismesReferentielDb().insertOne({
       ...(adresse ? { adresse } : {}),
+      ...(contacts ? { contacts } : {}),
       ...(enseigne ? { enseigne } : {}),
       ...(etat_administratif ? { etat_administratif } : {}),
       ...(forme_juridique ? { forme_juridique } : {}),
