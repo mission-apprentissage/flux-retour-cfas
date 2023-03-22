@@ -24,6 +24,9 @@ export const schema = object(
     organisation_id: objectId({
       description: "Organisation à laquelle appartient l'utilisateur",
     }),
+    type_organisation: string({
+      description: "Type d'organisation [temporaire pendant l'inscription en attendant d'être rattaché]",
+    }),
 
     // Internal
     account_status: string({
@@ -61,19 +64,6 @@ export const schema = object(
   },
   { required: ["email"], additionalProperties: true }
 );
-
-// Default value
-export function defaultValuesUser() {
-  return {
-    account_status: "PENDING_EMAIL_VALIDATION",
-    has_accept_cgu_version: "",
-    invalided_token: false,
-    password_updated_at: new Date(),
-    connection_history: [],
-    emails: [],
-    created_at: new Date(),
-  };
-}
 
 // Extra validation
 export function validateUser(props) {

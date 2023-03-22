@@ -29,6 +29,7 @@ import logger from "../../../common/logger.js";
 import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
 import registrationSchema from "../../../common/validation/registrationSchema.js";
+import { returnResult } from "../../middlewares/helpers.js";
 import { USER_ACCOUNT_STATUS } from "../../../common/constants/usersConstants.js";
 
 const checkActivationToken = () => {
@@ -63,53 +64,37 @@ export default ({ mailer }) => {
     validateRequestMiddleware({
       body: registrationSchema().strict(),
     }),
-    async ({ body }, res) => {
-      const { type, email, password, siret, uai: userUai, nom, prenom, civility, type_organisation } = body;
+    returnResult(async (req) => {
+      const registration = req.body;
+      registration.email = registration.email.toLowerCase();
 
-      const alreadyExists = await getUserByEmail(email.toLowerCase());
+      const alreadyExists = await getUserByEmail(registration.email.toLowerCase());
       if (alreadyExists) {
         throw Boom.conflict("email already in use", { message: "email already in use" });
       }
 
-      let uai = null;
-      if (type === "of") {
-        const resp = await fetchOrganismeWithSiret(siret);
-        if (resp) {
-          uai = resp.uai;
-        } else {
+      // type temporaire incomplet (manque la nature)
+      // mais on ne peut pas encore affecter l'utilisateur à une organisation car il nous manque des données
+      if (registration.type_organisation === "ORGANISME_FORMATION") {
+        const organisme = await fetchOrganismeWithSiret(registration.siret);
+        if (!organisme) {
           throw Boom.badRequest("SIRET inconnu");
         }
-        if (userUai !== uai) {
+        registration.uai = organisme.uai;
+        if (registration.uai !== organisme.uai) {
           // TODO FIABILISATION
           logger.error(
-            `POSSIBLE FIABILISATION PAR UN UTILISATUER ${email} : uai referentiel ${uai} - uai utilisateur ${uai} - siret ${siret}`
+            `POSSIBLE FIABILISATION PAR UN UTILISATUER ${registration.email} : uai referentiel ${organisme.uai} - uai utilisateur ${registration.uai} - siret ${registration.siret}`
           );
         }
-        uai = userUai;
       }
 
-      // FIXME
-      const user = await createUser(
-        { email, password },
-        {
-          roles: [type],
-          siret,
-          nom,
-          prenom,
-          civility,
-          organisation: type_organisation,
-          ...(uai ? { uai } : {}),
-        }
-      );
+      await createUser(registration);
 
-      if (!user) {
-        throw Boom.badRequest("Something went wrong");
-      }
+      await mailer.sendEmail({ to: registration.email, payload: registration }, "activation_user");
 
-      await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
-
-      return res.json({ succeeded: true });
-    }
+      return { succeeded: true };
+    })
   );
 
   router.post("/uai-siret-adresse", async ({ body }, res) => {

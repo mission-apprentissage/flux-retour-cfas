@@ -75,20 +75,21 @@ export default ({ mailer }) => {
       body: userSchema({ isNew: true }).strict(),
     }),
     async ({ body }, res) => {
-      const { password, email, ...data } = body;
-      const alreadyExists = await getUserByEmail(email);
-      if (alreadyExists) {
-        throw Boom.conflict(`Unable to create, user ${email} already exists`);
-      }
-      const user = await createUser({ email, password }, data);
-      try {
-        await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
-        return res.json(user);
-      } catch (err) {
-        logger.error(`Error sending activation email ${err?.toString()}`);
-        await removeUser(user._id);
-        throw Boom.internal("Unable to send activation_user email");
-      }
+      // FIXME à corriger depuis l'écran d'administration
+      // const { password, email, ...data } = body;
+      // const alreadyExists = await getUserByEmail(email);
+      // if (alreadyExists) {
+      //   throw Boom.conflict(`Unable to create, user ${email} already exists`);
+      // }
+      // const user = await createUser({ email, password }, data);
+      // try {
+      //   await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
+      //   return res.json(user);
+      // } catch (err) {
+      //   logger.error(`Error sending activation email ${err?.toString()}`);
+      //   await removeUser(user._id);
+      //   throw Boom.internal("Unable to send activation_user email");
+      // }
     }
   );
 

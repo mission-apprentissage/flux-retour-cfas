@@ -1,4 +1,7 @@
+import { EffectifsFilters } from "@/src/common/actions/helpers/filters.js";
+import { Organisation } from "@/src/common/model/organisations.model.js";
 import express from "express";
+import { Request } from "express-serve-static-core";
 import Joi from "joi";
 import { getNbDistinctOrganismes } from "../../../common/actions/effectifs.actions.js";
 import {
@@ -27,18 +30,11 @@ const commonEffectifsFiltersSchema = {
 
 /**
  * Build filters from the request
- * @param {*} req
- * @returns {Promise<import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters>}
  */
-export async function buildEffectifsFiltersFromRequest(req) {
-  /** @type {import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters} */
-  const filters = await validateFullObjectSchema(req.query, commonEffectifsFiltersSchema);
+export async function buildEffectifsFiltersFromRequest(req: Request) {
+  const filters = await validateFullObjectSchema<EffectifsFilters>(req.query, commonEffectifsFiltersSchema);
 
-  // restriction aux organismes accessibles par l'utilisateur sauf pour un admin
-  if (!req.user.is_admin) {
-    filters.organisme_ids = req.user.organisme_ids;
-  }
-
+  // FIXME restreindre les filtres selon les accès
   return filters;
 }
 

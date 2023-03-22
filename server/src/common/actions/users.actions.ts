@@ -1,12 +1,12 @@
 import { addHours } from "date-fns";
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId } from "mongodb";
 
 import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
 import { usersMigrationDb } from "../model/collections.js";
-import { defaultValuesUser, validateUser } from "../model/usersMigration.model.js";
+import { validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
-import { passwordSchema } from "../utils/validationUtils.js";
+import { passwordSchema, stripEmptyFields } from "../utils/validationUtils.js";
 
 /**
  * Méthode de création d'un utilisateur
@@ -20,29 +20,36 @@ import { passwordSchema } from "../utils/validationUtils.js";
  * @param {string} [options.prenom] - Prenom
  * @param {string} [options.telephone] - Telephone
  */
-export const createUser = async ({ email, password }, options: any = {}): Promise<WithId<any>> => {
-  const passwordHash = hashUtil(password);
-  const { civility, nom, prenom, telephone } = options || {};
 
-  // Vérification de l'existence de l'email - même si on a un index unique
-  const existingUserEmail = await usersMigrationDb().findOne({ email });
-  if (existingUserEmail) {
-    throw new Error("User with this email already exists");
-  }
+interface UserRegistration {
+  email: string;
+  civility: string;
+  nom: string;
+  prenom: string;
+  type_organisation: string;
+}
+
+export const createUser = async (user: UserRegistration): Promise<ObjectId> => {
+  const { civility, nom, prenom, email, type_organisation } = user;
 
   const { insertedId } = await usersMigrationDb().insertOne(
-    validateUser({
-      ...defaultValuesUser(),
+    stripEmptyFields({
+      account_status: "PENDING_EMAIL_VALIDATION",
+      has_accept_cgu_version: "",
+      invalided_token: false,
+      password_updated_at: new Date(),
+      connection_history: [],
+      emails: [],
+      created_at: new Date(),
       email: email.toLowerCase(),
-      password: passwordHash,
-      ...(civility ? { civility } : {}),
-      ...(nom ? { nom } : {}),
-      ...(prenom ? { prenom } : {}),
-      ...(telephone ? { telephone } : {}),
+      civility,
+      nom,
+      prenom,
+      type_organisation,
     })
   );
 
-  return await usersMigrationDb().findOne({ _id: insertedId });
+  return insertedId;
 };
 
 /**

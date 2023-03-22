@@ -182,51 +182,8 @@ const Finalize = () => {
         <Box mt={5}>
           {auth.isInPendingValidation &&
             auth.account_status === "PENDING_PERMISSIONS_SETUP" &&
-            auth.roles.includes("of") && (
+            auth.type_organisation === "ORGANISME_FORMATION" && (
               <Box w="50%">
-                <FormControl py={2} isRequired isInvalid={errors.type && touched.type}>
-                  <FormLabel fontSize="1.3rem" fontWeight="bold" mb={5}>
-                    Votre accès
-                  </FormLabel>
-                  <Text>
-                    En tant qu’utilisateur, vous pouvez choisir votre droit d’accès :
-                    <br /> (Vous pourrez toujours changer votre rôle en contactant le gestionnaire)
-                  </Text>
-                  <RadioGroup id="type" name="type" value={valuesAccess.type} mt={8}>
-                    <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
-                      <Radio value={"organisme.readonly"} onChange={handleChange} size="lg" alignItems="flex-start">
-                        <VStack justifyContent="flex-start">
-                          <Text w="full">Lecture</Text>
-                          <Text w="full" color="#666666" fontSize="0.9rem">
-                            Une fois l’autorisation validée par le gestionnaire de votre organisme, ce rôle vous
-                            autorise à consulter les données de votre organisme et leur évolution.
-                          </Text>
-                        </VStack>
-                      </Radio>
-                      <Radio value={"organisme.member"} onChange={handleChange} size="lg" alignItems="flex-start">
-                        <VStack justifyContent="flex-start">
-                          <Text w="full">Écriture</Text>
-                          <Text w="full" color="#666666" fontSize="0.9rem">
-                            Une fois l’autorisation validée par le gestionnaire de votre organisme, ce rôle vous
-                            autorise à contribuer au partage des effectifs de votre organisme.
-                          </Text>
-                        </VStack>
-                      </Radio>
-                      <Radio value={"organisme.admin"} onChange={handleChange} size="lg" alignItems="flex-start">
-                        <VStack justifyContent="flex-start">
-                          <Text w="full">Gestion</Text>
-                          <Text w="full" color="#666666" fontSize="0.9rem">
-                            Ce rôle vous permet de valider (ou d’annuler) les demandes de création de compte de vos
-                            collaborateurs. En tant que gestionnaire, vous êtes la seule personne à intervenir sur les
-                            droits d’accès à l’espace de l’organisme. Vous pouvez aussi consulter et contribuer au
-                            partage de vos effectifs.
-                          </Text>
-                        </VStack>
-                      </Radio>
-                    </VStack>
-                  </RadioGroup>
-                  {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
-                </FormControl>
                 <Button
                   size="md"
                   variant="primary"
@@ -304,7 +261,7 @@ const Finalize = () => {
                   auth.organisation === "CONSEIL_REGIONAL") && (
                   <>
                     <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-                      À quelle(s) région(s) souhaitez-vous accéder?
+                      À quelle région souhaitez-vous accéder?
                     </Heading>
                     <MultipleCheckBox
                       title=""
@@ -320,7 +277,7 @@ const Finalize = () => {
                 {auth.organisation === "ACADEMIE" && (
                   <>
                     <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-                      À quelle(s) académie(s) souhaitez-vous accéder?
+                      À quelle académie souhaitez-vous accéder?
                     </Heading>
                     <MultipleCheckBox
                       title=""

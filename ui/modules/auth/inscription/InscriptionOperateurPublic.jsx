@@ -37,7 +37,7 @@ export const InscriptionOperateurPublic = ({ onEtablissementSelected }) => {
       <Text fontWeight="bold">Vous représentez :</Text>
       <Box mt="2w">
         <Input
-          name="typePilot"
+          name="type"
           fieldType="select"
           placeholder="Sélectionner un opérateur public"
           options={options}

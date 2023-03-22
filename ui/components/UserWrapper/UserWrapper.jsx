@@ -11,7 +11,7 @@ import { emitter } from "../../common/emitter";
 import { isUserAdmin } from "@/common/utils/rolesUtils";
 
 const AccountWrapper = ({ children }) => {
-  const { auth } = useAuth();
+  const { auth, organisationType } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -33,14 +33,14 @@ const AccountWrapper = ({ children }) => {
           } else if (
             ["PENDING_PERMISSIONS_SETUP", "PENDING_ADMIN_VALIDATION"].includes(auth.account_status) &&
             router.asPath !== "/auth/finalisation" &&
-            !isUserAdmin(auth)
+            organisationType !== "ADMINISTRATEUR"
           ) {
             router.push("/auth/finalisation");
           }
         }
       }
     })();
-  }, [auth, router]);
+  }, [auth, organisationType, router]);
 
   return <>{children}</>;
 };

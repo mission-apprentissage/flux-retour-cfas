@@ -9,10 +9,9 @@ const registrationSchema = () =>
     prenom: z.string(),
     nom: z.string(),
     email: z.string(),
-    type: z.enum(["pilot", "of", "reseau_of"]),
+    civility: z.string(),
     siret: z.string(),
     uai: z.string().nullable().optional(),
-    civility: z.string(),
     // @ts-expect-error
     type_organisation: z.enum(organisationTypes.filter((v) => v !== "ADMINISTRATEUR")),
   });

@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import useAuth from "../hooks/useAuth";
+import useAuth from "@/hooks/useAuth";
 
 export const organisationTypes = [
   "ORGANISME_FORMATION_FORMATEUR",
@@ -16,7 +16,7 @@ export const organisationTypes = [
   "ADMINISTRATEUR",
 ] as const;
 
-const withAuth = (Component: any, authorizedOrganisationTypes: (typeof organisationTypes)[number][]) => {
+const withAuth = (Component: any, authorizedOrganisationTypes: (typeof organisationTypes)[number][] = []) => {
   const AuthenticatedPage = (props) => {
     const router = useRouter();
     const { auth, organisationType } = useAuth();
@@ -27,8 +27,9 @@ const withAuth = (Component: any, authorizedOrganisationTypes: (typeof organisat
       return <></>;
     }
 
-    if (!authorizedOrganisationTypes.includes(organisationType)) {
+    if (authorizedOrganisationTypes.length > 0 && !authorizedOrganisationTypes.includes(organisationType)) {
       if (typeof window !== "undefined") {
+        console.error(`Vous n'avez pas les droits pour accéder à cette page`);
         router.push("/auth/connexion");
       }
       return <></>;

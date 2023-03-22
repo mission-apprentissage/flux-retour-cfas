@@ -1,15 +1,43 @@
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
 
+export type EffectifsFilters = {
+  date: Date;
+  organisme_id?: string;
+  organisme_ids?: string[];
+  formation_cfd?: string;
+  etablissement_reseaux?: string;
+  etablissement_num_departement?: string;
+  etablissement_num_region?: string;
+  niveau_formation?: string;
+  siret_etablissement?: string;
+  uai_etablissement?: string;
+};
+
+export interface FilterConfiguration {
+  matchKey: string;
+
+  // optional transformer
+  transformValue?: (value: any) => any;
+
+  // some filters need a preliminary lookup with another collection
+  preliminaryLookup?: {
+    from: string;
+    localField: string;
+    foreignField: string;
+    as: string;
+  };
+}
+
+export type FilterConfigurations = { [key in keyof EffectifsFilters]: FilterConfiguration };
+
 export const organismeLookup = {
   from: "organismes",
   localField: "organisme_id",
   foreignField: "_id",
   as: "organisme",
 };
-
-/** @type {import("./filters-struct.js").FilterConfigurations} */
-const filtersConfigurations = {
+const filtersConfigurations: FilterConfigurations = {
   date: {
     matchKey: "annee_scolaire",
     transformValue: (date) => ({ $in: getAnneesScolaireListFromDate(date) }),
@@ -47,10 +75,7 @@ const filtersConfigurations = {
   },
 };
 
-/**
- * @param {Partial<import("./filters-struct.js").EffectifsFilters>} filters
- */
-export function buildMongoPipelineFilterStages(filters: any = {}) {
+export function buildMongoPipelineFilterStages(filters: EffectifsFilters) {
   const matchFilters = {};
   const afterLookupsMatchFilters = {};
   const preliminaryLookups: any[] = [];

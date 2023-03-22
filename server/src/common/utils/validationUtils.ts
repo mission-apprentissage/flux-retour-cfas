@@ -41,7 +41,7 @@ export function validateUai(uai) {
   return uaiSchema().required().validate(uai);
 }
 
-export async function validateFullObjectSchema(object, schema) {
+export async function validateFullObjectSchema<T = any>(object, schema): Promise<T> {
   return await Joi.object(schema).validateAsync(object, { abortEarly: false });
 }
 
