@@ -4,7 +4,7 @@ import { effectifsDb } from "../model/collections.js";
 import { defaultValuesEffectif, validateEffectif } from "../model/effectifs.model/effectifs.model.js";
 import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../model/effectifs.model/parts/formation.effectif.part.js";
-import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber.js";
+import { transformToInternationalNumber } from "../validation/utils/frenchTelephoneNumber.js";
 import { buildMongoPipelineFilterStages } from "./helpers/filters.js";
 
 /**

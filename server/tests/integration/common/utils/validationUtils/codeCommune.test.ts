@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { validateCodeCommune } from "../../../../../src/common/utils/validationsUtils/codeCommune.js";
+import { validateCodeCommune } from "../../../../../src/common/validation/utils/codeCommune.js";
 
 describe("Domain Code Commune", () => {
   describe("validateCodeCommune", () => {

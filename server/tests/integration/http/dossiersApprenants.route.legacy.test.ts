@@ -8,7 +8,7 @@ import {
   createRandomDossierApprenant,
   createRandomOrganisme,
 } from "../../data/randomizedSample.js";
-import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd.js";
+import { cfdRegex } from "../../../src/common/validation/utils/cfd.js";
 import { dossiersApprenantsMigrationDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
 import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";

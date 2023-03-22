@@ -2,19 +2,19 @@ import { v4 as uuid } from "uuid";
 import {
   validateNomApprenant,
   normalizeNomApprenant,
-} from "../../../common/utils/validationsUtils/apprenant/nomApprenant.js";
+} from "../../../common/validation/utils/apprenant/nomApprenant.js";
 import {
   validatePrenomApprenant,
   normalizePrenomApprenant,
-} from "../../../common/utils/validationsUtils/apprenant/prenomApprenant.js";
+} from "../../../common/validation/utils/apprenant/prenomApprenant.js";
 import { USER_EVENTS_ACTIONS } from "../../../common/constants/userEventsConstants.js";
-import { validateIneApprenant } from "../../../common/utils/validationsUtils/apprenant/ineApprenant.js";
-import { validateDateDeNaissanceApprenant } from "../../../common/utils/validationsUtils/apprenant/dateDeNaissanceApprenant.js";
-import { validateCodeCommune } from "../../../common/utils/validationsUtils/codeCommune.js";
-import { validateFrenchTelephoneNumber } from "../../../common/utils/validationsUtils/frenchTelephoneNumber.js";
-import { validateEmail } from "../../../common/utils/validationsUtils/email.js";
+import { validateIneApprenant } from "../../../common/validation/utils/apprenant/ineApprenant.js";
+import { validateDateDeNaissanceApprenant } from "../../../common/validation/utils/apprenant/dateDeNaissanceApprenant.js";
+import { validateCodeCommune } from "../../../common/validation/utils/codeCommune.js";
+import { validateFrenchTelephoneNumber } from "../../../common/validation/utils/frenchTelephoneNumber.js";
+import { validateEmail } from "../../../common/validation/utils/email.js";
 import { validateUai } from "../../../common/utils/validationUtils.js";
-import { validateSiret } from "../../../common/utils/validationsUtils/siret.js";
+import { validateSiret } from "../../../common/validation/utils/siret.js";
 import logger from "../../../common/logger.js";
 import { userEventsDb } from "../../../common/model/collections.js";
 import { getDbCollection } from "../../../common/mongodb.js";

@@ -12,7 +12,7 @@ import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collection
 import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/mapping.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../src/common/constants/fiabilisationConstants.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/natureOrganismeConstants.js";
 import { SAMPLES_ETABLISSEMENTS_API_ENTREPRISE } from "../../../data/entreprise.api.gouv.fr/sampleDataApiEntreprise.js";
 import { DEPARTEMENTS } from "../../../../src/common/constants/territoiresConstants.js";
 import { subDays } from "date-fns";

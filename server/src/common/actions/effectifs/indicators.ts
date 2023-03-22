@@ -3,7 +3,7 @@ import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstant
 import {
   SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS,
   SEUIL_ALERTE_NB_MOIS_RUPTURANTS,
-} from "../../utils/validationsUtils/effectif.js";
+} from "../../validation/utils/effectif.js";
 import { mapMongoObjectToCSVObject } from "./export.js";
 import { Indicator } from "./indicator.js";
 

@@ -4,7 +4,7 @@ import { ObjectId, WithId } from "mongodb";
 import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
-import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
+import { telephoneConverter } from "../../validation/utils/frenchTelephoneNumber.js";
 import { buildNewHistoriqueStatutApprenant } from "../dossiersApprenants.actions.js";
 import {
   buildEffectif,
