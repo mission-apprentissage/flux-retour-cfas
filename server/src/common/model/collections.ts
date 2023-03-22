@@ -33,7 +33,7 @@ import {
   UsersMigration,
 } from "./@types";
 
-export const modelDescriptors = [
+export const modelDescriptors: { schema?: any; indexes?: any[][]; collectionName: string }[] = [
   usersModelDescriptor,
   userEventsModelDescriptor,
   formationsModelDescriptor,

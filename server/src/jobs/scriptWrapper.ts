@@ -54,6 +54,7 @@ export const runScript = async (job, jobName) => {
     redisClient = services.cache;
     result = await job(services);
   } catch (e: any) {
+    console.error(e);
     error = e?.toString();
     await updateJobEvent(jobEventId, {
       action: jobEventStatuts.error,

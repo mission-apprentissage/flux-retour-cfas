@@ -2,13 +2,11 @@ import { object, objectId, string, date, stringOrNull, any } from "./json-schema
 
 const collectionName = "userEvents";
 
-const indexes = () => {
-  return [
-    [{ username: 1 }, { name: "username" }],
-    [{ user_email: 1 }, { name: "user_email" }],
-    [{ action: 1 }, { name: "action" }],
-  ];
-};
+const indexes = [
+  [{ username: 1 }, { name: "username" }],
+  [{ user_email: 1 }, { name: "user_email" }],
+  [{ action: 1 }, { name: "action" }],
+];
 
 const schema = object(
   {

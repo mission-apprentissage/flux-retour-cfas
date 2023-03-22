@@ -2,13 +2,11 @@ import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } fro
 
 const collectionName = "users";
 
-const indexes = () => {
-  return [
-    [{ username: 1 }, { name: "username" }],
-    [{ email: 1 }, { name: "email" }],
-    [{ organisme: 1 }, { name: "organisme" }],
-  ];
-};
+const indexes = [
+  [{ username: 1 }, { name: "username" }],
+  [{ email: 1 }, { name: "email" }],
+  [{ organisme: 1 }, { name: "organisme" }],
+];
 
 const schema = object(
   {

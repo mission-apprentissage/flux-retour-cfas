@@ -4,9 +4,7 @@ import { documentSchema } from "./parts/document.part.js";
 
 const collectionName = "uploads";
 
-function indexes() {
-  return [[{ organisme_id: 1 }, { unique: true }]];
-}
+const indexes = [[{ organisme_id: 1 }, { unique: true }]];
 
 const schema = object(
   {

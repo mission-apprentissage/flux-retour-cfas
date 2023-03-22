@@ -1,5 +1,3 @@
-import { getDatabase } from "../mongodb.js";
-
 /**
  * Find data in mongoCollection and return paginated list
  * @param {*} collection
@@ -27,18 +25,4 @@ export const findAndPaginate = async (collection, query, options: any = {}) => {
       total,
     },
   };
-};
-
-/**
- * Checks if a collection exists in a mongo database.
- *
- * @param db a mongo db object.  eg.
- *    client = await MongoClient.connect(uri);
- *    db = client.db();
- * @param collectionName the name of the collection to search for
- * @returns {Promise<boolean>}
- */
-export const doesCollectionExistInDb = async (collectionName) => {
-  const collection = await getDatabase().collection(collectionName);
-  return !!collection;
 };
