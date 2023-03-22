@@ -58,12 +58,15 @@ export const schema = object(
     created_at: date({ description: "Date d'ajout en base de données" }),
     processed_at: date({ description: "Date de process des données" }),
     validation_errors: arrayOf(
-      object({
-        fieldName: any({ description: "Nom du champ en erreur" }),
-        type: any({ description: "Type d'erreur" }),
-        inputValue: any({ description: "Valeur fournie en entrée" }),
-        message: any({ description: "Message de l'erreur" }),
-      }),
+      object(
+        {
+          message: any({ description: "message d'erreur" }),
+          path: any({ description: "champ en erreur" }),
+        },
+        {
+          additionalProperties: true,
+        }
+      ),
       {
         description: "Erreurs de validation de cet effectif",
       }

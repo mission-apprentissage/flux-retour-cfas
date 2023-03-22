@@ -57,20 +57,12 @@ export interface EffectifsQueue {
    */
   validation_errors?: {
     /**
-     * Nom du champ en erreur
-     */
-    fieldName?: any;
-    /**
-     * Type d'erreur
-     */
-    type?: any;
-    /**
-     * Valeur fournie en entrée
-     */
-    inputValue?: any;
-    /**
-     * Message de l'erreur
+     * message d'erreur
      */
     message?: any;
+    /**
+     * champ en erreur
+     */
+    path?: any;
   }[];
 }

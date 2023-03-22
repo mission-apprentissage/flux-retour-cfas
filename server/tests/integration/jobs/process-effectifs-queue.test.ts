@@ -10,11 +10,16 @@ const siret = "77937827200016";
 
 describe("Processing de EffectifsQueue", () => {
   beforeEach(async () => {
-    await createOrganisme(createRandomOrganisme({ uai, siret }), {
-      buildFormationTree: false,
-      buildInfosFromSiret: false,
-      callLbaApi: false,
-    });
+    try {
+      await createOrganisme(createRandomOrganisme({ uai, siret }), {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
+    } catch (e) {
+      console.log("Oups", e);
+      throw e;
+    }
   });
 
   const requiredFields = [
@@ -100,7 +105,11 @@ describe("Processing de EffectifsQueue", () => {
         source: "testSource",
       })
     );
-    await processEffectifsQueue();
+    try {
+      await processEffectifsQueue();
+    } catch (e) {
+      console.log(">>>>>>>", JSON.stringify(e, null, 2));
+    }
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
     assert.deepStrictEqual(updatedInput?.validation_errors, [
       {
