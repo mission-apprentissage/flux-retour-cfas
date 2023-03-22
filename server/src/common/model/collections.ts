@@ -14,6 +14,7 @@ import OrganismesModelDescriptor from "./organismes.model.js";
 import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model.js";
 import dossiersApprenantsMigrationModelDescriptor from "./dossiersApprenantsMigration.model.js";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model.js";
+import effectifsQueueModelDescriptor from "./effectifsQueue.model.js";
 import uploadsModelDescriptor from "./uploads.model/uploads.model.js";
 import {
   DossiersApprenantsMigration,
@@ -32,6 +33,7 @@ import {
   User,
   UsersMigration,
 } from "./@types";
+import { EffectifsQueue } from "./@types/EffectifsQueue.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
@@ -48,6 +50,7 @@ export const modelDescriptors = [
   OrganismesReferentielModelDescriptor,
   dossiersApprenantsMigrationModelDescriptor,
   effectifsModelDescriptor,
+  effectifsQueueModelDescriptor,
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
 ];
@@ -70,6 +73,7 @@ export const maintenanceMessageDb = () =>
 export const dossiersApprenantsMigrationDb = () =>
   getDbCollection<DossiersApprenantsMigration>(dossiersApprenantsMigrationModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);
+export const effectifsQueueDb = () => getDbCollection<EffectifsQueue>(effectifsQueueModelDescriptor.collectionName);
 export const uploadsDb = () => getDbCollection<Upload>(uploadsModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);

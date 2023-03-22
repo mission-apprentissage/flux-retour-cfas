@@ -288,7 +288,7 @@ const hydrateOrganisme = async (organisme: any) => {
  *
  * @param {*} dossiersApprenants
  */
-export const runEngine = async ({ effectifData }, organismeData) => {
+export const runEngine = async (effectifData, organismeData) => {
   let organismeCreatedId: any = null;
   let organismeFoundId: any = null;
 

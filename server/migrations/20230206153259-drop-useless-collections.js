@@ -15,8 +15,10 @@ export const up = async (db) => {
   ];
 
   for (const currentCollectionToRemove of collectionsToRemove) {
-    if (collectionExistInDb(collectionsInDb, currentCollectionToRemove))
+    if (collectionExistInDb(collectionsInDb, currentCollectionToRemove)) {
+      console.info(`Suppression de la collection ${currentCollectionToRemove}`);
       await db.collection(currentCollectionToRemove).drop();
+    }
   }
 };
 

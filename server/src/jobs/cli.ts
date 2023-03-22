@@ -29,6 +29,7 @@ import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-ef
 import { recreateIndexes } from "./db/recreateIndexes.js";
 import { findInvalidDocuments } from "./db/findInvalidDocuments.js";
 import { generateTypes } from "./seed/types/generate-types.js";
+import { processEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
 
 program.configureHelp({
   sortSubcommands: true,
@@ -52,6 +53,15 @@ program
       await findInvalidDocuments(collectionName);
     }, options._name);
   });
+
+program
+  .command("process:effectifs-queue")
+  .description("Process la queue des effectifs")
+  .action(async (_, options) =>
+    runScript(async () => {
+      await processEffectifsQueue();
+    }, options._name)
+  );
 
 /**
  * Job (temporaire) de suppression d'un organisme et de ses effectifs / dossiersApprenantsMigration liés
