@@ -1,7 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 import { MongoServerError } from "mongodb";
 import { deleteOrganismeAndEffectifsAndDossiersApprenantsMigration } from "../../../../common/actions/organismes/organismes.actions.js";
-
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
@@ -14,9 +13,7 @@ import {
   organismesDb,
 } from "../../../../common/model/collections.js";
 
-const filters = {
-  annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },
-};
+const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] } };
 
 let nbOrganismesFiables = 0;
 let nbOrganismesFiabilises = 0;
@@ -31,10 +28,12 @@ let nbOrganismesNonFiabilisablesUaiNonValidees = 0;
 
 /**
  * Méthode d'application de la fiabilisation pour les 3 cas :
- *  Données à fiabiliser (depuis les couples construits) : MAJ des dossiersApprenantsMigration ainsi que le champ fiabilisation_statut des organismes concernés
- *  Données déja identifiées comme fiables : MAJ le champ fiabilisation_statut des organismes concernés
- *  Données identifiées comme non fiabilisables : MAJ le champ fiabilisation_statut des organismes concernés
- *
+ *  Couples déja identifiées comme fiables : MAJ le champ fiabilisation_statut des organismes concernés
+ *  Couples à fiabiliser : On déplace les effectifs / dossiersApprenantsMigration, puis on MAJ le champ fiabilisation_statut des organismes concernés
+ *    et on supprime les organismes non fiables restants
+ *  Couples identifiés comme non fiabilisables (via Mapping) : MAJ le champ fiabilisation_statut des organismes concernés
+ *    et suppression des organismes si on trouve un organisme fiable lié à ce couple
+ *  Couples identifiés comme non fiabilisables (UAI non validée référentiel) : MAJ le champ fiabilisation_statut des organismes concernés
  */
 export const applyFiabilisationUaiSiret = async () => {
   // Traitement // de l'identification des différents statuts de fiabilisation
@@ -78,6 +77,8 @@ export const applyFiabilisationUaiSiret = async () => {
   };
 };
 
+// #region ORGANISMES FIABLES
+
 /**
  * Méthode maj des statuts de fiabilisation FIABLE pour les organismes avec UAI & présents dans le référentiel
  */
@@ -109,25 +110,31 @@ const updateOrganismesCouplesFiables = async () => {
   });
 };
 
+// #endregion
+
+// #region ORGANISMES A FIABILISER
+
 /**
  * Méthode de MAJ des organismes et dossiersApprenantsMigration pour les cas ou l'on bien fiabilisé la donnée
  */
 const updateDossiersApprenantAndOrganismesFiabilise = async () => {
-  logger.info("Identification des dossiersApprenants et organismes fiabilisés ...");
+  logger.info("Traitement des organismes à fiabiliser ...");
   const couplesAFiabiliser = await fiabilisationUaiSiretDb()
     .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER })
     .toArray();
 
-  await PromisePool.for(couplesAFiabiliser).process(updateOrganismeAndDossiersApprenantForCoupleFiabilise);
+  await PromisePool.for(couplesAFiabiliser).process(updateOrganismeForCoupleFiabilise);
 };
 
 /**
- * Méthode de MAJ unitaire d'un organisme et de ses dossiersApprenantsMigration pour les cas ou l'on bien fiabilisé la donnée
+ * Méthode de MAJ unitaire d'un organisme à fiabiliser et de ses effectifs / dossiersApprenantsMigration
  * Pour chaque couple identifié on va mettre à jour les dossiers apprenants (uai et siret)
- * Ensuite on va mettre à jour l'organisme en question comme étant FIABILISE
+ * Ensuite on va mettre à jour l'organisme en question comme étant FIABLE
+ * Enfin on va déplacer les effectifs de l'organisme non fiable vers le fiable
+ * Puis supprimer l'organisme non fiable
  * @param {*} currentFiabilisationCouple
  */
-const updateOrganismeAndDossiersApprenantForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret_fiable }: any) => {
+const updateOrganismeForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret_fiable }: any) => {
   // Update de tous les dossiersApprenantsMigration qui étaient sur le mauvais couple UAI-SIRET
   const dossiersApprenantsMigrationForFiabilisationCouple = await dossiersApprenantsMigrationDb()
     .find({ ...filters, uai_etablissement: uai, siret_etablissement: siret })
@@ -138,11 +145,26 @@ const updateOrganismeAndDossiersApprenantForCoupleFiabilise = async ({ uai, uai_
     await updateDossierApprenantMigrationForUaiSiretFiable(currentDossierToUpdate, uai_fiable, siret_fiable);
   }
 
-  // Update de l'organisme lié à un couple UAI-SIRET marqué comme A_FIABILISER en FIABILISE
+  // Update de l'organisme lié à un couple UAI-SIRET marqué comme A_FIABILISER en FIABLE
   const { modifiedCount: organismesModifiedCount } = await organismesDb().updateOne(
     { uai: uai_fiable, siret: siret_fiable },
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
   );
+
+  const organismeFiable = await organismesDb().findOne({ uai: uai_fiable, siret: siret_fiable });
+  const organismeNonFiable = await organismesDb().findOne({ uai: uai, siret: siret });
+
+  if (organismeFiable && organismeNonFiable) {
+    // Déplacement des effectifs de l'organisme non fiable vers l'organisme fiable
+    await effectifsDb().updateMany(
+      { organisme_id: organismeNonFiable?._id },
+      { $set: { organisme_id: organismeFiable?._id } }
+    );
+
+    // Suppression de l'organisme non fiable et de ses effectifs / dossiersApprenantsMigration
+    await deleteOrganismeAndEffectifsAndDossiersApprenantsMigration(organismeNonFiable?._id);
+  }
+
   nbOrganismesFiabilises += organismesModifiedCount;
 };
 
@@ -173,6 +195,10 @@ const updateDossierApprenantMigrationForUaiSiretFiable = async (
     nbDossiersApprenantsFiabilises++;
   }
 };
+
+// #endregion
+
+// #region ORGANISMES NON FIABILISABLES MAPPING
 
 /**
  * Méthode de MAJ de tous les couples non fiabilisables en utilisant le mapping >> NON_FIABILISABLE_MAPPING
@@ -251,6 +277,9 @@ const updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable = async ({
     if (nbEffectifsFixedOrganismesNonFiabilisablesMapping > 0) nbOrganismesNonFiabilisablesMappingFixEffectifs++;
   }
 };
+// #endregion
+
+// #region ORGANISMES NON FIABILISABLES UAI NON VALIDEE
 
 /**
  * Méthode de MAJ de tous les organismes non fiabilisables sans UAI dans le référentiel >> NON_FIABILISABLE_UAI_NON_VALIDEE
@@ -278,3 +307,5 @@ const updateOrganismeForCurrentCoupleNonFiabilisableUaiNonValidee = async (curre
   );
   nbOrganismesNonFiabilisablesUaiNonValidees += modifiedCount;
 };
+
+// #endregion
