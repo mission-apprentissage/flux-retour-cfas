@@ -101,11 +101,13 @@ const updateOrganismesCouplesFiables = async () => {
     .toArray();
 
   await PromisePool.for(couplesFiables).process(async ({ siret, uai }) => {
-    if (!siret || !uai) return;
+    if (!(siret && uai)) {
+      return;
+    }
     const { modifiedCount } = (await organismesDb().updateMany(
       { uai, siret },
       { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
-    )) as any as UpdateResult;
+    )) as UpdateResult;
     nbOrganismesFiables += modifiedCount;
   });
 };

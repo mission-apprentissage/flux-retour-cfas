@@ -74,7 +74,7 @@ export const findActivePermissionsForUser = async ({ userEmail }, projection = {
 
 export const hasPermission = async ({ organisme_id, userEmail }, projection = {}) => {
   return await permissionsDb().findOne(
-    { organisme_id: organisme_id ? new ObjectId(organisme_id) : null, userEmail: userEmail.toLowerCase() },
+    { organisme_id: organisme_id ? new ObjectId(organisme_id) : null, userEmail: userEmail.toLowerCase() } as any,
     { projection }
   );
 };
@@ -98,7 +98,7 @@ const findPermissionsByUserEmail = async (organisme_id: string, userEmail: strin
       {
         ...(organisme_id ? { organisme_id: new ObjectId(organisme_id) } : {}),
         userEmail: userEmail.toLowerCase(),
-      },
+      } as any,
       { projection }
     )
     .toArray();

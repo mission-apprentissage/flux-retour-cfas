@@ -16,8 +16,8 @@ import {
 } from "../../../../src/common/actions/formations.actions.js";
 import { createSampleEffectif } from "../../../data/randomizedSample.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
-import { Organismes } from "../../../../src/common/model/@types/Organismes.js";
-import { Formations } from "../../../../src/common/model/@types/Formations.js";
+import { Organisme } from "../../../../src/common/model/@types/Organisme.js";
+import { Formation } from "../../../../src/common/model/@types/Formation.js";
 
 describe("Tests des actions Formations", () => {
   describe("existsFormation", () => {
@@ -55,7 +55,7 @@ describe("Tests des actions Formations", () => {
       const cfd = "2502000D";
       const { insertedId } = await formationsDb().insertOne({ cfd });
 
-      const found = (await getFormationWithCfd(cfd)) as Formations;
+      const found = (await getFormationWithCfd(cfd)) as Formation;
       assert.equal(insertedId.equals(found._id), true);
     });
   });
@@ -241,7 +241,7 @@ describe("Tests des actions Formations", () => {
       assert.ok(results.find((formation) => formation.cfd === formationsSeed[5].cfd));
     });
 
-    const organisme: Organismes = {
+    const organisme: Organisme = {
       uai: "0040533H",
       siret: "19040492100016",
       nom: "LYCEE POLYVALENT LES ISCLES",
