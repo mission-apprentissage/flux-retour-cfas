@@ -63,7 +63,6 @@ const UserMenu = () => {
       )}
       {auth?.sub !== "anonymous" && (
         <Flex w="full">
-          {/* <NotificationsMenu mr={5} w="15px" /> */}
           <Link
             href="/mon-espace/mon-organisme"
             borderBottom="1px solid"

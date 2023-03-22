@@ -1,6 +1,5 @@
 import logger from "../../../common/logger.js";
 import { createUser, getUserByEmail } from "../../../common/actions/users.actions.js";
-import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
 import {
   addContributeurOrganisme,
   createOrganisme,
