@@ -1,3 +1,10 @@
+## [3.16.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.16.0...v3.16.1) (2023-03-22)
+
+
+### Bug Fixes
+
+* suppression index unique sur effectifsQueue ([e959068](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e959068faee132358287c830d6c386a69dda1f90))
+
 # [3.16.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.15.0...v3.16.0) (2023-03-22)
 
 
