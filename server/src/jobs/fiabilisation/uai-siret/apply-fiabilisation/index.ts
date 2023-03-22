@@ -1,5 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
-import { MongoServerError } from "mongodb";
+import { MongoServerError, UpdateResult } from "mongodb";
 import { deleteOrganismeAndEffectifsAndDossiersApprenantsMigration } from "../../../../common/actions/organismes/organismes.actions.js";
 
 import {
@@ -101,10 +101,13 @@ const updateOrganismesCouplesFiables = async () => {
     .toArray();
 
   await PromisePool.for(couplesFiables).process(async ({ siret, uai }) => {
-    const { modifiedCount } = await organismesDb().updateMany(
-      { uai: uai, siret: siret },
+    if (!(siret && uai)) {
+      return;
+    }
+    const { modifiedCount } = (await organismesDb().updateMany(
+      { uai, siret },
       { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
-    );
+    )) as UpdateResult;
     nbOrganismesFiables += modifiedCount;
   });
 };

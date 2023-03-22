@@ -1,14 +1,6 @@
 import { schemaValidation } from "../utils/schemaUtils.js";
 import { cfdSchema } from "../utils/validationUtils.js";
-import {
-  object,
-  string,
-  date,
-  objectId,
-  dateOrNull,
-  stringOrNull,
-  arrayOfOrNull,
-} from "./json-schema/jsonSchemaTypes.js";
+import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "./json-schema/jsonSchemaTypes.js";
 
 const collectionName = "formations";
 
@@ -32,7 +24,7 @@ const schema = object(
     cfd_start_date: dateOrNull({ description: "Date d'ouverture du CFD" }),
     cfd_end_date: dateOrNull({ description: "Date de fermeture du CFD" }),
     libelle: stringOrNull({ description: "Libellé normalisé depuis Tables de Correspondances" }),
-    rncps: arrayOfOrNull(string(), {
+    rncps: arrayOf(string(), {
       description: "Liste des codes RNCPs de la formation récupéré depuis Tables de Correspondances",
     }),
     niveau: stringOrNull({ description: "Niveau de formation récupéré via Tables de Correspondances" }),
@@ -40,7 +32,7 @@ const schema = object(
       description: "Libellé du niveau de formation récupéré via Tables de Correspondances",
     }),
     tokenized_libelle: stringOrNull({ description: "Libellé tokenizé pour la recherche" }),
-    metiers: arrayOfOrNull(string(), { description: "Les domaines métiers rattachés à la formation" }),
+    metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à la formation" }),
     duree: stringOrNull({ description: "Durée de la formation théorique" }),
     annee: stringOrNull({ description: "Année de la formation (cursus)" }),
 

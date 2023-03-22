@@ -1,4 +1,4 @@
-import { CollectionInfo, MongoClient } from "mongodb";
+import { CollectionInfo, Document, MongoClient } from "mongodb";
 import omitDeep from "omit-deep";
 import logger from "./logger.js";
 import { asyncForEach } from "./utils/asyncUtils.js";
@@ -36,9 +36,9 @@ export const getDatabase = () => {
   return mongodbClient.db();
 };
 
-export const getDbCollection = (name) => {
+export const getDbCollection = <TSchema extends Document>(name) => {
   ensureInitialization();
-  return mongodbClient.db().collection(name);
+  return mongodbClient.db().collection<TSchema>(name);
 };
 
 export const getDbCollectionSchema = async (name) => {
@@ -94,7 +94,7 @@ export const configureDbSchemaValidation = async (modelDescriptors) => {
       validationLevel: "strict",
       validationAction: "error",
       validator: {
-        $jsonSchema: { title: `${collectionName} validation schema`, ...omitDeep(schema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
+        $jsonSchema: { title: collectionName, ...omitDeep(schema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
       },
     });
   });

@@ -71,7 +71,7 @@ export const hasAclsByRoleId = async (id, acl) => {
     throw new Error("Role doesn't exist");
   }
 
-  return acl.every((page) => roleDb.acl.includes(page));
+  return acl.every((page) => roleDb.acl?.includes(page));
 };
 
 export const getRoleByName = async (name, projection = {}) => {

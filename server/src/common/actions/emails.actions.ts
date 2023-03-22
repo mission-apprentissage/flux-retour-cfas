@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { usersMigrationDb } from "../model/collections.js";
 import { generateHtml } from "../utils/emailsUtils.js";
 
-function addEmail(userEmail, token, templateName, payload) {
+function addEmail(userEmail: string, token: string, templateName: string, payload: any) {
   return usersMigrationDb().findOneAndUpdate(
     { email: userEmail },
     {
@@ -155,9 +155,9 @@ export const createMailer = (mailerService) => {
       if (!user) {
         throw new Error("user not found");
       }
-      const previous = user.emails.find((e) => e.token === token);
+      const previous = user.emails?.find((e) => e.token === token);
 
-      const nextTemplateName = options.newTemplateName || previous.templateName;
+      const nextTemplateName = options.newTemplateName || previous?.templateName;
       const template = mailerService.templates[nextTemplateName](user, token, { resend: !options.retry });
 
       try {

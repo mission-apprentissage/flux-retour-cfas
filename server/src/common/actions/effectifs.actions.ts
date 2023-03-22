@@ -272,7 +272,7 @@ export const updateEffectif = async (id, data, opt = { keepPreviousErrors: false
         ...(opt.keepPreviousErrors
           ? {
               validation_errors: uniqBy(
-                [...effectif.validation_errors, ...(data.validation_errors || [])],
+                [...(effectif.validation_errors || []), ...(data.validation_errors || [])],
                 "fieldName"
               ),
             }

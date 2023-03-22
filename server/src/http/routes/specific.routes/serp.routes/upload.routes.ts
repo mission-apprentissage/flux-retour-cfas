@@ -270,8 +270,8 @@ export default ({ clamav }) => {
 
   const getUnconfirmedDocumentContent = async (organisme_id) => {
     const uploads = await getUploadEntryByOrgaId(organisme_id);
-    const unconfirmed = uploads.documents.filter((d) => !d.confirm);
-    const stream = await getFromStorage(unconfirmed[0].chemin_fichier);
+    const unconfirmed = uploads.documents?.filter((d) => !d.confirm);
+    const stream = await getFromStorage(unconfirmed?.[0].chemin_fichier);
     let headers: any = [];
     let rawFileJson: any[] = [];
     await oleoduc(
@@ -284,7 +284,7 @@ export default ({ clamav }) => {
         { accumulator: Buffer.from(new Uint8Array()) }
       ),
       writeData(async (data) => {
-        if (unconfirmed[0].ext_fichier === "csv") {
+        if (unconfirmed?.[0].ext_fichier === "csv") {
           const content = csvToJson.latin1Encoding().csvStringToJson(data.toString());
           headers = Object.keys(content[0]);
           rawFileJson = content;
@@ -295,7 +295,7 @@ export default ({ clamav }) => {
         }
       })
     );
-    return { headers, rawFileJson, unconfirmedDocument: unconfirmed[0] };
+    return { headers, rawFileJson, unconfirmedDocument: unconfirmed?.[0] };
   };
 
   router.get(
@@ -611,7 +611,7 @@ export default ({ clamav }) => {
       await uploadsDb().findOneAndUpdate(
         { _id: upload._id },
         {
-          $set: { models: uniqBy([model, ...upload.models], "type_document"), updated_at: new Date() },
+          $set: { models: uniqBy([model, ...(upload?.models || [])], "type_document"), updated_at: new Date() },
         },
         { returnDocument: "after" }
       );
@@ -637,8 +637,8 @@ export default ({ clamav }) => {
       const { annee_scolaire, typeCodeDiplome, ...mapping } = userMapping;
 
       await updateDocument(organisme_id, {
-        nom_fichier: document.nom_fichier,
-        taille_fichier: document.taille_fichier,
+        nom_fichier: document?.nom_fichier,
+        taille_fichier: document?.taille_fichier,
         mapping_column: userMapping,
       });
       const applyMapping = (arr, mapping) =>
@@ -668,12 +668,12 @@ export default ({ clamav }) => {
           data.formation.cfd = formation?.cfd ?? "Erreur";
         } else {
           const { rncps } = (await getFormationWithCfd(data.formation.cfd, { rncps: 1 })) || { rncps: [] };
-          data.formation.rncp = rncps[0] ?? data.formation?.rncp;
+          data.formation.rncp = rncps?.[0] ?? data.formation?.rncp;
         }
 
         const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
           organisme_id,
-          source: document.document_id.toString(),
+          source: document?.document_id.toString(),
           id_erp_apprenant: new ObjectId().toString(),
           annee_scolaire,
           apprenant: { nom: data.apprenant?.nom ?? "", prenom: data.apprenant?.prenom ?? "" },
@@ -714,7 +714,7 @@ export default ({ clamav }) => {
             const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
               {
                 organisme_id,
-                source: document.document_id.toString(),
+                source: document?.document_id.toString(),
                 id_erp_apprenant: `${index}`,
                 annee_scolaire,
                 ...data,
@@ -834,22 +834,26 @@ export default ({ clamav }) => {
       const upload = await getUploadEntryByOrgaId(organisme_id);
 
       let models = upload.models;
-      const model = find(upload.models, { type_document: document.type_document });
+      const model = find(upload.models, { type_document: document?.type_document });
       if (!model) {
         models = [
-          ...models,
+          ...(models || []),
           {
-            type_document: document.type_document,
+            type_document: document?.type_document,
             mapping_column: userMapping,
             lock: false,
           },
-        ];
+        ] as any;
       }
 
       await uploadsDb().findOneAndUpdate(
         { _id: upload._id },
         {
-          $set: { last_snapshot_effectifs: canBeImportEffectifs, models, updated_at: new Date() },
+          $set: {
+            last_snapshot_effectifs: canBeImportEffectifs,
+            models,
+            updated_at: new Date(),
+          } as any,
         },
         { returnDocument: "after" }
       );
@@ -901,7 +905,7 @@ export default ({ clamav }) => {
         .validateAsync(req.body, { abortEarly: false });
 
       const uploads = await getUploadEntryByOrgaId(organisme_id);
-      const [unconfirmedDocument] = uploads.documents.filter((d) => !d.confirm);
+      const unconfirmedDocument = uploads?.documents?.filter((d) => !d.confirm)?.[0];
       const effectifsDb = await findEffectifs(organisme_id);
 
       for (let index = 0; index < uploads.last_snapshot_effectifs.length; index++) {
@@ -941,11 +945,13 @@ export default ({ clamav }) => {
         { returnDocument: "after" }
       );
 
-      await updateDocument(organisme_id, {
-        nom_fichier: unconfirmedDocument.nom_fichier,
-        taille_fichier: unconfirmedDocument.taille_fichier,
-        confirm: true,
-      });
+      if (unconfirmedDocument) {
+        await updateDocument(organisme_id, {
+          nom_fichier: unconfirmedDocument.nom_fichier,
+          taille_fichier: unconfirmedDocument.taille_fichier,
+          confirm: true,
+        });
+      }
 
       if (uploads.last_snapshot_effectifs.length > 0) await setOrganismeTransmissionDates(organisme_id);
 

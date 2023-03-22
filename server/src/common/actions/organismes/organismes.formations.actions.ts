@@ -173,7 +173,7 @@ export const findOrganismeFormationByCfd = async (organisme_id: string, cfd: str
   const formationId = formationFound._id;
 
   let found: any = null;
-  for (const formation of organisme.formations) {
+  for (const formation of organisme.formations || []) {
     if (formation.formation_id.toString() === formationId.toString()) {
       found = { ...formation };
     }

@@ -74,7 +74,7 @@ export const findActivePermissionsForUser = async ({ userEmail }, projection = {
 
 export const hasPermission = async ({ organisme_id, userEmail }, projection = {}) => {
   return await permissionsDb().findOne(
-    { organisme_id: organisme_id ? new ObjectId(organisme_id) : null, userEmail: userEmail.toLowerCase() },
+    { organisme_id: organisme_id ? new ObjectId(organisme_id) : null, userEmail: userEmail.toLowerCase() } as any,
     { projection }
   );
 };
@@ -92,13 +92,13 @@ const findPermissionByUserEmail = async (organisme_id, userEmail, projection = {
   return permissionsDb().findOne({ organisme_id, userEmail: userEmail.toLowerCase() }, { projection });
 };
 
-const findPermissionsByUserEmail = async (organisme_id, userEmail, projection = {}) => {
+const findPermissionsByUserEmail = async (organisme_id: string, userEmail: string, projection: any = {}) => {
   return await permissionsDb()
     .find(
       {
         ...(organisme_id ? { organisme_id: new ObjectId(organisme_id) } : {}),
         userEmail: userEmail.toLowerCase(),
-      },
+      } as any,
       { projection }
     )
     .toArray();
@@ -110,8 +110,13 @@ export const hasAtLeastOneContributeurNotPending = async (organisme_id: string, 
     throw new Error("Role doesn't exist");
   }
 
-  const permission = await permissionsDb().findOne({ organisme_id, role: roleDb._id, pending: false });
-  return !!permission;
+  return permissionsDb()
+    .find({
+      organisme_id,
+      role: roleDb._id,
+      pending: false,
+    } as any)
+    .hasNext();
 };
 
 /**

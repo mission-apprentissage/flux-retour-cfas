@@ -1,7 +1,7 @@
 export const NATURE_ORGANISME_DE_FORMATION = {
-  RESPONSABLE: "responsable",
-  FORMATEUR: "formateur",
-  RESPONSABLE_FORMATEUR: "responsable_formateur",
-  LIEU: "lieu_formation",
-  INCONNUE: "inconnue",
+  RESPONSABLE: "responsable" as const,
+  FORMATEUR: "formateur" as const,
+  RESPONSABLE_FORMATEUR: "responsable_formateur" as const,
+  LIEU: "lieu_formation" as const,
+  INCONNUE: "inconnue" as const,
 };

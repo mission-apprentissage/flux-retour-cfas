@@ -133,7 +133,7 @@ export const removeDocument = async (
 ): Promise<WithId<any>> => {
   const found = await getUploadEntryByOrgaId(organismeId);
 
-  let newDocuments = [...found.documents];
+  let newDocuments = [...(found.documents || [])];
   const foundIndexDocument = findIndex(newDocuments, {
     nom_fichier,
     chemin_fichier,

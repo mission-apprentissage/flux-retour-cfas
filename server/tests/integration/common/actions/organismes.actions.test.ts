@@ -104,10 +104,9 @@ describe("Test des actions Organismes", () => {
 
       // Vérification des autres champs
       assert.equal(created?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(created?.private_url !== null, true);
-      assert.equal(created?.accessToken !== null, true);
-      assert.equal(created?.created_at !== null, true);
-      assert.equal(created?.updated_at !== null, true);
+      assert.equal(!!created?.access_token, true);
+      assert.equal(!!created?.created_at, true);
+      assert.equal(!!created?.updated_at, true);
     });
 
     it("returns created organisme when valid with SIRET and no UAI & no API Calls", async () => {
@@ -138,10 +137,9 @@ describe("Test des actions Organismes", () => {
 
       // Vérification des autres champs
       assert.equal(created?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(created?.private_url !== null, true);
-      assert.equal(created?.accessToken !== null, true);
-      assert.equal(created?.created_at !== null, true);
-      assert.equal(created?.updated_at !== null, true);
+      assert.equal(!!created?.access_token, true);
+      assert.equal(!!created?.created_at, true);
+      assert.equal(!!created?.updated_at, true);
     });
 
     it("returns created organisme when valid with UAI & SIRET & API Calls", async () => {
@@ -179,10 +177,9 @@ describe("Test des actions Organismes", () => {
 
       // Vérification des autres champs
       assert.equal(created?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(created?.private_url !== null, true);
-      assert.equal(created?.accessToken !== null, true);
-      assert.equal(created?.created_at !== null, true);
-      assert.equal(created?.updated_at !== null, true);
+      assert.equal(!!created?.access_token, true);
+      assert.equal(!!created?.created_at, true);
+      assert.equal(!!created?.updated_at, true);
     });
 
     it("returns created organisme when valid with SIRET & no UAI & API Calls", async () => {
@@ -228,10 +225,9 @@ describe("Test des actions Organismes", () => {
 
       // Vérification des autres champs
       assert.equal(created?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(created?.private_url !== null, true);
-      assert.equal(created?.accessToken !== null, true);
-      assert.equal(created?.created_at !== null, true);
-      assert.equal(created?.updated_at !== null, true);
+      assert.equal(!!created?.access_token, true);
+      assert.equal(!!created?.created_at, true);
+      assert.equal(!!created?.updated_at, true);
     });
   });
 
@@ -285,10 +281,9 @@ describe("Test des actions Organismes", () => {
       });
 
       assert.equal(updatedOrganisme?.nom_tokenized, buildTokenizedString("UPDATED", 4));
-      assert.equal(updatedOrganisme?.private_url !== null, true);
-      assert.equal(updatedOrganisme?.accessToken !== null, true);
-      assert.equal(updatedOrganisme?.created_at !== null, true);
-      assert.equal(updatedOrganisme?.updated_at !== null, true);
+      assert.equal(!!updatedOrganisme?.access_token, true);
+      assert.equal(!!updatedOrganisme?.created_at, true);
+      assert.equal(!!updatedOrganisme?.updated_at, true);
     });
 
     it("returns updated organisme when id valid and API Calls", async () => {
@@ -338,10 +333,9 @@ describe("Test des actions Organismes", () => {
       // TODO Tester les API pour les formations tree et les metiers LBA
 
       assert.equal(updatedOrganisme?.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
-      assert.equal(updatedOrganisme?.private_url !== null, true);
-      assert.equal(updatedOrganisme?.accessToken !== null, true);
-      assert.equal(updatedOrganisme?.created_at !== null, true);
-      assert.equal(updatedOrganisme?.updated_at !== null, true);
+      assert.equal(!!updatedOrganisme?.access_token, true);
+      assert.equal(!!updatedOrganisme?.created_at, true);
+      assert.equal(!!updatedOrganisme?.updated_at, true);
     });
 
     it("returns updated organisme & update ferme field to false when id valid and no API Calls", async () => {

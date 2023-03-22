@@ -3,6 +3,7 @@ import logger from "../../../common/logger.js";
 import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { organismesReferentielDb } from "../../../common/model/collections.js";
+import { OrganismesReferentiel } from "../../../common/model/@types/OrganismesReferentiel.js";
 
 const JOB_NAME = "hydrate-organismes-referentiel";
 let nbOrganismeCreated = 0;
@@ -67,7 +68,7 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
       ...(siege_social ? { siege_social } : {}),
       ...(lieux_de_formation ? { lieux_de_formation } : { lieux_de_formation: [] }),
       ...(uai ? { uai } : {}),
-    });
+    } as OrganismesReferentiel);
     nbOrganismeCreated++;
   } catch (error) {
     nbOrganismeNotCreated++;

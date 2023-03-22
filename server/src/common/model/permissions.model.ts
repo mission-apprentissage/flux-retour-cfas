@@ -21,7 +21,7 @@ export const schema = object(
       description: "Organisme id", // Could be null on purpose (to see all organismes)
     }),
     userEmail: string({ description: "Email utilisateur" }),
-    role: objectId({ description: "Roles id" }),
+    role: objectId({ description: "Role id" }),
     pending: boolean({ description: "En attente d'acceptation" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout de la permission" }),

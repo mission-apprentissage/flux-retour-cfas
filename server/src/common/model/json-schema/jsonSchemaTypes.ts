@@ -9,6 +9,12 @@ export function integer(custom = {}) {
 export function objectId(custom = {}) {
   return { bsonType: "objectId", ...custom };
 }
+/**
+ * Note: this JSON schema type is not well supported by bson-schema-to-typescript
+ * that's, why we have overriden the Permissions type
+ * @param custom
+ * @returns
+ */
 export function objectIdOrNull(custom = {}) {
   return { bsonType: ["objectId", "null"], ...custom };
 }
@@ -36,14 +42,6 @@ export function dateOrNull(custom = {}) {
 export function arrayOf(items, custom = {}) {
   return {
     bsonType: "array",
-    ...custom,
-    items,
-  };
-}
-
-export function arrayOfOrNull(items, custom = {}) {
-  return {
-    bsonType: ["array", "null"],
     ...custom,
     items,
   };

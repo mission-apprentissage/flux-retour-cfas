@@ -29,6 +29,7 @@ import logger from "../../../common/logger.js";
 import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
 import registrationSchema from "../../../common/validation/registrationSchema.js";
+import { USER_ACCOUNT_STATUS } from "../../../common/constants/usersConstants.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -234,7 +235,14 @@ export default ({ mailer }) => {
       throw Boom.conflict("Unable to retrieve user");
     }
 
-    if (!["PENDING_PERMISSIONS_SETUP", "PENDING_ADMIN_VALIDATION"].includes(userDb.account_status)) {
+    if (
+      !(
+        userDb.account_status &&
+        [USER_ACCOUNT_STATUS.PENDING_PERMISSIONS_SETUP, USER_ACCOUNT_STATUS.PENDING_ADMIN_VALIDATION].includes(
+          userDb.account_status
+        )
+      )
+    ) {
       logger.error(
         `User ${userDb.email} is not in the right status to ask for access (status : ${userDb.account_status})`
       );

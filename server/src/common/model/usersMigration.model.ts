@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { integer, object, objectId, string, boolean, arrayOf, date } from "./json-schema/jsonSchemaTypes.js";
+import { integer, object, objectId, string, boolean, any, arrayOf, date } from "./json-schema/jsonSchemaTypes.js";
 import { schemaValidation } from "../utils/schemaUtils.js";
 import { siretSchema, passwordSchema, uaiSchema } from "../utils/validationUtils.js";
 import { RESEAUX_CFAS } from "../constants/networksConstants.js";
@@ -88,7 +88,7 @@ export const schema = object(
         {
           token: string(),
           templateName: string(),
-          // payload: object(),
+          payload: any(),
           sendDates: arrayOf(date()),
           openDate: date(),
           messageIds: arrayOf(string()),

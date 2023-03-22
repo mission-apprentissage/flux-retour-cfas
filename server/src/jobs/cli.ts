@@ -28,6 +28,7 @@ import { getStats } from "./fiabilisation/stats.js";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count.js";
 import { recreateIndexes } from "./db/recreateIndexes.js";
 import { findInvalidDocuments } from "./db/findInvalidDocuments.js";
+import { generateTypes } from "./seed/types/generate-types.js";
 
 program.configureHelp({
   sortSubcommands: true,
@@ -414,6 +415,18 @@ program
   .action((_, options) =>
     runScript(async () => {
       await getStats();
+    }, options._name)
+  );
+
+/**
+ * Job d'affichage des stats fiabilisation
+ */
+program
+  .command("dev:generate-ts-types")
+  .description("Generation des types TS à partir des schemas de la base de données")
+  .action((_, options) =>
+    runScript(async () => {
+      await generateTypes();
     }, options._name)
   );
 
