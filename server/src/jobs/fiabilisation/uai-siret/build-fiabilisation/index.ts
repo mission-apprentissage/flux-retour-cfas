@@ -4,7 +4,7 @@ import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/const
 import logger from "../../../../common/logger.js";
 import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../../common/model/collections.js";
 import { getPercentage } from "../../../../common/utils/miscUtils.js";
-import { insertInFiabilisationIfNotExist, insertManualMappingsFromFile } from "./utils.js";
+import { insertManualMappingsFromFile } from "./utils.js";
 
 // Filtres année scolaire pour récupération des couples UAI-SIRET
 const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] } };
