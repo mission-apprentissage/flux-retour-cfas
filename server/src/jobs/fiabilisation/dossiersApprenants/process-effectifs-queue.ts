@@ -12,6 +12,8 @@ import {
 import dossierApprenantSchema from "../../../common/validation/dossierApprenantSchema.js";
 
 export const processEffectifsQueue = async () => {
+  const count = await effectifsQueueDb().count({ processed_at: { $exists: false } });
+
   const dataIn = await effectifsQueueDb()
     .find({ processed_at: { $exists: false } })
     .sort({ created_at: 1 })
@@ -19,10 +21,14 @@ export const processEffectifsQueue = async () => {
     .toArray();
   let nbItemsValid = 0;
 
+  logger.info(`${dataIn.length} items à processer (${count} items en attente))`);
+
   // Validate items one by one
   for (let index = 0; index < dataIn.length; index++) {
     try {
       const effectifQueued = dataIn[index];
+
+      logger.info(`#${index} Process item ${effectifQueued._id}`);
 
       const { error, value: effectifNormalized } = dossierApprenantSchema.validate(effectifQueued, {
         stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
@@ -55,12 +61,22 @@ export const processEffectifsQueue = async () => {
           ],
         };
 
-        // Construction d'un historique à partir du statut et de la date_metier_mise_a_jour_statut
-        const effectifData = structureEffectifFromDossierApprenant(dossierApprenant);
-        const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenant);
+        let organisme;
+        try {
+          // Construction d'un historique à partir du statut et de la date_metier_mise_a_jour_statut
+          const effectifData = structureEffectifFromDossierApprenant(dossierApprenant);
+          const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenant);
 
-        // Call runEngine -> va créer les données nécessaires (effectifs + organismes)
-        const { organisme } = await runEngine(effectifData, organismeData);
+          // Call runEngine -> va créer les données nécessaires (effectifs + organismes)
+          ({ organisme } = await runEngine(effectifData, organismeData));
+        } catch (error: any) {
+          logger.info(` Error with item ${effectifQueued._id}: ${error.toString()}`);
+          await effectifsQueueDb().updateOne(
+            { _id: effectifQueued._id },
+            { $set: { processed_at: new Date(), error: error.toString() } }
+          );
+          continue;
+        }
 
         // POST Engine création du dossierApprenantMigration avec organisme lié
         // TODO à supprimer une fois que la collection DossierApprenantMigration sera useless
@@ -81,9 +97,16 @@ export const processEffectifsQueue = async () => {
             { _id: 1 }
           );
 
-          const insertedId = foundDossierWithUnicityFields
-            ? await updateDossierApprenant(foundDossierWithUnicityFields?._id, structuredDossierApprenant)
-            : await insertDossierApprenant(structuredDossierApprenant);
+          let insertedId;
+
+          if (foundDossierWithUnicityFields) {
+            ({ _id: insertedId } = await updateDossierApprenant(
+              foundDossierWithUnicityFields?._id,
+              structuredDossierApprenant
+            ));
+          } else {
+            insertedId = await insertDossierApprenant(structuredDossierApprenant);
+          }
 
           await effectifsQueueDb().updateOne(
             { _id: effectifQueued._id },
@@ -93,11 +116,12 @@ export const processEffectifsQueue = async () => {
       }
     } catch (err: any) {
       logger.error(`an error occured while processing effectif queue item ${index}: ${err.message}`);
+      console.log(JSON.stringify(err, null, 2));
       logger.error(err);
     }
   }
 
-  logger.info(`${dataIn.length} items à processer`);
+  logger.info(`${dataIn.length} items processés`);
   logger.info(`${nbItemsValid} items valides`);
   logger.info(`${dataIn.length - nbItemsValid} items invalides`);
 };
