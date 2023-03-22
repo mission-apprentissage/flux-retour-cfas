@@ -9,6 +9,7 @@ const API_ENDPOINT = config.mnaReferentielApi.endpoint;
 const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
   "adresse",
   "enseigne",
+  "contacts",
   "etat_administratif",
   "forme_juridique",
   "nature",

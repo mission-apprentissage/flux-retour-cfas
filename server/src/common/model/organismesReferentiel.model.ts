@@ -91,6 +91,20 @@ const schema = object(
     ),
     qualiopi: boolean(),
     lieux_de_formation: arrayOf(object({ uai: string() }, { additionalProperties: true })),
+    contacts: arrayOf(
+      object(
+        {
+          email: string(),
+          confirmé: boolean(),
+          date_collecte: string(),
+          sources: arrayOf(string()),
+        },
+        { additionalProperties: true }
+      ),
+      {
+        description: "Formations de cet organisme",
+      }
+    ),
   },
   { required: ["siret", "nature", "lieux_de_formation"] }
 );
