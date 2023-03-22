@@ -10,7 +10,7 @@ import {
   hasAtLeastOneContributeurNotPending,
 } from "./permissions.actions.js";
 import { updateMainOrganismeUser } from "./users.actions.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../constants/natureOrganismeConstants.js";
 import { uniq } from "lodash-es";
 import { permissionsDb } from "../model/collections.js";
 import { getRoleByName } from "./roles.actions.js";

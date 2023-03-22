@@ -3,7 +3,7 @@ import { addHours, isBefore } from "date-fns";
 import { usersDb } from "../../model/collections.js";
 import { generateRandomAlphanumericPhrase } from "../../utils/miscUtils.js";
 import { compare, isTooWeak, hash } from "../../utils/sha512Utils.js";
-import { validatePassword } from "../../utils/validationsUtils/password.js";
+import { validatePassword } from "../../validation/utils/password.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
 
 const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;

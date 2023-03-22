@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-import { validateCfd } from "../utils/validationsUtils/cfd.js";
+import { validateCfd } from "../validation/utils/cfd.js";
 import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { formationsDb, effectifsDb } from "../model/collections.js";

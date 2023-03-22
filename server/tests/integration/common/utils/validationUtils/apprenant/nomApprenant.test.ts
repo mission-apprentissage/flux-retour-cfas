@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { validateNomApprenant } from "../../../../../../src/common/utils/validationsUtils/apprenant/nomApprenant.js";
+import { validateNomApprenant } from "../../../../../../src/common/validation/utils/apprenant/nomApprenant.js";
 
 describe("Domain nom apprenant", () => {
   describe("validateNomApprenant", () => {
