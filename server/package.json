@@ -14,7 +14,7 @@
     "start:dev": "nodemon --ignore tests/ --exec 'ts-node' src/index.ts -e ts",
     "test": "yarn test:cmd tests/integration/**/*.ts",
     "test:coverage": "c8 --check-coverage yarn test",
-    "test:cmd": "NODE_ENV=test cross-env DOTENV_CONFIG_PATH=.env.test ts-mocha -n loader=ts-node/esm",
+    "test:cmd": "cross-env NODE_ENV=test DOTENV_CONFIG_PATH=.env.test ts-mocha -n loader=ts-node/esm",
     "lint": "eslint --cache . --ext .ts",
     "cli": "ts-node --transpileOnly src/jobs/cli.ts",
     "migration:create": "migrate-mongo create",
