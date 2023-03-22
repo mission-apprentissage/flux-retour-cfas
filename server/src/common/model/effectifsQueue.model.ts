@@ -3,13 +3,6 @@ import { object, string, date, arrayOf, any, objectId } from "./json-schema/json
 const collectionName = "effectifsQueue";
 
 const indexes = [
-  [
-    {
-      annee_scolaire: 1,
-      id_erp_apprenant: 1,
-    },
-    { unique: true },
-  ],
   [{ effectif_id: 1 }, { name: "effectif_id" }],
   [{ processed_at: 1 }, { name: "processed_at" }],
 ];
