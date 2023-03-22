@@ -14,6 +14,7 @@ import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
 import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
+import { Organisme } from "../../model/@types/Organisme.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -222,8 +223,7 @@ export const findOrganismeByUaiAndSiret = async (uai, siret, projection = {}) =>
  * @returns
  */
 export const findOrganismeById = async (id, projection = {}) => {
-  const found = await organismesDb().findOne({ _id: new ObjectId(id) }, { projection });
-  return found;
+  return organismesDb().findOne({ _id: new ObjectId(id) }, { projection });
 };
 
 /**
@@ -391,36 +391,20 @@ export const getContributeurs = async (organismeId) => {
 
 /**
  * Méthode de maj des dates de transmission d'un organisme
- * @param {*} id
+ * @param {*} organisme
  * @returns
  */
-export const setOrganismeTransmissionDates = async (id) => {
-  const _id = typeof id === "string" ? new ObjectId(id) : id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) throw new Error(`Unable to find organisme ${_id.toString()}`);
-
-  // Si l'organisme n'a jamais transmis on set first_transmission_date et last_transmission_date
-  if (!organisme.first_transmission_date) {
-    await organismesDb().findOneAndUpdate(
-      { _id: organisme._id },
-      {
-        $set: {
-          first_transmission_date: new Date(),
-          last_transmission_date: new Date(),
-          updated_at: new Date(),
-        },
-      }
-    );
-  } else {
-    // Si l'organisme a déja transmis on update uniquement last_transmission_date
-    await organismesDb().findOneAndUpdate(
-      { _id: organisme._id },
-      { $set: { last_transmission_date: new Date(), updated_at: new Date() } }
-    );
-  }
-};
+export const setOrganismeTransmissionDates = async (organisme: Organisme) =>
+  organismesDb().findOneAndUpdate(
+    { _id: organisme._id },
+    {
+      $set: {
+        ...(organisme.first_transmission_date ? {} : { first_transmission_date: new Date() }),
+        last_transmission_date: new Date(),
+        updated_at: new Date(),
+      },
+    }
+  );
 
 /**
  * Returns sous-établissements by siret for an uai

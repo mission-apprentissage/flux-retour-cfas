@@ -67,15 +67,6 @@ const createCollectionIfDoesNotExist = async (collectionName) => {
 };
 
 /**
- * Vérification de l'existence d'une collection à partir de la liste des collections
- * @param {*} collectionsInDb
- * @param {*} collectionName
- * @returns
- */
-export const collectionExistInDb = (collectionsInDb, collectionName) =>
-  collectionsInDb.map(({ name }) => name).includes(collectionName);
-
-/**
  * Config de la validation
  * @param {*} modelDescriptors
  */

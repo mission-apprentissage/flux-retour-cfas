@@ -1,9 +1,6 @@
-import { collectionExistInDb } from "../src/common/mongodb.js";
-
 export const up = async (db) => {
   // Suppression des collections inutilisées (si elles existent)
-
-  const collectionsInDb = await db.listCollections().toArray();
+  const collectionsInDb = (await db.listCollections().toArray()).map(({ name }) => name);
 
   const collectionsToRemove = [
     "effectifsApprenants",
@@ -15,8 +12,10 @@ export const up = async (db) => {
   ];
 
   for (const currentCollectionToRemove of collectionsToRemove) {
-    if (collectionExistInDb(collectionsInDb, currentCollectionToRemove))
+    if (collectionsInDb.includes(currentCollectionToRemove)) {
+      console.info(`Suppression de la collection ${currentCollectionToRemove}`);
       await db.collection(currentCollectionToRemove).drop();
+    }
   }
 };
 

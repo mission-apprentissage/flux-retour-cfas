@@ -22,3 +22,12 @@
     hour: "12"
     day: "1"
     job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-archive-job.sh"
+
+- name: Add CRON to process effectifsQueue every minute
+  become: true
+  cron:
+    name: "Process effectifsQueue every minute"
+    minute: "1"
+    hour: "*"
+    day: "*"
+    job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run_process_effectifs_queue_job.sh"

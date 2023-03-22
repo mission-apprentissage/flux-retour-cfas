@@ -288,7 +288,7 @@ const hydrateOrganisme = async (organisme: any) => {
  *
  * @param {*} dossiersApprenants
  */
-export const runEngine = async ({ effectifData }, organismeData) => {
+export const runEngine = async (effectifData, organismeData) => {
   let organismeCreatedId: any = null;
   let organismeFoundId: any = null;
 
@@ -325,7 +325,7 @@ export const runEngine = async ({ effectifData }, organismeData) => {
       organismeFoundId = organismeFound?._id;
 
       // On ajoute ou mets à jour les dates de transmission si l'organisme est déja existant
-      await setOrganismeTransmissionDates(organismeFoundId);
+      await setOrganismeTransmissionDates(organismeFound);
 
       effectifData.organisme_id = organismeFound?._id.toString();
     }

@@ -32,7 +32,10 @@ import {
   getFormationWithRNCP,
   findFormationById,
 } from "../../../../common/actions/formations.actions.js";
-import { setOrganismeTransmissionDates } from "../../../../common/actions/organismes/organismes.actions.js";
+import {
+  findOrganismeById,
+  setOrganismeTransmissionDates,
+} from "../../../../common/actions/organismes/organismes.actions.js";
 import { sendServerEventsForUser } from "../server-events.routes.js";
 
 const mappingModel = {
@@ -904,6 +907,11 @@ export default ({ clamav }) => {
         .unknown()
         .validateAsync(req.body, { abortEarly: false });
 
+      const organisme = await findOrganismeById(organisme_id);
+      if (!organisme) {
+        return res.status(404).json({ error: "Organisme not found" });
+      }
+
       const uploads = await getUploadEntryByOrgaId(organisme_id);
       const unconfirmedDocument = uploads?.documents?.filter((d) => !d.confirm)?.[0];
       const effectifsDb = await findEffectifs(organisme_id);
@@ -953,7 +961,9 @@ export default ({ clamav }) => {
         });
       }
 
-      if (uploads.last_snapshot_effectifs.length > 0) await setOrganismeTransmissionDates(organisme_id);
+      if (uploads.last_snapshot_effectifs.length > 0) {
+        await setOrganismeTransmissionDates(organisme);
+      }
 
       return res.json({});
     }

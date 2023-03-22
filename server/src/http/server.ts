@@ -154,9 +154,11 @@ export default async (services) => {
   // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
   app.use("/api/login", loginRouter());
 
-  // @deprecated to /dossiers-apprenants
   app.use(
-    ["/api/statut-candidats", "/api/dossiers-apprenants"],
+    [
+      "/api/statut-candidats", // @deprecated to /dossiers-apprenants
+      "/api/dossiers-apprenants",
+    ],
     requireJwtAuthenticationMiddleware(),
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     dossierApprenantRouter()

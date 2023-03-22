@@ -25,7 +25,6 @@ const schema = object(
         }),
         mapping_column: any({
           description: "Mapping des colonnes du fichier",
-          additionalProperties: true,
         }),
         lock: boolean({ description: "Le modèle est vérouillé" }),
       }),
