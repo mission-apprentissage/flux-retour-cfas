@@ -1,3 +1,20 @@
+# [3.16.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.15.0...v3.16.0) (2023-03-22)
+
+
+### Bug Fixes
+
+* creation des indexes ([#2804](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2804)) ([17ad910](https://github.com/mission-apprentissage/flux-retour-cfas/commit/17ad910b79a6a1e847eff3ab4fe604f6a24f8a66))
+* fix pb index sur effectifsQueue ([f6f9aaa](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f6f9aaa2006d00c2554c5338b982ee51aab9cd42))
+* **server:** fiabilisation - suppression des organismes non fiables ([#2793](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2793)) ([db06447](https://github.com/mission-apprentissage/flux-retour-cfas/commit/db06447f25a142ae00d776259a5e52ac3214b646))
+
+
+### Features
+
+* ajout du champ contacts dans organismesReferentiel ([#2801](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2801)) ([c48d5a1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c48d5a15099403749c3702c8387fc87a5d4330a4))
+* ajout du monitoring des métriques de l'hôte et des conteneurs ([#2800](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2800)) ([9775c53](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9775c53ff658cc3f206bd5d270a5909849b134d2))
+* ajout typage des modeles mongo ([#2790](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2790)) ([860dfeb](https://github.com/mission-apprentissage/flux-retour-cfas/commit/860dfeb705c33ca279f91e5cdde65976a4d315b5))
+* mise en queue des effectifs entrants pour processing asynchrone ([#2792](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2792)) ([da0c563](https://github.com/mission-apprentissage/flux-retour-cfas/commit/da0c563a59abc1ce7d1e41d008a504428c63e11a))
+
 # [3.15.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.14.2...v3.15.0) (2023-03-20)
 
 
