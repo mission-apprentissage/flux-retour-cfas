@@ -1,5 +1,5 @@
+import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 import { fiabilisationUaiSiretDb } from "../../../../common/model/collections.js";
-import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { FIABILISATION_MAPPINGS as manualMapping } from "../mapping.js";
 
 /**
@@ -24,7 +24,7 @@ export const insertInFiabilisationIfNotExist = async (fiabilisation) => {
 export const insertManualMappingsFromFile = async () => {
   let nbInserted = 0;
 
-  await asyncForEach(manualMapping, async (mapping) => {
+  await PromisePool.for(manualMapping).process(async (mapping) => {
     await fiabilisationUaiSiretDb().updateOne(
       { uai: mapping.uai, siret: mapping.siret },
       { $set: mapping },
