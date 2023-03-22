@@ -3,5 +3,6 @@ import { AuthenticationContext } from "../components/UserWrapper/UserWrapper";
 
 export default function useAuth() {
   const { auth, setAuth } = useContext(AuthenticationContext);
-  return [auth, setAuth];
+  const organisationType = auth?.organisation?.type;
+  return { auth, setAuth, organisationType };
 }

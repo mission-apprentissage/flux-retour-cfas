@@ -89,7 +89,7 @@ const NavBarPublic = ({ isOpen }) => {
 };
 
 const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
-  let [auth] = useAuth();
+  const { auth } = useAuth();
   let {
     navigation: { user: userNavigation },
     myOrganisme,
@@ -198,7 +198,7 @@ const NavBarOrganisme = ({ isOpen }) => {
 };
 
 const NavigationMenu = ({ espaceContextisLoading, ...props }) => {
-  let [auth] = useAuth();
+  const { auth } = useAuth();
   const router = useRouter();
 
   let { isOrganismePages } = useEspace();

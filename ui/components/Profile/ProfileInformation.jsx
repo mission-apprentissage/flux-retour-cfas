@@ -20,7 +20,7 @@ import useAuth from "../../hooks/useAuth";
 import { _put } from "../../common/httpClient";
 
 const ProfileInformation = () => {
-  let [auth] = useAuth();
+  const { auth } = useAuth();
 
   const { values, handleChange, handleSubmit, errors, touched, setFieldValue } = useFormik({
     initialValues: {

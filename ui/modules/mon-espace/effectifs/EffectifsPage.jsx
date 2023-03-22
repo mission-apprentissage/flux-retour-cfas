@@ -51,7 +51,7 @@ function useOrganismesEffectifs(organismeId) {
 }
 
 const EffectifsPage = ({ isMine }) => {
-  let [auth] = useAuth();
+  const { auth } = useAuth();
   const organisme = useRecoilValue(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
 

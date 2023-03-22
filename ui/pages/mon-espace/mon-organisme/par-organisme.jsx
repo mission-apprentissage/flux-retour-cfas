@@ -9,7 +9,7 @@ import {
 import withAuth from "@/components/withAuth";
 
 const IndicateursVueOrganismePageContainer = () => {
-  const [auth] = useAuth();
+  const { auth } = useAuth();
   if (auth?.roles?.includes("reseau_of")) {
     const fixedFiltersState = { reseau: { nom: auth.reseau } };
     const defaultFiltersState = { ...getDefaultState(), ...fixedFiltersState };

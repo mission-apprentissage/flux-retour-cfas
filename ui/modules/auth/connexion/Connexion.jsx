@@ -25,7 +25,7 @@ import { _get, _post } from "../../../common/httpClient";
 import { AlertRounded, ShowPassword } from "../../../theme/components/icons";
 
 const Login = (props) => {
-  const [, setAuth] = useAuth();
+  const { setAuth } = useAuth();
   const [, setToken] = useToken();
   const router = useRouter();
 

@@ -92,7 +92,7 @@ const MultipleCheckBox = ({ title, name, choices, onChange }) => {
 };
 
 const Finalize = () => {
-  const [auth, setAuth] = useAuth();
+  const { auth, setAuth } = useAuth();
   const [, setToken] = useToken();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);

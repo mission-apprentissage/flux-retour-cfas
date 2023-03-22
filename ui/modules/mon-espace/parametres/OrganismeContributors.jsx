@@ -50,7 +50,7 @@ function useOrganismeAcces() {
 }
 
 const OrganismeContributors = ({ size = "md" }) => {
-  let [auth] = useAuth();
+  const { auth } = useAuth();
   const { toastSuccess, toastError } = useToaster();
   const organisme = useRecoilValue(organismeAtom);
   const { organismeContributors, roles, isLoading, defaultRoleName, refetchContributors, canDeletePermissions } =

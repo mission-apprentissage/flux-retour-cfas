@@ -30,7 +30,7 @@ YupPassword(Yup); // extend yup
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const ResetPasswordPage = () => {
-  const [auth, setAuth] = useAuth();
+  const { auth, setAuth } = useAuth();
   const [, setToken] = useToken();
   const router = useRouter();
   const { passwordToken } = router.query;

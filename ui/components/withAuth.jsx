@@ -5,7 +5,7 @@ import { hasPageAccessTo } from "../common/utils/rolesUtils";
 const withAuth = (Component, aclRef = null) => {
   const Auth = (props) => {
     const router = useRouter();
-    let [auth] = useAuth();
+    const { auth } = useAuth();
 
     if (auth.sub === "anonymous") {
       if (typeof window !== "undefined") {

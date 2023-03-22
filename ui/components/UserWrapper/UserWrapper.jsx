@@ -12,7 +12,7 @@ import { emitter } from "../../common/emitter";
 import { isUserAdmin } from "@/common/utils/rolesUtils";
 
 const AccountWrapper = ({ children }) => {
-  let [auth] = useAuth();
+  const { auth } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const AccountWrapper = ({ children }) => {
 };
 
 const ForceAcceptCGU = ({ children }) => {
-  let [auth, setAuth] = useAuth();
+  const { auth, setAuth } = useAuth();
   const cguContainer = useRef(null);
 
   const onAcceptCguClicked = async () => {

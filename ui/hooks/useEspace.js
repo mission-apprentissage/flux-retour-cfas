@@ -51,7 +51,7 @@ function getMesOrganismesLabelFromOrganisationType(type) {
 
 export function useEspace() {
   const router = useRouter();
-  let [auth] = useAuth();
+  const { auth } = useAuth();
 
   const [isloaded, setIsLoaded] = useState(false);
   const [isReloaded, setIsReloaded] = useState(false);

@@ -17,7 +17,7 @@ import useAuth from "@/hooks/useAuth";
 
 const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerritoireReset, variant = "primary" }) => {
   const [isOpen, setIsOpen] = useState(false);
-  let [user] = useAuth();
+  let { user } = useAuth();
 
   const onTerritoireClick = (territoire) => {
     if (!territoire) {

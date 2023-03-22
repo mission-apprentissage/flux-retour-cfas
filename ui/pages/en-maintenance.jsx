@@ -26,7 +26,7 @@ const chakraUIMarkdownRendererTheme = {
 
 const MaintenancePage = () => {
   const router = useRouter();
-  let [auth] = useAuth();
+  const { auth } = useAuth();
 
   const { messageMaintenance, isLoading } = useMaintenanceMessages();
 

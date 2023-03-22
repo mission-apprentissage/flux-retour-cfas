@@ -29,13 +29,12 @@ import { _get } from "../../../common/httpClient.js";
 import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
 import { Settings4Fill, UserFill } from "../../../theme/components/icons";
-// import { NotificationsMenu } from "./Notifications/Notifications";
 
 const UserMenu = () => {
-  let [auth] = useAuth();
+  const { auth } = useAuth();
   const router = useRouter();
 
-  let logout = async () => {
+  const logout = async () => {
     await _get("/api/v1/auth/logout");
     window.location.href = "/";
   };

@@ -35,7 +35,7 @@ function useActivation(activationToken) {
 
 const Confirmed = () => {
   const router = useRouter();
-  const [, setAuth] = useAuth();
+  const { setAuth } = useAuth();
   const [, setToken] = useToken();
   const { activationToken } = router.query;
   const email = activationToken ? decodeJWT(activationToken).sub : "";
