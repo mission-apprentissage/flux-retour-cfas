@@ -119,7 +119,7 @@ const runFiabilisationOnUaiSiretCouples = async () => {
  * @param organismesFromReferentiel Liste des organismes du Référentiel
  * @returns
  */
-const buildFiabilisationCoupleForTdbCouple = async (
+export const buildFiabilisationCoupleForTdbCouple = async (
   coupleUaiSiretTdb,
   allCouplesUaiSiretTdb,
   organismesFromReferentiel
@@ -131,11 +131,11 @@ const buildFiabilisationCoupleForTdbCouple = async (
   // [Couple fiable]
   // Si le SIRET et l'UAI lié trouvés dans le référentiel sont ok, couple déja fiable, on le stocke et passe au suivant
   if (organismeFoundInReferentielViaSiret && organismeFoundInReferentielViaSiret.uai === coupleUaiSiretTdb.uai) {
-    await insertInFiabilisationIfNotExist({
-      uai: coupleUaiSiretTdb.uai,
-      siret: coupleUaiSiretTdb.siret,
-      type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE,
-    });
+    await fiabilisationUaiSiretDb().updateOne(
+      { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
+      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE } },
+      { upsert: true }
+    );
     return;
   }
 
@@ -160,14 +160,17 @@ const buildFiabilisationCoupleForTdbCouple = async (
     }).length === 1;
 
   if (siretIsSubjectToUpdate && !!organismeUniqueFoundInReferentielViaUai && uaiUniqueAmongAllCouplesTdb) {
-    await insertInFiabilisationIfNotExist({
-      uai: coupleUaiSiretTdb.uai,
-      siret: coupleUaiSiretTdb.siret,
-      uai_fiable: coupleUaiSiretTdb.uai,
-      siret_fiable: organismeUniqueFoundInReferentielViaUai.siret,
-      type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-    });
-
+    await fiabilisationUaiSiretDb().updateOne(
+      { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
+      {
+        $set: {
+          uai_fiable: coupleUaiSiretTdb.uai,
+          siret_fiable: organismeUniqueFoundInReferentielViaUai.siret,
+          type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+        },
+      },
+      { upsert: true }
+    );
     return;
   }
 
@@ -184,13 +187,17 @@ const buildFiabilisationCoupleForTdbCouple = async (
     organismeFoundInReferentielViaSiret.uai !== coupleUaiSiretTdb.uai &&
     siretUniqueAmongAllCouplesTdb
   ) {
-    await insertInFiabilisationIfNotExist({
-      uai: coupleUaiSiretTdb.uai,
-      siret: coupleUaiSiretTdb.siret,
-      uai_fiable: organismeFoundInReferentielViaSiret.uai,
-      siret_fiable: coupleUaiSiretTdb.siret,
-      type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-    });
+    await fiabilisationUaiSiretDb().updateOne(
+      { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
+      {
+        $set: {
+          uai_fiable: organismeFoundInReferentielViaSiret.uai,
+          siret_fiable: coupleUaiSiretTdb.siret,
+          type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+        },
+      },
+      { upsert: true }
+    );
     return;
   }
 
