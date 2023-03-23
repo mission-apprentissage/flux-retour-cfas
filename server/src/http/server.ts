@@ -15,11 +15,10 @@ import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAu
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 
-import { indicateursExport } from "./routes/specific.routes/indicateurs-export.routes.js";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
-import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
+import indicateursRouter, { buildEffectifsFiltersFromRequest } from "./routes/specific.routes/indicateurs.routes.js";
 import serverEvents from "./routes/specific.routes/server-events.routes.js";
 
 import emails from "./routes/emails.routes.js";
@@ -56,6 +55,8 @@ import { authenticateLegacy } from "../common/actions/legacy/users.legacy.action
 import { createUserToken } from "../common/utils/jwtUtils.js";
 import { createUserEvent } from "../common/actions/userEvents.actions.js";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../common/constants/userEventsConstants.js";
+import { exportAnonymizedEffectifsAsCSV } from "../common/actions/effectifs/effectifs-export.actions.js";
+import { Application } from "express-serve-static-core";
 
 /**
  * Create the express app
@@ -91,13 +92,25 @@ export default async (services) => {
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
 
-  const checkJwtToken = authMiddleware();
-
   app.use(bodyParser.json());
   app.use(logMiddleware());
   app.use(cookieParser());
   app.use(passport.initialize());
 
+  setupRoutes(app, services);
+
+  // The error handler must be before any other error middleware and after all controllers
+  app.use(Sentry.Handlers.errorHandler());
+
+  app.use(errorMiddleware());
+
+  return app;
+};
+
+function setupRoutes(app: Application, services) {
+  /********************************
+   * Anonymous routes             *
+   ********************************/
   app.get(
     "/api",
     returnResult(async () => {
@@ -130,7 +143,21 @@ export default async (services) => {
     })
   );
 
-  // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
+  app.use("/api/emails", emails(services)); // No versionning to be sure emails links are always working
+  app.use("/api/v1/auth", auth());
+  app.use("/api/v1/auth", register(services));
+  app.use("/api/v1/password", password(services));
+  app.get(
+    "/api/v1/maintenanceMessages",
+    returnResult(async () => {
+      return await findMaintenanceMessages();
+    })
+  );
+  app.use("/api/indicateurs-national", indicateursNationalRouter(services));
+
+  /*****************************************************************************
+   * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *
+   *****************************************************************************/
   app.post(
     "/api/login",
     returnResult(async (req) => {
@@ -154,7 +181,9 @@ export default async (services) => {
     dossierApprenantRouter()
   );
 
-  // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
+  /*********************************************************
+   * API authentifié par clé utilisé pour le réferentiel   *
+   *********************************************************/
   app.use(
     "/api/organismes",
     requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
@@ -162,25 +191,10 @@ export default async (services) => {
   );
 
   /********************************
-   * Anonymous routes             *
-   ********************************/
-  app.use("/api/emails", emails(services)); // No versionning to be sure emails links are always working
-  app.use("/api/v1/auth", auth());
-  app.use("/api/v1/auth", register(services));
-  app.use("/api/v1/password", password(services));
-  app.use(
-    "/api/v1/maintenanceMessages",
-    returnResult(async () => {
-      return await findMaintenanceMessages();
-    })
-  );
-  app.use("/api/indicateurs-national", indicateursNationalRouter(services));
-
-  /********************************
    * Authenticated routes         *
    ********************************/
   const authRouter = express.Router();
-  authRouter.use(checkJwtToken);
+  authRouter.use(authMiddleware());
 
   authRouter.get(
     "/api/v1/session/current",
@@ -205,7 +219,11 @@ export default async (services) => {
   authRouter.use("/api/v1/admin", statsAdmin());
   authRouter.use("/api/v1/admin/maintenanceMessages", maintenancesAdmin());
   authRouter.use("/api/indicateurs", indicateursRouter());
-  authRouter.get("/api/v1/indicateurs-export", indicateursExport);
+  authRouter.get("/api/v1/indicateurs-export", async (req, res) => {
+    const filters = await buildEffectifsFiltersFromRequest(req);
+    const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
+    res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
+  });
 
   /*
    * formations
@@ -255,11 +273,4 @@ export default async (services) => {
   );
 
   app.use(authRouter);
-
-  // The error handler must be before any other error middleware and after all controllers
-  app.use(Sentry.Handlers.errorHandler());
-
-  app.use(errorMiddleware());
-
-  return app;
-};
+}

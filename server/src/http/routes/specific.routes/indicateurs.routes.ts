@@ -1,8 +1,7 @@
+import Joi from "joi";
 import { EffectifsFilters } from "@/src/common/actions/helpers/filters.js";
-import { Organisation } from "@/src/common/model/organisations.model.js";
 import express from "express";
 import { Request } from "express-serve-static-core";
-import Joi from "joi";
 import { getNbDistinctOrganismes } from "../../../common/actions/effectifs.actions.js";
 import {
   getEffectifsCountByAnneeFormationAtDate,

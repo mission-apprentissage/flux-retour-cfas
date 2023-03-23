@@ -38,7 +38,6 @@ export interface OrganisationOrganismeFormation extends AbstractOrganisation {
   type: "ORGANISME_FORMATION_FORMATEUR" | "ORGANISME_FORMATION_REPONSABLE" | "ORGANISME_FORMATION_REPONSABLE_FORMATEUR";
   siret: string;
   uai: string;
-  nature: string;
 }
 
 export interface OrganisationTeteReseau extends AbstractOrganisation {

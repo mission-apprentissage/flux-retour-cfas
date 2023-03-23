@@ -1,5 +1,5 @@
 import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenantConstants.js";
-import { buildMongoPipelineFilterStages, organismeLookup } from "../helpers/filters.js";
+import { buildMongoPipelineFilterStages, EffectifsFilters, organismeLookup } from "../helpers/filters.js";
 import { mergeObjectsBy } from "../../utils/mergeObjectsBy.js";
 import { DEPARTEMENTS_BY_ID } from "../../constants/territoiresConstants.js";
 import {
@@ -295,10 +295,8 @@ export const getEffectifsCountByDepartementAtDate = async (filters: any) => {
 
 /**
  * Récupération des effectifs anonymisés à une date donnée
- * @param {*} filters
- * @returns
  */
-export const getDataListEffectifsAtDate = async (filters: any = {}) => {
+export const getDataListEffectifsAtDate = async (filters: EffectifsFilters) => {
   const filterStages = buildMongoPipelineFilterStages(filters);
   const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
     apprentisIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.apprentis),

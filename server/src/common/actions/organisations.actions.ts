@@ -1,3 +1,4 @@
+import { AuthContext } from "@/src/types.js";
 import { ObjectId } from "mongodb";
 
 import { organisationsDb, usersMigrationDb } from "../model/collections.js";
@@ -16,7 +17,7 @@ export async function getOrganisationById(organisationId: string): Promise<Organ
   return organisation;
 }
 
-export async function listeOrganisationMembers(organisationId: string): Promise<any[]> {
+export async function listOrganisationMembers(organisationId: string): Promise<any[]> {
   const members = await usersMigrationDb()
     .find({
       organisation_id: new ObjectId(organisationId),

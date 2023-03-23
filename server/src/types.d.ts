@@ -3,13 +3,13 @@ import { Organisation } from "./common/model/organisations.model";
 
 export {};
 
-interface User {
+export interface AuthContext<IOrganisation = Organisation> {
   _id: ObjectId;
   email: string;
   organisation_id: ObjectId;
 
-  // computed via $lookup
-  organisation: Organisation;
+  // populated via $lookup
+  organisation: IOrganisation;
 
   // fields that should be removed
   tmpPwd: string;
@@ -25,7 +25,7 @@ declare global {
       id: string;
 
       // authentication context
-      user: User;
+      user: AuthContext;
     }
   }
 }
