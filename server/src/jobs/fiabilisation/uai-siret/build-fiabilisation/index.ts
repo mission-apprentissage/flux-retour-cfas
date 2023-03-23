@@ -1,4 +1,4 @@
-import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
+import { PromisePool } from "@supercharge/promise-pool";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
@@ -114,25 +114,25 @@ const runFiabilisationOnUaiSiretCouples = async () => {
 
 /**
  * Fonction de construction du couple de fiabilisation pour le couple du TDB fourni
- * @param coupleUaiSiretTdb Couple UAI-SIRET du Tdb
+ * @param coupleUaiSiretTdbToCheck  Couple UAI-SIRET du Tdb
  * @param allCouplesUaiSiretTdb Liste de tous les couples UAI-SIRET du Tdb
  * @param organismesFromReferentiel Liste des organismes du Référentiel
  * @returns
  */
 export const buildFiabilisationCoupleForTdbCouple = async (
-  coupleUaiSiretTdb,
+  coupleUaiSiretTdbToCheck,
   allCouplesUaiSiretTdb,
   organismesFromReferentiel
 ) => {
   const organismeFoundInReferentielViaSiret = organismesFromReferentiel.find(
-    (item) => item.siret === coupleUaiSiretTdb.siret
+    (item) => item.siret === coupleUaiSiretTdbToCheck.siret
   );
 
   // [Couple fiable]
   // Si le SIRET et l'UAI lié trouvés dans le référentiel sont ok, couple déja fiable, on le stocke et passe au suivant
-  if (organismeFoundInReferentielViaSiret && organismeFoundInReferentielViaSiret.uai === coupleUaiSiretTdb.uai) {
+  if (organismeFoundInReferentielViaSiret && organismeFoundInReferentielViaSiret.uai === coupleUaiSiretTdbToCheck.uai) {
     await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
       { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE } },
       { upsert: true }
     );
@@ -145,26 +145,27 @@ export const buildFiabilisationCoupleForTdbCouple = async (
   // alors on remplace le SIRET par celui trouvé dans le référentiel si l'UAI n'est pas présent
   // dans un autre couple TDB
   const organismesFoundInReferentielViaUai = organismesFromReferentiel.filter(
-    (item) => item.uai === coupleUaiSiretTdb.uai
+    (item) => item.uai === coupleUaiSiretTdbToCheck.uai
   );
 
   const organismeUniqueFoundInReferentielViaUai =
     organismesFoundInReferentielViaUai.length === 1 ? organismesFoundInReferentielViaUai[0] : null;
 
   const siretIsSubjectToUpdate =
-    !coupleUaiSiretTdb.siret || coupleUaiSiretTdb.siret !== organismeUniqueFoundInReferentielViaUai?.siret;
+    !coupleUaiSiretTdbToCheck.siret ||
+    coupleUaiSiretTdbToCheck.siret !== organismeUniqueFoundInReferentielViaUai?.siret;
 
   const uaiUniqueAmongAllCouplesTdb =
     allCouplesUaiSiretTdb.filter(({ uai }) => {
-      return uai === coupleUaiSiretTdb.uai;
+      return uai === coupleUaiSiretTdbToCheck.uai;
     }).length === 1;
 
   if (siretIsSubjectToUpdate && !!organismeUniqueFoundInReferentielViaUai && uaiUniqueAmongAllCouplesTdb) {
     await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
       {
         $set: {
-          uai_fiable: coupleUaiSiretTdb.uai,
+          uai_fiable: coupleUaiSiretTdbToCheck.uai,
           siret_fiable: organismeUniqueFoundInReferentielViaUai.siret,
           type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
         },
@@ -179,20 +180,20 @@ export const buildFiabilisationCoupleForTdbCouple = async (
   // pas présent dans un autre couple TDB
   const siretUniqueAmongAllCouplesTdb =
     allCouplesUaiSiretTdb.filter(({ siret }) => {
-      return siret === coupleUaiSiretTdb.siret;
+      return siret === coupleUaiSiretTdbToCheck.siret;
     }).length === 1;
 
   if (
     !!organismeFoundInReferentielViaSiret?.uai &&
-    organismeFoundInReferentielViaSiret.uai !== coupleUaiSiretTdb.uai &&
+    organismeFoundInReferentielViaSiret.uai !== coupleUaiSiretTdbToCheck.uai &&
     siretUniqueAmongAllCouplesTdb
   ) {
     await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
       {
         $set: {
           uai_fiable: organismeFoundInReferentielViaSiret.uai,
-          siret_fiable: coupleUaiSiretTdb.siret,
+          siret_fiable: coupleUaiSiretTdbToCheck.siret,
           type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
         },
       },
@@ -204,20 +205,18 @@ export const buildFiabilisationCoupleForTdbCouple = async (
   // On est dans le cas d'un couple NON_FIABILISABLE
   // On distingue le cas ou l'UAI du tdb n'est pas présente dans le Référentiel du cas ou l'on ne sait pas mapper le couple
   const isUaiPresentInReferentiel =
-    (await organismesReferentielDb().countDocuments({ uai: coupleUaiSiretTdb.uai })) > 0;
+    (await organismesReferentielDb().countDocuments({ uai: coupleUaiSiretTdbToCheck.uai })) > 0;
 
   // Upsert du couple avec statut de fiabilisation comme NON_FIABILISABLE en fonction de la présence de l'uai dans le référentiel
-  if (isUaiPresentInReferentiel) {
-    await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
-      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING } },
-      { upsert: true }
-    );
-  } else {
-    await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret },
-      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE } },
-      { upsert: true }
-    );
-  }
+  await fiabilisationUaiSiretDb().updateOne(
+    { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+    {
+      $set: {
+        type: isUaiPresentInReferentiel
+          ? STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING
+          : STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
+      },
+    },
+    { upsert: true }
+  );
 };
