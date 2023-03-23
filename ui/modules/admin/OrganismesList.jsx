@@ -71,6 +71,7 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
             </Text>
           ),
         },
+
         uai: {
           size: 60,
           header: () => "Numéro UAI",
@@ -82,6 +83,19 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
               variant={getValue() && getValue() === highlight?.uai ? "highlight" : undefined}
             >
               {getValue() || ""}
+            </Text>
+          ),
+        },
+        est_dans_le_referentiel: {
+          size: 60,
+          header: () => "Dans Réfé.?",
+          cell: ({ getValue }) => (
+            <Text
+              as={getValue() ? Link : "p"}
+              href={{ query: { ...router.query, est_dans_le_referentiel: getValue() } }}
+              fontSize="0.9rem"
+            >
+              {getValue() ? "OUI" : "NON"}
             </Text>
           ),
         },
@@ -123,7 +137,9 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
           ),
         },
         effectifs_count: { header: () => "Effectifs" },
-
+        mode_de_transmission: {
+          header: () => "Mode trans.",
+        },
         last_transmission_date: {
           size: 120,
           header: () => "Dernière transmission au tdb",

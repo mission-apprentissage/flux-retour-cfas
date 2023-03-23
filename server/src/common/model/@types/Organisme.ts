@@ -908,10 +908,6 @@ export interface Organisme {
    */
   last_transmission_date?: Date;
   /**
-   * Date de la dernière transmission de données
-   */
-  date_derniere_transmission?: Date;
-  /**
    * Est dans le referentiel onisep des organismes
    */
   est_dans_le_referentiel?: boolean;
