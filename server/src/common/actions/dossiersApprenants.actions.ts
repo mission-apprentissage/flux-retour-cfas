@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import { isEqual } from "date-fns";
 import { dossiersApprenantsMigrationDb } from "../model/collections.js";
 import {
@@ -6,6 +6,7 @@ import {
   validateDossiersApprenantsMigration,
 } from "../model/dossiersApprenantsMigration.model.js";
 import { findOrganismeById } from "./organismes/organismes.actions.js";
+import { DossiersApprenantsMigration } from "../model/@types/DossiersApprenantsMigration.js";
 
 /**
  * Méthode qui ajoute un dossierApprenant en base
@@ -97,7 +98,7 @@ export const updateDossierApprenant = async (
     date_metier_mise_a_jour_statut,
     ...data
   }
-) => {
+): Promise<WithId<DossiersApprenantsMigration>> => {
   const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
@@ -151,7 +152,7 @@ export const updateDossierApprenant = async (
     { returnDocument: "after" }
   );
 
-  return updated.value;
+  return updated.value as WithId<DossiersApprenantsMigration>;
 };
 
 /**
