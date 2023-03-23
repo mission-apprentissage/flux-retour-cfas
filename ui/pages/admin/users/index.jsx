@@ -25,20 +25,19 @@ import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import ModalClosingButton from "@/components/ModalClosingButton/ModalClosingButton";
-import Table from "@/components/Table/Table";
 import UserForm from "@/modules/admin/UserForm";
-import { ArrowRightLine } from "@/theme/components/icons";
-import { getUserOrganisationLabel, USER_STATUS_LABELS } from "@/common/constants/usersConstants";
+import UsersList from "@/modules/admin/UsersList";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
+const DEFAULT_LIMIT = 100;
 
 const Users = () => {
   const title = "Gestion des utilisateurs";
   const router = useRouter();
-  const page = parseInt(router.query.page, 10) || 1;
-  const limit = parseInt(router.query.limit, 10) || 10;
+  let { page, limit, sort, q: searchValue, ...filter } = router.query;
+  page = parseInt(page, 10) || 1;
+  limit = parseInt(limit, 10) || DEFAULT_LIMIT;
 
-  const searchValue = router.query.q;
   const {
     data: roles,
     isLoading: isLoadingRoles,
@@ -49,15 +48,16 @@ const Users = () => {
     refetch: refetchUsers,
     isLoading: isLoadingUsers,
     error: errorUsers,
-  } = useQuery(["admin/users", page, limit, limit, searchValue], () =>
-    _get("/api/v1/admin/users/", { params: { page, q: searchValue } })
+  } = useQuery(["admin/users", page, limit, filter, searchValue], () =>
+    _get("/api/v1/admin/users/", { params: { page, q: searchValue, filter } })
   );
   // prefetch next page
   useQuery(
-    ["users", page + 1, limit, searchValue],
-    () => _get("/api/v1/admin/users/", { params: { page: page + 1, limit, q: searchValue } }),
+    ["users", page + 1, limit, filter, searchValue],
+    () => _get("/api/v1/admin/users/", { params: { page: page + 1, limit, q: searchValue, filter } }),
     { enabled: !!(users?.pagination && page + 1 < users?.pagination?.lastPage) }
   );
+  console.log(">>", users);
 
   const rolesById = roles?.reduce((acc, role) => ({ ...acc, [role._id]: role }), {});
   const isLoading = isLoadingUsers || isLoadingRoles;
@@ -137,73 +137,14 @@ const Users = () => {
               </HStack>
             </form>
             <Text>
-              {users?.pagination?.total} {users?.pagination?.total > 1 ? "comptes utilisateurs" : "compte utilisateur"}
+              {users?.pagination?.total || 0}{" "}
+              {users?.pagination?.total > 1 ? "comptes utilisateurs" : "compte utilisateur"}
             </Text>
-            <Table
+            <UsersList
               mt={4}
+              rolesById={rolesById}
               data={users?.data || []}
-              manualPagination={true}
               pagination={users?.pagination}
-              onPaginationChange={({ page, limit }) => {
-                router.push({ pathname: "/admin/users", query: { page, limit } }, null, { shallow: true });
-              }}
-              columns={{
-                nom: {
-                  size: 200,
-                  header: () => "Nom",
-                },
-                prenom: {
-                  size: 100,
-                  header: () => "Prénom",
-                },
-                main_organisme: {
-                  size: 100,
-                  header: () => "Etablissement",
-                  cell: ({ getValue }) => (
-                    <NavLink href={`/admin/organismes/${getValue()?._id}`} flexGrow={1}>
-                      <Text isTruncated maxWidth={400}>
-                        {getValue()?.nom}
-                      </Text>
-                    </NavLink>
-                  ),
-                },
-                organisation: {
-                  size: 70,
-                  header: () => "Utilisateur",
-                  cell: ({ row }) => <Text fontSize="md">{getUserOrganisationLabel(row.original)}</Text>,
-                },
-                account_status: {
-                  size: 70,
-                  header: () => "Statut du compte",
-                  cell: ({ getValue }) => (
-                    <Text fontSize="md" whiteSpace="nowrap">
-                      {USER_STATUS_LABELS[getValue()] ?? getValue()}
-                    </Text>
-                  ),
-                },
-                roles: {
-                  size: 60,
-                  header: () => "Role",
-                  cell: ({ getValue, row }) => (
-                    <Text fontSize="md" whiteSpace="nowrap">
-                      {getValue().length
-                        ? getValue().map((roleId) => rolesById?.[roleId]?.title || roleId)
-                        : row.original.is_admin
-                        ? "Admin"
-                        : ""}
-                    </Text>
-                  ),
-                },
-                actions: {
-                  size: 25,
-                  header: () => "",
-                  cell: (info) => (
-                    <NavLink href={`/admin/users/${info.row.original._id}`} flexGrow={1}>
-                      <ArrowRightLine w="1w" />
-                    </NavLink>
-                  ),
-                },
-              }}
               searchValue={searchValue}
             />
           </Stack>

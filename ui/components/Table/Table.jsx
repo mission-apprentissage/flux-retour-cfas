@@ -98,7 +98,7 @@ export default function Table({
     // general
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    ...(manualPagination ? {} : { getFilteredRowModel: getFilteredRowModel() }),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     globalFilterFn: fuzzyFilter,
