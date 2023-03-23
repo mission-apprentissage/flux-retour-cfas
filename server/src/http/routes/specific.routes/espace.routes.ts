@@ -1,4 +1,5 @@
 import express from "express";
+import Boom from "boom";
 
 import { findOrganismesByQuery } from "../../../common/actions/organismes/organismes.actions.js";
 import { pageAccessMiddleware } from "../../middlewares/pageAccessMiddleware.js";
@@ -10,6 +11,11 @@ export default () => {
     const query = !user.organisme_ids.length
       ? {}
       : { _id: { $in: user.organisme_ids.filter((id) => id.toString() !== user.main_organisme_id?.toString()) } };
+
+    if (!user.organisme_ids?.length && !user.is_admin) {
+      throw Boom.unauthorized("Accès non autorisé");
+    }
+
     const organismes = await findOrganismesByQuery(query, {
       _id: 1,
       nom: 1,
