@@ -10,7 +10,11 @@ export const createIndexes = async () => {
       logger.info(`Create indexes for collection ${descriptor.collectionName}`);
       await Promise.all(
         descriptor.indexes.map(([index, options]) => {
-          return getDbCollection(descriptor.collectionName).createIndex(index, options);
+          return getDbCollection(descriptor.collectionName)
+            .createIndex(index, options)
+            .catch((err) => {
+              console.error(`Error creating indexes for descriptor.collectionName: ${err}`);
+            });
         })
       );
     }

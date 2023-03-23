@@ -38,9 +38,10 @@ program.configureHelp({
 program
   .command("indexes:create")
   .description("Creation des indexes mongo")
-  .action(async (_, options) =>
+  .option("-d, --drop", "Supprime les indexes existants avant de les recréer")
+  .action(async ({ drop }, options) =>
     runScript(async () => {
-      await recreateIndexes();
+      await recreateIndexes({ drop });
     }, options._name)
   );
 
