@@ -1,7 +1,7 @@
-import { AuthContext } from "@/src/types.js";
 import { Parser } from "json2csv";
 
 import { getExportAnonymizedEventNameFromFilters, USER_EVENTS_TYPES } from "../../constants/userEventsConstants.js";
+import { AuthContext } from "../../model/internal/AuthContext.js";
 import { Organisation } from "../../model/organisations.model.js";
 import { EffectifsFilters } from "../helpers/filters";
 import { getOrganisationRelatedOrganismes } from "../organismes/organismes.actions.js";
@@ -47,7 +47,7 @@ async function getFiltersFromOrganisation(organisation: Organisation): Promise<a
     case "ACADEMIE":
       return { "organisme.adresse.academie": organisation.code_academie };
 
-    case "DGEFP":
+    case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       return {};
   }

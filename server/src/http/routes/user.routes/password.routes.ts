@@ -79,7 +79,7 @@ export default ({ mailer }) => {
       });
       // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
 
-      const updatedUser = await changePassword(user.email, newPassword);
+      const updatedUser = await changePassword(req.user, newPassword);
 
       const payload = await structureUser(updatedUser);
 

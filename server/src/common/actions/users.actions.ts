@@ -2,7 +2,9 @@ import { addHours } from "date-fns";
 import { ObjectId } from "mongodb";
 
 import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
+import { UsersMigration } from "../model/@types/UsersMigration.js";
 import { usersMigrationDb } from "../model/collections.js";
+import { AuthContext } from "../model/internal/AuthContext.js";
 import { validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
@@ -23,7 +25,7 @@ import { passwordSchema, stripEmptyFields } from "../utils/validationUtils.js";
 
 interface UserRegistration {
   email: string;
-  civility: string;
+  civility: "Madame" | "Monsieur";
   nom: string;
   prenom: string;
   type_organisation: string;
@@ -33,7 +35,7 @@ export const createUser = async (user: UserRegistration): Promise<ObjectId> => {
   const { civility, nom, prenom, email, type_organisation } = user;
 
   const { insertedId } = await usersMigrationDb().insertOne(
-    stripEmptyFields({
+    stripEmptyFields<UsersMigration>({
       account_status: "PENDING_EMAIL_VALIDATION",
       has_accept_cgu_version: "",
       invalided_token: false,
@@ -334,13 +336,17 @@ export const finalizeUser = async (email: string) => {
  * @param {string} newPassword
  * @returns
  */
-export const changePassword = async (email: string, newPassword: string) => {
-  const user = await usersMigrationDb().findOne({ email });
+export const changePassword = async (authContext: AuthContext, newPassword: string) => {
+  const user = await usersMigrationDb().findOne({ _id: authContext._id });
   if (!user) {
     throw new Error("Unable to find user");
   }
 
-  if (passwordSchema(user.is_admin).required().validate(newPassword).error) {
+  if (
+    passwordSchema(authContext.organisation.type === "ADMINISTRATEUR")
+      .required()
+      .validate(newPassword).error
+  ) {
     throw new Error("Password must be valid");
   }
 
