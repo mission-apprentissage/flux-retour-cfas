@@ -15,6 +15,7 @@ export const organisationTypes = [
   "CONSEIL_REGIONAL",
   "DDETS",
   "ACADEMIE",
+  "OPERATEUR_PUBLIC_NATIONAL",
   "ADMINISTRATEUR",
 ] as const;
 
@@ -46,7 +47,8 @@ export interface OrganisationTeteReseau extends AbstractOrganisation {
 }
 
 export interface OrganisationOperateurPublicNational extends AbstractOrganisation {
-  type: "DGEFP";
+  type: "OPERATEUR_PUBLIC_NATIONAL";
+  nom: string;
 }
 
 export interface OrganisationOperateurPublicRegion extends AbstractOrganisation {
