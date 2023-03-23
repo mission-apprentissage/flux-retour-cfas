@@ -34,7 +34,7 @@ const DEFAULT_LIMIT = 100;
 const Users = () => {
   const title = "Gestion des utilisateurs";
   const router = useRouter();
-  let { page, limit, sort, q: searchValue, ...filter } = router.query;
+  let { page, limit, q: searchValue, ...filter } = router.query;
   page = parseInt(page, 10) || 1;
   limit = parseInt(limit, 10) || DEFAULT_LIMIT;
 
