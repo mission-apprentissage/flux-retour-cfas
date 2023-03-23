@@ -40,7 +40,7 @@ import config from "../config.js";
 
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
-import { returnResult } from "./middlewares/helpers.js";
+import { requireAdministrator, returnResult } from "./middlewares/helpers.js";
 import { jobEventsDb } from "../common/model/collections.js";
 import { packageJson } from "../common/utils/esmUtils.js";
 import logger from "../common/logger.js";
@@ -214,10 +214,6 @@ function setupRoutes(app: Application, services) {
   authRouter.use("/api/v1/effectif", effectif());
   authRouter.use("/api/v1/upload", upload(services));
   authRouter.use("/api/v1/server-events", serverEvents());
-  authRouter.use("/api/v1/admin", usersAdmin(services));
-  authRouter.use("/api/v1/admin", organismesAdmin());
-  authRouter.use("/api/v1/admin", statsAdmin());
-  authRouter.use("/api/v1/admin/maintenanceMessages", maintenancesAdmin());
   authRouter.use("/api/indicateurs", indicateursRouter());
   authRouter.get("/api/v1/indicateurs-export", async (req, res) => {
     const filters = await buildEffectifsFiltersFromRequest(req);
@@ -271,6 +267,17 @@ function setupRoutes(app: Application, services) {
       return organismes;
     })
   );
+
+  /********************************
+   * API droits administrateurs   *
+   ********************************/
+  const adminRouter = express.Router();
+  adminRouter.use(requireAdministrator);
+  adminRouter.use("/api/v1/admin", usersAdmin(services));
+  adminRouter.use("/api/v1/admin", organismesAdmin());
+  adminRouter.use("/api/v1/admin", statsAdmin());
+  adminRouter.use("/api/v1/admin/maintenanceMessages", maintenancesAdmin());
+  authRouter.use(adminRouter);
 
   app.use(authRouter);
 }

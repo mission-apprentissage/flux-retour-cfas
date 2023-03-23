@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// FIXME modèle à revoir
 const userSchema = () =>
   z.object({
     prenom: z.string({ required_error: "Champ obligatoire" }),

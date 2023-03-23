@@ -134,4 +134,4 @@ const Organismes = () => {
   );
 };
 
-export default withAuth(Organismes, "admin/page_gestion_organismes");
+export default withAuth(Organismes, ["ADMINISTRATEUR"]);

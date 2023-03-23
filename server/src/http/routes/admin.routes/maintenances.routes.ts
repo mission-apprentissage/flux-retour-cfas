@@ -6,13 +6,11 @@ import {
   updateMaintenanceMessage,
   removeMaintenanceMessage,
 } from "../../../common/actions/maintenances.actions.js";
-import { requireAdministrator } from "../../middlewares/helpers.js";
 
 export default () => {
   const router = express.Router();
 
   router.post("/", async (req, res) => {
-    requireAdministrator(req);
     const { msg, type, enabled, context } = await validateFullObjectSchema(req.body, {
       msg: Joi.string().required(),
       type: Joi.string().required(),

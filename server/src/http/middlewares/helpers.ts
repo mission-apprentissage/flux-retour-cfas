@@ -39,9 +39,10 @@ export function ensureValidUser(user) {
   }
 }
 
-export function requireAdministrator(req: Request) {
+export function requireAdministrator(req: Request, _res: Response, next: NextFunction) {
   ensureValidUser(req.user);
   if (req.user.organisation.type !== "ADMINISTRATEUR") {
     throw Boom.forbidden("Accès non autorisé");
   }
+  next();
 }
