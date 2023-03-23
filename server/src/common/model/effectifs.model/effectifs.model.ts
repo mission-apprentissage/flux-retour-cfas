@@ -21,6 +21,7 @@ const indexes = [
       "apprenant.nom": 1,
       "apprenant.prenom": 1,
       "formation.cfd": 1,
+      "formation.annee": 1,
     },
     { unique: true },
   ],
