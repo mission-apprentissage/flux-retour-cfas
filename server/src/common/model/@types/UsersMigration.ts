@@ -26,21 +26,14 @@ export interface UsersMigration {
    * Le téléphone de l'utilisateur
    */
   telephone?: string;
-
+  /**
+   * Organisation à laquelle appartient l'utilisateur
+   */
+  organisation_id?: any;
   /**
    * Type d'organisation [temporaire pendant l'inscription en attendant d'être rattaché]
    */
-  type_organisation?:
-    | "TETE_DE_RESEAU"
-    | "ACADEMIE"
-    | "DRAAF"
-    | "CARIF_OREF"
-    | "DREETS"
-    | "DEETS"
-    | "DDETS"
-    | "CONSEIL_REGIONAL"
-    | "CELLULE_APPRENTISSAGE"
-    | "ORGANISME_FORMATION";
+  type_organisation?: string;
   /**
    * Statut du compte
    */

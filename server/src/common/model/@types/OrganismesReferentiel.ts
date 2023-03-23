@@ -47,4 +47,15 @@ export interface OrganismesReferentiel {
   lieux_de_formation: {
     uai?: string;
   }[];
+
+  /**
+   * Formations de cet organisme
+   * FIXME non présent dans les données de prod, à supprimer ?
+   */
+  contacts?: {
+    email?: string;
+    confirmé?: boolean;
+    date_collecte?: string;
+    sources?: string[];
+  }[];
 }
