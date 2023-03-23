@@ -1,4 +1,3 @@
-import { AuthContext } from "@/src/types.js";
 import { ObjectId } from "mongodb";
 
 import { organisationsDb, usersMigrationDb } from "../model/collections.js";

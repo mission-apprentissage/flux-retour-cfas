@@ -1,22 +1,6 @@
-import { ObjectId } from "mongodb";
-import { Organisation } from "./common/model/organisations.model";
+import { AuthContext } from "./common/model/internal/AuthContext";
 
 export {};
-
-export interface AuthContext<IOrganisation = Organisation> {
-  _id: ObjectId;
-  email: string;
-  organisation_id: ObjectId;
-
-  // populated via $lookup
-  organisation: IOrganisation;
-
-  // fields that should be removed
-  tmpPwd: string;
-
-  // legacy field used for ERPs
-  username: string;
-}
 
 declare global {
   namespace Express {

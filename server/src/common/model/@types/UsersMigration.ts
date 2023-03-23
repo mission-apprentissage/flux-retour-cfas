@@ -84,4 +84,18 @@ export interface UsersMigration {
    * unsubscribe email
    */
   unsubscribe?: boolean;
+
+  // FIXME à supprimer quand process d'inscription revu
+  /**
+   * N° SIRET
+   * Type d'organisation [temporaire pendant l'inscription en attendant d'être rattaché]
+   */
+  siret?: string;
+  /**
+   * Code UAI de l'organisme (seulement pour les utilisateurs OF)
+   */
+  uai?: string;
+  /**
+   * Appartenance à une organisation (exemple DREETS, MISSION_LOCALE..)
+   */
 }

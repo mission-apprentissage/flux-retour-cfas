@@ -13,9 +13,7 @@ import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
 import { Organisme } from "../../model/@types/Organisme.js";
 import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
-import { AuthContext } from "@/src/types.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../utils/validationsUtils/organisme-de-formation/nature.js";
-import { OrganisationOrganismeFormation } from "../../model/organisations.model.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeConstants.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -722,7 +720,7 @@ export async function getOrganisationRelatedOrganismes(siret: string, uai: strin
       for (const relatedOrganisme of formation.organismes) {
         if (
           ![NATURE_ORGANISME_DE_FORMATION.LIEU, NATURE_ORGANISME_DE_FORMATION.INCONNUE].includes(
-            relatedOrganisme.nature
+            relatedOrganisme.nature as any
           ) &&
           organisme.siret !== relatedOrganisme.siret
         ) {
