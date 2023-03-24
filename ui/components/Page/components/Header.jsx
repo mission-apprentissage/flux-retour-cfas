@@ -95,9 +95,6 @@ const UserMenu = () => {
                   <MenuItem href="/admin/organismes" icon={<Parametre boxSize={4} />}>
                     Gestion des organismes
                   </MenuItem>
-                  <MenuItem href="/admin/roles" icon={<Parametre boxSize={4} />}>
-                    Gestion des rôles
-                  </MenuItem>
                   <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
                     Message de maintenance
                   </MenuItem>
