@@ -8,6 +8,7 @@ import { AuthContext } from "../model/internal/AuthContext.js";
 import { Organisation } from "../model/organisations.model.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { sendSimpleEmail } from "../services/mailer/mailer.js";
+import logger from "../logger.js";
 
 export async function createOrganisation(organisation: Organisation): Promise<ObjectId> {
   const { insertedId } = await organisationsDb().insertOne(organisation);
@@ -100,7 +101,12 @@ async function buildOrganisationLabel(organisation: Organisation): Promise<strin
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
       const organisme = await organismesDb().findOne({ siret: organisation.siret, uai: organisation.uai });
-      return `${organisme?.nom} - SIRET : ${organisation.siret}, UAI :${organisation.uai}`;
+      if (!organisme) {
+        logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
+      }
+      return `${organisme?.nom || organisme?.enseigne || "Organisme"} - SIRET : ${organisation.siret}, UAI : ${
+        organisation.uai
+      }`;
     }
 
     case "TETE_DE_RESEAU":
