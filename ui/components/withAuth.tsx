@@ -20,6 +20,7 @@ const withAuth = (Component: any, authorizedOrganisationTypes: (typeof organisat
   const AuthenticatedPage = (props) => {
     const router = useRouter();
     const { auth, organisationType } = useAuth();
+    // FIXME probablement lever une erreur si le compte n'est confirmé
     if (!auth) {
       if (typeof window !== "undefined") {
         router.push("/auth/connexion");

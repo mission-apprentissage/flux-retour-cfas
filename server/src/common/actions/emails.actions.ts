@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
+import logger from "../logger.js";
 import { usersMigrationDb } from "../model/collections.js";
+import { TemplateName, TemplatePayloads } from "../services/mailer/mailer.js";
 import { generateHtml } from "../utils/emailsUtils.js";
 
 function addEmail(userEmail: string, token: string, templateName: string, payload: any) {
@@ -132,6 +134,24 @@ export async function checkIfEmailExists(token) {
 //Ces actions sont construites à la volée car il est nécessaire de pouvoir injecter un mailer durant les tests
 export const createMailer = (mailerService) => {
   return {
+    // version intermédiaire qui prend le template en paramètre (constuit et vérifié au préalable avec TS)
+    async sendSimpleEmail<T extends TemplateName>(
+      recipient: string,
+      templateName: T,
+      payload: TemplatePayloads[T],
+      template: any,
+      emailToken: any
+    ): Promise<void> {
+      try {
+        template.data.token = emailToken;
+        await addEmail(recipient, emailToken, templateName, payload);
+        const messageId = await mailerService.sendEmailMessage(recipient, template);
+        await addEmailMessageId(emailToken, messageId);
+      } catch (err: any) {
+        logger.error({ err, template: templateName }, "error sending email");
+        await addEmailError(emailToken, err);
+      }
+    },
     async sendEmail({ to, payload }, templateName) {
       const token = uuidv4();
       if (!mailerService.templates[templateName]) {

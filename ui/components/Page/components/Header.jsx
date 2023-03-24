@@ -87,6 +87,9 @@ const UserMenu = () => {
               <MenuItem href="/mon-compte" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
                 Mon compte
               </MenuItem>
+              <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
+                Gestion des membres
+              </MenuItem>
               {organisationType === "ADMINISTRATEUR" && (
                 <MenuGroup title="Administration">
                   <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>

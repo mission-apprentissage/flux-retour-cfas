@@ -39,15 +39,10 @@ const Users = () => {
   limit = parseInt(limit, 10) || DEFAULT_LIMIT;
 
   const {
-    data: roles,
-    isLoading: isLoadingRoles,
-    error: errorRoles,
-  } = useQuery(["admin/roles"], () => _get("/api/v1/admin/roles/"));
-  const {
     data: users,
     refetch: refetchUsers,
-    isLoading: isLoadingUsers,
-    error: errorUsers,
+    isLoading,
+    error,
   } = useQuery(["admin/users", page, limit, filter, searchValue], () =>
     _get("/api/v1/admin/users/", { params: { page, q: searchValue, filter } })
   );
@@ -58,10 +53,6 @@ const Users = () => {
     { enabled: !!(users?.pagination && page + 1 < users?.pagination?.lastPage) }
   );
   console.log(">>", users);
-
-  const rolesById = roles?.reduce((acc, role) => ({ ...acc, [role._id]: role }), {});
-  const isLoading = isLoadingUsers || isLoadingRoles;
-  const error = errorUsers || errorRoles;
 
   const closeModal = () => router.push("/admin/users", undefined, { shallow: true });
 
@@ -84,7 +75,6 @@ const Users = () => {
           <ModalClosingButton />
           <UserForm
             user={null}
-            roles={roles}
             afterSubmit={async (result, error) => {
               if (!error) {
                 closeModal();
@@ -140,13 +130,7 @@ const Users = () => {
               {users?.pagination?.total || 0}{" "}
               {users?.pagination?.total > 1 ? "comptes utilisateurs" : "compte utilisateur"}
             </Text>
-            <UsersList
-              mt={4}
-              rolesById={rolesById}
-              data={users?.data || []}
-              pagination={users?.pagination}
-              searchValue={searchValue}
-            />
+            <UsersList mt={4} data={users?.data || []} pagination={users?.pagination} searchValue={searchValue} />
           </Stack>
         )}
       </VStack>

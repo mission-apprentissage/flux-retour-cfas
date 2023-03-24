@@ -10,7 +10,7 @@ import { getUserOrganisationLabel, USER_STATUS_LABELS } from "@/common/constants
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const UsersList = ({ data, pagination, sorting, searchValue, rolesById }) => {
+const UsersList = ({ data, pagination, sorting, searchValue }) => {
   const router = useRouter();
 
   return (
@@ -54,19 +54,6 @@ const UsersList = ({ data, pagination, sorting, searchValue, rolesById }) => {
           cell: ({ getValue }) => (
             <Text fontSize="md" whiteSpace="nowrap">
               {USER_STATUS_LABELS[getValue()] ?? getValue()}
-            </Text>
-          ),
-        },
-        roles: {
-          size: 60,
-          header: () => "Role",
-          cell: ({ getValue, row }) => (
-            <Text fontSize="md" whiteSpace="nowrap">
-              {getValue()?.length > 0
-                ? getValue().map((roleId) => rolesById?.[roleId]?.title || roleId)
-                : row.original.is_admin
-                ? "Admin"
-                : ""}
             </Text>
           ),
         },

@@ -8,6 +8,7 @@ import * as sessions from "../../common/actions/sessions.actions.js";
 import { COOKIE_NAME } from "../../common/constants/cookieName.js";
 import { getOrganisationById } from "../../common/actions/organisations.actions.js";
 import { AuthContext } from "../../common/model/internal/AuthContext.js";
+import { ObjectId } from "mongodb";
 
 export const authMiddleware = () => {
   passport.use(
@@ -34,7 +35,7 @@ export const authMiddleware = () => {
             await updateUser(user._id, { invalided_token: false });
             return done(null, { invalided_token: true });
           }
-          (user as AuthContext).organisation = await getOrganisationById(user.organisation_id);
+          (user as AuthContext).organisation = await getOrganisationById(user.organisation_id as ObjectId);
           done(null, user);
         } catch (err) {
           done(err);

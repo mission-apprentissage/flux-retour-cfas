@@ -44,6 +44,7 @@ export const createUser = async (user: UserRegistration): Promise<ObjectId> => {
       emails: [],
       created_at: new Date(),
       email: email.toLowerCase(),
+      organisation_id: undefined as any, // FIXME revoir l'inscription pour assigner l'organisation choisie
       civility,
       nom,
       prenom,

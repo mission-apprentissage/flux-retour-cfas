@@ -14,6 +14,7 @@ import { escapeRegExp } from "../../utils/regexUtils.js";
 import { Organisme } from "../../model/@types/Organisme.js";
 import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeConstants.js";
+import Boom from "boom";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -692,10 +693,13 @@ export async function findUserOrganismes(user) {
   }));
 }
 
-export async function getOrganisme(organismeId: string) {
+export async function getOrganismeById(organismeId: string) {
   // TODO check permissions
-  const found = await organismesDb().findOne({ _id: new ObjectId(organismeId) });
-  return found;
+  const organisme = await organismesDb().findOne({ _id: new ObjectId(organismeId) });
+  if (!organisme) {
+    throw Boom.notFound(`missing organisation ${organismeId}`);
+  }
+  return organisme;
 }
 
 /**

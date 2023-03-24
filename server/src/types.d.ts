@@ -10,6 +10,12 @@ declare global {
 
       // authentication context
       user: AuthContext;
+
+      // populated by the errorMiddleware
+      err?: Error;
+
+      // populated by the server-events routes
+      requestId?: number;
     }
   }
 }

@@ -8,7 +8,7 @@ import Boom from "boom";
 
 import { apiRoles } from "../common/roles.js";
 
-import logMiddleware from "./middlewares/logMiddleware.js";
+import { logMiddleware } from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
@@ -57,6 +57,12 @@ import { createUserEvent } from "../common/actions/userEvents.actions.js";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../common/constants/userEventsConstants.js";
 import { exportAnonymizedEffectifsAsCSV } from "../common/actions/effectifs/effectifs-export.actions.js";
 import { Application } from "express-serve-static-core";
+import {
+  inviteUserToOrganisation,
+  listOrganisationMembers,
+  listOrganisationPendingInvitations,
+  removeUserFromOrganisation,
+} from "../common/actions/organisations.actions.js";
 
 /**
  * Create the express app
@@ -93,7 +99,7 @@ export default async (services) => {
   app.use(Sentry.Handlers.tracingHandler());
 
   app.use(bodyParser.json());
-  app.use(logMiddleware());
+  app.use(logMiddleware);
   app.use(cookieParser());
   app.use(passport.initialize());
 
@@ -265,6 +271,34 @@ function setupRoutes(app: Application, services) {
     returnResult(() => {
       const organismes = Object.keys(ORGANISMES_APPARTENANCE).map((id) => ({ id, nom: ORGANISMES_APPARTENANCE[id] }));
       return organismes;
+    })
+  );
+
+  authRouter.get(
+    "/api/v1/organisation/membres",
+    returnResult(async (req) => {
+      return await listOrganisationMembers(req.user.organisation_id);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/organisation/membres",
+    returnResult(async (req) => {
+      return await inviteUserToOrganisation(req.user, req.body.email.toLowerCase());
+    })
+  );
+
+  authRouter.delete(
+    "/api/v1/organisation/membres/:userId",
+    returnResult(async (req) => {
+      return await removeUserFromOrganisation(req.user, req.params.userId);
+    })
+  );
+
+  authRouter.get(
+    "/api/v1/organisation/invitations",
+    returnResult(async (req) => {
+      return await listOrganisationPendingInvitations(req.user);
     })
   );
 

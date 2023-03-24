@@ -30,6 +30,7 @@ import {
   UsersMigration,
 } from "./@types";
 import { EffectifsQueue } from "./@types/EffectifsQueue.js";
+import invitationsModelDescriptor from "./invitations.model.js";
 import organisationsModelDescriptor from "./organisations.model.js";
 
 export const modelDescriptors: { schema?: any; indexes?: any[][]; collectionName: string }[] = [
@@ -41,6 +42,7 @@ export const modelDescriptors: { schema?: any; indexes?: any[][]; collectionName
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
   MaintenanceMessagesModelDescriptor,
+  invitationsModelDescriptor,
   organisationsModelDescriptor,
   OrganismesModelDescriptor,
   OrganismesReferentielModelDescriptor,
@@ -60,6 +62,7 @@ export const jwtSessionsDb = () => getDbCollection<JwtSession>(JwtSessionsModelD
 export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDescriptor.collectionName);
 export const dossiersApprenantsApiErrorsDb = () =>
   getDbCollection<any>(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
+export const invitationsDb = () => getDbCollection(invitationsModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection(organisationsModelDescriptor.collectionName);
 export const organismesReferentielDb = () =>
   getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);

@@ -3,6 +3,9 @@ import { Organisation } from "../organisations.model";
 
 export interface AuthContext<IOrganisation = Organisation> {
   _id: ObjectId;
+  civility: string;
+  nom: string;
+  prenom: string;
   email: string;
   organisation_id: ObjectId;
 

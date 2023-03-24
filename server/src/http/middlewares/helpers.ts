@@ -1,15 +1,20 @@
 import Boom from "boom";
 import { NextFunction, Request, Response } from "express";
-import { Handler } from "express-serve-static-core";
 
 import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
+
+type Handler = (req: Request, res: Response, next: NextFunction) => any | Promise<any>;
 
 // catch errors and return the result of the request handler
 export function returnResult(serviceFunc: Handler) {
   return async (req: Request, res: Response, next: NextFunction) => {
     const result = await serviceFunc(req, res, next);
     res.set("Content-Type", "application/json");
-    res.send(result);
+    res.send(
+      result ?? {
+        message: "success",
+      }
+    );
   };
 }
 

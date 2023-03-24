@@ -2,7 +2,7 @@ import React from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
-import { Box, Flex, Heading, Stack, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, Heading, Stack, Spinner } from "@chakra-ui/react";
 
 import { _get } from "@/common/httpClient";
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
@@ -17,21 +17,13 @@ const User = () => {
   const router = useRouter();
   const id = router.query.id;
   const {
-    data: roles,
-    isLoading: isLoadingRoles,
-    error: errorsRoles,
-  } = useQuery(["roles"], () => _get("/api/v1/admin/roles/"));
-  const {
     data: user,
     refetch: refetchUser,
-    isLoading: isLoadingUsers,
-    error: errorsUsers,
+    isLoading,
+    error,
   } = useQuery(["user", id], () => _get(`/api/v1/admin/users/${id}`));
 
   const title = "Gestion des utilisateurs";
-  const pendingPermissionsCount = user?.permissions?.filter((p) => p.pending).length;
-  const isLoading = isLoadingRoles || isLoadingUsers;
-  const error = errorsUsers || errorsRoles;
 
   return (
     <Page>
@@ -55,16 +47,8 @@ const User = () => {
               <p>Date de création du compte : {new Date(user.created_at).toLocaleString()}</p>
               <p>Date de dernière connexion : {new Date(user.last_connection).toLocaleString()}</p>
             </Box>
-            <Flex fontSize="gamma" flexGrow={1} justifyContent="space-between" alignItems="center">
-              <VStack alignItems="flex-end" spacing={0}>
-                {pendingPermissionsCount > 0 && (
-                  <Text fontSize={"sm"}>{pendingPermissionsCount} permission(s) en attente de validation</Text>
-                )}
-              </VStack>
-            </Flex>
             <UserForm
               user={user}
-              roles={roles}
               afterSubmit={async () => {
                 await refetchUser();
               }}
