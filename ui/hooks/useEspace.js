@@ -24,8 +24,8 @@ const fetchMyOrganisme = async (my_organisme_id, accountIsNotReady = false) => {
 function getMesOrganismesLabelFromOrganisationType(type) {
   switch (type) {
     case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_REPONSABLE":
-    case "ORGANISME_FORMATION_REPONSABLE_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
       return "Mes organismes";
 
     case "TETE_DE_RESEAU":
@@ -98,8 +98,8 @@ export function useEspace() {
               },
               ...([
                 "ORGANISME_FORMATION_FORMATEUR",
-                "ORGANISME_FORMATION_REPONSABLE",
-                "ORGANISME_FORMATION_REPONSABLE_FORMATEUR",
+                "ORGANISME_FORMATION_RESPONSABLE",
+                "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
               ].includes(organisationType)
                 ? {
                     effectifs: {

@@ -26,8 +26,8 @@ const natures = {
 function getHeaderTitleFromOrganisationType(type) {
   switch (type) {
     case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_REPONSABLE":
-    case "ORGANISME_FORMATION_REPONSABLE_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
       return "Mes organismes";
 
     case "TETE_DE_RESEAU":

@@ -24,8 +24,8 @@ const CSV_DEFAULT_FIELDS = [
 async function getFiltersFromOrganisation(organisation: Organisation): Promise<any> {
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_REPONSABLE":
-    case "ORGANISME_FORMATION_REPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
       // TODO restreindre aux organismes liés
       return {
         "organisme._id": {

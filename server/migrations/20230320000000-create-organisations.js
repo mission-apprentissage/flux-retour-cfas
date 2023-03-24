@@ -85,7 +85,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
 
     const natureOFToOrganisationType = {
       responsable_formateur: "RESPONSABLE_FORMATEUR",
-      responsable: "REPONSABLE",
+      responsable: "RESPONSABLE",
       formateur: "FORMATEUR",
       inconnue: "FORMATEUR",
     };

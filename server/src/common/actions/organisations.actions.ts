@@ -97,8 +97,8 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
 async function buildOrganisationLabel(organisation: Organisation): Promise<string> {
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_REPONSABLE":
-    case "ORGANISME_FORMATION_REPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
       const organisme = await organismesDb().findOne({ siret: organisation.siret, uai: organisation.uai });
       return `${organisme?.nom} - SIRET : ${organisation.siret}, UAI :${organisation.uai}`;
     }
