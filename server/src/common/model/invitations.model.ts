@@ -3,9 +3,7 @@ import { date, object, objectId, string } from "./json-schema/jsonSchemaTypes.js
 const collectionName = "invitations";
 
 // FIXME compléter si besoin d'indexes
-const indexes = () => {
-  return [];
-};
+const indexes = [];
 
 const schema = object(
   {

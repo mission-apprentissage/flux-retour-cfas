@@ -76,9 +76,7 @@ export interface OrganisationAdministrateur extends AbstractOrganisation {
 const collectionName = "organisations";
 
 // FIXME compléter si besoin d'indexes
-const indexes = () => {
-  return [];
-};
+const indexes = [];
 
 const schema = object(
   {
