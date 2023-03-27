@@ -29,6 +29,7 @@ import { recreateIndexes } from "./db/recreateIndexes.js";
 import { findInvalidDocuments } from "./db/findInvalidDocuments.js";
 import { generateTypes } from "./seed/types/generate-types.js";
 import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
+import { removeDuplicatesEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates.js";
 
 program.configureHelp({
   sortSubcommands: true,
@@ -60,6 +61,15 @@ program
   .action(async (_, options) =>
     runScript(async () => {
       await processEffectifsQueueEndlessly();
+    }, options._name)
+  );
+
+program
+  .command("process:effectifs-queue:remove-duplicates")
+  .description("Process la queue des effectifs")
+  .action(async (_, options) =>
+    runScript(async () => {
+      await removeDuplicatesEffectifsQueue();
     }, options._name)
   );
 
