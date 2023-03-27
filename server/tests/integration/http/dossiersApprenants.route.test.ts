@@ -5,7 +5,7 @@ import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "../../data/randomizedSample.js";
 import { effectifsQueueDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
-import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
+import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
 
 const user = {
   name: "userApi",
