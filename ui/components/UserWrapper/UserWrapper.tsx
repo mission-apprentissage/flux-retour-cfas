@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useRef, createContext } from "react";
+import React, { useState, useEffect, createContext } from "react";
 import { useRouter } from "next/router";
-import { Flex, Box, Text, Spinner } from "@chakra-ui/react";
+import { Flex, Spinner } from "@chakra-ui/react";
 
-import { _get, _post, _put } from "../../common/httpClient";
+import { _get, _post } from "../../common/httpClient";
 import useAuth from "../../hooks/useAuth";
 import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
-import { Cgu, cguVersion } from "../legal/Cgu";
-import AcknowledgeModal from "../../components/Modals/AcknowledgeModal";
 import { emitter } from "../../common/emitter";
-import { isUserAdmin } from "@/common/utils/rolesUtils";
+import { IAuthenticationContext } from "@/common/internal/AuthContext";
 
 const AccountWrapper = ({ children }) => {
   const { auth, organisationType } = useAuth();
@@ -45,66 +43,65 @@ const AccountWrapper = ({ children }) => {
   return <>{children}</>;
 };
 
-const ForceAcceptCGU = ({ children }) => {
-  const { auth, setAuth } = useAuth();
-  const cguContainer = useRef(null);
+// const ForceAcceptCGU = ({ children }) => {
+//   const { auth, setAuth } = useAuth();
+//   const cguContainer = useRef(null);
 
-  const onAcceptCguClicked = async () => {
-    try {
-      let user = await _put("/api/v1/profile/acceptCgu", {
-        has_accept_cgu_version: cguVersion(),
-      });
-      setAuth(user);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+//   const onAcceptCguClicked = async () => {
+//     try {
+//       let user = await _put("/api/v1/profile/acceptCgu", {
+//         has_accept_cgu_version: cguVersion(),
+//       });
+//       setAuth(user);
+//     } catch (e) {
+//       console.error(e);
+//     }
+//   };
 
-  return (
-    <>
-      {auth && auth.account_status === "CONFIRMED" && (
-        <AcknowledgeModal
-          title="Conditions générales d'utilisation"
-          acknowledgeText="Accepter"
-          isOpen={auth.has_accept_cgu_version !== cguVersion()}
-          onAcknowledgement={onAcceptCguClicked}
-          canBeClosed={false}
-          bgOverlay="rgba(0, 0, 0, 0.28)"
-          size="full"
-        >
-          <Box mb={3}>
-            {!auth.has_accept_cgu_version && (
-              <Text fontSize="1.1rem" fontWeight="bold">
-                Merci de lire attentivement les conditions générales d&apos;utilisation avant de les accepter.
-              </Text>
-            )}
-            {auth.has_accept_cgu_version && (
-              <Text fontSize="1.1rem" fontWeight="bold">
-                Nos conditions générales d&apos;utilisation ont changé depuis votre dernières visite. (
-                {auth.has_accept_cgu_version} -&gt; {cguVersion()}) <br />
-                <br />
-                Merci de lire attentivement les conditions générales d&apos;utilisation avant de les accepter.
-              </Text>
-            )}
-          </Box>
-          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} ref={cguContainer}>
-            <Cgu
-              isWrapped="1"
-              onLoad={async () => {
-                // eslint-disable-next-line no-undef
-                await new Promise((resolve) => setTimeout(resolve, 500));
-                cguContainer.current?.scrollTo(0, 0);
-              }}
-            />
-          </Box>
-        </AcknowledgeModal>
-      )}
-      {children}
-    </>
-  );
-};
+//   return (
+//     <>
+//       {auth && auth.account_status === "CONFIRMED" && (
+//         <AcknowledgeModal
+//           title="Conditions générales d'utilisation"
+//           acknowledgeText="Accepter"
+//           isOpen={auth.has_accept_cgu_version !== cguVersion()}
+//           onAcknowledgement={onAcceptCguClicked}
+//           canBeClosed={false}
+//           bgOverlay="rgba(0, 0, 0, 0.28)"
+//           size="full"
+//         >
+//           <Box mb={3}>
+//             {!auth.has_accept_cgu_version && (
+//               <Text fontSize="1.1rem" fontWeight="bold">
+//                 Merci de lire attentivement les conditions générales d&apos;utilisation avant de les accepter.
+//               </Text>
+//             )}
+//             {auth.has_accept_cgu_version && (
+//               <Text fontSize="1.1rem" fontWeight="bold">
+//                 Nos conditions générales d&apos;utilisation ont changé depuis votre dernières visite. (
+//                 {auth.has_accept_cgu_version} -&gt; {cguVersion()}) <br />
+//                 <br />
+//                 Merci de lire attentivement les conditions générales d&apos;utilisation avant de les accepter.
+//               </Text>
+//             )}
+//           </Box>
+//           <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} ref={cguContainer}>
+//             <Cgu
+//               isWrapped="1"
+//               onLoad={async () => {
+//                 await new Promise((resolve) => setTimeout(resolve, 500));
+//                 (cguContainer.current as any)?.scrollTo(0, 0);
+//               }}
+//             />
+//           </Box>
+//         </AcknowledgeModal>
+//       )}
+//       {children}
+//     </>
+//   );
+// };
 
-export const AuthenticationContext = createContext({});
+export const AuthenticationContext = createContext<IAuthenticationContext>({} as any);
 
 const UserWrapper = ({ children, ssrAuth }) => {
   const [token, setToken] = useState();
@@ -119,7 +116,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
         messageMaintenance?.enabled &&
         router.asPath !== "/en-maintenance" &&
         router.asPath !== "/auth/connexion" &&
-        !isUserAdmin(auth)
+        auth.organisation.type === "ADMINISTRATEUR"
       ) {
         router.push("/en-maintenance");
       }
@@ -144,14 +141,16 @@ const UserWrapper = ({ children, ssrAuth }) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const handler = (response) => {
+    const onAPIResponseError = (response) => {
       if (response.status === 401) {
         //Auto logout user when token is invalid
         setAuth(null);
       }
     };
-    emitter.on("http:error", handler);
-    return () => emitter.off("http:error", handler);
+    emitter.on("http:error", onAPIResponseError);
+    return () => {
+      emitter.off("http:error", onAPIResponseError);
+    };
   }, []);
 
   if (isLoading) {
@@ -165,7 +164,8 @@ const UserWrapper = ({ children, ssrAuth }) => {
   return (
     <AuthenticationContext.Provider value={{ auth, token, setAuth, setToken }}>
       <AccountWrapper>
-        <ForceAcceptCGU>{children}</ForceAcceptCGU>
+        {children}
+        {/* <ForceAcceptCGU>{children}</ForceAcceptCGU> */}
       </AccountWrapper>
     </AuthenticationContext.Provider>
   );

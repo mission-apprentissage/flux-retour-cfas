@@ -6,16 +6,11 @@ import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useEspace } from "@/hooks/useEspace";
-import { hasContextAccessTo } from "@/common/utils/rolesUtils";
 import EffectifsPage from "@/modules/mon-espace/effectifs/EffectifsPage";
-import RibbonsUnauthorizedAccessToOrganisme from "@/components/Ribbons/RibbonsUnauthorizedAccessToOrganisme";
-import RibbonsOrganismeNotFound from "@/components/Ribbons/RibbonsOrganismeNotFound";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const PageEffectifsDeMonOrganisme = () => {
-  let { myOrganisme, isloaded } = useEspace();
   const title = PAGES.mesEffectifs().title;
 
   return (
@@ -27,19 +22,7 @@ const PageEffectifsDeMonOrganisme = () => {
         <Container maxW="xl" px={0}>
           <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
           <Box mt={4}>
-            {myOrganisme ? (
-              <>
-                {hasContextAccessTo(myOrganisme, "organisme/page_effectifs") ? (
-                  <>
-                    <EffectifsPage isMine={true} />
-                  </>
-                ) : (
-                  <RibbonsUnauthorizedAccessToOrganisme mt="0.5rem" />
-                )}
-              </>
-            ) : isloaded ? (
-              <RibbonsOrganismeNotFound mt="0.5rem" />
-            ) : null}
+            <EffectifsPage isMine={true} />
           </Box>
         </Container>
       </Box>

@@ -21,7 +21,7 @@ function Page({ children, ...rest }) {
       <Header espaceContextisLoading={espaceContextisLoading} />
       <NavigationMenu espaceContextisLoading={espaceContextisLoading} />
       <Box minH={"40vh"} flexGrow="1">
-        <Section>{!espaceContextisLoading && children}</Section>
+        <Section>{children}</Section>
       </Box>
       <Link
         isExternal

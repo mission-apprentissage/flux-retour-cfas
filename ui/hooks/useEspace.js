@@ -6,21 +6,6 @@ import { _get } from "../common/httpClient";
 import useAuth from "./useAuth";
 import { organismeAtom, organismeNavigationAtom } from "./organismeAtoms";
 
-const fetchMyOrganisme = async (my_organisme_id, accountIsNotReady = false) => {
-  if (!my_organisme_id || accountIsNotReady) return { myOrganisme: null };
-  try {
-    const myOrganisme = await _get(`/api/v1/organisme/entity/${my_organisme_id}?organisme_id=${my_organisme_id}`);
-    return { myOrganisme };
-  } catch (e) {
-    if (e.statusCode === 404) {
-      return { myOrganisme: null };
-    } else {
-      console.error(e);
-    }
-    return { myOrganisme: null };
-  }
-};
-
 function getMesOrganismesLabelFromOrganisationType(type) {
   switch (type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -53,13 +38,6 @@ export function useEspace() {
   const router = useRouter();
   const { auth, organisationType } = useAuth();
 
-  const [isloaded, setIsLoaded] = useState(false);
-  const [isReloaded, setIsReloaded] = useState(false);
-  const [error, setError] = useState(null);
-
-  const [myOrganisme, setMyOrganisme] = useRecoilState(organismeAtom);
-  const [navigation, setNavigation] = useRecoilState(organismeNavigationAtom);
-
   const match = router.asPath.match(/mon-espace\/(?<part>[0-9a-zA-Z-_]+)(\/(?<slug>[0-9a-zA-Z-_/]+))?/);
   const part = match?.groups?.part;
   const slug = match?.groups?.slug?.split("/") || [];
@@ -72,130 +50,69 @@ export function useEspace() {
   const isTeleversementPage = isEffectifsPage && slug.includes("televersement");
   const isSIFAPage = slug.includes("enquete-SIFA");
   const isParametresPage = slug.includes("parametres");
-  const contextNav = isOrganismePages ? "organisme" : "user";
   const organisme_id = isOrganismePages
     ? slug?.[slug.length - (isTeleversementPage ? 3 : isEffectifsPage || isSIFAPage || isParametresPage ? 2 : 1)]
     : null;
-  // const hasAccessToOnlyOneOrganisme = auth.organisme_ids.length === 1;
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    setIsReloaded(false);
-
-    // FIXME, récupérer mon organisme ???
-    fetchMyOrganisme(
-      auth?.main_organisme_id,
-      auth?.account_status !== "CONFIRMED" || auth?.isInPendingValidation || true
-    )
-      .then(({ myOrganisme }) => {
-        if (!abortController.signal.aborted) {
-          const navigation = {
-            user: {
-              landingEspace: {
-                pageTitle: "Mon tableau de bord",
-                navTitle: "Mon tableau de bord",
-                path: "/mon-espace/mon-organisme",
-              },
-              ...([
-                "ORGANISME_FORMATION_FORMATEUR",
-                "ORGANISME_FORMATION_RESPONSABLE",
-                "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-              ].includes(organisationType)
-                ? {
-                    effectifs: {
-                      pageTitle: "Mes effectifs",
-                      navTitle: "Mes effectifs",
-                      path: "/mon-espace/mon-organisme/effectifs",
-                    },
-                    televersement: {
-                      pageTitle: "Import de fichier(s)",
-                      navTitle: "Import de fichier(s)",
-                      path: "/mon-espace/mon-organisme/effectifs/televersement",
-                    },
-                    sifa2: {
-                      pageTitle: "Mon enquête SIFA",
-                      navTitle: "Mon enquête SIFA",
-                      path: "/mon-espace/mon-organisme/enquete-SIFA",
-                    },
-                    parametres: {
-                      pageTitle: "Mes paramètres",
-                      navTitle: "Mes paramètres",
-                      path: "/mon-espace/mon-organisme/parametres",
-                    },
-                  }
-                : {}),
-              ...{
-                mesOrganismes: {
-                  pageTitle: getMesOrganismesLabelFromOrganisationType(organisationType),
-                  navTitle: getMesOrganismesLabelFromOrganisationType(organisationType),
-                  path: "/mon-espace/mes-organismes",
-                },
-              },
+  const navigation = {
+    user: {
+      landingEspace: {
+        pageTitle: "Mon tableau de bord",
+        navTitle: "Mon tableau de bord",
+        path: "/mon-espace/mon-organisme",
+      },
+      ...([
+        "ORGANISME_FORMATION_FORMATEUR",
+        "ORGANISME_FORMATION_RESPONSABLE",
+        "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+      ].includes(organisationType)
+        ? {
+            effectifs: {
+              pageTitle: "Mes effectifs",
+              navTitle: "Mes effectifs",
+              path: "/mon-espace/mon-organisme/effectifs",
             },
-            organisme: {
-              landingEspace: {
-                pageTitle: "Son tableau de bord",
-                navTitle: "Son tableau de bord",
-                path: `/mon-espace/organisme/${organisme_id}`,
-              },
-              effectifs: {
-                pageTitle: "Ses effectifs",
-                navTitle: "Ses effectifs",
-                path: `/mon-espace/organisme/${organisme_id}/effectifs`,
-              },
-              televersement: {
-                pageTitle: "Import de fichier(s)",
-                navTitle: "Import de fichier(s)",
-                path: `/mon-espace/organisme/${organisme_id}/effectifs/televersement`,
-              },
-              sifa2: {
-                pageTitle: "Son enquête SIFA",
-                navTitle: "Son enquête SIFA",
-                path: `/mon-espace/organisme/${organisme_id}/enquete-SIFA`,
-              },
-              parametres: {
-                pageTitle: "Ses paramètres",
-                navTitle: "Ses paramètres",
-                path: `/mon-espace/organisme/${organisme_id}/parametres`,
-              },
+            televersement: {
+              pageTitle: "Import de fichier(s)",
+              navTitle: "Import de fichier(s)",
+              path: "/mon-espace/mon-organisme/effectifs/televersement",
             },
-          };
-
-          setNavigation(navigation);
-          setMyOrganisme(myOrganisme);
-          setIsReloaded(true);
-          setIsLoaded(true);
-        }
-      })
-      .catch((e) => {
-        if (!abortController.signal.aborted) {
-          setError(e);
-          setIsReloaded(false);
-          setIsLoaded(false);
-        }
-      });
-    return () => {
-      abortController.abort();
-    };
-  }, [
-    auth?.main_organisme_id,
-    contextNav,
-    isEffectifsPage,
-    isParametresPage,
-    isSIFAPage,
-    organisme_id,
-    setNavigation,
-    setMyOrganisme,
-    organisationType,
-    auth?.isInPendingValidation,
-    auth?.account_status,
-    isTeleversementPage,
-    auth?.is_cross_organismes,
-  ]);
-
-  if (error !== null) {
-    throw error;
-  }
+            sifa2: {
+              pageTitle: "Mon enquête SIFA",
+              navTitle: "Mon enquête SIFA",
+              path: "/mon-espace/mon-organisme/enquete-SIFA",
+            },
+          }
+        : {}),
+      mesOrganismes: {
+        pageTitle: getMesOrganismesLabelFromOrganisationType(organisationType),
+        navTitle: getMesOrganismesLabelFromOrganisationType(organisationType),
+        path: "/mon-espace/mes-organismes",
+      },
+    },
+    organisme: {
+      landingEspace: {
+        pageTitle: "Son tableau de bord",
+        navTitle: "Son tableau de bord",
+        path: `/mon-espace/organisme/${organisme_id}`,
+      },
+      effectifs: {
+        pageTitle: "Ses effectifs",
+        navTitle: "Ses effectifs",
+        path: `/mon-espace/organisme/${organisme_id}/effectifs`,
+      },
+      televersement: {
+        pageTitle: "Import de fichier(s)",
+        navTitle: "Import de fichier(s)",
+        path: `/mon-espace/organisme/${organisme_id}/effectifs/televersement`,
+      },
+      sifa2: {
+        pageTitle: "Son enquête SIFA",
+        navTitle: "Son enquête SIFA",
+        path: `/mon-espace/organisme/${organisme_id}/enquete-SIFA`,
+      },
+    },
+  };
 
   return {
     organisme_id,

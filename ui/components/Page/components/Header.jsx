@@ -23,7 +23,7 @@ import Link from "../../Links/Link";
 import { PRODUCT_NAME } from "../../../common/constants/product";
 import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
 import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
-import useAuth from "../../../hooks/useAuth.js";
+import useAuth from "../../../hooks/useAuth";
 import { _post } from "../../../common/httpClient.js";
 import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
@@ -41,6 +41,7 @@ const UserMenu = () => {
   // my workspace ?
   const myWks = (router.pathname.includes("/mon-espace") || router.pathname.includes("/organisme")) && auth;
 
+  // FIXME: corriger le chargement de l'auth
   return (
     <>
       {!auth && (
@@ -113,7 +114,7 @@ const UserMenu = () => {
   );
 };
 
-const Header = ({ espaceContextisLoading }) => {
+const Header = () => {
   return (
     <Container maxW={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
       <Container maxW="xl" py={[0, 2]} px={[0, 4]}>
@@ -143,7 +144,7 @@ const Header = ({ espaceContextisLoading }) => {
             mb={["3w", "3w", "0", "0"]}
           >
             {/* {espaceContextisLoading && <Skeleton height="30px" w="200px" startColor="grey.300" endColor="galt" />} */}
-            {!espaceContextisLoading && <UserMenu />}
+            <UserMenu />
           </Flex>
         </Flex>
       </Container>

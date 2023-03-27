@@ -1,23 +1,16 @@
 import React from "react";
 import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
-import { useRouter } from "next/router";
 
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useOrganisme } from "@/hooks/useOrganisme";
 import SIFAPage from "@/modules/mon-espace/SIFA/SIFAPage";
-import { hasContextAccessTo } from "@/common/utils/rolesUtils";
-import RibbonsUnauthorizedAccessToOrganisme from "@/components/Ribbons/RibbonsUnauthorizedAccessToOrganisme";
-import RibbonsOrganismeNotFound from "@/components/Ribbons/RibbonsOrganismeNotFound";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const PageEnqueteSIFA = () => {
-  const router = useRouter();
-  const { organisme, isloaded } = useOrganisme(router.query.id);
   const title = "Enquête SIFA";
 
   return (
@@ -29,15 +22,7 @@ const PageEnqueteSIFA = () => {
         <Container maxW="xl" px={0}>
           <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
           <Box mt={4}>
-            {organisme ? (
-              hasContextAccessTo(organisme, "organisme/page_sifa") ? (
-                <SIFAPage isMine={false} />
-              ) : (
-                <RibbonsUnauthorizedAccessToOrganisme mt="0.5rem" />
-              )
-            ) : isloaded ? (
-              <RibbonsOrganismeNotFound mt="0.5rem" />
-            ) : null}
+            <SIFAPage isMine={false} />
           </Box>
         </Container>
       </Box>

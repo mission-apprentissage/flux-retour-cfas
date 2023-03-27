@@ -7,9 +7,10 @@ import { useRouter } from "next/router";
 import { InfoCircle } from "../../../theme/components/icons/index.js";
 import { ERPS } from "../../../common/constants/erps";
 import { useOrganisme } from "../../../hooks/useOrganisme";
+import { configureOrganisationERP } from "../../../common/api/tableauDeBord.js";
 
 const TransmissionAPI = () => {
-  const { organisme, updateOrganisme } = useOrganisme();
+  const { organisme } = useOrganisme();
   const router = useRouter();
 
   const { values, handleSubmit, handleChange, isSubmitting } = useFormik({
@@ -63,12 +64,13 @@ const TransmissionAPI = () => {
 
               <Button
                 variant="primary"
-                onClick={async () =>
-                  updateOrganisme(organisme.id, {
+                onClick={async () => {
+                  await configureOrganisationERP({
                     mode_de_transmission: "MANUEL",
                     setup_step_courante: "COMPLETE",
-                  })
-                }
+                  });
+                  window.location.reload(); // FIXME, il faudrait refetch l'organisme
+                }}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -82,7 +84,10 @@ const TransmissionAPI = () => {
           )}
 
           <Button
-            onClick={async () => updateOrganisme(organisme.id, { mode_de_transmission: null })}
+            onClick={async () => {
+              await configureOrganisationERP({ mode_de_transmission: null });
+              window.location.reload(); // FIXME, il faudrait refetch l'organisme
+            }}
             color="bluefrance"
             variant={"link"}
             padding={2}

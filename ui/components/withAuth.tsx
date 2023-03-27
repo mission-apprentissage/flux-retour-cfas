@@ -1,22 +1,8 @@
 import { useRouter } from "next/router";
 import useAuth from "@/hooks/useAuth";
+import { OrganisationType } from "@/common/internal/Organisation";
 
-export const organisationTypes = [
-  "ORGANISME_FORMATION_FORMATEUR",
-  "ORGANISME_FORMATION_RESPONSABLE",
-  "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-  "TETE_DE_RESEAU",
-  "DGEFP",
-  "DREETS",
-  "DEETS",
-  "DRAAF",
-  "CONSEIL_REGIONAL",
-  "DDETS",
-  "ACADEMIE",
-  "ADMINISTRATEUR",
-] as const;
-
-const withAuth = (Component: any, authorizedOrganisationTypes: (typeof organisationTypes)[number][] = []) => {
+const withAuth = (Component: any, authorizedOrganisationTypes: OrganisationType[] = []) => {
   const AuthenticatedPage = (props) => {
     const router = useRouter();
     const { auth, organisationType } = useAuth();

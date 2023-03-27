@@ -6,7 +6,6 @@ import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, Settings4Fill, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 import { useEspace } from "../../../hooks/useEspace";
-import { hasContextAccessTo, hasPageAccessTo } from "../../../common/utils/rolesUtils";
 import { useOrganisme } from "../../../hooks/useOrganisme";
 
 const NavItem = ({
@@ -89,7 +88,6 @@ const NavBarPublic = ({ isOpen }) => {
 };
 
 const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
-  const { auth } = useAuth();
   let {
     navigation: { user: userNavigation },
     myOrganisme,
@@ -101,13 +99,13 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
     <NavContainer isOpen={isOpen}>
       <NavItem to={userNavigation.landingEspace.path}>{userNavigation.landingEspace.navTitle}</NavItem>
 
-      {userNavigation.mesOrganismes && hasPageAccessTo(auth, "page/mes-organismes") && (
+      {userNavigation.mesOrganismes && (
         <NavItem to={userNavigation.mesOrganismes.path} isActive={mesOrganismesActive}>
           {userNavigation.mesOrganismes.navTitle}
         </NavItem>
       )}
 
-      {hasContextAccessTo(myOrganisme, "organisme/page_effectifs") && userNavigation.effectifs && (
+      {userNavigation.effectifs && (
         <NavItem
           to={userNavigation.effectifs.path}
           isActive={isMonOrganismePages && (isEffectifsPage || isTeleversementPage)}
@@ -115,7 +113,7 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
           {userNavigation.effectifs.navTitle}
         </NavItem>
       )}
-      {hasContextAccessTo(myOrganisme, "organisme/page_sifa") && userNavigation.sifa2 && (
+      {userNavigation.sifa2 && (
         <NavItem
           to={userNavigation.sifa2.path}
           isDisabled={!myOrganisme.first_transmission_date}
@@ -125,15 +123,6 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
         >
           {userNavigation.sifa2.navTitle}
         </NavItem>
-      )}
-
-      {hasContextAccessTo(myOrganisme, "organisme/page_parametres") && userNavigation.parametres && (
-        <>
-          <Box flexGrow={1} />
-          <NavItem to={userNavigation.parametres.path}>
-            <Settings4Fill boxSize={4} mr={2} color="bluefrance" /> {userNavigation.parametres.navTitle}
-          </NavItem>
-        </>
       )}
     </NavContainer>
   );
@@ -158,41 +147,31 @@ const NavBarOrganisme = ({ isOpen }) => {
       <Box p={4} bg={"transparent"}>
         <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
       </Box>
-      {hasContextAccessTo(organisme, "organisme/tableau_de_bord") && (
-        <NavItem to={organismeNavigation.landingEspace.path} colorActive="dsfr_lightprimary.bluefrance_850">
-          {organismeNavigation.landingEspace.navTitle}
-        </NavItem>
-      )}
-      {hasContextAccessTo(organisme, "organisme/page_effectifs") && (
-        <NavItem
-          to={organismeNavigation.effectifs.path}
-          colorActive="dsfr_lightprimary.bluefrance_850"
-          isActive={isOrganismePages && (isEffectifsPage || isTeleversementPage)}
-        >
-          {organismeNavigation.effectifs.navTitle}
-        </NavItem>
-      )}
-      {hasContextAccessTo(organisme, "organisme/page_sifa") && (
-        <NavItem
-          to={organismeNavigation.sifa2.path}
-          colorActive="dsfr_lightprimary.bluefrance_850"
-          isDisabled={!organisme.first_transmission_date}
-          disabledReason={
-            !organisme.first_transmission_date ? "Désactivé car cet organisme n'a encore rien transmis" : ""
-          }
-        >
-          {organismeNavigation.sifa2.navTitle}
-        </NavItem>
-      )}
-      {hasContextAccessTo(organisme, "organisme/page_parametres") && (
-        <>
-          <Box flexGrow={1} />
-          <NavItem to={organismeNavigation.parametres.path} colorActive="dsfr_lightprimary.bluefrance_850">
-            <Settings4Fill boxSize={4} mr={2} color="dsfr_lightprimary.bluefrance_850" />
-            {organismeNavigation.parametres.navTitle}
-          </NavItem>
-        </>
-      )}
+      <NavItem to={organismeNavigation.landingEspace.path} colorActive="dsfr_lightprimary.bluefrance_850">
+        {organismeNavigation.landingEspace.navTitle}
+      </NavItem>
+      <NavItem
+        to={organismeNavigation.effectifs.path}
+        colorActive="dsfr_lightprimary.bluefrance_850"
+        isActive={isOrganismePages && (isEffectifsPage || isTeleversementPage)}
+      >
+        {organismeNavigation.effectifs.navTitle}
+      </NavItem>
+      <NavItem
+        to={organismeNavigation.sifa2.path}
+        colorActive="dsfr_lightprimary.bluefrance_850"
+        isDisabled={!organisme.first_transmission_date}
+        disabledReason={
+          !organisme.first_transmission_date ? "Désactivé car cet organisme n'a encore rien transmis" : ""
+        }
+      >
+        {organismeNavigation.sifa2.navTitle}
+      </NavItem>
+      <Box flexGrow={1} />
+      <NavItem to={organismeNavigation.parametres.path} colorActive="dsfr_lightprimary.bluefrance_850">
+        <Settings4Fill boxSize={4} mr={2} color="dsfr_lightprimary.bluefrance_850" />
+        {organismeNavigation.parametres.navTitle}
+      </NavItem>
     </NavContainer>
   );
 };
@@ -206,8 +185,8 @@ const NavigationMenu = ({ espaceContextisLoading, ...props }) => {
 
   const toggle = () => setIsOpen(!isOpen);
 
-  const isMonEspacePage = router.pathname.includes("/mon-espace/") && auth?.sub !== "anonymous";
-  const isMesOrganismes = router.pathname.includes("/mon-espace/mes-organismes") && auth?.sub !== "anonymous";
+  const isMonEspacePage = router.pathname.includes("/mon-espace/") && !!auth;
+  const isMesOrganismes = router.pathname.includes("/mon-espace/mes-organismes") && !!auth;
 
   function NavToggle({ toggle, isOpen }) {
     return (

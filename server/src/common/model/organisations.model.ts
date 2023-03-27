@@ -3,12 +3,12 @@ import { RESEAUX_CFAS } from "../constants/networksConstants.js";
 import { REGIONS, DEPARTEMENTS, ACADEMIES } from "../constants/territoiresConstants.js";
 import { WithId } from "mongodb";
 
+// types en doublon avec l'UI
 export const organisationTypes = [
   "ORGANISME_FORMATION_FORMATEUR",
   "ORGANISME_FORMATION_RESPONSABLE",
   "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
   "TETE_DE_RESEAU",
-  "DGEFP",
   "DREETS",
   "DEETS",
   "DRAAF",
@@ -29,8 +29,10 @@ export type Organisation = WithId<
   | OrganisationAdministrateur
 >;
 
+export type OrganisationType = typeof organisationTypes[number];
+
 interface AbstractOrganisation {
-  type: typeof organisationTypes[number];
+  type: OrganisationType;
   created_at: Date;
 }
 

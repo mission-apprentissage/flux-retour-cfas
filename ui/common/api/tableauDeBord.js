@@ -1,6 +1,6 @@
 // NOTE: ce fichier est obsoltète, préférer plutot l'utilisation de hooks dédiés
 
-import { _get, _post } from "../httpClient";
+import { _get, _post, _put } from "../httpClient";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 export const fetchEffectifs = (filters) => {
@@ -28,3 +28,8 @@ export const fetchEffectifsDataListCsvExport = (filters) => {
 export const fetchSearchOrganismes = async (filters) => {
   return await _post("/api/v1/organisme/search", filters);
 };
+
+// Pour les OF uniquement
+export async function configureOrganisationERP(configurationERP) {
+  await _put("/api/v1/organisation/configuration-erp", configurationERP);
+}

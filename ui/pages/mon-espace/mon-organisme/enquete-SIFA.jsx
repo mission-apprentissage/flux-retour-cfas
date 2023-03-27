@@ -6,17 +6,11 @@ import Page from "@/components/Page/Page";
 
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useEspace } from "@/hooks/useEspace";
 import SIFAPage from "@/modules/mon-espace/SIFA/SIFAPage";
-import { hasContextAccessTo } from "@/common/utils/rolesUtils";
-import RibbonsUnauthorizedAccessToOrganisme from "@/components/Ribbons/RibbonsUnauthorizedAccessToOrganisme";
-import RibbonsOrganismeNotFound from "@/components/Ribbons/RibbonsOrganismeNotFound";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const PageEnqueteSIFADeMonOrganisme = () => {
-  let { myOrganisme, isloaded } = useEspace();
-
   const title = "Mon enquête SIFA";
   return (
     <Page>
@@ -27,17 +21,7 @@ const PageEnqueteSIFADeMonOrganisme = () => {
         <Container maxW="xl" px={0}>
           <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
           <Box mt={4}>
-            {myOrganisme ? (
-              <>
-                {hasContextAccessTo(myOrganisme, "organisme/page_sifa") ? (
-                  <SIFAPage isMine />
-                ) : (
-                  <RibbonsUnauthorizedAccessToOrganisme mt="0.5rem" />
-                )}
-              </>
-            ) : isloaded ? (
-              <RibbonsOrganismeNotFound mt="0.5rem" />
-            ) : null}
+            <SIFAPage isMine />
           </Box>
         </Container>
       </Box>
