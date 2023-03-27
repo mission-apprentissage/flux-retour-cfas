@@ -4,7 +4,6 @@ import { Option, program } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
 import { clear, clearRoles, clearUsers } from "./clear/clear-all.js";
-import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
 import { createErpUserLegacy, createUserAccount } from "./users/create-user.js";
 import {
@@ -17,19 +16,19 @@ import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
-import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
+// import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
 import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
 import { updateUserPassword } from "./users/update-user-password.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs copy/index.js";
-import { removeOrganismeAndEffectifsAndDossiersApprenantsMigration } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
+import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
 import { seedPlausibleGoals } from "./seed/plausible/goals.js";
 import { getStats } from "./fiabilisation/stats.js";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count.js";
 import { recreateIndexes } from "./db/recreateIndexes.js";
 import { findInvalidDocuments } from "./db/findInvalidDocuments.js";
 import { generateTypes } from "./seed/types/generate-types.js";
-import { processEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
+import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
 
 program.configureHelp({
   sortSubcommands: true,
@@ -60,21 +59,21 @@ program
   .description("Process la queue des effectifs")
   .action(async (_, options) =>
     runScript(async () => {
-      await processEffectifsQueue();
+      await processEffectifsQueueEndlessly();
     }, options._name)
   );
 
 /**
- * Job (temporaire) de suppression d'un organisme et de ses effectifs / dossiersApprenantsMigration liés
+ * Job (temporaire) de suppression d'un organisme et de ses effectifs
  */
 program
-  .command("tmp:patches:remove-organisme-effectifs-dossiersApprenantsMigration")
-  .description("[TEMPORAIRE] Suppression d'un organisme avec ses effectifs & dossiersApprenantsMigration liés")
+  .command("tmp:patches:remove-organisme-effectifs")
+  .description("[TEMPORAIRE] Suppression d'un organisme avec ses effectifs")
   .requiredOption("--uai <string>", "Uai de l'organisme")
   .requiredOption("--siret <string>", "Siret de l'organisme")
   .action(async ({ uai, siret }, options) =>
     runScript(async () => {
-      return removeOrganismeAndEffectifsAndDossiersApprenantsMigration({ uai, siret });
+      return removeOrganismeAndEffectifs({ uai, siret });
     }, options._name)
   );
 
@@ -265,19 +264,6 @@ program
   );
 
 /**
- * Job d'archivage des dossiers apprenants et des effectifs
- */
-program
-  .command("archive:dossiersApprenantsEffectifs")
-  .description("Archivage des dossiers apprenants")
-  .option("--limit <int>", "Année limite d'archivage")
-  .action(async ({ limit }, options) =>
-    runScript(async () => {
-      return hydrateArchivesDossiersApprenantsAndEffectifs(limit);
-    }, options._name)
-  );
-
-/**
  * Job de purge des events
  */
 program
@@ -408,14 +394,14 @@ program
 /**
  * Job d'analyse de la fiabilité des dossiersApprenants reçus
  */
-program
-  .command("fiabilisation:analyse:dossiersApprenants-recus")
-  .description("Analyse de la fiabilité des dossiersApprenants reçus")
-  .action((_, options) =>
-    runScript(async () => {
-      return analyseFiabiliteDossierApprenantsRecus();
-    }, options._name)
-  );
+// program
+//   .command("fiabilisation:analyse:dossiersApprenants-recus")
+//   .description("Analyse de la fiabilité des dossiersApprenants reçus")
+//   .action((_, options) =>
+//     runScript(async () => {
+//       return analyseFiabiliteDossierApprenantsRecus();
+//     }, options._name)
+//   );
 
 /**
  * Job d'affichage des stats fiabilisation

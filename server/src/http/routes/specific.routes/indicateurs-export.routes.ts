@@ -1,11 +1,6 @@
 import express from "express";
 import { Parser } from "json2csv";
 
-import {
-  getExportAnonymizedEventNameFromFilters,
-  USER_EVENTS_TYPES,
-} from "../../../common/constants/userEventsConstants.js";
-import { createUserEvent } from "../../../common/actions/userEvents.actions.js";
 import { buildEffectifsFiltersFromRequest } from "./indicateurs.routes.js";
 import { exportedFields } from "../../../common/actions/effectifs/export.js";
 import { getDataListEffectifsAtDate } from "../../../common/actions/effectifs/effectifs.actions.js";
@@ -30,14 +25,6 @@ export default () => {
    */
   router.get("/", async (req, res) => {
     const filters = await buildEffectifsFiltersFromRequest(req);
-
-    await createUserEvent({
-      type: USER_EVENTS_TYPES.EXPORT_CSV,
-      action: getExportAnonymizedEventNameFromFilters(filters),
-      username: req.user.username,
-      data: req.query,
-    });
-
     const dataList = await getDataListEffectifsAtDate(filters);
 
     const json2csvParser = new Parser({

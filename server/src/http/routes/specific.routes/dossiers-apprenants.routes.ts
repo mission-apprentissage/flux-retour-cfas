@@ -2,11 +2,7 @@ import express from "express";
 import Joi from "joi";
 
 import logger from "../../../common/logger.js";
-import { findAndPaginate } from "../../../common/utils/dbUtils.js";
-import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../common/constants/userEventsConstants.js";
-import { dossiersApprenantsMigrationDb, effectifsQueueDb } from "../../../common/model/collections.js";
-import { sendTransformedPaginatedJsonStream } from "../../../common/utils/httpUtils.js";
-import { createUserEvent } from "../../../common/actions/userEvents.actions.js";
+import { effectifsQueueDb } from "../../../common/model/collections.js";
 import { defaultValuesEffectifQueue } from "../../../common/model/effectifsQueue.model.js";
 import dossierApprenantSchema from "../../../common/validation/dossierApprenantSchema.js";
 
@@ -53,56 +49,6 @@ export default () => {
       logger.error(`POST /dossiers-apprenants error : ${err.toString()}`);
       res.status(400).json({
         status: "ERROR",
-        message: err.message,
-      });
-    }
-  });
-
-  /**
-   * Route get for DossierApprenant
-   */
-  router.get("/", async (req, res) => {
-    const {
-      page: reqPage,
-      limit: reqLimit,
-      ...filtersFromBody
-    } = await Joi.object({
-      page: Joi.number(),
-      limit: Joi.number(),
-      etablissement_num_region: Joi.string().allow(null, ""),
-      etablissement_num_departement: Joi.string().allow(null, ""),
-      formation_cfd: Joi.string().allow(null, ""),
-      uai_etablissement: Joi.string().allow(null, ""),
-      siret_etablissement: Joi.string().allow(null, ""),
-      annee_scolaire: Joi.string().allow(null, ""),
-    }).validateAsync(req.query, { abortEarly: false });
-
-    const page = Number(reqPage ?? 1);
-    const limit = Number(reqLimit ?? 1000);
-
-    try {
-      // Add user event
-      await createUserEvent({
-        username: req.user.username,
-        type: USER_EVENTS_TYPES.GET,
-        action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
-        data: req.body,
-      });
-
-      // Gets paginated data filtered on source mapped to username
-      const { find, pagination } = await findAndPaginate(
-        dossiersApprenantsMigrationDb(),
-        { ...filtersFromBody, source: req.user.username },
-        { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
-      );
-
-      // Return JSON transformed Stream
-      return sendTransformedPaginatedJsonStream(find.stream(), "dossiersApprenants", pagination, res);
-    } catch (err) {
-      logger.error(`GET DossierApprenants error : ${err}`);
-      res.status(500).json({
-        status: "ERROR",
-        // @ts-ignore
         message: err.message,
       });
     }

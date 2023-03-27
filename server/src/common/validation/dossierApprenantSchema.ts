@@ -11,8 +11,8 @@ import { schema as siretSchema } from "./utils/siret.js";
 
 const dossierApprenantSchema = Joi.object({
   // required fields
-  nom_apprenant: nomApprenantSchema.required(),
-  prenom_apprenant: prenomApprenantSchema.required(),
+  nom_apprenant: nomApprenantSchema.required().trim(),
+  prenom_apprenant: prenomApprenantSchema.required().trim(),
   date_de_naissance_apprenant: ISO8601DateSchema.required(),
   uai_etablissement: uaiSchema().required(),
   nom_etablissement: Joi.string().required(),

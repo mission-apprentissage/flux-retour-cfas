@@ -1,19 +1,12 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 import { MongoServerError, UpdateResult } from "mongodb";
-import { deleteOrganismeAndEffectifsAndDossiersApprenantsMigration } from "../../../../common/actions/organismes/organismes.actions.js";
+import { deleteOrganismeAndEffectifs } from "../../../../common/actions/organismes/organismes.actions.js";
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
 } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
-import {
-  dossiersApprenantsMigrationDb,
-  effectifsDb,
-  fiabilisationUaiSiretDb,
-  organismesDb,
-} from "../../../../common/model/collections.js";
-
-const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] } };
+import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../common/model/collections.js";
 
 let nbOrganismesFiables = 0;
 let nbOrganismesFiabilises = 0;
@@ -29,7 +22,7 @@ let nbOrganismesNonFiabilisablesUaiNonValidees = 0;
 /**
  * Méthode d'application de la fiabilisation pour les 3 cas :
  *  Couples déja identifiées comme fiables : MAJ le champ fiabilisation_statut des organismes concernés
- *  Couples à fiabiliser : On déplace les effectifs / dossiersApprenantsMigration, puis on MAJ le champ fiabilisation_statut des organismes concernés
+ *  Couples à fiabiliser : On déplace les effectifs, puis on MAJ le champ fiabilisation_statut des organismes concernés
  *    et on supprime les organismes non fiables restants
  *  Couples identifiés comme non fiabilisables (via Mapping) : MAJ le champ fiabilisation_statut des organismes concernés
  *    et suppression des organismes si on trouve un organisme fiable lié à ce couple
@@ -40,7 +33,7 @@ export const applyFiabilisationUaiSiret = async () => {
   await Promise.all([
     updateOrganismesReferentielFiables(),
     updateOrganismesCouplesFiables(),
-    updateDossiersApprenantAndOrganismesFiabilise(),
+    updateOrganismesFiabilise(),
     updateOrganismesNonFiabilisablesMapping(),
     updateOrganismesNonFiabilisablesUaiNonValidees(),
   ]);
@@ -118,9 +111,9 @@ const updateOrganismesCouplesFiables = async () => {
 // #region ORGANISMES A FIABILISER
 
 /**
- * Méthode de MAJ des organismes et dossiersApprenantsMigration pour les cas ou l'on bien fiabilisé la donnée
+ * Méthode de MAJ des organismes pour les cas ou l'on bien fiabilisé la donnée
  */
-const updateDossiersApprenantAndOrganismesFiabilise = async () => {
+const updateOrganismesFiabilise = async () => {
   logger.info("Traitement des organismes à fiabiliser ...");
   const couplesAFiabiliser = await fiabilisationUaiSiretDb()
     .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER })
@@ -130,7 +123,7 @@ const updateDossiersApprenantAndOrganismesFiabilise = async () => {
 };
 
 /**
- * Méthode de MAJ unitaire d'un organisme à fiabiliser et de ses effectifs / dossiersApprenantsMigration
+ * Méthode de MAJ unitaire d'un organisme à fiabiliser et de ses effectifs
  * Pour chaque couple identifié on va mettre à jour les dossiers apprenants (uai et siret)
  * Ensuite on va mettre à jour l'organisme en question comme étant FIABLE
  * Enfin on va déplacer les effectifs de l'organisme non fiable vers le fiable
@@ -138,16 +131,6 @@ const updateDossiersApprenantAndOrganismesFiabilise = async () => {
  * @param {*} currentFiabilisationCouple
  */
 const updateOrganismeForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret_fiable }: any) => {
-  // Update de tous les dossiersApprenantsMigration qui étaient sur le mauvais couple UAI-SIRET
-  const dossiersApprenantsMigrationForFiabilisationCouple = await dossiersApprenantsMigrationDb()
-    .find({ ...filters, uai_etablissement: uai, siret_etablissement: siret })
-    .toArray();
-
-  // Update via For Of pour limiter les appels //
-  for (const currentDossierToUpdate of dossiersApprenantsMigrationForFiabilisationCouple) {
-    await updateDossierApprenantMigrationForUaiSiretFiable(currentDossierToUpdate, uai_fiable, siret_fiable);
-  }
-
   // Update de l'organisme lié à un couple UAI-SIRET marqué comme A_FIABILISER en FIABLE
   const { modifiedCount: organismesModifiedCount } = await organismesDb().updateOne(
     { uai: uai_fiable, siret: siret_fiable },
@@ -164,39 +147,11 @@ const updateOrganismeForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret
       { $set: { organisme_id: organismeFiable?._id } }
     );
 
-    // Suppression de l'organisme non fiable et de ses effectifs / dossiersApprenantsMigration
-    await deleteOrganismeAndEffectifsAndDossiersApprenantsMigration(organismeNonFiable?._id);
+    // Suppression de l'organisme non fiable et de ses effectifs
+    await deleteOrganismeAndEffectifs(organismeNonFiable?._id);
   }
 
   nbOrganismesFiabilises += organismesModifiedCount;
-};
-
-/**
- * Méthode de maj unitaire d'un dossier apprenant avec un couple uai siret fiable
- * @param {*} currentDossierApprenantToUpdate
- * @param {*} uai_fiable
- * @param {*} siret_fiable
- */
-const updateDossierApprenantMigrationForUaiSiretFiable = async (
-  currentDossierApprenantToUpdate,
-  uai_fiable,
-  siret_fiable
-) => {
-  // Si aucun dossierApprenant en doublon (via index id_erp_apprenant/uai_etablissement/annee_scolaire) on fait la MAJ
-  const countDossierApprenantForUaiSiretFiable = await dossiersApprenantsMigrationDb().countDocuments({
-    id_erp_apprenant: currentDossierApprenantToUpdate.id_erp_apprenant,
-    uai_etablissement: uai_fiable,
-    siret_etablissement: siret_fiable,
-    annee_scolaire: currentDossierApprenantToUpdate.annee_scolaire,
-  });
-
-  if (countDossierApprenantForUaiSiretFiable === 0) {
-    await dossiersApprenantsMigrationDb().updateOne(
-      { _id: currentDossierApprenantToUpdate._id },
-      { $set: { uai_etablissement: uai_fiable, siret_etablissement: siret_fiable } }
-    );
-    nbDossiersApprenantsFiabilises++;
-  }
 };
 
 // #endregion
@@ -224,9 +179,9 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
     updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable
   );
 
-  // Enfin on va supprimer les organismes NON_FIABILISABLE_MAPPING et leurs effectifs / dossiersApprenantsMigration
+  // Enfin on va supprimer les organismes NON_FIABILISABLE_MAPPING et leurs effectifs
   await PromisePool.for(organismesNonFiabilisablesMapping).process(async ({ _id }: any) => {
-    await deleteOrganismeAndEffectifsAndDossiersApprenantsMigration(_id);
+    await deleteOrganismeAndEffectifs(_id);
     nbOrganismesNonFiabilisablesMappingSupprimes++;
   });
 };

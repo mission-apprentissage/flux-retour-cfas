@@ -2,15 +2,10 @@ import { strict as assert } from "assert";
 
 import { startServer } from "../../utils/testUtils.js";
 import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
-import {
-  createRandomDossierApprenantApiInput,
-  createRandomDossierApprenant,
-  createRandomOrganisme,
-} from "../../data/randomizedSample.js";
+import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "../../data/randomizedSample.js";
 import { effectifsQueueDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
-import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
-import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";
+import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
 
 const user = {
   name: "userApi",
@@ -36,7 +31,6 @@ describe("Dossiers Apprenants Route", () => {
   const uai = "0802004U";
   const siret = "77937827200016";
   let randomOrganisme;
-  let createdOrganisme;
   beforeEach(async () => {
     // Create organisme
     randomOrganisme = createRandomOrganisme({ uai, siret });
@@ -47,7 +41,6 @@ describe("Dossiers Apprenants Route", () => {
         buildInfosFromSiret: false,
         callLbaApi: false,
       });
-      createdOrganisme = await findOrganismeById(_id);
     } catch (/** @type {any}*/ err: any) {
       console.error("Error with the following randomOrganisme", randomOrganisme);
       throw new Error(err);
@@ -188,162 +181,6 @@ describe("Dossiers Apprenants Route", () => {
       assert.deepEqual(await effectifsQueueDb().countDocuments({}), nbItemsToTest);
       // Check source is set
       assert.deepEqual((await effectifsQueueDb().findOne({}))?.source, "userApi");
-    });
-  });
-
-  describe("GET dossiers-apprenants/", () => {
-    it("Vérifie que la récupération via GET /dossiers-apprenants renvoie une 401 pour un user non authentifié", async () => {
-      const { httpClient } = await startServer();
-
-      const response = await httpClient.get("/api/dossiers-apprenants", {
-        headers: { Authorization: "" },
-      });
-
-      assert.deepEqual(response.status, 401);
-    });
-
-    it("Vérifie que la récupération via GET /dossiers-apprenants renvoie une 403 pour un user n'ayant pas la permission", async () => {
-      const { httpClient } = await startServer();
-
-      // Create a normal user
-
-      const createdId = await createUserLegacy({
-        username: "normal-user",
-        password: "password",
-        permissions: [],
-      });
-      const userWithoutPermission = await usersDb().findOne({ _id: createdId });
-      assert.deepEqual(userWithoutPermission?.permissions?.length, 0);
-
-      const { data } = await httpClient.post("/api/login", {
-        username: userWithoutPermission?.username,
-        password: "password",
-      });
-
-      // Call Api Route
-      const response = await httpClient.get("/api/dossiers-apprenants", {
-        headers: {
-          Authorization: `Bearer ${data.access_token}`,
-        },
-      });
-
-      assert.deepEqual(response.status, 403);
-    });
-
-    it("Vérifie que la récupération via GET /dossiers-apprenants renvoie tous les dossiersApprenants ayant pour source le username d'un user appelant", async () => {
-      const { httpClient } = await startServer();
-
-      await createApiUser();
-      const accessToken = await getJwtForUser(httpClient);
-
-      // Create random dossiers for fixed uai & user.name as source
-      const nbRandomDossiers = 10;
-      for (let index = 0; index < nbRandomDossiers; index++) {
-        await insertDossierApprenant(
-          createRandomDossierApprenant({
-            uai_etablissement: createdOrganisme.uai,
-            siret_etablissement: createdOrganisme.siret,
-            organisme_id: createdOrganisme._id,
-            source: user.name,
-          })
-        );
-      }
-
-      // Call Api Route with limit 2 elements
-      const response = await httpClient.get("/api/dossiers-apprenants?limit=2", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      // Check Api Route data
-      assert.deepEqual(response.status, 200);
-      assert.equal(response.data.dossiersApprenants.length, 2);
-      assert.equal(response.data.pagination.page, 1);
-      assert.equal(response.data.pagination.nombre_de_page, nbRandomDossiers / 2);
-      assert.equal(response.data.pagination.total, nbRandomDossiers);
-    });
-
-    it("Vérifie que la récupération via GET /dossiers-apprenants/ ne renvoie aucun dossiersApprenants si aucun n'a pour source le username du user appelant", async () => {
-      const { httpClient } = await startServer();
-      await createApiUser();
-      const accessToken = await getJwtForUser(httpClient);
-
-      // Create random dossiers for fixed uai & OTHER_ERP as source
-      const nbRandomDossiers = 10;
-      const currentUai = "0762232N";
-      for (let index = 0; index < nbRandomDossiers; index++) {
-        await insertDossierApprenant(
-          createRandomDossierApprenant({
-            uai_etablissement: currentUai,
-            siret_etablissement: createdOrganisme.siret,
-            organisme_id: createdOrganisme._id,
-            source: "OTHER_ERP", // Source not linked to username
-          })
-        );
-      }
-
-      // Call Api Route with limit 2 elements
-      const response = await httpClient.get("/api/dossiers-apprenants?limit=2", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      // Check Api Route data
-      assert.deepEqual(response.status, 200);
-      assert.equal(response.data.dossiersApprenants.length, 0);
-      assert.equal(response.data.pagination.page, 1);
-      assert.equal(response.data.pagination.nombre_de_page, 1);
-      assert.equal(response.data.pagination.total, 0);
-    });
-
-    it("Vérifie que la récupération via GET /dossiers-apprenants/ renvoie uniquement les bons dossiersApprenants pour un user ayant la permission", async () => {
-      const { httpClient } = await startServer();
-      await createApiUser();
-      const accessToken = await getJwtForUser(httpClient);
-
-      // Create random dossiers for fixed uai & user.name as source
-      const nbRandomDossiersForUser = 20;
-      const currentUai = "0762232N";
-
-      for (let index = 0; index < nbRandomDossiersForUser; index++) {
-        await insertDossierApprenant(
-          createRandomDossierApprenant({
-            uai_etablissement: currentUai,
-            source: user.name,
-            organisme_id: createdOrganisme._id,
-            siret_etablissement: createdOrganisme.siret,
-          })
-        );
-      }
-
-      // Create random dossiers for fixed uai & OTHER_ERP as source
-      const nbRandomDossiersForOtherErp = 50;
-      for (let index = 0; index < nbRandomDossiersForOtherErp; index++) {
-        await insertDossierApprenant(
-          createRandomDossierApprenant({
-            uai_etablissement: currentUai,
-            source: "OTHER_ERP",
-            organisme_id: createdOrganisme._id,
-            siret_etablissement: createdOrganisme.siret,
-          })
-        );
-      }
-
-      // Call Api Route with limit 2 elements
-      const response = await httpClient.get("/api/dossiers-apprenants?limit=2", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      // Check Api Route data
-      assert.deepEqual(response.status, 200);
-      assert.equal(response.data.dossiersApprenants.length, 2);
-      assert.equal(response.data.pagination.page, 1);
-      assert.equal(response.data.pagination.nombre_de_page, nbRandomDossiersForUser / 2);
-      assert.equal(response.data.pagination.total, nbRandomDossiersForUser);
     });
   });
 });
