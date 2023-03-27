@@ -39,7 +39,7 @@ export const getEntreprise = (siren, non_diffusables = true) => {
       let response = await client.get(`entreprises/${siren}`, {
         params: { ...apiParams, non_diffusables },
       });
-      logger.debug(`[Entreprise API] Fetching entreprise ${siren} ${response.cached ? "(from cache)" : ""}`);
+      logger.debug(`[Entreprise API] Fetched entreprise ${siren} ${response.cached ? "(from cache)" : ""}`);
       if (!response?.data?.entreprise) {
         throw new ApiError("Api Entreprise", "No entreprise data received");
       }
@@ -70,7 +70,7 @@ export const getEtablissement = async (siret, non_diffusables = true) => {
       let response = await client.get(`etablissements/${siret}`, {
         params: { ...apiParams, non_diffusables },
       });
-      logger.debug(`[Entreprise API] Fetching etablissement ${siret} ${response.cached ? "(from cache)" : ""}`);
+      logger.debug(`[Entreprise API] Fetched etablissement ${siret} ${response.cached ? "(from cache)" : ""}`);
       if (!response?.data?.etablissement) {
         throw new ApiError("Api Entreprise", "No etablissement data received");
       }
@@ -94,7 +94,7 @@ export const getConventionCollective = async (siret, non_diffusables = true) => 
       let response = await client.get(`conventions_collectives/${siret}`, {
         params: { ...apiParams, non_diffusables },
       });
-      logger.debug(`[Entreprise API] Fetching convention collective ${siret} ${response.cached ? "(from cache)" : ""}`);
+      logger.debug(`[Entreprise API] Fetched convention collective ${siret} ${response.cached ? "(from cache)" : ""}`);
 
       if (!response?.data?.conventions[0]) {
         throw new ApiError("Api Entreprise", "error getConventionCollective");
