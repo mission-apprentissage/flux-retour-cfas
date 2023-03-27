@@ -32,7 +32,7 @@ describe("Processing de EffectifsQueue", () => {
     "date_metier_mise_a_jour_statut",
     "id_erp_apprenant",
   ];
-  requiredFields.forEach((requiredField) => {
+  requiredFields.forEach(async (requiredField) => {
     it(`Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
       // set required field as undefined
       const { insertedId } = await effectifsQueueDb().insertOne(
@@ -49,7 +49,7 @@ describe("Processing de EffectifsQueue", () => {
       ]);
 
       // check that no data was created
-      assert.equal(await effectifsQueueDb().countDocuments({}), 0);
+      assert.equal(await effectifsDb().countDocuments({}), 0);
     });
   });
 
@@ -91,7 +91,7 @@ describe("Processing de EffectifsQueue", () => {
     ]);
 
     // check that no data was created
-    assert.equal(await effectifsQueueDb().countDocuments({}), 0);
+    assert.equal(await effectifsDb().countDocuments({}), 0);
   });
 
   it(`Vérifie qu'on ne crée pas de donnée et renvoie une erreur lorsque les champs date ne sont pas iso`, async () => {
@@ -147,7 +147,7 @@ describe("Processing de EffectifsQueue", () => {
     ]);
 
     // check that no data was created
-    assert.equal(await effectifsQueueDb().countDocuments({}), 0);
+    assert.equal(await effectifsDb().countDocuments({}), 0);
   });
 
   it("Vérifie l'ajout avec de la donnée valide", async () => {
@@ -216,40 +216,118 @@ describe("Processing de EffectifsQueue", () => {
     const insertedDossier = await effectifsDb().findOne({});
 
     assert(insertedDossier);
+
     assert.deepStrictEqual(insertedDossier, {
-      ine_apprenant: "402957826QH",
-      nom_apprenant: "FLEURY",
-      prenom_apprenant: "FORTUNÉ",
-      date_de_naissance_apprenant: new Date("1999-08-31T16:21:32"),
-      email_contact: "Clandre34@hotmail.fr",
-      id_formation: "50033610",
-      libelle_long_formation: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
-      uai_etablissement: uai,
-      siret_etablissement: siret,
-      nom_etablissement: "ETABLISSEMENT EMPOWER",
-      statut_apprenant: 3,
-      date_metier_mise_a_jour_statut: new Date("2022-12-28T04:05:47.647Z"),
-      annee_formation: 0,
-      periode_formation: [2022, 2024],
-      annee_scolaire: "2024-2025",
+      apprenant: {
+        nom: "FLEURY",
+        prenom: "Fortuné",
+        historique_statut: [
+          {
+            valeur_statut: 3,
+            date_statut: new Date("2022-12-28T04:05:47.647Z"),
+            date_reception: insertedDossier.apprenant.historique_statut[0].date_reception || "shouldnotbeempty",
+          },
+        ],
+        ine: "402957826QH",
+        date_de_naissance: new Date("1999-08-31T16:21:32"),
+        courriel: "Clandre34@hotmail.fr",
+        adresse: {
+          code_insee: "05109",
+          code_postal: "05109",
+          commune: "[NOM_DE_LA_COMMUNE]",
+          departement: "05",
+          academie: "2",
+          region: "93",
+        },
+        contrats: [],
+      },
+      formation: {
+        cfd: "50033610",
+        periode: [2022, 2024],
+        libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
+      },
       id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
-      tel_apprenant: "+33 534648662",
-      code_commune_insee_apprenant: "05109",
+      is_lock: {
+        apprenant: {
+          ine: true,
+          nom: true,
+          prenom: true,
+          sexe: false,
+          date_de_naissance: true,
+          nationalite: false,
+          handicap: false,
+          courriel: true,
+          telephone: false,
+          adresse: {
+            numero: false,
+            repetition_voie: false,
+            voie: false,
+            complement: false,
+            code_postal: true,
+            code_insee: true,
+            commune: true,
+            departement: true,
+            region: true,
+            academie: true,
+            complete: false,
+            pays: false,
+          },
+          historique_statut: true,
+          contrats: true,
+          code_postal_de_naissance: false,
+          regime_scolaire: false,
+          inscription_sportif_haut_niveau: false,
+          situation_avant_contrat: false,
+          derniere_situation: false,
+          dernier_organisme_uai: false,
+          organisme_gestionnaire: false,
+          dernier_diplome: false,
+          mineur_emancipe: false,
+          representant_legal: {
+            nom: false,
+            prenom: false,
+            pcs: false,
+            meme_adresse: false,
+            adresse: {
+              numero: false,
+              repetition_voie: false,
+              voie: false,
+              complement: false,
+              code_postal: false,
+              code_insee: false,
+              commune: false,
+              departement: false,
+              region: false,
+              academie: false,
+              complete: false,
+              pays: false,
+            },
+            courriel: false,
+            telephone: false,
+          },
+        },
+        formation: {
+          cfd: true,
+          rncp: false,
+          libelle_long: true,
+          niveau: false,
+          niveau_libelle: false,
+          periode: true,
+          annee: false,
+          date_debut_formation: false,
+          date_fin_formation: false,
+          date_obtention_diplome: false,
+          duree_formation_relle: false,
+        },
+      },
+      validation_errors: [],
       source: "testSource",
+      annee_scolaire: "2024-2025",
       // other added fields
       _id: insertedDossier._id,
       created_at: insertedDossier.created_at || "shouldnotbeempty",
       updated_at: insertedDossier.updated_at || "shouldnotbeempty",
       organisme_id: insertedDossier.organisme_id || "shouldnotbeempty",
-      etablissement_reseaux: [],
-      formation_cfd: "50033610",
-      // historique_statut_apprenant: [
-      //   {
-      //     date_reception: insertedDossier.historique_statut_apprenant[0].date_reception || "shouldnotbeempty",
-      //     date_statut: new Date("2022-12-28T04:05:47.647Z"),
-      //     valeur_statut: 3,
-      //   },
-      // ],
     });
   });
 });

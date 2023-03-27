@@ -28,7 +28,7 @@ import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-ef
 import { recreateIndexes } from "./db/recreateIndexes.js";
 import { findInvalidDocuments } from "./db/findInvalidDocuments.js";
 import { generateTypes } from "./seed/types/generate-types.js";
-import { processEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
+import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
 
 program.configureHelp({
   sortSubcommands: true,
@@ -59,7 +59,7 @@ program
   .description("Process la queue des effectifs")
   .action(async (_, options) =>
     runScript(async () => {
-      await processEffectifsQueue();
+      await processEffectifsQueueEndlessly();
     }, options._name)
   );
 
