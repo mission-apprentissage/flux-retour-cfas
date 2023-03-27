@@ -15,6 +15,9 @@ import { Organisme } from "../../model/@types/Organisme.js";
 import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeConstants.js";
 import Boom from "boom";
+import { AuthContext } from "../../model/internal/AuthContext.js";
+import { OrganisationOrganismeFormation } from "../../model/organisations.model.js";
+import { getAggregatedIndicateursRestriction, getOrganismeRestriction } from "../helpers/permissions.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -660,31 +663,24 @@ export const getStatOrganismes = async () => {
   return stats;
 };
 
-export async function findUserOrganismes(user) {
-  // const query = !user.organisme_ids.length
-  //   ? {}
-  //   : { _id: { $in: user.organisme_ids.filter((id) => id.toString() !== user.main_organisme_id?.toString()) } };
-  // FIXME filtrer selon type d'organisation
+export async function findUserOrganismes(authContext: AuthContext) {
   const organismes = await organismesDb()
-    .find(
-      {},
-      {
-        projection: {
-          _id: 1,
-          nom: 1,
-          enseigne: 1,
-          raison_sociale: 1,
-          ferme: 1,
-          nature: 1,
-          adresse: 1,
-          siret: 1,
-          uai: 1,
-          first_transmission_date: 1,
-          last_transmission_date: 1,
-          fiabilisation_statut: 1,
-        },
-      }
-    )
+    .find(await getOrganismeRestriction(authContext), {
+      projection: {
+        _id: 1,
+        nom: 1,
+        enseigne: 1,
+        raison_sociale: 1,
+        ferme: 1,
+        nature: 1,
+        adresse: 1,
+        siret: 1,
+        uai: 1,
+        first_transmission_date: 1,
+        last_transmission_date: 1,
+        fiabilisation_statut: 1,
+      },
+    })
     .toArray();
 
   return organismes.map((organisme) => ({

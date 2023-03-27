@@ -14,6 +14,10 @@ export type EffectifsFilters = {
   uai_etablissement?: string;
 };
 
+export type EffectifsFiltersWithRestriction = EffectifsFilters & {
+  restrictionMongo?: any; // dirty, en attendant des routes propres
+};
+
 export interface FilterConfiguration {
   matchKey: string;
 
