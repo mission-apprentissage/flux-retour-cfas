@@ -10,7 +10,6 @@ import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../
 
 let nbOrganismesFiables = 0;
 let nbOrganismesFiabilises = 0;
-let nbDossiersApprenantsFiabilises = 0;
 let nbOrganismesNonFiabilisablesMapping = 0;
 let nbOrganismesNonFiabilisablesMappingSupprimes = 0;
 
@@ -40,7 +39,6 @@ export const applyFiabilisationUaiSiret = async () => {
 
   // Log
   logger.info(nbOrganismesFiables, "organismes mis à jour en tant que fiables");
-  logger.info(nbDossiersApprenantsFiabilises, "dossiers apprenants mis à jour en tant que fiabilisés");
   logger.info(nbOrganismesFiabilises, "organismes mis à jour en tant que fiabilisés");
   logger.info(nbOrganismesNonFiabilisablesMapping, "organismes mis à jour en tant que non fiabilisables (mapping)");
   logger.info(
@@ -63,7 +61,6 @@ export const applyFiabilisationUaiSiret = async () => {
 
   return {
     nbOrganismesFiables,
-    nbDossiersApprenantsFiabilises,
     nbOrganismesFiabilises,
     nbOrganismesNonFiabilisablesMapping,
     nbOrganismesNonFiabilisablesUaiNonValidees,
@@ -124,8 +121,7 @@ const updateOrganismesFiabilise = async () => {
 
 /**
  * Méthode de MAJ unitaire d'un organisme à fiabiliser et de ses effectifs
- * Pour chaque couple identifié on va mettre à jour les dossiers apprenants (uai et siret)
- * Ensuite on va mettre à jour l'organisme en question comme étant FIABLE
+ * Pour chaque couple identifié on va mettre à jour l'organisme en question comme étant FIABLE
  * Enfin on va déplacer les effectifs de l'organisme non fiable vers le fiable
  * Puis supprimer l'organisme non fiable
  * @param {*} currentFiabilisationCouple
@@ -190,13 +186,20 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
  * Méthode de MAJ unitaire d'un organisme comme étant non fiabilisable en utilisant le mapping >> NON_FIABILISABLE_MAPPING
  * @param {*} currentFiabilisationCouple
  */
-const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (currentFiabilisationCouple) => {
-  const { modifiedCount } = await organismesDb().updateMany(
-    { uai: currentFiabilisationCouple.uai, siret: currentFiabilisationCouple.siret },
-    { $set: { fiabilisation_statut: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING } },
-    { bypassDocumentValidation: true }
-  );
-  nbOrganismesNonFiabilisablesMapping += modifiedCount;
+const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (coupleNonFiabilisableMapping) => {
+  try {
+    logger.info(
+      `updateOrganismeForCurrentCoupleNonFiabilisableMapping : uai ${coupleNonFiabilisableMapping.uai} / siret ${coupleNonFiabilisableMapping.siret}`
+    );
+    const { modifiedCount } = await organismesDb().updateMany(
+      { uai: coupleNonFiabilisableMapping.uai, siret: coupleNonFiabilisableMapping.siret },
+      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING } },
+      { bypassDocumentValidation: true }
+    );
+    nbOrganismesNonFiabilisablesMapping += modifiedCount;
+  } catch (err) {
+    logger.error(`Erreur updateOrganismeForCurrentCoupleNonFiabilisableMapping : ${err}`);
+  }
 };
 
 /**
