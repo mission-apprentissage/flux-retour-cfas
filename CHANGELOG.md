@@ -1,3 +1,21 @@
+## [3.16.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.16.1...v3.16.2) (2023-03-27)
+
+
+### Bug Fixes
+
+* ajout index formation.annee sur effectifs ([25f3858](https://github.com/mission-apprentissage/flux-retour-cfas/commit/25f38586a743d2615770717d6ce59bef342f1a20))
+* bloque l'acces à la liste des organismes pour les comptes en pending ([f8c0566](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f8c05667c666ca92bdcd5e4e0e25be9a4a6bbad2))
+* ci ([bc447c8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/bc447c84f00aeccb76f1bd51b0f6455151fd0a78))
+* configuration du proxy pour exposer les métriques ([#2805](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2805)) ([84a84ad](https://github.com/mission-apprentissage/flux-retour-cfas/commit/84a84adf909ebed7d2a40953824d3e805e780cfc))
+* fix frequence cron pour process effectifsQueue ([37d78d8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/37d78d8faa80e8ebbd5e332a76d5228e098eae7a))
+* fix type issues ([6284f66](https://github.com/mission-apprentissage/flux-retour-cfas/commit/6284f66b9b8cfe48781d7d849b8df922b0b1eda7))
+* hostname des agents de monitoring ([#2812](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2812)) ([f6e6dc0](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f6e6dc0aa3fa2de4ddf4c4802a704b67e8651e72))
+* insertDossierApprenant in process-effectifs-queue ([982b8f8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/982b8f82644db953abe2dca384177e573a8b3f73))
+* optimisation du process d'ingestion ([#2816](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2816)) ([21f30c0](https://github.com/mission-apprentissage/flux-retour-cfas/commit/21f30c02770f0721f095229ede3574a64aa862f1))
+* pagination on users list ([ef9a00a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ef9a00ad62502f9c66f66971bd09033803462280))
+* **server:** job fiabilisation : identification NON_FIABILISABLES_MAPPING ([#2817](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2817)) ([f6504b0](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f6504b0b639eb77a747ef0441c3f415c730203e0))
+* ts issue on indexes job ([0d18d8b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0d18d8b5e484c6e4e8d3dc7902721c0c873ccfcb))
+
 ## [3.16.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.16.0...v3.16.1) (2023-03-22)
 
 
