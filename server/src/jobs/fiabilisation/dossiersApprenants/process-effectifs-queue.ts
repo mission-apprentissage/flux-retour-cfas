@@ -3,12 +3,6 @@ import { effectifsQueueDb } from "../../../common/model/collections.js";
 import { runEngine } from "../../../common/actions/engine/engine.actions.js";
 import { structureEffectifFromDossierApprenant } from "../../../common/actions/effectifs.actions.js";
 import { structureOrganismeFromDossierApprenant } from "../../../common/actions/organismes/organismes.actions.js";
-import {
-  findDossierApprenantByQuery,
-  insertDossierApprenant,
-  structureDossierApprenant,
-  updateDossierApprenant,
-} from "../../../common/actions/dossiersApprenants.actions.js";
 import dossierApprenantSchema from "../../../common/validation/dossierApprenantSchema.js";
 
 export const processEffectifsQueue = async () => {
@@ -61,56 +55,23 @@ export const processEffectifsQueue = async () => {
           ],
         };
 
-        let organisme;
         try {
           // Construction d'un historique à partir du statut et de la date_metier_mise_a_jour_statut
           const effectifData = structureEffectifFromDossierApprenant(dossierApprenant);
           const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenant);
 
           // Call runEngine -> va créer les données nécessaires (effectifs + organismes)
-          ({ organisme } = await runEngine(effectifData, organismeData));
+          const { effectifId } = await runEngine(effectifData, organismeData);
+
+          await effectifsQueueDb().updateOne(
+            { _id: effectifQueued._id },
+            { $set: { effectif_id: effectifId, processed_at: new Date() } }
+          );
         } catch (error: any) {
           logger.info(` Error with item ${effectifQueued._id}: ${error.toString()}`);
           await effectifsQueueDb().updateOne(
             { _id: effectifQueued._id },
             { $set: { processed_at: new Date(), error: error.toString() } }
-          );
-          continue;
-        }
-
-        // POST Engine création du dossierApprenantMigration avec organisme lié
-        // TODO à supprimer une fois que la collection DossierApprenantMigration sera useless
-        // TODO Store userEvents
-        if (organisme.createdId || organisme.foundId) {
-          const structuredDossierApprenant = await structureDossierApprenant({
-            ...dossierApprenant,
-            organisme_id: organisme.createdId || organisme.foundId, // Update sur l'organisme ajouté ou maj,
-          });
-
-          // Recherche du dossier via sa clé d'unicité
-          const foundDossierWithUnicityFields = await findDossierApprenantByQuery(
-            {
-              id_erp_apprenant: structuredDossierApprenant.id_erp_apprenant,
-              uai_etablissement: structuredDossierApprenant.uai_etablissement,
-              annee_scolaire: structuredDossierApprenant.annee_scolaire,
-            },
-            { _id: 1 }
-          );
-
-          let insertedId;
-
-          if (foundDossierWithUnicityFields) {
-            ({ _id: insertedId } = await updateDossierApprenant(
-              foundDossierWithUnicityFields?._id,
-              structuredDossierApprenant
-            ));
-          } else {
-            insertedId = await insertDossierApprenant(structuredDossierApprenant);
-          }
-
-          await effectifsQueueDb().updateOne(
-            { _id: effectifQueued._id },
-            { $set: { effectif_id: insertedId, processed_at: new Date() } }
           );
         }
       }

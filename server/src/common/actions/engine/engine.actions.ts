@@ -1,11 +1,12 @@
 import Joi from "joi";
+import { isEqual } from "date-fns";
 import { capitalize, cloneDeep, get } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
+
 import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import { telephoneConverter } from "../../validation/utils/frenchTelephoneNumber.js";
-import { buildNewHistoriqueStatutApprenant } from "../dossiersApprenants.actions.js";
 import {
   buildEffectif,
   findEffectifById,
@@ -22,6 +23,57 @@ import {
   setOrganismeTransmissionDates,
 } from "../organismes/organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
+
+/**
+ * Méthode de construction d'un nouveau tableau d'historique de statut
+ * a partir d'un nouveau couple statut / date_metier
+ * Va append au tableau un nouvel élément si nécessaire
+ * @param {*} historique_statut_apprenant_existant
+ * @param {*} updated_statut_apprenant
+ * @param {*} updated_date_metier_mise_a_jour_statut
+ * @returns
+ */
+export const buildNewHistoriqueStatutApprenant = (
+  historique_statut_apprenant_existant,
+  updated_statut_apprenant,
+  updated_date_metier_mise_a_jour_statut
+) => {
+  if (!updated_statut_apprenant) return historique_statut_apprenant_existant;
+
+  let newHistoriqueStatutApprenant = historique_statut_apprenant_existant;
+
+  // Vérification si le nouveau statut existe déja dans l'historique actuel
+  const statutExistsInHistorique = historique_statut_apprenant_existant.find((historiqueItem) => {
+    return (
+      historiqueItem.valeur_statut === updated_statut_apprenant &&
+      isEqual(new Date(historiqueItem.date_statut), new Date(updated_date_metier_mise_a_jour_statut))
+    );
+  });
+
+  // Si le statut n'existe pas déja on l'ajoute
+  if (!statutExistsInHistorique) {
+    const newHistoriqueElement = {
+      valeur_statut: updated_statut_apprenant,
+      date_statut: new Date(updated_date_metier_mise_a_jour_statut),
+      date_reception: new Date(),
+    };
+
+    // add new element to historique
+    const historique = historique_statut_apprenant_existant.slice();
+    historique.push(newHistoriqueElement);
+
+    // sort historique chronologically
+    const historiqueSorted = historique.sort((a, b) => {
+      return a.date_statut.getTime() - b.date_statut.getTime();
+    });
+
+    // find new element index in sorted historique to remove subsequent ones
+    const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
+    newHistoriqueStatutApprenant = historiqueSorted.slice(0, newElementIndex + 1);
+  }
+
+  return newHistoriqueStatutApprenant;
+};
 
 /**
  * Fonction de remplissage d'un effectif à créer ou à mettre à jour
@@ -288,12 +340,8 @@ const hydrateOrganisme = async (organisme: any) => {
  *
  * @param {*} dossiersApprenants
  */
-export const runEngine = async (effectifData, organismeData) => {
-  let organismeCreatedId: any = null;
-  let organismeFoundId: any = null;
-
-  let effectifCreatedId: any = null;
-  let effectifUpdatedId: any = null;
+export const runEngine = async (effectifData: Record<string, any>, organismeData: Record<string, any>) => {
+  let effectifId: any = null;
 
   // Gestion de l'organisme : hydrate et ensuite create or update
   if (organismeData) {
@@ -312,21 +360,16 @@ export const runEngine = async (effectifData, organismeData) => {
         buildInfosFromSiret: false,
         callLbaApi: false,
       });
-
       // Ajout organisme id a l'effectifData
-      organismeCreatedId = _id;
-      effectifData.organisme_id = organismeCreatedId.toString();
+      effectifData.organisme_id = _id.toString();
     }
 
     // Organisme existant sans erreur
     if (organismeFound?._id) {
       // Ajout organisme id a l'effectifData
       // Pas besoin d'update l'organisme
-      organismeFoundId = organismeFound?._id;
-
       // On ajoute ou mets à jour les dates de transmission si l'organisme est déja existant
       await setOrganismeTransmissionDates(organismeFound);
-
       effectifData.organisme_id = organismeFound?._id.toString();
     }
   }
@@ -340,7 +383,7 @@ export const runEngine = async (effectifData, organismeData) => {
 
     // Gestion des maj d'effectif
     if (found) {
-      effectifUpdatedId = found._id;
+      effectifId = found._id;
 
       // Update de historique
       effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
@@ -349,25 +392,16 @@ export const runEngine = async (effectifData, organismeData) => {
         effectifData.apprenant?.historique_statut[0]?.date_statut
       );
 
-      await updateEffectifAndLock(effectifUpdatedId, effectif);
+      await updateEffectifAndLock(effectifId, effectif);
     } else {
-      effectifCreatedId = await insertEffectif(effectif);
-      const effectifCreated: WithId<any> = await findEffectifById(effectifCreatedId);
-      await updateEffectifAndLock(effectifCreatedId, {
+      effectifId = await insertEffectif(effectif);
+      const effectifCreated: WithId<any> = await findEffectifById(effectifId);
+      await updateEffectifAndLock(effectifId, {
         apprenant: effectifCreated.apprenant,
         formation: effectifCreated.formation,
       });
     }
   }
 
-  return {
-    effectif: {
-      created: effectifCreatedId,
-      updated: effectifUpdatedId,
-    },
-    organisme: {
-      createdId: organismeCreatedId,
-      foundId: organismeFoundId,
-    },
-  };
+  return { effectifId };
 };

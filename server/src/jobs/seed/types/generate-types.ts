@@ -26,7 +26,6 @@ const IGNORE_COLLECTIONS = [
   "cfas",
   "changelog",
   "dossiersApprenants",
-  "dossiersApprenantsApiErrors",
   "duplicatesEvents",
   "effectifsApprenants",
   "referentielSiret",

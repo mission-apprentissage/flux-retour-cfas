@@ -1,4 +1,3 @@
-export { DossiersApprenantsMigration } from "./DossiersApprenantsMigration.js";
 export { Effectif } from "./Effectif.js";
 export { FiabilisationUaiSiret } from "./FiabilisationUaiSiret.js";
 export { Formation } from "./Formation.js";
@@ -10,6 +9,5 @@ export { OrganismesReferentiel } from "./OrganismesReferentiel.js";
 export { Permission } from "./Permission.js";
 export { Role } from "./Role.js";
 export { Upload } from "./Upload.js";
-export { UserEvent } from "./UserEvent.js";
 export { User } from "./User.js";
 export { UsersMigration } from "./UsersMigration.js";

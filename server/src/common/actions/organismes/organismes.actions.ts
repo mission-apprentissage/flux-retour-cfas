@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
 import { getMetiersBySiret } from "../../apis/apiLba.js";
-import { organismesDb, effectifsDb, permissionsDb, dossiersApprenantsMigrationDb } from "../../model/collections.js";
+import { organismesDb, effectifsDb, permissionsDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
@@ -477,10 +477,10 @@ export const searchOrganismes = async (searchCriteria) => {
 };
 
 /**
- * Supprime l'organisme identifié par son id et supprime tous ses effectifs & dossiersApprenantsMigration liés s'ils existent
+ * Supprime l'organisme identifié par son id et supprime tous ses effectifs
  * @param {*} id
  */
-export const deleteOrganismeAndEffectifsAndDossiersApprenantsMigration = async (id) => {
+export const deleteOrganismeAndEffectifs = async (id) => {
   const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
@@ -488,17 +488,11 @@ export const deleteOrganismeAndEffectifsAndDossiersApprenantsMigration = async (
   if (!organisme) throw new Error(`Unable to find organisme ${_id.toString()}`);
   if (!organisme.uai) throw new Error(`Organisme ${_id.toString()} doesn't have any UAI`);
 
-  // Suppression des dossiersApprenants liés sur la base du couple uai siret
-  const { deletedCount: deletedDossiersApprenantsMigration } = await dossiersApprenantsMigrationDb().deleteMany({
-    uai_etablissement: organisme.uai,
-    siret_etablissement: organisme.siret,
-  });
-
   // Suppression des effectifs liés puis de l'organisme
   const { deletedCount: deletedEffectifs } = await effectifsDb().deleteMany({ organisme_id: id });
   const { deletedCount: deletedOrganisme } = await organismesDb().deleteOne({ _id: id });
 
-  return { deletedDossiersApprenantsMigration, deletedEffectifs, deletedOrganisme };
+  return { deletedEffectifs, deletedOrganisme };
 };
 
 /**
