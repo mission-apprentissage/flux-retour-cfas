@@ -1,11 +1,15 @@
-import axios from "axios";
 import parentLogger from "../logger.js";
 import config from "../../config.js";
+import getApiClient from "./client.js";
 
 // Cf Documentation : https://catalogue.apprentissage.beta.gouv.fr/api/v1/docs
 
 const logger = parentLogger.child({
   module: "api-catalogue",
+});
+
+const axiosClient = getApiClient({
+  baseURL: config.mnaCatalogApi.endpoint,
 });
 
 /**
@@ -17,7 +21,7 @@ const logger = parentLogger.child({
 export const getCatalogFormationsForOrganisme = async (uai, page = 1) => {
   try {
     // On cherche parmi les formations publiées ayant soit l'UAI formateur soit l'UAI gestionnaire
-    const response = await axios.get(`${config.mnaCatalogApi.endpoint}/entity/formations`, {
+    const response = await axiosClient.get("/entity/formations", {
       params: {
         page,
         limit: 1050,

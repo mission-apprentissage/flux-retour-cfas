@@ -1,10 +1,12 @@
-import axios from "axios";
 import logger from "../logger.js";
 import config from "../../config.js";
+import getApiClient from "./client.js";
 
 // Cf Documentation : https://referentiel.apprentissage.onisep.fr/api/v1/doc/#/
 
-const API_ENDPOINT = config.mnaReferentielApi.endpoint;
+const axiosClient = getApiClient({
+  baseURL: config.mnaReferentielApi.endpoint,
+});
 
 const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
   "adresse",
@@ -28,10 +30,7 @@ const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
  * @returns {Promise<{organismes: import("./@types/MnaOrganisme").default[]}>}
  */
 export const fetchOrganismes = async () => {
-  const { data } = await axios({
-    method: "GET",
-    baseURL: API_ENDPOINT,
-    url: "/organismes",
+  const { data } = await axiosClient.get("/organismes", {
     params: {
       items_par_page: 10000,
       champs: DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(","),
@@ -45,9 +44,8 @@ export const fetchOrganismes = async () => {
  * @returns {Promise<import("./@types/MnaOrganisme.js").default|null>}
  */
 export const fetchOrganismeWithSiret = async (siret) => {
-  const url = `${API_ENDPOINT}/organismes/${siret}`;
   try {
-    const { data } = await axios.get(url);
+    const { data } = await axiosClient.get(`/organismes/${siret}`);
 
     return data;
   } catch (err: any) {
@@ -58,9 +56,8 @@ export const fetchOrganismeWithSiret = async (siret) => {
 };
 
 export const fetchOrganismesWithUai = async (uai) => {
-  const url = `${API_ENDPOINT}/organismes`;
   try {
-    const { data } = await axios.get(url, { params: { uais: uai } });
+    const { data } = await axiosClient.get("/organismes", { params: { uais: uai } });
     return data;
   } catch (err: any) {
     const errorMessage = err.response?.data || err.code;

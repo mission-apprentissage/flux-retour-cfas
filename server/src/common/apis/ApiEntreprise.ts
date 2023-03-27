@@ -1,20 +1,22 @@
-import axios from "axios";
 import axiosRetry from "axios-retry";
 
 import config from "../../config.js";
 import logger from "../logger.js";
 import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
+import getApiClient from "./client.js";
 
 export const API_ENDPOINT = config.apiEntreprise.endpoint;
+
+const axiosClient = getApiClient({
+  baseURL: API_ENDPOINT,
+});
 
 // Cf Documentation : https://v2.entreprise.api.gouv.fr/catalogue/
 const executeWithRateLimiting = apiRateLimiter("apiEntreprise", {
   //2 requests per second
   nbRequests: 2,
   durationInSeconds: 1,
-  client: axios.create({
-    baseURL: API_ENDPOINT,
-  }),
+  client: axiosClient,
 });
 
 const apiParams = {
@@ -34,10 +36,10 @@ const apiParams = {
 export const getEntreprise = (siren, non_diffusables = true) => {
   return executeWithRateLimiting(async (client) => {
     try {
-      logger.debug(`[Entreprise API] Fetching entreprise ${siren}...`);
       let response = await client.get(`entreprises/${siren}`, {
         params: { ...apiParams, non_diffusables },
       });
+      logger.debug(`[Entreprise API] Fetched entreprise ${siren} ${response.cached ? "(from cache)" : ""}`);
       if (!response?.data?.entreprise) {
         throw new ApiError("Api Entreprise", "No entreprise data received");
       }
@@ -65,10 +67,10 @@ export const getEtablissement = async (siret, non_diffusables = true) => {
     axiosRetry(client, { retries: 3 });
 
     try {
-      logger.debug(`[Entreprise API] Fetching etablissement ${siret}...`);
       let response = await client.get(`etablissements/${siret}`, {
         params: { ...apiParams, non_diffusables },
       });
+      logger.debug(`[Entreprise API] Fetched etablissement ${siret} ${response.cached ? "(from cache)" : ""}`);
       if (!response?.data?.etablissement) {
         throw new ApiError("Api Entreprise", "No etablissement data received");
       }
@@ -89,10 +91,11 @@ export const getEtablissement = async (siret, non_diffusables = true) => {
 export const getConventionCollective = async (siret, non_diffusables = true) => {
   return executeWithRateLimiting(async (client) => {
     try {
-      logger.debug(`[Entreprise API] Fetching convention collective ${siret}...`);
       let response = await client.get(`conventions_collectives/${siret}`, {
         params: { ...apiParams, non_diffusables },
       });
+      logger.debug(`[Entreprise API] Fetched convention collective ${siret} ${response.cached ? "(from cache)" : ""}`);
+
       if (!response?.data?.conventions[0]) {
         throw new ApiError("Api Entreprise", "error getConventionCollective");
       }

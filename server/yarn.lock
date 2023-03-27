@@ -1432,6 +1432,15 @@ aws4@^1.8.0:
   resolved "https://registry.npmjs.org/aws4/-/aws4-1.11.0.tgz#d61f46d83b2519250e2784daf5b09479a8b41c59"
   integrity sha512-xh1Rl34h6Fi1DC2WWKfxUTVqRsNnr6LsKz2+hfwDxQJWmrx8+c7ylaqBMcHfl1U1r2dsifOvKX3LQuLNZ+XSvA==
 
+axios-cache-interceptor@^0.10.7:
+  version "0.10.7"
+  resolved "https://registry.yarnpkg.com/axios-cache-interceptor/-/axios-cache-interceptor-0.10.7.tgz#9a69fdaf10b7bb65e62d264ebe0a068efcb73bef"
+  integrity sha512-UjpxChG5DpF6Kf1IPGMLOzRDNL8ZNS6TOn1jTaVvCE7cWFU904jJwi0T1s+IbijpnLEjK2iq5uLIuR8Sj+RsFQ==
+  dependencies:
+    cache-parser "^1.2.4"
+    fast-defer "^1.1.7"
+    object-code "^1.2.4"
+
 axios-retry@3.3.1:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/axios-retry/-/axios-retry-3.3.1.tgz#47624646138aedefbad2ac32f226f4ee94b6dcab"
@@ -1675,6 +1684,11 @@ c8@7.12.0:
     v8-to-istanbul "^9.0.0"
     yargs "^16.2.0"
     yargs-parser "^20.2.9"
+
+cache-parser@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/cache-parser/-/cache-parser-1.2.4.tgz#60975135ef2330e6a1d60895279d7237a2a9b398"
+  integrity sha512-O0KwuHuJnbHUrghHi2kGp0SxnWSIBXTYt7M8WVhW0kbPRUNUKoE/Of6e1rRD6AAxmfxFunKnt90yEK09D+sc5g==
 
 cacheable-request@^6.0.0:
   version "6.1.0"
@@ -2805,6 +2819,11 @@ fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"
   integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
+
+fast-defer@^1.1.7:
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/fast-defer/-/fast-defer-1.1.7.tgz#943bc3c7a876d437360318ab1e1f269a29f31ba4"
+  integrity sha512-tJ01ulDWT2WhqxMKS20nXX6wyX2iInBYpbN3GO7yjKwXMY4qvkdBRxak9IFwBLlFDESox+SwSvqMCZDfe1tqeg==
 
 fast-diff@^1.1.2:
   version "1.2.0"
@@ -5056,6 +5075,11 @@ object-assign@^4.0.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==
+
+object-code@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/object-code/-/object-code-1.2.4.tgz#c356b1c5237272e736a3843c6086ca09a754b277"
+  integrity sha512-uGq4ETUuWe+GA586NXEriiaozNuff+YNFXlpD8cVrM1GoiuTZpCABP+bZCWDrvQDoCiSTyiWAFHD/HF/iwhb2w==
 
 object-inspect@^1.9.0:
   version "1.12.0"

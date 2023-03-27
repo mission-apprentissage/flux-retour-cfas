@@ -1,17 +1,19 @@
-import axios from "axios";
 import config from "../../config.js";
 import logger from "../logger.js";
 import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
+import getApiClient from "./client.js";
+
+const axiosClient = getApiClient({
+  baseURL: config.cfadockApi.endpoint,
+  timeout: 5000,
+});
 
 // Cf Documentation : https://www.cfadock.fr/Home/ApiDescription
 const executeWithRateLimiting = apiRateLimiter("apiCfaDock", {
   //2 requests per second
   nbRequests: 2,
   durationInSeconds: 1,
-  client: axios.create({
-    baseURL: config.cfadockApi.endpoint,
-    timeout: 5000,
-  }),
+  client: axiosClient,
 });
 
 export const getOpcoData = (siret) => {
