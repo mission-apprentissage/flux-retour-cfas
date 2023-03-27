@@ -22,6 +22,7 @@ const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
   "siege_social",
   "uai",
   "lieux_de_formation",
+  "relations",
 ];
 
 /**

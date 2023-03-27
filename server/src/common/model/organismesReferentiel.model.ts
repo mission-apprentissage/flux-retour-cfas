@@ -103,6 +103,20 @@ const schema = object(
         description: "Formations de cet organisme",
       }
     ),
+    relations: arrayOf(
+      object(
+        {
+          type: string({
+            enum: ["formateur->responsable", "responsable->formateur", "entreprise"],
+          }),
+          siret: string(),
+          referentiel: boolean(),
+          label: string(),
+          sources: arrayOf(string()),
+        },
+        { additionalProperties: true }
+      )
+    ),
   },
   { required: ["siret", "nature", "lieux_de_formation"] }
 );
