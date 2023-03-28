@@ -133,8 +133,9 @@ export const validateEffectifObject = (effectif) => {
  * @returns
  */
 export const insertEffectif = async (data) => {
-  const { insertedId } = await effectifsDb().insertOne(validateEffectif(data));
-  return insertedId;
+  const dataSanitized = validateEffectif(data);
+  const { insertedId } = await effectifsDb().insertOne(dataSanitized);
+  return { _id: insertedId, ...dataSanitized };
 };
 
 /**
@@ -169,51 +170,45 @@ export const structureEffectifFromDossierApprenant = (dossiersApprenant) => {
     historique_statut_apprenant: historique_statut,
   } = dossiersApprenant;
 
-  // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
-  const contrats =
-    contrat_date_debut || contrat_date_fin || contrat_date_rupture
-      ? [
-          {
-            ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
-            ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
-            ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
-          },
-        ]
-      : [];
-
-  const apprenantEffectif = {
-    ...defaultValuesApprenant(),
-    ...(ine ? { ine } : {}),
-    ...(nom ? { nom } : {}),
-    ...(prenom ? { prenom } : {}),
-    ...(date_de_naissance ? { date_de_naissance } : {}),
-
-    ...(courriel ? { courriel } : {}),
-    ...(telephone ? { telephone: transformToInternationalNumber(telephone) } : {}),
-    ...(historique_statut ? { historique_statut } : {}),
-    // Build adresse with code_commune_insee
-    ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
-    // Build contrats si nécessaire
-    contrats,
-  };
-
-  const formationEffectif = {
-    ...defaultValuesFormationEffectif(),
-    ...(cfd ? { cfd } : {}),
-    ...(rncp ? { rncp } : {}),
-    ...(libelle_long ? { libelle_long } : {}),
-    ...(niveau ? { niveau } : {}),
-    ...(niveau_libelle ? { niveau_libelle } : {}),
-    ...(periode ? { periode } : {}),
-    ...(annee ? { annee } : {}),
-  };
-
   return {
     ...(annee_scolaire ? { annee_scolaire } : {}),
     ...(source ? { source } : {}),
     ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-    apprenant: apprenantEffectif,
-    formation: formationEffectif,
+    organisme_id: undefined,
+    apprenant: {
+      ...defaultValuesApprenant(),
+      ...(ine ? { ine } : {}),
+      ...(nom ? { nom } : {}),
+      ...(prenom ? { prenom } : {}),
+      ...(date_de_naissance ? { date_de_naissance } : {}),
+
+      ...(courriel ? { courriel } : {}),
+      ...(telephone ? { telephone: transformToInternationalNumber(telephone) } : {}),
+      ...(historique_statut ? { historique_statut } : {}),
+      // Build adresse with code_commune_insee
+      ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
+      // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
+      contrats:
+        contrat_date_debut || contrat_date_fin || contrat_date_rupture
+          ? [
+              {
+                ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
+                ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
+                ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
+              },
+            ]
+          : [],
+    },
+    formation: {
+      ...defaultValuesFormationEffectif(),
+      ...(cfd ? { cfd } : {}),
+      ...(rncp ? { rncp } : {}),
+      ...(libelle_long ? { libelle_long } : {}),
+      ...(niveau ? { niveau } : {}),
+      ...(niveau_libelle ? { niveau_libelle } : {}),
+      ...(periode ? { periode } : {}),
+      ...(annee ? { annee } : {}),
+    },
   };
 };
 

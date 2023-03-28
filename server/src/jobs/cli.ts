@@ -58,9 +58,11 @@ program
 program
   .command("process:effectifs-queue")
   .description("Process la queue des effectifs")
-  .action(async (_, options) =>
+  .option("--id <string>", "ID de l'effectifQueue à traiter")
+  .option("-f, --force", "Force le re-traitement des effectifs déjà traités")
+  .action(async ({ id, force }, options) =>
     runScript(async () => {
-      await processEffectifsQueueEndlessly();
+      await processEffectifsQueueEndlessly({ id, force });
     }, options._name)
   );
 

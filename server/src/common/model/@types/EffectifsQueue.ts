@@ -53,6 +53,10 @@ export interface EffectifsQueue {
    */
   processed_at?: Date;
   /**
+   * Erreur rencontré lors de la création de l'effectif
+   */
+  error?: any;
+  /**
    * Erreurs de validation de cet effectif
    */
   validation_errors?: {
