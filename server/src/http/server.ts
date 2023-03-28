@@ -19,7 +19,7 @@ import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursRouter, { buildEffectifsFiltersFromRequest } from "./routes/specific.routes/indicateurs.routes.js";
-import serverEvents from "./routes/specific.routes/server-events.routes.js";
+import { serverEventsHandler } from "./routes/specific.routes/server-events.routes.js";
 
 import emails from "./routes/emails.routes.js";
 
@@ -261,7 +261,7 @@ function setupRoutes(app: Application, services) {
   authRouter.use("/api/v1/organisme", organisme(services));
   authRouter.use("/api/v1/effectif", effectif());
   authRouter.use("/api/v1/upload", upload(services));
-  authRouter.use("/api/v1/server-events", serverEvents());
+  authRouter.get("/api/v1/server-events", serverEventsHandler);
   authRouter.use("/api/indicateurs", indicateursRouter());
   authRouter.get("/api/v1/indicateurs-export", async (req, res) => {
     const filters = await buildEffectifsFiltersFromRequest(req);
