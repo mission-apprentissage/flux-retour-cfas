@@ -4,7 +4,6 @@ import { usersDb } from "../../model/collections.js";
 import { generateRandomAlphanumericPhrase } from "../../utils/miscUtils.js";
 import { compare, isTooWeak, hash } from "../../utils/sha512Utils.js";
 import { validatePassword } from "../../validation/utils/password.js";
-import { escapeRegExp } from "../../utils/regexUtils.js";
 
 const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
 
@@ -181,44 +180,6 @@ export const removeUserLegacy = async (username) => {
   }
 
   await usersDb().deleteOne({ username });
-};
-
-/**
- * Recherche parmi les utilisateurs depuis un critère de recherche
- * @param {*} searchCriteria
- * @returns
- */
-export const searchUsersLegacy = async (searchCriteria) => {
-  const { searchTerm } = searchCriteria;
-
-  const matchStage: any = {};
-  if (searchTerm) {
-    matchStage.$or = [
-      { username: new RegExp(escapeRegExp(searchTerm), "i") },
-      { email: new RegExp(escapeRegExp(searchTerm), "i") },
-      { organisme: new RegExp(escapeRegExp(searchTerm), "i") },
-      { region: new RegExp(escapeRegExp(searchTerm), "i") },
-    ];
-  }
-
-  const sortStage = { username: 1 };
-
-  const found = await usersDb()
-    .aggregate([{ $match: matchStage }, { $sort: sortStage }])
-    .toArray();
-
-  return found.map((user) => {
-    return {
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      permissions: user.permissions,
-      network: user.network,
-      region: user.region,
-      organisme: user.organisme,
-      created_at: user.created_at,
-    };
-  });
 };
 
 /**

@@ -5,10 +5,12 @@ import { UsersMigration } from "../model/@types/UsersMigration.js";
 
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
-import { Organisation, OrganisationOrganismeFormation } from "../model/organisations.model.js";
+import { Organisation } from "../model/organisations.model.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { sendSimpleEmail } from "../services/mailer/mailer.js";
 import logger from "../logger.js";
+import { Organisme } from "../model/@types/Organisme.js";
+import { requireOrganisationOF } from "./helpers/permissions.js";
 
 export async function createOrganisation(organisation: Organisation): Promise<ObjectId> {
   const { insertedId } = await organisationsDb().insertOne(organisation);
@@ -140,17 +142,8 @@ interface ConfigurationERP {
 }
 
 export async function configureOrganismeERP(ctx: AuthContext, conf: ConfigurationERP): Promise<void> {
-  if (
-    ![
-      "ORGANISME_FORMATION_FORMATEUR",
-      "ORGANISME_FORMATION_RESPONSABLE",
-      "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-    ].includes(ctx.organisation.type)
-  ) {
-    throw Boom.forbidden("Permissions invalides");
-  }
+  const organisationOF = requireOrganisationOF(ctx);
 
-  const organisationOF = (ctx as AuthContext<OrganisationOrganismeFormation>).organisation;
   const organisme = await organismesDb().findOne({ siret: organisationOF.siret, uai: organisationOF.uai });
   if (!organisme) {
     throw Boom.notFound("organisme de l'organisation non trouvé", {
@@ -159,4 +152,17 @@ export async function configureOrganismeERP(ctx: AuthContext, conf: Configuratio
     });
   }
   await organismesDb().updateOne({ _id: organisme._id }, conf);
+}
+
+export async function getOrganisationOrganisme(ctx: AuthContext): Promise<Organisme> {
+  const organisationOF = requireOrganisationOF(ctx);
+
+  const organisme = await organismesDb().findOne({ siret: organisationOF.siret, uai: organisationOF.uai });
+  if (!organisme) {
+    throw Boom.notFound("organisme de l'organisation non trouvé", {
+      siret: organisationOF.siret,
+      uai: organisationOF.uai,
+    });
+  }
+  return organisme;
 }

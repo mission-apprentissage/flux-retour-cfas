@@ -12,11 +12,11 @@ import {
   getEffectifsCountBySiretAtDate,
   getIndicateurs,
 } from "../../../common/actions/effectifs/effectifs.actions.js";
-import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
+import { validateFullObjectSchemaUnknown } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
 import {
   canAccessOrganismeInfos,
-  getAggregatedIndicateursRestriction,
+  getEffectifsOrganismeRestriction,
 } from "../../../common/actions/helpers/permissions.js";
 import Boom from "boom";
 
@@ -36,7 +36,7 @@ const commonEffectifsFiltersSchema = {
  * Build filters from the request
  */
 export async function buildEffectifsFiltersFromRequest(req: Request): Promise<EffectifsFiltersWithRestriction> {
-  const filters: EffectifsFiltersWithRestriction = await validateFullObjectSchema<EffectifsFilters>(
+  const filters: EffectifsFiltersWithRestriction = await validateFullObjectSchemaUnknown<EffectifsFilters>(
     req.query,
     commonEffectifsFiltersSchema
   );
@@ -52,7 +52,7 @@ export async function buildEffectifsFiltersFromRequest(req: Request): Promise<Ef
     }
   } else {
     // amend filters with a restriction
-    filters.restrictionMongo = await getAggregatedIndicateursRestriction(req.user);
+    filters.restrictionMongo = await getEffectifsOrganismeRestriction(req.user);
   }
 
   // FIXME restreindre les filtres selon les accès

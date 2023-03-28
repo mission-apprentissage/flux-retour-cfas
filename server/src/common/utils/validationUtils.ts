@@ -45,6 +45,10 @@ export async function validateFullObjectSchema<T = any>(object, schema): Promise
   return await Joi.object(schema).validateAsync(object, { abortEarly: false });
 }
 
+export async function validateFullObjectSchemaUnknown<T = any>(object, schema): Promise<T> {
+  return await Joi.object(schema).validateAsync(object, { abortEarly: false, allowUnknown: true });
+}
+
 export function stripEmptyFields<T extends object>(object: T): T {
   return Object.entries(object).reduce((acc, [key, value]) => {
     if (typeof value !== "undefined" && value !== null) {

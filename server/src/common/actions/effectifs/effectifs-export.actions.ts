@@ -1,11 +1,7 @@
 import { Parser } from "json2csv";
 
-import { getExportAnonymizedEventNameFromFilters, USER_EVENTS_TYPES } from "../../constants/userEventsConstants.js";
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { Organisation } from "../../model/organisations.model.js";
 import { EffectifsFilters } from "../helpers/filters";
-import { getOrganisationRelatedOrganismes } from "../organismes/organismes.actions.js";
-import { createUserEvent } from "../userEvents.actions.js";
 import { getDataListEffectifsAtDate } from "./effectifs.actions.js";
 import { exportedFields } from "./export.js";
 
@@ -21,48 +17,7 @@ const CSV_DEFAULT_FIELDS = [
   })),
 ];
 
-async function getFiltersFromOrganisation(organisation: Organisation): Promise<any> {
-  switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      // TODO restreindre aux organismes liés
-      return {
-        "organisme._id": {
-          $in: await getOrganisationRelatedOrganismes(organisation.siret, organisation.uai),
-        },
-      };
-    }
-
-    case "TETE_DE_RESEAU":
-      return { "organisme.reseaux": organisation.reseau };
-
-    case "DREETS":
-    case "DEETS":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-      return { "organisme.adresse.departement": organisation.code_region };
-    case "DDETS":
-      return { "organisme.adresse.departement": organisation.code_departement }; // FIXME valider si accès au reste en anonyme
-    case "ACADEMIE":
-      return { "organisme.adresse.academie": organisation.code_academie };
-
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "ADMINISTRATEUR":
-      return {};
-  }
-}
-
-export async function exportAnonymizedEffectifsAsCSV(authContext: AuthContext, filters: EffectifsFilters) {
-  // TODO connaitre le contexte d'export des données pour mieux sécuriser les paramètres
-  console.log("filers", await getFiltersFromOrganisation(authContext.organisation));
-  await createUserEvent({
-    type: USER_EVENTS_TYPES.EXPORT_CSV,
-    action: getExportAnonymizedEventNameFromFilters(filters),
-    username: authContext.email,
-    data: filters,
-  });
-
+export async function exportAnonymizedEffectifsAsCSV(ctx: AuthContext, filters: EffectifsFilters) {
   const effectifs = await getDataListEffectifsAtDate(filters);
 
   const json2csvParser = new Parser({

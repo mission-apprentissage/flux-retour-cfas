@@ -1,3 +1,4 @@
+import Boom from "boom";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeConstants.js";
 import logger from "../../logger.js";
 import { organismesDb } from "../../model/collections.js";
@@ -78,10 +79,10 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
   }
 }
 
-/*
-TODO faire un 2e restriction adaptée à la collection organisme directement dans le $lookup organisme
-*/
-export async function getAggregatedIndicateursRestriction(ctx: AuthContext): Promise<any> {
+/**
+ * Même fonction que plus haut, mais pour un $lookup organisme
+ */
+export async function getEffectifsOrganismeRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -122,6 +123,10 @@ export async function getAggregatedIndicateursRestriction(ctx: AuthContext): Pro
   }
 }
 
+/**
+ * Informations en provenance du catalogue :
+ * organismes(siret=siret de l'organisation, uai=uai de l'organisation).formations.organismes
+ */
 export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeFormation>) {
   const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
@@ -157,4 +162,17 @@ export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrg
     }
   }
   return [...subOrganismesIds.values()];
+}
+
+export function requireOrganisationOF(ctx: AuthContext): OrganisationOrganismeFormation {
+  if (
+    ![
+      "ORGANISME_FORMATION_FORMATEUR",
+      "ORGANISME_FORMATION_RESPONSABLE",
+      "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+    ].includes(ctx.organisation.type)
+  ) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+  return (ctx as AuthContext<OrganisationOrganismeFormation>).organisation;
 }

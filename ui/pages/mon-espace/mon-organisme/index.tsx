@@ -1,16 +1,15 @@
 import React, { ReactElement } from "react";
-import { Stack, Heading, Box, Container } from "@chakra-ui/react";
+import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useEspace } from "@/hooks/useEspace";
-import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/components/OrganismeInfo";
-import ViewSelection from "@/modules/mon-espace/landing/visualiser-les-indicateurs/ViewSelection";
 import Page from "@/components/Page/Page";
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import { OrganisationType } from "@/common/internal/Organisation";
+import DahsboardOrganisme from "@/modules/mon-espace/landing/DashboardOrganisme";
+import DashboardTransverse from "@/modules/mon-espace/landing/DashboardTransverse";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -19,14 +18,7 @@ const getDashboardComponents = (organisationType: OrganisationType): ReactElemen
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      return (
-        <Stack spacing="2w">
-          <Heading textStyle="h2" color="grey.800">
-            Bienvenue sur votre tableau de bord
-          </Heading>
-          <OrganismeInfo organisme={myOrganisme} isMine={true} />
-        </Stack>
-      );
+      return <DahsboardOrganisme />;
     }
 
     case "TETE_DE_RESEAU":
@@ -38,12 +30,12 @@ const getDashboardComponents = (organisationType: OrganisationType): ReactElemen
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
-      return <ViewSelection />;
+      // fourre-tout, mais on pourra avoir des différences plus tard
+      return <DashboardTransverse />;
   }
 };
 
 const PageMonOrganisme = () => {
-  const { myOrganisme } = useEspace();
   const { organisationType } = useAuth();
   const title = "Tableau de bord";
 

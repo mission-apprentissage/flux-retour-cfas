@@ -79,7 +79,7 @@ const filtersConfigurations: FilterConfigurations = {
   },
 };
 
-export function buildMongoPipelineFilterStages(filters: EffectifsFilters) {
+export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRestriction) {
   const matchFilters = {};
   const afterLookupsMatchFilters = {};
   const preliminaryLookups: any[] = [];
@@ -101,6 +101,11 @@ export function buildMongoPipelineFilterStages(filters: EffectifsFilters) {
     }
   }
 
+  // force le lookup si pas déjà présent
+  if (filters.restrictionMongo && !preliminaryLookups.includes(organismeLookup)) {
+    preliminaryLookups.push(organismeLookup);
+  }
+
   // note: empty match stages are noop with MongoDB
   return [
     ...(filters.organisme_id !== undefined
@@ -118,6 +123,7 @@ export function buildMongoPipelineFilterStages(filters: EffectifsFilters) {
     ...preliminaryLookups.map((lookupConf) => ({
       $lookup: lookupConf,
     })),
+    filters.restrictionMongo ? { $match: filters.restrictionMongo } : {},
     {
       $match: afterLookupsMatchFilters,
     },

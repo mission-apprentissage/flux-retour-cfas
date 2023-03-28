@@ -12,9 +12,9 @@ import withAuth from "@/components/withAuth";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const IndicateursVueReseauPageContainer = () => {
-  const { auth } = useAuth();
-  if (auth?.roles?.includes("reseau_of")) {
-    const fixedFiltersState = { reseau: { nom: auth.reseau } };
+  const { auth, organisationType } = useAuth();
+  if (organisationType === "TETE_DE_RESEAU") {
+    const fixedFiltersState = { reseau: { nom: auth.organisation.reseau } };
     const defaultFiltersState = { ...getDefaultState(), ...fixedFiltersState };
     return (
       <FiltersProvider defaultState={defaultFiltersState} fixedState={fixedFiltersState}>

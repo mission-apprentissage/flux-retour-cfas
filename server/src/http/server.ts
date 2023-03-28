@@ -63,6 +63,7 @@ import { exportAnonymizedEffectifsAsCSV } from "../common/actions/effectifs/effe
 import { Application } from "express-serve-static-core";
 import {
   configureOrganismeERP,
+  getOrganisationOrganisme,
   inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
@@ -230,12 +231,6 @@ function setupRoutes(app: Application, services) {
   );
 
   authRouter.get(
-    "/api/v1/organismes",
-    returnResult(async (req) => {
-      return await findUserOrganismes(req.user);
-    })
-  );
-  authRouter.get(
     "/api/v1/organismes/:id",
     returnResult(async (req) => {
       return await getOrganisme(req.user, req.params.id);
@@ -321,6 +316,18 @@ function setupRoutes(app: Application, services) {
     })
   );
 
+  authRouter.get(
+    "/api/v1/organisation/organismes",
+    returnResult(async (req) => {
+      return await findUserOrganismes(req.user);
+    })
+  );
+  authRouter.get(
+    "/api/v1/organisation/organisme",
+    returnResult(async (req) => {
+      return await getOrganisationOrganisme(req.user);
+    })
+  );
   authRouter.post(
     "/api/v1/organisation/configure-erp",
     returnResult(async (req) => {

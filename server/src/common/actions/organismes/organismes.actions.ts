@@ -13,7 +13,6 @@ import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
 import { Organisme } from "../../model/@types/Organisme.js";
 import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeConstants.js";
 import Boom from "boom";
 import { AuthContext } from "../../model/internal/AuthContext.js";
 import { canAccessOrganismeInfos, getOrganismeRestriction } from "../helpers/permissions.js";
@@ -614,41 +613,4 @@ export async function getOrganismeById(organismeId: string) {
     throw Boom.notFound(`missing organisation ${organismeId}`);
   }
   return organisme;
-}
-
-/**
- * Informations en provenance du catalogue :
- * organismes(siret=siret de l'organisation, uai=uai de l'organisation).formations.organismes
- */
-export async function getOrganisationRelatedOrganismes(siret: string, uai: string): Promise<string[]> {
-  const organisme = await organismesDb().findOne({
-    siret: siret,
-    uai: uai,
-  });
-  if (!organisme) {
-    throw new Error(`No organisme found for this UAI/SIRET ${uai}/${siret}`);
-  }
-
-  const relatedOrganismesIds: string[] = [];
-  if (
-    organisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
-    organisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
-  ) {
-    for (const formation of organisme.formations) {
-      for (const relatedOrganisme of formation.organismes) {
-        if (
-          ![NATURE_ORGANISME_DE_FORMATION.LIEU, NATURE_ORGANISME_DE_FORMATION.INCONNUE].includes(
-            relatedOrganisme.nature as any
-          ) &&
-          organisme.siret !== relatedOrganisme.siret
-        ) {
-          const relatedOrganismeDb = await findOrganismeBySiret(relatedOrganisme.siret);
-          if (relatedOrganismeDb && !relatedOrganismesIds.includes(relatedOrganismeDb._id.toString())) {
-            relatedOrganismesIds.push(relatedOrganismeDb._id.toString());
-          }
-        }
-      }
-    }
-  }
-  return [...new Set(relatedOrganismesIds)];
 }

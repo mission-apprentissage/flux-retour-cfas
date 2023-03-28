@@ -11,12 +11,10 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react";
-import { useRecoilValue } from "recoil";
 
 import Section from "@/components/Section/Section";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
-import { organismeAtom } from "@/hooks/organismeAtoms";
 import { getReseauDisplayNameFromKey } from "@/common/constants/networksConstants.js";
 import IndicateursInfo from "../../common/IndicateursInfos.jsx";
 import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
@@ -216,8 +214,8 @@ export default function OrganismeInfo({ organisme, isMine }) {
             Service d’import de vos effectifs en version bêta.
           </Text>
           <Text color="grey.800" mt={4} textStyle="sm">
-            Nous listons actuellement toutes les informations qui peuvent empêcher l'import de fichier afin de permettre
-            par la suite une meilleure prise en charge de tout type de fichier.
+            Nous listons actuellement toutes les informations qui peuvent empêcher l{"'"}import de fichier afin de
+            permettre par la suite une meilleure prise en charge de tout type de fichier.
           </Text>
         </Box>
       </Ribbons>
