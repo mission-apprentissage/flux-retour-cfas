@@ -20,13 +20,11 @@ import { useRouter } from "next/router";
 import NavLink from "next/link";
 
 import useAuth from "../../../hooks/useAuth";
-import useToken from "../../../hooks/useToken";
 import { _get, _post } from "../../../common/httpClient";
 import { AlertRounded, ShowPassword } from "../../../theme/components/icons";
 
 const Login = (props) => {
   const { setAuth } = useAuth();
-  const [, setToken] = useToken();
   const router = useRouter();
 
   const [show, setShow] = React.useState(false);
@@ -38,7 +36,6 @@ const Login = (props) => {
       if (result.loggedIn) {
         const user = await _get("/api/v1/session/current");
         setAuth(user);
-        setToken(result.token);
         if (!user.account_status === "PENDING_EMAIL_VALIDATION") {
           router.push("/auth/en-attente-confirmation");
         } else {

@@ -19,7 +19,6 @@ import YupPassword from "yup-password";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 import useAuth from "@/hooks/useAuth";
-import useToken from "@/hooks/useToken";
 import { _get, _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { ShowPassword } from "../../theme/components/icons";
@@ -31,7 +30,6 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 const ResetPasswordPage = () => {
   const { auth, setAuth } = useAuth();
-  const [, setToken] = useToken();
   const router = useRouter();
   const { passwordToken } = router.query;
 
@@ -88,7 +86,6 @@ const ResetPasswordPage = () => {
         if (result.loggedIn) {
           const user = await _get("/api/v1/session/current");
           setAuth(user);
-          setToken(result.token);
           router.push("/mon-espace/mon-organisme");
         }
       } catch (e) {

@@ -126,10 +126,8 @@ const UserWrapper = ({ children, ssrAuth }) => {
   useEffect(() => {
     async function getUser() {
       try {
-        let user = ssrAuth ?? (await _get("/api/v1/session/current"));
-        if (user?.loggedIn) {
-          setAuth(user);
-        }
+        const user = ssrAuth ?? (await _get("/api/v1/session/current"));
+        setAuth(user);
       } catch (error) {
         setAuth(null);
       }

@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import { _get, _post } from "@/common/httpClient";
 import decodeJWT from "@/common/utils/decodeJWT";
 import useAuth from "@/hooks/useAuth";
-import useToken from "@/hooks/useToken";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useQuery } from "@tanstack/react-query";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
@@ -36,7 +35,6 @@ function useActivation(activationToken) {
 const Confirmed = () => {
   const router = useRouter();
   const { setAuth } = useAuth();
-  const [, setToken] = useToken();
   const { activationToken } = router.query;
   const email = activationToken ? decodeJWT(activationToken).sub : "";
 
@@ -48,7 +46,6 @@ const Confirmed = () => {
         if (data.succeeded) {
           const user = await _get("/api/v1/session/current");
           setAuth(user);
-          setToken(data.token);
         }
       }
     };

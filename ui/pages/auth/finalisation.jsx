@@ -6,10 +6,7 @@ import {
   Heading,
   FormControl,
   FormLabel,
-  RadioGroup,
   VStack,
-  Radio,
-  FormErrorMessage,
   Center,
   Grid,
   Checkbox,
@@ -24,7 +21,6 @@ import uniq from "lodash.uniq";
 
 import Page from "@/components/Page/Page";
 
-import useToken from "@/hooks/useToken";
 import useAuth from "@/hooks/useAuth";
 import { _get, _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -93,7 +89,6 @@ const MultipleCheckBox = ({ title, name, choices, onChange }) => {
 
 const Finalize = () => {
   const { auth, setAuth } = useAuth();
-  const [, setToken] = useToken();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -128,7 +123,6 @@ const Finalize = () => {
           if (result.loggedIn) {
             const user = await _get("/api/v1/session/current");
             setAuth(user);
-            setToken(result.token);
           }
         } catch (e) {
           if (e.messages.message === "No organisme found") {
@@ -158,7 +152,6 @@ const Finalize = () => {
           if (result.loggedIn) {
             const user = await _get("/api/v1/session/current");
             setAuth(user);
-            setToken(result.token);
             router.push("/mon-espace/mon-organisme");
           }
         } catch (e) {
