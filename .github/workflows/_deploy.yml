@@ -28,6 +28,7 @@ on:
       status:
         description: Whether deployment succeeded or not
         value: ${{ jobs.deploy.outputs.status }}
+concurrency: ${{ inputs.environment }}_deployment
 jobs:
   deploy:
     name: Deploy on ${{ inputs.environment }}
