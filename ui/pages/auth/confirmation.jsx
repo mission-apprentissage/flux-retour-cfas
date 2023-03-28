@@ -2,7 +2,7 @@ import { Box, Flex, Heading, HStack, Spinner } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { _get, _post } from "@/common/httpClient";
+import { _post } from "@/common/httpClient";
 import decodeJWT from "@/common/utils/decodeJWT";
 import useAuth from "@/hooks/useAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -34,7 +34,7 @@ function useActivation(activationToken) {
 
 const Confirmed = () => {
   const router = useRouter();
-  const { setAuth } = useAuth();
+  const { refreshSession } = useAuth();
   const { activationToken } = router.query;
   const email = activationToken ? decodeJWT(activationToken).sub : "";
 
@@ -42,11 +42,8 @@ const Confirmed = () => {
 
   useEffect(() => {
     const run = async () => {
-      if (!isLoading && data) {
-        if (data.succeeded) {
-          const user = await _get("/api/v1/session");
-          setAuth(user);
-        }
+      if (!isLoading && data && data.succeeded) {
+        await refreshSession();
       }
     };
     run();

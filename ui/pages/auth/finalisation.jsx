@@ -88,7 +88,7 @@ const MultipleCheckBox = ({ title, name, choices, onChange }) => {
 };
 
 const Finalize = () => {
-  const { auth, setAuth } = useAuth();
+  const { auth, refreshSession } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -150,8 +150,7 @@ const Finalize = () => {
         try {
           const result = await _post("/api/v1/auth/finalize", values);
           if (result.loggedIn) {
-            const user = await _get("/api/v1/session");
-            setAuth(user);
+            await refreshSession();
             router.push("/mon-espace/mon-organisme");
           }
         } catch (e) {
