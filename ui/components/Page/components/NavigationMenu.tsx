@@ -25,7 +25,7 @@ function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): stri
     case "CONSEIL_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
-      return "Sur mon territoire";
+      return "Mon territoire";
 
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":

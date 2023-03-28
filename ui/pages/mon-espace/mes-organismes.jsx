@@ -27,7 +27,7 @@ function getHeaderTitleFromOrganisationType(type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
-      return "Mes organismes";
+      return "Mes organismes formateurs";
 
     case "TETE_DE_RESEAU":
       return "Les organismes de mon réseau";
@@ -38,7 +38,7 @@ function getHeaderTitleFromOrganisationType(type) {
     case "CONSEIL_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
-      return "Les organismes sur mon territoire";
+      return "Les organismes de mon territoire";
 
     case "DGEFP":
     case "ADMINISTRATEUR":
