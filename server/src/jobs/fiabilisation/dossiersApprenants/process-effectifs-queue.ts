@@ -1,4 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
+import { formatDuration, intervalToDuration } from "date-fns";
 
 import logger from "../../../common/logger.js";
 import { effectifsQueueDb } from "../../../common/model/collections.js";
@@ -58,10 +59,8 @@ export const processEffectifsQueue = async (options?: Options) => {
     .for(dataIn)
     .process(async (effectifQueued, index) => {
       try {
+        const startDate = new Date();
         let dataToUpdate: Partial<EffectifsQueue>;
-        logger.info(
-          `#${index} Process item ${effectifQueued._id} created at ${effectifQueued.created_at?.toISOString()}`
-        );
 
         const { error, value: effectifNormalized } = dossierApprenantSchema.validate(effectifQueued, {
           stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
@@ -168,6 +167,14 @@ export const processEffectifsQueue = async (options?: Options) => {
                 processed_at: new Date(),
               },
             }
+          );
+
+          const durationInMs = new Date().getTime() - startDate.getTime();
+          logger.info(
+            `#${index} Item ${
+              effectifQueued._id
+            } created at ${effectifQueued.created_at?.toISOString()} processed in ${durationInMs} ms`,
+            { duration: durationInMs }
           );
         }
       } catch (err: any) {
