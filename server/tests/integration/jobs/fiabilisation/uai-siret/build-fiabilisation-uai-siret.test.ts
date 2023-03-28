@@ -13,7 +13,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       // Création d'un organisme dans le référentiel avec un couple
       const { value } = await organismesReferentielDb().findOneAndUpdate(
         { uai: UAI_REFERENTIEL, siret: SIRET_REFERENTIEL, nature: "formateur" },
-        { $set: { lieux_de_formation: [] } },
+        { $set: { lieux_de_formation: [], relations: [] } },
         { upsert: true, returnDocument: "after" }
       );
       organismeReferentiel = value;
@@ -168,6 +168,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: SIRET_REFERENTIEL2,
         nature: "formateur",
         lieux_de_formation: [],
+        relations: [],
       });
 
       // Construction de la collection de fiabilisation pour un couple avec le SIRET du référentiel et un UAI différent du référentiel
