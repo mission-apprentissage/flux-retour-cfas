@@ -34,7 +34,7 @@ const Login = (props) => {
     try {
       const result = await _post("/api/v1/auth/login", values);
       if (result.loggedIn) {
-        const user = await _get("/api/v1/session/current");
+        const user = await _get("/api/v1/session");
         setAuth(user);
         if (!user.account_status === "PENDING_EMAIL_VALIDATION") {
           router.push("/auth/en-attente-confirmation");

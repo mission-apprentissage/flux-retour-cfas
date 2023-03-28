@@ -121,7 +121,7 @@ const Finalize = () => {
         try {
           const result = await _post("/api/v1/auth/demande-acces", values);
           if (result.loggedIn) {
-            const user = await _get("/api/v1/session/current");
+            const user = await _get("/api/v1/session");
             setAuth(user);
           }
         } catch (e) {
@@ -150,7 +150,7 @@ const Finalize = () => {
         try {
           const result = await _post("/api/v1/auth/finalize", values);
           if (result.loggedIn) {
-            const user = await _get("/api/v1/session/current");
+            const user = await _get("/api/v1/session");
             setAuth(user);
             router.push("/mon-espace/mon-organisme");
           }

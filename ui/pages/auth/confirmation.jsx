@@ -44,7 +44,7 @@ const Confirmed = () => {
     const run = async () => {
       if (!isLoading && data) {
         if (data.succeeded) {
-          const user = await _get("/api/v1/session/current");
+          const user = await _get("/api/v1/session");
           setAuth(user);
         }
       }

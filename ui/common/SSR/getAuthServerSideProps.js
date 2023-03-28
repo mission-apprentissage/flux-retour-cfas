@@ -6,7 +6,7 @@ export const getAuthServerSideProps = async (context) => {
     return {};
   }
   try {
-    const { status, data } = await axios.get(`${process.env.SERVER_URI}/api/v1/session/current`, {
+    const { status, data } = await axios.get(`${process.env.SERVER_URI}/api/v1/session`, {
       headers: context.req.headers,
     });
     return {

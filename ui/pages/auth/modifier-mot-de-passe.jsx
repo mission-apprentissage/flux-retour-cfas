@@ -84,7 +84,7 @@ const ResetPasswordPage = () => {
           passwordToken,
         });
         if (result.loggedIn) {
-          const user = await _get("/api/v1/session/current");
+          const user = await _get("/api/v1/session");
           setAuth(user);
           router.push("/mon-espace/mon-organisme");
         }

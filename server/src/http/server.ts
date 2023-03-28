@@ -211,7 +211,7 @@ function setupRoutes(app: Application, services) {
   authRouter.use(authMiddleware());
 
   authRouter.get(
-    "/api/v1/session/current",
+    "/api/v1/session",
     returnResult(async (req) => {
       return req.user;
     })
