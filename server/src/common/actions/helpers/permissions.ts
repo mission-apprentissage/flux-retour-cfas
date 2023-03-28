@@ -6,36 +6,23 @@ import { AuthContext } from "../../model/internal/AuthContext.js";
 import { OrganisationOrganismeFormation } from "../../model/organisations.model.js";
 import { getOrganismeById } from "../organismes/organismes.actions.js";
 
-export async function canAccessOrganismeInfos(authContext: AuthContext, organismeId: string): Promise<boolean> {
-  const organisme = await getOrganismeById(organismeId);
-  const organisation = authContext.organisation;
-  switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOFLinkedOrganismesIds(
-        authContext as AuthContext<OrganisationOrganismeFormation>
-      );
-      return linkedOrganismesIds.includes(organismeId);
-    }
-
-    case "TETE_DE_RESEAU":
-      return (organisme.reseaux as string[])?.includes(organisation.reseau);
-
-    case "DREETS":
-    case "DEETS":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-      return organisme.adresse?.region === organisation.code_region;
-    case "DDETS":
-      return organisme.adresse?.departement === organisation.code_departement;
-    case "ACADEMIE":
-      return organisme.adresse?.academie === organisation.code_academie;
-
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "ADMINISTRATEUR":
-      return true;
+export async function requireOrganismeAccess(ctx: AuthContext, organismeId: string): Promise<void> {
+  if (!(await canAccessOrganisme(ctx, organismeId))) {
+    throw Boom.forbidden("Permissions invalides");
   }
+}
+
+export function requireOrganisationOF(ctx: AuthContext): OrganisationOrganismeFormation {
+  if (
+    ![
+      "ORGANISME_FORMATION_FORMATEUR",
+      "ORGANISME_FORMATION_RESPONSABLE",
+      "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+    ].includes(ctx.organisation.type)
+  ) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+  return (ctx as AuthContext<OrganisationOrganismeFormation>).organisation;
 }
 
 export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
@@ -127,7 +114,7 @@ export async function getEffectifsOrganismeRestriction(ctx: AuthContext): Promis
  * Informations en provenance du catalogue :
  * organismes(siret=siret de l'organisation, uai=uai de l'organisation).formations.organismes
  */
-export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeFormation>) {
+async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeFormation>) {
   const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,
@@ -164,15 +151,32 @@ export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrg
   return [...subOrganismesIds.values()];
 }
 
-export function requireOrganisationOF(ctx: AuthContext): OrganisationOrganismeFormation {
-  if (
-    ![
-      "ORGANISME_FORMATION_FORMATEUR",
-      "ORGANISME_FORMATION_RESPONSABLE",
-      "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-    ].includes(ctx.organisation.type)
-  ) {
-    throw Boom.forbidden("Permissions invalides");
+async function canAccessOrganisme(ctx: AuthContext, organismeId: string): Promise<boolean> {
+  const organisme = await getOrganismeById(organismeId);
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
+      return linkedOrganismesIds.includes(organismeId);
+    }
+
+    case "TETE_DE_RESEAU":
+      return (organisme.reseaux as string[])?.includes(organisation.reseau);
+
+    case "DREETS":
+    case "DEETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+      return organisme.adresse?.region === organisation.code_region;
+    case "DDETS":
+      return organisme.adresse?.departement === organisation.code_departement;
+    case "ACADEMIE":
+      return organisme.adresse?.academie === organisation.code_academie;
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return true;
   }
-  return (ctx as AuthContext<OrganisationOrganismeFormation>).organisation;
 }

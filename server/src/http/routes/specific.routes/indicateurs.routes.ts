@@ -15,10 +15,9 @@ import {
 import { validateFullObjectSchemaUnknown } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
 import {
-  canAccessOrganismeInfos,
   getEffectifsOrganismeRestriction,
+  requireOrganismeAccess,
 } from "../../../common/actions/helpers/permissions.js";
-import Boom from "boom";
 
 const commonEffectifsFiltersSchema = {
   date: Joi.date().required(),
@@ -47,9 +46,7 @@ export async function buildEffectifsFiltersFromRequest(req: Request): Promise<Ef
   // TODO il faudra sortir organisme_id pour le spécifier dans une autre route /organismes/:id/indicateurs
   // pour que les indicateurs ici ne soit que ceux agrégés
   if (filters.organisme_id) {
-    if (!(await canAccessOrganismeInfos(req.user, filters.organisme_id))) {
-      throw Boom.forbidden("Permissions invalides");
-    }
+    await requireOrganismeAccess(req.user, filters.organisme_id);
   } else {
     // amend filters with a restriction
     filters.restrictionMongo = await getEffectifsOrganismeRestriction(req.user);

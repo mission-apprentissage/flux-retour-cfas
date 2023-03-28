@@ -16,8 +16,9 @@ import Section from "@/components/Section/Section";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import { getReseauDisplayNameFromKey } from "@/common/constants/networksConstants.js";
-import IndicateursInfo from "../../common/IndicateursInfos.jsx";
+import IndicateursInfos from "../../common/IndicateursInfos";
 import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
+import { Organisme } from "@/common/internal/Organisme";
 
 export const natureOrganismeDeFormationLabel = {
   responsable: "Responsable",
@@ -74,7 +75,7 @@ export const natureOrganismeDeFormationTooltip = {
   ),
 };
 
-export default function OrganismeInfo({ organisme, isMine }) {
+export default function OrganismeInfo({ organisme, isMine }: { organisme: Organisme; isMine: boolean }) {
   if (!organisme) {
     return (
       <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
@@ -83,20 +84,6 @@ export default function OrganismeInfo({ organisme, isMine }) {
       </Section>
     );
   }
-
-  const {
-    _id: organismeId,
-    uai,
-    nature,
-    nature_validity_warning,
-    siret,
-    ferme,
-    enseigne,
-    raison_sociale,
-    reseaux,
-  } = organisme;
-
-  const reseauxToDisplay = reseaux.map((item) => getReseauDisplayNameFromKey(item));
 
   return (
     <>
@@ -112,20 +99,20 @@ export default function OrganismeInfo({ organisme, isMine }) {
       >
         <Box>
           <Heading color="grey.800" fontSize="1.6rem" as="h3" mb={2}>
-            {enseigne || raison_sociale}
+            {organisme.enseigne || organisme.raison_sociale}
           </Heading>
           <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
             <HStack>
               <Text>UAI :</Text>
               <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
-                {uai}
+                {organisme.uai || "UAI INCONNUE"}
               </Badge>
             </HStack>
 
             <HStack>
               <Text>SIRET :</Text>
               <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
-                {siret || "SIRET INCONNU"}
+                {organisme.siret || "SIRET INCONNU"}
               </Badge>
             </HStack>
 
@@ -139,14 +126,14 @@ export default function OrganismeInfo({ organisme, isMine }) {
                 paddingY="2px"
                 backgroundColor="#ECEAE3"
               >
-                {natureOrganismeDeFormationLabel[nature] || "Inconnue"}
+                {natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}
               </Badge>
-              {natureOrganismeDeFormationTooltip[nature] && (
+              {natureOrganismeDeFormationTooltip[organisme.nature] && (
                 <Tooltip
                   background="bluefrance"
                   color="white"
-                  label={<Box padding="2w">{natureOrganismeDeFormationTooltip[nature]}</Box>}
-                  aria-label={natureOrganismeDeFormationTooltip[nature]}
+                  label={<Box padding="2w">{natureOrganismeDeFormationTooltip[organisme.nature]}</Box>}
+                  aria-label={natureOrganismeDeFormationTooltip[organisme.nature]}
                 >
                   <Box
                     as="i"
@@ -158,21 +145,21 @@ export default function OrganismeInfo({ organisme, isMine }) {
                   />
                 </Tooltip>
               )}
-              {nature_validity_warning && <NatureOrganismeDeFormationWarning />}
+              {organisme.nature_validity_warning && <NatureOrganismeDeFormationWarning />}
             </HStack>
           </HStack>
 
           <VStack mt={10} alignItems={"baseline"}>
-            {reseauxToDisplay?.length > 0 && (
+            {organisme.reseaux && organisme.reseaux?.length > 0 && (
               <Text>
-                Cet organisme fait partie {reseauxToDisplay?.length === 1 ? "du réseau" : "des réseaux"}{" "}
-                <b>{reseauxToDisplay?.join(", ")}</b>
+                Cet organisme fait partie {organisme.reseaux?.length === 1 ? "du réseau" : "des réseaux"}{" "}
+                <b>{organisme.reseaux.map((item) => getReseauDisplayNameFromKey(item))?.join(", ")}</b>
               </Text>
             )}
             {organisme.adresse?.complete && <Text>Sa domiciliation est : {organisme.adresse.complete}</Text>}
           </VStack>
 
-          {ferme && (
+          {organisme.ferme && (
             <Ribbons variant="alert" mt={10}>
               <Box ml={3}>
                 <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
@@ -220,8 +207,8 @@ export default function OrganismeInfo({ organisme, isMine }) {
         </Box>
       </Ribbons>
       {organisme.first_transmission_date && (
-        <SimpleFiltersProvider initialState={{ organismeId }}>
-          <IndicateursInfo />
+        <SimpleFiltersProvider>
+          <IndicateursInfos organismeId={organisme._id} />
         </SimpleFiltersProvider>
       )}
     </>

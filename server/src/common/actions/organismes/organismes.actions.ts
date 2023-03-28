@@ -15,7 +15,7 @@ import { Organisme } from "../../model/@types/Organisme.js";
 import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
 import Boom from "boom";
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { canAccessOrganismeInfos, getOrganismeRestriction } from "../helpers/permissions.js";
+import { getOrganismeRestriction, requireOrganismeAccess } from "../helpers/permissions.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -599,9 +599,7 @@ export async function findUserOrganismes(ctx: AuthContext) {
 }
 
 export async function getOrganisme(ctx: AuthContext, organismeId: string) {
-  if (!(await canAccessOrganismeInfos(ctx, organismeId))) {
-    throw Boom.forbidden("Permissions invalides");
-  }
+  await requireOrganismeAccess(ctx, organismeId);
   return await getOrganismeById(organismeId); // double récupération avec les permissions mais pas très grave
 }
 

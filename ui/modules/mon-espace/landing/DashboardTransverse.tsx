@@ -9,6 +9,7 @@ const DashboardTransverse = () => {
         Bienvenue sur votre tableau de bord
       </Heading>
 
+      {/* Anciens écrans d'indicateurs, qu'il faudra supprimer / adapter une fois les nouvelles maquettes prêtes */}
       <ViewSelection />
     </Stack>
   );

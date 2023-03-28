@@ -1,5 +1,4 @@
 import React from "react";
-import { useRouter } from "next/router";
 import {
   Box,
   Button,
@@ -15,7 +14,6 @@ import {
   MenuItem as ChakraMenuItem,
   Tag,
   Text,
-  // Skeleton,
 } from "@chakra-ui/react";
 
 import { Logo } from "./Logo";
@@ -31,15 +29,11 @@ import { Settings4Fill, UserFill } from "../../../theme/components/icons";
 
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();
-  const router = useRouter();
 
   const logout = async () => {
     await _post("/api/v1/auth/logout");
     window.location.href = "/";
   };
-
-  // my workspace ?
-  const monEspaceActif = (router.pathname.includes("/mon-espace") || router.pathname.includes("/organisme")) && auth;
 
   // FIXME: corriger le chargement de l'auth
   return (
@@ -62,17 +56,6 @@ const UserMenu = () => {
       )}
       {auth && (
         <Flex w="full">
-          <Link
-            href="/mon-espace/mon-organisme"
-            borderBottom="1px solid"
-            borderColor={monEspaceActif ? "bluefrance" : "transparent"}
-            color={monEspaceActif ? "bluefrance" : "grey.800"}
-            mr={5}
-            variant="summary"
-            w="97px"
-          >
-            Mon espace
-          </Link>
           <Menu placement="bottom">
             <MenuButton as={Button} variant="pill" px={0} flexGrow={1}>
               <Flex maxWidth="226px">
@@ -119,7 +102,6 @@ const Header = () => {
     <Container maxW={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
       <Container maxW="xl" py={[0, 2]} px={[0, 4]}>
         <Flex flexDirection={["column", "column", "column", "row"]} alignItems="center" color="grey.800">
-          {/* Logo */}
           <Link href="/" p={[4, 0]}>
             <Logo />
           </Link>
@@ -143,7 +125,6 @@ const Header = () => {
             alignItems="center"
             mb={["3w", "3w", "0", "0"]}
           >
-            {/* {espaceContextisLoading && <Skeleton height="30px" w="200px" startColor="grey.300" endColor="galt" />} */}
             <UserMenu />
           </Flex>
         </Flex>

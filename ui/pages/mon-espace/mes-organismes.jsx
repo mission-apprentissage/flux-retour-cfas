@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 
-import { _get } from "@/common/httpClient";
 import { ArrowDropRightLine } from "@/theme/components/icons";
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import Page from "@/components/Page/Page";
-import { useEspace } from "@/hooks/useEspace";
 import Link from "@/components/Links/Link";
 import Table from "@/components/Table/Table";
 import withAuth from "@/components/withAuth";
+import useAuth from "@/hooks/useAuth";
+import { useOrganisationOrganismes } from "@/hooks/organismes";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils.js";
 
 const natures = {
@@ -50,18 +49,10 @@ function getHeaderTitleFromOrganisationType(type) {
   }
 }
 
-function useEspaceOrganismes() {
-  const { data: organismes, isLoading, isFetching } = useQuery(["organismes"], () => _get("/api/v1/organismes"));
-
-  return { isLoading: isFetching || isLoading, organismes };
-}
-
 function MesOrganismes() {
   const title = "Mes organismes";
-  const { isLoading, organismes } = useEspaceOrganismes();
-
-  const { organisationType } = useEspace();
-
+  const { organisationType } = useAuth();
+  const { isLoading, organismes } = useOrganisationOrganismes();
   const [searchValue, setSearchValue] = useState("");
 
   return (

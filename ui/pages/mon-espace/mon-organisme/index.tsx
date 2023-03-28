@@ -8,17 +8,17 @@ import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import { OrganisationType } from "@/common/internal/Organisation";
-import DahsboardOrganisme from "@/modules/mon-espace/landing/DashboardOrganisme";
+import DashboardOrganisme from "@/modules/mon-espace/landing/DashboardOrganisme";
 import DashboardTransverse from "@/modules/mon-espace/landing/DashboardTransverse";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const getDashboardComponents = (organisationType: OrganisationType): ReactElement => {
+const getDashboardComponent = (organisationType: OrganisationType): ReactElement => {
   switch (organisationType) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      return <DahsboardOrganisme />;
+      return <DashboardOrganisme />;
     }
 
     case "TETE_DE_RESEAU":
@@ -50,7 +50,7 @@ const PageMonOrganisme = () => {
 
           {/* Landing page tableau de bord de chaque utilisateur */}
           {/* On affiche les bons écrans / composants selon le type d'organisation */}
-          {getDashboardComponents(organisationType)}
+          {getDashboardComponent(organisationType)}
         </Container>
       </Box>
     </Page>

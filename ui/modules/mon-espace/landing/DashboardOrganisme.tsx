@@ -1,9 +1,9 @@
 import React from "react";
 import { Heading, Stack } from "@chakra-ui/react";
 import OrganismeInfo from "./LandingOrganisme/components/OrganismeInfo";
-import { useOrganisationOrganisme } from "@/hooks/useOrganisationOrganisme";
+import { useOrganisationOrganisme } from "@/hooks/organismes";
 
-const DahsboardOrganisme = () => {
+const DashboardOrganisme = () => {
   const { organisme } = useOrganisationOrganisme();
   return (
     <Stack spacing="2w">
@@ -16,4 +16,4 @@ const DahsboardOrganisme = () => {
   );
 };
 
-export default DahsboardOrganisme;
+export default DashboardOrganisme;
