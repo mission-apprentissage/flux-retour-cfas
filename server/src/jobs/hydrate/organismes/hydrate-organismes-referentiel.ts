@@ -52,6 +52,7 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
     siege_social,
     uai,
     lieux_de_formation,
+    relations,
   } = organismeReferentiel;
   // Ajout de l'organisme dans la collection
   try {
@@ -67,7 +68,8 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
       ...(raison_sociale ? { raison_sociale } : {}),
       ...(siret ? { siret } : {}),
       ...(siege_social ? { siege_social } : {}),
-      ...(lieux_de_formation ? { lieux_de_formation } : { lieux_de_formation: [] }),
+      lieux_de_formation: lieux_de_formation || [],
+      relations: relations || [],
       ...(uai ? { uai } : {}),
     } as OrganismesReferentiel);
     nbOrganismeCreated++;

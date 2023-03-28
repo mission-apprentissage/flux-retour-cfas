@@ -12,6 +12,8 @@ let nbOrganismesFiables = 0;
 let nbOrganismesFiabilises = 0;
 let nbOrganismesNonFiabilisablesMapping = 0;
 let nbOrganismesNonFiabilisablesMappingSupprimes = 0;
+let nbOrganismesNonFiablesUaiSupprimes = 0;
+let nbEffectifsDuplicateOrganismesAFiabiliser = 0;
 
 let nbOrganismesNonFiabilisablesMappingFixEffectifs = 0;
 let nbEffectifsFixedOrganismesNonFiabilisablesMapping = 0;
@@ -59,11 +61,19 @@ export const applyFiabilisationUaiSiret = async () => {
   );
   logger.info(nbOrganismesNonFiabilisablesMappingSupprimes, "organismes non fiabilisables (mapping) supprimés");
 
+  logger.info(
+    nbEffectifsDuplicateOrganismesAFiabiliser,
+    "Effectifs en doublons sur organismes non fiable en tentative de correction sur un organisme fiable lié"
+  );
+  logger.info(nbOrganismesNonFiablesUaiSupprimes, "organismes non fiables (uai) supprimés");
+
   return {
     nbOrganismesFiables,
     nbOrganismesFiabilises,
     nbOrganismesNonFiabilisablesMapping,
     nbOrganismesNonFiabilisablesUaiNonValidees,
+    nbOrganismesNonFiabilisablesMappingSupprimes,
+    nbOrganismesNonFiablesUaiSupprimes,
   };
 };
 
@@ -137,14 +147,25 @@ const updateOrganismeForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret
   const organismeNonFiable = await organismesDb().findOne({ uai: uai, siret: siret });
 
   if (organismeFiable && organismeNonFiable) {
-    // Déplacement des effectifs de l'organisme non fiable vers l'organisme fiable
-    await effectifsDb().updateMany(
-      { organisme_id: organismeNonFiable?._id },
-      { $set: { organisme_id: organismeFiable?._id } }
-    );
+    try {
+      // Déplacement des effectifs de l'organisme non fiable vers l'organisme fiable
+      await effectifsDb().updateMany(
+        { organisme_id: organismeNonFiable?._id },
+        { $set: { organisme_id: organismeFiable?._id } },
+        { upsert: true }
+      );
+    } catch (error) {
+      if (error instanceof MongoServerError) {
+        if (error.message.includes("duplicate key error")) {
+          // On décompte les effectifs en doublon - pas de rattachement nécessaire vu que l'effectif existe déja
+          nbEffectifsDuplicateOrganismesAFiabiliser++;
+        }
+      }
+    }
 
     // Suppression de l'organisme non fiable et de ses effectifs
     await deleteOrganismeAndEffectifs(organismeNonFiable?._id);
+    nbOrganismesNonFiablesUaiSupprimes++;
   }
 
   nbOrganismesFiabilises += organismesModifiedCount;
@@ -188,9 +209,6 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
  */
 const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (coupleNonFiabilisableMapping) => {
   try {
-    logger.info(
-      `updateOrganismeForCurrentCoupleNonFiabilisableMapping : uai ${coupleNonFiabilisableMapping.uai} / siret ${coupleNonFiabilisableMapping.siret}`
-    );
     const { modifiedCount } = await organismesDb().updateMany(
       { uai: coupleNonFiabilisableMapping.uai, siret: coupleNonFiabilisableMapping.siret },
       { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING } },
