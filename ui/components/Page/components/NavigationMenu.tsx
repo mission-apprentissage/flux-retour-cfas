@@ -128,19 +128,26 @@ function NavBarOrganismeFormation(): ReactElement {
 }
 
 function NavBarAutreOrganisme(): ReactElement {
-  // FIXME récupérer le contexte de l'organisme visité recoil atom ?
-  // const { organisme } = useOrganisme();
+  const router = useRouter();
+
+  // Construction dynamique des liens de la navbar en fonction de la navigation URL
+  const showSubNavBar = router.pathname.startsWith("/mon-espace/organisme/[id]");
+  const organismeId = router.query.id as string;
+
   return (
     <>
-      <Box p={4} bg={"transparent"}>
-        <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
-      </Box>
-      {/* <NavItem to={`/mon-espace/organisme/${organisme_id}`} colorActive="dsfr_lightprimary.bluefrance_850">
-        Son tableau de bord
-      </NavItem> */}
-      <NavItem to={"/mon-espace/organisme/635acda75e798f12bd919367"} colorActive="dsfr_lightprimary.bluefrance_850">
-        Son tableau de bord
-      </NavItem>
+      {showSubNavBar && (
+        <Container maxW="xl">
+          <Flex as="nav" align="center" wrap="wrap" w="100%">
+            <Box p={4} bg={"transparent"}>
+              <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
+            </Box>
+            <NavItem to={`/mon-espace/organisme/${organismeId}`} colorActive="dsfr_lightprimary.bluefrance_850">
+              Son tableau de bord
+            </NavItem>
+          </Flex>
+        </Container>
+      )}
     </>
   );
 }
@@ -168,15 +175,14 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
   return <NavBarPublic />;
 }
 
-const NavigationMenu = ({ ...props }) => {
+const NavigationMenu = () => {
   const { auth } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-
   return (
-    <Box w="full" {...props} boxShadow="md">
+    <Box w="full" boxShadow="md">
       <Box borderBottom={"1px solid"} borderColor={"grey.400"}>
         <Container maxW="xl">
-          <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" {...props}>
+          <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%">
             <Box display={{ base: "block", md: "none" }} onClick={() => setIsOpen(!isOpen)} py={4}>
               {isOpen ? <Close boxSize={8} /> : <MenuFill boxSize={8} />}
             </Box>
@@ -200,13 +206,7 @@ const NavigationMenu = ({ ...props }) => {
           </Flex>
         </Container>
       </Box>
-      {auth && (
-        <Container maxW="xl">
-          <Flex as="nav" align="center" wrap="wrap" w="100%" {...props}>
-            <NavBarAutreOrganisme />
-          </Flex>
-        </Container>
-      )}
+      {auth && <NavBarAutreOrganisme />}
     </Box>
   );
 };

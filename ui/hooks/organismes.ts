@@ -66,7 +66,7 @@ export function useFetchOrganismeIndicateurs(organismeId: string) {
     data: indicateurs,
     isLoading,
     error,
-  } = useQuery(["organismes", organismeId, "indicateurs"], () =>
+  } = useQuery(["organismes", organismeId, "indicateurs", requestFilters], () =>
     _get(`/api/v1/organismes/${organismeId}/indicateurs`, { params: requestFilters })
   );
 
