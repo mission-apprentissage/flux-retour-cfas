@@ -6,7 +6,7 @@ export function useOrganisme(organismeId: string) {
     data: organisme,
     isLoading,
     error,
-  } = useQuery(["organisme", organismeId], () => _get(`/api/v1/organisme/entity/${organismeId}`), {
+  } = useQuery(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
     enabled: !!organismeId,
   });
 

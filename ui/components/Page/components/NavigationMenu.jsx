@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Box, Container, Flex, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 
 import useAuth from "../../../hooks/useAuth";
-import { MenuFill, Close, Settings4Fill, ParentGroupIcon } from "../../../theme/components/icons";
+import { MenuFill, Close, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 import { useEspace } from "../../../hooks/useEspace";
 import { useOrganisme } from "../../../hooks/useOrganisme";
@@ -97,7 +97,7 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
   } = useEspace();
   return (
     <NavContainer isOpen={isOpen}>
-      <NavItem to={userNavigation.landingEspace.path}>{userNavigation.landingEspace.navTitle}</NavItem>
+      <NavItem to={userNavigation.tableauDeBord.path}>{userNavigation.tableauDeBord.navTitle}</NavItem>
 
       {userNavigation.mesOrganismes && (
         <NavItem to={userNavigation.mesOrganismes.path} isActive={mesOrganismesActive}>
@@ -131,9 +131,6 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
 const NavBarOrganisme = ({ isOpen }) => {
   let {
     navigation: { organisme: organismeNavigation },
-    isOrganismePages,
-    isEffectifsPage,
-    isTeleversementPage,
   } = useEspace();
 
   const { isloaded, organisme } = useOrganisme();
@@ -147,30 +144,8 @@ const NavBarOrganisme = ({ isOpen }) => {
       <Box p={4} bg={"transparent"}>
         <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
       </Box>
-      <NavItem to={organismeNavigation.landingEspace.path} colorActive="dsfr_lightprimary.bluefrance_850">
-        {organismeNavigation.landingEspace.navTitle}
-      </NavItem>
-      <NavItem
-        to={organismeNavigation.effectifs.path}
-        colorActive="dsfr_lightprimary.bluefrance_850"
-        isActive={isOrganismePages && (isEffectifsPage || isTeleversementPage)}
-      >
-        {organismeNavigation.effectifs.navTitle}
-      </NavItem>
-      <NavItem
-        to={organismeNavigation.sifa2.path}
-        colorActive="dsfr_lightprimary.bluefrance_850"
-        isDisabled={!organisme.first_transmission_date}
-        disabledReason={
-          !organisme.first_transmission_date ? "Désactivé car cet organisme n'a encore rien transmis" : ""
-        }
-      >
-        {organismeNavigation.sifa2.navTitle}
-      </NavItem>
-      <Box flexGrow={1} />
-      <NavItem to={organismeNavigation.parametres.path} colorActive="dsfr_lightprimary.bluefrance_850">
-        <Settings4Fill boxSize={4} mr={2} color="dsfr_lightprimary.bluefrance_850" />
-        {organismeNavigation.parametres.navTitle}
+      <NavItem to={organismeNavigation.tableauDeBord.path} colorActive="dsfr_lightprimary.bluefrance_850">
+        {organismeNavigation.tableauDeBord.navTitle}
       </NavItem>
     </NavContainer>
   );

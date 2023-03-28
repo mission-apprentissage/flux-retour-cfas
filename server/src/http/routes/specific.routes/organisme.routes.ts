@@ -1,15 +1,9 @@
 import express from "express";
 import Joi from "joi";
 import { compact, get } from "lodash-es";
-import Boom from "boom";
 
 import {
   findOrganismeById,
-  getContributeurs,
-  addContributeurOrganisme,
-  removeContributeurOrganisme,
-  updateOrganisme,
-  searchOrganismes,
   findOrganismeByUai,
   getSousEtablissementsForUai,
 } from "../../../common/actions/organismes/organismes.actions.js";
@@ -17,32 +11,9 @@ import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa, isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
 import { getUserByEmail } from "../../../common/actions/users.actions.js";
 import { uaiSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
-import { returnResult } from "../../middlewares/helpers.js";
 
 export default ({ mailer }) => {
   const router = express.Router();
-
-  router.get(
-    "/entity/:id",
-    // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    returnResult(async ({ params }) => {
-      const organisme = await findOrganismeById(params.id);
-      return organisme;
-    })
-  );
-
-  router.put(
-    "/entity/:id",
-    // permissionsOrganismeMiddleware(["organisme/page_parametres"]),
-    async (req, res) => {
-      // TODO JOI
-      const updatedOrganisme = await updateOrganisme(req.params.id, req.body);
-      return res.json({
-        ...updatedOrganisme,
-        // acl: user.currentPermissionAcl,
-      });
-    }
-  );
 
   router.get(
     "/effectifs",
@@ -123,89 +94,89 @@ export default ({ mailer }) => {
     }
   );
 
-  router.get(
-    "/contributors",
-    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    async ({ query: { organisme_id } }, res) => {
-      const contributors = await getContributeurs(organisme_id);
+  // router.get(
+  //   "/contributors",
+  //   // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+  //   async ({ query: { organisme_id } }, res) => {
+  //     const contributors = await getContributeurs(organisme_id);
 
-      return res.json(contributors);
-    }
-  );
+  //     return res.json(contributors);
+  //   }
+  // );
 
-  router.post(
-    "/contributors",
-    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    async (req, res) => {
-      const { userEmail, roleName, organisme_id } = await Joi.object({
-        userEmail: Joi.string().email().required(),
-        organisme_id: Joi.string().required(),
-        roleName: Joi.string().required(),
-      }).validateAsync(req.body, { abortEarly: false });
+  // router.post(
+  //   "/contributors",
+  //   // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+  //   async (req, res) => {
+  //     const { userEmail, roleName, organisme_id } = await Joi.object({
+  //       userEmail: Joi.string().email().required(),
+  //       organisme_id: Joi.string().required(),
+  //       roleName: Joi.string().required(),
+  //     }).validateAsync(req.body, { abortEarly: false });
 
-      if (!roleName.includes("organisme.")) {
-        throw Boom.unauthorized("Something went wrong");
-      }
+  //     if (!roleName.includes("organisme.")) {
+  //       throw Boom.unauthorized("Something went wrong");
+  //     }
 
-      const organisme = await findOrganismeById(organisme_id);
-      if (!organisme) {
-        throw Boom.unauthorized("Accès non autorisé");
-      }
+  //     const organisme = await findOrganismeById(organisme_id);
+  //     if (!organisme) {
+  //       throw Boom.unauthorized("Accès non autorisé");
+  //     }
 
-      await addContributeurOrganisme(organisme_id, userEmail, roleName);
+  //     await addContributeurOrganisme(organisme_id, userEmail, roleName);
 
-      return res.json({ ok: true });
-    }
-  );
+  //     return res.json({ ok: true });
+  //   }
+  // );
 
-  router.put(
-    "/contributors",
-    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    async (req, res) => {
-      const { userEmail, roleName, organisme_id } = await Joi.object({
-        userEmail: Joi.string().email().required(),
-        organisme_id: Joi.string().required(),
-        roleName: Joi.string().required(),
-      }).validateAsync(req.body, { abortEarly: false });
+  // router.put(
+  //   "/contributors",
+  //   // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+  //   async (req, res) => {
+  //     const { userEmail, roleName, organisme_id } = await Joi.object({
+  //       userEmail: Joi.string().email().required(),
+  //       organisme_id: Joi.string().required(),
+  //       roleName: Joi.string().required(),
+  //     }).validateAsync(req.body, { abortEarly: false });
 
-      if (!roleName.includes("organisme.")) {
-        throw Boom.unauthorized("Something went wrong");
-      }
+  //     if (!roleName.includes("organisme.")) {
+  //       throw Boom.unauthorized("Something went wrong");
+  //     }
 
-      const organisme = await findOrganismeById(organisme_id);
-      if (!organisme) {
-        throw Boom.unauthorized("Accès non autorisé");
-      }
+  //     const organisme = await findOrganismeById(organisme_id);
+  //     if (!organisme) {
+  //       throw Boom.unauthorized("Accès non autorisé");
+  //     }
 
-      // await updatePermission({ organisme_id: organisme._id, userEmail, roleName });
+  //     // await updatePermission({ organisme_id: organisme._id, userEmail, roleName });
 
-      return res.json({ ok: true });
-    }
-  );
+  //     return res.json({ ok: true });
+  //   }
+  // );
 
-  router.delete(
-    "/contributors",
-    // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
-    async (req, res) => {
-      const { userEmail, organisme_id } = await Joi.object({
-        userEmail: Joi.string().email().required(),
-        organisme_id: Joi.string().required(),
-      }).validateAsync(req.query, { abortEarly: false });
+  // router.delete(
+  //   "/contributors",
+  //   // permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+  //   async (req, res) => {
+  //     const { userEmail, organisme_id } = await Joi.object({
+  //       userEmail: Joi.string().email().required(),
+  //       organisme_id: Joi.string().required(),
+  //     }).validateAsync(req.query, { abortEarly: false });
 
-      if (req.user.email === userEmail) {
-        throw Boom.badRequest("Something went wrong");
-      }
+  //     if (req.user.email === userEmail) {
+  //       throw Boom.badRequest("Something went wrong");
+  //     }
 
-      const organisme = await findOrganismeById(organisme_id);
+  //     const organisme = await findOrganismeById(organisme_id);
 
-      if (!organisme) {
-        throw Boom.unauthorized("Accès non autorisé");
-      }
-      await removeContributeurOrganisme(organisme_id, userEmail);
+  //     if (!organisme) {
+  //       throw Boom.unauthorized("Accès non autorisé");
+  //     }
+  //     await removeContributeurOrganisme(organisme_id, userEmail);
 
-      return res.json({ ok: true });
-    }
-  );
+  //     return res.json({ ok: true });
+  //   }
+  // );
 
   // router.get(
   //   "/roles_list",
@@ -241,19 +212,19 @@ export default ({ mailer }) => {
     }
   );
 
-  const organismeSearchSchema = {
-    searchTerm: Joi.string().min(3),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  };
-  router.post(
-    "/search",
-    returnResult(async (req) => {
-      const search = await validateFullObjectSchema(req.body, organismeSearchSchema);
-      return await searchOrganismes(search);
-    })
-  );
+  // const organismeSearchSchema = {
+  //   searchTerm: Joi.string().min(3),
+  //   etablissement_num_region: Joi.string().allow(null, ""),
+  //   etablissement_num_departement: Joi.string().allow(null, ""),
+  //   etablissement_reseaux: Joi.string().allow(null, ""),
+  // };
+  // router.post(
+  //   "/search",
+  //   returnResult(async (req) => {
+  //     const search = await validateFullObjectSchema(req.body, organismeSearchSchema);
+  //     return await searchOrganismes(search);
+  //   })
+  // );
 
   const getByUaiSchema = {
     uai: uaiSchema(),

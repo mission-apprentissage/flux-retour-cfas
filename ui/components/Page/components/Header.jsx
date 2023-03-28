@@ -39,7 +39,7 @@ const UserMenu = () => {
   };
 
   // my workspace ?
-  const myWks = (router.pathname.includes("/mon-espace") || router.pathname.includes("/organisme")) && auth;
+  const monEspaceActif = (router.pathname.includes("/mon-espace") || router.pathname.includes("/organisme")) && auth;
 
   // FIXME: corriger le chargement de l'auth
   return (
@@ -65,8 +65,8 @@ const UserMenu = () => {
           <Link
             href="/mon-espace/mon-organisme"
             borderBottom="1px solid"
-            borderColor={myWks ? "bluefrance" : "transparent"}
-            color={myWks ? "bluefrance" : "grey.800"}
+            borderColor={monEspaceActif ? "bluefrance" : "transparent"}
+            color={monEspaceActif ? "bluefrance" : "grey.800"}
             mr={5}
             variant="summary"
             w="97px"

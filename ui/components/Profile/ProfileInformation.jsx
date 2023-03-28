@@ -37,7 +37,7 @@ const ProfileInformation = () => {
       civility: Yup.string(),
       email: Yup.string().email("Email invalide"),
     }),
-    onSubmit: ({ nom, prenom, telephone, email, civility }, { setSubmitting }) => {
+    onSubmit: ({ nom, prenom, telephone, civility }, { setSubmitting }) => {
       // eslint-disable-next-line no-undef, no-async-promise-executor
       return new Promise(async (resolve) => {
         try {
@@ -46,7 +46,6 @@ const ProfileInformation = () => {
             prenom: prenom || "",
             telephone: telephone ? `+${telephone}` : "",
             civility: civility || "",
-            email,
           });
           window.location.reload();
         } catch (e) {

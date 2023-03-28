@@ -51,11 +51,7 @@ function getHeaderTitleFromOrganisationType(type) {
 }
 
 function useEspaceOrganismes() {
-  const {
-    data: organismes,
-    isLoading,
-    isFetching,
-  } = useQuery(["espace/organismes"], () => _get("/api/v1/espace/organismes"));
+  const { data: organismes, isLoading, isFetching } = useQuery(["organismes"], () => _get("/api/v1/organismes"));
 
   return { isLoading: isFetching || isLoading, organismes };
 }

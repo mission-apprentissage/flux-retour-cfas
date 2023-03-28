@@ -26,7 +26,6 @@ import emails from "./routes/emails.routes.js";
 import auth from "./routes/user.routes/auth.routes.js";
 import register from "./routes/user.routes/register.routes.js";
 import password from "./routes/user.routes/password.routes.js";
-import profile from "./routes/user.routes/profile.routes.js";
 
 import organisme from "./routes/specific.routes/organisme.routes.js";
 import effectif from "./routes/specific.routes/effectif.routes.js";
@@ -45,7 +44,12 @@ import { jobEventsDb } from "../common/model/collections.js";
 import { packageJson } from "../common/utils/esmUtils.js";
 import logger from "../common/logger.js";
 import { findMaintenanceMessages } from "../common/actions/maintenances.actions.js";
-import { findUserOrganismes } from "../common/actions/organismes/organismes.actions.js";
+import {
+  findUserOrganismes,
+  getOrganisme,
+  OrganismesSearch,
+  searchOrganismes,
+} from "../common/actions/organismes/organismes.actions.js";
 import { validateFullObjectSchema } from "../common/utils/validationUtils.js";
 import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
 import Joi from "joi";
@@ -58,11 +62,14 @@ import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../common/constants/user
 import { exportAnonymizedEffectifsAsCSV } from "../common/actions/effectifs/effectifs-export.actions.js";
 import { Application } from "express-serve-static-core";
 import {
+  configureOrganismeERP,
   inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
   removeUserFromOrganisation,
 } from "../common/actions/organisations.actions.js";
+import { getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
+import { updateUserProfile } from "../common/actions/users.actions.js";
 
 /**
  * Create the express app
@@ -208,14 +215,54 @@ function setupRoutes(app: Application, services) {
       return req.user;
     })
   );
-  authRouter.use("/api/v1/profile", profile());
-
-  authRouter.get(
-    "/api/v1/espace/organismes",
+  const userProfileUpdateSchema = {
+    prenom: Joi.string().default("").allow(""),
+    nom: Joi.string().default("").allow(""),
+    telephone: Joi.string().default("").allow(""),
+    civility: Joi.string().default("").allow(""),
+  };
+  authRouter.put(
+    "/api/v1/profile/user",
     returnResult(async (req) => {
-      return findUserOrganismes(req.user);
+      const infos = await validateFullObjectSchema(req.body, userProfileUpdateSchema);
+      await updateUserProfile(req.user, infos);
     })
   );
+
+  authRouter.get(
+    "/api/v1/organismes",
+    returnResult(async (req) => {
+      return await findUserOrganismes(req.user);
+    })
+  );
+  authRouter.get(
+    "/api/v1/organismes/:id",
+    returnResult(async (req) => {
+      return await getOrganisme(req.user, req.params.id);
+    })
+  );
+  authRouter.get(
+    "/api/v1/organismes/:id/indicateurs",
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      return await getOrganismeIndicateurs(req.user, req.params.id, filters);
+    })
+  );
+
+  const organismeSearchSchema = {
+    searchTerm: Joi.string().min(3),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
+  };
+  authRouter.post(
+    "/api/v1/organismes/search",
+    returnResult(async (req) => {
+      const search = await validateFullObjectSchema<OrganismesSearch>(req.body, organismeSearchSchema);
+      return await searchOrganismes(req.user, search);
+    })
+  );
+
   authRouter.use("/api/v1/organisme", organisme(services));
   authRouter.use("/api/v1/effectif", effectif());
   authRouter.use("/api/v1/upload", upload(services));
@@ -274,10 +321,17 @@ function setupRoutes(app: Application, services) {
     })
   );
 
+  authRouter.post(
+    "/api/v1/organisation/configure-erp",
+    returnResult(async (req) => {
+      return await configureOrganismeERP(req.user, req.body.email.toLowerCase());
+    })
+  );
+
   authRouter.get(
     "/api/v1/organisation/membres",
     returnResult(async (req) => {
-      return await listOrganisationMembers(req.user.organisation_id);
+      return await listOrganisationMembers(req.user);
     })
   );
 

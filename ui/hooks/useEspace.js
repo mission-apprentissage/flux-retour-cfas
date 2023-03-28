@@ -56,7 +56,7 @@ export function useEspace() {
 
   const navigation = {
     user: {
-      landingEspace: {
+      tableauDeBord: {
         pageTitle: "Mon tableau de bord",
         navTitle: "Mon tableau de bord",
         path: "/mon-espace/mon-organisme",
@@ -91,25 +91,10 @@ export function useEspace() {
       },
     },
     organisme: {
-      landingEspace: {
+      tableauDeBord: {
         pageTitle: "Son tableau de bord",
         navTitle: "Son tableau de bord",
         path: `/mon-espace/organisme/${organisme_id}`,
-      },
-      effectifs: {
-        pageTitle: "Ses effectifs",
-        navTitle: "Ses effectifs",
-        path: `/mon-espace/organisme/${organisme_id}/effectifs`,
-      },
-      televersement: {
-        pageTitle: "Import de fichier(s)",
-        navTitle: "Import de fichier(s)",
-        path: `/mon-espace/organisme/${organisme_id}/effectifs/televersement`,
-      },
-      sifa2: {
-        pageTitle: "Son enquête SIFA",
-        navTitle: "Son enquête SIFA",
-        path: `/mon-espace/organisme/${organisme_id}/enquete-SIFA`,
       },
     },
   };
@@ -118,9 +103,6 @@ export function useEspace() {
     organisme_id,
     organisationType,
     navigation: navigation || {},
-    isloaded,
-    isReloaded,
-    myOrganisme,
     isMonOrganismePages,
     isOrganismePages,
     isMesOrganismesPages,

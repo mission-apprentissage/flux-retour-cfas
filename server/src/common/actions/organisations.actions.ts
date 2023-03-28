@@ -5,7 +5,7 @@ import { UsersMigration } from "../model/@types/UsersMigration.js";
 
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
-import { Organisation } from "../model/organisations.model.js";
+import { Organisation, OrganisationOrganismeFormation } from "../model/organisations.model.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { sendSimpleEmail } from "../services/mailer/mailer.js";
 import logger from "../logger.js";
@@ -23,11 +23,11 @@ export async function getOrganisationById(organisationId: ObjectId): Promise<Org
   return organisation;
 }
 
-export async function listOrganisationMembers(organisationId: ObjectId): Promise<Partial<UsersMigration[]>> {
+export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial<UsersMigration[]>> {
   return await usersMigrationDb()
     .find(
       {
-        organisation_id: organisationId,
+        organisation_id: ctx.organisation_id,
       },
       {
         projection: {
@@ -131,4 +131,32 @@ async function buildOrganisationLabel(organisation: Organisation): Promise<strin
     case "ADMINISTRATEUR":
       return "ADMINISTRATEUR";
   }
+}
+
+interface ConfigurationERP {
+  erps?: string[];
+  mode_de_transmission?: "API" | "MANUEL";
+  setup_step_courante?: "STEP1" | "STEP2" | "STEP3" | "COMPLETE";
+}
+
+export async function configureOrganismeERP(ctx: AuthContext, conf: ConfigurationERP): Promise<void> {
+  if (
+    ![
+      "ORGANISME_FORMATION_FORMATEUR",
+      "ORGANISME_FORMATION_RESPONSABLE",
+      "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+    ].includes(ctx.organisation.type)
+  ) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+
+  const organisationOF = (ctx as AuthContext<OrganisationOrganismeFormation>).organisation;
+  const organisme = await organismesDb().findOne({ siret: organisationOF.siret, uai: organisationOF.uai });
+  if (!organisme) {
+    throw Boom.notFound("organisme de l'organisation non trouvé", {
+      siret: organisationOF.siret,
+      uai: organisationOF.uai,
+    });
+  }
+  await organismesDb().updateOne({ _id: organisme._id }, conf);
 }

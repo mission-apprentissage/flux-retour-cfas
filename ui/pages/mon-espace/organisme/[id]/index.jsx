@@ -15,7 +15,6 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 const Organisme = () => {
   const router = useRouter();
   const { organisme } = useOrganisme(router.query.id);
-
   return (
     <Page>
       <Head>

@@ -31,5 +31,5 @@ export const fetchSearchOrganismes = async (filters) => {
 
 // Pour les OF uniquement
 export async function configureOrganisationERP(configurationERP) {
-  await _put("/api/v1/organisation/configuration-erp", configurationERP);
+  await _put("/api/v1/organisation/configure-erp", configurationERP);
 }

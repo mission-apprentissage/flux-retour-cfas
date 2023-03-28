@@ -9,8 +9,19 @@ import {
   rupturantsIndicator,
 } from "./indicators.js";
 import { effectifsDb } from "../../model/collections.js";
+import { AuthContext } from "../../model/internal/AuthContext.js";
+import { canAccessOrganismeInfos } from "../helpers/permissions.js";
+import Boom from "boom";
 
-export const getIndicateurs = async (filters: any) => {
+export async function getOrganismeIndicateurs(ctx: AuthContext, organismeId: string, filters: EffectifsFilters) {
+  if (!(await canAccessOrganismeInfos(ctx, organismeId))) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+  filters.organisme_id = organismeId;
+  return await getIndicateurs(filters);
+}
+
+export const getIndicateurs = async (filters: EffectifsFilters) => {
   const filterStages = buildMongoPipelineFilterStages(filters);
   const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
     apprentisIndicator.getCountAtDate(filters.date, filterStages),

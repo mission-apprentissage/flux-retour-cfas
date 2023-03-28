@@ -16,8 +16,7 @@ import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/fil
 import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeConstants.js";
 import Boom from "boom";
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { OrganisationOrganismeFormation } from "../../model/organisations.model.js";
-import { getAggregatedIndicateursRestriction, getOrganismeRestriction } from "../helpers/permissions.js";
+import { canAccessOrganismeInfos, getOrganismeRestriction } from "../helpers/permissions.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -303,96 +302,6 @@ export const updateOrganisme = async (
 };
 
 /**
- * TODO add to unit tests
- * Méthode d'ajout d'un contributeur à un organisme
- * @param {*} organisme_id
- * @returns
- */
-export const addContributeurOrganisme = async (organisme_id, userEmail, roleName, pending = true) => {
-  const _id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${_id.toString()}`);
-  }
-
-  // await createPermission({
-  //   organisme_id: organisme._id as any,
-  //   userEmail: userEmail.toLowerCase(),
-  //   roleName,
-  //   pending,
-  // });
-};
-
-/**
- * TODO add to unit tests
- * Méthode de suppression d'un contributeur à un organisme
- * @param {*} organisme_id
- * @returns
- */
-export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
-  const _id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${_id.toString()}`);
-  }
-
-  // await removePermissions({ organisme_id: organisme._id, userEmail });
-};
-
-/**
- * TODO add to unit tests
- * Méthode de récupération des contributeurs d'un organisme
- * @param {string} organismeId
- * @returns
- */
-export const getContributeurs = async (organismeId) => {
-  const _id = typeof organismeId === "string" ? new ObjectId(organismeId) : organismeId;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${_id.toString()}`);
-  }
-
-  // const permissionsWithUserAndRole = await permissionsDb()
-  //   .aggregate([
-  //     { $match: { organisme_id: organisme._id } },
-  //     // lookup user
-  //     {
-  //       $lookup: {
-  //         from: "usersMigration",
-  //         localField: "userEmail",
-  //         foreignField: "email",
-  //         as: "user",
-  //       },
-  //     },
-  //     { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
-  //     // lookup role
-  //     {
-  //       $lookup: {
-  //         from: "roles",
-  //         localField: "role",
-  //         foreignField: "_id",
-  //         as: "role",
-  //       },
-  //     },
-  //     { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
-  //   ])
-  //   .toArray();
-
-  // return Promise.all(
-  //   permissionsWithUserAndRole.map(async (perm) => ({
-  //     ...perm,
-  //     user: perm.user ? await structureUser(perm.user) : null,
-  //   }))
-  // );
-};
-
-/**
  * Méthode de maj des dates de transmission d'un organisme
  * @param {*} organisme
  * @returns
@@ -433,9 +342,10 @@ export type OrganismesSearch = {
 
 /**
  * Retourne la liste des organismes correspondant aux critères de recherche
+ * restreint aux organismes accessibles par l'utilisateur
  */
-export const searchOrganismes = async (searchCriteria: OrganismesSearch) => {
-  const matchStage: any = {};
+export const searchOrganismes = async (ctx: AuthContext, searchCriteria: OrganismesSearch) => {
+  const matchStage: any = await getOrganismeRestriction(ctx);
   if (searchCriteria.searchTerm) {
     matchStage.$or = [
       { $text: { $search: searchCriteria.searchTerm } },
@@ -663,9 +573,9 @@ export const getStatOrganismes = async () => {
   return stats;
 };
 
-export async function findUserOrganismes(authContext: AuthContext) {
+export async function findUserOrganismes(ctx: AuthContext) {
   const organismes = await organismesDb()
-    .find(await getOrganismeRestriction(authContext), {
+    .find(await getOrganismeRestriction(ctx), {
       projection: {
         _id: 1,
         nom: 1,
@@ -689,9 +599,17 @@ export async function findUserOrganismes(authContext: AuthContext) {
   }));
 }
 
+export async function getOrganisme(ctx: AuthContext, organismeId: string) {
+  if (!(await canAccessOrganismeInfos(ctx, organismeId))) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+  return await getOrganismeById(organismeId); // double récupération avec les permissions mais pas très grave
+}
+
 export async function getOrganismeById(organismeId: string) {
-  // TODO check permissions
-  const organisme = await organismesDb().findOne({ _id: new ObjectId(organismeId) });
+  const organisme = await organismesDb().findOne({
+    _id: new ObjectId(organismeId),
+  });
   if (!organisme) {
     throw Boom.notFound(`missing organisation ${organismeId}`);
   }

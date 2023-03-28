@@ -15,7 +15,7 @@ import {
 import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
 import {
-  canAccessOrganismeIndicateurs,
+  canAccessOrganismeInfos,
   getAggregatedIndicateursRestriction,
 } from "../../../common/actions/helpers/permissions.js";
 import Boom from "boom";
@@ -47,7 +47,7 @@ export async function buildEffectifsFiltersFromRequest(req: Request): Promise<Ef
   // TODO il faudra sortir organisme_id pour le spécifier dans une autre route /organismes/:id/indicateurs
   // pour que les indicateurs ici ne soit que ceux agrégés
   if (filters.organisme_id) {
-    if (!(await canAccessOrganismeIndicateurs(req.user, filters.organisme_id))) {
+    if (!(await canAccessOrganismeInfos(req.user, filters.organisme_id))) {
       throw Boom.forbidden("Permissions invalides");
     }
   } else {

@@ -437,3 +437,12 @@ async function updateUserStatus(email: any, newStatus: any, data?: any) {
 
   return updated.value;
 }
+
+export async function updateUserProfile(ctx: AuthContext, infos: any) {
+  await usersMigrationDb().findOneAndUpdate(
+    { _id: ctx._id },
+    {
+      $set: infos,
+    }
+  );
+}

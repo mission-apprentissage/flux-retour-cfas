@@ -5,7 +5,7 @@ import { AuthContext } from "../../model/internal/AuthContext.js";
 import { OrganisationOrganismeFormation } from "../../model/organisations.model.js";
 import { getOrganismeById } from "../organismes/organismes.actions.js";
 
-export async function canAccessOrganismeIndicateurs(authContext: AuthContext, organismeId: string): Promise<boolean> {
+export async function canAccessOrganismeInfos(authContext: AuthContext, organismeId: string): Promise<boolean> {
   const organisme = await getOrganismeById(organismeId);
   const organisation = authContext.organisation;
   switch (organisation.type) {
@@ -37,15 +37,13 @@ export async function canAccessOrganismeIndicateurs(authContext: AuthContext, or
   }
 }
 
-export async function getOrganismeRestriction(authContext: AuthContext): Promise<any> {
-  const organisation = authContext.organisation;
+export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOFLinkedOrganismesIds(
-        authContext as AuthContext<OrganisationOrganismeFormation>
-      );
+      const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
       return {
         _id: {
           $in: linkedOrganismesIds,
@@ -83,15 +81,13 @@ export async function getOrganismeRestriction(authContext: AuthContext): Promise
 /*
 TODO faire un 2e restriction adaptée à la collection organisme directement dans le $lookup organisme
 */
-export async function getAggregatedIndicateursRestriction(authContext: AuthContext): Promise<any> {
-  const organisation = authContext.organisation;
+export async function getAggregatedIndicateursRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOFLinkedOrganismesIds(
-        authContext as AuthContext<OrganisationOrganismeFormation>
-      );
+      const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
       return {
         organisme_id: {
           $in: linkedOrganismesIds,
@@ -126,8 +122,8 @@ export async function getAggregatedIndicateursRestriction(authContext: AuthConte
   }
 }
 
-export async function findOFLinkedOrganismesIds(authContext: AuthContext<OrganisationOrganismeFormation>) {
-  const organisation = authContext.organisation;
+export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeFormation>) {
+  const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,
     uai: organisation.uai,
