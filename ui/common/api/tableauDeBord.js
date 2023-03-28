@@ -26,7 +26,7 @@ export const fetchEffectifsDataListCsvExport = (filters) => {
 
 /* Organisme Search */
 export const fetchSearchOrganismes = async (filters) => {
-  return await _post("/api/v1/organisme/search", filters);
+  return await _post("/api/v1/organismes/search", filters);
 };
 
 // Pour les OF uniquement
