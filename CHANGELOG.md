@@ -1,3 +1,10 @@
+## [3.17.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.17.0...v3.17.1) (2023-03-28)
+
+
+### Bug Fixes
+
+* **server:** refacto fiab & ajout du cas 2 (UAI et SIRET multiples) ([#2821](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2821)) ([8e9950c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8e9950c5323f54707c5860587ee98afd329bf3bb))
+
 # [3.17.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.16.2...v3.17.0) (2023-03-28)
 
 
