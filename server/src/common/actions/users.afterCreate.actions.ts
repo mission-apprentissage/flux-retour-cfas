@@ -115,7 +115,8 @@ export const createUserPermissions = async ({
               if (
                 subOrganismes.nature !== NATURE_ORGANISME_DE_FORMATION.LIEU &&
                 subOrganismes.nature !== NATURE_ORGANISME_DE_FORMATION.INCONNUE &&
-                organisme.siret !== subOrganismes.siret
+                organisme.siret !== subOrganismes.siret &&
+                subOrganismes.siret
               ) {
                 const subOrganismesDb = await findOrganismeBySiret(subOrganismes.siret);
                 if (subOrganismesDb && !subOrganismesIds.includes(subOrganismesDb._id.toString())) {

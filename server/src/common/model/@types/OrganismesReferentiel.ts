@@ -47,4 +47,13 @@ export interface OrganismesReferentiel {
   lieux_de_formation: {
     uai?: string;
   }[];
+  /**
+   * Formations de cet organisme
+   */
+  contacts?: {
+    email?: string;
+    confirmé?: boolean;
+    date_collecte?: string;
+    sources?: string[];
+  }[];
 }

@@ -50,6 +50,7 @@ export const schema = object(
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
     processed_at: date({ description: "Date de process des données" }),
+    error: any({ description: "Erreur rencontré lors de la création de l'effectif" }),
     validation_errors: arrayOf(
       object(
         {

@@ -6,7 +6,6 @@ import { defaultValuesOrganisme, validateOrganisme } from "../../model/organisme
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
-import { siretSchema } from "../../utils/validationUtils.js";
 import { createPermission, removePermissions } from "../permissions.actions.js";
 import { structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
@@ -17,24 +16,6 @@ import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
 import { Organisme } from "../../model/@types/Organisme.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
-
-/**
- * Méthode de récupération de l'adresse pour un organisme via ses props
- * Par défaut l'adresse est construite depuis l'UAI
- * Si l'organisme a un siret valide alors on récupère l'adresse depuis l'API Entreprise
- * @param {*} cfaProps
- */
-const buildAdresseForOrganisme = async ({ uai, siret }) => {
-  let adresseForOrganisme = buildAdresseFromUai(uai);
-
-  // Si siret est valide on récupère l'adresse via l'API Entreprise
-  const validSiret = siretSchema().validate(siret);
-  if (!validSiret.error) {
-    adresseForOrganisme = await buildAdresseFromApiEntreprise(siret);
-  }
-
-  return adresseForOrganisme;
-};
 
 /**
  * Méthode de création d'un organisme
@@ -62,25 +43,24 @@ export const createOrganisme = async (
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
     ? await getOrganismeInfosFromSiret(siret)
     : { nom: nomIn?.trim(), adresse: adresseIn, ferme: fermeIn, enseigne: undefined, raison_sociale: undefined };
-
-  const { insertedId } = await organismesDb().insertOne(
-    validateOrganisme({
-      ...(uai ? { uai } : {}),
-      ...(nom ? { nom, nom_tokenized: buildTokenizedString(nom, 4) } : {}),
-      ...defaultValuesOrganisme(),
-      ...(siret ? { siret } : {}),
-      metiers,
-      formations,
-      ...(adresse ? { adresse } : {}),
-      ...data,
-      ferme: ferme || false,
-      ...(enseigne ? { enseigne } : {}),
-      ...(raison_sociale ? { raison_sociale } : {}),
-    })
-  );
+  const dataToInsert = validateOrganisme({
+    ...(uai ? { uai } : {}),
+    ...(nom ? { nom, nom_tokenized: buildTokenizedString(nom, 4) } : {}),
+    ...defaultValuesOrganisme(),
+    ...(siret ? { siret } : {}),
+    metiers,
+    formations,
+    ...(adresse ? { adresse } : {}),
+    ...data,
+    ferme: ferme || false,
+    ...(enseigne ? { enseigne } : {}),
+    ...(raison_sociale ? { raison_sociale } : {}),
+  });
+  const { insertedId } = await organismesDb().insertOne(dataToInsert);
 
   return {
     _id: insertedId,
+    ...dataToInsert,
   };
 };
 
@@ -144,26 +124,31 @@ const getOrganismeInfosFromSiret = async (siret: any) => {
 };
 
 /**
- * Création d'un objet organisme depuis les données d'un dossierApprenant
- * @param {*} dossierApprenant
- * @returns
+ * Création d'un objet organisme
  */
-export const structureOrganismeFromDossierApprenant = async (dossierApprenant) => {
-  const { uai_etablissement, siret_etablissement, nom_etablissement } = dossierApprenant;
-
-  const adresseForOrganisme = siret_etablissement
-    ? await buildAdresseForOrganisme({ uai: uai_etablissement, siret: siret_etablissement })
-    : {};
+export const structureOrganisme = async ({
+  uai,
+  siret,
+  nom,
+}: {
+  uai?: string | undefined;
+  siret?: string | undefined;
+  nom?: string;
+}) => {
+  let adresseForOrganisme = {};
+  if (uai) {
+    adresseForOrganisme = buildAdresseFromUai(uai);
+  } else if (siret) {
+    adresseForOrganisme = await buildAdresseFromApiEntreprise(siret);
+  }
 
   return {
     ...defaultValuesOrganisme(),
-    uai: uai_etablissement,
-    siret: siret_etablissement,
+    nom,
+    uai,
+    siret,
     last_transmission_date: new Date(),
     ...adresseForOrganisme,
-    ...(nom_etablissement
-      ? { nom: nom_etablissement.trim(), nom_tokenized: buildTokenizedString(nom_etablissement.trim(), 4) }
-      : {}),
   };
 };
 
@@ -198,11 +183,8 @@ export const findOrganismeByUai = async (uai, projection = {}) => {
  * @param {*} projection
  * @returns
  */
-export const findOrganismeBySiret = async (siret, projection = {}) => {
-  if (!siret) {
-    throw Error("missing parameter `siret`");
-  }
-  return await organismesDb().findOne({ siret }, { projection });
+export const findOrganismeBySiret = async (siret: string, projection = {}) => {
+  return organismesDb().findOne({ siret }, { projection });
 };
 
 /**
@@ -212,8 +194,11 @@ export const findOrganismeBySiret = async (siret, projection = {}) => {
  * @param {*} projection
  * @returns
  */
-export const findOrganismeByUaiAndSiret = async (uai, siret, projection = {}) => {
-  return await organismesDb().findOne({ uai, siret }, { projection });
+export const findOrganismeByUaiAndSiret = async (uai?: string, siret?: string, projection = {}) => {
+  if (!uai && !siret) {
+    throw new Error("missing parameter `uai` or `siret`");
+  }
+  return await organismesDb().findOne({ uai, siret } as any, { projection });
 };
 
 /**

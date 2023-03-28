@@ -1,26 +1,16 @@
 import Joi from "joi";
 import { isEqual } from "date-fns";
 import { capitalize, cloneDeep, get } from "lodash-es";
-import { ObjectId, WithId } from "mongodb";
 
 import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import { telephoneConverter } from "../../validation/utils/frenchTelephoneNumber.js";
+import { buildEffectif, findEffectifByQuery, validateEffectifObject } from "../effectifs.actions.js";
 import {
-  buildEffectif,
-  findEffectifById,
-  findEffectifByQuery,
-  insertEffectif,
-  updateEffectifAndLock,
-  validateEffectifObject,
-} from "../effectifs.actions.js";
-import {
-  createOrganisme,
   findOrganismeBySiret,
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
-  setOrganismeTransmissionDates,
 } from "../organismes/organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
 
@@ -266,142 +256,39 @@ export const hydrateEffectif = async (effectifData: any, options?: any) => {
  * Si nécessaire va renvoyer un organisme fiabilisé à créer
  * ?? Pas besoin d'update car le runEngine ne va que créer / contrôler l'existant
  * ?? -> La MAJ d'un organisme ne doit pas se faire via l'API / migration ???
- * TODO Contrôle base ACCESS à ajouter ici
- * @param {*} organisme
  */
-const hydrateOrganisme = async (organisme: any) => {
-  let organismeToCreate = null;
-  let organismeFoundId: ObjectId | null = null;
-  let organismeFoundError: string | null = null;
+export const resolveOrganisme = async ({ uai, siret }: { uai?: string; siret?: string }) => {
+  let error: string | null = null;
 
   // Applique le mapping de fiabilisation
   const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
-    uai: organisme.uai,
-    siret: organisme.siret,
+    uai,
+    siret,
   });
 
   // Si pas de siret après fiabilisation -> erreur
-  if (!cleanSiret) organismeFoundError = `Impossible de créer l'organisme d'uai ${organisme.uai} avec un SIRET vide`;
+  if (!cleanSiret) error = `Impossible de créer l'organisme d'uai ${uai} avec un SIRET vide`;
 
   // Applique les règles de rejection si pas dans la db
   const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
 
-  if (organismeFoundWithUaiSiret?._id) {
-    organismeFoundId = organismeFoundWithUaiSiret?._id;
-  } else {
-    const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
-    // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> erreur
-    if (organismeFoundWithSiret?._id)
-      organismeFoundError = `L'organisme ayant le SIRET ${organisme.siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`;
-
-    const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
-    // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> erreur
-    if (organismeFoundWithUai?._id)
-      organismeFoundError = `L'organisme ayant l'UAI ${organisme.uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`;
-
-    // TODO CHECK BASE ACCES
-
-    // Création de l'organisme avec uai / siret fiabilisés
-    organismeToCreate = { ...organisme, uai: cleanUai, siret: cleanSiret };
-  }
-
-  return { organismeToCreate, organismeFound: { _id: organismeFoundId, error: organismeFoundError } };
-};
-
-/**
- * Fonction de run du moteur de construction d'organisme et d'effectifs
- * Prends en entrée un objet effectifData contenant les propriétés d'un effectif à créer ou maj
- * et un objet organismeData contenant les propriétés d'un organisme à créer ou identifier
- *
- * 1 - SOURCE : Migration
- *     Depuis la migration des dossiersApprenants le run est exécuté avec organismeData vide
- *     On va lui fournir en entrée un effectif contenant déja un organisme_id donc pas nécessaire de traiter les organismes
- *     On va appeler l'hydrateEffectifs avec un seul élément (celui en input du runEngine) et récupérer soit un objet à créer soit à maj
- *     On va ensuite selon le cas (create ou update)
- *        soit le créer puis faire un updateAndLock pour locker les champs
- *        soit faire uniquement un updateAndLock
- *     On renvoie l'id de l'effectif créé et / ou maj
- *
- * 2 - SOURCE : API
- *     Depuis l'API le run est exécuté pour chaque item itéré, donc avec un effectifData et un organismeData provenant de l'input API
- *     On va appeler l'hydrateOrganisme qui va contrôler l'organisme à créer ou à identifier
- *     Si l'organisme passe le contrôle de fiabilisation et est identifié comme nouveau, alors on va le créer et le relier à l'effectif fourni en entrée
- *     Si l'organisme passe le contrôle de fiabilisation et est identifié comme existant, alors on va le relier à l'effectif fourni en entrée // TODO Pas besoin d'update ?
- *     Si l'organisme ne passe pas le contrôle de fiabilisation car erreur, alors on va throw l'erreur // TODO Faire autre chose ?
- *
- * 2 - SOURCE : UPLOAD
- *     Depuis l'upload le run devra être exécuté avec organismeData vide vu que l'organisme est déja existant
- *     Idem API itérer sur un élément de l'upload et faire un runEngine
- *     Va créer / update l'effectif provenant de l'upload
- *     lockEffectif false
- *
- *
- *
- *
- * @param {*} dossiersApprenants
- */
-export const runEngine = async (effectifData: Record<string, any>, organismeData: Record<string, any>) => {
-  let effectifId: any = null;
-
-  // Gestion de l'organisme : hydrate et ensuite create or update
-  if (organismeData) {
-    const { organismeToCreate, organismeFound }: any = await hydrateOrganisme(organismeData);
-
-    // Organisme existant avec erreur on throw
-    if (organismeFound?.error) {
-      // TODO Here log ? action ? update ?
-      throw new Error(organismeFound.error);
+  if (!organismeFoundWithUaiSiret) {
+    if (cleanSiret) {
+      const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
+      // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> erreur
+      if (organismeFoundWithSiret?._id)
+        error = `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`;
     }
-
-    // Création de l'organisme (sans appels API externes)
-    if (organismeToCreate) {
-      const { _id } = await createOrganisme(organismeToCreate, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      });
-      // Ajout organisme id a l'effectifData
-      effectifData.organisme_id = _id.toString();
-    }
-
-    // Organisme existant sans erreur
-    if (organismeFound?._id) {
-      // Ajout organisme id a l'effectifData
-      // Pas besoin d'update l'organisme
-      // On ajoute ou mets à jour les dates de transmission si l'organisme est déja existant
-      await setOrganismeTransmissionDates(organismeFound);
-      effectifData.organisme_id = organismeFound?._id.toString();
+    if (cleanUai) {
+      const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
+      // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> erreur
+      if (organismeFoundWithUai?._id)
+        error = `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`;
     }
   }
 
-  // Gestion de l'effectif
-  if (effectifData) {
-    const { effectif, found } = await hydrateEffectif(effectifData, {
-      queryKeys: ["id_erp_apprenant", "organisme_id", "annee_scolaire"],
-      checkIfExist: true,
-    });
-
-    // Gestion des maj d'effectif
-    if (found) {
-      effectifId = found._id;
-
-      // Update de historique
-      effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
-        found.apprenant.historique_statut,
-        effectifData.apprenant?.historique_statut[0]?.valeur_statut,
-        effectifData.apprenant?.historique_statut[0]?.date_statut
-      );
-
-      await updateEffectifAndLock(effectifId, effectif);
-    } else {
-      effectifId = await insertEffectif(effectif);
-      const effectifCreated: WithId<any> = await findEffectifById(effectifId);
-      await updateEffectifAndLock(effectifId, {
-        apprenant: effectifCreated.apprenant,
-        formation: effectifCreated.formation,
-      });
-    }
-  }
-
-  return { effectifId };
+  return {
+    organisme: organismeFoundWithUaiSiret || { _id: undefined, uai: cleanUai, siret: cleanSiret },
+    error: error,
+  };
 };
