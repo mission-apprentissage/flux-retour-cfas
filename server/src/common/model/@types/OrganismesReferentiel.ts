@@ -56,4 +56,8 @@ export interface OrganismesReferentiel {
     date_collecte?: string;
     sources?: string[];
   }[];
+  relations: {
+    type?: string;
+    siret?: string;
+  }[];
 }

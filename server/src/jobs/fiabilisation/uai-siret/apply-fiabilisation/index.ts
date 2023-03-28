@@ -66,6 +66,15 @@ export const applyFiabilisationUaiSiret = async () => {
     "Effectifs en doublons sur organismes non fiable en tentative de correction sur un organisme fiable lié"
   );
   logger.info(nbOrganismesNonFiablesUaiSupprimes, "organismes non fiables (uai) supprimés");
+
+  return {
+    nbOrganismesFiables,
+    nbOrganismesFiabilises,
+    nbOrganismesNonFiabilisablesMapping,
+    nbOrganismesNonFiabilisablesUaiNonValidees,
+    nbOrganismesNonFiabilisablesMappingSupprimes,
+    nbOrganismesNonFiablesUaiSupprimes,
+  };
 };
 
 // #region ORGANISMES FIABLES
@@ -200,9 +209,6 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
  */
 const updateOrganismeForCurrentCoupleNonFiabilisableMapping = async (coupleNonFiabilisableMapping) => {
   try {
-    logger.info(
-      `updateOrganismeForCurrentCoupleNonFiabilisableMapping : uai ${coupleNonFiabilisableMapping.uai} / siret ${coupleNonFiabilisableMapping.siret}`
-    );
     const { modifiedCount } = await organismesDb().updateMany(
       { uai: coupleNonFiabilisableMapping.uai, siret: coupleNonFiabilisableMapping.siret },
       { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING } },
