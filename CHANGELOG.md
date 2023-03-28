@@ -1,3 +1,17 @@
+# [3.17.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.16.2...v3.17.0) (2023-03-28)
+
+
+### Bug Fixes
+
+* fix ci ([1ae76a9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1ae76a9e7aed04a338cee03edce481600258dd7c))
+* optimisation du process d'ingestion ([#2825](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2825)) ([a0517ca](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a0517cab790b80ef9ff364b07d61c184db571f7f))
+
+
+### Features
+
+* ajout cache axios  ([#2820](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2820)) ([b0c0896](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b0c0896823b8e489fb566916d7f8abe16c7a8a7c))
+* ajout script pour suppression des doublons dans effectifQueue ([#2822](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2822)) ([c8bba36](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c8bba36f28677cc1da54db6a8d73ae76df576571))
+
 ## [3.16.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.16.1...v3.16.2) (2023-03-27)
 
 
