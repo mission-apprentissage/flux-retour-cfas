@@ -1,5 +1,4 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { formatDuration, intervalToDuration } from "date-fns";
 
 import logger from "../../../common/logger.js";
 import { effectifsQueueDb } from "../../../common/model/collections.js";
