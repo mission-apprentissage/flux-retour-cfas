@@ -63,7 +63,7 @@ function MesOrganismes() {
       <Box w="100%" pt={[4, 6]} px={[1, 1, 4, 4]} mb={16}>
         <Container maxW="xl">
           <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
-          <Heading textStyle="h2" color="grey.800" mt={5}>
+          <Heading textStyle="h2" color="grey.800" my={5}>
             {getHeaderTitleFromOrganisationType(organisationType)}
           </Heading>
 
