@@ -6,7 +6,7 @@ db.getSiblingDB("{{ vault.DB_SIBLING_NAME }}").createRole({
   privileges: [
     {
       resource: { db: "{{ vault.DB_NAME }}", collection: "" },
-      actions: ["collMod", "createIndex", "listCollections"],
+      actions: ["collMod", "createIndex", "listCollections", "bypassDocumentValidation"],
     },
   ],
 });
