@@ -1,9 +1,17 @@
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../common/constants/natureOrganismeConstants.js";
 import { PromisePool } from "@supercharge/promise-pool";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants.js";
+import {
+  STATUT_FIABILISATION_COUPLES_UAI_SIRET,
+  STATUT_FIABILISATION_ORGANISME,
+} from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
-import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../../common/model/collections.js";
+import {
+  effectifsDb,
+  fiabilisationUaiSiretDb,
+  organismesDb,
+  organismesReferentielDb,
+} from "../../../../common/model/collections.js";
 import { getPercentage } from "../../../../common/utils/miscUtils.js";
 import { insertManualMappingsFromFile } from "./utils.js";
 
@@ -150,6 +158,12 @@ export const buildFiabilisationCoupleForTdbCouple = async (
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
       { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE } },
       { upsert: true }
+    );
+
+    // MAJ du statut de l'organisme lié
+    await organismesDb().updateOne(
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
     );
     return;
   }
@@ -346,6 +360,19 @@ export const buildFiabilisationCoupleForTdbCouple = async (
         },
       },
       { upsert: true }
+    );
+
+    // Maj de l'organisme lié avec { bypassDocumentValidation: true } si siret vide
+    await organismesDb().updateOne(
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+      {
+        $set: {
+          fiabilisation_statut: isUaiPresentInReferentiel
+            ? STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING
+            : STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE,
+        },
+      },
+      { bypassDocumentValidation: true }
     );
   }
 };
