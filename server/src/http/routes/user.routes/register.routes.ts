@@ -96,6 +96,7 @@ export default ({ mailer }) => {
     })
   );
 
+  // FIXME potentiellement remplacé par /api/v1/organismes/search-by-uai-siret
   router.post("/uai-siret-adresse", async ({ body }, res) => {
     const {
       uai: userUai,

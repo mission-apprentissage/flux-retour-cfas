@@ -612,3 +612,27 @@ export async function getOrganismeById(organismeId: string) {
   }
   return organisme;
 }
+
+export async function getOrganismeFiableBySIRET(siret: string): Promise<Organisme> {
+  const organisme = await organismesDb().findOne({
+    siret: siret,
+    // fiabilisation_statut: "FIABLE", // FIXME tmp désactivé pour avoir des données
+  });
+  if (!organisme) {
+    throw Boom.badRequest("Aucun organisme trouvé");
+  }
+  return organisme;
+}
+
+export async function findOrganismesFiableByUAI(uai: string): Promise<Organisme[]> {
+  const organismes = await organismesDb()
+    .find({
+      uai: uai,
+      // fiabilisation_statut: "FIABLE", // FIXME tmp désactivé pour avoir des données
+    })
+    .toArray();
+  if (organismes.length === 0) {
+    throw Boom.badRequest("Aucun organisme trouvé");
+  }
+  return organismes;
+}

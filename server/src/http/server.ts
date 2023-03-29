@@ -48,6 +48,8 @@ import {
   getOrganisme,
   OrganismesSearch,
   searchOrganismes,
+  findOrganismesFiableByUAI,
+  getOrganismeFiableBySIRET,
 } from "../common/actions/organismes/organismes.actions.js";
 import { validateFullObjectSchema } from "../common/utils/validationUtils.js";
 import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
@@ -153,6 +155,24 @@ function setupRoutes(app: Application, services) {
           mongodb: mongodbHealthy,
         },
       };
+    })
+  );
+  app.post(
+    "/api/v1/organismes/search-by-siret",
+    returnResult(async (req) => {
+      const { siret } = await validateFullObjectSchema(req.body, {
+        siret: Joi.string(),
+      });
+      return await getOrganismeFiableBySIRET(siret);
+    })
+  );
+  app.post(
+    "/api/v1/organismes/search-by-uai",
+    returnResult(async (req) => {
+      const { uai } = await validateFullObjectSchema(req.body, {
+        uai: Joi.string().uppercase(),
+      });
+      return await findOrganismesFiableByUAI(uai);
     })
   );
 
