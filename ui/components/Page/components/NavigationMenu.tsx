@@ -47,7 +47,7 @@ const NavItem = ({
   ...rest
 }) => {
   const router = useRouter();
-  const isActiveInternal = isActive || router.pathname === to || router.asPath === to;
+  const isActiveInternal = isActive || router.pathname.startsWith(to) || router.asPath.startsWith(to);
 
   const hasState = isActiveInternal || isDisabled;
   const colorCurrentState = isActiveInternal ? colorActive : isDisabled ? colorDisabled : "";
