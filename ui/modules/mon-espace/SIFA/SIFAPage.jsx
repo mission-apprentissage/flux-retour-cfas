@@ -24,26 +24,21 @@ function useOrganismesEffectifs(organismeId) {
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
       prevOrganismeId.current = organismeId;
-      queryClient.resetQueries("organismesEffectifs", { exact: true });
+      // FIXME, reset toutes les queries ?!
+      // queryClient.resetQueries("organismesEffectifs", { exact: true });
     }
   }, [queryClient, organismeId]);
 
-  const { data, isLoading, isFetching } = useQuery(
-    ["organismesEffectifs"],
-    async () => {
-      const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organismeId}&sifa=true`);
-      // eslint-disable-next-line no-undef
-      const newEffectifsState = new Map();
-      for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
-        newEffectifsState.set(id, { validation_errors, requiredSifa });
-      }
-      setCurrentEffectifsState(newEffectifsState);
-      return organismesEffectifs;
-    },
-    {
-      refetchOnWindowFocus: false,
+  const { data, isLoading, isFetching } = useQuery(["organismesEffectifs"], async () => {
+    const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organismeId}&sifa=true`);
+    // eslint-disable-next-line no-undef
+    const newEffectifsState = new Map();
+    for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
+      newEffectifsState.set(id, { validation_errors, requiredSifa });
     }
-  );
+    setCurrentEffectifsState(newEffectifsState);
+    return organismesEffectifs;
+  });
 
   return { isLoading: isFetching || isLoading, organismesEffectifs: data || [] };
 }

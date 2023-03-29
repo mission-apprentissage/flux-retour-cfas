@@ -11,7 +11,6 @@ const useFetchEtablissements = ({ siret, uai, organismeFormation }) => {
       ),
     // note: we don't use `onSuccess` here, because not called if cache is used
     enabled: !!(siret || uai),
-    refetchOnWindowFocus: false,
     staleTime: 10 * 60 * 1000,
     cacheTime: 30 * 60 * 1000,
   });

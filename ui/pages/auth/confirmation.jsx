@@ -12,17 +12,11 @@ import { CONTACT_ADDRESS } from "@/common/constants/product";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 function useActivation(activationToken) {
-  const { data, isLoading, isFetching, isError } = useQuery(
-    ["useActivation"],
-    async () => {
-      if (!activationToken) throw new Error("Missing activation token");
-      const response = await _post("/api/v1/auth/activation", { activationToken });
-      return response;
-    },
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data, isLoading, isFetching, isError } = useQuery(["useActivation"], async () => {
+    if (!activationToken) throw new Error("Missing activation token");
+    const response = await _post("/api/v1/auth/activation", { activationToken });
+    return response;
+  });
 
   return {
     data,
