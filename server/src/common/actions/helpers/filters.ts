@@ -123,7 +123,7 @@ export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRest
     ...preliminaryLookups.map((lookupConf) => ({
       $lookup: lookupConf,
     })),
-    filters.restrictionMongo ? { $match: filters.restrictionMongo } : {},
+    { $match: filters.restrictionMongo ? filters.restrictionMongo : {} },
     {
       $match: afterLookupsMatchFilters,
     },
