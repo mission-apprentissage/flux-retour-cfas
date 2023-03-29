@@ -1,3 +1,4 @@
+import React from "react";
 import { Organisation } from "./Organisation";
 
 export interface AuthContext<IOrganisation = Organisation> {
@@ -20,7 +21,5 @@ export interface AuthContext<IOrganisation = Organisation> {
 // contexte côté UI
 export interface IAuthenticationContext {
   auth: AuthContext;
-  token: any;
-  setAuth: any;
-  setToken: any;
+  setAuth: React.Dispatch<AuthContext>;
 }

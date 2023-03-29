@@ -102,7 +102,6 @@ const ForceAcceptCGU = ({ children }) => {
 export const AuthenticationContext = createContext<IAuthenticationContext>({} as any);
 
 const UserWrapper = ({ children, ssrAuth }) => {
-  const [token, setToken] = useState();
   const [auth, setAuth] = useState(ssrAuth);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(!ssrAuth);
@@ -158,7 +157,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
   }
 
   return (
-    <AuthenticationContext.Provider value={{ auth, token, setAuth, setToken }}>
+    <AuthenticationContext.Provider value={{ auth, setAuth }}>
       <AccountWrapper>
         <ForceAcceptCGU>{children}</ForceAcceptCGU>
       </AccountWrapper>
