@@ -76,7 +76,7 @@ const EntrepriseDetails = ({ data }) => {
   );
 };
 
-export const UaiBlock = ({ uai, onUaiFetched }) => {
+export const UaiBlock = ({ onUaiFetched }) => {
   const router = useRouter();
 
   const { values, errors, handleChange } = useFormik({
@@ -88,7 +88,7 @@ export const UaiBlock = ({ uai, onUaiFetched }) => {
         })
         .required("L'UAI est obligatoire"),
     }),
-    initialValues: { uai: uai || "" },
+    initialValues: { uai: "" },
   });
   const { data: etablissements, isFetching } = useFetchEtablissements(
     validateUai(values.uai)
@@ -96,6 +96,7 @@ export const UaiBlock = ({ uai, onUaiFetched }) => {
           uai: values.uai,
           organismeFormation: true,
           onSuccess: (data) => {
+            console.log("fetch ok !");
             // si plusieurs etablissement,
             // on laisse l'utilisateur choisir
             if (data.length === 1) {

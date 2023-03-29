@@ -3,11 +3,11 @@ import Head from "next/head";
 import { Flex, Spinner } from "@chakra-ui/react";
 
 import Page from "@/components/Page/Page";
-import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import InscriptionStep2 from "@/modules/auth/inscription/InscriptionStep2";
 import { useRouter } from "next/router";
 import useFetchEtablissements from "@/hooks/useFetchEtablissements";
+import { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -28,7 +28,7 @@ const PageFormulaire = () => {
   const { data: etablissements, isFetching } = useFetchEtablissements({ siret });
   const etablissement = etablissements?.[0];
 
-  const type = mappingTypeOrganisationToType[typeOrganisation];
+  const type = mappingTypeOrganisationToType[typeOrganisation as CategorieCompteInscription];
 
   return (
     <Page>
@@ -55,7 +55,6 @@ const PageFormulaire = () => {
             />
           )
         )}
-        <InformationBlock w={{ base: "100%", md: "50%" }} />
       </Flex>
     </Page>
   );
