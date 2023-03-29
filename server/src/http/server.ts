@@ -161,7 +161,7 @@ function setupRoutes(app: Application, services) {
     "/api/v1/organismes/search-by-siret",
     returnResult(async (req) => {
       const { siret } = await validateFullObjectSchema(req.body, {
-        siret: Joi.string(),
+        siret: Joi.string().required(),
       });
       return await getOrganismeFiableBySIRET(siret);
     })
@@ -170,7 +170,7 @@ function setupRoutes(app: Application, services) {
     "/api/v1/organismes/search-by-uai",
     returnResult(async (req) => {
       const { uai } = await validateFullObjectSchema(req.body, {
-        uai: Joi.string().uppercase(),
+        uai: Joi.string().required().uppercase(),
       });
       return await findOrganismesFiableByUAI(uai);
     })

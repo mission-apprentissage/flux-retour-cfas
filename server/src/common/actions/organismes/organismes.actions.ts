@@ -614,6 +614,7 @@ export async function getOrganismeById(organismeId: string) {
 }
 
 export async function getOrganismeFiableBySIRET(siret: string): Promise<Organisme> {
+  // FIXME projection à définir
   const organisme = await organismesDb().findOne({
     siret: siret,
     // fiabilisation_statut: "FIABLE", // FIXME tmp désactivé pour avoir des données
@@ -625,6 +626,7 @@ export async function getOrganismeFiableBySIRET(siret: string): Promise<Organism
 }
 
 export async function findOrganismesFiableByUAI(uai: string): Promise<Organisme[]> {
+  // FIXME projection à définir
   const organismes = await organismesDb()
     .find({
       uai: uai,

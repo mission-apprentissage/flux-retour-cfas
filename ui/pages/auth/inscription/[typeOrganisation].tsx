@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Box, Button, HStack, Link, Text } from "@chakra-ui/react";
+import NavLink from "next/link";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useRouter } from "next/router";
@@ -75,6 +76,19 @@ const RegisterConfigurationOrganisationPage = () => {
           Suivant
         </Button>
       </HStack>
+      {typeOrganisation === "organisme_formation" && (
+        <Text mt={6}>
+          <Link
+            as={NavLink}
+            href="/auth/inscription/organisme-inconnu"
+            borderBottom="1px solid"
+            color="bluefrance"
+            _hover={{ textDecoration: "none" }}
+          >
+            Vous ne connaissez ni votre UAI ni votre SIRET
+          </Link>
+        </Text>
+      )}
     </InscriptionWrapper>
   );
 };

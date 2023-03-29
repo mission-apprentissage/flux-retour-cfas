@@ -5,7 +5,7 @@ import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 
 import { ERP_STATE, ERPS_FORM_CASES } from "../../../common/constants/erps";
-import { uaiRegex } from "../../../common/domain/uai";
+import { UAI_REGEX } from "../../../common/domain/uai";
 import {
   DemandeBranchementErpFormErpComingSection,
   DemandeBranchementErpFormErpOnGoingSection,
@@ -32,7 +32,7 @@ const DemandeBranchementErpForm = ({ onSubmit }) => {
       initialValues={formInitialValues}
       validationSchema={Yup.object().shape({
         nom_organisme: Yup.string().required("Requis"),
-        uai_organisme: Yup.string().matches(uaiRegex, "UAI invalide").required("Requis"),
+        uai_organisme: Yup.string().matches(UAI_REGEX, "UAI invalide").required("Requis"),
         nb_apprentis: Yup.string(),
         email_demandeur: Yup.string().email("Format d'email invalide").required("Requis"),
         is_ready_co_construction: Yup.bool(),

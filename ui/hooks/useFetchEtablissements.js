@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import { _post } from "@/common/httpClient";
 
-const useFetchEtablissements = ({ siret, uai, organismeFormation }) => {
+const useFetchEtablissements = ({ siret, uai }) => {
   const { data, isFetching, error, refetch } = useQuery({
-    queryKey: ["uai-siret-adresse", { siret, uai, organismeFormation }],
+    queryKey: ["uai-siret-adresse", { siret, uai }],
     queryFn: () =>
-      _post("/api/v1/auth/uai-siret-adresse", { siret, uai, organismeFormation }).then((rawData) =>
+      _post("/api/v1/organismes/search-by-uai-siret", { siret, uai }).then((rawData) =>
         rawData?.map(({ result }) => result)
       ),
     // note: we don't use `onSuccess` here, because not called if cache is used
