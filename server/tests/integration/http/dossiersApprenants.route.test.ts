@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 
 import { startServer } from "../../utils/testUtils.js";
-import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
+import { apiRoles } from "../../../src/common/roles.js";
 import {
   createRandomDossierApprenantApiInput,
   createRandomDossierApprenant,
@@ -114,7 +114,7 @@ describe("Dossiers Apprenants Route", () => {
       const createdId = await createUserLegacy({
         username: "normal-user",
         password: "password",
-        permissions: [tdbRoles.cfa, tdbRoles.network, tdbRoles.pilot],
+        permissions: ["cfa", "network", "pilot"],
       });
 
       const userWithoutPermission = await usersDb().findOne({ _id: createdId });

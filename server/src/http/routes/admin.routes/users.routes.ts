@@ -4,7 +4,6 @@ import Boom from "boom";
 
 import { findOrganismeById } from "../../../common/actions/organismes/organismes.actions.js";
 import {
-  createUser,
   getAllUsers,
   getUserByEmail,
   getDetailedUserById,
@@ -16,7 +15,6 @@ import searchShema from "../../../common/validation/searchSchema.js";
 import objectIdSchema from "../../../common/validation/objectIdSchema.js";
 import userSchema from "../../../common/validation/userSchema.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
-import logger from "../../../common/logger.js";
 
 export default ({ mailer }) => {
   const router = express.Router();
@@ -69,29 +67,30 @@ export default ({ mailer }) => {
     return res.json({ ok: true });
   });
 
-  router.post(
-    "/users",
-    validateRequestMiddleware({
-      body: userSchema({ isNew: true }).strict(),
-    }),
-    async ({ body }, res) => {
-      // FIXME à corriger depuis l'écran d'administration
-      // const { password, email, ...data } = body;
-      // const alreadyExists = await getUserByEmail(email);
-      // if (alreadyExists) {
-      //   throw Boom.conflict(`Unable to create, user ${email} already exists`);
-      // }
-      // const user = await createUser({ email, password }, data);
-      // try {
-      //   await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
-      //   return res.json(user);
-      // } catch (err) {
-      //   logger.error(`Error sending activation email ${err?.toString()}`);
-      //   await removeUser(user._id);
-      //   throw Boom.internal("Unable to send activation_user email");
-      // }
-    }
-  );
+  // Plutôt permettre d'inviter des comptes dans des organisations
+  // router.post(
+  //   "/users",
+  //   validateRequestMiddleware({
+  //     body: userSchema({ isNew: true }).strict(),
+  //   }),
+  //   async ({ body }, res) => {
+  //     // FIXME à corriger depuis l'écran d'administration
+  //     // const { password, email, ...data } = body;
+  //     // const alreadyExists = await getUserByEmail(email);
+  //     // if (alreadyExists) {
+  //     //   throw Boom.conflict(`Unable to create, user ${email} already exists`);
+  //     // }
+  //     // const user = await createUser({ email, password }, data);
+  //     // try {
+  //     //   await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
+  //     //   return res.json(user);
+  //     // } catch (err) {
+  //     //   logger.error(`Error sending activation email ${err?.toString()}`);
+  //     //   await removeUser(user._id);
+  //     //   throw Boom.internal("Unable to send activation_user email");
+  //     // }
+  //   }
+  // );
 
   router.put(
     "/users/:id",

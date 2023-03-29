@@ -6,7 +6,6 @@ import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 import DemandeBranchementErpFormBlock from "@/modules/organisme-formation/DemandeBranchementErp/DemandeBranchementErpFormBlock";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 const CommentTransmettreVosDonneesPage = () => {
   const title = "Comment transmettre les données de votre organisme ?";

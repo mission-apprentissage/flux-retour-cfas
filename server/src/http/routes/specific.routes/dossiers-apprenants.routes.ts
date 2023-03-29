@@ -1,4 +1,4 @@
-import express, { Request } from "express";
+import express from "express";
 import Joi from "joi";
 
 import logger from "../../../common/logger.js";

@@ -7,12 +7,11 @@ import {
   generatePasswordUpdateTokenLegacy,
   getUserLegacyById,
   removeUserLegacy,
-  searchUsersLegacy,
   updatePasswordLegacy,
   updateUserLegacy,
 } from "../../../../src/common/actions/legacy/users.legacy.actions.js";
 import { usersDb } from "../../../../src/common/model/collections.js";
-import { apiRoles, tdbRoles } from "../../../../src/common/roles.js";
+import { apiRoles } from "../../../../src/common/roles.js";
 
 describe("Components Users Test", () => {
   describe("createUserLegacy", () => {
@@ -49,40 +48,6 @@ describe("Components Users Test", () => {
       });
       const found = await usersDb().findOne({ _id: createdId });
       assert.equal(found?.permissions?.includes(apiRoles.administrator), true);
-    });
-
-    it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
-      const createdId = await createUserLegacy({
-        username: "userAdmin",
-        password: "password",
-        permissions: [tdbRoles.network],
-        email: "email@test.fr",
-        network: "test",
-      });
-      const found = await usersDb().findOne({ _id: createdId });
-
-      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
-      assert.equal(found?.network === "test", true);
-      assert.equal(found?.email === "email@test.fr", true);
-    });
-
-    it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau, une région et un organisme", async () => {
-      const createdId = await createUserLegacy({
-        username: "userAdmin",
-        password: "password",
-        permissions: [tdbRoles.network],
-        email: "email@test.fr",
-        network: "test",
-        region: "REGION",
-        organisme: "ORGANISME",
-      });
-      const found = await usersDb().findOne({ _id: createdId });
-
-      assert.equal(found?.permissions?.includes(tdbRoles.network), true);
-      assert.equal(found?.network === "test", true);
-      assert.equal(found?.region === "REGION", true);
-      assert.equal(found?.organisme === "ORGANISME", true);
-      assert.equal(found?.email === "email@test.fr", true);
     });
   });
 

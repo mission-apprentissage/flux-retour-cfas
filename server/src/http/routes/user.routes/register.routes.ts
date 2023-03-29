@@ -266,7 +266,7 @@ export default ({ mailer }) => {
       throw Boom.badRequest("Something went wrong");
     }
 
-    await createUserPermissions({ user: updateUser, mailer, asRole: type });
+    // await createUserPermissions({ user: updateUser, mailer, asRole: type });
 
     const payload = await structureUser(updateUser);
 

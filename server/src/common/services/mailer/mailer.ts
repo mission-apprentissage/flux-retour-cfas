@@ -7,7 +7,7 @@ import { getPublicUrl, generateHtml } from "../../utils/emailsUtils.js";
 import * as templates from "./emails/templates.js";
 import { __dirname } from "../../utils/esmUtils.js";
 import { mailerActions } from "../../../services.js";
-import { uuid4 } from "@sentry/utils";
+import { v4 as uuidv4 } from "uuid";
 
 function createTransporter(smtp) {
   const needsAuthentication = !!smtp.auth.user;
@@ -46,7 +46,7 @@ export async function sendSimpleEmail<T extends TemplateName>(
   payload: TemplatePayloads[T]
 ): Promise<void> {
   // identifiant email car stocké en BDD et possibilité de le consulter via navigateur
-  const emailToken = uuid4();
+  const emailToken = uuidv4();
   await mailerActions.sendSimpleEmail(
     recipient,
     template,
