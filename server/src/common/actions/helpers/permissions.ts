@@ -126,6 +126,7 @@ async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeF
   }
 
   const subOrganismesIds = new Set<string>();
+  subOrganismesIds.add(userOrganisme._id.toString());
   if (
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
