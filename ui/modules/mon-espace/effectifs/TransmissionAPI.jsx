@@ -6,11 +6,11 @@ import { useRouter } from "next/router";
 
 import { InfoCircle } from "../../../theme/components/icons/index.js";
 import { ERPS } from "../../../common/constants/erps";
-import { useOrganisme } from "../../../hooks/useOrganisme";
+import { useOrganisationOrganisme } from "../../../hooks/organismes";
 import { configureOrganisationERP } from "../../../common/api/tableauDeBord.js";
 
 const TransmissionAPI = () => {
-  const { organisme } = useOrganisme();
+  const { organisme } = useOrganisationOrganisme();
   const router = useRouter();
 
   const { values, handleSubmit, handleChange, isSubmitting } = useFormik({

@@ -1,17 +1,28 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 
+import { useOrganisationOrganisme } from "@/hooks/organismes";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import SIFAPage from "@/modules/mon-espace/SIFA/SIFAPage";
+import { useRecoilState } from "recoil";
+import { organismeAtom } from "../../../hooks/organismeAtoms";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const PageEnqueteSIFADeMonOrganisme = () => {
   const title = "Mon enquête SIFA";
+  const { organisme } = useOrganisationOrganisme();
+
+  const [organismeState, setMyOrganisme] = useRecoilState(organismeAtom);
+
+  useEffect(() => {
+    setMyOrganisme(organisme);
+  }, [organisme, setMyOrganisme]);
+
   return (
     <Page>
       <Head>
@@ -20,9 +31,7 @@ const PageEnqueteSIFADeMonOrganisme = () => {
       <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
         <Container maxW="xl" px={0}>
           <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
-          <Box mt={4}>
-            <SIFAPage isMine />
-          </Box>
+          <Box mt={4}>{organismeState && <SIFAPage isMine />}</Box>
         </Container>
       </Box>
     </Page>
