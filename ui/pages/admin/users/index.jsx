@@ -20,7 +20,6 @@ import {
 } from "@chakra-ui/react";
 
 import { _get } from "@/common/httpClient";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -61,8 +60,6 @@ const Users = () => {
       <Head>
         <title>{title}</title>
       </Head>
-
-      <Breadcrumb pages={[PAGES.homepage(), { title }]} />
 
       <Modal isOpen={router.query.new} onClose={closeModal} size="2xl">
         <ModalOverlay />

@@ -4,7 +4,6 @@ import React from "react";
 
 import LinkCard from "@/components/LinkCard/LinkCard";
 import useAuth from "@/hooks/useAuth";
-import { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const ViewOptionCard = ({ navigationPageData }) => {
   return (
@@ -31,15 +30,27 @@ const ViewSelection = () => {
             title: `Vue du réseau ${auth.reseau}`,
           },
           {
-            path: PAGES.visualiserLesIndicateursParOrganisme().path,
+            path: "/mon-espace/mon-organisme/par-organisme",
             title: "Vue par organisme de formation du réseau",
           },
         ]
       : [
-          PAGES.visualiserLesIndicateursParTerritoire(),
-          PAGES.visualiserLesIndicateursParReseau(),
-          PAGES.visualiserLesIndicateursParOrganisme(),
-          PAGES.visualiserLesIndicateursParFormation(),
+          {
+            title: "Vue territoriale",
+            path: "/mon-espace/mon-organisme/par-territoire",
+          },
+          {
+            title: "Vue par réseau",
+            path: "/mon-espace/mon-organisme/par-reseau",
+          },
+          {
+            title: "Vue par organisme de formation",
+            path: "/mon-espace/mon-organisme/par-organisme",
+          },
+          {
+            title: "Vue par formation",
+            path: "/mon-espace/mon-organisme/par-formation",
+          },
         ];
   return (
     <HStack marginTop="3w" spacing="3w">

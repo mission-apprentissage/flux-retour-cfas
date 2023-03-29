@@ -3,7 +3,6 @@ import Head from "next/head";
 
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import MentionsLegales from "@/components/legal/MentionsLegales";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
@@ -17,7 +16,6 @@ const MentionsLegalesPage = () => {
         <title>{title}</title>
       </Head>
       <Section>
-        <Breadcrumb pages={[PAGES.homepage(), { title }]} />
         <MentionsLegales />
       </Section>
     </Page>

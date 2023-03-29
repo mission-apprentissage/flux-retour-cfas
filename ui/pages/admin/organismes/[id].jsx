@@ -6,7 +6,7 @@ import { Box, Heading, Stack, Spinner, Text, VStack, HStack } from "@chakra-ui/r
 import { formatDistanceToNow } from "date-fns";
 
 import { _get } from "@/common/httpClient";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -71,7 +71,7 @@ const Organisme = () => {
         <title>{title}</title>
       </Head>
 
-      <Breadcrumb pages={[PAGES.homepage(), { title, path: "/admin/organismes" }, { title: "Fiche organisme" }]} />
+      <Breadcrumb pages={[{ title, path: "/admin/organismes" }, { title: "Fiche organisme" }]} />
 
       {isLoading ? (
         <Spinner alignSelf="center" />

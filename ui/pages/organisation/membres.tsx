@@ -4,7 +4,6 @@ import { HamburgerIcon } from "@chakra-ui/icons";
 import Head from "next/head";
 import { useQuery } from "@tanstack/react-query";
 
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import InvitationForm from "@/modules/mon-espace/organisation/InvitationForm";
@@ -45,8 +44,6 @@ const PageGestionDesMembres = () => {
         <title>{title}</title>
       </Head>
       <Container maxW="xl" px={0}>
-        <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
-
         <Box mt={8}>
           <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
             Gestion des rôles et habilitations

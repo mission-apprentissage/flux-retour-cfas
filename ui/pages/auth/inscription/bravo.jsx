@@ -5,18 +5,15 @@ import { Text, Center, Heading, Flex } from "@chakra-ui/react";
 import Page from "@/components/Page/Page";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const RegisterPage = () => {
-  const title = "Créer un compte";
   return (
     <Page>
       <Head>
         <title>Inscription</title>
       </Head>
-      <Breadcrumb pages={[PAGES.homepage(), { title }]} />
       <Flex w="100%" mt={8} minH="40vh" direction={{ base: "column", md: "row" }}>
         <Center w="full" flexDirection="column" border="1px solid" borderColor="openbluefrance" p={12}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

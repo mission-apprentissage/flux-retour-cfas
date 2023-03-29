@@ -5,7 +5,6 @@ import { Flex } from "@chakra-ui/react";
 import Page from "@/components/Page/Page";
 import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Inscription from "@/modules/auth/inscription/Inscription";
 import { useRouter } from "next/router";
 
@@ -13,7 +12,6 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 const RegisterPage = () => {
   const router = useRouter();
-  const title = "Créer un compte";
   const { typeOrganisation } = router.query;
   console.log(typeOrganisation, router.query);
   return (
@@ -21,7 +19,6 @@ const RegisterPage = () => {
       <Head>
         <title>Inscription</title>
       </Head>
-      <Breadcrumb pages={[PAGES.homepage(), { title }]} />
       <Flex w="100%" mt={8} minH="40vh" direction={{ base: "column", md: "row" }}>
         <Inscription
           flexDirection="column"

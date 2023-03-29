@@ -5,7 +5,6 @@ import { Flex, Spinner } from "@chakra-ui/react";
 import Page from "@/components/Page/Page";
 import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import InscriptionStep2 from "@/modules/auth/inscription/InscriptionStep2";
 import { useRouter } from "next/router";
 import useFetchEtablissements from "@/hooks/useFetchEtablissements";
@@ -25,7 +24,6 @@ export const mappingTypeOrganisationToType = {
 
 const PageFormulaire = () => {
   const router = useRouter();
-  const title = "Créer un compte";
   const { typeOrganisation, siret, uai } = router.query;
   const { data: etablissements, isFetching } = useFetchEtablissements({ siret });
   const etablissement = etablissements?.[0];
@@ -37,7 +35,6 @@ const PageFormulaire = () => {
       <Head>
         <title>Inscription</title>
       </Head>
-      <Breadcrumb pages={[PAGES.homepage(), { title }]} />
       <Flex w="100%" mt={8} minH="40vh" direction={{ base: "column", md: "row" }}>
         {isFetching ? (
           <Spinner />

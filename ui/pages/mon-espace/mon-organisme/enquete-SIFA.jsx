@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 
 import { useOrganisationOrganisme } from "@/hooks/organismes";
@@ -30,7 +29,6 @@ const PageEnqueteSIFADeMonOrganisme = () => {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
         <Container maxW="xl" px={0}>
-          <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
           <Box mt={4}>{organismeState && <SIFAPage isMine />}</Box>
         </Container>
       </Box>

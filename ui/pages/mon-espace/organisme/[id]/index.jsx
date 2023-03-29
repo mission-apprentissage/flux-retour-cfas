@@ -3,7 +3,6 @@ import { Box, Container, Stack, Heading } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -22,7 +21,6 @@ const Organisme = () => {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
         <Container maxW="xl" px={0}>
-          <Breadcrumb pages={[PAGES.monEspace()]} />
           <Stack spacing="2w">
             <Heading textStyle="h2" color="grey.800">
               Bienvenue sur le tableau de bord de :

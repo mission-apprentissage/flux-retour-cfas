@@ -5,7 +5,6 @@ import { Box, Flex, FormControl, FormLabel, Heading, Radio, RadioGroup, VStack }
 import Page from "@/components/Page/Page";
 import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -31,13 +30,11 @@ const categoriesCompte = [
 
 const RegisterPage = () => {
   const router = useRouter();
-  const title = "Créer un compte";
   return (
     <Page>
       <Head>
         <title>Inscription</title>
       </Head>
-      <Breadcrumb pages={[PAGES.homepage(), { title }]} />
       <Flex w="100%" mt={8} minH="40vh" direction={{ base: "column", md: "row" }}>
         <Box flexDirection="column" border="1px solid" h="100%" flexGrow={1} borderColor="openbluefrance" p={12}>
           <Heading as="h2" fontSize="2xl" mb={[3, 6]}>

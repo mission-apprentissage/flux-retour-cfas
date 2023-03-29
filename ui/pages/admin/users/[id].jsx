@@ -5,7 +5,7 @@ import Head from "next/head";
 import { Box, Heading, Stack, Spinner } from "@chakra-ui/react";
 
 import { _get } from "@/common/httpClient";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -31,7 +31,7 @@ const User = () => {
         <title>{title}</title>
       </Head>
 
-      <Breadcrumb pages={[PAGES.homepage(), { title, path: "/admin/users" }, { title: "Fiche Utilisateur" }]} />
+      <Breadcrumb pages={[{ title, path: "/admin/users" }, { title: "Fiche Utilisateur" }]} />
 
       {isLoading ? (
         <Spinner alignSelf="center" />

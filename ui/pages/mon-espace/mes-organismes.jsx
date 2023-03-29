@@ -3,7 +3,6 @@ import Head from "next/head";
 import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
 
 import { ArrowDropRightLine } from "@/theme/components/icons";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import Page from "@/components/Page/Page";
@@ -62,7 +61,6 @@ function MesOrganismes() {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 4, 4]} mb={16}>
         <Container maxW="xl">
-          <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
           <Heading textStyle="h2" color="grey.800" my={5}>
             {getHeaderTitleFromOrganisationType(organisationType)}
           </Heading>

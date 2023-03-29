@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Flex, Heading } from "@chakra-ui/react";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import Head from "next/head";
 import withAuth from "@/components/withAuth";
@@ -10,8 +9,11 @@ import ProfileInformation from "@/components/Profile/ProfileInformation";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const ProfilePage = () => {
-  const MyProfile = () => {
-    return (
+  return (
+    <Page>
+      <Head>
+        <title>Mon compte</title>
+      </Head>
       <Flex>
         <Box w="30%" pt={[4, 8]} color="#1E1E1E">
           <Box borderLeft="2px solid" _hover={{ cursor: "pointer" }} borderColor={"bluefrance"} color={"bluefrance"}>
@@ -24,17 +26,6 @@ const ProfilePage = () => {
           <ProfileInformation />
         </Box>
       </Flex>
-    );
-  };
-
-  return (
-    <Page>
-      <Head>
-        <title>Mon compte</title>
-      </Head>
-
-      <Breadcrumb pages={[{ title: "Mon Compte", to: "/" }, { title: "Mon compte" }]} />
-      <MyProfile />
     </Page>
   );
 };

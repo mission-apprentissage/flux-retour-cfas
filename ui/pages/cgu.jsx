@@ -1,7 +1,6 @@
 import React from "react";
 import Head from "next/head";
 
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import { Cgu } from "@/components/legal/Cgu";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
@@ -17,7 +16,6 @@ const CguPage = () => {
         <title>{title}</title>
       </Head>
       <Section>
-        <Breadcrumb pages={[PAGES.homepage(), { title }]} />
         <Cgu />
       </Section>
     </Page>
