@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box, Button, HStack, Link, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
 
@@ -18,9 +18,6 @@ const RegisterConfigurationOrganisationPage = () => {
   const typeOrganisation = router.query.typeOrganisation as CategorieCompteInscription;
   console.log(typeOrganisation, router.query);
 
-  // TODO supprimer de ce composant
-  const [siret, setSiret] = useState(null);
-
   return (
     <InscriptionWrapper>
       <Box>
@@ -35,15 +32,11 @@ const RegisterConfigurationOrganisationPage = () => {
             </Box>
           </HStack>
         )}
-        {typeOrganisation === "organisme_formation" && (
-          <InscriptionOF onEtablissementSelected={({ siret }) => setSiret(siret)} />
-        )}
+        {typeOrganisation === "organisme_formation" && <InscriptionOF />}
         {["operateur_public", "dreets", "ddets", "draaf", "academie", "conseil_regional"].includes(
           typeOrganisation
-        ) && <InscriptionOperateurPublic onEtablissementSelected={({ siret }) => setSiret(siret)} />}
-        {typeOrganisation === "tete_de_reseau" && (
-          <InscriptionReseau onEtablissementSelected={({ siret }) => setSiret(siret)} />
-        )}
+        ) && <InscriptionOperateurPublic />}
+        {typeOrganisation === "tete_de_reseau" && <InscriptionReseau />}
       </Box>
       <HStack gap="24px" mt={5}>
         <Button
