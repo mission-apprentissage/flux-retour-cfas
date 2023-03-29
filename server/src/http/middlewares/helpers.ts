@@ -1,3 +1,4 @@
+import { AuthContext } from "@/src/common/model/internal/AuthContext.js";
 import Boom from "boom";
 import { NextFunction, Request, Response } from "express";
 
@@ -18,18 +19,6 @@ export function returnResult(serviceFunc: Handler) {
   };
 }
 
-// would be simpler to put this helper function into the cache structure
-export async function tryCachedExecution(cache, cacheKey, serviceFunc) {
-  const cachedResult = await cache.get(cacheKey);
-  if (cachedResult) {
-    return JSON.parse(cachedResult);
-  } else {
-    const result = await serviceFunc();
-    await cache.set(cacheKey, JSON.stringify(result));
-    return result;
-  }
-}
-
 export function indicateursPermissions() {
   return async (req, _, next) => {
     ensureValidUser(req.user);
@@ -38,7 +27,7 @@ export function indicateursPermissions() {
 }
 
 // helpers
-export function ensureValidUser(user) {
+export function ensureValidUser(user: AuthContext) {
   if (user.account_status !== USER_ACCOUNT_STATUS.CONFIRMED) {
     throw Boom.forbidden("Accès non autorisé");
   }

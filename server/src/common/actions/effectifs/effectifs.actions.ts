@@ -16,6 +16,10 @@ import {
 import { effectifsDb } from "../../model/collections.js";
 import { AuthContext } from "../../model/internal/AuthContext.js";
 import { requireOrganismeAccess } from "../helpers/permissions.js";
+import { format } from "date-fns";
+import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
+import { cache } from "../../../services.js";
+import { tryCachedExecution } from "../../utils/cacheUtils.js";
 
 export async function getOrganismeIndicateurs(ctx: AuthContext, organismeId: string, filters: EffectifsFilters) {
   await requireOrganismeAccess(ctx, organismeId);
@@ -337,3 +341,15 @@ export const getNbDistinctOrganismes = async (filters = {}) => {
   const distinctOrganismes = await effectifsDb().distinct("organisme_id", filters);
   return distinctOrganismes ? distinctOrganismes.length : 0;
 };
+
+export async function getIndicateursNational(date: Date) {
+  const cacheKey = `indicateurs-national:${format(date, "yyyy-MM-dd")}`;
+  return tryCachedExecution(cache, cacheKey, async () => {
+    const [indicateurs, totalOrganismes] = await Promise.all([
+      getIndicateurs({ date }),
+      getNbDistinctOrganismes({ annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } }),
+    ]);
+    indicateurs.totalOrganismes = totalOrganismes;
+    return indicateurs;
+  });
+}

@@ -17,7 +17,6 @@ import { authMiddleware } from "./middlewares/authMiddleware.js";
 
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
-import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursRouter, { buildEffectifsFiltersFromRequest } from "./routes/specific.routes/indicateurs.routes.js";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes.js";
 
@@ -69,7 +68,7 @@ import {
   listOrganisationPendingInvitations,
   removeUserFromOrganisation,
 } from "../common/actions/organisations.actions.js";
-import { getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
+import { getIndicateursNational, getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
 import { updateUserProfile } from "../common/actions/users.actions.js";
 
 /**
@@ -167,7 +166,15 @@ function setupRoutes(app: Application, services) {
       return await findMaintenanceMessages();
     })
   );
-  app.use("/api/indicateurs-national", indicateursNationalRouter(services));
+  app.use(
+    "/api/indicateurs-national",
+    returnResult(async (req) => {
+      const { date } = await validateFullObjectSchema(req.query, {
+        date: Joi.date().required(),
+      });
+      return await getIndicateursNational(date);
+    })
+  );
 
   /*****************************************************************************
    * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *

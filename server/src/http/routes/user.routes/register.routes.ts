@@ -21,7 +21,6 @@ import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { authMiddleware } from "../../middlewares/authMiddleware.js";
-import { createUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
