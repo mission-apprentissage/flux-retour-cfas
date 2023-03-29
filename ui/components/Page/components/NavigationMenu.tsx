@@ -47,7 +47,9 @@ const NavItem = ({
   ...rest
 }) => {
   const router = useRouter();
-  const isActiveInternal = isActive || router.pathname.startsWith(to) || router.asPath.startsWith(to);
+  // on traite la racine en mode exact
+  const isActiveInternal =
+    isActive || (to === "/" ? router.pathname === "/" : router.pathname.startsWith(to) || router.asPath.startsWith(to));
 
   const hasState = isActiveInternal || isDisabled;
   const colorCurrentState = isActiveInternal ? colorActive : isDisabled ? colorDisabled : "";
@@ -99,8 +101,8 @@ function NavBarTransverse(): ReactElement {
   const { organisationType } = useAuth();
   return (
     <>
-      <NavItem to="/mon-espace/mon-organisme">Mon tableau de bord</NavItem>
-      <NavItem to="/mon-espace/mes-organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
+      <NavItem to="/">Mon tableau de bord</NavItem>
+      <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
     </>
   );
 }
@@ -110,14 +112,12 @@ function NavBarOrganismeFormation(): ReactElement {
   const { organisme } = useOrganisationOrganisme();
   return (
     <>
-      <NavItem to="/mon-espace/mon-organisme">Mon tableau de bord</NavItem>
-      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && (
-        <NavItem to="/mon-espace/mes-organismes">Mes organismes</NavItem>
-      )}
-      <NavItem to="/mon-espace/mon-organisme/effectifs">Mes effectifs</NavItem>
+      <NavItem to="/">Mon tableau de bord</NavItem>
+      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && <NavItem to="/organismes">Mes organismes</NavItem>}
+      <NavItem to="/effectifs">Mes effectifs</NavItem>
       {organisme && (
         <NavItem
-          to="/mon-espace/mon-organisme/enquete-SIFA"
+          to="/enquete-sifa"
           isDisabled={!organisme.first_transmission_date}
           disabledReason={
             !organisme.first_transmission_date ? "Désactivé car votre organisme n'a encore rien transmis" : ""
@@ -134,7 +134,7 @@ function NavBarAutreOrganisme(): ReactElement {
   const router = useRouter();
 
   // Construction dynamique des liens de la navbar en fonction de la navigation URL
-  const showSubNavBar = router.pathname.startsWith("/mon-espace/organisme/[id]");
+  const showSubNavBar = router.pathname.startsWith("/organismes/[id]");
   const organismeId = router.query.id as string;
 
   return (
@@ -145,7 +145,7 @@ function NavBarAutreOrganisme(): ReactElement {
             <Box p={4} bg={"transparent"}>
               <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
             </Box>
-            <NavItem to={`/mon-espace/organisme/${organismeId}`} colorActive="dsfr_lightprimary.bluefrance_850">
+            <NavItem to={`/organismes/${organismeId}`} colorActive="dsfr_lightprimary.bluefrance_850">
               Son tableau de bord
             </NavItem>
           </Flex>

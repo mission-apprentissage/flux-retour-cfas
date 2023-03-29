@@ -132,7 +132,7 @@ const SIFAPage = ({ isMine }) => {
             p={{ base: 2, md: 4 }}
             h={{ base: 8, md: 10 }}
             onClick={() => {
-              router.push(`${router.asPath.replace("/enquete-SIFA", "/effectifs/televersement")}`);
+              router.push(`${router.asPath.replace("/enquete-sifa", "/effectifs/televersement")}`);
             }}
             variant="secondary"
           >

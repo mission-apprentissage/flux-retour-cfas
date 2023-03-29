@@ -26,30 +26,30 @@ const ViewSelection = () => {
     organisationType === "TETE_DE_RESEAU"
       ? [
           {
-            path: "/mon-espace/mon-organisme/par-reseau",
+            path: "/par-reseau",
             title: `Vue du réseau ${auth.reseau}`,
           },
           {
-            path: "/mon-espace/mon-organisme/par-organisme",
+            path: "/par-organisme",
             title: "Vue par organisme de formation du réseau",
           },
         ]
       : [
           {
             title: "Vue territoriale",
-            path: "/mon-espace/mon-organisme/par-territoire",
+            path: "/par-territoire",
           },
           {
             title: "Vue par réseau",
-            path: "/mon-espace/mon-organisme/par-reseau",
+            path: "/par-reseau",
           },
           {
             title: "Vue par organisme de formation",
-            path: "/mon-espace/mon-organisme/par-organisme",
+            path: "/par-organisme",
           },
           {
             title: "Vue par formation",
-            path: "/mon-espace/mon-organisme/par-formation",
+            path: "/par-formation",
           },
         ];
   return (

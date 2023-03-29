@@ -85,7 +85,7 @@ const ResetPasswordPage = () => {
         });
         if (result.loggedIn) {
           await refreshSession();
-          router.push("/mon-espace/mon-organisme");
+          router.push("/");
         }
       } catch (e) {
         console.error(e);

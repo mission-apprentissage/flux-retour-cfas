@@ -8,7 +8,7 @@ import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import SIFAPage from "@/modules/mon-espace/SIFA/SIFAPage";
 import { useRecoilState } from "recoil";
-import { organismeAtom } from "../../../hooks/organismeAtoms";
+import { organismeAtom } from "@/hooks/organismeAtoms";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

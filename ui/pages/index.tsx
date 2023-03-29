@@ -1,18 +1,18 @@
-import React, { ReactElement } from "react";
-import { Box, Container } from "@chakra-ui/react";
+import React from "react";
 import Head from "next/head";
+import { Box, Container } from "@chakra-ui/react";
 
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
-import withAuth from "@/components/withAuth";
-import useAuth from "@/hooks/useAuth";
 import { OrganisationType } from "@/common/internal/Organisation";
 import DashboardOrganisme from "@/modules/mon-espace/landing/DashboardOrganisme";
 import DashboardTransverse from "@/modules/mon-espace/landing/DashboardTransverse";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import useAuth from "@/hooks/useAuth";
+import PublicLandingPage from "@/modules/PublicLandingPage";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const getDashboardComponent = (organisationType: OrganisationType): ReactElement => {
+function getDashboardComponent(organisationType: OrganisationType) {
   switch (organisationType) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
@@ -32,9 +32,9 @@ const getDashboardComponent = (organisationType: OrganisationType): ReactElement
       // fourre-tout, mais on pourra avoir des différences plus tard
       return <DashboardTransverse />;
   }
-};
+}
 
-const PageMonOrganisme = () => {
+function DashboardPage() {
   const { organisationType } = useAuth();
   const title = "Tableau de bord";
 
@@ -52,6 +52,10 @@ const PageMonOrganisme = () => {
       </Box>
     </Page>
   );
-};
+}
 
-export default withAuth(PageMonOrganisme);
+export default function Home() {
+  const { auth } = useAuth();
+  // FIXME vérifier le chargement
+  return auth ? <DashboardPage /> : <PublicLandingPage />;
+}

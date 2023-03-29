@@ -152,7 +152,7 @@ function MesOrganismes() {
                     header: () => " ",
                     cell: ({ row }) => {
                       return (
-                        <Link href={`/mon-espace/organisme/${organismes[row.id]._id}`} flexGrow={1}>
+                        <Link href={`/organismes/${organismes[row.id]._id}`} flexGrow={1}>
                           <ArrowDropRightLine />
                         </Link>
                       );

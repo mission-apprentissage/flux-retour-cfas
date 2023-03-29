@@ -110,7 +110,7 @@ const ConfigurationAPI = () => {
               setup_step_courante: "COMPLETE",
               mode_de_transmission: "API",
             });
-            router.push("/mon-espace/mon-organisme/effectifs");
+            router.push("/effectifs");
           }}
           variant="secondary"
           padding={2}

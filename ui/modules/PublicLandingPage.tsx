@@ -9,7 +9,7 @@ import LinkCard from "@/components/LinkCard/LinkCard";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 
-export default function Home() {
+export default function PublicLandingPage() {
   const title = PRODUCT_NAME_TITLE;
   return (
     <Page>

@@ -151,7 +151,7 @@ const Finalize = () => {
           const result = await _post("/api/v1/auth/finalize", values);
           if (result.loggedIn) {
             await refreshSession();
-            router.push("/mon-espace/mon-organisme");
+            router.push("/");
           }
         } catch (e) {
           console.error(e);
