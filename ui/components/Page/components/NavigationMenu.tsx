@@ -106,11 +106,14 @@ function NavBarTransverse(): ReactElement {
 }
 
 function NavBarOrganismeFormation(): ReactElement {
+  const { organisationType } = useAuth();
   const { organisme } = useOrganisationOrganisme();
   return (
     <>
       <NavItem to="/mon-espace/mon-organisme">Mon tableau de bord</NavItem>
-      <NavItem to="/mon-espace/mes-organismes">Mes organismes</NavItem>
+      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && (
+        <NavItem to="/mon-espace/mes-organismes">Mes organismes</NavItem>
+      )}
       <NavItem to="/mon-espace/mon-organisme/effectifs">Mes effectifs</NavItem>
       {organisme && (
         <NavItem
