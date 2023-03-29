@@ -8,6 +8,8 @@ export interface AuthContext<IOrganisation = Organisation> {
   prenom: string;
   email: string;
   organisation_id: ObjectId;
+  account_status: string; // FIXME, mettre les bons types une fois l'UI revisitée avec les nouvelles permissions
+  has_accept_cgu_version: string;
 
   // populated via $lookup
   organisation: IOrganisation;

@@ -230,6 +230,16 @@ function setupRoutes(app: Application, services) {
     })
   );
 
+  const userCGUUpdateSchema = {
+    has_accept_cgu_version: Joi.string().required(),
+  };
+  authRouter.put(
+    "/api/v1/profile/cgu",
+    returnResult(async (req) => {
+      const infos = await validateFullObjectSchema(req.body, userCGUUpdateSchema);
+      await updateUserProfile(req.user, infos);
+    })
+  );
   authRouter.get(
     "/api/v1/organismes/:id",
     returnResult(async (req) => {
