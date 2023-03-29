@@ -46,6 +46,7 @@ export interface OrganismesReferentiel {
   qualiopi?: boolean;
   lieux_de_formation: {
     uai?: string;
+    uai_fiable?: boolean;
   }[];
   /**
    * Formations de cet organisme
