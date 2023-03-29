@@ -930,8 +930,9 @@ export interface Organisme {
     | "FIABLE"
     | "NON_FIABILISABLE_UAI_NON_VALIDEE"
     | "NON_FIABILISABLE_MAPPING"
-    | "INCONNU"
-    | "FIABILISE";
+    | "A_CONTACTER"
+    | "INCONNU";
+
   /**
    * Mode de transmission des effectifs
    */

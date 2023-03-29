@@ -1,3 +1,4 @@
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 import { MongoServerError } from "mongodb";
 import { deleteOrganismeAndEffectifs } from "../../../../common/actions/organismes/organismes.actions.js";
@@ -6,7 +7,12 @@ import {
   STATUT_FIABILISATION_ORGANISME,
 } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
-import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../common/model/collections.js";
+import {
+  effectifsDb,
+  fiabilisationUaiSiretDb,
+  organismesDb,
+  organismesReferentielDb,
+} from "../../../../common/model/collections.js";
 
 let nbOrganismesReferentielFiables = 0;
 let nbOrganismesFiabilises = 0;
@@ -32,6 +38,7 @@ export const applyFiabilisationUaiSiret = async () => {
     updateOrganismesReferentielFiables(),
     updateOrganismesFiabilise(),
     updateOrganismesNonFiabilisablesMapping(),
+    handleOrganismesNonFiabilisablesUaiNonValide(),
   ]);
 
   // Log
@@ -201,4 +208,54 @@ const updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable = async ({
     if (nbEffectifsFixedOrganismesNonFiabilisablesMapping > 0) nbOrganismesNonFiabilisablesMappingFixEffectifs++;
   }
 };
+// #endregion
+
+// #region ORGANISMES NON FIABILISABLES UAI NON VALIDEE
+
+const handleOrganismesNonFiabilisablesUaiNonValide = async () => {
+  logger.info("Traitement des organismes non fiabilisables car uai non validée ...");
+
+  // Récupération de tous les organismes non fiabilisables car uai non validée
+  const organismesNonFiabilisablesUai = await organismesDb()
+    .find({ fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE })
+    .toArray();
+
+  await PromisePool.for(organismesNonFiabilisablesUai).process(async ({ uai, siret }: any) => {
+    const organismesFiableForSiret = await organismesDb()
+      .find({ siret, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
+      .toArray();
+
+    // S'il existe un unique couple fiable lié au couple non fiable courant on vérifie si l'uai est fermée
+    if (organismesFiableForSiret.length === 1) {
+      const organismeReferentielUai = await organismesReferentielDb().findOne({ uai });
+
+      // TODO vérifier si l'uai est fermée
+      if (organismeReferentielUai) {
+        const isUaiNonFiableFerme = organismeReferentielUai?.etat_administratif === "fermé";
+        await createJobEvent({
+          jobname: "fiabilisation:uai-siret:apply",
+          action: "log-handleOrganismesNonFiabilisablesUaiNonValide-1-fiableLie",
+          date: new Date(),
+          data: {
+            uai,
+            siret,
+            coupleFiableUai: organismesFiableForSiret[0].uai,
+            coupleFiableSiret: organismesFiableForSiret[0].siret,
+            isUaiNonFiableFerme,
+            organismeReferentielUai: organismeReferentielUai || false,
+          },
+        });
+        // TODO Vérifier doublons d'effectifs
+        // TODO Si nécessaire suppression de l'organisme non fiable
+      }
+    } else {
+      // Sinon on marque l'organisme comme A_CONTACTER
+      await organismesDb().updateOne(
+        { uai, siret },
+        { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.A_CONTACTER } }
+      );
+    }
+  });
+};
+
 // #endregion
