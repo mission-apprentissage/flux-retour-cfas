@@ -85,8 +85,7 @@ const PageGestionDesMembres = () => {
                         header: () => "Options",
                         cell: (info) => {
                           const user = info.row.original;
-                          const you = auth.email !== user.email;
-                          return you ? (
+                          return auth.email === user.email ? (
                             <></>
                           ) : (
                             <>
@@ -168,8 +167,7 @@ const PageGestionDesMembres = () => {
                     header: () => "Options",
                     cell: (info) => {
                       const user = info.row.original;
-                      const you = auth.email !== user.email;
-                      return you ? (
+                      return auth.email === user.email ? (
                         <></>
                       ) : (
                         <>
