@@ -16,18 +16,20 @@ let nbOrganismesNonFiablesUaiSupprimes = 0;
 let nbEffectifsDuplicateOrganismesAFiabiliser = 0;
 
 let nbOrganismesNonFiabilisablesMappingFixEffectifs = 0;
+let nbOrganismesNonFiabilisablesPbCollecte = 0;
 let nbEffectifsFixedOrganismesNonFiabilisablesMapping = 0;
 let nbEffectifsDuplicateOrganismesNonFiabilisablesMapping = 0;
 let nbOrganismesNonFiabilisablesUaiNonValidees = 0;
 
 /**
- * Méthode d'application de la fiabilisation pour les 3 cas :
+ * Méthode d'application de la fiabilisation pour les différents cas :
  *  Couples déja identifiées comme fiables : MAJ le champ fiabilisation_statut des organismes concernés
  *  Couples à fiabiliser : On déplace les effectifs, puis on MAJ le champ fiabilisation_statut des organismes concernés
  *    et on supprime les organismes non fiables restants
  *  Couples identifiés comme non fiabilisables (via Mapping) : MAJ le champ fiabilisation_statut des organismes concernés
  *    et suppression des organismes si on trouve un organisme fiable lié à ce couple
  *  Couples identifiés comme non fiabilisables (UAI non validée référentiel) : MAJ le champ fiabilisation_statut des organismes concernés
+ *  Couples identifiés comme non fiabilisables (pb de collecte) : MAJ le champ fiabilisation_statut des organismes concernés
  */
 export const applyFiabilisationUaiSiret = async () => {
   // Traitement // de l'identification des différents statuts de fiabilisation
@@ -37,6 +39,7 @@ export const applyFiabilisationUaiSiret = async () => {
     updateOrganismesFiabilise(),
     updateOrganismesNonFiabilisablesMapping(),
     updateOrganismesNonFiabilisablesUaiNonValidees(),
+    updateOrganismesNonFiabilisablesPbCollecte(),
   ]);
 
   // Log
@@ -66,6 +69,7 @@ export const applyFiabilisationUaiSiret = async () => {
     "Effectifs en doublons sur organismes non fiable en tentative de correction sur un organisme fiable lié"
   );
   logger.info(nbOrganismesNonFiablesUaiSupprimes, "organismes non fiables (uai) supprimés");
+  logger.info(nbOrganismesNonFiabilisablesPbCollecte, "organismes non fiabilisables car pb de collecte");
 
   return {
     nbOrganismesFiables,
@@ -74,6 +78,7 @@ export const applyFiabilisationUaiSiret = async () => {
     nbOrganismesNonFiabilisablesUaiNonValidees,
     nbOrganismesNonFiabilisablesMappingSupprimes,
     nbOrganismesNonFiablesUaiSupprimes,
+    nbOrganismesNonFiabilisablesPbCollecte,
   };
 };
 
@@ -285,6 +290,29 @@ const updateOrganismeForCurrentCoupleNonFiabilisableUaiNonValidee = async (curre
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE } }
   );
   nbOrganismesNonFiabilisablesUaiNonValidees += modifiedCount;
+};
+
+// #endregion
+
+// #region ORGANISMES NON FIABILISABLES PB COLLECTE
+
+/**
+ * Méthode de MAJ de tous les organismes non fiabilisables car pb de collecte >> NON_FIABILISABLE_PB_COLLECTE
+ */
+const updateOrganismesNonFiabilisablesPbCollecte = async () => {
+  logger.info("Identification des organismes non fiabilisables car pb de collecte ...");
+
+  const couplesNonFiabilisablesPbCollecte = await fiabilisationUaiSiretDb()
+    .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE })
+    .toArray();
+
+  await PromisePool.for(couplesNonFiabilisablesPbCollecte).process(async ({ uai, siret }: any) => {
+    const { modifiedCount } = await organismesDb().updateOne(
+      { uai, siret },
+      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_PB_COLLECTE } }
+    );
+    nbOrganismesNonFiabilisablesPbCollecte += modifiedCount;
+  });
 };
 
 // #endregion
