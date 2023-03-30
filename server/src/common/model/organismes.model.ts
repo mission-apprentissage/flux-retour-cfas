@@ -49,6 +49,9 @@ const schema = object(
       }
     ),
     effectifs_count: integer({ description: "Compteur sur le nombre d'effectifs de l'organisme" }),
+    effectifs_current_year_count: integer({
+      description: "Compteur sur le nombre d'effectifs de l'organisme sur l'année courante",
+    }),
     nature: string({
       description: "Nature de l'organisme de formation",
       enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
@@ -114,6 +117,7 @@ const schema = object(
     last_transmission_date: date({ description: "Date de la dernière transmission de données" }),
     est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
     ferme: boolean({ description: "Le siret est fermé" }),
+    qualiopi: boolean({ description: "a la certification Qualiopi" }),
 
     // TODO [tech] TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
