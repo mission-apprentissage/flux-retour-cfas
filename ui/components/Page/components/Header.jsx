@@ -18,7 +18,7 @@ import {
 
 import { Logo } from "./Logo";
 import Link from "../../Links/Link";
-import { PRODUCT_NAME } from "../../../common/constants/product";
+import { PRODUCT_NAME_TITLE } from "../../../common/constants/product";
 import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
 import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
 import useAuth from "../../../hooks/useAuth";
@@ -107,12 +107,12 @@ const Header = () => {
           </Link>
           <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]} flexGrow={1}>
             <Heading as="h6" variant="h1" fontSize="gamma">
-              Le {PRODUCT_NAME}{" "}
+              {PRODUCT_NAME_TITLE}{" "}
               <Tag backgroundColor="#FEE7FC" color="#6E445A" fontWeight="bold" ml={1}>
                 BETA
               </Tag>
             </Heading>
-            <Text fontFamily="Marianne" color="grey.700" fontSize="zeta">
+            <Text fontFamily="Marianne" color="grey.700" fontSize="zeta" mt={1}>
               Mettre à disposition des différents acteurs les données clés de l&apos;apprentissage en temps réel
             </Text>
           </Box>
