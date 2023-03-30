@@ -23,7 +23,7 @@ import { serverEventsHandler } from "./routes/specific.routes/server-events.rout
 import emails from "./routes/emails.routes.js";
 
 import auth from "./routes/user.routes/auth.routes.js";
-import register from "./routes/user.routes/register.routes.js";
+import registerRouter from "./routes/user.routes/register.routes.js";
 import password from "./routes/user.routes/password.routes.js";
 
 import organisme from "./routes/specific.routes/organisme.routes.js";
@@ -77,6 +77,10 @@ import {
 } from "../common/actions/organisations.actions.js";
 import { getIndicateursNational, getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
 import { updateUserProfile } from "../common/actions/users.actions.js";
+import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
+import registrationSchema from "../common/validation/registrationSchema.js";
+import { z } from "zod";
+import { register } from "../common/actions/registration.actions.js";
 
 /**
  * Create the express app
@@ -183,7 +187,19 @@ function setupRoutes(app: Application, services) {
 
   app.use("/api/emails", emails(services)); // No versionning to be sure emails links are always working
   app.use("/api/v1/auth", auth());
-  app.use("/api/v1/auth", register(services));
+  app.use("/api/v1/auth", registerRouter());
+
+  app.post(
+    "/api/v1/auth/register",
+    validateRequestMiddleware({
+      body: registrationSchema().strict(),
+    }),
+    returnResult(async (req) => {
+      const registration = req.body as z.infer<ReturnType<typeof registrationSchema>>;
+      registration.user.email = registration.user.email.toLowerCase(); // sans doute possibilité de transformer avec zod, mais pour être sûr
+      await register(registration);
+    })
+  );
   app.use("/api/v1/password", password(services));
   app.get(
     "/api/v1/maintenanceMessages",

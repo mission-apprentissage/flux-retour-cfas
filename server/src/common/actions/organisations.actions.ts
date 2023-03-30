@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import Boom from "boom";
 import { ObjectId } from "mongodb";
 import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "../constants/territoiresConstants.js";
@@ -12,6 +11,7 @@ import logger from "../logger.js";
 import { Organisme } from "../model/@types/Organisme.js";
 import { requireOrganisationOF } from "./helpers/permissions.js";
 import { Invitation } from "../model/invitations.model.js";
+import { generateKey } from "../utils/cryptoUtils.js";
 
 type NewOrganisation = Omit<Organisation, "_id" | "created_at">;
 
@@ -73,7 +73,7 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
         : "Cet utilisateur est déjà présent dans une autre organisation. Si vous pensez que c'est une erreur, merci de contacter le support."
     );
   }
-  const invitationToken = uuidv4();
+  const invitationToken = generateKey(50, "hex");
   await invitationsDb().insertOne({
     organisation_id: ctx.organisation_id,
     email,

@@ -7,13 +7,14 @@
       <mj-section background-color="#ffffff" padding-top="0">
         <mj-column>
           <mj-text>
-            Bonjour <strong><%= data.user.civility || "Madame, Monsieur" %> <%= data.user.nom %></strong>,
+            Bonjour <strong><%= data.user.prenom %> <%= data.user.nom %></strong>,
           </mj-text>
           <mj-text>
             <div>
-              Vous venez de créer votre compte (<%= data.user.email %>) sur le
-              <strong>tableau de bord de l'apprentissage</strong> et nous vous en remercions. <br /><br />Si vous êtes
-              bien à l'origine de cette demande, merci de cliquer sur le lien ci-dessous afin d'activer votre compte.
+              Vous venez de créer votre compte <strong>tableau de bord de l'apprentissage</strong> et nous vous en remercions.
+              <br />
+              Si vous êtes bien à l'origine de cette demande, merci de cliquer sur le lien ci-dessous afin d'activer votre compte.
+              <br />
               <strong>Votre identifiant est votre courriel.</strong>
             </div>
           </mj-text>
@@ -22,7 +23,7 @@
             background-color="#0e4194"
             color="white"
           >
-            Je valide mon compte
+            J'active mon compte
           </mj-button>
 
           <mj-text>

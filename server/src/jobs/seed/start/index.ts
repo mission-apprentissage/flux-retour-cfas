@@ -1,32 +1,44 @@
 import logger from "../../../common/logger.js";
 import { createUser, getUserByEmail } from "../../../common/actions/users.actions.js";
 import {
-  addContributeurOrganisme,
   createOrganisme,
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { createUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
+import { register } from "../../../common/actions/registration.actions.js";
+import { usersMigrationDb } from "../../../common/model/collections.js";
 
-export const seedAdmin = async ({ adminEmail }) => {
+export const seedAdmin = async (email = "admin@test.fr") => {
   // Create user Admin
-  const aEmail = adminEmail || "admin@test.fr";
-  const userAdmin = await createUser(
-    { email: aEmail, password: "Secret!Password1" },
-    {
+  await register({
+    user: {
+      email,
+      password: "Secret!Password1",
+      civility: "Monsieur",
       nom: "Admin",
       prenom: "test",
-      is_admin: true,
-      is_cross_organismes: true,
-      account_status: "DIRECT_PENDING_PASSWORD_SETUP",
-      siret: "13002526500013", // Siret Dinum
+      fonction: "",
+      telephone: "",
+      has_accept_cgu_version: "",
+    },
+    organisation: {
+      type: "ADMINISTRATEUR",
+    },
+  });
+
+  await usersMigrationDb().updateOne(
+    {
+      email,
+    },
+    {
+      $set: {
+        account_status: "DIRECT_PENDING_PASSWORD_SETUP",
+      },
     }
   );
-  await createUserPermissions({ user: userAdmin, pending: false, notify: false });
-  logger.info(`User ${aEmail} with password 'Secret!Password1' and admin is successfully created `);
-
-  logger.info("Seed admin created");
+  logger.info(`Admin User ${email} with password 'Secret!Password1' is successfully created `);
 };
 
 export const seedSample = async () => {

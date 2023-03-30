@@ -12,7 +12,6 @@ import {
   updateUserLastConnection,
   structureUser,
   activateUser,
-  createUser,
   finalizeUser,
   userHasAskAccess,
 } from "../../../common/actions/users.actions.js";
@@ -25,13 +24,7 @@ import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import logger from "../../../common/logger.js";
-import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
-import registrationSchema from "../../../common/validation/registrationSchema.js";
-import { returnResult } from "../../middlewares/helpers.js";
 import { USER_ACCOUNT_STATUS } from "../../../common/constants/usersConstants.js";
-import { z } from "zod";
-import { createOrganisation } from "../../../common/actions/organisations.actions.js";
-import { organisationsDb } from "../../../common/model/collections.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -57,32 +50,8 @@ const checkActivationToken = () => {
   return passport.authenticate("jwt-activation", { session: false, failWithError: true });
 };
 
-export default ({ mailer }) => {
+export default () => {
   const router = express.Router();
-
-  router.post(
-    "/register",
-    validateRequestMiddleware({
-      body: registrationSchema().strict(),
-    }),
-    returnResult(async (req) => {
-      const registration = req.body as z.infer<ReturnType<typeof registrationSchema>>;
-      registration.user.email = registration.user.email.toLowerCase(); // sans doute possibilité de transformer avec zod, mais pour être sûr
-
-      const alreadyExists = await getUserByEmail(registration.user.email);
-      if (alreadyExists) {
-        throw Boom.conflict("email already in use", { message: "email already in use" });
-      }
-
-      const organisation = await organisationsDb().findOne(registration.organisation);
-      const organisationId = organisation ? organisation._id : await createOrganisation(registration.organisation);
-
-      await createUser(registration.user, organisationId);
-
-      // FIXME vérifier payload
-      await mailer.sendEmail({ to: registration.user.email, payload: registration }, "activation_user");
-    })
-  );
 
   // FIXME potentiellement remplacé par /api/v1/organismes/search-by-uai/siret
   router.post("/uai-siret-adresse", async ({ body }, res) => {

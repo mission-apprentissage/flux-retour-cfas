@@ -106,19 +106,6 @@ program
  * Job d'initialisation de données de test
  */
 program
-  .command("seed")
-  .description("Seed global data")
-  .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .action(async ({ email }, options) =>
-    runScript(async () => {
-      return seedAdmin({ adminEmail: email?.toLowerCase() });
-    }, options._name)
-  );
-
-/**
- * Job d'initialisation de données de test
- */
-program
   .command("seed:sample")
   .description("Seed sample data")
   .action(async (_, options) =>
@@ -137,7 +124,7 @@ program
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
   .action(async ({ email }, options) =>
     runScript(async () => {
-      return seedAdmin({ adminEmail: email?.toLowerCase() });
+      return seedAdmin(email?.toLowerCase());
     }, options._name)
   );
 

@@ -3,8 +3,10 @@ import { date, object, objectId, string } from "./json-schema/jsonSchemaTypes.js
 
 const collectionName = "invitations";
 
-// FIXME compléter si besoin d'indexes
-const indexes = [];
+const indexes = [
+  [{ token: 1 }, { name: "token", unique: true }],
+  [{ organisation_id: 1 }, { name: "organisation_id" }],
+];
 
 export interface Invitation {
   token: string;
