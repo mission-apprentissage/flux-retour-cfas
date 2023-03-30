@@ -1529,6 +1529,7 @@ export const DEPARTEMENTS_BY_ID = DEPARTEMENTS.reduce((acc, departement) => {
 
 /**
  * TODO Rationaliser / construire le référentiel des académies
+ * FIXME Est-ce qu'on définit 01 comme clé ou 1 (en BDD il n'y a pas l'air d'avoir de padding dans organismes)
  */
 export const ACADEMIES = {
   "01": { nom: "Paris", code: 1 },
@@ -1573,6 +1574,7 @@ export const ACADEMIES_BY_ID = Object.values(ACADEMIES).reduce((acc, academie) =
 export const TERRITOIRE_TYPE = {
   REGION: "region",
   DEPARTEMENT: "departement",
+  ACADEMIE: "academie",
 };
 
 export const REGIONS_SORTED = sortAlphabeticallyBy("nom", REGIONS).map((region) => {
@@ -1581,4 +1583,8 @@ export const REGIONS_SORTED = sortAlphabeticallyBy("nom", REGIONS).map((region) 
 
 export const DEPARTEMENTS_SORTED = sortAlphabeticallyBy("code", DEPARTEMENTS).map((departement) => {
   return { ...departement, type: TERRITOIRE_TYPE.DEPARTEMENT };
+});
+
+export const ACADEMIES_SORTED = sortAlphabeticallyBy("nom", Object.values(ACADEMIES)).map((academie) => {
+  return { ...academie, type: TERRITOIRE_TYPE.ACADEMIE };
 });
