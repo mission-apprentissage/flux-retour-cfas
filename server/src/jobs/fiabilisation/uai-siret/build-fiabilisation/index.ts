@@ -272,12 +272,12 @@ export const buildFiabilisationCoupleForTdbCouple = async (
         }
 
         // Phase 2. Recherche dans les lieux de formation
-        const lieuFormationMatchUai = organismesRespOrRespFormateurForUaiTdb[0].lieux_de_formation.find(
-          (item) => item.uai === currentMultipleUaisCouple.uai
+        const lieuFormationFiableMatchUai = organismesRespOrRespFormateurForUaiTdb[0].lieux_de_formation.find(
+          (item) => item.uai === currentMultipleUaisCouple.uai && item.uai_fiable
         );
 
-        // Si l'UAI Match sur un des lieux alors on peut fiabiliser tel quel en marquant que c'est un couple de lieu de formation
-        if (lieuFormationMatchUai) {
+        // Si l'UAI Match sur un des lieux fiables alors on peut fiabiliser tel quel en marquant que c'est un couple de lieu de formation
+        if (lieuFormationFiableMatchUai) {
           await fiabilisationUaiSiretDb().updateOne(
             { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
             {
