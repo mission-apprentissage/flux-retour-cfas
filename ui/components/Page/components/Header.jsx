@@ -108,7 +108,7 @@ const Header = () => {
           <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]} flexGrow={1}>
             <Heading as="h6" variant="h1" fontSize="gamma">
               Le {PRODUCT_NAME}{" "}
-              <Tag backgroundColor="bluefrance" color="white" position="absolute" ml={4} mt={-2}>
+              <Tag backgroundColor="#FEE7FC" color="#6E445A" fontWeight="bold" ml={1}>
                 BETA
               </Tag>
             </Heading>
