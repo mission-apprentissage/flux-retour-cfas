@@ -140,7 +140,6 @@ const PageFormulaireProfil = () => {
         } catch (err) {
           toastError(err?.message);
         }
-        // organisation;
       })();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -169,6 +168,10 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
   const passwordMinLength = organisation.type === "ADMINISTRATEUR" ? 20 : 12;
   const [showPasswordCharacters, setShowPasswordCharacters] = React.useState(false);
 
+  const isOrganismeFormation =
+    organisation.type === "ORGANISME_FORMATION_FORMATEUR" ||
+    organisation.type === "ORGANISME_FORMATION_RESPONSABLE" ||
+    organisation.type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR";
   return (
     <Formik
       initialValues={{
@@ -203,7 +206,8 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
                 message: "Les mots de passe doivent correspondre.",
               });
         }),
-        has_accepted_cgu: Yup.string().required("Vous devez cocher cette case"),
+        consent_of: isOrganismeFormation ? Yup.boolean().required("Vous devez cocher cette case") : (null as any),
+        has_accepted_cgu: Yup.boolean().required("Vous devez cocher cette case"),
       })}
       onSubmit={async (form, actions) => {
         try {
@@ -235,8 +239,6 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
     >
       {(form) => (
         <Form>
-          <pre>{JSON.stringify(form, null, 4)}</pre>
-
           <Field name="email">
             {({ field, meta }) => (
               <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
@@ -343,17 +345,19 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
               </FormControl>
             )}
           </Field>
-          <Field name="has_accepted_cgu">
-            {({ field, meta }) => (
-              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
-                <Checkbox {...field} id={field.name} icon={<Check />}>
-                  J{"'"}accepte d{"'"}être contacté par un opérateur public (DREETS, DEETS, Académie, …). Mon email
-                  apparaîtra dans le profil dans mon organisme.
-                </Checkbox>
-                <FormErrorMessage>{meta.error}</FormErrorMessage>
-              </FormControl>
-            )}
-          </Field>
+          {isOrganismeFormation && (
+            <Field name="consent_of">
+              {({ field, meta }) => (
+                <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                  <Checkbox {...field} id={field.name} icon={<Check />}>
+                    J{"'"}accepte d{"'"}être contacté par un opérateur public (DREETS, DEETS, Académie, …). Mon email
+                    apparaîtra dans le profil dans mon organisme.
+                  </Checkbox>
+                  <FormErrorMessage>{meta.error}</FormErrorMessage>
+                </FormControl>
+              )}
+            </Field>
+          )}
           <HStack gap="24px" mt={5}>
             <Button onClick={() => router.back()} color="bluefrance" variant="secondary">
               Revenir

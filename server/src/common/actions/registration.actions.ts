@@ -19,5 +19,5 @@ export async function register(registration: z.infer<ReturnType<typeof registrat
   await createUser(registration.user, organisationId);
 
   // FIXME send simple email
-  await mailerActions.sendEmail({ to: registration.user.email, payload: registration }, "activation_user");
+  await mailerActions.sendEmail({ to: registration.user.email, payload: registration.user }, "activation_user");
 }
