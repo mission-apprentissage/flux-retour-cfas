@@ -12,6 +12,7 @@ export const organisationTypes = [
   "ACADEMIE",
   "OPERATEUR_PUBLIC_NATIONAL",
   "ADMINISTRATEUR",
+  "AUTRE", // UI uniquement
 ] as const;
 
 export type Organisation = { _id: string } & (
@@ -22,6 +23,7 @@ export type Organisation = { _id: string } & (
   | OrganisationOperateurPublicAcademie
   | OrganisationOperateurPublicNational
   | OrganisationAdministrateur
+  | OrganisationAutre
 );
 
 export type OrganisationType = (typeof organisationTypes)[number];
@@ -68,4 +70,9 @@ export interface OrganisationOperateurPublicAcademie extends AbstractOrganisatio
 
 export interface OrganisationAdministrateur extends AbstractOrganisation {
   type: "ADMINISTRATEUR";
+}
+
+export interface OrganisationAutre extends AbstractOrganisation {
+  type: "AUTRE";
+  nom: string;
 }

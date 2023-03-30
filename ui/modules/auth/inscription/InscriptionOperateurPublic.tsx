@@ -2,45 +2,46 @@ import React, { useState } from "react";
 import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
 import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoiresConstants";
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
+import { InscriptionOrganistionChildProps } from "./common";
 
 const typesOrganisation = [
   {
     label: "D(R)(I)EETS",
-    value: "dreets",
+    value: "DREETS",
   },
   {
     label: "DDETS",
-    value: "ddets",
+    value: "DDETS",
   },
   {
     label: "DEETS",
-    value: "deets",
+    value: "DEETS",
   },
   {
     label: "DRAAF",
-    value: "draaf",
+    value: "DRAAF",
   },
   {
     label: "Académie",
-    value: "academie",
+    value: "ACADEMIE",
   },
   {
     label: "Conseil régional",
-    value: "conseil_regional",
+    value: "CONSEIL_REGIONAL",
   },
   {
     label: "Organisation nationale",
-    value: "organisation_nationale",
+    value: "OPERATEUR_PUBLIC_NATIONAL",
   },
   {
     label: "Autre opérateur public",
-    value: "autre",
+    value: "AUTRE",
   },
 ] as const;
 
 type TypeOrganisation = (typeof typesOrganisation)[number]["value"];
 
-export const InscriptionOperateurPublic = ({ setOrganisation }) => {
+export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrganistionChildProps) => {
   const [typeOrganisation, setTypeOrganisation] = useState<TypeOrganisation | null>(null);
 
   return (
@@ -56,7 +57,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
         </Select>
       </FormControl>
 
-      {typeOrganisation === "academie" && (
+      {typeOrganisation === "ACADEMIE" && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
           <Select
@@ -76,7 +77,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
           </Select>
         </FormControl>
       )}
-      {typeOrganisation === "ddets" && (
+      {typeOrganisation === "DDETS" && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
           <Select
@@ -96,14 +97,14 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
           </Select>
         </FormControl>
       )}
-      {(["dreets", "deets", "draaf", "conseil_regional"] as (typeof typeOrganisation)[]).includes(typeOrganisation) && (
+      {["DREETS", "DEETS", "DRAAF", "CONSEIL_REGIONAL"].includes(typeOrganisation as string) && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
           <Select
             placeholder="Sélectionner un territoire"
             onChange={(e) =>
               setOrganisation({
-                type: typeOrganisation,
+                type: typeOrganisation as "DREETS" | "DEETS" | "DRAAF" | "CONSEIL_REGIONAL",
                 code_region: e.target.value,
               })
             }
@@ -116,7 +117,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
           </Select>
         </FormControl>
       )}
-      {typeOrganisation === "organisation_nationale" && (
+      {typeOrganisation === "OPERATEUR_PUBLIC_NATIONAL" && (
         <FormControl isRequired>
           <FormLabel>Préciser l{"'"}organisation :</FormLabel>
           <Select
@@ -136,10 +137,18 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
           </Select>
         </FormControl>
       )}
-      {typeOrganisation === "autre" && (
+      {typeOrganisation === "AUTRE" && (
         <FormControl isRequired>
           <FormLabel>Indiquez le nom de votre établissement :</FormLabel>
-          <Input placeholder="..." />
+          <Input
+            placeholder="..."
+            onChange={(e) =>
+              setOrganisation({
+                type: typeOrganisation,
+                nom: e.target.value,
+              })
+            }
+          />
         </FormControl>
       )}
     </>

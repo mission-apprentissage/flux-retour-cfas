@@ -21,7 +21,6 @@ function getRibbon(organisation: Organisation) {
           <Text fontSize="20px" fontWeight="bold">
             nom entreprise
           </Text>
-          ;
           <Text>
             UAI : {organisation.uai} - SIRET : {organisation.siret} (en activité)
           </Text>

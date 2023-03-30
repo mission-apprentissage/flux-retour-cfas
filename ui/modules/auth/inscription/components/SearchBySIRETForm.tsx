@@ -19,8 +19,9 @@ import {
 import { searchOrganismesBySIRET } from "@/common/api/tableauDeBord";
 import { SIRET_REGEX } from "@/common/domain/siret";
 import OrganismeDetails from "./OrganismeDetails";
+import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "../common";
 
-export default function SearchBySIRETForm({ setOrganisation }) {
+export default function SearchBySIRETForm({ setOrganisation }: InscriptionOrganistionChildProps) {
   const [organismes, setOrganismes] = useState<any[] | null>(null);
 
   return (
@@ -85,7 +86,7 @@ export default function SearchBySIRETForm({ setOrganisation }) {
                     px={6}
                     onClick={() =>
                       setOrganisation({
-                        type: "organisme_formation", // FIXME récupérer la nature également
+                        type: getOrganisationTypeFromNature(organismes[0].nature),
                         siret: organismes[0].siret,
                         uai: organismes[0].uai,
                       })
@@ -122,7 +123,7 @@ export default function SearchBySIRETForm({ setOrganisation }) {
                             px={6}
                             onClick={() =>
                               setOrganisation({
-                                type: "organisme_formation", // FIXME récupérer la nature également
+                                type: getOrganisationTypeFromNature(organisme.nature),
                                 siret: organisme.siret,
                                 uai: organisme.uai,
                               })

@@ -2,8 +2,9 @@ import React from "react";
 
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
 import { TETE_DE_RESEAUX } from "@/common/constants/networksConstants";
+import { InscriptionOrganistionChildProps } from "./common";
 
-export const InscriptionTeteDeReseau = ({ setOrganisation }) => {
+export const InscriptionTeteDeReseau = ({ setOrganisation }: InscriptionOrganistionChildProps) => {
   return (
     <>
       <FormControl isRequired>
@@ -12,7 +13,7 @@ export const InscriptionTeteDeReseau = ({ setOrganisation }) => {
           placeholder="Sélectionner votre réseau"
           onChange={(e) =>
             setOrganisation({
-              type: "tete_de_reseau",
+              type: "TETE_DE_RESEAU",
               reseau: e.target.value,
             })
           }

@@ -10,13 +10,15 @@ import { InscriptionOF } from "@/modules/auth/inscription/InscriptionOF";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
+import { Organisation } from "@/common/internal/Organisation";
+import { SetterOrganisation } from "@/modules/auth/inscription/common";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const RegisterConfigurationOrganisationPage = () => {
   const router = useRouter();
   const typeOrganisation = router.query.typeOrganisation as CategorieCompteInscription;
-  const [organisation, setOrganisation] = useState();
+  const [organisation, setOrganisation] = useState<Organisation>();
 
   return (
     <InscriptionWrapper>
@@ -32,11 +34,15 @@ const RegisterConfigurationOrganisationPage = () => {
             </Box>
           </HStack>
         )}
-        {typeOrganisation === "organisme_formation" && <InscriptionOF setOrganisation={setOrganisation} />}
-        {["operateur_public", "dreets", "ddets", "draaf", "academie", "conseil_regional"].includes(
-          typeOrganisation
-        ) && <InscriptionOperateurPublic setOrganisation={setOrganisation} />}
-        {typeOrganisation === "tete_de_reseau" && <InscriptionTeteDeReseau setOrganisation={setOrganisation} />}
+        {typeOrganisation === "organisme_formation" && (
+          <InscriptionOF setOrganisation={setOrganisation as SetterOrganisation} />
+        )}
+        {typeOrganisation === "operateur_public" && (
+          <InscriptionOperateurPublic setOrganisation={setOrganisation as SetterOrganisation} />
+        )}
+        {typeOrganisation === "tete_de_reseau" && (
+          <InscriptionTeteDeReseau setOrganisation={setOrganisation as SetterOrganisation} />
+        )}
       </Box>
       <HStack gap="24px" mt={5}>
         <Button

@@ -3,10 +3,11 @@ import { useRouter } from "next/router";
 import { Box, Text, Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import SearchBySIRETForm from "./components/SearchBySIRETForm";
 import SearchByUAIForm from "./components/SearchByUAIForm";
+import { InscriptionOrganistionChildProps } from "./common";
 
 type TypeOfSearch = "siret" | "uai" | undefined;
 
-export const InscriptionOF = ({ setOrganisation }) => {
+export const InscriptionOF = ({ setOrganisation }: InscriptionOrganistionChildProps) => {
   const router = useRouter();
   const typeOfSearch = router.query.select as TypeOfSearch;
 
