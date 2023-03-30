@@ -11,11 +11,15 @@ import { sendSimpleEmail } from "../services/mailer/mailer.js";
 import logger from "../logger.js";
 import { Organisme } from "../model/@types/Organisme.js";
 import { requireOrganisationOF } from "./helpers/permissions.js";
+import { Invitation } from "../model/invitations.model.js";
 
 type NewOrganisation = Omit<Organisation, "_id" | "created_at">;
 
 export async function createOrganisation(organisation: NewOrganisation): Promise<ObjectId> {
-  const { insertedId } = await organisationsDb().insertOne(organisation);
+  const { insertedId } = await organisationsDb().insertOne({
+    created_at: new Date(),
+    ...organisation,
+  } as any); // FIXME pb de type
   return insertedId;
 }
 
@@ -87,6 +91,41 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
     organisationLabel: await buildOrganisationLabel(ctx.organisation),
     invitationToken,
   });
+}
+
+export async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Promise<Invitation> {
+  const invitation = await invitationsDb().findOne<Invitation>({
+    _id: invitationId,
+    organisation_id: ctx.organisation_id, // filtrage pour restreindre les accès
+  });
+  if (!invitation) {
+    throw Boom.notFound(`missing invitation ${invitationId}`);
+  }
+  return invitation;
+}
+
+export async function resendInvitationEmail(ctx: AuthContext, invitationId: string): Promise<void> {
+  const invitation = await getInvitationById(ctx, new ObjectId(invitationId));
+  await sendSimpleEmail(invitation.email, "invitation_organisation", {
+    author: {
+      civility: ctx.civility,
+      nom: ctx.nom,
+      prenom: ctx.prenom,
+      email: ctx.email,
+    },
+    organisationLabel: await buildOrganisationLabel(ctx.organisation),
+    invitationToken: invitation.token,
+  });
+}
+
+export async function cancelInvitation(ctx: AuthContext, invitationId: string): Promise<void> {
+  const res = await invitationsDb().deleteOne({
+    organisation_id: ctx.organisation_id,
+    _id: new ObjectId(invitationId),
+  });
+  if (res.deletedCount === 0) {
+    throw Boom.forbidden("Permissions invalides");
+  }
 }
 
 export async function removeUserFromOrganisation(ctx: AuthContext, userId: string): Promise<void> {

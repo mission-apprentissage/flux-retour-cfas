@@ -17,8 +17,8 @@ export const InscriptionTeteDeReseau = ({ setOrganisation }) => {
           placeholder="Sélectionner votre réseau"
           onChange={(e) =>
             setOrganisation({
-              organisation: "tete_de_reseau",
-              nom: e.target.value,
+              type: "tete_de_reseau",
+              reseau: e.target.value,
             })
           }
         >

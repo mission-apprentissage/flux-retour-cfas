@@ -12,6 +12,7 @@ import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import { useOrganisationOrganismes } from "@/hooks/organismes";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils.js";
+import { OrganisationType } from "@/common/internal/Organisation";
 
 const natures = {
   responsable: "Responsable",
@@ -21,7 +22,7 @@ const natures = {
   inconnue: "Inconnue",
 };
 
-function getHeaderTitleFromOrganisationType(type) {
+function getHeaderTitleFromOrganisationType(type: OrganisationType) {
   switch (type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
@@ -39,7 +40,7 @@ function getHeaderTitleFromOrganisationType(type) {
     case "ACADEMIE":
       return "Les organismes de mon territoire";
 
-    case "DGEFP":
+    case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";
 

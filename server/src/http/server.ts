@@ -63,12 +63,14 @@ import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../common/constants/user
 import { exportAnonymizedEffectifsAsCSV } from "../common/actions/effectifs/effectifs-export.actions.js";
 import { Application } from "express-serve-static-core";
 import {
+  cancelInvitation,
   configureOrganismeERP,
   getOrganisationOrganisme,
   inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
   removeUserFromOrganisation,
+  resendInvitationEmail,
 } from "../common/actions/organisations.actions.js";
 import { getIndicateursNational, getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
 import { updateUserProfile } from "../common/actions/users.actions.js";
@@ -368,7 +370,7 @@ function setupRoutes(app: Application, services) {
   authRouter.post(
     "/api/v1/organisation/configure-erp",
     returnResult(async (req) => {
-      return await configureOrganismeERP(req.user, req.body.email.toLowerCase());
+      await configureOrganismeERP(req.user, req.body.email.toLowerCase());
     })
   );
 
@@ -382,14 +384,14 @@ function setupRoutes(app: Application, services) {
   authRouter.post(
     "/api/v1/organisation/membres",
     returnResult(async (req) => {
-      return await inviteUserToOrganisation(req.user, req.body.email.toLowerCase());
+      await inviteUserToOrganisation(req.user, req.body.email.toLowerCase());
     })
   );
 
   authRouter.delete(
     "/api/v1/organisation/membres/:userId",
     returnResult(async (req) => {
-      return await removeUserFromOrganisation(req.user, req.params.userId);
+      await removeUserFromOrganisation(req.user, req.params.userId);
     })
   );
 
@@ -397,6 +399,20 @@ function setupRoutes(app: Application, services) {
     "/api/v1/organisation/invitations",
     returnResult(async (req) => {
       return await listOrganisationPendingInvitations(req.user);
+    })
+  );
+
+  authRouter.delete(
+    "/api/v1/organisation/invitations/:invitationId",
+    returnResult(async (req) => {
+      await cancelInvitation(req.user, req.params.invitationId);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/organisation/invitations/:invitationId/resend",
+    returnResult(async (req) => {
+      await resendInvitationEmail(req.user, req.params.invitationId);
     })
   );
 

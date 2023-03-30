@@ -1,9 +1,17 @@
+import { ObjectId } from "mongodb";
 import { date, object, objectId, string } from "./json-schema/jsonSchemaTypes.js";
 
 const collectionName = "invitations";
 
 // FIXME compléter si besoin d'indexes
 const indexes = [];
+
+export interface Invitation {
+  token: string;
+  email: string;
+  organisation_id: ObjectId;
+  created_at: Date;
+}
 
 const schema = object(
   {

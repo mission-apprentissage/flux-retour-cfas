@@ -10,18 +10,22 @@ import InvitationForm from "@/modules/mon-espace/organisation/InvitationForm";
 import useAuth from "@/hooks/useAuth";
 import Page from "@/components/Page/Page";
 
-import { _get } from "@/common/httpClient";
+import { _delete, _get, _post } from "@/common/httpClient";
 import Table from "@/components/Table/Table";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
+import useToaster from "@/hooks/useToaster";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const PageGestionDesMembres = () => {
   const { auth } = useAuth();
+  const { toastSuccess } = useToaster();
 
-  const { data: membres, status: statusMembres } = useQuery<any[]>(["membres"], () =>
-    _get("/api/v1/organisation/membres")
-  );
+  const {
+    data: membres,
+    status: statusMembres,
+    refetch: refetchMembres,
+  } = useQuery<any[]>(["membres"], () => _get("/api/v1/organisation/membres"));
   const {
     data: invitations,
     status: statusInvitations,
@@ -33,9 +37,26 @@ const PageGestionDesMembres = () => {
     [membres]
   );
 
-  const onInvitation = () => {
-    refetchInvitations();
-  };
+  async function resendInvitation(invitationId: string) {
+    await _post(`/api/v1/organisation/invitations/${invitationId}/resend`);
+    toastSuccess("L'email d'invitation a été renvoyé");
+  }
+
+  async function cancelInvitation(invitationId: string) {
+    await _delete(`/api/v1/organisation/invitations/${invitationId}`);
+    await refetchInvitations();
+    toastSuccess("L'invitation a été annulée");
+  }
+
+  async function disableMembre() {
+    throw new Error("not implemented");
+  }
+
+  async function deleteMembre(userId: string) {
+    await _delete(`/api/v1/organisation/membres/${userId}`);
+    await refetchMembres();
+    toastSuccess("Le membre a été supprimé");
+  }
 
   const title = "Gestion des membres";
   return (
@@ -51,7 +72,7 @@ const PageGestionDesMembres = () => {
           <Text fontSize="sm">
             Vous êtes actuellement <strong>Gestionnaire</strong> pour votre organisation sur le tableau de bord.
           </Text>
-          <InvitationForm onInvitation={onInvitation} />
+          <InvitationForm onInvitation={() => refetchInvitations()} />
 
           {statusMembres === "success" && statusInvitations === "success" && (
             <Box>
@@ -124,14 +145,19 @@ const PageGestionDesMembres = () => {
                       },
                       actions: {
                         header: () => "Options",
-                        cell: () => {
+                        cell: (info) => {
+                          const invitation = info.row.original;
                           return (
                             <>
                               <Menu placement="bottom">
                                 <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} />
                                 <MenuList>
-                                  <MenuItem>Renvoyer l{"'"}invitation</MenuItem>
-                                  <MenuItem>Annuler l{"'"}invitation</MenuItem>
+                                  <MenuItem onClick={() => resendInvitation(invitation._id)}>
+                                    Renvoyer l{"'"}invitation
+                                  </MenuItem>
+                                  <MenuItem onClick={() => cancelInvitation(invitation._id)}>
+                                    Annuler l{"'"}invitation
+                                  </MenuItem>
                                 </MenuList>
                               </Menu>
                             </>
@@ -174,8 +200,8 @@ const PageGestionDesMembres = () => {
                           <Menu placement="bottom">
                             <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} />
                             <MenuList>
-                              <MenuItem>Suspendre le compte</MenuItem>
-                              <MenuItem>Supprimer le compte</MenuItem>
+                              <MenuItem onClick={() => disableMembre()}>Suspendre le compte</MenuItem>
+                              <MenuItem onClick={() => deleteMembre(user._id)}>Supprimer le compte</MenuItem>
                             </MenuList>
                           </Menu>
                         </>
