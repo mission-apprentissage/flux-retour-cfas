@@ -1,3 +1,7 @@
+import { JSONSchema4 } from "json-schema";
+
+export type JSONSchema = JSONSchema4;
+
 export function number(custom = {}) {
   return { bsonType: "number", ...custom };
 }

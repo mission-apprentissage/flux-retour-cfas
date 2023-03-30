@@ -16,4 +16,4 @@ const schema = object({
   siret_fiable: string({ description: "Le SIRET fiable lié au couple à fiabiliser" }),
 });
 
-export default { schema, collectionName };
+export default { schema, collectionName, indexes: [] };

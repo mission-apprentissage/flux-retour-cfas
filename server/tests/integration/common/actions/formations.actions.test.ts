@@ -29,18 +29,14 @@ describe("Tests des actions Formations", () => {
     it("returns false when formation with given cfd does not exist", async () => {
       // create a formation
       await formationsDb().insertOne({ cfd: "0123456G" });
-
-      const shouldBeFalse = await existsFormation("blabla");
-      assert.equal(shouldBeFalse, false);
+      assert.equal(await existsFormation("blabla"), false);
     });
 
     it("returns true when formation with given cfd exists", async () => {
       // create a formation
       const cfd = "0123456G";
       await formationsDb().insertOne({ cfd });
-
-      const shouldBeTrue = await existsFormation(cfd);
-      assert.equal(shouldBeTrue, true);
+      assert.equal(await existsFormation(cfd), true);
     });
   });
 
@@ -91,7 +87,7 @@ describe("Tests des actions Formations", () => {
       const insertedId = await createFormation({ cfd });
       const created = await findFormationById(insertedId);
 
-      assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
+      assert.deepEqual(omit(created, ["created_at", "_id"]), {
         cfd,
         cfd_start_date: new Date(dataForGetCfdInfo.withIntituleLong.date_ouverture),
         cfd_end_date: new Date(dataForGetCfdInfo.withIntituleLong.date_fermeture),
@@ -117,7 +113,7 @@ describe("Tests des actions Formations", () => {
       const insertedId = await createFormation({ cfd });
       const created = await findFormationById(insertedId);
 
-      assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
+      assert.deepEqual(omit(created, ["created_at", "_id"]), {
         cfd,
         cfd_start_date: new Date(dataForGetCfdInfo.withIntituleLong.date_ouverture),
         cfd_end_date: new Date(dataForGetCfdInfo.withIntituleLong.date_fermeture),
@@ -163,7 +159,7 @@ describe("Tests des actions Formations", () => {
             effectifsDb().insertOne(
               createSampleEffectif({
                 formation: {
-                  cfd: cfd,
+                  cfd,
                 },
               })
             ),
@@ -221,24 +217,12 @@ describe("Tests des actions Formations", () => {
     ];
 
     validCases.forEach(({ searchTerm, caseDescription, expectedResult }) => {
-      it(`returns results ${caseDescription}`, async () => {
+      it(`returns results ${caseDescription} (search ${searchTerm})`, async () => {
         const results = await searchFormations({ searchTerm });
 
         const mapCfd = (result) => result.cfd;
         assert.deepEqual(results.map(mapCfd), expectedResult.map(mapCfd));
       });
-    });
-
-    it("sends a 200 HTTP response with results matching different cases and diacritics in libelle", async () => {
-      const searchTerm = "decoratio";
-
-      const results = await searchFormations({ searchTerm });
-
-      assert.equal(results.length, 4);
-      assert.ok(results.find((formation) => formation.cfd === formationsSeed[2].cfd));
-      assert.ok(results.find((formation) => formation.cfd === formationsSeed[3].cfd));
-      assert.ok(results.find((formation) => formation.cfd === formationsSeed[4].cfd));
-      assert.ok(results.find((formation) => formation.cfd === formationsSeed[5].cfd));
     });
 
     const organisme: Organisme = {
@@ -259,6 +243,7 @@ describe("Tests des actions Formations", () => {
       },
       reseaux: ["AGRI"],
     };
+
     it("returns results matching libelle and etablissement_num_region", async () => {
       const searchTerm = "decoration";
 

@@ -5,7 +5,6 @@ import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { formationsDb, effectifsDb } from "../model/collections.js";
 import { validateFormation } from "../model/formations.model.js";
-import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import logger from "../logger.js";
 import { buildMongoPipelineFilterStages } from "./helpers/filters.js";
 
@@ -82,7 +81,6 @@ export const createFormation = async ({ cfd, duree = null, annee = null }) => {
 
   // Libelle
   const libelleFormationBuilt = formationInfo?.intitule_long || "";
-  const tokenizedLibelle = buildTokenizedString(libelleFormationBuilt || "", 3);
 
   const { insertedId } = await formationsDb().insertOne(
     validateFormation({
@@ -91,7 +89,6 @@ export const createFormation = async ({ cfd, duree = null, annee = null }) => {
       cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
       rncps: formationInfo?.rncps?.map((item) => item.code_rncp) || [], // Returned by TCO
       libelle: libelleFormationBuilt,
-      tokenized_libelle: tokenizedLibelle,
       niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
       niveau_libelle: formationInfo?.niveau,
       metiers: [],
@@ -122,7 +119,8 @@ export const searchFormations = async (searchCriteria) => {
   const matchStage = searchCriteria.searchTerm
     ? {
         $or: [
-          { $text: { $search: searchCriteria.searchTerm } },
+          { $text: { $search: searchCriteria.searchTerm, $caseSensitive: false, $diacriticSensitive: false } },
+          { libelle: { $regex: searchCriteria.searchTerm, $options: "i" } },
           { cfd: new RegExp(escapeRegExp(searchCriteria.searchTerm), "g") },
           { rncps: new RegExp(escapeRegExp(searchCriteria.searchTerm), "gi") },
         ],
@@ -138,6 +136,7 @@ export const searchFormations = async (searchCriteria) => {
     : { libelle: 1 };
 
   start = Date.now();
+
   const formations = await formationsDb()
     .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
     .toArray();

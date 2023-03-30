@@ -1,3 +1,5 @@
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
 import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes.js";
 import { adresseSchema } from "./json-schema/adresseSchema.js";
 import { RESEAUX_CFAS } from "../constants/networksConstants.js";
@@ -8,7 +10,7 @@ import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConsta
 
 const collectionName = "organismes";
 
-const indexes = [
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [
     { uai: 1, siret: 1 },
     { name: "uai_siret", unique: true },
@@ -21,8 +23,8 @@ const indexes = [
   [{ fiabilisation_statut: 1 }, { name: "fiabilisation_statut" }],
   [{ nature: 1 }, { name: "nature" }],
   [
-    { nom: "text", nom_tokenized: "text", siret: "text", uai: "text" },
-    { name: "nom_tokenized_text", default_language: "french" },
+    { nom: "text", siret: "text", uai: "text" },
+    { name: "nom_siret_uai_text", default_language: "french" },
   ],
   [{ "adresse.departement": 1 }, { name: "departement" }], // FIXME n'a pas l'air d'améliorer les performances
   [{ "adresse.region": 1 }, { name: "region" }],
@@ -60,9 +62,6 @@ const schema = object(
     nom: string({ description: "Nom de l'organisme de formation" }),
     enseigne: string({ description: "Enseigne de l'organisme de formation" }),
     raison_sociale: string({ description: "Raison sociale de l'organisme de formation" }),
-    nom_tokenized: string({
-      description: "Nom de l'organisme de formation tokenized pour la recherche textuelle",
-    }),
     adresse: {
       ...adresseSchema,
       description: "Adresse de l'établissement",

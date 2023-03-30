@@ -1,3 +1,4 @@
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { uniqBy } from "lodash-es";
 import { schemaValidation } from "../../utils/schemaUtils.js";
 import { object, objectId, string, date, boolean, arrayOf } from "../json-schema/jsonSchemaTypes.js";
@@ -12,7 +13,7 @@ import {
 
 const collectionName = "effectifs";
 
-const indexes = [
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [
     {
       organisme_id: 1,

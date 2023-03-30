@@ -8,7 +8,6 @@ import {
   setOrganismeTransmissionDates,
   updateOrganisme,
 } from "../../../../src/common/actions/organismes/organismes.actions.js";
-import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
 import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
 import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/mapping.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
@@ -34,7 +33,6 @@ const sampleOrganismeWithUAI = {
 const sampleOrganismeWithoutUAIOutput = {
   siret: sampleOrganismeWithUAI.siret,
   nom: sampleOrganismeWithUAI.nom,
-  nom_tokenized: buildTokenizedString(sampleOrganismeWithUAI.nom.trim(), 4),
   nature: sampleOrganismeWithUAI.nature,
   metiers: [],
   reseaux: [],

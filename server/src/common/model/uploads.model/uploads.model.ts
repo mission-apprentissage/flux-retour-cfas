@@ -1,10 +1,11 @@
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { preDefinedModels } from "../../constants/models/upload.models.part.js";
 import { object, objectId, array, date, arrayOf, any, string, boolean } from "../json-schema/jsonSchemaTypes.js";
 import { documentSchema } from "./parts/document.part.js";
 
 const collectionName = "uploads";
 
-const indexes = [[{ organisme_id: 1 }, { unique: true }]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ organisme_id: 1 }, { unique: true }]];
 
 const schema = object(
   {
