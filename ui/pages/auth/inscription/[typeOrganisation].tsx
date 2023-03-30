@@ -8,7 +8,7 @@ import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
 import { InscriptionOF } from "@/modules/auth/inscription/InscriptionOF";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
-import { InscriptionReseau } from "@/modules/auth/inscription/InscriptionReseau";
+import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -36,7 +36,7 @@ const RegisterConfigurationOrganisationPage = () => {
         {["operateur_public", "dreets", "ddets", "draaf", "academie", "conseil_regional"].includes(
           typeOrganisation
         ) && <InscriptionOperateurPublic />}
-        {typeOrganisation === "tete_de_reseau" && <InscriptionReseau />}
+        {typeOrganisation === "tete_de_reseau" && <InscriptionTeteDeReseau />}
       </Box>
       <HStack gap="24px" mt={5}>
         <Button
