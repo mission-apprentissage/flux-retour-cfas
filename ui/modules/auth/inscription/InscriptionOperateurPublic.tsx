@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { Box, FormControl, FormLabel, Select } from "@chakra-ui/react";
+import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
 import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoiresConstants";
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
 
@@ -32,6 +32,10 @@ const typesOrganisation = [
   {
     label: "Organisation nationale",
     value: "organisation_nationale",
+  },
+  {
+    label: "Autre opérateur public",
+    value: "autre",
   },
 ] as const;
 
@@ -107,6 +111,12 @@ export const InscriptionOperateurPublic = () => {
               </option>
             ))}
           </Select>
+        </FormControl>
+      )}
+      {typeOrganisation === "autre" && (
+        <FormControl isRequired>
+          <FormLabel>Indiquez le nom de votre établissement :</FormLabel>
+          <Input placeholder="..." />
         </FormControl>
       )}
     </>
