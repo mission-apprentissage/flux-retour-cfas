@@ -2,96 +2,59 @@ import { addHours } from "date-fns";
 import { ObjectId } from "mongodb";
 
 import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
-import { UsersMigration } from "../model/@types/UsersMigration.js";
 import { usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
 import { validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
-import { passwordSchema, stripEmptyFields } from "../utils/validationUtils.js";
-
-/**
- * Méthode de création d'un utilisateur
- *
- * @param {object} requiredFields
- * @param {object} requiredFields.email - Email
- * @param {object} requiredFields.password - Password
- * @param {object} [options]
- * @param {string} [options.civility] - Civility
- * @param {string} [options.nom] - Nom
- * @param {string} [options.prenom] - Prenom
- * @param {string} [options.telephone] - Telephone
- */
+import { passwordSchema } from "../utils/validationUtils.js";
 
 interface UserRegistration {
   email: string;
-  civility: "Madame" | "Monsieur";
   nom: string;
   prenom: string;
-  type_organisation: string;
+  civility: "Madame" | "Monsieur";
+  fonction: string;
+  telephone: string;
+  password: string;
+  has_accept_cgu_version: string;
 }
 
-export const createUser = async (user: UserRegistration): Promise<ObjectId> => {
-  const { civility, nom, prenom, email, type_organisation } = user;
-
-  const { insertedId } = await usersMigrationDb().insertOne(
-    stripEmptyFields<UsersMigration>({
-      account_status: "PENDING_EMAIL_VALIDATION",
-      has_accept_cgu_version: "",
-      invalided_token: false,
-      password_updated_at: new Date(),
-      connection_history: [],
-      emails: [],
-      created_at: new Date(),
-      email: email.toLowerCase(),
-      organisation_id: undefined as any, // FIXME revoir l'inscription pour assigner l'organisation choisie
-      civility,
-      nom,
-      prenom,
-      type_organisation,
-    })
-  );
+export const createUser = async (user: UserRegistration, organisationId: ObjectId): Promise<ObjectId> => {
+  const { insertedId } = await usersMigrationDb().insertOne({
+    account_status: "PENDING_EMAIL_VALIDATION",
+    invalided_token: false,
+    password_updated_at: new Date(),
+    connection_history: [],
+    emails: [],
+    created_at: new Date(),
+    ...user,
+    organisation_id: organisationId,
+  });
 
   return insertedId;
 };
 
-/**
- * Méthode de rehash du password de l'utilisateur
- * @param {ObjectId} _id
- * @param {*} password
- * @returns
- */
-const rehashPassword = async (_id, password) => {
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id },
+const updateUserPassword = async (userId: ObjectId, password: string) => {
+  await usersMigrationDb().findOneAndUpdate(
+    { _id: userId },
     {
       $set: {
         password: hashUtil(password),
       },
-    },
-    { returnDocument: "after" }
+    }
   );
-
-  return updated.value;
 };
 
-/**
- * Méthode d'authentification de l'utilisateur
- * compare les hash des mots de passe
- * @param {*} email
- * @param {*} password
- * @returns
- */
-export const authenticate = async (email, password) => {
+export const authenticate = async (email: string, password: string) => {
+  // FIXME projection à définir, ne pas renvoyer le password haché
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
     return null;
   }
-
-  const current = user.password;
-  if (compare(password, current)) {
-    if (isTooWeak(current)) {
-      await rehashPassword(user._id, password);
+  if (compare(password, user.password)) {
+    if (isTooWeak(user.password)) {
+      await updateUserPassword(user._id, password);
     }
     return user;
   }
@@ -111,7 +74,6 @@ export const getUserByEmail = async (email) => {
         emails: 0,
         connection_history: 0,
         password: 0,
-        __v: 0,
       },
     }
   );

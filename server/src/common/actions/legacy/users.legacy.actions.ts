@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { addHours, isBefore } from "date-fns";
 import { usersDb } from "../../model/collections.js";
 import { generateRandomAlphanumericPhrase } from "../../utils/miscUtils.js";
-import { compare, isTooWeak, hash } from "../../utils/sha512Utils.js";
+import { compare, isTooWeak, hash } from "../../utils/passwordUtils.js";
 import { validatePassword } from "../../validation/utils/password.js";
 
 const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
@@ -28,14 +28,13 @@ export const authenticateLegacy = async (username, password) => {
     return null;
   }
 
-  const current = user.password;
-  if (compare(password, current)) {
+  if (compare(password, user.password)) {
     const { value: updatedUser } = await usersDb().findOneAndUpdate(
       { _id: user._id },
       {
         $set: {
           last_connection: new Date(),
-          ...(isTooWeak(current) ? { password: hash(password) } : {}),
+          ...(isTooWeak(user.password) ? { password: hash(password) } : {}),
         },
       },
       { returnDocument: "after" }

@@ -11,35 +11,31 @@ export interface UsersMigration {
   /**
    * Le mot de passe hashé
    */
-  password?: string;
+  password: string;
   /**
    * civilité
    */
-  civility?: "Madame" | "Monsieur";
+  civility: "Madame" | "Monsieur";
   /**
    * Le nom de l'utilisateur
    */
-  nom?: string;
+  nom: string;
   /**
    * Le prénom de l'utilisateur
    */
-  prenom?: string;
+  prenom: string;
   /**
    * Le téléphone de l'utilisateur
    */
-  telephone?: string;
+  telephone: string;
   /**
    * Organisation à laquelle appartient l'utilisateur
    */
   organisation_id: ObjectId;
   /**
-   * Type d'organisation [temporaire pendant l'inscription en attendant d'être rattaché]
-   */
-  type_organisation?: string;
-  /**
    * Statut du compte
    */
-  account_status?:
+  account_status:
     | "PENDING_EMAIL_VALIDATION"
     | "PENDING_PASSWORD_SETUP"
     | "PENDING_PERMISSIONS_SETUP"
@@ -49,7 +45,7 @@ export interface UsersMigration {
   /**
    * Version des cgu accepté par l'utilisateur
    */
-  has_accept_cgu_version?: string;
+  has_accept_cgu_version: string;
   /**
    * Date de création du compte
    */
@@ -86,18 +82,4 @@ export interface UsersMigration {
    * unsubscribe email
    */
   unsubscribe?: boolean;
-
-  // FIXME à supprimer quand process d'inscription revu
-  /**
-   * N° SIRET
-   * Type d'organisation [temporaire pendant l'inscription en attendant d'être rattaché]
-   */
-  siret?: string;
-  /**
-   * Code UAI de l'organisme (seulement pour les utilisateurs OF)
-   */
-  uai?: string;
-  /**
-   * Appartenance à une organisation (exemple DREETS, MISSION_LOCALE..)
-   */
 }

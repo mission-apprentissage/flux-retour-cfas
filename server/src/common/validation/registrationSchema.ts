@@ -1,19 +1,38 @@
 import { z } from "zod";
-
 import { organisationTypes } from "../model/organisations.model.js";
-import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 
 const registrationSchema = () =>
   z.object({
-    password: z.preprocess((v: any) => v || generateRandomAlphanumericPhrase(), z.string()),
-    prenom: z.string(),
-    nom: z.string(),
-    email: z.string(),
-    civility: z.string(),
-    siret: z.string(),
-    uai: z.string().nullable().optional(),
-    // @ts-expect-error
-    type_organisation: z.enum(organisationTypes.filter((v) => v !== "ADMINISTRATEUR")),
+    user: z.object({
+      email: z.string(),
+      prenom: z.string(),
+      civility: z.enum(["Madame", "Monsieur"]),
+      nom: z.string(),
+      fonction: z.string(),
+      telephone: z.string(),
+      password: z.string(),
+      has_accept_cgu_version: z.string(),
+    }),
+    organisation: z.object({
+      type: z.enum(organisationTypes),
+
+      // of
+      uai: z.string().optional(),
+      siret: z.string().optional(),
+
+      // tête de réseau
+      reseau: z.string().optional(),
+
+      // dreets, deets, draaf, conseil_regional
+      code_region: z.string().optional(),
+      // ddets
+      code_departement: z.string().optional(),
+      // academie
+      code_academie: z.string().optional(),
+
+      // opérateur public national
+      nom: z.string().optional(),
+    }),
   });
 
 export default registrationSchema;

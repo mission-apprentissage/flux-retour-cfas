@@ -25,11 +25,13 @@ import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import logger from "../../../common/logger.js";
-import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
 import registrationSchema from "../../../common/validation/registrationSchema.js";
 import { returnResult } from "../../middlewares/helpers.js";
 import { USER_ACCOUNT_STATUS } from "../../../common/constants/usersConstants.js";
+import { z } from "zod";
+import { createOrganisation } from "../../../common/actions/organisations.actions.js";
+import { organisationsDb } from "../../../common/model/collections.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -64,39 +66,25 @@ export default ({ mailer }) => {
       body: registrationSchema().strict(),
     }),
     returnResult(async (req) => {
-      const registration = req.body;
-      registration.email = registration.email.toLowerCase();
+      const registration = req.body as z.infer<ReturnType<typeof registrationSchema>>;
+      registration.user.email = registration.user.email.toLowerCase(); // sans doute possibilité de transformer avec zod, mais pour être sûr
 
-      const alreadyExists = await getUserByEmail(registration.email.toLowerCase());
+      const alreadyExists = await getUserByEmail(registration.user.email);
       if (alreadyExists) {
         throw Boom.conflict("email already in use", { message: "email already in use" });
       }
 
-      // type temporaire incomplet (manque la nature)
-      // mais on ne peut pas encore affecter l'utilisateur à une organisation car il nous manque des données
-      if (registration.type_organisation === "ORGANISME_FORMATION") {
-        const organisme = await fetchOrganismeWithSiret(registration.siret);
-        if (!organisme) {
-          throw Boom.badRequest("SIRET inconnu");
-        }
-        registration.uai = organisme.uai;
-        if (registration.uai !== organisme.uai) {
-          // TODO FIABILISATION
-          logger.error(
-            `POSSIBLE FIABILISATION PAR UN UTILISATUER ${registration.email} : uai referentiel ${organisme.uai} - uai utilisateur ${registration.uai} - siret ${registration.siret}`
-          );
-        }
-      }
+      const organisation = await organisationsDb().findOne(registration.organisation);
+      const organisationId = organisation ? organisation._id : await createOrganisation(registration.organisation);
 
-      await createUser(registration);
+      await createUser(registration.user, organisationId);
 
-      await mailer.sendEmail({ to: registration.email, payload: registration }, "activation_user");
-
-      return { succeeded: true };
+      // FIXME vérifier payload
+      await mailer.sendEmail({ to: registration.user.email, payload: registration }, "activation_user");
     })
   );
 
-  // FIXME potentiellement remplacé par /api/v1/organismes/search-by-uai-siret
+  // FIXME potentiellement remplacé par /api/v1/organismes/search-by-uai/siret
   router.post("/uai-siret-adresse", async ({ body }, res) => {
     const {
       uai: userUai,
@@ -178,7 +166,7 @@ export default ({ mailer }) => {
       activationToken: Joi.string().required(),
     }).validateAsync(body, { abortEarly: false });
 
-    const auth = await authenticate(user.email.toLowerCase(), user.tmpPwd);
+    const auth = await authenticate(user.email.toLowerCase(), "user.tmpPwd"); // FIXME A VIRER
 
     if (!auth) {
       throw Boom.unauthorized("Accès non autorisé");
@@ -244,15 +232,15 @@ export default ({ mailer }) => {
       is_cross_organismes = true;
     }
 
-    if (!is_cross_organismes && !wantedReseau) {
-      const organisme =
-        (userDb.uai && (await findOrganismeByUai(userDb.uai))) ||
-        (userDb.siret && (await findOrganismeBySiret(userDb.siret)));
-      if (!organisme) {
-        logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
-        throw Boom.badRequest("No organisme found");
-      }
-    }
+    // if (!is_cross_organismes && !wantedReseau) {
+    //   const organisme =
+    //     (userDb.uai && (await findOrganismeByUai(userDb.uai))) ||
+    //     (userDb.siret && (await findOrganismeBySiret(userDb.siret)));
+    //   if (!organisme) {
+    //     logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
+    //     throw Boom.badRequest("No organisme found");
+    //   }
+    // }
 
     const updateUser = await userHasAskAccess(userDb.email, {
       ...(codes_region ? { codes_region: uniq(codes_region) } : {}),

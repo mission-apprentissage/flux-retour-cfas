@@ -35,7 +35,7 @@ export const authMiddleware = () => {
             await updateUser(user._id, { invalided_token: false });
             return done(null, { invalided_token: true });
           }
-          (user as AuthContext).organisation = await getOrganisationById(user.organisation_id as ObjectId);
+          (user as unknown as AuthContext).organisation = await getOrganisationById(user.organisation_id as ObjectId);
           done(null, user);
         } catch (err) {
           done(err);

@@ -12,7 +12,9 @@ import logger from "../logger.js";
 import { Organisme } from "../model/@types/Organisme.js";
 import { requireOrganisationOF } from "./helpers/permissions.js";
 
-export async function createOrganisation(organisation: Organisation): Promise<ObjectId> {
+type NewOrganisation = Omit<Organisation, "_id" | "created_at">;
+
+export async function createOrganisation(organisation: NewOrganisation): Promise<ObjectId> {
   const { insertedId } = await organisationsDb().insertOne(organisation);
   return insertedId;
 }

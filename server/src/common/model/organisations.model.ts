@@ -2,6 +2,7 @@ import { date, object, objectId, string } from "./json-schema/jsonSchemaTypes.js
 import { RESEAUX_CFAS } from "../constants/networksConstants.js";
 import { REGIONS, DEPARTEMENTS, ACADEMIES } from "../constants/territoiresConstants.js";
 import { WithId } from "mongodb";
+import { ORGANISATIONS_NATIONALES } from "../constants/organisations.js";
 
 // types en doublon avec l'UI
 export const organisationTypes = [
@@ -121,6 +122,12 @@ const schema = object(
     code_academie: string({
       enum: Object.values(ACADEMIES).map(({ code }) => `${code}`),
       description: "Code académie",
+    }),
+
+    // si opérateur public national
+    nom: string({
+      enum: ORGANISATIONS_NATIONALES.map(({ key }) => key),
+      description: "Nom de l'organisation nationale",
     }),
 
     created_at: date({ description: "Date de création en base de données" }),
