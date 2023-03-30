@@ -10,7 +10,6 @@ export interface Organisation {
     | "ORGANISME_FORMATION_RESPONSABLE"
     | "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR"
     | "TETE_DE_RESEAU"
-    | "DGEFP"
     | "DREETS"
     | "DEETS"
     | "DRAAF"
