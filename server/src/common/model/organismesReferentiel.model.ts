@@ -88,7 +88,7 @@ const schema = object(
       { required: ["code", "label"] }
     ),
     qualiopi: boolean(),
-    lieux_de_formation: arrayOf(object({ uai: string() }, { additionalProperties: true })),
+    lieux_de_formation: arrayOf(object({ uai: string(), uai_fiable: boolean() }, { additionalProperties: true })),
     contacts: arrayOf(
       object(
         {
