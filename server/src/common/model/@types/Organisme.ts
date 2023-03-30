@@ -918,7 +918,7 @@ export interface Organisme {
   /**
    * L'organisme est qualiopi
    */
-  qualiopo?: boolean;
+  qualiopi?: boolean;
   /**
    * Le token permettant l'accès au CFA à sa propre page
    */
