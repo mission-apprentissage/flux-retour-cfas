@@ -49,6 +49,9 @@ const schema = object(
       }
     ),
     effectifs_count: integer({ description: "Compteur sur le nombre d'effectifs de l'organisme" }),
+    effectifs_current_year_count: integer({
+      description: "Compteur sur le nombre d'effectifs de l'organisme sur l'année courante",
+    }),
     nature: string({
       description: "Nature de l'organisme de formation",
       enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
