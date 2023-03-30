@@ -65,6 +65,7 @@ import { Application } from "express-serve-static-core";
 import {
   cancelInvitation,
   configureOrganismeERP,
+  getInvitationByToken,
   getOrganisationOrganisme,
   inviteUserToOrganisation,
   listOrganisationMembers,
@@ -197,6 +198,13 @@ function setupRoutes(app: Application, services) {
         date: Joi.date().required(),
       });
       return await getIndicateursNational(date);
+    })
+  );
+
+  app.get(
+    "/api/v1/invitations/:token",
+    returnResult(async (req) => {
+      return await getInvitationByToken(req.params.token);
     })
   );
 

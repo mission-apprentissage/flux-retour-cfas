@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useRouter } from "next/router";
@@ -8,10 +8,12 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
 import { Organisation } from "@/common/internal/Organisation";
 import { ACADEMIES_BY_ID, REGIONS_BY_ID, DEPARTEMENTS_BY_ID } from "@/common/constants/territoiresConstants";
+import { _get } from "@/common/httpClient";
+import useToaster from "@/hooks/useToaster";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-function getRibbon(organisation: Organisation) {
+function getOrganisationRibbon(organisation: Organisation) {
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
@@ -92,17 +94,39 @@ function getRibbon(organisation: Organisation) {
 
 const PageFormulaireProfil = () => {
   const router = useRouter();
-  // TODO extract from url json conf
-  console.log(router.query);
-  const organisation: Organisation = JSON.parse(router.query.organisation as string);
+  const { toastError } = useToaster();
+  const [organisation, setOrganisation] = useState<Organisation | null>(null);
+
+  // try to use the invitation token if provided
+  useEffect(() => {
+    if (router.query.organisation) {
+      setOrganisation(JSON.parse(router.query.organisation as string));
+    }
+    if (router.query.invitationToken) {
+      (async () => {
+        try {
+          const invitation = await _get(`/api/v1/invitations/${router.query.invitationToken}`);
+          console.log("invitation", invitation);
+          setOrganisation(invitation.organisation);
+          // FIXME reject
+          // TODO verrouiller email
+        } catch (err) {
+          toastError(err?.message);
+        }
+        // organisation;
+      })();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <InscriptionWrapper>
-      <Ribbons variant="success" mt="0.5rem">
-        <Box ml={3} color="grey.800">
-          {getRibbon(organisation)}
-        </Box>
-      </Ribbons>
+      {organisation && (
+        <Ribbons variant="success" mt="0.5rem">
+          <Box ml={3} color="grey.800">
+            {getOrganisationRibbon(organisation)}
+          </Box>
+        </Ribbons>
+      )}
       {/* {isFetching ? (
       //   <Spinner />
       // ) : (

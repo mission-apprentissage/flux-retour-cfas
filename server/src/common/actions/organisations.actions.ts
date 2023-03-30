@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import Boom from "boom";
 import { ObjectId } from "mongodb";
 import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "../constants/territoiresConstants.js";
@@ -6,7 +7,6 @@ import { UsersMigration } from "../model/@types/UsersMigration.js";
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
 import { Organisation } from "../model/organisations.model.js";
-import { generateKey } from "../utils/cryptoUtils.js";
 import { sendSimpleEmail } from "../services/mailer/mailer.js";
 import logger from "../logger.js";
 import { Organisme } from "../model/@types/Organisme.js";
@@ -73,7 +73,7 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
         : "Cet utilisateur est déjà présent dans une autre organisation. Si vous pensez que c'est une erreur, merci de contacter le support."
     );
   }
-  const invitationToken = generateKey();
+  const invitationToken = uuidv4();
   await invitationsDb().insertOne({
     organisation_id: ctx.organisation_id,
     email,
@@ -91,17 +91,6 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
     organisationLabel: await buildOrganisationLabel(ctx.organisation),
     invitationToken,
   });
-}
-
-export async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Promise<Invitation> {
-  const invitation = await invitationsDb().findOne<Invitation>({
-    organisation_id: ctx.organisation_id, // filtrage pour restreindre les accès
-    _id: invitationId,
-  });
-  if (!invitation) {
-    throw Boom.notFound(`missing invitation ${invitationId}`);
-  }
-  return invitation;
 }
 
 export async function resendInvitationEmail(ctx: AuthContext, invitationId: string): Promise<void> {
@@ -238,6 +227,17 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<Organi
   return organisme;
 }
 
+export async function getInvitationByToken(token: string): Promise<any> {
+  const invitation = await invitationsDb().findOne({
+    token,
+  });
+  if (!invitation) {
+    throw Boom.notFound("Jeton d'invitation non valide");
+  }
+  const organisation = await getOrganisationById(invitation.organisation_id);
+  return { ...invitation, organisation };
+}
+
 // utilitaires
 async function getUserById(ctx: AuthContext, userId: string): Promise<UsersMigration> {
   const user = await usersMigrationDb().findOne({
@@ -248,4 +248,15 @@ async function getUserById(ctx: AuthContext, userId: string): Promise<UsersMigra
     throw Boom.forbidden("Permissions invalides");
   }
   return user;
+}
+
+async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Promise<Invitation> {
+  const invitation = await invitationsDb().findOne<Invitation>({
+    organisation_id: ctx.organisation_id, // filtrage pour restreindre les accès
+    _id: invitationId,
+  });
+  if (!invitation) {
+    throw Boom.notFound(`missing invitation ${invitationId}`);
+  }
+  return invitation;
 }
