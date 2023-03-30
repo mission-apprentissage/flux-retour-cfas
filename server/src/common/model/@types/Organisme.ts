@@ -932,10 +932,10 @@ export interface Organisme {
    */
   fiabilisation_statut?:
     | "FIABLE"
+    | "NON_FIABILISABLE_PB_COLLECTE"
     | "NON_FIABILISABLE_UAI_NON_VALIDEE"
     | "NON_FIABILISABLE_MAPPING"
-    | "INCONNU"
-    | "FIABILISE";
+    | "INCONNU";
   /**
    * Mode de transmission des effectifs
    */
