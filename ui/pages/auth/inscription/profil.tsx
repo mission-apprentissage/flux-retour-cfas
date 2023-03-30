@@ -3,6 +3,7 @@ import React from "react";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useRouter } from "next/router";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
+import { Text } from "@chakra-ui/react";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -10,9 +11,12 @@ const PageFormulaireProfil = () => {
   const router = useRouter();
   // TODO extract from url json conf
   console.log(router.query);
+  const organisation = JSON.parse(router.query.organisation as string);
 
   return (
     <InscriptionWrapper>
+      <Text>organisation : {organisation.organisation}</Text>
+      {/* Selon le type aller chercher les infos */}
       {/* {isFetching ? (
         <Spinner />
       ) : (

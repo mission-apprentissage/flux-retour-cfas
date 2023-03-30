@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { Box, Text, Radio, RadioGroup, Stack } from "@chakra-ui/react";
-import { SiretBlock } from "./components/SiretBlock";
+import SearchBySIRETForm from "./components/SearchBySIRETForm";
 import SearchByUAIForm from "./components/SearchByUAIForm";
 
 type TypeOfSearch = "siret" | "uai" | undefined;
@@ -26,7 +26,7 @@ export const InscriptionOF = ({ setOrganisation }) => {
           </Stack>
         </RadioGroup>
       </Box>
-      {typeOfSearch === "siret" && <SiretBlock />}
+      {typeOfSearch === "siret" && <SearchBySIRETForm setOrganisation={setOrganisation} />}
       {typeOfSearch === "uai" && <SearchByUAIForm setOrganisation={setOrganisation} />}
     </Box>
   );

@@ -613,19 +613,21 @@ export async function getOrganismeById(organismeId: string) {
   return organisme;
 }
 
-export async function getOrganismeFiableBySIRET(siret: string): Promise<Organisme> {
+export async function findOrganismesFiablesBySIRET(siret: string): Promise<Organisme[]> {
   // FIXME projection à définir
-  const organisme = await organismesDb().findOne({
-    siret: siret,
-    // fiabilisation_statut: "FIABLE", // FIXME tmp désactivé pour avoir des données
-  });
-  if (!organisme) {
+  const organismes = await organismesDb()
+    .find({
+      siret: siret,
+      // fiabilisation_statut: "FIABLE", // FIXME tmp désactivé pour avoir des données
+    })
+    .toArray();
+  if (organismes.length === 0) {
     throw Boom.badRequest("Aucun organisme trouvé");
   }
-  return organisme;
+  return organismes;
 }
 
-export async function findOrganismesFiableByUAI(uai: string): Promise<Organisme[]> {
+export async function findOrganismesFiablesByUAI(uai: string): Promise<Organisme[]> {
   // FIXME projection à définir
   const organismes = await organismesDb()
     .find({

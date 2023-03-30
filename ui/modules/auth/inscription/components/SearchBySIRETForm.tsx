@@ -16,31 +16,31 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react";
-import { searchOrganismesByUAI } from "@/common/api/tableauDeBord";
-import { UAI_REGEX } from "@/common/domain/uai";
+import { searchOrganismesBySIRET } from "@/common/api/tableauDeBord";
+import { SIRET_REGEX } from "@/common/domain/siret";
 import OrganismeDetails from "./OrganismeDetails";
 
-export default function SearchByUAIForm({ setOrganisation }) {
+export default function SearchBySIRETForm({ setOrganisation }) {
   const [organismes, setOrganismes] = useState<any[] | null>(null);
 
   return (
     <Formik
-      initialValues={{ uai: "" }}
+      initialValues={{ siret: "" }}
       validationSchema={Yup.object().shape({
-        uai: Yup.string().required("L'UAI est obligatoire").matches(UAI_REGEX, {
-          message: "UAI invalide",
+        siret: Yup.string().required("Le SIRET est obligatoire").matches(SIRET_REGEX, {
+          message: "SIRET invalide",
         }),
       })}
-      onSubmit={async ({ uai }, actions) => {
+      onSubmit={async ({ siret }, actions) => {
         try {
-          const organismes = await searchOrganismesByUAI(uai);
+          const organismes = await searchOrganismesBySIRET(siret);
           setOrganismes(organismes);
         } catch (err) {
           let errorMessage: string = err?.json?.data?.message || err.message;
           if (err?.json?.data?.message === "Aucun organisme trouvé") {
-            errorMessage = "Ce code UAI n'existe pas. Veuillez vérifier à nouveau";
+            errorMessage = "Ce SIRET n'existe pas. Veuillez vérifier à nouveau";
           }
-          actions.setFieldError("uai", errorMessage);
+          actions.setFieldError("siret", errorMessage);
         } finally {
           actions.setSubmitting(false);
         }
@@ -48,12 +48,12 @@ export default function SearchByUAIForm({ setOrganisation }) {
     >
       {() => (
         <Form>
-          <Field name="uai">
+          <Field name="siret">
             {({ field, meta }) => (
               <FormControl mt={4} py={2} isRequired isInvalid={meta.error && meta.touched}>
-                <FormLabel>UAI de votre organisme</FormLabel>
-                <FormHelperText mb={2}>Une UAI au format valide est composée de 7 chiffres et 1 lettre</FormHelperText>
-                <Input {...field} id={field.name} placeholder="Exemple : 1234567A" />
+                <FormLabel>SIRET de votre organisme</FormLabel>
+                <FormHelperText mb={2}>Un SIRET au format valide est composé de 14 chiffres</FormHelperText>
+                <Input {...field} id={field.name} placeholder="Exemple : 98765432400019" />
                 <FormErrorMessage>{meta.error}</FormErrorMessage>
               </FormControl>
             )}
@@ -100,7 +100,7 @@ export default function SearchByUAIForm({ setOrganisation }) {
                 <>
                   <Box color="error" my={2}>
                     <Box as="i" className="ri-alert-fill" color="warning" marginRight="1v" />
-                    Plusieurs SIRET sont identifiés pour cette UAI. Choisissez votre établissement.
+                    Plusieurs UAI sont identifiés pour ce SIRET. Choisissez votre établissement.
                   </Box>
 
                   <Accordion allowToggle variant="withBorder" w="100%">

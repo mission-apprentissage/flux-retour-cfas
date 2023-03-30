@@ -34,10 +34,10 @@ export async function configureOrganisationERP(configurationERP) {
   await _put("/api/v1/organisation/configure-erp", configurationERP);
 }
 
-export async function searchOrganismeBySIRET(/** @type {string} */ siret) {
+export async function searchOrganismesBySIRET(/** @type {string} */ siret) {
   return await _post("/api/v1/organismes/search-by-siret", { siret });
 }
 
-export async function searchOrganismeByUAI(/** @type {string} */ uai) {
+export async function searchOrganismesByUAI(/** @type {string} */ uai) {
   return await _post("/api/v1/organismes/search-by-uai", { uai });
 }

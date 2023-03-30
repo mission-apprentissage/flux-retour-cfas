@@ -48,8 +48,8 @@ import {
   getOrganisme,
   OrganismesSearch,
   searchOrganismes,
-  findOrganismesFiableByUAI,
-  getOrganismeFiableBySIRET,
+  findOrganismesFiablesByUAI,
+  findOrganismesFiablesBySIRET,
 } from "../common/actions/organismes/organismes.actions.js";
 import { validateFullObjectSchema } from "../common/utils/validationUtils.js";
 import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
@@ -163,7 +163,7 @@ function setupRoutes(app: Application, services) {
       const { siret } = await validateFullObjectSchema(req.body, {
         siret: Joi.string().required(),
       });
-      return await getOrganismeFiableBySIRET(siret);
+      return await findOrganismesFiablesBySIRET(siret);
     })
   );
   app.post(
@@ -172,7 +172,7 @@ function setupRoutes(app: Application, services) {
       const { uai } = await validateFullObjectSchema(req.body, {
         uai: Joi.string().required().uppercase(),
       });
-      return await findOrganismesFiableByUAI(uai);
+      return await findOrganismesFiablesByUAI(uai);
     })
   );
 

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useRouter } from "next/router";
 import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
 import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoiresConstants";
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
@@ -50,7 +49,6 @@ const regions = REGIONS_SORTED.map(({ nom, code }) => ({ label: nom, value: code
 
 export const InscriptionOperateurPublic = ({ setOrganisation }) => {
   const [typeOrganisation, setTypeOrganisation] = useState<TypeOrganisation | null>(null);
-  // const { typeOrganisation } = router.query;
 
   return (
     <>
@@ -64,10 +62,19 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
           ))}
         </Select>
       </FormControl>
+
       {typeOrganisation === "academie" && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
-          <Select placeholder="Sélectionner un territoire">
+          <Select
+            placeholder="Sélectionner un territoire"
+            onChange={(e) =>
+              setOrganisation({
+                type: typeOrganisation,
+                code_academie: e.target.value,
+              })
+            }
+          >
             {academies.map((option, index) => (
               <option value={option.value} key={index}>
                 {option.label}
@@ -79,7 +86,15 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
       {typeOrganisation === "ddets" && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
-          <Select placeholder="Sélectionner un territoire">
+          <Select
+            placeholder="Sélectionner un territoire"
+            onChange={(e) =>
+              setOrganisation({
+                type: typeOrganisation,
+                code_departement: e.target.value,
+              })
+            }
+          >
             {departements.map((option, index) => (
               <option value={option.value} key={index}>
                 {option.label}
@@ -89,17 +104,17 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
         </FormControl>
       )}
       {(["dreets", "deets", "draaf", "conseil_regional"] as (typeof typeOrganisation)[]).includes(typeOrganisation) && (
-        <FormControl
-          isRequired
-          onChange={(e) =>
-            setOrganisation({
-              organisation: typeOrganisation,
-              nom: e.target.value,
-            })
-          }
-        >
+        <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
-          <Select placeholder="Sélectionner un territoire">
+          <Select
+            placeholder="Sélectionner un territoire"
+            onChange={(e) =>
+              setOrganisation({
+                type: typeOrganisation,
+                code_region: e.target.value,
+              })
+            }
+          >
             {regions.map((option, index) => (
               <option value={option.value} key={index}>
                 {option.label}
@@ -111,7 +126,15 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
       {typeOrganisation === "organisation_nationale" && (
         <FormControl isRequired>
           <FormLabel>Préciser l{"'"}organisation :</FormLabel>
-          <Select placeholder="Sélectionner votre organisation">
+          <Select
+            placeholder="Sélectionner votre organisation"
+            onChange={(e) =>
+              setOrganisation({
+                type: typeOrganisation,
+                nom: e.target.value,
+              })
+            }
+          >
             {ORGANISATIONS_NATIONALES.map((option, index) => (
               <option value={option.key} key={index}>
                 {option.nom}
