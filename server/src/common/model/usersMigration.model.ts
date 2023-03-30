@@ -21,11 +21,9 @@ export const schema = object(
     nom: string({ description: "Le nom de l'utilisateur" }),
     prenom: string({ description: "Le prénom de l'utilisateur" }),
     telephone: string({ description: "Le téléphone de l'utilisateur" }),
+    fonction: string({ description: "La fonction de l'utilisateur" }),
     organisation_id: objectId({
       description: "Organisation à laquelle appartient l'utilisateur",
-    }),
-    type_organisation: string({
-      description: "Type d'organisation [temporaire pendant l'inscription en attendant d'être rattaché]",
     }),
 
     // Internal

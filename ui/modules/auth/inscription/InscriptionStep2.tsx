@@ -14,13 +14,14 @@ import {
   RadioGroup,
   Radio,
   Heading,
+  Checkbox,
 } from "@chakra-ui/react";
 import { _post } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { SIRET_REGEX } from "@/common/domain/siret";
 import useToaster from "@/hooks/useToaster";
 
-const InscriptionStep2 = ({ onSucceeded, uai, typeOrganisation, etablissement, ...props }) => {
+const InscriptionStep2 = ({ onSucceeded, organisation, ...props }) => {
   const { toastError } = useToaster();
   const router = useRouter();
   const uaiToDisplay = etablissement.uai || uai || undefined;
@@ -28,30 +29,30 @@ const InscriptionStep2 = ({ onSucceeded, uai, typeOrganisation, etablissement, .
   const { values, handleChange, handleSubmit, errors, touched, setErrors, isValid, isValidating } = useFormik({
     initialValues: {
       email: "",
-      nom: "",
       civility: "",
+      nom: "",
       prenom: "",
-      type_organisation: typeOrganisation.toUpperCase(),
-      siret: etablissement.siret,
-      uai,
+      fonction: "",
+      telephone: "",
+      password: "",
+      has_accept_cgu_version: "",
     },
     validationSchema: Yup.object().shape({
       email: Yup.string().email("Format d'email invalide").required("Votre email est obligatoire"),
-      siret: Yup.string()
-        .matches(SIRET_REGEX, {
-          message: "SIRET invalide",
-          excludeEmptyString: true,
-        })
-        .required("Le siret est obligatoire"),
-      uai: Yup.string(),
-      type_organisation: Yup.string().required("type_organisation obligatoire"),
       civility: Yup.string().required("Votre civilité est obligatoire"),
       nom: Yup.string().required("Votre nom est obligatoire"),
       prenom: Yup.string().required("Votre prénom est obligatoire"),
+      fonction: Yup.string().required("Votre fonction est obligatoire"),
+      telephone: Yup.string(),
+      password: Yup.string().required("Un mot de passe est obligatoire"),
+      has_accept_cgu_version: Yup.string().required("Votre prénom est obligatoire"),
     }),
-    onSubmit: async (values) => {
+    onSubmit: async (user) => {
       try {
-        const result = await _post("/api/v1/auth/register", values);
+        const result = await _post("/api/v1/auth/register", {
+          user,
+          organisation,
+        });
         if (result.succeeded) {
           onSucceeded();
         }
@@ -73,21 +74,7 @@ const InscriptionStep2 = ({ onSucceeded, uai, typeOrganisation, etablissement, .
       </Heading>
       <form onSubmit={handleSubmit}>
         <Box>
-          <Ribbons variant="success" mt="0.5rem">
-            <Box ml={3} color="grey.800">
-              <Text fontSize="20px" fontWeight="bold">
-                {etablissement.enseigne || etablissement.entreprise_raison_sociale}
-              </Text>
-              {values.type_organisation === "of" && (
-                <Text>
-                  Uai : {uaiToDisplay} - SIRET : {etablissement.siret} (en activité)
-                </Text>
-              )}
-              {values.type !== "of" && <Text>SIRET : {etablissement.siret} (en activité)</Text>}
-            </Box>
-          </Ribbons>
-
-          <FormControl mt={4} py={2} isRequired isInvalid={errors.email && touched.email}>
+          <FormControl mt={4} py={2} isRequired isInvalid={!!(errors.email && touched.email)}>
             <FormLabel>Votre courriel</FormLabel>
             <Input
               id="email"
@@ -139,12 +126,7 @@ const InscriptionStep2 = ({ onSucceeded, uai, typeOrganisation, etablissement, .
           </HStack>
         </Box>
         <HStack gap="24px" mt={5}>
-          {/* FIXME ne fonctionne pas si on rentre un siret */}
-          <Button
-            onClick={() => router.push({ pathname: `/auth/inscription/${typeOrganisation}`, query: { uai } })}
-            color="bluefrance"
-            variant="secondary"
-          >
+          <Button onClick={() => router.push("/auth/inscription/")} color="bluefrance" variant="secondary">
             Revenir
           </Button>
 

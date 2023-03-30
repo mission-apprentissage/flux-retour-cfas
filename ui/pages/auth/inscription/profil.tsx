@@ -1,15 +1,42 @@
 import React, { useEffect, useState } from "react";
+import * as Yup from "yup";
+import YupPassword from "yup-password";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useRouter } from "next/router";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
-import { Box, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  Input,
+  InputGroup,
+  InputRightElement,
+  List,
+  ListIcon,
+  ListItem,
+  Radio,
+  RadioGroup,
+  Text,
+} from "@chakra-ui/react";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
 import { Organisation } from "@/common/internal/Organisation";
 import { ACADEMIES_BY_ID, REGIONS_BY_ID, DEPARTEMENTS_BY_ID } from "@/common/constants/territoiresConstants";
-import { _get } from "@/common/httpClient";
+import { _get, _post } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
+import { Field, Form, Formik } from "formik";
+import { Check } from "@/theme/components/icons";
+import { CheckIcon } from "@chakra-ui/icons";
+import { ShowPassword } from "@/theme/components/icons";
+import Link from "next/link";
+import { CGU_VERSION } from "@/components/legal/Cgu";
+
+YupPassword(Yup); // extend yup
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -121,33 +148,298 @@ const PageFormulaireProfil = () => {
   return (
     <InscriptionWrapper>
       {organisation && (
-        <Ribbons variant="success" mt="0.5rem">
-          <Box ml={3} color="grey.800">
-            {getOrganisationRibbon(organisation)}
-          </Box>
-        </Ribbons>
+        <>
+          <Ribbons variant="success" mt="0.5rem">
+            <Box ml={3} color="grey.800">
+              {getOrganisationRibbon(organisation)}
+            </Box>
+          </Ribbons>
+          <ProfileForm organisation={organisation} />
+        </>
       )}
-      {/* {isFetching ? (
-      //   <Spinner />
-      // ) : (
-      //   etablissement &&
-      //   typeOrganisation && (
-      //     <InscriptionStep2
-      //       flexDirection="column"
-      //       border="1px solid"
-      //       h="100%"
-      //       flexGrow={1}
-      //       borderColor="openbluefrance"
-      //       etablissement={etablissement}
-      //       typeOrganisation={typeOrganisation}
-      //       type={type}
-      //       uai={uai}
-      //       onSucceeded={() => router.push("/auth/inscription/bravo")}
-      //     />
-      //   )
-      // )} */}
     </InscriptionWrapper>
   );
 };
 
 export default PageFormulaireProfil;
+
+function ProfileForm({ organisation }: { organisation: Organisation }) {
+  const router = useRouter();
+  const { toastError } = useToaster();
+  const passwordMinLength = organisation.type === "ADMINISTRATEUR" ? 20 : 12;
+  const [showPasswordCharacters, setShowPasswordCharacters] = React.useState(false);
+
+  return (
+    <Formik
+      initialValues={{
+        email: "",
+        civility: "",
+        nom: "",
+        prenom: "",
+        fonction: "",
+        telephone: "",
+        password: "",
+        passwordConfirmation: "",
+        has_accepted_cgu: "",
+      }}
+      validationSchema={Yup.object().shape({
+        email: Yup.string().email("Format d'email invalide").required("Votre email est obligatoire"),
+        civility: Yup.string().required("Votre civilité est obligatoire"),
+        nom: Yup.string().required("Votre nom est obligatoire"),
+        prenom: Yup.string().required("Votre prénom est obligatoire"),
+        fonction: Yup.string().required("Votre fonction est obligatoire"),
+        telephone: Yup.string(),
+        password: Yup.string()
+          .required("Veuillez saisir un mot de passe")
+          .min(passwordMinLength, `Le mot de passe doit contenir au moins ${passwordMinLength} caractères`)
+          .minLowercase(1, "Le mot de passe doit contenir au moins une lettre minuscule")
+          .minUppercase(1, "Le mot de passe doit contenir au moins une lettre majuscule")
+          .minNumbers(1, "Le mot de passe doit contenir au moins un nombre")
+          .minSymbols(1, "Le mot de passe doit contenir au moins un caractère spécial"),
+        passwordConfirmation: Yup.string().test((value, context) => {
+          return value === context.parent.password
+            ? true
+            : context.createError({
+                message: "Les mots de passe doivent correspondre.",
+              });
+        }),
+        has_accepted_cgu: Yup.string().required("Vous devez cocher cette case"),
+      })}
+      onSubmit={async (form, actions) => {
+        try {
+          await _post("/api/v1/auth/register", {
+            user: {
+              email: form.email,
+              civility: form.civility,
+              nom: form.nom,
+              prenom: form.prenom,
+              fonction: form.fonction,
+              telephone: form.telephone,
+              password: form.password,
+              has_accept_cgu_version: CGU_VERSION,
+            },
+            organisation,
+          });
+          await router.push("/auth/inscription/bravo");
+        } catch (err) {
+          let errorMessage: string = err?.json?.data?.message || err.message;
+          if (err?.json?.data?.message === "Aucun organisme trouvé") {
+            errorMessage = "Ce code UAI n'existe pas. Veuillez vérifier à nouveau";
+          }
+          actions.setFieldError("uai", errorMessage);
+          toastError(err.messages?.message || "Une erreur est survenue. Merci de réessayer plus tard.");
+        } finally {
+          actions.setSubmitting(false);
+        }
+      }}
+    >
+      {(form) => (
+        <Form>
+          <pre>{JSON.stringify(form, null, 4)}</pre>
+
+          <Field name="email">
+            {({ field, meta }) => (
+              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <FormLabel>Votre courriel</FormLabel>
+                <Input {...field} id={field.name} placeholder="Ex : jeandupont@mail.com" />
+                <FormErrorMessage>{meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <Field name="civility">
+            {({ field, meta }) => (
+              <FormControl my={4} isRequired isInvalid={meta.error && meta.touched}>
+                <RadioGroup {...field} id={field.name}>
+                  <HStack>
+                    <Field as={Radio} name="civility" value="Monsieur">
+                      Monsieur
+                    </Field>
+                    <Field as={Radio} name="civility" value="Madame" ml="2.5rem !important">
+                      Madame
+                    </Field>
+                  </HStack>
+                </RadioGroup>
+                <FormErrorMessage>{meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <Field name="nom">
+            {({ field, meta }) => (
+              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <FormLabel>Votre nom</FormLabel>
+                <Input {...field} id={field.name} placeholder="Ex : Dupont" />
+                <FormErrorMessage>{meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <Field name="prenom">
+            {({ field, meta }) => (
+              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <FormLabel>Votre prénom</FormLabel>
+                <Input {...field} id={field.name} placeholder="Ex : Jean" />
+                <FormErrorMessage>{meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <Field name="fonction">
+            {({ field, meta }) => (
+              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <FormLabel>Votre fonction au sein de l{"'"}établissement</FormLabel>
+                <Input {...field} id={field.name} placeholder="Ex : Responsable administratif" />
+                <FormErrorMessage>{meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <Field name="telephone">
+            {({ field, meta }) => (
+              <FormControl minH={100} isInvalid={meta.error && meta.touched}>
+                <FormLabel>Téléphone</FormLabel>
+                <Input {...field} id={field.name} placeholder="Ex : 06 89 10 11 12" />
+                <FormErrorMessage>{meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <Field name="password">
+            {({ field, meta }) => (
+              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <FormLabel>Mot de passe</FormLabel>
+                <InputGroup size="md">
+                  <Input
+                    {...field}
+                    id={field.name}
+                    type={showPasswordCharacters ? "text" : "password"}
+                    placeholder="Choisissez votre mot de passe"
+                  />
+
+                  <InputRightElement width="2.5rem">
+                    <ShowPassword
+                      boxSize={4}
+                      onClick={() => setShowPasswordCharacters(!showPasswordCharacters)}
+                      cursor="pointer"
+                    />
+                  </InputRightElement>
+                </InputGroup>
+                <PasswordConditions password={field.value} />
+              </FormControl>
+            )}
+          </Field>
+          <Field name="passwordConfirmation">
+            {({ field, meta }) => (
+              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <FormLabel>Confirmation du mot de passe</FormLabel>
+                <Input {...field} id={field.name} type="password" placeholder="Confirmez votre mot de passe" />
+                <FormErrorMessage>{field.value && meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <Field name="has_accepted_cgu">
+            {({ field, meta }) => (
+              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <Checkbox {...field} id={field.name} icon={<Check />}>
+                  J{"'"}atteste avoir lu et accepté les{" "}
+                  <Link href={"/cgu"}>conditions générales d{"'"}utilisation</Link>
+                </Checkbox>
+                <FormErrorMessage>{meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <Field name="has_accepted_cgu">
+            {({ field, meta }) => (
+              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <Checkbox {...field} id={field.name} icon={<Check />}>
+                  J{"'"}accepte d{"'"}être contacté par un opérateur public (DREETS, DEETS, Académie, …). Mon email
+                  apparaîtra dans le profil dans mon organisme.
+                </Checkbox>
+                <FormErrorMessage>{meta.error}</FormErrorMessage>
+              </FormControl>
+            )}
+          </Field>
+          <HStack gap="24px" mt={5}>
+            <Button onClick={() => router.back()} color="bluefrance" variant="secondary">
+              Revenir
+            </Button>
+
+            <Button
+              size="md"
+              type="submit"
+              variant="primary"
+              px={6}
+              isLoading={form.isSubmitting}
+              // isDisabled={form.touched && (!form.isValid || form.isSubmitting)}
+            >
+              S&rsquo;inscrire
+            </Button>
+          </HStack>
+        </Form>
+      )}
+    </Formik>
+  );
+}
+
+const passwordChecks = [
+  {
+    schema: Yup.string().min(12), // FIXME a-t-on vraiment besoin des 20c pour un admin ?...
+    label: (
+      <>
+        Le mot de passe doit contenir <strong>au moins {12} caractères</strong>
+      </>
+    ),
+  },
+  {
+    schema: Yup.string().matches(/[a-z]/),
+    label: (
+      <>
+        Le mot de passe doit contenir <strong>au moins une lettre minuscule</strong>
+      </>
+    ),
+  },
+  {
+    schema: Yup.string().matches(/[A-Z]/),
+    label: (
+      <>
+        Le mot de passe doit contenir <strong>au moins une lettre majuscule</strong>
+      </>
+    ),
+  },
+  {
+    schema: Yup.string().matches(/[^\w\d\s:]/),
+    label: (
+      <>
+        Le mot de passe doit contenir <strong>au moins un caractère spécial</strong>
+      </>
+    ),
+  },
+  {
+    schema: Yup.string().matches(/[0-9]/),
+    label: (
+      <>
+        Le mot de passe doit contenir <strong>au moins un chiffre</strong>
+      </>
+    ),
+  },
+];
+
+function PasswordConditions({ password }: { password: string }) {
+  const conditions = passwordChecks.map((check) => ({
+    ...check,
+    valid: check.schema.isValidSync(password),
+  }));
+
+  return (
+    <>
+      <List mb={5} fontSize="zeta">
+        {conditions.map((condition, i) => (
+          <ListItem color={condition.valid ? "success" : "default"} my={3} key={i}>
+            <ListIcon
+              aria-hidden={true}
+              as={CheckIcon}
+              color="success"
+              visibility={condition.valid ? "visible" : "hidden"}
+            />
+            {condition.label}
+          </ListItem>
+        ))}
+      </List>
+    </>
+  );
+}

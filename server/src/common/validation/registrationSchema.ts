@@ -5,9 +5,9 @@ const registrationSchema = () =>
   z.object({
     user: z.object({
       email: z.string(),
-      prenom: z.string(),
       civility: z.enum(["Madame", "Monsieur"]),
       nom: z.string(),
+      prenom: z.string(),
       fonction: z.string(),
       telephone: z.string(),
       password: z.string(),
