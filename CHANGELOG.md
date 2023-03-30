@@ -1,3 +1,15 @@
+# [3.18.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.17.1...v3.18.0) (2023-03-30)
+
+
+### Bug Fixes
+
+* **server:** fiab sur uai lieux fiables + fix qualiopi hydrate ([#2840](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2840)) ([f5b5beb](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f5b5beb06d48322cf70ffc41a2a1ae38ca8d977f))
+
+
+### Features
+
+* ajout champs organismes.effectifs_current_year_count+qualiopi ([#2838](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2838)) ([b08a258](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b08a258294470f04bdfa4e7ffad1b37787bbca3d))
+
 ## [3.17.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.17.0...v3.17.1) (2023-03-28)
 
 
