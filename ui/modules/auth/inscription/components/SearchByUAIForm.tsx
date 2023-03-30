@@ -69,10 +69,10 @@ export default function SearchByUAIForm({ setOrganisation }) {
                     borderColor="green.500"
                     rounded="md"
                     flexDirection="column"
-                    py={4}
+                    p={4}
                     w="100%"
                   >
-                    <Text mx="auto" px={4} pb={2} fontSize="1.1rem" fontWeight="bold">
+                    <Text mx="auto" pb={2} fontSize="1.1rem" fontWeight="bold">
                       Organisme de formation identifié :
                     </Text>
                     <OrganismeDetails organisme={organismes[0]} />
