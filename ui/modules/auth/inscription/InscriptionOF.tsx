@@ -6,7 +6,7 @@ import SearchByUAIForm from "./components/SearchByUAIForm";
 
 type TypeOfSearch = "siret" | "uai" | undefined;
 
-export const InscriptionOF = () => {
+export const InscriptionOF = ({ setOrganisation }) => {
   const router = useRouter();
   const typeOfSearch = router.query.select as TypeOfSearch;
 
@@ -27,7 +27,7 @@ export const InscriptionOF = () => {
         </RadioGroup>
       </Box>
       {typeOfSearch === "siret" && <SiretBlock />}
-      {typeOfSearch === "uai" && <SearchByUAIForm />}
+      {typeOfSearch === "uai" && <SearchByUAIForm setOrganisation={setOrganisation} />}
     </Box>
   );
 };

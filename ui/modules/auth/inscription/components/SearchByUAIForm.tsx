@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
-import { useRouter } from "next/router";
 import {
   Accordion,
   AccordionButton,
@@ -21,15 +20,8 @@ import { searchOrganismeByUAI } from "@/common/api/tableauDeBord";
 import { UAI_REGEX } from "@/common/domain/uai";
 import OrganismeDetails from "./OrganismeDetails";
 
-export default function SearchByUAIForm() {
-  const router = useRouter();
-
+export default function SearchByUAIForm({ setOrganisation }) {
   const [organismes, setOrganismes] = useState<any[] | null>(null);
-
-  function goToFinalisation(organisme: any) {
-    // WIP avoir la page d'atterrisage commune avec les paramètres query en JSON (ils seront revalidés par la suite)
-    router.push(`/auth/inscription/organisme_formation/${organisme.uai}/${organisme.siret}`);
-  }
 
   return (
     <Formik
@@ -91,7 +83,13 @@ export default function SearchByUAIForm() {
                     size="md"
                     variant="primary"
                     px={6}
-                    onClick={() => goToFinalisation(organismes[0])}
+                    onClick={() =>
+                      setOrganisation({
+                        organisation: "organisme_formation",
+                        siret: organismes[0].siret,
+                        uai: organismes[0].uai,
+                      })
+                    }
                   >
                     Ceci est mon organisme
                   </Button>
@@ -122,7 +120,13 @@ export default function SearchByUAIForm() {
                             size="md"
                             variant="primary"
                             px={6}
-                            onClick={() => goToFinalisation(organisme)}
+                            onClick={() =>
+                              setOrganisation({
+                                organisation: "organisme_formation",
+                                siret: organisme.siret,
+                                uai: organisme.uai,
+                              })
+                            }
                           >
                             Ceci est mon organisme
                           </Button>

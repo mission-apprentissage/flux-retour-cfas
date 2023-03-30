@@ -48,8 +48,7 @@ const departements = DEPARTEMENTS_SORTED.map(({ nom, code }) => ({
 }));
 const regions = REGIONS_SORTED.map(({ nom, code }) => ({ label: nom, value: code }));
 
-export const InscriptionOperateurPublic = () => {
-  const router = useRouter();
+export const InscriptionOperateurPublic = ({ setOrganisation }) => {
   const [typeOrganisation, setTypeOrganisation] = useState<TypeOrganisation | null>(null);
   // const { typeOrganisation } = router.query;
 
@@ -90,7 +89,15 @@ export const InscriptionOperateurPublic = () => {
         </FormControl>
       )}
       {(["dreets", "deets", "draaf", "conseil_regional"] as (typeof typeOrganisation)[]).includes(typeOrganisation) && (
-        <FormControl isRequired>
+        <FormControl
+          isRequired
+          onChange={(e) =>
+            setOrganisation({
+              organisation: typeOrganisation,
+              nom: e.target.value,
+            })
+          }
+        >
           <FormLabel>Votre territoire :</FormLabel>
           <Select placeholder="Sélectionner un territoire">
             {regions.map((option, index) => (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Button, HStack, Link, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
 
@@ -16,7 +16,7 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 const RegisterConfigurationOrganisationPage = () => {
   const router = useRouter();
   const typeOrganisation = router.query.typeOrganisation as CategorieCompteInscription;
-  console.log(typeOrganisation, router.query);
+  const [organisation, setOrganisation] = useState();
 
   return (
     <InscriptionWrapper>
@@ -32,11 +32,11 @@ const RegisterConfigurationOrganisationPage = () => {
             </Box>
           </HStack>
         )}
-        {typeOrganisation === "organisme_formation" && <InscriptionOF />}
+        {typeOrganisation === "organisme_formation" && <InscriptionOF setOrganisation={setOrganisation} />}
         {["operateur_public", "dreets", "ddets", "draaf", "academie", "conseil_regional"].includes(
           typeOrganisation
-        ) && <InscriptionOperateurPublic />}
-        {typeOrganisation === "tete_de_reseau" && <InscriptionTeteDeReseau />}
+        ) && <InscriptionOperateurPublic setOrganisation={setOrganisation} />}
+        {typeOrganisation === "tete_de_reseau" && <InscriptionTeteDeReseau setOrganisation={setOrganisation} />}
       </Box>
       <HStack gap="24px" mt={5}>
         <Button
@@ -53,18 +53,9 @@ const RegisterConfigurationOrganisationPage = () => {
         <Button
           size="md"
           variant="primary"
-          onClick={() =>
-            router.push({
-              pathname: `/auth/inscription/${typeOrganisation}/${siret}`,
-              query: router.query.uai
-                ? {
-                    uai: router.query.uai,
-                  }
-                : {},
-            })
-          }
+          onClick={() => router.push(`/auth/inscription/profil?organisation=${JSON.stringify(organisation)}`)}
           px={6}
-          isDisabled={!siret}
+          isDisabled={!organisation}
         >
           Suivant
         </Button>
