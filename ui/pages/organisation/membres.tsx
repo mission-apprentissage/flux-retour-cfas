@@ -52,6 +52,18 @@ const PageGestionDesMembres = () => {
     throw new Error("not implemented");
   }
 
+  async function validateMembre(userId: string) {
+    await _post(`/api/v1/organisation/membres/${userId}/validate`);
+    await refetchMembres();
+    toastSuccess("Le membre a été validé");
+  }
+
+  async function rejectMembre(userId: string) {
+    await _post(`/api/v1/organisation/membres/${userId}/reject`);
+    await refetchMembres();
+    toastSuccess("Le membre a été refusé");
+  }
+
   async function deleteMembre(userId: string) {
     await _delete(`/api/v1/organisation/membres/${userId}`);
     await refetchMembres();
@@ -113,8 +125,8 @@ const PageGestionDesMembres = () => {
                               <Menu placement="bottom">
                                 <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} />
                                 <MenuList>
-                                  <MenuItem>Valider le compte</MenuItem>
-                                  <MenuItem>Refuser la demande</MenuItem>
+                                  <MenuItem onClick={() => validateMembre(user._id)}>Valider le compte</MenuItem>
+                                  <MenuItem onClick={() => rejectMembre(user._id)}>Refuser la demande</MenuItem>
                                 </MenuList>
                               </Menu>
                             </>

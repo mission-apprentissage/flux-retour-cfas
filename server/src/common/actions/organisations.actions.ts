@@ -95,8 +95,8 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
 
 export async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Promise<Invitation> {
   const invitation = await invitationsDb().findOne<Invitation>({
-    _id: invitationId,
     organisation_id: ctx.organisation_id, // filtrage pour restreindre les accès
+    _id: invitationId,
   });
   if (!invitation) {
     throw Boom.notFound(`missing invitation ${invitationId}`);
@@ -126,6 +126,36 @@ export async function cancelInvitation(ctx: AuthContext, invitationId: string): 
   if (res.deletedCount === 0) {
     throw Boom.forbidden("Permissions invalides");
   }
+}
+
+export async function validateMembre(ctx: AuthContext, userId: string): Promise<void> {
+  // const user = await getUserById(ctx, userId)
+  const res = await usersMigrationDb().updateOne(
+    {
+      organisation_id: ctx.organisation_id,
+      _id: new ObjectId(userId),
+      account_status: "PENDING_ADMIN_VALIDATION",
+    },
+    {
+      account_status: "CONFIRMED",
+    }
+  );
+  if (res.modifiedCount === 0) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+  // TODO send email
+}
+
+export async function rejectMembre(ctx: AuthContext, userId: string): Promise<void> {
+  const res = await usersMigrationDb().deleteOne({
+    organisation_id: ctx.organisation_id,
+    _id: new ObjectId(userId),
+    account_status: "PENDING_ADMIN_VALIDATION",
+  });
+  if (res.deletedCount === 0) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+  // TODO send email
 }
 
 export async function removeUserFromOrganisation(ctx: AuthContext, userId: string): Promise<void> {
@@ -206,4 +236,16 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<Organi
     });
   }
   return organisme;
+}
+
+// utilitaires
+async function getUserById(ctx: AuthContext, userId: string): Promise<UsersMigration> {
+  const user = await usersMigrationDb().findOne({
+    organisation_id: ctx.organisation_id,
+    _id: new ObjectId(userId),
+  });
+  if (!user) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+  return user;
 }

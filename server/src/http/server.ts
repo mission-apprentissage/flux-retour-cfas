@@ -69,8 +69,10 @@ import {
   inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
+  rejectMembre,
   removeUserFromOrganisation,
   resendInvitationEmail,
+  validateMembre,
 } from "../common/actions/organisations.actions.js";
 import { getIndicateursNational, getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
 import { updateUserProfile } from "../common/actions/users.actions.js";
@@ -392,6 +394,20 @@ function setupRoutes(app: Application, services) {
     "/api/v1/organisation/membres/:userId",
     returnResult(async (req) => {
       await removeUserFromOrganisation(req.user, req.params.userId);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/organisation/membres/:userId/validate",
+    returnResult(async (req) => {
+      await validateMembre(req.user, req.params.userId);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/organisation/membres/:userId/reject",
+    returnResult(async (req) => {
+      await rejectMembre(req.user, req.params.userId);
     })
   );
 
