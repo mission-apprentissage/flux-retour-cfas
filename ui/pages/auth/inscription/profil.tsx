@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
 import { Box, Text } from "@chakra-ui/react";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { getReseauDisplayNameFromKey } from "@/common/constants/networksConstants";
+import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
 import { Organisation } from "@/common/internal/Organisation";
 import { ACADEMIES_BY_ID, REGIONS_BY_ID, DEPARTEMENTS_BY_ID } from "@/common/constants/territoiresConstants";
 
@@ -32,7 +32,7 @@ function getRibbon(organisation: Organisation) {
     case "TETE_DE_RESEAU":
       return (
         <Text fontSize="20px" fontWeight="bold">
-          {getReseauDisplayNameFromKey(organisation.reseau)}
+          {TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}
         </Text>
       );
 

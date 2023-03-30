@@ -15,7 +15,7 @@ import {
 import Section from "@/components/Section/Section";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
-import { getReseauDisplayNameFromKey } from "@/common/constants/networksConstants.js";
+import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
 import IndicateursInfos from "../../common/IndicateursInfos";
 import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
 import { Organisme } from "@/common/internal/Organisme";
@@ -154,7 +154,7 @@ export default function OrganismeInfo({ organisme, isMine }: { organisme: Organi
             {organisme.reseaux && organisme.reseaux?.length > 0 && (
               <Text>
                 Cet organisme fait partie {organisme.reseaux?.length === 1 ? "du réseau" : "des réseaux"}{" "}
-                <b>{organisme.reseaux.map((item) => getReseauDisplayNameFromKey(item))?.join(", ")}</b>
+                <b>{organisme.reseaux.map((reseau) => TETE_DE_RESEAUX_BY_ID[reseau]?.nom)?.join(", ")}</b>
               </Text>
             )}
             {organisme.adresse?.complete && <Text>Sa domiciliation est : {organisme.adresse.complete}</Text>}

@@ -40,13 +40,6 @@ const typesOrganisation = [
 
 type TypeOrganisation = (typeof typesOrganisation)[number]["value"];
 
-const academies = ACADEMIES_SORTED.map(({ nom, code }) => ({ label: nom, value: code }));
-const departements = DEPARTEMENTS_SORTED.map(({ nom, code }) => ({
-  label: nom,
-  value: code,
-}));
-const regions = REGIONS_SORTED.map(({ nom, code }) => ({ label: nom, value: code }));
-
 export const InscriptionOperateurPublic = ({ setOrganisation }) => {
   const [typeOrganisation, setTypeOrganisation] = useState<TypeOrganisation | null>(null);
 
@@ -75,9 +68,9 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
               })
             }
           >
-            {academies.map((option, index) => (
-              <option value={option.value} key={index}>
-                {option.label}
+            {ACADEMIES_SORTED.map((option, index) => (
+              <option value={option.code} key={index}>
+                {option.nom}
               </option>
             ))}
           </Select>
@@ -95,9 +88,9 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
               })
             }
           >
-            {departements.map((option, index) => (
-              <option value={option.value} key={index}>
-                {option.label}
+            {DEPARTEMENTS_SORTED.map((option, index) => (
+              <option value={option.code} key={index}>
+                {option.nom}
               </option>
             ))}
           </Select>
@@ -115,9 +108,9 @@ export const InscriptionOperateurPublic = ({ setOrganisation }) => {
               })
             }
           >
-            {regions.map((option, index) => (
-              <option value={option.value} key={index}>
-                {option.label}
+            {REGIONS_SORTED.map((option, index) => (
+              <option value={option.code} key={index}>
+                {option.nom}
               </option>
             ))}
           </Select>

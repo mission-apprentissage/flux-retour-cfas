@@ -1,12 +1,7 @@
 import React from "react";
 
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
-import { RESEAUX_CFAS } from "@/common/constants/networksConstants";
-
-const reseaux = Object.values(RESEAUX_CFAS).map(({ nomReseau }) => ({
-  label: `${nomReseau}`,
-  value: nomReseau,
-}));
+import { TETE_DE_RESEAUX } from "@/common/constants/networksConstants";
 
 export const InscriptionTeteDeReseau = ({ setOrganisation }) => {
   return (
@@ -22,9 +17,9 @@ export const InscriptionTeteDeReseau = ({ setOrganisation }) => {
             })
           }
         >
-          {reseaux.map((reseau, index) => (
-            <option value={reseau.value} key={index}>
-              {reseau.label}
+          {TETE_DE_RESEAUX.map((reseau, index) => (
+            <option value={reseau.key} key={index}>
+              {reseau.nom}
             </option>
           ))}
         </Select>
