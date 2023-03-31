@@ -3,7 +3,7 @@ import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeCo
 import logger from "../../logger.js";
 import { organismesDb } from "../../model/collections.js";
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { OrganisationOrganismeFormation } from "../../model/organisations.model.js";
+import { OrganisationOrganismeFormation, OrganisationType } from "../../model/organisations.model.js";
 import { getOrganismeById } from "../organismes/organismes.actions.js";
 
 export async function requireOrganismeAccess(ctx: AuthContext, organismeId: string): Promise<void> {
@@ -13,13 +13,7 @@ export async function requireOrganismeAccess(ctx: AuthContext, organismeId: stri
 }
 
 export function requireOrganisationOF(ctx: AuthContext): OrganisationOrganismeFormation {
-  if (
-    ![
-      "ORGANISME_FORMATION_FORMATEUR",
-      "ORGANISME_FORMATION_RESPONSABLE",
-      "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-    ].includes(ctx.organisation.type)
-  ) {
+  if (!isOrganisationOF(ctx.organisation.type)) {
     throw Boom.forbidden("Permissions invalides");
   }
   return (ctx as AuthContext<OrganisationOrganismeFormation>).organisation;
@@ -180,4 +174,12 @@ async function canAccessOrganisme(ctx: AuthContext, organismeId: string): Promis
     case "ADMINISTRATEUR":
       return true;
   }
+}
+
+export function isOrganisationOF(type: OrganisationType): boolean {
+  return (
+    type === "ORGANISME_FORMATION_FORMATEUR" ||
+    type === "ORGANISME_FORMATION_RESPONSABLE" ||
+    type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR"
+  );
 }

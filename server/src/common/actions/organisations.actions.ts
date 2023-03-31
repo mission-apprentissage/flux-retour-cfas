@@ -239,16 +239,6 @@ export async function getInvitationByToken(token: string): Promise<any> {
 }
 
 // utilitaires
-async function getUserById(ctx: AuthContext, userId: string): Promise<UsersMigration> {
-  const user = await usersMigrationDb().findOne({
-    organisation_id: ctx.organisation_id,
-    _id: new ObjectId(userId),
-  });
-  if (!user) {
-    throw Boom.forbidden("Permissions invalides");
-  }
-  return user;
-}
 
 async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Promise<Invitation> {
   const invitation = await invitationsDb().findOne<Invitation>({

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { organisationTypes } from "../model/organisations.model.js";
 
 const registrationSchema = () =>
   z.object({
@@ -13,26 +12,15 @@ const registrationSchema = () =>
       password: z.string(),
       has_accept_cgu_version: z.string(),
     }),
-    organisation: z.object({
-      type: z.enum(organisationTypes),
-
-      // of
-      uai: z.string().optional(),
-      siret: z.string().optional(),
-
-      // tête de réseau
-      reseau: z.string().optional(),
-
-      // dreets, deets, draaf, conseil_regional
-      code_region: z.string().optional(),
-      // ddets
-      code_departement: z.string().optional(),
-      // academie
-      code_academie: z.string().optional(),
-
-      // opérateur public national
-      nom: z.string().optional(),
-    }),
+    organisation: z.discriminatedUnion("type", [
+      z.object({ type: z.literal("ORGANISME_FORMATION_FORMATEUR"), uai: z.string(), siret: z.string() }),
+      z.object({ type: z.literal("TETE_DE_RESEAU"), reseau: z.string() }),
+      z.object({ type: z.enum(["DREETS", "DEETS", "DRAAF", "CONSEIL_REGIONAL"]), code_region: z.string() }),
+      z.object({ type: z.literal("DDETS"), code_departement: z.string() }),
+      z.object({ type: z.literal("ACADEMIE"), code_academie: z.string() }),
+      z.object({ type: z.literal("OPERATEUR_PUBLIC_NATIONAL"), nom: z.string() }),
+      z.object({ type: z.literal("ADMINISTRATEUR") }),
+    ]),
   });
 
 export default registrationSchema;
