@@ -9,6 +9,11 @@ import { schema as nomApprenantSchema } from "./utils/apprenant/nomApprenant.js"
 import { schema as prenomApprenantSchema } from "./utils/apprenant/prenomApprenant.js";
 import { schema as siretSchema } from "./utils/siret.js";
 
+/**
+ * @deprecated
+ * Note: ce schema Joi est déprécié, et utilisé uniquement par l'API V1
+ * La V2 utilise Zod, qui permet le typing et la generation de la doc openAPI
+ */
 const dossierApprenantSchema = Joi.object({
   // required fields
   nom_apprenant: nomApprenantSchema.required().trim(),

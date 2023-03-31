@@ -22,6 +22,7 @@
     "migration:down": "migrate-mongo down"
   },
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "4.5.1",
     "@sentry/node": "7.33.0",
     "@sentry/tracing": "7.33.0",
     "@supercharge/promise-pool": "2.4.0",
@@ -73,6 +74,7 @@
     "nodemailer-html-to-text": "3.2.0",
     "oleoduc": "0.7.0",
     "omit-deep": "0.3.0",
+    "openapi3-ts": "4.0.2",
     "passport": "0.5.2",
     "passport-jwt": "4.0.0",
     "passport-localapikey": "0.0.3",
@@ -82,6 +84,8 @@
     "safe-stable-stringify": "2.4.1",
     "sha512crypt-node": "1.0.2",
     "sinon": "15.0.2",
+    "swagger-jsdoc": "6.2.8",
+    "swagger-ui-express": "4.6.2",
     "tcp-port-used": "1.0.2",
     "ts-node": "10.9.1",
     "uuid": "8.3.2",

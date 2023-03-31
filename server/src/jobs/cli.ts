@@ -14,6 +14,7 @@ import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-o
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
+import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count.js";
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
 // import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
@@ -24,12 +25,12 @@ import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organis
 import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
 import { seedPlausibleGoals } from "./seed/plausible/goals.js";
 import { getStats } from "./fiabilisation/stats.js";
-import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count.js";
 import { recreateIndexes } from "./db/recreateIndexes.js";
 import { findInvalidDocuments } from "./db/findInvalidDocuments.js";
 import { generateTypes } from "./seed/types/generate-types.js";
 import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
 import { removeDuplicatesEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates.js";
+import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api.js";
 
 program.configureHelp({
   sortSubcommands: true,
@@ -219,6 +220,15 @@ program
   .action(async (_, options) =>
     runScript(async () => {
       return hydrateOrganismesReferentiel();
+    }, options._name)
+  );
+
+program
+  .command("hydrate:open-api")
+  .description("Création/maj du fichier open-api.json")
+  .action(async (_, options) =>
+    runScript(async () => {
+      return hydrateOpenApi();
     }, options._name)
   );
 
