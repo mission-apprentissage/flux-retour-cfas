@@ -622,6 +622,7 @@ export async function findOrganismesFiablesBySIRET(siret: string): Promise<Organ
     })
     .toArray();
   if (organismes.length === 0) {
+    // FIXME fallback api entreprise
     throw Boom.badRequest("Aucun organisme trouvé");
   }
   return organismes;

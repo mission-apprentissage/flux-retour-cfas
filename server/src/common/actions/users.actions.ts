@@ -1,7 +1,7 @@
+import Boom from "boom";
 import { addHours } from "date-fns";
 import { ObjectId } from "mongodb";
 
-import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
 import { usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
 import { validateUser } from "../model/usersMigration.model.js";
@@ -281,16 +281,23 @@ export const updateUserLastConnection = async (email) => {
   );
 };
 
-export const activateUser = async (email) => {
-  return await updateUserStatus(email, USER_ACCOUNT_STATUS.PENDING_PASSWORD_SETUP);
-};
-
-export const userHasAskAccess = async (email, data) => {
-  return await updateUserStatus(email, USER_ACCOUNT_STATUS.PENDING_ADMIN_VALIDATION, data);
-};
-
-export const finalizeUser = async (email: string) => {
-  return await updateUserStatus(email, USER_ACCOUNT_STATUS.CONFIRMED);
+/** Ca serait mieux de gérer un token d'activation */
+export const activateUser = async (email: string) => {
+  const res = await usersMigrationDb().updateOne(
+    {
+      email,
+      account_status: "PENDING_EMAIL_VALIDATION",
+    },
+    {
+      $set: {
+        account_status: "PENDING_ADMIN_VALIDATION", // previously PENDING_PASSWORD_SETUP
+      },
+    }
+  );
+  if (res.modifiedCount === 0) {
+    throw Boom.badRequest("Permissions invalides");
+  }
+  // FIXME envoyer mail aux admin / gestionnaires
 };
 
 /**
@@ -373,31 +380,6 @@ function getNextAccountStatus(user: any) {
     default:
       return user.account_status;
   }
-}
-
-/**
- * @param {string} email
- * @param {string} newStatus
- * @param {any=} data
- */
-async function updateUserStatus(email: any, newStatus: any, data?: any) {
-  const user = await usersMigrationDb().findOne({ email });
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
-
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id: user._id },
-    {
-      $set: {
-        account_status: newStatus,
-        ...data,
-      },
-    },
-    { returnDocument: "after" }
-  );
-
-  return updated.value;
 }
 
 export async function updateUserProfile(ctx: AuthContext, infos: any) {

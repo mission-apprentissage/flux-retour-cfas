@@ -43,7 +43,7 @@ export default () => {
     if (await sessions.findJwt(token)) {
       await sessions.removeJwt(token);
     }
-    await sessions.addJwt(token);
+    await sessions.createSession(token);
 
     responseWithCookie({ res, token }).status(200).json({
       loggedIn: true,

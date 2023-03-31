@@ -2,7 +2,6 @@ import Joi from "joi";
 import { object, objectId, string, boolean, any, arrayOf, date } from "./json-schema/jsonSchemaTypes.js";
 import { schemaValidation } from "../utils/schemaUtils.js";
 import { passwordSchema } from "../utils/validationUtils.js";
-import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
 
 export const collectionName = "usersMigration";
 
@@ -29,7 +28,14 @@ export const schema = object(
     // Internal
     account_status: string({
       description: "Statut du compte",
-      enum: Object.keys(USER_ACCOUNT_STATUS),
+      enum: [
+        "PENDING_EMAIL_VALIDATION",
+        "PENDING_PASSWORD_SETUP", // à supprimer
+        "PENDING_PERMISSIONS_SETUP", // à supprimer
+        "PENDING_ADMIN_VALIDATION",
+        "CONFIRMED",
+        "DIRECT_PENDING_PASSWORD_SETUP",
+      ],
     }),
     has_accept_cgu_version: string({ description: "Version des cgu accepté par l'utilisateur" }),
     created_at: date({ description: "Date de création du compte" }),

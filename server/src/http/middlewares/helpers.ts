@@ -2,8 +2,6 @@ import { AuthContext } from "@/src/common/model/internal/AuthContext.js";
 import Boom from "boom";
 import { NextFunction, Request, Response } from "express";
 
-import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
-
 type Handler = (req: Request, res: Response, next: NextFunction) => any | Promise<any>;
 
 // catch errors and return the result of the request handler
@@ -28,7 +26,7 @@ export function indicateursPermissions() {
 
 // helpers
 export function ensureValidUser(user: AuthContext) {
-  if (user.account_status !== USER_ACCOUNT_STATUS.CONFIRMED) {
+  if (user.account_status !== "CONFIRMED") {
     throw Boom.forbidden("Accès non autorisé");
   }
 }

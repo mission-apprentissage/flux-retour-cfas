@@ -1,30 +1,17 @@
 import express from "express";
-import Boom from "boom";
 import Joi from "joi";
 import passport from "passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
-import { uniq } from "lodash-es";
 
 import config from "../../../config.js";
-import {
-  getUserByEmail,
-  authenticate,
-  updateUserLastConnection,
-  structureUser,
-  activateUser,
-  finalizeUser,
-  userHasAskAccess,
-} from "../../../common/actions/users.actions.js";
+import { getUserByEmail, activateUser } from "../../../common/actions/users.actions.js";
 import * as sessions from "../../../common/actions/sessions.actions.js";
-import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
-import { authMiddleware } from "../../middlewares/authMiddleware.js";
 import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
-import logger from "../../../common/logger.js";
-import { USER_ACCOUNT_STATUS } from "../../../common/constants/usersConstants.js";
+import { returnResult } from "../../middlewares/helpers.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -40,7 +27,7 @@ const checkActivationToken = () => {
             if (!user) {
               return done(null, false);
             }
-            return done(null, { ...user, tmpPwd: jwt_payload.tmpPwd });
+            return done(null, user);
           })
           .catch((err) => done(err));
       }
@@ -130,161 +117,145 @@ export default () => {
     return res.json([buildPublicResponse({ uai, siret, ...responseFromApiEntreprise })]);
   });
 
-  router.post("/activation", checkActivationToken(), async ({ body, user }, res) => {
-    await Joi.object({
-      activationToken: Joi.string().required(),
-    }).validateAsync(body, { abortEarly: false });
-
-    const auth = await authenticate(user.email.toLowerCase(), "user.tmpPwd"); // FIXME A VIRER
-
-    if (!auth) {
-      throw Boom.unauthorized("Accès non autorisé");
-    }
-
-    const updatedUser = await activateUser(user.email.toLowerCase());
-
-    const payload = await structureUser(updatedUser);
-
-    await updateUserLastConnection(payload.email);
-
-    const token = createUserTokenSimple({ payload: { email: payload.email } });
-    await sessions.addJwt(token);
-
-    return responseWithCookie({ res, token }).status(200).json({
-      succeeded: true,
-      token,
-    });
-  });
-
-  router.post("/demande-acces", authMiddleware(), async ({ body, user }, res) => {
-    const {
-      type,
-      codes_region: wantedRegions,
-      codes_academie: wantedAcademnie,
-      codes_departement: wantedDepartements,
-      reseau: wantedReseau,
-    } = await Joi.object({
-      type: Joi.string()
-        .valid("organisme.admin", "organisme.member", "organisme.readonly", "organisme.statsonly")
-        .required(),
-      codes_region: Joi.string().allow(null, ""),
-      codes_academie: Joi.string().allow(null, ""),
-      codes_departement: Joi.string().allow(null, ""),
-      reseau: Joi.string().allow(null, ""),
-    }).validateAsync(body, { abortEarly: false });
-
-    const userDb = await getUserByEmail(user.email.toLowerCase());
-    if (!userDb) {
-      throw Boom.conflict("Unable to retrieve user");
-    }
-
-    if (
-      !(
-        userDb.account_status &&
-        [USER_ACCOUNT_STATUS.PENDING_PERMISSIONS_SETUP, USER_ACCOUNT_STATUS.PENDING_ADMIN_VALIDATION].includes(
-          userDb.account_status
-        )
-      )
-    ) {
-      logger.error(
-        `User ${userDb.email} is not in the right status to ask for access (status : ${userDb.account_status})`
-      );
-      throw Boom.badRequest("Something went wrong");
-    }
-
-    let codes_region = wantedRegions?.split(",") ?? null;
-    let codes_academie = wantedAcademnie?.split(",") ?? null;
-    let codes_departement = wantedDepartements?.split(",") ?? null;
-
-    let is_cross_organismes = false;
-    if (codes_region || codes_academie || codes_departement) {
-      is_cross_organismes = true;
-    }
-
-    // if (!is_cross_organismes && !wantedReseau) {
-    //   const organisme =
-    //     (userDb.uai && (await findOrganismeByUai(userDb.uai))) ||
-    //     (userDb.siret && (await findOrganismeBySiret(userDb.siret)));
-    //   if (!organisme) {
-    //     logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
-    //     throw Boom.badRequest("No organisme found");
-    //   }
-    // }
-
-    const updateUser = await userHasAskAccess(userDb.email, {
-      ...(codes_region ? { codes_region: uniq(codes_region) } : {}),
-      ...(codes_academie ? { codes_academie } : {}),
-      ...(codes_departement ? { codes_departement } : {}),
-      ...(is_cross_organismes ? { is_cross_organismes } : {}),
-      ...(wantedReseau ? { reseau: wantedReseau } : {}),
-    });
-
-    if (!updateUser) {
-      throw Boom.badRequest("Something went wrong");
-    }
-
-    // await createUserPermissions({ user: updateUser, mailer, asRole: type });
-
-    const payload = await structureUser(updateUser);
-
-    await updateUserLastConnection(payload.email);
-
-    const token = createUserTokenSimple({ payload: { email: payload.email } });
-
-    if (await sessions.findJwt(token)) {
-      await sessions.removeJwt(token);
-    }
-    await sessions.addJwt(token);
-
-    return responseWithCookie({ res, token }).status(200).json({
-      loggedIn: true,
-      token,
-    });
-  });
-
   router.post(
-    "/finalize",
-    authMiddleware(),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async ({ user }, res) => {
-      // TODO [tech]
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      // const { compte, siret } = await Joi.object({
-      //   compte: Joi.string().required(),
-      //   siret: Joi.string().required(),
-      // }).validateAsync(body, { abortEarly: false });
-
-      const userDb = await getUserByEmail(user.email);
-      if (!userDb) {
-        throw Boom.conflict("Unable to retrieve user");
-      }
-
-      if (userDb.account_status !== "PENDING_ADMIN_VALIDATION") {
-        throw Boom.badRequest("Something went wrong");
-      }
-
-      const updateUser = await finalizeUser(userDb.email);
-      if (!updateUser) {
-        throw Boom.badRequest("Something went wrong");
-      }
-
-      const payload = await structureUser(updateUser);
-
-      await updateUserLastConnection(payload.email);
-
-      const token = createUserTokenSimple({ payload: { email: payload.email } });
-
-      if (await sessions.findJwt(token)) {
-        await sessions.removeJwt(token);
-      }
-      await sessions.addJwt(token);
-
-      return responseWithCookie({ res, token }).status(200).json({
-        loggedIn: true,
+    "/activation",
+    checkActivationToken(),
+    returnResult(async (req, res) => {
+      // le body a déjà été validé et l'utilisateur récupéré
+      // await validateFullObjectSchema(req.body, {
+      //   activationToken: Joi.string().required(),
+      // });
+      await activateUser(req.user.email);
+      const token = await sessions.createSession(req.user.email);
+      responseWithCookie({ res, token });
+      return {
         token,
-      });
-    }
+      };
+    })
   );
+
+  // router.post("/demande-acces", authMiddleware(), async ({ body, user }, res) => {
+  //   const {
+  //     type,
+  //     codes_region: wantedRegions,
+  //     codes_academie: wantedAcademnie,
+  //     codes_departement: wantedDepartements,
+  //     reseau: wantedReseau,
+  //   } = await Joi.object({
+  //     type: Joi.string()
+  //       .valid("organisme.admin", "organisme.member", "organisme.readonly", "organisme.statsonly")
+  //       .required(),
+  //     codes_region: Joi.string().allow(null, ""),
+  //     codes_academie: Joi.string().allow(null, ""),
+  //     codes_departement: Joi.string().allow(null, ""),
+  //     reseau: Joi.string().allow(null, ""),
+  //   }).validateAsync(body, { abortEarly: false });
+
+  //   const userDb = await getUserByEmail(user.email.toLowerCase());
+  //   if (!userDb) {
+  //     throw Boom.conflict("Unable to retrieve user");
+  //   }
+
+  //   if (
+  //     !(
+  //       userDb.account_status &&
+  //       ["PENDING_PERMISSIONS_SETUP", "PENDING_ADMIN_VALIDATION"].includes(userDb.account_status)
+  //     )
+  //   ) {
+  //     logger.error(
+  //       `User ${userDb.email} is not in the right status to ask for access (status : ${userDb.account_status})`
+  //     );
+  //     throw Boom.badRequest("Something went wrong");
+  //   }
+
+  //   let codes_region = wantedRegions?.split(",") ?? null;
+  //   let codes_academie = wantedAcademnie?.split(",") ?? null;
+  //   let codes_departement = wantedDepartements?.split(",") ?? null;
+
+  //   let is_cross_organismes = false;
+  //   if (codes_region || codes_academie || codes_departement) {
+  //     is_cross_organismes = true;
+  //   }
+
+  //   // if (!is_cross_organismes && !wantedReseau) {
+  //   //   const organisme =
+  //   //     (userDb.uai && (await findOrganismeByUai(userDb.uai))) ||
+  //   //     (userDb.siret && (await findOrganismeBySiret(userDb.siret)));
+  //   //   if (!organisme) {
+  //   //     logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
+  //   //     throw Boom.badRequest("No organisme found");
+  //   //   }
+  //   // }
+
+  //   const updateUser = await userHasAskAccess(userDb.email, {
+  //     ...(codes_region ? { codes_region: uniq(codes_region) } : {}),
+  //     ...(codes_academie ? { codes_academie } : {}),
+  //     ...(codes_departement ? { codes_departement } : {}),
+  //     ...(is_cross_organismes ? { is_cross_organismes } : {}),
+  //     ...(wantedReseau ? { reseau: wantedReseau } : {}),
+  //   });
+
+  //   if (!updateUser) {
+  //     throw Boom.badRequest("Something went wrong");
+  //   }
+
+  //   // await createUserPermissions({ user: updateUser, mailer, asRole: type });
+
+  //   const payload = await structureUser(updateUser);
+
+  //   await updateUserLastConnection(payload.email);
+
+  //   const token = await sessions.createSession(payload.email);
+
+  //   return responseWithCookie({ res, token }).status(200).json({
+  //     loggedIn: true,
+  //     token,
+  //   });
+  // });
+
+  // router.post(
+  //   "/finalize",
+  //   authMiddleware(),
+  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //   async ({ user }, res) => {
+  //     // TODO [tech]
+  //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //     // const { compte, siret } = await Joi.object({
+  //     //   compte: Joi.string().required(),
+  //     //   siret: Joi.string().required(),
+  //     // }).validateAsync(body, { abortEarly: false });
+
+  //     const userDb = await getUserByEmail(user.email);
+  //     if (!userDb) {
+  //       throw Boom.conflict("Unable to retrieve user");
+  //     }
+
+  //     if (userDb.account_status !== "PENDING_ADMIN_VALIDATION") {
+  //       throw Boom.badRequest("Something went wrong");
+  //     }
+
+  //     const updateUser = await finalizeUser(userDb.email);
+  //     if (!updateUser) {
+  //       throw Boom.badRequest("Something went wrong");
+  //     }
+
+  //     const payload = await structureUser(updateUser);
+
+  //     await updateUserLastConnection(payload.email);
+
+  //     const token = createUserTokenSimple({ payload: { email: payload.email } });
+
+  //     if (await sessions.findJwt(token)) {
+  //       await sessions.removeJwt(token);
+  //     }
+  //     await sessions.createSession(token);
+
+  //     return responseWithCookie({ res, token }).status(200).json({
+  //       loggedIn: true,
+  //       token,
+  //     });
+  //   }
+  // );
 
   return router;
 };

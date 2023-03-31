@@ -122,7 +122,7 @@ const Finalize = () => {
           const result = await _post("/api/v1/auth/demande-acces", values);
           if (result.loggedIn) {
             const user = await _get("/api/v1/session");
-            setAuth(user);
+            // setAuth(user);
           }
         } catch (e) {
           if (e.messages.message === "No organisme found") {
@@ -173,133 +173,6 @@ const Finalize = () => {
         </Heading>
         <Box mt={5}>
           {auth.isInPendingValidation &&
-            auth.account_status === "PENDING_PERMISSIONS_SETUP" &&
-            auth.type_organisation === "ORGANISME_FORMATION" && (
-              <Box w="50%">
-                <Button
-                  size="md"
-                  variant="primary"
-                  onClick={handleDemandeAcces}
-                  px={6}
-                  isDisabled={isSubmitting}
-                  mt={12}
-                >
-                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
-                  Demander l&rsquo;accès
-                </Button>
-              </Box>
-            )}
-
-          {auth.isInPendingValidation &&
-            auth.account_status === "PENDING_PERMISSIONS_SETUP" &&
-            auth.roles.includes("reseau_of") && (
-              <>
-                <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-                  Quel est votre réseau ?
-                </Heading>
-                <Input
-                  {...{
-                    name: "reseau",
-                    fieldType: "select",
-                    placeholder: "Sélectionner votre réseau",
-                    options: Object.values(RESEAUX_CFAS).map(({ nomReseau }) => ({
-                      label: `${nomReseau}`,
-                      value: nomReseau,
-                    })),
-                  }}
-                  value={valuesAccess.reseau}
-                  onSubmit={(value) => {
-                    setFieldValue("type", "organisme.statsonly");
-                    setFieldValue("reseau", value);
-                  }}
-                  w="100%"
-                />
-                <Button
-                  size="md"
-                  variant="primary"
-                  onClick={handleDemandeAcces}
-                  px={6}
-                  mt={8}
-                  isDisabled={isSubmitting || !valuesAccess.reseau}
-                >
-                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
-                  Demander l&rsquo;accès
-                </Button>
-              </>
-            )}
-          {auth.isInPendingValidation &&
-            auth.account_status === "PENDING_PERMISSIONS_SETUP" &&
-            auth.roles.includes("pilot") && (
-              <>
-                {auth.organisation === "DDETS" && (
-                  <>
-                    <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-                      À quel(s) département(s) souhaitez-vous accéder?
-                    </Heading>
-                    <MultipleCheckBox
-                      title=""
-                      name="accessDepartementList"
-                      choices={DEPARTEMENTS_SORTED.map(({ nom, code }) => ({ label: `${nom} (${code})`, value: code }))}
-                      onChange={(selected) => {
-                        setFieldValue("type", "organisme.statsonly");
-                        setFieldValue("codes_departement", selected.join(","));
-                      }}
-                    />
-                  </>
-                )}
-                {(auth.organisation === "DREETS" ||
-                  auth.organisation === "DEETS" ||
-                  auth.organisation === "DRAAF" ||
-                  auth.organisation === "CONSEIL_REGIONAL") && (
-                  <>
-                    <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-                      À quelle région souhaitez-vous accéder?
-                    </Heading>
-                    <MultipleCheckBox
-                      title=""
-                      name="accessRegionList"
-                      choices={REGIONS_SORTED.map(({ nom, code }) => ({ label: `${nom} (${code})`, value: code }))}
-                      onChange={(selected) => {
-                        setFieldValue("type", "organisme.statsonly");
-                        setFieldValue("codes_region", selected.join(","));
-                      }}
-                    />
-                  </>
-                )}
-                {auth.organisation === "ACADEMIE" && (
-                  <>
-                    <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-                      À quelle académie souhaitez-vous accéder?
-                    </Heading>
-                    <MultipleCheckBox
-                      title=""
-                      name="accessAcademieList"
-                      choices={ACADEMIES_SORTED.map(({ nom, code }) => ({ label: `${nom} (${code})`, value: code }))}
-                      onChange={(selected) => {
-                        setFieldValue("type", "organisme.statsonly");
-                        setFieldValue("codes_academie", selected.join(","));
-                      }}
-                    />
-                  </>
-                )}
-                <Button
-                  size="md"
-                  variant="primary"
-                  onClick={handleDemandeAcces}
-                  px={6}
-                  mt={8}
-                  isDisabled={
-                    isSubmitting ||
-                    (!valuesAccess.codes_region && !valuesAccess.codes_departement && !valuesAccess.codes_academie)
-                  }
-                >
-                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
-                  Demander l&rsquo;accès
-                </Button>
-              </>
-            )}
-
-          {auth.isInPendingValidation &&
             !auth.isOrganismeAdmin &&
             auth.account_status === "PENDING_ADMIN_VALIDATION" && (
               <Ribbons variant="info" mt="0.5rem">
@@ -345,16 +218,6 @@ const Finalize = () => {
                 Accéder à mon espace
               </Button>
             </VStack>
-          )}
-          {auth.isInPendingValidation && (
-            <Flex flexGrow={1} alignItems="end" my={8}>
-              <Text mt={8} fontSize="1rem">
-                Votre réseau n’apparaît pas dans la liste ?{" "}
-                <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" ml={3}>
-                  Contacter l&apos;assistance
-                </Link>
-              </Text>
-            </Flex>
           )}
         </Box>
       </Flex>

@@ -86,7 +86,7 @@ export default ({ mailer }) => {
       await updateUserLastConnection(payload.email);
 
       const token = createUserTokenSimple({ payload: { email: payload.email } });
-      await sessions.addJwt(token);
+      await sessions.createSession(token);
 
       responseWithCookie({ res, token });
       return {
