@@ -33,10 +33,11 @@ const typesOrganisation = [
     label: "Organisation nationale",
     value: "OPERATEUR_PUBLIC_NATIONAL",
   },
-  {
-    label: "Autre opérateur public",
-    value: "AUTRE",
-  },
+  // FIXME, pas pris en compte pour l'instant, car il faut pouvoir enregistrer l'utilisateur / envoyer un mail
+  // {
+  //   label: "Autre opérateur public",
+  //   value: "AUTRE",
+  // },
 ] as const;
 
 type TypeOrganisation = (typeof typesOrganisation)[number]["value"];
