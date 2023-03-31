@@ -21,7 +21,7 @@ export function createMailerService(transporter = createTransporter({ ...config.
     const { subject, data } = template;
 
     const { messageId } = await transporter.sendMail({
-      from: config.email,
+      from: `${config.email_from} <${config.email}>`,
       to,
       subject,
       html: await generateHtml(to, template),
