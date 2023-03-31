@@ -8,8 +8,6 @@ export { MaintenanceMessage } from "./MaintenanceMessage.js";
 // FIXME ajouter le type de l'organisation
 export { Organisme } from "./Organisme.js";
 export { OrganismesReferentiel } from "./OrganismesReferentiel.js";
-export { Permission } from "./Permission.js";
-export { Role } from "./Role.js";
 export { Upload } from "./Upload.js";
 export { UserEvent } from "./UserEvent.js";
 export { User } from "./User.js";
