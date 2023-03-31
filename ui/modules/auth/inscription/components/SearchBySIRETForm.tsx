@@ -14,12 +14,14 @@ import {
   FormHelperText,
   FormLabel,
   Input,
+  Spinner,
   Text,
 } from "@chakra-ui/react";
 import { searchOrganismesBySIRET } from "@/common/api/tableauDeBord";
 import { SIRET_REGEX } from "@/common/domain/siret";
 import OrganismeDetails from "./OrganismeDetails";
 import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "../common";
+import { sleep } from "@/common/utils/misc";
 
 export default function SearchBySIRETForm({ setOrganisation }: InscriptionOrganistionChildProps) {
   const [organismes, setOrganismes] = useState<any[] | null>(null);
@@ -35,6 +37,7 @@ export default function SearchBySIRETForm({ setOrganisation }: InscriptionOrgani
       onSubmit={async ({ siret }, actions) => {
         try {
           const organismes = await searchOrganismesBySIRET(siret);
+          await sleep(500); // attente pour ne pas paraitre trop instantané...
           setOrganismes(organismes);
         } catch (err) {
           let errorMessage: string = err?.json?.data?.message || err.message;
@@ -74,6 +77,7 @@ export default function SearchBySIRETForm({ setOrganisation }: InscriptionOrgani
               </FormControl>
             )}
           </Field>
+          {form.isSubmitting && <Spinner display="block" mx="auto" />}
           {organismes && (
             <>
               {organismes.length === 1 && (
@@ -99,6 +103,7 @@ export default function SearchBySIRETForm({ setOrganisation }: InscriptionOrgani
                     size="md"
                     variant="primary"
                     px={6}
+                    isDisabled={organismes[0].ferme}
                     onClick={() =>
                       setOrganisation({
                         type: getOrganisationTypeFromNature(organismes[0].nature),
@@ -136,6 +141,7 @@ export default function SearchBySIRETForm({ setOrganisation }: InscriptionOrgani
                             size="md"
                             variant="primary"
                             px={6}
+                            isDisabled={organisme.ferme}
                             onClick={() =>
                               setOrganisation({
                                 type: getOrganisationTypeFromNature(organisme.nature),

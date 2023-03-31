@@ -14,12 +14,14 @@ import {
   FormHelperText,
   FormLabel,
   Input,
+  Spinner,
   Text,
 } from "@chakra-ui/react";
 import { searchOrganismesByUAI } from "@/common/api/tableauDeBord";
 import { UAI_REGEX } from "@/common/domain/uai";
 import OrganismeDetails from "./OrganismeDetails";
 import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "../common";
+import { sleep } from "@/common/utils/misc";
 
 export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganistionChildProps) {
   const [organismes, setOrganismes] = useState<any[] | null>(null);
@@ -35,6 +37,7 @@ export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganist
       onSubmit={async ({ uai }, actions) => {
         try {
           const organismes = await searchOrganismesByUAI(uai);
+          await sleep(500); // attente pour ne pas paraitre trop instantané...
           setOrganismes(organismes);
         } catch (err) {
           let errorMessage: string = err?.json?.data?.message || err.message;
@@ -58,6 +61,7 @@ export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganist
                   {...field}
                   id={field.name}
                   placeholder="Exemple : 1234567A"
+                  isDisabled={form.isSubmitting}
                   onChange={(e) => {
                     field.onChange(e);
                     // reset results and selection
@@ -74,6 +78,7 @@ export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganist
               </FormControl>
             )}
           </Field>
+          {form.isSubmitting && <Spinner display="block" mx="auto" />}
           {organismes && (
             <>
               {organismes.length === 1 && (
@@ -99,6 +104,7 @@ export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganist
                     size="md"
                     variant="primary"
                     px={6}
+                    isDisabled={organismes[0].ferme}
                     onClick={() =>
                       setOrganisation({
                         type: getOrganisationTypeFromNature(organismes[0].nature),
@@ -136,6 +142,7 @@ export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganist
                             size="md"
                             variant="primary"
                             px={6}
+                            isDisabled={organisme.ferme}
                             onClick={() =>
                               setOrganisation({
                                 type: getOrganisationTypeFromNature(organisme.nature),

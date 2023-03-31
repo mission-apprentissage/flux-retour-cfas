@@ -21,6 +21,7 @@ import {
   ListItem,
   Radio,
   RadioGroup,
+  Spinner,
   Text,
 } from "@chakra-ui/react";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -40,7 +41,20 @@ YupPassword(Yup); // extend yup
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-function getOrganisationRibbon(organisation: Organisation) {
+function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
+  const loading = true;
+  return loading ? (
+    <Spinner />
+  ) : (
+    <Ribbons variant="success" mt="0.5rem">
+      <Box ml={3} color="grey.800">
+        {getOrganisationRibbonContent(organisation)}
+      </Box>
+    </Ribbons>
+  );
+}
+
+function getOrganisationRibbonContent(organisation: Organisation) {
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
@@ -148,11 +162,7 @@ const PageFormulaireProfil = () => {
     <InscriptionWrapper>
       {organisation && (
         <>
-          <Ribbons variant="success" mt="0.5rem">
-            <Box ml={3} color="grey.800">
-              {getOrganisationRibbon(organisation)}
-            </Box>
-          </Ribbons>
+          <OrganisationRibbon organisation={organisation} />
           <ProfileForm organisation={organisation} />
         </>
       )}
@@ -241,7 +251,7 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
         <Form>
           <Field name="email">
             {({ field, meta }) => (
-              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+              <FormControl minH={100} mt={6} isRequired isInvalid={meta.error && meta.touched}>
                 <FormLabel>Votre courriel</FormLabel>
                 <Input {...field} id={field.name} placeholder="Ex : jeandupont@mail.com" />
                 <FormErrorMessage>{meta.error}</FormErrorMessage>

@@ -8,7 +8,7 @@ export default function OrganismeDetails({ organisme }) {
         UAI : <b>{organisme.uai}</b>
       </Text>
       <Text>
-        Nature : <b>{natureOrganismeDeFormationLabel[organisme.nature] || "Inconnnue"}</b>
+        Nature : <b>{natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}</b>
       </Text>
       <Text>
         SIRET :{" "}
@@ -22,6 +22,7 @@ export default function OrganismeDetails({ organisme }) {
       <Text>
         Adresse : <b>{organisme.adresse?.complete}</b>
       </Text>
+      {organisme.ferme && <Text color="error">Le SIRET {organisme.siret} est un établissement fermé.</Text>}
     </VStack>
   );
 }
