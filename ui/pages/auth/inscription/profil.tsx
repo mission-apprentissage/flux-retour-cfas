@@ -222,7 +222,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
         fonction: "",
         telephone: "",
         password: "",
-        passwordConfirmation: "",
+        password_confirmation: "",
         has_accepted_cgu: "",
       }}
       validationSchema={Yup.object().shape({
@@ -239,7 +239,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
           .minUppercase(1, "Le mot de passe doit contenir au moins une lettre majuscule")
           .minNumbers(1, "Le mot de passe doit contenir au moins un nombre")
           .minSymbols(1, "Le mot de passe doit contenir au moins un caractère spécial"),
-        passwordConfirmation: Yup.string().test((value, context) => {
+        password_confirmation: Yup.string().test((value, context) => {
           return value === context.parent.password
             ? true
             : context.createError({
@@ -371,7 +371,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
               </FormControl>
             )}
           </Field>
-          <Field name="passwordConfirmation">
+          <Field name="password_confirmation">
             {({ field, meta }) => (
               <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
                 <FormLabel>Confirmation du mot de passe</FormLabel>
