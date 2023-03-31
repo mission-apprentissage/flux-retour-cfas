@@ -346,7 +346,7 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
           </Field>
           <Field name="has_accepted_cgu">
             {({ field, meta }) => (
-              <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+              <FormControl mb={6} isRequired isInvalid={meta.error && meta.touched}>
                 <Checkbox {...field} id={field.name} icon={<Check />}>
                   J{"'"}atteste avoir lu et accepté les{" "}
                   <Link href={"/cgu"}>conditions générales d{"'"}utilisation</Link>
@@ -358,7 +358,7 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
           {isOrganismeFormation && (
             <Field name="consent_of">
               {({ field, meta }) => (
-                <FormControl minH={100} isRequired isInvalid={meta.error && meta.touched}>
+                <FormControl mb={6} isRequired isInvalid={meta.error && meta.touched}>
                   <Checkbox {...field} id={field.name} icon={<Check />}>
                     J{"'"}accepte d{"'"}être contacté par un opérateur public (DREETS, DEETS, Académie, …). Mon email
                     apparaîtra dans le profil dans mon organisme.
