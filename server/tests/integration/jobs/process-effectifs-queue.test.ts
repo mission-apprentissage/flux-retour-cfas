@@ -105,11 +105,8 @@ describe("Processing de EffectifsQueue", () => {
         source: "testSource",
       })
     );
-    try {
-      await processEffectifsQueue();
-    } catch (e) {
-      console.log(">>>>>>>", JSON.stringify(e, null, 2));
-    }
+    await processEffectifsQueue();
+
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
     assert.deepStrictEqual(updatedInput?.validation_errors, [
       {
