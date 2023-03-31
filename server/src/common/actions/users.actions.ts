@@ -6,7 +6,7 @@ import { usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
 import { validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
-import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
+import { hash, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { passwordSchema } from "../utils/validationUtils.js";
 
 interface UserRegistration {
@@ -29,6 +29,7 @@ export const createUser = async (user: UserRegistration, organisationId: ObjectI
     emails: [],
     created_at: new Date(),
     ...user,
+    password: hash(user.password),
     organisation_id: organisationId,
   });
 
@@ -40,7 +41,7 @@ const updateUserPassword = async (userId: ObjectId, password: string) => {
     { _id: userId },
     {
       $set: {
-        password: hashUtil(password),
+        password: hash(password),
       },
     }
   );
@@ -254,20 +255,6 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
   return updated.value;
 };
 
-export const structureUser = async (user) => {
-  return {
-    _id: user._id,
-    organisation_id: user.organisation_id,
-    email: user.email,
-    civility: user.civility,
-    nom: user.nom,
-    prenom: user.prenom,
-    telephone: user.telephone,
-    account_status: user.account_status,
-    has_accept_cgu_version: user.has_accept_cgu_version,
-  };
-};
-
 export const updateUserLastConnection = async (email) => {
   await usersMigrationDb().findOneAndUpdate(
     { email },
@@ -325,7 +312,7 @@ export const changePassword = async (authContext: AuthContext, newPassword: stri
     {
       $set: {
         account_status: getNextAccountStatus(user),
-        password: hashUtil(newPassword),
+        password: hash(newPassword),
         password_updated_at: new Date(),
       },
     },

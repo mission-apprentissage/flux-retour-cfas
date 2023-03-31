@@ -5,13 +5,12 @@ import { Strategy, ExtractJwt } from "passport-jwt";
 
 import config from "../../../config.js";
 import { getUserByEmail, activateUser } from "../../../common/actions/users.actions.js";
-import * as sessions from "../../../common/actions/sessions.actions.js";
-import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
+import { usersMigrationDb } from "../../../common/model/collections.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -120,142 +119,35 @@ export default () => {
   router.post(
     "/activation",
     checkActivationToken(),
-    returnResult(async (req, res) => {
-      // le body a déjà été validé et l'utilisateur récupéré
+    returnResult(async (req) => {
+      // le body a déjà été validé et l'utilisateur récupéré + session
       // await validateFullObjectSchema(req.body, {
       //   activationToken: Joi.string().required(),
       // });
-      await activateUser(req.user.email);
-      const token = await sessions.createSession(req.user.email);
-      responseWithCookie({ res, token });
-      return {
-        token,
-      };
+
+      // cette route va permettre de retrouver l'utilisateur en fonction d'un token sans utiliser de jwt
+      // car il n'y aura qu'un session cookie à terme
+
+      // tant que l'utilisateur n'est pas confirmé
+      if (req.user.account_status === "PENDING_EMAIL_VALIDATION") {
+        await activateUser(req.user.email);
+      }
+      return await usersMigrationDb().findOne(
+        { email: req.user.email },
+        {
+          projection: {
+            _id: 0,
+            account_status: 1,
+          },
+        }
+      );
+      // const token = await sessions.createSession(req.user.email);
+      // responseWithCookie({ res, token });
+      // return {
+      //   token,
+      // };
     })
   );
-
-  // router.post("/demande-acces", authMiddleware(), async ({ body, user }, res) => {
-  //   const {
-  //     type,
-  //     codes_region: wantedRegions,
-  //     codes_academie: wantedAcademnie,
-  //     codes_departement: wantedDepartements,
-  //     reseau: wantedReseau,
-  //   } = await Joi.object({
-  //     type: Joi.string()
-  //       .valid("organisme.admin", "organisme.member", "organisme.readonly", "organisme.statsonly")
-  //       .required(),
-  //     codes_region: Joi.string().allow(null, ""),
-  //     codes_academie: Joi.string().allow(null, ""),
-  //     codes_departement: Joi.string().allow(null, ""),
-  //     reseau: Joi.string().allow(null, ""),
-  //   }).validateAsync(body, { abortEarly: false });
-
-  //   const userDb = await getUserByEmail(user.email.toLowerCase());
-  //   if (!userDb) {
-  //     throw Boom.conflict("Unable to retrieve user");
-  //   }
-
-  //   if (
-  //     !(
-  //       userDb.account_status &&
-  //       ["PENDING_PERMISSIONS_SETUP", "PENDING_ADMIN_VALIDATION"].includes(userDb.account_status)
-  //     )
-  //   ) {
-  //     logger.error(
-  //       `User ${userDb.email} is not in the right status to ask for access (status : ${userDb.account_status})`
-  //     );
-  //     throw Boom.badRequest("Something went wrong");
-  //   }
-
-  //   let codes_region = wantedRegions?.split(",") ?? null;
-  //   let codes_academie = wantedAcademnie?.split(",") ?? null;
-  //   let codes_departement = wantedDepartements?.split(",") ?? null;
-
-  //   let is_cross_organismes = false;
-  //   if (codes_region || codes_academie || codes_departement) {
-  //     is_cross_organismes = true;
-  //   }
-
-  //   // if (!is_cross_organismes && !wantedReseau) {
-  //   //   const organisme =
-  //   //     (userDb.uai && (await findOrganismeByUai(userDb.uai))) ||
-  //   //     (userDb.siret && (await findOrganismeBySiret(userDb.siret)));
-  //   //   if (!organisme) {
-  //   //     logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
-  //   //     throw Boom.badRequest("No organisme found");
-  //   //   }
-  //   // }
-
-  //   const updateUser = await userHasAskAccess(userDb.email, {
-  //     ...(codes_region ? { codes_region: uniq(codes_region) } : {}),
-  //     ...(codes_academie ? { codes_academie } : {}),
-  //     ...(codes_departement ? { codes_departement } : {}),
-  //     ...(is_cross_organismes ? { is_cross_organismes } : {}),
-  //     ...(wantedReseau ? { reseau: wantedReseau } : {}),
-  //   });
-
-  //   if (!updateUser) {
-  //     throw Boom.badRequest("Something went wrong");
-  //   }
-
-  //   // await createUserPermissions({ user: updateUser, mailer, asRole: type });
-
-  //   const payload = await structureUser(updateUser);
-
-  //   await updateUserLastConnection(payload.email);
-
-  //   const token = await sessions.createSession(payload.email);
-
-  //   return responseWithCookie({ res, token }).status(200).json({
-  //     loggedIn: true,
-  //     token,
-  //   });
-  // });
-
-  // router.post(
-  //   "/finalize",
-  //   authMiddleware(),
-  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //   async ({ user }, res) => {
-  //     // TODO [tech]
-  //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //     // const { compte, siret } = await Joi.object({
-  //     //   compte: Joi.string().required(),
-  //     //   siret: Joi.string().required(),
-  //     // }).validateAsync(body, { abortEarly: false });
-
-  //     const userDb = await getUserByEmail(user.email);
-  //     if (!userDb) {
-  //       throw Boom.conflict("Unable to retrieve user");
-  //     }
-
-  //     if (userDb.account_status !== "PENDING_ADMIN_VALIDATION") {
-  //       throw Boom.badRequest("Something went wrong");
-  //     }
-
-  //     const updateUser = await finalizeUser(userDb.email);
-  //     if (!updateUser) {
-  //       throw Boom.badRequest("Something went wrong");
-  //     }
-
-  //     const payload = await structureUser(updateUser);
-
-  //     await updateUserLastConnection(payload.email);
-
-  //     const token = createUserTokenSimple({ payload: { email: payload.email } });
-
-  //     if (await sessions.findJwt(token)) {
-  //       await sessions.removeJwt(token);
-  //     }
-  //     await sessions.createSession(token);
-
-  //     return responseWithCookie({ res, token }).status(200).json({
-  //       loggedIn: true,
-  //       token,
-  //     });
-  //   }
-  // );
 
   return router;
 };

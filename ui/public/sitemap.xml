@@ -4,7 +4,7 @@
 <url> <loc>https://cfas.apprentissage.beta.gouv.fr/stats</loc> </url>
 <url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/connexion</loc> </url>
 <url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/inscription</loc> </url>
-<url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/confirmation</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/finalisation</loc> </url>
 <url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/en-attente-confirmation</loc> </url>
 <url> <loc>https://cfas.apprentissage.beta.gouv.fr/modifier-mot-de-passe</loc> </url>
 <url> <loc>https://cfas.apprentissage.beta.gouv.fr/mot-de-passe-oublie</loc> </url>

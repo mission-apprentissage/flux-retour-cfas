@@ -80,7 +80,7 @@ import { updateUserProfile } from "../common/actions/users.actions.js";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
 import registrationSchema from "../common/validation/registrationSchema.js";
 import { z } from "zod";
-import { register } from "../common/actions/registration.actions.js";
+import { register } from "../common/actions/account.actions.js";
 
 /**
  * Create the express app

@@ -72,7 +72,7 @@ const UserMenu = () => {
                 Mon compte
               </MenuItem>
               <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
-                Gestion des membres
+                Rôles et habilisations
               </MenuItem>
               {organisationType === "ADMINISTRATEUR" && (
                 <MenuGroup title="Administration">

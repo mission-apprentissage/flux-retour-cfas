@@ -8,7 +8,7 @@ export interface AuthContext<IOrganisation = Organisation> {
   prenom: string;
   email: string;
   organisation_id: ObjectId;
-  account_status: string; // FIXME, mettre les bons types une fois l'UI revisitée avec les nouvelles permissions
+  account_status: "PENDING_EMAIL_VALIDATION" | "PENDING_ADMIN_VALIDATION" | "CONFIRMED";
   has_accept_cgu_version: string;
 
   // populated via $lookup

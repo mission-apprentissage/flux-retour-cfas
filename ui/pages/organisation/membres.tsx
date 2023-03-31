@@ -70,7 +70,7 @@ const PageGestionDesMembres = () => {
     toastSuccess("Le membre a été supprimé");
   }
 
-  const title = "Gestion des membres";
+  const title = "Gestion des rôles et habilitations";
   return (
     <Page>
       <Head>
@@ -79,7 +79,7 @@ const PageGestionDesMembres = () => {
       <Container maxW="xl" px={0}>
         <Box mt={8}>
           <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
-            Gestion des rôles et habilitations
+            {title}
           </Heading>
           <Text fontSize="sm">
             Vous êtes actuellement <strong>Gestionnaire</strong> pour votre organisation sur le tableau de bord.

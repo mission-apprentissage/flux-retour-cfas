@@ -7,7 +7,7 @@ import {
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { createUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
-import { register } from "../../../common/actions/registration.actions.js";
+import { register } from "../../../common/actions/account.actions.js";
 import { usersMigrationDb } from "../../../common/model/collections.js";
 
 export const seedAdmin = async (email = "admin@test.fr") => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, createContext, useRef } from "react";
 import { useRouter } from "next/router";
 import { Box, Flex, Spinner, Text } from "@chakra-ui/react";
 
-import { _get, _post, _put } from "../../common/httpClient";
+import { _get, _put } from "../../common/httpClient";
 import useAuth from "../../hooks/useAuth";
 import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
 import { emitter } from "../../common/emitter";
@@ -11,36 +11,37 @@ import { Cgu, CGU_VERSION } from "../legal/Cgu";
 import AcknowledgeModal from "../Modals/AcknowledgeModal";
 
 const AccountWrapper = ({ children }) => {
-  const { auth, organisationType } = useAuth();
-  const router = useRouter();
+  // const { auth, organisationType } = useAuth();
+  // const router = useRouter();
 
-  useEffect(() => {
-    (async () => {
-      if (auth) {
-        if (auth.account_status === "PENDING_EMAIL_VALIDATION") {
-          if (router.pathname !== "/auth/en-attente-confirmation" && router.pathname !== "/auth/confirmation") {
-            router.push("/auth/en-attente-confirmation");
-          }
-        } else {
-          if (
-            (auth.account_status === "PENDING_PASSWORD_SETUP" ||
-              auth.account_status === "DIRECT_PENDING_PASSWORD_SETUP") &&
-            router.pathname !== "/auth/modifier-mot-de-passe" &&
-            router.asPath !== "/en-maintenance"
-          ) {
-            let { token } = await _post("/api/v1/password/forgotten-password", { email: auth.email, noEmail: true });
-            router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
-          } else if (
-            ["PENDING_PERMISSIONS_SETUP", "PENDING_ADMIN_VALIDATION"].includes(auth.account_status) &&
-            router.asPath !== "/auth/finalisation" &&
-            organisationType !== "ADMINISTRATEUR"
-          ) {
-            router.push("/auth/finalisation");
-          }
-        }
-      }
-    })();
-  }, [auth, organisationType, router]);
+  // FIXME, éventuellement remettre des redirections plus tard pour simplifier l'inscription
+  // useEffect(() => {
+  //   (async () => {
+  //     if (auth) {
+  //       if (auth.account_status === "PENDING_EMAIL_VALIDATION") {
+  //         if (router.pathname !== "/auth/en-attente-confirmation" && router.pathname !== "/auth/confirmation") {
+  //           router.push("/auth/en-attente-confirmation");
+  //         }
+  //       } else {
+  //         if (
+  //           (auth.account_status === "PENDING_PASSWORD_SETUP" ||
+  //             auth.account_status === "DIRECT_PENDING_PASSWORD_SETUP") &&
+  //           router.pathname !== "/auth/modifier-mot-de-passe" &&
+  //           router.asPath !== "/en-maintenance"
+  //         ) {
+  //           let { token } = await _post("/api/v1/password/forgotten-password", { email: auth.email, noEmail: true });
+  //           router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
+  //         } else if (
+  //           ["PENDING_PERMISSIONS_SETUP", "PENDING_ADMIN_VALIDATION"].includes(auth.account_status) &&
+  //           router.asPath !== "/auth/finalisation" &&
+  //           organisationType !== "ADMINISTRATEUR"
+  //         ) {
+  //           router.push("/auth/finalisation");
+  //         }
+  //       }
+  //     }
+  //   })();
+  // }, [auth, organisationType, router]);
 
   return <>{children}</>;
 };

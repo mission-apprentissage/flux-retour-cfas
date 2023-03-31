@@ -3,17 +3,12 @@ import Joi from "joi";
 import config from "../../../config.js";
 import { passwordSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import passport from "passport";
-import { createResetPasswordToken, createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
+import { createResetPasswordToken } from "../../../common/utils/jwtUtils.js";
 import { Strategy, ExtractJwt } from "passport-jwt";
-import {
-  changePassword,
-  getUserByEmail,
-  updateUserLastConnection,
-  structureUser,
-} from "../../../common/actions/users.actions.js";
-import * as sessions from "../../../common/actions/sessions.actions.js";
+import { changePassword, getUserByEmail, updateUserLastConnection } from "../../../common/actions/users.actions.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
+import { createSession } from "../../../common/actions/sessions.actions.js";
 
 const checkPasswordToken = () => {
   passport.use(
@@ -71,24 +66,20 @@ export default ({ mailer }) => {
     "/reset-password",
     checkPasswordToken(),
     returnResult(async (req, res) => {
-      const user = req.user;
-
+      // FIXME vérifier si la session fonctionne
+      // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
       const { newPassword } = await validateFullObjectSchema(req.body, {
         passwordToken: Joi.string().required(),
-        newPassword: passwordSchema(user.organisation.type === "ADMINISTRATEUR").required(),
+        newPassword: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
       });
-      // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
+      await changePassword(req.user, newPassword);
 
-      const updatedUser = await changePassword(req.user, newPassword);
+      await updateUserLastConnection(req.user.email);
 
-      const payload = await structureUser(updatedUser);
+      // pourtant on a déjà une session
+      const token = await createSession(req.user.email);
 
-      await updateUserLastConnection(payload.email);
-
-      const token = createUserTokenSimple({ payload: { email: payload.email } });
-      await sessions.createSession(token);
-
-      responseWithCookie({ res, token });
+      responseWithCookie(res, token);
       return {
         loggedIn: true,
         token,

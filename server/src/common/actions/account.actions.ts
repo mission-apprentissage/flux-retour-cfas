@@ -5,7 +5,8 @@ import { z } from "zod";
 import { organisationsDb } from "../model/collections.js";
 import registrationSchema from "../validation/registrationSchema.js";
 import { createOrganisation } from "./organisations.actions.js";
-import { createUser, getUserByEmail } from "./users.actions.js";
+import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions.js";
+import { createSession } from "./sessions.actions.js";
 
 export async function register(registration: z.infer<ReturnType<typeof registrationSchema>>): Promise<void> {
   const alreadyExists = await getUserByEmail(registration.user.email);
@@ -20,4 +21,21 @@ export async function register(registration: z.infer<ReturnType<typeof registrat
 
   // FIXME send simple email
   await mailerActions.sendEmail({ to: registration.user.email, payload: registration.user }, "activation_user");
+}
+
+export async function login(email: string, password: string): Promise<string> {
+  const user = await getUserByEmail(email.toLowerCase());
+  if (!user) {
+    throw Boom.unauthorized("Accès non autorisé");
+  }
+
+  const auth = await authenticate(user.email, password);
+  if (!auth) {
+    throw Boom.unauthorized("Accès non autorisé");
+  }
+
+  await updateUserLastConnection(auth.email);
+
+  const sessionToken = createSession(auth.email);
+  return sessionToken;
 }

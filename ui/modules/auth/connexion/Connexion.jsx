@@ -20,11 +20,11 @@ import { useRouter } from "next/router";
 import NavLink from "next/link";
 
 import useAuth from "../../../hooks/useAuth";
-import { _get, _post } from "../../../common/httpClient";
+import { _post } from "../../../common/httpClient";
 import { AlertRounded, ShowPassword } from "../../../theme/components/icons";
 
 const Login = (props) => {
-  const { setAuth } = useAuth();
+  const { refreshSession } = useAuth();
   const router = useRouter();
 
   const [show, setShow] = React.useState(false);
@@ -32,17 +32,15 @@ const Login = (props) => {
 
   const login = async (values, { setStatus }) => {
     try {
-      const result = await _post("/api/v1/auth/login", values);
-      if (result.loggedIn) {
-        const user = await _get("/api/v1/session");
-        setAuth(user);
-        if (!user.account_status === "PENDING_EMAIL_VALIDATION") {
-          router.push("/auth/en-attente-confirmation");
-        } else {
-          router.push("/auth/redirection");
-        }
+      await _post("/api/v1/auth/login", values);
+      const user = refreshSession();
+      if (user.account_status === "PENDING_EMAIL_VALIDATION") {
+        router.push("/auth/en-attente-confirmation");
+      } else {
+        router.push("/auth/redirection");
       }
     } catch (e) {
+      // FIXME message obsolète à supprimer ?
       if (e.messages?.message === "Old connection method") {
         setStatus({ error: "Pour des raisons de sécurité, merci de vous créer un compte nominatif" });
       } else {
