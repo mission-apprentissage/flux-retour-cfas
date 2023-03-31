@@ -166,6 +166,7 @@ const PageFormulaireProfil = () => {
   const router = useRouter();
   const { toastError } = useToaster();
   const [organisation, setOrganisation] = useState<Organisation | null>(null);
+  const [fixedEmail, setFixedEmail] = useState("");
 
   // try to use the invitation token if provided
   useEffect(() => {
@@ -178,8 +179,8 @@ const PageFormulaireProfil = () => {
           const invitation = await _get(`/api/v1/invitations/${router.query.invitationToken}`);
           console.log("invitation", invitation);
           setOrganisation(invitation.organisation);
-          // FIXME reject
-          // TODO verrouiller email
+          setFixedEmail(invitation.email);
+          // TODO il faudra gérer le refus de l'invitation
         } catch (err) {
           toastError(err?.message);
         }
@@ -192,7 +193,7 @@ const PageFormulaireProfil = () => {
       {organisation && (
         <>
           <OrganisationRibbon organisation={organisation} />
-          <ProfileForm organisation={organisation} />
+          <ProfileForm organisation={organisation} fixedEmail={fixedEmail} />
         </>
       )}
     </InscriptionWrapper>
@@ -201,7 +202,7 @@ const PageFormulaireProfil = () => {
 
 export default PageFormulaireProfil;
 
-function ProfileForm({ organisation }: { organisation: Organisation }) {
+function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation; fixedEmail: string }) {
   const router = useRouter();
   const { toastError } = useToaster();
   const passwordMinLength = organisation.type === "ADMINISTRATEUR" ? 20 : 12;
@@ -214,7 +215,7 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
   return (
     <Formik
       initialValues={{
-        email: "",
+        email: fixedEmail,
         civility: "",
         nom: "",
         prenom: "",
@@ -280,7 +281,13 @@ function ProfileForm({ organisation }: { organisation: Organisation }) {
         <Form>
           <Field name="email">
             {({ field, meta }) => (
-              <FormControl minH={100} mt={6} isRequired isInvalid={meta.error && meta.touched}>
+              <FormControl
+                minH={100}
+                mt={6}
+                isRequired
+                isInvalid={meta.error && meta.touched}
+                isDisabled={fixedEmail !== ""}
+              >
                 <FormLabel>Votre courriel</FormLabel>
                 <Input {...field} id={field.name} placeholder="Ex : jeandupont@mail.com" />
                 <FormErrorMessage>{meta.error}</FormErrorMessage>
