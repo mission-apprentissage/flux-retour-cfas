@@ -1,8 +1,9 @@
 import Boom from "boom";
 import { addHours } from "date-fns";
 import { ObjectId } from "mongodb";
+import logger from "../logger.js";
 
-import { usersMigrationDb } from "../model/collections.js";
+import { invitationsDb, usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
 import { validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
@@ -270,6 +271,18 @@ export const updateUserLastConnection = async (email) => {
 
 /** Ca serait mieux de gérer un token d'activation */
 export const activateUser = async (email: string) => {
+  const user = await getUserByEmail(email);
+  if (!user) {
+    logger.error({ email }, "utilisateur non trouvé à l'activation");
+    throw Boom.internal("Une erreur est survenue");
+  }
+
+  // si une invitation existe, on confirme directement l'utilisateur
+  const invitation = await invitationsDb().findOne({
+    organisation_id: user.organisation_id,
+    email: user.email,
+  });
+
   const res = await usersMigrationDb().updateOne(
     {
       email,
@@ -277,7 +290,7 @@ export const activateUser = async (email: string) => {
     },
     {
       $set: {
-        account_status: "PENDING_ADMIN_VALIDATION", // previously PENDING_PASSWORD_SETUP
+        account_status: invitation ? "CONFIRMED" : "PENDING_ADMIN_VALIDATION", // previously PENDING_PASSWORD_SETUP
       },
     }
   );
