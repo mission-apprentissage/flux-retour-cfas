@@ -641,3 +641,15 @@ export async function findOrganismesFiablesByUAI(uai: string): Promise<Organisme
   }
   return organismes;
 }
+
+export async function getOrganismeByUAIAndSIRET(uai: string, siret: string): Promise<Organisme> {
+  // FIXME projection à définir
+  const organisme = await organismesDb().findOne({
+    uai: uai,
+    siret: siret,
+  });
+  if (!organisme) {
+    throw Boom.badRequest("Aucun organisme trouvé");
+  }
+  return organisme;
+}

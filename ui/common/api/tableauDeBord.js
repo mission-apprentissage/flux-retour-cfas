@@ -41,3 +41,7 @@ export async function searchOrganismesBySIRET(/** @type {string} */ siret) {
 export async function searchOrganismesByUAI(/** @type {string} */ uai) {
   return await _post("/api/v1/organismes/search-by-uai", { uai });
 }
+
+export async function getOrganismeByUAIAndSIRET(/** @type {string} */ uai, /** @type {string} */ siret) {
+  return await _post("/api/v1/organismes/get-by-uai-siret", { uai, siret });
+}

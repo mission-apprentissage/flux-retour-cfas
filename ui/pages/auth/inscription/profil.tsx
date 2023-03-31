@@ -36,101 +36,130 @@ import { CheckIcon } from "@chakra-ui/icons";
 import { ShowPassword } from "@/theme/components/icons";
 import Link from "next/link";
 import { CGU_VERSION } from "@/components/legal/Cgu";
+import { getOrganismeByUAIAndSIRET } from "@/common/api/tableauDeBord";
 
 YupPassword(Yup); // extend yup
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
-  const loading = true;
-  return loading ? (
+  const { toastError } = useToaster();
+  const isOrganismeFormation =
+    organisation.type === "ORGANISME_FORMATION_FORMATEUR" ||
+    organisation.type === "ORGANISME_FORMATION_RESPONSABLE" ||
+    organisation.type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR";
+
+  const [organisationFormationLabel, setOrganisationFormationLabel] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    if (isOrganismeFormation) {
+      (async () => {
+        try {
+          try {
+            const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
+            setOrganisationFormationLabel(organisme.raison_sociale || organisme.nom || organisme.enseigne);
+          } catch (err) {
+            const errorMessage: string = err?.json?.data?.message || err.message;
+            setOrganisationFormationLabel(errorMessage);
+            toastError(errorMessage);
+            setError(true);
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isOrganismeFormation]);
+
+  return isLoading ? (
     <Spinner />
   ) : (
-    <Ribbons variant="success" mt="0.5rem">
+    <Ribbons variant={error ? "error" : "success"} mt="0.5rem">
       <Box ml={3} color="grey.800">
-        {getOrganisationRibbonContent(organisation)}
+        {(() => {
+          switch (organisation.type) {
+            case "ORGANISME_FORMATION_FORMATEUR":
+            case "ORGANISME_FORMATION_RESPONSABLE":
+            case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+              return (
+                <>
+                  <Text fontSize="20px" fontWeight="bold">
+                    {organisationFormationLabel}
+                  </Text>
+                  <Text>
+                    UAI : {organisation.uai} - SIRET : {organisation.siret}
+                  </Text>
+                </>
+              );
+            }
+
+            case "TETE_DE_RESEAU":
+              return (
+                <Text fontSize="20px" fontWeight="bold">
+                  {TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}
+                </Text>
+              );
+
+            case "DREETS":
+            case "DEETS":
+            case "DRAAF":
+              return (
+                <>
+                  <Text fontSize="20px" fontWeight="bold">
+                    {organisation.type}
+                  </Text>
+                  <Text>Territoire : {REGIONS_BY_ID[organisation.code_region].nom}</Text>
+                </>
+              );
+            case "CONSEIL_REGIONAL":
+              return (
+                <>
+                  <Text fontSize="20px" fontWeight="bold">
+                    Conseil régional
+                  </Text>
+                  <Text>Territoire : {REGIONS_BY_ID[organisation.code_region].nom}</Text>
+                </>
+              );
+            case "DDETS":
+              return (
+                <>
+                  <Text fontSize="20px" fontWeight="bold">
+                    DDETS
+                  </Text>
+                  <Text>Territoire : {DEPARTEMENTS_BY_ID[organisation.code_departement].nom}</Text>
+                </>
+              );
+
+            case "ACADEMIE":
+              return (
+                <>
+                  <Text fontSize="20px" fontWeight="bold">
+                    Académie
+                  </Text>
+                  <Text>Territoire : {ACADEMIES_BY_ID[organisation.code_academie].nom}</Text>
+                </>
+              );
+
+            case "OPERATEUR_PUBLIC_NATIONAL":
+              return (
+                <Text fontSize="20px" fontWeight="bold">
+                  {organisation.nom}
+                </Text>
+              );
+            case "ADMINISTRATEUR":
+              return (
+                <Text fontSize="20px" fontWeight="bold">
+                  Administrateur
+                </Text>
+              );
+          }
+        })()}
       </Box>
     </Ribbons>
   );
-}
-
-function getOrganisationRibbonContent(organisation: Organisation) {
-  switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      return (
-        <>
-          <Text fontSize="20px" fontWeight="bold">
-            nom entreprise
-          </Text>
-          <Text>
-            UAI : {organisation.uai} - SIRET : {organisation.siret} (en activité)
-          </Text>
-        </>
-      );
-    }
-
-    case "TETE_DE_RESEAU":
-      return (
-        <Text fontSize="20px" fontWeight="bold">
-          {TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}
-        </Text>
-      );
-
-    case "DREETS":
-    case "DEETS":
-    case "DRAAF":
-      return (
-        <>
-          <Text fontSize="20px" fontWeight="bold">
-            {organisation.type}
-          </Text>
-          <Text>Territoire : {REGIONS_BY_ID[organisation.code_region].nom}</Text>
-        </>
-      );
-    case "CONSEIL_REGIONAL":
-      return (
-        <>
-          <Text fontSize="20px" fontWeight="bold">
-            Conseil régional
-          </Text>
-          <Text>Territoire : {REGIONS_BY_ID[organisation.code_region].nom}</Text>
-        </>
-      );
-    case "DDETS":
-      return (
-        <>
-          <Text fontSize="20px" fontWeight="bold">
-            DDETS
-          </Text>
-          <Text>Territoire : {DEPARTEMENTS_BY_ID[organisation.code_departement].nom}</Text>
-        </>
-      );
-
-    case "ACADEMIE":
-      return (
-        <>
-          <Text fontSize="20px" fontWeight="bold">
-            Académie
-          </Text>
-          <Text>Territoire : {ACADEMIES_BY_ID[organisation.code_academie].nom}</Text>
-        </>
-      );
-
-    case "OPERATEUR_PUBLIC_NATIONAL":
-      return (
-        <Text fontSize="20px" fontWeight="bold">
-          {organisation.nom}
-        </Text>
-      );
-    case "ADMINISTRATEUR":
-      return (
-        <Text fontSize="20px" fontWeight="bold">
-          Administrateur
-        </Text>
-      );
-  }
 }
 
 const PageFormulaireProfil = () => {
@@ -156,7 +185,7 @@ const PageFormulaireProfil = () => {
         }
       })();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <InscriptionWrapper>
