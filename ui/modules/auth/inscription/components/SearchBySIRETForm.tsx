@@ -47,14 +47,29 @@ export default function SearchBySIRETForm({ setOrganisation }: InscriptionOrgani
         }
       }}
     >
-      {() => (
+      {(form) => (
         <Form>
           <Field name="siret">
             {({ field, meta }) => (
-              <FormControl mt={4} py={2} isRequired isInvalid={meta.error && meta.touched}>
+              <FormControl minH={120} mt={4} isRequired isInvalid={meta.error && meta.touched}>
                 <FormLabel>SIRET de votre organisme</FormLabel>
                 <FormHelperText mb={2}>Un SIRET au format valide est composé de 14 chiffres</FormHelperText>
-                <Input {...field} id={field.name} placeholder="Exemple : 98765432400019" />
+                <Input
+                  {...field}
+                  id={field.name}
+                  placeholder="Exemple : 98765432400019"
+                  onChange={(e) => {
+                    field.onChange(e);
+                    // reset results and selection
+                    setOrganisation(null);
+                    setOrganismes([]);
+
+                    // try to submit the form
+                    setTimeout(() => {
+                      form.submitForm();
+                    });
+                  }}
+                />
                 <FormErrorMessage>{meta.error}</FormErrorMessage>
               </FormControl>
             )}

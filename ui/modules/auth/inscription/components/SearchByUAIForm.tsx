@@ -47,14 +47,29 @@ export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganist
         }
       }}
     >
-      {() => (
+      {(form) => (
         <Form>
           <Field name="uai">
             {({ field, meta }) => (
-              <FormControl mt={4} py={2} isRequired isInvalid={meta.error && meta.touched}>
+              <FormControl minH={120} mt={4} isRequired isInvalid={meta.error && meta.touched}>
                 <FormLabel>UAI de votre organisme</FormLabel>
                 <FormHelperText mb={2}>Une UAI au format valide est composée de 7 chiffres et 1 lettre</FormHelperText>
-                <Input {...field} id={field.name} placeholder="Exemple : 1234567A" />
+                <Input
+                  {...field}
+                  id={field.name}
+                  placeholder="Exemple : 1234567A"
+                  onChange={(e) => {
+                    field.onChange(e);
+                    // reset results and selection
+                    setOrganisation(null);
+                    setOrganismes([]);
+
+                    // try to submit the form
+                    setTimeout(() => {
+                      form.submitForm();
+                    });
+                  }}
+                />
                 <FormErrorMessage>{meta.error}</FormErrorMessage>
               </FormControl>
             )}

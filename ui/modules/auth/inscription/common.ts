@@ -1,9 +1,9 @@
 import { Organisation } from "@/common/internal/Organisation";
 import { DistributiveOmit } from "@emotion/react";
 
-type NewOrganisation = DistributiveOmit<Organisation, "_id" | "created_at">;
+export type NewOrganisation = DistributiveOmit<Organisation, "_id" | "created_at">;
 
-export type SetterOrganisation = (o: NewOrganisation) => void; // eslint-disable-line no-unused-vars
+export type SetterOrganisation = (o: NewOrganisation | null) => void; // eslint-disable-line no-unused-vars
 export type InscriptionOrganistionChildProps = { setOrganisation: SetterOrganisation };
 
 export const natureOFToOrganisationType = {

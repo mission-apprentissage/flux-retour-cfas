@@ -10,15 +10,14 @@ import { InscriptionOF } from "@/modules/auth/inscription/InscriptionOF";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
-import { Organisation } from "@/common/internal/Organisation";
-import { SetterOrganisation } from "@/modules/auth/inscription/common";
+import { NewOrganisation, SetterOrganisation } from "@/modules/auth/inscription/common";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const RegisterConfigurationOrganisationPage = () => {
   const router = useRouter();
   const typeOrganisation = router.query.typeOrganisation as CategorieCompteInscription;
-  const [organisation, setOrganisation] = useState<Organisation>();
+  const [organisation, setOrganisation] = useState<NewOrganisation | null>(null);
 
   return (
     <InscriptionWrapper>
@@ -45,15 +44,7 @@ const RegisterConfigurationOrganisationPage = () => {
         )}
       </Box>
       <HStack gap="24px" mt={5}>
-        <Button
-          onClick={() =>
-            router.query.select
-              ? router.push("/auth/inscription/organisme_formation")
-              : router.push("/auth/inscription")
-          }
-          color="bluefrance"
-          variant="secondary"
-        >
+        <Button onClick={() => router.push("/auth/inscription")} color="bluefrance" variant="secondary">
           Revenir
         </Button>
         <Button

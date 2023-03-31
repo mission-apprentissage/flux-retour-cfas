@@ -13,6 +13,7 @@ export const InscriptionOF = ({ setOrganisation }: InscriptionOrganistionChildPr
 
   function setTypeOfSearch(type: string) {
     router.push(`/auth/inscription/organisme_formation?select=${type}`);
+    setOrganisation(null);
   }
 
   return (
