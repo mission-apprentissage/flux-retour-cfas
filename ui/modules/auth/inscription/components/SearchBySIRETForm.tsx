@@ -29,6 +29,7 @@ export default function SearchBySIRETForm({ setOrganisation }: InscriptionOrgani
   return (
     <Formik
       initialValues={{ siret: "" }}
+      validateOnBlur={false}
       validationSchema={Yup.object().shape({
         siret: Yup.string().required("Le SIRET est obligatoire").matches(SIRET_REGEX, {
           message: "SIRET invalide",

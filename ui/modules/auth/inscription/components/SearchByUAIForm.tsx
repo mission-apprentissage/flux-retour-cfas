@@ -29,6 +29,7 @@ export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganist
   return (
     <Formik
       initialValues={{ uai: "" }}
+      validateOnBlur={false}
       validationSchema={Yup.object().shape({
         uai: Yup.string().required("L'UAI est obligatoire").matches(UAI_REGEX, {
           message: "UAI invalide",
