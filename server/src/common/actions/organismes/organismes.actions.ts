@@ -622,8 +622,8 @@ export async function findOrganismesFiablesBySIRET(siret: string): Promise<Organ
     })
     .toArray();
   if (organismes.length === 0) {
-    // FIXME fallback api entreprise
-    throw Boom.badRequest("Aucun organisme trouvé");
+    // fallback interrogation API entreprise si l'organisme n'est pas dans notre BDD (et donc dans le référentiel)
+    return [await fetchFromAPIEntreprise(siret)];
   }
   return organismes;
 }
@@ -642,14 +642,45 @@ export async function findOrganismesFiablesByUAI(uai: string): Promise<Organisme
   return organismes;
 }
 
-export async function getOrganismeByUAIAndSIRET(uai: string, siret: string): Promise<Organisme> {
+export async function getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(
+  uai: string | null,
+  siret: string
+): Promise<Organisme> {
+  try {
+    return await getOrganismeByUAIAndSIRET(uai, siret);
+  } catch (err) {
+    return fetchFromAPIEntreprise(siret);
+  }
+}
+
+export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<Organisme> {
   // FIXME projection à définir
   const organisme = await organismesDb().findOne({
-    uai: uai,
+    uai: uai as any,
     siret: siret,
   });
   if (!organisme) {
     throw Boom.badRequest("Aucun organisme trouvé");
   }
   return organisme;
+}
+
+/**
+ * Renvoie les données principales d'un établissement de l'API Entreprise
+ * Sert pour afficher sur l'UI à l'inscription
+ */
+async function fetchFromAPIEntreprise(siret: string): Promise<any> {
+  const result = await findDataFromSiret(siret);
+  if (result.messages.api_entreprise !== "Ok") {
+    throw Boom.badRequest("Aucun organisme trouvé");
+  }
+  return {
+    uai: null,
+    siret: result.result.siret,
+    ferme: result.result.ferme,
+    raison_sociale: result.result.entreprise_raison_sociale,
+    adresse: {
+      complete: result.result.adresse,
+    },
+  };
 }

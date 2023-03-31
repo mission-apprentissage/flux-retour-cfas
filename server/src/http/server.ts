@@ -50,9 +50,9 @@ import {
   searchOrganismes,
   findOrganismesFiablesByUAI,
   findOrganismesFiablesBySIRET,
-  getOrganismeByUAIAndSIRET,
+  getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
 } from "../common/actions/organismes/organismes.actions.js";
-import { validateFullObjectSchema } from "../common/utils/validationUtils.js";
+import { validateFullObjectSchema, validateFullZodObjectSchema } from "../common/utils/validationUtils.js";
 import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
 import Joi from "joi";
 import { RESEAUX_CFAS } from "../common/constants/networksConstants.js";
@@ -78,8 +78,7 @@ import {
 } from "../common/actions/organisations.actions.js";
 import { getIndicateursNational, getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
 import { updateUserProfile } from "../common/actions/users.actions.js";
-import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
-import registrationSchema from "../common/validation/registrationSchema.js";
+import { registrationSchema } from "../common/validation/registrationSchema.js";
 import { z } from "zod";
 import { register } from "../common/actions/account.actions.js";
 
@@ -188,11 +187,11 @@ function setupRoutes(app: Application, services) {
   app.post(
     "/api/v1/organismes/get-by-uai-siret",
     returnResult(async (req) => {
-      const { uai, siret } = await validateFullObjectSchema(req.body, {
-        uai: Joi.string().required().uppercase(),
-        siret: Joi.string().required(),
+      const { uai, siret } = await validateFullZodObjectSchema(req.body, {
+        uai: z.string().nullable(),
+        siret: z.string(),
       });
-      return await getOrganismeByUAIAndSIRET(uai, siret);
+      return await getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(uai, siret);
     })
   );
 
@@ -202,12 +201,9 @@ function setupRoutes(app: Application, services) {
 
   app.post(
     "/api/v1/auth/register",
-    validateRequestMiddleware({
-      body: registrationSchema().strict(),
-    }),
     returnResult(async (req) => {
-      const registration = req.body as z.infer<ReturnType<typeof registrationSchema>>;
-      registration.user.email = registration.user.email.toLowerCase(); // sans doute possibilité de transformer avec zod, mais pour être sûr
+      const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
+      registration.user.email = registration.user.email.toLowerCase();
       await register(registration);
     })
   );

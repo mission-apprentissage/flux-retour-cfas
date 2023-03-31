@@ -100,7 +100,6 @@ export default function SearchByUAIForm({ setOrganisation }: InscriptionOrganist
                     <OrganismeDetails organisme={organismes[0]} />
                   </Box>
                   <Button
-                    type="submit"
                     mt="2w"
                     size="md"
                     variant="primary"

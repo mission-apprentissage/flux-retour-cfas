@@ -5,7 +5,7 @@ export default function OrganismeDetails({ organisme }) {
   return (
     <VStack alignItems={"baseline"} spacing={1}>
       <Text>
-        UAI : <b>{organisme.uai}</b>
+        UAI : <b>{organisme.uai || "Inconnu"}</b>
       </Text>
       <Text>
         Nature : <b>{natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}</b>

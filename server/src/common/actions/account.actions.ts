@@ -1,31 +1,36 @@
 import { mailerActions } from "../../services.js";
 import Boom from "boom";
-import { z } from "zod";
 
 import { organisationsDb } from "../model/collections.js";
-import registrationSchema from "../validation/registrationSchema.js";
+import { RegistrationSchema } from "../validation/registrationSchema.js";
 import { createOrganisation } from "./organisations.actions.js";
 import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions.js";
 import { createSession } from "./sessions.actions.js";
-import { isOrganisationOF } from "./helpers/permissions.js";
 import { createOrganisme, getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions.js";
-import { OrganisationOrganismeFormation } from "../model/organisations.model.js";
+import logger from "../logger.js";
 
-export async function register(registration: z.infer<ReturnType<typeof registrationSchema>>): Promise<void> {
+export async function register(registration: RegistrationSchema): Promise<void> {
   const alreadyExists = await getUserByEmail(registration.user.email);
   if (alreadyExists) {
     throw Boom.conflict("email already in use", { message: "email already in use" });
   }
 
   // on s'assure que l'organisme existe pour un OF
-  if (isOrganisationOF(registration.organisation.type)) {
-    const registrationOrganisation = registration.organisation as OrganisationOrganismeFormation; // typage zod à revoir
+  const type = registration.organisation.type;
+  if (
+    type === "ORGANISME_FORMATION_FORMATEUR" ||
+    type === "ORGANISME_FORMATION_RESPONSABLE" ||
+    type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR"
+  ) {
+    const { uai, siret } = registration.organisation;
     try {
-      await getOrganismeByUAIAndSIRET(registrationOrganisation.uai, registrationOrganisation.siret);
+      await getOrganismeByUAIAndSIRET(uai, siret);
     } catch (err) {
       // FIXME créer un organisme depuis API entreprise ?
       // paramètres par défaut = va chercher dans API entreprise
-      await createOrganisme({ uai: registrationOrganisation.uai, siret: registrationOrganisation.siret });
+      logger.warn({ action: "register", uai, siret }, "organisme inconnu");
+      throw new Error("création à partir de API entreprise à faire");
+      // await createOrganisme({ uai, siret });
     }
   }
 

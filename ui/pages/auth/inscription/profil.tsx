@@ -90,7 +90,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
                     {organisationFormationLabel}
                   </Text>
                   <Text>
-                    UAI : {organisation.uai} - SIRET : {organisation.siret}
+                    UAI : {organisation.uai || "Inconnu"} - SIRET : {organisation.siret}
                   </Text>
                 </>
               );
@@ -177,7 +177,6 @@ const PageFormulaireProfil = () => {
       (async () => {
         try {
           const invitation = await _get(`/api/v1/invitations/${router.query.invitationToken}`);
-          console.log("invitation", invitation);
           setOrganisation(invitation.organisation);
           setFixedEmail(invitation.email);
           // TODO il faudra gérer le refus de l'invitation
