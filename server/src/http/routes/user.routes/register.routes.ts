@@ -4,13 +4,14 @@ import passport from "passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
 
 import config from "../../../config.js";
-import { getUserByEmail, activateUser } from "../../../common/actions/users.actions.js";
+import { getUserByEmail } from "../../../common/actions/users.actions.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
 import { usersMigrationDb } from "../../../common/model/collections.js";
+import { activateUser } from "../../../common/actions/account.actions.js";
 
 const checkActivationToken = () => {
   passport.use(

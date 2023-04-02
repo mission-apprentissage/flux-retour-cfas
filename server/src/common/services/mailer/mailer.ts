@@ -63,6 +63,8 @@ export async function sendSimpleEmail<T extends TemplateName>(
 const templatesTitleFuncs: TemplateTitleFuncs = {
   invitation_organisation: (payload) =>
     `${payload.author.civility} ${payload.author.nom} vous invite à rejoindre le tableau de bord de l'apprentissage`,
+  activation_user: () => "Activation de votre compte",
+  validation_user_by_tdb_team: (payload) => `[ADMIN] Demande d'accès à l'organisation ${payload.organisationLabel}`,
 };
 
 // Pour chaque template, déclarer les champs qui sont utilisés dans le template
@@ -77,6 +79,24 @@ export type TemplatePayloads = {
     };
     organisationLabel: string;
     invitationToken: string;
+  };
+  activation_user: {
+    tdbEmail: string;
+    user: {
+      civility: string;
+      nom: string;
+      prenom: string;
+      email: string;
+    };
+    activationToken: string;
+  };
+  validation_user_by_tdb_team: {
+    user: {
+      nom: string;
+      prenom: string;
+      email: string;
+    };
+    organisationLabel: string;
   };
 };
 

@@ -1,6 +1,13 @@
 import { date, object, objectId, string } from "./json-schema/jsonSchemaTypes.js";
-import { RESEAUX_CFAS } from "../constants/networksConstants.js";
-import { REGIONS, DEPARTEMENTS, ACADEMIES } from "../constants/territoiresConstants.js";
+import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "../constants/networksConstants.js";
+import {
+  REGIONS,
+  DEPARTEMENTS,
+  ACADEMIES,
+  ACADEMIES_BY_ID,
+  DEPARTEMENTS_BY_ID,
+  REGIONS_BY_ID,
+} from "../constants/territoiresConstants.js";
 import { WithId } from "mongodb";
 import { ORGANISATIONS_NATIONALES } from "../constants/organisations.js";
 
@@ -76,6 +83,35 @@ export interface OrganisationAdministrateur extends AbstractOrganisation {
   type: "ADMINISTRATEUR";
 }
 
+export function getOrganisationLabel(organisation: Organisation): string {
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      return `${organisation.type}  UAI : ${organisation.uai || "Inconnu"} - SIRET : ${organisation.siret}`;
+    }
+
+    case "TETE_DE_RESEAU":
+      return `Réseau ${TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}`;
+
+    case "DREETS":
+    case "DEETS":
+    case "DRAAF":
+      return `${organisation.type} ${REGIONS_BY_ID[organisation.code_region].nom}`;
+    case "CONSEIL_REGIONAL":
+      return `Conseil régional ${REGIONS_BY_ID[organisation.code_region].nom}`;
+    case "DDETS":
+      return `DDETS ${DEPARTEMENTS_BY_ID[organisation.code_departement].nom}`;
+    case "ACADEMIE":
+      return `Académie ${ACADEMIES_BY_ID[organisation.code_academie].nom}`;
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+      return organisation.nom;
+    case "ADMINISTRATEUR":
+      return "Administrateur";
+  }
+}
+
 const collectionName = "organisations";
 
 // FIXME compléter si besoin d'indexes
@@ -100,7 +136,7 @@ const schema = object(
     }),
 
     // si tête de réseau
-    reseau: string({ enum: Object.keys(RESEAUX_CFAS), description: "Nom du réseau" }),
+    reseau: string({ enum: TETE_DE_RESEAUX.map((r) => r.key), description: "Nom du réseau" }),
 
     // si DREETS, DEETS, DRAAF, CONSEIL_REGIONAL
     code_region: string({

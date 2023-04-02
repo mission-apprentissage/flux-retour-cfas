@@ -10,33 +10,14 @@
               <mj-text>
                 <div>
                   <br />
-                  L'utilisateur <strong>
-                    <%= data.user.email %>
-                  </strong> demande un accès <strong>
-                    <%= data.type %>
-                  </strong> :
+                  L'utilisateur <strong><%= data.user.email %></strong> demande un accès :
                 </div>
                 <ul>
                   <li>
                     <%= data.user.nom %>
-                      <%= data.user.prenom %>
+                    <%= data.user.prenom %>
                   </li>
-                  <li>Organisation : <%= data.user.organisation %>
-                  </li>
-                  <li>Siret : <%= data.user.siret %>
-                  </li>
-                  <li>RESEAU : <%= data.user.reseau %>
-                  </li>
-                  <li>
-                    TERRITOIRES :
-                    <ul>
-                      <li>Region(s) : <%= data.regions_as_string %>
-                      </li>
-                      <li>Academie(s) : <%= data.academies_as_string %>
-                      </li>
-                      <li>Departement(s): <%= data.departements_as_string %>
-                      </li>
-                    </ul>
+                  <li>Organisation : <%= data.organisationLabel %>
                   </li>
                 </ul>
               </mj-text>

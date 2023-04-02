@@ -55,7 +55,6 @@ import {
 import { validateFullObjectSchema, validateFullZodObjectSchema } from "../common/utils/validationUtils.js";
 import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
 import Joi from "joi";
-import { RESEAUX_CFAS } from "../common/constants/networksConstants.js";
 import { ORGANISMES_APPARTENANCE } from "../common/constants/usersConstants.js";
 import { authenticateLegacy } from "../common/actions/legacy/users.legacy.actions.js";
 import { createUserToken } from "../common/utils/jwtUtils.js";
@@ -81,6 +80,7 @@ import { updateUserProfile } from "../common/actions/users.actions.js";
 import { registrationSchema } from "../common/validation/registrationSchema.js";
 import { z } from "zod";
 import { register } from "../common/actions/account.actions.js";
+import { TETE_DE_RESEAUX } from "../common/constants/networksConstants.js";
 
 /**
  * Create the express app
@@ -373,10 +373,10 @@ function setupRoutes(app: Application, services) {
     returnResult(() => {
       // TODO : TMP on ne renvoie que les réseaux fiabilisés pour l'instant - débloquer le reste quand ce sera fiable
       const RESEAUX_CFAS_INVALID = ["ANASUP", "GRETA_VAUCLUSE", "BTP_CFA"];
-      const networks = Object.keys(RESEAUX_CFAS)
-        .filter((item) => !RESEAUX_CFAS_INVALID.includes(item))
-        .map((id) => ({ id, nom: RESEAUX_CFAS[id].nomReseau }));
-      return networks;
+      return TETE_DE_RESEAUX.filter((reseau) => !RESEAUX_CFAS_INVALID.includes(reseau.key)).map((reseau) => ({
+        id: reseau.key,
+        nom: reseau.nom,
+      }));
     })
   );
 

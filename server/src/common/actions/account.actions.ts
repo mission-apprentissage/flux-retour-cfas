@@ -1,13 +1,17 @@
 import { mailerActions } from "../../services.js";
 import Boom from "boom";
 
-import { organisationsDb } from "../model/collections.js";
+import { invitationsDb, organisationsDb, usersMigrationDb } from "../model/collections.js";
 import { RegistrationSchema } from "../validation/registrationSchema.js";
-import { createOrganisation } from "./organisations.actions.js";
+import { createOrganisation, getOrganisationById } from "./organisations.actions.js";
 import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions.js";
 import { createSession } from "./sessions.actions.js";
-import { createOrganisme, getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions.js";
+import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions.js";
 import logger from "../logger.js";
+import { sendSimpleEmail } from "../services/mailer/mailer.js";
+import config from "../../config.js";
+import { createActivationToken } from "../utils/jwtUtils.js";
+import { getOrganisationLabel } from "../model/organisations.model.js";
 
 export async function register(registration: RegistrationSchema): Promise<void> {
   const alreadyExists = await getUserByEmail(registration.user.email);
@@ -41,6 +45,18 @@ export async function register(registration: RegistrationSchema): Promise<void> 
 
   // FIXME send simple email
   await mailerActions.sendEmail({ to: registration.user.email, payload: registration.user }, "activation_user");
+
+  // 2 pour voir la différence
+  await sendSimpleEmail(registration.user.email, "activation_user", {
+    tdbEmail: config.email,
+    user: {
+      civility: registration.user.civility,
+      nom: registration.user.nom,
+      prenom: registration.user.prenom,
+      email: registration.user.email,
+    },
+    activationToken: createActivationToken(registration.user.email, { payload: {} }),
+  });
 }
 
 export async function login(email: string, password: string): Promise<string> {
@@ -59,3 +75,48 @@ export async function login(email: string, password: string): Promise<string> {
   const sessionToken = createSession(auth.email);
   return sessionToken;
 }
+
+/** Ca serait mieux de gérer un token d'activation */
+export const activateUser = async (email: string) => {
+  const user = await getUserByEmail(email);
+  if (!user) {
+    logger.error({ email }, "utilisateur non trouvé à l'activation");
+    throw Boom.internal("Une erreur est survenue");
+  }
+
+  // si une invitation existe, on confirme directement l'utilisateur
+  const invitation = await invitationsDb().findOne({
+    organisation_id: user.organisation_id,
+    email: user.email,
+  });
+
+  const res = await usersMigrationDb().updateOne(
+    {
+      email,
+      account_status: "PENDING_EMAIL_VALIDATION",
+    },
+    {
+      $set: {
+        account_status: invitation ? "CONFIRMED" : "PENDING_ADMIN_VALIDATION", // previously PENDING_PASSWORD_SETUP
+      },
+    }
+  );
+  if (res.modifiedCount === 0) {
+    throw Boom.badRequest("Permissions invalides");
+  }
+
+  // si l'invitation a été utilisée, on la supprime et il n'y a pas besoin de notification
+  if (invitation) {
+    await invitationsDb().deleteOne({ _id: invitation._id });
+  } else {
+    // FIXME pour l'instant, pas de notif aux admins ou gestionnaires directement
+    await sendSimpleEmail("tableau-de-bord@apprentissage.beta.gouv.fr", "validation_user_by_tdb_team", {
+      user: {
+        nom: user.nom,
+        prenom: user.prenom,
+        email: user.email,
+      },
+      organisationLabel: getOrganisationLabel(await getOrganisationById(user.organisation_id)),
+    });
+  }
+};

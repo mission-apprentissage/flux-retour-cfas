@@ -10,6 +10,7 @@ import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
 import { register } from "../../../common/actions/account.actions.js";
 import { usersMigrationDb } from "../../../common/model/collections.js";
 
+// TODO devrait désactiver l'envoi d'email globalement en mode CLI
 export const seedAdmin = async (email = "admin@test.fr") => {
   // Create user Admin
   await register({
@@ -34,7 +35,7 @@ export const seedAdmin = async (email = "admin@test.fr") => {
     },
     {
       $set: {
-        account_status: "DIRECT_PENDING_PASSWORD_SETUP",
+        account_status: "CONFIRMED",
       },
     }
   );

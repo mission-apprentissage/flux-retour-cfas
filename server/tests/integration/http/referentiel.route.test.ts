@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { startServer } from "../../utils/testUtils.js";
-import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants.js";
+import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "../../../src/common/constants/networksConstants.js";
 
 describe("Referentiel Route", () => {
   it("Vérifie qu'on peut récupérer les réseaux référentiels via API", async () => {
@@ -10,7 +10,7 @@ describe("Referentiel Route", () => {
 
     assert.deepStrictEqual(response.status, 200);
     const RESEAUX_CFAS_INVALID = ["ANASUP", "GRETA_VAUCLUSE", "BTP_CFA"];
-    assert.deepStrictEqual(response.data.length, Object.values(RESEAUX_CFAS).length - RESEAUX_CFAS_INVALID.length);
-    assert.deepStrictEqual(response.data[0].nom, RESEAUX_CFAS.ADEN.nomReseau);
+    assert.deepStrictEqual(response.data.length, TETE_DE_RESEAUX.length - RESEAUX_CFAS_INVALID.length);
+    assert.deepStrictEqual(response.data[0].nom, TETE_DE_RESEAUX_BY_ID["ADEN"].nom);
   });
 });
