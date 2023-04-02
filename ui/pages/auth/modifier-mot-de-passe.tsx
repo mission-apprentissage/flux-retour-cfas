@@ -18,27 +18,26 @@ import * as Yup from "yup";
 import YupPassword from "yup-password";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
-import useAuth from "@/hooks/useAuth";
 import { _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { ShowPassword } from "../../theme/components/icons";
-import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
+import useToaster from "@/hooks/useToaster";
 
 YupPassword(Yup); // extend yup
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const ResetPasswordPage = () => {
-  const { auth, refreshSession } = useAuth();
+  const { toastSuccess } = useToaster();
   const router = useRouter();
   const { passwordToken } = router.query;
 
   const [show, setShow] = React.useState(false);
   const onShowPassword = () => setShow(!show);
 
-  const minLength = auth.is_admin ? 20 : 12;
-
-  const isFirstSetPassword = auth.account_status === "PENDING_PASSWORD_SETUP";
+  // FIXME on pourrait avoir le type d'organisation dans le token pour l'avoir
+  // const minLength = auth?.organisation?.type === "ADMINISTRATEUR" ? 20 : 12;
+  const minLength = 12;
 
   const [conditions, setConditions] = useState({
     min: "unknown",
@@ -47,7 +46,7 @@ const ResetPasswordPage = () => {
     special: "unknown",
     number: "unknown",
   });
-  const [status, setStatus] = useState({ error: null });
+  const [status, setStatus] = useState<{ error: any | null }>({ error: null });
 
   const variant = {
     success: {
@@ -79,14 +78,12 @@ const ResetPasswordPage = () => {
     }),
     onSubmit: async ({ newPassword }) => {
       try {
-        const result = await _post("/api/v1/password/reset-password", {
-          newPassword: newPassword.trim(),
+        await _post("/api/v1/password/reset-password", {
           passwordToken,
+          password: newPassword.trim(),
         });
-        if (result.loggedIn) {
-          await refreshSession();
-          router.push("/");
-        }
+        toastSuccess("Votre mot de passe a bien été changé. Vous pouvez désormais vous connecter.");
+        router.push("/auth/connexion");
       } catch (e) {
         console.error(e);
         setStatus({
@@ -124,8 +121,7 @@ const ResetPasswordPage = () => {
     <Flex height="100vh" justifyContent="flex-start" flexDirection="column" p={10}>
       <Box width={"auto"}>
         <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          {isFirstSetPassword && "Veuillez créer votre mot de passe"}
-          {!isFirstSetPassword && "Une mise à jour de votre mot de passe est obligatoire"}
+          Veuillez saisir un nouveau mot de passe
         </Heading>
         <form onSubmit={handleSubmit}>
           <InputGroup size="md">
@@ -133,7 +129,7 @@ const ResetPasswordPage = () => {
               id="newPassword"
               name="newPassword"
               type={show ? "text" : "password"}
-              placeholder={isFirstSetPassword ? "Votre mot de passe..." : "Votre nouveau mot de passe..."}
+              placeholder="Votre mot de passe..."
               onChange={onChange}
               value={values.newPassword.trim()}
               mb={3}
@@ -181,8 +177,7 @@ const ResetPasswordPage = () => {
             </ListItem>
           </List>
           <Button variant="primary" type="submit" w="full">
-            {isFirstSetPassword && "Créer le mot de passe"}
-            {!isFirstSetPassword && "Réinitialiser le mot de passe"}
+            Réinitialiser le mot de passe
           </Button>
           {status.error && (
             <Text color="error" mt={2}>
@@ -191,7 +186,6 @@ const ResetPasswordPage = () => {
           )}
         </form>
       </Box>
-      {isFirstSetPassword && <InformationBlock mt={10} />}
     </Flex>
   );
 };

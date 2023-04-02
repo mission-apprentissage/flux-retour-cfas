@@ -24,7 +24,6 @@ import emails from "./routes/emails.routes.js";
 
 import auth from "./routes/user.routes/auth.routes.js";
 import registerRouter from "./routes/user.routes/register.routes.js";
-import password from "./routes/user.routes/password.routes.js";
 
 import organisme from "./routes/specific.routes/organisme.routes.js";
 import effectif from "./routes/specific.routes/effectif.routes.js";
@@ -52,7 +51,11 @@ import {
   findOrganismesFiablesBySIRET,
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
 } from "../common/actions/organismes/organismes.actions.js";
-import { validateFullObjectSchema, validateFullZodObjectSchema } from "../common/utils/validationUtils.js";
+import {
+  passwordSchema,
+  validateFullObjectSchema,
+  validateFullZodObjectSchema,
+} from "../common/utils/validationUtils.js";
 import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
 import Joi from "joi";
 import { ORGANISMES_APPARTENANCE } from "../common/constants/usersConstants.js";
@@ -76,11 +79,12 @@ import {
   validateMembre,
 } from "../common/actions/organisations.actions.js";
 import { getIndicateursNational, getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
-import { updateUserProfile } from "../common/actions/users.actions.js";
+import { changePassword, updateUserProfile } from "../common/actions/users.actions.js";
 import { registrationSchema } from "../common/validation/registrationSchema.js";
 import { z } from "zod";
-import { register } from "../common/actions/account.actions.js";
+import { sendForgotPasswordRequest, register } from "../common/actions/account.actions.js";
 import { TETE_DE_RESEAUX } from "../common/constants/networksConstants.js";
+import { checkPasswordToken } from "./helpers/passport-handlers.js";
 
 /**
  * Create the express app
@@ -207,7 +211,26 @@ function setupRoutes(app: Application, services) {
       await register(registration);
     })
   );
-  app.use("/api/v1/password", password(services));
+  app.post(
+    "/api/v1/password/forgotten-password",
+    returnResult(async (req) => {
+      const { email } = await validateFullObjectSchema(req.body, {
+        email: Joi.string().email().required().lowercase().trim(),
+      });
+      await sendForgotPasswordRequest(email);
+    })
+  );
+  app.post(
+    "/reset-password",
+    checkPasswordToken(),
+    returnResult(async (req) => {
+      // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
+      const { password } = await validateFullObjectSchema(req.body, {
+        password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
+      });
+      await changePassword(req.user, password);
+    })
+  );
   app.get(
     "/api/v1/maintenanceMessages",
     returnResult(async () => {

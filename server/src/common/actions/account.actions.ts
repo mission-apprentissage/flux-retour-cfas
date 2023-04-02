@@ -10,7 +10,7 @@ import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions.js";
 import logger from "../logger.js";
 import { sendSimpleEmail } from "../services/mailer/mailer.js";
 import config from "../../config.js";
-import { createActivationToken } from "../utils/jwtUtils.js";
+import { createActivationToken, createResetPasswordToken } from "../utils/jwtUtils.js";
 import { getOrganisationLabel } from "../model/organisations.model.js";
 
 export async function register(registration: RegistrationSchema): Promise<void> {
@@ -120,3 +120,19 @@ export const activateUser = async (email: string) => {
     });
   }
 };
+
+export async function sendForgotPasswordRequest(email: string) {
+  const user = await getUserByEmail(email);
+  if (!user) {
+    logger.warn({ email }, "forgot-password: missing user");
+    return;
+  }
+
+  const token = createResetPasswordToken(user.email);
+  sendSimpleEmail(user.email, "reset_password", {
+    user: {
+      email: config.email,
+    },
+    resetPasswordToken: token,
+  });
+}

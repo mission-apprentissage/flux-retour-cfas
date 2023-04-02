@@ -1,4 +1,4 @@
-import { AuthContext } from "@/src/common/model/internal/AuthContext.js";
+import { AuthContext } from "../../common/model/internal/AuthContext.js";
 import Boom from "boom";
 import { NextFunction, Request, Response } from "express";
 

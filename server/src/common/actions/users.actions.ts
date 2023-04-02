@@ -1,12 +1,13 @@
+import Boom from "boom";
 import { addHours } from "date-fns";
 import { ObjectId } from "mongodb";
+import { UsersMigration } from "../model/@types/UsersMigration.js";
 
 import { usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
 import { validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash, compare, isTooWeak } from "../utils/passwordUtils.js";
-import { passwordSchema } from "../utils/validationUtils.js";
 
 interface UserRegistration {
   email: string;
@@ -269,38 +270,18 @@ export const updateUserLastConnection = async (email) => {
 
 /**
  * Méthode de mise à jour du mot de passe d'un user
- * @param {string} email
- * @param {string} newPassword
- * @returns
  */
-export const changePassword = async (authContext: AuthContext, newPassword: string) => {
-  const user = await usersMigrationDb().findOne({ _id: authContext._id });
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
-
-  if (
-    passwordSchema(authContext.organisation.type === "ADMINISTRATEUR")
-      .required()
-      .validate(newPassword).error
-  ) {
-    throw new Error("Password must be valid");
-  }
-
-  const updated = await usersMigrationDb().findOneAndUpdate(
-    { _id: user._id },
+export async function changePassword(authContext: AuthContext, password: string) {
+  await usersMigrationDb().findOneAndUpdate(
+    { _id: authContext._id },
     {
       $set: {
-        account_status: getNextAccountStatus(user),
-        password: hash(newPassword),
+        password: hash(password),
         password_updated_at: new Date(),
       },
-    },
-    { returnDocument: "after" }
+    }
   );
-
-  return updated.value;
-};
+}
 
 /**
  * Génération d'un token d'update de mot de passe
@@ -334,21 +315,6 @@ export const generatePasswordUpdateToken = async (email: string) => {
   return token;
 };
 
-/**
- * Renvoie le statut du compte après réinitialisation du mot de passe.
- * Uniquement utile lors de l'inscription.
- */
-function getNextAccountStatus(user: any) {
-  switch (user.account_status) {
-    case "PENDING_PASSWORD_SETUP":
-      return user.is_admin ? "CONFIRMED" : "PENDING_PERMISSIONS_SETUP";
-    case "DIRECT_PENDING_PASSWORD_SETUP":
-      return "CONFIRMED";
-    default:
-      return user.account_status;
-  }
-}
-
 export async function updateUserProfile(ctx: AuthContext, infos: any) {
   await usersMigrationDb().findOneAndUpdate(
     { _id: ctx._id },
@@ -356,4 +322,12 @@ export async function updateUserProfile(ctx: AuthContext, infos: any) {
       $set: infos,
     }
   );
+}
+
+export async function getUserById(userId: ObjectId): Promise<UsersMigration> {
+  const user = await usersMigrationDb().findOne({ _id: userId });
+  if (!user) {
+    throw Boom.notFound(`missing user ${userId}`);
+  }
+  return user;
 }

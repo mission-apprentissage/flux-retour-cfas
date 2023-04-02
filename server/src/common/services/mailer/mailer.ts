@@ -65,6 +65,7 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `${payload.author.civility} ${payload.author.nom} vous invite à rejoindre le tableau de bord de l'apprentissage`,
   activation_user: () => "Activation de votre compte",
   validation_user_by_tdb_team: (payload) => `[ADMIN] Demande d'accès à l'organisation ${payload.organisationLabel}`,
+  reset_password: () => "Réinitialisation du mot de passe",
 };
 
 // Pour chaque template, déclarer les champs qui sont utilisés dans le template
@@ -97,6 +98,12 @@ export type TemplatePayloads = {
       email: string;
     };
     organisationLabel: string;
+  };
+  reset_password: {
+    user: {
+      email: string;
+    };
+    resetPasswordToken: string;
   };
 };
 

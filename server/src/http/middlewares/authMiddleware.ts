@@ -31,6 +31,7 @@ export const authMiddleware = () => {
           if (!user) {
             return done(new Error("Unauthorized"), false);
           }
+          // FIXME à quoi sert ce champ ?
           if (user.invalided_token) {
             await updateUser(user._id, { invalided_token: false });
             return done(null, { invalided_token: true });
