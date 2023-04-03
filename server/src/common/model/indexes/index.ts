@@ -3,21 +3,20 @@ import { getDbCollection, getCollectionList } from "../../mongodb.js";
 import { modelDescriptors } from "../collections.js";
 
 export const createIndexes = async () => {
-  const collections = (await getCollectionList()).map((collection) => collection.name);
-
   for (const descriptor of modelDescriptors) {
-    if (descriptor.indexes && collections.includes(descriptor.collectionName)) {
-      logger.info(`Create indexes for collection ${descriptor.collectionName}`);
-      await Promise.all(
-        descriptor.indexes.map(async ([index, options]) => {
-          try {
-            await getDbCollection(descriptor.collectionName).createIndex(index, options);
-          } catch (err) {
-            console.error(`Error creating indexes for descriptor.collectionName: ${err}`);
-          }
-        })
-      );
+    if (!descriptor.indexes) {
+      return;
     }
+    logger.info(`Create indexes for collection ${descriptor.collectionName}`);
+    await Promise.all(
+      descriptor.indexes.map(async ([index, options]) => {
+        try {
+          await getDbCollection(descriptor.collectionName).createIndex(index, options);
+        } catch (err) {
+          console.error(`Error creating indexes for descriptor.collectionName: ${err}`);
+        }
+      })
+    );
   }
 };
 

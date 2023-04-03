@@ -1,8 +1,9 @@
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { object, string, objectId } from "./json-schema/jsonSchemaTypes.js";
 
 const collectionName = "jwtSessions";
 
-const indexes = [[{ jwt: 1 }, { unique: true }]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ jwt: 1 }, { unique: true }]];
 
 const schema = object(
   {

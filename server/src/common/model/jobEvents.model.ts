@@ -13,4 +13,4 @@ const schema = object(
   { required: ["jobname", "action", "date"] }
 );
 
-export default { schema, collectionName };
+export default { schema, collectionName, indexes: [] };

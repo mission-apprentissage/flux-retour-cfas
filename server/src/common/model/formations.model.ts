@@ -1,15 +1,14 @@
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
 import { schemaValidation } from "../utils/schemaUtils.js";
 import { cfdSchema } from "../utils/validationUtils.js";
 import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "./json-schema/jsonSchemaTypes.js";
 
 const collectionName = "formations";
 
-const indexes = [
-  [
-    { libelle: "text", tokenized_libelle: "text" },
-    { default_language: "french" },
-    { name: "libelle_text_tokenized_libelle_text" },
-  ],
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ libelle: "text" }, { default_language: "french", name: "libelle_text" }],
+  [{ libelle: 1 }, { name: "libelle" }], // this index is also needed to search using regex
   [{ cfd: 1 }, { name: "cfd", unique: true }],
   [{ rncps: 1 }, { name: "rncps" }],
 ];
@@ -29,7 +28,6 @@ const schema = object(
     niveau_libelle: stringOrNull({
       description: "Libellé du niveau de formation récupéré via Tables de Correspondances",
     }),
-    tokenized_libelle: stringOrNull({ description: "Libellé tokenizé pour la recherche" }),
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à la formation" }),
     duree: stringOrNull({ description: "Durée de la formation théorique" }),
     annee: stringOrNull({ description: "Année de la formation (cursus)" }),

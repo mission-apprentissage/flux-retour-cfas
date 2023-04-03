@@ -4,7 +4,6 @@ import { getMetiersBySiret } from "../../apis/apiLba.js";
 import { organismesDb, effectifsDb, permissionsDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
-import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
 import { createPermission, removePermissions } from "../permissions.actions.js";
 import { structureUser } from "../users.actions.js";
@@ -45,7 +44,7 @@ export const createOrganisme = async (
     : { nom: nomIn?.trim(), adresse: adresseIn, ferme: fermeIn, enseigne: undefined, raison_sociale: undefined };
   const dataToInsert = validateOrganisme({
     ...(uai ? { uai } : {}),
-    ...(nom ? { nom, nom_tokenized: buildTokenizedString(nom, 4) } : {}),
+    ...(nom ? { nom } : {}),
     ...defaultValuesOrganisme(),
     ...(siret ? { siret } : {}),
     metiers,
@@ -268,7 +267,7 @@ export const updateOrganisme = async (
         ...(organisme.uai ? { uai: organisme.uai } : {}),
         ...(siret ? { siret } : {}),
         ...data,
-        ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
+        ...(nom ? { nom: nom.trim() } : {}),
         metiers,
         formations,
         ...(adresse ? { adresse } : {}),

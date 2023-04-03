@@ -5,13 +5,14 @@ import { siretSchema, passwordSchema, uaiSchema } from "../utils/validationUtils
 import { RESEAUX_CFAS } from "../constants/networksConstants.js";
 import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../constants/territoiresConstants.js";
 import { ORGANISMES_APPARTENANCE, USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 export const collectionName = "usersMigration";
 
-const indexes = [
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ email: 1 }, { unique: true }],
-  [{ "emails.token": 1 }],
-  [{ email: "text", nom: "text", prenom: "text", siret: "text", uai: "text" }],
+  [{ "emails.token": 1 }, {}],
+  [{ email: "text", nom: "text", prenom: "text", siret: "text", uai: "text" }, {}],
 ];
 
 export const schema = object(

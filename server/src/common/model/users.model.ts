@@ -1,8 +1,9 @@
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } from "./json-schema/jsonSchemaTypes.js";
 
 const collectionName = "users";
 
-const indexes = [
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ username: 1 }, { name: "username" }],
   [{ email: 1 }, { name: "email" }],
   [{ organisme: 1 }, { name: "organisme" }],

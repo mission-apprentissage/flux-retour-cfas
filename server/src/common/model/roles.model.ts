@@ -1,8 +1,9 @@
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { integer, object, objectId, string, arrayOf } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "roles";
 
-const indexes = [[{ name: 1 }, { unique: true }]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ name: 1 }, { unique: true }]];
 
 export const schema = object(
   {
