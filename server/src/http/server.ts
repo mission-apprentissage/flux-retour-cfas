@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
+import swaggerUi from "swagger-ui-express";
 
 import { apiRoles } from "../common/roles.js";
 
@@ -47,6 +48,8 @@ import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import maintenancesRoutes from "./routes/maintenances.routes.js";
 import config from "../config.js";
 import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
+
+import openapiSpecs from "./open-api.json" assert { type: "json" };
 
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
@@ -172,6 +175,8 @@ export default async (services) => {
 
   app.use("/api/formations", formationRouter()); // FRONT
   app.use("/api/referentiel", referentielRouter()); // FRONT
+
+  app.use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs));
 
   // The error handler must be before any other error middleware and after all controllers
   app.use(Sentry.Handlers.errorHandler());

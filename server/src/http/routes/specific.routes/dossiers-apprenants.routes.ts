@@ -47,7 +47,7 @@ export default () => {
       });
     } catch (err: any) {
       logger.error(`POST /dossiers-apprenants error : ${err.toString()}`);
-      res.status(400).json({
+      res.status(500).json({
         status: "ERROR",
         message: err.message,
       });

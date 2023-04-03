@@ -16,14 +16,14 @@ export const schema = object(
     // required fields to create an effectif
     nom_apprenant: any(),
     prenom_apprenant: any(),
-    date_de_naissance_apprenant: any(),
-    uai_etablissement: any(),
-    nom_etablissement: any(),
+    date_de_naissance_apprenant: any({ description: "Date de naissance de l'apprenant" }),
+    uai_etablissement: any({ description: "UAI de l'établissement" }),
+    nom_etablissement: any({ description: "Nom de l'établissement" }),
     id_formation: any(),
     annee_scolaire: any({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
     }),
-    statut_apprenant: any(),
+    statut_apprenant: any({ description: "0, 2 ou 3" }),
     date_metier_mise_a_jour_statut: any(),
     id_erp_apprenant: any({ description: "Identifiant de l'apprenant dans l'erp" }),
 

@@ -1,0 +1,1497 @@
+{
+  "info": {
+    "version": "1.0.0",
+    "title": "API mission apprentissage",
+    "description": "L'API mission apprentissage est à disposition des ERPs et organismes de formation qui souhaitent envoyer leur donnnées effectifs au tableau de bord de l'apprentissage.",
+    "contact": {
+      "name": "support",
+      "email": "tableau-de-bord@apprentissage.beta.gouv.fr"
+    }
+  },
+  "externalDocs": {
+    "description": "Plus d'info sur le tableau de bord de l'apprentissage",
+    "url": "https://beta.gouv.fr/startups/tdb-apprentissage.html"
+  },
+  "servers": [
+    {
+      "url": "https://cfas.apprentissage.beta.gouv.fr/api"
+    }
+  ],
+  "tags": [
+    {
+      "name": "v1",
+      "description": "Version 2021. L'authentification se fait à l'aide d'un login/mot de passe. Cette version a été déprécié."
+    },
+    {
+      "name": "v2",
+      "description": "Version 2022. L'authentification se fait à l'aide d'un login/mot de passe. Cette version est en cours de dépréciation et sera remplacée par la version 3."
+    },
+    {
+      "name": "v3",
+      "description": "Version à venir (courant 1er semestre 2023). L'authentification se fera à l'aide d'une apiKey."
+    }
+  ],
+  "openapi": "3.0.0",
+  "components": {
+    "securitySchemes": {
+      "httpAuth": {
+        "description": "Méthode d'authentification pour la V1 et V2, avec un login et un mot de passe",
+        "type": "http",
+        "scheme": "basic"
+      },
+      "apiKeyAuth": {
+        "description": "Méthode d'authentification pour la V3 (à venir) avec une clé d'API",
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    },
+    "schemas": {},
+    "parameters": {}
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Authentification de l'ERP",
+        "tags": [
+          "v1",
+          "v2"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Le username pour s'authentifier",
+                    "example": "jean.dupont"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Le mot de passe pour s'authentifier",
+                    "example": "monMOtDePAsseSecur1sE"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "400": {
+                      "description": "Invalid username/password supplied"
+                    },
+                    "access_token": {
+                      "type": "string",
+                      "description": "Token d'authentification",
+                      "example": "<JWT Access token>"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-apprenants": {
+      "post": {
+        "deprecated": true,
+        "tags": [
+          "v1"
+        ],
+        "summary": "Import des dossiers apprenants",
+        "description": "Permet la création ou la mise à jour de plusieurs dossiers apprenants",
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "nom_apprenant": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "nom de l'apprenant",
+                      "example": "Lenôtre"
+                    },
+                    "prenom_apprenant": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "prénom de l'apprenant",
+                      "example": "Gaston"
+                    },
+                    "date_de_naissance_apprenant": {
+                      "type": "string",
+                      "format": "YYYY-MM-DD",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date de naissance de l'apprenant, au format ISO-8601",
+                      "example": "2000-10-28T00:00:00.000Z"
+                    },
+                    "uai_etablissement": {
+                      "type": "string",
+                      "description": "UAI apprentissage de l'établissement responsable",
+                      "example": "0123456A"
+                    },
+                    "nom_etablissement": {
+                      "type": "string",
+                      "description": "Nom l'établissement responsable"
+                    },
+                    "id_formation": {
+                      "type": "string",
+                      "minLength": 8,
+                      "maxLength": 8,
+                      "description": "Code Formation Diplôme (CFD)"
+                    },
+                    "annee_scolaire": {
+                      "type": "string",
+                      "description": "Période scolaire",
+                      "examples": [
+                        "2022-2023",
+                        "2023-2023"
+                      ]
+                    },
+                    "statut_apprenant": {
+                      "type": "integer",
+                      "description": "0, 2 ou 3",
+                      "enum": [
+                        0,
+                        2,
+                        3
+                      ]
+                    },
+                    "date_metier_mise_a_jour_statut": {
+                      "type": "string",
+                      "description": "Identifiant de l'apprenant dans l'erp"
+                    },
+                    "id_erp_apprenant": {
+                      "type": "string",
+                      "description": "Identifiant de l'apprenant dans l'erp"
+                    },
+                    "ine_apprenant": {
+                      "type": "string",
+                      "description": "Identifiant National Élève de l'apprenant"
+                    },
+                    "email_contact": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "Email de l'apprenant",
+                      "example": "gaston.lenotre@domain.tld"
+                    },
+                    "tel_apprenant": {
+                      "type": "string",
+                      "description": "Téléphone de l'apprenant",
+                      "example": "628000000"
+                    },
+                    "code_commune_insee_apprenant": {
+                      "type": "string",
+                      "minLength": 5,
+                      "maxLength": 5,
+                      "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                      "description": "Code Insee de la commune de résidence de l'apprenant"
+                    },
+                    "siret_etablissement": {
+                      "type": "string",
+                      "pattern": "^[0-9]{14}$",
+                      "description": "SIRET de l'établissement responsable",
+                      "example": "19750655300019"
+                    },
+                    "libelle_court_formation": {
+                      "type": "string",
+                      "description": "Libéllé court de la formation",
+                      "example": "CAP PATISSIER"
+                    },
+                    "libelle_long_formation": {
+                      "type": "string",
+                      "description": "Libéllé complet de la formation",
+                      "example": "CAP PATISSIER"
+                    },
+                    "periode_formation": {
+                      "type": "string",
+                      "description": "Période de la formation, en année",
+                      "example": "2022-2024"
+                    },
+                    "annee_formation": {
+                      "type": "integer",
+                      "description": "Année de la formation",
+                      "enum": [
+                        0,
+                        1,
+                        2,
+                        3
+                      ],
+                      "example": 1
+                    },
+                    "formation_rncp": {
+                      "type": "string",
+                      "description": "Code RNCP de la formation",
+                      "examples": [
+                        "RNCP35316",
+                        "35316"
+                      ]
+                    },
+                    "contrat_date_debut": {
+                      "type": "string",
+                      "format": "YYYY-MM-DD",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
+                      "example": "2022-10-05T03:31:06.107Z"
+                    },
+                    "contrat_date_fin": {
+                      "type": "string",
+                      "format": "YYYY-MM-DD",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
+                      "example": "2023-03-04T04:31:06.107Z"
+                    },
+                    "contrat_date_rupture": {
+                      "type": "string",
+                      "format": "YYYY-MM-DD",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
+                      "example": "2023-03-04T04:31:06.107Z"
+                    }
+                  },
+                  "required": [
+                    "nom_apprenant",
+                    "prenom_apprenant",
+                    "date_de_naissance_apprenant",
+                    "uai_etablissement",
+                    "nom_etablissement",
+                    "id_formation",
+                    "annee_scolaire",
+                    "statut_apprenant",
+                    "date_metier_mise_a_jour_statut",
+                    "id_erp_apprenant"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "les dossiers apprenants sont en attente de traitement. Les éventuelles erreurs seront remontées par email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Queued",
+                      "enum": [
+                        "Queued"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "nom_apprenant": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "nom de l'apprenant",
+                            "example": "Lenôtre"
+                          },
+                          "prenom_apprenant": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "prénom de l'apprenant",
+                            "example": "Gaston"
+                          },
+                          "date_de_naissance_apprenant": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de naissance de l'apprenant, au format ISO-8601",
+                            "example": "2000-10-28T00:00:00.000Z"
+                          },
+                          "uai_etablissement": {
+                            "type": "string",
+                            "description": "UAI apprentissage de l'établissement responsable",
+                            "example": "0123456A"
+                          },
+                          "nom_etablissement": {
+                            "type": "string",
+                            "description": "Nom l'établissement responsable"
+                          },
+                          "id_formation": {
+                            "type": "string",
+                            "minLength": 8,
+                            "maxLength": 8,
+                            "description": "Code Formation Diplôme (CFD)"
+                          },
+                          "annee_scolaire": {
+                            "type": "string",
+                            "description": "Période scolaire",
+                            "examples": [
+                              "2022-2023",
+                              "2023-2023"
+                            ]
+                          },
+                          "statut_apprenant": {
+                            "type": "integer",
+                            "description": "0, 2 ou 3",
+                            "enum": [
+                              0,
+                              2,
+                              3
+                            ]
+                          },
+                          "date_metier_mise_a_jour_statut": {
+                            "type": "string",
+                            "description": "Identifiant de l'apprenant dans l'erp"
+                          },
+                          "id_erp_apprenant": {
+                            "type": "string",
+                            "description": "Identifiant de l'apprenant dans l'erp"
+                          },
+                          "ine_apprenant": {
+                            "type": "string",
+                            "description": "Identifiant National Élève de l'apprenant"
+                          },
+                          "email_contact": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "Email de l'apprenant",
+                            "example": "gaston.lenotre@domain.tld"
+                          },
+                          "tel_apprenant": {
+                            "type": "string",
+                            "description": "Téléphone de l'apprenant",
+                            "example": "628000000"
+                          },
+                          "code_commune_insee_apprenant": {
+                            "type": "string",
+                            "minLength": 5,
+                            "maxLength": 5,
+                            "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                            "description": "Code Insee de la commune de résidence de l'apprenant"
+                          },
+                          "siret_etablissement": {
+                            "type": "string",
+                            "pattern": "^[0-9]{14}$",
+                            "description": "SIRET de l'établissement responsable",
+                            "example": "19750655300019"
+                          },
+                          "libelle_court_formation": {
+                            "type": "string",
+                            "description": "Libéllé court de la formation",
+                            "example": "CAP PATISSIER"
+                          },
+                          "libelle_long_formation": {
+                            "type": "string",
+                            "description": "Libéllé complet de la formation",
+                            "example": "CAP PATISSIER"
+                          },
+                          "periode_formation": {
+                            "type": "string",
+                            "description": "Période de la formation, en année",
+                            "example": "2022-2024"
+                          },
+                          "annee_formation": {
+                            "type": "integer",
+                            "description": "Année de la formation",
+                            "enum": [
+                              0,
+                              1,
+                              2,
+                              3
+                            ],
+                            "example": 1
+                          },
+                          "formation_rncp": {
+                            "type": "string",
+                            "description": "Code RNCP de la formation",
+                            "examples": [
+                              "RNCP35316",
+                              "35316"
+                            ]
+                          },
+                          "contrat_date_debut": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
+                            "example": "2022-10-05T03:31:06.107Z"
+                          },
+                          "contrat_date_fin": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "contrat_date_rupture": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "validation_errors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "msg": {
+                                  "type": "string",
+                                  "description": "Message d'erreur",
+                                  "example": "\"contrat_date_rupture\" must be in iso format"
+                                },
+                                "path": {
+                                  "type": "string",
+                                  "description": "Chemin du champ en erreur",
+                                  "example": "contrat_date_rupture"
+                                }
+                              },
+                              "required": [
+                                "msg",
+                                "path"
+                              ]
+                            },
+                            "description": "Erreurs de validation de cet effectif"
+                          }
+                        },
+                        "required": [
+                          "nom_apprenant",
+                          "prenom_apprenant",
+                          "date_de_naissance_apprenant",
+                          "uai_etablissement",
+                          "nom_etablissement",
+                          "id_formation",
+                          "annee_scolaire",
+                          "statut_apprenant",
+                          "date_metier_mise_a_jour_statut",
+                          "id_erp_apprenant"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Les données reçues ne sont pas valides"
+          },
+          "500": {
+            "description": "Une erreur est survenue"
+          }
+        }
+      }
+    },
+    "/dossiers-apprenants": {
+      "post": {
+        "tags": [
+          "v2"
+        ],
+        "summary": "Import des dossiers apprenants",
+        "description": "Permet la création ou la mise à jour de plusieurs dossiers apprenants",
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "nom_apprenant": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "nom de l'apprenant",
+                      "example": "Lenôtre"
+                    },
+                    "prenom_apprenant": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "prénom de l'apprenant",
+                      "example": "Gaston"
+                    },
+                    "date_de_naissance_apprenant": {
+                      "type": "string",
+                      "format": "YYYY-MM-DD",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date de naissance de l'apprenant, au format ISO-8601",
+                      "example": "2000-10-28T00:00:00.000Z"
+                    },
+                    "uai_etablissement": {
+                      "type": "string",
+                      "description": "UAI apprentissage de l'établissement responsable",
+                      "example": "0123456A"
+                    },
+                    "nom_etablissement": {
+                      "type": "string",
+                      "description": "Nom l'établissement responsable"
+                    },
+                    "id_formation": {
+                      "type": "string",
+                      "minLength": 8,
+                      "maxLength": 8,
+                      "description": "Code Formation Diplôme (CFD)"
+                    },
+                    "annee_scolaire": {
+                      "type": "string",
+                      "description": "Période scolaire",
+                      "examples": [
+                        "2022-2023",
+                        "2023-2023"
+                      ]
+                    },
+                    "statut_apprenant": {
+                      "type": "integer",
+                      "description": "0, 2 ou 3",
+                      "enum": [
+                        0,
+                        2,
+                        3
+                      ]
+                    },
+                    "date_metier_mise_a_jour_statut": {
+                      "type": "string",
+                      "description": "Identifiant de l'apprenant dans l'erp"
+                    },
+                    "id_erp_apprenant": {
+                      "type": "string",
+                      "description": "Identifiant de l'apprenant dans l'erp"
+                    },
+                    "ine_apprenant": {
+                      "type": "string",
+                      "description": "Identifiant National Élève de l'apprenant"
+                    },
+                    "email_contact": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "Email de l'apprenant",
+                      "example": "gaston.lenotre@domain.tld"
+                    },
+                    "tel_apprenant": {
+                      "type": "string",
+                      "description": "Téléphone de l'apprenant",
+                      "example": "628000000"
+                    },
+                    "code_commune_insee_apprenant": {
+                      "type": "string",
+                      "minLength": 5,
+                      "maxLength": 5,
+                      "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                      "description": "Code Insee de la commune de résidence de l'apprenant"
+                    },
+                    "siret_etablissement": {
+                      "type": "string",
+                      "pattern": "^[0-9]{14}$",
+                      "description": "SIRET de l'établissement responsable",
+                      "example": "19750655300019"
+                    },
+                    "libelle_court_formation": {
+                      "type": "string",
+                      "description": "Libéllé court de la formation",
+                      "example": "CAP PATISSIER"
+                    },
+                    "libelle_long_formation": {
+                      "type": "string",
+                      "description": "Libéllé complet de la formation",
+                      "example": "CAP PATISSIER"
+                    },
+                    "periode_formation": {
+                      "type": "string",
+                      "description": "Période de la formation, en année",
+                      "example": "2022-2024"
+                    },
+                    "annee_formation": {
+                      "type": "integer",
+                      "description": "Année de la formation",
+                      "enum": [
+                        0,
+                        1,
+                        2,
+                        3
+                      ],
+                      "example": 1
+                    },
+                    "formation_rncp": {
+                      "type": "string",
+                      "description": "Code RNCP de la formation",
+                      "examples": [
+                        "RNCP35316",
+                        "35316"
+                      ]
+                    },
+                    "contrat_date_debut": {
+                      "type": "string",
+                      "format": "YYYY-MM-DD",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
+                      "example": "2022-10-05T03:31:06.107Z"
+                    },
+                    "contrat_date_fin": {
+                      "type": "string",
+                      "format": "YYYY-MM-DD",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
+                      "example": "2023-03-04T04:31:06.107Z"
+                    },
+                    "contrat_date_rupture": {
+                      "type": "string",
+                      "format": "YYYY-MM-DD",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
+                      "example": "2023-03-04T04:31:06.107Z"
+                    }
+                  },
+                  "required": [
+                    "nom_apprenant",
+                    "prenom_apprenant",
+                    "date_de_naissance_apprenant",
+                    "uai_etablissement",
+                    "nom_etablissement",
+                    "id_formation",
+                    "annee_scolaire",
+                    "statut_apprenant",
+                    "date_metier_mise_a_jour_statut",
+                    "id_erp_apprenant"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "les dossiers apprenants sont en attente de traitement. Les éventuelles erreurs seront remontées par email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Queued",
+                      "enum": [
+                        "Queued"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "nom_apprenant": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "nom de l'apprenant",
+                            "example": "Lenôtre"
+                          },
+                          "prenom_apprenant": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "prénom de l'apprenant",
+                            "example": "Gaston"
+                          },
+                          "date_de_naissance_apprenant": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de naissance de l'apprenant, au format ISO-8601",
+                            "example": "2000-10-28T00:00:00.000Z"
+                          },
+                          "uai_etablissement": {
+                            "type": "string",
+                            "description": "UAI apprentissage de l'établissement responsable",
+                            "example": "0123456A"
+                          },
+                          "nom_etablissement": {
+                            "type": "string",
+                            "description": "Nom l'établissement responsable"
+                          },
+                          "id_formation": {
+                            "type": "string",
+                            "minLength": 8,
+                            "maxLength": 8,
+                            "description": "Code Formation Diplôme (CFD)"
+                          },
+                          "annee_scolaire": {
+                            "type": "string",
+                            "description": "Période scolaire",
+                            "examples": [
+                              "2022-2023",
+                              "2023-2023"
+                            ]
+                          },
+                          "statut_apprenant": {
+                            "type": "integer",
+                            "description": "0, 2 ou 3",
+                            "enum": [
+                              0,
+                              2,
+                              3
+                            ]
+                          },
+                          "date_metier_mise_a_jour_statut": {
+                            "type": "string",
+                            "description": "Identifiant de l'apprenant dans l'erp"
+                          },
+                          "id_erp_apprenant": {
+                            "type": "string",
+                            "description": "Identifiant de l'apprenant dans l'erp"
+                          },
+                          "ine_apprenant": {
+                            "type": "string",
+                            "description": "Identifiant National Élève de l'apprenant"
+                          },
+                          "email_contact": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "Email de l'apprenant",
+                            "example": "gaston.lenotre@domain.tld"
+                          },
+                          "tel_apprenant": {
+                            "type": "string",
+                            "description": "Téléphone de l'apprenant",
+                            "example": "628000000"
+                          },
+                          "code_commune_insee_apprenant": {
+                            "type": "string",
+                            "minLength": 5,
+                            "maxLength": 5,
+                            "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                            "description": "Code Insee de la commune de résidence de l'apprenant"
+                          },
+                          "siret_etablissement": {
+                            "type": "string",
+                            "pattern": "^[0-9]{14}$",
+                            "description": "SIRET de l'établissement responsable",
+                            "example": "19750655300019"
+                          },
+                          "libelle_court_formation": {
+                            "type": "string",
+                            "description": "Libéllé court de la formation",
+                            "example": "CAP PATISSIER"
+                          },
+                          "libelle_long_formation": {
+                            "type": "string",
+                            "description": "Libéllé complet de la formation",
+                            "example": "CAP PATISSIER"
+                          },
+                          "periode_formation": {
+                            "type": "string",
+                            "description": "Période de la formation, en année",
+                            "example": "2022-2024"
+                          },
+                          "annee_formation": {
+                            "type": "integer",
+                            "description": "Année de la formation",
+                            "enum": [
+                              0,
+                              1,
+                              2,
+                              3
+                            ],
+                            "example": 1
+                          },
+                          "formation_rncp": {
+                            "type": "string",
+                            "description": "Code RNCP de la formation",
+                            "examples": [
+                              "RNCP35316",
+                              "35316"
+                            ]
+                          },
+                          "contrat_date_debut": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
+                            "example": "2022-10-05T03:31:06.107Z"
+                          },
+                          "contrat_date_fin": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "contrat_date_rupture": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "validation_errors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "msg": {
+                                  "type": "string",
+                                  "description": "Message d'erreur",
+                                  "example": "\"contrat_date_rupture\" must be in iso format"
+                                },
+                                "path": {
+                                  "type": "string",
+                                  "description": "Chemin du champ en erreur",
+                                  "example": "contrat_date_rupture"
+                                }
+                              },
+                              "required": [
+                                "msg",
+                                "path"
+                              ]
+                            },
+                            "description": "Erreurs de validation de cet effectif"
+                          }
+                        },
+                        "required": [
+                          "nom_apprenant",
+                          "prenom_apprenant",
+                          "date_de_naissance_apprenant",
+                          "uai_etablissement",
+                          "nom_etablissement",
+                          "id_formation",
+                          "annee_scolaire",
+                          "statut_apprenant",
+                          "date_metier_mise_a_jour_statut",
+                          "id_erp_apprenant"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Les données reçues ne sont pas valides"
+          },
+          "500": {
+            "description": "Une erreur est survenue"
+          }
+        }
+      }
+    },
+    "/v3/dossiers-apprenants": {
+      "post": {
+        "summary": "Import des dossiers apprenants",
+        "description": "Permet la création ou la mise à jour de plusieurs dossiers apprenants",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "v3"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "apprenant": {
+                      "type": "object",
+                      "properties": {
+                        "nom": {
+                          "type": "string",
+                          "minLength": 1,
+                          "description": "nom de l'apprenant",
+                          "example": "Lenôtre"
+                        },
+                        "prenom_apprenant": {
+                          "type": "string",
+                          "minLength": 1,
+                          "description": "prénom de l'apprenant",
+                          "example": "Gaston"
+                        },
+                        "date_de_naissance_apprenant": {
+                          "type": "string",
+                          "format": "YYYY-MM-DD",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Date de naissance de l'apprenant, au format ISO-8601",
+                          "example": "2000-10-28T00:00:00.000Z"
+                        },
+                        "statut_apprenant": {
+                          "type": "integer",
+                          "description": "0, 2 ou 3",
+                          "enum": [
+                            0,
+                            2,
+                            3
+                          ]
+                        },
+                        "date_metier_mise_a_jour_statut": {
+                          "type": "string",
+                          "format": "YYYY-MM-DD",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601"
+                        },
+                        "ine_apprenant": {
+                          "type": "string",
+                          "description": "Identifiant National Élève de l'apprenant"
+                        },
+                        "email_contact": {
+                          "type": "string",
+                          "format": "email",
+                          "description": "Email de l'apprenant",
+                          "example": "gaston.lenotre@domain.tld"
+                        },
+                        "tel_apprenant": {
+                          "type": "string",
+                          "description": "Téléphone de l'apprenant",
+                          "example": "628000000"
+                        },
+                        "code_commune_insee_apprenant": {
+                          "type": "string",
+                          "minLength": 5,
+                          "maxLength": 5,
+                          "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                          "description": "Code Insee de la commune de résidence de l'apprenant"
+                        },
+                        "sexe": {
+                          "type": "string",
+                          "description": "Sexe de l'apprenant",
+                          "enum": [
+                            "M",
+                            "F"
+                          ],
+                          "example": "M"
+                        },
+                        "affelnet": {
+                          "type": "boolean",
+                          "description": "Voeu en apprentissage formulé sur Affelnet"
+                        },
+                        "parcoursup": {
+                          "type": "boolean",
+                          "description": "Voeu en apprentissage formulé sur Parcoursup"
+                        },
+                        "rqth": {
+                          "type": "boolean",
+                          "description": "Reconnaissance de la Qualité de Travailleur Handicapé",
+                          "example": true
+                        },
+                        "date_rqth": {
+                          "type": "string",
+                          "format": "YYYY-MM-DD",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Date de la reconnaissance travailleur handicapé",
+                          "example": "2010-10-28T00:00:00.000Z"
+                        }
+                      },
+                      "required": [
+                        "nom",
+                        "prenom_apprenant",
+                        "date_de_naissance_apprenant",
+                        "statut_apprenant",
+                        "date_metier_mise_a_jour_statut"
+                      ]
+                    },
+                    "etablissement_responsable": {
+                      "type": "object",
+                      "properties": {
+                        "siret": {
+                          "type": "string",
+                          "pattern": "^[0-9]{14}$",
+                          "description": "SIRET de l'établissement responsable",
+                          "example": "19750655300019"
+                        },
+                        "uai": {
+                          "type": "string",
+                          "description": "UAI apprentissage de l'établissement responsable",
+                          "example": "0123456A"
+                        },
+                        "nom": {
+                          "type": "string",
+                          "description": "Nom l'établissement responsable"
+                        }
+                      }
+                    },
+                    "etablissement_formateur": {
+                      "type": "object",
+                      "properties": {
+                        "siret": {
+                          "type": "string",
+                          "pattern": "^[0-9]{14}$",
+                          "description": "SIRET de l'établissement formateur",
+                          "example": "19750655300019"
+                        },
+                        "uai": {
+                          "type": "string",
+                          "description": "UAI apprentissage de l'établissement formateur",
+                          "example": "0123456A"
+                        },
+                        "nom": {
+                          "type": "string",
+                          "description": "Nom l'établissement formateur"
+                        },
+                        "code_commune_insee": {
+                          "type": "string",
+                          "minLength": 5,
+                          "maxLength": 5,
+                          "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                          "description": "Code Insee de la commune de l'établissement formateur"
+                        }
+                      }
+                    },
+                    "formations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "libelle_court": {
+                            "type": "string",
+                            "description": "Libéllé court de la formation",
+                            "example": "CAP PATISSIER"
+                          },
+                          "libelle_long": {
+                            "type": "string",
+                            "description": "Libéllé complet de la formation",
+                            "example": "CAP PATISSIER"
+                          },
+                          "periode": {
+                            "type": "string",
+                            "description": "Période de la formation, en année",
+                            "example": "2022-2024"
+                          },
+                          "annee_scolaire": {
+                            "type": "string",
+                            "description": "Période scolaire",
+                            "examples": [
+                              "2022-2023",
+                              "2023-2023"
+                            ]
+                          },
+                          "annee": {
+                            "type": "integer",
+                            "description": "Année de la formation",
+                            "enum": [
+                              0,
+                              1,
+                              2,
+                              3
+                            ],
+                            "example": 1
+                          },
+                          "code_rncp": {
+                            "type": "string",
+                            "description": "Code RNCP de la formation",
+                            "examples": [
+                              "RNCP35316",
+                              "35316"
+                            ]
+                          },
+                          "code_cfd": {
+                            "type": "string",
+                            "minLength": 8,
+                            "maxLength": 8,
+                            "description": "Code Formation Diplôme (CFD)"
+                          },
+                          "date_inscription": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date d'inscription de l'apprenant dans la formation, au format ISO-8601"
+                          },
+                          "date_entree": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date d'entrée de l'apprenant dans la formation, au format ISO-8601",
+                            "example": "2022-10-05T03:31:06.107Z"
+                          },
+                          "date_fin": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de fin de la formation, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "obtention_diplome": {
+                            "type": "boolean",
+                            "description": "L'apprenant a obtenu son diplôme sur la formation donnée",
+                            "example": true
+                          },
+                          "date_obtention_diplome": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de l'obtention du diplôme de l'apprenant, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "date_exclusion": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "cause_exclusion": {
+                            "type": "string",
+                            "description": "Cause de l'exclusion de l'apprenant de la formation",
+                            "examples": [
+                              "absences répétées et injustifiées",
+                              "cessation du travail et abandon des cours",
+                              "non respect des règles de sécurité"
+                            ]
+                          },
+                          "referent_handicap": {
+                            "type": "object",
+                            "properties": {
+                              "nom": {
+                                "type": "string",
+                                "description": "Nom du référent handicap de la formation"
+                              },
+                              "prenom": {
+                                "type": "string",
+                                "description": "Prénom du référent handicap de la formation"
+                              },
+                              "email": {
+                                "type": "string",
+                                "format": "email",
+                                "description": "Email du référent handicap de la formation"
+                              }
+                            }
+                          },
+                          "contrats": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "date_debut": {
+                                  "type": "string",
+                                  "format": "YYYY-MM-DD",
+                                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                  "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
+                                  "example": "2022-10-05T03:31:06.107Z"
+                                },
+                                "date_fin": {
+                                  "type": "string",
+                                  "format": "YYYY-MM-DD",
+                                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                  "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
+                                  "example": "2023-03-04T04:31:06.107Z"
+                                },
+                                "date_rupture": {
+                                  "type": "string",
+                                  "format": "YYYY-MM-DD",
+                                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                  "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
+                                  "example": "2023-03-04T04:31:06.107Z"
+                                },
+                                "cause_rupture": {
+                                  "type": "string",
+                                  "description": "Cause de la rupture du contrat de l'apprenant",
+                                  "examples": [
+                                    "démission",
+                                    "résiliation",
+                                    "force majeure",
+                                    "obtention du diplôme",
+                                    "faute lourde",
+                                    "inaptitude constatée par la médecine du travail"
+                                  ]
+                                },
+                                "employeur": {
+                                  "type": "object",
+                                  "properties": {
+                                    "siret": {
+                                      "type": "string",
+                                      "pattern": "^[0-9]{14}$",
+                                      "description": "SIRET de l'employeur"
+                                    },
+                                    "code_commune_insee": {
+                                      "type": "string",
+                                      "minLength": 5,
+                                      "maxLength": 5,
+                                      "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                                      "description": "Code Insee de la commune de l'établissement de l'employeur"
+                                    },
+                                    "code_naf": {
+                                      "type": "string",
+                                      "minLength": 5,
+                                      "maxLength": 5,
+                                      "description": "Code NAF de l'employeur"
+                                    }
+                                  },
+                                  "description": "Informations sur l'employeur"
+                                }
+                              }
+                            },
+                            "description": "Liste des contrats de l'apprenant (max 3)"
+                          }
+                        },
+                        "required": [
+                          "annee_scolaire",
+                          "date_inscription",
+                          "date_entree",
+                          "date_fin"
+                        ]
+                      },
+                      "description": "Liste des formations de l'apprenant"
+                    }
+                  },
+                  "required": [
+                    "apprenant",
+                    "etablissement_responsable",
+                    "etablissement_formateur",
+                    "formations"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "les dossiers apprenants ont été mise en queue, en attente de traitement. Les éventuels erreurs seront remontées par email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Queued",
+                      "enum": [
+                        "Queued"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "nom_apprenant": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "nom de l'apprenant",
+                            "example": "Lenôtre"
+                          },
+                          "prenom_apprenant": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "prénom de l'apprenant",
+                            "example": "Gaston"
+                          },
+                          "date_de_naissance_apprenant": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de naissance de l'apprenant, au format ISO-8601",
+                            "example": "2000-10-28T00:00:00.000Z"
+                          },
+                          "uai_etablissement": {
+                            "type": "string",
+                            "description": "UAI apprentissage de l'établissement responsable",
+                            "example": "0123456A"
+                          },
+                          "nom_etablissement": {
+                            "type": "string",
+                            "description": "Nom l'établissement responsable"
+                          },
+                          "id_formation": {
+                            "type": "string",
+                            "minLength": 8,
+                            "maxLength": 8,
+                            "description": "Code Formation Diplôme (CFD)"
+                          },
+                          "annee_scolaire": {
+                            "type": "string",
+                            "description": "Période scolaire",
+                            "examples": [
+                              "2022-2023",
+                              "2023-2023"
+                            ]
+                          },
+                          "statut_apprenant": {
+                            "type": "integer",
+                            "description": "0, 2 ou 3",
+                            "enum": [
+                              0,
+                              2,
+                              3
+                            ]
+                          },
+                          "date_metier_mise_a_jour_statut": {
+                            "type": "string",
+                            "description": "Identifiant de l'apprenant dans l'erp"
+                          },
+                          "id_erp_apprenant": {
+                            "type": "string",
+                            "description": "Identifiant de l'apprenant dans l'erp"
+                          },
+                          "ine_apprenant": {
+                            "type": "string",
+                            "description": "Identifiant National Élève de l'apprenant"
+                          },
+                          "email_contact": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "Email de l'apprenant",
+                            "example": "gaston.lenotre@domain.tld"
+                          },
+                          "tel_apprenant": {
+                            "type": "string",
+                            "description": "Téléphone de l'apprenant",
+                            "example": "628000000"
+                          },
+                          "code_commune_insee_apprenant": {
+                            "type": "string",
+                            "minLength": 5,
+                            "maxLength": 5,
+                            "pattern": "^([0-9]{2}|2A|2B)[0-9]{3}$",
+                            "description": "Code Insee de la commune de résidence de l'apprenant"
+                          },
+                          "siret_etablissement": {
+                            "type": "string",
+                            "pattern": "^[0-9]{14}$",
+                            "description": "SIRET de l'établissement responsable",
+                            "example": "19750655300019"
+                          },
+                          "libelle_court_formation": {
+                            "type": "string",
+                            "description": "Libéllé court de la formation",
+                            "example": "CAP PATISSIER"
+                          },
+                          "libelle_long_formation": {
+                            "type": "string",
+                            "description": "Libéllé complet de la formation",
+                            "example": "CAP PATISSIER"
+                          },
+                          "periode_formation": {
+                            "type": "string",
+                            "description": "Période de la formation, en année",
+                            "example": "2022-2024"
+                          },
+                          "annee_formation": {
+                            "type": "integer",
+                            "description": "Année de la formation",
+                            "enum": [
+                              0,
+                              1,
+                              2,
+                              3
+                            ],
+                            "example": 1
+                          },
+                          "formation_rncp": {
+                            "type": "string",
+                            "description": "Code RNCP de la formation",
+                            "examples": [
+                              "RNCP35316",
+                              "35316"
+                            ]
+                          },
+                          "contrat_date_debut": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
+                            "example": "2022-10-05T03:31:06.107Z"
+                          },
+                          "contrat_date_fin": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "contrat_date_rupture": {
+                            "type": "string",
+                            "format": "YYYY-MM-DD",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
+                            "example": "2023-03-04T04:31:06.107Z"
+                          },
+                          "validation_errors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "msg": {
+                                  "type": "string",
+                                  "description": "Message d'erreur",
+                                  "example": "\"contrat_date_rupture\" must be in iso format"
+                                },
+                                "path": {
+                                  "type": "string",
+                                  "description": "Chemin du champ en erreur",
+                                  "example": "contrat_date_rupture"
+                                }
+                              },
+                              "required": [
+                                "msg",
+                                "path"
+                              ]
+                            },
+                            "description": "Erreurs de validation de cet effectif"
+                          }
+                        },
+                        "required": [
+                          "nom_apprenant",
+                          "prenom_apprenant",
+                          "date_de_naissance_apprenant",
+                          "uai_etablissement",
+                          "nom_etablissement",
+                          "id_formation",
+                          "annee_scolaire",
+                          "statut_apprenant",
+                          "date_metier_mise_a_jour_statut",
+                          "id_erp_apprenant"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Une erreur est survenue"
+          }
+        }
+      }
+    }
+  }
+}
