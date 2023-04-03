@@ -150,7 +150,7 @@ export const primitivesV1 = {
 
 export const primitivesV2 = {
   apprenant: {
-    // addresse: TODO
+    // addresse: TODO à discuter
     sexe: z.string().openapi({
       description: "Sexe de l'apprenant",
       enum: ["M", "F"],

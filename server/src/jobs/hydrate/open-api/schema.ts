@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { OpenAPIRegistry, OpenAPIGenerator } from "@asteasolutions/zod-to-openapi";
+import { OpenAPIRegistry, OpenAPIGenerator, RouteConfig } from "@asteasolutions/zod-to-openapi";
 
-import loginSchema from "../../../common/validation/loginSchema.js";
+import loginSchemaLegacy from "../../../common/validation/loginSchemaLegacy.js";
 import dossierApprenantSchema from "../../../common/validation/dossierApprenantSchemaV1V2Zod.js";
 import dossierApprenantSchemaV3 from "../../../common/validation/dossierApprenantSchemaV3.js";
 
@@ -48,7 +48,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: loginSchema,
+          schema: loginSchemaLegacy,
         },
       },
     },
@@ -77,8 +77,8 @@ registry.registerPath({
   },
 });
 
-const dossierApprenantPostRoute = {
-  method: "post" as const,
+const dossierApprenantPostRoute: Omit<RouteConfig, "path"> = {
+  method: "post",
   summary: "Import des dossiers apprenants",
   description: "Permet la création ou la mise à jour de plusieurs dossiers apprenants",
   security: [{ [httpAuth.name]: [] }],
@@ -95,7 +95,7 @@ const dossierApprenantPostRoute = {
   responses: {
     "200": {
       description:
-        "les dossiers apprenants ont été mise en queue, en attente de traitement. Les éventuels erreurs seront remontées par email.",
+        "les dossiers apprenants sont en attente de traitement. Les éventuelles erreurs seront remontées par email.",
       content: {
         "application/json": {
           schema: z.object({
@@ -107,6 +107,9 @@ const dossierApprenantPostRoute = {
           }),
         },
       },
+    },
+    "400": {
+      description: "Les données reçues ne sont pas valides",
     },
     "500": {
       description: "Une erreur est survenue",
@@ -184,7 +187,7 @@ export default generator.generateDocument({
     {
       name: "v2",
       description:
-        "Version 2022. L'authentification se fait à l'aide d'un login/mot de passe. Cette version est en cours de dépréciation et sera remplacée par la version 2.",
+        "Version 2022. L'authentification se fait à l'aide d'un login/mot de passe. Cette version est en cours de dépréciation et sera remplacée par la version 3.",
     },
     {
       name: "v3",

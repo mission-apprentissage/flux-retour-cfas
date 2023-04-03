@@ -2,7 +2,7 @@ import { z } from "zod";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 extendZodWithOpenApi(z);
 
-const loginSchema = z.object({
+const loginSchemaLegacy = z.object({
   username: z.string().openapi({
     description: "Le username pour s'authentifier",
     example: "jean.dupont",
@@ -13,4 +13,4 @@ const loginSchema = z.object({
   }),
 });
 
-export default loginSchema;
+export default loginSchemaLegacy;

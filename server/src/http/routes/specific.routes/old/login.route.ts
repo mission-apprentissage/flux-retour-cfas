@@ -3,7 +3,7 @@ import express from "express";
 import { authenticateLegacy } from "../../../../common/actions/legacy/users.legacy.actions.js";
 import { createUserToken } from "../../../../common/utils/jwtUtils.js";
 import validateRequestMiddleware from "../../../../http/middlewares/validateRequestMiddleware.js";
-import loginSchema from "../../../../common/validation/loginSchema.js";
+import loginSchemaLegacy from "../../../../common/validation/loginSchemaLegacy.js";
 
 export default () => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -11,7 +11,7 @@ export default () => {
   router.post(
     "/",
     validateRequestMiddleware({
-      body: loginSchema.strict(),
+      body: loginSchemaLegacy.strict(),
     }),
     async (req, res) => {
       const { username, password } = req.body;
