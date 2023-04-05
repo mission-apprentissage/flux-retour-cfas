@@ -20,4 +20,8 @@ const createGlobalServices = async () => {
   });
 };
 
+export function setRedisCache(redisCache: any) {
+  cache = redisCache;
+}
+
 export default createGlobalServices;
