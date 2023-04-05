@@ -26,23 +26,23 @@ export const existsFormation = async (cfd) => {
  * @return {Promise<Object | null>} Found formation
  */
 export const getFormationWithCfd = async (cfd: string, projection: any = {}) => {
-  return await formationsDb().findOne({ cfd }, { projection });
+  return formationsDb().findOne({ cfd }, { projection });
 };
 
-export const getFormationWithRNCP = async (rncp, projection = {}) => {
-  return await formationsDb().findOne({ rncps: { $in: [rncp] } }, { projection });
+export const getFormationWithRNCP = async (rncp: string, projection = {}) => {
+  const normalizedRncp = rncp.toUpperCase().startsWith("RNCP") ? rncp.toUpperCase() : `RNCP${rncp}`;
+
+  return formationsDb().findOne({ rncps: { $in: [normalizedRncp] } }, { projection });
 };
 
 /**
- * TODO : missing unit test (really useful ?)
  * Méthode de récupération d'une formation depuis un id
  * @param {string|ObjectId} id
  * @param {*} projection
  * @returns
  */
 export const findFormationById = async (id, projection = {}) => {
-  const found = await formationsDb().findOne({ _id: new ObjectId(id) }, { projection });
-  return found;
+  return formationsDb().findOne({ _id: new ObjectId(id) }, { projection });
 };
 
 /**
