@@ -5,7 +5,7 @@ import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin } from "./seed/start/index.js";
 import { clear, clearUsers } from "./clear/clear-all.js";
 import { purgeEvents } from "./clear/purge-events.js";
-import { createErpUserLegacy, createUserAccount } from "./users/create-user.js";
+import { createErpUserLegacy } from "./users/create-user.js";
 import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
@@ -265,25 +265,21 @@ program
 /**
  * Job de création d'un utilisateur
  */
-program
-  .command("create:user")
-  .description("Création d'un utilisateur")
-  .requiredOption("--email <string>", "Email de l'utilisateur")
-  .option("--prenom <string>", "Prénom de l'utilisateur")
-  .option("--nom <string>", "Nom de l'utilisateur")
-  .option("--isAdmin <bool>", "Indique s'il est administrateur")
-  .option("--isCrossOrganismes <bool>", "Indique s'il est cross organismes")
-  .action(async ({ email, prenom, nom, isAdmin, isCrossOrganismes }, options) =>
-    runScript(async () => {
-      return createUserAccount({
-        email,
-        prenom,
-        nom,
-        is_admin: isAdmin,
-        is_cross_organismes: isCrossOrganismes,
-      });
-    }, options._name)
-  );
+// program
+//   .command("create:user")
+//   .description("Création d'un utilisateur")
+//   .requiredOption("--email <string>", "Email de l'utilisateur")
+//   .option("--prenom <string>", "Prénom de l'utilisateur")
+//   .option("--nom <string>", "Nom de l'utilisateur")
+//   .action(async ({ email, prenom, nom }, options) =>
+//     runScript(async () => {
+//       return createUserAccount({
+//         email,
+//         prenom,
+//         nom,
+//       });
+//     }, options._name)
+//   );
 
 /**
  * Job de création d'un utilisateur ERP legacy
