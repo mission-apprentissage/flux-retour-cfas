@@ -935,6 +935,7 @@ export interface Organisme {
     | "NON_FIABILISABLE_PB_COLLECTE"
     | "NON_FIABILISABLE_UAI_NON_VALIDEE"
     | "NON_FIABILISABLE_MAPPING"
+    | "A_CONTACTER"
     | "INCONNU";
   /**
    * Mode de transmission des effectifs
