@@ -519,6 +519,58 @@ export const getDetailedOrganismeById = async (_id) => {
   const organisme = await organismesDb()
     .aggregate([
       { $match: { _id: new ObjectId(_id) } },
+      // lookup formations
+      {
+        $lookup: {
+          from: "formations",
+          localField: "relatedFormations.formation_id",
+          foreignField: "_id",
+          as: "_tmp_related_formations",
+          // lookup are not ordered by default, so we need to sort them manually
+          let: { formationIds: "$relatedFormations.formation_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $in: ["$_id", "$$formationIds"] },
+              },
+            },
+            {
+              $addFields: {
+                sort: {
+                  $indexOfArray: ["$$formationIds", "$_id"],
+                },
+              },
+            },
+            { $sort: { sort: 1 } },
+            { $addFields: { sort: "$$REMOVE" } },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          relatedFormations: {
+            $map: {
+              input: "$relatedFormations",
+              as: "formation",
+              in: {
+                $mergeObjects: [
+                  "$$formation",
+                  {
+                    formation: {
+                      $arrayElemAt: [
+                        "$_tmp_related_formations",
+                        { $indexOfArray: ["$relatedFormations", "$$formation"] },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      { $unset: ["_tmp_related_formations"] },
+      // lookup organismesReferentiel
       {
         $lookup: {
           from: "organismesReferentiel",
@@ -541,6 +593,7 @@ export const getDetailedOrganismeById = async (_id) => {
           ],
         },
       },
+      // lookup for doublons
       {
         $lookup: {
           from: "organismes",
