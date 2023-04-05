@@ -3,12 +3,9 @@ import NavLink from "next/link";
 import { Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Table from "@/components/Table/Table";
 import { ArrowRightLine } from "@/theme/components/icons";
 import { getUserOrganisationLabel, USER_STATUS_LABELS } from "@/common/constants/usersConstants";
-
-export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const UsersList = ({ data, pagination, sorting, searchValue, rolesById }) => {
   const router = useRouter();
