@@ -87,7 +87,6 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
 
     organismesLinkedToFormation.push({
       ...(organismeInTdb ? { organisme_id: organismeInTdb._id } : {}), // Si organisme trouvé dans le tdb
-      ...(organismeInTdb ? { adresse: organismeInTdb.adresse } : {}), // Si organisme trouvé dans le tdb on son adresse
       nature: getOrganismeNature(
         NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
         formationCatalog,
@@ -107,7 +106,6 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
 
     organismesLinkedToFormation.push({
       ...(organismeInTdb ? { organisme_id: organismeInTdb._id } : {}), // Si organisme trouvé dans le tdb
-      ...(organismeInTdb ? { adresse: organismeInTdb.adresse } : {}), // Si organisme trouvé dans le tdb on son adresse
       nature: getOrganismeNature(
         NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
         formationCatalog,
