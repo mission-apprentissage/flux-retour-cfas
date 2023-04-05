@@ -270,8 +270,8 @@ export const updateOrganisme = async (
         ...(siret ? { siret } : {}),
         ...data,
         ...(nom ? { nom: nom.trim() } : {}),
-        metiers,
-        relatedFormations,
+        ...(callLbaApi ? { metiers } : {}),
+        ...(buildFormationTree ? { relatedFormations } : {}),
         ...(adresse ? { adresse } : {}),
         ...(ferme ? { ferme } : { ferme: false }), // Si aucun champ ferme fourni false par défaut
         ...(enseigne ? { enseigne } : {}),
