@@ -236,7 +236,7 @@ const Organisme = () => {
                 Formations
               </Heading>
               <Text color="mgalt">
-                {organisme?.relatedFormations?.length || 0} Formations dispensées par l'organisme
+                {organisme?.relatedFormations?.length || 0} Formations dispensées par l&&apos;organisme
               </Text>
               <Table
                 mt={4}

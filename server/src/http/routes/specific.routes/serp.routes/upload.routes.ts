@@ -26,12 +26,7 @@ import { hydrateEffectif } from "../../../../common/actions/engine/engine.action
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
-import { findOrganismeFormationByCfd } from "../../../../common/actions/organismes/organismes.formations.actions.js";
-import {
-  getFormationWithCfd,
-  getFormationWithRNCP,
-  findFormationById,
-} from "../../../../common/actions/formations.actions.js";
+import { getFormationWithCfd, getFormationWithRNCP } from "../../../../common/actions/formations.actions.js";
 import {
   findOrganismeById,
   setOrganismeTransmissionDates,
