@@ -24,11 +24,10 @@ export const updateOrganismesWithApis = async () => {
 
   logger.info(`Mise à jour avec appels API des ${organismesToUpdate.length} organismes ...`);
 
-  for (const currentOrganismeFromReferentiel of organismesToUpdate) {
-    const { uai, siret } = currentOrganismeFromReferentiel;
-    logger.info(`Mise à jour de l'organisme UAI ${uai || "inconnu"} - SIRET ${siret} ...`);
+  for (const organisme of organismesToUpdate) {
+    logger.info(`Mise à jour de l'organisme UAI ${organisme.uai || "inconnu"} - SIRET ${organisme.siret} ...`);
 
-    await updateOrganismeWithApis(currentOrganismeFromReferentiel);
+    await updateOrganismeWithApis(organisme);
 
     // Delai entre les updates pour limites API
     await new Promise((r) => setTimeout(r, DELAY_BETWEEN_UPDATES));
