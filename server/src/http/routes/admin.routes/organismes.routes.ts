@@ -1,7 +1,12 @@
 import express from "express";
 import Boom from "boom";
 
-import { getAllOrganismes, getDetailedOrganismeById } from "../../../common/actions/organismes/organismes.actions.js";
+import {
+  findOrganismeById,
+  getAllOrganismes,
+  getDetailedOrganismeById,
+  updateOrganisme,
+} from "../../../common/actions/organismes/organismes.actions.js";
 import paginationShema from "../../../common/validation/paginationSchema.js";
 import searchShema from "../../../common/validation/searchSchema.js";
 import objectIdSchema from "../../../common/validation/objectIdSchema.js";
@@ -46,6 +51,28 @@ export default () => {
       }
 
       res.json(organisme);
+    }
+  );
+
+  router.put(
+    "/organismes/:id/hydrate",
+    validateRequestMiddleware({
+      params: objectIdSchema("id"),
+    }),
+    async ({ params }, res) => {
+      const { id } = params;
+      const organisme = await findOrganismeById(id);
+      if (!organisme) {
+        throw Boom.notFound(`Organisme with id ${id} not found`);
+      }
+
+      const updated = await updateOrganisme(organisme._id, organisme, {
+        buildFormationTree: true,
+        buildInfosFromSiret: true,
+        callLbaApi: true,
+      });
+
+      res.json(updated);
     }
   );
 

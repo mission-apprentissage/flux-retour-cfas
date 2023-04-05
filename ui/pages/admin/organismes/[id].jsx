@@ -1,11 +1,12 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Head from "next/head";
-import { Box, Heading, Stack, Spinner, Text, VStack, HStack } from "@chakra-ui/react";
+import { Box, Heading, Stack, Spinner, Text, VStack, HStack, Button } from "@chakra-ui/react";
 import { formatDistanceToNow } from "date-fns";
+import useToaster from "@/hooks/useToaster";
 
-import { _get } from "@/common/httpClient";
+import { _get, _put } from "@/common/httpClient";
 import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
@@ -55,15 +56,28 @@ const ExternalLinks = ({ search, siret, ...props }) => (
 );
 
 const Organisme = () => {
+  const title = "Gestion des organismes";
   const router = useRouter();
   const id = router.query.id;
   const {
     data: organisme,
     isLoading,
+    refetch,
     error,
   } = useQuery(["organisme", id], () => _get(`/api/v1/admin/organismes/${id}`));
 
-  const title = "Gestion des organismes";
+  const { mutateAsync: hydrateOrganisme } = useMutation(() => _put(`/api/v1/admin/organismes/${id}/hydrate`));
+  const { toastSuccess, toastError } = useToaster();
+
+  async function refreshFormation() {
+    const resp = await hydrateOrganisme();
+    if (resp._id) {
+      toastSuccess("Mise à jour effectuée");
+      await refetch();
+    } else {
+      toastError("Une erreur est survenue");
+    }
+  }
 
   return (
     <Page>
@@ -232,11 +246,17 @@ const Organisme = () => {
             </Box>
 
             <Box w="100%">
-              <Heading color="grey.800" as="h2" fontSize="beta">
-                Formations
-              </Heading>
+              <HStack justifyContent="space-between">
+                <Heading color="grey.800" as="h2" fontSize="beta">
+                  Formations
+                </Heading>
+                <Button onClick={refreshFormation} variant="unstyled">
+                  Metttre à jour
+                </Button>
+              </HStack>
+
               <Text color="mgalt">
-                {organisme?.relatedFormations?.length || 0} Formations dispensées par l&&apos;organisme
+                {organisme?.relatedFormations?.length || 0} Formations dispensées par l&apos;organisme
               </Text>
               <Table
                 mt={4}
