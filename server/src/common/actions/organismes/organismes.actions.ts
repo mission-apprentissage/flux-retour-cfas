@@ -36,7 +36,7 @@ export const createOrganisme = async (
   const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
 
   // Construction de l'arbre des formations de l'organisme si option active
-  const formations = buildFormationTree ? (await getFormationsTreeForOrganisme(uai))?.formations || [] : [];
+  const relatedFormations = buildFormationTree ? (await getFormationsTreeForOrganisme(uai))?.formations || [] : [];
 
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
@@ -48,7 +48,7 @@ export const createOrganisme = async (
     ...defaultValuesOrganisme(),
     ...(siret ? { siret } : {}),
     metiers,
-    formations,
+    relatedFormations,
     ...(adresse ? { adresse } : {}),
     ...data,
     ferme: ferme || false,
@@ -246,7 +246,9 @@ export const updateOrganisme = async (
   const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
 
   // Construction de l'arbre des formations de l'organisme si option active
-  const formations = buildFormationTree ? (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [] : [];
+  const relatedFormations = buildFormationTree
+    ? (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || []
+    : [];
 
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
@@ -269,7 +271,7 @@ export const updateOrganisme = async (
         ...data,
         ...(nom ? { nom: nom.trim() } : {}),
         metiers,
-        formations,
+        relatedFormations,
         ...(adresse ? { adresse } : {}),
         ...(ferme ? { ferme } : { ferme: false }), // Si aucun champ ferme fourni false par défaut
         ...(enseigne ? { enseigne } : {}),

@@ -31,10 +31,6 @@ export interface Formation {
    */
   niveau_libelle?: string | null;
   /**
-   * Libellé tokenizé pour la recherche
-   */
-  tokenized_libelle?: string | null;
-  /**
    * Les domaines métiers rattachés à la formation
    */
   metiers?: string[];

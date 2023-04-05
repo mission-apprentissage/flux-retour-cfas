@@ -169,14 +169,9 @@ export const findOrganismeFormationByCfd = async (organisme_id: string, cfd: str
   }
   const formationFound = await getFormationWithCfd(cfd, { _id: 1 });
 
-  if (!formationFound) return null;
-  const formationId = formationFound._id;
-
-  let found: any = null;
-  for (const formation of organisme.formations || []) {
-    if (formation.formation_id.toString() === formationId.toString()) {
-      found = { ...formation };
-    }
-  }
-  return found;
+  return formationFound
+    ? organisme.relatedFormations?.find(
+        (formation) => formation.formation_id.toString() === formationFound._id.toString()
+      )
+    : null;
 };

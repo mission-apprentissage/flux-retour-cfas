@@ -66,7 +66,7 @@ const schema = object(
       ...adresseSchema,
       description: "Adresse de l'établissement",
     },
-    formations: arrayOf(
+    relatedFormations: arrayOf(
       object(
         {
           formation_id: objectId(),
