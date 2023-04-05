@@ -1,9 +1,17 @@
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../common/constants/natureOrganismeConstants.js";
 import { PromisePool } from "@supercharge/promise-pool";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../common/constants/fiabilisationConstants.js";
+import {
+  STATUT_FIABILISATION_COUPLES_UAI_SIRET,
+  STATUT_FIABILISATION_ORGANISME,
+} from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
-import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../../common/model/collections.js";
+import {
+  effectifsDb,
+  fiabilisationUaiSiretDb,
+  organismesDb,
+  organismesReferentielDb,
+} from "../../../../common/model/collections.js";
 import { getPercentage } from "../../../../common/utils/miscUtils.js";
 import { insertManualMappingsFromFile } from "./utils.js";
 
@@ -157,6 +165,12 @@ export const buildFiabilisationCoupleForTdbCouple = async (
       { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE } },
       { upsert: true }
     );
+
+    // MAJ du statut de l'organisme lié
+    await organismesDb().updateOne(
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
+    );
     return;
   }
 
@@ -250,29 +264,31 @@ export const buildFiabilisationCoupleForTdbCouple = async (
         const relationsReponsableWithSiret =
           organismesRespOrRespFormateurForUaiTdb[0]?.relations?.filter((item) => item.siret) || [];
 
-        // Pour chacune des relations du responsable si l'UAI Match alors on peut fiabiliser en remplacant le siret de la relation
-        for (const currentRelation of relationsReponsableWithSiret) {
-          // On vérifie si la relation match sur l'UAI
-          const relationMatchingUai = await organismesReferentielDb().countDocuments({
-            siret: currentRelation.siret as string,
-            uai: currentMultipleUaisCouple.uai,
-          });
+        if (relationsReponsableWithSiret) {
+          // Pour chacune des relations du responsable si l'UAI Match alors on peut fiabiliser en remplacant le siret de la relation
+          for (const currentRelation of relationsReponsableWithSiret) {
+            // On vérifie si la relation match sur l'UAI
+            const relationMatchingUai = await organismesReferentielDb().countDocuments({
+              siret: currentRelation.siret as string,
+              uai: currentMultipleUaisCouple.uai,
+            });
 
-          // SI Match Relation UAI alors on ajoute le couple à fiabiliser avec cet UAI
-          if (relationMatchingUai > 0) {
-            await fiabilisationUaiSiretDb().updateOne(
-              { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-              {
-                $set: {
-                  uai_fiable: currentMultipleUaisCouple.uai,
-                  siret_fiable: coupleUaiSiretTdbToCheck.siret,
-                  type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+            // SI Match Relation UAI alors on ajoute le couple à fiabiliser avec cet UAI
+            if (relationMatchingUai > 0) {
+              await fiabilisationUaiSiretDb().updateOne(
+                { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+                {
+                  $set: {
+                    uai_fiable: currentMultipleUaisCouple.uai,
+                    siret_fiable: coupleUaiSiretTdbToCheck.siret,
+                    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+                  },
                 },
-              },
-              { upsert: true }
-            );
+                { upsert: true }
+              );
 
-            return;
+              return;
+            }
           }
         }
 
@@ -339,6 +355,12 @@ export const buildFiabilisationCoupleForTdbCouple = async (
       { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE } },
       { upsert: true }
     );
+
+    // MAJ du statut de l'organisme lié
+    await organismesDb().updateOne(
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_PB_COLLECTE } }
+    );
   }
 
   // Si aucune entrée déja ajoutée à la table de fiabilisation pour ce couple on marque le couple non fiabilisable selon le cas
@@ -364,6 +386,19 @@ export const buildFiabilisationCoupleForTdbCouple = async (
         },
       },
       { upsert: true }
+    );
+
+    // Maj de l'organisme lié avec { bypassDocumentValidation: true } si siret vide
+    await organismesDb().updateOne(
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+      {
+        $set: {
+          fiabilisation_statut: isUaiPresentInReferentiel
+            ? STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING
+            : STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE,
+        },
+      },
+      { bypassDocumentValidation: true }
     );
   }
 };
