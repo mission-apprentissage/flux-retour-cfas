@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 import config from "../../../src/config.js";
 import { startServer } from "../../utils/testUtils.js";
+import { packageJson } from "../../../src/common/utils/esmUtils.js";
 
 describe("Healthcheck route", () => {
   it("Vérifie que le server fonctionne", async () => {
@@ -9,9 +10,13 @@ describe("Healthcheck route", () => {
     const response = await httpClient.get("/api/healthcheck");
 
     assert.equal(response.status, 200);
-    assert.equal(response.data.name, `Serveur MNA - ${config.appName}`);
-    assert.equal(response.data.healthcheck.mongodb, true);
-    assert.ok(response.data.env);
-    assert.ok(response.data.version);
+    assert.deepStrictEqual(response.data, {
+      name: "TDB Apprentissage API",
+      version: packageJson.version,
+      env: config.env,
+      healthcheck: {
+        mongodb: true,
+      },
+    });
   });
 });
