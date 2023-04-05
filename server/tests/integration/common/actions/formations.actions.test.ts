@@ -242,6 +242,7 @@ describe("Tests des actions Formations", () => {
         voie: "AVREGIS RYCKEBUSH",
       },
       reseaux: ["AGRI"],
+      relatedFormations: [],
     };
 
     it("returns results matching libelle and etablissement_num_region", async () => {
