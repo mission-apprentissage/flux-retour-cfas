@@ -1,3 +1,18 @@
+# [3.19.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.18.0...v3.19.0) (2023-04-05)
+
+
+### Bug Fixes
+
+* fix televersement effectifs ([#2853](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2853)) ([b9c572b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b9c572b82928ce100677f0c8bc3b38f63dbb998e))
+* fixe les formations et les mértiers manquants sur les organismes ([#2855](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2855)) ([d3a06ee](https://github.com/mission-apprentissage/flux-retour-cfas/commit/d3a06ee598e7ad11e9117ec25ef6929be7cf90df))
+* fixe les formations et les métiers manquants sur les organismes maj ([#2856](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2856)) ([e1abcc7](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e1abcc781d2b6d7b719db603890336ce2962a197))
+
+
+### Features
+
+* ajout specifications open Api ([#2842](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2842)) ([491883e](https://github.com/mission-apprentissage/flux-retour-cfas/commit/491883e0471c7949b02fe063badd7d5dfa8068fd))
+* l'admin peut mettre à jour la liste des formations d'un organisme ([#2859](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2859)) ([7a91622](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7a9162253cfac56b2f5344517098813565f30263))
+
 # [3.18.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.17.1...v3.18.0) (2023-03-30)
 
 
