@@ -247,9 +247,8 @@ export const buildFiabilisationCoupleForTdbCouple = async (
       // si UAI unique au niveau du référentiel alors on cherche dans les relations puis dans les lieux de formation
       if (organismesRespOrRespFormateurForUaiTdb.length === 1) {
         // Phase 1. Recherche dans les relations
-        const relationsReponsableWithSiret = organismesRespOrRespFormateurForUaiTdb[0].relations.filter(
-          (item) => item.siret
-        );
+        const relationsReponsableWithSiret =
+          organismesRespOrRespFormateurForUaiTdb[0]?.relations?.filter((item) => item.siret) || [];
 
         // Pour chacune des relations du responsable si l'UAI Match alors on peut fiabiliser en remplacant le siret de la relation
         for (const currentRelation of relationsReponsableWithSiret) {

@@ -36,7 +36,7 @@ export const createOrganisme = async (
   const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
 
   // Construction de l'arbre des formations de l'organisme si option active
-  const formations = buildFormationTree ? (await getFormationsTreeForOrganisme(uai))?.formations || [] : [];
+  const relatedFormations = buildFormationTree ? (await getFormationsTreeForOrganisme(uai))?.formations || [] : [];
 
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
@@ -48,7 +48,7 @@ export const createOrganisme = async (
     ...defaultValuesOrganisme(),
     ...(siret ? { siret } : {}),
     metiers,
-    formations,
+    relatedFormations,
     ...(adresse ? { adresse } : {}),
     ...data,
     ferme: ferme || false,
@@ -246,7 +246,9 @@ export const updateOrganisme = async (
   const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
 
   // Construction de l'arbre des formations de l'organisme si option active
-  const formations = buildFormationTree ? (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [] : [];
+  const relatedFormations = buildFormationTree
+    ? (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || []
+    : [];
 
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
@@ -269,7 +271,7 @@ export const updateOrganisme = async (
         ...data,
         ...(nom ? { nom: nom.trim() } : {}),
         metiers,
-        formations,
+        relatedFormations,
         ...(adresse ? { adresse } : {}),
         ...(ferme ? { ferme } : { ferme: false }), // Si aucun champ ferme fourni false par défaut
         ...(enseigne ? { enseigne } : {}),
@@ -517,6 +519,58 @@ export const getDetailedOrganismeById = async (_id) => {
   const organisme = await organismesDb()
     .aggregate([
       { $match: { _id: new ObjectId(_id) } },
+      // lookup formations
+      {
+        $lookup: {
+          from: "formations",
+          localField: "relatedFormations.formation_id",
+          foreignField: "_id",
+          as: "_tmp_related_formations",
+          // lookup are not ordered by default, so we need to sort them manually
+          let: { formationIds: "$relatedFormations.formation_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $in: ["$_id", "$$formationIds"] },
+              },
+            },
+            {
+              $addFields: {
+                sort: {
+                  $indexOfArray: ["$$formationIds", "$_id"],
+                },
+              },
+            },
+            { $sort: { sort: 1 } },
+            { $addFields: { sort: "$$REMOVE" } },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          relatedFormations: {
+            $map: {
+              input: "$relatedFormations",
+              as: "formation",
+              in: {
+                $mergeObjects: [
+                  "$$formation",
+                  {
+                    formation: {
+                      $arrayElemAt: [
+                        "$_tmp_related_formations",
+                        { $indexOfArray: ["$relatedFormations", "$$formation"] },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      { $unset: ["_tmp_related_formations"] },
+      // lookup organismesReferentiel
       {
         $lookup: {
           from: "organismesReferentiel",
@@ -539,6 +593,7 @@ export const getDetailedOrganismeById = async (_id) => {
           ],
         },
       },
+      // lookup for doublons
       {
         $lookup: {
           from: "organismes",

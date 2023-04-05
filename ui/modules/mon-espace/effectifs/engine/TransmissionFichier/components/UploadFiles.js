@@ -157,16 +157,18 @@ const UploadFiles = ({ title }) => {
         {title}
       </Heading>
       <Text>Veuillez privilégier le format .csv</Text>
-      <Text>
-        Avant de démarrer l’importation, votre fichier doit inclure obligatoirement une ligne d’en-tête avec les champs
-        suivants :
+      <Box>
+        <Text>
+          Avant de démarrer l’importation, votre fichier doit inclure obligatoirement une ligne d’en-tête avec les
+          champs suivants :
+        </Text>
         <UnorderedList>
           <li>Code Formation Diplôme ou RNCP</li>
           <li>Année scolaire sur laquelle l'apprenant est positionné</li>
           <li>Nom de l’apprenant</li>
           <li>Prénom de l’apprenant</li>
         </UnorderedList>
-      </Text>
+      </Box>
       {documents?.unconfirmed?.length > 0 ? (
         <Box mb={8}>
           {uploadError && <Text color="error">{uploadError}</Text>}

@@ -454,13 +454,11 @@ const Televersements = () => {
                           </Flex>
                           <HStack justifyContent="center" spacing="4w" w="100%" alignItems="start">
                             <Input
-                              {...{
-                                name: `line${2}_in`,
-                                fieldType: "select",
-                                placeholder: "Sélectionner une de vos en-têtes",
-                                options: availableKeys.in,
-                                locked: typeCodeDiplome !== "RNCP",
-                              }}
+                              name={`line${2}_in`}
+                              fieldType="select"
+                              placeholder="Sélectionner une de vos en-têtes"
+                              options={availableKeys.in}
+                              locked={typeCodeDiplome !== "RNCP"}
                               value={lines[2].in.value}
                               onSubmit={(value) =>
                                 onLineChange({ line: 2, part: "in" }, { value, hasError: false, required: true })
@@ -614,12 +612,10 @@ const Televersements = () => {
                                 />
                                 <ArrowRightLong boxSize={10} color="bluefrance" />
                                 <Input
-                                  {...{
-                                    name: `line${lineNum}_out`,
-                                    fieldType: "select",
-                                    placeholder: "Sélectionner une de vos en-têtes",
-                                    options: availableKeys.out,
-                                  }}
+                                  name={`line${lineNum}_out`}
+                                  fieldType="select"
+                                  placeholder="Sélectionner une de vos en-têtes"
+                                  options={availableKeys.out}
                                   value={lines[lineNum].out.value}
                                   onSubmit={(value) =>
                                     onLineChange({ line: lineNum, part: "out" }, { value, hasError: false })

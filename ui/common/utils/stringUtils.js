@@ -36,7 +36,7 @@ export const capitalize = (str) => {
 };
 
 export function normalize(string) {
-  return string == null
+  return string === null || string === undefined
     ? ""
     : string
         .toLowerCase()

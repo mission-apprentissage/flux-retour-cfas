@@ -57,7 +57,6 @@ const Users = () => {
     () => _get("/api/v1/admin/users/", { params: { page: page + 1, limit, q: searchValue, filter } }),
     { enabled: !!(users?.pagination && page + 1 < users?.pagination?.lastPage) }
   );
-  console.log(">>", users);
 
   const rolesById = roles?.reduce((acc, role) => ({ ...acc, [role._id]: role }), {});
   const isLoading = isLoadingUsers || isLoadingRoles;

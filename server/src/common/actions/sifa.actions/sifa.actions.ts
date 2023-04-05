@@ -54,7 +54,7 @@ export const generateSifa = async (organisme_id) => {
   for (const effectif of effectifs) {
     const formationBcn =
       (await findFormationById(effectif.formation.formation_id)) || (await getFormationWithCfd(effectif.formation.cfd));
-    const formationOrganisme = organisme.formations?.find(
+    const formationOrganisme = organisme.relatedFormations?.find(
       (f) => f.formation_id?.toString() === effectif.formation.formation_id?.toString()
     );
     const cpInfo = await getCodePostalInfo(effectif.apprenant.code_postal_de_naissance);

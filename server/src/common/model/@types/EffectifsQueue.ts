@@ -3,14 +3,26 @@
 export interface EffectifsQueue {
   nom_apprenant?: any;
   prenom_apprenant?: any;
+  /**
+   * Date de naissance de l'apprenant
+   */
   date_de_naissance_apprenant?: any;
+  /**
+   * UAI de l'établissement
+   */
   uai_etablissement?: any;
+  /**
+   * Nom de l'établissement
+   */
   nom_etablissement?: any;
   id_formation?: any;
   /**
    * Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")
    */
   annee_scolaire?: any;
+  /**
+   * 0, 2 ou 3
+   */
   statut_apprenant?: any;
   date_metier_mise_a_jour_statut?: any;
   /**

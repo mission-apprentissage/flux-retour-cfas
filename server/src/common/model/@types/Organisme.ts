@@ -38,6 +38,10 @@ export interface Organisme {
    */
   effectifs_count?: number;
   /**
+   * Compteur sur le nombre d'effectifs de l'organisme sur l'année courante
+   */
+  effectifs_current_year_count?: number;
+  /**
    * Nature de l'organisme de formation
    */
   nature?: "responsable" | "formateur" | "responsable_formateur" | "lieu_formation" | "inconnue";
@@ -57,10 +61,6 @@ export interface Organisme {
    * Raison sociale de l'organisme de formation
    */
   raison_sociale?: string;
-  /**
-   * Nom de l'organisme de formation tokenized pour la recherche textuelle
-   */
-  nom_tokenized?: string;
   /**
    * Adresse de l'établissement
    */
@@ -468,7 +468,7 @@ export interface Organisme {
   /**
    * Formations de cet organisme
    */
-  formations?: {
+  relatedFormations?: {
     formation_id?: any;
     /**
      * Année millésime de la formation pour cet organisme
@@ -916,7 +916,7 @@ export interface Organisme {
    */
   ferme?: boolean;
   /**
-   * L'organisme est qualiopi
+   * a la certification Qualiopi
    */
   qualiopi?: boolean;
   /**

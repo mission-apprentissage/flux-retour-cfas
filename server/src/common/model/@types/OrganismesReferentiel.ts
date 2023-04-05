@@ -57,8 +57,11 @@ export interface OrganismesReferentiel {
     date_collecte?: string;
     sources?: string[];
   }[];
-  relations: {
-    type?: string;
+  relations?: {
+    type?: "formateur->responsable" | "responsable->formateur" | "entreprise";
     siret?: string;
+    referentiel?: boolean;
+    label?: string;
+    sources?: string[];
   }[];
 }

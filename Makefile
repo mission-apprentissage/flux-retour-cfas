@@ -19,9 +19,6 @@ build-server:
 start:
 	docker-compose up --build --force-recreate -d
 
-start-mongodb:
-	docker-compose up -d mongodb
-
 stop:
 	docker-compose stop
 

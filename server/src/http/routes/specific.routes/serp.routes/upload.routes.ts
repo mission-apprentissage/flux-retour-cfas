@@ -26,12 +26,7 @@ import { hydrateEffectif } from "../../../../common/actions/engine/engine.action
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
-import { findOrganismeFormationByCfd } from "../../../../common/actions/organismes/organismes.formations.actions.js";
-import {
-  getFormationWithCfd,
-  getFormationWithRNCP,
-  findFormationById,
-} from "../../../../common/actions/formations.actions.js";
+import { getFormationWithCfd, getFormationWithRNCP } from "../../../../common/actions/formations.actions.js";
 import {
   findOrganismeById,
   setOrganismeTransmissionDates,
@@ -634,6 +629,11 @@ export default ({ clamav }) => {
         .unknown()
         .validateAsync(req.body, { abortEarly: false });
 
+      const organisme = await findOrganismeById(organisme_id);
+      if (!organisme) {
+        throw new Error("organisme not found");
+      }
+
       const { rawFileJson, unconfirmedDocument: document } = await getUnconfirmedDocumentContent(organisme_id);
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -666,12 +666,13 @@ export default ({ clamav }) => {
           req.user._id,
           `Vérification en cours: ${index + 1} sur ${convertedData.length} effectifs`
         );
+        let formationFound;
         if (typeCodeDiplome === "RNCP" && data.formation?.rncp) {
-          const formation = await getFormationWithRNCP(data.formation?.rncp, { cfd: 1 });
-          data.formation.cfd = formation?.cfd ?? "Erreur";
+          formationFound = await getFormationWithRNCP(data.formation?.rncp, { cfd: 1 });
+          data.formation.cfd = formationFound?.cfd ?? "Erreur";
         } else {
-          const { rncps } = (await getFormationWithCfd(data.formation.cfd, { rncps: 1 })) || { rncps: [] };
-          data.formation.rncp = rncps?.[0] ?? data.formation?.rncp;
+          formationFound = await getFormationWithCfd(data.formation.cfd, { rncps: 1 });
+          data.formation.rncp = formationFound?.rncps?.[0] ?? data.formation?.rncp;
         }
 
         const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
@@ -693,8 +694,11 @@ export default ({ clamav }) => {
             error: "requiredMissing",
           });
         } else {
-          const organismeFormation = await findOrganismeFormationByCfd(organisme_id, data.formation.cfd);
-          if (!organismeFormation) {
+          const isItAFormationGivenByOrganisme = organisme.relatedFormations?.find(
+            (f) => f.formation_id.toString() === formationFound._id.toString()
+          );
+
+          if (!isItAFormationGivenByOrganisme) {
             canNotBeImportEffectifs.push({
               annee_scolaire: canNotBeImportEffectif.annee_scolaire,
               validation_errors: canNotBeImportEffectif.validation_errors,
@@ -710,10 +714,9 @@ export default ({ clamav }) => {
               : [];
             data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
 
-            const formationDb = await findFormationById(organismeFormation.formation_id);
-            data.formation.formation_id = organismeFormation.formation_id;
-            data.formation.annee = formationDb?.annee;
-            data.formation.libelle_long = formationDb?.libelle;
+            data.formation.formation_id = formationFound._id;
+            data.formation.annee = formationFound?.annee;
+            data.formation.libelle_long = formationFound?.libelle;
             const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
               {
                 organisme_id,

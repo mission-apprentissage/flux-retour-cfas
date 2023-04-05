@@ -79,7 +79,7 @@ const Organisme = () => {
         <Box>Une erreur est survenue : {error.message}</Box>
       ) : organisme ? (
         <>
-          <Stack spacing={2} w="100%">
+          <Stack spacing={10} w="100%">
             <Heading as="h1" mt={6}>
               {organisme.nom || organisme.enseigne}
             </Heading>
@@ -229,6 +229,36 @@ const Organisme = () => {
                   </HStack>
                 </VStack>
               ))}
+            </Box>
+
+            <Box w="100%">
+              <Heading color="grey.800" as="h2" fontSize="beta">
+                Formations
+              </Heading>
+              <Text color="mgalt">
+                {organisme?.relatedFormations?.length || 0} Formations dispensées par l&&apos;organisme
+              </Text>
+              <Table
+                mt={4}
+                data={organisme?.relatedFormations || []}
+                columns={{
+                  "formation.rncps": {
+                    size: 100,
+                    header: () => "RNCP(s)",
+                    cell: ({ getValue }) => <Text>{(getValue() || []).join(", ")}</Text>,
+                  },
+                  "formation.cfd": {
+                    size: 10,
+                    header: () => "CFD",
+                    cell: ({ getValue }) => <Text>{getValue()}</Text>,
+                  },
+                  "formation.libelle": {
+                    size: 200,
+                    header: () => "Nature",
+                    cell: ({ getValue }) => <Text fontSize="1rem">{getValue()}</Text>,
+                  },
+                }}
+              />
             </Box>
 
             <Box w="100%">
