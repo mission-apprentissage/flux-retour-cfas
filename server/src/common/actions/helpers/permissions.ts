@@ -124,7 +124,7 @@ async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeF
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
   ) {
-    for (const { organismes } of userOrganisme.formations) {
+    for (const { organismes } of userOrganisme.relatedFormations) {
       for (const subOrganismeCatalog of organismes) {
         if (
           subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.LIEU &&

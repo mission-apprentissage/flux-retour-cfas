@@ -8,7 +8,7 @@ import {
   DEPARTEMENTS_BY_ID,
   REGIONS_BY_ID,
 } from "../constants/territoiresConstants.js";
-import { WithId } from "mongodb";
+import { CreateIndexesOptions, IndexSpecification, WithId } from "mongodb";
 import { ORGANISATIONS_NATIONALES } from "../constants/organisations.js";
 
 // types en doublon avec l'UI
@@ -153,8 +153,7 @@ export function getWarningOnEmail(email: string, organisation: Organisation & { 
 
 const collectionName = "organisations";
 
-// FIXME compléter si besoin d'indexes
-const indexes = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
 
 const schema = object(
   {
