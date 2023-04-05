@@ -6,7 +6,13 @@ import {
   STATUT_FIABILISATION_ORGANISME,
 } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
-import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../common/model/collections.js";
+import {
+  effectifsDb,
+  fiabilisationUaiSiretDb,
+  organismesDb,
+  organismesReferentielDb,
+} from "../../../../common/model/collections.js";
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
 let nbOrganismesReferentielFiables = 0;
 let nbOrganismesFiabilises = 0;
@@ -34,6 +40,7 @@ export const applyFiabilisationUaiSiret = async () => {
     updateOrganismesReferentielFiables(),
     updateOrganismesFiabilise(),
     updateOrganismesNonFiabilisablesMapping(),
+    handleOrganismesNonFiabilisablesUaiNonValide(),
   ]);
 
   // Log
@@ -205,4 +212,57 @@ const updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable = async ({
     if (nbEffectifsFixedOrganismesNonFiabilisablesMapping > 0) nbOrganismesNonFiabilisablesMappingFixEffectifs++;
   }
 };
+// #endregion
+
+// #region ORGANISMES NON FIABILISABLES UAI NON VALIDEE
+
+const handleOrganismesNonFiabilisablesUaiNonValide = async () => {
+  logger.info("Traitement des organismes non fiabilisables car uai non validée ...");
+
+  // Récupération de tous les organismes non fiabilisables car uai non validée
+  const organismesNonFiabilisablesUai = await organismesDb()
+    .find({ fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE })
+    .toArray();
+
+  await PromisePool.for(organismesNonFiabilisablesUai).process(async ({ _id, uai, siret }: any) => {
+    const organismesFiableForSiret = await organismesDb()
+      .find({ siret, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
+      .toArray();
+
+    // S'il existe un unique organisme fiable lié au couple non fiable courant on vérifie
+    // s'il existe un organisme dans le référentiel avec l'uai non fiable fermée
+    if (organismesFiableForSiret.length === 1) {
+      const organismeFiable = organismesFiableForSiret[0];
+      const organismeNonFiable = await organismesDb().findOne({ uai, siret });
+      const countOrganismeReferentielForUaiFerme = await organismesReferentielDb().countDocuments({
+        uai,
+        etat_administratif: "fermé",
+      });
+
+      if (countOrganismeReferentielForUaiFerme > 0) {
+        await createJobEvent({
+          jobname: "fiabilisation:uai-siret:apply",
+          action: "log-handleOrganismesNonFiabilisablesUaiNonValide-1-fiableLie",
+          date: new Date(),
+          data: {
+            uai,
+            siret,
+            coupleFiableUai: organismesFiableForSiret[0].uai,
+            coupleFiableSiret: organismesFiableForSiret[0].siret,
+          },
+        });
+
+        // TODO Vérifier doublons d'effectifs
+        // TODO Si nécessaire suppression de l'organisme non fiable
+      }
+    } else {
+      // Si pas d'organisme fiable lié on marque l'organisme comme A_CONTACTER
+      await organismesDb().updateOne(
+        { uai, siret },
+        { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.A_CONTACTER } }
+      );
+    }
+  });
+};
+
 // #endregion
