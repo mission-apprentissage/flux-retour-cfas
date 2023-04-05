@@ -229,11 +229,11 @@ const handleOrganismesNonFiabilisablesUaiNonValide = async () => {
       .find({ siret, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
       .toArray();
 
-    // S'il existe un unique organisme fiable lié au couple non fiable courant on vérifie
-    // s'il existe un organisme dans le référentiel avec l'uai non fiable fermée
+    // S'il existe un unique organisme fiable lié au couple non fiable courant alors
+    // on vérifie s'il existe un organisme dans le référentiel avec l'uai non fiable fermée
     if (organismesFiableForSiret.length === 1) {
-      const organismeFiable = organismesFiableForSiret[0];
-      const organismeNonFiable = await organismesDb().findOne({ uai, siret });
+      // const organismeFiable = organismesFiableForSiret[0];
+      // const organismeNonFiable = await organismesDb().findOne({ uai, siret });
       const countOrganismeReferentielForUaiFerme = await organismesReferentielDb().countDocuments({
         uai,
         etat_administratif: "fermé",
@@ -252,8 +252,8 @@ const handleOrganismesNonFiabilisablesUaiNonValide = async () => {
           },
         });
 
-        // TODO Vérifier doublons d'effectifs
-        // TODO Si nécessaire suppression de l'organisme non fiable
+        // TODO Vérifier doublons d'effectifs ?
+        // TODO Si nécessaire suppression de l'organisme non fiable ?
       }
     } else {
       // Si pas d'organisme fiable lié on marque l'organisme comme A_CONTACTER
