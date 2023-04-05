@@ -18,7 +18,7 @@ export const createUpload = async ({ organisme_id }) => {
   return effectifCreated;
 };
 
-export const getUploadEntryByOrgaId = async (organismeId, projection = {}) => {
+export const getUploadEntryByOrgaId = async (organismeId: ObjectId | string, projection = {}) => {
   const organisme_id = typeof organismeId === "string" ? new ObjectId(organismeId) : organismeId;
   if (!ObjectId.isValid(organisme_id)) throw new Error("Invalid organismeId passed");
 
