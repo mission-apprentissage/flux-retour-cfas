@@ -1,9 +1,9 @@
-import { ObjectId } from "mongodb";
+import { CreateIndexesOptions, IndexSpecification, ObjectId } from "mongodb";
 import { date, object, objectId, string } from "./json-schema/jsonSchemaTypes.js";
 
 const collectionName = "invitations";
 
-const indexes = [
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ token: 1 }, { name: "token", unique: true }],
   [{ organisation_id: 1 }, { name: "organisation_id" }],
 ];

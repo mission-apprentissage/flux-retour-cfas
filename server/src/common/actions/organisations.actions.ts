@@ -133,7 +133,7 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
   }
 
   await usersMigrationDb().updateOne(
-    { _id: user._id! },
+    { _id: user._id },
     {
       $set: {
         account_status: "CONFIRMED",
@@ -159,7 +159,7 @@ export async function rejectMembre(ctx: AuthContext, userId: string): Promise<vo
   if (!(ctx.organisation.type === "ADMINISTRATEUR" || user.organisation_id.equals(ctx.organisation_id))) {
     throw Boom.forbidden("Permissions invalides");
   }
-  await usersMigrationDb().deleteOne({ _id: user._id! });
+  await usersMigrationDb().deleteOne({ _id: user._id });
   await sendEmail(user.email, "notify_access_rejected", {
     recipient: {
       civility: user.civility,

@@ -9,6 +9,7 @@ import { validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { getOrganisationLabel } from "../model/organisations.model.js";
+import { WithId } from "mongodb";
 
 interface UserRegistration {
   email: string;
@@ -362,7 +363,7 @@ export async function updateUserProfile(ctx: AuthContext, infos: any) {
   );
 }
 
-export async function getUserById(userId: ObjectId): Promise<UsersMigration> {
+export async function getUserById(userId: ObjectId): Promise<WithId<UsersMigration>> {
   const user = await usersMigrationDb().findOne({ _id: userId });
   if (!user) {
     throw Boom.notFound(`missing user ${userId}`);

@@ -3,7 +3,6 @@
 import { ObjectId } from "mongodb";
 
 export interface UsersMigration {
-  _id?: ObjectId;
   /**
    * Email utilisateur
    */
