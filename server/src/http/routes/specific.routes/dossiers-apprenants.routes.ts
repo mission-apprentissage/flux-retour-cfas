@@ -46,7 +46,7 @@ export default () => {
         data: effectifsToQueue,
       });
     } catch (err: any) {
-      logger.error(`POST /dossiers-apprenants error : ${err.toString()}`);
+      logger.error({ err }, "POST /dossiers-apprenants error");
       res.status(500).json({
         status: "ERROR",
         message: err.message,
