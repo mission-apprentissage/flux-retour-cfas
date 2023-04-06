@@ -64,77 +64,78 @@ const ProfileInformation = () => {
 
   return (
     <Box w="100%" color="#1E1E1E">
-      <Box>
-        <Heading as="h1" fontSize="32px">
-          Mes informations
-        </Heading>
-        <Box mt={8}>
-          <FormControl isRequired isInvalid={!!errors.civility}>
-            <RadioGroup value={values.civility}>
-              <HStack>
-                <Radio
-                  type="radio"
-                  name="civility"
-                  value={"Monsieur"}
-                  checked={values.civility !== "Madame"}
-                  onChange={handleChange}
-                >
-                  Monsieur
-                </Radio>
-                <Radio
-                  type="radio"
-                  name="civility"
-                  value="Madame"
-                  checked={values.civility === "Madame"}
-                  onChange={handleChange}
-                >
-                  Madame
-                </Radio>
-              </HStack>
-            </RadioGroup>
-            {errors.civility && <FormErrorMessage>{errors.civility}</FormErrorMessage>}
-          </FormControl>
+      <form onSubmit={handleSubmit}>
+        <Box>
+          <Heading as="h1" fontSize="32px">
+            Mes informations
+          </Heading>
+          <Box mt={8}>
+            <FormControl isRequired isInvalid={!!errors.civility}>
+              <RadioGroup value={values.civility}>
+                <HStack>
+                  <Radio
+                    type="radio"
+                    name="civility"
+                    value={"Monsieur"}
+                    checked={values.civility !== "Madame"}
+                    onChange={handleChange}
+                  >
+                    Monsieur
+                  </Radio>
+                  <Radio
+                    type="radio"
+                    name="civility"
+                    value="Madame"
+                    checked={values.civility === "Madame"}
+                    onChange={handleChange}
+                  >
+                    Madame
+                  </Radio>
+                </HStack>
+              </RadioGroup>
+              {errors.civility && <FormErrorMessage>{errors.civility}</FormErrorMessage>}
+            </FormControl>
+          </Box>
+          <Flex mt={2}>
+            <FormControl isRequired mt={2} isInvalid={!!errors.prenom}>
+              <FormLabel>Prénom</FormLabel>
+              <Input type="text" name="prenom" value={values.prenom} onChange={handleChange} required />
+              {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
+            </FormControl>
+            <FormControl isRequired mt={2} isInvalid={!!errors.nom} ml={10}>
+              <FormLabel>Nom</FormLabel>
+              <Input type="text" name="nom" value={values.nom} onChange={handleChange} required />
+              {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
+            </FormControl>
+          </Flex>
+          <Flex mt={5}>
+            <FormControl isInvalid={!!errors.telephone}>
+              <FormLabel>Téléphone</FormLabel>
+              <PhoneInput
+                country={"fr"}
+                value={values.telephone}
+                masks={{
+                  fr: ". .. .. .. ..",
+                }}
+                countryCodeEditable={false}
+                onChange={(value) => setFieldValue("telephone", value)}
+              />
+              {errors.telephone && touched.telephone && <FormErrorMessage>{errors.telephone}</FormErrorMessage>}
+            </FormControl>
+            <FormControl isRequired isInvalid={!!errors.email} ml={10}>
+              <FormLabel>E-mail</FormLabel>
+              <Input type="email" name="email" value={values.email} onChange={handleChange} required isDisabled />
+              {errors.email && touched.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
+            </FormControl>
+          </Flex>
+          <Divider mt={10} mb={4} borderWidth="2px" />
         </Box>
-        <Flex mt={2}>
-          <FormControl isRequired mt={2} isInvalid={!!errors.prenom}>
-            <FormLabel>Prénom</FormLabel>
-            <Input type="text" name="prenom" value={values.prenom} onChange={handleChange} required />
-            {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
-          </FormControl>
-          <FormControl isRequired mt={2} isInvalid={!!errors.nom} ml={10}>
-            <FormLabel>Nom</FormLabel>
-            <Input type="text" name="nom" value={values.nom} onChange={handleChange} required />
-            {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
-          </FormControl>
-        </Flex>
-        <Flex mt={5}>
-          <FormControl isInvalid={!!errors.telephone}>
-            <FormLabel>Téléphone</FormLabel>
-            <PhoneInput
-              country={"fr"}
-              value={values.telephone}
-              masks={{
-                fr: ". .. .. .. ..",
-              }}
-              countryCodeEditable={false}
-              onChange={(value) => setFieldValue("telephone", value)}
-              name="telephone"
-            />
-            {errors.telephone && touched.telephone && <FormErrorMessage>{errors.telephone}</FormErrorMessage>}
-          </FormControl>
-          <FormControl isRequired isInvalid={!!errors.email} ml={10}>
-            <FormLabel>E-mail</FormLabel>
-            <Input type="email" name="email" value={values.email} onChange={handleChange} required isDisabled />
-            {errors.email && touched.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
-          </FormControl>
-        </Flex>
-        <Divider mt={10} mb={4} borderWidth="2px" />
-      </Box>
-      <Box mt="2rem">
-        <Button variant="primary" onClick={handleSubmit} type="submit">
-          Enregistrer
-        </Button>
-      </Box>
+        <Box mt="2rem">
+          <Button variant="primary" type="submit">
+            Enregistrer
+          </Button>
+        </Box>
+      </form>
     </Box>
   );
 };
