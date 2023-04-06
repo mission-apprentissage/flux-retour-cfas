@@ -5,6 +5,7 @@ import { organismesDb } from "../../model/collections.js";
 import { AuthContext } from "../../model/internal/AuthContext.js";
 import { OrganisationOrganismeFormation, OrganisationType } from "../../model/organisations.model.js";
 import { getOrganismeById } from "../organismes/organismes.actions.js";
+import { ObjectId } from "mongodb";
 
 export async function requireOrganismeAccess(ctx: AuthContext, organismeId: string): Promise<void> {
   if (!(await canAccessOrganisme(ctx, organismeId))) {
@@ -142,7 +143,7 @@ async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeF
       }
     }
   }
-  return [...subOrganismesIds.values()];
+  return [...subOrganismesIds.values()].map((id) => new ObjectId(id));
 }
 
 async function canAccessOrganisme(ctx: AuthContext, organismeId: string): Promise<boolean> {
@@ -153,7 +154,7 @@ async function canAccessOrganisme(ctx: AuthContext, organismeId: string): Promis
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
       const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
-      return linkedOrganismesIds.includes(organismeId);
+      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId);
     }
 
     case "TETE_DE_RESEAU":
