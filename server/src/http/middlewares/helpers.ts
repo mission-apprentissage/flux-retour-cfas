@@ -8,7 +8,10 @@ type Handler = (req: Request, res: Response, next: NextFunction) => any | Promis
 export function returnResult(serviceFunc: Handler) {
   return async (req: Request, res: Response, next: NextFunction) => {
     const result = await serviceFunc(req, res, next);
-    res.set("Content-Type", "application/json");
+    // le résultat est à renvoyer en JSON par défaut
+    if (!res.getHeader("Content-Type")) {
+      res.set("Content-Type", "application/json");
+    }
     res.send(
       result ?? {
         message: "success",

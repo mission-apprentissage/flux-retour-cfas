@@ -123,7 +123,7 @@ const SIFAPage = ({ isMine }) => {
         <HStack spacing={4}>
           <DownloadButton
             fileName={exportSifaFilename}
-            getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
+            getFile={() => _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`)}
             title="Télécharger SIFA"
           />
           <Button

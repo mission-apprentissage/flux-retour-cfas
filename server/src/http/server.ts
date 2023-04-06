@@ -372,11 +372,10 @@ function setupRoutes(app: Application) {
       return await getOrganismeEffectifs(req.user, req.params.id);
     })
   );
-  // FIXME à tester + adapter returnResult pour ne pas avoir du JSON
   authRouter.get(
-    "/api/v1/organismes/:id/sifa/export-csv-list",
+    "/api/v1/organismes/:id/sifa-export",
     returnResult(async (req, res) => {
-      const sifaCsv = await generateSifa(req.user, req.params.organismeId);
+      const sifaCsv = await generateSifa(req.user, req.params.id);
       res.attachment(`tdb-données-sifa-${req.query.organismeId}.csv`);
       return sifaCsv;
     })
