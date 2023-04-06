@@ -32,11 +32,11 @@
               >
                 Accéder au tableau de bord
               </mj-button>
-              <mj-button
-                href="<%= utils.getPublicUrl(`/api/inscription/profil?invitationToken=${data.invitationToken}&reject`) %>"
+              <!-- <mj-button
+                href="<%= utils.getPublicUrl(`/auth/inscription/profil?invitationToken=${data.invitationToken}&reject`) %>"
                 background-color="#ff0000" color="white">
                 Je ne suis pas concerné
-              </mj-button>
+              </mj-button> -->
 
               <%- include('./common/signature.ejs'); %>
             </mj-column>
