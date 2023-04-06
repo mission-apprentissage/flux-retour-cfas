@@ -11,6 +11,7 @@ import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js"
 import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import { getCodePostalInfo } from "../../../common/apis/apiTablesCorrespondances.js";
+import { requireManageEffectifsPermission } from "./organisme.routes.js";
 
 const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
@@ -20,6 +21,14 @@ const flattenKeys = (obj: any, path: any = []) =>
 // TODO [tech] TMP
 export default () => {
   const router = express.Router();
+  router.use(async (req, res, next) => {
+    try {
+      await requireManageEffectifsPermission(req.user, req.query.organisme_id as string);
+      next();
+    } catch (err) {
+      next(err);
+    }
+  });
 
   const buildEffectifResult = (effectif) => {
     const { properties: effectifSchema } = schema;

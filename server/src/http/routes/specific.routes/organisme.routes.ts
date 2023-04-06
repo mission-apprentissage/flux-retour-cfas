@@ -1,4 +1,3 @@
-import express from "express";
 import { compact, get } from "lodash-es";
 import Boom from "boom";
 
@@ -7,13 +6,12 @@ import {
   getSousEtablissementsForUai,
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
-import { generateSifa, isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
-import { uaiSchema, validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
+import { isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
 import { AuthContext } from "../../../common/model/internal/AuthContext.js";
 import { OrganisationOrganismeFormation } from "../../../common/model/organisations.model.js";
 import { findOFLinkedOrganismesIds } from "../../../common/actions/helpers/permissions.js";
 
-async function canManageEffectifs(ctx: AuthContext, organismeId: string): Promise<boolean> {
+export async function canManageEffectifs(ctx: AuthContext, organismeId: string): Promise<boolean> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -105,44 +103,21 @@ export async function getOrganismeEffectifs(ctx: AuthContext, organismeId: strin
   return effectifs;
 }
 
-export default () => {
-  const router = express.Router();
+export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {
+  const organisme = await findOrganismeByUai(uai);
+  if (!organisme) {
+    throw Boom.notFound(`No cfa found for UAI ${uai}`);
+  }
 
-  router.get(
-    "/sifa/export-csv-list",
-    // permissionsOrganismeMiddleware(["organisme/page_sifa/telecharger"]),
-    async ({ query: { organisme_id } }, res) => {
-      const sifaCsv = await generateSifa(organisme_id);
-
-      return res.attachment(`tdb-données-sifa-${organisme_id}.csv`).send(sifaCsv);
-    }
-  );
-
-  const getByUaiSchema = {
-    uai: uaiSchema(),
+  const sousEtablissements = await getSousEtablissementsForUai(uai);
+  return {
+    libelleLong: organisme.nom,
+    reseaux: organisme.reseaux,
+    domainesMetiers: organisme.metiers,
+    uai: organisme.uai,
+    nature: organisme.nature,
+    nature_validity_warning: organisme.nature_validity_warning,
+    adresse: organisme.adresse,
+    sousEtablissements,
   };
-  /**
-   * Gets the dashboard data for cfa
-   */
-  router.get("/:uai", async (req, res) => {
-    const { uai } = await validateFullObjectSchema(req.params, getByUaiSchema);
-    const organisme = await findOrganismeByUai(uai);
-    if (!organisme) {
-      return res.status(404).json({ message: `No cfa found for UAI ${uai}` });
-    }
-
-    const sousEtablissements = await getSousEtablissementsForUai(uai);
-    return res.json({
-      libelleLong: organisme.nom,
-      reseaux: organisme.reseaux,
-      domainesMetiers: organisme.metiers,
-      uai: organisme.uai,
-      nature: organisme.nature,
-      nature_validity_warning: organisme.nature_validity_warning,
-      adresse: organisme.adresse,
-      sousEtablissements,
-    });
-  });
-
-  return router;
-};
+}
