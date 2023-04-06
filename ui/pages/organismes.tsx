@@ -86,9 +86,9 @@ function MesOrganismes() {
                     },
                   ],
                   placeholder: "Rechercher un organisme",
+                  value: searchValue,
+                  onSubmit: (value: string) => setSearchValue(value.trim()),
                 }}
-                onSubmit={(value) => setSearchValue(value.trim())}
-                value={searchValue}
               />
               <Table
                 mt={4}
