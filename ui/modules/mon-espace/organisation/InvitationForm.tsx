@@ -1,8 +1,6 @@
 import React from "react";
-import { Box, Button, Flex, Link, Text, Input, Heading } from "@chakra-ui/react";
-import NavLink from "next/link";
+import { Box, Button, Flex, Input, Heading } from "@chakra-ui/react";
 
-import { Question } from "@/theme/components/icons";
 import { _post } from "@/common/httpClient";
 import { object, string } from "yup";
 import { useFormik } from "formik";
@@ -119,7 +117,7 @@ const InvitationForm = (props: InvitationFormProps) => {
             </Button>
           </Box>
         </Flex>
-        <Text textStyle="xs">
+        {/* <Text textStyle="xs">
           <Question w="10px" h="10px" mt="-0.2rem" /> Une question sur un rôle ? Consulter la{" "}
           <Link
             color="bluefrance"
@@ -129,7 +127,7 @@ const InvitationForm = (props: InvitationFormProps) => {
           >
             FAQ
           </Link>
-        </Text>
+        </Text> */}
       </Flex>
     </Box>
   );
