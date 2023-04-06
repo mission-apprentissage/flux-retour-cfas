@@ -34,7 +34,6 @@ import { Field, Form, Formik } from "formik";
 import { Check } from "@/theme/components/icons";
 import { CheckIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { ShowPassword } from "@/theme/components/icons";
-import Link from "next/link";
 import { CGU_VERSION } from "@/components/legal/Cgu";
 import { getOrganismeByUAIAndSIRET } from "@/common/api/tableauDeBord";
 
