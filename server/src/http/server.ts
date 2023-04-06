@@ -27,7 +27,7 @@ import emails from "./routes/emails.routes.js";
 
 import auth from "./routes/user.routes/auth.routes.js";
 
-import organisme from "./routes/specific.routes/organisme.routes.js";
+import organisme, { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes.js";
 import effectif from "./routes/specific.routes/effectif.routes.js";
 import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
 
@@ -377,6 +377,12 @@ function setupRoutes(app: Application) {
   );
 
   authRouter.use("/api/v1/organisme", organisme());
+  authRouter.get(
+    "/api/v1/organismes/:organismeId/effectifs",
+    returnResult(async (req) => {
+      return await getOrganismeEffectifs(req.user, req.params.organismeId);
+    })
+  );
   authRouter.use("/api/v1/effectif", effectif());
   authRouter.use("/api/v1/upload", upload());
   authRouter.get("/api/v1/server-events", serverEventsHandler);

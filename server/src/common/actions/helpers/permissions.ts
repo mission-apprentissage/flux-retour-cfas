@@ -108,7 +108,7 @@ export async function getEffectifsOrganismeRestriction(ctx: AuthContext): Promis
  * Informations en provenance du catalogue :
  * organismes(siret=siret de l'organisation, uai=uai de l'organisation).formations.organismes
  */
-async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeFormation>) {
+export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeFormation>) {
   const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,
