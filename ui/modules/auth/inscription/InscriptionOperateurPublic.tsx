@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
+import { FormControl, FormLabel, Select } from "@chakra-ui/react";
 import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoiresConstants";
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
 import { InscriptionOrganistionChildProps } from "./common";
@@ -138,7 +138,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
           </Select>
         </FormControl>
       )}
-      {typeOrganisation === "AUTRE" && (
+      {/* {typeOrganisation === "AUTRE" && (
         <FormControl isRequired>
           <FormLabel>Indiquez le nom de votre établissement :</FormLabel>
           <Input
@@ -151,7 +151,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
             }
           />
         </FormControl>
-      )}
+      )} */}
     </>
   );
 };
