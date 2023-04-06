@@ -12,7 +12,9 @@ import config from "../../config.js";
 import { createActivationToken, createResetPasswordToken } from "../utils/jwtUtils.js";
 import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConstants.js";
 
-export async function register(registration: RegistrationSchema): Promise<void> {
+export async function register(registration: RegistrationSchema): Promise<{
+  account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";
+}> {
   const alreadyExists = await getUserByEmail(registration.user.email);
   if (alreadyExists) {
     throw Boom.conflict("Cet email est déjà utilisé.");
@@ -42,17 +44,42 @@ export async function register(registration: RegistrationSchema): Promise<void> 
   const organisation = await organisationsDb().findOne(registration.organisation);
   const organisationId = organisation ? organisation._id : await createOrganisation(registration.organisation);
 
-  await createUser(registration.user, organisationId);
+  const userId = await createUser(registration.user, organisationId);
 
-  await sendEmail(registration.user.email, "activation_user", {
-    recipient: {
-      civility: registration.user.civility,
-      nom: registration.user.nom,
-      prenom: registration.user.prenom,
-    },
-    tdbEmail: config.email,
-    activationToken: createActivationToken(registration.user.email, { payload: {} }),
+  // si l'utilisateur est invité, alors on juge son email comme validé et ses permissions valides
+  const invitation = await invitationsDb().findOne({
+    organisation_id: organisationId,
+    email: registration.user.email,
   });
+  if (invitation) {
+    await usersMigrationDb().updateOne(
+      {
+        _id: userId,
+      },
+      {
+        $set: {
+          account_status: "CONFIRMED",
+        },
+      }
+    );
+    await invitationsDb().deleteOne({ _id: invitation._id });
+    return {
+      account_status: "CONFIRMED",
+    };
+  } else {
+    await sendEmail(registration.user.email, "activation_user", {
+      recipient: {
+        civility: registration.user.civility,
+        nom: registration.user.nom,
+        prenom: registration.user.prenom,
+      },
+      tdbEmail: config.email,
+      activationToken: createActivationToken(registration.user.email, { payload: {} }),
+    });
+    return {
+      account_status: "PENDING_EMAIL_VALIDATION",
+    };
+  }
 }
 
 export async function login(email: string, password: string): Promise<string> {

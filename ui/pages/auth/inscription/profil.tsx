@@ -203,7 +203,7 @@ export default PageFormulaireProfil;
 
 function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation; fixedEmail: string }) {
   const router = useRouter();
-  const { toastError } = useToaster();
+  const { toastSuccess, toastError } = useToaster();
   const passwordMinLength = organisation.type === "ADMINISTRATEUR" ? 20 : 12;
   const [showPasswordCharacters, setShowPasswordCharacters] = React.useState(false);
 
@@ -250,7 +250,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
       })}
       onSubmit={async (form, actions) => {
         try {
-          await _post("/api/v1/auth/register", {
+          const { account_status } = await _post("/api/v1/auth/register", {
             user: {
               email: form.email,
               civility: form.civility,
@@ -263,7 +263,14 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
             },
             organisation,
           });
-          await router.push("/auth/inscription/bravo");
+
+          if (account_status === "CONFIRMED") {
+            toastSuccess("Votre compte a été créé. Vous pouvez désormais vous connecter.");
+            await router.push("/auth/connexion");
+          } else {
+            // PENDING_EMAIL_VALIDATION
+            await router.push("/auth/inscription/bravo");
+          }
         } catch (err) {
           let errorMessage: string = err?.json?.data?.message || err.message;
           if (err?.json?.data?.message === "Aucun organisme trouvé") {
