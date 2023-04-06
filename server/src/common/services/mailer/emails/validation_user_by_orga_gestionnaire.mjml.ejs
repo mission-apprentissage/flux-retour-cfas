@@ -13,7 +13,7 @@
                 L'utilisateur <strong><%= data.user.civility %> <%= data.user.prenom %> <%= data.user.nom %> (<%= data.user.email %>)</strong> souhaite accéder à votre organisation <%= data.organisationLabel %>.
               </mj-text>
               <mj-button href="<%= utils.getPublicUrl(`/organisation/membres`) %>" background-color="#0e4194" color="white">
-                Accéder à Rôles et habilitations
+                Gérer les accès
               </mj-button>
               <%- include('./common/signature.ejs'); %>
             </mj-column>
