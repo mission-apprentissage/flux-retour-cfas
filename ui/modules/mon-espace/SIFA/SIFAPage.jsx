@@ -30,7 +30,7 @@ function useOrganismesEffectifs(organismeId) {
   }, [queryClient, organismeId]);
 
   const { data, isLoading, isFetching } = useQuery(["organismesEffectifs"], async () => {
-    const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organismeId}&sifa=true`);
+    const organismesEffectifs = await _get(`/api/v1/organismes/${organismeId}/effectifs?sifa=true`);
     // eslint-disable-next-line no-undef
     const newEffectifsState = new Map();
     for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {

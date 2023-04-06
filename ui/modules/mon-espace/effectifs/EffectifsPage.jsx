@@ -21,14 +21,14 @@ function useOrganismesEffectifs(organismeId) {
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
       prevOrganismeId.current = organismeId;
-      queryClient.resetQueries("organismesEffectifs", { exact: true });
+      // queryClient.resetQueries("organismesEffectifs", { exact: true });
     }
   }, [queryClient, organismeId]);
 
   const { data, isLoading, isFetching } = useQuery(
     ["organismesEffectifs", organismeId],
     async () => {
-      const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organismeId}`);
+      const organismesEffectifs = await _get(`/api/v1/organismes/${organismeId}/effectifs`);
 
       // eslint-disable-next-line no-undef
       const newEffectifsState = new Map();

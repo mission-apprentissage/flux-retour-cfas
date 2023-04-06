@@ -60,9 +60,9 @@ function MesOrganismes() {
       <Head>
         <title>{title}</title>
       </Head>
-      <Box w="100%" pt={[4, 6]} px={[1, 1, 4, 4]} mb={16}>
-        <Container maxW="xl">
-          <Heading textStyle="h2" color="grey.800" my={5}>
+      <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
+        <Container maxW="xl" px={0}>
+          <Heading textStyle="h2" color="grey.800" mb={5}>
             {getHeaderTitleFromOrganisationType(organisationType)}
           </Heading>
 

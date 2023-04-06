@@ -97,7 +97,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
     return <></>;
   }
   return (
-    <Flex flexDir="column" width="100%" my={10}>
+    <Flex flexDir="column" width="100%">
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Heading textStyle="h2" color="grey.800" mb={5}>
           {isMine ? "Mes effectifs" : "Ses effectifs"}
