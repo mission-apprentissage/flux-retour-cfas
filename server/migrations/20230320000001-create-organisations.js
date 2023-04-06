@@ -462,7 +462,17 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
       },
     })
     .toArray();
-  console.log(`Utilisateurs non migrés: ${users.length}`);
+  console.log(`> Utilisateurs non migrés : ${users.length}`);
+  users.forEach((user) => {
+    console.log(`${user.email} : ${user.nom} ${user.prenom} (ancienne organisation = '${user.organisation}')`);
+  });
+  console.log("> Il faudra contacter manuellement ces personnes pour recréer leur compte !");
+
+  await db.collection("usersMigration").deleteMany({
+    organisation_id: {
+      $exists: false,
+    },
+  });
 };
 
 function stripUndefinedFields(object) {
