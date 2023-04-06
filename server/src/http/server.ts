@@ -206,7 +206,7 @@ function setupRoutes(app: Application) {
     returnResult(async (req) => {
       const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
       registration.user.email = registration.user.email.toLowerCase();
-      await register(registration);
+      return await register(registration);
     })
   );
   app.post(
