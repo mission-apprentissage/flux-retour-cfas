@@ -15,7 +15,7 @@ export default () => {
   const router = express.Router();
 
   router.get(
-    "/users",
+    "/",
     validateRequestMiddleware({
       query: paginationShema({ defaultSort: "created_at:-1" }).merge(searchShema()).strict(),
     }),
@@ -27,21 +27,21 @@ export default () => {
   );
 
   router.put(
-    "/users/:id/validate",
+    "/:id/validate",
     returnResult(async (req) => {
       await validateMembre(req.user, req.params.id);
     })
   );
 
   router.put(
-    "/users/:id/reject",
+    "/:id/reject",
     returnResult(async (req) => {
       await rejectMembre(req.user, req.params.id);
     })
   );
 
   router.put(
-    "/users/:id",
+    "/:id",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
       body: userSchema({ isNew: false }).strict(),
@@ -64,7 +64,7 @@ export default () => {
   );
 
   router.get(
-    "/users/:id",
+    "/:id",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
     }),
@@ -82,7 +82,7 @@ export default () => {
   );
 
   router.delete(
-    "/users/:id",
+    "/:id",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
     }),

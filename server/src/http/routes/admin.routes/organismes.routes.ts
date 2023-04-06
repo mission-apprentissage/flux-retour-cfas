@@ -17,7 +17,7 @@ export default () => {
   const router = express.Router();
 
   router.get(
-    "/organismes",
+    "/",
     validateRequestMiddleware({
       query: paginationShema({ defaultSort: "created_at:-1" })
         .merge(searchShema())
@@ -41,7 +41,7 @@ export default () => {
   );
 
   router.get(
-    "/organismes/:id",
+    "/:id",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
     }),
@@ -57,7 +57,7 @@ export default () => {
   );
 
   router.put(
-    "/organismes/:id/hydrate",
+    "/:id/hydrate",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
     }),

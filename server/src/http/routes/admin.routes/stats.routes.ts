@@ -5,7 +5,7 @@ import { getStatOrganismes } from "../../../common/actions/organismes/organismes
 export default () => {
   const router = express.Router();
 
-  router.get("/stats", async (req, res) => {
+  router.get("/", async (req, res) => {
     const result = await getStatOrganismes();
     return res.json(result);
   });
