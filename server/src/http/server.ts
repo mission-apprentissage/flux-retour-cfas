@@ -27,7 +27,10 @@ import emails from "./routes/emails.routes.js";
 
 import auth from "./routes/user.routes/auth.routes.js";
 
-import organisme, { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes.js";
+import {
+  getOrganismeByUAIAvecSousEtablissements,
+  getOrganismeEffectifs,
+} from "./routes/specific.routes/organisme.routes.js";
 import effectif from "./routes/specific.routes/effectif.routes.js";
 import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
 
@@ -55,6 +58,7 @@ import {
 } from "../common/actions/organismes/organismes.actions.js";
 import {
   passwordSchema,
+  uaiSchema,
   validateFullObjectSchema,
   validateFullZodObjectSchema,
 } from "../common/utils/validationUtils.js";
@@ -86,6 +90,7 @@ import { TETE_DE_RESEAUX } from "../common/constants/networksConstants.js";
 import { checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers.js";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
 import loginSchemaLegacy from "../common/validation/loginSchemaLegacy.js";
+import { generateSifa } from "../common/actions/sifa.actions/sifa.actions.js";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 
@@ -361,6 +366,31 @@ function setupRoutes(app: Application) {
       return await getOrganismeIndicateurs(req.user, req.params.id, filters);
     })
   );
+  authRouter.get(
+    "/api/v1/organismes/:id/effectifs",
+    returnResult(async (req) => {
+      return await getOrganismeEffectifs(req.user, req.params.id);
+    })
+  );
+  // FIXME à tester + adapter returnResult pour ne pas avoir du JSON
+  authRouter.get(
+    "/api/v1/organismes/:id/sifa/export-csv-list",
+    returnResult(async (req, res) => {
+      const sifaCsv = await generateSifa(req.user, req.params.organismeId);
+      res.attachment(`tdb-données-sifa-${req.query.organismeId}.csv`);
+      return sifaCsv;
+    })
+  );
+  // LEGACY écrans indicateurs
+  authRouter.get(
+    "/api/v1/organisme/:uai", // FIXME SECURITE openbar pour la recherche
+    returnResult(async (req) => {
+      const { uai } = await validateFullObjectSchema(req.params, {
+        uai: uaiSchema(),
+      });
+      return await getOrganismeByUAIAvecSousEtablissements(uai);
+    })
+  );
 
   const organismeSearchSchema = {
     searchTerm: Joi.string().min(3),
@@ -376,13 +406,6 @@ function setupRoutes(app: Application) {
     })
   );
 
-  authRouter.use("/api/v1/organisme", organisme());
-  authRouter.get(
-    "/api/v1/organismes/:organismeId/effectifs",
-    returnResult(async (req) => {
-      return await getOrganismeEffectifs(req.user, req.params.organismeId);
-    })
-  );
   authRouter.use("/api/v1/effectif", effectif());
   authRouter.use("/api/v1/upload", upload());
   authRouter.get("/api/v1/server-events", serverEventsHandler);

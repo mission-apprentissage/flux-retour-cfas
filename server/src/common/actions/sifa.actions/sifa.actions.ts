@@ -6,6 +6,8 @@ import { findOrganismeById } from "../organismes/organismes.actions.js";
 import { SIFA_FIELDS } from "./sifaCsvFields.js";
 import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
 import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
+import { AuthContext } from "../../model/internal/AuthContext.js";
+import { requireManageEffectifsPermission } from "@/src/http/routes/specific.routes/organisme.routes.js";
 
 export const isEligibleSIFA = ({ historique_statut }) => {
   const filtered = historique_statut.filter(({ date_statut }) => {
@@ -35,11 +37,8 @@ export const isEligibleSIFA = ({ historique_statut }) => {
   return false;
 };
 
-/**
- * Méthode
- * @param {string} organisme_id
- */
-export const generateSifa = async (organisme_id) => {
+export const generateSifa = async (ctx: AuthContext, organisme_id) => {
+  await requireManageEffectifsPermission(ctx, organisme_id);
   const organisme = await findOrganismeById(organisme_id);
   if (!organisme) {
     throw new Error("organisme not found");
