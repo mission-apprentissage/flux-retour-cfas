@@ -15,7 +15,7 @@ import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConsta
 export async function register(registration: RegistrationSchema): Promise<void> {
   const alreadyExists = await getUserByEmail(registration.user.email);
   if (alreadyExists) {
-    throw Boom.conflict("email already in use", { message: "email already in use" });
+    throw Boom.conflict("Cet email est déjà utilisé.");
   }
 
   // on s'assure que l'organisme existe pour un OF
