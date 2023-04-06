@@ -123,7 +123,7 @@ const Users = () => {
               </HStack>
             </form>
             <Text>
-              {users?.pagination?.total || 0}{" "}
+              {Intl.NumberFormat().format(users?.pagination?.total || 0)}{" "}
               {users?.pagination?.total > 1 ? "comptes utilisateurs" : "compte utilisateur"}
             </Text>
             <UsersList mt={4} data={users?.data || []} pagination={users?.pagination} searchValue={searchValue} />

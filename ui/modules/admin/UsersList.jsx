@@ -18,7 +18,7 @@ const UsersList = ({ data, pagination, sorting, searchValue }) => {
       pagination={pagination}
       sorting={sorting}
       onPaginationChange={({ page, limit }) => {
-        router.push({ pathname: "/admin/users", query: { page, limit } }, null, { shallow: true });
+        router.push({ pathname: "/admin/users", query: { ...router.query, page, limit } }, null, { shallow: true });
       }}
       columns={{
         nom: {

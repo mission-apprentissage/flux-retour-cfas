@@ -19,7 +19,9 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
       pagination={pagination}
       sorting={sorting}
       onPaginationChange={({ page, limit }) => {
-        router.push({ pathname: "/admin/organismes", query: { page, limit } }, null, { shallow: true });
+        router.push({ pathname: "/admin/organismes", query: { ...router.query, page, limit } }, null, {
+          shallow: true,
+        });
       }}
       pageSizes={[10, 50, 100, 200]}
       enableSorting={true}

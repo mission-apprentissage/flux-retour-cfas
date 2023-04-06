@@ -1,7 +1,8 @@
+import React from "react";
+
 import { Center, InputGroup, InputRightElement, Spinner } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { LockFill } from "../../../../../../../theme/components/icons";
-import React from "react";
 
 export const getRightIcon = ({ loading, locked, success }) => {
   if (loading) return <Spinner boxSize="4" />;

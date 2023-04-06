@@ -7,6 +7,9 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ effectif_id: 1 }, { name: "effectif_id" }],
   [{ processed_at: 1 }, { name: "processed_at" }],
   [{ created_at: 1 }, { name: "created_at" }],
+  [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
+  [{ source: 1 }, { name: "source" }],
+  [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
 ];
 
 /**
