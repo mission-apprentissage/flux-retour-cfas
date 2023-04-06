@@ -32,7 +32,7 @@ import { _get, _post } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
 import { Field, Form, Formik } from "formik";
 import { Check } from "@/theme/components/icons";
-import { CheckIcon } from "@chakra-ui/icons";
+import { CheckIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { ShowPassword } from "@/theme/components/icons";
 import Link from "next/link";
 import { CGU_VERSION } from "@/components/legal/Cgu";
@@ -391,7 +391,10 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
               <FormControl mb={6} isRequired isInvalid={meta.error && meta.touched}>
                 <Checkbox {...field} id={field.name} icon={<Check />}>
                   J{"'"}atteste avoir lu et accepté les{" "}
-                  <Link href={"/cgu"}>conditions générales d{"'"}utilisation</Link>
+                  <a href="/cgu" target="_blank" rel="noreferrer">
+                    conditions générales d{"'"}utilisation
+                    <ExternalLinkIcon ml={2} />
+                  </a>
                 </Checkbox>
                 <FormErrorMessage>{meta.error}</FormErrorMessage>
               </FormControl>
