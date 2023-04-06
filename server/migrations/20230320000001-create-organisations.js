@@ -473,6 +473,38 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
       $exists: false,
     },
   });
+
+  // utilisateurs avec les anciens statuts
+  {
+    const users = await db
+      .collection("usersMigration")
+      .find({
+        account_status: {
+          $not: {
+            $in: ["PENDING_EMAIL_VALIDATION", "PENDING_ADMIN_VALIDATION", "CONFIRMED"],
+          },
+        },
+      })
+      .toArray();
+    console.log("> Utilisateurs dont il faudra leur communiquer de reset leur MDP :");
+    users.forEach((user) => {
+      console.log(
+        `${user.email} : ${user.nom} ${user.prenom} (ancienne organisation='${user.organisation}', ancien statut='${user.account_status}')`
+      );
+    });
+    await db.collection("usersMigration").updateMany(
+      {
+        _id: {
+          $in: users.map((user) => user._id),
+        },
+      },
+      {
+        $set: {
+          account_status: "CONFIRMED",
+        },
+      }
+    );
+  }
 };
 
 function stripUndefinedFields(object) {
