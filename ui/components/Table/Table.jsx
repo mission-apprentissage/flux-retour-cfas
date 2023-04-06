@@ -27,21 +27,21 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
 
 export default function Table({
   data: defaultData,
-  onRowClick,
+  onRowClick = undefined,
   columns: columnsDef,
-  renderSubComponent,
-  getRowCanExpand,
+  renderSubComponent = undefined,
+  getRowCanExpand = undefined,
   searchValue,
   onCountItemsChange = () => {},
   // pagination
   manualPagination = false,
   onPaginationChange = null,
-  pagination,
+  pagination = undefined,
   // sorting
   manualSorting = false,
-  enableSorting,
+  enableSorting = undefined,
   onSortingChange = null,
-  sorting,
+  sorting = undefined,
   pageSizes = [5, 10, 20, 30, 40, 50],
   ...props
 }) {
