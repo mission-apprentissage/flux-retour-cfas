@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Center, Spinner } from "@chakra-ui/react";
-import Effectifs from "./engine/Effectifs.jsx";
+import Effectifs from "./engine/Effectifs";
 
 import { organismeAtom } from "../../../hooks/organismeAtoms";
 import { _get } from "../../../common/httpClient";

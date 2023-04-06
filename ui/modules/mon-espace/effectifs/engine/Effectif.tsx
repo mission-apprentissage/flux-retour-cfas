@@ -8,7 +8,17 @@ import { useInitCerfa } from "./formEngine/hooks/useInitCerfa";
 import { useAutoSave } from "./formEngine/hooks/useAutoSave";
 import { CerfaForm } from "./cerfaForm/CerfaForm";
 
-const Effectif = React.memo(function EffectifMemo({ modeSifa = false, canEdit = false, effectifsSnapshot = false }) {
+interface EffectifProps {
+  modeSifa: boolean;
+  canEdit: boolean;
+  effectifsSnapshot: boolean;
+}
+
+const Effectif = React.memo(function EffectifMemo({
+  modeSifa = false,
+  canEdit = false,
+  effectifsSnapshot = false,
+}: EffectifProps) {
   const { controller: cerfaController } = useCerfa({ schema: cerfaSchema });
   const { isLoading } = useInitCerfa({ controller: cerfaController, modeSifa, canEdit, effectifsSnapshot });
   useAutoSave({ controller: cerfaController });
@@ -18,11 +28,15 @@ const Effectif = React.memo(function EffectifMemo({ modeSifa = false, canEdit = 
   }
 
   return (
-    <CerfaControllerContext.Provider value={cerfaController}>
-      <Box my={12} px={5}>
-        <CerfaForm modeSifa={modeSifa} />
-      </Box>
-    </CerfaControllerContext.Provider>
+    <>
+      {/* @ts-ignore */}
+      <CerfaControllerContext.Provider value={cerfaController}>
+        <Box my={12} px={5}>
+          {/* @ts-ignore */}
+          <CerfaForm modeSifa={modeSifa} />
+        </Box>
+      </CerfaControllerContext.Provider>
+    </>
   );
 });
 
