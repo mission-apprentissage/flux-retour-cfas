@@ -49,6 +49,18 @@ const ShowErrorInCell = ({ item, fieldName, value }) => {
   return value;
 };
 
+interface EffectifsTableProps {
+  organismesEffectifs: any[];
+  modeSifa?: boolean;
+  effectifsSnapshot?: boolean;
+  canEdit?: boolean;
+  columns?: string[];
+  show?: string;
+  searchValue?: string;
+  RenderErrorImport?: (data: any) => any; // eslint-disable-line no-unused-vars
+  onCountItemsChange?: (count: number) => any; // eslint-disable-line no-unused-vars
+}
+
 const EffectifsTable = ({
   organismesEffectifs,
   modeSifa = false,
@@ -59,7 +71,7 @@ const EffectifsTable = ({
   searchValue,
   RenderErrorImport = () => {},
   onCountItemsChange = () => {},
-}) => {
+}: EffectifsTableProps) => {
   const [count, setCount] = useState(organismesEffectifs.length);
 
   return (
@@ -69,6 +81,7 @@ const EffectifsTable = ({
         mt={4}
         data={organismesEffectifs}
         searchValue={searchValue}
+        /* @ts-ignore */
         onCountItemsChange={(count) => {
           setCount(count);
           onCountItemsChange(count);
@@ -511,7 +524,9 @@ const EffectifsTable = ({
               }
             : {}),
         }}
+        /* @ts-ignore */
         getRowCanExpand={() => true}
+        /* @ts-ignore */
         renderSubComponent={({ row }) => {
           return (
             <EffectifDetails row={row} modeSifa={modeSifa} canEdit={canEdit} effectifsSnapshot={effectifsSnapshot} />

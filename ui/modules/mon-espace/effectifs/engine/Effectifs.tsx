@@ -83,7 +83,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
-  const exportFilename = `tdb-données-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
+  const exportFilename = `tdb-données-${organisme?.nom || ""}-${new Date().toLocaleDateString()}.csv`;
   const [searchValue, setSearchValue] = useState("");
 
   const organismesEffectifsGroupedBySco = useMemo(
@@ -93,6 +93,9 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
   const [anneScolaire, setAnneScolaire] = useState("all");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
 
+  if (!organisme) {
+    return <></>;
+  }
   return (
     <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
@@ -142,7 +145,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
         </HStack>
 
         <Ribbons variant="info" mb={6}>
-          <Box ml={3} fle>
+          <Box ml={3}>
             <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
               Service d’import de vos effectifs en version bêta.
             </Text>
@@ -203,11 +206,12 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
                   },
                 ],
                 placeholder: "Recherche",
+                value: searchValue,
+                onSubmit: (value) => {
+                  setSearchValue(value.trim());
+                },
               }}
-              onSubmit={(value) => {
-                setSearchValue(value.trim());
-              }}
-              value={searchValue}
+              /* @ts-ignore */
               w="35%"
             />
           </VStack>
@@ -244,10 +248,10 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
       )}
 
       <Box mt={10} mb={16}>
-        {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]) => {
+        {Object.entries<any[]>(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]) => {
           if (anneScolaire !== "all" && anneScolaire !== anneSco) return null;
           const orgaEffectifs = showOnlyErrors ? orgaE.filter((ef) => ef.validation_errors.length) : orgaE;
-          const effectifsByCfd = groupBy(orgaEffectifs, "formation.cfd");
+          const effectifsByCfd: { [cfd: string]: any[] } = groupBy(orgaEffectifs, "formation.cfd");
           const borderStyle = { borderColor: "dgalt", borderWidth: 1 }; //anneScolaire === "all" ? { borderColor: "bluefrance", borderWidth: 1 } : {};
           return (
             <Box key={anneSco} mb={5}>
