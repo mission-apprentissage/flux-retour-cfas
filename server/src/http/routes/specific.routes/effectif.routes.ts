@@ -11,17 +11,18 @@ import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js"
 import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import { getCodePostalInfo } from "../../../common/apis/apiTablesCorrespondances.js";
-import { requireManageEffectifsPermission } from "./organisme.routes.js";
+import { requireManageEffectifsPermission } from "../../../common/actions/helpers/permissions.js";
 
 const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
     ? { [path.join(".")]: obj }
     : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
 
-// TODO [tech] TMP
 export default () => {
   const router = express.Router();
-  router.use(async (req, res, next) => {
+
+  // FIXME à tester
+  router.use(async (req, _res, next) => {
     try {
       await requireManageEffectifsPermission(req.user, req.query.organisme_id as string);
       next();

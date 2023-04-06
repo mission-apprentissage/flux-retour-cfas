@@ -183,3 +183,28 @@ export function isOrganisationOF(type: OrganisationType): boolean {
     type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR"
   );
 }
+
+export async function canManageEffectifs(ctx: AuthContext, organismeId: string): Promise<boolean> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
+      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId);
+    }
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+export async function requireManageEffectifsPermission(ctx: AuthContext, organismeId: string): Promise<void> {
+  if (!(await canManageEffectifs(ctx, organismeId))) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+}
