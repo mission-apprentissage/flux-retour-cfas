@@ -19,7 +19,7 @@ export default () => {
         email: Joi.string().email().required(),
         password: Joi.string().required(),
       });
-      const sessionToken = await login(email, password);
+      const sessionToken = await login(email.toLowerCase(), password);
       responseWithCookie(res, sessionToken);
     })
   );
