@@ -25,8 +25,8 @@ export default () => {
         .strict(),
     }),
     async (req, res) => {
-      const { page, limit, sort, q, filter } = req.query;
-      const query = filter || {};
+      const { page, limit, sort, q, filter } = req.query as any;
+      const query: any = filter || {};
       if (q) {
         query.$text = { $search: q };
       }
