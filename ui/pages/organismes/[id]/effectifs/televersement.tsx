@@ -5,17 +5,19 @@ import Head from "next/head";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useEffectifsOrganismeOrganisation } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
+import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 import Televersements from "@/modules/mon-espace/effectifs/Televersements";
+import { useRouter } from "next/router";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const PageImportEffectifsDeMonOrganisme = () => {
-  const { organisme } = useEffectifsOrganismeOrganisation();
+const PageImportEffectifsDeSonOrganisme = () => {
+  const router = useRouter();
+  const { organisme } = useEffectifsOrganisme(router.query.id as string);
   return (
     <Page>
       <Head>
-        <title>Mes effectifs - Import</title>
+        <title>Ses effectifs - Import</title>
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
         <Container maxW="xl">{organisme && <Televersements organisme={organisme} />}</Container>
@@ -24,4 +26,4 @@ const PageImportEffectifsDeMonOrganisme = () => {
   );
 };
 
-export default withAuth(PageImportEffectifsDeMonOrganisme);
+export default withAuth(PageImportEffectifsDeSonOrganisme);

@@ -5,9 +5,9 @@ import { useRouter } from "next/router";
 
 import { DownloadLine } from "../../../theme/components/icons/index.js";
 import { ERPS } from "../../../common/constants/erps";
-import { configureOrganisationERP } from "../../../common/api/tableauDeBord.js";
+import { configureOrganismeERP } from "../../../common/api/tableauDeBord.js";
 
-const ConfigurationAPI = () => {
+const ConfigurationAPI = ({ organisme, isMine }) => {
   const router = useRouter();
 
   const erpIdSelected = router.query.erp;
@@ -36,7 +36,7 @@ const ConfigurationAPI = () => {
               padding={"2px"}
               alignItems="end"
               onClick={async () => {
-                await configureOrganisationERP({
+                await configureOrganismeERP(organisme._id, {
                   setup_step_courante: "STEP2",
                   erps: [erpIdSelected],
                 });
@@ -105,12 +105,12 @@ const ConfigurationAPI = () => {
         </VStack>
         <Button
           onClick={async () => {
-            await configureOrganisationERP({
+            await configureOrganismeERP(organisme._id, {
               erps: [erpIdSelected],
               setup_step_courante: "COMPLETE",
               mode_de_transmission: "API",
             });
-            router.push("/effectifs");
+            router.push(isMine ? "/effectifs" : `/organismes/${organisme._id}/effectifs`);
           }}
           variant="secondary"
           padding={2}

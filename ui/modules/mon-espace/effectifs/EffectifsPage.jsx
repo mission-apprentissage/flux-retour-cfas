@@ -59,10 +59,10 @@ const EffectifsPage = ({ isMine }) => {
   }
 
   if (!organisme.mode_de_transmission) {
-    return <ChoixTransmission />;
+    return <ChoixTransmission organisme={organisme} />;
   } else if (organisme.mode_de_transmission === "API") {
     if (organisme.erps?.length === 0 && !organisme.first_transmission_date) {
-      return <TransmissionAPI />;
+      return <TransmissionAPI isMine={isMine} organisme={organisme} />;
     } else {
       return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} organisme={organisme} />;
     }

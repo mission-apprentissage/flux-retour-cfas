@@ -6,11 +6,9 @@ import { useRouter } from "next/router";
 
 import { InfoCircle } from "../../../theme/components/icons/index.js";
 import { ERPS } from "../../../common/constants/erps";
-import { useOrganisationOrganisme } from "../../../hooks/organismes";
-import { configureOrganisationERP } from "../../../common/api/tableauDeBord.js";
+import { configureOrganismeERP } from "../../../common/api/tableauDeBord.js";
 
-const TransmissionAPI = () => {
-  const { organisme } = useOrganisationOrganisme();
+const TransmissionAPI = ({ organisme, isMine }) => {
   const router = useRouter();
 
   const { values, handleSubmit, handleChange, isSubmitting } = useFormik({
@@ -21,7 +19,11 @@ const TransmissionAPI = () => {
       erp: Yup.string().required("Requis"),
     }),
     onSubmit: async (submittedValues) => {
-      router.push(`/effectifs/aide-configuration-erp?erp=${submittedValues.erp}`);
+      router.push(
+        isMine
+          ? `/effectifs/aide-configuration-erp?erp=${submittedValues.erp}`
+          : `/organismes/${organisme._id}/effectifs/aide-configuration-erp?erp=${submittedValues.erp}`
+      );
     },
   });
   return (
@@ -65,7 +67,7 @@ const TransmissionAPI = () => {
               <Button
                 variant="primary"
                 onClick={async () => {
-                  await configureOrganisationERP({
+                  await configureOrganismeERP(organisme._id, {
                     mode_de_transmission: "MANUEL",
                     setup_step_courante: "COMPLETE",
                   });
@@ -85,7 +87,7 @@ const TransmissionAPI = () => {
 
           <Button
             onClick={async () => {
-              await configureOrganisationERP({ mode_de_transmission: null });
+              await configureOrganismeERP(organisme._id, { mode_de_transmission: null });
               window.location.reload(); // FIXME, il faudrait refetch l'organisme
             }}
             color="bluefrance"

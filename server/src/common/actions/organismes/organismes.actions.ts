@@ -16,9 +16,12 @@ import { AuthContext } from "../../model/internal/AuthContext.js";
 import {
   getOrganismeRestriction,
   isOrganisationOF,
+  requireManageOrganismeEffectifsPermission,
   requireOrganismeIndicateursAccess,
 } from "../helpers/permissions.js";
 import { getOrganisationOrganisme } from "../organisations.actions.js";
+import { ConfigurationERP } from "../../validation/configurationERPSchema.js";
+import { stripEmptyFields } from "../../utils/validationUtils.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -748,4 +751,14 @@ async function fetchFromAPIEntreprise(siret: string): Promise<any> {
       complete: result.result.adresse,
     },
   };
+}
+
+export async function configureOrganismeERP(
+  ctx: AuthContext,
+  organismeId: string,
+  conf: ConfigurationERP
+): Promise<void> {
+  await requireManageOrganismeEffectifsPermission(ctx, organismeId);
+  console.log("set erp", stripEmptyFields(conf));
+  await organismesDb().updateOne({ _id: new ObjectId(organismeId) }, { $set: stripEmptyFields(conf) as any });
 }

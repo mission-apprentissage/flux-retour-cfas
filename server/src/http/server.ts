@@ -55,6 +55,7 @@ import {
   findOrganismesByUAI,
   findOrganismesBySIRET,
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
+  configureOrganismeERP,
 } from "../common/actions/organismes/organismes.actions.js";
 import {
   passwordSchema,
@@ -70,7 +71,6 @@ import { exportAnonymizedEffectifsAsCSV } from "../common/actions/effectifs/effe
 import { Application } from "express-serve-static-core";
 import {
   cancelInvitation,
-  configureOrganismeERP,
   getInvitationByToken,
   getOrganisationOrganisme,
   inviteUserToOrganisation,
@@ -386,6 +386,13 @@ function setupRoutes(app: Application) {
       return sifaCsv;
     })
   );
+  authRouter.put(
+    "/api/v1/organismes/:id/configure-erp",
+    returnResult(async (req) => {
+      const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
+      await configureOrganismeERP(req.user, req.params.id, conf);
+    })
+  );
   // LEGACY écrans indicateurs
   authRouter.get(
     "/api/v1/organisme/:uai", // FIXME SECURITE openbar pour la recherche
@@ -472,14 +479,6 @@ function setupRoutes(app: Application) {
       return await getOrganisationOrganisme(req.user);
     })
   );
-  authRouter.put(
-    "/api/v1/organisation/configure-erp",
-    returnResult(async (req) => {
-      const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
-      await configureOrganismeERP(req.user, conf);
-    })
-  );
-
   authRouter.get(
     "/api/v1/organisation/membres",
     returnResult(async (req) => {

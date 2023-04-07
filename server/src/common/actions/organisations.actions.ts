@@ -13,8 +13,6 @@ import { requireOrganisationOF } from "./helpers/permissions.js";
 import { Invitation } from "../model/invitations.model.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { getUserById } from "./users.actions.js";
-import { ConfigurationERP } from "../validation/configurationERPSchema.js";
-import { stripEmptyFields } from "../utils/validationUtils.js";
 
 type NewOrganisation = Omit<Organisation, "_id" | "created_at">;
 
@@ -180,19 +178,6 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
   if (res.deletedCount === 0) {
     throw Boom.forbidden("Permissions invalides");
   }
-}
-
-export async function configureOrganismeERP(ctx: AuthContext, conf: ConfigurationERP): Promise<void> {
-  const organisationOF = requireOrganisationOF(ctx);
-
-  const organisme = await organismesDb().findOne({ siret: organisationOF.siret, uai: organisationOF.uai });
-  if (!organisme) {
-    throw Boom.notFound("organisme de l'organisation non trouvé", {
-      siret: organisationOF.siret,
-      uai: organisationOF.uai,
-    });
-  }
-  await organismesDb().updateOne({ _id: organisme._id }, { $set: stripEmptyFields(conf) as any });
 }
 
 export async function getOrganisationOrganisme(ctx: AuthContext): Promise<Organisme> {

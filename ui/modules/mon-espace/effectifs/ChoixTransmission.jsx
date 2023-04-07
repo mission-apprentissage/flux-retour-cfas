@@ -5,9 +5,9 @@ import { Box, Button, Center, Flex, Heading, HStack, Text } from "@chakra-ui/rea
 
 import { ArrowDropRightLine } from "@/theme/components/icons";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { configureOrganisationERP } from "../../../common/api/tableauDeBord";
+import { configureOrganismeERP } from "../../../common/api/tableauDeBord";
 
-const ChoixTransmission = () => {
+const ChoixTransmission = ({ organisme }) => {
   const router = useRouter();
 
   return (
@@ -46,7 +46,7 @@ const ChoixTransmission = () => {
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  await configureOrganisationERP({ mode_de_transmission: "API" });
+                  await configureOrganismeERP(organisme._id, { mode_de_transmission: "API" });
                   router.reload();
                 }}
                 size={"md"}
@@ -80,7 +80,7 @@ const ChoixTransmission = () => {
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  await configureOrganisationERP({
+                  await configureOrganismeERP(organisme._id, {
                     mode_de_transmission: "MANUEL",
                     setup_step_courante: "COMPLETE",
                   });

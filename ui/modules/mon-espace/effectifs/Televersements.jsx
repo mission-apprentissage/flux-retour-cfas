@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import {
   Box,
   Button,
@@ -20,7 +20,6 @@ import uniq from "lodash.uniq";
 
 import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon } from "@/theme/components/icons";
 import { _get, _post } from "@/common/httpClient";
-import { organismeAtom } from "@/hooks/organismeAtoms";
 import useServerEvents from "@/hooks/useServerEvents";
 import { ArrowRightLong } from "@/theme/components/icons";
 import { Input } from "./engine/formEngine/components/Input/Input";
