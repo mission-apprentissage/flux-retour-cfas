@@ -1,3 +1,11 @@
+## [3.19.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.19.0...v3.19.1) (2023-04-07)
+
+
+### Bug Fixes
+
+* cookie valide pendant 6 jours ([#2857](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2857)) ([1a7d9f7](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1a7d9f78fa4e802f71d102f2de7d7ce6da921891))
+* un organisme fermé ne devrait pas etre rouvert pendant l'inscrip… ([#2867](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2867)) ([0c1ea36](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0c1ea36a758fc28f128f4cec9ed635151781dac4))
+
 # [3.19.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.18.0...v3.19.0) (2023-04-05)
 
 
