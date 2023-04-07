@@ -208,7 +208,13 @@ const PageGestionDesMembres = () => {
                           <Menu placement="bottom">
                             <MenuButton as={IconButton} aria-label="Options" icon={<HamburgerIcon />} />
                             <MenuList>
-                              <MenuItem onClick={() => deleteMembre(user._id)}>Supprimer le compte</MenuItem>
+                              <MenuItem
+                                onClick={() =>
+                                  confirm("Voulez-vous vraiment supprimer ce compte ?") && deleteMembre(user._id)
+                                }
+                              >
+                                Supprimer le compte
+                              </MenuItem>
                             </MenuList>
                           </Menu>
                         </>
