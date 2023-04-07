@@ -53,7 +53,7 @@ export function createUploadStream(url, httpOptions = {}) {
 
 export function responseWithCookie({ res, token }) {
   return res.cookie(COOKIE_NAME, token, {
-    maxAge: 30 * 24 * 3600000,
+    maxAge: 6 * 24 * 60 * 60 * 1000, // 6 jours (unité en millisecondes)
     httpOnly: true,
     sameSite: "lax",
     secure: true,
