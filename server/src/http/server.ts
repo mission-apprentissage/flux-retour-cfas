@@ -382,7 +382,7 @@ function setupRoutes(app: Application) {
     "/api/v1/organismes/:id/sifa-export",
     returnResult(async (req, res) => {
       const sifaCsv = await generateSifa(req.user, req.params.id);
-      res.attachment(`tdb-données-sifa-${req.query.organismeId}.csv`);
+      res.attachment(`tdb-données-sifa-${req.params.id}.csv`);
       return sifaCsv;
     })
   );
