@@ -34,7 +34,7 @@ const Login = (props) => {
     try {
       await _post("/api/v1/auth/login", values);
       await refreshSession();
-      router.push("/auth/redirection");
+      router.push("/");
     } catch (err) {
       const errorMessage = err?.json?.data?.message || err.message;
       setStatus({ error: errorMessage });
