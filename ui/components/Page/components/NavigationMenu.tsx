@@ -8,6 +8,7 @@ import Link from "../../Links/Link";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
 import { AuthContext } from "@/common/internal/AuthContext";
+import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 
 function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): string {
   switch (type) {
@@ -36,6 +37,34 @@ function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): stri
   }
 }
 
+function canManageEffectifsOrganisme(type: OrganisationType): boolean {
+  switch (type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+      return true;
+
+    case "TETE_DE_RESEAU":
+      return true;
+
+    case "DREETS":
+    case "DEETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+      return false;
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+      return false;
+    case "ADMINISTRATEUR":
+      return true;
+
+    default:
+      throw new Error(`Type '${type}' inconnu`);
+  }
+}
+
 const NavItem = ({
   children,
   to = "/",
@@ -44,12 +73,14 @@ const NavItem = ({
   isDisabled = false,
   disabledReason = "",
   colorDisabled = "dgalt",
+  exactMatch = false,
   ...rest
 }) => {
   const router = useRouter();
-  // on traite la racine en mode exact
   const isActiveInternal =
-    isActive || (to === "/" ? router.pathname === "/" : router.pathname.startsWith(to) || router.asPath.startsWith(to));
+    isActive || exactMatch
+      ? router.pathname === to || router.asPath === to
+      : router.pathname.startsWith(to) || router.asPath.startsWith(to);
 
   const hasState = isActiveInternal || isDisabled;
   const colorCurrentState = isActiveInternal ? colorActive : isDisabled ? colorDisabled : "";
@@ -90,7 +121,9 @@ const NavItem = ({
 const NavBarPublic = () => {
   return (
     <>
-      <NavItem to="/">Accueil</NavItem>
+      <NavItem to="/" exactMatch>
+        Accueil
+      </NavItem>
       <NavItem to="/explorer-les-indicateurs">Indicateurs en temps réel</NavItem>
     </>
   );
@@ -101,7 +134,9 @@ function NavBarTransverse(): ReactElement {
   const { organisationType } = useAuth();
   return (
     <>
-      <NavItem to="/">Mon tableau de bord</NavItem>
+      <NavItem to="/" exactMatch>
+        Mon tableau de bord
+      </NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
     </>
   );
@@ -113,7 +148,9 @@ function NavBarOrganismeFormation(): ReactElement {
   const { organismes } = useOrganisationOrganismes();
   return (
     <>
-      <NavItem to="/">Mon tableau de bord</NavItem>
+      <NavItem to="/" exactMatch>
+        Mon tableau de bord
+      </NavItem>
       {/* on s'assure qu'un organisme a accès à au moins un autre organisme */}
       {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && organismes?.length > 0 && (
         <NavItem to="/organismes">Mes organismes</NavItem>
@@ -136,10 +173,13 @@ function NavBarOrganismeFormation(): ReactElement {
 
 function NavBarAutreOrganisme(): ReactElement {
   const router = useRouter();
+  const { organisationType } = useAuth();
 
   // Construction dynamique des liens de la navbar en fonction de la navigation URL
   const showSubNavBar = router.pathname.startsWith("/organismes/[id]");
   const organismeId = router.query.id as string;
+
+  const { organisme } = useEffectifsOrganisme(organismeId);
 
   return (
     <>
@@ -149,9 +189,27 @@ function NavBarAutreOrganisme(): ReactElement {
             <Box p={4} bg={"transparent"}>
               <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
             </Box>
-            <NavItem to={`/organismes/${organismeId}`} colorActive="dsfr_lightprimary.bluefrance_850">
+            <NavItem to={`/organismes/${organismeId}`} exactMatch colorActive="dsfr_lightprimary.bluefrance_850">
               Son tableau de bord
             </NavItem>
+            {canManageEffectifsOrganisme(organisationType) && (
+              <>
+                <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
+                  Ses effectifs
+                </NavItem>
+                {organisme && (
+                  <NavItem
+                    to={`/organismes/${organismeId}/enquete-sifa`}
+                    isDisabled={!organisme.first_transmission_date}
+                    disabledReason={
+                      !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
+                    }
+                  >
+                    Son enquête SIFA
+                  </NavItem>
+                )}
+              </>
+            )}
           </Flex>
         </Container>
       )}

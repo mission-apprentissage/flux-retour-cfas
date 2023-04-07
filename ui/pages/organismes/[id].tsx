@@ -11,9 +11,9 @@ import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/compone
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const Organisme = () => {
+const DashboardOrganisme = () => {
   const router = useRouter();
-  const { organisme } = useOrganisme(router.query.id);
+  const { organisme } = useOrganisme(router.query.id as string);
   return (
     <Page>
       <Head>
@@ -33,4 +33,4 @@ const Organisme = () => {
   );
 };
 
-export default withAuth(Organisme);
+export default withAuth(DashboardOrganisme);
