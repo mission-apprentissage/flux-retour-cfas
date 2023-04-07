@@ -1,4 +1,4 @@
-import { requireManageEffectifsPermission } from "../../common/actions/helpers/permissions.js";
+import { requireManageOrganismeEffectifsPermission } from "../../common/actions/helpers/permissions.js";
 import { NextFunction, Request, Response } from "express";
 
 export async function legacyRequireManageEffectifsPermissionMiddleware(
@@ -7,7 +7,7 @@ export async function legacyRequireManageEffectifsPermissionMiddleware(
   next: NextFunction
 ) {
   try {
-    await requireManageEffectifsPermission(
+    await requireManageOrganismeEffectifsPermission(
       req.user,
       (req.query.organisme_id as string) || (req.body.organisme_id as string)
     );

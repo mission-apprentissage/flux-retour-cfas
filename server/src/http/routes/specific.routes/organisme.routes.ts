@@ -8,10 +8,10 @@ import {
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
 import { AuthContext } from "../../../common/model/internal/AuthContext.js";
-import { requireManageEffectifsPermission } from "../../../common/actions/helpers/permissions.js";
+import { requireManageOrganismeEffectifsPermission } from "../../../common/actions/helpers/permissions.js";
 
 export async function getOrganismeEffectifs(ctx: AuthContext, organismeId: string, sifa = false) {
-  await requireManageEffectifsPermission(ctx, organismeId);
+  await requireManageOrganismeEffectifsPermission(ctx, organismeId);
 
   const effectifsDb = await findEffectifs(organismeId);
 

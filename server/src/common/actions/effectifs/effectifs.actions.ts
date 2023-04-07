@@ -15,14 +15,14 @@ import {
 } from "./indicators.js";
 import { effectifsDb } from "../../model/collections.js";
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { requireOrganismeAccess } from "../helpers/permissions.js";
+import { requireOrganismeIndicateursAccess } from "../helpers/permissions.js";
 import { format } from "date-fns";
 import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
 import { cache } from "../../../services.js";
 import { tryCachedExecution } from "../../utils/cacheUtils.js";
 
 export async function getOrganismeIndicateurs(ctx: AuthContext, organismeId: string, filters: EffectifsFilters) {
-  await requireOrganismeAccess(ctx, organismeId);
+  await requireOrganismeIndicateursAccess(ctx, organismeId);
   filters.organisme_id = organismeId;
   return await getIndicateurs(filters);
 }

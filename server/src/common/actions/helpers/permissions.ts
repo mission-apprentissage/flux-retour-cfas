@@ -6,9 +6,10 @@ import { AuthContext } from "../../model/internal/AuthContext.js";
 import { OrganisationOrganismeFormation, OrganisationType } from "../../model/organisations.model.js";
 import { getOrganismeById } from "../organismes/organismes.actions.js";
 import { ObjectId } from "mongodb";
+import { Organisme } from "../../model/@types/Organisme.js";
 
-export async function requireOrganismeAccess(ctx: AuthContext, organismeId: string): Promise<void> {
-  if (!(await canAccessOrganisme(ctx, organismeId))) {
+export async function requireOrganismeIndicateursAccess(ctx: AuthContext, organismeId: string): Promise<void> {
+  if (!(await canAccessOrganismeIndicateurs(ctx, organismeId))) {
     throw Boom.forbidden("Permissions invalides");
   }
 }
@@ -26,7 +27,9 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
       return {
         _id: {
           $in: linkedOrganismesIds,
@@ -69,7 +72,9 @@ export async function getEffectifsOrganismeRestriction(ctx: AuthContext): Promis
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
       return {
         organisme_id: {
           $in: linkedOrganismesIds,
@@ -105,10 +110,9 @@ export async function getEffectifsOrganismeRestriction(ctx: AuthContext): Promis
 }
 
 /**
- * Informations en provenance du catalogue :
- * organismes(siret=siret de l'organisation, uai=uai de l'organisation).formations.organismes
+ * Liste tous les organismes accessibles pour une organisation (dont l'organisme lié à l'organisation)
  */
-export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrganismeFormation>) {
+export async function findOrganismesAccessiblesByOrganisation(ctx: AuthContext<OrganisationOrganismeFormation>) {
   const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,
@@ -118,9 +122,15 @@ export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrg
     logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
     throw new Error("organisme de l'organisation non trouvé");
   }
+  return [userOrganisme._id, ...(await findOFLinkedOrganismesIds(userOrganisme))];
+}
 
+/**
+ * Informations en provenance du catalogue :
+ * organismes(siret=siret de l'organisation, uai=uai de l'organisation).formations.organismes
+ */
+export async function findOFLinkedOrganismesIds(userOrganisme: Organisme) {
   const subOrganismesIds = new Set<string>();
-  subOrganismesIds.add(userOrganisme._id.toString());
   if (
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
@@ -146,14 +156,16 @@ export async function findOFLinkedOrganismesIds(ctx: AuthContext<OrganisationOrg
   return [...subOrganismesIds.values()].map((id) => new ObjectId(id));
 }
 
-async function canAccessOrganisme(ctx: AuthContext, organismeId: string): Promise<boolean> {
+async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: string): Promise<boolean> {
   const organisme = await getOrganismeById(organismeId);
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
       return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId);
     }
 
@@ -184,13 +196,15 @@ export function isOrganisationOF(type: OrganisationType): boolean {
   );
 }
 
-export async function canManageEffectifs(ctx: AuthContext, organismeId: string): Promise<boolean> {
+export async function canManageOrganismeEffectifs(ctx: AuthContext, organismeId: string): Promise<boolean> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOFLinkedOrganismesIds(ctx as AuthContext<OrganisationOrganismeFormation>);
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
       return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId);
     }
 
@@ -203,8 +217,8 @@ export async function canManageEffectifs(ctx: AuthContext, organismeId: string):
   }
 }
 
-export async function requireManageEffectifsPermission(ctx: AuthContext, organismeId: string): Promise<void> {
-  if (!(await canManageEffectifs(ctx, organismeId))) {
+export async function requireManageOrganismeEffectifsPermission(ctx: AuthContext, organismeId: string): Promise<void> {
+  if (!(await canManageOrganismeEffectifs(ctx, organismeId))) {
     throw Boom.forbidden("Permissions invalides");
   }
 }

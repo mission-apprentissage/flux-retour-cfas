@@ -13,7 +13,12 @@ import { Organisme } from "../../model/@types/Organisme.js";
 import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
 import Boom from "boom";
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { getOrganismeRestriction, requireOrganismeAccess } from "../helpers/permissions.js";
+import {
+  getOrganismeRestriction,
+  isOrganisationOF,
+  requireOrganismeIndicateursAccess,
+} from "../helpers/permissions.js";
+import { getOrganisationOrganisme } from "../organisations.actions.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -616,23 +621,39 @@ export const getStatOrganismes = async () => {
 };
 
 export async function findUserOrganismes(ctx: AuthContext) {
+  const restrictionOwnOrganisme = isOrganisationOF(ctx.organisation.type)
+    ? {
+        _id: {
+          $ne: (await getOrganisationOrganisme(ctx))._id,
+        },
+      }
+    : {};
   const organismes = await organismesDb()
-    .find(await getOrganismeRestriction(ctx), {
-      projection: {
-        _id: 1,
-        nom: 1,
-        enseigne: 1,
-        raison_sociale: 1,
-        ferme: 1,
-        nature: 1,
-        adresse: 1,
-        siret: 1,
-        uai: 1,
-        first_transmission_date: 1,
-        last_transmission_date: 1,
-        fiabilisation_statut: 1,
+    .find(
+      {
+        $and: [
+          await getOrganismeRestriction(ctx),
+          // cas particulier pour l'OF qui ne doit pas lister son propre organisme
+          restrictionOwnOrganisme,
+        ],
       },
-    })
+      {
+        projection: {
+          _id: 1,
+          nom: 1,
+          enseigne: 1,
+          raison_sociale: 1,
+          ferme: 1,
+          nature: 1,
+          adresse: 1,
+          siret: 1,
+          uai: 1,
+          first_transmission_date: 1,
+          last_transmission_date: 1,
+          fiabilisation_statut: 1,
+        },
+      }
+    )
     .toArray();
 
   return organismes.map((organisme) => ({
@@ -642,7 +663,7 @@ export async function findUserOrganismes(ctx: AuthContext) {
 }
 
 export async function getOrganisme(ctx: AuthContext, organismeId: string) {
-  await requireOrganismeAccess(ctx, organismeId);
+  await requireOrganismeIndicateursAccess(ctx, organismeId);
   return await getOrganismeById(organismeId); // double récupération avec les permissions mais pas très grave
 }
 

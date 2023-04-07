@@ -16,7 +16,7 @@ import { validateFullObjectSchemaUnknown } from "../../../common/utils/validatio
 import { returnResult } from "../../middlewares/helpers.js";
 import {
   getEffectifsOrganismeRestriction,
-  requireOrganismeAccess,
+  requireOrganismeIndicateursAccess,
 } from "../../../common/actions/helpers/permissions.js";
 
 const commonEffectifsFiltersSchema = {
@@ -46,7 +46,7 @@ export async function buildEffectifsFiltersFromRequest(req: Request): Promise<Ef
   // TODO il faudra sortir organisme_id pour le spécifier dans une autre route /organismes/:id/indicateurs
   // pour que les indicateurs ici ne soit que ceux agrégés
   if (filters.organisme_id) {
-    await requireOrganismeAccess(req.user, filters.organisme_id);
+    await requireOrganismeIndicateursAccess(req.user, filters.organisme_id);
   } else {
     // amend filters with a restriction
     filters.restrictionMongo = await getEffectifsOrganismeRestriction(req.user);
