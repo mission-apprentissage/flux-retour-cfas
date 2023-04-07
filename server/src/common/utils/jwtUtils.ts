@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 import config from "../../config.js";
 
-const createToken = (type: string, subject = null, options: any = {}) => {
+const createToken = (type: string, subject = null, options: any = {}): string => {
   const defaults = config.auth[type];
   const secret = options.secret || defaults.jwtSecret;
   const expiresIn = options.expiresIn || defaults.expiresIn;

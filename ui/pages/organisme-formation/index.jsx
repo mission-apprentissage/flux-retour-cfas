@@ -7,7 +7,6 @@ import { CONTACT_ADDRESS } from "@/common/constants/product";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import LinkCard from "@/components/LinkCard/LinkCard";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import { Checkbox } from "@/theme/components/icons";
 import AcquisitionCfaBarGraph from "@/modules/organisme-formation/AcquisitionCfaBarGraph";
 
@@ -19,7 +18,6 @@ export default function OrganismeFormation() {
         <title>{title}</title>
       </Head>
       <Section>
-        <Breadcrumb pages={[PAGES.homepage(), { title }]} />
         <Heading textStyle="h2" color="grey.800" mt={5}>
           Vous êtes un organisme de formation
         </Heading>

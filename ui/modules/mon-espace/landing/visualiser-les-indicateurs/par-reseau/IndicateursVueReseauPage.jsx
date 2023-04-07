@@ -12,22 +12,20 @@ import SwitchViewButton from "../SwitchViewButton";
 import ReseauSelect from "./ReseauSelect/ReseauSelect";
 import ReseauSelectPanel from "./ReseauSelect/ReseauSelectPanel";
 import ReseauViewContent from "./ReseauViewContent";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
-  const page = PAGES.visualiserLesIndicateursParReseau();
+  const title = "Vue par réseau";
   const currentReseau = filtersContext.state.reseau;
 
   return (
     <Page>
       <Head>
-        <title>{page.title}</title>
+        <title>{title}</title>
       </Head>
       <Section paddingY="3w">
-        <Breadcrumb pages={[PAGES.monTableauDeBord(), page]} />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
-          <Heading as="h1">{page.title}</Heading>
+          <Heading as="h1">{title}</Heading>
           <SwitchViewButton />
         </HStack>
         {currentReseau ? (

@@ -19,16 +19,16 @@ export const formationSchema = {
   "formation.date_debut_formation": {
     fieldType: "date",
     label: "Date de début de formation :",
-    showInfo: true,
+    showInfo: false,
   },
   "formation.date_fin_formation": {
     fieldType: "date",
     label: "Date de fin de formation :",
-    showInfo: true,
+    showInfo: false,
   },
   "formation.date_obtention_diplome": {
     fieldType: "date",
     label: "Date d'obtention du diplôme :",
-    showInfo: true,
+    showInfo: false,
   },
 };

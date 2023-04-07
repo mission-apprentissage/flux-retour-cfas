@@ -2,10 +2,10 @@ import "dotenv/config.js";
 import { Option, program } from "commander";
 
 import { runScript } from "./scriptWrapper.js";
-import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
-import { clear, clearRoles, clearUsers } from "./clear/clear-all.js";
+import { seedSample, seedAdmin } from "./seed/start/index.js";
+import { clear, clearUsers } from "./clear/clear-all.js";
 import { purgeEvents } from "./clear/purge-events.js";
-import { createErpUserLegacy, createUserAccount } from "./users/create-user.js";
+import { createErpUserLegacy } from "./users/create-user.js";
 import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
@@ -118,38 +118,11 @@ program
  * Job d'initialisation de données de test
  */
 program
-  .command("seed")
-  .description("Seed global data")
-  .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .action(async ({ email }, options) =>
-    runScript(async () => {
-      await seedRoles();
-      return seedAdmin({ adminEmail: email?.toLowerCase() });
-    }, options._name)
-  );
-
-/**
- * Job d'initialisation de données de test
- */
-program
   .command("seed:sample")
   .description("Seed sample data")
   .action(async (_, options) =>
     runScript(async () => {
       return seedSample();
-    }, options._name)
-  );
-
-/**
- * Job d'initialisation des roles
- * Pas nécessaire de l'exécuter si on créé un admin
- */
-program
-  .command("seed:roles")
-  .description("Seed roles")
-  .action(async (_, options) =>
-    runScript(async () => {
-      return seedRoles();
     }, options._name)
   );
 
@@ -163,7 +136,7 @@ program
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
   .action(async ({ email }, options) =>
     runScript(async () => {
-      return seedAdmin({ adminEmail: email?.toLowerCase() });
+      return seedAdmin(email?.toLowerCase());
     }, options._name)
   );
 
@@ -199,15 +172,6 @@ program
   .action((_, options) =>
     runScript(async () => {
       return clearUsers();
-    }, options._name)
-  );
-
-program
-  .command("clear:roles")
-  .description("Clear roles")
-  .action((_, options) =>
-    runScript(async () => {
-      return clearRoles();
     }, options._name)
   );
 
@@ -301,25 +265,21 @@ program
 /**
  * Job de création d'un utilisateur
  */
-program
-  .command("create:user")
-  .description("Création d'un utilisateur")
-  .requiredOption("--email <string>", "Email de l'utilisateur")
-  .option("--prenom <string>", "Prénom de l'utilisateur")
-  .option("--nom <string>", "Nom de l'utilisateur")
-  .option("--isAdmin <bool>", "Indique s'il est administrateur")
-  .option("--isCrossOrganismes <bool>", "Indique s'il est cross organismes")
-  .action(async ({ email, prenom, nom, isAdmin, isCrossOrganismes }, options) =>
-    runScript(async () => {
-      return createUserAccount({
-        email,
-        prenom,
-        nom,
-        is_admin: isAdmin,
-        is_cross_organismes: isCrossOrganismes,
-      });
-    }, options._name)
-  );
+// program
+//   .command("create:user")
+//   .description("Création d'un utilisateur")
+//   .requiredOption("--email <string>", "Email de l'utilisateur")
+//   .option("--prenom <string>", "Prénom de l'utilisateur")
+//   .option("--nom <string>", "Nom de l'utilisateur")
+//   .action(async ({ email, prenom, nom }, options) =>
+//     runScript(async () => {
+//       return createUserAccount({
+//         email,
+//         prenom,
+//         nom,
+//       });
+//     }, options._name)
+//   );
 
 /**
  * Job de création d'un utilisateur ERP legacy

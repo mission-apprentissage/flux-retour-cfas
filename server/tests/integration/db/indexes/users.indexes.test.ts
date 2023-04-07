@@ -3,20 +3,19 @@ import { strict as assert } from "assert";
 import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
 import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
 import usersModelDescriptor from "../../../../src/common/model/users.model.js";
-import { createUser } from "../../../../src/common/actions/users.actions.js";
 
 describe("Users Indexes", () => {
   it("Vérifie l'existence des indexes", async () => {
     // Crée une entrée en base
-    await createUser(
-      { email: "of@test.fr", password: "Secret!Password1" },
-      {
-        nom: "of",
-        prenom: "test",
-        roles: ["of"],
-        account_status: "DIRECT_PENDING_PASSWORD_SETUP",
-      }
-    );
+    // await createUser(
+    //   { email: "of@test.fr", password: "Secret!Password1" },
+    //   {
+    //     nom: "of",
+    //     prenom: "test",
+    //     roles: ["of"],
+    //     account_status: "DIRECT_PENDING_PASSWORD_SETUP",
+    //   }
+    // );
 
     // Re-créé les index après l'ajout d'une entrée en base & récupère les index
     await dropIndexes();

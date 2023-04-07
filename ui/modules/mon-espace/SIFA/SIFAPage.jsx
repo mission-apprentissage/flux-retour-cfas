@@ -8,7 +8,6 @@ import { usePlausible } from "next-plausible";
 
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { _get, _getBlob } from "@/common/httpClient";
-import { hasContextAccessTo } from "@/common/utils/rolesUtils";
 import useDownloadClick from "@/hooks/useDownloadClick";
 import { DownloadLine } from "@/theme/components/icons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
@@ -17,7 +16,11 @@ import EffectifsTable from "../effectifs/engine/EffectifsTable";
 import { effectifsStateAtom } from "../effectifs/engine/atoms";
 import { Input } from "../effectifs/engine/formEngine/components/Input/Input";
 
-function useOrganismesEffectifs(organismeId) {
+const currentYear = new Date().getFullYear();
+const previousYear = currentYear - 1;
+const currentAnneeScolaire = `${previousYear}-${currentYear}`;
+
+function useOrganismesEffectifs(organismeId, anneeScolaire) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const queryClient = useQueryClient();
   const prevOrganismeId = useRef(null);
@@ -25,26 +28,23 @@ function useOrganismesEffectifs(organismeId) {
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
       prevOrganismeId.current = organismeId;
-      queryClient.resetQueries("organismesEffectifs", { exact: true });
+      // FIXME, reset toutes les queries ?!
+      // queryClient.resetQueries("organismesEffectifs", { exact: true });
     }
   }, [queryClient, organismeId]);
 
-  const { data, isLoading, isFetching } = useQuery(
-    ["organismesEffectifs"],
-    async () => {
-      const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organismeId}&sifa=true`);
-      // eslint-disable-next-line no-undef
-      const newEffectifsState = new Map();
-      for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
-        newEffectifsState.set(id, { validation_errors, requiredSifa });
-      }
-      setCurrentEffectifsState(newEffectifsState);
-      return organismesEffectifs;
-    },
-    {
-      refetchOnWindowFocus: false,
+  const { data, isLoading, isFetching } = useQuery(["organismesEffectifs", organismeId], async () => {
+    const organismesEffectifs = await _get(
+      `/api/v1/organismes/${organismeId}/effectifs?sifa=true&annee_scolaire=${anneeScolaire}`
+    );
+    // eslint-disable-next-line no-undef
+    const newEffectifsState = new Map();
+    for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
+      newEffectifsState.set(id, { validation_errors, requiredSifa });
     }
-  );
+    setCurrentEffectifsState(newEffectifsState);
+    return organismesEffectifs;
+  });
 
   return { isLoading: isFetching || isLoading, organismesEffectifs: data || [] };
 }
@@ -100,8 +100,7 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
 const SIFAPage = ({ isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue(organismeAtom);
-  const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
-  const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
+  const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id, currentAnneeScolaire);
   const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
   const [searchValue, setSearchValue] = useState("");
@@ -110,7 +109,6 @@ const SIFAPage = ({ isMine }) => {
     () => groupBy(organismesEffectifs, "annee_scolaire"),
     [organismesEffectifs]
   );
-  const anneScolaire = "2022-2023";
   const [showOnlyMissingSifa, setShowOnlyMissingSifa] = useState(false);
 
   if (isLoading) {
@@ -128,55 +126,45 @@ const SIFAPage = ({ isMine }) => {
           {isMine ? "Mon Enquête SIFA" : "Son Enquête SIFA"}
         </Heading>
         <HStack spacing={4}>
-          {hasContextAccessTo(organisme, "organisme/page_sifa/telecharger") && (
-            <DownloadButton
-              fileName={exportSifaFilename}
-              getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
-              title="Télécharger SIFA"
-            />
-          )}
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/televersement_document") && (
-            <>
-              <Button
-                size="md"
-                fontSize={{ base: "sm", md: "md" }}
-                p={{ base: 2, md: 4 }}
-                h={{ base: 8, md: 10 }}
-                onClick={() => {
-                  router.push(`${router.asPath.replace("/enquete-SIFA", "/effectifs/televersement")}`);
-                }}
-                variant="secondary"
-              >
-                <Text as="span">+ Ajouter</Text>
-              </Button>
-            </>
-          )}
+          <DownloadButton
+            fileName={exportSifaFilename}
+            getFile={() => _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`)}
+            title="Télécharger SIFA"
+          />
+          <Button
+            size="md"
+            fontSize={{ base: "sm", md: "md" }}
+            p={{ base: 2, md: 4 }}
+            h={{ base: 8, md: 10 }}
+            onClick={() => {
+              router.push(`${router.asPath.replace("/enquete-sifa", "/effectifs/televersement")}`);
+            }}
+            variant="secondary"
+          >
+            <Text as="span">+ Ajouter</Text>
+          </Button>
         </HStack>
       </Flex>
 
       <VStack alignItems="flex-start">
         <Text fontWeight="bold">
-          Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre{" "}
-          {new Date().getFullYear() - 1}. Pour plus de facilité, vous pouvez effectuer une recherche, ou filtrer par
-          année.
+          Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre {previousYear}, sur
+          l&apos;année scolaire {currentAnneeScolaire}. Pour plus de facilité, vous pouvez effectuer une recherche, ou
+          filtrer par année.
         </Text>
         <Input
-          {...{
-            name: "search_effectifs",
-            fieldType: "text",
-            mask: "C",
-            maskBlocks: [
-              {
-                name: "C",
-                mask: "Pattern",
-                pattern: "^.*$",
-              },
-            ],
-            placeholder: "Recherche",
-          }}
-          onSubmit={(value) => {
-            setSearchValue(value.trim());
-          }}
+          name="search_effectifs"
+          placeholder="Recherche"
+          fieldType="text"
+          mask="C"
+          maskBlocks={[
+            {
+              name: "C",
+              mask: "Pattern",
+              pattern: "^.*$",
+            },
+          ]}
+          onSubmit={(value) => setSearchValue(value.trim())}
           value={searchValue}
           w="35%"
         />
@@ -202,22 +190,20 @@ const SIFAPage = ({ isMine }) => {
 
       <Box mt={10} mb={16}>
         {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]) => {
-          if (anneScolaire !== "all" && anneScolaire !== anneSco) return null;
           const orgaEffectifs = showOnlyMissingSifa ? orgaE.filter((ef) => ef.requiredSifa.length) : orgaE;
           const effectifsByCfd = groupBy(orgaEffectifs, "formation.cfd");
-          const borderStyle = { borderColor: "dgalt", borderWidth: 1 }; //anneScolaire === "all" ? { borderColor: "bluefrance", borderWidth: 1 } : {};
           return (
             <Box key={anneSco} mb={5}>
               <Text>
                 {anneSco} {!searchValue ? `- ${orgaEffectifs.length} apprenant(es) total` : ""}
               </Text>
-              <Box p={4} {...borderStyle}>
+              <Box p={4} style={{ borderColor: "dgalt", borderWidth: 1 }}>
                 {Object.entries(effectifsByCfd).map(([cfd, effectifs], i) => {
                   const { formation } = effectifs[0];
                   return (
                     <EffectifsTableContainer
                       key={anneSco + cfd}
-                      canEdit={canEdit}
+                      canEdit={true} // FIXME organisation liée à l'organisme uniquement ?
                       effectifs={effectifs}
                       formation={formation}
                       searchValue={searchValue}

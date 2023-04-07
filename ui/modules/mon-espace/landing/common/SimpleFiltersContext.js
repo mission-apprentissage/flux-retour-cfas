@@ -10,17 +10,15 @@ const SimpleFiltersContext = createContext();
 export const SimpleFiltersProvider = ({ children, initialState = null }) => {
   // TODO Check all filters needed
   const [date, setDate] = useState(new Date());
-  const [organismeId, setOrganismeId] = useState(null);
 
   // Handle initial state
   useEffect(() => {
     if (initialState?.date) setDate(initialState.date);
-    if (initialState?.organismeId) setOrganismeId(initialState.organismeId);
   }, [initialState]);
 
   const contextValue = {
-    filtersValues: { date, organismeId },
-    filtersSetters: { setDate, setOrganismeId },
+    filtersValues: { date },
+    filtersSetters: { setDate },
   };
 
   return <SimpleFiltersContext.Provider value={contextValue}>{children}</SimpleFiltersContext.Provider>;

@@ -7,17 +7,12 @@
           <mj-section background-color="#ffffff" padding-top="0">
             <mj-column>
               <mj-text>
-                Bonjour <strong>
-                  <%= data.userCivility || "Madame, Monsieur" %>
-                    <%= data.userName %>
-                </strong>,
+                Bonjour <strong><%= data.recipient.civility %> <%= data.recipient.prenom %> <%= data.recipient.nom %></strong>,
               </mj-text>
               <mj-text>
-                <div>
-                  Votre demande d'accès sur le <strong>tableau de bord de l'apprentissage</strong>
-                  <% if (data.organismeName) {%> pour l'organisme "<%= data.organismeName %>" <%}%> a été rejetée.
-                </div>
+                  Votre demande d'accès sur le <strong>tableau de bord de l'apprentissage</strong> pour l'organisation <%= data.organisationLabel %> a été rejetée.
               </mj-text>
+
               <%- include('./common/signature.ejs'); %>
             </mj-column>
           </mj-section>

@@ -192,26 +192,6 @@ export const questions = [
       </Text>
     ),
   },
-  // encore en discussion
-  // {
-  //   question: "Pourquoi des apprentis se retrouvent “sans contrat” ou en “abandon” alors que ce n'est pas le cas ?",
-  //   answer: (
-  //     <Stack>
-  //       <Text>
-  //         Parfois, lorsque les données sont remplies partiellement, des apprentis se retrouvent dans la colonne sans
-  //         contrat ou abandon.
-  //       </Text>
-  //       <Text>
-  //         Il peut s&apos;agir d&apos;apprenants qui ne sont pas en apprentissage et qui n&apos;ont donc pas de contrat.
-  //         Cela provient d&apos;un mauvais paramétrage dans votre ERP, vous pouvez{" "}
-  //         <Link as={NavLink} color="bluefrance" to={NAVIGATION_PAGES.TransmettreVosDonnees.path}>
-  //           consulter les pas à pas
-  //         </Link>
-  //         &nbsp; pour le modifier.
-  //       </Text>
-  //     </Stack>
-  //   ),
-  // },
   {
     question: "Certaines données affichées ne sont pas bonnes. Comment puis-je les corriger ?",
     answer: (

@@ -1,5 +1,10 @@
 import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenantConstants.js";
-import { buildMongoPipelineFilterStages, organismeLookup } from "../helpers/filters.js";
+import {
+  buildMongoPipelineFilterStages,
+  EffectifsFilters,
+  EffectifsFiltersWithRestriction,
+  organismeLookup,
+} from "../helpers/filters.js";
 import { mergeObjectsBy } from "../../utils/mergeObjectsBy.js";
 import { DEPARTEMENTS_BY_ID } from "../../constants/territoiresConstants.js";
 import {
@@ -9,8 +14,20 @@ import {
   rupturantsIndicator,
 } from "./indicators.js";
 import { effectifsDb } from "../../model/collections.js";
+import { AuthContext } from "../../model/internal/AuthContext.js";
+import { requireOrganismeIndicateursAccess } from "../helpers/permissions.js";
+import { format } from "date-fns";
+import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
+import { cache } from "../../../services.js";
+import { tryCachedExecution } from "../../utils/cacheUtils.js";
 
-export const getIndicateurs = async (filters: any) => {
+export async function getOrganismeIndicateurs(ctx: AuthContext, organismeId: string, filters: EffectifsFilters) {
+  await requireOrganismeIndicateursAccess(ctx, organismeId);
+  filters.organisme_id = organismeId;
+  return await getIndicateurs(filters);
+}
+
+export const getIndicateurs = async (filters: EffectifsFilters) => {
   const filterStages = buildMongoPipelineFilterStages(filters);
   const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
     apprentisIndicator.getCountAtDate(filters.date, filterStages),
@@ -295,10 +312,8 @@ export const getEffectifsCountByDepartementAtDate = async (filters: any) => {
 
 /**
  * Récupération des effectifs anonymisés à une date donnée
- * @param {*} filters
- * @returns
  */
-export const getDataListEffectifsAtDate = async (filters: any = {}) => {
+export const getDataListEffectifsAtDate = async (filters: EffectifsFiltersWithRestriction) => {
   const filterStages = buildMongoPipelineFilterStages(filters);
   const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
     apprentisIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.apprentis),
@@ -326,3 +341,15 @@ export const getNbDistinctOrganismes = async (filters = {}) => {
   const distinctOrganismes = await effectifsDb().distinct("organisme_id", filters);
   return distinctOrganismes ? distinctOrganismes.length : 0;
 };
+
+export async function getIndicateursNational(date: Date) {
+  const cacheKey = `indicateurs-national:${format(date, "yyyy-MM-dd")}`;
+  return tryCachedExecution(cache, cacheKey, async () => {
+    const [indicateurs, totalOrganismes] = await Promise.all([
+      getIndicateurs({ date }),
+      getNbDistinctOrganismes({ annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } }),
+    ]);
+    indicateurs.totalOrganismes = totalOrganismes;
+    return indicateurs;
+  });
+}

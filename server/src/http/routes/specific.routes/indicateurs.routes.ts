@@ -1,5 +1,7 @@
-import express from "express";
 import Joi from "joi";
+import { EffectifsFilters, EffectifsFiltersWithRestriction } from "../../../common/actions/helpers/filters.js";
+import express from "express";
+import { Request } from "express-serve-static-core";
 import { getNbDistinctOrganismes } from "../../../common/actions/effectifs.actions.js";
 import {
   getEffectifsCountByAnneeFormationAtDate,
@@ -10,8 +12,12 @@ import {
   getEffectifsCountBySiretAtDate,
   getIndicateurs,
 } from "../../../common/actions/effectifs/effectifs.actions.js";
-import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
+import { validateFullObjectSchemaUnknown } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
+import {
+  getEffectifsOrganismeRestriction,
+  requireOrganismeIndicateursAccess,
+} from "../../../common/actions/helpers/permissions.js";
 
 const commonEffectifsFiltersSchema = {
   date: Joi.date().required(),
@@ -27,18 +33,26 @@ const commonEffectifsFiltersSchema = {
 
 /**
  * Build filters from the request
- * @param {*} req
- * @returns {Promise<import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters>}
  */
-export async function buildEffectifsFiltersFromRequest(req) {
-  /** @type {import("../../../common/actions/helpers/filters-struct.js").EffectifsFilters} */
-  const filters = await validateFullObjectSchema(req.query, commonEffectifsFiltersSchema);
+export async function buildEffectifsFiltersFromRequest(req: Request): Promise<EffectifsFiltersWithRestriction> {
+  const filters: EffectifsFiltersWithRestriction = await validateFullObjectSchemaUnknown<EffectifsFilters>(
+    req.query,
+    commonEffectifsFiltersSchema
+  );
 
-  // restriction aux organismes accessibles par l'utilisateur sauf pour un admin
-  if (!req.user.is_admin) {
-    filters.organisme_ids = req.user.organisme_ids;
+  // ce helper est principalement appelé dans les routes des indicateurs agrégés et non scopés à un organisme, mais aussi pour un organisme :
+  // - si organisme_id, indicateurs pour un organisme, on vérifie que l'organisation y a accès
+  // - si pas d'organisme_id, indicateurs aggrégés, restriction classique
+  // TODO il faudra sortir organisme_id pour le spécifier dans une autre route /organismes/:id/indicateurs
+  // pour que les indicateurs ici ne soit que ceux agrégés
+  if (filters.organisme_id) {
+    await requireOrganismeIndicateursAccess(req.user, filters.organisme_id);
+  } else {
+    // amend filters with a restriction
+    filters.restrictionMongo = await getEffectifsOrganismeRestriction(req.user);
   }
 
+  // FIXME restreindre les filtres selon les accès
   return filters;
 }
 

@@ -4,11 +4,10 @@ import { useRouter } from "next/router";
 import { Box, Button, Center, Flex, Heading, HStack, Text } from "@chakra-ui/react";
 
 import { ArrowDropRightLine } from "@/theme/components/icons";
-import { useOrganisme } from "@/hooks/useOrganisme";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { configureOrganismeERP } from "../../../common/api/tableauDeBord";
 
-const ChoixTransmission = () => {
-  const { organisme, updateOrganisme } = useOrganisme();
+const ChoixTransmission = ({ organisme }) => {
   const router = useRouter();
 
   return (
@@ -47,7 +46,7 @@ const ChoixTransmission = () => {
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  await updateOrganisme(organisme.id, { mode_de_transmission: "API" });
+                  await configureOrganismeERP(organisme._id, { mode_de_transmission: "API" });
                   router.reload();
                 }}
                 size={"md"}
@@ -81,7 +80,7 @@ const ChoixTransmission = () => {
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  await updateOrganisme(organisme.id, {
+                  await configureOrganismeERP(organisme._id, {
                     mode_de_transmission: "MANUEL",
                     setup_step_courante: "COMPLETE",
                   });

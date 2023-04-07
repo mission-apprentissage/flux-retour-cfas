@@ -24,11 +24,11 @@ async function getClamscan(uri) {
   });
 }
 
-export const createClamav = async (uri) => {
+export const createClamav = (uri) => {
   async function getScanner() {
     let clamscan = await getClamscan(uri);
     let scanStream = clamscan.passthrough();
-    let scanResults = new Promise((resolve) => {
+    let scanResults = new Promise<any>((resolve) => {
       scanStream.on("scan-complete", (res) => {
         resolve(res);
       });

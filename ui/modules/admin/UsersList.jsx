@@ -5,9 +5,9 @@ import { useRouter } from "next/router";
 
 import Table from "@/components/Table/Table";
 import { ArrowRightLine } from "@/theme/components/icons";
-import { getUserOrganisationLabel, USER_STATUS_LABELS } from "@/common/constants/usersConstants";
+import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 
-const UsersList = ({ data, pagination, sorting, searchValue, rolesById }) => {
+const UsersList = ({ data, pagination, sorting, searchValue }) => {
   const router = useRouter();
 
   return (
@@ -29,21 +29,19 @@ const UsersList = ({ data, pagination, sorting, searchValue, rolesById }) => {
           size: 100,
           header: () => "Prénom",
         },
-        main_organisme: {
+        organisation: {
           size: 100,
           header: () => "Etablissement",
-          cell: ({ getValue }) => (
-            <NavLink href={`/admin/organismes/${getValue()?._id}`} flexGrow={1}>
-              <Text isTruncated maxWidth={400}>
-                {getValue()?.nom}
+          cell: ({ getValue }) => {
+            const organisme = getValue()?.organisme;
+            return (
+              <Text as={organisme ? NavLink : "p"} href={`/admin/organismes/${organisme?._id}`} flexGrow={1}>
+                <Text isTruncated maxWidth={400}>
+                  {organisme?.nom || getValue()?.label}
+                </Text>
               </Text>
-            </NavLink>
-          ),
-        },
-        organisation: {
-          size: 70,
-          header: () => "Utilisateur",
-          cell: ({ row }) => <Text fontSize="md">{getUserOrganisationLabel(row.original)}</Text>,
+            );
+          },
         },
         account_status: {
           size: 70,
@@ -51,19 +49,6 @@ const UsersList = ({ data, pagination, sorting, searchValue, rolesById }) => {
           cell: ({ getValue }) => (
             <Text fontSize="md" whiteSpace="nowrap">
               {USER_STATUS_LABELS[getValue()] ?? getValue()}
-            </Text>
-          ),
-        },
-        roles: {
-          size: 60,
-          header: () => "Role",
-          cell: ({ getValue, row }) => (
-            <Text fontSize="md" whiteSpace="nowrap">
-              {getValue()?.length > 0
-                ? getValue().map((roleId) => rolesById?.[roleId]?.title || roleId)
-                : row.original.is_admin
-                ? "Admin"
-                : ""}
             </Text>
           ),
         },

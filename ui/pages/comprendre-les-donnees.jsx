@@ -4,7 +4,6 @@ import { Box, Flex, Heading, HStack, Link, ListItem, Text, UnorderedList } from 
 
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Sommaire from "@/components/Sommaire/Sommaire";
 import { PRODUCT_NAME } from "@/common/constants/product";
 
@@ -16,9 +15,6 @@ const ComprendreLesDonneesPage = () => {
         <title>{title}</title>
       </Head>
       <Section>
-        <Box paddingTop="3w">
-          <Breadcrumb pages={[PAGES.homepage(), { title }]} />
-        </Box>
         <HStack
           mt="4w"
           spacing={["0", "0", "0", "6w"]}

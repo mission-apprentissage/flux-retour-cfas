@@ -4,4 +4,5 @@ export const FIABILISATION_LABEL = {
   NON_FIABILISABLE_UAI_NON_VALIDEE: "Non fiabilisable (uai non validée)",
   NON_FIABILISABLE_MAPPING: "Non fiabilisable (mapping)",
   INCONNU: "Inconnu",
+  INCONNU_INSCRIPTION: "Inconnu (inscription)",
 };

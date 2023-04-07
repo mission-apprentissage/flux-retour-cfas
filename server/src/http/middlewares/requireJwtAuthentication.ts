@@ -1,17 +1,16 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import config from "../../config.js";
-import { tdbRoles } from "../../common/roles.js";
 import { getUserLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
-import { findOrganismeByUai } from "../../common/actions/organismes/organismes.actions.js";
 
 export default () => {
   const findUserOrCfa = async (usernameOrUai) => {
     const foundUser = await getUserLegacy(usernameOrUai);
     if (foundUser) return foundUser;
 
-    const foundOrganisme = await findOrganismeByUai(usernameOrUai);
-    if (foundOrganisme) return { username: usernameOrUai, permissions: [tdbRoles.cfa] };
+    // FIXME devrait être supprimé car authentification seulement utilisée pour les ERP
+    // const foundOrganisme = await findOrganismeByUai(usernameOrUai);
+    // if (foundOrganisme) return { username: usernameOrUai, permissions: [tdbRoles.cfa] };
 
     return null;
   };

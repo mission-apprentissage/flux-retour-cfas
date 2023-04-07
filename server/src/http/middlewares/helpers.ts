@@ -1,20 +1,43 @@
+import { AuthContext } from "../../common/model/internal/AuthContext.js";
+import Boom from "boom";
+import { NextFunction, Request, Response } from "express";
+
+type Handler = (req: Request, res: Response, next: NextFunction) => any | Promise<any>;
+
 // catch errors and return the result of the request handler
-export function returnResult(serviceFunc) {
-  return async (req, res, next) => {
+export function returnResult(serviceFunc: Handler) {
+  return async (req: Request, res: Response, next: NextFunction) => {
     const result = await serviceFunc(req, res, next);
-    res.set("Content-Type", "application/json");
-    res.send(result);
+    // le résultat est à renvoyer en JSON par défaut
+    if (!res.getHeader("Content-Type")) {
+      res.set("Content-Type", "application/json");
+    }
+    res.send(
+      result ?? {
+        message: "success",
+      }
+    );
   };
 }
 
-// would be simpler to put this helper function into the cache structure
-export async function tryCachedExecution(cache, cacheKey, serviceFunc) {
-  const cachedResult = await cache.get(cacheKey);
-  if (cachedResult) {
-    return JSON.parse(cachedResult);
-  } else {
-    const result = await serviceFunc();
-    await cache.set(cacheKey, JSON.stringify(result));
-    return result;
+export function indicateursPermissions() {
+  return async (req, _, next) => {
+    ensureValidUser(req.user);
+    next();
+  };
+}
+
+// helpers
+export function ensureValidUser(user: AuthContext) {
+  if (user.account_status !== "CONFIRMED") {
+    throw Boom.forbidden("Accès non autorisé");
   }
+}
+
+export function requireAdministrator(req: Request, _res: Response, next: NextFunction) {
+  ensureValidUser(req.user);
+  if (req.user.organisation.type !== "ADMINISTRATEUR") {
+    throw Boom.forbidden("Accès non autorisé");
+  }
+  next();
 }

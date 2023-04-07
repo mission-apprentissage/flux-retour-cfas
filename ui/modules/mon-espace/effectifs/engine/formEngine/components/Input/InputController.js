@@ -20,7 +20,7 @@ export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }) => 
 
   if (!field) return <></>;
 
-  if (!field) throw new Error(`Field ${name} is not defined.`);
+  // if (!field) throw new Error(`Field ${name} is not defined.`);
 
   return (
     <InputField

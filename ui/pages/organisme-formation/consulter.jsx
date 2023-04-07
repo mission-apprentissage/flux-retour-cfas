@@ -4,7 +4,6 @@ import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
 
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Link from "@/components/Links/Link";
 import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 import CheckCfaTransmissionContent from "@/modules/organisme-formation/CheckCfaTransmission/CheckCfaTransmissionContent";
@@ -17,13 +16,6 @@ export default function CommentConsulterEtVerifierLesDonnees() {
         <title>{title}</title>
       </Head>
       <Section>
-        <Breadcrumb
-          pages={[
-            PAGES.homepage(),
-            { title: "Vous êtes un organisme de formation", to: "/organisme-formation" },
-            { title },
-          ]}
-        />
         <Box paddingTop="5w" marginBottom="10w">
           <HStack spacing={["0", "0", "0", "0", "4w"]} flexDirection={["column", "column", "column", "column", "row"]}>
             <Box alignSelf="flex-start" width="100%">

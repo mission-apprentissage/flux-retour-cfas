@@ -5,7 +5,6 @@ import Boom from "boom";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";
 
 import config from "../../config.js";
-import { sendHTML } from "../../common/utils/httpUtils.js";
 
 import {
   checkIfEmailExists,
@@ -31,7 +30,7 @@ function checkWebhookKey() {
   return passport.authenticate("localapikey", { session: false, failWithError: true });
 }
 
-export default ({ mailer }) => {
+export default () => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   async function checkEmailToken(req, res, next) {
@@ -44,11 +43,9 @@ export default ({ mailer }) => {
   }
 
   router.get("/:token/preview", checkEmailToken, async (req, res) => {
-    const { token } = req.params;
-
-    const html = await renderEmail(mailer, token);
-
-    return sendHTML(html, res);
+    const html = await renderEmail(req.params.token);
+    res.set("Content-Type", "text/html");
+    res.send(Buffer.from(html));
   });
 
   router.get("/:token/markAsOpened", async (req, res) => {

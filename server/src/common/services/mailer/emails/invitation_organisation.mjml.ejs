@@ -1,0 +1,47 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+    <mj-body background-color="#f9fafc">
+      <%- include('./common/header.ejs'); %>
+        <mj-wrapper padding="10px 20px">
+          <mj-section background-color="#ffffff" padding-top="0">
+            <mj-column>
+              <mj-text>
+                Bonjour,
+              </mj-text>
+              <mj-text>
+                <div>
+                  Vous avez reçu une invitation pour accéder au <strong>tableau de bord de l'apprentissage</strong>. Cette invitation provient de :
+                  <ul>
+                    <li>
+                      <%= data.author.civility %> <%= data.author.prenom %> <%= data.author.nom %>
+                    </li>
+                    <li>
+                      <%= data.author.email %>
+                    </li>
+                    <li>
+                      <%= data.organisationLabel %>
+                    </li>
+                  </ul>
+                </div>
+              </mj-text>
+              <mj-button
+                href="<%= utils.getPublicUrl(`/auth/inscription/profil?invitationToken=${data.invitationToken}`) %>"
+                background-color="#0e4194"
+                color="white"
+              >
+                Accéder au tableau de bord
+              </mj-button>
+              <!-- <mj-button
+                href="<%= utils.getPublicUrl(`/auth/inscription/profil?invitationToken=${data.invitationToken}&reject`) %>"
+                background-color="#ff0000" color="white">
+                Je ne suis pas concerné
+              </mj-button> -->
+
+              <%- include('./common/signature.ejs'); %>
+            </mj-column>
+          </mj-section>
+        </mj-wrapper>
+      <%- include('./common/footer.ejs'); %>
+    </mj-body>
+</mjml>

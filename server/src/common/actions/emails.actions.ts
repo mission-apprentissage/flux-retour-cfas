@@ -1,5 +1,8 @@
+import { mailer } from "../../services.js";
 import { v4 as uuidv4 } from "uuid";
+import logger from "../logger.js";
 import { usersMigrationDb } from "../model/collections.js";
+import { getEmailInfos, TemplateName, TemplatePayloads } from "../services/mailer/mailer.js";
 import { generateHtml } from "../utils/emailsUtils.js";
 
 function addEmail(userEmail: string, token: string, templateName: string, payload: any) {
@@ -44,22 +47,6 @@ function addEmailError(token, e) {
           type: "fatal",
           message: e.message,
         },
-      },
-    },
-    { returnDocument: "after" }
-  );
-}
-
-function addEmailSendDate(token, templateName) {
-  return usersMigrationDb().findOneAndUpdate(
-    { "emails.token": token },
-    {
-      $set: {
-        "emails.$.templateName": templateName,
-      },
-      // @ts-ignore
-      $push: {
-        "emails.$.sendDates": new Date(),
       },
     },
     { returnDocument: "after" }
@@ -116,12 +103,10 @@ export async function unsubscribeUser(id) {
   );
 }
 
-export async function renderEmail({ templates }, token) {
+export async function renderEmail(token: string) {
   const user: any = await usersMigrationDb().findOne({ "emails.token": token });
   const { templateName, payload } = user.emails.find((e) => e.token === token);
-  const template = templates[templateName]({ to: user.email, payload }, token);
-
-  return generateHtml(user.email, template);
+  return generateHtml(user.email, getEmailInfos(templateName as TemplateName, payload));
 }
 
 export async function checkIfEmailExists(token) {
@@ -129,48 +114,21 @@ export async function checkIfEmailExists(token) {
   return count > 0;
 }
 
-//Ces actions sont construites à la volée car il est nécessaire de pouvoir injecter un mailer durant les tests
-export const createMailer = (mailerService) => {
-  return {
-    async sendEmail({ to, payload }, templateName) {
-      const token = uuidv4();
-      if (!mailerService.templates[templateName]) {
-        throw new Error(`No email template found for ${templateName}`);
-      }
-      const template = mailerService.templates[templateName]({ to, payload }, token);
-
-      try {
-        await addEmail(to, token, templateName, payload);
-        const messageId = await mailerService.sendEmailMessage(to, template);
-        await addEmailMessageId(token, messageId);
-      } catch (e: any) {
-        console.error(`Error sending email template "${templateName}"`, e);
-        await addEmailError(token, e);
-      }
-
-      return token;
-    },
-    async resendEmail(token, options: any = {}) {
-      const user = await usersMigrationDb().findOne({ "emails.token": token });
-      if (!user) {
-        throw new Error("user not found");
-      }
-      const previous = user.emails?.find((e) => e.token === token);
-
-      const nextTemplateName = options.newTemplateName || previous?.templateName;
-      const template = mailerService.templates[nextTemplateName](user, token, { resend: !options.retry });
-
-      try {
-        await addEmailSendDate(token, nextTemplateName);
-        const messageId = await mailerService.sendEmailMessage(user.email, template);
-        await addEmailMessageId(token, messageId);
-      } catch (e: any) {
-        console.error(`Error resending email with token "${token}"`, e);
-        await addEmailError(token, e);
-      }
-
-      return token;
-    },
-    templates: mailerService.templates,
-  };
-};
+// version intermédiaire qui prend le template en paramètre (constuit et vérifié au préalable avec TS)
+export async function sendStoredEmail<T extends TemplateName>(
+  recipient: string,
+  templateName: T,
+  payload: TemplatePayloads[T],
+  template: any
+): Promise<void> {
+  const emailToken = uuidv4();
+  try {
+    template.data.token = emailToken;
+    await addEmail(recipient, emailToken, templateName, payload);
+    const messageId = await mailer.sendEmailMessage(recipient, template);
+    await addEmailMessageId(emailToken, messageId);
+  } catch (err: any) {
+    logger.error({ err, template: templateName }, "error sending email");
+    await addEmailError(emailToken, err);
+  }
+}

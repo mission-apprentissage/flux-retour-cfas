@@ -10,7 +10,6 @@ import Page from "@/components/Page/Page";
 import { ExternalLinkLine } from "../theme/components/icons";
 import useAuth from "../hooks/useAuth";
 import useMaintenanceMessages from "../hooks/useMaintenanceMessages";
-import { isUserAdmin } from "@/common/utils/rolesUtils";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -26,7 +25,7 @@ const chakraUIMarkdownRendererTheme = {
 
 const MaintenancePage = () => {
   const router = useRouter();
-  let [auth] = useAuth();
+  const { organisationType } = useAuth();
 
   const { messageMaintenance, isLoading } = useMaintenanceMessages();
 
@@ -39,7 +38,7 @@ const MaintenancePage = () => {
 
   const title = "Site en cours de maintenance";
   return (
-    <Page withoutDisplayNavigationBar={!isUserAdmin(auth)}>
+    <Page withoutDisplayNavigationBar={organisationType !== "ADMINISTRATEUR"}>
       <Head>
         <title>{title}</title>
       </Head>

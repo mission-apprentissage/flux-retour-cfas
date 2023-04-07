@@ -1,18 +1,27 @@
 import { ObjectId } from "mongodb";
 
 import { getMetiersBySiret } from "../../apis/apiLba.js";
-import { organismesDb, effectifsDb, permissionsDb } from "../../model/collections.js";
+import { organismesDb, effectifsDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
-import { createPermission, removePermissions } from "../permissions.actions.js";
-import { structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
 import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
-import { buildMongoPipelineFilterStages } from "../helpers/filters.js";
 import { Organisme } from "../../model/@types/Organisme.js";
+import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
+import Boom from "boom";
+import { AuthContext } from "../../model/internal/AuthContext.js";
+import {
+  getOrganismeRestriction,
+  isOrganisationOF,
+  requireManageOrganismeEffectifsPermission,
+  requireOrganismeIndicateursAccess,
+} from "../helpers/permissions.js";
+import { getOrganisationOrganisme } from "../organisations.actions.js";
+import { ConfigurationERP } from "../../validation/configurationERPSchema.js";
+import { stripEmptyFields } from "../../utils/validationUtils.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -286,96 +295,6 @@ export const updateOrganisme = async (
 };
 
 /**
- * TODO add to unit tests
- * Méthode d'ajout d'un contributeur à un organisme
- * @param {*} organisme_id
- * @returns
- */
-export const addContributeurOrganisme = async (organisme_id, userEmail, roleName, pending = true) => {
-  const _id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${_id.toString()}`);
-  }
-
-  await createPermission({
-    organisme_id: organisme._id as any,
-    userEmail: userEmail.toLowerCase(),
-    roleName,
-    pending,
-  });
-};
-
-/**
- * TODO add to unit tests
- * Méthode de suppression d'un contributeur à un organisme
- * @param {*} organisme_id
- * @returns
- */
-export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
-  const _id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${_id.toString()}`);
-  }
-
-  await removePermissions({ organisme_id: organisme._id, userEmail });
-};
-
-/**
- * TODO add to unit tests
- * Méthode de récupération des contributeurs d'un organisme
- * @param {string} organismeId
- * @returns
- */
-export const getContributeurs = async (organismeId) => {
-  const _id = typeof organismeId === "string" ? new ObjectId(organismeId) : organismeId;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const organisme = await organismesDb().findOne({ _id });
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${_id.toString()}`);
-  }
-
-  const permissionsWithUserAndRole = await permissionsDb()
-    .aggregate([
-      { $match: { organisme_id: organisme._id } },
-      // lookup user
-      {
-        $lookup: {
-          from: "usersMigration",
-          localField: "userEmail",
-          foreignField: "email",
-          as: "user",
-        },
-      },
-      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
-      // lookup role
-      {
-        $lookup: {
-          from: "roles",
-          localField: "role",
-          foreignField: "_id",
-          as: "role",
-        },
-      },
-      { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
-    ])
-    .toArray();
-
-  return Promise.all(
-    permissionsWithUserAndRole.map(async (perm) => ({
-      ...perm,
-      user: perm.user ? await structureUser(perm.user) : null,
-    }))
-  );
-};
-
-/**
  * Méthode de maj des dates de transmission d'un organisme
  * @param {*} organisme
  * @returns
@@ -407,13 +326,19 @@ export const getSousEtablissementsForUai = async (uai) => {
     .toArray();
 };
 
+export type OrganismesSearch = {
+  searchTerm: string;
+  etablissement_num_region: string;
+  etablissement_num_departement: string;
+  etablissement_reseaux: string;
+};
+
 /**
  * Retourne la liste des organismes correspondant aux critères de recherche
- * @param {import("./organismes.actions-struct.js").OrganismesSearch} searchCriteria
- * @return {Promise<{ uai: string; nom: string; }[]>} Array of CFA information
+ * restreint aux organismes accessibles par l'utilisateur
  */
-export const searchOrganismes = async (searchCriteria) => {
-  const matchStage: any = {};
+export const searchOrganismes = async (ctx: AuthContext, searchCriteria: OrganismesSearch) => {
+  const matchStage: any = await getOrganismeRestriction(ctx);
   if (searchCriteria.searchTerm) {
     matchStage.$or = [
       { $text: { $search: searchCriteria.searchTerm } },
@@ -431,7 +356,10 @@ export const searchOrganismes = async (searchCriteria) => {
     const start = Date.now();
     const eligibleUais = (
       await effectifsDb()
-        .aggregate([...buildMongoPipelineFilterStages(searchCriteria), { $group: { _id: "$organisme.uai" } }])
+        .aggregate([
+          ...buildMongoPipelineFilterStages(searchCriteria as unknown as EffectifsFilters),
+          { $group: { _id: "$organisme.uai" } },
+        ])
         .toArray()
     ).map((row) => row._id[0]);
     logger.info({ elapsted: Date.now() - start, eligibleUais: eligibleUais.length }, "searchOrganismes_eligibleUais");
@@ -694,3 +622,143 @@ export const getStatOrganismes = async () => {
 
   return stats;
 };
+
+export async function findUserOrganismes(ctx: AuthContext) {
+  const restrictionOwnOrganisme = isOrganisationOF(ctx.organisation.type)
+    ? {
+        _id: {
+          $ne: (await getOrganisationOrganisme(ctx))._id,
+        },
+      }
+    : {};
+  const organismes = await organismesDb()
+    .find(
+      {
+        $and: [
+          await getOrganismeRestriction(ctx),
+          // cas particulier pour l'OF qui ne doit pas lister son propre organisme
+          restrictionOwnOrganisme,
+        ],
+      },
+      {
+        projection: {
+          _id: 1,
+          nom: 1,
+          enseigne: 1,
+          raison_sociale: 1,
+          ferme: 1,
+          nature: 1,
+          adresse: 1,
+          siret: 1,
+          uai: 1,
+          first_transmission_date: 1,
+          last_transmission_date: 1,
+          fiabilisation_statut: 1,
+        },
+      }
+    )
+    .toArray();
+
+  return organismes.map((organisme) => ({
+    ...organisme,
+    nomOrga: organisme.enseigne || organisme.raison_sociale,
+  }));
+}
+
+export async function getOrganisme(ctx: AuthContext, organismeId: string) {
+  await requireOrganismeIndicateursAccess(ctx, organismeId);
+  return await getOrganismeById(organismeId); // double récupération avec les permissions mais pas très grave
+}
+
+export async function getOrganismeById(organismeId: string) {
+  const organisme = await organismesDb().findOne({
+    _id: new ObjectId(organismeId),
+  });
+  if (!organisme) {
+    throw Boom.notFound(`missing organisation ${organismeId}`);
+  }
+  return organisme;
+}
+
+export async function findOrganismesBySIRET(siret: string): Promise<Organisme[]> {
+  // FIXME projection à définir
+  const organismes = await organismesDb()
+    .find({
+      siret: siret,
+    })
+    .toArray();
+  if (organismes.length === 0) {
+    logger.warn({ module: "inscription", siret }, "aucun organisme trouvé en base");
+    // si pas d'organisme en base (et donc le référentiel), on cherche depuis API entreprise
+    return [await fetchFromAPIEntreprise(siret)];
+  }
+  return organismes;
+}
+
+export async function findOrganismesByUAI(uai: string): Promise<Organisme[]> {
+  // FIXME projection à définir
+  const organismes = await organismesDb()
+    .find({
+      uai: uai,
+    })
+    .toArray();
+  if (organismes.length === 0) {
+    logger.warn({ module: "inscription", uai }, "aucun organisme trouvé en base");
+    throw Boom.badRequest("Aucun organisme trouvé");
+  }
+  return organismes;
+}
+
+export async function getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(
+  uai: string | null,
+  siret: string
+): Promise<Organisme> {
+  try {
+    return await getOrganismeByUAIAndSIRET(uai, siret);
+  } catch (err) {
+    return fetchFromAPIEntreprise(siret);
+  }
+}
+
+export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<Organisme> {
+  // FIXME projection à définir
+  const organisme = await organismesDb().findOne({
+    uai: uai as any,
+    siret: siret,
+  });
+  if (!organisme) {
+    throw Boom.badRequest("Aucun organisme trouvé");
+  }
+  return organisme;
+}
+
+/**
+ * Renvoie les données principales d'un établissement de l'API Entreprise
+ * Sert pour afficher sur l'UI à l'inscription
+ */
+async function fetchFromAPIEntreprise(siret: string): Promise<any> {
+  const result = await findDataFromSiret(siret);
+  if (result.messages.api_entreprise !== "Ok") {
+    logger.warn({ module: "inscription", siret }, "aucun organisme trouvé sur api entreprise");
+    throw Boom.badRequest("Aucun organisme trouvé");
+  }
+  return {
+    uai: null,
+    siret: result.result.siret,
+    ferme: result.result.ferme,
+    raison_sociale: result.result.entreprise_raison_sociale,
+    adresse: {
+      complete: result.result.adresse,
+    },
+  };
+}
+
+export async function configureOrganismeERP(
+  ctx: AuthContext,
+  organismeId: string,
+  conf: ConfigurationERP
+): Promise<void> {
+  await requireManageOrganismeEffectifsPermission(ctx, organismeId);
+  console.log("set erp", stripEmptyFields(conf));
+  await organismesDb().updateOne({ _id: new ObjectId(organismeId) }, { $set: stripEmptyFields(conf) as any });
+}

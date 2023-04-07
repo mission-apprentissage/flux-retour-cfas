@@ -10,7 +10,6 @@ import useEffectifs from "@/hooks/useEffectifs";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import IndicateursAndRepartitionEffectifsTerritoire from "./IndicateursAndRepartitionEffectifsTerritoire";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 
 const IndicateursVueTerritoirePage = () => {
   const filtersContext = useFiltersContext();
@@ -23,7 +22,6 @@ const IndicateursVueTerritoirePage = () => {
         <title>{title}</title>
       </Head>
       <Section paddingY="3w">
-        <Breadcrumb pages={[PAGES.monTableauDeBord(), PAGES.visualiserLesIndicateursParTerritoire()]} />
         <HStack marginTop="4w" marginBottom="3v" spacing="2w">
           <Heading as="h1">{title}</Heading>
           <SwitchViewButton />

@@ -4,7 +4,6 @@ import { Box, Container, Heading, Text } from "@chakra-ui/react";
 import { startOfHour } from "date-fns";
 
 import Page from "@/components/Page/Page";
-import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import Section from "@/components/Section/Section";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import IndicateursGridStack from "@/components/IndicateursGridStack";
@@ -22,7 +21,6 @@ const ExplorerLesIndicateursPage = () => {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]} backgroundColor="galt" paddingY="2w" color="grey.800">
         <Container maxW="xl">
-          <Breadcrumb pages={[PAGES.monEspace(), { title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
             {title}
           </Heading>

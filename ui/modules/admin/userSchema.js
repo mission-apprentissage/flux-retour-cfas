@@ -1,12 +1,13 @@
 import { z } from "zod";
 
+// FIXME modèle à revoir
 const userSchema = () =>
   z.object({
+    civility: z.string({ required_error: "Champ obligatoire" }),
     prenom: z.string({ required_error: "Champ obligatoire" }),
     nom: z.string({ required_error: "Champ obligatoire" }),
     email: z.string({ required_error: "Champ obligatoire" }).email("Email invalide"),
-    roles: z.string({ required_error: "Champ obligatoire" }).array(),
-    is_admin: z.boolean({}).optional(),
+    account_status: z.boolean({}).optional(),
   });
 
 export default userSchema;
