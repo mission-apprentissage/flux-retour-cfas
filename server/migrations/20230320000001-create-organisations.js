@@ -1,6 +1,11 @@
 export const up = async (/** @type {import('mongodb').Db} */ db) => {
   // cette migration introduit la collection organisations et affecte une organisation à chaque utilisateur
-  await db.createCollection("organisations");
+  // try catch au cas où la collection soit créée par le serveur d'abord...
+  try {
+    await db.createCollection("organisations");
+  } catch (err) {
+    //
+  }
 
   /*
   Création des organisations avec les membres, récupérés via champ usersMigration.organisation avec :
