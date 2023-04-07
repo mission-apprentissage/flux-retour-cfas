@@ -6,7 +6,7 @@ import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 import { OrganisationType } from "@/common/internal/Organisation";
-import { useOrganisationOrganisme } from "@/hooks/organismes";
+import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
 import { AuthContext } from "@/common/internal/AuthContext";
 
 function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): string {
@@ -110,10 +110,14 @@ function NavBarTransverse(): ReactElement {
 function NavBarOrganismeFormation(): ReactElement {
   const { organisationType } = useAuth();
   const { organisme } = useOrganisationOrganisme();
+  const { organismes } = useOrganisationOrganismes();
   return (
     <>
       <NavItem to="/">Mon tableau de bord</NavItem>
-      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && <NavItem to="/organismes">Mes organismes</NavItem>}
+      {/* on s'assure qu'un organisme a accès à au moins un autre organisme */}
+      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && organismes?.length > 1 && (
+        <NavItem to="/organismes">Mes organismes</NavItem>
+      )}
       <NavItem to="/effectifs">Mes effectifs</NavItem>
       {organisme && (
         <NavItem
