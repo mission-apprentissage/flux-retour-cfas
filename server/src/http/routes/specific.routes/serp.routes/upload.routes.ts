@@ -32,6 +32,7 @@ import {
 } from "../../../../common/actions/organismes/organismes.actions.js";
 import { sendServerEventsForUser } from "../server-events.routes.js";
 import { clamav } from "../../../../services.js";
+import { requireManageEffectifsPermission } from "../../../../common/actions/helpers/permissions.js";
 
 const mappingModel = {
   annee_scolaire: "annee_scolaire",
@@ -105,6 +106,19 @@ function noop() {
 
 export default () => {
   const router = express.Router();
+
+  // FIXME à tester
+  router.use(async (req, _res, next) => {
+    try {
+      await requireManageEffectifsPermission(
+        req.user,
+        (req.query.organisme_id as string) || (req.body.organisme_id as string)
+      );
+      next();
+    } catch (err) {
+      next(err);
+    }
+  });
 
   function handleMultipartForm(req, res, organisme_id, callback) {
     let form = new multiparty.Form();
