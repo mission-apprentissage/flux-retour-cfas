@@ -1,29 +1,36 @@
 import React from "react";
 import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
-
 import Page from "@/components/Page/Page";
+
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import SIFAPage from "@/modules/mon-espace/SIFA/SIFAPage";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
-import Televersements from "@/modules/mon-espace/effectifs/Televersements";
 import { useRouter } from "next/router";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const PageImportEffectifsDeSonOrganisme = () => {
+const PageEnqueteSIFADeSonOrganisme = () => {
   const router = useRouter();
-  const { organisme } = useEffectifsOrganisme(router.query.id as string);
+  const { organisme } = useEffectifsOrganisme(router.query.organismeId as string);
+
   return (
     <Page>
       <Head>
-        <title>Ses effectifs - Import</title>
+        <title>Mon enquête SIFA</title>
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
-        <Container maxW="xl">{organisme && <Televersements organisme={organisme} />}</Container>
+        <Container maxW="xl" px={0}>
+          {organisme && <SIFAPage isMine={false} />}
+        </Container>
       </Box>
     </Page>
   );
 };
 
-export default withAuth(PageImportEffectifsDeSonOrganisme);
+export default withAuth(PageEnqueteSIFADeSonOrganisme, [
+  "ORGANISME_FORMATION_FORMATEUR",
+  "ORGANISME_FORMATION_RESPONSABLE",
+  "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+]);

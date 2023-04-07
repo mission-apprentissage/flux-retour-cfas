@@ -171,49 +171,39 @@ function NavBarOrganismeFormation(): ReactElement {
   );
 }
 
-function NavBarAutreOrganisme(): ReactElement {
-  const router = useRouter();
+function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactElement {
   const { organisationType } = useAuth();
-
-  // Construction dynamique des liens de la navbar en fonction de la navigation URL
-  const showSubNavBar = router.pathname.startsWith("/organismes/[id]");
-  const organismeId = router.query.id as string;
-
   const { organisme } = useEffectifsOrganisme(organismeId);
 
   return (
-    <>
-      {showSubNavBar && (
-        <Container maxW="xl">
-          <Flex as="nav" align="center" wrap="wrap" w="100%">
-            <Box p={4} bg={"transparent"}>
-              <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
-            </Box>
-            <NavItem to={`/organismes/${organismeId}`} exactMatch colorActive="dsfr_lightprimary.bluefrance_850">
-              Son tableau de bord
+    <Container maxW="xl">
+      <Flex as="nav" align="center" wrap="wrap" w="100%">
+        <Box p={4} bg={"transparent"}>
+          <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
+        </Box>
+        <NavItem to={`/organismes/${organismeId}`} exactMatch colorActive="dsfr_lightprimary.bluefrance_850">
+          Son tableau de bord
+        </NavItem>
+        {canManageEffectifsOrganisme(organisationType) && (
+          <>
+            <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
+              Ses effectifs
             </NavItem>
-            {canManageEffectifsOrganisme(organisationType) && (
-              <>
-                <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
-                  Ses effectifs
-                </NavItem>
-                {organisme && (
-                  <NavItem
-                    to={`/organismes/${organismeId}/enquete-sifa`}
-                    isDisabled={!organisme.first_transmission_date}
-                    disabledReason={
-                      !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
-                    }
-                  >
-                    Son enquête SIFA
-                  </NavItem>
-                )}
-              </>
+            {organisme && (
+              <NavItem
+                to={`/organismes/${organismeId}/enquete-sifa`}
+                isDisabled={!organisme.first_transmission_date}
+                disabledReason={
+                  !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
+                }
+              >
+                Son enquête SIFA
+              </NavItem>
             )}
-          </Flex>
-        </Container>
-      )}
-    </>
+          </>
+        )}
+      </Flex>
+    </Container>
   );
 }
 
@@ -241,8 +231,13 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
 }
 
 const NavigationMenu = () => {
+  const router = useRouter();
   const { auth } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  const showSubNavBar = auth && router.pathname.startsWith("/organismes/[organismeId]");
+  const subOrganismeId = router.query.organismeId as string;
+
   return (
     <Box w="full" boxShadow="md">
       <Box borderBottom={"1px solid"} borderColor={"grey.400"}>
@@ -271,7 +266,7 @@ const NavigationMenu = () => {
           </Flex>
         </Container>
       </Box>
-      {auth && <NavBarAutreOrganisme />}
+      {showSubNavBar && <NavBarAutreOrganisme organismeId={subOrganismeId} />}
     </Box>
   );
 };
