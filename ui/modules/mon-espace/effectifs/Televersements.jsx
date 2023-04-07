@@ -32,10 +32,9 @@ import EffectifsTable from "./engine/EffectifsTable";
 import { effectifsStateAtom } from "./engine/atoms";
 import { sortByNormalizedLabels } from "@/common/utils/array";
 
-const Televersements = () => {
+const Televersements = ({ organisme }) => {
   const { documents, uploads, onDocumentsChanged } = useDocuments();
   const [step, setStep] = useState("landing");
-  const organisme = useRecoilValue(organismeAtom);
   useFetchUploads(organisme?._id);
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const [mapping, setMapping] = useState(null);
