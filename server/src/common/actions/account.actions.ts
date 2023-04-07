@@ -105,12 +105,6 @@ export const activateUser = async (email: string) => {
     throw Boom.internal("Une erreur est survenue");
   }
 
-  // si une invitation existe, on confirme directement l'utilisateur
-  const invitation = await invitationsDb().findOne({
-    organisation_id: user.organisation_id,
-    email: user.email,
-  });
-
   const res = await usersMigrationDb().updateOne(
     {
       email,
@@ -118,7 +112,7 @@ export const activateUser = async (email: string) => {
     },
     {
       $set: {
-        account_status: invitation ? "CONFIRMED" : "PENDING_ADMIN_VALIDATION", // previously PENDING_PASSWORD_SETUP
+        account_status: "PENDING_ADMIN_VALIDATION",
       },
     }
   );
@@ -126,50 +120,45 @@ export const activateUser = async (email: string) => {
     throw Boom.badRequest("Permissions invalides");
   }
 
-  // si l'invitation a été utilisée, on la supprime et il n'y a pas besoin de notification
-  if (invitation) {
-    await invitationsDb().deleteOne({ _id: invitation._id });
-  } else {
-    // si des gestionnaires existent, on les notifie, sinon c'est un admin du TDB qui doit valider
-    const gestionnaires = await usersMigrationDb()
-      .find({
-        organisation_id: user.organisation_id,
-        account_status: "CONFIRMED",
-      })
-      .toArray();
+  // si des gestionnaires existent, on les notifie, sinon c'est un admin du TDB qui doit valider
+  const gestionnaires = await usersMigrationDb()
+    .find({
+      organisation_id: user.organisation_id,
+      account_status: "CONFIRMED",
+    })
+    .toArray();
 
-    if (gestionnaires.length > 0) {
-      await Promise.all(
-        gestionnaires.map(async (gestionnaire) => {
-          await sendEmail(gestionnaire.email, "validation_user_by_orga_gestionnaire", {
-            recipient: {
-              civility: gestionnaire.civility,
-              prenom: gestionnaire.prenom,
-              nom: gestionnaire.nom,
-            },
-            user: {
-              _id: user._id.toString(),
-              civility: user.civility,
-              nom: user.nom,
-              prenom: user.prenom,
-              email: user.email,
-            },
-            organisationLabel: await buildOrganisationLabel(user.organisation_id),
-          });
-        })
-      );
-    } else {
-      await sendEmail("tableau-de-bord@apprentissage.beta.gouv.fr", "validation_user_by_tdb_team", {
-        user: {
-          _id: user._id.toString(),
-          civility: user.civility,
-          prenom: user.prenom,
-          nom: user.nom,
-          email: user.email,
-        },
-        organisationLabel: await buildOrganisationLabel(user.organisation_id),
-      });
-    }
+  if (gestionnaires.length > 0) {
+    await Promise.all(
+      gestionnaires.map(async (gestionnaire) => {
+        await sendEmail(gestionnaire.email, "validation_user_by_orga_gestionnaire", {
+          recipient: {
+            civility: gestionnaire.civility,
+            prenom: gestionnaire.prenom,
+            nom: gestionnaire.nom,
+          },
+          user: {
+            _id: user._id.toString(),
+            civility: user.civility,
+            nom: user.nom,
+            prenom: user.prenom,
+            email: user.email,
+          },
+          organisationLabel: await buildOrganisationLabel(user.organisation_id),
+        });
+      })
+    );
+  } else {
+    await sendEmail("tableau-de-bord@apprentissage.beta.gouv.fr", "validation_user_by_tdb_team", {
+      user: {
+        _id: user._id.toString(),
+        civility: user.civility,
+        prenom: user.prenom,
+        nom: user.nom,
+        email: user.email,
+      },
+      organisationLabel: await buildOrganisationLabel(user.organisation_id),
+    });
   }
 };
 
