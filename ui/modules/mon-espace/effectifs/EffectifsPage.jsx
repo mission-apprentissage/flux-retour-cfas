@@ -10,7 +10,6 @@ import ChoixTransmission from "./ChoixTransmission";
 import TransmissionAPI from "./TransmissionAPI";
 import Televersements from "./Televersements";
 import { effectifsStateAtom } from "./engine/atoms.js";
-import useAuth from "../../../hooks/useAuth";
 
 function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -48,7 +47,6 @@ function useOrganismesEffectifs(organismeId) {
 }
 
 const EffectifsPage = ({ isMine }) => {
-  const { auth, organisationType } = useAuth();
   const organisme = useRecoilValue(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
 

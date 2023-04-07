@@ -9,7 +9,6 @@ export function useEffectifsOrganismeOrganisation() {
   const { organisme } = useOrganisationOrganisme();
   const [organismeState, setOrganisme] = useRecoilState(organismeAtom);
   useEffect(() => {
-    console.log("setOrganisme", organisme);
     setOrganisme(organisme);
   }, [organisme]);
 
@@ -20,7 +19,6 @@ export function useEffectifsOrganisme(organismeId: string) {
   const { organisme } = useOrganisme(organismeId);
   const [organismeState, setOrganisme] = useRecoilState(organismeAtom);
   useEffect(() => {
-    console.log("setOrganisme", organisme);
     setOrganisme(organisme);
   }, [organisme]);
 
