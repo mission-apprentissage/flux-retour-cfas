@@ -1,4 +1,6 @@
 import express from "express";
+import fs from "fs";
+import path from "path";
 import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
@@ -49,10 +51,10 @@ import maintenancesRoutes from "./routes/maintenances.routes.js";
 import config from "../config.js";
 import { indicateursPermissions } from "./middlewares/permissionsOrganismeMiddleware.js";
 
-import openapiSpecs from "./open-api.json" assert { type: "json" };
-
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
+
+const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 
 /**
  * Create the express app
