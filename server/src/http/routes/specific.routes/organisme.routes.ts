@@ -48,7 +48,11 @@ export default ({ mailer }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async ({ body: { organisme_id, ...data }, params, user }, res) => {
       // TODO JOI
-      const updatedOrganisme = await updateOrganisme(params.id, data);
+      const updatedOrganisme = await updateOrganisme(params.id, data, {
+        callLbaApi: false,
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+      });
       return res.json({
         ...updatedOrganisme,
         acl: user.currentPermissionAcl,

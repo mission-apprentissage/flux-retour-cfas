@@ -5,7 +5,7 @@ import config from "../../../src/config.js";
 // import { createRandomOrganisme } from "../../data/randomizedSample.js";
 import { startServer } from "../../utils/testUtils.js";
 
-describe("Routes Organismes", () => {
+describe("Routes Organismes for API referentiel", () => {
   it("Vérifie que la route /organismes renvoie une 401 si aucune apiKey n'est fournie", async () => {
     const { httpClient } = await startServer();
     const response = await httpClient.post("/api/organismes");
