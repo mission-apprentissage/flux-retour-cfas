@@ -469,7 +469,7 @@ function setupRoutes(app: Application) {
   authRouter.post(
     "/api/v1/organisation/configure-erp",
     returnResult(async (req) => {
-      await configureOrganismeERP(req.user, req.body.email.toLowerCase());
+      await configureOrganismeERP(req.user, req.body);
     })
   );
 
