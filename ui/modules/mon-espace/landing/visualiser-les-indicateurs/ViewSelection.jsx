@@ -27,7 +27,7 @@ const ViewSelection = () => {
       ? [
           {
             path: "/par-reseau",
-            title: `Vue du réseau ${auth.reseau}`,
+            title: `Vue du réseau ${auth.organisation.reseau}`,
           },
           {
             path: "/par-organisme",
