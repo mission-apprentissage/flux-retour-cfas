@@ -16,7 +16,11 @@ import EffectifsTable from "../effectifs/engine/EffectifsTable";
 import { effectifsStateAtom } from "../effectifs/engine/atoms";
 import { Input } from "../effectifs/engine/formEngine/components/Input/Input";
 
-function useOrganismesEffectifs(organismeId) {
+const currentYear = new Date().getFullYear();
+const previousYear = currentYear - 1;
+const currentAnneeScolaire = `${previousYear}-${currentYear}`;
+
+function useOrganismesEffectifs(organismeId, anneeScolaire) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const queryClient = useQueryClient();
   const prevOrganismeId = useRef(null);
@@ -29,8 +33,10 @@ function useOrganismesEffectifs(organismeId) {
     }
   }, [queryClient, organismeId]);
 
-  const { data, isLoading, isFetching } = useQuery(["organismesEffectifs"], async () => {
-    const organismesEffectifs = await _get(`/api/v1/organismes/${organismeId}/effectifs?sifa=true`);
+  const { data, isLoading, isFetching } = useQuery(["organismesEffectifs", organismeId], async () => {
+    const organismesEffectifs = await _get(
+      `/api/v1/organismes/${organismeId}/effectifs?sifa=true&annee_scolaire=${anneeScolaire}`
+    );
     // eslint-disable-next-line no-undef
     const newEffectifsState = new Map();
     for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
@@ -94,7 +100,7 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
 const SIFAPage = ({ isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue(organismeAtom);
-  const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
+  const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id, currentAnneeScolaire);
   const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
   const [searchValue, setSearchValue] = useState("");
@@ -103,7 +109,6 @@ const SIFAPage = ({ isMine }) => {
     () => groupBy(organismesEffectifs, "annee_scolaire"),
     [organismesEffectifs]
   );
-  const anneScolaire = "2022-2023";
   const [showOnlyMissingSifa, setShowOnlyMissingSifa] = useState(false);
 
   if (isLoading) {
@@ -143,27 +148,23 @@ const SIFAPage = ({ isMine }) => {
 
       <VStack alignItems="flex-start">
         <Text fontWeight="bold">
-          Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre{" "}
-          {new Date().getFullYear() - 1}. Pour plus de facilité, vous pouvez effectuer une recherche, ou filtrer par
-          année.
+          Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre {previousYear}, sur
+          l&apos;année scolaire {currentAnneeScolaire}. Pour plus de facilité, vous pouvez effectuer une recherche, ou
+          filtrer par année.
         </Text>
         <Input
-          {...{
-            name: "search_effectifs",
-            fieldType: "text",
-            mask: "C",
-            maskBlocks: [
-              {
-                name: "C",
-                mask: "Pattern",
-                pattern: "^.*$",
-              },
-            ],
-            placeholder: "Recherche",
-          }}
-          onSubmit={(value) => {
-            setSearchValue(value.trim());
-          }}
+          name="search_effectifs"
+          placeholder="Recherche"
+          fieldType="text"
+          mask="C"
+          maskBlocks={[
+            {
+              name: "C",
+              mask: "Pattern",
+              pattern: "^.*$",
+            },
+          ]}
+          onSubmit={(value) => setSearchValue(value.trim())}
           value={searchValue}
           w="35%"
         />
@@ -189,16 +190,14 @@ const SIFAPage = ({ isMine }) => {
 
       <Box mt={10} mb={16}>
         {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]) => {
-          if (anneScolaire !== "all" && anneScolaire !== anneSco) return null;
           const orgaEffectifs = showOnlyMissingSifa ? orgaE.filter((ef) => ef.requiredSifa.length) : orgaE;
           const effectifsByCfd = groupBy(orgaEffectifs, "formation.cfd");
-          const borderStyle = { borderColor: "dgalt", borderWidth: 1 }; //anneScolaire === "all" ? { borderColor: "bluefrance", borderWidth: 1 } : {};
           return (
             <Box key={anneSco} mb={5}>
               <Text>
                 {anneSco} {!searchValue ? `- ${orgaEffectifs.length} apprenant(es) total` : ""}
               </Text>
-              <Box p={4} {...borderStyle}>
+              <Box p={4} style={{ borderColor: "dgalt", borderWidth: 1 }}>
                 {Object.entries(effectifsByCfd).map(([cfd, effectifs], i) => {
                   const { formation } = effectifs[0];
                   return (

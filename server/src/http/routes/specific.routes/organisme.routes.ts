@@ -5,15 +5,27 @@ import {
   findOrganismeByUai,
   getSousEtablissementsForUai,
 } from "../../../common/actions/organismes/organismes.actions.js";
-import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
+import { findEffectifsByQuery } from "../../../common/actions/effectifs.actions.js";
 import { isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
 import { AuthContext } from "../../../common/model/internal/AuthContext.js";
 import { requireManageOrganismeEffectifsPermission } from "../../../common/actions/helpers/permissions.js";
+import { ObjectId } from "mongodb";
+import { Effectif } from "@/src/common/model/@types/Effectif.js";
 
-export async function getOrganismeEffectifs(ctx: AuthContext, organismeId: string, sifa = false) {
+export async function getOrganismeEffectifs(
+  ctx: AuthContext,
+  organismeId: string,
+  anneeScolaire: string | undefined,
+  sifa = false
+) {
   await requireManageOrganismeEffectifsPermission(ctx, organismeId);
 
-  const effectifsDb = await findEffectifs(organismeId);
+  const filter: Partial<Effectif> = { organisme_id: new ObjectId(organismeId) };
+  if (anneeScolaire) {
+    filter.annee_scolaire = anneeScolaire;
+  }
+
+  const effectifsDb = await findEffectifsByQuery(filter);
 
   const effectifs: any[] = [];
 
@@ -65,11 +77,7 @@ export async function getOrganismeEffectifs(ctx: AuthContext, organismeId: strin
         : {}),
     };
 
-    if (sifa) {
-      if (isEligibleSIFA({ historique_statut })) {
-        effectifs.push(effectif);
-      }
-    } else {
+    if (!sifa || isEligibleSIFA({ historique_statut })) {
       effectifs.push(effectif);
     }
   }
