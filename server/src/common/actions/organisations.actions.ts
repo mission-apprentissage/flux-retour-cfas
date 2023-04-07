@@ -13,6 +13,8 @@ import { requireOrganisationOF } from "./helpers/permissions.js";
 import { Invitation } from "../model/invitations.model.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { getUserById } from "./users.actions.js";
+import { ConfigurationERP } from "../validation/configurationERPSchema.js";
+import { stripEmptyFields } from "../utils/validationUtils.js";
 
 type NewOrganisation = Omit<Organisation, "_id" | "created_at">;
 
@@ -180,12 +182,6 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
   }
 }
 
-interface ConfigurationERP {
-  erps?: string[];
-  mode_de_transmission?: "API" | "MANUEL";
-  setup_step_courante?: "STEP1" | "STEP2" | "STEP3" | "COMPLETE";
-}
-
 export async function configureOrganismeERP(ctx: AuthContext, conf: ConfigurationERP): Promise<void> {
   const organisationOF = requireOrganisationOF(ctx);
 
@@ -196,7 +192,7 @@ export async function configureOrganismeERP(ctx: AuthContext, conf: Configuratio
       uai: organisationOF.uai,
     });
   }
-  await organismesDb().updateOne({ _id: organisme._id }, conf);
+  await organismesDb().updateOne({ _id: organisme._id }, { $set: stripEmptyFields(conf) as any });
 }
 
 export async function getOrganisationOrganisme(ctx: AuthContext): Promise<Organisme> {

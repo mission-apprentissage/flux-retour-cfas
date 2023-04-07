@@ -91,6 +91,7 @@ import { checkActivationToken, checkPasswordToken } from "./helpers/passport-han
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
 import loginSchemaLegacy from "../common/validation/loginSchemaLegacy.js";
 import { generateSifa } from "../common/actions/sifa.actions/sifa.actions.js";
+import { configurationERPSchema } from "../common/validation/configurationERPSchema.js";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 
@@ -466,10 +467,11 @@ function setupRoutes(app: Application) {
       return await getOrganisationOrganisme(req.user);
     })
   );
-  authRouter.post(
+  authRouter.put(
     "/api/v1/organisation/configure-erp",
     returnResult(async (req) => {
-      await configureOrganismeERP(req.user, req.body);
+      const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
+      await configureOrganismeERP(req.user, conf);
     })
   );
 
