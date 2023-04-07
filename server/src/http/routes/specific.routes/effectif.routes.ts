@@ -6,12 +6,11 @@ import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
 import { schema } from "../../../common/model/effectifs.model/effectifs.model.js";
 import { effectifsDb } from "../../../common/model/collections.js";
 import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
-// import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import { getCodePostalInfo } from "../../../common/apis/apiTablesCorrespondances.js";
-import { requireManageEffectifsPermission } from "../../../common/actions/helpers/permissions.js";
+import { legacyRequireManageEffectifsPermissionMiddleware } from "../../middlewares/legacyRequireManageEffectifsPermissionMiddleware.js";
 
 const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
@@ -21,15 +20,7 @@ const flattenKeys = (obj: any, path: any = []) =>
 export default () => {
   const router = express.Router();
 
-  // FIXME à tester
-  router.use(async (req, _res, next) => {
-    try {
-      await requireManageEffectifsPermission(req.user, req.query.organisme_id as string);
-      next();
-    } catch (err) {
-      next(err);
-    }
-  });
+  router.use(legacyRequireManageEffectifsPermissionMiddleware);
 
   const buildEffectifResult = (effectif) => {
     const { properties: effectifSchema } = schema;
@@ -154,56 +145,48 @@ export default () => {
     }
   );
 
-  router.get(
-    "/:id/snapshot",
-    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
-    async ({ params, query }, res) => {
-      let { id, organisme_id } = await Joi.object({
-        id: Joi.string().required(),
-        organisme_id: Joi.string().required(),
-      })
-        .unknown()
-        .validateAsync({ ...params, ...query }, { abortEarly: false });
+  router.get("/:id/snapshot", async ({ params, query }, res) => {
+    let { id, organisme_id } = await Joi.object({
+      id: Joi.string().required(),
+      organisme_id: Joi.string().required(),
+    })
+      .unknown()
+      .validateAsync({ ...params, ...query }, { abortEarly: false });
 
-      const uploads = await getUploadEntryByOrgaId(organisme_id);
+    const uploads = await getUploadEntryByOrgaId(organisme_id);
 
-      const effectif = uploads.last_snapshot_effectifs.find(({ _id }) => _id.toString() === id);
+    const effectif = uploads.last_snapshot_effectifs.find(({ _id }) => _id.toString() === id);
 
-      if (!effectif) {
-        throw new Error(`Unable to find effectif ${params.id}`);
-      }
-
-      return res.json(buildEffectifResult(effectif));
+    if (!effectif) {
+      throw new Error(`Unable to find effectif ${params.id}`);
     }
-  );
 
-  router.post(
-    "/",
-    // permissionsOrganismeMiddleware(["organisme/page_effectifs/ajout_apprenant"]),
-    async ({ body }, res) => {
-      const { organisme_id, annee_scolaire, source, apprenant, formation } = await Joi.object({
-        organisme_id: Joi.string().required(),
-        annee_scolaire: Joi.string().required(),
-        source: Joi.string().required(),
-        apprenant: Joi.object({
-          nom: Joi.string().required(),
-          prenom: Joi.string().required(),
-        }).required(),
-        formation: Joi.object({
-          cfd: Joi.string().required(),
-        }).required(),
-      }).validateAsync(body, { abortEarly: false });
+    return res.json(buildEffectifResult(effectif));
+  });
 
-      const effectif = await createEffectif({
-        organisme_id,
-        annee_scolaire,
-        source,
-        apprenant,
-        formation,
-      });
-      return res.json(effectif);
-    }
-  );
+  router.post("/", async ({ body }, res) => {
+    const { organisme_id, annee_scolaire, source, apprenant, formation } = await Joi.object({
+      organisme_id: Joi.string().required(),
+      annee_scolaire: Joi.string().required(),
+      source: Joi.string().required(),
+      apprenant: Joi.object({
+        nom: Joi.string().required(),
+        prenom: Joi.string().required(),
+      }).required(),
+      formation: Joi.object({
+        cfd: Joi.string().required(),
+      }).required(),
+    }).validateAsync(body, { abortEarly: false });
+
+    const effectif = await createEffectif({
+      organisme_id,
+      annee_scolaire,
+      source,
+      apprenant,
+      formation,
+    });
+    return res.json(effectif);
+  });
 
   const compactObject = (val) => {
     const data = Array.isArray(val) ? val.filter(Boolean) : val;
@@ -224,128 +207,112 @@ export default () => {
     );
   };
 
-  router.put(
-    "/:id",
-    // permissionsOrganismeMiddleware(["organisme/page_effectifs/edition"]),
-    async ({ body, params }, res) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)
+  router.put("/:id", async ({ body, params }, res) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)
 
-      const effectifDb = await effectifsDb().findOne({ _id: new ObjectId(params.id) });
-      if (!effectifDb) {
-        throw new Error(`Unable to find effectif ${params.id}`);
-      }
+    const effectifDb = await effectifsDb().findOne({ _id: new ObjectId(params.id) });
+    if (!effectifDb) {
+      throw new Error(`Unable to find effectif ${params.id}`);
+    }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { is_lock, nouveau_statut, nouveau_contrat, ...restData } = data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { is_lock, nouveau_statut, nouveau_contrat, ...restData } = data;
 
-      // TODO CHECK IS LOCK IF COMING FROM API
-      // organisme
+    // TODO CHECK IS LOCK IF COMING FROM API
+    // organisme
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
-        merge(effectifDb, {
-          ...compactObject(restData),
-        });
-
-      // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
-      if (dataToUpdate.formation.date_debut_formation)
-        dataToUpdate.formation.date_debut_formation = new Date(dataToUpdate.formation.date_debut_formation);
-      if (dataToUpdate.formation.date_fin_formation)
-        dataToUpdate.formation.date_fin_formation = new Date(dataToUpdate.formation.date_fin_formation);
-      if (dataToUpdate.formation.date_obtention_diplome)
-        dataToUpdate.formation.date_obtention_diplome = new Date(dataToUpdate.formation.date_obtention_diplome);
-
-      if (nouveau_statut) {
-        dataToUpdate.apprenant.historique_statut.push({
-          valeur_statut: nouveau_statut.valeur_statut,
-          date_statut: nouveau_statut.date_statut,
-          date_reception: new Date(),
-        });
-      }
-      if (nouveau_contrat) {
-        dataToUpdate.apprenant.contrats.push(nouveau_contrat);
-      }
-
-      let validation_errors: any[] = [];
-      for (const validation_error of dataToUpdate.validation_errors) {
-        if (!inputNames.includes(validation_error.fieldName)) {
-          validation_errors.push(validation_error);
-        }
-      }
-
-      const effectifUpdated = await updateEffectif(effectifDb._id, {
-        ...dataToUpdate,
-        id_erp_apprenant,
-        organisme_id,
-        annee_scolaire,
-        source,
-        validation_errors,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
+      merge(effectifDb, {
+        ...compactObject(restData),
       });
 
-      return res.json(buildEffectifResult(effectifUpdated));
+    // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
+    if (dataToUpdate.formation.date_debut_formation)
+      dataToUpdate.formation.date_debut_formation = new Date(dataToUpdate.formation.date_debut_formation);
+    if (dataToUpdate.formation.date_fin_formation)
+      dataToUpdate.formation.date_fin_formation = new Date(dataToUpdate.formation.date_fin_formation);
+    if (dataToUpdate.formation.date_obtention_diplome)
+      dataToUpdate.formation.date_obtention_diplome = new Date(dataToUpdate.formation.date_obtention_diplome);
+
+    if (nouveau_statut) {
+      dataToUpdate.apprenant.historique_statut.push({
+        valeur_statut: nouveau_statut.valeur_statut,
+        date_statut: nouveau_statut.date_statut,
+        date_reception: new Date(),
+      });
     }
-  );
-
-  router.post(
-    "/recherche-siret",
-    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
-    async ({ body }, res) => {
-      // TODO organismeFormation
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { siret, organismeFormation } = await Joi.object({
-        siret: Joi.string().required(),
-        organismeFormation: Joi.boolean(),
-      })
-        .unknown()
-        .validateAsync(body, { abortEarly: false });
-
-      const data = await findDataFromSiret(siret);
-
-      return res.json(data);
+    if (nouveau_contrat) {
+      dataToUpdate.apprenant.contrats.push(nouveau_contrat);
     }
-  );
 
-  router.post(
-    "/recherche-uai",
-    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
-    async ({ body }, res) => {
-      const { uai: userUai } = await Joi.object({
-        uai: Joi.string(),
-      })
-        .unknown()
-        .validateAsync(body, { abortEarly: false });
-
-      let uai = null;
-      if (userUai) {
-        if (!algoUAI(userUai)) return res.json({ uai, error: `L'UAI ${userUai} n'est pas valide` });
-        uai = userUai;
+    let validation_errors: any[] = [];
+    for (const validation_error of dataToUpdate.validation_errors) {
+      if (!inputNames.includes(validation_error.fieldName)) {
+        validation_errors.push(validation_error);
       }
-
-      // if (uai) {
-      //   const { organismes: organismesResp } = await fetchOrganismesWithUai(uai);
-      //   if (!organismesResp.length) return res.json({ uai, error: `L'uai ${uai} n'a pas été retrouvé` });
-      // }
-
-      return res.json({ uai });
     }
-  );
 
-  router.post(
-    "/recherche-code-postal",
-    // permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
-    async ({ body }, res) => {
-      const { codePostal } = await Joi.object({
-        codePostal: Joi.string().pattern(new RegExp("^[0-9]{5}$")),
-      })
-        .unknown()
-        .validateAsync(body, { abortEarly: false });
+    const effectifUpdated = await updateEffectif(effectifDb._id, {
+      ...dataToUpdate,
+      id_erp_apprenant,
+      organisme_id,
+      annee_scolaire,
+      source,
+      validation_errors,
+    });
 
-      const result = await getCodePostalInfo(codePostal);
+    return res.json(buildEffectifResult(effectifUpdated));
+  });
 
-      return res.json(result);
+  router.post("/recherche-siret", async ({ body }, res) => {
+    // TODO organismeFormation
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { siret, organismeFormation } = await Joi.object({
+      siret: Joi.string().required(),
+      organismeFormation: Joi.boolean(),
+    })
+      .unknown()
+      .validateAsync(body, { abortEarly: false });
+
+    const data = await findDataFromSiret(siret);
+
+    return res.json(data);
+  });
+
+  router.post("/recherche-uai", async ({ body }, res) => {
+    const { uai: userUai } = await Joi.object({
+      uai: Joi.string(),
+    })
+      .unknown()
+      .validateAsync(body, { abortEarly: false });
+
+    let uai = null;
+    if (userUai) {
+      if (!algoUAI(userUai)) return res.json({ uai, error: `L'UAI ${userUai} n'est pas valide` });
+      uai = userUai;
     }
-  );
+
+    // if (uai) {
+    //   const { organismes: organismesResp } = await fetchOrganismesWithUai(uai);
+    //   if (!organismesResp.length) return res.json({ uai, error: `L'uai ${uai} n'a pas été retrouvé` });
+    // }
+
+    return res.json({ uai });
+  });
+
+  router.post("/recherche-code-postal", async ({ body }, res) => {
+    const { codePostal } = await Joi.object({
+      codePostal: Joi.string().pattern(new RegExp("^[0-9]{5}$")),
+    })
+      .unknown()
+      .validateAsync(body, { abortEarly: false });
+
+    const result = await getCodePostalInfo(codePostal);
+
+    return res.json(result);
+  });
 
   return router;
 };

@@ -369,7 +369,7 @@ function setupRoutes(app: Application) {
   authRouter.get(
     "/api/v1/organismes/:id/effectifs",
     returnResult(async (req) => {
-      return await getOrganismeEffectifs(req.user, req.params.id);
+      return await getOrganismeEffectifs(req.user, req.params.id, req.query.sifa === "true");
     })
   );
   authRouter.get(

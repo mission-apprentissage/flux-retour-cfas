@@ -12,7 +12,7 @@ import { requireManageEffectifsPermission } from "../helpers/permissions.js";
 export const isEligibleSIFA = ({ historique_statut }) => {
   const filtered = historique_statut.filter(({ date_statut }) => {
     const dateStatut = DateTime.fromJSDate(new Date(date_statut)).setZone("Europe/Paris").setLocale("fr-FR");
-    const endOfyear = DateTime.fromFormat("31/12/2022", "dd/MM/yyyy").setLocale("fr-FR");
+    const endOfyear = DateTime.fromFormat("31/12/2022", "dd/MM/yyyy").setLocale("fr-FR"); // FIXME, date à revoir / configurer ?
     return dateStatut <= endOfyear;
   });
   const historiqueSorted = filtered.sort((a, b) => {
