@@ -27,4 +27,14 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   );
   await db.collection("permissions").drop();
   await db.collection("roles").drop();
+
+  await db.collection("organismes").updateMany(
+    {},
+    {
+      $unset: {
+        contributeurs: 1,
+      },
+    },
+    { bypassDocumentValidation: true }
+  );
 };
