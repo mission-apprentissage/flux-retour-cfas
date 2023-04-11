@@ -10,6 +10,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ email: 1 }, { unique: true }],
   [{ "emails.token": 1 }, {}],
   [{ email: "text", nom: "text", prenom: "text" }, {}],
+  [{ organisation_id: 1 }, {}],
 ];
 
 export const schema = object(
