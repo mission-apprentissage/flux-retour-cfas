@@ -270,6 +270,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
     });
   });
 
+  // describe("checkUaiMultiplesRelationsAndLieux"), async () => {};
+
   describe("buildFiabilisationCoupleForTdbCouple", async () => {
     it.skip("Vérifie l'ajout d'une entrée de fiabilisation FIABLE pour un couple du TDB dont le SIRET et l'UAI sont trouvés dans le Référentiel", async () => {
       // Construction de la collection de fiabilisation pour ce couple,
