@@ -10,6 +10,8 @@ import {
   formationEffectifSchema,
   validateFormationEffectif,
 } from "./parts/formation.effectif.part.js";
+import { TETE_DE_RESEAUX } from "../../constants/networksConstants.js";
+import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../../constants/territoiresConstants.js";
 
 const collectionName = "effectifs";
 
@@ -26,6 +28,16 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
     { unique: true },
   ],
+  [{ annee_scolaire: 1 }, {}],
+  [{ "_computed.organisme.region": 1 }, {}],
+  [{ "_computed.organisme.departement": 1 }, {}],
+  [{ "_computed.organisme.academie": 1 }, {}],
+  [{ "_computed.organisme.reseaux": 1 }, {}],
+
+  // 2 indexes utiles seulement pour les indicateurs v1
+  // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
+  [{ "_computed.organisme.uai": 1 }, {}],
+  [{ "_computed.organisme.siret": 1 }, {}],
 ];
 
 export const schema = object(
@@ -60,6 +72,38 @@ export const schema = object(
       }),
       {
         description: "Erreurs de validation de cet effectif",
+      }
+    ),
+    _computed: object(
+      {
+        organisme: object({
+          region: string({
+            enum: REGIONS.map(({ code }) => code),
+          }),
+          departement: string({
+            example: "1 Ain, 99 Étranger",
+            pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
+            enum: DEPARTEMENTS.map(({ code }) => code),
+            maxLength: 3,
+            minLength: 1,
+          }),
+          academie: string({
+            enum: Object.values(ACADEMIES).map(({ code }) => `${code}`),
+          }),
+          reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) })),
+
+          // 2 champs utiles seulement pour les indicateurs v1
+          // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
+          uai: string({
+            pattern: "^[0-9]{7}[a-zA-Z]$",
+            maxLength: 8,
+            minLength: 8,
+          }),
+          siret: string({ pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
+        }),
+      },
+      {
+        description: "Propriétés calculées ou récupérées d'autres collections",
       }
     ),
   },
