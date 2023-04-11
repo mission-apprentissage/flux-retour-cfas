@@ -1,5 +1,6 @@
 import express from "express";
 import Boom from "boom";
+import { z } from "zod";
 
 import { getAllUsers, getDetailedUserById, removeUser, updateUser } from "../../../common/actions/users.actions.js";
 import paginationShema from "../../../common/validation/paginationSchema.js";
@@ -11,40 +12,43 @@ import { getWarningOnEmail } from "../../../common/model/organisations.model.js"
 import { returnResult } from "../../middlewares/helpers.js";
 import { rejectMembre, validateMembre } from "../../../common/actions/organisations.actions.js";
 
+const listSchema = paginationShema({ defaultSort: "created_at:-1" }).merge(searchShema()).strict();
+type ListSchema = z.infer<typeof listSchema>;
+
 export default () => {
   const router = express.Router();
 
   router.get(
-    "/users",
+    "/",
     validateRequestMiddleware({
-      query: paginationShema({ defaultSort: "created_at:-1" }).merge(searchShema()).strict(),
+      query: listSchema,
     }),
     async (req, res) => {
-      const { page, limit, sort, q } = req.query;
+      const { page, limit, sort, q } = req.query as ListSchema;
       const result = await getAllUsers(q ? { $text: { $search: q } } : {}, { page, limit, sort });
       return res.json(result);
     }
   );
 
   router.put(
-    "/users/:id/validate",
+    "/:id/validate",
     returnResult(async (req) => {
       await validateMembre(req.user, req.params.id);
     })
   );
 
   router.put(
-    "/users/:id/reject",
+    "/:id/reject",
     returnResult(async (req) => {
       await rejectMembre(req.user, req.params.id);
     })
   );
 
   router.put(
-    "/users/:id",
+    "/:id",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
-      body: userSchema({ isNew: false }).strict(),
+      body: userSchema().strict(),
     }),
     async ({ body, params }, res) => {
       const { id } = params;
@@ -64,7 +68,7 @@ export default () => {
   );
 
   router.get(
-    "/users/:id",
+    "/:id",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
     }),
@@ -82,7 +86,7 @@ export default () => {
   );
 
   router.delete(
-    "/users/:id",
+    "/:id",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
     }),

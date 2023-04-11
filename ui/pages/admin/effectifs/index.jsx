@@ -9,13 +9,13 @@ import { _get } from "@/common/httpClient";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import OrganismesList from "@/modules/admin/OrganismesList";
+import EffectifsList from "@/modules/admin/EffectifsList";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 const DEFAULT_LIMIT = 100;
 
-const Organismes = () => {
-  const title = "Gestion des organismes";
+const Effectifs = () => {
+  const title = "Gestion des effectifs";
   const router = useRouter();
   let { page, limit, sort, q: searchValue, ...filter } = router.query;
   page = parseInt(page, 10) || 1;
@@ -23,24 +23,24 @@ const Organismes = () => {
   filter = filter || undefined;
 
   const {
-    data: organismes,
-    isLoading: isLoadingOrganismes,
-    error: errorsOrganismes,
-  } = useQuery(["admin/organismes", page, limit, searchValue, sort, filter], () =>
-    _get("/api/v1/admin/organismes/", { params: { page, limit, q: searchValue, sort, filter } })
+    data: effectifs,
+    isLoading: isLoadingEffectifs,
+    error: errorsEffectifs,
+  } = useQuery(["admin/effectifs", page, limit, searchValue, sort, filter], () =>
+    _get("/api/v1/admin/effectifs/", { params: { page, limit, q: searchValue, sort, filter } })
   );
   // prefetch next page
   useQuery(
-    ["organismes", page + 1, limit, searchValue, sort, filter],
-    () => _get("/api/v1/admin/organismes/", { params: { page: page + 1, limit, q: searchValue, sort, filter } }),
-    { enabled: !!(organismes?.pagination && page + 1 < organismes?.pagination?.lastPage) }
+    ["effectifs", page + 1, limit, searchValue, sort, filter],
+    () => _get("/api/v1/admin/effectifs/", { params: { page: page + 1, limit, q: searchValue, sort, filter } }),
+    { enabled: !!(effectifs?.pagination && page + 1 < effectifs?.pagination?.lastPage) }
   );
 
   const [sortField, sortDirection] = sort?.split(":") || [];
   const sorting = sortField ? [{ id: sortField, desc: sortDirection === "-1" }] : undefined;
 
-  const isLoading = isLoadingOrganismes;
-  const error = errorsOrganismes;
+  const isLoading = isLoadingEffectifs;
+  const error = errorsEffectifs;
 
   return (
     <Page>
@@ -54,7 +54,7 @@ const Organismes = () => {
             {title}
           </Heading>
         </HStack>
-        {isLoading && !organismes?.data ? (
+        {isLoading && !effectifs?.data ? (
           <Spinner alignSelf="center" />
         ) : error ? (
           <Box>Une erreur est survenue : {error.message}</Box>
@@ -68,7 +68,7 @@ const Organismes = () => {
                 const { q } = Object.fromEntries(formData);
                 router.push(
                   {
-                    pathname: "/admin/organismes",
+                    pathname: "/admin/effectifs",
                     query: q ? { q } : null,
                   },
                   undefined,
@@ -86,8 +86,8 @@ const Organismes = () => {
             </form>
 
             <Text fontSize="1rem">
-              {Intl.NumberFormat().format(organismes?.pagination?.total || 0)}{" "}
-              {organismes?.pagination?.total > 1 ? "organismes" : "organisme"}
+              {Intl.NumberFormat().format(effectifs?.pagination?.total || 0)}{" "}
+              {effectifs?.pagination?.total > 1 ? "effectifs" : "effectif"}
             </Text>
 
             {Object.entries(filter).length > 0 && (
@@ -118,10 +118,10 @@ const Organismes = () => {
               </HStack>
             )}
 
-            <OrganismesList
+            <EffectifsList
               mt={4}
-              data={organismes?.data || []}
-              pagination={organismes?.pagination}
+              data={effectifs?.data || []}
+              pagination={effectifs?.pagination}
               sorting={sorting}
               searchValue={searchValue}
             />
@@ -132,4 +132,4 @@ const Organismes = () => {
   );
 };
 
-export default withAuth(Organismes, ["ADMINISTRATEUR"]);
+export default withAuth(Effectifs, "ADMINISTRATEUR");

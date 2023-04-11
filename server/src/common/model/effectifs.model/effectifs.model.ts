@@ -28,7 +28,48 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
     { unique: true },
   ],
-  [{ annee_scolaire: 1 }, {}],
+  [
+    {
+      "apprenant.nom": "text",
+      "apprenant.prenom": "text",
+      annee_scolaire: "text",
+      id_erp_apprenant: "text",
+    },
+    {
+      name: "nom_prenom_annsco_iderp_text",
+      default_language: "french",
+      collation: {
+        locale: "simple", // simple binary comparison
+        strength: 1, // case and accent insensitive
+      },
+    },
+  ],
+  [{ organisme_id: 1 }, { name: "organisme_id" }],
+  [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
+  [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
+  [{ date_de_naissance: 1 }, { name: "date_de_naissance" }],
+  [
+    { "apprenant.nom": 1 },
+    {
+      name: "nom",
+      collation: {
+        locale: "fr",
+        strength: 1, // case and accent insensitive
+      },
+    },
+  ],
+  [
+    { "apprenant.prenom": 1 },
+    {
+      name: "prenom",
+      collation: {
+        locale: "fr",
+        strength: 1, // case and accent insensitive
+      },
+    },
+  ],
+  [{ source: 1 }, { name: "source" }],
+  [{ created_at: 1 }, { name: "created_at" }],
   [{ "_computed.organisme.region": 1 }, {}],
   [{ "_computed.organisme.departement": 1 }, {}],
   [{ "_computed.organisme.academie": 1 }, {}],

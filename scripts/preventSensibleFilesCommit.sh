@@ -4,6 +4,7 @@
 
 sensible_files_pattern="\.(csv|xls|xls(x?)|json|env)$"
 exception="((package.json|custom-environment-variables.json"
+exception="$exception|.vscode/settings.json"
 exception="$exception|manifest.json"
 exception="$exception|open-api.json"
 exception="$exception|eslintrc.json|app.json|jsconfig.json|tsconfig.json|rome.json"

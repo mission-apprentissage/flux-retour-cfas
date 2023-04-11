@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-const paginationShema = ({ defaultSort }) =>
+const paginationShema = ({ defaultSort }: { defaultSort: string }) =>
   z.object({
-    page: z.preprocess((v: any) => parseInt(v || "1", 10), z.number().positive().max(10000)),
-    limit: z.preprocess((v: any) => parseInt(v || "10", 10), z.number().positive().max(10000)),
+    page: z.coerce.number().positive().max(10000).default(1),
+    limit: z.coerce.number().positive().max(10000).default(10),
     sort: z.preprocess(
       (v: any) => {
         const value = (v || defaultSort).split(":");
@@ -17,5 +17,4 @@ const paginationShema = ({ defaultSort }) =>
         .transform((v) => ({ [v.field]: v.direction }))
     ),
   });
-
 export default paginationShema;

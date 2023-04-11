@@ -35,6 +35,7 @@ import effectif from "./routes/specific.routes/effectif.routes.js";
 import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
+import effectifsAdmin from "./routes/admin.routes/effectifs.routes.js";
 import organismesAdmin from "./routes/admin.routes/organismes.routes.js";
 import statsAdmin from "./routes/admin.routes/stats.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
@@ -540,11 +541,13 @@ function setupRoutes(app: Application) {
    ********************************/
   const adminRouter = express.Router();
   adminRouter.use(requireAdministrator);
-  adminRouter.use("/api/v1/admin", usersAdmin());
-  adminRouter.use("/api/v1/admin", organismesAdmin());
-  adminRouter.use("/api/v1/admin", statsAdmin());
-  adminRouter.use("/api/v1/admin/maintenanceMessages", maintenancesAdmin());
-  authRouter.use(adminRouter);
+  adminRouter.use("/users", usersAdmin());
+  adminRouter.use("/organismes", organismesAdmin());
+  adminRouter.use("/effectifs", effectifsAdmin());
+  adminRouter.use("/stats", statsAdmin());
+  adminRouter.use("/maintenanceMessages", maintenancesAdmin());
+
+  authRouter.use("/api/v1/admin", adminRouter);
 
   app.use(authRouter);
 }

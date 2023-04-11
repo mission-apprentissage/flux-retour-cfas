@@ -164,7 +164,10 @@ export const getDetailedUserById = async (_id) => {
  * @param {*} query
  * @returns
  */
-export const getAllUsers = async (query = {}, { page, limit, sort }) => {
+export const getAllUsers = async (
+  query = {},
+  { page, limit, sort } = { page: 1, limit: 10, sort: { created_at: -1 } as { [key: string]: number } }
+) => {
   const result = await usersMigrationDb()
     .aggregate([
       { $match: query },

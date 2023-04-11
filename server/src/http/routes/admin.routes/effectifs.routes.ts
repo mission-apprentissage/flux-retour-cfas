@@ -2,21 +2,16 @@ import express from "express";
 import Boom from "boom";
 import { z } from "zod";
 
-import {
-  findOrganismeById,
-  getAllOrganismes,
-  getDetailedOrganismeById,
-  updateOrganisme,
-} from "../../../common/actions/organismes/organismes.actions.js";
+import { getAllEffectifs, getDetailedEffectifById } from "../../../common/actions/effectifs/effectifs.actions.js";
 import paginationShema from "../../../common/validation/paginationSchema.js";
 import searchShema from "../../../common/validation/searchSchema.js";
 import objectIdSchema from "../../../common/validation/objectIdSchema.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
-import organismesFilterSchema from "../../../common/validation/organismesFilterSchema.js";
+import effectifsFilterSchema from "../../../common/validation/effectifsFilterSchema.js";
 
 const listSchema = paginationShema({ defaultSort: "created_at:-1" })
   .merge(searchShema())
-  .merge(organismesFilterSchema())
+  .merge(effectifsFilterSchema())
   .strict();
 type ListSchema = z.infer<typeof listSchema>;
 
@@ -32,11 +27,10 @@ export default () => {
       const { page, limit, sort, q, filter } = req.query as ListSchema;
       const query: any = filter || {};
       if (q) {
-        // FIXME propager le type zod. Possible ?
-        (query as any).$text = { $search: q };
+        query.$text = { $search: q };
       }
-      // FIXME propager le type zod. Possible ?
-      const result = await getAllOrganismes(query, { page, limit, sort });
+
+      const result = await getAllEffectifs(query, { page, limit, sort });
       if (result) {
         result.filter = filter;
       }
@@ -51,34 +45,12 @@ export default () => {
     }),
     async ({ params }, res) => {
       const { id } = params;
-      const organisme = await getDetailedOrganismeById(id);
+      const organisme = await getDetailedEffectifById(id);
       if (!organisme) {
-        throw Boom.notFound(`Organisme with id ${id} not found`);
+        throw Boom.notFound(`Effectifs with id ${id} not found`);
       }
 
       res.json(organisme);
-    }
-  );
-
-  router.put(
-    "/:id/hydrate",
-    validateRequestMiddleware({
-      params: objectIdSchema("id"),
-    }),
-    async ({ params }, res) => {
-      const { id } = params;
-      const organisme = await findOrganismeById(id);
-      if (!organisme) {
-        throw Boom.notFound(`Organisme with id ${id} not found`);
-      }
-
-      const updated = await updateOrganisme(organisme._id, organisme, {
-        buildFormationTree: true,
-        buildInfosFromSiret: true,
-        callLbaApi: true,
-      });
-
-      res.json(updated);
     }
   );
 
