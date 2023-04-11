@@ -156,42 +156,15 @@ export const buildFiabilisationCoupleForTdbCouple = async (
   // Règle n°1 on vérifie si on a un couple fiable
   if (await checkCoupleFiable(coupleUaiSiretTdbToCheck, organismesFromReferentiel)) return;
 
-  // TODO Refacto split
-  // cas où on trouve un organisme unique dans le référentiel avec l'UAI du couple mais que le SIRET du couple
-  // - est vide
-  // - n'est pas le même dans le référentiel
-  // alors on remplace le SIRET par celui trouvé dans le référentiel si l'UAI n'est pas présent
-  // dans un autre couple TDB
-  const organismesFoundInReferentielViaUai = organismesFromReferentiel.filter(
-    (item) => item.uai === coupleUaiSiretTdbToCheck.uai
-  );
-
-  const organismeUniqueFoundInReferentielViaUai =
-    organismesFoundInReferentielViaUai.length === 1 ? organismesFoundInReferentielViaUai[0] : null;
-
-  const siretIsSubjectToUpdate =
-    !coupleUaiSiretTdbToCheck.siret ||
-    coupleUaiSiretTdbToCheck.siret !== organismeUniqueFoundInReferentielViaUai?.siret;
-
-  const uaiUniqueAmongAllCouplesTdb =
-    allCouplesUaiSiretTdb.filter(({ uai }) => {
-      return uai === coupleUaiSiretTdbToCheck.uai;
-    }).length === 1;
-
-  if (siretIsSubjectToUpdate && !!organismeUniqueFoundInReferentielViaUai && uaiUniqueAmongAllCouplesTdb) {
-    await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      {
-        $set: {
-          uai_fiable: coupleUaiSiretTdbToCheck.uai,
-          siret_fiable: organismeUniqueFoundInReferentielViaUai.siret,
-          type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-        },
-      },
-      { upsert: true }
-    );
+  // Règle n°2 on vérifie si on a un match sur l'UAI unique dans le référentiel mais avec un SIRET différent
+  if (
+    await checkMatchReferentielUaiUniqueSiretDifferent(
+      coupleUaiSiretTdbToCheck,
+      organismesFromReferentiel,
+      allCouplesUaiSiretTdb
+    )
+  )
     return;
-  }
 
   // TODO Refacto split
   // cas où on trouve un organisme via le SIRET mais que l'UAI lié n'est pas celui du couple
@@ -415,6 +388,53 @@ export const checkCoupleFiable = async (coupleUaiSiretTdbToCheck, organismesFrom
     await organismesDb().updateOne(
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
       { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
+    );
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ *
+ */
+export const checkMatchReferentielUaiUniqueSiretDifferent = async (
+  coupleUaiSiretTdbToCheck,
+  organismesFromReferentiel,
+  allCouplesUaiSiretTdb
+) => {
+  // cas où on trouve un organisme unique dans le référentiel avec l'UAI du couple mais que le SIRET du couple
+  // - est vide
+  // - n'est pas le même dans le référentiel
+  // alors on remplace le SIRET par celui trouvé dans le référentiel si l'UAI n'est pas présent
+  // dans un autre couple TDB
+  const organismesFoundInReferentielViaUai = organismesFromReferentiel.filter(
+    (item) => item.uai === coupleUaiSiretTdbToCheck.uai
+  );
+
+  const organismeUniqueFoundInReferentielViaUai =
+    organismesFoundInReferentielViaUai.length === 1 ? organismesFoundInReferentielViaUai[0] : null;
+
+  const siretIsSubjectToUpdate =
+    !coupleUaiSiretTdbToCheck.siret ||
+    coupleUaiSiretTdbToCheck.siret !== organismeUniqueFoundInReferentielViaUai?.siret;
+
+  const uaiUniqueAmongAllCouplesTdb =
+    allCouplesUaiSiretTdb.filter(({ uai }) => {
+      return uai === coupleUaiSiretTdbToCheck.uai;
+    }).length === 1;
+
+  if (siretIsSubjectToUpdate && !!organismeUniqueFoundInReferentielViaUai && uaiUniqueAmongAllCouplesTdb) {
+    await fiabilisationUaiSiretDb().updateOne(
+      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+      {
+        $set: {
+          uai_fiable: coupleUaiSiretTdbToCheck.uai,
+          siret_fiable: organismeUniqueFoundInReferentielViaUai.siret,
+          type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+        },
+      },
+      { upsert: true }
     );
     return true;
   }
