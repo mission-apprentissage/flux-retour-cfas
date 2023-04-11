@@ -18,7 +18,7 @@ export const useInitCerfa = ({ controller, modeSifa, canEdit, effectifsSnapshot 
     ["effectif", effectifId],
     async () => {
       if (!effectifId) return null;
-      const cerfa = await _get(`/api/v1/effectif/${effectifId}${effectifsSnapshot ? "!effectifsSnapshot" : ""}`, {
+      const cerfa = await _get(`/api/v1/effectif/${effectifId}${effectifsSnapshot ? "/snapshot" : ""}`, {
         params: { organisme_id: organisme._id },
       });
       // await sleep(300); // TODO SPECIAL UX

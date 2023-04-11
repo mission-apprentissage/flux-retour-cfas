@@ -130,20 +130,16 @@ export default () => {
     };
   };
 
-  router.get(
-    "/:id",
-    //permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
-    async ({ params }, res) => {
-      let { id } = await Joi.object({
-        id: Joi.string().required(),
-      })
-        .unknown()
-        .validateAsync(params, { abortEarly: false });
+  router.get("/:id", async ({ params }, res) => {
+    let { id } = await Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validateAsync(params, { abortEarly: false });
 
-      const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
-      return res.json(buildEffectifResult(effectif));
-    }
-  );
+    const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
+    return res.json(buildEffectifResult(effectif));
+  });
 
   router.get("/:id/snapshot", async ({ params, query }, res) => {
     let { id, organisme_id } = await Joi.object({
@@ -164,6 +160,7 @@ export default () => {
     return res.json(buildEffectifResult(effectif));
   });
 
+  // FIXME n'a pas l'air utilisé
   router.post("/", async ({ body }, res) => {
     const { organisme_id, annee_scolaire, source, apprenant, formation } = await Joi.object({
       organisme_id: Joi.string().required(),
