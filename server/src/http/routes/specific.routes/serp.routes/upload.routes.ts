@@ -918,7 +918,7 @@ export default () => {
           { keepPreviousErrors: true }
         );
       } else {
-        await createEffectif({ ...effectif, validation_errors: errorsToKeep });
+        await createEffectif({ organisme_id, ...effectif, validation_errors: errorsToKeep });
       }
     }
 

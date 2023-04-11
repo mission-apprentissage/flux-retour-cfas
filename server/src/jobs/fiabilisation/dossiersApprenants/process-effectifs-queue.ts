@@ -142,6 +142,17 @@ export const processEffectifsQueue = async (options?: Options) => {
                 );
                 await updateEffectifAndLock(effectifId, effectif);
               } else {
+                // FIXME intégrer dans une fonction globale insertEffectif
+                effectif._computed = {
+                  organisme: {
+                    region: organismeWithId.adresse.region,
+                    departement: organismeWithId.adresse.departement,
+                    academie: organismeWithId.adresse.academie,
+                    reseaux: organismeWithId.reseaux,
+                    uai: organismeWithId.uai,
+                    siret: organismeWithId.siret,
+                  },
+                };
                 const effectifCreated = await insertEffectif(effectif);
                 effectifId = effectifCreated._id;
                 await updateEffectifAndLock(effectifId, {

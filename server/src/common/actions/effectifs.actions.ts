@@ -6,6 +6,7 @@ import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant
 import { defaultValuesFormationEffectif } from "../model/effectifs.model/parts/formation.effectif.part.js";
 import { transformToInternationalNumber } from "../validation/utils/frenchTelephoneNumber.js";
 import { buildMongoPipelineFilterStages, EffectifsFilters } from "./helpers/filters.js";
+import { getOrganismeById } from "./organismes/organismes.actions.js";
 
 /**
  * Méthode de build d'un effectif
@@ -69,6 +70,17 @@ export const createEffectif = async (
     lockAtCreate
   );
 
+  const organisme = await getOrganismeById(organisme_id);
+  (dataToInsert as any)._computed = {
+    organisme: {
+      region: organisme.adresse?.region,
+      departement: organisme.adresse?.departement,
+      academie: organisme.adresse?.academie,
+      reseaux: organisme.reseaux,
+      uai: organisme.uai,
+      siret: organisme.siret,
+    },
+  };
   const { insertedId } = await effectifsDb().insertOne(validateEffectif(dataToInsert));
 
   return insertedId;

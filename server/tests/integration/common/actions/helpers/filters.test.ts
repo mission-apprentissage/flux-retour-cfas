@@ -31,35 +31,10 @@ describe("Filtres Indicateurs", () => {
       assert.deepStrictEqual(stages, [
         {
           $match: {
+            annee_scolaire: {
+              $in: ["2022-2022", "2022-2023"],
+            },
             organisme_id: new ObjectId("635acdad5e798f12bd919861"),
-          },
-        },
-        {
-          $match: {
-            annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
-            },
-          },
-        },
-        {
-          $match: {},
-        },
-      ]);
-    });
-    it("Gère le filtre organisme_ids", () => {
-      const stages = buildMongoPipelineFilterStages({
-        date: currentDate,
-        organisme_ids: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
-      });
-      assert.deepStrictEqual(stages, [
-        {
-          $match: {
-            annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
-            },
-            organisme_id: {
-              $in: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
-            },
           },
         },
         {
@@ -78,20 +53,11 @@ describe("Filtres Indicateurs", () => {
             annee_scolaire: {
               $in: ["2022-2022", "2022-2023"],
             },
+            "_computed.organisme.departement": "56",
           },
         },
         {
-          $lookup: {
-            from: "organismes",
-            localField: "organisme_id",
-            foreignField: "_id",
-            as: "organisme",
-          },
-        },
-        {
-          $match: {
-            "organisme.adresse.departement": "56",
-          },
+          $match: {},
         },
       ]);
     });
@@ -106,20 +72,11 @@ describe("Filtres Indicateurs", () => {
             annee_scolaire: {
               $in: ["2022-2022", "2022-2023"],
             },
+            "_computed.organisme.region": "25",
           },
         },
         {
-          $lookup: {
-            from: "organismes",
-            localField: "organisme_id",
-            foreignField: "_id",
-            as: "organisme",
-          },
-        },
-        {
-          $match: {
-            "organisme.adresse.region": "25",
-          },
+          $match: {},
         },
       ]);
     });
@@ -134,20 +91,11 @@ describe("Filtres Indicateurs", () => {
             annee_scolaire: {
               $in: ["2022-2022", "2022-2023"],
             },
+            "_computed.organisme.reseaux": "AGRI",
           },
         },
         {
-          $lookup: {
-            from: "organismes",
-            localField: "organisme_id",
-            foreignField: "_id",
-            as: "organisme",
-          },
-        },
-        {
-          $match: {
-            "organisme.reseaux": "AGRI",
-          },
+          $match: {},
         },
       ]);
     });
@@ -162,20 +110,11 @@ describe("Filtres Indicateurs", () => {
             annee_scolaire: {
               $in: ["2022-2022", "2022-2023"],
             },
+            "_computed.organisme.siret": "84412312300008",
           },
         },
         {
-          $lookup: {
-            from: "organismes",
-            localField: "organisme_id",
-            foreignField: "_id",
-            as: "organisme",
-          },
-        },
-        {
-          $match: {
-            "organisme.siret": "84412312300008",
-          },
+          $match: {},
         },
       ]);
     });
@@ -190,20 +129,11 @@ describe("Filtres Indicateurs", () => {
             annee_scolaire: {
               $in: ["2022-2022", "2022-2023"],
             },
+            "_computed.organisme.uai": "0112233A",
           },
         },
         {
-          $lookup: {
-            from: "organismes",
-            localField: "organisme_id",
-            foreignField: "_id",
-            as: "organisme",
-          },
-        },
-        {
-          $match: {
-            "organisme.uai": "0112233A",
-          },
+          $match: {},
         },
       ]);
     });
@@ -253,47 +183,68 @@ describe("Filtres Indicateurs", () => {
         etablissement_reseaux: "AGRI",
         siret_etablissement: "84412312300008",
         uai_etablissement: "0112233A",
-        organisme_id: "635acdad5e798f12bd919863", // overridden by organisme_ids
-        organisme_ids: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
+        organisme_id: "635acdad5e798f12bd919863",
         formation_cfd: "25021000",
         niveau_formation: "2",
       });
       assert.deepStrictEqual(stages, [
         {
           $match: {
-            organisme_id: new ObjectId("635acdad5e798f12bd919863"),
-          },
-        },
-        {
-          $match: {
             annee_scolaire: {
               $in: ["2022-2022", "2022-2023"],
             },
-            organisme_id: {
-              $in: ["635acdad5e798f12bd919861", "635acdad5e798f12bd919862"],
-            },
             "formation.cfd": "25021000",
             "formation.niveau": "2",
+            organisme_id: new ObjectId("635acdad5e798f12bd919863"),
+            "_computed.organisme.region": "25",
+            "_computed.organisme.departement": "56",
+            "_computed.organisme.siret": "84412312300008",
+            "_computed.organisme.uai": "0112233A",
+            "_computed.organisme.reseaux": "AGRI",
           },
         },
         {
-          $lookup: {
-            from: "organismes",
-            localField: "organisme_id",
-            foreignField: "_id",
-            as: "organisme",
-          },
-        },
-        {
-          $match: {
-            "organisme.adresse.region": "25",
-            "organisme.adresse.departement": "56",
-            "organisme.siret": "84412312300008",
-            "organisme.uai": "0112233A",
-            "organisme.reseaux": "AGRI",
-          },
+          $match: {},
         },
       ]);
+      it("Gère tous les filtres avec une restriction", () => {
+        const stages = buildMongoPipelineFilterStages({
+          date: currentDate,
+          etablissement_num_region: "25",
+          etablissement_num_departement: "56",
+          etablissement_reseaux: "AGRI",
+          siret_etablissement: "84412312300008",
+          uai_etablissement: "0112233A",
+          organisme_id: "635acdad5e798f12bd919863",
+          formation_cfd: "25021000",
+          niveau_formation: "2",
+          restrictionMongo: {
+            "_computed.organisme.departement": "29",
+          },
+        });
+        assert.deepStrictEqual(stages, [
+          {
+            $match: {
+              annee_scolaire: {
+                $in: ["2022-2022", "2022-2023"],
+              },
+              "formation.cfd": "25021000",
+              "formation.niveau": "2",
+              organisme_id: new ObjectId("635acdad5e798f12bd919863"),
+              "_computed.organisme.region": "25",
+              "_computed.organisme.departement": "56",
+              "_computed.organisme.siret": "84412312300008",
+              "_computed.organisme.uai": "0112233A",
+              "_computed.organisme.reseaux": "AGRI",
+            },
+          },
+          {
+            $match: {
+              "_computed.organisme.departement": "29",
+            },
+          },
+        ]);
+      });
     });
   });
 });

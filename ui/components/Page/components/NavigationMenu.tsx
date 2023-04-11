@@ -45,7 +45,7 @@ function canManageEffectifsOrganisme(type: OrganisationType): boolean {
       return true;
 
     case "TETE_DE_RESEAU":
-      return true;
+      return false;
 
     case "DREETS":
     case "DEETS":

@@ -358,10 +358,10 @@ export const searchOrganismes = async (ctx: AuthContext, searchCriteria: Organis
       await effectifsDb()
         .aggregate([
           ...buildMongoPipelineFilterStages(searchCriteria as unknown as EffectifsFilters),
-          { $group: { _id: "$organisme.uai" } },
+          { $group: { _id: "$_computed.organisme.uai" } },
         ])
         .toArray()
-    ).map((row) => row._id[0]);
+    ).map((row) => row._id);
     logger.info({ elapsted: Date.now() - start, eligibleUais: eligibleUais.length }, "searchOrganismes_eligibleUais");
     matchStage.uai = { $in: eligibleUais };
   }
