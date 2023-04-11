@@ -362,7 +362,7 @@ export async function getIndicateursNational(date: Date) {
  */
 export const getAllEffectifs = async (
   query = {},
-  { page, limit, sort } = { page: 1, limit: 10, sort: { createdAt: -1 } }
+  { page, limit, sort } = { page: 1, limit: 10, sort: { created_at: -1 } as { [key: string]: number } }
 ) => {
   const result = await effectifsDb()
     .aggregate([

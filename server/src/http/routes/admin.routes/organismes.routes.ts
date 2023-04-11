@@ -1,5 +1,6 @@
 import express from "express";
 import Boom from "boom";
+import { z } from "zod";
 
 import {
   findOrganismeById,
@@ -13,26 +14,29 @@ import objectIdSchema from "../../../common/validation/objectIdSchema.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
 import organismesFilterSchema from "../../../common/validation/organismesFilterSchema.js";
 
+const listSchema = paginationShema({ defaultSort: "created_at:-1" })
+  .merge(searchShema())
+  .merge(organismesFilterSchema())
+  .strict();
+type ListSchema = z.infer<typeof listSchema>;
+
 export default () => {
   const router = express.Router();
 
   router.get(
     "/",
     validateRequestMiddleware({
-      query: paginationShema({ defaultSort: "created_at:-1" })
-        .merge(searchShema())
-        .merge(organismesFilterSchema())
-        .strict(),
+      query: listSchema,
     }),
     async (req, res) => {
-      const { page, limit, sort, q, filter } = req.query as any;
+      const { page, limit, sort, q, filter } = req.query as ListSchema;
       const query: any = filter || {};
       if (q) {
         // FIXME propager le type zod. Possible ?
         (query as any).$text = { $search: q };
       }
       // FIXME propager le type zod. Possible ?
-      const result = await getAllOrganismes(query, { page, limit, sort } as any);
+      const result = await getAllOrganismes(query, { page, limit, sort });
       if (result) {
         result.filter = filter;
       }

@@ -1,3 +1,14 @@
+import { RequestHandler } from "express";
+import { ZodError, ZodSchema } from "zod";
+
+declare type RequestValidation<TParams, TQuery, TBody> = {
+  params?: ZodSchema<TParams>;
+  query?: ZodSchema<TQuery>;
+  body?: ZodSchema<TBody>;
+};
+
+type ErrorListItem = { type: "Query" | "Params" | "Body"; errors: ZodError<any> };
+
 /**
  * Forked from https://github.com/Aquila169/zod-express-middleware/blob/c434943b385eca214533f6c38caf83d513477dc8/src/index.ts#L50
  * so we can control the error handling
@@ -5,36 +16,35 @@
  * @param {*} schemas
  * @returns
  */
-export default function validateRequestMiddleware(schemas) {
-  return (req, res, next) => {
-    const errors: any[] = [];
-    if (schemas.params) {
-      const parsed = schemas.params.safeParse(req.params);
-      if (parsed.success) {
-        req.params = parsed.data;
-      } else {
+
+export const validateRequestMiddleware: <TParams = any, TQuery = any, TBody = any>(
+  schemas: RequestValidation<TParams, TQuery, TBody>
+) => RequestHandler<TParams, any, TBody, TQuery> =
+  ({ params, query, body }) =>
+  (req, res, next) => {
+    const errors: Array<ErrorListItem> = [];
+    if (params) {
+      const parsed = params.safeParse(req.params);
+      if (!parsed.success) {
         errors.push({ type: "Params", errors: parsed.error });
       }
     }
-    if (schemas.query) {
-      const parsed = schemas.query.safeParse(req.query);
-      if (parsed.success) {
-        req.query = parsed.data;
-      } else {
+    if (query) {
+      const parsed = query.safeParse(req.query);
+      if (!parsed.success) {
         errors.push({ type: "Query", errors: parsed.error });
       }
     }
-    if (schemas.body) {
-      const parsed = schemas.body.safeParse(req.body);
-      if (parsed.success) {
-        req.body = parsed.data;
-      } else {
+    if (body) {
+      const parsed = body.safeParse(req.body);
+      if (!parsed.success) {
         errors.push({ type: "Body", errors: parsed.error });
       }
     }
     if (errors.length > 0) {
-      return next(errors, req, res);
+      return (next as any)(errors, req, res);
     }
     return next();
   };
-}
+
+export default validateRequestMiddleware;

@@ -1,5 +1,6 @@
 import express from "express";
 import Boom from "boom";
+import { z } from "zod";
 
 import { getAllUsers, getDetailedUserById, removeUser, updateUser } from "../../../common/actions/users.actions.js";
 import paginationShema from "../../../common/validation/paginationSchema.js";
@@ -11,16 +12,19 @@ import { getWarningOnEmail } from "../../../common/model/organisations.model.js"
 import { returnResult } from "../../middlewares/helpers.js";
 import { rejectMembre, validateMembre } from "../../../common/actions/organisations.actions.js";
 
+const listSchema = paginationShema({ defaultSort: "created_at:-1" }).merge(searchShema()).strict();
+type ListSchema = z.infer<typeof listSchema>;
+
 export default () => {
   const router = express.Router();
 
   router.get(
     "/",
     validateRequestMiddleware({
-      query: paginationShema({ defaultSort: "created_at:-1" }).merge(searchShema()).strict(),
+      query: listSchema,
     }),
     async (req, res) => {
-      const { page, limit, sort, q } = req.query;
+      const { page, limit, sort, q } = req.query as ListSchema;
       const result = await getAllUsers(q ? { $text: { $search: q } } : {}, { page, limit, sort });
       return res.json(result);
     }
@@ -44,7 +48,7 @@ export default () => {
     "/:id",
     validateRequestMiddleware({
       params: objectIdSchema("id"),
-      body: userSchema({ isNew: false }).strict(),
+      body: userSchema().strict(),
     }),
     async ({ body, params }, res) => {
       const { id } = params;

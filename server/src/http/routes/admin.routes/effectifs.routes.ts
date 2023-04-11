@@ -1,5 +1,6 @@
 import express from "express";
 import Boom from "boom";
+import { z } from "zod";
 
 import { getAllEffectifs, getDetailedEffectifById } from "../../../common/actions/effectifs/effectifs.actions.js";
 import paginationShema from "../../../common/validation/paginationSchema.js";
@@ -8,23 +9,27 @@ import objectIdSchema from "../../../common/validation/objectIdSchema.js";
 import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
 import effectifsFilterSchema from "../../../common/validation/effectifsFilterSchema.js";
 
+const listSchema = paginationShema({ defaultSort: "created_at:-1" })
+  .merge(searchShema())
+  .merge(effectifsFilterSchema())
+  .strict();
+type ListSchema = z.infer<typeof listSchema>;
+
 export default () => {
   const router = express.Router();
 
   router.get(
     "/",
     validateRequestMiddleware({
-      query: paginationShema({ defaultSort: "created_at:-1" })
-        .merge(searchShema())
-        .merge(effectifsFilterSchema())
-        .strict(),
+      query: listSchema,
     }),
     async (req, res) => {
-      const { page, limit, sort, q, filter } = req.query as any;
+      const { page, limit, sort, q, filter } = req.query as ListSchema;
       const query: any = filter || {};
       if (q) {
         query.$text = { $search: q };
       }
+
       const result = await getAllEffectifs(query, { page, limit, sort });
       if (result) {
         result.filter = filter;
