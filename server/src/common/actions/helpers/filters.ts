@@ -4,7 +4,6 @@ import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js
 export type EffectifsFilters = {
   date: Date;
   organisme_id?: string;
-  organisme_ids?: string[];
   formation_cfd?: string;
   etablissement_reseaux?: string;
   etablissement_num_departement?: string;
@@ -23,14 +22,6 @@ export interface FilterConfiguration {
 
   // optional transformer
   transformValue?: (value: any) => any;
-
-  // some filters need a preliminary lookup with another collection
-  preliminaryLookup?: {
-    from: string;
-    localField: string;
-    foreignField: string;
-    as: string;
-  };
 }
 
 export type FilterConfigurations = { [key in keyof EffectifsFilters]: FilterConfiguration };
@@ -46,30 +37,24 @@ const filtersConfigurations: FilterConfigurations = {
     matchKey: "annee_scolaire",
     transformValue: (date) => ({ $in: getAnneesScolaireListFromDate(date) }),
   },
-  // filter used to ensure access permissions between the user and organismes (if not admin)
-  organisme_ids: {
+  organisme_id: {
     matchKey: "organisme_id",
-    transformValue: (organismeIds) => ({ $in: organismeIds }),
+    transformValue: (organismeId) => new ObjectId(organismeId),
   },
   etablissement_num_departement: {
-    matchKey: "organisme.adresse.departement",
-    preliminaryLookup: organismeLookup,
+    matchKey: "_computed.organisme.departement",
   },
   etablissement_num_region: {
-    matchKey: "organisme.adresse.region",
-    preliminaryLookup: organismeLookup,
+    matchKey: "_computed.organisme.region",
   },
   etablissement_reseaux: {
-    matchKey: "organisme.reseaux",
-    preliminaryLookup: organismeLookup,
+    matchKey: "_computed.organisme.reseaux",
   },
   siret_etablissement: {
-    matchKey: "organisme.siret",
-    preliminaryLookup: organismeLookup,
+    matchKey: "_computed.organisme.siret",
   },
   uai_etablissement: {
-    matchKey: "organisme.uai",
-    preliminaryLookup: organismeLookup,
+    matchKey: "_computed.organisme.uai",
   },
   formation_cfd: {
     matchKey: "formation.cfd",
@@ -81,8 +66,6 @@ const filtersConfigurations: FilterConfigurations = {
 
 export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRestriction) {
   const matchFilters = {};
-  const afterLookupsMatchFilters = {};
-  const preliminaryLookups: any[] = [];
   for (const [filterName, filterValue] of Object.entries(filters)) {
     const filterConfiguration = filtersConfigurations[filterName];
     if (!filterConfiguration) {
@@ -90,42 +73,14 @@ export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRest
       continue;
     }
 
-    const targetMatch = filterConfiguration.preliminaryLookup !== undefined ? afterLookupsMatchFilters : matchFilters;
-    targetMatch[filterConfiguration.matchKey] = filterConfiguration.transformValue?.(filterValue) ?? filterValue;
-
-    if (
-      filterConfiguration.preliminaryLookup !== undefined &&
-      !preliminaryLookups.includes(filterConfiguration.preliminaryLookup)
-    ) {
-      preliminaryLookups.push(filterConfiguration.preliminaryLookup);
-    }
-  }
-
-  // force le lookup si pas déjà présent
-  if (filters.restrictionMongo && !preliminaryLookups.includes(organismeLookup)) {
-    preliminaryLookups.push(organismeLookup);
+    matchFilters[filterConfiguration.matchKey] = filterConfiguration.transformValue?.(filterValue) ?? filterValue;
   }
 
   // note: empty match stages are noop with MongoDB
   return [
-    ...(filters.organisme_id !== undefined
-      ? [
-          {
-            $match: {
-              organisme_id: new ObjectId(filters.organisme_id),
-            },
-          },
-        ]
-      : []),
     {
       $match: matchFilters,
     },
-    ...preliminaryLookups.map((lookupConf) => ({
-      $lookup: lookupConf,
-    })),
     { $match: filters.restrictionMongo ? filters.restrictionMongo : {} },
-    {
-      $match: afterLookupsMatchFilters,
-    },
   ];
 }
