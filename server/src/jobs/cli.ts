@@ -31,6 +31,7 @@ import { generateTypes } from "./seed/types/generate-types.js";
 import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
 import { removeDuplicatesEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates.js";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api.js";
+import { hydrateEffectifsComputed } from "./hydrate/hydrate-effectifs-computed.js";
 
 program.configureHelp({
   sortSubcommands: true,
@@ -172,6 +173,15 @@ program
   .action((_, options) =>
     runScript(async () => {
       return clearUsers();
+    }, options._name)
+  );
+
+program
+  .command("hydrate:effectifs-computed")
+  .description("Remplissage du champ effectifs._computed avec les attributs des organismes")
+  .action(async (_, options) =>
+    runScript(async () => {
+      return hydrateEffectifsComputed();
     }, options._name)
   );
 

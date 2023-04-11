@@ -325,6 +325,16 @@ describe("Processing de EffectifsQueue", () => {
       created_at: insertedDossier.created_at || "shouldnotbeempty",
       updated_at: insertedDossier.updated_at || "shouldnotbeempty",
       organisme_id: insertedDossier.organisme_id || "shouldnotbeempty",
+      _computed: {
+        organisme: {
+          academie: "10",
+          departement: "01",
+          region: "84",
+          reseaux: [],
+          siret: "77937827200016",
+          uai: "0802004U",
+        },
+      },
     });
   });
 });

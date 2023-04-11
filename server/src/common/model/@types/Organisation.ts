@@ -25,7 +25,7 @@ export interface Organisation {
   /**
    * Code UAI de l'organisme (seulement pour les utilisateurs OF)
    */
-  uai?: string;
+  uai?: string | null;
   /**
    * Nom du réseau
    */

@@ -64,9 +64,9 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
 }
 
 /**
- * Même fonction que plus haut, mais pour un $lookup organisme
+ * Restriction pour accéder aux indicateurs effectifs et indicateurs agrégés
  */
-export async function getEffectifsOrganismeRestriction(ctx: AuthContext): Promise<any> {
+export async function getEffectifsRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -84,25 +84,15 @@ export async function getEffectifsOrganismeRestriction(ctx: AuthContext): Promis
 
     case "TETE_DE_RESEAU":
       return {
-        "organisme.reseaux": organisation.reseau,
+        "_computed.organisme.reseaux": organisation.reseau,
       };
 
     case "DREETS":
     case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
-      return {
-        "organisme.adresse.region": organisation.code_region,
-      };
     case "DDETS":
-      return {
-        "organisme.adresse.departement": organisation.code_departement,
-      };
     case "ACADEMIE":
-      return {
-        "organisme.adresse.academie": organisation.code_academie,
-      };
-
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       return {};

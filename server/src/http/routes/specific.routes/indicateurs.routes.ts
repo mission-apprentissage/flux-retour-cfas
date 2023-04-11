@@ -15,9 +15,11 @@ import {
 import { validateFullObjectSchemaUnknown } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
 import {
-  getEffectifsOrganismeRestriction,
+  getEffectifsRestriction,
   requireOrganismeIndicateursAccess,
 } from "../../../common/actions/helpers/permissions.js";
+import { organismesDb } from "../../../common/model/collections.js";
+import Boom from "boom";
 
 const commonEffectifsFiltersSchema = {
   date: Joi.date().required(),
@@ -41,18 +43,37 @@ export async function buildEffectifsFiltersFromRequest(req: Request): Promise<Ef
   );
 
   // ce helper est principalement appelé dans les routes des indicateurs agrégés et non scopés à un organisme, mais aussi pour un organisme :
-  // - si organisme_id, indicateurs pour un organisme, on vérifie que l'organisation y a accès
-  // - si pas d'organisme_id, indicateurs aggrégés, restriction classique
-  // TODO il faudra sortir organisme_id pour le spécifier dans une autre route /organismes/:id/indicateurs
+  // - si uai ou siret, indicateurs pour un organisme, on vérifie que l'organisation y a accès
+  // - si pas d'organisme_id, indicateurs agrégés, restriction classique
+  // TODO il faudra sortir organisme_id (et uai / siret) pour le spécifier dans une autre route /organismes/:id/indicateurs
   // pour que les indicateurs ici ne soit que ceux agrégés
-  if (filters.organisme_id) {
-    await requireOrganismeIndicateursAccess(req.user, filters.organisme_id);
+  if (filters.uai_etablissement) {
+    // comme on a pas l'organisme_id on doit retrouver l'organisme via uai
+    const organisme = await organismesDb()
+      .find({
+        uai: filters.uai_etablissement,
+      })
+      .next();
+    if (!organisme) {
+      throw Boom.notFound("Organisme non trouvé");
+    }
+    await requireOrganismeIndicateursAccess(req.user, organisme._id.toString());
+  } else if (filters.siret_etablissement) {
+    // comme on a pas l'organisme_id on doit retrouver l'organisme via siret
+    const organisme = await organismesDb()
+      .find({
+        siret: filters.siret_etablissement,
+      })
+      .next();
+    if (!organisme) {
+      throw Boom.notFound("Organisme non trouvé");
+    }
+    await requireOrganismeIndicateursAccess(req.user, organisme._id.toString());
   } else {
     // amend filters with a restriction
-    filters.restrictionMongo = await getEffectifsOrganismeRestriction(req.user);
+    filters.restrictionMongo = await getEffectifsRestriction(req.user);
   }
 
-  // FIXME restreindre les filtres selon les accès
   return filters;
 }
 
