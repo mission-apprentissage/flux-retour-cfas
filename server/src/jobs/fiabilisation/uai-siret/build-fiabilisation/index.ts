@@ -153,27 +153,10 @@ export const buildFiabilisationCoupleForTdbCouple = async (
   allCouplesUaiSiretTdb,
   organismesFromReferentiel
 ) => {
-  const organismeFoundInReferentielViaSiret = organismesFromReferentiel.find(
-    (item) => item.siret === coupleUaiSiretTdbToCheck.siret
-  );
+  // Règle n°1 on vérifie si on a un couple fiable
+  if (await checkCoupleFiable(coupleUaiSiretTdbToCheck, organismesFromReferentiel)) return;
 
-  // [Couple fiable]
-  // Si le SIRET et l'UAI lié trouvés dans le référentiel sont ok, couple déja fiable, on le stocke et passe au suivant
-  if (organismeFoundInReferentielViaSiret && organismeFoundInReferentielViaSiret.uai === coupleUaiSiretTdbToCheck.uai) {
-    await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE } },
-      { upsert: true }
-    );
-
-    // MAJ du statut de l'organisme lié
-    await organismesDb().updateOne(
-      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
-    );
-    return;
-  }
-
+  // TODO Refacto split
   // cas où on trouve un organisme unique dans le référentiel avec l'UAI du couple mais que le SIRET du couple
   // - est vide
   // - n'est pas le même dans le référentiel
@@ -210,195 +193,231 @@ export const buildFiabilisationCoupleForTdbCouple = async (
     return;
   }
 
+  // TODO Refacto split
   // cas où on trouve un organisme via le SIRET mais que l'UAI lié n'est pas celui du couple
   // alors on remplace l'UAI du couple par celui du référentiel si il existe et que le SIRET du couple n'est
   // pas présent dans un autre couple TDB
-  const siretUniqueAmongAllCouplesTdb =
-    allCouplesUaiSiretTdb.filter(({ siret }) => {
-      return siret === coupleUaiSiretTdbToCheck.siret;
-    }).length === 1;
+  // const siretUniqueAmongAllCouplesTdb =
+  //   allCouplesUaiSiretTdb.filter(({ siret }) => {
+  //     return siret === coupleUaiSiretTdbToCheck.siret;
+  //   }).length === 1;
 
-  if (
-    !!organismeFoundInReferentielViaSiret?.uai &&
-    organismeFoundInReferentielViaSiret.uai !== coupleUaiSiretTdbToCheck.uai &&
-    siretUniqueAmongAllCouplesTdb
-  ) {
-    await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      {
-        $set: {
-          uai_fiable: organismeFoundInReferentielViaSiret.uai,
-          siret_fiable: coupleUaiSiretTdbToCheck.siret,
-          type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-        },
-      },
-      { upsert: true }
-    );
-    return;
-  }
+  // if (
+  //   !!organismeFoundInReferentielViaSiret?.uai &&
+  //   organismeFoundInReferentielViaSiret.uai !== coupleUaiSiretTdbToCheck.uai &&
+  //   siretUniqueAmongAllCouplesTdb
+  // ) {
+  //   await fiabilisationUaiSiretDb().updateOne(
+  //     { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+  //     {
+  //       $set: {
+  //         uai_fiable: organismeFoundInReferentielViaSiret.uai,
+  //         siret_fiable: coupleUaiSiretTdbToCheck.siret,
+  //         type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+  //       },
+  //     },
+  //     { upsert: true }
+  //   );
+  //   return;
+  // }
 
+  // TODO Refacto split
   // CAS 2 - UAI Multiples
   // Si SIRET du TdB n'est pas unique dans tous les couples du TDB = Match SIRET & plusieurs UAI pour ce SIRET dans le TDB
-  if (!siretUniqueAmongAllCouplesTdb && organismeFoundInReferentielViaSiret) {
-    // Récupération de la liste des couples avec UAI multiples pour ce match SIRET
-    const couplesUaiMultiplesInTdbForSiretMatch = allCouplesUaiSiretTdb.filter(({ siret }) => {
-      return siret === coupleUaiSiretTdbToCheck.siret;
-    });
+  // if (!siretUniqueAmongAllCouplesTdb && organismeFoundInReferentielViaSiret) {
+  //   // Récupération de la liste des couples avec UAI multiples pour ce match SIRET
+  //   const couplesUaiMultiplesInTdbForSiretMatch = allCouplesUaiSiretTdb.filter(({ siret }) => {
+  //     return siret === coupleUaiSiretTdbToCheck.siret;
+  //   });
 
-    // Pour chaque UAI de la liste on cherche dans le référentiel s’il existe un ou plusieurs responsable ou responsable formateur
-    await PromisePool.for(couplesUaiMultiplesInTdbForSiretMatch).process(async (currentMultipleUaisCouple: any) => {
-      // on recherche dans le référentiel un unique organisme avec cet UAI de nature responsable ou responsable formateur
-      const organismesRespOrRespFormateurForUaiTdb = await organismesReferentielDb()
-        .find({
-          uai: currentMultipleUaisCouple.uai,
-          $or: [
-            { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR },
-            { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE },
-          ],
-        })
-        .toArray();
+  //   // Pour chaque UAI de la liste on cherche dans le référentiel s’il existe un ou plusieurs responsable ou responsable formateur
+  //   await PromisePool.for(couplesUaiMultiplesInTdbForSiretMatch).process(async (currentMultipleUaisCouple: any) => {
+  //     // on recherche dans le référentiel un unique organisme avec cet UAI de nature responsable ou responsable formateur
+  //     const organismesRespOrRespFormateurForUaiTdb = await organismesReferentielDb()
+  //       .find({
+  //         uai: currentMultipleUaisCouple.uai,
+  //         $or: [
+  //           { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR },
+  //           { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE },
+  //         ],
+  //       })
+  //       .toArray();
 
-      // si UAI unique au niveau du référentiel alors on cherche dans les relations puis dans les lieux de formation
-      if (organismesRespOrRespFormateurForUaiTdb.length === 1) {
-        // Phase 1. Recherche dans les relations
-        const relationsReponsableWithSiret =
-          organismesRespOrRespFormateurForUaiTdb[0]?.relations?.filter((item) => item.siret) || [];
+  //     // si UAI unique au niveau du référentiel alors on cherche dans les relations puis dans les lieux de formation
+  //     if (organismesRespOrRespFormateurForUaiTdb.length === 1) {
+  //       // Phase 1. Recherche dans les relations
+  //       const relationsReponsableWithSiret =
+  //         organismesRespOrRespFormateurForUaiTdb[0]?.relations?.filter((item) => item.siret) || [];
 
-        if (relationsReponsableWithSiret) {
-          // Pour chacune des relations du responsable si l'UAI Match alors on peut fiabiliser en remplacant le siret de la relation
-          for (const currentRelation of relationsReponsableWithSiret) {
-            // On vérifie si la relation match sur l'UAI
-            const relationMatchingUai = await organismesReferentielDb().countDocuments({
-              siret: currentRelation.siret as string,
-              uai: currentMultipleUaisCouple.uai,
-            });
+  //       if (relationsReponsableWithSiret) {
+  //         // Pour chacune des relations du responsable si l'UAI Match alors on peut fiabiliser en remplacant le siret de la relation
+  //         for (const currentRelation of relationsReponsableWithSiret) {
+  //           // On vérifie si la relation match sur l'UAI
+  //           const relationMatchingUai = await organismesReferentielDb().countDocuments({
+  //             siret: currentRelation.siret as string,
+  //             uai: currentMultipleUaisCouple.uai,
+  //           });
 
-            // SI Match Relation UAI alors on ajoute le couple à fiabiliser avec cet UAI
-            if (relationMatchingUai > 0) {
-              await fiabilisationUaiSiretDb().updateOne(
-                { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-                {
-                  $set: {
-                    uai_fiable: currentMultipleUaisCouple.uai,
-                    siret_fiable: coupleUaiSiretTdbToCheck.siret,
-                    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-                  },
-                },
-                { upsert: true }
-              );
+  //           // SI Match Relation UAI alors on ajoute le couple à fiabiliser avec cet UAI
+  //           if (relationMatchingUai > 0) {
+  //             await fiabilisationUaiSiretDb().updateOne(
+  //               { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+  //               {
+  //                 $set: {
+  //                   uai_fiable: currentMultipleUaisCouple.uai,
+  //                   siret_fiable: coupleUaiSiretTdbToCheck.siret,
+  //                   type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+  //                 },
+  //               },
+  //               { upsert: true }
+  //             );
 
-              return;
-            }
-          }
-        }
+  //             return;
+  //           }
+  //         }
+  //       }
 
-        // Phase 2. Recherche dans les lieux de formation
-        const lieuFormationFiableMatchUai = organismesRespOrRespFormateurForUaiTdb[0].lieux_de_formation.find(
-          (item) => item.uai === currentMultipleUaisCouple.uai && item.uai_fiable
-        );
+  //       // Phase 2. Recherche dans les lieux de formation
+  //       const lieuFormationFiableMatchUai = organismesRespOrRespFormateurForUaiTdb[0].lieux_de_formation.find(
+  //         (item) => item.uai === currentMultipleUaisCouple.uai && item.uai_fiable
+  //       );
 
-        // Si l'UAI Match sur un des lieux fiables alors on peut fiabiliser tel quel en marquant que c'est un couple de lieu de formation
-        if (lieuFormationFiableMatchUai) {
-          await fiabilisationUaiSiretDb().updateOne(
-            { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-            {
-              $set: {
-                uai_fiable: coupleUaiSiretTdbToCheck.uai,
-                siret_fiable: coupleUaiSiretTdbToCheck.siret,
-                type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-              },
-            },
-            { upsert: true }
-          );
+  //       // Si l'UAI Match sur un des lieux fiables alors on peut fiabiliser tel quel en marquant que c'est un couple de lieu de formation
+  //       if (lieuFormationFiableMatchUai) {
+  //         await fiabilisationUaiSiretDb().updateOne(
+  //           { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+  //           {
+  //             $set: {
+  //               uai_fiable: coupleUaiSiretTdbToCheck.uai,
+  //               siret_fiable: coupleUaiSiretTdbToCheck.siret,
+  //               type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+  //             },
+  //           },
+  //           { upsert: true }
+  //         );
 
-          return;
-        }
-      }
-    });
-  }
+  //         return;
+  //       }
+  //     }
+  //   });
+  // }
 
+  // TODO Refacto split
   // CAS 2 - SIRET Multiples
-  if (!uaiUniqueAmongAllCouplesTdb && organismeUniqueFoundInReferentielViaUai) {
-    // Récupération de la liste des couples avec SIRET multiples pour ce match UAI
-    const couplesSIRETMultiplesInTdbForUaiMatch = allCouplesUaiSiretTdb.filter(({ uai }) => {
-      return uai === coupleUaiSiretTdbToCheck.uai;
-    });
+  // if (!uaiUniqueAmongAllCouplesTdb && organismeUniqueFoundInReferentielViaUai) {
+  //   // Récupération de la liste des couples avec SIRET multiples pour ce match UAI
+  //   const couplesSIRETMultiplesInTdbForUaiMatch = allCouplesUaiSiretTdb.filter(({ uai }) => {
+  //     return uai === coupleUaiSiretTdbToCheck.uai;
+  //   });
 
-    // Pour chaque SIRET de la liste on cherche dans le référentiel s’il existe un ou plusieurs responsable ou responsable formateur
-    await PromisePool.for(couplesSIRETMultiplesInTdbForUaiMatch).process(async (currentMultipleSiretCouple: any) => {
-      // on recherche dans le référentiel un unique organisme avec cet UAI de nature responsable ou responsable formateur
-      const organismesRespOrRespFormateurForSiretTdb = await organismesReferentielDb()
-        .find({
-          siret: currentMultipleSiretCouple.siret,
-          $or: [
-            { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR },
-            { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE },
-          ],
-        })
-        .toArray();
+  //   // Pour chaque SIRET de la liste on cherche dans le référentiel s’il existe un ou plusieurs responsable ou responsable formateur
+  //   await PromisePool.for(couplesSIRETMultiplesInTdbForUaiMatch).process(async (currentMultipleSiretCouple: any) => {
+  //     // on recherche dans le référentiel un unique organisme avec cet UAI de nature responsable ou responsable formateur
+  //     const organismesRespOrRespFormateurForSiretTdb = await organismesReferentielDb()
+  //       .find({
+  //         siret: currentMultipleSiretCouple.siret,
+  //         $or: [
+  //           { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR },
+  //           { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE },
+  //         ],
+  //       })
+  //       .toArray();
 
-      // si SIRET unique au niveau du référentiel alors on y associe l'UAI présent dans référentiel
-      if (organismesRespOrRespFormateurForSiretTdb.length === 1) {
-        // TODO en attente
-      }
-    });
-  }
+  //     // si SIRET unique au niveau du référentiel alors on y associe l'UAI présent dans référentiel
+  //     if (organismesRespOrRespFormateurForSiretTdb.length === 1) {
+  //       // TODO en attente
+  //     }
+  //   });
+  // }
 
+  // TODO Refacto split
   // Identification des pb de collecte : match via SIRET mais UAI n'est dans aucun lieu du référentiel
-  const organismesMatchsUaiInLieuxReferentiel = await organismesReferentielDb().countDocuments({
-    "lieux_de_formation.uai": coupleUaiSiretTdbToCheck.uai,
-  });
+  // const organismesMatchsUaiInLieuxReferentiel = await organismesReferentielDb().countDocuments({
+  //   "lieux_de_formation.uai": coupleUaiSiretTdbToCheck.uai,
+  // });
 
-  if (organismesMatchsUaiInLieuxReferentiel === 0) {
+  // if (organismesMatchsUaiInLieuxReferentiel === 0) {
+  //   await fiabilisationUaiSiretDb().updateOne(
+  //     { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+  //     { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE } },
+  //     { upsert: true }
+  //   );
+
+  //   // MAJ du statut de l'organisme lié
+  //   await organismesDb().updateOne(
+  //     { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+  //     { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_PB_COLLECTE } }
+  //   );
+  // }
+
+  // TODO Refacto split
+  // // Si aucune entrée déja ajoutée à la table de fiabilisation pour ce couple on marque le couple non fiabilisable selon le cas
+  // if (
+  //   (await fiabilisationUaiSiretDb().countDocuments({
+  //     uai: coupleUaiSiretTdbToCheck.uai,
+  //     siret: coupleUaiSiretTdbToCheck.siret,
+  //   })) === 0
+  // ) {
+  //   // On est dans le cas d'un couple NON_FIABILISABLE
+  //   // On distingue le cas ou l'UAI du tdb n'est pas présente dans le Référentiel du cas ou l'on ne sait pas mapper le couple
+  //   const isUaiPresentInReferentiel =
+  //     (await organismesReferentielDb().countDocuments({ uai: coupleUaiSiretTdbToCheck.uai })) > 0;
+
+  //   // Upsert du couple avec statut de fiabilisation comme NON_FIABILISABLE en fonction de la présence de l'uai dans le référentiel
+  //   await fiabilisationUaiSiretDb().updateOne(
+  //     { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+  //     {
+  //       $set: {
+  //         type: isUaiPresentInReferentiel
+  //           ? STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING
+  //           : STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
+  //       },
+  //     },
+  //     { upsert: true }
+  //   );
+
+  //   // Maj de l'organisme lié avec { bypassDocumentValidation: true } si siret vide
+  //   await organismesDb().updateOne(
+  //     { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
+  //     {
+  //       $set: {
+  //         fiabilisation_statut: isUaiPresentInReferentiel
+  //           ? STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING
+  //           : STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE,
+  //       },
+  //     },
+  //     { bypassDocumentValidation: true }
+  //   );
+  // }
+};
+
+/**
+ *
+ * @param organismeFoundInReferentielViaSiret
+ * @param coupleUaiSiretTdbToCheck
+ * @returns
+ */
+export const checkCoupleFiable = async (coupleUaiSiretTdbToCheck, organismesFromReferentiel) => {
+  const organismeFoundInReferentielViaSiret = organismesFromReferentiel.find(
+    (item) => item.siret === coupleUaiSiretTdbToCheck.siret
+  );
+
+  // [Couple fiable]
+  // Si le SIRET et l'UAI lié trouvés dans le référentiel sont ok, couple déja fiable, on le stocke et passe au suivant
+  if (organismeFoundInReferentielViaSiret && organismeFoundInReferentielViaSiret.uai === coupleUaiSiretTdbToCheck.uai) {
     await fiabilisationUaiSiretDb().updateOne(
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE } },
+      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE } },
       { upsert: true }
     );
 
     // MAJ du statut de l'organisme lié
     await organismesDb().updateOne(
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_PB_COLLECTE } }
+      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
     );
+    return true;
   }
 
-  // Si aucune entrée déja ajoutée à la table de fiabilisation pour ce couple on marque le couple non fiabilisable selon le cas
-  if (
-    (await fiabilisationUaiSiretDb().countDocuments({
-      uai: coupleUaiSiretTdbToCheck.uai,
-      siret: coupleUaiSiretTdbToCheck.siret,
-    })) === 0
-  ) {
-    // On est dans le cas d'un couple NON_FIABILISABLE
-    // On distingue le cas ou l'UAI du tdb n'est pas présente dans le Référentiel du cas ou l'on ne sait pas mapper le couple
-    const isUaiPresentInReferentiel =
-      (await organismesReferentielDb().countDocuments({ uai: coupleUaiSiretTdbToCheck.uai })) > 0;
-
-    // Upsert du couple avec statut de fiabilisation comme NON_FIABILISABLE en fonction de la présence de l'uai dans le référentiel
-    await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      {
-        $set: {
-          type: isUaiPresentInReferentiel
-            ? STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING
-            : STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
-        },
-      },
-      { upsert: true }
-    );
-
-    // Maj de l'organisme lié avec { bypassDocumentValidation: true } si siret vide
-    await organismesDb().updateOne(
-      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      {
-        $set: {
-          fiabilisation_statut: isUaiPresentInReferentiel
-            ? STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING
-            : STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE,
-        },
-      },
-      { bypassDocumentValidation: true }
-    );
-  }
+  return false;
 };
