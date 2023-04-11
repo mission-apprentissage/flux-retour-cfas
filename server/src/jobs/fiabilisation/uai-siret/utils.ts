@@ -1,6 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
-import { fiabilisationUaiSiretDb } from "../../../../common/model/collections.js";
-import { FIABILISATION_MAPPINGS as manualMapping } from "../mapping.js";
+import { fiabilisationUaiSiretDb } from "../../../common/model/collections.js";
+import { FIABILISATION_MAPPINGS as manualMapping } from "./mapping.js";
 
 /**
  * Insertion des mapping manuels depuis fichier

@@ -1,12 +1,12 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 import { MongoServerError } from "mongodb";
-import { deleteOrganismeAndEffectifs } from "../../../../common/actions/organismes/organismes.actions.js";
+import { deleteOrganismeAndEffectifs } from "../../../common/actions/organismes/organismes.actions.js";
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
-} from "../../../../common/constants/fiabilisationConstants.js";
-import logger from "../../../../common/logger.js";
-import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../common/model/collections.js";
+} from "../../../common/constants/fiabilisationConstants.js";
+import logger from "../../../common/logger.js";
+import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../common/model/collections.js";
 
 let nbOrganismesReferentielFiables = 0;
 let nbOrganismesFiabilises = 0;

@@ -17,9 +17,8 @@ call_daily_jobs_with_logs(){
   # Remplissage des réseaux
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux" || true
 
-  # Construction & application de la fiabilisation des couples UAI - SIRET
-  docker exec flux_retour_cfas_server bash -c "yarn cli fiabilisation:uai-siret:build" || true
-  docker exec flux_retour_cfas_server bash -c "yarn cli fiabilisation:uai-siret:apply" || true
+  # Lancement des scripts de fiabilisation des couples UAI - SIRET
+  docker exec flux_retour_cfas_server bash -c "yarn cli fiabilisation:uai-siret:run" || true
 
   # Mise à jour des organismes via APIs externes
   docker exec flux_retour_cfas_server bash -c "yarn cli update:organismes-with-apis" || true

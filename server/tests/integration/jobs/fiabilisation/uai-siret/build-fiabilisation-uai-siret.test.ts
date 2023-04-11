@@ -1,12 +1,12 @@
 import { strict as assert } from "assert";
 import { organismesReferentielDb, fiabilisationUaiSiretDb } from "../../../../../src/common/model/collections.js";
+import { buildFiabilisationCoupleForTdbCouple } from "../../../../../src/jobs/fiabilisation/uai-siret/build.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../../src/common/constants/fiabilisationConstants.js";
 import {
-  buildFiabilisationCoupleForTdbCouple,
   checkCoupleFiable,
   checkMatchReferentielSiretUaiDifferent,
   checkMatchReferentielUaiUniqueSiretDifferent,
-} from "../../../../../src/jobs/fiabilisation/uai-siret/build-fiabilisation/index.js";
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../../src/common/constants/fiabilisationConstants.js";
+} from "../../../../../src/jobs/fiabilisation/uai-siret/rules.js";
 
 describe("Job Build Fiabilisation UAI SIRET", () => {
   const UAI_REFERENTIEL = "7722672E";
