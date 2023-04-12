@@ -262,9 +262,6 @@ const PolitiqueDeConfidentialite = () => {
               <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="70px" p={5}>
                 <Text>OVH SAS</Text>
               </Flex>
-              <Flex border="1px solid" h="70px" borderRightWidth={[1, 1, 1, 0]} p={5}>
-                <Text>Crisp</Text>
-              </Flex>
             </Flex>
             <Flex flexDirection={"column"}>
               <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
@@ -298,11 +295,6 @@ const PolitiqueDeConfidentialite = () => {
               <Flex border="1px solid" borderBottomWidth={0} h="70px" p={5}>
                 <Link color="primary" href="https://www.ovhcloud.com/fr/personal-data-protection">
                   https://www.ovhcloud.com/fr/personal-data-protection
-                </Link>
-              </Flex>
-              <Flex border="1px solid" h="70px" p={5}>
-                <Link color="primary" href="https://crisp.chat/fr/privacy">
-                  https://crisp.chat/fr/privacy
                 </Link>
               </Flex>
             </Flex>
