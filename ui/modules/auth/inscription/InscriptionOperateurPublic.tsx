@@ -14,10 +14,6 @@ const typesOrganisation = [
     value: "DDETS",
   },
   {
-    label: "DEETS",
-    value: "DEETS",
-  },
-  {
     label: "DRAAF",
     value: "DRAAF",
   },
@@ -98,14 +94,14 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
           </Select>
         </FormControl>
       )}
-      {["DREETS", "DEETS", "DRAAF", "CONSEIL_REGIONAL"].includes(typeOrganisation as string) && (
+      {["DREETS", "DRAAF", "CONSEIL_REGIONAL"].includes(typeOrganisation as string) && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
           <Select
             placeholder="Sélectionner un territoire"
             onChange={(e) =>
               setOrganisation({
-                type: typeOrganisation as "DREETS" | "DEETS" | "DRAAF" | "CONSEIL_REGIONAL",
+                type: typeOrganisation as "DREETS" | "DRAAF" | "CONSEIL_REGIONAL",
                 code_region: e.target.value,
               })
             }

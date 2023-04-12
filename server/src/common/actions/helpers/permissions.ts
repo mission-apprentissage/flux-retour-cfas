@@ -42,7 +42,6 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
       };
 
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
       return {
@@ -88,7 +87,6 @@ export async function getEffectifsRestriction(ctx: AuthContext): Promise<any> {
       };
 
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "DDETS":
@@ -163,7 +161,6 @@ async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: stri
       return (organisme.reseaux as string[])?.includes(organisation.reseau);
 
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
       return organisme.adresse?.region === organisation.code_region;

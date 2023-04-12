@@ -22,7 +22,6 @@ function getDashboardComponent(organisationType: OrganisationType) {
 
     case "TETE_DE_RESEAU":
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "DDETS":

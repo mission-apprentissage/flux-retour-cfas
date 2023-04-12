@@ -21,7 +21,6 @@ function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): stri
       return "Mon réseau";
 
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "DDETS":
@@ -48,7 +47,6 @@ function canManageEffectifsOrganisme(type: OrganisationType): boolean {
       return false;
 
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "DDETS":
@@ -217,7 +215,6 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
 
     case "TETE_DE_RESEAU":
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "DDETS":

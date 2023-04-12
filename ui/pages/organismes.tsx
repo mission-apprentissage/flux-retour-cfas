@@ -33,7 +33,6 @@ function getHeaderTitleFromOrganisationType(type: OrganisationType) {
       return "Les organismes de mon réseau";
 
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "DDETS":
