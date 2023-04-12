@@ -125,15 +125,15 @@ export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise
     case "DRAAF":
     case "CONSEIL_REGIONAL":
       return {
-        "organisme.adresse.region": organisation.code_region,
+        "_computed.organisme.region": organisation.code_region,
       };
     case "DDETS":
       return {
-        "organisme.adresse.departement": organisation.code_departement,
+        "_computed.organisme.departement": organisation.code_departement,
       };
     case "ACADEMIE":
       return {
-        "organisme.adresse.academie": organisation.code_academie,
+        "_computed.organisme.academie": organisation.code_academie,
       };
 
     case "OPERATEUR_PUBLIC_NATIONAL":

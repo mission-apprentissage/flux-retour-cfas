@@ -16,7 +16,11 @@ import {
 } from "./indicators.js";
 import { effectifsDb, organismesDb } from "../../model/collections.js";
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { getIndicateursRestriction, requireOrganismeIndicateursAccess } from "../helpers/permissions.js";
+import {
+  getEffectifsAnonymesRestriction,
+  getIndicateursRestriction,
+  requireOrganismeIndicateursAccess,
+} from "../helpers/permissions.js";
 import { format } from "date-fns";
 import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
 import { cache } from "../../../services.js";
@@ -248,8 +252,9 @@ export const getEffectifsCountByAnneeFormationAtDate = async (ctx: AuthContext, 
  * }]
  */
 export const getEffectifsCountByCfaAtDate = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
-  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
-  const effectifsCountByCfa = await getEffectifsCountAtDate(filtersWithRestriction, {
+  // on descend au niveau des organismes, donc restriction comme pour les effectifs anonymes
+  (filters as EffectifsFiltersWithRestriction).restrictionMongo = await getEffectifsAnonymesRestriction(ctx);
+  const effectifsCountByCfa = await getEffectifsCountAtDate(filters, {
     // we need to project these fields to give information about the CFAs
     additionalFilterStages: [{ $lookup: organismeLookup }],
     projection: {
