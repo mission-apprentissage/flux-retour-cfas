@@ -40,6 +40,7 @@ const INPUT_FILES = [
   "assets/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
   "assets/referentiel-reseau-uimm.csv", // UIMM
   "assets/referentiel-reseau-greta.csv", // GRETA
+  "assets/referentiel-reseau-en.csv", // EDUC. NAT
   // "assets/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
 ];
 

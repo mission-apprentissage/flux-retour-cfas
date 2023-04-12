@@ -58,6 +58,18 @@ export const TETE_DE_RESEAUX = [
     nom: "CFA SAT",
     key: "CFA_SAT",
   },
+  {
+    nom: "EN HORS MURS",
+    key: "EN_HORS_MURS",
+  },
+  {
+    nom: "EN CFA ACADEMIQUE",
+    key: "EN_CFA_ACADEMIQUE",
+  },
+  {
+    nom: "EN EPLE",
+    key: "EN_EPLE",
+  },
 ];
 
 export const TETE_DE_RESEAUX_BY_ID = TETE_DE_RESEAUX.reduce((acc, reseau) => {
