@@ -1,6 +1,5 @@
 import React from "react";
 import { useRouter } from "next/router";
-import NavLink from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import {
@@ -86,11 +85,12 @@ const Users = () => {
           <Heading as="h1" mb={8} mt={6}>
             {title}
           </Heading>
-          {!isLoading && (
+          {/** désactivé tant que formulaire de création pas complet */}
+          {/* {!isLoading && (
             <Button as={NavLink} href="?new=1" bg="bluefrance" color="white" _hover={{ bg: "blue.700" }}>
               Créer un utilisateur
             </Button>
-          )}
+          )} */}
         </HStack>
         {isLoading && !users?.data ? (
           <Spinner alignSelf="center" />
