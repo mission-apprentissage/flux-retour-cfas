@@ -10,7 +10,7 @@ import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
 import { escapeRegExp } from "../../utils/regexUtils.js";
 import { Organisme } from "../../model/@types/Organisme.js";
-import { buildMongoPipelineFilterStages, EffectifsFilters } from "../helpers/filters.js";
+import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "../helpers/filters.js";
 import Boom from "boom";
 import { AuthContext } from "../../model/internal/AuthContext.js";
 import {
@@ -357,7 +357,7 @@ export const searchOrganismes = async (ctx: AuthContext, searchCriteria: Organis
     const eligibleUais = (
       await effectifsDb()
         .aggregate([
-          ...buildMongoPipelineFilterStages(searchCriteria as unknown as EffectifsFilters),
+          ...buildMongoPipelineFilterStages(searchCriteria as unknown as LegacyEffectifsFilters),
           { $group: { _id: "$_computed.organisme.uai" } },
         ])
         .toArray()

@@ -63,9 +63,9 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
 }
 
 /**
- * Restriction pour accéder aux indicateurs effectifs et indicateurs agrégés
+ * Restriction pour accéder aux indicateurs agrégés
  */
-export async function getEffectifsRestriction(ctx: AuthContext): Promise<any> {
+export async function getIndicateursRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -91,6 +91,51 @@ export async function getEffectifsRestriction(ctx: AuthContext): Promise<any> {
     case "CONSEIL_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return {};
+  }
+}
+
+/**
+ * Restriction pour accéder aux effectifs anonymes
+ */
+export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+      return {
+        organisme_id: {
+          $in: linkedOrganismesIds,
+        },
+      };
+    }
+
+    case "TETE_DE_RESEAU":
+      return {
+        "_computed.organisme.reseaux": organisation.reseau,
+      };
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+      return {
+        "organisme.adresse.region": organisation.code_region,
+      };
+    case "DDETS":
+      return {
+        "organisme.adresse.departement": organisation.code_departement,
+      };
+    case "ACADEMIE":
+      return {
+        "organisme.adresse.academie": organisation.code_academie,
+      };
+
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       return {};

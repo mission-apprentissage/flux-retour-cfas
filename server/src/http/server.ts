@@ -20,7 +20,7 @@ import { authMiddleware } from "./middlewares/authMiddleware.js";
 
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
-import indicateursRouter, { buildEffectifsFiltersFromRequest } from "./routes/specific.routes/indicateurs.routes.js";
+import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes.js";
 
 import emails from "./routes/emails.routes.js";
@@ -93,6 +93,7 @@ import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.j
 import loginSchemaLegacy from "../common/validation/loginSchemaLegacy.js";
 import { generateSifa } from "../common/actions/sifa.actions/sifa.actions.js";
 import { configurationERPSchema } from "../common/validation/configurationERPSchema.js";
+import { legacyEffectifsFiltersSchema } from "../common/actions/helpers/filters.js";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 
@@ -265,11 +266,11 @@ function setupRoutes(app: Application) {
       return await findMaintenanceMessages();
     })
   );
-  app.use(
+  app.get(
     "/api/indicateurs-national",
     returnResult(async (req) => {
-      const { date } = await validateFullObjectSchema(req.query, {
-        date: Joi.date().required(),
+      const { date } = await validateFullZodObjectSchema(req.query, {
+        date: legacyEffectifsFiltersSchema.date,
       });
       return await getIndicateursNational(date);
     })
@@ -364,7 +365,7 @@ function setupRoutes(app: Application) {
   authRouter.get(
     "/api/v1/organismes/:id/indicateurs",
     returnResult(async (req) => {
-      const filters = await buildEffectifsFiltersFromRequest(req);
+      const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
       return await getOrganismeIndicateurs(req.user, req.params.id, filters);
     })
   );
@@ -424,7 +425,7 @@ function setupRoutes(app: Application) {
   authRouter.get("/api/v1/server-events", serverEventsHandler);
   authRouter.use("/api/indicateurs", indicateursRouter());
   authRouter.get("/api/v1/indicateurs-export", async (req, res) => {
-    const filters = await buildEffectifsFiltersFromRequest(req);
+    const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
     const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
     res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
   });

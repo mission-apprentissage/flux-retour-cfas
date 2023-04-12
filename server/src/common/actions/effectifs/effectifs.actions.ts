@@ -1,10 +1,9 @@
 import { ObjectId } from "mongodb";
 
-import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenantConstants.js";
 import {
   buildMongoPipelineFilterStages,
-  EffectifsFilters,
   EffectifsFiltersWithRestriction,
+  LegacyEffectifsFilters,
   organismeLookup,
 } from "../helpers/filters.js";
 import { mergeObjectsBy } from "../../utils/mergeObjectsBy.js";
@@ -15,22 +14,70 @@ import {
   inscritsSansContratsIndicator,
   rupturantsIndicator,
 } from "./indicators.js";
-import { effectifsDb } from "../../model/collections.js";
+import { effectifsDb, organismesDb } from "../../model/collections.js";
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { requireOrganismeIndicateursAccess } from "../helpers/permissions.js";
+import { getIndicateursRestriction, requireOrganismeIndicateursAccess } from "../helpers/permissions.js";
 import { format } from "date-fns";
 import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
 import { cache } from "../../../services.js";
 import { tryCachedExecution } from "../../utils/cacheUtils.js";
+import Boom from "boom";
 
-export async function getOrganismeIndicateurs(ctx: AuthContext, organismeId: string, filters: EffectifsFilters) {
-  await requireOrganismeIndicateursAccess(ctx, organismeId);
-  filters.organisme_id = organismeId;
-  return await getIndicateurs(filters);
+// ce helper est principalement appelé dans les routes des indicateurs agrégés et non scopés à un organisme, mais aussi pour un organisme :
+// - si organisme_id, uai ou siret, indicateurs pour un organisme, on vérifie que l'organisation y a accès
+// - si pas d'organisme_id, indicateurs agrégés, restriction classique
+// TODO il faudra sortir organisme_id (et uai / siret) pour le spécifier dans une autre route /organismes/:id/indicateurs
+// pour que les indicateurs ici ne soit que ceux agrégés
+/**
+ * Vérifie si l'utilisateur peut accéder à des indicateurs.
+ * Selon le contexte et les filtres, peut compléter les filtres avec une restriction (un territoire par exemple)
+ */
+export async function checkIndicateursFiltersPermissions(
+  ctx: AuthContext,
+  filters: LegacyEffectifsFilters
+): Promise<EffectifsFiltersWithRestriction> {
+  if (filters.organisme_id) {
+    await requireOrganismeIndicateursAccess(ctx, filters.organisme_id);
+  } else if (filters.uai_etablissement) {
+    // comme on a pas l'organisme_id on doit retrouver l'organisme via uai
+    const organisme = await organismesDb()
+      .find({
+        uai: filters.uai_etablissement,
+      })
+      .next();
+    if (!organisme) {
+      throw Boom.notFound("Organisme non trouvé");
+    }
+    await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
+  } else if (filters.siret_etablissement) {
+    // comme on a pas l'organisme_id on doit retrouver l'organisme via siret
+    const organisme = await organismesDb()
+      .find({
+        siret: filters.siret_etablissement,
+      })
+      .next();
+    if (!organisme) {
+      throw Boom.notFound("Organisme non trouvé");
+    }
+    await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
+  } else {
+    // amend filters with a restriction
+    (filters as EffectifsFiltersWithRestriction).restrictionMongo = await getIndicateursRestriction(ctx);
+  }
+
+  return filters;
 }
 
-export const getIndicateurs = async (filters: EffectifsFilters) => {
-  const filterStages = buildMongoPipelineFilterStages(filters);
+export async function getOrganismeIndicateurs(ctx: AuthContext, organismeId: string, filters: LegacyEffectifsFilters) {
+  // doublon avec vérification dans getIndicateurs, mais sera utile plus tard
+  await requireOrganismeIndicateursAccess(ctx, organismeId);
+  filters.organisme_id = organismeId;
+  return await getIndicateurs(ctx, filters);
+}
+
+export const getIndicateurs = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
+  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
+  const filterStages = buildMongoPipelineFilterStages(filtersWithRestriction);
   const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
     apprentisIndicator.getCountAtDate(filters.date, filterStages),
     inscritsSansContratsIndicator.getCountAtDate(filters.date, filterStages),
@@ -96,9 +143,10 @@ export const getEffectifsCountAtDate = async (
  *  }
  * }]
  */
-export const getEffectifsCountByNiveauFormationAtDate = async (filters: any) => {
+export const getEffectifsCountByNiveauFormationAtDate = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
   // compute number of apprentis, abandons, inscrits sans contrat and rupturants
-  const effectifsByNiveauFormation = await getEffectifsCountAtDate(filters, {
+  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
+  const effectifsByNiveauFormation = await getEffectifsCountAtDate(filtersWithRestriction, {
     additionalFilterStages: [{ $match: { "formation.niveau": { $ne: null } } }],
     projection: { "formation.niveau": 1, "formation.niveau_libelle": 1 },
     groupedBy: { _id: "$formation.niveau", niveau_libelle: { $first: "$formation.niveau_libelle" } },
@@ -130,8 +178,9 @@ export const getEffectifsCountByNiveauFormationAtDate = async (filters: any) => 
  *  }
  * }]
  */
-export const getEffectifsCountByFormationAtDate = async (filters: any) => {
-  const effectifsByFormation = await getEffectifsCountAtDate(filters, {
+export const getEffectifsCountByFormationAtDate = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
+  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
+  const effectifsByFormation = await getEffectifsCountAtDate(filtersWithRestriction, {
     projection: { "formation.cfd": 1, "formation.libelle_long": 1 },
     groupedBy: {
       _id: "$formation.cfd",
@@ -165,8 +214,9 @@ export const getEffectifsCountByFormationAtDate = async (filters: any) => {
  *  }
  * }]
  */
-export const getEffectifsCountByAnneeFormationAtDate = async (filters) => {
-  const effectifsByAnneeFormation = await getEffectifsCountAtDate(filters, {
+export const getEffectifsCountByAnneeFormationAtDate = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
+  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
+  const effectifsByAnneeFormation = await getEffectifsCountAtDate(filtersWithRestriction, {
     projection: { "formation.annee": 1 },
     groupedBy: { _id: "$formation.annee" },
   });
@@ -197,8 +247,9 @@ export const getEffectifsCountByAnneeFormationAtDate = async (filters) => {
  *  }
  * }]
  */
-export const getEffectifsCountByCfaAtDate = async (filters) => {
-  const effectifsCountByCfa = await getEffectifsCountAtDate(filters, {
+export const getEffectifsCountByCfaAtDate = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
+  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
+  const effectifsCountByCfa = await getEffectifsCountAtDate(filtersWithRestriction, {
     // we need to project these fields to give information about the CFAs
     additionalFilterStages: [{ $lookup: organismeLookup }],
     projection: {
@@ -248,8 +299,9 @@ export const getEffectifsCountByCfaAtDate = async (filters) => {
  *  }
  * }]
  */
-export const getEffectifsCountBySiretAtDate = async (filters) => {
-  const effectifsCountByCfa = await getEffectifsCountAtDate(filters, {
+export const getEffectifsCountBySiretAtDate = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
+  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
+  const effectifsCountByCfa = await getEffectifsCountAtDate(filtersWithRestriction, {
     additionalFilterStages: [{ $lookup: organismeLookup }, { $match: { "organisme.siret": { $ne: null } } }],
     // we need to project these fields to give information about the CFAs
     projection: {
@@ -289,8 +341,9 @@ export const getEffectifsCountBySiretAtDate = async (filters) => {
  *  }
  * }]
  */
-export const getEffectifsCountByDepartementAtDate = async (filters: any) => {
-  const effectifsCountByDepartement = await getEffectifsCountAtDate(filters, {
+export const getEffectifsCountByDepartementAtDate = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
+  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
+  const effectifsCountByDepartement = await getEffectifsCountAtDate(filtersWithRestriction, {
     additionalFilterStages: [{ $lookup: organismeLookup }],
     projection: {
       "organisme.adresse.departement": 1,
@@ -312,47 +365,33 @@ export const getEffectifsCountByDepartementAtDate = async (filters: any) => {
   }));
 };
 
-/**
- * Récupération des effectifs anonymisés à une date donnée
- */
-export const getDataListEffectifsAtDate = async (filters: EffectifsFiltersWithRestriction) => {
-  const filterStages = buildMongoPipelineFilterStages(filters);
-  const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
-    apprentisIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.apprentis),
-    inscritsSansContratsIndicator.getFullExportFormattedListAtDate(
-      filters.date,
-      filterStages,
-      EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
-    ),
-    rupturantsIndicator.getFullExportFormattedListAtDate(
-      filters.date,
-      filterStages,
-      EFFECTIF_INDICATOR_NAMES.rupturants
-    ),
-    abandonsIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.abandons),
-  ]);
-  return [...apprentis, ...inscritsSansContrat, ...rupturants, ...abandons];
-};
-
-/**
- * Récupération du nb distinct d'organismes transmettant des effectifs (distinct organisme_id dans la collection effectifs)
- * @param {import("mongodb").Filter<any>} filters
- * @returns
- */
-export const getNbDistinctOrganismes = async (filters = {}) => {
-  const distinctOrganismes = await effectifsDb().distinct("organisme_id", filters);
-  return distinctOrganismes ? distinctOrganismes.length : 0;
-};
-
 export async function getIndicateursNational(date: Date) {
   const cacheKey = `indicateurs-national:${format(date, "yyyy-MM-dd")}`;
   return tryCachedExecution(cache, cacheKey, async () => {
     const [indicateurs, totalOrganismes] = await Promise.all([
-      getIndicateurs({ date }),
-      getNbDistinctOrganismes({ annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } }),
+      (async () => {
+        const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
+          apprentisIndicator.getCountAtDate(date),
+          inscritsSansContratsIndicator.getCountAtDate(date),
+          rupturantsIndicator.getCountAtDate(date),
+          abandonsIndicator.getCountAtDate(date),
+        ]);
+        return {
+          date,
+          apprentis,
+          inscritsSansContrat,
+          rupturants,
+          abandons,
+        };
+      })(),
+      (async () => {
+        const distinctOrganismes = await effectifsDb().distinct("organisme_id", {
+          annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
+        });
+        return distinctOrganismes ? distinctOrganismes.length : 0;
+      })(),
     ]);
-    indicateurs.totalOrganismes = totalOrganismes;
-    return indicateurs;
+    return { ...indicateurs, totalOrganismes };
   });
 }
 /**
