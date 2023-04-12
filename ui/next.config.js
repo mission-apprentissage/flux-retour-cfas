@@ -19,8 +19,8 @@ const contentSecurityPolicy = `
       object-src 'none';
       script-src 'self' https://plausible.io ${process.env.NEXT_PUBLIC_ENV === "dev" ? "'unsafe-eval'" : ""};
       script-src-attr 'none';
-      style-src 'self' https:  https: *.plausible.io 'unsafe-inline';
-      connect-src 'self' https://geo.api.gouv.fr/ https://plausible.io;
+      style-src 'self' https: *.plausible.io 'unsafe-inline';
+      connect-src 'self' https://plausible.io;
       upgrade-insecure-requests;
 `;
 
