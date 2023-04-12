@@ -335,7 +335,7 @@ export const checkSiretMultiplesRelationsAndLieux = async (
  * @returns
  */
 export const checkUaiAucunLieuReferentiel = async (coupleUaiSiretTdbToCheck) => {
-  // Identification des pb de collecte : match via SIRET mais UAI n'est dans aucun lieu du référentiel
+  // Identification des pb de collecte : UAI n'est dans aucun lieu du référentiel
   const organismesMatchsUaiInLieuxReferentiel = await organismesReferentielDb().countDocuments({
     "lieux_de_formation.uai": coupleUaiSiretTdbToCheck.uai,
   });
