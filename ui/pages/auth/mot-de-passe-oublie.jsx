@@ -15,9 +15,12 @@ import React from "react";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
 import NavLink from "next/link";
+import Head from "next/head";
 
-import { _post } from "@/common/httpClient";
+import Page from "@/components/Page/Page";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
+import { _post } from "@/common/httpClient";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -28,7 +31,7 @@ const ForgottenPasswordPage = () => {
     try {
       await _post("/api/v1/password/forgotten-password", { ...values });
       setStatus({ message: "Vous allez recevoir un lien vous permettant de réinitialiser votre mot de passe." });
-      setTimeout(() => router.push("/"), 1500);
+      setTimeout(() => router.push("/"), 3000);
     } catch (e) {
       console.error(e);
       setStatus({ error: e.prettyMessage });
@@ -38,58 +41,73 @@ const ForgottenPasswordPage = () => {
   const title = "Mot de passe oublié";
 
   return (
-    <Flex height="100vh" justifyContent="center" mt="10">
-      <Box width={["auto", "28rem"]}>
-        <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          {title}
-        </Heading>
-        <Formik
-          initialValues={{
-            email: "",
-          }}
-          validationSchema={Yup.object().shape({
-            email: Yup.string().email("Veuillez saisir un email valide").required("Veuillez saisir un identifiant"),
-          })}
-          onSubmit={resetPassword}
+    <Page>
+      <Head>
+        <title>{title}</title>
+      </Head>
+      <Flex w="100%" mt={8} minH="40vh" direction={{ base: "column", md: "row" }}>
+        <Flex
+          flexDirection="column"
+          p={12}
+          w={{ base: "100%", md: "50%" }}
+          h="100%"
+          border="1px solid"
+          borderColor="openbluefrance"
         >
-          {({ status = {} }) => {
-            return (
-              <Form>
-                <Field name="email">
-                  {({ field, meta }) => {
-                    return (
-                      <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                        <FormLabel>Votre email :</FormLabel>
-                        <Input {...field} id={field.name} placeholder="prenom.nom@courriel.fr" />
-                        <FormErrorMessage>{meta.error}</FormErrorMessage>
-                      </FormControl>
-                    );
-                  }}
-                </Field>
-                {status.error && (
-                  <Text color="error" my={2}>
-                    {status.error}
-                  </Text>
-                )}
-                {status.message && (
-                  <Text color="info" my={2}>
-                    {status.message}
-                  </Text>
-                )}
-                <VStack>
-                  <Button variant="primary" type={"submit"} w="100%">
-                    Recevoir un courriel de ré-initialisation
-                  </Button>
-                  <NavLink type={"submit"} w="100%" href="/auth/connexion">
-                    Annuler
-                  </NavLink>
-                </VStack>
-              </Form>
-            );
-          }}
-        </Formik>
-      </Box>
-    </Flex>
+          <Box width={["auto", "28rem"]}>
+            <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
+              {title}
+            </Heading>
+            <Formik
+              initialValues={{
+                email: "",
+              }}
+              validationSchema={Yup.object().shape({
+                email: Yup.string().email("Veuillez saisir un email valide").required("Veuillez saisir un identifiant"),
+              })}
+              onSubmit={resetPassword}
+            >
+              {({ status = {} }) => {
+                return (
+                  <Form>
+                    <Field name="email">
+                      {({ field, meta }) => {
+                        return (
+                          <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
+                            <FormLabel>Votre email :</FormLabel>
+                            <Input {...field} id={field.name} placeholder="prenom.nom@courriel.fr" />
+                            <FormErrorMessage>{meta.error}</FormErrorMessage>
+                          </FormControl>
+                        );
+                      }}
+                    </Field>
+                    {status.error && (
+                      <Text color="error" my={2}>
+                        {status.error}
+                      </Text>
+                    )}
+                    {status.message && (
+                      <Text color="info" my={2}>
+                        {status.message}
+                      </Text>
+                    )}
+                    <VStack>
+                      <Button variant="primary" type={"submit"} w="100%">
+                        Recevoir un courriel de ré-initialisation
+                      </Button>
+                      <NavLink type={"submit"} w="100%" href="/auth/connexion">
+                        Annuler
+                      </NavLink>
+                    </VStack>
+                  </Form>
+                );
+              }}
+            </Formik>
+          </Box>
+        </Flex>
+        <InformationBlock w={{ base: "100%", md: "50%" }} />
+      </Flex>
+    </Page>
   );
 };
 
