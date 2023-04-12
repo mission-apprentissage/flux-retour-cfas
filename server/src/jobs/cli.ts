@@ -19,7 +19,7 @@ import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
 // import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build.js";
-import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply.js";
+import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update.js";
 import { updateUserPassword } from "./users/update-user-password.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs copy/index.js";
 import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
@@ -370,9 +370,11 @@ program
       // On lance séquentiellement 2 fois de suite la construction (build) de la collection fiabilisation suivi de la MAJ des données liées (apply)
       // Nécessaire pour le bon fonctionnement de l'algo
       await buildFiabilisationUaiSiret();
-      await applyFiabilisationUaiSiret();
-      await buildFiabilisationUaiSiret();
-      await applyFiabilisationUaiSiret();
+      await updateOrganismesFiabilisationUaiSiret();
+      const buildResults = await buildFiabilisationUaiSiret();
+      const updateResults = await updateOrganismesFiabilisationUaiSiret();
+
+      return { buildResults, updateResults };
     }, options._name)
   );
 

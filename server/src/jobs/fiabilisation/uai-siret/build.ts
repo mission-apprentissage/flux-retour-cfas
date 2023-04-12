@@ -1,5 +1,4 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../common/logger.js";
 import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../common/model/collections.js";
@@ -13,7 +12,7 @@ import {
   checkSiretMultiplesRelationsAndLieux,
   checkUaiAucunLieuReferentiel,
   checkUaiMultiplesRelationsAndLieux,
-} from "./rules.js";
+} from "./build.rules.js";
 
 // Filtres année scolaire pour récupération des couples UAI-SIRET
 const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] } };
@@ -22,17 +21,10 @@ const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"]
  * Fonction de construction de la collection des couples de fiabilisation UAI SIRET
  */
 export const buildFiabilisationUaiSiret = async () => {
-  logger.info("Clear de la table fiabilisation UAI-SIRET...");
   await fiabilisationUaiSiretDb().deleteMany({});
 
   logger.info("> Execution du script de fiabilisation sur tous les couples UAI-SIRET...");
-  await runFiabilisationOnUaiSiretCouples();
-};
 
-/**
- * Méthode de création de la collection pour fiabilisation couples UAI SIRET
- */
-const runFiabilisationOnUaiSiretCouples = async () => {
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
 
   // on récupère tous les couples UAI/SIRET depuis les effectifs en faisant un lookup effectifs - organismes
@@ -83,59 +75,27 @@ const runFiabilisationOnUaiSiretCouples = async () => {
     type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE,
   });
 
-  logger.info(
-    ` -> ${nbCouplesFiablesFound} couples déjà fiables (${getPercentage(
-      nbCouplesFiablesFound,
-      allCouplesUaiSiretTdb.length
-    )}%)`
-  );
+  let percentageCouplesFiables = getPercentage(nbCouplesFiablesFound, allCouplesUaiSiretTdb.length);
+  let nbCouplesNonFiabilisables =
+    nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping + nbCouplesNonFiabilisablesPbCollecte;
+  let percentageCouplesNonFiabilisables = getPercentage(nbCouplesNonFiabilisables, allCouplesUaiSiretTdb.length);
+
+  logger.info(` -> ${nbCouplesFiablesFound} couples déjà fiables (${percentageCouplesFiables}%)`);
   logger.info(` -> ${nbCouplesAFiabiliser} nouveaux couples à fiabiliser`);
-  logger.info(
-    ` -> ${
-      nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping + nbCouplesNonFiabilisablesPbCollecte
-    } couples ne peuvent pas être fiabilisés automatiquement (${getPercentage(
-      nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping + nbCouplesNonFiabilisablesPbCollecte,
-      allCouplesUaiSiretTdb.length
-    )}%)`
-  );
-
-  logger.info(
-    ` -> dont ${nbCouplesNonFiabilisablesUaiNonValidee} non fiabilisables car UAI non validée dans le Référentiel`
-  );
-  logger.info(` -> dont ${nbCouplesNonFiabilisablesMapping} non fiabilisables à cause du mapping.`);
-  logger.info(` -> dont ${nbCouplesNonFiabilisablesPbCollecte} non fiabilisables à cause d'un problème de collecte.`);
-
-  await createJobEvent({
-    jobname: "fiabilisation:uai-siret:build",
-    date: new Date(),
-    action: "ending",
-    data: {
-      nbCouplesDejaFiables: nbCouplesFiablesFound,
-      nbCouplesDejaFiablesPercentage: getPercentage(nbCouplesFiablesFound, allCouplesUaiSiretTdb.length),
-      nbNouveauxCouplesAFiabiliser: nbCouplesAFiabiliser,
-      nbCouplesNonFiabilisablesUaiNonValidee,
-      nbCouplesNonFiabilisablesMapping,
-      nbCouplesNonFiabilisablesPbCollecte,
-      nbCouplesNonFiabilisables:
-        nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping + nbCouplesNonFiabilisablesPbCollecte,
-      nbCouplesNonFiabilisablesPercentage: getPercentage(
-        nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping + nbCouplesNonFiabilisablesPbCollecte,
-        allCouplesUaiSiretTdb.length
-      ),
-    },
-  });
+  logger.info(` -> ${nbCouplesNonFiabilisables} couples non fiabilisables (${percentageCouplesNonFiabilisables}%)`);
+  logger.info(`  -> dont ${nbCouplesNonFiabilisablesUaiNonValidee} non fiabilisables > UAI non validée Référentiel`);
+  logger.info(`  -> dont ${nbCouplesNonFiabilisablesMapping} non fiabilisables > mapping`);
+  logger.info(`  -> dont ${nbCouplesNonFiabilisablesPbCollecte} non fiabilisables > problème de collecte`);
 
   return {
     nbCouplesDejaFiables: nbCouplesFiablesFound,
-    nbCouplesDejaFiablesPercentage: getPercentage(nbCouplesFiablesFound, allCouplesUaiSiretTdb.length),
-    nbNouveauxCouplesAFiabiliser: nbCouplesAFiabiliser,
+    percentageCouplesFiables,
+    nbCouplesAFiabiliser,
+    nbCouplesNonFiabilisables,
+    percentageCouplesNonFiabilisables,
     nbCouplesNonFiabilisablesUaiNonValidee,
     nbCouplesNonFiabilisablesMapping,
-    nbCouplesNonFiabilisables: nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping,
-    nbCouplesNonFiabilisablesPercentage: getPercentage(
-      nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping,
-      allCouplesUaiSiretTdb.length
-    ),
+    nbCouplesNonFiabilisablesPbCollecte,
   };
 };
 

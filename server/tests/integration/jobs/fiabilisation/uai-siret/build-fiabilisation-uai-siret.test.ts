@@ -6,7 +6,7 @@ import {
   checkCoupleFiable,
   checkMatchReferentielSiretUaiDifferent,
   checkMatchReferentielUaiUniqueSiretDifferent,
-} from "../../../../../src/jobs/fiabilisation/uai-siret/rules.js";
+} from "../../../../../src/jobs/fiabilisation/uai-siret/build.rules.js";
 
 describe("Job Build Fiabilisation UAI SIRET", () => {
   const UAI_REFERENTIEL = "7722672E";
