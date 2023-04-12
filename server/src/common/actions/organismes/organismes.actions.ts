@@ -759,6 +759,5 @@ export async function configureOrganismeERP(
   conf: ConfigurationERP
 ): Promise<void> {
   await requireManageOrganismeEffectifsPermission(ctx, organismeId);
-  console.log("set erp", stripEmptyFields(conf));
   await organismesDb().updateOne({ _id: new ObjectId(organismeId) }, { $set: stripEmptyFields(conf) as any });
 }
