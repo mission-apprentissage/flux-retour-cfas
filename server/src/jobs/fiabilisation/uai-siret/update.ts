@@ -42,12 +42,26 @@ export const updateOrganismesFiabilisationUaiSiret = async () => {
   logger.info(" ->", nbOrganismesFiabilises, "organismes mis à jour en tant que fiabilisés");
   logger.info(" ->", nbOrganismesNonFiablesSupprimes, "organismes non fiables supprimés");
   logger.info(" ->", nbEffectifsDuplicateOrganismesAFiabiliser, "effectifs doublons sur fiabilisation d'un organisme");
+  logger.info(" ->", nbOrganismesNonFiabilisablesMappingSupprimes, "organismes supprimés (non fiabilisables mapping)");
+  logger.info(
+    " ->",
+    nbEffectifsDuplicateOrganismesNonFiabilisablesMapping,
+    "doublons d'effectifs organismes (non fiabilisables mapping)"
+  );
+  logger.info(
+    " ->",
+    nbOrganismesNonFiabilisablesMappingFixEffectifs,
+    "fix d'effectifs organismes (non fiabilisables mapping)"
+  );
 
   return {
     nbOrganismesReferentielFiables,
     nbOrganismesFiabilises,
     nbOrganismesNonFiablesSupprimes,
     nbEffectifsDuplicateOrganismesAFiabiliser,
+    nbOrganismesNonFiabilisablesMappingSupprimes,
+    nbEffectifsDuplicateOrganismesNonFiabilisablesMapping,
+    nbOrganismesNonFiabilisablesMappingFixEffectifs,
   };
 };
 
