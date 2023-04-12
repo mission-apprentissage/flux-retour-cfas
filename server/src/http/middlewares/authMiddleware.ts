@@ -20,17 +20,14 @@ export const authMiddleware = () => {
         secretOrKey: config.auth.user.jwtSecret,
       },
       async (jwtPayload, done) => {
-        const { exp } = jwtPayload;
-
-        if (Date.now() > exp * 1000) {
-          done(new Error("Unauthorized"), false);
-          return;
-        }
-
         try {
+          const { exp } = jwtPayload;
+          if (Date.now() > exp * 1000) {
+            throw Boom.unauthorized("Vous n'êtes pas connecté");
+          }
           const user = await getUserByEmail(jwtPayload.email);
           if (!user) {
-            return done(new Error("Unauthorized"), false);
+            throw Boom.unauthorized("Vous n'êtes pas connecté");
           }
           // FIXME à quoi sert ce champ ?
           if (user.invalided_token) {
