@@ -3,7 +3,6 @@ import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../common/constant
 import logger from "../../../common/logger.js";
 import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../common/model/collections.js";
 import { getPercentage } from "../../../common/utils/miscUtils.js";
-import { insertManualMappingsFromFile } from "./utils.js";
 import {
   checkCoupleFiable,
   checkCoupleNonFiabilisable,
@@ -52,11 +51,6 @@ export const buildFiabilisationUaiSiret = async () => {
   await PromisePool.for(allCouplesUaiSiretTdb).process(async (coupleUaiSiretTdb) => {
     await buildFiabilisationCoupleForTdbCouple(coupleUaiSiretTdb, allCouplesUaiSiretTdb, organismesFromReferentiel);
   });
-
-  // on insère les mapping de fiabilisation présents dans le fichier JSON créé à la main
-  // cette source est prioritaire par rapport à l'analyse faite plus haut
-  // on remplace donc la fiabilisation à faire si déjà existante
-  await insertManualMappingsFromFile();
 
   // Stats & log / info
   const nbCouplesFiablesFound = await fiabilisationUaiSiretDb().countDocuments({

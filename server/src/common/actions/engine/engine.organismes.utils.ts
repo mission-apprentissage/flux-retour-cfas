@@ -1,4 +1,3 @@
-import { FIABILISATION_MAPPINGS } from "../../../jobs/fiabilisation/uai-siret/mapping.js";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../constants/fiabilisationConstants.js";
 import { fiabilisationUaiSiretDb } from "../../model/collections.js";
 
@@ -15,9 +14,8 @@ export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret = null }
   const fiabilisationUaiSiretFromCollection = await fiabilisationUaiSiretDb()
     .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER })
     .toArray();
-  const fiabilisationMappings = [...fiabilisationUaiSiretFromCollection, ...FIABILISATION_MAPPINGS];
 
-  const foundCouple = fiabilisationMappings
+  const foundCouple = fiabilisationUaiSiretFromCollection
     .filter((item) => item.uai === uai && item.siret === siret)
     .map(({ uai_fiable, siret_fiable }) => ({ cleanUai: uai_fiable, cleanSiret: siret_fiable }));
 
