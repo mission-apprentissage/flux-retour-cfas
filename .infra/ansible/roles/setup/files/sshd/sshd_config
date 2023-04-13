@@ -9,16 +9,11 @@ UsePAM yes
 PermitRootLogin no
 PasswordAuthentication no
 PermitEmptyPasswords no
-RSAAuthentication no
 ChallengeResponseAuthentication no
-RhostsRSAAuthentication no
 HostbasedAuthentication no
 IgnoreRhosts yes
 
 #Misc
-UsePrivilegeSeparation yes
-KeyRegenerationInterval 3600
-ServerKeyBits 1024
 SyslogFacility AUTH
 LogLevel VERBOSE
 LoginGraceTime 120
