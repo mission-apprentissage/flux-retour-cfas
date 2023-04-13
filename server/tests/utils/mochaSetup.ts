@@ -26,11 +26,11 @@ export const mochaHooks = {
   beforeEach: async () => {
     nockExternalApis();
     setRedisCache(redisFakeClient);
+    await clearAllCollections();
+    await redisFakeClient.flushall();
   },
   afterEach: async () => {
     nock.cleanAll();
-    await clearAllCollections();
-    await redisFakeClient.flushall();
   },
 };
 

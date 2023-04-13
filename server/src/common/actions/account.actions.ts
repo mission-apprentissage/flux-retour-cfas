@@ -93,7 +93,7 @@ export async function login(email: string, password: string): Promise<string> {
 
   await updateUserLastConnection(user._id);
 
-  const sessionToken = createSession(email);
+  const sessionToken = await createSession(email);
   return sessionToken;
 }
 

@@ -14,14 +14,15 @@ import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "../helpe
 import Boom from "boom";
 import { AuthContext } from "../../model/internal/AuthContext.js";
 import {
+  findOrganismesAccessiblesByOrganisation,
   getOrganismeRestriction,
   isOrganisationOF,
-  requireManageOrganismeEffectifsPermission,
   requireOrganismeIndicateursAccess,
 } from "../helpers/permissions.js";
 import { getOrganisationOrganisme } from "../organisations.actions.js";
 import { ConfigurationERP } from "../../validation/configurationERPSchema.js";
 import { stripEmptyFields } from "../../utils/validationUtils.js";
+import { OrganisationOrganismeFormation } from "../../model/organisations.model.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -753,11 +754,33 @@ async function fetchFromAPIEntreprise(siret: string): Promise<any> {
   };
 }
 
+async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: string): Promise<boolean> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId);
+    }
+
+    case "ADMINISTRATEUR":
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 export async function configureOrganismeERP(
   ctx: AuthContext,
   organismeId: string,
   conf: ConfigurationERP
 ): Promise<void> {
-  await requireManageOrganismeEffectifsPermission(ctx, organismeId);
+  if (!(await canConfigureOrganismeERP(ctx, organismeId))) {
+    throw Boom.forbidden("Permissions invalides");
+  }
   await organismesDb().updateOne({ _id: new ObjectId(organismeId) }, { $set: stripEmptyFields(conf) as any });
 }

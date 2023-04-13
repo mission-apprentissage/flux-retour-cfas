@@ -1,10 +1,18 @@
+import { strict as assert } from "assert";
 import axiosist from "axiosist";
 import sinon from "sinon";
 
-import server from "../../src/http/server.js";
-import { configureDbSchemaValidation } from "../../src/common/mongodb.js";
-import { modelDescriptors } from "../../src/common/model/collections.js";
+import { AxiosResponse } from "axios";
 import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.actions.js";
+import { createOrganisation } from "../../src/common/actions/organisations.actions.js";
+import { createSession } from "../../src/common/actions/sessions.actions.js";
+import { createUser } from "../../src/common/actions/users.actions.js";
+import { COOKIE_NAME } from "../../src/common/constants/cookieName.js";
+import { modelDescriptors, usersMigrationDb } from "../../src/common/model/collections.js";
+import { NewOrganisation, getOrganisationLabel } from "../../src/common/model/organisations.model.js";
+import { configureDbSchemaValidation } from "../../src/common/mongodb.js";
+import server from "../../src/http/server.js";
+import { ObjectId } from "mongodb";
 
 export const startServer = async () => {
   const mailer = { sendEmail: sinon.spy() };
@@ -41,59 +49,151 @@ export const startServer = async () => {
   };
 };
 
-// FIXME définir une API pour mettre au bons statuts directement
-// export const createSimpleUser = async () => {
-//   const data = { email: "test@test.beta.gouv.fr", password: "password" };
-//   const createdUser = await createUser(data, {
-//     is_admin: false,
-//     is_cross_organismes: true,
-//   });
-//   return { ...createdUser, ...data };
-// };
+export type RequestAsOrganisationFunc = <T>(
+  organisation: NewOrganisation,
+  method: Method,
+  url: string,
+  body?: T
+) => Promise<AxiosResponse>;
 
-// export const createAdminUser = async () => {
-//   const data = { email: "admin@test.beta.gouv.fr", password: "password" };
-//   const createdUser = await createUser(data, {
-//     is_admin: true,
-//     is_cross_organismes: true,
-//   });
+export async function initTestApp() {
+  // FIXME revoir l'initialisation de l'application (1 point d'entrée, avec config pour savoir si démarrer services ou pas)
+  // const services = { cache: redisFakeClient, mailer, clamav: { scan: () => {} } };
+  const app = await server();
+  const httpClient = axiosist(app);
 
-//   return { ...createdUser, ...data };
-// };
+  await configureDbSchemaValidation(modelDescriptors);
+
+  return {
+    httpClient,
+
+    /**
+     * Permet de faire une requête authentifié pour une organisation
+     * L'utilisateur et l'organisation sont créés à la volée
+     */
+    async requestAsOrganisation<T>(
+      organisation: NewOrganisation,
+      method: Method,
+      url: string,
+      body?: T
+    ): Promise<AxiosResponse> {
+      const organisationId = await createOrganisation(organisation);
+      const userEmail = `${getOrganisationLabel(organisation)}@test.local`; // généré selon l'organisation
+      const userId = await createUser(
+        {
+          civility: "Madame",
+          nom: "Dupont",
+          prenom: "Jean",
+          fonction: "Responsable administratif",
+          email: userEmail,
+          telephone: "",
+          password: "azerty123",
+          has_accept_cgu_version: "v0.1",
+        },
+        organisationId
+      );
+      await usersMigrationDb().updateOne({ _id: userId }, { $set: { account_status: "CONFIRMED" } });
+      const sessionToken = await createSession(userEmail);
+      return await httpClient.request({
+        method,
+        url,
+        data: body,
+        headers: { cookie: `${COOKIE_NAME}=${sessionToken}` },
+      });
+    },
+
+    // paramètres et usage en WIP
+    async authenticateAsOrganisation(organisation: NewOrganisation): Promise<RequestAPIFunc> {
+      const organisationId = await createOrganisation(organisation);
+      const userId = await createUser(
+        {
+          civility: "Madame",
+          nom: "Dupont",
+          prenom: "Jean",
+          fonction: "Responsable administratif",
+          email: "jean@test.local",
+          telephone: "",
+          password: "azerty123",
+          has_accept_cgu_version: "v0.1",
+        },
+        organisationId
+      );
+      await usersMigrationDb().updateOne({ _id: userId }, { $set: { account_status: "CONFIRMED" } });
+      const sessionToken = await createSession("jean@test.local");
+
+      return async function requestAPI<T>(method: Method, url: string, body?: T): Promise<AxiosResponse> {
+        return await httpClient.request({
+          method,
+          url,
+          data: body,
+          headers: { cookie: `${COOKIE_NAME}=${sessionToken}` },
+        });
+      };
+    },
+  };
+}
 
 /**
- * Helper function to return an authenticated client to the API
- * @param {import("axiosist").AxiosInstance} httpClient
+ * Convertit un nombre au format ObjectID pour les tests
  */
-// export async function createAndAuthenticateUser(httpClient: AxiosInstance, userInfos, asRole = "organisme.statsonly") {
-//   // create the user with its permissions
-//   const email = "of@test.fr";
-//   const password = "Secret!Password1";
-//   const userOf = await createUser(
-//     { email, password },
-//     {
-//       nom: "of",
-//       prenom: "test",
-//       description: "Aden formation Caen - direction",
-//       account_status: "CONFIRMED",
-//       organisation: "ORGANISME_FORMATION",
-//       historique_statut: [""],
-//       ...userInfos,
-//     }
-//   );
-//   await createUserPermissions({ user: userOf, pending: false, notify: false, asRole });
+export function id(i: number): string {
+  return `${"000000000000000000000000".substring(0, 24 - `${i}`.length)}${i}`;
+}
 
-//   // authenticate the user
-//   const response = await httpClient.post("/api/v1/auth/login", { email, password });
-//   const cookie = response.headers["set-cookie"].join(";");
+export type Method = "get" | "post" | "put" | "patch" | "delete";
+export type RequestAPIFunc = <T>(
+  method: Method,
+  url: string,
+  body?: T,
+  headers?: { [key: string]: string }
+) => Promise<AxiosResponse>;
 
-//   return async (method, url, params, body = null) => {
-//     return await httpClient.request({
-//       method,
-//       url,
-//       data: body,
-//       params,
-//       headers: { cookie },
-//     });
-//   };
-// }
+export function expectUnauthorizedError(response: any) {
+  assert.strictEqual(response.status, 401);
+  assert.deepStrictEqual(response.data, "Unauthorized");
+  // ça serait bien d'avoir du JSON mais il faut voir avec passport...
+  // assert.deepStrictEqual(response.data, {
+  //   error: "Unauthorized",
+  //   message: "Vous n'êtes pas connecté",
+  // });
+}
+
+export function expectForbiddenError(response: any) {
+  assert.strictEqual(response.status, 403);
+  assert.deepStrictEqual(response.data, {
+    error: "Forbidden",
+    message: "Permissions invalides",
+  });
+}
+
+export function stringifyMongoFields<T extends object>(object: T): T {
+  return Object.entries(object).reduce((acc, [key, value]) => {
+    if (value instanceof Date) {
+      acc[key] = value.toISOString();
+    } else if (value instanceof ObjectId) {
+      acc[key] = value.toString();
+    } else {
+      acc[key] = value;
+    }
+    return acc;
+  }, {}) as T;
+}
+
+type TestFunc = (organisation: NewOrganisation, allowed: boolean) => Promise<any>;
+
+export interface PermissionTest {
+  label: string;
+  organisation: NewOrganisation;
+  allowed: boolean;
+}
+
+/**
+ * Helper to run a test with multiple profiles
+ */
+export function testPermissions(permissions: PermissionTest[], testFunc: TestFunc) {
+  permissions.forEach((permission) => {
+    it(`${permission.label} - ${permission.allowed ? "ALLOWED" : "FORBIDDEN"}`, async () => {
+      await testFunc(permission.organisation, permission.allowed);
+    });
+  });
+}
