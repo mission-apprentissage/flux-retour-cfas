@@ -1,4 +1,3 @@
-import { PromisePool } from "@supercharge/promise-pool";
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
@@ -152,7 +151,7 @@ export const checkUaiMultiplesRelationsAndLieux = async (
     });
 
     // Pour chaque UAI de la liste on cherche dans le référentiel s’il existe un ou plusieurs responsable ou responsable formateur
-    await PromisePool.for(couplesUaiMultiplesInTdbForSiretMatch).process(async (currentMultipleUaisCouple: any) => {
+    for (const currentMultipleUaisCouple of couplesUaiMultiplesInTdbForSiretMatch) {
       // on recherche dans le référentiel un unique organisme avec cet UAI de nature responsable ou responsable formateur
       const organismesRespOrRespFormateurForUaiTdb = await organismesReferentielDb()
         .find({
@@ -220,7 +219,7 @@ export const checkUaiMultiplesRelationsAndLieux = async (
           return true;
         }
       }
-    });
+    }
   }
 
   return false;
@@ -254,8 +253,9 @@ export const checkSiretMultiplesRelationsAndLieux = async (
     const couplesSIRETMultiplesInTdbForUaiMatch = allCouplesUaiSiretTdb.filter(({ uai }) => {
       return uai === coupleUaiSiretTdbToCheck.uai;
     });
+
     // Pour chaque SIRET de la liste on cherche dans le référentiel s’il existe un ou plusieurs responsable ou responsable formateur
-    await PromisePool.for(couplesSIRETMultiplesInTdbForUaiMatch).process(async (currentMultipleSiretCouple: any) => {
+    for (const currentMultipleSiretCouple of couplesSIRETMultiplesInTdbForUaiMatch) {
       // on recherche dans le référentiel un unique organisme avec cet UAI de nature responsable ou responsable formateur
       const organismesRespOrRespFormateurForSiretTdb = await organismesReferentielDb()
         .find({
@@ -323,7 +323,7 @@ export const checkSiretMultiplesRelationsAndLieux = async (
           return true;
         }
       }
-    });
+    }
   }
 
   return false;
