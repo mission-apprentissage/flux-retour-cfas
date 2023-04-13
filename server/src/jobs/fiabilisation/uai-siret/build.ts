@@ -78,7 +78,7 @@ export const buildFiabilisationUaiSiret = async () => {
   logger.info(` -> ${nbCouplesAFiabiliser} nouveaux couples à fiabiliser`);
   logger.info(` -> ${nbCouplesNonFiabilisables} couples non fiabilisables (${percentageCouplesNonFiabilisables}%)`);
   logger.info(`  -> dont ${nbCouplesNonFiabilisablesUaiNonValidee} non fiabilisables > UAI non validée Référentiel`);
-  logger.info(`  -> dont ${nbCouplesNonFiabilisablesUaiValidee} non fiabilisables > mapping`);
+  logger.info(`  -> dont ${nbCouplesNonFiabilisablesUaiValidee} non fiabilisables > UAI validée Référentiel`);
   logger.info(`  -> dont ${nbCouplesNonFiabilisablesPbCollecte} non fiabilisables > problème de collecte`);
 
   return {
