@@ -21,7 +21,7 @@ import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTr
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build.js";
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update.js";
 import { updateUserPassword } from "./users/update-user-password.js";
-import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs copy/index.js";
+import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index.js";
 import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
 import { seedPlausibleGoals } from "./seed/plausible/goals.js";
 import { getStats } from "./fiabilisation/stats.js";
