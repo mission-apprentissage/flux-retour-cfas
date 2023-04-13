@@ -58,6 +58,18 @@ export const TETE_DE_RESEAUX = [
     nom: "CFA SAT",
     key: "CFA_SAT",
   },
+  {
+    nom: "EN HORS MURS", // Réseau Education Nationale
+    key: "EN_HORS_MURS",
+  },
+  {
+    nom: "EN CFA ACADEMIQUE", // Réseau Education Nationale
+    key: "EN_CFA_ACADEMIQUE",
+  },
+  {
+    nom: "EN EPLE", // Réseau Education Nationale
+    key: "EN_EPLE",
+  },
 ];
 
 export const TETE_DE_RESEAUX_BY_ID = TETE_DE_RESEAUX.reduce((acc, reseau) => {
