@@ -55,22 +55,18 @@ async function checkEffectifsAnonymesPermissions(
     await requireOrganismeIndicateursAccess(ctx, filters.organisme_id);
   } else if (filters.uai_etablissement) {
     // comme on a pas l'organisme_id on doit retrouver l'organisme via uai
-    const organisme = await organismesDb()
-      .find({
-        uai: filters.uai_etablissement,
-      })
-      .next();
+    const organisme = await organismesDb().findOne({
+      uai: filters.uai_etablissement,
+    });
     if (!organisme) {
       throw Boom.notFound("Organisme non trouvé");
     }
     await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
   } else if (filters.siret_etablissement) {
     // comme on a pas l'organisme_id on doit retrouver l'organisme via siret
-    const organisme = await organismesDb()
-      .find({
-        siret: filters.siret_etablissement,
-      })
-      .next();
+    const organisme = await organismesDb().findOne({
+      siret: filters.siret_etablissement,
+    });
     if (!organisme) {
       throw Boom.notFound("Organisme non trouvé");
     }

@@ -14,14 +14,11 @@ const IndicateursVueTerritoirePageContainer = () => {
   const { auth } = useAuth();
 
   // filtre initial positionné sur la région / département de l'utilisateur
-  const defaultState = { ...getDefaultState() };
+  const defaultState = getDefaultState();
   if (auth.organisation.code_region) {
     defaultState.region = REGIONS_BY_ID[auth.organisation.code_region];
   } else if (auth.organisation.code_departement) {
     defaultState.departement = DEPARTEMENTS_BY_ID[auth.organisation.code_departement];
-    // TODO
-    // } else if (auth.organisation.code_academie) {
-    //   defaultState.academie = (ACADEMIES_BY_ID[auth.organisation.code_academie]);
   }
 
   return (
