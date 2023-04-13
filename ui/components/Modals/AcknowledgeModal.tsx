@@ -4,14 +4,26 @@ import { ArrowRightLine, Close } from "../../theme/components/icons";
 
 const AcknowledgeModal = ({
   isOpen,
-  onClose = () => {},
+  onClose = () => {
+    // do nothing
+  },
   title,
   children,
   size = "4xl",
   acknowledgeText = "J'ai compris",
   canBeClosed = true,
-  onAcknowledgement = () => {},
+  onAcknowledgement,
   bgOverlay = "rgba(0, 0, 0, 0.48)",
+}: {
+  isOpen: boolean;
+  onClose?: () => void;
+  title?: string;
+  children?: React.ReactNode;
+  size?: any;
+  acknowledgeText?: string;
+  canBeClosed?: boolean;
+  onAcknowledgement?: () => void;
+  bgOverlay?: string;
 }) => {
   return (
     <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose} size={size}>
@@ -24,7 +36,7 @@ const AcknowledgeModal = ({
             color="bluefrance"
             fontSize={"epsilon"}
             onClick={() => {
-              onClose();
+              onClose?.();
             }}
             variant="unstyled"
             pt={10}
@@ -49,8 +61,8 @@ const AcknowledgeModal = ({
           <Button
             variant="primary"
             onClick={() => {
-              onAcknowledgement();
-              onClose();
+              onAcknowledgement?.();
+              onClose?.();
             }}
             type="submit"
           >

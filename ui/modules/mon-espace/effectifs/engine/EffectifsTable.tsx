@@ -450,7 +450,7 @@ const EffectifsTable = ({
                   cell: ({ row }) => {
                     const { id } = organismesEffectifs[row.id];
                     // eslint-disable-next-line react-hooks/rules-of-hooks
-                    const { validation_errors, requiredSifa } = useRecoilValue(effectifStateSelector(id)); // Not the best; THIS IS AN EXCEPTION; This should not be reproduce anywhere else
+                    const { validation_errors, requiredSifa } = useRecoilValue<any>(effectifStateSelector(id)); // Not the best; THIS IS AN EXCEPTION; This should not be reproduce anywhere else
 
                     const MissingSIFA = ({ requiredSifa }) => {
                       if (!requiredSifa?.length)

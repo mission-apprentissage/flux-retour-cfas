@@ -90,7 +90,6 @@ const PageGestionDesMembres = () => {
                     Comptes en attente de validation ({membresEnAttenteValidation.length})
                   </Heading>
 
-                  {/* @ts-expect-error composant Table à revoir */}
                   <Table
                     data={membresEnAttenteValidation}
                     columns={{
@@ -139,7 +138,6 @@ const PageGestionDesMembres = () => {
                     Invitations en cours ({invitations.length})
                   </Heading>
 
-                  {/* @ts-expect-error composant Table à revoir */}
                   <Table
                     data={invitations}
                     columns={{
@@ -181,7 +179,6 @@ const PageGestionDesMembres = () => {
                 Utilisateurs actuels ({membres.length})
               </Heading>
 
-              {/* @ts-expect-error composant Table à revoir */}
               <Table
                 data={membres}
                 columns={{

@@ -8,7 +8,7 @@ import { documentsIsRequired } from "./domain/documentsIsRequired";
 import UploadFiles from "./components/UploadFiles";
 
 const PiecesJustificatives = ({ organisme }) => {
-  const typeContratApp = useRecoilValue(valueSelector("contrat.typeContratApp"));
+  const typeContratApp = useRecoilValue<any>(valueSelector("contrat.typeContratApp"));
   const documentsRequired = documentsIsRequired(typeContratApp);
 
   return (

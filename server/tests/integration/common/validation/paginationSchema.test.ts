@@ -14,6 +14,7 @@ describe("paginationShema", () => {
     const output = paginationShema({ defaultSort: "created_at:-1" })
       .strict()
       .safeParse({ page: "2", limit: "100", sort: "name:1" });
+
     assert.deepStrictEqual(output, {
       success: true,
       data: { page: 2, limit: 100, sort: { name: 1 } },

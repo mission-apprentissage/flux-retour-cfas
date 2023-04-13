@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { Box, HStack, Heading, Text, Link, Flex } from "@chakra-ui/react";
 
-import Sommaire from "../Sommaire/Sommaire.jsx";
-import Section from "../Section/Section.jsx";
+import Sommaire from "../Sommaire/Sommaire";
+import Section from "../Section/Section";
 
 export const CGU_VERSION = "v0.1";
 
@@ -38,9 +38,9 @@ const SommaireData = [
   },
 ];
 
-export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
+export const Cgu = ({ onLoad, isWrapped }: { onLoad?: () => void; isWrapped?: boolean }) => {
   useEffect(() => {
-    onLoad();
+    onLoad?.();
   }, [onLoad]);
 
   return (

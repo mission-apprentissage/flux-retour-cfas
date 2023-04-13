@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
 
 import { ArrowDropRightLine } from "@/theme/components/icons";
-import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
+import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import Page from "@/components/Page/Page";
 import Link from "@/components/Links/Link";
@@ -11,7 +11,7 @@ import Table from "@/components/Table/Table";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import { useOrganisationOrganismes } from "@/hooks/organismes";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils.js";
+import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { OrganisationType } from "@/common/internal/Organisation";
 
 const natures = {
@@ -134,7 +134,7 @@ function MesOrganismes() {
                     size: 120,
                     header: () => "Fiabilisation",
                     cell: ({ getValue }) => (
-                      <Text>{FIABILISATION_LABEL[getValue()] || FIABILISATION_LABEL.INCONNUE}</Text>
+                      <Text>{FIABILISATION_LABEL[getValue()] || FIABILISATION_LABEL.INCONNU}</Text>
                     ),
                   },
                   last_transmission_date: {

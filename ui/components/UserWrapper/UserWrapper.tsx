@@ -50,7 +50,7 @@ const ForceAcceptCGU = ({ children }) => {
           </Box>
           <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} ref={cguContainer}>
             <Cgu
-              isWrapped="1"
+              isWrapped
               onLoad={async () => {
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 (cguContainer.current as any)?.scrollTo(0, 0);

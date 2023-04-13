@@ -81,7 +81,7 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
 
 const Effectifs = ({ organismesEffectifs, isMine }) => {
   const router = useRouter();
-  const organisme = useRecoilValue(organismeAtom);
+  const organisme = useRecoilValue<any>(organismeAtom);
   const ajoutModal = useDisclosure();
   const exportFilename = `tdb-données-${organisme?.nom || ""}-${new Date().toLocaleDateString()}.csv`;
   const [searchValue, setSearchValue] = useState("");

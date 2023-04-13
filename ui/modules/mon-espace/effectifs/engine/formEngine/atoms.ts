@@ -1,0 +1,148 @@
+import { atom, selector, selectorFamily } from "recoil";
+import { getValues } from "./utils/getValues";
+// import { getFormStatus } from "../cerfaForm/completion";
+import { effectifsStateAtom } from "../atoms";
+
+export const cerfaAtom = atom({
+  key: "cerfaAtom",
+  default: undefined,
+});
+
+export const cerfaStatusGetter = selector({
+  key: "errorsGetter",
+  get: ({ get }) => {
+    const fields = get(cerfaAtom);
+    const values = get(valuesSelector);
+    // const dossier = get(dossierAtom);
+    if (!(fields && values)) return;
+    // return getFormStatus({ fields, values, dossier });
+    return null;
+  },
+});
+
+export const effectifStateSelector = selectorFamily({
+  key: "effectifStateSelector",
+  set:
+    (effectifId) =>
+    ({ set }, { inputNames }) => {
+      set(effectifsStateAtom, (prevEffectifsState: any) => {
+        // eslint-disable-next-line no-undef
+        const newEffectifsState = new Map<any, any>(JSON.parse(JSON.stringify(Array.from(prevEffectifsState))));
+        let validation_errors: any[] = [];
+        const {
+          validation_errors: prevValidationErrors,
+          requiredSifa: prevRequiredSifa,
+        }: { validation_errors: any[]; requiredSifa: any[] } = newEffectifsState.get(effectifId);
+        for (const validation_error of prevValidationErrors) {
+          if (!inputNames.includes(validation_error.fieldName)) {
+            validation_errors.push(validation_error);
+          }
+        }
+        let requiredSifa: any[] = [];
+        for (const currentRequiredSifa of prevRequiredSifa) {
+          if (!inputNames.includes(currentRequiredSifa)) {
+            requiredSifa.push(currentRequiredSifa);
+          }
+        }
+        newEffectifsState.set(effectifId, { validation_errors, requiredSifa });
+
+        return newEffectifsState;
+      });
+    },
+  get:
+    (effectifId) =>
+    ({ get }) => {
+      const effectifsState: any = get(effectifsStateAtom);
+      const { validation_errors, requiredSifa } = effectifsState.get(effectifId) ?? {
+        validation_errors: [],
+        requiredSifa: [],
+      };
+      const validationErrorsByBlock: {
+        statuts: any[];
+        apprenant: any[];
+        formation: any[];
+        contrats: any[];
+      } = {
+        statuts: [],
+        apprenant: [],
+        formation: [],
+        contrats: [],
+      };
+      for (const validation_error of validation_errors) {
+        if (validation_error.fieldName.includes("apprenant.contrats")) {
+          validationErrorsByBlock.contrats.push(validation_error);
+        } else if (validation_error.fieldName.includes("apprenant.historique_statut")) {
+          validationErrorsByBlock.statuts.push(validation_error);
+        } else if (validation_error.fieldName.includes("formation.")) {
+          validationErrorsByBlock.formation.push(validation_error);
+        } else {
+          validationErrorsByBlock.apprenant.push(validation_error);
+        }
+      }
+
+      const requiredSifaByBlock: {
+        statuts: any[];
+        apprenant: any[];
+        formation: any[];
+        contrats: any[];
+      } = {
+        statuts: [],
+        apprenant: [],
+        formation: [],
+        contrats: [],
+      };
+      for (const currentRequiredSifa of requiredSifa) {
+        if (currentRequiredSifa.includes("apprenant.contrats")) {
+          requiredSifaByBlock.contrats.push(currentRequiredSifa);
+        } else if (currentRequiredSifa.includes("apprenant.historique_statut")) {
+          requiredSifaByBlock.statuts.push(currentRequiredSifa);
+        } else if (currentRequiredSifa.includes("formation.")) {
+          requiredSifaByBlock.formation.push(currentRequiredSifa);
+        } else {
+          requiredSifaByBlock.apprenant.push(currentRequiredSifa);
+        }
+      }
+
+      return { validation_errors, validationErrorsByBlock, requiredSifa, requiredSifaByBlock };
+    },
+});
+
+export const cerfaSetter = selector({
+  key: "cerfaSetter",
+  get: () => ({}),
+  set: ({ set }, payload) => {
+    set(cerfaAtom, (cerfa: any) => {
+      let newState = { ...cerfa };
+      Object.entries(payload).forEach(([name, patch]) => {
+        if (patch === undefined) {
+          delete newState[name];
+          return;
+        }
+        newState = { ...newState, [name]: { ...newState[name], ...patch } };
+        if (patch.value !== undefined && patch.touched === undefined) {
+          newState[name].touched = true;
+        }
+      });
+      return newState;
+    });
+  },
+});
+
+export const valueSelector = selectorFamily({
+  key: "valueSelector",
+  get:
+    (name: string) =>
+    ({ get }) =>
+      (get(cerfaAtom)?.[name] as any)?.value,
+});
+
+export const valuesSelector = selector({ key: "valuesSelector", get: ({ get }) => getValues(get(cerfaAtom) as any) });
+
+export const fieldSelector = selectorFamily({
+  key: "fieldSelector",
+  get:
+    (name: string) =>
+    ({ get }) => {
+      return get(cerfaAtom)?.[name];
+    },
+});
