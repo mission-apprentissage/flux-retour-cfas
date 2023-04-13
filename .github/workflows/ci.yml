@@ -8,11 +8,21 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
 
-      - run: make ci
+      - name: "Installation des dépendances"
+        run: make install
+
+      - name: "Lint"
+        run: make lint
+
+      - name: "Tests"
+        run: make test
+
+      - name: "Build"
+        run: make build
 
   deploy-recette:
+    if: github.ref == "refs/heads/master"
     name: "Déploiement en recette"
-    if: github.ref == 'refs/heads/master'
     needs: tests
     uses: "./.github/workflows/_deploy.yml"
     with:
