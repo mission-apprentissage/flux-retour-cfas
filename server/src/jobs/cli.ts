@@ -18,8 +18,8 @@ import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-ef
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
 // import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
-import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
-import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
+import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build.js";
+import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update.js";
 import { updateUserPassword } from "./users/update-user-password.js";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs copy/index.js";
 import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
@@ -360,26 +360,21 @@ program
   );
 
 /**
- * Job de création de la collection fiabilisation UAI SIRET
+ * Job de lancement des scripts de fiabilisation des couples UAI SIRET
  */
 program
-  .command("fiabilisation:uai-siret:build")
-  .description("Création de la collection pour fiabilisation des UAI SIRET")
+  .command("fiabilisation:uai-siret:run")
+  .description("Lancement des scripts de fiabilisation des couples UAI SIRET")
   .action((_, options) =>
     runScript(async () => {
+      // On lance séquentiellement 2 fois de suite la construction (build) de la collection fiabilisation suivi de la MAJ des données liées (apply)
+      // Nécessaire pour le bon fonctionnement de l'algo
       await buildFiabilisationUaiSiret();
-    }, options._name)
-  );
+      await updateOrganismesFiabilisationUaiSiret();
+      const buildResults = await buildFiabilisationUaiSiret();
+      const updateResults = await updateOrganismesFiabilisationUaiSiret();
 
-/**
- * Job d'application de la fiabilisation UAI SIRET
- */
-program
-  .command("fiabilisation:uai-siret:apply")
-  .description("Application du mapping de fiabilisation des UAI SIRET")
-  .action((_, options) =>
-    runScript(async () => {
-      return applyFiabilisationUaiSiret();
+      return { buildResults, updateResults };
     }, options._name)
   );
 

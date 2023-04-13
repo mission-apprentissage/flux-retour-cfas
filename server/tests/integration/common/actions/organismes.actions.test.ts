@@ -9,7 +9,6 @@ import {
   updateOrganisme,
 } from "../../../../src/common/actions/organismes/organismes.actions.js";
 import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
-import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/mapping.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../src/common/constants/fiabilisationConstants.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/natureOrganismeConstants.js";
@@ -330,15 +329,6 @@ describe("Test des actions Organismes", () => {
       });
       assert.equal(cleanUai, uai);
       assert.equal(cleanSiret, siret);
-    });
-
-    it("return cleaned uai-siret couple when uai present in fiabilisation file", async () => {
-      const uai = FIABILISATION_MAPPINGS[0].uai;
-      const siret = FIABILISATION_MAPPINGS[0].siret;
-
-      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
-      assert.equal(cleanUai, FIABILISATION_MAPPINGS[0].uai_fiable);
-      assert.equal(cleanSiret, FIABILISATION_MAPPINGS[0].siret_fiable);
     });
 
     it("return cleaned uai-siret couple when uai is the same in fiabilisation collection", async () => {
