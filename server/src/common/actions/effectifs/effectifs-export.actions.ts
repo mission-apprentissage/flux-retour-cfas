@@ -1,9 +1,23 @@
 import { Parser } from "json2csv";
 
 import { AuthContext } from "../../model/internal/AuthContext.js";
-import { EffectifsFilters } from "../helpers/filters";
-import { getDataListEffectifsAtDate } from "./effectifs.actions.js";
+import {
+  EffectifsFiltersWithRestriction,
+  LegacyEffectifsFilters,
+  buildMongoPipelineFilterStages,
+} from "../helpers/filters.js";
 import { exportedFields } from "./export.js";
+import { getEffectifsAnonymesRestriction } from "../helpers/permissions.js";
+import { requireOrganismeIndicateursAccess } from "../helpers/permissions.js";
+import { organismesDb } from "../../model/collections.js";
+import Boom from "boom";
+import {
+  abandonsIndicator,
+  apprentisIndicator,
+  inscritsSansContratsIndicator,
+  rupturantsIndicator,
+} from "./indicators.js";
+import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenantConstants.js";
 
 // Parse to french localized CSV with specific fields order & labels (; as delimiter and UTF8 using withBOM)
 const CSV_DEFAULT_FIELDS = [
@@ -17,8 +31,8 @@ const CSV_DEFAULT_FIELDS = [
   })),
 ];
 
-export async function exportAnonymizedEffectifsAsCSV(ctx: AuthContext, filters: EffectifsFilters) {
-  const effectifs = await getDataListEffectifsAtDate(filters);
+export async function exportAnonymizedEffectifsAsCSV(ctx: AuthContext, filters: LegacyEffectifsFilters) {
+  const effectifs = await getAnonymisedEffectifsAtDate(ctx, filters);
 
   const json2csvParser = new Parser({
     fields: CSV_DEFAULT_FIELDS,
@@ -27,4 +41,63 @@ export async function exportAnonymizedEffectifsAsCSV(ctx: AuthContext, filters: 
   });
   const csvFile = await json2csvParser.parse(effectifs);
   return csvFile;
+}
+
+/**
+ * Vérifie si l'utilisateur peut accéder aux effectifs anonymes.
+ * Selon le contexte et les filtres, peut compléter les filtres avec une restriction (un territoire par exemple)
+ */
+async function checkEffectifsAnonymesPermissions(
+  ctx: AuthContext,
+  filters: LegacyEffectifsFilters
+): Promise<EffectifsFiltersWithRestriction> {
+  if (filters.organisme_id) {
+    await requireOrganismeIndicateursAccess(ctx, filters.organisme_id);
+  } else if (filters.uai_etablissement) {
+    // comme on a pas l'organisme_id on doit retrouver l'organisme via uai
+    const organisme = await organismesDb().findOne({
+      uai: filters.uai_etablissement,
+    });
+    if (!organisme) {
+      throw Boom.notFound("Organisme non trouvé");
+    }
+    await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
+  } else if (filters.siret_etablissement) {
+    // comme on a pas l'organisme_id on doit retrouver l'organisme via siret
+    const organisme = await organismesDb().findOne({
+      siret: filters.siret_etablissement,
+    });
+    if (!organisme) {
+      throw Boom.notFound("Organisme non trouvé");
+    }
+    await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
+  } else {
+    // amend filters with a restriction
+    (filters as EffectifsFiltersWithRestriction).restrictionMongo = await getEffectifsAnonymesRestriction(ctx);
+  }
+
+  return filters;
+}
+
+/**
+ * Récupération des effectifs anonymisés à une date donnée
+ */
+async function getAnonymisedEffectifsAtDate(ctx: AuthContext, filters: EffectifsFiltersWithRestriction) {
+  const filtersWithRestriction = await checkEffectifsAnonymesPermissions(ctx, filters);
+  const filterStages = buildMongoPipelineFilterStages(filtersWithRestriction);
+  const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
+    apprentisIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.apprentis),
+    inscritsSansContratsIndicator.getFullExportFormattedListAtDate(
+      filters.date,
+      filterStages,
+      EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
+    ),
+    rupturantsIndicator.getFullExportFormattedListAtDate(
+      filters.date,
+      filterStages,
+      EFFECTIF_INDICATOR_NAMES.rupturants
+    ),
+    abandonsIndicator.getFullExportFormattedListAtDate(filters.date, filterStages, EFFECTIF_INDICATOR_NAMES.abandons),
+  ]);
+  return [...apprentis, ...inscritsSansContrat, ...rupturants, ...abandons];
 }

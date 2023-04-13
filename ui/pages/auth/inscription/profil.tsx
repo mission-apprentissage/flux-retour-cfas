@@ -103,7 +103,6 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
               );
 
             case "DREETS":
-            case "DEETS":
             case "DRAAF":
               return (
                 <>
@@ -404,7 +403,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
               {({ field, meta }) => (
                 <FormControl mb={6} isRequired isInvalid={meta.error && meta.touched}>
                   <Checkbox {...field} id={field.name} icon={<Check />}>
-                    J{"'"}accepte d{"'"}être contacté par un opérateur public (DREETS, DEETS, Académie, …). Mon email
+                    J{"'"}accepte d{"'"}être contacté par un opérateur public (DREETS, Académie, …). Mon email
                     apparaîtra dans le profil dans mon organisme.
                   </Checkbox>
                   <FormErrorMessage>{meta.error}</FormErrorMessage>

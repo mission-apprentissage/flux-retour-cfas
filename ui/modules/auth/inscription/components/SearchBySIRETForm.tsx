@@ -108,7 +108,7 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
                       setOrganisation({
                         type: getOrganisationTypeFromNature(organismes[0].nature),
                         siret: organismes[0].siret,
-                        uai: organismes[0].uai,
+                        uai: organismes[0].uai || null, // peut être absent si non présent dans le référentiel
                       })
                     }
                   >
@@ -146,7 +146,7 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
                               setOrganisation({
                                 type: getOrganisationTypeFromNature(organisme.nature),
                                 siret: organisme.siret,
-                                uai: organisme.uai,
+                                uai: organisme.uai || null, // peut être absent si non présent dans le référentiel
                               })
                             }
                           >

@@ -18,7 +18,6 @@ export const organisationTypes = [
   "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
   "TETE_DE_RESEAU",
   "DREETS",
-  "DEETS",
   "DRAAF",
   "CONSEIL_REGIONAL",
   "DDETS",
@@ -65,7 +64,7 @@ export interface OrganisationOperateurPublicNational extends AbstractOrganisatio
 }
 
 export interface OrganisationOperateurPublicRegion extends AbstractOrganisation {
-  type: "DREETS" | "DEETS" | "DRAAF" | "CONSEIL_REGIONAL";
+  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL";
   code_region: string;
 }
 
@@ -102,7 +101,6 @@ export function getOrganisationLabel(organisation: Organisation): string {
       return `Réseau ${TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}`;
 
     case "DREETS":
-    case "DEETS":
     case "DRAAF":
       return `${organisation.type} ${REGIONS_BY_ID[organisation.code_region]?.nom || organisation.code_region}`;
     case "CONSEIL_REGIONAL":
@@ -122,7 +120,6 @@ export function getOrganisationLabel(organisation: Organisation): string {
 function isPublicOrganisation(organisation: Organisation): boolean {
   return [
     "DREETS",
-    "DEETS",
     "DRAAF",
     "CONSEIL_REGIONAL",
     "DDETS",
@@ -138,7 +135,7 @@ export function getWarningOnEmail(email: string, organisation: Organisation & { 
     return;
   }
   if (
-    ["DREETS", "DEETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS", "ACADEMIE"].includes(organisation.type) &&
+    ["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS", "ACADEMIE"].includes(organisation.type) &&
     !email.endsWith(".gouv.fr")
   ) {
     warning = "Cet email n'appartient pas à un compte public finissant par .gouv.fr.";
@@ -176,7 +173,7 @@ const schema = object(
     // si tête de réseau
     reseau: string({ enum: TETE_DE_RESEAUX.map((r) => r.key), description: "Nom du réseau" }),
 
-    // si DREETS, DEETS, DRAAF, CONSEIL_REGIONAL
+    // si DREETS, DRAAF, CONSEIL_REGIONAL
     code_region: string({
       enum: REGIONS.map(({ code }) => code),
       description: "Code région",

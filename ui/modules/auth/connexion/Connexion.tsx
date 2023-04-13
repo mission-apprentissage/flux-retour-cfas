@@ -49,8 +49,7 @@ const Login = (props) => {
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={Yup.object().shape({
-          email: Yup.string().required("Requis"),
-          // email: Yup.string().email().required("Requis"), // TODO TMP migration
+          email: Yup.string().email("Format d'email invalide").required("Requis"),
           password: Yup.string().required("Requis"),
         })}
         onSubmit={login}

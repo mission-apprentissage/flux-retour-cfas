@@ -21,6 +21,6 @@ export const authArgTypes = {
   auth__organisation: {
     name: "Organisation",
     control: "select",
-    options: ["DDETS", "DREETS", "DEETS", "DRAAF", "CONSEIL_REGIONAL", "ACADEMIE"],
+    options: ["DDETS", "DREETS", "DRAAF", "CONSEIL_REGIONAL", "ACADEMIE"],
   },
 };

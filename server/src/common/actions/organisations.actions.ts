@@ -237,8 +237,6 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
 
     case "DREETS":
       return `DREETS ${REGIONS_BY_ID[organisation.code_region]?.nom}`;
-    case "DEETS":
-      return `DEETS ${REGIONS_BY_ID[organisation.code_region]?.nom}`;
     case "DRAAF":
       return `DRAAF ${REGIONS_BY_ID[organisation.code_region]?.nom}`;
     case "CONSEIL_REGIONAL":

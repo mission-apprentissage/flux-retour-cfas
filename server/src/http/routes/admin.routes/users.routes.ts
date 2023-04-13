@@ -24,8 +24,11 @@ export default () => {
       query: listSchema,
     }),
     async (req, res) => {
-      const { page, limit, sort, q } = req.query as ListSchema;
-      const result = await getAllUsers(q ? { $text: { $search: q } } : {}, { page, limit, sort });
+      const { page, limit, sort, q } = req.query as ListSchema; // eslint-disable-line
+      // FIXME corrige temporairement un problème de $sort et valeurs par défaut
+      // à supprimer après correction
+      const result = await getAllUsers(q ? { $text: { $search: q } } : {});
+      // const result = await getAllUsers(q ? { $text: { $search: q } } : {}, { page, limit, sort });
       return res.json(result);
     }
   );

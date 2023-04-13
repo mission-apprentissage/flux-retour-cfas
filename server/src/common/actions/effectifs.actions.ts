@@ -5,8 +5,10 @@ import { defaultValuesEffectif, validateEffectif } from "../model/effectifs.mode
 import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../model/effectifs.model/parts/formation.effectif.part.js";
 import { transformToInternationalNumber } from "../validation/utils/frenchTelephoneNumber.js";
-import { buildMongoPipelineFilterStages, EffectifsFilters } from "./helpers/filters.js";
+import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters.js";
 import { getOrganismeById } from "./organismes/organismes.actions.js";
+import { AuthContext } from "../model/internal/AuthContext.js";
+import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions.js";
 
 /**
  * Méthode de build d'un effectif
@@ -359,8 +361,12 @@ export const updateEffectifAndLock = async (id, { apprenant, formation, validati
   return updated.value;
 };
 
-export const getNbDistinctOrganismes = async (filters: EffectifsFilters) => {
-  const filterStages = buildMongoPipelineFilterStages(filters);
+/**
+ * Récupération du nb distinct d'organismes transmettant des effectifs (distinct organisme_id dans la collection effectifs)
+ */
+export const getNbDistinctOrganismes = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
+  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
+  const filterStages = buildMongoPipelineFilterStages(filtersWithRestriction);
   const distinctOrganismes = await effectifsDb()
     .aggregate([
       ...filterStages,

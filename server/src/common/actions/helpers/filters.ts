@@ -1,19 +1,26 @@
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
+import { z } from "zod";
 
-export type EffectifsFilters = {
-  date: Date;
-  organisme_id?: string;
-  formation_cfd?: string;
-  etablissement_reseaux?: string;
-  etablissement_num_departement?: string;
-  etablissement_num_region?: string;
-  niveau_formation?: string;
-  siret_etablissement?: string;
-  uai_etablissement?: string;
+// version legacy des filtres indicateurs/effectifs avec organisme_id / siret / uai
+// devra être changée avec les nouveaux écrans pour sortir ces paramètres
+// qui influencent grandement les vérifications à faire selon le contexte
+// (permissions par organisme_id !== permissions par etablissement_reseaux)
+export const legacyEffectifsFiltersSchema = {
+  date: z.preprocess((str: any) => new Date(str), z.date()),
+  organisme_id: z.string().optional(),
+  formation_cfd: z.string().optional(),
+  etablissement_reseaux: z.string().optional(),
+  etablissement_num_departement: z.string().optional(),
+  etablissement_num_region: z.string().optional(),
+  niveau_formation: z.string().optional(),
+  siret_etablissement: z.string().optional(),
+  uai_etablissement: z.string().optional(),
 };
 
-export type EffectifsFiltersWithRestriction = EffectifsFilters & {
+export type LegacyEffectifsFilters = z.infer<z.ZodObject<typeof legacyEffectifsFiltersSchema>>;
+
+export type EffectifsFiltersWithRestriction = LegacyEffectifsFilters & {
   restrictionMongo?: any; // dirty, en attendant des routes propres
 };
 
@@ -24,7 +31,7 @@ export interface FilterConfiguration {
   transformValue?: (value: any) => any;
 }
 
-export type FilterConfigurations = { [key in keyof EffectifsFilters]: FilterConfiguration };
+export type FilterConfigurations = { [key in keyof LegacyEffectifsFilters]: FilterConfiguration };
 
 export const organismeLookup = {
   from: "organismes",

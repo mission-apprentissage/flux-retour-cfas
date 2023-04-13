@@ -5,7 +5,6 @@ export const organisationTypes = [
   "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
   "TETE_DE_RESEAU",
   "DREETS",
-  "DEETS",
   "DRAAF",
   "CONSEIL_REGIONAL",
   "DDETS",
@@ -54,7 +53,7 @@ export interface OrganisationOperateurPublicNational extends AbstractOrganisatio
 }
 
 export interface OrganisationOperateurPublicRegion extends AbstractOrganisation {
-  type: "DREETS" | "DEETS" | "DRAAF" | "CONSEIL_REGIONAL";
+  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL";
   code_region: string;
 }
 

@@ -11,7 +11,6 @@ export interface Organisation {
     | "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR"
     | "TETE_DE_RESEAU"
     | "DREETS"
-    | "DEETS"
     | "DRAAF"
     | "CONSEIL_REGIONAL"
     | "DDETS"
