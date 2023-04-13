@@ -32,6 +32,7 @@ import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenan
 import { removeDuplicatesEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates.js";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api.js";
 import { hydrateEffectifsComputed } from "./hydrate/hydrate-effectifs-computed.js";
+import { patchBadTransmissionOrganisme } from "./patches/tmp-merge-organisme-cci-cher/index.js";
 
 program.configureHelp({
   sortSubcommands: true,
@@ -74,6 +75,22 @@ program
   .action(async (_, options) =>
     runScript(async () => {
       await removeDuplicatesEffectifsQueue();
+    }, options._name)
+  );
+
+/**
+ * Job (temporaire) de cleaning d'une mauvaise transmission sur un mauvais couple UAI SIRET
+ */
+program
+  .command("tmp:patches:clean-bad-transmission")
+  .description("[TEMPORAIRE] Nettoyage de l'organisme CCI Cher")
+  .requiredOption("--uai_toKeep <string>", "Uai de l'organisme à conserver")
+  .requiredOption("--siret_toKeep <string>", "Siret de l'organisme à conserver")
+  .requiredOption("--uai_toRemove <string>", "Uai de l'organisme à supprimer")
+  .requiredOption("--siret_toRemove <string>", "Siret de l'organisme à supprimer")
+  .action(async ({ uai_toKeep, siret_toKeep, uai_toRemove, siret_toRemove }, options) =>
+    runScript(async () => {
+      return patchBadTransmissionOrganisme({ uai_toKeep, siret_toKeep, uai_toRemove, siret_toRemove });
     }, options._name)
   );
 

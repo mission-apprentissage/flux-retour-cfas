@@ -1,38 +1,27 @@
 import logger from "../../../common/logger.js";
-import { organismesDb } from "../../../common/model/collections.js";
+import { effectifsDb, organismesDb } from "../../../common/model/collections.js";
 
 /**
- * Fonction "patch" de correction d'une mauvaise transmission de l'organisme CCI CHER
- * Il faut garder l'organisme de siret "18180001200021" et UAI "0180865T"
- * Il faut transférer les effectifs du mauvais organisme mauvais siret : "53825807000019" et UAI : "0180865T"
- * Et enfin il faudra supprimer le mauvais organisme
+ * Fonction "patch" de correction d'une mauvaise transmission d'organisme
+ * On déplace les effectifs de l'organisme à conserver vers celui à supprimer, puis on le supprime de la base
  */
-export const patchCleanCciCher = async () => {
-  logger.info("Suppression des organismes sans siret et sans aucun effectif ... ");
+export const patchBadTransmissionOrganisme = async ({ uai_toKeep, siret_toKeep, uai_toRemove, siret_toRemove }) => {
+  logger.info("Patch de mauvaise transmission...");
 
-  const organismesIdSansSiretSansEffectifs = (
-    await organismesDb()
-      .aggregate([
-        // Organismes sans siret
-        { $match: { $or: [{ siret: null }, { siret: "" }] } },
-        // Lookup OrganismeId sur effectifs
-        {
-          $lookup: {
-            from: "effectifs",
-            localField: "_id",
-            foreignField: "organisme_id",
-            as: "MatchOrganismeIdEffectifs",
-          },
-        },
-        // Filtre sur aucun match sur effectifs
-        { $match: { MatchOrganismeIdEffectifs: { $size: 0 } } },
-        //  Récupération id de l'organisme
-        { $project: { _id: 1 } },
-      ])
-      .toArray()
-  ).map(({ _id }) => _id);
+  const cleanOrganisme = await organismesDb().findOne({ uai: uai_toKeep, siret: siret_toKeep });
+  const toRemoveOrganisme = await organismesDb().findOne({ uai: uai_toRemove, siret: siret_toRemove });
 
-  logger.info(`${organismesIdSansSiretSansEffectifs.length} organismes a supprimer ...`);
-  const { deletedCount } = await organismesDb().deleteMany({ _id: { $in: organismesIdSansSiretSansEffectifs } });
-  logger.info(`${deletedCount} organismes supprimés avec succès !`);
+  if (cleanOrganisme && toRemoveOrganisme) {
+    logger.info(
+      `Déplacement des effectifs de l'organisme à supprimer (uai ${uai_toRemove} - siret ${siret_toRemove}) vers l'organisme à conserver (uai ${uai_toKeep} - siret ${siret_toKeep})`
+    );
+    await effectifsDb().updateMany(
+      { organisme_id: toRemoveOrganisme._id },
+      { $set: { organisme_id: cleanOrganisme._id } }
+    );
+    logger.info("Effectifs déplacés vers l'organisme à conserver");
+
+    await organismesDb().deleteOne({ uai: uai_toRemove, siret: siret_toRemove });
+    logger.info("Organisme à supprimer supprimé");
+  }
 };
