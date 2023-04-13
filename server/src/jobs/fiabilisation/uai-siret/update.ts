@@ -137,22 +137,22 @@ const updateOrganismeForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret
 
 // #endregion
 
-// #region ORGANISMES NON FIABILISABLES MAPPING
+// #region ORGANISMES NON FIABILISABLES UAI VALIDEE
 
 /**
- * Méthode de MAJ de tous les couples non fiabilisables en utilisant le mapping >> NON_FIABILISABLE_MAPPING
+ * Méthode de MAJ de tous les couples non fiabilisables en utilisant le mapping >> NON_FIABILISABLE_UAI_VALIDEE
  */
 const updateOrganismesNonFiabilisablesMapping = async () => {
-  // Une fois tous les couples ayant permis de maj les organismes on va rattacher les effectifs de chacun des organismes NON_FIABILISABLE_MAPPING
+  // Une fois tous les couples ayant permis de maj les organismes on va rattacher les effectifs de chacun des organismes NON_FIABILISABLE_UAI_VALIDEE
   const organismesNonFiabilisablesMapping = await organismesDb()
-    .find({ fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING })
+    .find({ fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_VALIDEE })
     .toArray();
 
   await PromisePool.for(organismesNonFiabilisablesMapping).process(
     updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable
   );
 
-  // Enfin on va supprimer les organismes NON_FIABILISABLE_MAPPING et leurs effectifs
+  // Enfin on va supprimer les organismes NON_FIABILISABLE_UAI_VALIDEE et leurs effectifs
   await PromisePool.for(organismesNonFiabilisablesMapping).process(async ({ _id }: any) => {
     await deleteOrganismeAndEffectifs(_id);
     nbOrganismesNonFiabilisablesMappingSupprimes++;
@@ -160,11 +160,11 @@ const updateOrganismesNonFiabilisablesMapping = async () => {
 };
 
 /**
- * Méthode de MAJ unitaire d'un organisme NON_FIABILISABLE_MAPPING en rattachant ses effectifs liés au bon organisme FIABLE s'il en existe un seul
+ * Méthode de MAJ unitaire d'un organisme NON_FIABILISABLE_UAI_VALIDEE en rattachant ses effectifs liés au bon organisme FIABLE s'il en existe un seul
  * @param {*} currentOrganismeNonFiabilisableMapping
  */
 const updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable = async ({ _id, uai }: any) => {
-  // Recherche d'un unique organisme fiable lié à l'UAI de l'organisme NON_FIABILISABLE_MAPPING
+  // Recherche d'un unique organisme fiable lié à l'UAI de l'organisme NON_FIABILISABLE_UAI_VALIDEE
   const organismeFiableForUai = await organismesDb()
     .find({ uai, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
     .toArray();

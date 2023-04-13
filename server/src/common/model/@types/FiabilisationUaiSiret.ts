@@ -10,7 +10,7 @@ export interface FiabilisationUaiSiret {
     | "FIABLE"
     | "A_FIABILISER"
     | "NON_FIABILISABLE_PB_COLLECTE"
-    | "NON_FIABILISABLE_MAPPING"
+    | "NON_FIABILISABLE_UAI_VALIDEE"
     | "NON_FIABILISABLE_UAI_NON_VALIDEE";
   /**
    * L'UAI du couple à fiabiliser

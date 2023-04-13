@@ -62,8 +62,8 @@ export const buildFiabilisationUaiSiret = async () => {
   const nbCouplesNonFiabilisablesUaiNonValidee = await fiabilisationUaiSiretDb().countDocuments({
     type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
   });
-  const nbCouplesNonFiabilisablesMapping = await fiabilisationUaiSiretDb().countDocuments({
-    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING,
+  const nbCouplesNonFiabilisablesUaiValidee = await fiabilisationUaiSiretDb().countDocuments({
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_VALIDEE,
   });
   const nbCouplesNonFiabilisablesPbCollecte = await fiabilisationUaiSiretDb().countDocuments({
     type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE,
@@ -71,14 +71,14 @@ export const buildFiabilisationUaiSiret = async () => {
 
   let percentageCouplesFiables = getPercentage(nbCouplesFiablesFound, allCouplesUaiSiretTdb.length);
   let nbCouplesNonFiabilisables =
-    nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesMapping + nbCouplesNonFiabilisablesPbCollecte;
+    nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesUaiValidee + nbCouplesNonFiabilisablesPbCollecte;
   let percentageCouplesNonFiabilisables = getPercentage(nbCouplesNonFiabilisables, allCouplesUaiSiretTdb.length);
 
   logger.info(` -> ${nbCouplesFiablesFound} couples déjà fiables (${percentageCouplesFiables}%)`);
   logger.info(` -> ${nbCouplesAFiabiliser} nouveaux couples à fiabiliser`);
   logger.info(` -> ${nbCouplesNonFiabilisables} couples non fiabilisables (${percentageCouplesNonFiabilisables}%)`);
   logger.info(`  -> dont ${nbCouplesNonFiabilisablesUaiNonValidee} non fiabilisables > UAI non validée Référentiel`);
-  logger.info(`  -> dont ${nbCouplesNonFiabilisablesMapping} non fiabilisables > mapping`);
+  logger.info(`  -> dont ${nbCouplesNonFiabilisablesUaiValidee} non fiabilisables > mapping`);
   logger.info(`  -> dont ${nbCouplesNonFiabilisablesPbCollecte} non fiabilisables > problème de collecte`);
 
   return {
@@ -88,7 +88,7 @@ export const buildFiabilisationUaiSiret = async () => {
     nbCouplesNonFiabilisables,
     percentageCouplesNonFiabilisables,
     nbCouplesNonFiabilisablesUaiNonValidee,
-    nbCouplesNonFiabilisablesMapping,
+    nbCouplesNonFiabilisablesUaiValidee,
     nbCouplesNonFiabilisablesPbCollecte,
   };
 };

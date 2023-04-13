@@ -372,18 +372,14 @@ export const checkCoupleNonFiabilisable = async (coupleUaiSiretTdbToCheck) => {
     const isUaiPresentInReferentiel =
       (await organismesReferentielDb().countDocuments({ uai: coupleUaiSiretTdbToCheck.uai })) > 0;
 
-    // Upsert du couple avec statut de fiabilisation comme NON_FIABILISABLE en fonction de la présence de l'uai dans le référentiel
-    await fiabilisationUaiSiretDb().updateOne(
-      { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
-      {
-        $set: {
-          type: isUaiPresentInReferentiel
-            ? STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_MAPPING
-            : STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
-        },
-      },
-      { upsert: true }
-    );
+    // Ajout du couple avec statut de fiabilisation comme NON_FIABILISABLE en fonction de la présence de l'uai dans le référentiel
+    await fiabilisationUaiSiretDb().insertOne({
+      uai: coupleUaiSiretTdbToCheck.uai,
+      siret: coupleUaiSiretTdbToCheck.siret,
+      type: isUaiPresentInReferentiel
+        ? STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_VALIDEE
+        : STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
+    });
 
     // Maj de l'organisme lié avec { bypassDocumentValidation: true } si siret vide
     await organismesDb().updateOne(
@@ -391,7 +387,7 @@ export const checkCoupleNonFiabilisable = async (coupleUaiSiretTdbToCheck) => {
       {
         $set: {
           fiabilisation_statut: isUaiPresentInReferentiel
-            ? STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_MAPPING
+            ? STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_VALIDEE
             : STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE,
         },
       },
