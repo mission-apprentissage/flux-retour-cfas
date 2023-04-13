@@ -21,7 +21,7 @@ jobs:
         run: make build
 
   deploy-recette:
-    if: github.ref == "refs/heads/master"
+    if: github.ref == 'refs/heads/master'
     name: "Déploiement en recette"
     needs: tests
     uses: "./.github/workflows/_deploy.yml"
