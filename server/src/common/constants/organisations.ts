@@ -68,3 +68,5 @@ export const ORGANISATIONS_NATIONALES = [
     key: "Ministère du Travail, du Plein emploi et de l'Insertion",
   },
 ] as const;
+
+export type OrganisationsNationalesKey = typeof ORGANISATIONS_NATIONALES[number]["key"];

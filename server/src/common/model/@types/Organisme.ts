@@ -7,7 +7,7 @@ export interface Organisme {
   /**
    * Code UAI de l'établissement
    */
-  uai?: string;
+  uai: string | null;
   /**
    * N° SIRET fiabilisé
    */

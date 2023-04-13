@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { TETE_DE_RESEAUX, TeteDeReseauKey } from "../constants/networksConstants.js";
+import { ORGANISATIONS_NATIONALES, OrganisationsNationalesKey } from "../constants/organisations.js";
 
 export const registrationSchema = {
   user: z.object({
@@ -21,11 +23,19 @@ export const registrationSchema = {
       uai: z.string().nullable(),
       siret: z.string(),
     }),
-    z.object({ type: z.literal("TETE_DE_RESEAU"), reseau: z.string() }),
+    z.object({
+      type: z.literal("TETE_DE_RESEAU"),
+      reseau: z.enum(TETE_DE_RESEAUX.map((reseau) => reseau.key) as [TeteDeReseauKey, ...TeteDeReseauKey[]]),
+    }),
     z.object({ type: z.enum(["DREETS", "DRAAF", "CONSEIL_REGIONAL"]), code_region: z.string() }),
     z.object({ type: z.literal("DDETS"), code_departement: z.string() }),
     z.object({ type: z.literal("ACADEMIE"), code_academie: z.string() }),
-    z.object({ type: z.literal("OPERATEUR_PUBLIC_NATIONAL"), nom: z.string() }),
+    z.object({
+      type: z.literal("OPERATEUR_PUBLIC_NATIONAL"),
+      nom: z.enum(
+        ORGANISATIONS_NATIONALES.map((org) => org.key) as [OrganisationsNationalesKey, ...OrganisationsNationalesKey[]]
+      ),
+    }),
     z.object({ type: z.literal("ADMINISTRATEUR") }),
   ]),
 };

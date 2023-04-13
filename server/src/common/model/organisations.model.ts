@@ -8,7 +8,7 @@ import {
   DEPARTEMENTS_BY_ID,
   REGIONS_BY_ID,
 } from "../constants/territoiresConstants.js";
-import { CreateIndexesOptions, IndexSpecification, WithId } from "mongodb";
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { ORGANISATIONS_NATIONALES } from "../constants/organisations.js";
 
 // types en doublon avec l'UI
@@ -26,59 +26,55 @@ export const organisationTypes = [
   "ADMINISTRATEUR",
 ] as const;
 
-export type Organisation = WithId<
+export type NewOrganisation =
   | OrganisationOrganismeFormation
   | OrganisationTeteReseau
   | OrganisationOperateurPublicRegion
   | OrganisationOperateurPublicDepartement
   | OrganisationOperateurPublicAcademie
   | OrganisationOperateurPublicNational
-  | OrganisationAdministrateur
->;
+  | OrganisationAdministrateur;
+
+export type Organisation = NewOrganisation & { created_at: Date };
 
 export type OrganisationType = typeof organisationTypes[number];
 
-interface AbstractOrganisation {
-  type: OrganisationType;
-  created_at: Date;
-}
-
 // OFRF, OFR, OFF
-export interface OrganisationOrganismeFormation extends AbstractOrganisation {
+export interface OrganisationOrganismeFormation {
   type:
     | "ORGANISME_FORMATION_FORMATEUR"
     | "ORGANISME_FORMATION_RESPONSABLE"
     | "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR";
   siret: string;
-  uai: string;
+  uai: string | null;
 }
 
-export interface OrganisationTeteReseau extends AbstractOrganisation {
+export interface OrganisationTeteReseau {
   type: "TETE_DE_RESEAU";
-  reseau: string;
+  reseau: typeof TETE_DE_RESEAUX[number]["key"];
 }
 
-export interface OrganisationOperateurPublicNational extends AbstractOrganisation {
+export interface OrganisationOperateurPublicNational {
   type: "OPERATEUR_PUBLIC_NATIONAL";
-  nom: string;
+  nom: typeof ORGANISATIONS_NATIONALES[number]["key"];
 }
 
-export interface OrganisationOperateurPublicRegion extends AbstractOrganisation {
+export interface OrganisationOperateurPublicRegion {
   type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL";
   code_region: string;
 }
 
-export interface OrganisationOperateurPublicDepartement extends AbstractOrganisation {
+export interface OrganisationOperateurPublicDepartement {
   type: "DDETS";
   code_departement: string;
 }
 
-export interface OrganisationOperateurPublicAcademie extends AbstractOrganisation {
+export interface OrganisationOperateurPublicAcademie {
   type: "ACADEMIE";
   code_academie: string;
 }
 
-export interface OrganisationAdministrateur extends AbstractOrganisation {
+export interface OrganisationAdministrateur {
   type: "ADMINISTRATEUR";
 }
 
@@ -87,7 +83,7 @@ const OFTypeLabelByType = {
   ORGANISME_FORMATION_RESPONSABLE: "OFR",
   ORGANISME_FORMATION_RESPONSABLE_FORMATEUR: "OFRF",
 };
-export function getOrganisationLabel(organisation: Organisation): string {
+export function getOrganisationLabel(organisation: NewOrganisation): string {
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
@@ -117,7 +113,7 @@ export function getOrganisationLabel(organisation: Organisation): string {
   }
 }
 
-function isPublicOrganisation(organisation: Organisation): boolean {
+function isPublicOrganisation(organisation: NewOrganisation): boolean {
   return [
     "DREETS",
     "DRAAF",

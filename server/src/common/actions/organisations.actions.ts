@@ -5,7 +5,7 @@ import { UsersMigration } from "../model/@types/UsersMigration.js";
 
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "../model/collections.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
-import { Organisation } from "../model/organisations.model.js";
+import { NewOrganisation, Organisation } from "../model/organisations.model.js";
 import { sendEmail } from "../services/mailer/mailer.js";
 import logger from "../logger.js";
 import { Organisme } from "../model/@types/Organisme.js";
@@ -14,13 +14,11 @@ import { Invitation } from "../model/invitations.model.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { getUserById } from "./users.actions.js";
 
-type NewOrganisation = Omit<Organisation, "_id" | "created_at">;
-
 export async function createOrganisation(organisation: NewOrganisation): Promise<ObjectId> {
   const { insertedId } = await organisationsDb().insertOne({
     created_at: new Date(),
     ...organisation,
-  } as any); // FIXME pb de type
+  });
   return insertedId;
 }
 
