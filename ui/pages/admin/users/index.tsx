@@ -32,7 +32,7 @@ const DEFAULT_LIMIT = 100;
 const Users = () => {
   const title = "Gestion des utilisateurs";
   const router = useRouter();
-  const { q: searchValue, ...filter } = router.query;
+  const { page: _page, limit: _limit, q: searchValue, ...filter } = router.query;
   const page = parseInt(router.query.page as string, 10) || 1;
   const limit = parseInt(router.query.limit as string, 10) || DEFAULT_LIMIT;
 
