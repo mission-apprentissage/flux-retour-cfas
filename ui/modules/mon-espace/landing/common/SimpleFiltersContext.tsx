@@ -1,13 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const SimpleFiltersContext = createContext();
+const SimpleFiltersContext = createContext({});
 
 /**
  * Todo voir ou placer / comment gérer ce contexte
  * @param {*} param0
  * @returns
  */
-export const SimpleFiltersProvider = ({ children, initialState = null }) => {
+export const SimpleFiltersProvider = ({ children, initialState = null }: { children: any; initialState?: any }) => {
   // TODO Check all filters needed
   const [date, setDate] = useState(new Date());
 
@@ -24,4 +24,4 @@ export const SimpleFiltersProvider = ({ children, initialState = null }) => {
   return <SimpleFiltersContext.Provider value={contextValue}>{children}</SimpleFiltersContext.Provider>;
 };
 
-export const useSimpleFiltersContext = () => useContext(SimpleFiltersContext);
+export const useSimpleFiltersContext = () => useContext<any>(SimpleFiltersContext);

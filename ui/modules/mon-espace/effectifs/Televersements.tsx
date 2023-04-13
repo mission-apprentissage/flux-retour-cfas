@@ -36,7 +36,7 @@ const Televersements = ({ organisme }) => {
   const [step, setStep] = useState("landing");
   useFetchUploads(organisme?._id);
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
-  const [mapping, setMapping] = useState(null);
+  const [mapping, setMapping] = useState<any>(null);
   const router = useRouter();
   const [lastMessage, resetServerEvent] = useServerEvents();
 
@@ -44,8 +44,8 @@ const Televersements = ({ organisme }) => {
     in: [{ label: "", value: "" }],
     out: [{ label: "", value: "" }],
   });
-  const [lines, setLines] = useState([]);
-  const [requireKeysSettled, setRequireKeysSettled] = useState([]);
+  const [lines, setLines] = useState<any[]>([]);
+  const [requireKeysSettled, setRequireKeysSettled] = useState<any[]>([]);
 
   const [preEffectifs, setPreEffectifs] = useState({ canBeImport: [], canNotBeImport: [] });
   const [typeDocument, setTypeDocument] = useState("");
@@ -54,7 +54,8 @@ const Televersements = ({ organisme }) => {
   const [modelAsChange, setModelAsChange] = useState(false);
   const toast = useToast();
 
-  const [mappingForThisType] = uploads?.models?.filter(({ type_document }) => type_document === typeDocument) || [];
+  const [mappingForThisType]: any[] =
+    uploads?.models?.filter(({ type_document }) => type_document === typeDocument) || [];
 
   const onDefineFileType = useCallback(
     async (type_document) => {
@@ -75,8 +76,8 @@ const Televersements = ({ organisme }) => {
 
   const onLineChange = useCallback(
     ({ line, part }, { value, hasError, required = false }) => {
-      let newLines = [...lines];
-      const prevValue = newLines[line][part].value;
+      let newLines: any[] = [...lines];
+      const prevValue: any = newLines[line][part].value;
       newLines[line][part].value = value;
       newLines[line][part].hasError = hasError;
       setLines(newLines);
@@ -114,8 +115,8 @@ const Televersements = ({ organisme }) => {
     ({ lineNum }) => {
       const currentLine = lines[lineNum];
       let newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
-      const currentInKeyLocked = newAvailableKeys.in.find((nAK) => nAK.value === currentLine.in.value);
-      const currentOutKeyLocked = newAvailableKeys.out.find((nAK) => nAK.value === currentLine.out.value);
+      const currentInKeyLocked: any = newAvailableKeys.in.find((nAK) => nAK.value === currentLine.in.value);
+      const currentOutKeyLocked: any = newAvailableKeys.out.find((nAK) => nAK.value === currentLine.out.value);
       if (currentInKeyLocked) currentInKeyLocked.locked = false;
       if (currentOutKeyLocked) currentOutKeyLocked.locked = false;
 
@@ -141,20 +142,20 @@ const Televersements = ({ organisme }) => {
     toast.closeAll();
     resetServerEvent();
     setStep("mapping");
-    const response = await _get(`/api/v1/upload/analyse?organisme_id=${organisme._id}`);
+    const response: any = await _get(`/api/v1/upload/analyse?organisme_id=${organisme._id}`);
 
     let currentAvailableKeys = {
       in: sortByNormalizedLabels(Object.values(response.inputKeys)),
       out: sortByNormalizedLabels(Object.values(response.outputKeys)),
     };
 
-    let initLines = [];
+    let initLines: any[] = [];
     // TODO REFACTOR THIS BELOW :vomit:
     if (mappingForThisType?.mapping_column) {
       let { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
       userMapping[""] = typeCodeDiplome === "CFD" ? "RNCP" : "CFD";
-      let remap = Object.entries(userMapping).reduce(
-        (acc, [key, value]) => (key !== "annee_scolaire" ? { ...acc, [value]: key } : acc),
+      let remap: any = Object.entries(userMapping).reduce(
+        (acc, [key, value]: any) => (key !== "annee_scolaire" ? { ...acc, [value]: key } : acc),
         {}
       );
       const { CFD, RNCP, ...rest } = remap;
@@ -218,7 +219,7 @@ const Televersements = ({ organisme }) => {
         onGoBackToUpload();
       }
     } else {
-      initLines = Object.values(response.requireKeys).map((requireKey) => ({
+      initLines = Object.values(response.requireKeys).map((requireKey: any) => ({
         in: { value: "", hasError: false },
         out: { value: requireKey.value, hasError: false },
       }));
@@ -524,7 +525,7 @@ const Televersements = ({ organisme }) => {
                     3. Choisir vos correspondances pour les colonnes obligatoires Nom et Prénom
                   </Heading>
                   <Box my={8}>
-                    {Object.values(mapping.requireKeys).map((requireKey, i) => {
+                    {Object.values(mapping.requireKeys).map((requireKey: any, i) => {
                       if (
                         requireKey.value === "annee_scolaire" ||
                         requireKey.value === "CFD" ||

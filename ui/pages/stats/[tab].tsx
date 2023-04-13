@@ -14,7 +14,7 @@ const StatistiquesPage = () => {
   const router = useRouter();
   const plausible = usePlausible();
 
-  const defaultIndex = router.query.tab ? tabs.indexOf(router.query.tab) : 0;
+  const defaultIndex = router.query.tab ? tabs.indexOf(router.query.tab as string) : 0;
 
   return (
     <Page>
@@ -55,7 +55,6 @@ const StatistiquesPage = () => {
                     style={{ height: "250vh", width: "100%" }}
                     src="https://plausible.io/share/cfas.apprentissage.beta.gouv.fr?auth=3m7gw6p_qiMJafdG-tiDq&embed=true&theme=light&background=transparent"
                     scrolling="no"
-                    frameborder="0"
                     loading="lazy"
                   />
                 </TabPanel>
@@ -63,28 +62,24 @@ const StatistiquesPage = () => {
                   <iframe
                     src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/8af240fe-aaed-466e-a903-537b328a749f"
                     style={{ height: "250vh", width: "100%" }}
-                    allowtransparency="true"
                   />
                 </TabPanel>
                 <TabPanel>
                   <iframe
                     src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/3725a628-f37b-4220-8e55-b63241835b13"
                     style={{ height: "1000px", width: "100%" }}
-                    allowtransparency="true"
                   />
                 </TabPanel>
                 <TabPanel>
                   <iframe
                     src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/78bc775c-1be5-4e61-b81c-3fe4679e480b"
                     style={{ height: "1450px", width: "100%" }}
-                    allowtransparency="true"
                   />
                 </TabPanel>
                 <TabPanel>
                   <iframe
                     src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/9808c918-2d2f-4ae5-b0e7-5e1d982e3e66"
                     style={{ height: "1450px", width: "100%" }}
-                    allowtransparency="true"
                   />
                 </TabPanel>
               </TabPanels>

@@ -1,13 +1,13 @@
 import React from "react";
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Text, StyleProps } from "@chakra-ui/react";
 
 const LogoFooter = ({ size = "sm" }) => {
-  let fontSize = "0.7875rem";
-  let beforeWidth = "2.0625rem";
-  let beforeHeight = "0.75rem";
-  let beforeMarginBottom = "0.25rem";
-  let beforeBackgroundSize = "2.0625rem 0.84375rem, 2.0625rem 0.75rem, 0";
-  let beforeBackgroundPosition = "0 -0.04688rem, 0 0, 0 0";
+  let fontSize: StyleProps["fontSize"] = "0.7875rem";
+  let beforeWidth: StyleProps["width"] = "2.0625rem";
+  let beforeHeight: StyleProps["height"] = "0.75rem";
+  let beforeMarginBottom: StyleProps["marginBottom"] = "0.25rem";
+  let beforeBackgroundSize: StyleProps["backgroundSize"] = "2.0625rem 0.84375rem, 2.0625rem 0.75rem, 0";
+  let beforeBackgroundPosition: StyleProps["marginBottom"] = "0 -0.04688rem, 0 0, 0 0";
 
   if (size === "xl") {
     fontSize = ["1.05rem", "1.05rem", "1.3125rem"];

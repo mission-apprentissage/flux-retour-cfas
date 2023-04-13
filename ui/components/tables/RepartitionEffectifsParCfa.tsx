@@ -11,8 +11,16 @@ import NatureOrganismeDeFormationWarning from "../NatureOrganismeDeFormationWarn
 import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";
 
-const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
-  let content = null;
+const RepartitionEffectifsParCfa = ({
+  repartitionEffectifsParCfa,
+  loading,
+  error,
+}: {
+  repartitionEffectifsParCfa: any[];
+  loading: boolean;
+  error?: any;
+}) => {
+  let content: React.ReactNode = null;
   const filtersContext = useFiltersContext();
   const router = useRouter();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);

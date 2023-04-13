@@ -5,7 +5,7 @@ import { cerfaStatusGetter } from "./formEngine/atoms";
 export const dossierCompletionStatus = selector({
   key: "dossierCompletionStatus",
   get: ({ get }) => {
-    const cerfaCompletionStatus = get(cerfaStatusGetter);
+    const cerfaCompletionStatus: any = get(cerfaStatusGetter);
     // const documentsCompletionStatus = get(documentsCompletionStatusGetter);
     // const signatureCompletionStatus = get(documentsCompletionStatusGetter);
     return {

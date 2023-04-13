@@ -8,7 +8,15 @@ import Loading from "../../Loading/Loading";
 import Table from "../Table";
 import EffectifBySiretRow from "./EffectifBySiretRow";
 
-const RepartitionEffectifsParSiret = ({ effectifs, loading, error }) => {
+const RepartitionEffectifsParSiret = ({
+  effectifs,
+  loading,
+  error,
+}: {
+  effectifs: any[];
+  loading: boolean;
+  error?: any;
+}) => {
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
 

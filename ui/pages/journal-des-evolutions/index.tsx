@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Head from "next/head";
 import { Badge, Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import { format, formatISO } from "date-fns";
 import fr from "date-fns/locale/fr";
@@ -7,18 +8,16 @@ import Page from "@/components/Page/Page";
 import Sommaire from "@/components/Sommaire/Sommaire";
 import { getUniquesMonthAndYearFromDatesList } from "@/common/utils/dateUtils";
 import { capitalize } from "@/common/utils/stringUtils";
-import { groupEvolutionsByDate } from "@/modules/journal-des-evolutions/groupEvolutionsByDate";
 import JournalDesEvolutionsTagFilter from "@/modules/journal-des-evolutions/JournalDesEvolutionsTagFilter";
 import {
   JOURNAL_DES_EVOLUTIONS_DATA,
   JOURNAL_DES_EVOLUTIONS_TAGS,
 } from "@/modules/journal-des-evolutions/JournalEvolutionsData";
-import Head from "next/head";
 import Section from "@/components/Section/Section";
 
 const JournalDesEvolutions = () => {
   const title = "Journal des évolutions";
-  const [tags, setTags] = useState([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [dataList, setDataList] = useState(JOURNAL_DES_EVOLUTIONS_DATA);
 
   useEffect(() => {
@@ -28,6 +27,17 @@ const JournalDesEvolutions = () => {
       setDataList(JOURNAL_DES_EVOLUTIONS_DATA);
     }
   }, [tags]);
+
+  const groupEvolutionsByDate: any = Object.values(
+    dataList.reduce((acc, cur) => {
+      const date = cur.date;
+      return {
+        ...acc,
+        [date]:
+          acc[date] === undefined ? { date, evolutions: [cur] } : { date, evolutions: [...acc[date].evolutions, cur] },
+      };
+    }, {})
+  );
 
   return (
     <Page>
@@ -62,7 +72,7 @@ const JournalDesEvolutions = () => {
           flexDirection={["column-reverse", "column-reverse", "column-reverse", "row"]}
         >
           <Box flex="1">
-            {groupEvolutionsByDate(dataList).map((item, index) => {
+            {groupEvolutionsByDate.map((item, index) => {
               const date = format(new Date(item.date), "dd MMMM yyyy", { locale: fr });
               return (
                 <Box paddingY="3w" key={index}>

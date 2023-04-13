@@ -24,7 +24,7 @@ const AnneeFormationRows = ({ formationCfd, niveauFormation }) => {
       "etablissement_reseaux",
     ]),
   };
-  const { data } = useQuery([QUERY_KEYS.EFFECTIF_PAR.ANNEE_FORMATION, requestFilters], () =>
+  const { data } = useQuery<any, any>([QUERY_KEYS.EFFECTIF_PAR.ANNEE_FORMATION, requestFilters], () =>
     fetchEffectifsParAnneeFormation(requestFilters)
   );
   if (!data) return null;

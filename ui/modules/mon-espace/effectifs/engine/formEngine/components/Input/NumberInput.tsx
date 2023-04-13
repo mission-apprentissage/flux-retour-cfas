@@ -9,7 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { InputWrapper } from "./InputWrapper";
 
-export const NumberInput = (props) => {
+export const NumberInput = (props: any) => {
   const {
     name,
     onChange,
@@ -41,8 +41,13 @@ export const NumberInput = (props) => {
         variant="cerfa"
         isInvalid={!!error}
         name={name.replaceAll(".", "_")}
-        type={fieldType}
-        disabled={locked}
+        {...{
+          // TODO: check all these attributes are valid
+          type: fieldType,
+          disabled: locked,
+          minLength,
+          maxLength,
+        }}
         onChange={(val) => {
           setLocalValue(val);
           if (!/\.$/.test(val) && val !== "") {
@@ -51,8 +56,6 @@ export const NumberInput = (props) => {
         }}
         value={localValue}
         placeholder={example ? `Exemple : ${example}` : description}
-        minLength={minLength}
-        maxLength={maxLength}
         min={min}
         max={max}
       >

@@ -14,7 +14,12 @@ const ConfigurationAPI = ({ organisme, isMine }) => {
   const erpSelected = ERPS.find((e) => e.id === erpIdSelected);
   const erpName = erpSelected?.name;
 
-  const { values, handleChange } = useFormik({ initialValues: { doYouUseAnotherService: "" } });
+  const { values, handleChange } = useFormik({
+    initialValues: { doYouUseAnotherService: "" },
+    onSubmit: async () => {
+      // DO NOTHING
+    },
+  });
 
   return (
     <form>
@@ -23,7 +28,7 @@ const ConfigurationAPI = ({ organisme, isMine }) => {
           Démarrer l’interfaçage avec [{erpName}].
         </Text>
 
-        {erpSelected.helpFilePath && (
+        {erpSelected?.helpFilePath && (
           <Stack>
             <Button
               variant="link"
@@ -78,7 +83,7 @@ const ConfigurationAPI = ({ organisme, isMine }) => {
                 </Box>
                 {values.doYouUseAnotherService === "yes" && (
                   <HStack color="flatsuccess" alignItems={"baseline"}>
-                    <i class="ri-checkbox-circle-line" />
+                    <i className="ri-checkbox-circle-line" />
                     <Text>
                       Il est possible de transmettre une partie de vos effectifs via votre ERP et d’importer l’autre
                       partie via l’onglet “Mes effectifs”. Si vous utilisez deux ERP connectés au tableau de bord

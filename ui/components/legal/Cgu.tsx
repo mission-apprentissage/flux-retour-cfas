@@ -38,7 +38,7 @@ const SommaireData = [
   },
 ];
 
-export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
+export const Cgu = ({ onLoad = () => {}, isWrapped }: { onLoad?: () => void; isWrapped?: boolean }) => {
   useEffect(() => {
     onLoad();
   }, [onLoad]);

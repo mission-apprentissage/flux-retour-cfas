@@ -11,7 +11,7 @@ import {
   RepartitionEffectifsParSiretSection,
 } from "./sections";
 
-const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
+const OrganismeViewContent = ({ infosCfa, loading, error, filters }: any) => {
   const [effectifs, effectifsLoading] = useEffectifs();
   const hasMultipleSirets = infosCfa?.sousEtablissements?.length > 1;
   const sirets = infosCfa?.sousEtablissements?.map((item) => item.siret_etablissement);

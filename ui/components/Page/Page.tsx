@@ -11,7 +11,7 @@ import Link from "../Links/Link";
 
 function Page({ children, ...rest }) {
   return (
-    <Container maxW="full" minH="100vh" d="flex" flexDirection="column" p={0} {...rest}>
+    <Container maxW="full" minH="100vh" display="flex" flexDirection="column" p={0} {...rest}>
       <Header />
       <NavigationMenu />
       <Box minH={"40vh"} flexGrow="1">

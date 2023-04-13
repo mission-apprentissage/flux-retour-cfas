@@ -8,7 +8,7 @@ import NumberValueCell from "../NumberValueCell";
 import AnneeFormationRows from "./AnneeFormationRows";
 
 const FormationRow = ({ formationCfd, intitule, effectifs, niveauFormation }) => {
-  const [isOpen, setIsOpen] = useState();
+  const [isOpen, setIsOpen] = useState<boolean>();
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   return (

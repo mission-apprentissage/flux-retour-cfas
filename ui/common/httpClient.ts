@@ -1,8 +1,12 @@
 import { emitter } from "./emitter";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import * as https from "https";
 
 class AuthError extends Error {
+  json: any;
+  statusCode: any;
+  prettyMessage: any;
+
   constructor(json, statusCode) {
     super(`Request rejected with status code ${statusCode}`);
     this.json = json;
@@ -12,6 +16,11 @@ class AuthError extends Error {
 }
 
 class HTTPError extends Error {
+  json: any;
+  messages: any;
+  statusCode: any;
+  prettyMessage: any;
+
   constructor(message, json, statusCode, messages = null) {
     super(message);
     this.json = json;
@@ -56,7 +65,7 @@ const getHttpsAgent = () => {
     : undefined;
 };
 
-export const _get = async (path, options) => {
+export const _get = async (path: string, options?: AxiosRequestConfig<any>) => {
   const response = await axios.get(path, {
     headers: getHeaders(),
     validateStatus: () => true,
@@ -66,7 +75,7 @@ export const _get = async (path, options) => {
   return handleResponse(path, response);
 };
 
-export const _getBlob = async (path, options) => {
+export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) => {
   const response = await axios.get(path, {
     headers: getHeaders(),
     validateStatus: () => true,
@@ -77,7 +86,7 @@ export const _getBlob = async (path, options) => {
   return handleResponse(path, response);
 };
 
-export const _post = async (path, body, options) => {
+export const _post = async (path: string, body?: any, options?: AxiosRequestConfig<any>) => {
   const response = await axios.post(path, body, {
     headers: getHeaders(),
     validateStatus: () => true,
@@ -87,9 +96,9 @@ export const _post = async (path, body, options) => {
   return handleResponse(path, response);
 };
 
-export const _postFile = async (path, data, options) => {
+export const _postFile = async (path: string, data, options?: AxiosRequestConfig<any>) => {
   const response = await axios.post(path, data, {
-    headers: getHeaders(null),
+    headers: getHeaders(),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
     ...options,
@@ -97,7 +106,7 @@ export const _postFile = async (path, data, options) => {
   return handleResponse(path, response);
 };
 
-export const _put = async (path, body = {}, options) => {
+export const _put = async (path: string, body = {}, options?: AxiosRequestConfig<any>) => {
   const response = await axios.put(path, body, {
     headers: getHeaders(),
     validateStatus: () => true,
@@ -107,7 +116,7 @@ export const _put = async (path, body = {}, options) => {
   return handleResponse(path, response);
 };
 
-export const _delete = async (path, options) => {
+export const _delete = async (path: string, options?: AxiosRequestConfig<any>) => {
   const response = await axios.delete(path, {
     headers: getHeaders(),
     validateStatus: () => true,

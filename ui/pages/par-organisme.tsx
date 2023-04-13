@@ -7,11 +7,12 @@ import {
   getDefaultState,
 } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import withAuth from "@/components/withAuth";
+import { OrganisationTeteReseau } from "@/common/internal/Organisation";
 
 const IndicateursVueOrganismePageContainer = () => {
   const { auth, organisationType } = useAuth();
   if (organisationType === "TETE_DE_RESEAU") {
-    const fixedFiltersState = { reseau: { nom: auth.organisation.reseau } };
+    const fixedFiltersState = { reseau: { nom: (auth.organisation as OrganisationTeteReseau).reseau } };
     const defaultFiltersState = { ...getDefaultState(), ...fixedFiltersState };
     return (
       <FiltersProvider defaultState={defaultFiltersState} fixedState={fixedFiltersState}>

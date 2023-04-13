@@ -110,6 +110,7 @@ const IndicateursGridStack = ({
       </Grid>
     );
   }
+  return null;
 };
 
 IndicateursGridStack.propTypes = {

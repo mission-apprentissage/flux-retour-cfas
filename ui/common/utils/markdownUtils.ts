@@ -6,7 +6,7 @@ export const replaceLinks = (str) => {
     return [str];
   }
   try {
-    const parseResults = [];
+    const parseResults: any[] = [];
     let currentPos = 0;
     while (m !== null) {
       // This is necessary to avoid infinite loops with zero-width matches

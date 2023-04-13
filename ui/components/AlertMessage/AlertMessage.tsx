@@ -5,7 +5,7 @@ import ChakraUIMarkdownRenderer from "chakra-ui-markdown-renderer";
 
 import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
 
-const chakraUIMarkdownRendererTheme = {
+const chakraUIMarkdownRendererTheme: any = {
   // we override anchors to reformat the link (aka remove the '##') and add an icon.
   a: ({ children, href, ...rest }) => (
     <Link textDecoration={"underline"} fontSize="md" isExternal {...rest} href={href.replace(/^##/, "")}>
@@ -27,11 +27,11 @@ const Messages = ({ messages }) => (
 );
 
 const AlertMessage = () => {
-  const { messagesAlert, messagesInfo, loading } = useMaintenanceMessages();
+  const { messagesAlert, messagesInfo, isLoading } = useMaintenanceMessages();
   const messagesAlertEnabled = messagesAlert?.filter((message) => message.enabled);
   const messagesInfoEnabled = messagesInfo?.filter((message) => message.enabled);
 
-  if (loading || (!messagesAlertEnabled?.length && !messagesInfoEnabled?.length)) return null;
+  if (isLoading || (!messagesAlertEnabled?.length && !messagesInfoEnabled?.length)) return null;
   return (
     <Box>
       {messagesAlertEnabled.length > 0 && (

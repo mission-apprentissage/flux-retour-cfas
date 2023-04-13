@@ -73,8 +73,6 @@ const TransmissionAPI = ({ organisme, isMine }) => {
                   });
                   window.location.reload(); // FIXME, il faudrait refetch l'organisme
                 }}
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 J’accède au service
               </Button>

@@ -43,7 +43,7 @@ const MaintenancePage = () => {
     messages,
     messageMaintenance,
     messageAutomatique,
-    loading,
+    isLoading,
     refetch: refetchMaintenanceMessages,
   } = useMaintenanceMessages();
 
@@ -166,7 +166,7 @@ const MaintenancePage = () => {
               {messages?.length > 0 && (
                 <Table
                   headers={["Messages précédents", "Context", "Type", "Actif", "Supprimer"]}
-                  loading={loading}
+                  loading={isLoading}
                   error={null}
                 >
                   <Tbody>
@@ -204,7 +204,7 @@ const MaintenancePage = () => {
             </Heading>
             <Box as="fieldset" mt={8}>
               <VStack alignItems="flex-start" mb={5}>
-                <FormControl isRequired isInvalid={errors.context}>
+                <FormControl isRequired isInvalid={!!errors.context}>
                   <FormLabel fontWeight="bold">Context du message</FormLabel>
                   <RadioGroup
                     value={values.context}
@@ -243,7 +243,7 @@ const MaintenancePage = () => {
                   </RadioGroup>
                 </FormControl>
               </VStack>
-              <FormControl isRequired isInvalid={errors.msg}>
+              <FormControl isRequired isInvalid={!!errors.msg}>
                 <FormLabel fontWeight="bold">Message</FormLabel>
                 <Textarea
                   name="msg"
@@ -253,14 +253,14 @@ const MaintenancePage = () => {
                   rows={3}
                   required
                 />
-                {touched.msg && <FormErrorMessage>{errors.msg}</FormErrorMessage>}
+                {touched.msg && <FormErrorMessage>{errors.msg as string}</FormErrorMessage>}
                 <Text fontSize="0.8rem" mb={5}>
                   Aide! Pour afficher un lien hypertexte dans les messages, veuillez suivre la synthaxe suivante [Mon
                   Lien](<strong>##</strong>https://MON_URL)
                 </Text>
               </FormControl>
               <HStack alignItems="flex-start" mb={5}>
-                <FormControl isRequired isInvalid={errors.type}>
+                <FormControl isRequired isInvalid={!!errors.type}>
                   <FormLabel fontWeight="bold">Type de message</FormLabel>
                   <RadioGroup value={values.type} isDisabled={values.context !== "manuel"}>
                     <HStack alignItems="flex-start">
@@ -283,12 +283,12 @@ const MaintenancePage = () => {
                         Info (Bandeau bleu)
                       </Radio>
                     </HStack>
-                    {touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
+                    {touched.type && <FormErrorMessage>{errors.type as string}</FormErrorMessage>}
                   </RadioGroup>
                 </FormControl>
               </HStack>
               <Box my="8">
-                <Button textStyle="sm" variant="primary" onClick={handleSubmit}>
+                <Button textStyle="sm" variant="primary" onClick={handleSubmit as any}>
                   Enregistrer
                 </Button>
               </Box>

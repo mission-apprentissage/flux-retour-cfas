@@ -23,7 +23,7 @@ const useOrganismeSearch = (searchTerm, filters) => {
     etablissement_reseaux: filters.reseau?.nom ?? null,
   });
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading } = useQuery<any, any>(
     [QUERY_KEYS.SEARCH_CFAS, requestFilters],
     () => fetchSearchOrganismes(requestFilters),
     {

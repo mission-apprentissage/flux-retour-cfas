@@ -23,7 +23,7 @@ const ReseauSelect = ({ onReseauChange, value }) => {
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <ReseauSelectPanel value={value} onReseauClick={onReseauClick} onClose={() => setIsOpen(false)} />
+          <ReseauSelectPanel value={value} onReseauClick={onReseauClick} />
         </OverlayMenu>
       )}
     </div>

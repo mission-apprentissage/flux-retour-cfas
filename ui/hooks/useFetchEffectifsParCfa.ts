@@ -8,13 +8,13 @@ import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 const useFetchEffectifsParCfa = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);
 
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.EFFECTIF_PAR.CFA, requestFilters], () =>
+  const { data, isLoading, error } = useQuery<any, any>([QUERY_KEYS.EFFECTIF_PAR.CFA, requestFilters], () =>
     fetchEffectifsParCfa(requestFilters)
   );
 
   const effectifs = data ? sortAlphabeticallyBy("nom_etablissement", data) : [];
 
-  return { data: effectifs, loading: isLoading, error };
+  return { data: effectifs, isLoading, error };
 };
 
 export default useFetchEffectifsParCfa;

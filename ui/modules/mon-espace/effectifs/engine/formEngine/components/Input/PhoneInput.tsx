@@ -19,9 +19,9 @@ export const PhoneInput = (props) => {
   return (
     <InputWrapper {...props}>
       <PInput
-        name={name}
+        {...{ name }}
         value={value}
-        country={"fr"}
+        country="fr"
         masks={{
           fr: ". .. .. .. ..",
         }}

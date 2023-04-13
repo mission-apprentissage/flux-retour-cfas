@@ -38,8 +38,8 @@ export function useFetchUploads(organismeId) {
 }
 
 export function useDocuments() {
-  const documents = useRecoilValue(documentsGetter);
-  const [uploads, setUploads] = useRecoilState(uploadsAtom);
+  const documents = useRecoilValue<any>(documentsGetter);
+  const [uploads, setUploads] = useRecoilState<any>(uploadsAtom);
 
   const onDocumentsChanged = useCallback(
     async (newDocumentsArray, models) => {

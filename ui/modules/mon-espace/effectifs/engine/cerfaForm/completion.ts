@@ -1,4 +1,4 @@
-import { contratSchema } from "./blocks/contrat/contratSchema";
+// import { contratSchema } from "./blocks/contrat/contratSchema";
 // import { formationSchema } from "./blocks/formation/formationSchema";
 // import { maitreSchema } from "./blocks/maitre/maitreSchema";
 // import { apprentiSchema } from "./blocks/apprenti/apprentiSchema";
@@ -37,20 +37,20 @@ export const getFormStatus = ({ fields, values }) => {
 };
 
 // eslint-disable-next-line no-unused-vars
-const getContratCompletion = (fields, values, formErrors) => {
-  const requiredFieldNames = getRequiredFieldNames(Object.keys(contratSchema), fields);
-  const invalidFields = getInvalidFields(requiredFieldNames, fields);
-  const completion = calcCompletion({
-    nbRequired: requiredFieldNames.length,
-    nbBlocErrors: formErrors.filter((error) => error.target === "avantageNature").length,
-    nbFieldErrors: invalidFields.length,
-  });
-  return {
-    fieldErrors: invalidFields,
-    complete: completion === 100,
-    completion,
-  };
-};
+// const getContratCompletion = (fields, values, formErrors) => {
+//   const requiredFieldNames = getRequiredFieldNames(Object.keys(contratSchema), fields);
+//   const invalidFields = getInvalidFields(requiredFieldNames, fields);
+//   const completion = calcCompletion({
+//     nbRequired: requiredFieldNames.length,
+//     nbBlocErrors: formErrors.filter((error) => error.target === "avantageNature").length,
+//     nbFieldErrors: invalidFields.length,
+//   });
+//   return {
+//     fieldErrors: invalidFields,
+//     complete: completion === 100,
+//     completion,
+//   };
+// };
 
 const getBlocCompletion = (fieldNames, fields, blocName, formErrors) => {
   const requiredFieldNames = getRequiredFieldNames(fieldNames, fields);
@@ -86,11 +86,11 @@ const getRequiredFieldNames = (fieldNames, fields) => {
   });
 };
 
-const getBlocErrors = ({ fields, values }) => {
-  const blockErrors = [];
-  cerfaSchema.logics.forEach((logic) => {
+const getBlocErrors = ({ fields, values }: { fields?: any; values?: any }) => {
+  const blockErrors: any[] = [];
+  cerfaSchema.logics.forEach((logic: any) => {
     if (!logic.target) return;
-    const { error } = logic.process({ values, fields }) ?? {};
+    const { error }: any = logic.process({ values }) ?? {};
     if (error) {
       blockErrors.push({
         target: logic.target,

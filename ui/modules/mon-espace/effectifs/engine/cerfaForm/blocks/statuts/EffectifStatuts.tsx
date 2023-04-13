@@ -7,8 +7,8 @@ import { InputController } from "../../../formEngine/components/Input/InputContr
 import { useCerfaController } from "../../../formEngine/CerfaControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
-const EffectifStatuts = memo(({ values, modeSifa = false }) => {
-  const nouveaStatutField = useRecoilValue(fieldSelector("apprenant.nouveau_statut"));
+const EffectifStatuts = memo(({ values }: { values: any }) => {
+  const nouveaStatutField = useRecoilValue<any>(fieldSelector("apprenant.nouveau_statut"));
   const cerfaController = useCerfaController();
   return (
     <>

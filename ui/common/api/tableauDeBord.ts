@@ -21,7 +21,7 @@ export const fetchEffectifsParAnneeFormation = (filters) => {
 
 /* CSV export of effectifs anonymized data list  */
 export const fetchEffectifsDataListCsvExport = (filters) => {
-  return _get("/api/v1/indicateurs-export", { params: filters, jsonResponse: false });
+  return _get("/api/v1/indicateurs-export", { params: filters });
 };
 
 /* Organisme Search */
@@ -30,18 +30,18 @@ export const fetchSearchOrganismes = async (filters) => {
 };
 
 // Pour les OF uniquement
-export async function configureOrganismeERP(organismeId, configurationERP) {
+export async function configureOrganismeERP(organismeId: string, configurationERP: any) {
   await _put(`/api/v1/organismes/${organismeId}/configure-erp`, configurationERP);
 }
 
-export async function searchOrganismesBySIRET(/** @type {string} */ siret) {
+export async function searchOrganismesBySIRET(siret: string) {
   return await _post("/api/v1/organismes/search-by-siret", { siret });
 }
 
-export async function searchOrganismesByUAI(/** @type {string} */ uai) {
+export async function searchOrganismesByUAI(uai: string) {
   return await _post("/api/v1/organismes/search-by-uai", { uai });
 }
 
-export async function getOrganismeByUAIAndSIRET(/** @type {string} */ uai, /** @type {string} */ siret) {
+export async function getOrganismeByUAIAndSIRET(uai: string, siret: string) {
   return await _post("/api/v1/organismes/get-by-uai-siret", { uai, siret });
 }

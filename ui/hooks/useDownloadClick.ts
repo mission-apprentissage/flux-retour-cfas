@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const useDownloadClick = (getFile, fileName) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState<any>();
 
   const onClick = async () => {
     try {

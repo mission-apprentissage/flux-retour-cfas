@@ -6,7 +6,7 @@ import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 const useFetchEffectifsParSiret = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);
-  const { data, isLoading, error } = useQuery(["/api/indicateurs/siret", requestFilters], () =>
+  const { data, isLoading, error } = useQuery<any, any>(["/api/indicateurs/siret", requestFilters], () =>
     _get("/api/indicateurs/siret", { params: requestFilters })
   );
   const effectifs = data ? sortAlphabeticallyBy("nom_etablissement", data) : [];

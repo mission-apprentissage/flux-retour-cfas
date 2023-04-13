@@ -5,7 +5,7 @@ import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 
 const useFetchEffectifsNational = (date) => {
   const requestFilters = mapFiltersToApiFormat({ date });
-  const { data, isLoading, error } = useQuery(["indicateurs-national", requestFilters], () =>
+  const { data, isLoading, error } = useQuery<any, any>(["indicateurs-national", requestFilters], () =>
     _get("/api/indicateurs-national", { params: requestFilters })
   );
 

@@ -1,7 +1,8 @@
 import { useRecoilCallback, useSetRecoilState } from "recoil";
+import { useMemo, useRef } from "react";
+
 import { cerfaAtom, cerfaSetter, cerfaStatusGetter, fieldSelector, valuesSelector } from "./atoms";
 import { validField } from "./utils/validField";
-import { useMemo, useRef } from "react";
 import { dossierAtom, effectifIdAtom } from "../atoms";
 import { isEmptyValue } from "./utils/isEmptyValue";
 import { indexedDependencies } from "./cerfaSchema";
@@ -11,23 +12,24 @@ import { indexedDependencesRevalidationRules, indexedRules } from "./cerfaSchema
 import { findLogicErrors } from "./utils/findLogicErrors";
 import { organismeAtom } from "../../../../../hooks/organismeAtoms";
 
-export const useCerfa = ({ schema } = {}) => {
-  const setCerfa = useSetRecoilState(cerfaAtom);
-  const patchFields = useSetRecoilState(cerfaSetter);
+export const useCerfa = ({ schema }: { schema: any }) => {
+  const setCerfa = useSetRecoilState<any>(cerfaAtom);
+  const patchFields = useSetRecoilState<any>(cerfaSetter);
 
   const getData = useRecoilCallback(
     ({ snapshot }) =>
-      async () => ({
-        organisme: await snapshot.getPromise(organismeAtom),
-        effectifId: await snapshot.getPromise(effectifIdAtom),
-        dossier: await snapshot.getPromise(dossierAtom), // TODO
-        fields: await snapshot.getPromise(cerfaAtom),
-        values: await snapshot.getPromise(valuesSelector),
-      }),
+      async () =>
+        ({
+          organisme: await snapshot.getPromise(organismeAtom),
+          effectifId: await snapshot.getPromise(effectifIdAtom),
+          dossier: await snapshot.getPromise(dossierAtom), // TODO
+          fields: await snapshot.getPromise(cerfaAtom),
+          values: await snapshot.getPromise(valuesSelector),
+        } as any),
     []
   );
 
-  const getFields = useRecoilCallback(
+  const getFields: any = useRecoilCallback(
     ({ snapshot }) =>
       async () =>
         await snapshot.getPromise(cerfaAtom),
@@ -38,14 +40,14 @@ export const useCerfa = ({ schema } = {}) => {
 
   const getValue = useRecoilCallback(
     ({ snapshot }) =>
-      async (name) =>
-        (await snapshot.getPromise(cerfaAtom))[name].value,
+      async (name: string) =>
+        ((await snapshot.getPromise(cerfaAtom)) as any)[name].value,
     []
   );
 
   const registerField = useRecoilCallback(
     ({ snapshot }) =>
-      async (name, fieldDefinition) => {
+      async (name: string, fieldDefinition: any) => {
         const field = await snapshot.getPromise(fieldSelector(name));
         if (field) return;
         const fieldSchema = findDefinition({ name, schema }) ?? fieldDefinition;
@@ -65,7 +67,7 @@ export const useCerfa = ({ schema } = {}) => {
   const controller = useMemo(() => {
     const computeGlobal = async ({ name }) => {
       abortControllers.current[name] = new AbortController();
-      for (let logic of indexedRules[name] ?? []) {
+      for (let logic of (indexedRules[name] as any[]) ?? []) {
         const { values, dossier, organisme, effectifId, fields } = await getData();
         try {
           const signal = abortControllers.current[name].signal;
@@ -117,7 +119,7 @@ export const useCerfa = ({ schema } = {}) => {
           error = (await validField({ field, value: field.value })).error;
           if (!error) {
             const logics = indexedDependencesRevalidationRules[name][dep];
-            error = await findLogicErrors({ name: dep, logics, values, dossier, organisme, effectifId, fields });
+            error = await findLogicErrors({ name: dep, logics, values, dossier, fields });
           }
           if (!error) {
             await processField({ name: dep, value: field.value });
@@ -212,7 +214,7 @@ export const useCerfa = ({ schema } = {}) => {
       setFields: (fields) => {
         const values = getValues(fields);
         const formattedFields = Object.fromEntries(
-          Object.entries(fields).map(([key, field]) => {
+          Object.entries(fields).map(([key, field]: [string, any]) => {
             field = { ...field, ...field._init?.({ values, fields }) };
             return [key, field];
           })

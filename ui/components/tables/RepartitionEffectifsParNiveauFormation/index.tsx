@@ -7,7 +7,15 @@ import { isDateFuture } from "../../../common/utils/dateUtils";
 import NumberValueCell from "../NumberValueCell";
 import Table from "../Table";
 
-const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading, error }) => {
+const RepartitionEffectifsParNiveauFormation = ({
+  repartitionEffectifs,
+  loading,
+  error,
+}: {
+  repartitionEffectifs: any[];
+  loading: boolean;
+  error?: any;
+}) => {
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
 

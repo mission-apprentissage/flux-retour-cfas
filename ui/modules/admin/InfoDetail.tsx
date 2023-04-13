@@ -9,9 +9,22 @@ import get from "lodash.get";
  * @param {*} param0
  * @returns
  */
-const InfoDetail = ({ rows, data }) => {
+const InfoDetail = ({
+  title,
+  rows,
+  data,
+}: {
+  title?: string;
+  rows: Record<any, { header?: () => any; cell?: ({ value }: { value: any; original: any }) => any }>;
+  data: any;
+}) => {
   return (
     <>
+      {title && (
+        <Box as="h2" fontSize="xl" fontWeight="semibold" mb={4}>
+          {title}
+        </Box>
+      )}
       {Object.entries(rows).map(([key, { header, cell }]) => {
         const value = get(data, key);
         return (

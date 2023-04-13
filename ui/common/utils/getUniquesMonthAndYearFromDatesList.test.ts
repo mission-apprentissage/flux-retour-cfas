@@ -1,4 +1,4 @@
-import { getUniquesMonthAndYearFromDatesList } from "./common/utils/dateUtils";
+import { getUniquesMonthAndYearFromDatesList } from "./dateUtils";
 
 it("renvoie un tableau de mois uniques", () => {
   const input = [

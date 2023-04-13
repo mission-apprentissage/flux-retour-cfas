@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifs } from "@/common/api/tableauDeBord";
-import { QUERY_KEYS } from "@/common/constants/queryKeys";
 
 const mapEffectifsData = (effectifsData) => {
   return {
@@ -16,7 +15,7 @@ const mapEffectifsData = (effectifsData) => {
 const useEffectifs = () => {
   const filtersContext = useFiltersContext();
 
-  const { status, data, error } = useQuery([QUERY_KEYS.EFFECTIFS, filtersContext.state], () =>
+  const { status, data, error } = useQuery<any, any>(["effectifs", filtersContext.state], () =>
     fetchEffectifs(filtersContext.state)
   );
 

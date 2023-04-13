@@ -8,7 +8,7 @@ import Table from "@/components/Table/Table";
 import { ArrowRightLine } from "@/theme/components/icons";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 
-const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) => {
+const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }: any) => {
   const router = useRouter();
 
   return (
@@ -19,7 +19,7 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
       pagination={pagination}
       sorting={sorting}
       onPaginationChange={({ page, limit }) => {
-        router.push({ pathname: "/admin/organismes", query: { ...router.query, page, limit } }, null, {
+        router.push({ pathname: "/admin/organismes", query: { ...router.query, page, limit } }, undefined, {
           shallow: true,
         });
       }}
@@ -29,7 +29,7 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
       onSortingChange={({ field, direction }) => {
         router.push(
           { pathname: "/admin/organismes", query: { ...router.query, page: 1, sort: `${field}:${direction}` } },
-          null,
+          undefined,
           {
             shallow: true,
           }
@@ -46,9 +46,8 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
           header: () => "Nature",
           cell: ({ getValue }) => (
             <Text
-              as={getValue() ? Link : "p"}
               fontSize="1rem"
-              href={{ query: { ...router.query, nature: getValue() } }}
+              {...(getValue() ? { as: Link, href: { query: { ...router.query, nature: getValue() } } } : {})}
             >
               {getValue()}
             </Text>
@@ -64,10 +63,9 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
           header: () => "SIRET",
           cell: ({ getValue }) => (
             <Text
-              as={getValue() ? Link : "p"}
               fontSize="0.9rem"
               variant={getValue() === highlight?.siret ? "highlight" : undefined}
-              href={{ query: { ...router.query, siret: getValue() } }}
+              {...(getValue() ? { as: Link, href: { query: { ...router.query, siret: getValue() } } } : {})}
             >
               {getValue() || ""}
             </Text>
@@ -79,10 +77,9 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
           header: () => "Numéro UAI",
           cell: ({ getValue }) => (
             <Text
-              as={getValue() ? Link : "p"}
-              href={{ query: { ...router.query, uai: getValue() } }}
               fontSize="0.9rem"
               variant={getValue() && getValue() === highlight?.uai ? "highlight" : undefined}
+              {...(getValue() ? { as: Link, href: { query: { ...router.query, uai: getValue() } } } : {})}
             >
               {getValue() || ""}
             </Text>
@@ -93,9 +90,10 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
           header: () => "Dans Réfé.?",
           cell: ({ getValue }) => (
             <Text
-              as={getValue() ? Link : "p"}
-              href={{ query: { ...router.query, est_dans_le_referentiel: getValue() } }}
               fontSize="0.9rem"
+              {...(getValue()
+                ? { as: Link, href: { query: { ...router.query, est_dans_le_referentiel: getValue() } } }
+                : {})}
             >
               {getValue() ? "OUI" : "NON"}
             </Text>
@@ -161,7 +159,7 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }) =
           size: 25,
           header: () => " ",
           cell: ({ row }) => (
-            <Link href={`/admin/organismes/${row.original._id}`} flexGrow={1}>
+            <Link href={`/admin/organismes/${row.original._id}`}>
               <ArrowRightLine />
             </Link>
           ),

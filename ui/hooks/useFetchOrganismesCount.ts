@@ -4,7 +4,7 @@ import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import { pick } from "@/common/utils/pick";
 import { _get } from "@/common/httpClient";
 
-const useFetchOrganismesCount = (filters = {}) => {
+const useFetchOrganismesCount = (filters: any = {}) => {
   const requestFilters = pick(mapFiltersToApiFormat(filters), [
     "date",
     "etablissement_num_region",
@@ -12,7 +12,7 @@ const useFetchOrganismesCount = (filters = {}) => {
     "etablissement_reseaux",
     "formation_cfd",
   ]);
-  const { data, isLoading } = useQuery(["total-organismes", requestFilters], () =>
+  const { data, isLoading } = useQuery<any, any>(["total-organismes", requestFilters], () =>
     _get("/api/indicateurs/total-organismes", { params: requestFilters })
   );
 

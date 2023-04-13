@@ -21,7 +21,7 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
   hasMultipleSirets = false,
   namedDataDownloadMode = false,
 }) => {
-  const { data, loading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
+  const { data, isLoading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
 
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
 

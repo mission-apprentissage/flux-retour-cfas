@@ -7,7 +7,17 @@ import Table from "@/components/Table/Table";
 import { ArrowRightLine } from "@/theme/components/icons";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 
-const EffectifsList = ({ data, pagination, sorting, searchValue }) => {
+const EffectifsList = ({
+  data,
+  pagination,
+  sorting,
+  searchValue,
+}: {
+  data: any;
+  pagination?: any;
+  sorting?: any;
+  searchValue?: any;
+}) => {
   const router = useRouter();
 
   return (
@@ -18,7 +28,9 @@ const EffectifsList = ({ data, pagination, sorting, searchValue }) => {
       pagination={pagination}
       sorting={sorting}
       onPaginationChange={({ page, limit }) => {
-        router.push({ pathname: "/admin/effectifs", query: { ...router.query, page, limit } }, null, { shallow: true });
+        router.push({ pathname: "/admin/effectifs", query: { ...router.query, page, limit } }, undefined, {
+          shallow: true,
+        });
       }}
       pageSizes={[10, 50, 100, 200]}
       enableSorting={true}
@@ -26,7 +38,7 @@ const EffectifsList = ({ data, pagination, sorting, searchValue }) => {
       onSortingChange={({ field, direction }) => {
         router.push(
           { pathname: "/admin/effectifs", query: { ...router.query, page: 1, sort: `${field}:${direction}` } },
-          null,
+          undefined,
           {
             shallow: true,
           }
@@ -46,9 +58,8 @@ const EffectifsList = ({ data, pagination, sorting, searchValue }) => {
           header: () => "Année scolaire",
           cell: ({ getValue }) => (
             <Text
-              as={getValue() ? Link : "p"}
               fontSize="0.9rem"
-              href={{ query: { ...router.query, annee_scolaire: getValue() } }}
+              {...(getValue() ? { as: Link, href: { query: { ...router.query, annee_scolaire: getValue() } } } : {})}
             >
               {getValue() || ""}
             </Text>
@@ -59,9 +70,8 @@ const EffectifsList = ({ data, pagination, sorting, searchValue }) => {
           header: () => "Source",
           cell: ({ getValue }) => (
             <Text
-              as={getValue() ? Link : "p"}
               fontSize="0.9rem"
-              href={{ query: { ...router.query, source: getValue() } }}
+              {...(getValue() ? { as: Link, href: { query: { ...router.query, source: getValue() } } } : {})}
             >
               {getValue() || ""}
             </Text>
@@ -72,9 +82,8 @@ const EffectifsList = ({ data, pagination, sorting, searchValue }) => {
           header: () => "ID ERP",
           cell: ({ getValue }) => (
             <Text
-              as={getValue() ? Link : "p"}
               fontSize="0.9rem"
-              href={{ query: { ...router.query, id_erp_apprenant: getValue() } }}
+              {...(getValue() ? { as: Link, href: { query: { ...router.query, id_erp_apprenant: getValue() } } } : {})}
             >
               {getValue() || ""}
             </Text>
@@ -93,9 +102,8 @@ const EffectifsList = ({ data, pagination, sorting, searchValue }) => {
           header: () => "organisme",
           cell: ({ getValue }) => (
             <Text
-              as={getValue() ? Link : "p"}
               fontSize="0.9rem"
-              href={getValue() ? { query: { ...router.query, organisme_id: getValue()._id } } : null}
+              {...(getValue() ? { as: Link, href: { query: { ...router.query, organisme_id: getValue()._id } } } : {})}
             >
               {getValue().siret}
             </Text>
@@ -115,7 +123,7 @@ const EffectifsList = ({ data, pagination, sorting, searchValue }) => {
           size: 25,
           header: () => " ",
           cell: ({ row }) => (
-            <Link href={`/admin/effectifs/${row.original._id}`} flexGrow={1}>
+            <Link href={`/admin/effectifs/${row.original._id}`}>
               <ArrowRightLine />
             </Link>
           ),

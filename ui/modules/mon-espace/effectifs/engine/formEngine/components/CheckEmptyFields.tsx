@@ -7,11 +7,11 @@ import { cerfaStatusGetter } from "../atoms";
 import { useCerfaController } from "../CerfaControllerContext";
 
 // eslint-disable-next-line react/display-name
-const CheckEmptyFields = React.memo(({ schema, blocName }) => {
+const CheckEmptyFields = React.memo(({ schema, blocName }: { schema: any; blocName: string }) => {
   const controller = useCerfaController();
   const [isOpen, setIsOpen] = useState(false);
 
-  const cerfaStatus = useRecoilValue(cerfaStatusGetter);
+  const cerfaStatus = useRecoilValue<any>(cerfaStatusGetter);
 
   const invalidFields = cerfaStatus[blocName].fieldErrors;
   const success = cerfaStatus[blocName].complete;
@@ -33,8 +33,9 @@ const CheckEmptyFields = React.memo(({ schema, blocName }) => {
       </Button>
       <Collapse in={isOpen} animateOpacity unmountOnExit>
         <Ribbons variant={success ? "success" : "error"} mt={5} oneLiner={success}>
-          {success && <Text>Tous les champs sont remplis</Text>}
-          {!success && (
+          {success ? (
+            <Text>Tous les champs sont remplis</Text>
+          ) : (
             <>
               <Flex w="full" ml={10}>
                 <Text>
@@ -61,7 +62,7 @@ const CheckEmptyFields = React.memo(({ schema, blocName }) => {
                     </ListItem>
                   );
                 })}
-                {Object.entries(cerfaStatus.global.errors).map(([target, error]) => (
+                {Object.entries(cerfaStatus.global.errors).map(([target, error]: [any, any]) => (
                   <ListItem key={target}>
                     <ListIcon as={ArrowRightLine} color="flaterror" />
                     <Link

@@ -10,7 +10,7 @@ import { queryClient } from "@/common/queryClient";
 
 const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isInputValid, setIsInputValid] = useState();
+  const [isInputValid, setIsInputValid] = useState<boolean>();
 
   const submit = async () => {
     // check that input is a valid SIRET or valid UAI
@@ -21,7 +21,9 @@ const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => 
       return;
     }
 
-    const data = await queryClient.fetchQuery(QUERY_KEYS.SEARCH_CFAS, () => fetchSearchOrganismes({ searchTerm }));
+    const data = await queryClient.fetchQuery(QUERY_KEYS.SEARCH_CFAS as any, () =>
+      fetchSearchOrganismes({ searchTerm })
+    );
 
     if (data?.[0]) {
       setOrganismeFound();

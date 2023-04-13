@@ -134,7 +134,7 @@ function MesOrganismes() {
                     size: 120,
                     header: () => "Fiabilisation",
                     cell: ({ getValue }) => (
-                      <Text>{FIABILISATION_LABEL[getValue()] || FIABILISATION_LABEL.INCONNUE}</Text>
+                      <Text>{FIABILISATION_LABEL[getValue()] || FIABILISATION_LABEL.INCONNU}</Text>
                     ),
                   },
                   last_transmission_date: {

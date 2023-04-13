@@ -32,16 +32,16 @@ const DEFAULT_LIMIT = 100;
 const Users = () => {
   const title = "Gestion des utilisateurs";
   const router = useRouter();
-  let { page, limit, q: searchValue, ...filter } = router.query;
-  page = parseInt(page, 10) || 1;
-  limit = parseInt(limit, 10) || DEFAULT_LIMIT;
+  let { q: searchValue, ...filter } = router.query;
+  const page = parseInt(router.query.page as string, 10) || 1;
+  const limit = parseInt(router.query.limit as string, 10) || DEFAULT_LIMIT;
 
   const {
     data: users,
     refetch: refetchUsers,
     isLoading,
     error,
-  } = useQuery(["admin/users", page, limit, filter, searchValue], () =>
+  } = useQuery<any, any>(["admin/users", page, limit, filter, searchValue], () =>
     _get("/api/v1/admin/users/", { params: { page, q: searchValue, filter } })
   );
   // prefetch next page
@@ -59,7 +59,7 @@ const Users = () => {
         <title>{title}</title>
       </Head>
 
-      <Modal isOpen={router.query.new} onClose={closeModal} size="2xl">
+      <Modal isOpen={!!router.query.new} onClose={closeModal} size="2xl">
         <ModalOverlay />
         <ModalContent borderRadius="0" p={"2w"}>
           <ModalHeader paddingX="8w" fontWeight="700" color="grey.800" fontSize="alpha" textAlign="left">
@@ -70,7 +70,7 @@ const Users = () => {
           <ModalClosingButton />
           <UserForm
             user={null}
-            afterSubmit={async (_action, error) => {
+            onCreate={async (_action, error) => {
               if (!error) {
                 closeModal();
                 await refetchUsers();
@@ -92,22 +92,22 @@ const Users = () => {
             </Button>
           )} */}
         </HStack>
-        {isLoading && !users?.data ? (
+        {isLoading && !(users as any)?.data ? (
           <Spinner alignSelf="center" />
         ) : error ? (
-          <Box>Une erreur est survenue : {error.message}</Box>
+          <Box>Une erreur est survenue : {(error as any).message}</Box>
         ) : (
           <Stack spacing={2} width="100%">
             <form
               method="get"
-              onSubmit={(e) => {
+              onSubmit={(e: any) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
                 const { q } = Object.fromEntries(formData);
                 router.push(
                   {
                     pathname: "/admin/users",
-                    query: q ? { q } : null,
+                    query: (q ? { q } : {}) as any,
                   },
                   undefined,
                   { shallow: true }
@@ -126,7 +126,7 @@ const Users = () => {
               {Intl.NumberFormat().format(users?.pagination?.total || 0)}{" "}
               {users?.pagination?.total > 1 ? "comptes utilisateurs" : "compte utilisateur"}
             </Text>
-            <UsersList mt={4} data={users?.data || []} pagination={users?.pagination} searchValue={searchValue} />
+            <UsersList data={users?.data || []} pagination={users?.pagination} searchValue={searchValue} />
           </Stack>
         )}
       </VStack>

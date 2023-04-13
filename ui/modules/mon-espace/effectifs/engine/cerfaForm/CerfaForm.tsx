@@ -15,7 +15,7 @@ const useOpenAccordionToLocation = () => {
   const scrolledRef = useRef(false);
   const { hash } = location;
   const hashRef = useRef(hash);
-  const [accordionIndex, setAccordionIndex] = useState([]);
+  const [accordionIndex, setAccordionIndex] = useState<number[]>([]);
 
   useEffect(() => {
     if (hash) {
@@ -34,34 +34,37 @@ const useOpenAccordionToLocation = () => {
         }
       }
     }
-    return () => {
-      return false;
-    };
   }, [hash]);
 
   return { accordionIndex, setAccordionIndex };
 };
 
 // eslint-disable-next-line react/display-name
-export const CerfaForm = memo(({ modeSifa = false }) => {
+export const CerfaForm = memo(({ modeSifa = false }: { modeSifa: boolean }) => {
   const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
 
-  const effectifId = useRecoilValue(effectifIdAtom);
-  const { validationErrorsByBlock, requiredSifaByBlock } = useRecoilValue(effectifStateSelector(effectifId));
-  const values = useRecoilValue(valuesSelector);
+  const effectifId = useRecoilValue<any>(effectifIdAtom);
+  const { validationErrorsByBlock, requiredSifaByBlock } = useRecoilValue<any>(effectifStateSelector(effectifId));
+  const values = useRecoilValue<any>(valuesSelector);
 
   return (
     <Box my={2} px={5}>
-      <Accordion allowMultiple mt={2} index={accordionIndex} onChange={setAccordionIndex} reduceMotion>
+      <Accordion
+        allowMultiple
+        mt={2}
+        index={accordionIndex}
+        onChange={(expandedIndex: number[]) => setAccordionIndex(expandedIndex)}
+        reduceMotion
+      >
         <AccordionItem border="none" id={"statuts"}>
           {({ isExpanded }) => (
             <AccordionItemChild
               isExpanded={isExpanded}
-              title={"Statuts"}
+              title="Statuts"
               validationErrors={validationErrorsByBlock.statuts}
               requiredSifa={requiredSifaByBlock.statuts}
             >
-              <EffectifStatuts modeSifa={modeSifa} values={values} />
+              <EffectifStatuts values={values} />
             </AccordionItemChild>
           )}
         </AccordionItem>
@@ -97,7 +100,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
               validationErrors={validationErrorsByBlock.contrats}
               requiredSifa={requiredSifaByBlock.contrats}
             >
-              <ApprenantContrats contrats={values?.apprenant.contrats} modeSifa={modeSifa} />
+              <ApprenantContrats contrats={values?.apprenant.contrats} />
             </AccordionItemChild>
           )}
         </AccordionItem>
@@ -107,34 +110,48 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
 });
 
 // eslint-disable-next-line react/display-name
-const AccordionItemChild = React.memo(({ title, children, validationErrors, requiredSifa, isExpanded }) => {
-  return (
-    <>
-      <AccordionButton bg="#F9F8F6">
-        {isExpanded ? (
-          <PlainArrowRight boxSize={7} color="bluefrance" transform="rotate(90deg)" />
-        ) : (
-          <PlainArrowRight boxSize={7} color="bluefrance" />
-        )}
-        <Box flex="1" textAlign="left">
-          <HStack>
-            <Text fontWeight="bold">{title}</Text>
-            {validationErrors.length && (
-              <HStack fontSize="0.8rem">
-                <ErrorPill color="redmarianne" boxSize="2" />
-                <Text color="redmarianne">({Math.round(validationErrors.length)})</Text>
-              </HStack>
-            )}
-            {requiredSifa.length && (
-              <HStack fontSize="0.8rem">
-                <ErrorPill color="warning" boxSize="2" />
-                <Text color="warning">({Math.round(requiredSifa.length)})</Text>
-              </HStack>
-            )}
-          </HStack>
-        </Box>
-      </AccordionButton>
-      <AccordionPanel pb={4}>{isExpanded && children}</AccordionPanel>
-    </>
-  );
-});
+const AccordionItemChild = React.memo(
+  ({
+    title,
+    children,
+    validationErrors,
+    requiredSifa,
+    isExpanded,
+  }: {
+    title: string;
+    children: any;
+    validationErrors: any;
+    requiredSifa: any;
+    isExpanded: boolean;
+  }) => {
+    return (
+      <>
+        <AccordionButton bg="#F9F8F6">
+          {isExpanded ? (
+            <PlainArrowRight boxSize={7} color="bluefrance" transform="rotate(90deg)" />
+          ) : (
+            <PlainArrowRight boxSize={7} color="bluefrance" />
+          )}
+          <Box flex="1" textAlign="left">
+            <HStack>
+              <Text fontWeight="bold">{title}</Text>
+              {validationErrors.length && (
+                <HStack fontSize="0.8rem">
+                  <ErrorPill color="redmarianne" boxSize="2" />
+                  <Text color="redmarianne">({Math.round(validationErrors.length)})</Text>
+                </HStack>
+              )}
+              {requiredSifa.length && (
+                <HStack fontSize="0.8rem">
+                  <ErrorPill color="warning" boxSize="2" />
+                  <Text color="warning">({Math.round(requiredSifa.length)})</Text>
+                </HStack>
+              )}
+            </HStack>
+          </Box>
+        </AccordionButton>
+        <AccordionPanel pb={4}>{isExpanded && children}</AccordionPanel>
+      </>
+    );
+  }
+);

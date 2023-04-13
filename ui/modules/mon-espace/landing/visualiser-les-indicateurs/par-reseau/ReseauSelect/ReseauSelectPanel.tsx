@@ -5,7 +5,7 @@ import React from "react";
 import FilterOption from "@/components/FilterOption/FilterOption";
 import useReseauxData from "./useReseauxData";
 
-const ReseauSelectPanel = ({ onReseauClick, value }) => {
+const ReseauSelectPanel = ({ onReseauClick, value }: { onReseauClick: (_reseau: any) => void; value: any }) => {
   const { data: reseaux } = useReseauxData();
 
   return (

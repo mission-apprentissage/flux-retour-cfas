@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 
 import { omitNullishValues } from "@/common/utils/omitNullishValues";
 
-const FiltersContext = createContext();
+const FiltersContext = createContext({});
 
 const setDate = (state, date) => {
   return { ...state, date };
@@ -54,7 +54,7 @@ export const stateToQueryString = (state) => {
 };
 
 const parseQueryString = (queryString) => {
-  const parsed = qs.parse(queryString);
+  const parsed: any = qs.parse(queryString);
   return {
     departement: parsed.departement ? JSON.parse(parsed.departement) : null,
     region: parsed.region ? JSON.parse(parsed.region) : null,
@@ -122,7 +122,7 @@ export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }
 };
 
 export const useFiltersContext = () => {
-  return useContext(FiltersContext);
+  return useContext<any>(FiltersContext);
 };
 
 export const filtersStatePropType = PropTypes.shape({

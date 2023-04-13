@@ -7,7 +7,7 @@ import Table from "@/components/Table/Table";
 import { ArrowRightLine } from "@/theme/components/icons";
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 
-const UsersList = ({ data, pagination, sorting, searchValue }) => {
+const UsersList = ({ data, pagination, sorting, searchValue }: any) => {
   const router = useRouter();
 
   return (
@@ -18,7 +18,9 @@ const UsersList = ({ data, pagination, sorting, searchValue }) => {
       pagination={pagination}
       sorting={sorting}
       onPaginationChange={({ page, limit }) => {
-        router.push({ pathname: "/admin/users", query: { ...router.query, page, limit } }, null, { shallow: true });
+        router.push({ pathname: "/admin/users", query: { ...router.query, page, limit } }, undefined, {
+          shallow: true,
+        });
       }}
       columns={{
         nom: {
@@ -35,7 +37,7 @@ const UsersList = ({ data, pagination, sorting, searchValue }) => {
           cell: ({ getValue }) => {
             const organisme = getValue()?.organisme;
             return (
-              <Text as={organisme ? NavLink : "p"} href={`/admin/organismes/${organisme?._id}`} flexGrow={1}>
+              <Text {...(organisme ? { as: NavLink, href: `/admin/organismes/${organisme?._id}` } : {})} flexGrow={1}>
                 <Text isTruncated maxWidth={400}>
                   {organisme?.nom || getValue()?.label}
                 </Text>
@@ -56,7 +58,7 @@ const UsersList = ({ data, pagination, sorting, searchValue }) => {
           size: 25,
           header: () => "",
           cell: (info) => (
-            <NavLink href={`/admin/users/${info.row.original._id}`} flexGrow={1}>
+            <NavLink href={`/admin/users/${info.row.original._id}`}>
               <ArrowRightLine w="1w" />
             </NavLink>
           ),

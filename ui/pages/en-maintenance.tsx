@@ -13,7 +13,7 @@ import useMaintenanceMessages from "../hooks/useMaintenanceMessages";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const chakraUIMarkdownRendererTheme = {
+const chakraUIMarkdownRendererTheme: any = {
   // we override anchors to reformat the link (aka remove the '##') and add an icon.
   a: ({ children, href, ...rest }) => (
     <Link textDecoration={"underline"} isExternal {...rest} href={href.replace(/^##/, "")}>

@@ -33,7 +33,7 @@ export const indexedRules = Object.fromEntries(
 );
 
 export const indexedDependencesRevalidationRules = Object.fromEntries(
-  Object.entries(indexedDependencies).map(([name, dependences]) => {
+  Object.entries(indexedDependencies).map(([name, dependences]: any) => {
     return [
       name,
       Object.fromEntries(

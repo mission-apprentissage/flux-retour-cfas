@@ -1,4 +1,4 @@
-import { IconButton, Input as ChackraInput } from "@chakra-ui/react";
+import { IconButton, Input as ChackraInput, InputProps } from "@chakra-ui/react";
 
 import React, { forwardRef, useMemo } from "react";
 import { InputWrapper } from "./InputWrapper";
@@ -77,6 +77,7 @@ const DateInputIn = (props) => {
           icon={<IoArrowBackward color={"disablegrey"} boxSize="4" />}
           size="sm"
           mt={-2}
+          aria-label={""}
         />
         <select value={yearValue} onChange={({ target: { value } }) => changeYear(value)}>
           {years.map((option) => (
@@ -105,6 +106,7 @@ const DateInputIn = (props) => {
           icon={<IoArrowForward olor={"disablegrey"} boxSize="4" />}
           size="sm"
           mt={-2}
+          aria-label={""}
         />
       </div>
     );
@@ -125,10 +127,12 @@ const DateInputIn = (props) => {
   );
 };
 
-const MInput = IMaskMixin(({ inputRef, ...props }) => <ChackraInput {...props} ref={inputRef} />);
+const MInput = IMaskMixin(({ inputRef, ...props }: { inputRef?: any } & InputProps) => (
+  <ChackraInput {...props} ref={inputRef} />
+));
 
 // eslint-disable-next-line react/display-name
-const CustomDateInput = forwardRef(({ value, onChange, onFocus, locked, onClick, ...props }, ref) => {
+const CustomDateInput = forwardRef(({ value, onChange, onFocus, locked, onClick, ...props }: any, ref) => {
   const actions = !locked
     ? { onClick: onClick, onFocus: onFocus }
     : {

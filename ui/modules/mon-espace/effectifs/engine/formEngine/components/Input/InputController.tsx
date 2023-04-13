@@ -6,7 +6,7 @@ import { useCerfaController } from "../../CerfaControllerContext";
 import { InputField } from "./Input";
 
 // eslint-disable-next-line react/display-name
-export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }) => {
+export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }: any) => {
   const controller = useCerfaController();
 
   const handle = useCallback(
@@ -16,7 +16,7 @@ export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }) => 
     [controller, name]
   );
 
-  const field = useRecoilValue(fieldSelector(name));
+  const field = useRecoilValue<any>(fieldSelector(name));
 
   if (!field) return <></>;
 

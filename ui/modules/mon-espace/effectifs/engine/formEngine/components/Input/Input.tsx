@@ -40,7 +40,7 @@ export const Input = memo(
     mt,
     mb,
     w,
-  }) => {
+  }: any) => {
     const props = useMemo(
       () => ({
         name,
@@ -87,7 +87,7 @@ export const Input = memo(
         precision,
       ]
     );
-    const [fieldState, setFieldState] = useState({ value });
+    const [fieldState, setFieldState] = useState<{ value: any; error?: any }>({ value });
 
     const handle = useCallback(
       async (value, extra) => {
@@ -124,7 +124,7 @@ export const Input = memo(
 );
 
 // eslint-disable-next-line react/display-name
-export const InputField = memo(({ mt, mb, ml, mr, w, ...props }) => {
+export const InputField = memo(({ mt, mb, ml, mr, w, ...props }: any) => {
   const { name, label, locked, isRequired, error, description, fieldType = "text", warning } = props;
   const Component = TypesMapping[fieldType] ?? (() => <></>);
 

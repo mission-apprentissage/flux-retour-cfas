@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 
 const OverlayMenu = ({ onClose, children, width, fixedHorizon = false }) => {
-  const menuRef = useRef();
+  const menuRef = useRef<any>();
   const [menuMaxHeight, setMenuMaxHeight] = useState("100%");
 
   useEffect(() => {

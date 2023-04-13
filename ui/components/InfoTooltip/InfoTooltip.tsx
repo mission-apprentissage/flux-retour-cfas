@@ -34,11 +34,11 @@ const TooltipIcon = (props) => (
 );
 
 // eslint-disable-next-line react/display-name
-const InfoTooltip = memo(({ description, descriptionComponent, label, history, noHistory = true, ...rest }) => {
+const InfoTooltip = memo(({ description, descriptionComponent, label, history, noHistory = true, ...rest }: any) => {
   return (
     <Popover placement="bottom">
       <PopoverTrigger>
-        <IconButton icon={<TooltipIcon color={"grey.700"} w="23px" h="23px" />} />
+        <IconButton icon={<TooltipIcon color={"grey.700"} w="23px" h="23px" />} aria-label={"tooltip"} />
       </PopoverTrigger>
       <PopoverContent {...rest}>
         <PopoverArrow />

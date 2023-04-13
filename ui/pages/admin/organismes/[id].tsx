@@ -26,7 +26,7 @@ const Organisme = () => {
     isLoading,
     refetch,
     error,
-  } = useQuery(["organisme", id], () => _get(`/api/v1/admin/organismes/${id}`));
+  } = useQuery<any, any>(["organisme", id], () => _get(`/api/v1/admin/organismes/${id}`));
 
   const { mutateAsync: hydrateOrganisme } = useMutation(() => _put(`/api/v1/admin/organismes/${id}/hydrate`));
   const { toastSuccess, toastError } = useToaster();

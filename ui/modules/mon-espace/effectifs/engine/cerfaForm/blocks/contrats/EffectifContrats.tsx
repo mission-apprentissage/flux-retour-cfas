@@ -6,8 +6,8 @@ import { fieldSelector } from "../../../formEngine/atoms";
 import { useCerfaController } from "../../../formEngine/CerfaControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
-export const ApprenantContrats = memo(({ contrats, modeSifa = false }) => {
-  const nouveaContratField = useRecoilValue(fieldSelector("apprenant.nouveau_contrat"));
+export const ApprenantContrats = memo(({ contrats }: { contrats: any[] }) => {
+  const nouveaContratField = useRecoilValue<any>(fieldSelector("apprenant.nouveau_contrat"));
   const cerfaController = useCerfaController();
   return (
     <>

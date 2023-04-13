@@ -5,7 +5,7 @@ import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 
 const useFetchEffectifsParNiveauFormation = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);
-  const { data, isLoading, error } = useQuery(["/api/indicateurs/niveau-formation", requestFilters], () =>
+  const { data, isLoading, error } = useQuery<any, any>(["/api/indicateurs/niveau-formation", requestFilters], () =>
     _get("/api/indicateurs/niveau-formation", { params: requestFilters })
   );
 
@@ -17,7 +17,7 @@ const useFetchEffectifsParNiveauFormation = (filters = {}) => {
     };
   });
 
-  return { data: repartitionEffectifs, loading: isLoading, error };
+  return { data: repartitionEffectifs, isLoading, error };
 };
 
 export default useFetchEffectifsParNiveauFormation;

@@ -21,13 +21,13 @@ import { indicateursEffectifsSchema } from "../indicateursEffectifsSchema";
 const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading }) => {
   const {
     data: effectifsParCfa,
-    loading: isEffectifsParCfaLoading,
+    isLoading: isEffectifsParCfaLoading,
     error: effectifsParCfaError,
   } = useFetchEffectifsParCfa(filters);
 
   const {
     data: effectifsParNiveauFormation,
-    loading: isEffectifsParNiveauFormationLoading,
+    isLoading: isEffectifsParNiveauFormationLoading,
     error: effectifsParNiveauFormationError,
   } = useFetchEffectifsParNiveauFormation(filters);
 

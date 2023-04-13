@@ -32,7 +32,7 @@ export default function Table({
   renderSubComponent = undefined,
   getRowCanExpand = undefined,
   searchValue,
-  onCountItemsChange = () => {},
+  onCountItemsChange = (_length: number) => {},
   // pagination
   manualPagination = false,
   onPaginationChange = null,
@@ -44,8 +44,8 @@ export default function Table({
   sorting = undefined,
   pageSizes = [5, 10, 20, 30, 40, 50],
   ...props
-}) {
-  const data = useMemo(() => defaultData, [defaultData]); // TODO TO CHECK RE-RENDERER WITH [defaultData] instead of []
+}: any) {
+  const data: any[] = useMemo(() => defaultData, [defaultData]); // TODO TO CHECK RE-RENDERER WITH [defaultData] instead of []
 
   const [globalFilter, setGlobalFilter] = useState(searchValue);
   const countItems = useRef(data.length);
@@ -60,7 +60,7 @@ export default function Table({
   const columnHelper = createColumnHelper();
 
   const columns = Object.keys(columnsDef).map((key) => {
-    return columnHelper.accessor(key, columnsDef[key]);
+    return columnHelper.accessor(key as any, columnsDef[key]);
   });
 
   const table = useReactTable({
@@ -72,7 +72,7 @@ export default function Table({
     pageCount: pagination?.total || data?.length,
     ...(onPaginationChange
       ? {
-          onPaginationChange: (updater) => {
+          onPaginationChange: (updater: any) => {
             const oldState = table.getState();
             const newState = updater(oldState.pagination);
             onPaginationChange({ page: newState.pageIndex + 1, limit: newState.pageSize });
@@ -85,7 +85,7 @@ export default function Table({
     onSortingChange,
     ...(onSortingChange
       ? {
-          onSortingChange: (updater) => {
+          onSortingChange: (updater: any) => {
             const oldState = table.getState();
             const newState = updater(oldState.sorting);
             // weird behaviour: sometimes newState is empty so we rollback to oldState
@@ -161,7 +161,7 @@ export default function Table({
                         {{
                           asc: " 🔼",
                           desc: " 🔽",
-                        }[header.column.getIsSorted()] ?? null}
+                        }[header.column.getIsSorted() as any] ?? null}
                       </div>
                     )}
                   </Box>

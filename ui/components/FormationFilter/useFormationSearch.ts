@@ -22,7 +22,7 @@ const useFormationSearch = (searchTerm, filters) => {
     etablissement_reseaux: filters.reseau?.nom ?? null,
   });
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading } = useQuery<any, any>(
     ["search-formations", requestFilters],
     () => _post("/api/formations/search", requestFilters),
     {

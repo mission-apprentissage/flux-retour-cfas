@@ -95,7 +95,7 @@ const ForgottenPasswordPage = () => {
                       <Button variant="primary" type={"submit"} w="100%">
                         Recevoir un courriel de ré-initialisation
                       </Button>
-                      <NavLink type={"submit"} w="100%" href="/auth/connexion">
+                      <NavLink type={"submit"} href="/auth/connexion">
                         Annuler
                       </NavLink>
                     </VStack>

@@ -6,7 +6,7 @@ import { organismeAtom } from "../../../../hooks/organismeAtoms";
 import { useRecoilValue } from "recoil";
 
 const AjoutApprenantModal = (modal) => {
-  const organisme = useRecoilValue(organismeAtom);
+  const organisme = useRecoilValue<any>(organismeAtom);
   let onCreateEffectifClicked = useCallback(async () => {
     try {
       await _post("/api/v1/effectif", {

@@ -24,7 +24,7 @@ function useOrganismesEffectifs(organismeId) {
     }
   }, [queryClient, organismeId]);
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isLoading, isFetching } = useQuery<any, any>(
     ["organismesEffectifs", organismeId],
     async () => {
       const organismesEffectifs = await _get(`/api/v1/organismes/${organismeId}/effectifs`);
@@ -47,7 +47,7 @@ function useOrganismesEffectifs(organismeId) {
 }
 
 const EffectifsPage = ({ isMine }) => {
-  const organisme = useRecoilValue(organismeAtom);
+  const organisme = useRecoilValue<any>(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
 
   if (isLoading) {
@@ -58,18 +58,20 @@ const EffectifsPage = ({ isMine }) => {
     );
   }
 
+  if (!organisme) return null;
+
   if (!organisme.mode_de_transmission) {
     return <ChoixTransmission organisme={organisme} />;
   } else if (organisme.mode_de_transmission === "API") {
     if (organisme.erps?.length === 0 && !organisme.first_transmission_date) {
       return <TransmissionAPI isMine={isMine} organisme={organisme} />;
     } else {
-      return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} organisme={organisme} />;
+      return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
     }
   } else if (organisme.mode_de_transmission === "MANUAL") {
     return <Televersements organisme={organisme} />;
   } else {
-    return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} organisme={organisme} />;
+    return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
   }
 };
 

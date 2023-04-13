@@ -56,10 +56,10 @@ function formatBytes(bytes, decimals = 2) {
 }
 
 const UploadFiles = ({ title }) => {
-  const organisme = useRecoilValue(organismeAtom);
+  const organisme = useRecoilValue<any>(organismeAtom);
   const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
+  const [uploadError, setUploadError] = useState<any>(null);
   const { documents, onDocumentsChanged } = useDocuments();
   const [lastMessage, resetServerEvent] = useServerEvents();
 
@@ -115,10 +115,10 @@ const UploadFiles = ({ title }) => {
       setIsSubmitting(true);
       try {
         let data = file;
-        const { documents } = await _delete(
+        const { documents, models } = await _delete(
           `${endpoint}/v1/upload?organisme_id=${organisme._id}&${queryString.stringify(data)}`
         );
-        onDocumentsChanged(documents);
+        onDocumentsChanged(documents, models);
         setIsSubmitting(false);
       } catch (e) {
         console.error(e);
@@ -200,7 +200,7 @@ const UploadFiles = ({ title }) => {
           </>
         </Box>
       ) : (
-        <Box {...getRootProps({ style })} mb={8} minH="200px">
+        <Box {...getRootProps<any>({ style })} mb={8} minH="200px">
           {isSubmitting ? (
             <Box textAlign="center" flex="1" flexDirection="column">
               <Spinner />
@@ -208,7 +208,7 @@ const UploadFiles = ({ title }) => {
             </Box>
           ) : (
             <>
-              <Input {...getInputProps()} />
+              <Input {...(getInputProps() as any)} />
               {isDragActive ? (
                 <Text>Glissez et déposez ici ...</Text>
               ) : (

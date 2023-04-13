@@ -33,7 +33,7 @@ function useOrganismesEffectifs(organismeId, anneeScolaire) {
     }
   }, [queryClient, organismeId]);
 
-  const { data, isLoading, isFetching } = useQuery(["organismesEffectifs", organismeId], async () => {
+  const { data, isLoading, isFetching } = useQuery<any, any>(["organismesEffectifs", organismeId], async () => {
     const organismesEffectifs = await _get(
       `/api/v1/organismes/${organismeId}/effectifs?sifa=true&annee_scolaire=${anneeScolaire}`
     );
@@ -56,9 +56,9 @@ const DownloadButton = ({ title, fileName, getFile }) => {
   return (
     <Button
       size="md"
-      onClick={(e) => {
+      onClick={(_e) => {
         plausible("telechargement_sifa");
-        return onClick(e);
+        return onClick();
       }}
       variant="secondary"
     >
@@ -99,13 +99,13 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
 
 const SIFAPage = ({ isMine }) => {
   const router = useRouter();
-  const organisme = useRecoilValue(organismeAtom);
+  const organisme = useRecoilValue<any>(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id, currentAnneeScolaire);
   const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
   const [searchValue, setSearchValue] = useState("");
 
-  const organismesEffectifsGroupedBySco = useMemo(
+  const organismesEffectifsGroupedBySco: any = useMemo(
     () => groupBy(organismesEffectifs, "annee_scolaire"),
     [organismesEffectifs]
   );
@@ -189,7 +189,7 @@ const SIFAPage = ({ isMine }) => {
       </VStack>
 
       <Box mt={10} mb={16}>
-        {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]) => {
+        {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]: [string, any]) => {
           const orgaEffectifs = showOnlyMissingSifa ? orgaE.filter((ef) => ef.requiredSifa.length) : orgaE;
           const effectifsByCfd = groupBy(orgaEffectifs, "formation.cfd");
           return (
@@ -198,7 +198,7 @@ const SIFAPage = ({ isMine }) => {
                 {anneSco} {!searchValue ? `- ${orgaEffectifs.length} apprenant(es) total` : ""}
               </Text>
               <Box p={4} style={{ borderColor: "dgalt", borderWidth: 1 }}>
-                {Object.entries(effectifsByCfd).map(([cfd, effectifs], i) => {
+                {Object.entries(effectifsByCfd).map(([cfd, effectifs]: [string, any[]], i) => {
                   const { formation } = effectifs[0];
                   return (
                     <EffectifsTableContainer
@@ -207,9 +207,7 @@ const SIFAPage = ({ isMine }) => {
                       effectifs={effectifs}
                       formation={formation}
                       searchValue={searchValue}
-                      {...{
-                        ...(i === 0 ? {} : { mt: 14 }),
-                      }}
+                      {...(i === 0 ? {} : { mt: 14 })}
                     />
                   );
                 })}

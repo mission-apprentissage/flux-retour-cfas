@@ -26,7 +26,7 @@ const IndicateursAndRepartitionEffectifsRegion = ({ filters, effectifs, loading 
   } = useFetchEffectifsParDepartement(filters);
   const {
     data: effectifsParNiveauFormation,
-    loading: isEffectifsParNiveauFormationLoading,
+    isLoading: isEffectifsParNiveauFormationLoading,
     error: effectifsParNiveauFormationError,
   } = useFetchEffectifsParNiveauFormation(filters);
 
@@ -69,7 +69,7 @@ const IndicateursAndRepartitionEffectifsRegion = ({ filters, effectifs, loading 
           <DateWithTooltipSelector marginBottom="1w" />
           <RepartitionEffectifsParNiveauFormation
             repartitionEffectifs={effectifsParNiveauFormation}
-            isEffectifsParNiveauFormationLoading={isEffectifsParNiveauFormationLoading}
+            loading={isEffectifsParNiveauFormationLoading}
             error={effectifsParNiveauFormationError}
           />
         </TabPanel>

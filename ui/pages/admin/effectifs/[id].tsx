@@ -22,7 +22,11 @@ const Effectif = () => {
   const title = "Gestion des effectifs";
   const router = useRouter();
   const id = router.query.id;
-  const { data: effectif, isLoading, error } = useQuery(["effectif", id], () => _get(`/api/v1/admin/effectifs/${id}`));
+  const {
+    data: effectif,
+    isLoading,
+    error,
+  } = useQuery<any, any>(["effectif", id], () => _get(`/api/v1/admin/effectifs/${id}`));
 
   let formationWarning = "";
   if (!effectif?.formation.formation_id) {
@@ -128,7 +132,6 @@ const Effectif = () => {
                 </Box>
               )}
               <InfoDetail
-                mt={4}
                 data={effectif?.formation_detail || effectif?.formation || {}}
                 rows={{
                   rncps: {
@@ -284,10 +287,7 @@ const Effectif = () => {
                 </Heading>
                 <Text color="mgalt">Dossiers avec le même nom et prénom</Text>
 
-                <EffectifsList
-                  data={effectif.effectifsDoublon}
-                  highlight={{ siret: effectif.siret, uai: effectif.uai }}
-                />
+                <EffectifsList data={effectif.effectifsDoublon} />
               </Box>
             )}
           </Stack>
@@ -299,4 +299,4 @@ const Effectif = () => {
   );
 };
 
-export default withAuth(Effectif, "ADMINISTRATEUR");
+export default withAuth(Effectif, ["ADMINISTRATEUR"]);

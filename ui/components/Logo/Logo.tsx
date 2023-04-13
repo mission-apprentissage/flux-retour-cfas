@@ -16,7 +16,7 @@ const Logo = ({ scale = 1 }) => {
   let afterPaddingTop = "1.65625rem";
 
   return (
-    <Box scale={scale} paddingY="3w" as={NavLink} to="/">
+    <Box scale={scale} paddingY="3w" as={NavLink} href="/">
       <Text
         display="inline-block"
         color="grey.800"

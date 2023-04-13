@@ -22,7 +22,7 @@ export default function ContacterLequipeDuTdb() {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]}>
         <Container maxW="xl">
-          <Breadcrumb pages={[{ title: "Questions & réponses", to: "/questions-reponses" }, { title }]} />
+          <Breadcrumb pages={[{ title: "Questions & réponses", path: "/questions-reponses" }, { title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
             Une question ? Quelques éléments de réponse.
           </Heading>

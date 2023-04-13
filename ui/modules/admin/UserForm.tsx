@@ -22,7 +22,17 @@ import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 
 import userSchema from "./userSchema";
 
-export const UserForm = ({ user, onCreate, onDelete, onUpdate }) => {
+export const UserForm = ({
+  user,
+  onCreate,
+  onDelete,
+  onUpdate,
+}: {
+  user: any;
+  onCreate?: any;
+  onDelete?: any;
+  onUpdate?: any;
+}) => {
   const { toastSuccess, toastError } = useToaster();
 
   const { values, errors, touched, dirty, handleSubmit, handleChange } = useFormik({
@@ -131,17 +141,17 @@ export const UserForm = ({ user, onCreate, onDelete, onUpdate }) => {
     <form onSubmit={handleSubmit}>
       <VStack gap={2} alignItems="baseline" my={8}>
         <Grid gridTemplateColumns="repeat(2, 2fr)" gridGap="2w">
-          <FormControl py={2} isInvalid={errors.nom}>
+          <FormControl py={2} isInvalid={!!errors.nom}>
             <FormLabel>Nom</FormLabel>
             <Input type="text" id="nom" name="nom" value={values.nom} onChange={handleChange} />
-            {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
+            {errors.nom && touched.nom && <FormErrorMessage>{errors.nom as string}</FormErrorMessage>}
           </FormControl>
-          <FormControl py={2} isInvalid={errors.prenom}>
+          <FormControl py={2} isInvalid={!!errors.prenom}>
             <FormLabel>Prénom</FormLabel>
             <Input type="text" id="prenom" name="prenom" value={values.prenom} onChange={handleChange} />
-            {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
+            {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom as string}</FormErrorMessage>}
           </FormControl>
-          <FormControl isRequired isInvalid={errors.civility}>
+          <FormControl isRequired isInvalid={!!errors.civility}>
             <FormLabel>Civilité</FormLabel>
             <RadioGroup value={values.civility}>
               <HStack>
@@ -165,12 +175,12 @@ export const UserForm = ({ user, onCreate, onDelete, onUpdate }) => {
                 </Radio>
               </HStack>
             </RadioGroup>
-            {errors.civility && touched.civility && <FormErrorMessage>{errors.civility}</FormErrorMessage>}
+            {errors.civility && touched.civility && <FormErrorMessage>{errors.civility as string}</FormErrorMessage>}
           </FormControl>
-          <FormControl py={2} isInvalid={errors.email}>
+          <FormControl py={2} isInvalid={!!errors.email}>
             <FormLabel>Email</FormLabel>
             <Input type="email" id="email" name="email" value={values.email} onChange={handleChange} />
-            {errors.email && touched.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
+            {errors.email && touched.email && <FormErrorMessage>{errors.email as string}</FormErrorMessage>}
           </FormControl>
         </Grid>
 

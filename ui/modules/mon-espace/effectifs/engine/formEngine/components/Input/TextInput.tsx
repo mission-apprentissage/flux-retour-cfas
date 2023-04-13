@@ -1,4 +1,4 @@
-import { Input as ChackraInput } from "@chakra-ui/react";
+import { Input as ChackraInput, InputProps } from "@chakra-ui/react";
 
 import React, { useMemo, useRef } from "react";
 import { InputWrapper } from "./InputWrapper";
@@ -158,7 +158,7 @@ const MaskedInput = (props) => {
       placeholderChar="_"
       autofix={true}
       blocks={blocks}
-      disabled={disabled}
+      isDisabled={disabled}
       onAccept={(currentValue) => (valueRef.current = currentValue)}
       onComplete={(va) => handle(va)}
       ref={inputRef}
@@ -176,4 +176,6 @@ const MaskedInput = (props) => {
   );
 };
 
-const MInput = IMaskMixin(({ inputRef, ...props }) => <ChackraInput {...props} ref={inputRef} />);
+const MInput = IMaskMixin(({ inputRef, ...props }: { inputRef?: any } & InputProps) => (
+  <ChackraInput {...props} ref={inputRef} />
+));

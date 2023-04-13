@@ -11,8 +11,8 @@ import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
 // const sleep = (m) => new Promise((r) => setTimeout(r, m));
 
 export const useInitCerfa = ({ controller, modeSifa, canEdit, effectifsSnapshot = false }) => {
-  const effectifId = useRecoilValue(effectifIdAtom);
-  const organisme = useRecoilValue(organismeAtom);
+  const effectifId = useRecoilValue<any>(effectifIdAtom);
+  const organisme = useRecoilValue<any>(organismeAtom);
 
   const { isLoading, isFetching } = useQuery(
     ["effectif", effectifId],

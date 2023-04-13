@@ -1,12 +1,12 @@
 import React from "react";
-import { Text, HStack } from "@chakra-ui/react";
+import { Text, HStack, StackProps } from "@chakra-ui/react";
 import { formatDistanceToNow } from "date-fns";
 
 import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import InfoDetail from "@/modules/admin/InfoDetail";
 
-export const ExternalLinks = ({ search, siret, ...props }) => (
+export const ExternalLinks = ({ search, siret, ...props }: { search?: string; siret?: string } & StackProps) => (
   <HStack gap={2} {...props}>
     <a
       target="_blank"
@@ -46,7 +46,6 @@ export const ExternalLinks = ({ search, siret, ...props }) => (
 const OrganismeDetail = ({ data }) => {
   return (
     <InfoDetail
-      mt={4}
       data={data}
       rows={{
         nom: {

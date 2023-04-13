@@ -8,13 +8,14 @@ import {
 import useAuth from "@/hooks/useAuth";
 import IndicateursVueReseauPage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-reseau/IndicateursVueReseauPage";
 import withAuth from "@/components/withAuth";
+import { OrganisationTeteReseau } from "@/common/internal/Organisation";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const IndicateursVueReseauPageContainer = () => {
   const { auth, organisationType } = useAuth();
   if (organisationType === "TETE_DE_RESEAU") {
-    const fixedFiltersState = { reseau: { nom: auth.organisation.reseau } };
+    const fixedFiltersState = { reseau: { nom: (auth.organisation as OrganisationTeteReseau).reseau } };
     const defaultFiltersState = { ...getDefaultState(), ...fixedFiltersState };
     return (
       <FiltersProvider defaultState={defaultFiltersState} fixedState={fixedFiltersState}>

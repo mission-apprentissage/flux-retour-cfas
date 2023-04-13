@@ -1,9 +1,9 @@
-import { useToast } from "@chakra-ui/react";
+import { useToast, UseToastOptions } from "@chakra-ui/react";
 
 export default function useToaster() {
   const toast = useToast();
 
-  const toastSuccess = (title, options) =>
+  const toastSuccess = (title: UseToastOptions["title"], options?: UseToastOptions) =>
     toast({
       title,
       status: "success",
@@ -11,7 +11,7 @@ export default function useToaster() {
       ...options,
     });
 
-  const toastError = (title, options) =>
+  const toastError = (title: UseToastOptions["title"], options?: UseToastOptions) =>
     toast({
       title,
       status: "error",

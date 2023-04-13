@@ -7,7 +7,7 @@ import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal"
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 
 // eslint-disable-next-line react/display-name
-export const EffectifApprenant = memo(({ apprenant }) => {
+export const EffectifApprenant = memo(({ apprenant }: { apprenant: any }) => {
   return (
     <Box>
       <Flex>

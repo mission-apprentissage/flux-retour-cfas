@@ -44,7 +44,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     fields[name] = { ...createField({ name, data }), ...(!canEdit ? { locked: true } : {}) };
   });
 
-  let historique_statut = [];
+  let historique_statut: any[] = [];
   let showAddStatut = true;
   if ((modeSifa && !!cerfa.apprenant.historique_statut.value.length) || !canEdit || isAPITransmission) {
     historique_statut = cerfa.apprenant.historique_statut.value;
@@ -54,6 +54,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
       name: "apprenant.nouveau_statut",
       data: "",
     });
+
     historique_statut = [
       {
         date_statut: "",
@@ -91,7 +92,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     };
   });
 
-  let contrats = [];
+  let contrats: any[] = [];
   let showAddContrat = true;
   if ((modeSifa && !!cerfa.apprenant.contrats.value.length) || !canEdit || isAPITransmission) {
     contrats = cerfa.apprenant.contrats.value;

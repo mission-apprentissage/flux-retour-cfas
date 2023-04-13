@@ -4,25 +4,25 @@ import React, { forwardRef } from "react";
 
 export const DEFAULT_PAGE_SIZE = 10;
 
-const Next = forwardRef((props, ref) => (
+const Next = forwardRef((props, ref: any) => (
   <Button ref={ref} {...props} style={{ textDecoration: "none" }}>
     <Box as="i" className="ri-skip-forward-fill" />
   </Button>
 ));
 
-const Prev = forwardRef((props, ref) => (
+const Prev = forwardRef((props, ref: any) => (
   <Button ref={ref} {...props} style={{ textDecoration: "none" }}>
     <Box as="i" className="ri-skip-back-fill" />
   </Button>
 ));
 
-const Forward = forwardRef((props, ref) => (
+const Forward = forwardRef((props, ref: any) => (
   <Button ref={ref} {...props} style={{ textDecoration: "none" }}>
     <Box as="i" className="ri-arrow-right-s-line" />
   </Button>
 ));
 
-const Backward = forwardRef((props, ref) => (
+const Backward = forwardRef((props, ref: any) => (
   <Button ref={ref} {...props} style={{ textDecoration: "none" }}>
     <Box as="i" className="ri-arrow-left-s-line" />
   </Button>

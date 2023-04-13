@@ -7,8 +7,16 @@ import { isDateFuture } from "../../../common/utils/dateUtils";
 import Table from "../Table";
 import DepartementRow from "./DepartementRow";
 
-const RepartitionEffectifsParDepartement = ({ effectifs, loading, error }) => {
-  let content = null;
+const RepartitionEffectifsParDepartement = ({
+  effectifs,
+  loading,
+  error,
+}: {
+  effectifs: any[];
+  loading: boolean;
+  error?: any;
+}) => {
+  let content: any = null;
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid

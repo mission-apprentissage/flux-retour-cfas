@@ -23,7 +23,7 @@ export const mapNatureOrganismeDeFormation = (nature) => {
   }
 };
 
-const CfaInformationSection = ({ infosCfa, loading, error }) => {
+const CfaInformationSection = ({ infosCfa, loading, error }: { infosCfa: any; loading: boolean; error?: any }) => {
   if (loading) {
     return <CfaInformationSkeleton />;
   }

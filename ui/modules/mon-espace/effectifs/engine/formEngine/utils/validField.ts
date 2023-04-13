@@ -1,7 +1,7 @@
 import { isEmptyValue } from "./isEmptyValue";
 import * as Yup from "yup";
 
-export const validField = async ({ field, value }) => {
+export const validField = async ({ field, value }): Promise<{ error?: string }> => {
   if (field.required && isEmptyValue(value)) {
     return { error: field.requiredMessage ?? "Ce champ est obligatoire" };
   }

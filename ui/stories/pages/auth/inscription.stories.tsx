@@ -1,6 +1,6 @@
 import React from "react";
 
-import Page from "../../../pages/auth/inscription/index";
+import Page from "../../../pages/auth/inscription";
 
 const Story = {
   title: "Pages / auth / inscription",

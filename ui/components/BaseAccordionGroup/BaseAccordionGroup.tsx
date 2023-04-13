@@ -12,7 +12,7 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 
 export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" }) => {
-  const [indexArray, setIndexArray] = useState();
+  const [indexArray, setIndexArray] = useState<number[]>([]);
   const [isUnfold, setIsUnfold] = useState(false);
   const indexItemArray = AccordionItemsDetailList.map((item) => AccordionItemsDetailList.indexOf(item));
 
@@ -26,7 +26,7 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
     setIsUnfold(false);
   };
 
-  const updateIndex = (indexNumber) => {
+  const updateIndex = (indexNumber: number) => {
     const myIndex = indexArray?.indexOf(indexNumber);
     if (myIndex !== -1) {
       const newIndexArray = indexArray?.filter((item) => {

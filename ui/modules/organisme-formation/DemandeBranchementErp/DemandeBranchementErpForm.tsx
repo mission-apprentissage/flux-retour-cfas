@@ -24,7 +24,7 @@ const formInitialValues = {
   autre_erp_nom: "",
 };
 
-const ErpSelectionList = [{ name: "Sélectionnez une option", state: null }].concat(ERPS_FORM_CASES);
+const ErpSelectionList: any = [{ name: "Sélectionnez une option", state: null }].concat(ERPS_FORM_CASES as any);
 
 const DemandeBranchementErpForm = ({ onSubmit }) => {
   return (

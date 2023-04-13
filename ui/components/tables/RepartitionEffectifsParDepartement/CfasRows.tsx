@@ -19,7 +19,7 @@ const CfasRows = ({ departementCode }) => {
     ...mapFiltersToApiFormat(filtersContext.state),
     etablissement_num_departement: departementCode,
   };
-  const { data, isLoading } = useQuery([QUERY_KEYS.EFFECTIF_PAR.CFA, requestFilters], () =>
+  const { data, isLoading } = useQuery<any, any>([QUERY_KEYS.EFFECTIF_PAR.CFA, requestFilters], () =>
     fetchEffectifsParCfa(requestFilters)
   );
 

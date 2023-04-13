@@ -25,18 +25,20 @@ export const effectifStateSelector = selectorFamily({
   set:
     (effectifId) =>
     ({ set }, { inputNames }) => {
-      set(effectifsStateAtom, (prevEffectifsState) => {
+      set(effectifsStateAtom, (prevEffectifsState: any) => {
         // eslint-disable-next-line no-undef
-        const newEffectifsState = new Map(JSON.parse(JSON.stringify(Array.from(prevEffectifsState))));
-        let validation_errors = [];
-        const { validation_errors: prevValidationErrors, requiredSifa: prevRequiredSifa } =
-          newEffectifsState.get(effectifId);
+        const newEffectifsState = new Map<any, any>(JSON.parse(JSON.stringify(Array.from(prevEffectifsState))));
+        let validation_errors: any[] = [];
+        const {
+          validation_errors: prevValidationErrors,
+          requiredSifa: prevRequiredSifa,
+        }: { validation_errors: any[]; requiredSifa: any[] } = newEffectifsState.get(effectifId);
         for (const validation_error of prevValidationErrors) {
           if (!inputNames.includes(validation_error.fieldName)) {
             validation_errors.push(validation_error);
           }
         }
-        let requiredSifa = [];
+        let requiredSifa: any[] = [];
         for (const currentRequiredSifa of prevRequiredSifa) {
           if (!inputNames.includes(currentRequiredSifa)) {
             requiredSifa.push(currentRequiredSifa);
@@ -50,12 +52,17 @@ export const effectifStateSelector = selectorFamily({
   get:
     (effectifId) =>
     ({ get }) => {
-      const effectifsState = get(effectifsStateAtom);
+      const effectifsState: any = get(effectifsStateAtom);
       const { validation_errors, requiredSifa } = effectifsState.get(effectifId) ?? {
         validation_errors: [],
         requiredSifa: [],
       };
-      const validationErrorsByBlock = {
+      const validationErrorsByBlock: {
+        statuts: any[];
+        apprenant: any[];
+        formation: any[];
+        contrats: any[];
+      } = {
         statuts: [],
         apprenant: [],
         formation: [],
@@ -73,7 +80,12 @@ export const effectifStateSelector = selectorFamily({
         }
       }
 
-      const requiredSifaByBlock = {
+      const requiredSifaByBlock: {
+        statuts: any[];
+        apprenant: any[];
+        formation: any[];
+        contrats: any[];
+      } = {
         statuts: [],
         apprenant: [],
         formation: [],
@@ -99,7 +111,7 @@ export const cerfaSetter = selector({
   key: "cerfaSetter",
   get: () => ({}),
   set: ({ set }, payload) => {
-    set(cerfaAtom, (cerfa) => {
+    set(cerfaAtom, (cerfa: any) => {
       let newState = { ...cerfa };
       Object.entries(payload).forEach(([name, patch]) => {
         if (patch === undefined) {
@@ -119,17 +131,17 @@ export const cerfaSetter = selector({
 export const valueSelector = selectorFamily({
   key: "valueSelector",
   get:
-    (name) =>
+    (name: string) =>
     ({ get }) =>
-      get(cerfaAtom)?.[name]?.value,
+      (get(cerfaAtom)?.[name] as any)?.value,
 });
 
-export const valuesSelector = selector({ key: "valuesSelector", get: ({ get }) => getValues(get(cerfaAtom)) });
+export const valuesSelector = selector({ key: "valuesSelector", get: ({ get }) => getValues(get(cerfaAtom) as any) });
 
 export const fieldSelector = selectorFamily({
   key: "fieldSelector",
   get:
-    (name) =>
+    (name: string) =>
     ({ get }) => {
       return get(cerfaAtom)?.[name];
     },

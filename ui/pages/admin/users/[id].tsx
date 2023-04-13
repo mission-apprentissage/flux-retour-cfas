@@ -22,7 +22,7 @@ const User = () => {
     refetch: refetchUser,
     isLoading,
     error,
-  } = useQuery(["user", id], () => _get(`/api/v1/admin/users/${id}`));
+  } = useQuery<any, any>(["user", id], () => _get(`/api/v1/admin/users/${id}`));
 
   const title = "Gestion des utilisateurs";
   const { user, warning } = data || {};

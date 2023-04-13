@@ -1,6 +1,7 @@
-import { Check } from "../../../../../../../theme/components/icons";
 import { Checkbox, Text } from "@chakra-ui/react";
 import React from "react";
+
+import { Check } from "../../../../../../../theme/components/icons";
 
 export const ConsentInput = (props) => {
   const { name, onChange, value, locked, label, isRequired } = props;

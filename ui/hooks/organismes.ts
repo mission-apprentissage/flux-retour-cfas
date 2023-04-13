@@ -9,7 +9,7 @@ export function useOrganisme(organismeId: string) {
     data: organisme,
     isLoading,
     error,
-  } = useQuery(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
+  } = useQuery<any, any>(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
     enabled: !!organismeId,
   });
 
@@ -26,7 +26,7 @@ export function useOrganisationOrganisme() {
     data: organisme,
     isLoading,
     error,
-  } = useQuery(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {});
+  } = useQuery<any, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {});
 
   return {
     organisme,
@@ -41,7 +41,7 @@ export function useOrganisationOrganismes() {
     data: organismes,
     isLoading,
     error,
-  } = useQuery(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {});
+  } = useQuery<any, any>(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {});
 
   return {
     organismes,
@@ -66,7 +66,7 @@ export function useFetchOrganismeIndicateurs(organismeId: string) {
     data: indicateurs,
     isLoading,
     error,
-  } = useQuery(["organismes", organismeId, "indicateurs", requestFilters], () =>
+  } = useQuery<any, any>(["organismes", organismeId, "indicateurs", requestFilters], () =>
     _get(`/api/v1/organismes/${organismeId}/indicateurs`, { params: requestFilters })
   );
 

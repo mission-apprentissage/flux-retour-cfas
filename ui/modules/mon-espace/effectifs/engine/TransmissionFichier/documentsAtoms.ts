@@ -4,7 +4,7 @@ import { uploadsAtom } from "../atoms";
 export const documentsGetter = selector({
   key: "documentsGetter",
   get: ({ get }) => {
-    const uploads = get(uploadsAtom);
+    const uploads: any = get(uploadsAtom);
     return uploads?.documents;
   },
 });

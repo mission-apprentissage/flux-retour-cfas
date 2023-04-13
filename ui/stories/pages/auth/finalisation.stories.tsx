@@ -1,6 +1,6 @@
 import React from "react";
 
-import Page from "../../../pages/auth/finalisation.jsx";
+import Page from "../../../pages/auth/finalisation";
 import { authArgTypes } from "../../../.storybook/utils.js";
 
 const Story = {

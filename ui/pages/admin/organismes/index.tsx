@@ -17,16 +17,17 @@ const DEFAULT_LIMIT = 100;
 const Organismes = () => {
   const title = "Gestion des organismes";
   const router = useRouter();
-  let { page, limit, sort, q: searchValue, ...filter } = router.query;
-  page = parseInt(page, 10) || 1;
-  limit = parseInt(limit, 10) || DEFAULT_LIMIT;
+  let { q: searchValue, ...filter } = router.query;
+  const sort = router.query.sort as string;
+  const page = parseInt(router.query.page as string, 10) || 1;
+  const limit = parseInt(router.query.limit as string, 10) || DEFAULT_LIMIT;
   filter = filter || undefined;
 
   const {
     data: organismes,
     isLoading: isLoadingOrganismes,
     error: errorsOrganismes,
-  } = useQuery(["admin/organismes", page, limit, searchValue, sort, filter], () =>
+  } = useQuery<any, any>(["admin/organismes", page, limit, searchValue, sort, filter], () =>
     _get("/api/v1/admin/organismes/", { params: { page, limit, q: searchValue, sort, filter } })
   );
   // prefetch next page
@@ -62,14 +63,14 @@ const Organismes = () => {
           <Stack spacing={2} width="100%">
             <form
               method="get"
-              onSubmit={(e) => {
+              onSubmit={(e: any) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
                 const { q } = Object.fromEntries(formData);
                 router.push(
                   {
                     pathname: "/admin/organismes",
-                    query: q ? { q } : null,
+                    query: (q ? { q } : null) as any,
                   },
                   undefined,
                   { shallow: true }
@@ -119,7 +120,6 @@ const Organismes = () => {
             )}
 
             <OrganismesList
-              mt={4}
               data={organismes?.data || []}
               pagination={organismes?.pagination}
               sorting={sorting}

@@ -9,7 +9,7 @@ import setWith from "lodash.setwith";
 import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
 import { effectifStateSelector } from "../atoms";
 
-const getIsLocked = (fields) => {
+const getIsLocked = (fields: Record<string, any>) => {
   if (!fields) return undefined;
   const values = {};
   Object.entries(fields).forEach(([key, field]) => {
@@ -30,15 +30,15 @@ export const useAutoSave = ({ controller }) => {
         snapshot.getPromise(organismeAtom),
     []
   );
-  const effectifId = useRecoilValue(effectifIdAtom);
+  const effectifId = useRecoilValue<any>(effectifIdAtom);
   const setEffectifsState = useSetRecoilState(effectifStateSelector(effectifId));
-  const inputNamesRef = useRef([]);
+  const inputNamesRef = useRef<any[]>([]);
   const setAutoSave = useSetRecoilState(autoSaveStatusAtom);
 
   useEffect(() => {
     let timeout;
     const save = debounce(
-      async ({ fields }) => {
+      async ({ fields }: { fields: Record<string, any> }) => {
         clearTimeout(timeout);
         const toSave = Object.fromEntries(
           Object.entries(fields)
@@ -53,6 +53,7 @@ export const useAutoSave = ({ controller }) => {
 
         const data = { ...getValues(toSave), is_lock: getIsLocked(toSave) };
         const organisme = await getOrganisme();
+        if (!organisme) throw new Error("Organisme not found");
         try {
           await apiService.saveCerfa({
             organisme_id: organisme._id,

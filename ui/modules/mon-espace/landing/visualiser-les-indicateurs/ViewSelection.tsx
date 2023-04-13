@@ -4,6 +4,7 @@ import React from "react";
 
 import LinkCard from "@/components/LinkCard/LinkCard";
 import useAuth from "@/hooks/useAuth";
+import { OrganisationTeteReseau } from "@/common/internal/Organisation";
 
 const ViewOptionCard = ({ navigationPageData }) => {
   return (
@@ -27,7 +28,7 @@ const ViewSelection = () => {
       ? [
           {
             path: "/par-reseau",
-            title: `Vue du réseau ${auth.organisation.reseau}`,
+            title: `Vue du réseau ${(auth.organisation as OrganisationTeteReseau).reseau}`,
           },
           {
             path: "/par-organisme",

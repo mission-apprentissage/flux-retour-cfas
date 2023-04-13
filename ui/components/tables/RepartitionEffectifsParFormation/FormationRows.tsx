@@ -24,7 +24,7 @@ const FormationRows = ({ niveauFormation }) => {
       "etablissement_num_departement",
     ]),
   };
-  const { data, isLoading } = useQuery([QUERY_KEYS.EFFECTIF_PAR.FORMATION, requestFilters], () =>
+  const { data, isLoading } = useQuery<any, any>([QUERY_KEYS.EFFECTIF_PAR.FORMATION, requestFilters], () =>
     fetchEffectifsParFormation(requestFilters)
   );
 

@@ -17,16 +17,17 @@ const DEFAULT_LIMIT = 100;
 const Effectifs = () => {
   const title = "Gestion des effectifs";
   const router = useRouter();
-  let { page, limit, sort, q: searchValue, ...filter } = router.query;
-  page = parseInt(page, 10) || 1;
-  limit = parseInt(limit, 10) || DEFAULT_LIMIT;
+  let { q: searchValue, ...filter } = router.query;
+  const sort = router.query.sort as string;
+  const page = parseInt(router.query.page as string, 10) || 1;
+  const limit = parseInt(router.query.limit as string, 10) || DEFAULT_LIMIT;
   filter = filter || undefined;
 
   const {
     data: effectifs,
     isLoading: isLoadingEffectifs,
     error: errorsEffectifs,
-  } = useQuery(["admin/effectifs", page, limit, searchValue, sort, filter], () =>
+  } = useQuery<any, any>(["admin/effectifs", page, limit, searchValue, sort, filter], () =>
     _get("/api/v1/admin/effectifs/", { params: { page, limit, q: searchValue, sort, filter } })
   );
   // prefetch next page
@@ -62,14 +63,14 @@ const Effectifs = () => {
           <Stack spacing={2} width="100%">
             <form
               method="get"
-              onSubmit={(e) => {
+              onSubmit={(e: any) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
                 const { q } = Object.fromEntries(formData);
                 router.push(
                   {
                     pathname: "/admin/effectifs",
-                    query: q ? { q } : null,
+                    query: (q ? { q } : null) as any,
                   },
                   undefined,
                   { shallow: true }
@@ -119,7 +120,6 @@ const Effectifs = () => {
             )}
 
             <EffectifsList
-              mt={4}
               data={effectifs?.data || []}
               pagination={effectifs?.pagination}
               sorting={sorting}
@@ -132,4 +132,4 @@ const Effectifs = () => {
   );
 };
 
-export default withAuth(Effectifs, "ADMINISTRATEUR");
+export default withAuth(Effectifs, ["ADMINISTRATEUR"]);

@@ -1,6 +1,6 @@
 import { omitNullishValues } from "./omitNullishValues";
 
-export const mapFiltersToApiFormat = (filters) => {
+export const mapFiltersToApiFormat = (filters: any) => {
   return omitNullishValues({
     date: filters.date.toISOString(),
     etablissement_num_region: filters.region?.code ?? null,

@@ -2,7 +2,7 @@ import { Box, Button } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { forwardRef } from "react";
 
-const PrimarySelectButton = forwardRef(({ children, onClick, isActive }, ref) => {
+const PrimarySelectButton = forwardRef(({ children, onClick, isActive }: any, ref: any) => {
   return (
     <Button variant="select-primary" onClick={onClick} ref={ref} color="bluefrance">
       <Box as="span" textDecoration="underline" fontSize="gamma">
