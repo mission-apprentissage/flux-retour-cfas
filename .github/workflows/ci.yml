@@ -1,14 +1,35 @@
 name: CI
 on: [push]
 jobs:
-  test:
+  tests:
+    name: "Tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
 
-      - run: make ci
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - run: 'echo "No build required"'
+      - name: "Installation des dépendances"
+        run: make install
+
+      - name: "Lint"
+        run: make lint
+
+      - name: "Tests"
+        run: make test
+
+      - name: "Build"
+        run: make build
+
+  deploy-recette:
+    if: github.ref == 'refs/heads/master'
+    name: "Déploiement en recette"
+    needs: tests
+    uses: "./.github/workflows/_deploy.yml"
+    with:
+      environment: recette
+      server_ip: 146.59.226.69
+      user: sven
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

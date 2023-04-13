@@ -9,16 +9,11 @@ UsePAM yes
 PermitRootLogin no
 PasswordAuthentication no
 PermitEmptyPasswords no
-RSAAuthentication no
 ChallengeResponseAuthentication no
-RhostsRSAAuthentication no
 HostbasedAuthentication no
 IgnoreRhosts yes
 
 #Misc
-UsePrivilegeSeparation yes
-KeyRegenerationInterval 3600
-ServerKeyBits 1024
 SyslogFacility AUTH
 LogLevel VERBOSE
 LoginGraceTime 120
@@ -30,7 +25,8 @@ AcceptEnv LANG LC_*                                             #Allow client to
 ClientAliveInterval 900                                         #Client timeout (15 minutes)
 ClientAliveCountMax 0                                           #This way enforces timeouts on the server side
 LoginGraceTime 30                                               #Authentication must happen within 30 seconds
-MaxStartups 2                                                   #Max concurrent SSH sessions
+#Test: désactivé car drop potentiellement des connexions
+#MaxStartups 2                                                   #Max concurrent SSH sessions
 TCPKeepAlive yes
 Subsystem sftp /usr/lib/openssh/sftp-server
 
