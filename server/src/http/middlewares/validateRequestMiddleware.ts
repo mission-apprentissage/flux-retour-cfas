@@ -25,19 +25,25 @@ export const validateRequestMiddleware: <TParams = any, TQuery = any, TBody = an
     const errors: Array<ErrorListItem> = [];
     if (params) {
       const parsed = params.safeParse(req.params);
-      if (!parsed.success) {
+      if (parsed.success) {
+        req.params = parsed.data;
+      } else {
         errors.push({ type: "Params", errors: parsed.error });
       }
     }
     if (query) {
       const parsed = query.safeParse(req.query);
-      if (!parsed.success) {
+      if (parsed.success) {
+        req.query = parsed.data;
+      } else {
         errors.push({ type: "Query", errors: parsed.error });
       }
     }
     if (body) {
       const parsed = body.safeParse(req.body);
-      if (!parsed.success) {
+      if (parsed.success) {
+        req.body = parsed.data;
+      } else {
         errors.push({ type: "Body", errors: parsed.error });
       }
     }

@@ -32,10 +32,9 @@ export default () => {
       const { page, limit, sort, q, filter } = req.query as ListSchema;
       const query: any = filter || {};
       if (q) {
-        // FIXME propager le type zod. Possible ?
-        (query as any).$text = { $search: q };
+        query.$text = { $search: q };
       }
-      // FIXME propager le type zod. Possible ?
+
       const result = await getAllOrganismes(query, { page, limit, sort });
       if (result) {
         result.filter = filter;
