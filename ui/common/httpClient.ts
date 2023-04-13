@@ -50,7 +50,7 @@ const handleResponse = (path, response) => {
   return response.data;
 };
 
-const getHeaders = (contentType = "application/json") => {
+const getHeaders = (contentType: string | null = "application/json") => {
   return {
     Accept: "application/json",
     ...(contentType ? { "Content-Type": contentType } : {}),
@@ -98,7 +98,7 @@ export const _post = async (path: string, body?: any, options?: AxiosRequestConf
 
 export const _postFile = async (path: string, data, options?: AxiosRequestConfig<any>) => {
   const response = await axios.post(path, data, {
-    headers: getHeaders(),
+    headers: getHeaders(null),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
     ...options,
