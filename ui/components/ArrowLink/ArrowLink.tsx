@@ -1,4 +1,4 @@
-const { Link, Box } = require("@chakra-ui/react");
+import { Link, Box } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 
 const ArrowLink = ({ title, ...props }) => (

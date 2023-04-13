@@ -14,16 +14,28 @@ import { ArrowRightLine, Close } from "../../theme/components/icons";
 
 const PromptModal = ({
   isOpen,
-  onClose = () => {},
+  onClose,
   title,
   children,
   size = "4xl",
   okText = "Oui",
   koText = "Non",
-  onOk = () => {},
-  onKo = () => {},
+  onOk,
+  onKo,
   canBeClosed = true,
   bgOverlay = "rgba(0, 0, 0, 0.48)",
+}: {
+  isOpen?: any;
+  onClose?: any;
+  title?: any;
+  children?: any;
+  size?: any;
+  okText?: any;
+  koText?: any;
+  onOk?: any;
+  onKo?: any;
+  canBeClosed?: any;
+  bgOverlay?: any;
 }) => {
   return (
     <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose} size={size}>

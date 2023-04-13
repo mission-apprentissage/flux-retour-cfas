@@ -1,15 +1,18 @@
-import { Box, Button, Divider } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
-
-const noop = () => {};
+import { Box, Button, Divider } from "@chakra-ui/react";
 
 const SecondarySelectButton = ({
   children,
   onClick,
   isActive = false,
   isClearable = false,
-  clearIconOnClick = noop,
+  clearIconOnClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  isActive?: boolean;
+  isClearable?: boolean;
+  clearIconOnClick?: () => void;
 }) => {
   const style = isClearable
     ? {
@@ -53,21 +56,13 @@ const SecondarySelectButton = ({
             _hover={{ opacity: "0.5" }}
             onClick={(event) => {
               event.stopPropagation();
-              clearIconOnClick();
+              clearIconOnClick?.();
             }}
           />
         </>
       )}
     </Button>
   );
-};
-
-SecondarySelectButton.propTypes = {
-  children: PropTypes.node.isRequired,
-  isClearable: PropTypes.bool,
-  isActive: PropTypes.bool,
-  onClick: PropTypes.func.isRequired,
-  clearIconOnClick: PropTypes.func,
 };
 
 export default SecondarySelectButton;

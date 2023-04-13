@@ -17,7 +17,9 @@ const DEFAULT_LIMIT = 100;
 const Organismes = () => {
   const title = "Gestion des organismes";
   const router = useRouter();
-  let { q: searchValue, ...filter } = router.query;
+  // eslint-disable-next-line prefer-const
+  let { q: _q, page: _page, limit: _limit, sort: _sort, ...filter } = router.query;
+  const searchValue = router.query.q as string;
   const sort = router.query.sort as string;
   const page = parseInt(router.query.page as string, 10) || 1;
   const limit = parseInt(router.query.limit as string, 10) || DEFAULT_LIMIT;

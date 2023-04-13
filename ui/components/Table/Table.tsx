@@ -32,7 +32,7 @@ export default function Table({
   renderSubComponent = undefined,
   getRowCanExpand = undefined,
   searchValue,
-  onCountItemsChange = (_length: number) => {},
+  onCountItemsChange,
   // pagination
   manualPagination = false,
   onPaginationChange = null,
@@ -53,7 +53,7 @@ export default function Table({
   useEffect(() => {
     setGlobalFilter(searchValue);
     if (searchValue === "") {
-      onCountItemsChange(data.length);
+      onCountItemsChange?.(data.length);
     }
   }, [data.length, onCountItemsChange, searchValue]);
 

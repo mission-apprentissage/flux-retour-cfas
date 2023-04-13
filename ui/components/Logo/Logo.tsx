@@ -4,16 +4,16 @@ import React from "react";
 import NavLink from "next/link";
 
 const Logo = ({ scale = 1 }) => {
-  let fontSize = "0.7875rem";
-  let beforeWidth = "2.0625rem";
-  let beforeHeight = "0.75rem";
-  let beforeMarginBottom = "0.25rem";
-  let beforeBackgroundSize = "2.0625rem 0.84375rem, 2.0625rem 0.75rem, 0";
-  let beforeBackgroundPosition = "0 -0.04688rem, 0 0, 0 0";
-  let afterMinWidth = "1.96875rem";
-  let afterBackgroundSize = "3.9375rem 2.8125rem";
-  let afterBackgroundPosition = "0 calc(100% + 1.40625rem)";
-  let afterPaddingTop = "1.65625rem";
+  const fontSize = "0.7875rem";
+  const beforeWidth = "2.0625rem";
+  const beforeHeight = "0.75rem";
+  const beforeMarginBottom = "0.25rem";
+  const beforeBackgroundSize = "2.0625rem 0.84375rem, 2.0625rem 0.75rem, 0";
+  const beforeBackgroundPosition = "0 -0.04688rem, 0 0, 0 0";
+  const afterMinWidth = "1.96875rem";
+  const afterBackgroundSize = "3.9375rem 2.8125rem";
+  const afterBackgroundPosition = "0 calc(100% + 1.40625rem)";
+  const afterPaddingTop = "1.65625rem";
 
   return (
     <Box scale={scale} paddingY="3w" as={NavLink} href="/">
