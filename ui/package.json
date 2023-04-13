@@ -19,8 +19,8 @@
     "build-storybook": "build-storybook -o .storybook-static"
   },
   "dependencies": {
-    "@chakra-ui/icons": "2.0.17",
-    "@chakra-ui/react": "2.5.1",
+    "@chakra-ui/icons": "2.0.18",
+    "@chakra-ui/react": "2.5.5",
     "@chakra-ui/theme": "2.2.4",
     "@choc-ui/paginator": "3.4.0",
     "@emotion/react": "11.10.6",
