@@ -929,6 +929,7 @@ export interface Organisme {
     | "FIABLE"
     | "NON_FIABILISABLE_UAI_NON_VALIDEE"
     | "NON_FIABILISABLE_UAI_VALIDEE"
+    | "A_CONTACTER"
     | "INCONNU"
     | "INCONNU_INSCRIPTION"
     | "FIABILISE";

@@ -6,34 +6,36 @@ import {
   STATUT_FIABILISATION_ORGANISME,
 } from "../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../common/logger.js";
-import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../common/model/collections.js";
+import {
+  effectifsDb,
+  fiabilisationUaiSiretDb,
+  organismesDb,
+  organismesReferentielDb,
+} from "../../../common/model/collections.js";
+import { getEffectifsDuplicatesFromOrganismes } from "./update.utils.js";
 
 let nbOrganismesReferentielFiables = 0;
 let nbOrganismesFiabilises = 0;
 let nbOrganismesNonFiablesSupprimes = 0;
 
-let nbOrganismesNonFiabilisablesMappingSupprimes = 0;
-let nbOrganismesNonFiabilisablesMappingFixEffectifs = 0;
-
 let nbEffectifsDuplicateOrganismesAFiabiliser = 0;
-let nbEffectifsFixedOrganismesNonFiabilisablesMapping = 0;
-let nbEffectifsDuplicateOrganismesNonFiabilisablesMapping = 0;
+let nbEffectifsDuplicatesOrganismesNonFiables = 0;
+let nbEffectifsMovedToOrganismeFiable = 0;
 
 /**
  * Méthode d'application de la fiabilisation pour les différents cas :
  *  Organismes du référentiel ayant une UAI valide : MAJ le champ fiabilisation_statut des organismes concernés comme FIABLE
  *  Couples à fiabiliser : On déplace les effectifs, puis on MAJ le champ fiabilisation_statut des organismes concernés
  *    et on supprime les organismes non fiables restants
- *  Couples identifiés comme non fiabilisables (via Mapping) : MAJ le champ fiabilisation_statut des organismes concernés
- *    et suppression des organismes si on trouve un organisme fiable lié à ce couple
- *  Couples identifiés comme non fiabilisables (UAI non validée référentiel) : ????
+ *  Couples identifiés comme non fiables : si on trouve un couple fiable lié à ce siret et que l'UAI est fermée dans le référentiel alors
+ *  si doublons d'effectifs on déplace les effectifs du non fiable vers le fiable et on supprime le non fiable
  */
 export const updateOrganismesFiabilisationUaiSiret = async () => {
   // Traitement // de l'identification des différents statuts de fiabilisation
   await Promise.all([
     updateOrganismesReferentielFiables(),
     updateOrganismesFiabilises(),
-    updateOrganismesNonFiabilisablesMapping(),
+    updateOrganismesNonFiablesUaiFermee(),
   ]);
 
   // Log
@@ -41,27 +43,17 @@ export const updateOrganismesFiabilisationUaiSiret = async () => {
   logger.info(" ->", nbOrganismesReferentielFiables, "organismes du référentiel mis à jour en tant que fiables");
   logger.info(" ->", nbOrganismesFiabilises, "organismes mis à jour en tant que fiabilisés");
   logger.info(" ->", nbOrganismesNonFiablesSupprimes, "organismes non fiables supprimés");
-  logger.info(" ->", nbEffectifsDuplicateOrganismesAFiabiliser, "effectifs doublons sur fiabilisation d'un organisme");
-  logger.info(" ->", nbOrganismesNonFiabilisablesMappingSupprimes, "organismes supprimés (non fiabilisables mapping)");
-  logger.info(
-    " ->",
-    nbEffectifsDuplicateOrganismesNonFiabilisablesMapping,
-    "doublons d'effectifs organismes (non fiabilisables mapping)"
-  );
-  logger.info(
-    " ->",
-    nbOrganismesNonFiabilisablesMappingFixEffectifs,
-    "fix d'effectifs organismes (non fiabilisables mapping)"
-  );
+  logger.info(" ->", nbEffectifsDuplicateOrganismesAFiabiliser, "doublons d'effectifs en fiabilisation d'organisme");
+  logger.info(" ->", nbEffectifsDuplicatesOrganismesNonFiables, "doublons d'effectifs sur les organismes non fiables");
+  logger.info(" ->", nbEffectifsMovedToOrganismeFiable, "effectifs déplacés d'un organisme non fiable vers fiable");
 
   return {
     nbOrganismesReferentielFiables,
     nbOrganismesFiabilises,
     nbOrganismesNonFiablesSupprimes,
     nbEffectifsDuplicateOrganismesAFiabiliser,
-    nbOrganismesNonFiabilisablesMappingSupprimes,
-    nbEffectifsDuplicateOrganismesNonFiabilisablesMapping,
-    nbOrganismesNonFiabilisablesMappingFixEffectifs,
+    nbEffectifsDuplicatesOrganismesNonFiables,
+    nbEffectifsMovedToOrganismeFiable,
   };
 };
 
@@ -137,62 +129,77 @@ const updateOrganismeForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret
 
 // #endregion
 
-// #region ORGANISMES NON FIABILISABLES UAI VALIDEE
-
 /**
- * Méthode de MAJ de tous les couples non fiabilisables en utilisant le mapping >> NON_FIABILISABLE_UAI_VALIDEE
+ * Fonction de MAJ des organismes non fiables si l'UAI du non fiable est fermée dans le référentiel
  */
-const updateOrganismesNonFiabilisablesMapping = async () => {
-  // Une fois tous les couples ayant permis de maj les organismes on va rattacher les effectifs de chacun des organismes NON_FIABILISABLE_UAI_VALIDEE
-  const organismesNonFiabilisablesMapping = await organismesDb()
-    .find({ fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_VALIDEE })
+export const updateOrganismesNonFiablesUaiFermee = async () => {
+  const organismesNonFiabilisables = await organismesDb()
+    .find({
+      fiabilisation_statut: {
+        $in: [
+          STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_VALIDEE,
+          STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_UAI_NON_VALIDEE,
+          STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_PB_COLLECTE,
+        ],
+      },
+    })
     .toArray();
 
-  await PromisePool.for(organismesNonFiabilisablesMapping).process(
-    updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable
-  );
+  await PromisePool.for(organismesNonFiabilisables).process(async ({ _id, uai, siret }: any) => {
+    // Recherche d'un unique organisme fiable avec ce SIRET
+    const organismesFiableForSiret = await organismesDb()
+      .find({ siret, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
+      .toArray();
 
-  // Enfin on va supprimer les organismes NON_FIABILISABLE_UAI_VALIDEE et leurs effectifs
-  await PromisePool.for(organismesNonFiabilisablesMapping).process(async ({ _id }: any) => {
-    await deleteOrganismeAndEffectifs(_id);
-    nbOrganismesNonFiabilisablesMappingSupprimes++;
-  });
-};
+    // S'il existe un unique organisme fiable lié au couple non fiable courant on vérifie
+    // s'il existe un organisme dans le référentiel avec l'uai non fiable fermée
+    if (organismesFiableForSiret.length === 1) {
+      const organismeFiable = organismesFiableForSiret[0];
+      const organismeNonFiable = await organismesDb().findOne({ uai, siret });
 
-/**
- * Méthode de MAJ unitaire d'un organisme NON_FIABILISABLE_UAI_VALIDEE en rattachant ses effectifs liés au bon organisme FIABLE s'il en existe un seul
- * @param {*} currentOrganismeNonFiabilisableMapping
- */
-const updateOrganismeNonFiabilisableMappingEffectifsToOrganismeFiable = async ({ _id, uai }: any) => {
-  // Recherche d'un unique organisme fiable lié à l'UAI de l'organisme NON_FIABILISABLE_UAI_VALIDEE
-  const organismeFiableForUai = await organismesDb()
-    .find({ uai, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
-    .toArray();
+      const countOrganismeReferentielForUaiFerme = await organismesReferentielDb().countDocuments({
+        uai,
+        etat_administratif: "fermé",
+      });
 
-  if (organismeFiableForUai.length === 1) {
-    const effectifsForOrganismeNonFiabilisableToFix = await effectifsDb().find({ organisme_id: _id }).toArray();
-    const organismeFiableId = organismeFiableForUai[0]._id;
-
-    // Update de chaque effectif via For Of pour limiter les appels //
-    for (const currentEffectifToUpdate of effectifsForOrganismeNonFiabilisableToFix) {
-      try {
-        const { modifiedCount } = await effectifsDb().updateOne(
-          { _id: currentEffectifToUpdate._id },
-          { $set: { organisme_id: organismeFiableId } }
+      // Si l'UAI du référentiel est fermée on essaie de fiabiliser les effectifs et l'organisme
+      if (countOrganismeReferentielForUaiFerme > 0) {
+        // On vérifie s'il existe des doublons en commun sur l'organisme fiable et non fiable
+        const duplicatesForFiableAndNonFiable = await getEffectifsDuplicatesFromOrganismes(
+          organismeFiable?._id,
+          organismeNonFiable?._id
         );
-        nbEffectifsFixedOrganismesNonFiabilisablesMapping += modifiedCount;
-      } catch (error) {
-        if (error instanceof MongoServerError) {
-          if (error.message.includes("duplicate key error")) {
-            // On décompte les effectifs en doublon - pas de rattachement nécessaire vu que l'effectif existe déja
-            // Remarque : on pilote les doublons d'effectifs via Metabase cela nous permettra de vérifier que la correction s'applique bien aux effectifs non déja présents
-            nbEffectifsDuplicateOrganismesNonFiabilisablesMapping++;
+
+        if (duplicatesForFiableAndNonFiable.length > 0) {
+          // On déplace les effectifs du non fiable vers le fiable
+          const effectifsToMoveToFiable = await effectifsDb().find({ organisme_id: organismeNonFiable?._id }).toArray();
+          for (const currentEffectifToUpdate of effectifsToMoveToFiable) {
+            try {
+              const { modifiedCount } = await effectifsDb().updateOne(
+                { _id: currentEffectifToUpdate._id },
+                { $set: { organisme_id: organismeFiable?._id } }
+              );
+              nbEffectifsMovedToOrganismeFiable += modifiedCount;
+            } catch (error) {
+              if (error instanceof MongoServerError) {
+                if (error.message.includes("duplicate key error")) {
+                  nbEffectifsDuplicatesOrganismesNonFiables++;
+                }
+              }
+            }
           }
+
+          // On supprime ensuite l'organisme non fiable
+          await deleteOrganismeAndEffectifs(organismeNonFiable?._id);
+          nbOrganismesNonFiablesSupprimes++;
         }
       }
+    } else {
+      // Si pas d'organisme fiable lié on marque l'organisme comme A_CONTACTER
+      await organismesDb().updateOne(
+        { uai, siret },
+        { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.A_CONTACTER } }
+      );
     }
-
-    if (nbEffectifsFixedOrganismesNonFiabilisablesMapping > 0) nbOrganismesNonFiabilisablesMappingFixEffectifs++;
-  }
+  });
 };
-// #endregion
