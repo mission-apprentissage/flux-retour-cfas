@@ -19,12 +19,12 @@ import {
 import { Logo } from "./Logo";
 import Link from "../../Links/Link";
 import { PRODUCT_NAME_TITLE } from "../../../common/constants/product";
-import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
-import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
+import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill";
+import { AccountFill } from "../../../theme/components/icons/AccountFill";
 import useAuth from "../../../hooks/useAuth";
-import { _post } from "../../../common/httpClient.js";
+import { _post } from "../../../common/httpClient";
 import MenuItem from "../../Links/MenuItem";
-import { Parametre } from "../../../theme/components/icons/Parametre.js";
+import { Parametre } from "../../../theme/components/icons/Parametre";
 import { Settings4Fill, UserFill } from "../../../theme/components/icons";
 
 const UserMenu = () => {

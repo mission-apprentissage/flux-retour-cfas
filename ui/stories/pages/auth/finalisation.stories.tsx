@@ -1,7 +1,7 @@
 import React from "react";
 
 import Page from "../../../pages/auth/finalisation";
-import { authArgTypes } from "../../../.storybook/utils.js";
+import { authArgTypes } from "../../../.storybook/utils";
 
 const Story = {
   title: "Pages / auth / finalisation",

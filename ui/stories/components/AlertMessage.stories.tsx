@@ -1,6 +1,6 @@
 import React from "react";
 
-import AlertMessage from "../../components/AlertMessage/AlertMessage.jsx";
+import AlertMessage from "../../components/AlertMessage/AlertMessage";
 
 function getMaintenanceMessages(response) {
   return [

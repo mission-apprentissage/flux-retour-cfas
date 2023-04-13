@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Text } from "@chakra-ui/react";
 
-import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
+import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation";
 import Table from "@/components/Table/Table";
 import { ArrowRightLine } from "@/theme/components/icons";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";

@@ -1,6 +1,6 @@
 import React from "react";
 
-import Page from "../../../pages/auth/mot-de-passe-oublie.jsx";
+import Page from "../../../pages/auth/mot-de-passe-oublie";
 
 const Story = {
   title: "Pages / auth / mot-de-passe-oublie",

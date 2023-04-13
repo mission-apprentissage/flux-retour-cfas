@@ -1,6 +1,6 @@
 import React from "react";
 
-import Page from "../../pages/404.jsx";
+import Page from "../../pages/404";
 
 const Story = {
   title: "Pages / 404",

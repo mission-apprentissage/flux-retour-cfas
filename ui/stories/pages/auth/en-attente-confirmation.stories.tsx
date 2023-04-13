@@ -1,6 +1,6 @@
 import React from "react";
 
-import Page from "../../../pages/auth/en-attente-confirmation.jsx";
+import Page from "../../../pages/auth/en-attente-confirmation";
 
 const Story = {
   title: "Pages / auth / en-attente-confirmation",

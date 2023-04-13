@@ -4,9 +4,9 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
 
-import { InfoCircle } from "../../../theme/components/icons/index.js";
+import { InfoCircle } from "../../../theme/components/icons/index";
 import { ERPS } from "../../../common/constants/erps";
-import { configureOrganismeERP } from "../../../common/api/tableauDeBord.js";
+import { configureOrganismeERP } from "../../../common/api/tableauDeBord";
 
 const TransmissionAPI = ({ organisme, isMine }) => {
   const router = useRouter();

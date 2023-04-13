@@ -1,6 +1,6 @@
 import React from "react";
 
-import ContactSection from "../../components/ContactSection/ContactSection.jsx";
+import ContactSection from "../../components/ContactSection/ContactSection";
 
 const Story = {
   title: "Components / ContactSection",

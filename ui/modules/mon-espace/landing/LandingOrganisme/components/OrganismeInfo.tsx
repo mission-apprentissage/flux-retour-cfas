@@ -17,7 +17,7 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
 import IndicateursInfos from "../../common/IndicateursInfos";
-import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
+import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext";
 import { Organisme } from "@/common/internal/Organisme";
 
 export const natureOrganismeDeFormationLabel = {

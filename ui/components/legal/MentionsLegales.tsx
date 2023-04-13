@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
-import Section from "../Section/Section.jsx";
-import Sommaire from "../Sommaire/Sommaire.jsx";
+import Section from "../Section/Section";
+import Sommaire from "../Sommaire/Sommaire";
 
 const anchors = {
   EditeurDuSite: "editeur-du-site",

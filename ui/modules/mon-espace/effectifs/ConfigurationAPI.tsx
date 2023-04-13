@@ -3,9 +3,9 @@ import { Box, Button, Flex, RadioGroup, Radio, Text, VStack, Stack, HStack } fro
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 
-import { DownloadLine } from "../../../theme/components/icons/index.js";
+import { DownloadLine } from "../../../theme/components/icons/index";
 import { ERPS } from "../../../common/constants/erps";
-import { configureOrganismeERP } from "../../../common/api/tableauDeBord.js";
+import { configureOrganismeERP } from "../../../common/api/tableauDeBord";
 
 const ConfigurationAPI = ({ organisme, isMine }) => {
   const router = useRouter();

@@ -6,7 +6,7 @@ import { Box, Container, Divider, Flex, Heading, HStack, Skeleton, Text } from "
 import { ERPS } from "../../../common/constants/erps";
 import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
 import { Checkbox } from "../../../theme/components/icons";
-import useFetchIndicateursNational from "../../../hooks/useFetchIndicateursNational.js";
+import useFetchIndicateursNational from "../../../hooks/useFetchIndicateursNational";
 
 const Count = ({ count = 0, label }) => {
   return (

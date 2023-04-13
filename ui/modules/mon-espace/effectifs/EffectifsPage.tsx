@@ -9,7 +9,7 @@ import { useSetRecoilState, useRecoilValue } from "recoil";
 import ChoixTransmission from "./ChoixTransmission";
 import TransmissionAPI from "./TransmissionAPI";
 import Televersements from "./Televersements";
-import { effectifsStateAtom } from "./engine/atoms.js";
+import { effectifsStateAtom } from "./engine/atoms";
 
 function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);

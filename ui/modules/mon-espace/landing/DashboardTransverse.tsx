@@ -1,6 +1,6 @@
 import React from "react";
 import { Heading, Stack } from "@chakra-ui/react";
-import ViewSelection from "./visualiser-les-indicateurs/ViewSelection.jsx";
+import ViewSelection from "./visualiser-les-indicateurs/ViewSelection";
 
 const DashboardTransverse = () => {
   return (

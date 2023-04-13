@@ -1,6 +1,6 @@
 import { Grid, Text, VStack } from "@chakra-ui/react";
 import React from "react";
-import * as AllIcons from "../../theme/components/icons/index.js";
+import * as AllIcons from "../../theme/components/icons/index";
 
 // Composant inspiré de Chakra UI
 // voir https://github.com/chakra-ui/chakra-ui/blob/bea57af3fc039fce0d1b9ac272cdd65c21fd98e1/packages/components/icons/stories/icons.stories.tsx
