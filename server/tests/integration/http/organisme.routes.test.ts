@@ -1,5 +1,4 @@
 import { strict as assert } from "assert";
-import { ObjectId } from "mongodb";
 
 import {
   stringifyMongoFields,
@@ -7,47 +6,11 @@ import {
   expectUnauthorizedError,
   id,
   initTestApp,
-  PermissionTest,
-  testPermissions,
   RequestAsOrganisationFunc,
 } from "../../utils/testUtils.js";
 import { AxiosInstance } from "axiosist";
 import { organismesDb } from "../../../src/common/model/collections.js";
-import { Organisme } from "@/src/common/model/@types/Organisme.js";
-
-const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key] }, "_id" | "siret" | "uai"> = {
-  adresse: {
-    departement: "56", // morbihan
-    region: "53", // bretagne
-    academie: "14", // rennes
-  },
-  reseaux: ["CCI"],
-  erps: ["YMAG"],
-  nature: "responsable_formateur",
-  nom: "ADEN Formations (Caen)",
-  fiabilisation_statut: "INCONNU",
-  metiers: [],
-  relatedFormations: [],
-  created_at: new Date("2023-04-12T18:00:00.000Z"),
-  updated_at: new Date("2023-04-12T18:00:00.000Z"),
-};
-
-const organismes: Organisme[] = [
-  // owner
-  {
-    _id: new ObjectId(id(1)),
-    uai: "0142321X",
-    siret: "41461021200014",
-    ...commonOrganismeAttributes,
-  },
-  // other
-  {
-    _id: new ObjectId(id(2)),
-    uai: "0142322X",
-    siret: "77568013501089",
-    ...commonOrganismeAttributes,
-  },
-];
+import { PermissionsTestConfig, organismes, testPermissions } from "../../utils/permissions.js";
 
 const userOrganisme = organismes[0];
 
@@ -55,7 +18,7 @@ let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
 
-describe("Routes organismes", () => {
+describe("Routes /organismes/:id", () => {
   before(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
@@ -65,90 +28,26 @@ describe("Routes organismes", () => {
     await organismesDb().insertMany(organismes);
   });
 
-  const accesOrganisme: PermissionTest[] = [
-    {
-      label: "OF lié",
-      organisation: {
-        type: "ORGANISME_FORMATION_FORMATEUR",
-        uai: "0142321X",
-        siret: "41461021200014",
-      },
-      allowed: true,
-    },
-    {
-      label: "OF non lié",
-      organisation: {
-        type: "ORGANISME_FORMATION_FORMATEUR",
-        uai: "0142322X",
-        siret: "77568013501089",
-      },
-      allowed: false,
-    },
-    {
-      label: "Tête de réseau",
-      organisation: {
-        type: "TETE_DE_RESEAU",
-        reseau: "CCI",
-      },
-      allowed: true,
-    },
-    {
-      label: "Tête de réseau non liée",
-      organisation: {
-        type: "TETE_DE_RESEAU",
-        reseau: "AGRI",
-      },
-      allowed: false,
-    },
-    {
-      label: "DREETS même région",
-      organisation: {
-        type: "DREETS",
-        code_region: "53",
-      },
-      allowed: true,
-    },
-    {
-      label: "DREETS autre région",
-      organisation: {
-        type: "DREETS",
-        code_region: "76",
-      },
-      allowed: false,
-    },
-    {
-      label: "DDETS même département",
-      organisation: {
-        type: "DDETS",
-        code_departement: "56",
-      },
-      allowed: true,
-    },
-    {
-      label: "DDETS autre département",
-      organisation: {
-        type: "DDETS",
-        code_departement: "31",
-      },
-      allowed: false,
-    },
-    {
-      label: "Opérateur public national",
-      organisation: {
-        type: "OPERATEUR_PUBLIC_NATIONAL",
-        nom: "Ministère de la Justice",
-      },
-      allowed: true,
-    },
-    {
-      label: "Administrateur",
-      organisation: {
-        type: "ADMINISTRATEUR",
-      },
-      allowed: true,
-    },
-  ];
-
+  const accesOrganisme: PermissionsTestConfig = {
+    "OFF lié": true,
+    "OFF non lié": false,
+    "OFR lié": true,
+    "OFR responsable": true,
+    "OFR non lié": false,
+    "OFRF lié": true,
+    "OFRF responsable": true,
+    "OFRF non lié": false,
+    "Tête de réseau": true,
+    "Tête de réseau non liée": false,
+    "DREETS même région": true,
+    "DREETS autre région": false,
+    "DDETS même département": true,
+    "DDETS autre département": false,
+    "ACADEMIE même académie": true,
+    "ACADEMIE autre académie": false,
+    "Opérateur public national": true,
+    Administrateur: true,
+  };
   describe("GET /organismes/:id - détail d'un organisme", () => {
     it("Erreur si non authentifié", async () => {
       const response = await httpClient.get(`/api/v1/organisme/${id(1)}`);
@@ -200,106 +99,26 @@ describe("Routes organismes", () => {
     });
   });
 
-  const configurationERP: PermissionTest[] = [
-    {
-      label: "OF lié",
-      organisation: {
-        type: "ORGANISME_FORMATION_FORMATEUR",
-        uai: "0142321X",
-        siret: "41461021200014",
-      },
-      allowed: true,
-    },
-    {
-      label: "OF non lié",
-      organisation: {
-        type: "ORGANISME_FORMATION_FORMATEUR",
-        uai: "0142322X",
-        siret: "77568013501089",
-      },
-      allowed: false,
-    },
-    {
-      label: "Tête de réseau",
-      organisation: {
-        type: "TETE_DE_RESEAU",
-        reseau: "CCI",
-      },
-      allowed: false,
-    },
-    {
-      label: "Tête de réseau non liée",
-      organisation: {
-        type: "TETE_DE_RESEAU",
-        reseau: "AGRI",
-      },
-      allowed: false,
-    },
-    {
-      label: "DREETS même région",
-      organisation: {
-        type: "DREETS",
-        code_region: "53",
-      },
-      allowed: false,
-    },
-    {
-      label: "DREETS autre région",
-      organisation: {
-        type: "DREETS",
-        code_region: "76",
-      },
-      allowed: false,
-    },
-    {
-      label: "ACADEMIE même région",
-      organisation: {
-        type: "ACADEMIE",
-        code_academie: "14",
-      },
-      allowed: false,
-    },
-    {
-      label: "ACADEMIE autre région",
-      organisation: {
-        type: "ACADEMIE",
-        code_academie: "16",
-      },
-      allowed: false,
-    },
-    {
-      label: "DDETS même département",
-      organisation: {
-        type: "DDETS",
-        code_departement: "56",
-      },
-      allowed: false,
-    },
-    {
-      label: "DDETS autre département",
-      organisation: {
-        type: "DDETS",
-        code_departement: "31",
-      },
-      allowed: false,
-    },
-    {
-      label: "Opérateur public national",
-      organisation: {
-        type: "OPERATEUR_PUBLIC_NATIONAL",
-        nom: "Ministère de la Justice",
-      },
-      allowed: false,
-    },
-    {
-      label: "Administrateur",
-      organisation: {
-        type: "ADMINISTRATEUR",
-      },
-      allowed: true,
-    },
-  ];
-
+  const configurationERP: PermissionsTestConfig = {
+    "OFF lié": true,
+    "OFF non lié": false,
+    "OFR lié": true,
+    "OFR responsable": true,
+    "OFR non lié": false,
+    "OFRF lié": true,
+    "OFRF responsable": true,
+    "OFRF non lié": false,
+    "Tête de réseau": false,
+    "Tête de réseau non liée": false,
+    "DREETS même région": false,
+    "DREETS autre région": false,
+    "DDETS même département": false,
+    "DDETS autre département": false,
+    "ACADEMIE même académie": false,
+    "ACADEMIE autre académie": false,
+    "Opérateur public national": false,
+    Administrateur: true,
+  };
   describe("PUT /organismes/:id/configure-erp - configuration de l'ERP d'un organisme", () => {
     it("Erreur si non authentifié", async () => {
       const response = await httpClient.put(`/api/v1/organismes/${id(1)}/configure-erp`, {

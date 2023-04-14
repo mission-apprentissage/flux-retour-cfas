@@ -101,35 +101,6 @@ export async function initTestApp() {
         headers: { cookie: `${COOKIE_NAME}=${sessionToken}` },
       });
     },
-
-    // paramètres et usage en WIP
-    async authenticateAsOrganisation(organisation: NewOrganisation): Promise<RequestAPIFunc> {
-      const organisationId = await createOrganisation(organisation);
-      const userId = await createUser(
-        {
-          civility: "Madame",
-          nom: "Dupont",
-          prenom: "Jean",
-          fonction: "Responsable administratif",
-          email: "jean@test.local",
-          telephone: "",
-          password: "azerty123",
-          has_accept_cgu_version: "v0.1",
-        },
-        organisationId
-      );
-      await usersMigrationDb().updateOne({ _id: userId }, { $set: { account_status: "CONFIRMED" } });
-      const sessionToken = await createSession("jean@test.local");
-
-      return async function requestAPI<T>(method: Method, url: string, body?: T): Promise<AxiosResponse> {
-        return await httpClient.request({
-          method,
-          url,
-          data: body,
-          headers: { cookie: `${COOKIE_NAME}=${sessionToken}` },
-        });
-      };
-    },
   };
 }
 
@@ -177,23 +148,4 @@ export function stringifyMongoFields<T extends object>(object: T): T {
     }
     return acc;
   }, {}) as T;
-}
-
-type TestFunc = (organisation: NewOrganisation, allowed: boolean) => Promise<any>;
-
-export interface PermissionTest {
-  label: string;
-  organisation: NewOrganisation;
-  allowed: boolean;
-}
-
-/**
- * Helper to run a test with multiple profiles
- */
-export function testPermissions(permissions: PermissionTest[], testFunc: TestFunc) {
-  permissions.forEach((permission) => {
-    it(`${permission.label} - ${permission.allowed ? "ALLOWED" : "FORBIDDEN"}`, async () => {
-      await testFunc(permission.organisation, permission.allowed);
-    });
-  });
 }

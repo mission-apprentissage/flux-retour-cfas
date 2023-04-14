@@ -72,7 +72,7 @@ export const TETE_DE_RESEAUX = [
   },
 ] as const;
 
-export type TeteDeReseauKey = typeof TETE_DE_RESEAUX[number]["key"];
+export type TeteDeReseauKey = (typeof TETE_DE_RESEAUX)[number]["key"];
 
 export const TETE_DE_RESEAUX_BY_ID = TETE_DE_RESEAUX.reduce((acc, reseau) => {
   acc[reseau.key] = reseau;

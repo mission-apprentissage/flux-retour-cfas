@@ -69,4 +69,4 @@ export const ORGANISATIONS_NATIONALES = [
   },
 ] as const;
 
-export type OrganisationsNationalesKey = typeof ORGANISATIONS_NATIONALES[number]["key"];
+export type OrganisationsNationalesKey = (typeof ORGANISATIONS_NATIONALES)[number]["key"];

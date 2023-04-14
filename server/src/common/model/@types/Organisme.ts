@@ -46,7 +46,7 @@ export interface Organisme {
   /**
    * Nature de l'organisme de formation
    */
-  nature: typeof NATURE_ORGANISME_DE_FORMATION[keyof typeof NATURE_ORGANISME_DE_FORMATION];
+  nature: (typeof NATURE_ORGANISME_DE_FORMATION)[keyof typeof NATURE_ORGANISME_DE_FORMATION];
   /**
    * Y a-t-il un doute sur la validité de la nature
    */
@@ -478,7 +478,7 @@ export interface Organisme {
     annee_formation?: number;
     organismes: {
       organisme_id?: any;
-      nature: typeof NATURE_ORGANISME_DE_FORMATION[keyof typeof NATURE_ORGANISME_DE_FORMATION];
+      nature: (typeof NATURE_ORGANISME_DE_FORMATION)[keyof typeof NATURE_ORGANISME_DE_FORMATION];
       /**
        * Code UAI du lieu de formation (optionnel)
        */

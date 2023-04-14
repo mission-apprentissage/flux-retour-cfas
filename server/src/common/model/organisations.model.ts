@@ -37,7 +37,7 @@ export type NewOrganisation =
 
 export type Organisation = NewOrganisation & { created_at: Date };
 
-export type OrganisationType = typeof organisationTypes[number];
+export type OrganisationType = (typeof organisationTypes)[number];
 
 // OFRF, OFR, OFF
 export interface OrganisationOrganismeFormation {
@@ -51,12 +51,12 @@ export interface OrganisationOrganismeFormation {
 
 export interface OrganisationTeteReseau {
   type: "TETE_DE_RESEAU";
-  reseau: typeof TETE_DE_RESEAUX[number]["key"];
+  reseau: (typeof TETE_DE_RESEAUX)[number]["key"];
 }
 
 export interface OrganisationOperateurPublicNational {
   type: "OPERATEUR_PUBLIC_NATIONAL";
-  nom: typeof ORGANISATIONS_NATIONALES[number]["key"];
+  nom: (typeof ORGANISATIONS_NATIONALES)[number]["key"];
 }
 
 export interface OrganisationOperateurPublicRegion {
