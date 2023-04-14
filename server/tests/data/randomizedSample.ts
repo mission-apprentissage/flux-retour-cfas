@@ -91,6 +91,7 @@ export const createSampleEffectif = (params: any = {}) => {
       email_contact: faker.internet.email(),
       date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
       historique_statut: [],
+      contrats: [],
       ...params?.apprenant,
     },
     formation: {

@@ -149,3 +149,9 @@ export function stringifyMongoFields<T extends object>(object: T): T {
     return acc;
   }, {}) as T;
 }
+
+export function generate<T>(amount: number, callback: () => T): T[] {
+  return Array(amount)
+    .fill(1)
+    .map(() => callback());
+}

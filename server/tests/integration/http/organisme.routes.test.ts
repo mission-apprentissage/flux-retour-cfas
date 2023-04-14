@@ -7,12 +7,36 @@ import {
   id,
   initTestApp,
   RequestAsOrganisationFunc,
+  generate,
 } from "../../utils/testUtils.js";
 import { AxiosInstance } from "axiosist";
-import { organismesDb } from "../../../src/common/model/collections.js";
+import { effectifsDb, organismesDb } from "../../../src/common/model/collections.js";
 import { PermissionsTestConfig, organismes, testPermissions } from "../../utils/permissions.js";
+import { beforeEach } from "mocha";
+import {
+  historySequenceApprenti,
+  historySequenceInscritToApprenti,
+  historySequenceInscritToApprentiToAbandon,
+} from "../../data/historySequenceSamples.js";
+import { createSampleEffectif } from "../../data/randomizedSample.js";
+import { Effectif } from "../../../src/common/model/@types/Effectif.js";
+import { validateEffectif } from "../../../src/common/model/effectifs.model/effectifs.model.js";
 
 const userOrganisme = organismes[0];
+
+const commonEffectifsAttributes: Pick<{ [key in keyof Effectif]: Effectif[key] }, "organisme_id" | "_computed"> = {
+  organisme_id: userOrganisme._id,
+  _computed: {
+    organisme: {
+      region: userOrganisme.adresse!.region!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- mauvais typage TS
+      departement: userOrganisme.adresse!.departement!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      academie: userOrganisme.adresse!.academie!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      reseaux: userOrganisme.reseaux!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      uai: userOrganisme.uai as string,
+      siret: userOrganisme.siret,
+    },
+  },
+};
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
@@ -69,6 +93,7 @@ describe("Routes /organismes/:id", () => {
 
   describe("GET /organismes/:id/indicateurs - indicateurs d'un organisme", () => {
     const date = "2023-04-13T10:00:00.000Z";
+    const anneeScolaire = "2022-2023";
 
     it("Erreur si non authentifié", async () => {
       const response = await httpClient.get(`/api/v1/organisme/${id(1)}/indicateurs?date=${date}`);
@@ -76,6 +101,44 @@ describe("Routes /organismes/:id", () => {
       expectUnauthorizedError(response);
     });
 
+    beforeEach(async () => {
+      // FIXME revoir les statuts
+      await effectifsDb().insertMany([
+        // 15 inscritToApprentiToAbandon
+        ...generate(10, () =>
+          validateEffectif(
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceInscritToApprentiToAbandon,
+              },
+            })
+          )
+        ),
+        // 5 apprenti
+        ...generate(5, () =>
+          createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceApprenti,
+            },
+          })
+        ),
+
+        // 15 inscritToApprenti
+        ...generate(15, () =>
+          createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceInscritToApprenti,
+            },
+          })
+        ),
+      ]);
+    });
     testPermissions(accesOrganisme, async (organisation, allowed) => {
       const response = await requestAsOrganisation(
         organisation,
@@ -87,10 +150,10 @@ describe("Routes /organismes/:id", () => {
         assert.strictEqual(response.status, 200);
         assert.deepStrictEqual(response.data, {
           date: date,
-          apprentis: 0,
+          apprentis: 20,
           inscritsSansContrat: 0,
           rupturants: 0,
-          abandons: 0,
+          abandons: 10,
           totalOrganismes: 0,
         });
       } else {
