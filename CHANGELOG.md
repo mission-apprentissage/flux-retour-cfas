@@ -1,3 +1,12 @@
+## [3.20.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.20.0...v3.20.1) (2023-04-14)
+
+
+### Bug Fixes
+
+* fix export des effectifs ([#2907](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2907)) ([5dc89b6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5dc89b69812013151f702883ee376f21d0b7cb3b))
+* logo ([#2908](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2908)) ([a68794a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a68794a03279f452698d0547b845a0edeb54547a))
+* **server:** add filterStages to indicateursNational ([#2909](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2909)) ([503223e](https://github.com/mission-apprentissage/flux-retour-cfas/commit/503223eda576bc9bd9a422ca09967a4ca4e2dbb7))
+
 # [3.20.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.19.1...v3.20.0) (2023-04-14)
 
 
