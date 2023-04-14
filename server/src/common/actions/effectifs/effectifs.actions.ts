@@ -369,13 +369,14 @@ export const getEffectifsCountByDepartementAtDate = async (ctx: AuthContext, fil
 export async function getIndicateursNational(date: Date) {
   const cacheKey = `indicateurs-national:${format(date, "yyyy-MM-dd")}`;
   return tryCachedExecution(cache, cacheKey, async () => {
+    const filterStages = [{ $match: { annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } } }];
     const [indicateurs, totalOrganismes] = await Promise.all([
       (async () => {
         const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
-          apprentisIndicator.getCountAtDate(date),
-          inscritsSansContratsIndicator.getCountAtDate(date),
-          rupturantsIndicator.getCountAtDate(date),
-          abandonsIndicator.getCountAtDate(date),
+          apprentisIndicator.getCountAtDate(date, filterStages),
+          inscritsSansContratsIndicator.getCountAtDate(date, filterStages),
+          rupturantsIndicator.getCountAtDate(date, filterStages),
+          abandonsIndicator.getCountAtDate(date, filterStages),
         ]);
         return {
           date,
