@@ -16,19 +16,10 @@ import {
   useFiltersContext,
 } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 
-const RepartitionEffectifsParSiretSection = ({ filters, namedDataDownloadMode = false }) => {
+const RepartitionEffectifsParSiretSection = ({ filters}) => {
   const { data, loading, error } = useFetchEffectifsParSiret(filters);
   const filtersContext = useFiltersContext();
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
-
-  const { organisationType } = useAuth();
-  const allowDownloadNamedData = organisationType === "ADMINISTRATEUR" || namedDataDownloadMode === true;
-
-  // enable namedDataMode if needed
-  const fetchEffectifsDataListQueryParams =
-    allowDownloadNamedData === true
-      ? { ...mapFiltersToApiFormat(filters), namedDataMode: true }
-      : mapFiltersToApiFormat(filters);
 
   return (
     <Section paddingY="4w">
@@ -59,11 +50,9 @@ const RepartitionEffectifsParSiretSection = ({ filters, namedDataDownloadMode = 
         <RepartitionEffectifsParSiret effectifs={data} loading={loading} error={error} />
         <DownloadBlock
           title="Télécharger les données de l’organisme sélectionné"
-          description={`Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste ${
-            allowDownloadNamedData === false ? "anonymisée" : ""
-          } des apprenants par organisme et formation.`}
+          description="Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste anonymisée des apprenants par organisme et formation."
           fileName={exportFilename}
-          getFile={() => fetchEffectifsDataListCsvExport(fetchEffectifsDataListQueryParams)}
+          getFile={() => fetchEffectifsDataListCsvExport(mapFiltersToApiFormat(filters))}
         />
       </Stack>
     </Section>
@@ -72,7 +61,6 @@ const RepartitionEffectifsParSiretSection = ({ filters, namedDataDownloadMode = 
 
 RepartitionEffectifsParSiretSection.propTypes = {
   filters: filtersPropTypes.state,
-  namedDataDownloadMode: PropTypes.bool,
 };
 
 export default RepartitionEffectifsParSiretSection;
