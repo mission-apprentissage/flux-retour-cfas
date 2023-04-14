@@ -19,20 +19,10 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
   effectifs,
   loading,
   hasMultipleSirets = false,
-  namedDataDownloadMode = false,
 }) => {
   const { data, isLoading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
 
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
-
-  const { organisationType } = useAuth();
-  const allowDownloadNamedData = organisationType === "ADMINISTRATEUR" || namedDataDownloadMode === true;
-
-  // enable namedDataMode if needed
-  const fetchEffectifsDataListQueryParams =
-    allowDownloadNamedData === true
-      ? { ...mapFiltersToApiFormat(filters), namedDataMode: true }
-      : mapFiltersToApiFormat(filters);
 
   return (
     <Section paddingY="4w" marginTop={!hasMultipleSirets ? "-85px" : ""}>
@@ -59,11 +49,9 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
               </Stack>
               <DownloadBlock
                 title="Télécharger les données de l’organisme sélectionné"
-                description={`Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste ${
-                  allowDownloadNamedData === false ? "anonymisée" : " "
-                } des apprenants par organisme et formation.`}
+                description="Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste des apprenants par organisme et formation."
                 fileName={exportFilename}
-                getFile={() => fetchEffectifsDataListCsvExport(fetchEffectifsDataListQueryParams)}
+                getFile={() => fetchEffectifsDataListCsvExport(mapFiltersToApiFormat(filters))}
               />
             </Stack>
           </TabPanel>
@@ -80,7 +68,6 @@ IndicateursAndRepartionCfaNiveauAnneesSection.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
   hasMultipleSirets: PropTypes.bool,
-  namedDataDownloadMode: PropTypes.bool,
   ...indicateursEffectifsSchema,
 };
 
