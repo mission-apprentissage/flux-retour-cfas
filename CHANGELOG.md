@@ -1,3 +1,22 @@
+# [3.20.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.19.1...v3.20.0) (2023-04-14)
+
+
+### Bug Fixes
+
+* fix pagination sur l'admin ([#2902](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2902)) ([dd879dd](https://github.com/mission-apprentissage/flux-retour-cfas/commit/dd879dda270a90af2a66f7f593c35fda7fb78bef))
+* fix régression upload ([#2905](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2905)) ([289f42e](https://github.com/mission-apprentissage/flux-retour-cfas/commit/289f42e0ab605b720d950ca6eace2ef833eb7fd7))
+* recette permissions ([#2890](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2890)) ([0b9d871](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0b9d871f3b02fd714e919a98bad2df47ac13b4b0))
+
+
+### Features
+
+* ajout page /admin/effectifs ([#2862](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2862)) ([c4e311c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c4e311cac457c080a447807236d2bd23a031e11d))
+* améliore les performances des indicateurs + 2/3 corrections ([#2879](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2879)) ([6e7f143](https://github.com/mission-apprentissage/flux-retour-cfas/commit/6e7f143a2e307436630a06d326600cca3307450d))
+* improve and debug ci ([#2901](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2901)) ([8916d10](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8916d10adc4344ddb8deac4f095f7615d158cd6b))
+* petites améliorations pour ansible ([#2895](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2895)) ([213a4be](https://github.com/mission-apprentissage/flux-retour-cfas/commit/213a4bec7526305e322f3d235684ed5342f0809e))
+* simplification du système de permissions :boom: ([#2772](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2772)) ([1e41146](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1e411465c5bd11d5719adc05b4a30af0a01d4e0e))
+* suppression des mentions crisp ([#2885](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2885)) ([e9a34e2](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e9a34e21e1c134a2012d34080afdb8d0ed9315f8))
+
 ## [3.19.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.19.0...v3.19.1) (2023-04-07)
 
 
