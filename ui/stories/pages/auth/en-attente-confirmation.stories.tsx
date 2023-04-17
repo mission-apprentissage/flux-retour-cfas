@@ -1,15 +1,16 @@
-import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 
 import Page from "../../../pages/auth/en-attente-confirmation";
 
-const Story = {
+const meta: Meta<typeof Page> = {
   title: "Pages / auth / en-attente-confirmation",
   component: Page,
 };
 
-const Template = (args) => <Page {...args} />;
+type Story = StoryObj<typeof Page>;
 
-export const WaitingConfirmation = Template.bind({});
-WaitingConfirmation.storyName = "EN attente de confirmation";
+export const WaitingConfirmation: Story = {
+  name: "En attente de confirmation",
+};
 
-export default Story;
+export default meta;

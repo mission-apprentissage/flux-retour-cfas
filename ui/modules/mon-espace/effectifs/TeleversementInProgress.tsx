@@ -1,11 +1,10 @@
 import React from "react";
 import { Heading, Text, VStack } from "@chakra-ui/react";
 
-export type Props = { message: string; children?: React.ReactNode };
-
-const TeleversementInProgress = ({ message, children }: Props) => {
+const TeleversementInProgress = ({ message, children }: { message: string; children?: React.ReactNode }) => {
   return (
     <VStack>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/televersement.svg" alt="Téléversement en cours" />
       <Heading as="h1" mb={8} mt={6}>
         Traitement en cours...

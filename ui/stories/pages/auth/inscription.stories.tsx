@@ -1,22 +1,27 @@
-import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 
 import Page from "../../../pages/auth/inscription";
 
-const Story = {
+const meta: Meta<typeof Page> = {
   title: "Pages / auth / inscription",
   component: Page,
 };
 
-const Template = (args) => <Page {...args} />;
+type Story = StoryObj<typeof Page>;
 
-export const Inscription = Template.bind({});
-Inscription.storyName = "Processus d'inscription";
-Inscription.parameters = {
-  mockAuth: {
-    isInPendingValidation: true,
-    account_status: "PENDING_PERMISSIONS_SETUP",
-    roles: ["of"],
+export const Inscription: Story = {
+  name: "Processus d'inscription",
+  args: {
+    primary: true,
+    label: "Button",
+  },
+  parameters: {
+    mockAuth: {
+      isInPendingValidation: true,
+      account_status: "PENDING_PERMISSIONS_SETUP",
+      roles: ["of"],
+    },
   },
 };
 
-export default Story;
+export default meta;

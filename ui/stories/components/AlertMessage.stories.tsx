@@ -1,6 +1,6 @@
-import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 
-import AlertMessage from "../../components/AlertMessage/AlertMessage";
+import Component from "../../components/AlertMessage/AlertMessage";
 
 function getMaintenanceMessages(response) {
   return [
@@ -13,33 +13,36 @@ function getMaintenanceMessages(response) {
   ];
 }
 
-const Story = {
+const meta: Meta<typeof Component> = {
   title: "Components / AlertMessage",
-  component: AlertMessage,
+  component: Component,
   parameters: {
     mockData: getMaintenanceMessages([]),
   },
 };
 
-const Template = (args) => <AlertMessage {...args} />;
+type Story = StoryObj<typeof Component>;
 
-export const AucunMessage = Template.bind({});
-AucunMessage.parameters = {
-  mockData: getMaintenanceMessages([]),
+export const AucunMessage: Story = {
+  parameters: {
+    mockData: getMaintenanceMessages([]),
+  },
 };
 
-export const MessageAlerte = Template.bind({});
-MessageAlerte.parameters = {
-  mockData: getMaintenanceMessages([
-    { _id: "1", context: "manuel", type: "alert", msg: "un exemple de message d'alerte", enabled: true },
-  ]),
+export const MessageAlerte: Story = {
+  parameters: {
+    mockData: getMaintenanceMessages([
+      { _id: "1", context: "manuel", type: "alert", msg: "un exemple de message d'alerte", enabled: true },
+    ]),
+  },
 };
 
-export const MessageInfo = Template.bind({});
-MessageInfo.parameters = {
-  mockData: getMaintenanceMessages([
-    { _id: "1", context: "manuel", type: "info", msg: "un exemple de message d'information", enabled: true },
-  ]),
+export const MessageInfo: Story = {
+  parameters: {
+    mockData: getMaintenanceMessages([
+      { _id: "1", context: "manuel", type: "info", msg: "un exemple de message d'information", enabled: true },
+    ]),
+  },
 };
 
-export default Story;
+export default meta;

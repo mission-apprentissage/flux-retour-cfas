@@ -1,4 +1,4 @@
-import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 
 import Component from "../../modules/mon-espace/effectifs/Televersements";
 
@@ -13,7 +13,7 @@ function getUploads(response) {
   ];
 }
 
-const Story = {
+const meta: Meta<typeof Component> = {
   title: "Modules / Effectifs / Televersements",
   component: Component,
   parameters: {
@@ -25,11 +25,12 @@ const Story = {
   },
 };
 
-const Template = (args) => <Component {...args} />;
+type Story = StoryObj<typeof Component>;
 
-export const Simple = Template.bind({});
-Simple.parameters = {
-  mockData: getUploads([]),
+export const Simple: Story = {
+  parameters: {
+    mockData: getUploads([]),
+  },
 };
 
-export default Story;
+export default meta;

@@ -24,7 +24,7 @@ stop:
 	docker-compose stop
 
 test-ui:
-	yarn --cwd ui test
+	yarn --cwd ui test:ci --ci
 
 test-server:
 	yarn --cwd server test

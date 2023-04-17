@@ -1,5 +1,7 @@
 import { Grid, Text, VStack } from "@chakra-ui/react";
 import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
+
 import * as AllIcons from "../../theme/components/icons/index";
 
 // Composant inspiré de Chakra UI
@@ -24,11 +26,13 @@ const Template = () => (
   </Grid>
 );
 
-const Story = {
+const meta: Meta<typeof Template> = {
   title: "Components / Liste des icones",
   component: Template,
 };
 
-export const Simple = Template.bind({});
+type Story = StoryObj<typeof Template>;
 
-export default Story;
+export const Simple: Story = {};
+
+export default meta;
