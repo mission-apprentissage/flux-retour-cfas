@@ -3,14 +3,13 @@ import { id, initTestApp } from "../../utils/testUtils.js";
 import { AxiosInstance } from "axiosist";
 import { organisationsDb, usersMigrationDb } from "../../../src/common/model/collections.js";
 import { UsersMigration } from "../../../src/common/model/@types/UsersMigration.js";
-import { ObjectId } from "mongodb";
-
-let app: Awaited<ReturnType<typeof initTestApp>>;
-let httpClient: AxiosInstance;
+import { setTime } from "../../../src/common/utils/timeUtils.js";
+import { ObjectId, WithId } from "mongodb";
 
 const date = "2022-10-10T00:00:00.000Z";
 
-const commonUserAttributes: Omit<UsersMigration, "organisation_id"> = {
+const testUser: WithId<UsersMigration> = {
+  _id: new ObjectId(id(1)),
   account_status: "CONFIRMED",
   invalided_token: false,
   password_updated_at: new Date(date),
@@ -26,32 +25,33 @@ const commonUserAttributes: Omit<UsersMigration, "organisation_id"> = {
   password:
     "$6$rounds=10000$c41a72eab295ea9b$6cMipCc33XlnZh8/rdraqeFq5Y4WhqtshSSoZJIv/WS3mJ6VayZxdYQW0.Nm2J53oklb8HfFSxypLwMTOtWh//", // MDP-azerty123
   has_accept_cgu_version: "v0.1",
+  organisation_id: new ObjectId(id(1)),
 };
+
+let app: Awaited<ReturnType<typeof initTestApp>>;
+let httpClient: AxiosInstance;
 
 describe("Authentification", () => {
   before(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
-  });
-
-  beforeEach(async () => {
-    await Promise.all([
-      await organisationsDb().insertOne({
-        _id: new ObjectId(id(1)),
-        created_at: new Date(date),
-        type: "DREETS",
-        code_region: "53",
-      }),
-      await usersMigrationDb().insertOne({
-        _id: new ObjectId(id(1)),
-        ...commonUserAttributes,
-        organisation_id: new ObjectId(id(1)),
-      }),
-    ]);
+    setTime(new Date(date));
   });
 
   describe("POST /v1/auth/login - authentification", () => {
-    it("", async () => {
+    beforeEach(async () => {
+      await Promise.all([
+        await organisationsDb().insertOne({
+          _id: new ObjectId(id(1)),
+          created_at: new Date(date),
+          type: "DREETS",
+          code_region: "53",
+        }),
+        await usersMigrationDb().insertOne(testUser),
+      ]);
+    });
+
+    it("Retourne un cookie de session", async () => {
       let response = await httpClient.post("/api/v1/auth/login", {
         email: "user@test.local.fr",
         password: "MDP-azerty123",
@@ -67,7 +67,7 @@ describe("Authentification", () => {
         },
       });
       assert.strictEqual(response.status, 200);
-      assert.strictEqual(response.data, {
+      assert.deepStrictEqual(response.data, {
         _id: id(1),
         account_status: "CONFIRMED",
         civility: "Madame",
@@ -84,38 +84,67 @@ describe("Authentification", () => {
           created_at: date,
           type: "DREETS",
         },
-        organisation_id: "643d2653769080b44b3149cd",
+        organisation_id: id(1),
         password_updated_at: date,
         prenom: "Jean",
         telephone: "",
       });
     });
+
     it("Erreur si mauvais mot de passe", async () => {
-      let response = await httpClient.post("/api/v1/auth/login", {
+      const response = await httpClient.post("/api/v1/auth/login", {
         email: "user@test.local.fr",
         password: "wrong password",
       });
 
       assert.strictEqual(response.status, 401);
     });
+
     it("Erreur si compte inconnu", async () => {
-      let response = await httpClient.post("/api/v1/auth/login", {
+      const response = await httpClient.post("/api/v1/auth/login", {
         email: "missing-user@test.local.fr",
         password: "MDP-azerty123",
       });
 
       assert.strictEqual(response.status, 401);
     });
-    // it("Erreur si compte non confirmé", async () => {
-    //   await usersMigrationDb().updateOne({
-    //     email:
-    //   })
-    //   let response = await httpClient.post("/api/v1/auth/login", {
-    //     email: "user@test.local.fr",
-    //     password: "MDP-azerty123",
-    //   });
 
-    //   assert.strictEqual(response.status, 4001);
-    // });
+    it("Erreur si compte en attente de validation email", async () => {
+      await usersMigrationDb().insertOne({
+        ...testUser,
+        _id: new ObjectId(id(2)),
+        email: "user2@test.local.fr",
+        account_status: "PENDING_EMAIL_VALIDATION",
+      });
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "user2@test.local.fr",
+        password: "MDP-azerty123",
+      });
+
+      assert.strictEqual(response.status, 403);
+      assert.deepStrictEqual(response.data, {
+        error: "Forbidden",
+        message: "Votre compte n'est pas encore validé.",
+      });
+    });
+
+    it("Erreur si compte en attente de confirmation", async () => {
+      await usersMigrationDb().insertOne({
+        ...testUser,
+        _id: new ObjectId(id(2)),
+        email: "user2@test.local.fr",
+        account_status: "PENDING_ADMIN_VALIDATION",
+      });
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "user2@test.local.fr",
+        password: "MDP-azerty123",
+      });
+
+      assert.strictEqual(response.status, 403);
+      assert.deepStrictEqual(response.data, {
+        error: "Forbidden",
+        message: "Votre compte n'est pas encore validé.",
+      });
+    });
   });
 });

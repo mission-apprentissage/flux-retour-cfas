@@ -58,11 +58,8 @@ export type RequestAsOrganisationFunc = <T>(
 
 export async function initTestApp() {
   resetTime();
-  // FIXME revoir l'initialisation de l'application (1 point d'entrée, avec config pour savoir si démarrer services ou pas)
-  // const services = { cache: redisFakeClient, mailer, clamav: { scan: () => {} } };
   const app = await server();
   const httpClient = axiosist(app);
-
   await configureDbSchemaValidation(modelDescriptors);
 
   return {
