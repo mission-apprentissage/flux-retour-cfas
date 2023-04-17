@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { id, initTestApp } from "../../utils/testUtils.js";
+import { id, initTestApp, testPasswordHash } from "../../utils/testUtils.js";
 import { AxiosInstance } from "axiosist";
 import { organisationsDb, usersMigrationDb } from "../../../src/common/model/collections.js";
 import { UsersMigration } from "../../../src/common/model/@types/UsersMigration.js";
@@ -22,8 +22,7 @@ const testUser: WithId<UsersMigration> = {
   fonction: "Responsable administratif",
   email: "user@test.local.fr",
   telephone: "",
-  password:
-    "$6$rounds=10000$c41a72eab295ea9b$6cMipCc33XlnZh8/rdraqeFq5Y4WhqtshSSoZJIv/WS3mJ6VayZxdYQW0.Nm2J53oklb8HfFSxypLwMTOtWh//", // MDP-azerty123
+  password: testPasswordHash,
   has_accept_cgu_version: "v0.1",
   organisation_id: new ObjectId(id(1)),
 };
@@ -41,13 +40,13 @@ describe("Authentification", () => {
   describe("POST /v1/auth/login - authentification", () => {
     beforeEach(async () => {
       await Promise.all([
-        await organisationsDb().insertOne({
+        organisationsDb().insertOne({
           _id: new ObjectId(id(1)),
           created_at: new Date(date),
           type: "DREETS",
           code_region: "53",
         }),
-        await usersMigrationDb().insertOne(testUser),
+        usersMigrationDb().insertOne(testUser),
       ]);
     });
 
@@ -76,7 +75,7 @@ describe("Authentification", () => {
         fonction: "Responsable administratif",
         has_accept_cgu_version: "v0.1",
         invalided_token: false,
-        last_connection: date, // = now, il faudrait figer le temsp global pour les tests
+        last_connection: date,
         nom: "Dupont",
         organisation: {
           _id: id(1),

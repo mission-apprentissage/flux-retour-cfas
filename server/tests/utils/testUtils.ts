@@ -7,12 +7,11 @@ import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.a
 import { createOrganisation } from "../../src/common/actions/organisations.actions.js";
 import { createSession } from "../../src/common/actions/sessions.actions.js";
 import { COOKIE_NAME } from "../../src/common/constants/cookieName.js";
-import { modelDescriptors, usersMigrationDb } from "../../src/common/model/collections.js";
+import { usersMigrationDb } from "../../src/common/model/collections.js";
 import { NewOrganisation, getOrganisationLabel } from "../../src/common/model/organisations.model.js";
-import { configureDbSchemaValidation } from "../../src/common/mongodb.js";
 import server from "../../src/http/server.js";
-import { ObjectId } from "mongodb";
 import { resetTime } from "../../src/common/utils/timeUtils.js";
+import { hash } from "../../src/common/utils/passwordUtils.js";
 
 export const startServer = async () => {
   const mailer = { sendEmail: sinon.spy() };
@@ -22,8 +21,6 @@ export const startServer = async () => {
   const app = await server();
 
   const httpClient = axiosist(app);
-
-  await configureDbSchemaValidation(modelDescriptors);
 
   return {
     httpClient,
@@ -60,7 +57,6 @@ export async function initTestApp() {
   resetTime();
   const app = await server();
   const httpClient = axiosist(app);
-  await configureDbSchemaValidation(modelDescriptors);
 
   return {
     httpClient,
@@ -90,8 +86,7 @@ export async function initTestApp() {
         fonction: "Responsable administratif",
         email: userEmail,
         telephone: "",
-        password:
-          "$6$rounds=10000$c41a72eab295ea9b$6cMipCc33XlnZh8/rdraqeFq5Y4WhqtshSSoZJIv/WS3mJ6VayZxdYQW0.Nm2J53oklb8HfFSxypLwMTOtWh//", // MDP-azerty123
+        password: testPasswordHash,
         has_accept_cgu_version: "v0.1",
         organisation_id: organisationId,
       });
@@ -108,10 +103,16 @@ export async function initTestApp() {
 }
 
 /**
+ * Hash de mot de passe précalculé et injecté dans la collection usersMigration
+ * pour économiser le coût de calcul du hash (~100ms)
+ */
+export const testPasswordHash = hash("MDP-azerty123");
+
+/**
  * Convertit un nombre au format ObjectID pour les tests
  */
 export function id(i: number): string {
-  return `${"000000000000000000000000".substring(0, 24 - `${i}`.length)}${i}`;
+  return `${i}`.padStart(24, "0");
 }
 
 export type Method = "get" | "post" | "put" | "patch" | "delete";
@@ -141,16 +142,7 @@ export function expectForbiddenError(response: any) {
 }
 
 export function stringifyMongoFields<T extends object>(object: T): T {
-  return Object.entries(object).reduce((acc, [key, value]) => {
-    if (value instanceof Date) {
-      acc[key] = value.toISOString();
-    } else if (value instanceof ObjectId) {
-      acc[key] = value.toString();
-    } else {
-      acc[key] = value;
-    }
-    return acc;
-  }, {}) as T;
+  return JSON.parse(JSON.stringify(object));
 }
 
 export function generate<T>(amount: number, callback: () => T): T[] {

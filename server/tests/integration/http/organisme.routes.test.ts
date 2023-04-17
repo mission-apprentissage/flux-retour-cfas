@@ -11,7 +11,13 @@ import {
 } from "../../utils/testUtils.js";
 import { AxiosInstance } from "axiosist";
 import { effectifsDb, organismesDb } from "../../../src/common/model/collections.js";
-import { PermissionsTestConfig, organismes, testPermissions } from "../../utils/permissions.js";
+import {
+  PermissionsTestConfig,
+  commonEffectifsAttributes,
+  organismes,
+  testPermissions,
+  userOrganisme,
+} from "../../utils/permissions.js";
 import { beforeEach } from "mocha";
 import {
   historySequenceApprenti,
@@ -19,23 +25,6 @@ import {
   historySequenceInscritToApprentiToAbandon,
 } from "../../data/historySequenceSamples.js";
 import { createSampleEffectif } from "../../data/randomizedSample.js";
-import { Effectif } from "../../../src/common/model/@types/Effectif.js";
-
-const userOrganisme = organismes[0];
-
-const commonEffectifsAttributes: Pick<{ [key in keyof Effectif]: Effectif[key] }, "organisme_id" | "_computed"> = {
-  organisme_id: userOrganisme._id,
-  _computed: {
-    organisme: {
-      region: userOrganisme.adresse!.region!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- mauvais typage TS
-      departement: userOrganisme.adresse!.departement!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      academie: userOrganisme.adresse!.academie!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      reseaux: userOrganisme.reseaux!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      uai: userOrganisme.uai as string,
-      siret: userOrganisme.siret,
-    },
-  },
-};
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;

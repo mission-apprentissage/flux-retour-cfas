@@ -10,7 +10,7 @@ describe("GET /indicateurs-national", () => {
     httpClient = app.httpClient;
   });
 
-  it("Accès non authentifié", async () => {
+  it("Accès public", async () => {
     const date = "2020-10-10T00:00:00.000Z";
     const response = await httpClient.get(`/api/indicateurs-national?date=${date}`);
 
