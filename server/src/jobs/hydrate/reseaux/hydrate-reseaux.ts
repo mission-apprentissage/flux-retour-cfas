@@ -4,13 +4,11 @@ import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
 import { __dirname } from "../../../common/utils/esmUtils.js";
-import {
-  findOrganismeByUaiAndSiret,
-  findOrganismesBySiret,
-} from "../../../common/actions/organismes/organismes.actions.js";
+import { findOrganismeByUaiAndSiret } from "../../../common/actions/organismes/organismes.actions.js";
 import { arraysContainSameValues } from "../../../common/utils/miscUtils.js";
 import { organismesDb } from "../../../common/model/collections.js";
 import { WithId } from "mongodb";
+import { STATUT_FIABILISATION_ORGANISME } from "../../../common/constants/fiabilisationConstants.js";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",
@@ -65,7 +63,7 @@ const parseReseauxTextFromCsv = (reseauText) => {
 const mapFileOrganisme = (organismeFromFile) => {
   return {
     siret: organismeFromFile[INPUT_FILE_COLUMN_NAMES.SIRET],
-    uai: organismeFromFile[INPUT_FILE_COLUMN_NAMES.UAI],
+    uai: organismeFromFile[INPUT_FILE_COLUMN_NAMES.UAI] || undefined,
     reseaux: parseReseauxTextFromCsv(organismeFromFile[INPUT_FILE_COLUMN_NAMES.RESEAUX_A_JOUR]),
   };
 };
@@ -119,10 +117,13 @@ const hydrateReseauFile = async (filename) => {
         1 - Add réseau information to organisme in TDB, if found unique
       */
     // try to retrieve organisme in our database with UAI and SIRET if UAI is provided
+    // if UAI not provided find organismes fiables with the SIRET
     /** @type {(import("mongodb").WithId<any>)[]} */
     const organismeInTdb = organismeParsedFromFile.uai
       ? [await findOrganismeByUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)].filter((o) => o)
-      : await findOrganismesBySiret(organismeParsedFromFile.siret);
+      : await organismesDb()
+          .find({ siret: organismeParsedFromFile.siret, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
+          .toArray();
 
     const found = organismeInTdb?.length !== 0;
     const foundUnique = found && organismeInTdb?.length === 1;
