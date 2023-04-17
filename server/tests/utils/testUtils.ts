@@ -6,7 +6,6 @@ import { AxiosResponse } from "axios";
 import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.actions.js";
 import { createOrganisation } from "../../src/common/actions/organisations.actions.js";
 import { createSession } from "../../src/common/actions/sessions.actions.js";
-import { createUser } from "../../src/common/actions/users.actions.js";
 import { COOKIE_NAME } from "../../src/common/constants/cookieName.js";
 import { modelDescriptors, usersMigrationDb } from "../../src/common/model/collections.js";
 import { NewOrganisation, getOrganisationLabel } from "../../src/common/model/organisations.model.js";
@@ -68,7 +67,7 @@ export async function initTestApp() {
     httpClient,
 
     /**
-     * Permet de faire une requête authentifié pour une organisation
+     * Permet de faire une requête authentifiée pour une organisation
      * L'utilisateur et l'organisation sont créés à la volée
      */
     async requestAsOrganisation<T>(
@@ -79,20 +78,25 @@ export async function initTestApp() {
     ): Promise<AxiosResponse> {
       const organisationId = await createOrganisation(organisation);
       const userEmail = `${getOrganisationLabel(organisation)}@test.local`; // généré selon l'organisation
-      const userId = await createUser(
-        {
-          civility: "Madame",
-          nom: "Dupont",
-          prenom: "Jean",
-          fonction: "Responsable administratif",
-          email: userEmail,
-          telephone: "",
-          password: "azerty123",
-          has_accept_cgu_version: "v0.1",
-        },
-        organisationId
-      );
-      await usersMigrationDb().updateOne({ _id: userId }, { $set: { account_status: "CONFIRMED" } });
+      await usersMigrationDb().insertOne({
+        account_status: "CONFIRMED",
+        invalided_token: false,
+        password_updated_at: new Date(),
+        connection_history: [],
+        emails: [],
+        created_at: new Date(),
+        civility: "Madame",
+        nom: "Dupont",
+        prenom: "Jean",
+        fonction: "Responsable administratif",
+        email: userEmail,
+        telephone: "",
+        password:
+          "$6$rounds=10000$c41a72eab295ea9b$6cMipCc33XlnZh8/rdraqeFq5Y4WhqtshSSoZJIv/WS3mJ6VayZxdYQW0.Nm2J53oklb8HfFSxypLwMTOtWh//", // MDP-azerty123
+        has_accept_cgu_version: "v0.1",
+        organisation_id: organisationId,
+      });
+
       const sessionToken = await createSession(userEmail);
       return await httpClient.request({
         method,
