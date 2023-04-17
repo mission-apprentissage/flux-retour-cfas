@@ -3,8 +3,6 @@ import { createUserTokenSimple } from "../utils/jwtUtils.js";
 
 export async function createSession(email: string): Promise<string> {
   const token = createUserTokenSimple({ payload: { email } });
-  // legacy, à supprimer car index unique au cas où on veuille générer le même jwt pour une session...
-  await jwtSessionsDb().deleteMany({ jwt: token });
   await jwtSessionsDb().insertOne({ jwt: token });
   return token;
 }
