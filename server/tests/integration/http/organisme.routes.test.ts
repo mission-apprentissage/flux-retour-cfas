@@ -20,7 +20,6 @@ import {
 } from "../../data/historySequenceSamples.js";
 import { createSampleEffectif } from "../../data/randomizedSample.js";
 import { Effectif } from "../../../src/common/model/@types/Effectif.js";
-import { validateEffectif } from "../../../src/common/model/effectifs.model/effectifs.model.js";
 
 const userOrganisme = organismes[0];
 
@@ -79,15 +78,17 @@ describe("Routes /organismes/:id", () => {
       expectUnauthorizedError(response);
     });
 
-    testPermissions(accesOrganisme, async (organisation, allowed) => {
-      const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
+    describe("Permissions", () => {
+      testPermissions(accesOrganisme, async (organisation, allowed) => {
+        const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
 
-      if (allowed) {
-        assert.strictEqual(response.status, 200);
-        assert.deepStrictEqual(response.data, stringifyMongoFields(userOrganisme));
-      } else {
-        expectForbiddenError(response);
-      }
+        if (allowed) {
+          assert.strictEqual(response.status, 200);
+          assert.deepStrictEqual(response.data, stringifyMongoFields(userOrganisme));
+        } else {
+          expectForbiddenError(response);
+        }
+      });
     });
   });
 
@@ -101,12 +102,12 @@ describe("Routes /organismes/:id", () => {
       expectUnauthorizedError(response);
     });
 
-    beforeEach(async () => {
-      // FIXME revoir les statuts
-      await effectifsDb().insertMany([
-        // 10 inscritToApprentiToAbandon
-        ...generate(10, () =>
-          validateEffectif(
+    describe("Permissions", () => {
+      beforeEach(async () => {
+        // FIXME revoir les statuts
+        await effectifsDb().insertMany([
+          // 10 inscritToApprentiToAbandon
+          ...generate(10, () =>
             createSampleEffectif({
               ...commonEffectifsAttributes,
               annee_scolaire: anneeScolaire,
@@ -114,51 +115,51 @@ describe("Routes /organismes/:id", () => {
                 historique_statut: historySequenceInscritToApprentiToAbandon,
               },
             })
-          )
-        ),
-        // 5 apprenti
-        ...generate(5, () =>
-          createSampleEffectif({
-            ...commonEffectifsAttributes,
-            annee_scolaire: anneeScolaire,
-            apprenant: {
-              historique_statut: historySequenceApprenti,
-            },
-          })
-        ),
+          ),
+          // 5 apprenti
+          ...generate(5, () =>
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceApprenti,
+              },
+            })
+          ),
 
-        // 15 inscritToApprenti
-        ...generate(15, () =>
-          createSampleEffectif({
-            ...commonEffectifsAttributes,
-            annee_scolaire: anneeScolaire,
-            apprenant: {
-              historique_statut: historySequenceInscritToApprenti,
-            },
-          })
-        ),
-      ]);
-    });
-    testPermissions(accesOrganisme, async (organisation, allowed) => {
-      const response = await requestAsOrganisation(
-        organisation,
-        "get",
-        `/api/v1/organismes/${id(1)}/indicateurs?date=${date}`
-      );
+          // 15 inscritToApprenti
+          ...generate(15, () =>
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceInscritToApprenti,
+              },
+            })
+          ),
+        ]);
+      });
+      testPermissions(accesOrganisme, async (organisation, allowed) => {
+        const response = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/organismes/${id(1)}/indicateurs?date=${date}`
+        );
 
-      if (allowed) {
-        assert.strictEqual(response.status, 200);
-        assert.deepStrictEqual(response.data, {
-          date: date,
-          apprentis: 20,
-          inscritsSansContrat: 0,
-          rupturants: 0,
-          abandons: 10,
-          totalOrganismes: 0,
-        });
-      } else {
-        expectForbiddenError(response);
-      }
+        if (allowed) {
+          assert.strictEqual(response.status, 200);
+          assert.deepStrictEqual(response.data, {
+            date: date,
+            apprentis: 20,
+            inscritsSansContrat: 0,
+            rupturants: 0,
+            abandons: 10,
+            totalOrganismes: 0,
+          });
+        } else {
+          expectForbiddenError(response);
+        }
+      });
     });
   });
 
@@ -192,20 +193,22 @@ describe("Routes /organismes/:id", () => {
       expectUnauthorizedError(response);
     });
 
-    testPermissions(configurationERP, async (organisation, allowed) => {
-      const response = await requestAsOrganisation(organisation, "put", `/api/v1/organismes/${id(1)}/configure-erp`, {
-        mode_de_transmission: "MANUEL",
-        setup_step_courante: "COMPLETE",
-      });
-
-      if (allowed) {
-        assert.strictEqual(response.status, 200);
-        assert.deepStrictEqual(response.data, {
-          message: "success",
+    describe("Permissions", () => {
+      testPermissions(configurationERP, async (organisation, allowed) => {
+        const response = await requestAsOrganisation(organisation, "put", `/api/v1/organismes/${id(1)}/configure-erp`, {
+          mode_de_transmission: "MANUEL",
+          setup_step_courante: "COMPLETE",
         });
-      } else {
-        expectForbiddenError(response);
-      }
+
+        if (allowed) {
+          assert.strictEqual(response.status, 200);
+          assert.deepStrictEqual(response.data, {
+            message: "success",
+          });
+        } else {
+          expectForbiddenError(response);
+        }
+      });
     });
   });
 });
