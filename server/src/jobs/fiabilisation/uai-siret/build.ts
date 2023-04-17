@@ -12,6 +12,7 @@ import {
   checkUaiAucunLieuReferentiel,
   checkUaiMultiplesRelationsAndLieux,
 } from "./build.rules.js";
+import { addFiabilisationsManuelles } from "./build.manual.js";
 
 // Filtres année scolaire pour récupération des couples UAI-SIRET
 const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] } };
@@ -51,6 +52,9 @@ export const buildFiabilisationUaiSiret = async () => {
   await PromisePool.for(allCouplesUaiSiretTdb).process(async (coupleUaiSiretTdb) => {
     await buildFiabilisationCoupleForTdbCouple(coupleUaiSiretTdb, allCouplesUaiSiretTdb, organismesFromReferentiel);
   });
+
+  // Ajout de fiabilisation manuelles
+  await addFiabilisationsManuelles();
 
   // Stats & log / info
   const nbCouplesFiablesFound = await fiabilisationUaiSiretDb().countDocuments({
