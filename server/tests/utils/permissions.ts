@@ -2,6 +2,7 @@ import { NewOrganisation } from "@/src/common/model/organisations.model.js";
 import { Organisme } from "@/src/common/model/@types/Organisme.js";
 import { ObjectId } from "mongodb";
 import { id } from "./testUtils.js";
+import { Effectif } from "@/src/common/model/@types/Effectif.js";
 
 /*
 Quelques sirets générés à utiliser pour une meilleure lisibilité :
@@ -79,6 +80,23 @@ export const organismes: Organisme[] = [
     ...commonOrganismeAttributes,
   },
 ];
+
+export const userOrganisme = organismes[0];
+
+export const commonEffectifsAttributes: Pick<{ [key in keyof Effectif]: Effectif[key] }, "organisme_id" | "_computed"> =
+  {
+    organisme_id: userOrganisme._id,
+    _computed: {
+      organisme: {
+        region: userOrganisme.adresse!.region!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- mauvais typage TS
+        departement: userOrganisme.adresse!.departement!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        academie: userOrganisme.adresse!.academie!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        reseaux: userOrganisme.reseaux!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        uai: userOrganisme.uai as string,
+        siret: userOrganisme.siret,
+      },
+    },
+  };
 
 export interface ProfilPermission {
   label: string;
@@ -229,14 +247,17 @@ export const profilsPermissionByLabel = profilsOrganisation.reduce(
   {} as { [key in profilLabels]: ProfilPermission }
 );
 
-export type PermissionsTestConfig = { [key in profilLabels]: boolean };
+export type PermissionsTestConfig<ExpectedResult = boolean> = { [key in profilLabels]: ExpectedResult };
 
-type TestFunc = (organisation: NewOrganisation, allowed: boolean) => Promise<any>;
+type TestFunc<ExpectedResult> = (organisation: NewOrganisation, expectedResult: ExpectedResult) => Promise<any>;
 
 /**
  * Utilitaire pour exécuter un test avec tous les profils d'organisation
  */
-export function testPermissions(permissionsConfig: PermissionsTestConfig, testFunc: TestFunc) {
+export function testPermissions<ExpectedResult>(
+  permissionsConfig: PermissionsTestConfig<ExpectedResult>,
+  testFunc: TestFunc<ExpectedResult>
+) {
   Object.entries(permissionsConfig).forEach(([label, allowed]) => {
     const conf = profilsPermissionByLabel[label];
     it(`${conf.label} - ${allowed ? "ALLOWED" : "FORBIDDEN"}`, async () => {

@@ -1,166 +1,140 @@
 import { strict as assert } from "assert";
-import { ObjectId } from "mongodb";
 
-import { startServer } from "../../utils/testUtils.js";
-import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
+import {
+  RequestAsOrganisationFunc,
+  expectForbiddenError,
+  expectUnauthorizedError,
+  id,
+  initTestApp,
+} from "../../utils/testUtils.js";
 import { createSampleEffectif } from "../../data/randomizedSample.js";
-import { effectifsDb } from "../../../src/common/model/collections.js";
+import { effectifsDb, organismesDb } from "../../../src/common/model/collections.js";
 import { historySequenceInscritToApprenti } from "../../data/historySequenceSamples.js";
+import { AxiosInstance } from "axiosist";
+import {
+  PermissionsTestConfig,
+  commonEffectifsAttributes,
+  organismes,
+  testPermissions,
+} from "../../utils/permissions.js";
 
-/**
- * Helper function to return an authenticated client to the API
- * @param {import("axiosist").AxiosInstance} httpClient
- */
-// async function createAndAuthenticateUser(httpClient, userInfos) {
-//   // create the user with its permissions
-//   const email = "of@test.fr";
-//   const password = "Secret!Password1";
-//   const userOf = await createUser(
-//     { email, password },
-//     {
-//       nom: "of",
-//       prenom: "test",
-//       description: "Aden formation Caen - direction",
-//       account_status: "CONFIRMED",
-//       organisation: "ORGANISME_FORMATION",
-//       historique_statut: [""],
-//       ...userInfos,
-//     }
-//   );
-//   await createUserPermissions({ user: userOf, pending: false, notify: false });
+let app: Awaited<ReturnType<typeof initTestApp>>;
+let httpClient: AxiosInstance;
+let requestAsOrganisation: RequestAsOrganisationFunc;
 
-//   // authenticate the user
-//   const response = await httpClient.post("/api/v1/auth/login", { email, password });
-//   const cookie = response.headers["set-cookie"].join(";");
+describe("Route indicateurs Route", () => {
+  before(async () => {
+    app = await initTestApp();
+    httpClient = app.httpClient;
+    requestAsOrganisation = app.requestAsOrganisation;
+  });
+  beforeEach(async () => {
+    await organismesDb().insertMany(organismes);
+  });
 
-//   return async (method, url, params, body = null) => {
-//     return await httpClient.request({
-//       method,
-//       url,
-//       data: body,
-//       params,
-//       headers: { cookie },
-//     });
-//   };
-// }
+  describe("GET /api/indicateurs - indicateurs sur les effectifs", () => {
+    const date = "2022-10-10T00:00:00.000Z";
+    const anneeScolaire = "2022-2023";
 
-let httpClient;
-let apiClient;
-
-const organismes = [
-  // owner
-  {
-    _id: new ObjectId("000000000000000000000001"),
-    uai: "0142321X",
-    siret: "41461021200014",
-    adresse: {
-      departement: "14",
-      region: "28",
-      academie: "70",
-    },
-    reseaux: ["CCI"],
-    erps: ["YMAG"],
-    nature: "responsable_formateur",
-    nom: "ADEN Formations (Caen)",
-  },
-  // other
-  {
-    _id: new ObjectId("000000000000000000000002"),
-    uai: "0142322X",
-    siret: "77568013501089",
-    adresse: {
-      departement: "14",
-      region: "28",
-      academie: "70",
-    },
-    reseaux: ["CCI"],
-    erps: ["YMAG"],
-    nature: "responsable_formateur",
-    nom: "ADEN Formations (Caen)",
-  },
-];
-
-xdescribe("Effectifs Route", () => {
-  describe("/api/indicateurs route", () => {
     beforeEach(async () => {
-      const app = await startServer();
-      httpClient = app.httpClient;
-
-      await Promise.all(
-        organismes.map((organisme) =>
-          createOrganisme(organisme, {
-            buildFormationTree: false,
-            buildInfosFromSiret: false,
-            callLbaApi: false,
-          })
-        )
+      await effectifsDb().insertOne(
+        createSampleEffectif({
+          ...commonEffectifsAttributes,
+          annee_scolaire: anneeScolaire,
+          apprenant: {
+            historique_statut: historySequenceInscritToApprenti,
+          },
+        })
       );
-
-      // apiClient = await createAndAuthenticateUser(httpClient, {
-      //   siret: "44492238900010",
-      //   uai: organismes[0].uai,
-      // });
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-      const response = await httpClient.get("/api/indicateurs", {
-        params: { date: "2020-10-10T00:00:00.000Z" },
-      });
+      const response = await httpClient.get(`/api/indicateurs?date=${date}`);
 
-      assert.strictEqual(response.status, 401);
+      expectUnauthorizedError(response);
     });
 
-    it("Vérifie qu'on peut accéder aux effectifs de son organisme", async () => {
-      await effectifsDb().insertOne(
-        createSampleEffectif({
-          organisme_id: organismes[0]._id,
-          annee_scolaire: "2022-2023",
-          apprenant: {
-            historique_statut: historySequenceInscritToApprenti,
-          },
-        })
-      );
+    describe("Sans filtre", () => {
+      describe("Permissions", () => {
+        const accesOrganisme: PermissionsTestConfig<number> = {
+          "OFF lié": 1,
+          "OFF non lié": 0,
+          "OFR lié": 1,
+          "OFR responsable": 1,
+          "OFR non lié": 0,
+          "OFRF lié": 1,
+          "OFRF responsable": 1,
+          "OFRF non lié": 0,
+          "Tête de réseau": 1,
+          "Tête de réseau non liée": 0,
+          "DREETS même région": 1,
+          "DREETS autre région": 1,
+          "DDETS même département": 1,
+          "DDETS autre département": 1,
+          "ACADEMIE même académie": 1,
+          "ACADEMIE autre académie": 1,
+          "Opérateur public national": 1,
+          Administrateur: 1,
+        };
+        testPermissions(accesOrganisme, async (organisation, nbApprentis) => {
+          const response = await requestAsOrganisation(organisation, "get", `/api/indicateurs?date=${date}`);
 
-      const response = await apiClient("get", "/api/indicateurs", {
-        date: "2022-10-10T00:00:00.000Z",
-        organisme_id: organismes[0]._id.toString(),
-      });
-
-      assert.strictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data, {
-        date: "2022-10-10T00:00:00.000Z",
-        apprentis: 1,
-        inscritsSansContrat: 0,
-        rupturants: 0,
-        abandons: 0,
-        totalOrganismes: 0,
+          assert.strictEqual(response.status, 200);
+          assert.deepStrictEqual(response.data, {
+            date,
+            apprentis: nbApprentis,
+            inscritsSansContrat: 0,
+            rupturants: 0,
+            abandons: 0,
+            totalOrganismes: 0,
+          });
+        });
       });
     });
 
-    it("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
-      await effectifsDb().insertOne(
-        createSampleEffectif({
-          organisme_id: organismes[1]._id,
-          annee_scolaire: "2022-2023",
-          apprenant: {
-            historique_statut: historySequenceInscritToApprenti,
-          },
-        })
-      );
+    describe("Avec filtre organisme_id", () => {
+      describe("Permissions", () => {
+        const accesOrganisme: PermissionsTestConfig = {
+          "OFF lié": true,
+          "OFF non lié": false,
+          "OFR lié": true,
+          "OFR responsable": true,
+          "OFR non lié": false,
+          "OFRF lié": true,
+          "OFRF responsable": true,
+          "OFRF non lié": false,
+          "Tête de réseau": true,
+          "Tête de réseau non liée": false,
+          "DREETS même région": true,
+          "DREETS autre région": false,
+          "DDETS même département": true,
+          "DDETS autre département": false,
+          "ACADEMIE même académie": true,
+          "ACADEMIE autre académie": false,
+          "Opérateur public national": true,
+          Administrateur: true,
+        };
+        testPermissions(accesOrganisme, async (organisation, allowed) => {
+          const response = await requestAsOrganisation(
+            organisation,
+            "get",
+            `/api/indicateurs?date=${date}&organisme_id=${id(1)}`
+          );
 
-      const response = await apiClient("get", "/api/indicateurs", {
-        date: "2022-10-10T00:00:00.000Z",
-        organisme_id: organismes[1]._id.toString(),
-      });
-
-      assert.strictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data, {
-        date: "2022-10-10T00:00:00.000Z",
-        apprentis: 0,
-        inscritsSansContrat: 0,
-        rupturants: 0,
-        abandons: 0,
-        totalOrganismes: 0,
+          if (allowed) {
+            assert.strictEqual(response.status, 200);
+            assert.deepStrictEqual(response.data, {
+              date,
+              apprentis: 1,
+              inscritsSansContrat: 0,
+              rupturants: 0,
+              abandons: 0,
+              totalOrganismes: 0,
+            });
+          } else {
+            expectForbiddenError(response);
+          }
+        });
       });
     });
 
