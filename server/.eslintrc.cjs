@@ -1,11 +1,16 @@
-// eslint-disable-next-line
+// eslint-disable-next-line no-undef
 module.exports = {
   root: true,
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:node/recommended-module",
     "plugin:prettier/recommended",
+    "plugin:import/recommended",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
+
+    // spécifique server
+    "plugin:node/recommended-module",
   ],
   plugins: ["mocha", "import", "@typescript-eslint"],
   rules: {
@@ -21,17 +26,25 @@ module.exports = {
       },
     ],
     "no-unused-vars": 0, // duplicated with @typescript-eslint/no-unused-vars
-    "import/no-unresolved": 0,
     "node/no-missing-import": 0, // duplicated with import/no-unresolved
-    "import/no-commonjs": 2,
-    "import/extensions": [
-      2,
-      "ignorePackages",
+
+    // imports
+    "import/extensions": ["error"],
+    "import/order": [
+      "error",
       {
-        js: "always",
-        ts: "never",
+        "newlines-between": "always",
+        alphabetize: {
+          order: "asc",
+          caseInsensitive: true,
+        },
       },
     ],
+    "import/newline-after-import": "error",
+    "import/no-extraneous-dependencies": "error",
+    "import/no-mutable-exports": "error",
+    "import/default": "off",
+    "import/no-named-as-default-member": "off",
 
     // désactivé temporairement pour éviter trop de changements
     // le temps de la migration complète vers typescript
@@ -50,7 +63,9 @@ module.exports = {
     {
       files: "tests/**/*.ts",
       rules: {
-        "node/no-unpublished-import": 0,
+        // autorise l'import des devDependencies
+        "node/no-unpublished-import": "off",
+        "node/no-extraneous-import": "error",
       },
     },
   ],
@@ -60,7 +75,7 @@ module.exports = {
       node: {
         extensions: [".js", ".ts"],
       },
-      //typescript: {}, // this loads <rootdir>/tsconfig.json to eslint
+      typescript: {}, // this loads <rootdir>/tsconfig.json to eslint
     },
   },
 };

@@ -33,6 +33,9 @@ const nextConfig = {
     appDir: false,
     typedRoutes: true,
   },
+  eslint: {
+    dirs: ["."],
+  },
   webpack: (config) => {
     config.plugins.push(new CaseSensitivePathsPlugin());
     return config;
