@@ -13,10 +13,11 @@ import { requireOrganisationOF } from "./helpers/permissions.js";
 import { Invitation } from "../model/invitations.model.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { getUserById } from "./users.actions.js";
+import { getCurrentTime } from "../utils/timeUtils.js";
 
 export async function createOrganisation(organisation: NewOrganisation): Promise<ObjectId> {
   const { insertedId } = await organisationsDb().insertOne({
-    created_at: new Date(),
+    created_at: getCurrentTime(),
     ...organisation,
   });
   return insertedId;
@@ -80,7 +81,7 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
     organisation_id: ctx.organisation_id,
     email,
     token: invitationToken,
-    created_at: new Date(),
+    created_at: getCurrentTime(),
   });
 
   await sendEmail(email, "invitation_organisation", {

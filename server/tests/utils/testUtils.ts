@@ -12,6 +12,7 @@ import { NewOrganisation, getOrganisationLabel } from "../../src/common/model/or
 import { configureDbSchemaValidation } from "../../src/common/mongodb.js";
 import server from "../../src/http/server.js";
 import { ObjectId } from "mongodb";
+import { resetTime } from "../../src/common/utils/timeUtils.js";
 
 export const startServer = async () => {
   const mailer = { sendEmail: sinon.spy() };
@@ -56,6 +57,7 @@ export type RequestAsOrganisationFunc = <T>(
 ) => Promise<AxiosResponse>;
 
 export async function initTestApp() {
+  resetTime();
   // FIXME revoir l'initialisation de l'application (1 point d'entrée, avec config pour savoir si démarrer services ou pas)
   // const services = { cache: redisFakeClient, mailer, clamav: { scan: () => {} } };
   const app = await server();

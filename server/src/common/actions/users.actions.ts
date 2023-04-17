@@ -10,6 +10,7 @@ import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { getOrganisationLabel } from "../model/organisations.model.js";
 import { WithId } from "mongodb";
+import { getCurrentTime } from "../utils/timeUtils.js";
 
 interface UserRegistration {
   email: string;
@@ -26,10 +27,10 @@ export const createUser = async (user: UserRegistration, organisationId: ObjectI
   const { insertedId } = await usersMigrationDb().insertOne({
     account_status: "PENDING_EMAIL_VALIDATION",
     invalided_token: false,
-    password_updated_at: new Date(),
+    password_updated_at: getCurrentTime(),
     connection_history: [],
     emails: [],
-    created_at: new Date(),
+    created_at: getCurrentTime(),
     ...user,
     password: hash(user.password),
     organisation_id: organisationId,
@@ -302,10 +303,9 @@ export const updateUserLastConnection = async (userId: ObjectId) => {
     { _id: userId },
     {
       $set: {
-        last_connection: new Date(),
+        last_connection: getCurrentTime(),
       },
-      // @ts-ignore
-      $push: { connection_history: new Date() },
+      $push: { connection_history: getCurrentTime() },
     }
   );
 };
@@ -319,7 +319,7 @@ export async function changePassword(authContext: AuthContext, password: string)
     {
       $set: {
         password: hash(password),
-        password_updated_at: new Date(),
+        password_updated_at: getCurrentTime(),
       },
     }
   );
@@ -342,7 +342,7 @@ export const generatePasswordUpdateToken = async (email: string) => {
   // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
   const token = generateRandomAlphanumericPhrase(80);
   // token will only be valid for duration defined in PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS
-  const tokenExpiry = addHours(new Date(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS);
+  const tokenExpiry = addHours(getCurrentTime(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS);
 
   await usersMigrationDb().updateOne(
     { _id: user._id },
