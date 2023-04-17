@@ -67,7 +67,8 @@ export const useCerfa = ({ schema }: { schema: any }) => {
   const controller = useMemo(() => {
     const computeGlobal = async ({ name }) => {
       abortControllers.current[name] = new AbortController();
-      for (let logic of (indexedRules[name] as any[]) ?? []) {
+      const rules: any[] = indexedRules[name] ?? [];
+      for (let logic of rules) {
         const { values, dossier, organisme, effectifId, fields } = await getData();
         try {
           const signal = abortControllers.current[name].signal;
