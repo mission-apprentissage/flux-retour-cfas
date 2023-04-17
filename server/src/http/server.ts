@@ -16,7 +16,6 @@ import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware.js";
-import { authMiddleware } from "./middlewares/authMiddleware.js";
 
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
@@ -88,7 +87,7 @@ import { registrationSchema } from "../common/validation/registrationSchema.js";
 import { z } from "zod";
 import { sendForgotPasswordRequest, register, activateUser } from "../common/actions/account.actions.js";
 import { TETE_DE_RESEAUX } from "../common/constants/networksConstants.js";
-import { checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers.js";
+import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers.js";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
 import loginSchemaLegacy from "../common/validation/loginSchemaLegacy.js";
 import { generateSifa } from "../common/actions/sifa.actions/sifa.actions.js";

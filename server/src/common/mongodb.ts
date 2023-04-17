@@ -1,7 +1,6 @@
 import { CollectionInfo, Document, MongoClient } from "mongodb";
 import omitDeep from "omit-deep";
 import logger from "./logger.js";
-import { asyncForEach } from "./utils/asyncUtils.js";
 
 let mongodbClient: MongoClient;
 
@@ -76,23 +75,24 @@ const createCollectionIfDoesNotExist = async (collectionName) => {
  */
 export const configureDbSchemaValidation = async (modelDescriptors) => {
   const db = getDatabase();
-  ensureInitialization();
-  await asyncForEach(modelDescriptors, async ({ collectionName, schema }) => {
-    await createCollectionIfDoesNotExist(collectionName);
+  await Promise.all(
+    modelDescriptors.map(async ({ collectionName, schema }) => {
+      await createCollectionIfDoesNotExist(collectionName);
 
-    if (!schema) {
-      return;
-    }
+      if (!schema) {
+        return;
+      }
 
-    await db.command({
-      collMod: collectionName,
-      validationLevel: "strict",
-      validationAction: "error",
-      validator: {
-        $jsonSchema: { title: collectionName, ...omitDeep(schema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
-      },
-    });
-  });
+      await db.command({
+        collMod: collectionName,
+        validationLevel: "strict",
+        validationAction: "error",
+        validator: {
+          $jsonSchema: { title: collectionName, ...omitDeep(schema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
+        },
+      });
+    })
+  );
 };
 
 /**

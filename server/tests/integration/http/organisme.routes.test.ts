@@ -1,126 +1,202 @@
 import { strict as assert } from "assert";
-import { ObjectId } from "mongodb";
 
-import { startServer } from "../../utils/testUtils.js";
-import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
+import {
+  stringifyMongoFields,
+  expectForbiddenError,
+  expectUnauthorizedError,
+  id,
+  initTestApp,
+  RequestAsOrganisationFunc,
+  generate,
+} from "../../utils/testUtils.js";
+import { AxiosInstance } from "axiosist";
+import { effectifsDb, organismesDb } from "../../../src/common/model/collections.js";
+import {
+  PermissionsTestConfig,
+  commonEffectifsAttributes,
+  organismes,
+  testPermissions,
+  userOrganisme,
+} from "../../utils/permissions.js";
+import { beforeEach } from "mocha";
+import {
+  historySequenceApprenti,
+  historySequenceInscritToApprenti,
+  historySequenceInscritToApprentiToAbandon,
+} from "../../data/historySequenceSamples.js";
+import { createSampleEffectif } from "../../data/randomizedSample.js";
 
-const ORGANISME_ENDPOINT = "/api/v1/organisme";
+let app: Awaited<ReturnType<typeof initTestApp>>;
+let httpClient: AxiosInstance;
+let requestAsOrganisation: RequestAsOrganisationFunc;
 
-const organismes = [
-  // owner
-  {
-    _id: new ObjectId("000000000000000000000001"),
-    uai: "0142321X",
-    siret: "41461021200014",
-    adresse: {
-      departement: "14",
-      region: "28",
-      academie: "70",
-    },
-    reseaux: ["CCI"],
-    erps: ["YMAG"],
-    nature: "responsable_formateur",
-    nom: "ADEN Formations (Caen)",
-    ferme: true,
-  },
-  // other
-  {
-    _id: new ObjectId("000000000000000000000002"),
-    uai: "0142322X",
-    siret: "77568013501089",
-    adresse: {
-      departement: "14",
-      region: "28",
-      academie: "70",
-    },
-    reseaux: ["CCI"],
-    erps: ["YMAG"],
-    nature: "responsable_formateur",
-    nom: "ADEN Formations (Caen)",
-  },
-];
-
-const userOrganisme = organismes[0];
-const userOrganismeId = userOrganisme._id.toString();
-let httpClient;
-let apiClient;
-
-xdescribe("Organisme Route", () => {
-  beforeEach(async () => {
-    const app = await startServer();
+describe("Routes /organismes/:id", () => {
+  before(async () => {
+    app = await initTestApp();
     httpClient = app.httpClient;
-
-    await Promise.all(
-      organismes.map((organisme) =>
-        createOrganisme(organisme, {
-          buildFormationTree: false,
-          buildInfosFromSiret: false,
-          callLbaApi: false,
-        })
-      )
-    );
-
-    // apiClient = await createAndAuthenticateUser(
-    //   httpClient,
-    //   {
-    //     siret: "44492238900010",
-    //     uai: userOrganisme.uai,
-    //   },
-    //   "organisme.admin"
-    // );
+    requestAsOrganisation = app.requestAsOrganisation;
+  });
+  beforeEach(async () => {
+    await organismesDb().insertMany(organismes);
   });
 
-  describe("GET /organisme", () => {
-    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-      const response = await httpClient.get(`${ORGANISME_ENDPOINT}/entity/${userOrganismeId}`);
+  const accesOrganisme: PermissionsTestConfig = {
+    "OFF lié": true,
+    "OFF non lié": false,
+    "OFR lié": true,
+    "OFR responsable": true,
+    "OFR non lié": false,
+    "OFRF lié": true,
+    "OFRF responsable": true,
+    "OFRF non lié": false,
+    "Tête de réseau": true,
+    "Tête de réseau non liée": false,
+    "DREETS même région": true,
+    "DREETS autre région": false,
+    "DDETS même département": true,
+    "DDETS autre département": false,
+    "ACADEMIE même académie": true,
+    "ACADEMIE autre académie": false,
+    "Opérateur public national": true,
+    Administrateur: true,
+  };
+  describe("GET /organismes/:id - détail d'un organisme", () => {
+    it("Erreur si non authentifié", async () => {
+      const response = await httpClient.get(`/api/v1/organisme/${id(1)}`);
 
-      assert.strictEqual(response.status, 401);
+      expectUnauthorizedError(response);
     });
 
-    it("Vérifie qu'on peut accéder aux details son organisme", async () => {
-      const response = await apiClient(
-        "get",
-        `${ORGANISME_ENDPOINT}/entity/${userOrganismeId}?organisme_id=${userOrganismeId}`
-      );
+    describe("Permissions", () => {
+      testPermissions(accesOrganisme, async (organisation, allowed) => {
+        const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
 
-      assert.strictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data, {
-        ...userOrganisme,
-        _id: userOrganismeId,
-        ferme: true,
-        fiabilisation_statut: "INCONNU",
-        formations: [],
-        metiers: [],
-        acl: response.data.acl,
-        created_at: response.data.created_at,
-        updated_at: response.data.updated_at,
+        if (allowed) {
+          assert.strictEqual(response.status, 200);
+          assert.deepStrictEqual(response.data, stringifyMongoFields(userOrganisme));
+        } else {
+          expectForbiddenError(response);
+        }
       });
     });
+  });
 
-    it("Vérifie qu'on peut mettre à jour les details son organisme", async () => {
-      const response = await apiClient(
-        "put",
-        `${ORGANISME_ENDPOINT}/entity/${userOrganismeId}?organisme_id=${userOrganismeId}`,
-        {},
-        {
-          setup_step_courante: "STEP2",
-          erps: ["ymag"],
-          organisme_id: userOrganismeId,
+  describe("GET /organismes/:id/indicateurs - indicateurs d'un organisme", () => {
+    const date = "2023-04-13T10:00:00.000Z";
+    const anneeScolaire = "2022-2023";
+
+    it("Erreur si non authentifié", async () => {
+      const response = await httpClient.get(`/api/v1/organisme/${id(1)}/indicateurs?date=${date}`);
+
+      expectUnauthorizedError(response);
+    });
+
+    describe("Permissions", () => {
+      beforeEach(async () => {
+        // FIXME revoir les statuts
+        await effectifsDb().insertMany([
+          // 10 inscritToApprentiToAbandon
+          ...generate(10, () =>
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceInscritToApprentiToAbandon,
+              },
+            })
+          ),
+          // 5 apprenti
+          ...generate(5, () =>
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceApprenti,
+              },
+            })
+          ),
+
+          // 15 inscritToApprenti
+          ...generate(15, () =>
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceInscritToApprenti,
+              },
+            })
+          ),
+        ]);
+      });
+      testPermissions(accesOrganisme, async (organisation, allowed) => {
+        const response = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/organismes/${id(1)}/indicateurs?date=${date}`
+        );
+
+        if (allowed) {
+          assert.strictEqual(response.status, 200);
+          assert.deepStrictEqual(response.data, {
+            date: date,
+            apprentis: 20,
+            inscritsSansContrat: 0,
+            rupturants: 0,
+            abandons: 10,
+            totalOrganismes: 0,
+          });
+        } else {
+          expectForbiddenError(response);
         }
-      );
+      });
+    });
+  });
 
-      assert.strictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data, {
-        ...userOrganisme,
-        _id: userOrganismeId,
-        erps: ["ymag"],
-        setup_step_courante: "STEP2",
-        fiabilisation_statut: "INCONNU",
-        formations: [],
-        metiers: [],
-        acl: response.data.acl,
-        created_at: response.data.created_at,
-        updated_at: response.data.updated_at,
+  const configurationERP: PermissionsTestConfig = {
+    "OFF lié": true,
+    "OFF non lié": false,
+    "OFR lié": true,
+    "OFR responsable": true,
+    "OFR non lié": false,
+    "OFRF lié": true,
+    "OFRF responsable": true,
+    "OFRF non lié": false,
+    "Tête de réseau": false,
+    "Tête de réseau non liée": false,
+    "DREETS même région": false,
+    "DREETS autre région": false,
+    "DDETS même département": false,
+    "DDETS autre département": false,
+    "ACADEMIE même académie": false,
+    "ACADEMIE autre académie": false,
+    "Opérateur public national": false,
+    Administrateur: true,
+  };
+  describe("PUT /organismes/:id/configure-erp - configuration de l'ERP d'un organisme", () => {
+    it("Erreur si non authentifié", async () => {
+      const response = await httpClient.put(`/api/v1/organismes/${id(1)}/configure-erp`, {
+        mode_de_transmission: "MANUEL",
+        setup_step_courante: "COMPLETE",
+      });
+
+      expectUnauthorizedError(response);
+    });
+
+    describe("Permissions", () => {
+      testPermissions(configurationERP, async (organisation, allowed) => {
+        const response = await requestAsOrganisation(organisation, "put", `/api/v1/organismes/${id(1)}/configure-erp`, {
+          mode_de_transmission: "MANUEL",
+          setup_step_courante: "COMPLETE",
+        });
+
+        if (allowed) {
+          assert.strictEqual(response.status, 200);
+          assert.deepStrictEqual(response.data, {
+            message: "success",
+          });
+        } else {
+          expectForbiddenError(response);
+        }
       });
     });
   });

@@ -1,0 +1,149 @@
+import { strict as assert } from "assert";
+import { id, initTestApp, testPasswordHash } from "../../utils/testUtils.js";
+import { AxiosInstance } from "axiosist";
+import { organisationsDb, usersMigrationDb } from "../../../src/common/model/collections.js";
+import { UsersMigration } from "../../../src/common/model/@types/UsersMigration.js";
+import { setTime } from "../../../src/common/utils/timeUtils.js";
+import { ObjectId, WithId } from "mongodb";
+
+const date = "2022-10-10T00:00:00.000Z";
+
+const testUser: WithId<UsersMigration> = {
+  _id: new ObjectId(id(1)),
+  account_status: "CONFIRMED",
+  invalided_token: false,
+  password_updated_at: new Date(date),
+  connection_history: [],
+  emails: [],
+  created_at: new Date(date),
+  civility: "Madame",
+  nom: "Dupont",
+  prenom: "Jean",
+  fonction: "Responsable administratif",
+  email: "user@test.local.fr",
+  telephone: "",
+  password: testPasswordHash,
+  has_accept_cgu_version: "v0.1",
+  organisation_id: new ObjectId(id(1)),
+};
+
+let app: Awaited<ReturnType<typeof initTestApp>>;
+let httpClient: AxiosInstance;
+
+describe("Authentification", () => {
+  before(async () => {
+    app = await initTestApp();
+    httpClient = app.httpClient;
+    setTime(new Date(date));
+  });
+
+  describe("POST /v1/auth/login - authentification", () => {
+    beforeEach(async () => {
+      await Promise.all([
+        organisationsDb().insertOne({
+          _id: new ObjectId(id(1)),
+          created_at: new Date(date),
+          type: "DREETS",
+          code_region: "53",
+        }),
+        usersMigrationDb().insertOne(testUser),
+      ]);
+    });
+
+    it("Retourne un cookie de session", async () => {
+      let response = await httpClient.post("/api/v1/auth/login", {
+        email: "user@test.local.fr",
+        password: "MDP-azerty123",
+      });
+
+      assert.strictEqual(response.status, 200);
+      const cookie = response.headers["set-cookie"][0];
+      assert.match(cookie, /^flux-retour-cfas-/);
+
+      response = await httpClient.get("/api/v1/session", {
+        headers: {
+          cookie: cookie,
+        },
+      });
+      assert.strictEqual(response.status, 200);
+      assert.deepStrictEqual(response.data, {
+        _id: id(1),
+        account_status: "CONFIRMED",
+        civility: "Madame",
+        created_at: date,
+        email: "user@test.local.fr",
+        fonction: "Responsable administratif",
+        has_accept_cgu_version: "v0.1",
+        invalided_token: false,
+        last_connection: date,
+        nom: "Dupont",
+        organisation: {
+          _id: id(1),
+          code_region: "53",
+          created_at: date,
+          type: "DREETS",
+        },
+        organisation_id: id(1),
+        password_updated_at: date,
+        prenom: "Jean",
+        telephone: "",
+      });
+    });
+
+    it("Erreur si mauvais mot de passe", async () => {
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "user@test.local.fr",
+        password: "wrong password",
+      });
+
+      assert.strictEqual(response.status, 401);
+    });
+
+    it("Erreur si compte inconnu", async () => {
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "missing-user@test.local.fr",
+        password: "MDP-azerty123",
+      });
+
+      assert.strictEqual(response.status, 401);
+    });
+
+    it("Erreur si compte en attente de validation email", async () => {
+      await usersMigrationDb().insertOne({
+        ...testUser,
+        _id: new ObjectId(id(2)),
+        email: "user2@test.local.fr",
+        account_status: "PENDING_EMAIL_VALIDATION",
+      });
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "user2@test.local.fr",
+        password: "MDP-azerty123",
+      });
+
+      assert.strictEqual(response.status, 403);
+      assert.deepStrictEqual(response.data, {
+        error: "Forbidden",
+        message: "Votre compte n'est pas encore validé.",
+      });
+    });
+
+    it("Erreur si compte en attente de confirmation", async () => {
+      await usersMigrationDb().insertOne({
+        ...testUser,
+        _id: new ObjectId(id(2)),
+        email: "user2@test.local.fr",
+        account_status: "PENDING_ADMIN_VALIDATION",
+      });
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "user2@test.local.fr",
+        password: "MDP-azerty123",
+      });
+
+      assert.strictEqual(response.status, 403);
+      assert.deepStrictEqual(response.data, {
+        error: "Forbidden",
+        message: "Votre compte n'est pas encore validé.",
+      });
+    });
+  });
+});

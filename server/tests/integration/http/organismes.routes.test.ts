@@ -1,25 +1,27 @@
 import { strict as assert } from "assert";
-// import { pick } from "lodash-es";
-// import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
 import config from "../../../src/config.js";
-// import { createRandomOrganisme } from "../../data/randomizedSample.js";
-import { startServer } from "../../utils/testUtils.js";
+import { initTestApp } from "../../utils/testUtils.js";
+import { AxiosInstance } from "axiosist";
+
+let httpClient: AxiosInstance;
 
 describe("Routes Organismes for API referentiel", () => {
+  before(async () => {
+    const app = await initTestApp();
+    httpClient = app.httpClient;
+  });
+
   it("Vérifie que la route /organismes renvoie une 401 si aucune apiKey n'est fournie", async () => {
-    const { httpClient } = await startServer();
     const response = await httpClient.post("/api/organismes");
     assert.strictEqual(response.status, 401);
   });
 
   it("Vérifie que la route /organismes renvoie une 401 si une mauvaise apiKey est fournie", async () => {
-    const { httpClient } = await startServer();
     const response = await httpClient.post("/api/organismes", { apiKey: "BAD_API_KEY" });
     assert.strictEqual(response.status, 401);
   });
 
   it("Vérifie que la route /organismes renvoie une 200 avec des données si une bonne apiKey est fournie", async () => {
-    const { httpClient } = await startServer();
     const response = await httpClient.post("/api/organismes", { apiKey: config.organismesConsultationApiKey });
     assert.strictEqual(response.status, 200);
 

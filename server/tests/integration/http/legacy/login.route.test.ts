@@ -1,15 +1,23 @@
 import jwt from "jsonwebtoken";
 
 import { strict as assert } from "assert";
-import config from "../../../src/config.js";
-import { startServer } from "../../utils/testUtils.js";
-import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
+import config from "../../../../src/config.js";
+import { initTestApp } from "../../../utils/testUtils.js";
+import { createUserLegacy } from "../../../../src/common/actions/legacy/users.legacy.actions.js";
+import { AxiosInstance } from "axiosist";
 
-describe("Login Route", () => {
-  it("Vérifie qu'on peut se connecter", async () => {
-    const { httpClient } = await startServer();
+let httpClient: AxiosInstance;
+
+describe("POST /login - Login [LEGACY]", () => {
+  before(async () => {
+    const app = await initTestApp();
+    httpClient = app.httpClient;
+  });
+  beforeEach(async () => {
     await createUserLegacy({ username: "user", password: "password" });
+  });
 
+  it("Vérifie qu'on peut se connecter", async () => {
     const response = await httpClient.post("/api/login", {
       username: "user",
       password: "password",
@@ -24,9 +32,6 @@ describe("Login Route", () => {
   });
 
   it("Vérifie qu'un mot de passe invalide est rejeté", async () => {
-    const { httpClient } = await startServer();
-    await createUserLegacy({ username: "user", password: "password" });
-
     const response = await httpClient.post("/api/login", {
       username: "user",
       password: "INVALID",
@@ -36,9 +41,6 @@ describe("Login Route", () => {
   });
 
   it("Vérifie qu'un login invalide est rejeté", async () => {
-    const { httpClient } = await startServer();
-    await createUserLegacy({ username: "user", password: "password" });
-
     const response = await httpClient.post("/api/login", {
       username: "INVALID",
       password: "password",

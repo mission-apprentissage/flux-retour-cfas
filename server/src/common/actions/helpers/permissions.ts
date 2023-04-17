@@ -175,6 +175,7 @@ export async function findOFLinkedOrganismesIds(userOrganisme: Organisme) {
           subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.INCONNUE &&
           userOrganisme.siret !== subOrganismeCatalog.siret
         ) {
+          // FIXME ici find pas unique. or on doit avoir l'uai en plus du siret
           const subOrganisme = await organismesDb().findOne({ siret: subOrganismeCatalog.siret as string });
           if (!subOrganisme) {
             logger.error({ siret: subOrganismeCatalog.siret }, "sous-organisme non trouvé");

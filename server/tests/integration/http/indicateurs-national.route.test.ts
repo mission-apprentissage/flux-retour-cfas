@@ -1,18 +1,27 @@
 import { strict as assert } from "assert";
-import { startServer } from "../../utils/testUtils.js";
+import { initTestApp } from "../../utils/testUtils.js";
+import { AxiosInstance } from "axiosist";
 
-describe("EffectifsNational Route", () => {
-  it("Verifie si la route fonctionne et verifie si l'objet renvoyé est correct", async () => {
-    const { httpClient } = await startServer();
-    const response = await httpClient.get("/api/indicateurs-national", {
-      params: { date: "2020-10-10T00:00:00.000Z" },
+let app: Awaited<ReturnType<typeof initTestApp>>;
+let httpClient: AxiosInstance;
+describe("GET /indicateurs-national", () => {
+  before(async () => {
+    app = await initTestApp();
+    httpClient = app.httpClient;
+  });
+
+  it("Accès public", async () => {
+    const date = "2020-10-10T00:00:00.000Z";
+    const response = await httpClient.get(`/api/indicateurs-national?date=${date}`);
+
+    assert.strictEqual(response.status, 200);
+    assert.deepStrictEqual(response.data, {
+      date: date,
+      apprentis: 0,
+      inscritsSansContrat: 0,
+      rupturants: 0,
+      abandons: 0,
+      totalOrganismes: 0,
     });
-
-    assert.equal(response.status, 200);
-    assert.equal(response.data.date, "2020-10-10T00:00:00.000Z");
-    assert.equal(response.data.totalOrganismes, 0);
-    assert.equal(response.data.rupturants, 0);
-    assert.equal(response.data.inscritsSansContrat, 0);
-    assert.equal(response.data.abandons, 0);
   });
 });
