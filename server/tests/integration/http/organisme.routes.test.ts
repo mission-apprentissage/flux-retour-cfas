@@ -104,7 +104,7 @@ describe("Routes /organismes/:id", () => {
     beforeEach(async () => {
       // FIXME revoir les statuts
       await effectifsDb().insertMany([
-        // 15 inscritToApprentiToAbandon
+        // 10 inscritToApprentiToAbandon
         ...generate(10, () =>
           validateEffectif(
             createSampleEffectif({
