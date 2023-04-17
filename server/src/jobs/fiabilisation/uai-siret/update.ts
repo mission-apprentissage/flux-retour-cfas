@@ -214,19 +214,7 @@ export const updateOrganismesNonFiablesUaiFermee = async () => {
 export const updateOrganismesFiablesFermes = async () => {
   // Récupération des couples fiables avec lookup sur le référentiel via SIRET et étant marqués comme fermés dans le référentiel
   const couplesFiablesFermesDansReferentiel = await organismesDb()
-    .aggregate([
-      {
-        $lookup: {
-          from: "organismesReferentiel",
-          localField: "siret",
-          foreignField: "siret",
-          as: "referentielInfo",
-        },
-      },
-      { $match: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } },
-      { $match: { "referentielInfo.etat_administratif": "fermé" } },
-      { $project: { _id: 0, uai: 1, siret: 1 } },
-    ])
+    .find({ fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE, ferme: true })
     .toArray();
 
   await PromisePool.for(couplesFiablesFermesDansReferentiel).process(async ({ uai, siret }: any) => {
