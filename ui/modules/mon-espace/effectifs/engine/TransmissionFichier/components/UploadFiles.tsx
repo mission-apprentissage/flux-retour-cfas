@@ -25,6 +25,7 @@ import useServerEvents from "@/hooks/useServerEvents";
 import { useDocuments } from "../hooks/useDocuments";
 
 const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
+const MAX_FILE_SIZE = 10_485_760; // 10MB
 
 const baseStyle = {
   flex: 1,
@@ -66,7 +67,10 @@ const UploadFiles = ({ title }) => {
   const maxFiles = 1;
 
   const onDrop = useCallback(
-    async (acceptedFiles) => {
+    async (acceptedFiles: File[]) => {
+      if (!acceptedFiles.length) {
+        return;
+      }
       setUploadError(null);
       setIsSubmitting(true);
 
@@ -98,9 +102,13 @@ const UploadFiles = ({ title }) => {
 
   const onDropRejected = useCallback(
     (rejections) => {
-      setUploadError(`Ce fichier ne peut pas être déposé: ${rejections?.[0]?.errors?.[0]?.message}`);
+      const error =
+        rejections?.[0]?.errors?.[0].code === "file-too-large"
+          ? `Ce fichier excède la taille maximale de ${formatBytes(MAX_FILE_SIZE)}`
+          : `Ce fichier ne peut pas être déposé: ${rejections?.[0]?.errors?.[0]?.message}`;
+      setUploadError(error);
       toast({
-        title: `Ce fichier ne peut pas être déposé: ${rejections?.[0]?.errors?.[0]?.message}`,
+        title: error,
         status: "error",
         duration: 5000,
       });
@@ -136,7 +144,7 @@ const UploadFiles = ({ title }) => {
       // "application/vnd.ms-excel": [".xls", ".csv"],
       "text/csv": [".csv"],
     },
-    maxSize: 10485760,
+    maxSize: MAX_FILE_SIZE,
   });
 
   const style = useMemo(
