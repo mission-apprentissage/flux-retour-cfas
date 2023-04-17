@@ -17,6 +17,7 @@ import { getEffectifsDuplicatesFromOrganismes } from "./update.utils.js";
 let nbOrganismesReferentielFiables = 0;
 let nbOrganismesFiabilises = 0;
 let nbOrganismesNonFiablesSupprimes = 0;
+let nbOrganismesFermesAFiabiliser = 0;
 
 let nbEffectifsDuplicateOrganismesAFiabiliser = 0;
 let nbEffectifsDuplicatesOrganismesNonFiables = 0;
@@ -36,6 +37,7 @@ export const updateOrganismesFiabilisationUaiSiret = async () => {
     updateOrganismesReferentielFiables(),
     updateOrganismesFiabilises(),
     updateOrganismesNonFiablesUaiFermee(),
+    updateOrganismesFiablesFermes(),
   ]);
 
   // Log
@@ -46,6 +48,7 @@ export const updateOrganismesFiabilisationUaiSiret = async () => {
   logger.info(" ->", nbEffectifsDuplicateOrganismesAFiabiliser, "doublons d'effectifs en fiabilisation d'organisme");
   logger.info(" ->", nbEffectifsDuplicatesOrganismesNonFiables, "doublons d'effectifs sur les organismes non fiables");
   logger.info(" ->", nbEffectifsMovedToOrganismeFiable, "effectifs déplacés d'un organisme non fiable vers fiable");
+  logger.info(" ->", nbOrganismesFermesAFiabiliser, "organismes fiables fermés à fiabiliser vers organisme ouvert");
 
   return {
     nbOrganismesReferentielFiables,
@@ -54,6 +57,7 @@ export const updateOrganismesFiabilisationUaiSiret = async () => {
     nbEffectifsDuplicateOrganismesAFiabiliser,
     nbEffectifsDuplicatesOrganismesNonFiables,
     nbEffectifsMovedToOrganismeFiable,
+    nbOrganismesFermesAFiabiliser,
   };
 };
 
@@ -200,6 +204,46 @@ export const updateOrganismesNonFiablesUaiFermee = async () => {
         { uai, siret },
         { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.A_CONTACTER } }
       );
+    }
+  });
+};
+
+/**
+ * Fonction de fiabilisation des organismes fermé si on trouve un unique organisme ouvert lié
+ */
+export const updateOrganismesFiablesFermes = async () => {
+  // Récupération des couples fiables avec lookup sur le référentiel via SIRET et étant marqués comme fermés dans le référentiel
+  const couplesFiablesFermesDansReferentiel = await organismesDb()
+    .aggregate([
+      {
+        $lookup: {
+          from: "organismesReferentiel",
+          localField: "siret",
+          foreignField: "siret",
+          as: "referentielInfo",
+        },
+      },
+      { $match: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } },
+      { $match: { "referentielInfo.etat_administratif": "fermé" } },
+      { $project: { _id: 0, uai: 1, siret: 1 } },
+    ])
+    .toArray();
+
+  await PromisePool.for(couplesFiablesFermesDansReferentiel).process(async ({ uai, siret }: any) => {
+    // On recherche s'il existe un organisme ouvert lié à l'UAI
+    const organismesReferentielOpen = await organismesReferentielDb()
+      .find({ uai, etat_administratif: "actif" })
+      .toArray();
+
+    // S'il existe un unique organisme ouvert lié on ajoute une fiabilisation
+    if (organismesReferentielOpen.length === 1) {
+      await updateOrganismeForCoupleFiabilise({
+        uai,
+        uai_fiable: uai,
+        siret,
+        siret_fiable: organismesReferentielOpen[0].siret,
+      });
+      nbOrganismesFermesAFiabiliser++;
     }
   });
 };
