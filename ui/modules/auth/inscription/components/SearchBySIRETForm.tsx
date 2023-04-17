@@ -22,6 +22,7 @@ import { SIRET_REGEX } from "@/common/domain/siret";
 import OrganismeDetails from "./OrganismeDetails";
 import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "../common";
 import { sleep } from "@/common/utils/misc";
+import Link from "@/components/Links/Link";
 
 export default function SearchBySIRETForm({ organisation, setOrganisation }: InscriptionOrganistionChildProps) {
   const [organismes, setOrganismes] = useState<any[] | null>(null);
@@ -41,10 +42,7 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
           await sleep(500); // attente pour ne pas paraitre trop instantané...
           setOrganismes(organismes);
         } catch (err) {
-          let errorMessage: string = err?.json?.data?.message || err.message;
-          if (err?.json?.data?.message === "Aucun organisme trouvé") {
-            errorMessage = "Ce SIRET n'existe pas. Veuillez vérifier à nouveau";
-          }
+          const errorMessage: string = err?.json?.data?.message || err.message;
           actions.setFieldError("siret", errorMessage);
         } finally {
           actions.setSubmitting(false);
@@ -74,7 +72,20 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
                     });
                   }}
                 />
-                <FormErrorMessage>{meta.error}</FormErrorMessage>
+                <FormErrorMessage>
+                  {meta.error === "Aucun organisme trouvé" ? (
+                    <div>
+                      {/* la div supprime le flex parent */}
+                      Ce SIRET n’a pas été identifié. Veuillez vérifier à nouveau ou consulter l’
+                      <Link href={"https://annuaire-entreprises.data.gouv.fr/"} textDecoration={"underline"} isExternal>
+                        annuaire des entreprises
+                      </Link>
+                      .
+                    </div>
+                  ) : (
+                    meta.error
+                  )}
+                </FormErrorMessage>
               </FormControl>
             )}
           </Field>

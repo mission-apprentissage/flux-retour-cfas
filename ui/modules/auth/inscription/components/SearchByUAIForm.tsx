@@ -42,7 +42,7 @@ export default function SearchByUAIForm({ organisation, setOrganisation }: Inscr
           setOrganismes(organismes);
         } catch (err) {
           let errorMessage: string = err?.json?.data?.message || err.message;
-          if (err?.json?.data?.message === "Aucun organisme trouvé") {
+          if (errorMessage === "Aucun organisme trouvé") {
             errorMessage = "Ce code UAI n'existe pas. Veuillez vérifier à nouveau";
           }
           actions.setFieldError("uai", errorMessage);
