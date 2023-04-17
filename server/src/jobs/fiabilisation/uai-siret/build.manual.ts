@@ -12,8 +12,8 @@ export const addFiabilisationsManuelles = async () => {
         { uai, siret } as any,
         {
           $set: {
-            siret_fiable: siret_fiable,
-            uai_fiable: uai_fiable,
+            siret_fiable,
+            uai_fiable,
             type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
           },
         },
