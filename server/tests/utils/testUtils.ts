@@ -1,9 +1,7 @@
 import { strict as assert } from "assert";
 import axiosist from "axiosist";
-import sinon from "sinon";
 
 import { AxiosResponse } from "axios";
-import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.actions.js";
 import { createOrganisation } from "../../src/common/actions/organisations.actions.js";
 import { createSession } from "../../src/common/actions/sessions.actions.js";
 import { COOKIE_NAME } from "../../src/common/constants/cookieName.js";
@@ -12,39 +10,6 @@ import { NewOrganisation, getOrganisationLabel } from "../../src/common/model/or
 import server from "../../src/http/server.js";
 import { resetTime } from "../../src/common/utils/timeUtils.js";
 import { hash } from "../../src/common/utils/passwordUtils.js";
-
-export const startServer = async () => {
-  const mailer = { sendEmail: sinon.spy() };
-
-  // FIXME revoir l'initialisation de l'application (1 point d'entrée, avec config pour savoir si démarrer services ou pas)
-  // const services = { cache: redisFakeClient, mailer, clamav: { scan: () => {} } };
-  const app = await server();
-
-  const httpClient = axiosist(app);
-
-  return {
-    httpClient,
-    mailer,
-    // Legacy auth jwt
-    createAndLogUserLegacy: async (username, password, options) => {
-      await createUserLegacy({ username, password, ...options });
-
-      const response = await httpClient.post("/api/login", {
-        username: username,
-        password: password,
-      });
-
-      return {
-        Authorization: `Bearer ${response.data.access_token}`,
-      };
-    },
-    // New auth cookie log user method
-    logUser: async (email, password) => {
-      const response = await httpClient.post("/api/v1/auth/login", { email, password });
-      return { cookie: response.headers["set-cookie"].join(";") };
-    },
-  };
-};
 
 export type RequestAsOrganisationFunc = <T>(
   organisation: NewOrganisation,

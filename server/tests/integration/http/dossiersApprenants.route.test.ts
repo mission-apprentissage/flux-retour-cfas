@@ -1,11 +1,12 @@
 import { strict as assert } from "assert";
 
-import { startServer } from "../../utils/testUtils.js";
+import { initTestApp } from "../../utils/testUtils.js";
 import { apiRoles } from "../../../src/common/roles.js";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "../../data/randomizedSample.js";
 import { effectifsQueueDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
 import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
+import { AxiosInstance } from "axiosist";
 
 const user = {
   name: "userApi",
@@ -27,10 +28,18 @@ const getJwtForUser = async (httpClient) => {
   return data.access_token;
 };
 
+let httpClient: AxiosInstance;
+
 describe("Dossiers Apprenants Route", () => {
+  before(async () => {
+    const app = await initTestApp();
+    httpClient = app.httpClient;
+  });
+
   const uai = "0802004U";
   const siret = "77937827200016";
   let randomOrganisme;
+
   beforeEach(async () => {
     // Create organisme
     randomOrganisme = createRandomOrganisme({ uai, siret });
@@ -49,7 +58,6 @@ describe("Dossiers Apprenants Route", () => {
 
   describe("POST dossiers-apprenants/test", () => {
     it("Vérifie que la route /dossiers-apprenants/test fonctionne avec un jeton JWT", async () => {
-      const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
@@ -72,7 +80,6 @@ describe("Dossiers Apprenants Route", () => {
 
   describe("POST dossiers-apprenants/", () => {
     it("Vérifie que la route /dossiers-apprenants fonctionne avec un tableau vide", async () => {
-      const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
@@ -89,8 +96,6 @@ describe("Dossiers Apprenants Route", () => {
     });
 
     it("Vérifie que la route /dossiers-apprenants renvoie une 401 pour un user non authentifié", async () => {
-      const { httpClient } = await startServer();
-
       const response = await httpClient.post("/api/dossiers-apprenants", [], {
         headers: {
           Authorization: "",
@@ -101,8 +106,6 @@ describe("Dossiers Apprenants Route", () => {
     });
 
     it("Vérifie que la route /dossiers-apprenants renvoie une 403 pour un user n'ayant pas la permission", async () => {
-      const { httpClient } = await startServer();
-
       // Create a normal user
       const createdId = await createUserLegacy({
         username: "normal-user",
@@ -128,7 +131,6 @@ describe("Dossiers Apprenants Route", () => {
     });
 
     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un trop grande nb de données randomisées (>100)", async () => {
-      const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
@@ -153,7 +155,6 @@ describe("Dossiers Apprenants Route", () => {
     });
 
     it("Vérifie l'ajout via route /dossiers-apprenants de 20 données randomisées", async function () {
-      const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
       const nbItemsToTest = 20;

@@ -1,12 +1,18 @@
 import { strict as assert } from "assert";
-import { startServer } from "../../utils/testUtils.js";
+import { initTestApp } from "../../utils/testUtils.js";
 import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "../../../src/common/constants/networksConstants.js";
+import { AxiosInstance } from "axiosist";
+
+let httpClient: AxiosInstance;
 
 // FIXME route authentifiée
 xdescribe("Referentiel Route", () => {
-  it("Vérifie qu'on peut récupérer les réseaux référentiels via API", async () => {
-    const { httpClient } = await startServer();
+  before(async () => {
+    const app = await initTestApp();
+    httpClient = app.httpClient;
+  });
 
+  it("Vérifie qu'on peut récupérer les réseaux référentiels via API", async () => {
     const response = await httpClient.get("/api/referentiel/networks");
 
     assert.deepStrictEqual(response.status, 200);

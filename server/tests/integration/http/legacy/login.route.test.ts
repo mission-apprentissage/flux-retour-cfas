@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 import { strict as assert } from "assert";
 import config from "../../../../src/config.js";
-import { startServer } from "../../../utils/testUtils.js";
+import { initTestApp } from "../../../utils/testUtils.js";
 import { createUserLegacy } from "../../../../src/common/actions/legacy/users.legacy.actions.js";
 import { AxiosInstance } from "axiosist";
 
@@ -10,7 +10,7 @@ let httpClient: AxiosInstance;
 
 describe("POST /login - Login [LEGACY]", () => {
   before(async () => {
-    const app = await startServer();
+    const app = await initTestApp();
     httpClient = app.httpClient;
   });
   beforeEach(async () => {

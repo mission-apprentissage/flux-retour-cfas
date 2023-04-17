@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import config from "../../../src/config.js";
-import { startServer } from "../../utils/testUtils.js";
+import { initTestApp } from "../../utils/testUtils.js";
 import { packageJson } from "../../../src/common/utils/esmUtils.js";
 import { AxiosInstance } from "axiosist";
 
@@ -8,7 +8,7 @@ let httpClient: AxiosInstance;
 
 describe("Routes diverses", () => {
   before(async () => {
-    const app = await startServer();
+    const app = await initTestApp();
     httpClient = app.httpClient;
   });
 
