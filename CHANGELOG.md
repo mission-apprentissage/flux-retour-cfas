@@ -1,3 +1,17 @@
+# [3.21.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.20.1...v3.21.0) (2023-04-18)
+
+
+### Bug Fixes
+
+* repair tests ([#2897](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2897)) ([bf1ae82](https://github.com/mission-apprentissage/flux-retour-cfas/commit/bf1ae824303dd1da3a62d8c4635de921a7b43729))
+* **server:** chargement des réseaux pour organismes sans UAI fiables ([#2918](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2918)) ([87e3501](https://github.com/mission-apprentissage/flux-retour-cfas/commit/87e3501948ee4bc3e9bee926b1ed2cb2e44ce4c7))
+* traduire msg si fichier trop volumineux ([#2921](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2921)) ([ec744f0](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ec744f0a65540885d899a8ab083c92ea36408e72))
+
+
+### Features
+
+* ajout du lien vers l'annuaire entreprises si siret non trouvé ([#2926](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2926)) ([3545cdd](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3545cdd084af86eaecc7d827345583902d588342))
+
 ## [3.20.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.20.0...v3.20.1) (2023-04-14)
 
 
