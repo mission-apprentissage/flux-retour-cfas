@@ -1,6 +1,6 @@
 import React, { ReactElement, useState } from "react";
 import { useRouter } from "next/router";
-import { Box, Container, Flex, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 
 import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, ParentGroupIcon } from "../../../theme/components/icons";
@@ -9,6 +9,8 @@ import { OrganisationType } from "@/common/internal/Organisation";
 import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
+import { ChevronDownIcon } from "@chakra-ui/icons";
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 
 function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): string {
   switch (type) {
@@ -227,6 +229,40 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
   return <NavBarPublic />;
 }
 
+const MenuQuestions = () => {
+  return (
+    <>
+      <Menu>
+        <MenuButton
+          p={4}
+          color="grey.800"
+          borderBottom="3px solid"
+          borderColor="transparent"
+          bg="transparent"
+          _hover={{ textDecoration: "none", color: "grey.800", bg: "grey.200" }}
+        >
+          <Text display="block">
+            Question ? <ChevronDownIcon />
+          </Text>
+        </MenuButton>
+        <MenuList>
+          <MenuItem
+            as="a"
+            href="https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Page d’aide
+          </MenuItem>
+          <MenuItem as="a" href={`mailto:${CONTACT_ADDRESS}`} target="_blank" rel="noopener noreferrer">
+            Nous envoyer un message
+          </MenuItem>
+        </MenuList>
+      </Menu>
+    </>
+  );
+};
+
 const NavigationMenu = () => {
   const router = useRouter();
   const { auth } = useAuth();
@@ -258,6 +294,7 @@ const NavigationMenu = () => {
                 textStyle="sm"
               >
                 {getNavBarComponent(auth)}
+                <MenuQuestions />
               </Flex>
             </Box>
           </Flex>
