@@ -34,4 +34,25 @@ const FIABILISATIONS_MANUELLES = [
     siret_fiable: "19561718800485",
     type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
   },
+  {
+    uai: "0572998Z",
+    siret: "19570099200041",
+    uai_fiable: "0572998Z",
+    siret_fiable: "19570099200074",
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+  },
+  {
+    uai: "0763153P",
+    siret: "40112310400010",
+    uai_fiable: "0763153P",
+    siret_fiable: "40112310400069",
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+  },
+  {
+    uai: "0691696U",
+    siret: "77572257200036",
+    uai_fiable: "0691696U",
+    siret_fiable: "77572257201190",
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+  },
 ];

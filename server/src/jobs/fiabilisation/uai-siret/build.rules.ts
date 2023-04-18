@@ -339,6 +339,7 @@ export const checkUaiAucunLieuReferentiel = async (coupleUaiSiretTdbToCheck) => 
   const organismesMatchsUaiInLieuxReferentiel = await organismesReferentielDb().countDocuments({
     "lieux_de_formation.uai": coupleUaiSiretTdbToCheck.uai,
   });
+
   if (organismesMatchsUaiInLieuxReferentiel === 0) {
     await fiabilisationUaiSiretDb().updateOne(
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
@@ -350,6 +351,37 @@ export const checkUaiAucunLieuReferentiel = async (coupleUaiSiretTdbToCheck) => 
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
       { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_PB_COLLECTE } }
     );
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Règle de vérification de la présence de l'UAI dans les lieux du référentiel
+ * Si jamais on trouve l'uai dans un des lieux on peut fiabiliser avec le siret de l'organisme ayant ces lieux
+ * @param coupleUaiSiretTdbToCheck
+ * @returns
+ */
+export const checkUaiLieuReferentiel = async ({ uai, siret }) => {
+  const organismesMatchsUaiInLieuxReferentiel = await organismesReferentielDb()
+    .find({ "lieux_de_formation.uai": uai })
+    .toArray();
+
+  if (organismesMatchsUaiInLieuxReferentiel.length === 1) {
+    // Si match unique et uai existant dans le référentiel on peut fiabiliser un couple lieu avec le siret de l'organisme du référentiel
+    await fiabilisationUaiSiretDb().updateOne(
+      { uai, siret },
+      {
+        $set: {
+          siret_fiable: organismesMatchsUaiInLieuxReferentiel[0].siret,
+          uai_fiable: uai,
+          type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+        },
+      },
+      { upsert: true }
+    );
+
     return true;
   }
 
