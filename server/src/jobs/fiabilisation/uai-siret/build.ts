@@ -10,6 +10,7 @@ import {
   checkMatchReferentielUaiUniqueSiretDifferent,
   checkSiretMultiplesRelationsAndLieux,
   checkUaiAucunLieuReferentiel,
+  checkUaiLieuReferentiel,
   checkUaiMultiplesRelationsAndLieux,
 } from "./build.rules.js";
 import { addFiabilisationsManuelles } from "./build.manual.js";
@@ -151,6 +152,9 @@ export const buildFiabilisationCoupleForTdbCouple = async (
   // Règle n°6 on vérifie les UAI non trouvées dans les lieux du référentiel
   if (await checkUaiAucunLieuReferentiel(coupleUaiSiretTdbToCheck)) return;
 
-  // Règle n°7 on vérifie les couples non fiabilisables, si l'UAI est validée cotée référentiel
+  // Règle n°7 on vérifie les UAI trouvées dans les lieux du référentiel
+  if (await checkUaiLieuReferentiel(coupleUaiSiretTdbToCheck)) return;
+
+  // Règle n°8 on vérifie les couples non fiabilisables, si l'UAI est validée cotée référentiel
   if (await checkCoupleNonFiabilisable(coupleUaiSiretTdbToCheck)) return;
 };

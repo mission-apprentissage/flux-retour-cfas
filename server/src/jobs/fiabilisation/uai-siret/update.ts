@@ -1,7 +1,8 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 import { MongoServerError } from "mongodb";
-import { deleteOrganismeAndEffectifs } from "../../../common/actions/organismes/organismes.actions.js";
+import { createOrganisme, deleteOrganismeAndEffectifs } from "../../../common/actions/organismes/organismes.actions.js";
 import {
+  STATUT_CREATION_ORGANISME,
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
 } from "../../../common/constants/fiabilisationConstants.js";
@@ -13,15 +14,15 @@ import {
   organismesReferentielDb,
 } from "../../../common/model/collections.js";
 import { getEffectifsDuplicatesFromOrganismes } from "./update.utils.js";
+import { findOrganismeById } from "../../../common/actions/organismes/organismes.actions.js";
 
-let nbOrganismesReferentielFiables = 0;
-let nbOrganismesFiabilises = 0;
-let nbOrganismesNonFiablesSupprimes = 0;
-let nbOrganismesFermesAFiabiliser = 0;
-
-let nbEffectifsDuplicateOrganismesAFiabiliser = 0;
-let nbEffectifsDuplicatesOrganismesNonFiables = 0;
-let nbEffectifsMovedToOrganismeFiable = 0;
+let nbOrganismesReferentielFiables: number;
+let nbOrganismesFiabilises: number;
+let nbOrganismesNonFiablesSupprimes: number;
+let nbOrganismesFermesAFiabiliser: number;
+let nbEffectifsDuplicateOrganismesAFiabiliser: number;
+let nbEffectifsDuplicatesOrganismesNonFiables: number;
+let nbEffectifsMovedToOrganismeFiable: number;
 
 /**
  * Méthode d'application de la fiabilisation pour les différents cas :
@@ -32,6 +33,15 @@ let nbEffectifsMovedToOrganismeFiable = 0;
  *  si doublons d'effectifs on déplace les effectifs du non fiable vers le fiable et on supprime le non fiable
  */
 export const updateOrganismesFiabilisationUaiSiret = async () => {
+  // Init counters
+  nbOrganismesReferentielFiables = 0;
+  nbOrganismesFiabilises = 0;
+  nbOrganismesNonFiablesSupprimes = 0;
+  nbOrganismesFermesAFiabiliser = 0;
+  nbEffectifsDuplicateOrganismesAFiabiliser = 0;
+  nbEffectifsDuplicatesOrganismesNonFiables = 0;
+  nbEffectifsMovedToOrganismeFiable = 0;
+
   // Traitement // de l'identification des différents statuts de fiabilisation
   await Promise.all([
     updateOrganismesReferentielFiables(),
@@ -103,8 +113,24 @@ const updateOrganismeForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
   );
 
-  const organismeFiable = await organismesDb().findOne({ uai: uai_fiable, siret: siret_fiable });
+  let organismeFiable = await organismesDb().findOne({ uai: uai_fiable, siret: siret_fiable });
   const organismeNonFiable = await organismesDb().findOne({ uai: uai, siret: siret });
+
+  if (!organismeFiable) {
+    // Si on ne trouve aucun organisme fiable pour l'uai fiable / siret_fiable c'est qu'on est dans le cas d'un couple d'un lieu
+    // On peut alors créer l'organisme comme étant un organisme "lieu"
+    const organismeLieuToCreate = await createOrganisme(
+      {
+        uai: uai_fiable,
+        siret: siret_fiable,
+        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE,
+        creation_statut: STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION, // Ajout d'un flag pour identifier que c'est un organisme créé à partir d'un lieu
+      },
+      { callLbaApi: false, buildFormationTree: false, buildInfosFromSiret: false }
+    );
+
+    organismeFiable = await findOrganismeById(organismeLieuToCreate?._id);
+  }
 
   if (organismeFiable && organismeNonFiable) {
     try {
