@@ -44,7 +44,7 @@ export default function CommentFonctionneLeTdb() {
               Comment fonctionne le {PRODUCT_NAME} ?
             </Heading>
             <BaseAccordionGroup
-              AccordionItemsDetailList={[
+              items={[
                 {
                   title: "Fonctionnement général du tableau de bord de l’apprentissage",
                   content: (
@@ -201,7 +201,7 @@ export default function CommentFonctionneLeTdb() {
               Si vous êtes organisme de formation (CFA ou UFA) :
             </Heading>
             <BaseAccordionGroup
-              AccordionItemsDetailList={[
+              items={[
                 {
                   title: "Comment transmettre les données de mon organisme au tableau de bord de l’apprentissage ?",
                   content: (
@@ -458,7 +458,7 @@ export default function CommentFonctionneLeTdb() {
               Si vous êtes une institution :
             </Heading>
             <BaseAccordionGroup
-              AccordionItemsDetailList={[
+              items={[
                 {
                   title: "Quelles sont les données affichées dans le tableau de bord ?",
                   content: (

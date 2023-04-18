@@ -8,44 +8,45 @@ import {
   Flex,
   Link,
 } from "@chakra-ui/react";
-import PropTypes from "prop-types";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
-export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" }) => {
+interface Props {
+  items: {
+    title: string;
+    content: ReactNode;
+  }[];
+}
+export const BaseAccordionGroup = ({ items }: Props) => {
   const [indexArray, setIndexArray] = useState<number[]>([]);
   const [isUnfold, setIsUnfold] = useState(false);
-  const indexItemArray = AccordionItemsDetailList.map((item) => AccordionItemsDetailList.indexOf(item));
 
-  const unfoldAll = () => {
-    setIndexArray(indexItemArray);
-    setIsUnfold(true);
+  const toggleFoldAll = () => {
+    setIndexArray(isUnfold ? [] : items.map((_, index) => index));
+    setIsUnfold(!isUnfold);
   };
 
-  const foldAll = () => {
-    setIndexArray([]);
-    setIsUnfold(false);
-  };
-
-  const updateIndex = (indexNumber: number) => {
+  const toggleFold = (indexNumber: number) => {
     const myIndex = indexArray?.indexOf(indexNumber);
     if (myIndex !== -1) {
       const newIndexArray = indexArray?.filter((item) => {
         return item !== indexNumber;
       });
-      return setIndexArray(newIndexArray);
-    } else return setIndexArray([...indexArray, indexNumber]);
+      setIndexArray(newIndexArray);
+    } else {
+      setIndexArray([...indexArray, indexNumber]);
+    }
   };
 
   return (
     <Flex flexDirection="column" marginTop="2w">
-      <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => (!isUnfold ? unfoldAll() : foldAll())}>
+      <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => toggleFoldAll()}>
         {!isUnfold ? "Tout déplier" : "Tout replier"}
       </Link>
       <Accordion marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
-        {AccordionItemsDetailList.map((item, index) => (
-          <AccordionItem key={index} onClick={() => updateIndex(index)}>
+        {items.map((item, index) => (
+          <AccordionItem key={index} onClick={() => toggleFold(index)} border="1px solid #E3E3FD" borderRadius="4px">
             <AccordionButton>
-              <Box fontSize={["14px", "delta", "delta"]} flex="1" textAlign="left" color={TextColor}>
+              <Box fontSize={["14px", "delta", "delta"]} flex="1" textAlign="left" color="#3A3A3A">
                 {item.title}
               </Box>
               <AccordionIcon />
@@ -56,14 +57,4 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
       </Accordion>
     </Flex>
   );
-};
-
-BaseAccordionGroup.propTypes = {
-  AccordionItemsDetailList: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      content: PropTypes.node.isRequired,
-    }).isRequired
-  ).isRequired,
-  TextColor: PropTypes.string,
 };
