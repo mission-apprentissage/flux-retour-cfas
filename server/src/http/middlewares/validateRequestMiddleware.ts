@@ -1,10 +1,16 @@
-import { RequestHandler } from "express";
-import { ZodError, ZodSchema } from "zod";
+import { ErrorRequestHandler, NextFunction, RequestHandler } from "express";
+import { ZodEffects, ZodError, ZodSchema } from "zod";
 
 declare type RequestValidation<TParams, TQuery, TBody> = {
   params?: ZodSchema<TParams>;
   query?: ZodSchema<TQuery>;
   body?: ZodSchema<TBody>;
+};
+
+declare type RequestProcessing<TParams, TQuery, TBody> = {
+  params?: ZodEffects<any, TParams>;
+  query?: ZodEffects<any, TQuery>;
+  body?: ZodEffects<any, TBody>;
 };
 
 type ErrorListItem = { type: "Query" | "Params" | "Body"; errors: ZodError<any> };
@@ -17,30 +23,35 @@ type ErrorListItem = { type: "Query" | "Params" | "Body"; errors: ZodError<any> 
  * @returns
  */
 
-export const validateRequestMiddleware: <TParams = any, TQuery = any, TBody = any>(
+function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
+  schemas: RequestProcessing<TParams, TQuery, TBody>
+): RequestHandler<TParams, any, TBody, TQuery>;
+function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
   schemas: RequestValidation<TParams, TQuery, TBody>
-) => RequestHandler<TParams, any, TBody, TQuery> =
-  ({ params, query, body }) =>
-  (req, res, next) => {
+): RequestHandler<TParams, any, TBody, TQuery>;
+function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
+  schemas: RequestValidation<TParams, TQuery, TBody> | RequestProcessing<TParams, TQuery, TBody>
+): RequestHandler<TParams, any, TBody, TQuery> {
+  return (req, res, next: NextFunction) => {
     const errors: Array<ErrorListItem> = [];
-    if (params) {
-      const parsed = params.safeParse(req.params);
+    if (schemas.params) {
+      const parsed = schemas.params.safeParse(req.params);
       if (parsed.success) {
         req.params = parsed.data;
       } else {
         errors.push({ type: "Params", errors: parsed.error });
       }
     }
-    if (query) {
-      const parsed = query.safeParse(req.query);
+    if (schemas.query) {
+      const parsed = schemas.query.safeParse(req.query);
       if (parsed.success) {
         req.query = parsed.data;
       } else {
         errors.push({ type: "Query", errors: parsed.error });
       }
     }
-    if (body) {
-      const parsed = body.safeParse(req.body);
+    if (schemas.body) {
+      const parsed = schemas.body.safeParse(req.body);
       if (parsed.success) {
         req.body = parsed.data;
       } else {
@@ -52,5 +63,6 @@ export const validateRequestMiddleware: <TParams = any, TQuery = any, TBody = an
     }
     return next();
   };
+}
 
 export default validateRequestMiddleware;

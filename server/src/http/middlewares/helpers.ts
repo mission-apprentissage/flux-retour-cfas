@@ -1,13 +1,15 @@
-import { AuthContext } from "../../common/model/internal/AuthContext.js";
 import Boom from "boom";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response, Locals } from "express";
 
-type Handler = (req: Request, res: Response, next: NextFunction) => any | Promise<any>;
+import { AuthContext } from "../../common/model/internal/AuthContext.js";
+
 
 // catch errors and return the result of the request handler
-export function returnResult(serviceFunc: Handler) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const result = await serviceFunc(req, res, next);
+export function returnResult<TParams = any, TQuery = any, TBody = any, TLocals extends Record<string, any> = any>(
+  serviceFunc: RequestHandler<TParams, any, TBody, TQuery, TLocals>
+): RequestHandler<TParams, any, TBody, TQuery, TLocals> {
+  return async (req, res, next) => {
+    const result = (await serviceFunc(req, res, next)) as any;
     // le résultat est à renvoyer en JSON par défaut
     if (!res.getHeader("Content-Type")) {
       res.set("Content-Type", "application/json");
