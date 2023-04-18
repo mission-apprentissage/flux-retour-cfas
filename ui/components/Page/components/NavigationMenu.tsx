@@ -234,7 +234,7 @@ const MenuQuestions = () => {
   const router = useRouter();
 
   // seulement un lien pour l'instant, on pourra regrouper les futures sous-pages sous un préfixe si besoin.
-  const isMenuActive = router.pathname === "/comprendre-les-donnees";
+  const isMenuActive = router.pathname === "/questions";
 
   return (
     <>
@@ -252,7 +252,7 @@ const MenuQuestions = () => {
           </Text>
         </MenuButton>
         <MenuList>
-          <MenuItem as={NavLink} href="/comprendre-les-donnees">
+          <MenuItem as={NavLink} href="/questions">
             Page d’aide
           </MenuItem>
           <MenuItem as="a" href={`mailto:${CONTACT_ADDRESS}`} target="_blank">

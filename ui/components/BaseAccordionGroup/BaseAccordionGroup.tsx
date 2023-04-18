@@ -10,12 +10,15 @@ import {
 } from "@chakra-ui/react";
 import { ReactNode, useState } from "react";
 
-interface Props {
-  items: {
-    title: string;
-    content: ReactNode;
-  }[];
+export interface AccordionItemProp {
+  title: string;
+  content: ReactNode;
 }
+
+interface Props {
+  items: AccordionItemProp[];
+}
+
 export const BaseAccordionGroup = ({ items }: Props) => {
   const [indexArray, setIndexArray] = useState<number[]>([]);
   const [isUnfold, setIsUnfold] = useState(false);
@@ -38,7 +41,7 @@ export const BaseAccordionGroup = ({ items }: Props) => {
   };
 
   return (
-    <Flex flexDirection="column" marginTop="2w">
+    <Flex flexDirection="column">
       <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => toggleFoldAll()}>
         {!isUnfold ? "Tout déplier" : "Tout replier"}
       </Link>
