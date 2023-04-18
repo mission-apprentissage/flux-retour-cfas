@@ -1,6 +1,7 @@
 import React, { ReactElement, useState } from "react";
 import { useRouter } from "next/router";
-import { Box, Container, Flex, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
+import NavLink from "next/link";
 
 import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, ParentGroupIcon } from "../../../theme/components/icons";
@@ -9,6 +10,8 @@ import { OrganisationType } from "@/common/internal/Organisation";
 import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
+import { CONTACT_ADDRESS } from "@/common/constants/product";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 
 function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): string {
   switch (type) {
@@ -227,6 +230,40 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
   return <NavBarPublic />;
 }
 
+const MenuQuestions = () => {
+  const router = useRouter();
+
+  // seulement un lien pour l'instant, on pourra regrouper les futures sous-pages sous un préfixe si besoin.
+  const isMenuActive = router.pathname === "/comprendre-les-donnees";
+
+  return (
+    <>
+      <Menu>
+        <MenuButton
+          p={4}
+          color={isMenuActive ? "bluefrance" : "grey.800"}
+          borderBottom="3px solid"
+          borderColor={isMenuActive ? "bluefrance" : "transparent"}
+          bg="transparent"
+          _hover={{ textDecoration: "none", color: "grey.800", bg: "grey.200" }}
+        >
+          <Text display="block">
+            Question ? <ChevronDownIcon />
+          </Text>
+        </MenuButton>
+        <MenuList>
+          <MenuItem as={NavLink} href="/comprendre-les-donnees">
+            Page d’aide
+          </MenuItem>
+          <MenuItem as="a" href={`mailto:${CONTACT_ADDRESS}`} target="_blank">
+            Nous envoyer un message
+          </MenuItem>
+        </MenuList>
+      </Menu>
+    </>
+  );
+};
+
 const NavigationMenu = () => {
   const router = useRouter();
   const { auth } = useAuth();
@@ -258,6 +295,7 @@ const NavigationMenu = () => {
                 textStyle="sm"
               >
                 {getNavBarComponent(auth)}
+                <MenuQuestions />
               </Flex>
             </Box>
           </Flex>
