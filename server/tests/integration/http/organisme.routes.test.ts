@@ -21,8 +21,9 @@ import {
 import { beforeEach } from "mocha";
 import {
   historySequenceApprenti,
-  historySequenceInscritToApprenti,
-  historySequenceInscritToApprentiToAbandon,
+  historySequenceApprentiToAbandon,
+  historySequenceApprentiToInscrit,
+  historySequenceInscrit,
 } from "../../data/historySequenceSamples.js";
 import { createSampleEffectif } from "../../data/randomizedSample.js";
 
@@ -95,16 +96,6 @@ describe("Routes /organismes/:id", () => {
       beforeEach(async () => {
         // FIXME revoir les statuts
         await effectifsDb().insertMany([
-          // 10 inscritToApprentiToAbandon
-          ...generate(10, () =>
-            createSampleEffectif({
-              ...commonEffectifsAttributes,
-              annee_scolaire: anneeScolaire,
-              apprenant: {
-                historique_statut: historySequenceInscritToApprentiToAbandon,
-              },
-            })
-          ),
           // 5 apprenti
           ...generate(5, () =>
             createSampleEffectif({
@@ -116,13 +107,35 @@ describe("Routes /organismes/:id", () => {
             })
           ),
 
-          // 15 inscritToApprenti
+          // 10 Inscrit
+          ...generate(10, () =>
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceInscrit,
+              },
+            })
+          ),
+
+          // 15 ApprentiToAbandon
           ...generate(15, () =>
             createSampleEffectif({
               ...commonEffectifsAttributes,
               annee_scolaire: anneeScolaire,
               apprenant: {
-                historique_statut: historySequenceInscritToApprenti,
+                historique_statut: historySequenceApprentiToAbandon,
+              },
+            })
+          ),
+
+          // 20 ApprentiToInscrit
+          ...generate(20, () =>
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceApprentiToInscrit,
               },
             })
           ),
@@ -139,10 +152,10 @@ describe("Routes /organismes/:id", () => {
           assert.strictEqual(response.status, 200);
           assert.deepStrictEqual(response.data, {
             date: date,
-            apprentis: 20,
-            inscritsSansContrat: 0,
-            rupturants: 0,
-            abandons: 10,
+            apprentis: 5,
+            inscritsSansContrat: 10,
+            abandons: 15,
+            rupturants: 20,
             totalOrganismes: 0,
           });
         } else {
