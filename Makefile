@@ -5,7 +5,7 @@ install-root:
 	yarn install
 
 install-server:
-	yarn --cwd server install --frozen-lockfile
+	yarn --cwd server install --frozen-lockfile --ignore-platform
 
 install-ui:
 	yarn --cwd ui install --frozen-lockfile

@@ -9,14 +9,14 @@
   "exports": "./src/index.js",
   "type": "module",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "tsx src/index.ts",
     "build": "tsc --build",
-    "start:dev": "nodemon --ignore tests/ --exec 'ts-node' src/index.ts -e ts",
+    "start:dev": "nodemon --ignore tests/ --exec yarn start -e ts",
     "test": "yarn test:cmd tests/integration/**/*.ts",
     "test:coverage": "c8 --check-coverage yarn test",
-    "test:cmd": "cross-env NODE_ENV=test DOTENV_CONFIG_PATH=.env.test ts-mocha -n loader=ts-node/esm",
+    "test:cmd": "cross-env NODE_ENV=test DOTENV_CONFIG_PATH=.env.test ts-mocha -r tsx",
     "lint": "eslint --cache . --ext .ts",
-    "cli": "ts-node --transpileOnly src/jobs/cli.ts",
+    "cli": "tsx src/jobs/cli.ts",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down"
@@ -116,6 +116,7 @@
     ]
   },
   "devDependencies": {
+    "@esbuild/linux-arm64": "^0.17.17",
     "@faker-js/faker": "7.6.0",
     "@types/boom": "7.3.2",
     "@types/bunyan": "1.8.8",
@@ -139,6 +140,7 @@
     "nodemon": "2.0.16",
     "prettier": "2.8.7",
     "ts-mocha": "10.0.0",
+    "tsx": "3.12.6",
     "typescript": "5.0.2"
   }
 }
