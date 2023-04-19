@@ -7,9 +7,12 @@ import { usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { getOrganisationLabel } from "@/common/model/organisations.model";
 import { validateUser } from "@/common/model/usersMigration.model";
+import { sendEmail } from "@/common/services/mailer/mailer";
+import { createActivationToken } from "@/common/utils/jwtUtils";
 import { generateRandomAlphanumericPhrase } from "@/common/utils/miscUtils";
 import { hash, compare, isTooWeak } from "@/common/utils/passwordUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
+import config from "@/config";
 
 interface UserRegistration {
   email: string;
@@ -371,4 +374,17 @@ export async function getUserById(userId: ObjectId): Promise<WithId<UsersMigrati
     throw Boom.notFound(`missing user ${userId}`);
   }
   return user;
+}
+
+export async function resendConfirmationEmail(userId: string): Promise<void> {
+  const user = await getUserById(new ObjectId(userId));
+  await sendEmail(user.email, "activation_user", {
+    recipient: {
+      civility: user.civility,
+      nom: user.nom,
+      prenom: user.prenom,
+    },
+    tdbEmail: config.email,
+    activationToken: createActivationToken(user.email, { payload: {} }),
+  });
 }
