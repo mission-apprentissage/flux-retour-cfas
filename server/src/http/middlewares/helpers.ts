@@ -1,8 +1,7 @@
 import Boom from "boom";
-import { NextFunction, Request, RequestHandler, Response, Locals } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 
 import { AuthContext } from "../../common/model/internal/AuthContext.js";
-
 
 // catch errors and return the result of the request handler
 export function returnResult<TParams = any, TQuery = any, TBody = any, TLocals extends Record<string, any> = any>(

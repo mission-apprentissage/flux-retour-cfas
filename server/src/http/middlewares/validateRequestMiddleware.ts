@@ -1,4 +1,4 @@
-import { ErrorRequestHandler, NextFunction, RequestHandler } from "express";
+import { NextFunction, RequestHandler } from "express";
 import { ZodEffects, ZodError, ZodSchema } from "zod";
 
 declare type RequestValidation<TParams, TQuery, TBody> = {
