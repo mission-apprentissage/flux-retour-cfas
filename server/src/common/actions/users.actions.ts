@@ -68,7 +68,7 @@ export const authenticate = async (email: string, password: string) => {
  * @param {*} email
  * @returns
  */
-export const getUserByEmail = async (email) => {
+export const getUserByEmail = async (email: string) => {
   const user = await usersMigrationDb().findOne(
     { email },
     {

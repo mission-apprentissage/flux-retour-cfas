@@ -8,6 +8,8 @@ import { createActivationToken, createResetPasswordToken } from "@/common/utils/
 import { RegistrationSchema } from "@/common/validation/registrationSchema";
 import config from "@/config";
 
+import { AuthContext } from "../model/internal/AuthContext.js";
+
 import { buildOrganisationLabel, createOrganisation } from "./organisations.actions";
 import { createOrganisme, getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { createSession } from "./sessions.actions";
@@ -98,71 +100,85 @@ export async function login(email: string, password: string): Promise<string> {
   return sessionToken;
 }
 
-/** Ca serait mieux de gérer un token d'activation */
-export const activateUser = async (email: string) => {
-  const user = await getUserByEmail(email);
-  if (!user) {
-    logger.error({ email }, "utilisateur non trouvé à l'activation");
-    throw Boom.internal("Une erreur est survenue");
-  }
-
-  const res = await usersMigrationDb().updateOne(
-    {
-      email,
-      account_status: "PENDING_EMAIL_VALIDATION",
-    },
-    {
-      $set: {
-        account_status: "PENDING_ADMIN_VALIDATION",
-      },
-    }
-  );
-  if (res.modifiedCount === 0) {
-    throw Boom.badRequest("Permissions invalides");
-  }
-
-  // si des gestionnaires existent, on les notifie, sinon c'est un admin du TDB qui doit valider
+/**
+ * Confirmation de l'email d'un utilisateur
+ */
+export async function activateUser(ctx: AuthContext) {
   const gestionnaires = await usersMigrationDb()
     .find({
-      organisation_id: user.organisation_id,
+      organisation_id: ctx.organisation_id,
       account_status: "CONFIRMED",
     })
     .toArray();
 
-  if (gestionnaires.length > 0) {
-    await Promise.all(
-      gestionnaires.map(async (gestionnaire) => {
-        await sendEmail(gestionnaire.email, "validation_user_by_orga_gestionnaire", {
-          recipient: {
-            civility: gestionnaire.civility,
-            prenom: gestionnaire.prenom,
-            nom: gestionnaire.nom,
-          },
-          user: {
-            _id: user._id.toString(),
-            civility: user.civility,
-            nom: user.nom,
-            prenom: user.prenom,
-            email: user.email,
-          },
-          organisationLabel: await buildOrganisationLabel(user.organisation_id),
-        });
-      })
-    );
-  } else {
-    await sendEmail("tableau-de-bord@apprentissage.beta.gouv.fr", "validation_user_by_tdb_team", {
-      user: {
-        _id: user._id.toString(),
-        civility: user.civility,
-        prenom: user.prenom,
-        nom: user.nom,
-        email: user.email,
+  // tant que l'utilisateur n'est pas confirmé
+  if (ctx.account_status === "PENDING_EMAIL_VALIDATION") {
+    const res = await usersMigrationDb().updateOne(
+      {
+        email: ctx.email,
+        account_status: "PENDING_EMAIL_VALIDATION",
       },
-      organisationLabel: await buildOrganisationLabel(user.organisation_id),
-    });
-  }
-};
+      {
+        $set: {
+          account_status: "PENDING_ADMIN_VALIDATION",
+        },
+      }
+    );
+    if (res.modifiedCount === 0) {
+      throw Boom.badRequest("Permissions invalides");
+    }
 
+    // si des gestionnaires existent, on les notifie, sinon c'est un admin du TDB qui doit valider
+    if (gestionnaires.length > 0) {
+      await Promise.all(
+        gestionnaires.map(async (gestionnaire) => {
+          await sendEmail(gestionnaire.email, "validation_user_by_orga_gestionnaire", {
+            recipient: {
+              civility: gestionnaire.civility,
+              prenom: gestionnaire.prenom,
+              nom: gestionnaire.nom,
+            },
+            user: {
+              _id: ctx._id.toString(),
+              civility: ctx.civility,
+              nom: ctx.nom,
+              prenom: ctx.prenom,
+              email: ctx.email,
+            },
+            organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
+          });
+        })
+      );
+    } else {
+      await sendEmail("tableau-de-bord@apprentissage.beta.gouv.fr", "validation_user_by_tdb_team", {
+        user: {
+          _id: ctx._id.toString(),
+          civility: ctx.civility,
+          prenom: ctx.prenom,
+          nom: ctx.nom,
+          email: ctx.email,
+        },
+        organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
+      });
+    }
+  }
+
+  // renvoi du statut du compte pour rediriger l'utilisateur si son statut change
+  return {
+    account_status: (
+      await usersMigrationDb().findOne(
+        { email: ctx.email },
+        {
+          projection: {
+            _id: 0,
+            account_status: 1,
+          },
+        }
+      )
+    )?.account_status,
+    validationByGestionnaire: gestionnaires.length > 0,
+  };
+}
 export async function sendForgotPasswordRequest(email: string) {
   const user = await getUserByEmail(email);
   if (!user) {
