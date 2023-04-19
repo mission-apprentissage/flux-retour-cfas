@@ -11,7 +11,7 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "build": "tsc --build",
-    "start:dev": "nodemon --ignore tests/ --exec yarn start -e ts",
+    "start:dev": "tsx watch src/index.ts",
     "test": "yarn test:cmd tests/integration/**/*.ts",
     "test:coverage": "c8 --check-coverage yarn test",
     "test:cmd": "cross-env NODE_ENV=test DOTENV_CONFIG_PATH=.env.test ts-mocha -r tsx",
@@ -117,7 +117,6 @@
     ]
   },
   "devDependencies": {
-    "@esbuild/linux-arm64": "^0.17.17",
     "@faker-js/faker": "7.6.0",
     "@types/boom": "7.3.2",
     "@types/bunyan": "1.8.8",
@@ -138,7 +137,6 @@
     "mocha": "10.0.0",
     "mongodb-memory-server": "8.5.2",
     "nock": "13.2.4",
-    "nodemon": "2.0.16",
     "prettier": "2.8.7",
     "ts-mocha": "10.0.0",
     "tsx": "3.12.6",

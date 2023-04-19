@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import logger from "../../common/logger.js";
+import logger from "@/common/logger.js";
 
 export function logMiddleware(req: Request, res: Response, next: NextFunction) {
   const startTime = new Date().getTime();
@@ -12,7 +12,7 @@ export function logMiddleware(req: Request, res: Response, next: NextFunction) {
         type: "http",
         responseTime: new Date().getTime() - startTime,
         method: req.method,
-        url: req.url,
+        url: req.originalUrl,
         statusCode: res.statusCode,
         requestId: (req as any).requestId,
         // via error serializer
