@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { createJobEvent } from "../../../../src/common/actions/jobEvents.actions.js";
-import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.js";
+import { jobEventStatuts } from "../../../../src/common/constants/jobs.js";
 import { jobEventsDb } from "../../../../src/common/model/collections.js";
 import { clearAllCollections, clearCollection } from "../../../../src/common/mongodb.js";
 import jobEventsModelDescriptor from "../../../../src/common/model/jobEvents.model.js";

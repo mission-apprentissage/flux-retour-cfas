@@ -2,11 +2,11 @@ import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes.js";
 import { adresseSchema } from "./json-schema/adresseSchema.js";
-import { TETE_DE_RESEAUX } from "../constants/networksConstants.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../constants/natureOrganismeConstants.js";
+import { TETE_DE_RESEAUX } from "../constants/networks.js";
+import { NATURE_ORGANISME_DE_FORMATION, SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "../constants/organisme.js";
 import { schemaValidation } from "../utils/schemaUtils.js";
 import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
-import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisation.js";
 
 const collectionName = "organismes";
 
@@ -37,11 +37,11 @@ const schema = object(
     _id: objectId(),
     uai: string({
       description: "Code UAI de l'établissement",
-      pattern: "^[0-9]{7}[a-zA-Z]$",
+      pattern: UAI_REGEX_PATTERN,
       maxLength: 8,
       minLength: 8,
     }),
-    siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
+    siret: string({ description: "N° SIRET", pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
     reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) }), {
       description: "Réseaux du CFA, s'ils existent",
     }),
@@ -85,13 +85,13 @@ const schema = object(
                 }),
                 uai: string({
                   description: "Code UAI du lieu de formation (optionnel)",
-                  pattern: "^[0-9]{7}[a-zA-Z]$",
+                  pattern: UAI_REGEX_PATTERN,
                   maxLength: 8,
                   minLength: 8,
                 }),
                 siret: string({
                   description: "Siret du lieu de formation (optionnel)",
-                  pattern: "^[0-9]{14}$",
+                  pattern: SIRET_REGEX_PATTERN,
                   maxLength: 14,
                   minLength: 14,
                 }),

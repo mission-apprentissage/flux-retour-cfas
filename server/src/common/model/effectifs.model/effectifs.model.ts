@@ -10,8 +10,9 @@ import {
   formationEffectifSchema,
   validateFormationEffectif,
 } from "./parts/formation.effectif.part.js";
-import { TETE_DE_RESEAUX } from "../../constants/networksConstants.js";
-import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../../constants/territoiresConstants.js";
+import { TETE_DE_RESEAUX } from "../../constants/networks.js";
+import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../../constants/territoires.js";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme.js";
 
 const collectionName = "effectifs";
 
@@ -136,11 +137,11 @@ export const schema = object(
           // 2 champs utiles seulement pour les indicateurs v1
           // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
           uai: string({
-            pattern: "^[0-9]{7}[a-zA-Z]$",
+            pattern: UAI_REGEX_PATTERN,
             maxLength: 8,
             minLength: 8,
           }),
-          siret: string({ pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
+          siret: string({ pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
         }),
       },
       {

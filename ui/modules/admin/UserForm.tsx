@@ -38,7 +38,7 @@ export const UserForm = ({
   const { values, errors, touched, dirty, handleSubmit, handleChange } = useFormik({
     validationSchema: toFormikValidationSchema(userSchema()),
     initialValues: {
-      civility: user?.civility || "",
+      civility: user?.civility,
       nom: user?.nom || "",
       prenom: user?.prenom || "",
       email: user?.email || "",

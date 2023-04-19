@@ -1,5 +1,6 @@
 import { cloneDeep, isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
+
 import { effectifsDb } from "../model/collections.js";
 import { defaultValuesEffectif, validateEffectif } from "../model/effectifs.model/effectifs.model.js";
 import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant.part.js";
@@ -9,6 +10,9 @@ import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helper
 import { getOrganismeById } from "./organismes/organismes.actions.js";
 import { AuthContext } from "../model/internal/AuthContext.js";
 import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions.js";
+import { Effectif } from "../model/@types/Effectif.js";
+import { EffectifsQueue } from "../model/@types/EffectifsQueue.js";
+import { stripEmptyFields } from "../utils/miscUtils.js";
 
 /**
  * Méthode de build d'un effectif
@@ -16,63 +20,32 @@ import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.action
  * @param {boolean} lockAtCreate
  * @returns
  */
-export const buildEffectif = (
-  {
-    organisme_id,
-    annee_scolaire,
-    source,
-    id_erp_apprenant = null,
-    validation_errors = [],
-    apprenant: { nom, prenom, ...apprenant },
-    formation: { cfd, ...formation },
-  },
-  lockAtCreate = false
-) => {
-  const _id_erp_apprenant = id_erp_apprenant ?? new ObjectId().toString();
+export const buildEffectif = (effectifData: Required<Effectif> & { organisme_id: ObjectId }, lockAtCreate = false) => {
   const defaultValues = defaultValuesEffectif({ lockAtCreate });
   return {
     ...defaultValues,
+    ...effectifData,
     apprenant: {
-      nom,
-      prenom,
       ...defaultValues.apprenant,
-      ...apprenant,
+      ...effectifData.apprenant,
     },
     formation: {
-      cfd,
       ...defaultValues.formation,
-      ...formation,
+      ...effectifData.formation,
     },
-    id_erp_apprenant: _id_erp_apprenant,
-    organisme_id: new ObjectId(organisme_id),
-    source,
-    annee_scolaire,
-    validation_errors,
   };
 };
+
 /**
  * Méthode de création d'un effectif
- * @param {Object} effectif
- * @param {string} effectif.organisme_id
- * @param {string} [effectif.annee_scolaire]
- * @param {string} [effectif.source]
- * @param {string|null} [effectif.id_erp_apprenant]
- * @param {Object} effectif.apprenant
- * @param {Object} effectif.formation
- * @param {any[]} [effectif.validation_errors]
- * @param {*} lockAtCreate
- * @returns
  */
 export const createEffectif = async (
-  { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant, formation, validation_errors = [] },
+  dataEffectif: Required<Effectif> & { organisme_id: ObjectId },
   lockAtCreate = false
 ) => {
-  const dataToInsert = buildEffectif(
-    { organisme_id, annee_scolaire, source, id_erp_apprenant, apprenant, formation, validation_errors },
-    lockAtCreate
-  );
+  const dataToInsert = buildEffectif(dataEffectif, lockAtCreate);
 
-  const organisme = await getOrganismeById(organisme_id);
+  const organisme = await getOrganismeById(dataEffectif.organisme_id);
   (dataToInsert as any)._computed = {
     organisme: {
       region: organisme.adresse?.region,
@@ -157,48 +130,49 @@ export const insertEffectif = async (data) => {
  * @param {*} dossiersApprenant
  * @returns
  */
-export const structureEffectifFromDossierApprenant = (dossiersApprenant) => {
+export const structureEffectifFromDossierApprenant = (dossiersApprenant: EffectifsQueue) => {
   const {
     annee_scolaire,
     source,
     id_erp_apprenant,
-
-    formation_cfd: cfd,
+    id_formation: cfd,
     formation_rncp: rncp,
     libelle_long_formation: libelle_long,
-    niveau_formation: niveau,
-    niveau_formation_libelle: niveau_libelle,
     periode_formation: periode,
     annee_formation: annee,
     code_commune_insee_apprenant,
     contrat_date_debut,
     contrat_date_fin,
     contrat_date_rupture,
+    statut_apprenant,
+    date_metier_mise_a_jour_statut,
     nom_apprenant: nom,
     prenom_apprenant: prenom,
     ine_apprenant: ine,
     date_de_naissance_apprenant: date_de_naissance,
     email_contact: courriel,
-    telephone_apprenant: telephone,
-
-    historique_statut_apprenant: historique_statut,
+    tel_apprenant: telephone,
   } = dossiersApprenant;
 
-  return {
-    ...(annee_scolaire ? { annee_scolaire } : {}),
-    ...(source ? { source } : {}),
-    ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-    organisme_id: undefined,
+  return stripEmptyFields({
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
     apprenant: {
       ...defaultValuesApprenant(),
-      ...(ine ? { ine } : {}),
-      ...(nom ? { nom } : {}),
-      ...(prenom ? { prenom } : {}),
-      ...(date_de_naissance ? { date_de_naissance } : {}),
-
-      ...(courriel ? { courriel } : {}),
-      ...(telephone ? { telephone: transformToInternationalNumber(telephone) } : {}),
-      ...(historique_statut ? { historique_statut } : {}),
+      historique_statut: [
+        {
+          valeur_statut: statut_apprenant,
+          date_statut: new Date(date_metier_mise_a_jour_statut),
+          date_reception: new Date(),
+        },
+      ],
+      ine,
+      nom,
+      prenom,
+      date_de_naissance,
+      courriel,
+      telephone: transformToInternationalNumber(telephone),
       // Build adresse with code_commune_insee
       ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
       // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
@@ -215,15 +189,14 @@ export const structureEffectifFromDossierApprenant = (dossiersApprenant) => {
     },
     formation: {
       ...defaultValuesFormationEffectif(),
-      ...(cfd ? { cfd } : {}),
-      ...(rncp ? { rncp } : {}),
-      ...(libelle_long ? { libelle_long } : {}),
-      ...(niveau ? { niveau } : {}),
-      ...(niveau_libelle ? { niveau_libelle } : {}),
-      ...(periode ? { periode } : {}),
-      ...(annee ? { annee } : {}),
+      cfd,
+      rncp,
+      libelle_long,
+      // periode is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
+      periode: periode ? periode.split("-").map(Number) : [],
+      annee,
     },
-  };
+  });
 };
 
 /**
@@ -274,10 +247,7 @@ export const findEffectifById = async (id, projection = {}) => {
  * @param {*} id
  * @returns
  */
-export const updateEffectif = async (id, data, opt = { keepPreviousErrors: false }) => {
-  const _id = typeof id === "string" ? new ObjectId(id) : id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
+export const updateEffectif = async (_id: ObjectId, data, opt = { keepPreviousErrors: false }) => {
   const effectif = await effectifsDb().findOne({ _id });
   if (!effectif) {
     throw new Error(`Unable to find effectif ${_id.toString()}`);

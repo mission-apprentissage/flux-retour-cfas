@@ -14,9 +14,10 @@ export const validateFrenchTelephoneNumber = (value) => {
 };
 
 // TODO a remove et remplacer par telephoneConverter partout ?
-export const transformToInternationalNumber = (value) => `33${value.replace(/^0/, "")}`;
+export const transformToInternationalNumber = (value) => (value ? `33${value.replace(/^0/, "")}` : value);
 
 export const telephoneConverter = (telephone, tryStartByZero = false) => {
+  if (!telephone) return telephone;
   let phone = telephone.replaceAll("-", "").replaceAll(".", "").replaceAll(" ", "");
 
   if (phone.length === 10 && phone[0] === "0") {

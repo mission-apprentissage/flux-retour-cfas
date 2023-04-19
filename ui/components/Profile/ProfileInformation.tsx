@@ -30,10 +30,10 @@ const ProfileInformation = () => {
       nom: auth.nom || "",
       telephone: auth.telephone?.replace("+", ""),
       email: auth.email || "",
-      civility: auth.civility || "",
+      civility: auth.civility,
     },
     validationSchema: Yup.object().shape({
-      prenom: Yup.string().required("Champs obligatoire"),
+      prenom: Yup.string().required("Champ obligatoire"),
       nom: Yup.string().required("Champs  obligatoire"),
       telephone: Yup.string(),
       civility: Yup.string(),

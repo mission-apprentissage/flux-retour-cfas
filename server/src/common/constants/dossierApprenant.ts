@@ -7,6 +7,12 @@ export const CODES_STATUT_APPRENANT = {
   abandon: 0,
 };
 
+export const CODES_STATUT_APPRENANT_ENUM = [
+  CODES_STATUT_APPRENANT.abandon,
+  CODES_STATUT_APPRENANT.inscrit,
+  CODES_STATUT_APPRENANT.apprenti,
+];
+
 /**
  * Nom des statuts
  */

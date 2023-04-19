@@ -1,5 +1,6 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { object, string, date, arrayOf, any, objectId } from "./json-schema/jsonSchemaTypes.js";
+import { CODES_STATUT_APPRENANT_ENUM } from "../constants/dossierApprenant.js";
 
 const collectionName = "effectifsQueue";
 
@@ -23,11 +24,11 @@ export const schema = object(
     date_de_naissance_apprenant: any({ description: "Date de naissance de l'apprenant" }),
     uai_etablissement: any({ description: "UAI de l'établissement" }),
     nom_etablissement: any({ description: "Nom de l'établissement" }),
-    id_formation: any(),
+    id_formation: any({ description: "Code CFD de la formation" }),
     annee_scolaire: any({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
     }),
-    statut_apprenant: any({ description: "0, 2 ou 3" }),
+    statut_apprenant: any({ description: CODES_STATUT_APPRENANT_ENUM.join(",") }),
     date_metier_mise_a_jour_statut: any(),
     id_erp_apprenant: any({ description: "Identifiant de l'apprenant dans l'erp" }),
 

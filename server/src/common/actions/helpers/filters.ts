@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
-import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
 import { z } from "zod";
+
+import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
 
 // version legacy des filtres indicateurs/effectifs avec organisme_id / siret / uai
 // devra être changée avec les nouveaux écrans pour sortir ces paramètres
@@ -8,7 +9,9 @@ import { z } from "zod";
 // (permissions par organisme_id !== permissions par etablissement_reseaux)
 export const legacyEffectifsFiltersSchema = {
   date: z.preprocess((str: any) => new Date(str), z.date()),
-  organisme_id: z.string().optional(),
+  organisme_id: z
+    .preprocess((v: any) => (ObjectId.isValid(v) ? new ObjectId(v) : v), z.instanceof(ObjectId))
+    .optional(),
   formation_cfd: z.string().optional(),
   etablissement_reseaux: z.string().optional(),
   etablissement_num_departement: z.string().optional(),

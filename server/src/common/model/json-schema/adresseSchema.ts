@@ -1,6 +1,7 @@
 import { object, string, integer } from "./jsonSchemaTypes.js";
-import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
-import { PAYS } from "../../constants/paysConstant.js";
+import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../../constants/territoires.js";
+import { PAYS } from "../../constants/pays.js";
+import { CODE_INSEE_PATTERN, CODE_POSTAL_PATTERN } from "@/common/constants/organisme.js";
 
 export const adresseSchema = object({
   numero: integer({
@@ -24,14 +25,14 @@ export const adresseSchema = object({
   code_postal: string({
     description: "Le code postal doit contenir 5 caractères",
     example: "75000",
-    pattern: "^[0-9]{5}$",
+    pattern: CODE_POSTAL_PATTERN,
     maxLength: 5,
     minLength: 5,
   }),
   code_insee: string({
     description: "Le code insee doit contenir 5 caractères",
     example: "54318",
-    pattern: "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+    pattern: CODE_INSEE_PATTERN,
     maxLength: 5,
     minLength: 5,
   }),

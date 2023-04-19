@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const SIRET_REGEX = /^[0-9]{14}$/;
+import { SIRET_REGEX } from "@/common/constants/organisme.js";
 
 export const schema = Joi.string().length(14).pattern(SIRET_REGEX);
 

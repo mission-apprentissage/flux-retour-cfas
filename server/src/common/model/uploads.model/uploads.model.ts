@@ -7,6 +7,11 @@ const collectionName = "uploads";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ organisme_id: 1 }, { unique: true }]];
 
+/**
+ * cet objet représente le schéma de données d'un upload pour un organisme donné.
+ * chaque fichier uploadé est ajouté au tableau 'documents'.
+ * chaque mapping est ajouté au tableau 'models'.
+ */
 const schema = object(
   {
     _id: objectId(),
@@ -14,7 +19,7 @@ const schema = object(
       description: "Organisme id",
     }),
     documents: arrayOf(documentSchema, {
-      description: "Historique des documents uploadé",
+      description: "Historique des documents uploadés",
     }),
 
     models: arrayOf(

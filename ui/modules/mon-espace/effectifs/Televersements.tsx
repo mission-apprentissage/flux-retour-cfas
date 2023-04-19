@@ -61,7 +61,7 @@ const Televersements = ({ organisme }) => {
     async (type_document) => {
       if (type_document?.length >= 4) {
         const { document_id } = documents.unconfirmed[0];
-        const response = await _put(`/api/v1/organismes/${organisme._id}/upload/${document_id}/setDocumentType`, {
+        const response = await _put(`/api/v1/organismes/${organisme._id}/upload/doc/${document_id}/setDocumentType`, {
           type_document,
         });
         onDocumentsChanged(response.documents, response.models);
@@ -253,10 +253,7 @@ const Televersements = ({ organisme }) => {
     );
     const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post(
       `/api/v1/organismes/${organisme._id}/upload/pre-import`,
-      {
-        organisme_id: organisme._id,
-        mapping: keyToKeyMapping,
-      }
+      keyToKeyMapping
     );
 
     // eslint-disable-next-line no-undef

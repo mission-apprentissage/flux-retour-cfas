@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { joiPasswordExtendCore } from "joi-password";
 import { z } from "zod";
+import { SIRET_REGEX, UAI_REGEX } from "../constants/organisme";
 const joiPassword = Joi.extend(joiPasswordExtendCore);
 
 export function passwordSchema(isAdmin = false) {
@@ -19,7 +20,7 @@ export function cfdSchema() {
 
 export function siretSchema() {
   return Joi.string()
-    .regex(/^[0-9]{14}$/)
+    .regex(SIRET_REGEX)
     .creditCard()
     .error((errors) => {
       // @ts-ignore
@@ -33,9 +34,8 @@ export function siretSchema() {
       );
     });
 }
-// const UAI_REGEX = /^[0-9_]{7}[a-zA-Z]{1}$/;
 export function uaiSchema() {
-  return Joi.string().regex(/^[0-9]{7}[a-zA-Z]$/);
+  return Joi.string().regex(UAI_REGEX);
 }
 
 export function validateUai(uai) {
@@ -56,13 +56,4 @@ export async function validateFullZodObjectSchema<Shape extends z.ZodRawShape>(
 
 export async function validateFullObjectSchemaUnknown<T = any>(object, schema): Promise<T> {
   return await Joi.object(schema).validateAsync(object, { abortEarly: false, allowUnknown: true });
-}
-
-export function stripEmptyFields<T extends object>(object: T): T {
-  return Object.entries(object).reduce((acc, [key, value]) => {
-    if (typeof value !== "undefined" && value !== null) {
-      acc[key] = value?.constructor?.name === "Object" ? stripEmptyFields(value) : value;
-    }
-    return acc;
-  }, {}) as T;
 }

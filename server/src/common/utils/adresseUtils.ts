@@ -1,6 +1,6 @@
 import { defaultValuesAdresse } from "../model/json-schema/adresseSchema.js";
 import * as apiEntreprise from "../apis/ApiEntreprise.js";
-import { ACADEMIES, DEPARTEMENTS } from "../constants/territoiresConstants.js";
+import { ACADEMIES, DEPARTEMENTS } from "../constants/territoires.js";
 import { find } from "lodash-es";
 
 export const getDepartementCodeFromCodeInsee = (codeInsee) => {

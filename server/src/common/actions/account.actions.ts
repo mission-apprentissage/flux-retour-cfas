@@ -10,7 +10,7 @@ import logger from "../logger.js";
 import { sendEmail } from "../services/mailer/mailer.js";
 import config from "../../config.js";
 import { createActivationToken, createResetPasswordToken } from "../utils/jwtUtils.js";
-import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisation.js";
 
 export async function register(registration: RegistrationSchema): Promise<{
   account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";

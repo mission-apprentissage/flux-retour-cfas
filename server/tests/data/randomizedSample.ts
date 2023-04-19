@@ -3,14 +3,16 @@ import RandExp from "randexp";
 import { sampleLibelles } from "./sampleLibelles.js";
 import { subMonths, addYears } from "date-fns";
 
-import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
+import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant.js";
+import { omit } from "@/common/utils/miscUtils.js";
+import { CFD_REGEX, INE_REGEX, RNCP_REGEX } from "@/common/constants/organisme.js";
+
 import sampleEtablissements from "./sampleEtablissements.js";
-import { omit } from "../../src/common/utils/miscUtils.js";
 
 const isPresent = () => Math.random() < 0.66;
-const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
-const getRandomFormationCfd = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
-const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
+const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
+const getRandomFormationCfd = () => new RandExp(CFD_REGEX).gen().toUpperCase();
+const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
 const getRandomEtablissement = (siret?: any) =>
   siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));

@@ -3,14 +3,15 @@ import Joi from "joi";
 import { ObjectId } from "mongodb";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
 
-import { schema } from "../../../common/model/effectifs.model/effectifs.model.js";
-import { effectifsDb } from "../../../common/model/collections.js";
-import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
-import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
-import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
-import { algoUAI } from "../../../common/utils/uaiUtils.js";
-import { getCodePostalInfo } from "../../../common/apis/apiTablesCorrespondances.js";
-import { legacyRequireManageEffectifsPermissionMiddleware } from "../../middlewares/legacyRequireManageEffectifsPermissionMiddleware.js";
+import { schema } from "@/common/model/effectifs.model/effectifs.model.js";
+import { effectifsDb } from "@/common/model/collections.js";
+import { updateEffectif } from "@/common/actions/effectifs.actions.js";
+import { findDataFromSiret } from "@/common/actions/infoSiret.actions.js";
+import { getUploadByOrgId } from "@/common/actions/uploads.actions.js";
+import { algoUAI } from "@/common/utils/uaiUtils.js";
+import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances.js";
+import { CODE_POSTAL_REGEX } from "@/common/constants/organisme.js";
+import { legacyRequireManageEffectifsPermissionMiddleware } from "@/http/middlewares/legacyRequireManageEffectifsPermissionMiddleware.js";
 
 const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
@@ -149,7 +150,7 @@ export default () => {
       .unknown()
       .validateAsync({ ...params, ...query }, { abortEarly: false });
 
-    const uploads = await getUploadEntryByOrgaId(organisme_id);
+    const uploads = await getUploadByOrgId(organisme_id);
 
     const effectif = uploads.last_snapshot_effectifs.find(({ _id }) => _id.toString() === id);
 
@@ -160,30 +161,30 @@ export default () => {
     return res.json(buildEffectifResult(effectif));
   });
 
-  // FIXME n'a pas l'air utilisé
-  router.post("/", async ({ body }, res) => {
-    const { organisme_id, annee_scolaire, source, apprenant, formation } = await Joi.object({
-      organisme_id: Joi.string().required(),
-      annee_scolaire: Joi.string().required(),
-      source: Joi.string().required(),
-      apprenant: Joi.object({
-        nom: Joi.string().required(),
-        prenom: Joi.string().required(),
-      }).required(),
-      formation: Joi.object({
-        cfd: Joi.string().required(),
-      }).required(),
-    }).validateAsync(body, { abortEarly: false });
+  // TODO https://github.com/mission-apprentissage/flux-retour-cfas/issues/2387
+  // router.post("/", async ({ body }, res) => {
+  //   const { organisme_id, annee_scolaire, source, apprenant, formation } = await Joi.object({
+  //     organisme_id: Joi.string().required(),
+  //     annee_scolaire: Joi.string().required(),
+  //     source: Joi.string().required(),
+  //     apprenant: Joi.object({
+  //       nom: Joi.string().required(),
+  //       prenom: Joi.string().required(),
+  //     }).required(),
+  //     formation: Joi.object({
+  //       cfd: Joi.string().required(),
+  //     }).required(),
+  //   }).validateAsync(body, { abortEarly: false });
 
-    const effectif = await createEffectif({
-      organisme_id,
-      annee_scolaire,
-      source,
-      apprenant,
-      formation,
-    });
-    return res.json(effectif);
-  });
+  //   const effectif = await createEffectif({
+  //     organisme_id,
+  //     annee_scolaire,
+  //     source,
+  //     apprenant,
+  //     formation,
+  //   });
+  //   return res.json(effectif);
+  // });
 
   const compactObject = (val) => {
     const data = Array.isArray(val) ? val.filter(Boolean) : val;
@@ -301,7 +302,7 @@ export default () => {
 
   router.post("/recherche-code-postal", async ({ body }, res) => {
     const { codePostal } = await Joi.object({
-      codePostal: Joi.string().pattern(new RegExp("^[0-9]{5}$")),
+      codePostal: Joi.string().pattern(CODE_POSTAL_REGEX),
     })
       .unknown()
       .validateAsync(body, { abortEarly: false });

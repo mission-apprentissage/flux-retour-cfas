@@ -5,6 +5,8 @@ import PromptModal from "../../../../components/Modals/PromptModal";
 import { organismeAtom } from "../../../../hooks/organismeAtoms";
 import { useRecoilValue } from "recoil";
 
+// TODO https://github.com/mission-apprentissage/flux-retour-cfas/issues/2387
+// ce composant a été partiellement développé, et n'est pas encore utilisé
 const AjoutApprenantModal = (modal) => {
   const organisme = useRecoilValue<any>(organismeAtom);
   let onCreateEffectifClicked = useCallback(async () => {

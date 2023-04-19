@@ -5,7 +5,7 @@ import {
   STATUT_CREATION_ORGANISME,
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
-} from "../../../common/constants/fiabilisationConstants.js";
+} from "../../../common/constants/fiabilisation.js";
 import logger from "../../../common/logger.js";
 import {
   effectifsDb,

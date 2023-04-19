@@ -270,7 +270,9 @@ interface RelatedOrganisme {
   siret: string;
   uai: string;
 }
-export function generateRelatedFormations(relatedOrganismes: RelatedOrganisme[]): Organisme["relatedFormations"] {
+export function generateRelatedFormations(
+  relatedOrganismes: RelatedOrganisme[]
+): Required<Organisme>["relatedFormations"] {
   return [
     {
       formation_id: new ObjectId(id(1)),

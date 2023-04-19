@@ -123,7 +123,7 @@ const UploadFiles = ({ title }) => {
       setIsSubmitting(true);
       try {
         const { documents, models } = await _delete(
-          `${endpoint}/v1/organismes/${organisme._id}/upload/${file.document_id}`
+          `${endpoint}/v1/organismes/${organisme._id}/upload/doc/${file.document_id}`
         );
         onDocumentsChanged(documents, models);
         setIsSubmitting(false);

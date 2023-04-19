@@ -42,7 +42,10 @@ export interface Organisation {
     | "MFR"
     | "AFTRAL"
     | "GRETA_VAUCLUSE"
-    | "CFA_SAT";
+    | "CFA_SAT"
+    | "EN_HORS_MURS"
+    | "EN_CFA_ACADEMIQUE"
+    | "EN_EPLE";
   /**
    * Code région
    */

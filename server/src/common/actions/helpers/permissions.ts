@@ -1,5 +1,5 @@
 import Boom from "boom";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeConstants.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/organisme.js";
 import logger from "../../logger.js";
 import { organismesDb } from "../../model/collections.js";
 import { AuthContext } from "../../model/internal/AuthContext.js";
@@ -8,7 +8,7 @@ import { getOrganismeById } from "../organismes/organismes.actions.js";
 import { ObjectId } from "mongodb";
 import { Organisme } from "../../model/@types/Organisme.js";
 
-export async function requireOrganismeIndicateursAccess(ctx: AuthContext, organismeId: string): Promise<void> {
+export async function requireOrganismeIndicateursAccess(ctx: AuthContext, organismeId: ObjectId): Promise<void> {
   if (!(await canAccessOrganismeIndicateurs(ctx, organismeId))) {
     throw Boom.forbidden("Permissions invalides");
   }
@@ -149,7 +149,7 @@ export async function findOrganismesAccessiblesByOrganisation(ctx: AuthContext<O
   const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,
-    uai: organisation.uai,
+    ...(organisation.uai ? { uai: organisation.uai } : {}),
   });
   if (!userOrganisme) {
     logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
@@ -168,8 +168,8 @@ export async function findOFLinkedOrganismesIds(userOrganisme: Organisme) {
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
   ) {
-    for (const { organismes } of userOrganisme.relatedFormations) {
-      for (const subOrganismeCatalog of organismes) {
+    for (const { organismes } of userOrganisme.relatedFormations || []) {
+      for (const subOrganismeCatalog of organismes || []) {
         if (
           subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.LIEU &&
           subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.INCONNUE &&
@@ -190,7 +190,7 @@ export async function findOFLinkedOrganismesIds(userOrganisme: Organisme) {
   return [...subOrganismesIds.values()].map((id) => new ObjectId(id));
 }
 
-async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: string): Promise<boolean> {
+async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
   const organisme = await getOrganismeById(organismeId);
   const organisation = ctx.organisation;
   switch (organisation.type) {
@@ -200,7 +200,7 @@ async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: stri
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
-      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId);
+      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());
     }
 
     case "TETE_DE_RESEAU":
@@ -229,7 +229,7 @@ export function isOrganisationOF(type: OrganisationType): boolean {
   );
 }
 
-export async function canManageOrganismeEffectifs(ctx: AuthContext, organismeId: string): Promise<boolean> {
+export async function canManageOrganismeEffectifs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -238,7 +238,7 @@ export async function canManageOrganismeEffectifs(ctx: AuthContext, organismeId:
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
-      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId);
+      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());
     }
 
     case "OPERATEUR_PUBLIC_NATIONAL":
@@ -250,7 +250,10 @@ export async function canManageOrganismeEffectifs(ctx: AuthContext, organismeId:
   }
 }
 
-export async function requireManageOrganismeEffectifsPermission(ctx: AuthContext, organismeId: string): Promise<void> {
+export async function requireManageOrganismeEffectifsPermission(
+  ctx: AuthContext,
+  organismeId: ObjectId
+): Promise<void> {
   if (!(await canManageOrganismeEffectifs(ctx, organismeId))) {
     throw Boom.forbidden("Permissions invalides");
   }

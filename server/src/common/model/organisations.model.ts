@@ -1,5 +1,5 @@
 import { date, object, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes.js";
-import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "../constants/networksConstants.js";
+import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "../constants/networks.js";
 import {
   REGIONS,
   DEPARTEMENTS,
@@ -7,9 +7,10 @@ import {
   ACADEMIES_BY_ID,
   DEPARTEMENTS_BY_ID,
   REGIONS_BY_ID,
-} from "../constants/territoiresConstants.js";
+} from "../constants/territoires.js";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { ORGANISATIONS_NATIONALES } from "../constants/organisations.js";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "../constants/organisme.js";
 
 // types en doublon avec l'UI
 export const organisationTypes = [
@@ -158,10 +159,10 @@ const schema = object(
     }),
 
     // si OFRF, OFR, OFF
-    siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
+    siret: string({ description: "N° SIRET", pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
     uai: stringOrNull({
       description: "Code UAI de l'organisme (seulement pour les utilisateurs OF)",
-      pattern: "^[0-9]{7}[a-zA-Z]$",
+      pattern: UAI_REGEX_PATTERN,
       maxLength: 8,
       minLength: 8,
     }),

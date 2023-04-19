@@ -1,4 +1,4 @@
-import { getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { getStatutApprenantNameFromCode } from "../../constants/dossierApprenant.js";
 
 export type FieldExport = {
   label: string;

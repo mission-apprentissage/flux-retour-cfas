@@ -1,26 +1,14 @@
 import { compact, get } from "lodash-es";
 import Boom from "boom";
-
-import {
-  findOrganismeByUai,
-  getSousEtablissementsForUai,
-} from "../../../common/actions/organismes/organismes.actions.js";
-import { findEffectifsByQuery } from "../../../common/actions/effectifs.actions.js";
-import { isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
-import { AuthContext } from "../../../common/model/internal/AuthContext.js";
-import { requireManageOrganismeEffectifsPermission } from "../../../common/actions/helpers/permissions.js";
 import { ObjectId } from "mongodb";
+
+import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions.js";
+import { findEffectifsByQuery } from "@/common/actions/effectifs.actions.js";
+import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions.js";
 import { Effectif } from "@/common/model/@types/Effectif.js";
 
-export async function getOrganismeEffectifs(
-  ctx: AuthContext,
-  organismeId: string,
-  anneeScolaire: string | undefined,
-  sifa = false
-) {
-  await requireManageOrganismeEffectifsPermission(ctx, organismeId);
-
-  const filter: Partial<Effectif> = { organisme_id: new ObjectId(organismeId) };
+export async function getOrganismeEffectifs(organismeId: ObjectId, anneeScolaire: string | undefined, sifa = false) {
+  const filter: Partial<Effectif> = { organisme_id: organismeId };
   if (anneeScolaire) {
     filter.annee_scolaire = anneeScolaire;
   }

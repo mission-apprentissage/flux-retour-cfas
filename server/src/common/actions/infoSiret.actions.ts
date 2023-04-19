@@ -1,9 +1,10 @@
 import * as apiEntreprise from "../apis/ApiEntreprise.js";
 import * as apiCfaDock from "../apis/ApiCfaDock.js";
 import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "../utils/adresseUtils.js";
+import { SIRET_REGEX } from "../constants/organisme.js";
 
 export const findDataFromSiret = async (providedSiret, non_diffusables = true, getConventionCollective = true) => {
-  if (!providedSiret || !/^[0-9]{14}$/g.test(providedSiret.trim())) {
+  if (!providedSiret || !SIRET_REGEX.test(providedSiret.trim())) {
     return {
       result: {},
       messages: {

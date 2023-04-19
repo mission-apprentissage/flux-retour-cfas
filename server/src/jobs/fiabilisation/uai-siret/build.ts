@@ -1,5 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../common/constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../common/constants/fiabilisation.js";
 import logger from "../../../common/logger.js";
 import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "../../../common/model/collections.js";
 import { getPercentage } from "../../../common/utils/miscUtils.js";

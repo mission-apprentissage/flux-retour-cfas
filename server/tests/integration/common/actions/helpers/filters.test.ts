@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { ObjectId } from "mongodb";
-import { buildMongoPipelineFilterStages } from "../../../../../src/common/actions/helpers/filters.js";
+import { buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters.js";
 
 const currentDate = new Date("2023-02-14T10:00:00Z");
 
@@ -26,7 +26,7 @@ describe("Filtres Indicateurs", () => {
     it("Gère le filtre organisme_id", () => {
       const stages = buildMongoPipelineFilterStages({
         date: currentDate,
-        organisme_id: "635acdad5e798f12bd919861",
+        organisme_id: new ObjectId("635acdad5e798f12bd919861"),
       });
       assert.deepStrictEqual(stages, [
         {
@@ -183,7 +183,7 @@ describe("Filtres Indicateurs", () => {
         etablissement_reseaux: "AGRI",
         siret_etablissement: "84412312300008",
         uai_etablissement: "0112233A",
-        organisme_id: "635acdad5e798f12bd919863",
+        organisme_id: new ObjectId("635acdad5e798f12bd919863"),
         formation_cfd: "25021000",
         niveau_formation: "2",
       });
@@ -215,7 +215,7 @@ describe("Filtres Indicateurs", () => {
           etablissement_reseaux: "AGRI",
           siret_etablissement: "84412312300008",
           uai_etablissement: "0112233A",
-          organisme_id: "635acdad5e798f12bd919863",
+          organisme_id: new ObjectId("635acdad5e798f12bd919863"),
           formation_cfd: "25021000",
           niveau_formation: "2",
           restrictionMongo: {

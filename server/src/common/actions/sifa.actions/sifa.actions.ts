@@ -7,9 +7,7 @@ import { findFormationById, getFormationWithCfd } from "../formations.actions.js
 import { findOrganismeById } from "../organismes/organismes.actions.js";
 import { SIFA_FIELDS } from "./sifaCsvFields.js";
 import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
-import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
-import { AuthContext } from "../../model/internal/AuthContext.js";
-import { requireManageOrganismeEffectifsPermission } from "../helpers/permissions.js";
+import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenant.js";
 import { Effectif } from "../../model/@types/Effectif.js";
 
 const formatStringForSIFA = (str) => {
@@ -81,12 +79,11 @@ export const isEligibleSIFA = ({ historique_statut }) => {
   return false;
 };
 
-export const generateSifa = async (ctx: AuthContext, organisme_id) => {
+export const generateSifa = async (organisme_id: ObjectId) => {
   const currentYear = new Date().getFullYear();
   const previousYear = currentYear - 1;
   const anneScolaire = `${previousYear}-${currentYear}`;
 
-  await requireManageOrganismeEffectifsPermission(ctx, organisme_id);
   const organisme = await findOrganismeById(organisme_id);
   if (!organisme) {
     throw new Error("organisme not found");

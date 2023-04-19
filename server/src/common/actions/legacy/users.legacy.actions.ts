@@ -24,7 +24,7 @@ const isUserLegacyPasswordUpdatedTokenValid = (user) => {
  */
 export const authenticateLegacy = async (username, password) => {
   const user = await usersDb().findOne({ username });
-  if (!user) {
+  if (!user?.password) {
     return null;
   }
 

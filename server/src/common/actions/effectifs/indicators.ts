@@ -1,5 +1,5 @@
 import { addMonths } from "date-fns";
-import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
+import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenant.js";
 import {
   SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS,
   SEUIL_ALERTE_NB_MOIS_RUPTURANTS,

@@ -50,7 +50,6 @@ export interface OrganismesReferentiel {
   }[];
   /**
    * Formations de cet organisme
-   * FIXME non présent dans les données de prod, à supprimer ?
    */
   contacts?: {
     email?: string;

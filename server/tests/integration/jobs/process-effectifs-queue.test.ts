@@ -1,12 +1,16 @@
 import { strict as assert } from "assert";
 
+import { createOrganisme } from "@/common/actions/organismes/organismes.actions.js";
+import { processEffectifsQueue } from "@/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue.js";
+import { effectifsQueueDb, effectifsDb } from "@/common/model/collections.js";
+
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "../../data/randomizedSample.js";
-import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
-import { processEffectifsQueue } from "../../../src/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue.js";
-import { effectifsQueueDb, effectifsDb } from "../../../src/common/model/collections.js";
 
 const uai = "0802004U";
 const siret = "77937827200016";
+
+const sortByPath = (array: { path?: string[] }[] | undefined) =>
+  array?.sort((a, b) => ((a?.path?.[0] || "") < (b?.path?.[0] || "") ? -1 : 1));
 
 describe("Processing de EffectifsQueue", () => {
   beforeEach(async () => {
@@ -38,12 +42,18 @@ describe("Processing de EffectifsQueue", () => {
       const { insertedId } = await effectifsQueueDb().insertOne(
         createRandomDossierApprenantApiInput({ [requiredField]: undefined, source: "testSource" })
       );
-      await processEffectifsQueue();
+      const result = await processEffectifsQueue();
+      assert.deepStrictEqual(result, {
+        totalProcessed: 1,
+        totalValidItems: 0,
+        totalInvalidItems: 1,
+      });
+
       const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
-      assert.deepStrictEqual(updatedInput?.validation_errors, [
+      assert.deepStrictEqual(sortByPath(updatedInput?.validation_errors), [
         {
-          message: `"${requiredField}" must be a string`,
+          message: "String attendu",
           path: [requiredField],
         },
       ]);
@@ -58,35 +68,42 @@ describe("Processing de EffectifsQueue", () => {
       createRandomDossierApprenantApiInput({
         annee_scolaire: "2021,2022",
         uai_etablissement: "invalideUAI",
+        formation_rncp: "invalideRncp",
         siret_etablissement: "invalideSiret",
         id_formation: "invalideIdFormation",
         source: "testSource",
       })
     );
-    await processEffectifsQueue();
+
+    const result = await processEffectifsQueue();
+    assert.deepStrictEqual(result, {
+      totalProcessed: 1,
+      totalValidItems: 0,
+      totalInvalidItems: 1,
+    });
+
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
-    assert.deepStrictEqual(updatedInput?.validation_errors, [
+
+    assert.deepStrictEqual(sortByPath(updatedInput?.validation_errors), [
       {
-        message:
-          '"uai_etablissement" with value "invalideUAI" fails to match the required pattern: /^[0-9]{7}[a-zA-Z]$/',
-        path: ["uai_etablissement"],
-      },
-      {
-        message:
-          '"id_formation" with value "invalideIdFormation" fails to match the required pattern: /^[a-zA-Z0-9_]{8}$/',
-        path: ["id_formation"],
-      },
-      {
-        message: '"annee_scolaire" with value "2021,2022" fails to match the required pattern: /^\\d{4}-\\d{4}$/',
+        message: "Format invalide",
         path: ["annee_scolaire"],
       },
       {
-        message: '"siret_etablissement" length must be 14 characters long',
+        message: "Code RNCP invalide",
+        path: ["formation_rncp"],
+      },
+      {
+        message: "Code CFD invalide",
+        path: ["id_formation"],
+      },
+      {
+        message: "SIRET invalide",
         path: ["siret_etablissement"],
       },
       {
-        message: '"siret_etablissement" with value "invalideSiret" fails to match the required pattern: /^[0-9]{14}$/',
-        path: ["siret_etablissement"],
+        message: "UAI invalide",
+        path: ["uai_etablissement"],
       },
     ]);
 
@@ -105,41 +122,35 @@ describe("Processing de EffectifsQueue", () => {
         source: "testSource",
       })
     );
-    await processEffectifsQueue();
+    const result = await processEffectifsQueue();
+    assert.deepStrictEqual(result, {
+      totalProcessed: 1,
+      totalValidItems: 0,
+      totalInvalidItems: 1,
+    });
 
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
-    assert.deepStrictEqual(updatedInput?.validation_errors, [
+
+    assert.deepStrictEqual(sortByPath(updatedInput?.validation_errors), [
       {
-        message:
-          '"date_de_naissance_apprenant" with value "2020-10" fails to match the required pattern: /^([0-9]{4})-([0-9]{2})-([0-9]{2})/',
+        message: "Format invalide",
+        path: ["contrat_date_debut"],
+      },
+      {
+        message: "Format invalide",
+        path: ["contrat_date_fin"],
+      },
+      {
+        message: "String attendu",
+        path: ["contrat_date_rupture"],
+      },
+      {
+        message: "Format invalide",
         path: ["date_de_naissance_apprenant"],
       },
       {
-        message:
-          '"date_metier_mise_a_jour_statut" with value "2020" fails to match the required pattern: /^([0-9]{4})-([0-9]{2})-([0-9]{2})/',
+        message: "Format invalide",
         path: ["date_metier_mise_a_jour_statut"],
-      },
-      {
-        message:
-          '"contrat_date_debut" with value "13/11/2020" fails to match the required pattern: /^([0-9]{4})-([0-9]{2})-([0-9]{2})/',
-        path: ["contrat_date_debut"],
-      },
-      {
-        message: '"contrat_date_debut" must be in iso format',
-        path: ["contrat_date_debut"],
-      },
-      {
-        message:
-          '"contrat_date_fin" with value "abc" fails to match the required pattern: /^([0-9]{4})-([0-9]{2})-([0-9]{2})/',
-        path: ["contrat_date_fin"],
-      },
-      {
-        message: '"contrat_date_fin" must be in iso format',
-        path: ["contrat_date_fin"],
-      },
-      {
-        message: '"contrat_date_rupture" must be a string',
-        path: ["contrat_date_rupture"],
       },
     ]);
 
@@ -171,7 +182,12 @@ describe("Processing de EffectifsQueue", () => {
     };
 
     await effectifsQueueDb().insertOne(sampleData);
-    await processEffectifsQueue();
+    const result = await processEffectifsQueue();
+    assert.deepStrictEqual(result, {
+      totalProcessed: 1,
+      totalValidItems: 1,
+      totalInvalidItems: 0,
+    });
 
     // Check Nb Items added
     assert.deepEqual(await effectifsQueueDb().countDocuments({}), 1);
@@ -205,10 +221,11 @@ describe("Processing de EffectifsQueue", () => {
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
     assert.equal(updatedInput?.validation_errors, undefined);
+    assert.equal(updatedInput?.error, undefined);
     assert.equal(!!updatedInput?.processed_at, true);
 
     // Check Nb Items added
-    assert.deepEqual(await effectifsQueueDb().countDocuments({}), 1);
+    assert.deepEqual(await effectifsDb().countDocuments({}), 1);
 
     const insertedDossier = await effectifsDb().findOne({});
 
@@ -240,6 +257,7 @@ describe("Processing de EffectifsQueue", () => {
       },
       formation: {
         cfd: "50033610",
+        annee: 0,
         periode: [2022, 2024],
         libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
       },
@@ -310,7 +328,7 @@ describe("Processing de EffectifsQueue", () => {
           niveau: false,
           niveau_libelle: false,
           periode: true,
-          annee: false,
+          annee: true,
           date_debut_formation: false,
           date_fin_formation: false,
           date_obtention_diplome: false,

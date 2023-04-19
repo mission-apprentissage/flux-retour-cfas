@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { getCatalogFormationsForOrganisme } from "../../apis/apiCatalogueMna.js";
 import { organismesDb } from "../../model/collections.js";
 import { asyncForEach } from "../../utils/asyncUtils.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/natureOrganismeConstants.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/organisme.js";
 import { createFormation, getFormationWithCfd } from "../formations.actions.js";
 import { findOrganismeByUai } from "./organismes.actions.js";
 

@@ -1,22 +1,41 @@
 import { z } from "zod";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
+import { capitalize } from "lodash-es";
+
+import { CODES_STATUT_APPRENANT_ENUM } from "@/common/constants/dossierApprenant.js";
+import { CFD_REGEX, RNCP_REGEX, SIRET_REGEX, UAI_REGEX } from "@/common/constants/organisme.js";
 
 extendZodWithOpenApi(z);
+
+// custom error map to translate zod errors to french
+const customErrorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_type) {
+    return { message: `${capitalize(issue.expected)} attendu` };
+  }
+  return { message: ctx.defaultError };
+};
+z.setErrorMap(customErrorMap);
 
 const currentYear = new Date().getFullYear();
 const aMonthAgo = subDays(new Date(), 30);
 const sixMonthAgo = subDays(new Date(), 30 * 6);
 
 const extensions = {
-  siret: () => z.string().regex(/^[0-9]{14}$/),
+  siret: () => z.string().regex(SIRET_REGEX, "SIRET invalide"), // e.g 01234567890123
+  uai: () => z.string().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
   iso8601Date: () =>
     z
       .string()
-      .regex(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)
+      .regex(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/, "Format invalide") // make sure the passed date contains at least YYYY-MM-DD
       .openapi({
         format: "YYYY-MM-DD",
       }),
+  iso8601Datetime: () =>
+    z.string().datetime("Format invalide").openapi({
+      format: "YYYY-MM-DD00:00:00Z",
+    }),
+
   codeCommuneInsee: () =>
     z
       .string()
@@ -25,12 +44,13 @@ const extensions = {
 };
 
 export const primitivesV1 = {
+  source: z.string().min(1), // configured by API
   apprenant: {
-    nom: z.string().min(1).openapi({
+    nom: z.string().min(1).trim().toUpperCase().openapi({
       description: "nom de l'apprenant",
       example: "Lenôtre",
     }),
-    prenom: z.string().min(1).openapi({
+    prenom: z.string().min(1).trim().openapi({
       description: "prénom de l'apprenant",
       example: "Gaston",
     }),
@@ -38,12 +58,21 @@ export const primitivesV1 = {
       description: "Date de naissance de l'apprenant, au format ISO-8601",
       example: "2000-10-28T00:00:00.000Z",
     }),
-    statut: z.string().openapi({
-      description: "0, 2 ou 3",
-      enum: [0, 2, 3],
-      type: "integer",
-    }),
-    date_metier_mise_a_jour_statut: extensions.iso8601Date().openapi({
+    statut: z
+      .preprocess(
+        (v: any) => (CODES_STATUT_APPRENANT_ENUM.includes(parseInt(v, 10)) ? parseInt(v, 10) : v),
+        z
+          .number({ invalid_type_error: `Valeurs possibles: ${CODES_STATUT_APPRENANT_ENUM.join(",")}` })
+          .int()
+          .min(0)
+          .max(3)
+      )
+      .openapi({
+        description: `Valeurs possibles: ${CODES_STATUT_APPRENANT_ENUM.join(",")}`,
+        enum: CODES_STATUT_APPRENANT_ENUM,
+        type: "integer",
+      }),
+    date_metier_mise_a_jour_statut: extensions.iso8601Datetime().openapi({
       description: "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
     }),
     id_erp: z.string().openapi({
@@ -68,7 +97,7 @@ export const primitivesV1 = {
     nom: z.string().openapi({
       description: "Nom l'établissement responsable",
     }),
-    uai: z.string().openapi({
+    uai: extensions.uai().openapi({
       description: "UAI apprentissage de l'établissement responsable",
       example: "0123456A",
     }),
@@ -84,7 +113,7 @@ export const primitivesV1 = {
     nom: z.string().openapi({
       description: "Nom l'établissement formateur",
     }),
-    uai: z.string().openapi({
+    uai: extensions.uai().openapi({
       description: "UAI apprentissage de l'établissement formateur",
       example: "0123456A",
     }),
@@ -98,11 +127,17 @@ export const primitivesV1 = {
   },
 
   formation: {
-    code_rncp: z.string().openapi({
-      description: "Code RNCP de la formation",
-      examples: ["RNCP35316", "35316"],
-    }),
-    code_cfd: z.string().length(8).openapi({
+    code_rncp: z
+      .preprocess(
+        // certains organismes n'envoient pas le prefix RNCP
+        (v: any) => (v?.toString().toUpperCase().startsWith("RNCP") ? v : `RNCP${v}`),
+        z.string().toUpperCase().regex(RNCP_REGEX, "Code RNCP invalide")
+      )
+      .openapi({
+        description: "Code RNCP de la formation",
+        examples: ["RNCP35316", "35316"],
+      }),
+    code_cfd: z.string().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
       description: "Code Formation Diplôme (CFD)", // aussi appelé id_formation
     }),
     libelle_court: z.string().openapi({
@@ -117,18 +152,22 @@ export const primitivesV1 = {
       description: "Période de la formation, en année",
       example: "2022-2024",
     }),
-    annee_scolaire: z.string().openapi({
-      description: "Période scolaire",
-      examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`],
-    }),
+    annee_scolaire: z
+      .string()
+      .regex(/^\d{4}-\d{4}$/, "Format invalide")
+      .openapi({
+        description: "Période scolaire",
+        examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`],
+      }),
     annee: z
       .number()
       .min(0)
       .max(3)
+      // Question: à quoi correspond l'année 0 ?
       .openapi({
         description: "Année de la formation",
         type: "integer",
-        enum: [0, 1, 2, 3],
+        enum: [0, 1, 2, 3, 4, 5],
         example: 1,
       }),
   },

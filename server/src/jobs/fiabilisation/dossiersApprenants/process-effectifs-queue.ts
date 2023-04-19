@@ -1,26 +1,27 @@
 import { PromisePool } from "@supercharge/promise-pool";
 
-import logger from "../../../common/logger.js";
-import { effectifsQueueDb } from "../../../common/model/collections.js";
+import logger from "@/common/logger.js";
+import { effectifsQueueDb } from "@/common/model/collections.js";
 import {
   buildNewHistoriqueStatutApprenant,
   hydrateEffectif,
   resolveOrganisme,
-} from "../../../common/actions/engine/engine.actions.js";
+} from "@/common/actions/engine/engine.actions.js";
 import {
   insertEffectif,
   structureEffectifFromDossierApprenant,
   updateEffectifAndLock,
-} from "../../../common/actions/effectifs.actions.js";
+} from "@/common/actions/effectifs.actions.js";
 import {
   createOrganisme,
   setOrganismeTransmissionDates,
   structureOrganisme,
-} from "../../../common/actions/organismes/organismes.actions.js";
-import dossierApprenantSchema from "../../../common/validation/dossierApprenantSchema.js";
+} from "@/common/actions/organismes/organismes.actions.js";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue.js";
+import { Effectif } from "@/common/model/@types/Effectif.js";
+import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod.js";
+import { sleep } from "@/common/utils/timeUtils.js";
 
-const sleep = (m) => new Promise((r) => setTimeout(r, m));
 const sleepDuration = 10_000;
 
 type Options = { id?: string; force?: boolean };
@@ -61,38 +62,18 @@ export const processEffectifsQueue = async (options?: Options) => {
         const startDate = new Date();
         let dataToUpdate: Partial<EffectifsQueue>;
 
-        const { error, value: effectifNormalized } = dossierApprenantSchema.validate(effectifQueued, {
-          stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
-          abortEarly: false, // make sure every invalid field will be communicated to the caller
-        });
-
-        if (error) {
-          const prettyValidationError = error.details.map(({ message, path }) => ({ message, path }));
+        const result = dossierApprenantSchemaV1V2Zod().safeParse(effectifQueued);
+        if (!result.success) {
+          const prettyValidationError = result.error.issues.map(({ path, message }) => ({ message, path }));
 
           dataToUpdate = { validation_errors: prettyValidationError };
         } else {
           totalValidItems++;
-          // Build item & map input fields
-          const dossierApprenant = {
-            ...effectifNormalized,
-            source: effectifQueued.source,
-            formation_cfd: effectifNormalized.id_formation,
-            // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
-            periode_formation: effectifNormalized.periode_formation
-              ? effectifNormalized.periode_formation.split("-").map(Number)
-              : [],
-            historique_statut_apprenant: [
-              {
-                valeur_statut: effectifNormalized.statut_apprenant,
-                date_statut: new Date(effectifNormalized.date_metier_mise_a_jour_statut),
-                date_reception: new Date(),
-              },
-            ],
-          };
+          const dossierApprenant = result.data;
 
           try {
             // Construction d'un historique à partir du statut et de la date_metier_mise_a_jour_statut
-            const effectifData = structureEffectifFromDossierApprenant(dossierApprenant);
+            const effectifData = structureEffectifFromDossierApprenant(dossierApprenant) as any as Effectif;
 
             let { organisme, error } = await resolveOrganisme({
               uai: dossierApprenant.uai_etablissement,
@@ -100,74 +81,80 @@ export const processEffectifsQueue = async (options?: Options) => {
             });
 
             if (error) {
-              dataToUpdate = { error: error.toString() };
-            } else {
-              let organismeWithId;
-              if (organisme._id) {
-                organismeWithId = organisme;
-              } else {
-                // nouvelle organisme, on va récupérer les données avec l'API entreprise
-                const organismeData = await structureOrganisme({
-                  ...organisme,
-                  nom: dossierApprenant.nom_etablissement,
-                });
-                organismeWithId = await createOrganisme(
-                  { ...organismeData, ...organisme },
-                  {
-                    buildFormationTree: false,
-                    buildInfosFromSiret: false,
-                    callLbaApi: false,
-                  }
-                );
-              }
-              await setOrganismeTransmissionDates(organismeWithId);
-              effectifData.organisme_id = organismeWithId._id.toString();
-              let effectifId: any = null;
+              throw error;
+            }
 
-              // Gestion de l'effectif
-              const { effectif, found } = await hydrateEffectif(effectifData, {
+            let organismeWithId;
+            if (organisme._id) {
+              organismeWithId = organisme;
+            } else {
+              // nouvelle organisme, on va récupérer les données avec l'API entreprise
+              const organismeData = await structureOrganisme({
+                ...organisme,
+                nom: dossierApprenant.nom_etablissement,
+              });
+              organismeWithId = await createOrganisme(
+                { ...organismeData, ...organisme },
+                {
+                  buildFormationTree: false,
+                  buildInfosFromSiret: false,
+                  callLbaApi: false,
+                }
+              );
+            }
+            await setOrganismeTransmissionDates(organismeWithId);
+            let effectifId: any = null;
+
+            // Gestion de l'effectif
+            const { effectif, found } = await hydrateEffectif(
+              {
+                ...effectifData,
+                organisme_id: organismeWithId._id,
+              },
+              {
                 queryKeys: ["id_erp_apprenant", "organisme_id", "annee_scolaire"],
                 checkIfExist: true,
-              });
-
-              // Gestion des maj d'effectif
-              if (found) {
-                effectifId = found._id;
-
-                // Update de historique
-                effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
-                  found.apprenant.historique_statut,
-                  effectifData.apprenant?.historique_statut[0]?.valeur_statut,
-                  effectifData.apprenant?.historique_statut[0]?.date_statut
-                );
-                await updateEffectifAndLock(effectifId, effectif);
-              } else {
-                // FIXME intégrer dans une fonction globale insertEffectif
-                effectif._computed = {
-                  organisme: {
-                    region: organismeWithId.adresse.region,
-                    departement: organismeWithId.adresse.departement,
-                    academie: organismeWithId.adresse.academie,
-                    reseaux: organismeWithId.reseaux,
-                    uai: organismeWithId.uai,
-                    siret: organismeWithId.siret,
-                  },
-                };
-                const effectifCreated = await insertEffectif(effectif);
-                effectifId = effectifCreated._id;
-                await updateEffectifAndLock(effectifId, {
-                  apprenant: effectifCreated.apprenant,
-                  formation: effectifCreated.formation,
-                });
               }
+            );
 
-              dataToUpdate = { effectif_id: effectifId };
+            // Gestion des maj d'effectif
+            if (found) {
+              effectifId = found._id;
+
+              // Update de historique
+              effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
+                found.apprenant.historique_statut,
+                effectifData.apprenant?.historique_statut[0]?.valeur_statut,
+                effectifData.apprenant?.historique_statut[0]?.date_statut
+              );
+              await updateEffectifAndLock(effectifId, effectif);
+            } else {
+              // FIXME intégrer dans une fonction globale insertEffectif
+              effectif._computed = {
+                organisme: {
+                  region: organismeWithId.adresse.region,
+                  departement: organismeWithId.adresse.departement,
+                  academie: organismeWithId.adresse.academie,
+                  reseaux: organismeWithId.reseaux,
+                  uai: organismeWithId.uai,
+                  siret: organismeWithId.siret,
+                },
+              };
+              const effectifCreated = await insertEffectif(effectif);
+              effectifId = effectifCreated._id;
+              await updateEffectifAndLock(effectifId, {
+                apprenant: effectifCreated.apprenant,
+                formation: effectifCreated.formation,
+              });
             }
+
+            dataToUpdate = { effectif_id: effectifId };
           } catch (error: any) {
             logger.info(` Error with item ${effectifQueued._id}: ${error.toString()}`);
             dataToUpdate = { error: error.toString() };
           }
         }
+
         if (dataToUpdate) {
           await effectifsQueueDb().updateOne(
             { _id: effectifQueued._id },

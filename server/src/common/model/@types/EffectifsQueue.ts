@@ -15,13 +15,16 @@ export interface EffectifsQueue {
    * Nom de l'établissement
    */
   nom_etablissement?: any;
+  /**
+   * Code CFD de la formation
+   */
   id_formation?: any;
   /**
    * Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")
    */
   annee_scolaire?: any;
   /**
-   * 0, 2 ou 3
+   * 0,2,3
    */
   statut_apprenant?: any;
   date_metier_mise_a_jour_statut?: any;
