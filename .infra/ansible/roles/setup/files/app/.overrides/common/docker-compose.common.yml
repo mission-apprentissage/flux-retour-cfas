@@ -15,8 +15,6 @@ services:
   server:
     environment:
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
-    volumes:
-      - /opt/flux-retour-cfas/data/server:/data
 
   mongodb:
     command: mongod --auth
