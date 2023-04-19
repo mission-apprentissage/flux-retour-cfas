@@ -33,6 +33,7 @@ services:
     ports:
       - "127.0.0.1:9229:9229" # Allows remote debugging
     volumes:
+      - /app/node_modules/@esbuild/ # exclus du mount et (re)-installer dans le Dockerfile pour avoir le bon driver
       - ./server:/app:z # Allows source folders to be watched
       - flux_retour_cfas_server_data:/data:z
     environment:
