@@ -10,7 +10,7 @@ import { isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.action
 import { AuthContext } from "../../../common/model/internal/AuthContext.js";
 import { requireManageOrganismeEffectifsPermission } from "../../../common/actions/helpers/permissions.js";
 import { ObjectId } from "mongodb";
-import { Effectif } from "@/src/common/model/@types/Effectif.js";
+import { Effectif } from "@/common/model/@types/Effectif.js";
 
 export async function getOrganismeEffectifs(
   ctx: AuthContext,

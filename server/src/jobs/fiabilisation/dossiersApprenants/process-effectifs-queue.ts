@@ -18,7 +18,7 @@ import {
   structureOrganisme,
 } from "../../../common/actions/organismes/organismes.actions.js";
 import dossierApprenantSchema from "../../../common/validation/dossierApprenantSchema.js";
-import { EffectifsQueue } from "@/src/common/model/@types/EffectifsQueue.js";
+import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue.js";
 
 const sleep = (m) => new Promise((r) => setTimeout(r, m));
 const sleepDuration = 10_000;

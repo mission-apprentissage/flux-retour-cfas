@@ -8,8 +8,11 @@ import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import Boom from "boom";
 import swaggerUi from "swagger-ui-express";
+import listEndpoints from "express-list-endpoints";
 
 import { apiRoles } from "../common/roles.js";
+// catch all unhandled promise rejections and call the error middleware
+import "express-async-errors";
 
 import { logMiddleware } from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
@@ -40,8 +43,6 @@ import statsAdmin from "./routes/admin.routes/stats.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import config from "../config.js";
 
-// catch all unhandled promise rejections and call the error middleware
-import "express-async-errors";
 import { requireAdministrator, returnResult } from "./middlewares/helpers.js";
 import { jobEventsDb, usersMigrationDb } from "../common/model/collections.js";
 import { packageJson } from "../common/utils/esmUtils.js";
@@ -550,4 +551,8 @@ function setupRoutes(app: Application) {
   authRouter.use("/api/v1/admin", adminRouter);
 
   app.use(authRouter);
+
+  listEndpoints(app).map(({ path, methods }: { path: string; methods: string[] }) =>
+    console.info(`${methods.join(", ").padStart(20)} ${path}`)
+  );
 }
