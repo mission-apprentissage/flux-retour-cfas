@@ -95,12 +95,6 @@ services:
     depends_on:
       - mongodb
 
-  redis:
-    ports:
-      - 6379:6379
-    volumes:
-      - flux_retour_cfas_redis_data:/data
-
 volumes:
   flux_retour_cfas_mongodb_data:
     driver: local
@@ -108,6 +102,3 @@ volumes:
   flux_retour_cfas_nginx_data:
     driver: local
     name: flux_retour_cfas_nginx_data
-  flux_retour_cfas_redis_data:
-    driver: local
-    name: flux_retour_cfas_redis_data

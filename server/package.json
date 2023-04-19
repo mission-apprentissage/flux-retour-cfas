@@ -83,7 +83,6 @@
     "passport-localapikey": "0.0.3",
     "randexp": "0.5.3",
     "rate-limiter-flexible": "2.3.6",
-    "redis": "4.1.0",
     "safe-stable-stringify": "2.4.1",
     "sha512crypt-node": "1.0.2",
     "sinon": "15.0.2",
