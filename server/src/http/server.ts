@@ -552,7 +552,9 @@ function setupRoutes(app: Application) {
 
   app.use(authRouter);
 
-  listEndpoints(app).map(({ path, methods }: { path: string; methods: string[] }) =>
-    console.info(`${methods.join(", ").padStart(20)} ${path}`)
-  );
+  if (process.env.NODE_ENV !== "test") {
+    listEndpoints(app).map(({ path, methods }: { path: string; methods: string[] }) =>
+      console.info(`${methods.join(", ").padStart(20)} ${path}`)
+    );
+  }
 }
