@@ -6,6 +6,6 @@ VOLUME /data
 EXPOSE 5000
 
 # esbuild est (re)-installé manuellement pour avoir le bon driver linux (vs le driver macos ou windows)
-RUN yarn add @esbuild/linux-arm64
+RUN yarn add esbuild
 
 CMD ["yarn", "start:dev"]
