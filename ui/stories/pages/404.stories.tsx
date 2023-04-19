@@ -1,14 +1,17 @@
-import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 
 import Page from "../../pages/404";
 
-const Story = {
+const meta: Meta<typeof Page> = {
   title: "Pages / 404",
   component: Page,
+  parameters: {},
 };
 
-const Template = (args) => <Page {...args} />;
+type Story = StoryObj<typeof Page>;
 
-export const pageNotFound = Template.bind({});
+export const Default: Story = {
+  parameters: {},
+};
 
-export default Story;
+export default meta;

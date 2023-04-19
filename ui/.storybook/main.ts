@@ -1,5 +1,6 @@
-module.exports = {
-  stories: ["../stories/**/*.stories.mdx", "../stories/**/*.stories.@(js|jsx|ts|tsx)"],
+import type { StorybookConfig } from "@storybook/nextjs";
+const config: StorybookConfig = {
+  stories: ["../stories/**/*.mdx", "../stories/**/*.stories.@(js|jsx|ts|tsx)"],
   staticDirs: ["../public"],
   addons: [
     "@storybook/addon-links",
@@ -8,9 +9,12 @@ module.exports = {
     "storybook-addon-mock",
     "storybook-addon-next",
   ],
-  framework: "@storybook/react",
-  core: {
-    builder: "@storybook/builder-webpack5",
+  framework: {
+    name: "@storybook/nextjs",
+    options: {},
+  },
+  docs: {
+    autodocs: "tag",
   },
   webpackFinal: (config) => {
     return {
@@ -26,3 +30,4 @@ module.exports = {
     };
   },
 };
+export default config;

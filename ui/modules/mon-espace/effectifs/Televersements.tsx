@@ -30,6 +30,7 @@ import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hook
 import EffectifsTable from "./engine/EffectifsTable";
 import { effectifsStateAtom } from "./engine/atoms";
 import { sortByNormalizedLabels } from "@/common/utils/array";
+import TeleversementInProgress from "./TeleversementInProgress";
 
 const Televersements = ({ organisme }) => {
   const { documents, uploads, onDocumentsChanged } = useDocuments();
@@ -376,12 +377,7 @@ const Televersements = ({ organisme }) => {
             </Button>
           </>
         )}
-        {step === "mapping" && !mapping && (
-          <Box textAlign="center" flex="1" flexDirection="column">
-            <Spinner />
-            <Text mt={2}>{lastMessage}</Text>
-          </Box>
-        )}
+        {step === "mapping" && !mapping && <TeleversementInProgress message={lastMessage} />}
         {step === "mapping" && mapping && lines.length && (
           <>
             <Box my={10}>
@@ -687,10 +683,7 @@ const Televersements = ({ organisme }) => {
           </>
         )}
         {step === "pre-import" && !preEffectifs.canBeImport.length && !preEffectifs.canNotBeImport.length && (
-          <Box textAlign="center" flex="1" flexDirection="column">
-            <Spinner />
-            <Text mt={2}>{lastMessage}</Text>
-          </Box>
+          <TeleversementInProgress message={lastMessage} />
         )}
         {step === "pre-import" && (!!preEffectifs.canBeImport.length || !!preEffectifs.canNotBeImport.length) && (
           <Box>
@@ -836,14 +829,12 @@ const Televersements = ({ organisme }) => {
           </Box>
         )}
         {step === "import" && (
-          <Box textAlign="center" flex="1" flexDirection="column">
-            <Spinner />
-            <Text my={2}>{lastMessage}</Text>
+          <TeleversementInProgress message={lastMessage}>
             <Text fontSize="1rem">Veuillez patienter pendant l&rsquo;importation de votre fichier.</Text>
             <Text fontSize="1rem">
               Une fois cette opération terminée vous serez redirigé automatiquement sur votre tableau d&rsquo;effectif.
             </Text>
-          </Box>
+          </TeleversementInProgress>
         )}
       </Flex>
     </>

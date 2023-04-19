@@ -1,5 +1,6 @@
 install: install-root install-server install-ui
 build: build-server build-ui
+test: test-server test-ui
 
 install-root:
 	yarn install
@@ -22,7 +23,10 @@ start:
 stop:
 	docker-compose stop
 
-test:
+test-ui:
+	yarn --cwd ui test:ci
+
+test-server:
 	yarn --cwd server test
 
 coverage:
