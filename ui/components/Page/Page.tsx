@@ -4,7 +4,6 @@ import { Box, Container } from "@chakra-ui/react";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
-import ContactSection from "../ContactSection/ContactSection";
 import Section from "../Section/Section";
 import { Interrogation } from "../../theme/components/icons";
 import Link from "../Links/Link";
@@ -14,7 +13,7 @@ function Page({ children, ...rest }) {
     <Container maxW="full" minH="100vh" display="flex" flexDirection="column" p={0} {...rest}>
       <Header />
       <NavigationMenu />
-      <Box minH={"40vh"} flexGrow="1">
+      <Box minH={"40vh"} flexGrow="1" pb={8}>
         <Section>{children}</Section>
       </Box>
       <Link
@@ -30,7 +29,6 @@ function Page({ children, ...rest }) {
       >
         <Interrogation color="white" pr="0.1em" pb="0.2em" />
       </Link>
-      <ContactSection />
       <Footer />
     </Container>
   );
