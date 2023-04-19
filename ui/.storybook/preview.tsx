@@ -11,6 +11,7 @@ import "react-phone-input-2/lib/style.css";
 import "react-datepicker/dist/react-datepicker.css";
 
 import { AuthenticationContext } from "../components/UserWrapper/UserWrapper";
+import { AuthContext } from "../common/internal/AuthContext";
 import theme from "../theme/index";
 import Fonts from "../theme/Fonts";
 import { organismeAtom } from "../hooks/organismeAtoms";
@@ -41,8 +42,7 @@ const preview: Preview = {
   },
   decorators: [
     (Story, { parameters, args }) => {
-      console.log("parameters", { parameters, args });
-      const mockedAuthArgs = Object.entries(args).reduce((acc, [key, value]) => {
+      const mockedAuthArgs: Partial<AuthContext> = Object.entries(args).reduce((acc, [key, value]) => {
         return key.startsWith("auth__") ? { ...acc, [key.replace("auth__", "")]: value } : acc;
       }, {});
 
@@ -59,13 +59,9 @@ const preview: Preview = {
               <AuthenticationContext.Provider
                 value={{
                   auth: {
-                    roles: [],
-                    organisme_ids: [1],
-                    permissions: [],
                     ...parameters?.mockAuth,
                     ...mockedAuthArgs,
                   },
-                  token: {},
                 }}
               >
                 <Story />
