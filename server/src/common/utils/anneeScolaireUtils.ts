@@ -1,15 +1,17 @@
 const AUGUST_MONTH_INDEX = 7;
 
-// annee scolaire is from 1st of August of year n to 31st of July of year n+1
-// for example 01/08/2020 to 31/07/2021
-const getNewAnneeScolaireDateForYear = (year) => {
-  return new Date(Date.UTC(year, AUGUST_MONTH_INDEX, 1));
-};
+/**
+ * Renvoie l'année scolaire (août à août) et l'année calendaire (janvier à décembre)
+ * pour une date donnée.
+ * (utilisé pour le filtrage des effectifs)
+ */
+export const getAnneesScolaireListFromDate = (date: Date) => {
+  const year = date.getFullYear();
+  return [
+    // année calendaire
+    `${year}-${year}`,
 
-export const getAnneesScolaireListFromDate = (date) => {
-  const dateYear = date.getFullYear();
-  if (date.getTime() >= getNewAnneeScolaireDateForYear(dateYear).getTime()) {
-    return [`${dateYear}-${dateYear}`, `${dateYear}-${dateYear + 1}`];
-  }
-  return [`${dateYear - 1}-${dateYear - 1}`, `${dateYear - 1}-${dateYear}`];
+    // année scolaire
+    date.getMonth() < AUGUST_MONTH_INDEX ? `${year - 1}-${year}` : `${year}-${year + 1}`,
+  ];
 };
