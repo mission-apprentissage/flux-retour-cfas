@@ -77,7 +77,7 @@ const UploadFiles = ({ title }) => {
       try {
         const data = new FormData();
         data.append("file", acceptedFiles[0]);
-        const { documents, models } = await _postFile(`${endpoint}/v1/upload?organisme_id=${organisme._id}`, data);
+        const { documents, models } = await _postFile(`${endpoint}/v1/organismes/${organisme._id}/upload`, data);
         onDocumentsChanged(documents, models);
         toast({
           title: "Le fichier a bien été déposé",
@@ -122,9 +122,8 @@ const UploadFiles = ({ title }) => {
     if (remove) {
       setIsSubmitting(true);
       try {
-        let data = file;
         const { documents, models } = await _delete(
-          `${endpoint}/v1/upload?organisme_id=${organisme._id}&${queryString.stringify(data)}`
+          `${endpoint}/v1/organismes/${organisme._id}/upload/${file.document_id}`
         );
         onDocumentsChanged(documents, models);
         setIsSubmitting(false);
@@ -154,6 +153,7 @@ const UploadFiles = ({ title }) => {
     }),
     [isDragActive]
   );
+  console.log("documents", documents);
 
   return (
     <>
@@ -191,7 +191,7 @@ const UploadFiles = ({ title }) => {
                         <File boxSize="5" color="bluefrance" />
                         <Box flexGrow={1}>
                           <Link
-                            href={`/api/v1/upload?organisme_id=${organisme._id}&path=${file.chemin_fichier}&name=${file.nom_fichier}`}
+                            href={`/api/v1/organismes/${organisme._id}/upload?path=${file.chemin_fichier}&name=${file.nom_fichier}`}
                             textDecoration={"underline"}
                             isExternal
                           >

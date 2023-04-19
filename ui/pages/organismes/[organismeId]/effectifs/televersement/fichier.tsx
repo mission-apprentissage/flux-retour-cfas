@@ -1,0 +1,29 @@
+import React from "react";
+import { Box, Container } from "@chakra-ui/react";
+import Head from "next/head";
+
+import Page from "@/components/Page/Page";
+import withAuth from "@/components/withAuth";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import { useRouter } from "next/router";
+import TeleversementsLanding from "@/modules/mon-espace/effectifs/TeleversementsLanding";
+
+export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
+
+const PageImportEffectifsDeSonOrganisme = () => {
+  const router = useRouter();
+  return (
+    <Page>
+      <Head>
+        <title>Ses effectifs - Import</title>
+      </Head>
+      <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
+        <Container maxW="xl">
+          <TeleversementsLanding importUrl={`${router.asPath}/fichier`} />
+        </Container>
+      </Box>
+    </Page>
+  );
+};
+
+export default withAuth(PageImportEffectifsDeSonOrganisme);

@@ -15,9 +15,7 @@ const ForceAcceptCGU = ({ children }) => {
   const cguContainer = useRef(null);
 
   const onAcceptCguClicked = async () => {
-    await _put("/api/v1/profile/cgu", {
-      has_accept_cgu_version: CGU_VERSION,
-    });
+    await _put(`/api/v1/profile/cgu/accept/${CGU_VERSION}`);
     await refreshSession();
   };
 

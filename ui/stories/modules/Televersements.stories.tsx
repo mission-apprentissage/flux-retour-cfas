@@ -5,7 +5,7 @@ import Component from "../../modules/mon-espace/effectifs/Televersements";
 function getUploads(response) {
   return [
     {
-      url: "/api/v1/upload/get?organisme_id=1",
+      url: "/api/v1/organismes/1/upload/get",
       method: "GET",
       status: 200,
       response,
