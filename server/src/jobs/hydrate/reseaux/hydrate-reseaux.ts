@@ -8,7 +8,7 @@ import { findOrganismeByUaiAndSiret } from "../../../common/actions/organismes/o
 import { arraysContainSameValues } from "../../../common/utils/miscUtils.js";
 import { organismesDb } from "../../../common/model/collections.js";
 import { WithId } from "mongodb";
-import { STATUT_FIABILISATION_ORGANISME } from "../../../common/constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_ORGANISME } from "../../../common/constants/fiabilisation.js";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",

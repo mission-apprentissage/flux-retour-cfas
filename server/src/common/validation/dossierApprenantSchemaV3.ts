@@ -5,14 +5,16 @@ const dossierApprenantSchemaV3 = () =>
   z.object({
     apprenant: z.object({
       nom: primitivesV1.apprenant.nom,
-      prenom_apprenant: primitivesV1.apprenant.prenom,
-      date_de_naissance_apprenant: primitivesV1.apprenant.date_de_naissance,
-      statut_apprenant: primitivesV1.apprenant.statut,
+      prenom: primitivesV1.apprenant.prenom,
+      date_de_naissance: primitivesV1.apprenant.date_de_naissance,
+      statut: primitivesV1.apprenant.statut,
       date_metier_mise_a_jour_statut: primitivesV1.apprenant.date_metier_mise_a_jour_statut,
-      ine_apprenant: primitivesV1.apprenant.ine.optional(),
-      email_contact: primitivesV1.apprenant.email.optional(),
-      tel_apprenant: primitivesV1.apprenant.tel.optional(),
-      code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
+      id_erp: primitivesV1.apprenant.id_erp,
+      // V1 - OPTIONAL FIELDS
+      ine: primitivesV1.apprenant.ine.optional(),
+      email: primitivesV1.apprenant.email.optional(),
+      telephone: primitivesV1.apprenant.tel.optional(),
+      code_commune_insee: primitivesV1.apprenant.code_commune_insee.optional(),
       // V2 - OPTIONAL FIELDS
       sexe: primitivesV2.apprenant.sexe.optional(),
       affelnet: primitivesV2.apprenant.affelnet.optional(),

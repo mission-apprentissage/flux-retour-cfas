@@ -6,7 +6,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Link,
   Radio,
   RadioGroup,
   Spinner,
@@ -19,7 +18,7 @@ import { useRouter } from "next/router";
 import uniq from "lodash.uniq";
 
 import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon } from "@/theme/components/icons";
-import { _get, _post } from "@/common/httpClient";
+import { _get, _post, _put } from "@/common/httpClient";
 import useServerEvents from "@/hooks/useServerEvents";
 import { ArrowRightLong } from "@/theme/components/icons";
 import { Input } from "./engine/formEngine/components/Input/Input";
@@ -34,7 +33,7 @@ import TeleversementInProgress from "./TeleversementInProgress";
 
 const Televersements = ({ organisme }) => {
   const { documents, uploads, onDocumentsChanged } = useDocuments();
-  const [step, setStep] = useState("landing");
+  const [step, setStep] = useState("upload");
   useFetchUploads(organisme?._id);
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const [mapping, setMapping] = useState<any>(null);
@@ -61,12 +60,9 @@ const Televersements = ({ organisme }) => {
   const onDefineFileType = useCallback(
     async (type_document) => {
       if (type_document?.length >= 4) {
-        const { nom_fichier, taille_fichier } = documents.unconfirmed[0];
-        const response = await _post("/api/v1/upload/setDocumentType", {
-          organisme_id: organisme._id,
+        const { document_id } = documents.unconfirmed[0];
+        const response = await _put(`/api/v1/organismes/${organisme._id}/upload/doc/${document_id}/setDocumentType`, {
           type_document,
-          nom_fichier,
-          taille_fichier,
         });
         onDocumentsChanged(response.documents, response.models);
       }
@@ -77,7 +73,7 @@ const Televersements = ({ organisme }) => {
 
   const onLineChange = useCallback(
     ({ line, part }, { value, hasError, required = false }) => {
-      let newLines: any[] = [...lines];
+      const newLines: any[] = [...lines];
       const prevValue: any = newLines[line][part].value;
       newLines[line][part].value = value;
       newLines[line][part].hasError = hasError;
@@ -85,7 +81,7 @@ const Televersements = ({ organisme }) => {
 
       if (required) {
         if (newLines[line].in.value && newLines[line].out.value) {
-          let newRequireKeysSettled = [...requireKeysSettled];
+          const newRequireKeysSettled = [...requireKeysSettled];
           if (prevValue) {
             const prevIndex = requireKeysSettled.indexOf(prevValue);
             newRequireKeysSettled[prevIndex] = value;
@@ -98,7 +94,7 @@ const Televersements = ({ organisme }) => {
 
       if (line !== 0) {
         // line 0 is anne scolaire
-        let newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
+        const newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
         if (prevValue) {
           const prevKeyLocked = newAvailableKeys[part].find((nAK) => nAK.value === prevValue);
           prevKeyLocked.locked = false;
@@ -115,13 +111,13 @@ const Televersements = ({ organisme }) => {
   const removeLine = useCallback(
     ({ lineNum }) => {
       const currentLine = lines[lineNum];
-      let newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
+      const newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
       const currentInKeyLocked: any = newAvailableKeys.in.find((nAK) => nAK.value === currentLine.in.value);
       const currentOutKeyLocked: any = newAvailableKeys.out.find((nAK) => nAK.value === currentLine.out.value);
       if (currentInKeyLocked) currentInKeyLocked.locked = false;
       if (currentOutKeyLocked) currentOutKeyLocked.locked = false;
 
-      let newLines = [...lines];
+      const newLines = [...lines];
       if (lineNum > -1) {
         newLines.splice(lineNum, 1);
       }
@@ -143,9 +139,9 @@ const Televersements = ({ organisme }) => {
     toast.closeAll();
     resetServerEvent();
     setStep("mapping");
-    const response: any = await _get(`/api/v1/upload/analyse?organisme_id=${organisme._id}`);
+    const response: any = await _get(`/api/v1/organismes/${organisme._id}/upload/analyse`);
 
-    let currentAvailableKeys = {
+    const currentAvailableKeys = {
       in: sortByNormalizedLabels(Object.values(response.inputKeys)),
       out: sortByNormalizedLabels(Object.values(response.outputKeys)),
     };
@@ -153,7 +149,7 @@ const Televersements = ({ organisme }) => {
     let initLines: any[] = [];
     // TODO REFACTOR THIS BELOW :vomit:
     if (mappingForThisType?.mapping_column) {
-      let { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
+      const { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
       userMapping[""] = typeCodeDiplome === "CFD" ? "RNCP" : "CFD";
       let remap: any = Object.entries(userMapping).reduce(
         (acc, [key, value]: any) => (key !== "annee_scolaire" ? { ...acc, [value]: key } : acc),
@@ -237,8 +233,7 @@ const Televersements = ({ organisme }) => {
       if (line.out.value === "annee_scolaire") return { ...acc, annee_scolaire: line.in.value };
       return { ...acc, [line.in.value]: line.out.value };
     }, {});
-    await _post("/api/v1/upload/setModel", {
-      organisme_id: organisme._id,
+    await _post(`/api/v1/organismes/${organisme._id}/upload/setModel`, {
       type_document: typeDocument,
       mapping: keyToKeyMapping,
     });
@@ -256,10 +251,10 @@ const Televersements = ({ organisme }) => {
       },
       { typeCodeDiplome }
     );
-    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post("/api/v1/upload/pre-import", {
-      organisme_id: organisme._id,
-      mapping: keyToKeyMapping,
-    });
+    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post(
+      `/api/v1/organismes/${organisme._id}/upload/pre-import`,
+      keyToKeyMapping
+    );
 
     // eslint-disable-next-line no-undef
     const newEffectifsState = new Map();
@@ -277,35 +272,14 @@ const Televersements = ({ organisme }) => {
   const onGoToImportStep = useCallback(async () => {
     setStep("import");
     resetServerEvent();
-    await _post("/api/v1/upload/import", {
-      organisme_id: organisme._id,
-    });
-    window.location.href = `${router.asPath.replace("/televersement", "")}`;
-    // router.push(`${router.asPath.replace("/televersement", "")}`);
+    await _post(`/api/v1/organismes/${organisme._id}/upload/import`, {});
+    router.push(`${router.asPath.replace("/televersement", "").replace("/fichier", "")}`);
     //onDocumentsChanged(documents, type_document);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organisme._id, router]);
 
   return (
     <>
-      {step === "landing" && (
-        <Flex alignItems="flex-start" flexDirection="column" gap={6}>
-          <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-            Importer votre fichier pour transmettre ou ajouter des effectifs.
-          </Heading>
-          <Button onClick={() => setStep("upload")} size={"md"} variant="primary">
-            Importer un fichier
-            <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
-          </Button>
-          <div>
-            <Text>Vous n&rsquo;avez pas de fichier ? Utilisez notre fichier modèle.</Text>
-            <Link href={"/modele_tableau_de_bord.csv"} textDecoration={"underline"} isExternal>
-              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de
-              bord
-            </Link>
-          </div>
-        </Flex>
-      )}
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         {step === "upload" && (
           <>
@@ -320,19 +294,18 @@ const Televersements = ({ organisme }) => {
                   Modèle existant :
                 </Heading>
                 <Input
-                  {...{
-                    name: "type_document",
-                    fieldType: "select",
-                    placeholder: "Sélectionner un modèle de fichier",
-                    locked: !(documents?.unconfirmed?.length && uploads?.models?.length),
-
-                    options: uploads?.models?.length
+                  name="type_document"
+                  fieldType="select"
+                  placeholder="Sélectionner un modèle de fichier"
+                  locked={!(documents?.unconfirmed?.length && uploads?.models?.length)}
+                  options={
+                    uploads?.models?.length
                       ? uploads?.models?.map(({ type_document }) => ({
                           label: type_document,
                           value: type_document,
                         }))
-                      : [{ label: "", value: "" }],
-                  }}
+                      : [{ label: "", value: "" }]
+                  }
                   value={typeDocument}
                   onSubmit={(value) => onDefineFileType(value)}
                 />
@@ -344,22 +317,20 @@ const Televersements = ({ organisme }) => {
                   Nouveau modèle de fichier :
                 </Heading>
                 <Input
-                  {...{
-                    name: "type_document",
-                    fieldType: "text",
-                    minLength: 4,
-                    mask: "C",
-                    maskBlocks: [
-                      {
-                        name: "C",
-                        mask: "Pattern",
-                        pattern: "^.*$",
-                      },
-                    ],
-                    placeholder: "Nommez votre fichier",
-                    validateMessage: "le modèle de fichier doit contenir au moins 4 caractères",
-                    locked: !documents?.unconfirmed?.length,
-                  }}
+                  name="type_document"
+                  fieldType="text"
+                  minLength={4}
+                  mask="C"
+                  maskBlocks={[
+                    {
+                      name: "C",
+                      mask: "Pattern",
+                      pattern: "^.*$",
+                    },
+                  ]}
+                  placeholder="Nommez votre fichier"
+                  validateMessage="le modèle de fichier doit contenir au moins 4 caractères"
+                  locked={!documents?.unconfirmed?.length}
                   onSubmit={(value) => onDefineFileType(value)}
                   onError={(value) => onDefineFileType(value)}
                   value={typeDocument}

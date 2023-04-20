@@ -8,7 +8,7 @@ import { buildFiabilisationCoupleForTdbCouple } from "../../../../../src/jobs/fi
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
-} from "../../../../../src/common/constants/fiabilisationConstants.js";
+} from "../../../../../src/common/constants/fiabilisation.js";
 import {
   checkCoupleFiable,
   checkCoupleNonFiabilisable,

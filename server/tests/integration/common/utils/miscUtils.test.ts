@@ -1,5 +1,6 @@
 import { strict as assert } from "assert";
-import { generateRandomAlphanumericPhrase } from "../../../../src/common/utils/miscUtils.js";
+
+import { generateRandomAlphanumericPhrase, stripEmptyFields } from "@/common/utils/miscUtils.js";
 
 describe("generateRandomAlphanumericPhrase", () => {
   it("crée une chaîne de caractère aléatoire de longueur demandée", () => {
@@ -15,5 +16,35 @@ describe("generateRandomAlphanumericPhrase", () => {
   it("crée une chaîne de caractère aléatoire ne contenant que des caractères alphanumériques", () => {
     const randomPhrase = generateRandomAlphanumericPhrase();
     assert.equal(/^[a-zA-Z0-9]*$/.test(randomPhrase), true);
+  });
+});
+
+describe("stripEmptyFields", () => {
+  const output = stripEmptyFields({
+    a: 1,
+    b: 2,
+    c: 3,
+    d: null,
+    e: undefined,
+    f: "",
+    g: 0,
+    h: false,
+    i: [],
+    j: [null, "", undefined],
+    nested: {
+      a: 1,
+      b: undefined,
+      c: [],
+    },
+  });
+  assert.deepStrictEqual(output, {
+    a: 1,
+    b: 2,
+    c: 3,
+    g: 0,
+    h: false,
+    i: [],
+    j: [null, "", undefined],
+    nested: { a: 1, c: [] },
   });
 });

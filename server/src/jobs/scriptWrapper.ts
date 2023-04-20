@@ -2,7 +2,7 @@ import { formatDuration, intervalToDuration } from "date-fns";
 
 import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb } from "../common/mongodb.js";
 import logger from "../common/logger.js";
-import { jobEventStatuts } from "../common/constants/jobsConstants.js";
+import { jobEventStatuts } from "../common/constants/jobs.js";
 import { modelDescriptors } from "../common/model/collections.js";
 import createGlobalServices from "../services.js";
 import config from "../config.js";

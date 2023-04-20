@@ -7,7 +7,7 @@ export interface Upload {
    */
   organisme_id: any;
   /**
-   * Historique des documents uploadé
+   * Historique des documents uploadés
    */
   documents?: {
     /**

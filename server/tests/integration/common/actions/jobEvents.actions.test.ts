@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { addMinutes } from "date-fns";
 
-import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.js";
+import { jobEventStatuts } from "../../../../src/common/constants/jobs.js";
 import { createJobEvent, isJobInAction } from "../../../../src/common/actions/jobEvents.actions.js";
 
 describe("Test des actions JobEvents", () => {

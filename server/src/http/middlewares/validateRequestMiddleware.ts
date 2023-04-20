@@ -22,7 +22,6 @@ type ErrorListItem = { type: "Query" | "Params" | "Body"; errors: ZodError<any> 
  * @param {*} schemas
  * @returns
  */
-
 function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
   schemas: RequestProcessing<TParams, TQuery, TBody>
 ): RequestHandler<TParams, any, TBody, TQuery>;

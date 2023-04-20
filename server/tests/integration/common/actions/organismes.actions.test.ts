@@ -10,8 +10,8 @@ import {
 } from "../../../../src/common/actions/organismes/organismes.actions.js";
 import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../src/common/constants/fiabilisationConstants.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/natureOrganismeConstants.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../src/common/constants/fiabilisation.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/organisme.js";
 
 const sampleOrganismeWithoutUai = {
   siret: "41461021200014",

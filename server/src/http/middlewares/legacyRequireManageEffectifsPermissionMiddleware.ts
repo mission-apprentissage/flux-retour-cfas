@@ -1,5 +1,7 @@
-import { requireManageOrganismeEffectifsPermission } from "../../common/actions/helpers/permissions.js";
+import { ObjectId } from "mongodb";
 import { NextFunction, Request, Response } from "express";
+
+import { requireManageOrganismeEffectifsPermission } from "../../common/actions/helpers/permissions.js";
 
 export async function legacyRequireManageEffectifsPermissionMiddleware(
   req: Request,
@@ -9,7 +11,7 @@ export async function legacyRequireManageEffectifsPermissionMiddleware(
   try {
     await requireManageOrganismeEffectifsPermission(
       req.user,
-      (req.query.organisme_id as string) || (req.body.organisme_id as string)
+      (req.query.organisme_id as any as ObjectId) || (req.body.organisme_id as any as ObjectId)
     );
     next();
   } catch (err) {

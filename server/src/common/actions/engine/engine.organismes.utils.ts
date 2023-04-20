@@ -1,4 +1,4 @@
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../constants/fiabilisationConstants.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../constants/fiabilisation.js";
 import { fiabilisationUaiSiretDb } from "../../model/collections.js";
 
 /**

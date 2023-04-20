@@ -10,8 +10,10 @@ import {
   formationEffectifSchema,
   validateFormationEffectif,
 } from "./parts/formation.effectif.part.js";
-import { TETE_DE_RESEAUX } from "../../constants/networksConstants.js";
-import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../../constants/territoiresConstants.js";
+import { TETE_DE_RESEAUX } from "../../constants/networks.js";
+import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../../constants/territoires.js";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme.js";
+import { Effectif } from "../@types/Effectif.js";
 
 const collectionName = "effectifs";
 
@@ -48,6 +50,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
   [{ date_de_naissance: 1 }, { name: "date_de_naissance" }],
+  [{ "formation.cfd": 1 }, { name: "formation.cfd" }],
   [
     { "apprenant.nom": 1 },
     {
@@ -136,11 +139,11 @@ export const schema = object(
           // 2 champs utiles seulement pour les indicateurs v1
           // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
           uai: string({
-            pattern: "^[0-9]{7}[a-zA-Z]$",
+            pattern: UAI_REGEX_PATTERN,
             maxLength: 8,
             minLength: 8,
           }),
-          siret: string({ pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
+          siret: string({ pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
         }),
       },
       {
@@ -167,7 +170,7 @@ export function defaultValuesEffectif({ lockAtCreate = false }) {
 }
 
 // TODO Extra validation
-export function validateEffectif(props, getErrors = false) {
+export function validateEffectif(props: Effectif, getErrors = false) {
   if (getErrors) {
     const errorsApprenant = validateApprenant(props.apprenant, getErrors);
     const errorsFormation = validateFormationEffectif(props.formation, getErrors);

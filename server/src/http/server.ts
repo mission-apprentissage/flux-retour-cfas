@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, RequestHandler, Response } from "express";
 import fs from "fs";
 import path from "path";
 import passport from "passport";
@@ -8,17 +8,20 @@ import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import Boom from "boom";
 import swaggerUi from "swagger-ui-express";
+import { ObjectId } from "mongodb";
 import listEndpoints from "express-list-endpoints";
+import { z } from "zod";
 
-import { apiRoles } from "../common/roles.js";
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
+import { apiRoles } from "@/common/roles.js";
 import { logMiddleware } from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware.js";
+import { authOrgMiddleware } from "./middlewares/authOrgMiddleware.js";
 
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
@@ -26,7 +29,6 @@ import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes.js";
 
 import emails from "./routes/emails.routes.js";
-
 import auth from "./routes/user.routes/auth.routes.js";
 
 import {
@@ -34,7 +36,7 @@ import {
   getOrganismeEffectifs,
 } from "./routes/specific.routes/organisme.routes.js";
 import effectif from "./routes/specific.routes/effectif.routes.js";
-import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
+import upload from "./routes/specific.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes.js";
@@ -44,31 +46,30 @@ import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import config from "../config.js";
 
 import { requireAdministrator, returnResult } from "./middlewares/helpers.js";
-import { jobEventsDb, usersMigrationDb } from "../common/model/collections.js";
-import { packageJson } from "../common/utils/esmUtils.js";
-import logger from "../common/logger.js";
-import { findMaintenanceMessages } from "../common/actions/maintenances.actions.js";
+import { jobEventsDb, usersMigrationDb } from "@/common/model/collections.js";
+import { packageJson } from "@/common/utils/esmUtils.js";
+import logger from "@/common/logger.js";
+import { findMaintenanceMessages } from "@/common/actions/maintenances.actions.js";
 import {
   findUserOrganismes,
-  getOrganisme,
-  OrganismesSearch,
   searchOrganismes,
   findOrganismesByUAI,
   findOrganismesBySIRET,
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
   configureOrganismeERP,
-} from "../common/actions/organismes/organismes.actions.js";
+  getOrganismeById,
+} from "@/common/actions/organismes/organismes.actions.js";
 import {
   passwordSchema,
   uaiSchema,
   validateFullObjectSchema,
   validateFullZodObjectSchema,
-} from "../common/utils/validationUtils.js";
-import { getFormationWithCfd, searchFormations } from "../common/actions/formations.actions.js";
+} from "@/common/utils/validationUtils.js";
+import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions.js";
 import Joi from "joi";
-import { authenticateLegacy } from "../common/actions/legacy/users.legacy.actions.js";
-import { createUserToken } from "../common/utils/jwtUtils.js";
-import { exportAnonymizedEffectifsAsCSV } from "../common/actions/effectifs/effectifs-export.actions.js";
+import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions.js";
+import { createUserToken } from "@/common/utils/jwtUtils.js";
+import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions.js";
 import { Application } from "express-serve-static-core";
 import {
   cancelInvitation,
@@ -81,19 +82,24 @@ import {
   removeUserFromOrganisation,
   resendInvitationEmail,
   validateMembre,
-} from "../common/actions/organisations.actions.js";
-import { getIndicateursNational, getOrganismeIndicateurs } from "../common/actions/effectifs/effectifs.actions.js";
-import { changePassword, updateUserProfile } from "../common/actions/users.actions.js";
-import { registrationSchema } from "../common/validation/registrationSchema.js";
-import { z } from "zod";
-import { sendForgotPasswordRequest, register, activateUser } from "../common/actions/account.actions.js";
-import { TETE_DE_RESEAUX } from "../common/constants/networksConstants.js";
+} from "@/common/actions/organisations.actions.js";
+import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions.js";
+import { changePassword, updateUserProfile } from "@/common/actions/users.actions.js";
+import { registrationSchema } from "@/common/validation/registrationSchema.js";
+import { sendForgotPasswordRequest, register, activateUser } from "@/common/actions/account.actions.js";
+import { TETE_DE_RESEAUX } from "@/common/constants/networks.js";
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers.js";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
-import loginSchemaLegacy from "../common/validation/loginSchemaLegacy.js";
-import { generateSifa } from "../common/actions/sifa.actions/sifa.actions.js";
-import { configurationERPSchema } from "../common/validation/configurationERPSchema.js";
-import { legacyEffectifsFiltersSchema } from "../common/actions/helpers/filters.js";
+import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy.js";
+import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions.js";
+import { configurationERPSchema } from "@/common/validation/configurationERPSchema.js";
+import { legacyEffectifsFiltersSchema } from "@/common/actions/helpers/filters.js";
+import objectIdSchema from "@/common/validation/objectIdSchema.js";
+import userProfileSchema from "@/common/validation/userProfileSchema.js";
+import uploadedDocumentSchema from "@/common/validation/uploadedDocumentSchema.js";
+import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFormationSearchSchema.js";
+import uploadMappingSchema from "@/common/validation/uploadMappingSchema.js";
+import uploadUpdateDocumentSchema from "@/common/validation/uploadUpdateDocumentSchema.js";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 
@@ -145,143 +151,141 @@ function setupRoutes(app: Application) {
   /********************************
    * Anonymous routes             *
    ********************************/
-  app.get(
-    "/api",
-    returnResult(async () => {
-      return {
-        name: "TDB Apprentissage API",
-        version: packageJson.version,
-        env: config.env,
-      };
-    })
-  );
-  app.get(
-    "/api/healthcheck",
-    returnResult(async () => {
-      let mongodbHealthy = false;
-      try {
-        await jobEventsDb().findOne({});
-        mongodbHealthy = true;
-      } catch (err) {
-        logger.error({ err }, "healthcheck failed");
-      }
-
-      return {
-        name: "TDB Apprentissage API",
-        version: packageJson.version,
-        env: config.env,
-        healthcheck: {
-          mongodb: mongodbHealthy,
-        },
-      };
-    })
-  );
-  app.use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs));
-  app.post(
-    "/api/v1/organismes/search-by-siret",
-    returnResult(async (req) => {
-      const { siret } = await validateFullObjectSchema(req.body, {
-        siret: Joi.string().required(),
-      });
-      return await findOrganismesBySIRET(siret);
-    })
-  );
-  app.post(
-    "/api/v1/organismes/search-by-uai",
-    returnResult(async (req) => {
-      const { uai } = await validateFullObjectSchema(req.body, {
-        uai: Joi.string().required().uppercase(),
-      });
-      return await findOrganismesByUAI(uai);
-    })
-  );
-  app.post(
-    "/api/v1/organismes/get-by-uai-siret",
-    returnResult(async (req) => {
-      const { uai, siret } = await validateFullZodObjectSchema(req.body, {
-        uai: z.string().nullable(),
-        siret: z.string(),
-      });
-      return await getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(uai, siret);
-    })
-  );
-
-  app.use("/api/emails", emails()); // No versionning to be sure emails links are always working
-  app.use("/api/v1/auth", auth());
-
-  app.post(
-    "/api/v1/auth/register",
-    returnResult(async (req) => {
-      const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
-      registration.user.email = registration.user.email.toLowerCase();
-      return await register(registration);
-    })
-  );
-  app.post(
-    "/api/v1/auth/activation",
-    // l'utilisateur est authentifié par JWT envoyé par email
-    checkActivationToken(),
-    returnResult(async (req) => {
-      // tant que l'utilisateur n'est pas confirmé
-      if (req.user.account_status === "PENDING_EMAIL_VALIDATION") {
-        await activateUser(req.user.email);
-      }
-      // renvoi du statut du compte pour rediriger l'utilisateur si son statut change
-      return await usersMigrationDb().findOne(
-        { email: req.user.email },
-        {
-          projection: {
-            _id: 0,
-            account_status: 1,
-          },
+  app
+    .get(
+      "/api",
+      returnResult(async () => {
+        return {
+          name: "TDB Apprentissage API",
+          version: packageJson.version,
+          env: config.env,
+        };
+      })
+    )
+    .get(
+      "/api/healthcheck",
+      returnResult(async () => {
+        let mongodbHealthy = false;
+        try {
+          await jobEventsDb().findOne({});
+          mongodbHealthy = true;
+        } catch (err) {
+          logger.error({ err }, "healthcheck failed");
         }
-      );
-    })
-  );
-  app.post(
-    "/api/v1/password/forgotten-password",
-    returnResult(async (req) => {
-      const { email } = await validateFullObjectSchema(req.body, {
-        email: Joi.string().email().required().lowercase().trim(),
-      });
-      await sendForgotPasswordRequest(email);
-    })
-  );
-  app.post(
-    "/api/v1/password/reset-password",
-    // l'utilisateur est authentifié par JWT envoyé par email
-    checkPasswordToken(),
-    returnResult(async (req) => {
-      // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
-      const { password } = await validateFullObjectSchema(req.body, {
-        passwordToken: Joi.string().required(),
-        password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
-      });
-      await changePassword(req.user, password);
-    })
-  );
-  app.get(
-    "/api/v1/maintenanceMessages",
-    returnResult(async () => {
-      return await findMaintenanceMessages();
-    })
-  );
-  app.get(
-    "/api/indicateurs-national",
-    returnResult(async (req) => {
-      const { date } = await validateFullZodObjectSchema(req.query, {
-        date: legacyEffectifsFiltersSchema.date,
-      });
-      return await getIndicateursNational(date);
-    })
-  );
 
-  app.get(
-    "/api/v1/invitations/:token",
-    returnResult(async (req) => {
-      return await getInvitationByToken(req.params.token);
-    })
-  );
+        return {
+          name: "TDB Apprentissage API",
+          version: packageJson.version,
+          env: config.env,
+          healthcheck: {
+            mongodb: mongodbHealthy,
+          },
+        };
+      })
+    )
+    .post(
+      "/api/v1/organismes/search-by-siret",
+      returnResult(async (req) => {
+        const { siret } = await validateFullObjectSchema(req.body, {
+          siret: Joi.string().required(),
+        });
+        return await findOrganismesBySIRET(siret);
+      })
+    )
+    .post(
+      "/api/v1/organismes/search-by-uai",
+      returnResult(async (req) => {
+        const { uai } = await validateFullObjectSchema(req.body, {
+          uai: Joi.string().required().uppercase(),
+        });
+        return await findOrganismesByUAI(uai);
+      })
+    )
+    .post(
+      "/api/v1/organismes/get-by-uai-siret",
+      returnResult(async (req) => {
+        const { uai, siret } = await validateFullZodObjectSchema(req.body, {
+          uai: z.string().nullable(),
+          siret: z.string(),
+        });
+        return await getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(uai, siret);
+      })
+    )
+    .use("/api/emails", emails()) // No versionning to be sure emails links are always working
+    .use("/api/v1/auth", auth())
+    .use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs))
+    .post(
+      "/api/v1/auth/register",
+      returnResult(async (req) => {
+        const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
+        registration.user.email = registration.user.email.toLowerCase();
+        return await register(registration);
+      })
+    )
+    .post(
+      "/api/v1/auth/activation",
+      // l'utilisateur est authentifié par JWT envoyé par email
+      checkActivationToken(),
+      returnResult(async (req) => {
+        // tant que l'utilisateur n'est pas confirmé
+        if (req.user.account_status === "PENDING_EMAIL_VALIDATION") {
+          await activateUser(req.user.email);
+        }
+        // renvoi du statut du compte pour rediriger l'utilisateur si son statut change
+        return await usersMigrationDb().findOne(
+          { email: req.user.email },
+          {
+            projection: {
+              _id: 0,
+              account_status: 1,
+            },
+          }
+        );
+      })
+    )
+    .post(
+      "/api/v1/password/forgotten-password",
+      returnResult(async (req) => {
+        const { email } = await validateFullObjectSchema(req.body, {
+          email: Joi.string().email().required().lowercase().trim(),
+        });
+        await sendForgotPasswordRequest(email);
+      })
+    )
+    .post(
+      "/api/v1/password/reset-password",
+      // l'utilisateur est authentifié par JWT envoyé par email
+      checkPasswordToken(),
+      returnResult(async (req) => {
+        // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
+        const { password } = await validateFullObjectSchema(req.body, {
+          passwordToken: Joi.string().required(),
+          password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
+        });
+        await changePassword(req.user, password);
+      })
+    )
+    .get(
+      "/api/v1/maintenanceMessages",
+      returnResult(async () => {
+        return await findMaintenanceMessages();
+      })
+    )
+    .get(
+      "/api/indicateurs-national",
+      returnResult(async (req) => {
+        const { date } = await validateFullZodObjectSchema(req.query, {
+          date: legacyEffectifsFiltersSchema.date,
+        });
+        return await getIndicateursNational(date);
+      })
+    )
+    .get(
+      "/api/v1/invitations/:token",
+      returnResult(async (req) => {
+        return await getInvitationByToken(req.params.token);
+      })
+    );
 
   /*****************************************************************************
    * Ancien mécanisme de login pour ERP (devrait être supprimé prochainement)  *
@@ -324,135 +328,194 @@ function setupRoutes(app: Application) {
    * Authenticated routes         *
    ********************************/
   const authRouter = express.Router();
-  authRouter.use(authMiddleware());
+  authRouter
+    .use(authMiddleware())
+    .get(
+      "/api/v1/session",
+      returnResult(async (req) => {
+        return req.user;
+      })
+    )
+    .put(
+      "/api/v1/profile/user",
+      validateRequestMiddleware({ body: userProfileSchema().strict() }),
+      returnResult(async (req) => {
+        await updateUserProfile(req.user, req.body);
+      })
+    )
+    .put(
+      "/api/v1/profile/cgu/accept/:version",
+      returnResult(async (req) => {
+        await updateUserProfile(req.user, { has_accepted_cgu: req.params.version });
+      })
+    );
 
-  authRouter.get(
-    "/api/v1/session",
-    returnResult(async (req) => {
-      return req.user;
-    })
-  );
-  const userProfileUpdateSchema = {
-    prenom: Joi.string().default("").allow(""),
-    nom: Joi.string().default("").allow(""),
-    telephone: Joi.string().default("").allow(""),
-    civility: Joi.string().default("").allow(""),
-  };
-  authRouter.put(
-    "/api/v1/profile/user",
-    returnResult(async (req) => {
-      const infos = await validateFullObjectSchema(req.body, userProfileUpdateSchema);
-      await updateUserProfile(req.user, infos);
-    })
-  );
-
-  const userCGUUpdateSchema = {
-    has_accept_cgu_version: Joi.string().required(),
-  };
-  authRouter.put(
-    "/api/v1/profile/cgu",
-    returnResult(async (req) => {
-      const infos = await validateFullObjectSchema(req.body, userCGUUpdateSchema);
-      await updateUserProfile(req.user, infos);
-    })
-  );
-  authRouter.get(
+  /********************************
+   * API pour un organisme   *
+   ********************************/
+  authRouter.use(
     "/api/v1/organismes/:id",
-    returnResult(async (req) => {
-      return await getOrganisme(req.user, req.params.id);
-    })
+    validateRequestMiddleware({ params: objectIdSchema("id") }),
+    (req, res, next) => {
+      res.locals.organismeId = new ObjectId((req.params as any).id);
+      next();
+    },
+    express
+      .Router()
+      .get(
+        "",
+        authOrgMiddleware("reader"),
+        returnResult(async (req, res) => {
+          return await getOrganismeById(res.locals.organismeId); // double récupération avec les permissions mais pas très grave
+        })
+      )
+      .get(
+        "/indicateurs",
+        authOrgMiddleware("reader"),
+        returnResult(async (req, res) => {
+          const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
+          return await getOrganismeIndicateurs(req.user, res.locals.organismeId, filters);
+        })
+      )
+      .get(
+        "/effectifs",
+        authOrgMiddleware("manager"),
+        returnResult(async (req, res) => {
+          return await getOrganismeEffectifs(
+            res.locals.organismeId,
+            req.query.annee_scolaire as string | undefined,
+            req.query.sifa === "true"
+          );
+        })
+      )
+      .get(
+        "/sifa-export",
+        authOrgMiddleware("manager"),
+        returnResult(async (req, res) => {
+          const organismeId = res.locals.organismeId;
+          const sifaCsv = await generateSifa(organismeId as any as ObjectId);
+          res.attachment(`tdb-données-sifa-${organismeId}.csv`);
+          return sifaCsv;
+        })
+      )
+      .put(
+        "/configure-erp",
+        authOrgMiddleware("manager"),
+        returnResult(async (req, res) => {
+          const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
+          await configureOrganismeERP(req.user, res.locals.organismeId, conf);
+        })
+      )
+      .use(
+        "/upload",
+        authOrgMiddleware("manager"),
+        express
+          .Router()
+          .get("/", validateRequestMiddleware({ body: uploadedDocumentSchema() }), async (req, res) => {
+            return upload.getDocument(res.locals.organismeId, req.body, res);
+          })
+          .post("/", async (req, res) => {
+            return upload.createUpload(res.locals.organismeId, req, res);
+          })
+          .get(
+            "/get",
+            returnResult(async (req, res) => {
+              return upload.getUpload(res.locals.organismeId);
+            })
+          )
+          .post(
+            "/pre-import",
+            validateRequestMiddleware({ body: uploadMappingSchema() }),
+            returnResult(async (req, res) => {
+              let userMapping = req.body;
+              return upload.preImport(res.locals.organismeId, req.user, userMapping);
+            })
+          )
+          .post(
+            "/import",
+            returnResult(async (req, res) => {
+              return upload.import(res.locals.organismeId, req.user);
+            })
+          )
+          .get(
+            "/analyse",
+            returnResult(async (req, res) => {
+              return upload.analyse(res.locals.organismeId, req.user);
+            })
+          )
+          // Manage uploaded documents (delete, set mapping modele)
+          .use(
+            "/doc/:document_id",
+            authOrgMiddleware("manager"),
+            validateRequestMiddleware({ params: objectIdSchema("document_id") }),
+            ((req: Request<{ document_id: ObjectId }>, res: Response, next: NextFunction) => {
+              // TODO investiguer pourquoi req.params.document_id est de type string ici
+              res.locals.documentId = new ObjectId(req.params.document_id);
+              next();
+            }) as RequestHandler<never, any, never, never, { documentId: ObjectId }>,
+            express
+              .Router()
+              .put(
+                "/setDocumentType",
+                validateRequestMiddleware({ body: uploadUpdateDocumentSchema() }),
+                returnResult(async (req, res) => {
+                  return upload.setDocumentType(res.locals.organismeId, res.locals.documentId, req.body.type_document);
+                })
+              )
+              .delete(
+                "",
+                returnResult(async (req, res) => {
+                  return upload.deleteUploadedDocument(res.locals.organismeId, res.locals.documentId);
+                })
+              )
+          )
+      )
   );
-  authRouter.get(
-    "/api/v1/organismes/:id/indicateurs",
-    returnResult(async (req) => {
-      const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
-      return await getOrganismeIndicateurs(req.user, req.params.id, filters);
-    })
-  );
-  authRouter.get(
-    "/api/v1/organismes/:id/effectifs",
-    returnResult(async (req) => {
-      return await getOrganismeEffectifs(
-        req.user,
-        req.params.id,
-        req.query.annee_scolaire as string | undefined,
-        req.query.sifa === "true"
-      );
-    })
-  );
-  authRouter.get(
-    "/api/v1/organismes/:id/sifa-export",
-    returnResult(async (req, res) => {
-      const sifaCsv = await generateSifa(req.user, req.params.id);
-      res.attachment(`tdb-données-sifa-${req.params.id}.csv`);
-      return sifaCsv;
-    })
-  );
-  authRouter.put(
-    "/api/v1/organismes/:id/configure-erp",
-    returnResult(async (req) => {
-      const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
-      await configureOrganismeERP(req.user, req.params.id, conf);
-    })
-  );
+
   // LEGACY écrans indicateurs
-  authRouter.get(
-    "/api/v1/organisme/:uai", // FIXME SECURITE openbar pour la recherche
-    returnResult(async (req) => {
-      const { uai } = await validateFullObjectSchema(req.params, {
-        uai: uaiSchema(),
-      });
-      return await getOrganismeByUAIAvecSousEtablissements(uai);
-    })
-  );
-
-  const organismeSearchSchema = {
-    searchTerm: Joi.string().min(3),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  };
-  authRouter.post(
-    "/api/v1/organismes/search",
-    returnResult(async (req) => {
-      const search = await validateFullObjectSchema<OrganismesSearch>(req.body, organismeSearchSchema);
-      return await searchOrganismes(req.user, search);
-    })
-  );
-
-  authRouter.use("/api/v1/effectif", effectif());
-  authRouter.use("/api/v1/upload", upload());
-  authRouter.get("/api/v1/server-events", serverEventsHandler);
-  authRouter.use("/api/indicateurs", indicateursRouter());
-  authRouter.get("/api/v1/indicateurs-export", async (req, res) => {
-    const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
-    const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
-    res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
-  });
+  authRouter
+    .get(
+      "/api/v1/organisme/:uai", // FIXME SECURITE openbar pour la recherche
+      returnResult(async (req) => {
+        const { uai } = await validateFullObjectSchema(req.params, {
+          uai: uaiSchema(),
+        });
+        return await getOrganismeByUAIAvecSousEtablissements(uai);
+      })
+    )
+    .post(
+      "/api/v1/organismes/search",
+      validateRequestMiddleware({ body: organismeOrFormationSearchSchema() }),
+      returnResult(async (req) => {
+        return await searchOrganismes(req.user, req.body as any);
+      })
+    )
+    .use("/api/v1/effectif", effectif())
+    .get("/api/v1/server-events", serverEventsHandler)
+    .use("/api/indicateurs", indicateursRouter())
+    .get("/api/v1/indicateurs-export", async (req, res) => {
+      const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
+      const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
+      res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
+    });
 
   /*
    * formations
    */
-  const formationsSearchSchema = {
-    searchTerm: Joi.string().min(3),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  };
-  authRouter.post(
-    "/api/formations/search",
-    returnResult(async (req) => {
-      const formationSearch = await validateFullObjectSchema(req.body, formationsSearchSchema);
-      return await searchFormations(formationSearch);
-    })
-  );
-
-  authRouter.get(
-    "/api/formations/:cfd",
-    returnResult(async (req) => {
-      return await getFormationWithCfd(req.params.cfd);
-    })
-  );
+  authRouter
+    .post(
+      "/api/formations/search",
+      validateRequestMiddleware({ body: organismeOrFormationSearchSchema() }),
+      returnResult(async (req) => {
+        return await searchFormations(req.body);
+      })
+    )
+    .get(
+      "/api/formations/:cfd",
+      returnResult(async (req) => {
+        return await getFormationWithCfd(req.params.cfd);
+      })
+    );
 
   /*
    * referentiel
@@ -469,86 +532,89 @@ function setupRoutes(app: Application) {
     })
   );
 
-  authRouter.get(
-    "/api/v1/organisation/organismes",
-    returnResult(async (req) => {
-      return await findUserOrganismes(req.user);
-    })
-  );
-  authRouter.get(
-    "/api/v1/organisation/organisme",
-    returnResult(async (req) => {
-      return await getOrganisationOrganisme(req.user);
-    })
-  );
-  authRouter.get(
-    "/api/v1/organisation/membres",
-    returnResult(async (req) => {
-      return await listOrganisationMembers(req.user);
-    })
-  );
-
-  authRouter.post(
-    "/api/v1/organisation/membres",
-    returnResult(async (req) => {
-      await inviteUserToOrganisation(req.user, req.body.email.toLowerCase());
-    })
-  );
-
-  authRouter.delete(
-    "/api/v1/organisation/membres/:userId",
-    returnResult(async (req) => {
-      await removeUserFromOrganisation(req.user, req.params.userId);
-    })
-  );
-
-  authRouter.post(
-    "/api/v1/organisation/membres/:userId/validate",
-    returnResult(async (req) => {
-      await validateMembre(req.user, req.params.userId);
-    })
-  );
-
-  authRouter.post(
-    "/api/v1/organisation/membres/:userId/reject",
-    returnResult(async (req) => {
-      await rejectMembre(req.user, req.params.userId);
-    })
-  );
-
-  authRouter.get(
-    "/api/v1/organisation/invitations",
-    returnResult(async (req) => {
-      return await listOrganisationPendingInvitations(req.user);
-    })
-  );
-
-  authRouter.delete(
-    "/api/v1/organisation/invitations/:invitationId",
-    returnResult(async (req) => {
-      await cancelInvitation(req.user, req.params.invitationId);
-    })
-  );
-
-  authRouter.post(
-    "/api/v1/organisation/invitations/:invitationId/resend",
-    returnResult(async (req) => {
-      await resendInvitationEmail(req.user, req.params.invitationId);
-    })
+  /********************************
+   * API organisation   *
+   ********************************/
+  authRouter.use(
+    "/api/v1/organisation",
+    express
+      .Router()
+      .get(
+        "/organismes",
+        returnResult(async (req) => {
+          return await findUserOrganismes(req.user);
+        })
+      )
+      .get(
+        "/organisme",
+        returnResult(async (req) => {
+          return await getOrganisationOrganisme(req.user);
+        })
+      )
+      .get(
+        "/membres",
+        returnResult(async (req) => {
+          return await listOrganisationMembers(req.user);
+        })
+      )
+      .post(
+        "/membres",
+        returnResult(async (req) => {
+          await inviteUserToOrganisation(req.user, req.body.email.toLowerCase());
+        })
+      )
+      .delete(
+        "/membres/:userId",
+        returnResult(async (req) => {
+          await removeUserFromOrganisation(req.user, req.params.userId);
+        })
+      )
+      .post(
+        "/membres/:userId/validate",
+        returnResult(async (req) => {
+          await validateMembre(req.user, req.params.userId);
+        })
+      )
+      .post(
+        "/membres/:userId/reject",
+        returnResult(async (req) => {
+          await rejectMembre(req.user, req.params.userId);
+        })
+      )
+      .get(
+        "/invitations",
+        returnResult(async (req) => {
+          return await listOrganisationPendingInvitations(req.user);
+        })
+      )
+      .delete(
+        "/invitations/:invitationId",
+        returnResult(async (req) => {
+          await cancelInvitation(req.user, req.params.invitationId);
+        })
+      )
+      .post(
+        "/invitations/:invitationId/resend",
+        returnResult(async (req) => {
+          await resendInvitationEmail(req.user, req.params.invitationId);
+        })
+      )
   );
 
   /********************************
    * API droits administrateurs   *
    ********************************/
-  const adminRouter = express.Router();
-  adminRouter.use(requireAdministrator);
-  adminRouter.use("/users", usersAdmin());
-  adminRouter.use("/organismes", organismesAdmin());
-  adminRouter.use("/effectifs", effectifsAdmin());
-  adminRouter.use("/stats", statsAdmin());
-  adminRouter.use("/maintenanceMessages", maintenancesAdmin());
-
-  authRouter.use("/api/v1/admin", adminRouter);
+  authRouter.use(
+    "/api/v1/admin",
+    express
+      .Router()
+      .use(requireAdministrator)
+      .use("/users", usersAdmin())
+      .use("/organismes", organismesAdmin())
+      .use("/effectifs", effectifsAdmin())
+      .use("/stats", statsAdmin())
+      .use("/maintenanceMessages", maintenancesAdmin())
+  );
 
   app.use(authRouter);
 

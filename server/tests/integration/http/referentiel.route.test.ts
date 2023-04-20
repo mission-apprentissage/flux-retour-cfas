@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { initTestApp } from "../../utils/testUtils.js";
-import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "../../../src/common/constants/networksConstants.js";
+import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "../../../src/common/constants/networks.js";
 import { AxiosInstance } from "axiosist";
 
 let httpClient: AxiosInstance;

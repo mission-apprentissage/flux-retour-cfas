@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { schemaValidation } from "../../../utils/schemaUtils.js";
 import { object, string, integer, arrayOf, objectId, date } from "../../json-schema/jsonSchemaTypes.js";
+import { CFD_REGEX_PATTERN, RNCP_REGEX_PATTERN } from "@/common/constants/organisme.js";
 
 export const formationEffectifSchema = object(
   {
@@ -15,12 +16,12 @@ export const formationEffectifSchema = object(
     }),
     cfd: string({
       description: "CFD de la formation à laquelle l'apprenant est inscrit",
-      pattern: "^[0-9A-Z]{8}[A-Z]?$",
+      pattern: CFD_REGEX_PATTERN,
       maxLength: 8,
     }),
     rncp: string({
       description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-      pattern: "^(RNCP)?[0-9]{2,5}$",
+      pattern: RNCP_REGEX_PATTERN,
       maxLength: 9,
     }),
     libelle_long: string({ description: "Libellé court de la formation visée" }),

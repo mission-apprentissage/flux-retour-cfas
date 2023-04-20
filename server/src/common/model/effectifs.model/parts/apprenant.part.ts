@@ -1,11 +1,13 @@
 import Joi from "joi";
 import { flattenDeep } from "lodash-es";
 
-import { CODES_STATUT_APPRENANT } from "../../../constants/dossierApprenantConstants.js";
+import { CODES_STATUT_APPRENANT } from "../../../constants/dossierApprenant.js";
 import { schemaValidation } from "../../../utils/schemaUtils.js";
 import { siretSchema } from "../../../utils/validationUtils.js";
 import { adresseSchema } from "../../json-schema/adresseSchema.js";
 import { object, string, date, integer, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes.js";
+import { CODE_POSTAL_PATTERN, SIRET_REGEX_PATTERN } from "@/common/constants/organisme.js";
+import { Effectif } from "../../@types/Effectif.js";
 
 export const apprenantSchema = object(
   {
@@ -24,7 +26,7 @@ export const apprenantSchema = object(
     code_postal_de_naissance: string({
       description: "Le code postal doit contenir 5 caractères",
       example: "75000",
-      pattern: "^[0-9]{5}$",
+      pattern: CODE_POSTAL_PATTERN,
       maxLength: 5,
       minLength: 5,
     }),
@@ -170,7 +172,7 @@ export const apprenantSchema = object(
         {
           siret: string({
             description: "N° SIRET de l'employeur",
-            pattern: "^[0-9]{14}$",
+            pattern: SIRET_REGEX_PATTERN,
             maxLength: 14,
             minLength: 14,
           }),
@@ -225,8 +227,8 @@ export function defaultValuesApprenant() {
 }
 
 // Extra validation
-export function validateApprenant({ contrats, ...props }, getErrors = false) {
-  const contratsValidation = contrats.map((contrat, i) => {
+export function validateApprenant({ contrats, ...props }: Partial<Effectif["apprenant"]>, getErrors = false) {
+  const contratsValidation = contrats?.map((contrat, i) => {
     return schemaValidation({
       entity: contrat,
       schema: apprenantSchema.properties.contrats.items,

@@ -13,7 +13,7 @@ export interface User {
   /**
    * Le mot de passe hashed
    */
-  password: string;
+  password?: string;
   /**
    * Token généré afin de sécuriser le changement de mot de passe
    */

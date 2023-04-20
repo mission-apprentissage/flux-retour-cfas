@@ -1,3 +1,5 @@
 #!/usr/bin/env sh
 
+yarn cli dev:generate-ts-types
+
 ./scripts/preventSensibleFilesCommit.sh && ./node_modules/.bin/lint-staged -q

@@ -13,7 +13,7 @@ export const getJsonFromXlsxData = (
   try {
     const { sheet_name_list, workbook } = readXLSXData(data, readOpt);
     const worksheet = workbook.Sheets[sheet_name_list[0]];
-    const json = XLSX.utils.sheet_to_json(worksheet, opt);
+    const json = XLSX.utils.sheet_to_json<any>(worksheet, opt);
 
     return json;
   } catch (err) {

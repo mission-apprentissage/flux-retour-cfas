@@ -17,7 +17,7 @@ import {
   inscritsSansContratsIndicator,
   rupturantsIndicator,
 } from "./indicators.js";
-import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenantConstants.js";
+import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenant.js";
 
 // Parse to french localized CSV with specific fields order & labels (; as delimiter and UTF8 using withBOM)
 const CSV_DEFAULT_FIELDS = [
@@ -61,7 +61,7 @@ async function checkEffectifsAnonymesPermissions(
     if (!organisme) {
       throw Boom.notFound("Organisme non trouvé");
     }
-    await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
+    await requireOrganismeIndicateursAccess(ctx, organisme._id);
   } else if (filters.siret_etablissement) {
     // comme on a pas l'organisme_id on doit retrouver l'organisme via siret
     const organisme = await organismesDb().findOne({
@@ -70,7 +70,7 @@ async function checkEffectifsAnonymesPermissions(
     if (!organisme) {
       throw Boom.notFound("Organisme non trouvé");
     }
-    await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
+    await requireOrganismeIndicateursAccess(ctx, organisme._id);
   } else {
     // amend filters with a restriction
     (filters as EffectifsFiltersWithRestriction).restrictionMongo = await getEffectifsAnonymesRestriction(ctx);

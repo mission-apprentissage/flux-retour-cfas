@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import checksumStream from "checksum-stream";
+
 import config from "../../config.js";
 
 const KEY = config.ovhStorage.encryptionKey;
@@ -8,7 +9,7 @@ export function isCipherAvailable() {
   return !!KEY;
 }
 
-export function cipher(iv) {
+export function cipher(iv: string) {
   if (!KEY || !iv) {
     throw new Error("Impossible chiffrer la donnée");
   }
@@ -17,7 +18,7 @@ export function cipher(iv) {
   return crypto.createCipheriv("aes-256-cbc", KEY, iv.slice(0, 16));
 }
 
-export function decipher(iv) {
+export function decipher(iv: string) {
   return crypto.createDecipheriv("aes-256-cbc", KEY, iv.slice(0, 16));
 }
 

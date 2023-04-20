@@ -15,7 +15,7 @@ import {
   searchFormations,
 } from "../../../../src/common/actions/formations.actions.js";
 import { createSampleEffectif } from "../../../data/randomizedSample.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/natureOrganismeConstants.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/organisme.js";
 import { Organisme } from "../../../../src/common/model/@types/Organisme.js";
 import { Formation } from "../../../../src/common/model/@types/Formation.js";
 

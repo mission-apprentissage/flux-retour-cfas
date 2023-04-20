@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TETE_DE_RESEAUX, TeteDeReseauKey } from "../constants/networksConstants.js";
+import { TETE_DE_RESEAUX, TeteDeReseauKey } from "../constants/networks.js";
 import { ORGANISATIONS_NATIONALES, OrganisationsNationalesKey } from "../constants/organisations.js";
 
 export const registrationSchema = {

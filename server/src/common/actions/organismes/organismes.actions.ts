@@ -1,28 +1,27 @@
 import { ObjectId } from "mongodb";
 
-import { getMetiersBySiret } from "../../apis/apiLba.js";
-import { organismesDb, effectifsDb } from "../../model/collections.js";
-import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
-import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
-import { buildAdresseFromUai, getDepartementCodeFromUai } from "../../utils/uaiUtils.js";
+import { getMetiersBySiret } from "@/common/apis/apiLba.js";
+import { organismesDb, effectifsDb } from "@/common/model/collections.js";
+import { defaultValuesOrganisme, validateOrganisme } from "@/common/model/organismes.model.js";
+import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils.js";
+import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/uaiUtils.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
 import { findDataFromSiret } from "../infoSiret.actions.js";
-import logger from "../../logger.js";
-import { escapeRegExp } from "../../utils/regexUtils.js";
-import { Organisme } from "../../model/@types/Organisme.js";
+import logger from "@/common/logger.js";
+import { escapeRegExp } from "@/common/utils/regexUtils.js";
+import { Organisme } from "@/common/model/@types/Organisme.js";
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "../helpers/filters.js";
 import Boom from "boom";
-import { AuthContext } from "../../model/internal/AuthContext.js";
+import { AuthContext } from "@/common/model/internal/AuthContext.js";
+import { getOrganisationOrganisme } from "../organisations.actions.js";
+import { ConfigurationERP } from "@/common/validation/configurationERPSchema.js";
+import { OrganisationOrganismeFormation } from "@/common/model/organisations.model.js";
+import { stripEmptyFields } from "@/common/utils/miscUtils.js";
 import {
   findOrganismesAccessiblesByOrganisation,
   getOrganismeRestriction,
   isOrganisationOF,
-  requireOrganismeIndicateursAccess,
 } from "../helpers/permissions.js";
-import { getOrganisationOrganisme } from "../organisations.actions.js";
-import { ConfigurationERP } from "../../validation/configurationERPSchema.js";
-import { stripEmptyFields } from "../../utils/validationUtils.js";
-import { OrganisationOrganismeFormation } from "../../model/organisations.model.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -53,17 +52,19 @@ export const createOrganisme = async (
     ? await getOrganismeInfosFromSiret(siret)
     : { nom: nomIn?.trim(), adresse: adresseIn, ferme: fermeIn, enseigne: undefined, raison_sociale: undefined };
   const dataToInsert = validateOrganisme({
-    ...(uai ? { uai } : {}),
-    ...(nom ? { nom } : {}),
     ...defaultValuesOrganisme(),
-    ...(siret ? { siret } : {}),
-    ...(callLbaApi ? { metiers } : {}),
-    ...(buildFormationTree ? { relatedFormations } : {}),
-    ...(adresse ? { adresse } : {}),
-    ...data,
-    ferme: ferme || false,
-    ...(enseigne ? { enseigne } : {}),
-    ...(raison_sociale ? { raison_sociale } : {}),
+    ...stripEmptyFields({
+      uai,
+      nom,
+      siret,
+      ...(callLbaApi ? { metiers } : {}),
+      ...(buildFormationTree ? { relatedFormations } : {}),
+      ...(adresse ? { adresse } : {}),
+      ...data,
+      ferme: ferme || false,
+      ...(enseigne ? { enseigne } : {}),
+      ...(raison_sociale ? { raison_sociale } : {}),
+    }),
   });
   const { insertedId } = await organismesDb().insertOne(dataToInsert);
 
@@ -328,10 +329,10 @@ export const getSousEtablissementsForUai = async (uai) => {
 };
 
 export type OrganismesSearch = {
-  searchTerm: string;
-  etablissement_num_region: string;
-  etablissement_num_departement: string;
-  etablissement_reseaux: string;
+  searchTerm?: string;
+  etablissement_num_region?: string;
+  etablissement_num_departement?: string;
+  etablissement_reseaux?: string;
 };
 
 /**
@@ -666,17 +667,10 @@ export async function findUserOrganismes(ctx: AuthContext) {
   }));
 }
 
-export async function getOrganisme(ctx: AuthContext, organismeId: string) {
-  await requireOrganismeIndicateursAccess(ctx, organismeId);
-  return await getOrganismeById(organismeId); // double récupération avec les permissions mais pas très grave
-}
-
-export async function getOrganismeById(organismeId: string) {
-  const organisme = await organismesDb().findOne({
-    _id: new ObjectId(organismeId),
-  });
+export async function getOrganismeById(_id: ObjectId) {
+  const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
-    throw Boom.notFound(`missing organisation ${organismeId}`);
+    throw Boom.notFound(`missing organisme ${_id}`);
   }
   return organisme;
 }
@@ -754,7 +748,7 @@ async function fetchFromAPIEntreprise(siret: string): Promise<any> {
   };
 }
 
-async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: string): Promise<boolean> {
+async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -763,7 +757,7 @@ async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: string): 
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
-      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId);
+      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());
     }
 
     case "ADMINISTRATEUR":
@@ -776,7 +770,7 @@ async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: string): 
 
 export async function configureOrganismeERP(
   ctx: AuthContext,
-  organismeId: string,
+  organismeId: ObjectId,
   conf: ConfigurationERP
 ): Promise<void> {
   if (!(await canConfigureOrganismeERP(ctx, organismeId))) {

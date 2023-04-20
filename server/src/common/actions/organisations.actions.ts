@@ -1,6 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "mongodb";
-import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "../constants/territoiresConstants.js";
+import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "../constants/territoires.js";
 import { UsersMigration } from "../model/@types/UsersMigration.js";
 
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "../model/collections.js";
@@ -182,7 +182,10 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
 export async function getOrganisationOrganisme(ctx: AuthContext): Promise<Organisme> {
   const organisationOF = requireOrganisationOF(ctx);
 
-  const organisme = await organismesDb().findOne({ siret: organisationOF.siret, uai: organisationOF.uai });
+  const organisme = await organismesDb().findOne({
+    siret: organisationOF.siret,
+    ...(organisationOF.uai ? { uai: organisationOF.uai } : {}),
+  });
   if (!organisme) {
     throw Boom.notFound("organisme de l'organisation non trouvé", {
       siret: organisationOF.siret,
@@ -222,7 +225,10 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const organisme = await organismesDb().findOne({ siret: organisation.siret, uai: organisation.uai });
+      const organisme = await organismesDb().findOne({
+        siret: organisation.siret,
+        ...(organisation.uai ? { uai: organisation.uai } : {}),
+      });
       if (!organisme) {
         logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
       }

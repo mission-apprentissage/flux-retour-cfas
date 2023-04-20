@@ -7,7 +7,7 @@ import {
   organismeLookup,
 } from "../helpers/filters.js";
 import { mergeObjectsBy } from "../../utils/mergeObjectsBy.js";
-import { DEPARTEMENTS_BY_ID } from "../../constants/territoiresConstants.js";
+import { DEPARTEMENTS_BY_ID } from "../../constants/territoires.js";
 import {
   abandonsIndicator,
   apprentisIndicator,
@@ -49,7 +49,7 @@ export async function checkIndicateursFiltersPermissions(
     if (!organisme) {
       throw Boom.notFound("Organisme non trouvé");
     }
-    await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
+    await requireOrganismeIndicateursAccess(ctx, organisme._id);
   } else if (filters.siret_etablissement) {
     // comme on a pas l'organisme_id on doit retrouver l'organisme via siret
     const organisme = await organismesDb().findOne({
@@ -58,7 +58,7 @@ export async function checkIndicateursFiltersPermissions(
     if (!organisme) {
       throw Boom.notFound("Organisme non trouvé");
     }
-    await requireOrganismeIndicateursAccess(ctx, organisme._id.toString());
+    await requireOrganismeIndicateursAccess(ctx, organisme._id);
   } else {
     // amend filters with a restriction
     (filters as EffectifsFiltersWithRestriction).restrictionMongo = await getIndicateursRestriction(ctx);
@@ -67,9 +67,11 @@ export async function checkIndicateursFiltersPermissions(
   return filters;
 }
 
-export async function getOrganismeIndicateurs(ctx: AuthContext, organismeId: string, filters: LegacyEffectifsFilters) {
-  // doublon avec vérification dans getIndicateurs, mais sera utile plus tard
-  await requireOrganismeIndicateursAccess(ctx, organismeId);
+export async function getOrganismeIndicateurs(
+  ctx: AuthContext,
+  organismeId: ObjectId,
+  filters: LegacyEffectifsFilters
+) {
   filters.organisme_id = organismeId;
   return await getIndicateurs(ctx, filters);
 }

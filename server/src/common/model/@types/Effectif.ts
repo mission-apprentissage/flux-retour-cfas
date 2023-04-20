@@ -1815,6 +1815,9 @@ export interface Effectif {
         | "AFTRAL"
         | "GRETA_VAUCLUSE"
         | "CFA_SAT"
+        | "EN_HORS_MURS"
+        | "EN_CFA_ACADEMIQUE"
+        | "EN_EPLE"
       )[];
       uai?: string;
       siret?: string;

@@ -96,11 +96,11 @@ const MaintenancePage = () => {
     initialValues: { msg: "", type: "", context: "manuel" },
     onSubmit: onSubmitMessage,
     validationSchema: Yup.object().shape({
-      msg: Yup.string().required("Champs obligatoire"),
-      context: Yup.string().required("Champs obligatoire"),
+      msg: Yup.string().required("Champ obligatoire"),
+      context: Yup.string().required("Champ obligatoire"),
       type: Yup.string().when("context", {
         is: "manuel",
-        then: (schema) => schema.required("Champs obligatoire"),
+        then: (schema) => schema.required("Champ obligatoire"),
       }),
     }),
   });

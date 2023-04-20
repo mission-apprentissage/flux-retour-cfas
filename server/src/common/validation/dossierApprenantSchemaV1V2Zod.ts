@@ -17,13 +17,14 @@ const dossierApprenantSchemaV1V2Zod = () =>
     id_formation: primitivesV1.formation.code_cfd,
     annee_scolaire: primitivesV1.formation.annee_scolaire,
     statut_apprenant: primitivesV1.apprenant.statut,
-    date_metier_mise_a_jour_statut: primitivesV1.apprenant.id_erp,
+    date_metier_mise_a_jour_statut: primitivesV1.apprenant.date_metier_mise_a_jour_statut,
     id_erp_apprenant: primitivesV1.apprenant.id_erp,
+    source: primitivesV1.source,
 
     // OPTIONAL FIELDS
     ine_apprenant: primitivesV1.apprenant.ine.optional(),
     email_contact: primitivesV1.apprenant.email.optional(),
-    tel_apprenant: primitivesV1.apprenant.tel.optional(),
+    tel_apprenant: primitivesV1.apprenant.tel.nullish(),
     code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
     siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
     libelle_court_formation: primitivesV1.formation.libelle_court.optional(),

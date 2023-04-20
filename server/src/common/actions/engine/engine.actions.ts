@@ -3,7 +3,7 @@ import { isEqual } from "date-fns";
 import { capitalize, cloneDeep, get } from "lodash-es";
 
 import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
-import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
+import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoires.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import { telephoneConverter } from "../../validation/utils/frenchTelephoneNumber.js";
 import { buildEffectif, findEffectifByQuery, validateEffectifObject } from "../effectifs.actions.js";
@@ -13,6 +13,17 @@ import {
   findOrganismeByUaiAndSiret,
 } from "../organismes/organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
+import { Effectif } from "@/common/model/@types/Effectif.js";
+import { ObjectId } from "mongodb";
+
+const dateConverter = (date) => {
+  // TODO If more than year 4000 error
+  if (date instanceof Date) return jsDateToLuxon(date).toISO();
+  else {
+    const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
+    return date_ISO ?? date;
+  }
+};
 
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
@@ -24,9 +35,9 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
  * @returns
  */
 export const buildNewHistoriqueStatutApprenant = (
-  historique_statut_apprenant_existant,
-  updated_statut_apprenant,
-  updated_date_metier_mise_a_jour_statut
+  historique_statut_apprenant_existant: Effectif["apprenant"]["historique_statut"],
+  updated_statut_apprenant: Effectif["apprenant"]["historique_statut"][0]["valeur_statut"],
+  updated_date_metier_mise_a_jour_statut: Date
 ) => {
   if (!updated_statut_apprenant) return historique_statut_apprenant_existant;
 
@@ -72,19 +83,18 @@ export const buildNewHistoriqueStatutApprenant = (
  * @param {*} effectifData
  * @param {*} [options]
  */
-export const hydrateEffectif = async (effectifData: any, options?: any) => {
+export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: ObjectId }, options?: any) => {
   const queryKeys = options?.queryKeys ?? ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"];
   const checkIfExist = options?.checkIfExist ?? false;
 
   let {
-    organisme_id,
     annee_scolaire,
     source,
     id_erp_apprenant,
     apprenant: { nom, prenom },
     formation: { cfd },
   } = await Joi.object({
-    organisme_id: Joi.string().required(),
+    organisme_id: Joi.any().required(),
     annee_scolaire: Joi.string().required(),
     source: Joi.string().required(),
     id_erp_apprenant: Joi.string().required(),
@@ -100,15 +110,6 @@ export const hydrateEffectif = async (effectifData: any, options?: any) => {
     .validateAsync(effectifData, { abortEarly: false });
 
   let convertedEffectif = cloneDeep(effectifData);
-
-  const dateConverter = (date) => {
-    // TODO If more than year 4000 error
-    if (date instanceof Date) return jsDateToLuxon(date).toISO();
-    else {
-      const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
-      return date_ISO ?? date;
-    }
-  };
 
   if (effectifData.apprenant.date_de_naissance) {
     convertedEffectif.apprenant.date_de_naissance = dateConverter(effectifData.apprenant.date_de_naissance);
@@ -136,13 +137,13 @@ export const hydrateEffectif = async (effectifData: any, options?: any) => {
     }
   }
 
-  if (effectifData.formation.date_debut_formation) {
+  if (effectifData?.formation?.date_debut_formation) {
     convertedEffectif.formation.date_debut_formation = dateConverter(effectifData.formation.date_debut_formation);
   }
-  if (effectifData.formation.date_fin_formation) {
+  if (effectifData?.formation?.date_fin_formation) {
     convertedEffectif.formation.date_fin_formation = dateConverter(effectifData.formation.date_fin_formation);
   }
-  if (effectifData.formation.date_obtention_diplome) {
+  if (effectifData?.formation?.date_obtention_diplome) {
     convertedEffectif.formation.date_obtention_diplome = dateConverter(effectifData.formation.date_obtention_diplome);
   }
 
@@ -219,7 +220,7 @@ export const hydrateEffectif = async (effectifData: any, options?: any) => {
 
   const effectif = buildEffectif(
     {
-      organisme_id,
+      organisme_id: effectifData.organisme_id,
       annee_scolaire,
       source,
       id_erp_apprenant,
@@ -257,7 +258,7 @@ export const hydrateEffectif = async (effectifData: any, options?: any) => {
  * ?? Pas besoin d'update car le runEngine ne va que créer / contrôler l'existant
  * ?? -> La MAJ d'un organisme ne doit pas se faire via l'API / migration ???
  */
-export const resolveOrganisme = async ({ uai, siret }: { uai?: string; siret?: string }) => {
+export const resolveOrganisme = async ({ uai, siret }: { uai?: string | undefined; siret?: string | undefined }) => {
   let error: string | null = null;
 
   // Applique le mapping de fiabilisation
