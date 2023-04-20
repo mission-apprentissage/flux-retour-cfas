@@ -153,7 +153,6 @@ const UploadFiles = ({ title }) => {
     }),
     [isDragActive]
   );
-  console.log("documents", documents);
 
   return (
     <>

@@ -34,7 +34,7 @@ const ProfileInformation = () => {
     },
     validationSchema: Yup.object().shape({
       prenom: Yup.string().required("Champ obligatoire"),
-      nom: Yup.string().required("Champs  obligatoire"),
+      nom: Yup.string().required("Champ obligatoire"),
       telephone: Yup.string(),
       civility: Yup.string(),
       email: Yup.string().email("Email invalide"),

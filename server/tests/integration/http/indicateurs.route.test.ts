@@ -37,20 +37,15 @@ describe("Route indicateurs Route", () => {
     const anneeScolaire = "2022-2023";
 
     beforeEach(async () => {
-      try {
-        await effectifsDb().insertOne(
-          createSampleEffectif({
-            ...commonEffectifsAttributes,
-            annee_scolaire: anneeScolaire,
-            apprenant: {
-              historique_statut: historySequenceInscritToApprenti,
-            },
-          })
-        );
-      } catch (e) {
-        console.log(JSON.stringify(e, null, 2));
-        throw e;
-      }
+      await effectifsDb().insertOne(
+        createSampleEffectif({
+          ...commonEffectifsAttributes,
+          annee_scolaire: anneeScolaire,
+          apprenant: {
+            historique_statut: historySequenceInscritToApprenti,
+          },
+        })
+      );
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {

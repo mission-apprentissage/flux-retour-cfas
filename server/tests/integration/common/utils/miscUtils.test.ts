@@ -19,7 +19,7 @@ describe("generateRandomAlphanumericPhrase", () => {
   });
 });
 
-describe("generateRandomAlphanumericPhrase", () => {
+describe("stripEmptyFields", () => {
   const output = stripEmptyFields({
     a: 1,
     b: 2,
