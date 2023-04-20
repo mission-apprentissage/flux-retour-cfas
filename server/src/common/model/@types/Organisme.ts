@@ -935,6 +935,7 @@ export interface Organisme {
    */
   fiabilisation_statut?:
     | "FIABLE"
+    | "NON_FIABILISABLE_INEXISTANT"
     | "NON_FIABILISABLE_PB_COLLECTE"
     | "NON_FIABILISABLE_UAI_NON_VALIDEE"
     | "NON_FIABILISABLE_UAI_VALIDEE"

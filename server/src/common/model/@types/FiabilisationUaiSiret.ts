@@ -9,6 +9,7 @@ export interface FiabilisationUaiSiret {
   type?:
     | "FIABLE"
     | "A_FIABILISER"
+    | "NON_FIABILISABLE_INEXISTANT"
     | "NON_FIABILISABLE_PB_COLLECTE"
     | "NON_FIABILISABLE_UAI_VALIDEE"
     | "NON_FIABILISABLE_UAI_NON_VALIDEE";
