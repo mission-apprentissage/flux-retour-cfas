@@ -1,6 +1,6 @@
 import logger from "../logger";
 
-const cache: { [key: string]: Promise<any> } = {};
+let cache: { [key: string]: Promise<any> } = {};
 
 /**
  * Met en cache le résultat d'une fonction.
@@ -22,4 +22,11 @@ export async function tryCachedExecution<T>(
     }, expiration);
   }
   return await cachedResult;
+}
+
+/**
+ * Vide toutes les entrées du cache.
+ */
+export function clearCache() {
+  cache = {};
 }
