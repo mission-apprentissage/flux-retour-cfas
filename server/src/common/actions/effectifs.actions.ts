@@ -12,7 +12,7 @@ import { AuthContext } from "../model/internal/AuthContext.js";
 import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions.js";
 import { Effectif } from "../model/@types/Effectif.js";
 import { EffectifsQueue } from "../model/@types/EffectifsQueue.js";
-import { compactObject, stripEmptyFields } from "../utils/miscUtils.js";
+import { stripEmptyFields } from "../utils/miscUtils.js";
 
 /**
  * Méthode de build d'un effectif
@@ -101,14 +101,14 @@ export const validateEffectifObject = (effectif) => {
   }
 
   // TODO Suppression des erreurs sur date de naissance si nécéssaire
-  return { ...compactObject(effectifMandate), validation_errors: effectifValidationErrors };
+  return { ...stripEmptyFields(effectifMandate), validation_errors: effectifValidationErrors };
 };
 
 /**
  * Méthode d'insertion d'un effectif en base de donnée
  * @returns
  */
-export const insertEffectif = async (data) => {
+export const insertEffectif = async (data: Effectif) => {
   const dataSanitized = validateEffectif(data);
   const { insertedId } = await effectifsDb().insertOne(dataSanitized);
   return { _id: insertedId, ...dataSanitized };

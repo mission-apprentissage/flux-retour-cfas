@@ -65,19 +65,3 @@ export function stripEmptyFields<T extends object>(object: T): T {
     return acc;
   }, {}) as T;
 }
-
-/**
- * TODO voir si merge possible avec stripEmptyFields
- * @param val
- * @returns
- */
-export const compactObject = <T extends object>(val: T): T => {
-  const data = Array.isArray(val) ? val.filter(Boolean) : val;
-  return Object.keys(data).reduce((acc, key) => {
-    const value = data[key];
-    if (!(value === null || value === undefined)) acc[key] = typeof value === "object" ? compactObject(value) : value;
-    if (acc[key] === null || acc[key] === undefined || (acc[key] instanceof Object && !Object.keys(acc[key]).length))
-      delete acc[key];
-    return acc;
-  }, (Array.isArray(val) ? [] : {}) as T);
-};

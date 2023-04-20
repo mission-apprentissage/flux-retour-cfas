@@ -12,7 +12,7 @@ import { algoUAI } from "@/common/utils/uaiUtils.js";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances.js";
 import { CODE_POSTAL_REGEX } from "@/common/constants/organisme.js";
 import { legacyRequireManageEffectifsPermissionMiddleware } from "@/http/middlewares/legacyRequireManageEffectifsPermissionMiddleware.js";
-import { compactObject } from "@/common/utils/miscUtils.js";
+import { stripEmptyFields } from "@/common/utils/miscUtils.js";
 
 const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
@@ -205,7 +205,7 @@ export default () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
       merge(effectifDb, {
-        ...compactObject(restData),
+        ...stripEmptyFields(restData),
       });
 
     // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE

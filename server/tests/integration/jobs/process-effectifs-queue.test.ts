@@ -217,7 +217,13 @@ describe("Processing de EffectifsQueue", () => {
     };
 
     const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
-    await processEffectifsQueue();
+    const result = await processEffectifsQueue();
+    assert.deepStrictEqual(result, {
+      totalProcessed: 1,
+      totalValidItems: 1,
+      totalInvalidItems: 0,
+    });
+
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
     assert.equal(updatedInput?.validation_errors, undefined);
