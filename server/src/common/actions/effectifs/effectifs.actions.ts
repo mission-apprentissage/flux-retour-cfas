@@ -23,6 +23,8 @@ import {
 } from "../helpers/permissions.js";
 import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
 import Boom from "boom";
+import { tryCachedExecution } from "@/common/utils/cacheUtils.js";
+import { format } from "date-fns";
 
 // ce helper est principalement appelé dans les routes des indicateurs agrégés et non scopés à un organisme, mais aussi pour un organisme :
 // - si organisme_id, uai ou siret, indicateurs pour un organisme, on vérifie que l'organisation y a accès
@@ -363,32 +365,40 @@ export const getEffectifsCountByDepartementAtDate = async (ctx: AuthContext, fil
   }));
 };
 
+const indicateursNationalCacheExpirationMs = 3600 * 1000; // 1 hour
+
 export async function getIndicateursNational(date: Date) {
-  const filterStages = [{ $match: { annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } } }];
-  const [indicateurs, totalOrganismes] = await Promise.all([
-    (async () => {
-      const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
-        apprentisIndicator.getCountAtDate(date, filterStages),
-        inscritsSansContratsIndicator.getCountAtDate(date, filterStages),
-        rupturantsIndicator.getCountAtDate(date, filterStages),
-        abandonsIndicator.getCountAtDate(date, filterStages),
+  return await tryCachedExecution(
+    `indicateurs-national:${format(date, "yyyy-MM-dd")}`,
+    indicateursNationalCacheExpirationMs,
+    async () => {
+      const filterStages = [{ $match: { annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } } }];
+      const [indicateurs, totalOrganismes] = await Promise.all([
+        (async () => {
+          const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
+            apprentisIndicator.getCountAtDate(date, filterStages),
+            inscritsSansContratsIndicator.getCountAtDate(date, filterStages),
+            rupturantsIndicator.getCountAtDate(date, filterStages),
+            abandonsIndicator.getCountAtDate(date, filterStages),
+          ]);
+          return {
+            date,
+            apprentis,
+            inscritsSansContrat,
+            rupturants,
+            abandons,
+          };
+        })(),
+        (async () => {
+          const distinctOrganismes = await effectifsDb().distinct("organisme_id", {
+            annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
+          });
+          return distinctOrganismes ? distinctOrganismes.length : 0;
+        })(),
       ]);
-      return {
-        date,
-        apprentis,
-        inscritsSansContrat,
-        rupturants,
-        abandons,
-      };
-    })(),
-    (async () => {
-      const distinctOrganismes = await effectifsDb().distinct("organisme_id", {
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-      });
-      return distinctOrganismes ? distinctOrganismes.length : 0;
-    })(),
-  ]);
-  return { ...indicateurs, totalOrganismes };
+      return { ...indicateurs, totalOrganismes };
+    }
+  );
 }
 /**
  * Méthode de récupération de la liste des effectifs en base
