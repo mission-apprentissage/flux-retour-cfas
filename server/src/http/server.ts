@@ -31,6 +31,7 @@ import {
   inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
+  rejectInvitation,
   rejectMembre,
   removeUserFromOrganisation,
   resendInvitationEmail,
@@ -266,6 +267,12 @@ function setupRoutes(app: Application) {
       "/api/v1/invitations/:token",
       returnResult(async (req) => {
         return await getInvitationByToken(req.params.token);
+      })
+    )
+    .post(
+      "/api/v1/invitations/:token/reject",
+      returnResult(async (req) => {
+        await rejectInvitation(req.params.token);
       })
     );
 
