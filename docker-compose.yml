@@ -54,11 +54,9 @@ services:
       - flux_retour_cfas_network
     depends_on:
       - mongodb
-      - redis
       - clamav
     environment:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
-      - FLUX_RETOUR_CFAS_REDIS_URI=redis://redis:6379
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
       - FLUX_RETOUR_CFAS_SENTRY_DSN=https://2c67929155a24fe2bdc16f61a67dab8e@o4504570758561792.ingest.sentry.io/4504570802798592
 
@@ -74,11 +72,9 @@ services:
       - flux_retour_cfas_network
     depends_on:
       - mongodb
-      - redis
       - clamav
     environment:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
-      - FLUX_RETOUR_CFAS_REDIS_URI=redis://redis:6379
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
       - FLUX_RETOUR_CFAS_SENTRY_DSN=https://2c67929155a24fe2bdc16f61a67dab8e@o4504570758561792.ingest.sentry.io/4504570802798592
 
@@ -102,16 +98,6 @@ services:
       interval: 60s
       retries: 3
       start_period: 120s
-
-  redis:
-    image: redis:7.0.4-alpine
-    # Redis will save the dataset to disk every 60 seconds if at least 1 change occured
-    # https://redis.io/docs/manual/persistence/#snapshotting
-    command: redis-server --save 60 1 --loglevel warning
-    container_name: flux_retour_cfas_redis
-    mem_limit: 512m
-    networks:
-      - flux_retour_cfas_network
 
 networks:
   flux_retour_cfas_network:

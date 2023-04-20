@@ -1,26 +1,32 @@
-import { stringify } from "safe-stable-stringify";
+import logger from "../logger";
+
+let cache: { [key: string]: Promise<any> } = {};
 
 /**
- * It takes a route and a set of filters and returns a string that uniquely identifies the route and
- * filters
- * @param route - The route that we want to cache.
- * @param filters - an object containing the filters that are applied to the route
- * @returns A string that is the route and the filters.
+ * Met en cache le résultat d'une fonction.
  */
+export async function tryCachedExecution<T>(
+  cacheKey: string,
+  expiration: number,
+  serviceFunc: () => Promise<T>
+): Promise<T> {
+  let cachedResult: Promise<T> = cache[cacheKey];
+  if (!cachedResult) {
+    logger.debug({ cacheKey, expiration }, "set cache");
+    cachedResult = cache[cacheKey] = serviceFunc();
 
-export const getCacheKeyForRoute = (route, filters) => {
-  // we use json-stringify-deterministic to make sure that {a: 1, b: 2} stringified is the same as {b: 2, a: 1}
-  return `${route}:${stringify(filters)}`;
-};
-
-// would be simpler to put this helper function into the cache structure
-export async function tryCachedExecution(cache: any, cacheKey: string, serviceFunc: () => Promise<any> | any) {
-  const cachedResult = await cache.get(cacheKey);
-  if (cachedResult) {
-    return JSON.parse(cachedResult);
-  } else {
-    const result = await serviceFunc();
-    await cache.set(cacheKey, JSON.stringify(result));
-    return result;
+    // invalidate the cache after some time
+    setTimeout(() => {
+      logger.debug({ cacheKey, expiration }, "clear cache");
+      delete cache[cacheKey];
+    }, expiration);
   }
+  return await cachedResult;
+}
+
+/**
+ * Vide toutes les entrées du cache.
+ */
+export function clearCache() {
+  cache = {};
 }

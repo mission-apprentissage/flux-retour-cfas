@@ -4,7 +4,7 @@ import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb }
 import logger from "../common/logger.js";
 import { jobEventStatuts } from "../common/constants/jobsConstants.js";
 import { modelDescriptors } from "../common/model/collections.js";
-import createGlobalServices, { cache } from "../services.js";
+import createGlobalServices from "../services.js";
 import config from "../config.js";
 import { createJobEvent, updateJobEvent } from "../common/actions/jobEvents.actions.js";
 
@@ -28,8 +28,6 @@ const exit = async (rawError) => {
       console.error(error);
     });
   }, 500);
-
-  await cache.quit();
 
   process.exitCode = error ? 1 : 0;
 };

@@ -15,8 +15,6 @@ services:
   server:
     environment:
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
-    volumes:
-      - /opt/flux-retour-cfas/data/server:/data
 
   mongodb:
     command: mongod --auth
@@ -27,10 +25,6 @@ services:
       - /opt/flux-retour-cfas/.overrides/mongodb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
     # ports:
     #   - "127.0.0.1:27017:27017"
-
-  redis:
-    volumes:
-      - /opt/flux-retour-cfas/data/redis:/data
 
   metabase:
     image: metabase/metabase:v0.45.3
@@ -55,10 +49,10 @@ services:
     restart: unless-stopped
     container_name: nodeexporter
     command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro

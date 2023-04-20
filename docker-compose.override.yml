@@ -35,7 +35,6 @@ services:
     volumes:
       - /app/node_modules/@esbuild/ # exclus du mount et (re)-installer dans le Dockerfile pour avoir le bon driver
       - ./server:/app:z # Allows source folders to be watched
-      - flux_retour_cfas_server_data:/data:z
     environment:
       - FLUX_RETOUR_CFAS_ENV=dev
       - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
@@ -55,7 +54,6 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./server:/app:z # Allows source folders to be watched
-      - flux_retour_cfas_server_data:/data:z
     environment:
       - FLUX_RETOUR_CFAS_ENV=dev
       - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
@@ -97,12 +95,6 @@ services:
     depends_on:
       - mongodb
 
-  redis:
-    ports:
-      - 6379:6379
-    volumes:
-      - flux_retour_cfas_redis_data:/data
-
 volumes:
   flux_retour_cfas_mongodb_data:
     driver: local
@@ -110,9 +102,3 @@ volumes:
   flux_retour_cfas_nginx_data:
     driver: local
     name: flux_retour_cfas_nginx_data
-  flux_retour_cfas_server_data:
-    driver: local
-    name: flux_retour_cfas_server_data
-  flux_retour_cfas_redis_data:
-    driver: local
-    name: flux_retour_cfas_redis_data
