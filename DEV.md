@@ -81,7 +81,7 @@ yarn --cwd server imports
 
 ### Seulement sur les environnements de test
 
-- Un serveur SMTP mailHog \_défini dans le service `smtp` du docker-compose.override.
+- Un serveur SMTP Mailpit \_défini dans le service `smtp` du docker-compose.override.
 
 ### Serveur Nodes & Nginx - Reverse Proxy
 
@@ -92,7 +92,7 @@ Le serveur Web Node Express utilise le port 5000.
 Dans la configuration de nginx, on fait référence au fichier `/reverse_proxy/app/nginx/conf.d/locations/api.inc` qui définir la gestion de l'API Node Express.
 Dans la configuration de nginx, on fait référence au fichier `/reverse_proxy/app/nginx/conf.d/locations/ui.inc` qui définir la gestion de l'UI React.
 Dans la configuration des websocket, on fait référence au fichier `/reverse_proxy/app/nginx/conf.d/locations/ws.inc` qui définir la gestion de socket.io.
-Dans la configuration de smtp, on fait référence au fichier `/reverse_proxy/app/nginx/conf.d/locations/smtp.inc` qui définir la gestion de MailHog.
+Dans la configuration de smtp, on fait référence au fichier `/reverse_proxy/app/nginx/conf.d/locations/smtp.inc` qui définir la gestion de Mailpit.
 Dans la configuration de metabase, on fait référence au fichier `/reverse_proxy/app/nginx/conf.d/locations/metabase.inc` qui définir la gestion de Metabase.
 
 ### Base de données MongoDb
@@ -163,7 +163,7 @@ Il est possible de tester en local le server express via `http://localhost/api`
 
 ## Mailer
 
-Le server SMTP de test mailhog est utilisé localement pour prendre en charge l'envoi d'emails.
+Le server SMTP de test [Mailpit](https://github.com/axllent/mailpit) est utilisé localement pour prendre en charge l'envoi d'emails.
 
 Web UI: http://localhost/smtp
 
