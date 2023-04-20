@@ -42,6 +42,17 @@ export const fetchOrganismes = async () => {
 };
 
 /**
+ * Récupération des uais de la base ACCE du référentiel
+ * Par défaut on récupère 50000 éléments par page
+ */
+export const fetchUaisAcce = async () => {
+  const { data } = await axiosClient.get("/uais", {
+    params: { items_par_page: 50000 },
+  });
+  return data;
+};
+
+/**
  * @param {*} siret
  * @returns {Promise<import("./@types/MnaOrganisme.js").default|null>}
  */

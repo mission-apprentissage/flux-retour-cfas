@@ -28,6 +28,7 @@ import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model"
 import uploadsModelDescriptor from "./uploads.model/uploads.model";
 import usersModelDescriptor from "./users.model";
 import usersMigrationModelDescriptor from "./usersMigration.model";
+import { UaisAcceReferentiel } from "./@types/UaisAcceReferentiel.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
@@ -56,6 +57,8 @@ export const invitationsDb = () => getDbCollection<Invitation>(invitationsModelD
 export const organisationsDb = () => getDbCollection<Organisation>(organisationsModelDescriptor.collectionName);
 export const organismesReferentielDb = () =>
   getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
+export const uaisAccesReferentielDb = () =>
+  getDbCollection<UaisAcceReferentiel>(UaisAcceReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
   getDbCollection<MaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);

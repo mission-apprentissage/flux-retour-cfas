@@ -194,7 +194,7 @@ program
   .description("Remplissage des organismes du référentiel")
   .action(async (_, options) =>
     runScript(async () => {
-      return hydrateOrganismesReferentiel();
+      return hydrateFromReferentiel();
     }, options._name)
   );
 
