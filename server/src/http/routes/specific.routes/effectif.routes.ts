@@ -12,6 +12,7 @@ import { algoUAI } from "@/common/utils/uaiUtils.js";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances.js";
 import { CODE_POSTAL_REGEX } from "@/common/constants/organisme.js";
 import { legacyRequireManageEffectifsPermissionMiddleware } from "@/http/middlewares/legacyRequireManageEffectifsPermissionMiddleware.js";
+import { compactObject } from "@/common/utils/miscUtils.js";
 
 const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
@@ -185,25 +186,6 @@ export default () => {
   //   });
   //   return res.json(effectif);
   // });
-
-  const compactObject = (val) => {
-    const data = Array.isArray(val) ? val.filter(Boolean) : val;
-    return Object.keys(data).reduce(
-      (acc, key) => {
-        const value = data[key];
-        if (!(value === null || value === undefined))
-          acc[key] = typeof value === "object" ? compactObject(value) : value;
-        if (
-          acc[key] === null ||
-          acc[key] === undefined ||
-          (acc[key] instanceof Object && !Object.keys(acc[key]).length)
-        )
-          delete acc[key];
-        return acc;
-      },
-      Array.isArray(val) ? [] : {}
-    );
-  };
 
   router.put("/:id", async ({ body, params }, res) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

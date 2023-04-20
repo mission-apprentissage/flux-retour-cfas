@@ -12,7 +12,7 @@ import { AuthContext } from "../model/internal/AuthContext.js";
 import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions.js";
 import { Effectif } from "../model/@types/Effectif.js";
 import { EffectifsQueue } from "../model/@types/EffectifsQueue.js";
-import { stripEmptyFields } from "../utils/miscUtils.js";
+import { compactObject, stripEmptyFields } from "../utils/miscUtils.js";
 
 /**
  * Méthode de build d'un effectif
@@ -70,16 +70,6 @@ export const validateEffectifObject = (effectif) => {
   // Vérification si erreurs de validation sur l'effectif
   const effectifValidationErrors = validateEffectif(effectif, true);
 
-  const compactObject = (val) => {
-    const data = Array.isArray(val) ? val.filter(Boolean) : val;
-    return Object.keys(data).reduce((acc, key) => {
-      const value = data[key];
-      if (!(value === undefined)) acc[key] = typeof value === "object" ? compactObject(value) : value;
-      if (acc[key] === undefined) delete acc[key];
-      return acc;
-    }, val);
-  };
-
   let effectifMandate = cloneDeep(effectif);
   for (const validationError of effectifValidationErrors) {
     set(effectifMandate, validationError.fieldName, undefined);
@@ -111,7 +101,6 @@ export const validateEffectifObject = (effectif) => {
   }
 
   // TODO Suppression des erreurs sur date de naissance si nécéssaire
-
   return { ...compactObject(effectifMandate), validation_errors: effectifValidationErrors };
 };
 

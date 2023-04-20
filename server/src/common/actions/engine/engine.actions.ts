@@ -16,6 +16,15 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
 import { Effectif } from "@/common/model/@types/Effectif.js";
 import { ObjectId } from "mongodb";
 
+const dateConverter = (date) => {
+  // TODO If more than year 4000 error
+  if (date instanceof Date) return jsDateToLuxon(date).toISO();
+  else {
+    const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
+    return date_ISO ?? date;
+  }
+};
+
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
  * a partir d'un nouveau couple statut / date_metier
@@ -101,15 +110,6 @@ export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: O
     .validateAsync(effectifData, { abortEarly: false });
 
   let convertedEffectif = cloneDeep(effectifData);
-
-  const dateConverter = (date) => {
-    // TODO If more than year 4000 error
-    if (date instanceof Date) return jsDateToLuxon(date).toISO();
-    else {
-      const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
-      return date_ISO ?? date;
-    }
-  };
 
   if (effectifData.apprenant.date_de_naissance) {
     convertedEffectif.apprenant.date_de_naissance = dateConverter(effectifData.apprenant.date_de_naissance);
