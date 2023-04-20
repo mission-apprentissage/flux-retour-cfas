@@ -13,6 +13,7 @@ import {
 import { TETE_DE_RESEAUX } from "../../constants/networks.js";
 import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../../constants/territoires.js";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme.js";
+import { Effectif } from "../@types/Effectif.js";
 
 const collectionName = "effectifs";
 
@@ -168,7 +169,7 @@ export function defaultValuesEffectif({ lockAtCreate = false }) {
 }
 
 // TODO Extra validation
-export function validateEffectif(props, getErrors = false) {
+export function validateEffectif(props: Effectif, getErrors = false) {
   if (getErrors) {
     const errorsApprenant = validateApprenant(props.apprenant, getErrors);
     const errorsFormation = validateFormationEffectif(props.formation, getErrors);

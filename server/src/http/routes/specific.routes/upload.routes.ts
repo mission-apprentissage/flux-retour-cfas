@@ -342,11 +342,10 @@ export default {
       if (typeCodeDiplome === "RNCP" && data.formation?.rncp) {
         formationFound = await getFormationWithRNCP(data.formation?.rncp, { cfd: 1 });
         data.formation.cfd = formationFound?.cfd ?? "Erreur";
-      } else if (data.formation?.rncp) {
+      } else if (data.formation?.cfd) {
         formationFound = await getFormationWithCfd(data.formation.cfd, { rncps: 1 });
         data.formation.rncp = formationFound?.rncps?.[0] ?? data.formation?.rncp;
       }
-
       const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
         organisme_id,
         source: document?.document_id.toString(),

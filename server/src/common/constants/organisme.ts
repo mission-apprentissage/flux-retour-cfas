@@ -11,7 +11,7 @@ export const CFD_REGEX_PATTERN = "^[A-Z0-9]{8}$";
 export const CODE_INSEE_PATTERN = "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$";
 export const CODE_POSTAL_PATTERN = "^[0-9]{5}$";
 export const INE_REGEX_PATTERN = "^[0-9]{9}[A-Z]{2}$";
-export const RNCP_REGEX_PATTERN = "^(RNCP)[0-9]{2,5}$";
+export const RNCP_REGEX_PATTERN = "^(RNCP)?[0-9]{2,5}$";
 export const SIRET_REGEX_PATTERN = "^[0-9]{14}$";
 export const UAI_REGEX_PATTERN = "^[0-9]{7}[a-zA-Z]$";
 

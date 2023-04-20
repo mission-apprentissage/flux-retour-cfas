@@ -273,8 +273,7 @@ const Televersements = ({ organisme }) => {
     setStep("import");
     resetServerEvent();
     await _post(`/api/v1/organismes/${organisme._id}/upload/import`, {});
-    window.location.href = `${router.asPath.replace("/televersement", "")}`;
-    // router.push(`${router.asPath.replace("/televersement", "")}`);
+    router.push(`${router.asPath.replace("/televersement", "").replace("/fichier", "")}`);
     //onDocumentsChanged(documents, type_document);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organisme._id, router]);

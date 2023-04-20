@@ -21,7 +21,7 @@ export const REQUIRED_KEYS = {
   },
 };
 
-export const ALL_KEYS = {
+export const OPTIONAL_KEYS = {
   identifiant_unique_apprenant: {
     label: "Identifiant unique de l'apprenant(e)",
     value: "identifiant_unique_apprenant",
@@ -245,7 +245,7 @@ export function getMapping(inputKeys: string[]) {
     requireKeys: REQUIRED_KEYS,
     inputKeys,
     // représente toutes les clés TDB de mapping
-    outputKeys: ALL_KEYS,
+    outputKeys: OPTIONAL_KEYS,
     numberOfNotRequiredFieldsToMap: 0,
     whichOneIsTheSmallest: "out",
   };

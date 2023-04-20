@@ -7,6 +7,7 @@ import { siretSchema } from "../../../utils/validationUtils.js";
 import { adresseSchema } from "../../json-schema/adresseSchema.js";
 import { object, string, date, integer, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes.js";
 import { CODE_POSTAL_PATTERN, SIRET_REGEX_PATTERN } from "@/common/constants/organisme.js";
+import { Effectif } from "../../@types/Effectif.js";
 
 export const apprenantSchema = object(
   {
@@ -226,8 +227,8 @@ export function defaultValuesApprenant() {
 }
 
 // Extra validation
-export function validateApprenant({ contrats, ...props }, getErrors = false) {
-  const contratsValidation = contrats.map((contrat, i) => {
+export function validateApprenant({ contrats, ...props }: Partial<Effectif["apprenant"]>, getErrors = false) {
+  const contratsValidation = contrats?.map((contrat, i) => {
     return schemaValidation({
       entity: contrat,
       schema: apprenantSchema.properties.contrats.items,

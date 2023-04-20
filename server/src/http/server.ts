@@ -457,16 +457,13 @@ function setupRoutes(app: Application) {
               .Router()
               .put(
                 "/setDocumentType",
-                validateRequestMiddleware({
-                  body: uploadUpdateDocumentSchema(),
-                }),
+                validateRequestMiddleware({ body: uploadUpdateDocumentSchema() }),
                 returnResult(async (req, res) => {
                   return upload.setDocumentType(res.locals.organismeId, res.locals.documentId, req.body.type_document);
                 })
               )
               .delete(
                 "",
-                validateRequestMiddleware({ params: objectIdSchema("document_id") }),
                 returnResult(async (req, res) => {
                   return upload.deleteUploadedDocument(res.locals.organismeId, res.locals.documentId);
                 })
