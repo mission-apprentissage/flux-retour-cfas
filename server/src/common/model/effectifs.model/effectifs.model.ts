@@ -50,6 +50,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
   [{ date_de_naissance: 1 }, { name: "date_de_naissance" }],
+  [{ "formation.cfd": 1 }, { name: "formation.cfd" }],
   [
     { "apprenant.nom": 1 },
     {
