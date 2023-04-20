@@ -119,6 +119,7 @@ atlassian-ide-plugin.xml
 .webpack
 
 build/
+.build/
 packaged.yaml
 /public/stack.json
 .DS_Store
