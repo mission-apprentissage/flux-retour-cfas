@@ -1,6 +1,6 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
 import { Box, Button, HStack, Input, Text } from "@chakra-ui/react";
+import PropTypes from "prop-types";
+import { useState } from "react";
 
 import { fetchSearchOrganismes } from "@/common/api/tableauDeBord";
 import { QUERY_KEYS } from "@/common/constants/queryKeys";

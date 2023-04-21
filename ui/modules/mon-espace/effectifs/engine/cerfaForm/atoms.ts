@@ -1,7 +1,9 @@
 import { selector } from "recoil";
-// import { dossierAtom } from "../atoms";
+
 import { getFormStatus } from "./completion";
-import { cerfaAtom, valuesSelector } from "../formEngine/atoms";
+
+// import { dossierAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+import { cerfaAtom, valuesSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
 
 export const atoms = selector({
   key: "cerfaFormCompletionSelector",

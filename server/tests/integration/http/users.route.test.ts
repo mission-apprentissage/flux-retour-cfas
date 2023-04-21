@@ -2,8 +2,8 @@
 // import { ObjectId } from "mongodb";
 // import sinon from "sinon";
 
-// import { startServer, createAdminUser, createSimpleUser } from "../../utils/testUtils.js";
-// import { createUser } from "../../../src/common/actions/users.actions.js";
+// import { startServer, createAdminUser, createSimpleUser } from "@tests/utils/testUtils";
+// import { createUser } from "@/common/actions/users.actions";
 
 // const ADMIN_USERS_ENDPOINT = "/api/v1/admin/users";
 

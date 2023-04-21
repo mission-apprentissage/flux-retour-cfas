@@ -1,5 +1,5 @@
-import React from "react";
 import { Box, Text, UnorderedList, ListItem } from "@chakra-ui/react";
+import React from "react";
 
 const InformationBlock = (props) => (
   <Box {...props} p={10}>

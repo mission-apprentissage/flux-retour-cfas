@@ -1,9 +1,11 @@
 import nock from "nock";
-import { startAndConnectMongodb, stopMongodb } from "./mongoUtils.js";
-import { nockExternalApis } from "./nockApis/index.js";
-import { createIndexes } from "../../src/common/model/indexes/index.js";
-import { clearAllCollections, configureDbSchemaValidation } from "../../src/common/mongodb.js";
-import { modelDescriptors } from "../../src/common/model/collections.js";
+
+import { startAndConnectMongodb, stopMongodb } from "./mongoUtils";
+import { nockExternalApis } from "./nockApis/index";
+
+import { modelDescriptors } from "@/common/model/collections";
+import { createIndexes } from "@/common/model/indexes/index";
+import { clearAllCollections, configureDbSchemaValidation } from "@/common/mongodb";
 
 const LOCAL_HOST = "127.0.0.1";
 const MONGODB_MEMORY_SERVER_DL_HOST = "fastdl.mongodb.org";

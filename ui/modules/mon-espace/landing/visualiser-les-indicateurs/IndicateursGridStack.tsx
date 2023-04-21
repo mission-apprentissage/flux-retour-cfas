@@ -2,10 +2,11 @@ import { Grid, Skeleton } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import EffectifCard from "@/components/EffectifCard/EffectifCard";
+import { indicateursEffectifsSchema } from "./indicateursEffectifsSchema";
+
 import { isDateFuture } from "@/common/utils/dateUtils";
 import { pluralize } from "@/common/utils/stringUtils";
-import { indicateursEffectifsSchema } from "./indicateursEffectifsSchema";
+import EffectifCard from "@/components/EffectifCard/EffectifCard";
 
 const GRID_TEMPLATE_COLUMNS = ["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"];
 

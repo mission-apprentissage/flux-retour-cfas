@@ -1,6 +1,7 @@
 import { CollectionInfo, Document, MongoClient } from "mongodb";
 import omitDeep from "omit-deep";
-import logger from "./logger.js";
+
+import logger from "@/common/logger";
 
 let mongodbClient: MongoClient;
 

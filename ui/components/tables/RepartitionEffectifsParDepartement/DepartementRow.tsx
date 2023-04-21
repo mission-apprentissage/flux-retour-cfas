@@ -2,8 +2,9 @@ import { Box, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import NumberValueCell from "../NumberValueCell";
 import CfasRows from "./CfasRows";
+
+import NumberValueCell from "@/components/tables/NumberValueCell";
 
 const DepartementRow = ({ departementCode, departementNom, effectifs, isPeriodInvalid }) => {
   const [isOpen, setIsOpen] = useState(false);

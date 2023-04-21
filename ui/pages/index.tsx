@@ -1,13 +1,13 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Container } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
-import Page from "@/components/Page/Page";
 import { OrganisationType } from "@/common/internal/Organisation";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Page from "@/components/Page/Page";
+import useAuth from "@/hooks/useAuth";
 import DashboardOrganisme from "@/modules/mon-espace/landing/DashboardOrganisme";
 import DashboardTransverse from "@/modules/mon-espace/landing/DashboardTransverse";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import useAuth from "@/hooks/useAuth";
 import PublicLandingPage from "@/modules/PublicLandingPage";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });

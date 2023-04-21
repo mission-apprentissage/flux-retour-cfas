@@ -1,12 +1,13 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import TerritoiresList from "./TerritoireList";
+
+import { REGIONS_SORTED, DEPARTEMENTS_SORTED, TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
-import TerritoiresList from "./TerritoireList";
 import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import { REGIONS_SORTED, DEPARTEMENTS_SORTED, TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
 
 const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerritoireReset, variant = "primary" }) => {
   const [isOpen, setIsOpen] = useState(false);

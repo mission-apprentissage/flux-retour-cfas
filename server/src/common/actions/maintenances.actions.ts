@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
-import { maintenanceMessageDb } from "../model/collections.js";
-import { defaultValuesMaintenanceMessage } from "../model/maintenanceMessages.model.js";
+import { maintenanceMessageDb } from "@/common/model/collections";
+import { defaultValuesMaintenanceMessage } from "@/common/model/maintenanceMessages.model";
 
 /**
  * Méthode de création d'un message de maintenance

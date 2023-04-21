@@ -1,6 +1,6 @@
 import { Box, Button, List } from "@chakra-ui/react";
-import React, { useState } from "react";
 import NavLink from "next/link";
+import React, { useState } from "react";
 
 import FilterOption from "@/components/FilterOption/FilterOption";
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";

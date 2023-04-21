@@ -1,13 +1,13 @@
 import Joi from "joi";
 import { flattenDeep } from "lodash-es";
 
-import { CODES_STATUT_APPRENANT } from "../../../constants/dossierApprenant.js";
-import { schemaValidation } from "../../../utils/schemaUtils.js";
-import { siretSchema } from "../../../utils/validationUtils.js";
-import { adresseSchema } from "../../json-schema/adresseSchema.js";
-import { object, string, date, integer, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes.js";
-import { CODE_POSTAL_PATTERN, SIRET_REGEX_PATTERN } from "@/common/constants/organisme.js";
-import { Effectif } from "../../@types/Effectif.js";
+import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
+import { CODE_POSTAL_PATTERN, SIRET_REGEX_PATTERN } from "@/common/constants/organisme";
+import { Effectif } from "@/common/model/@types/Effectif";
+import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
+import { object, string, date, integer, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
+import { schemaValidation } from "@/common/utils/schemaUtils";
+import { siretSchema } from "@/common/utils/validationUtils";
 
 export const apprenantSchema = object(
   {
@@ -48,8 +48,8 @@ export const apprenantSchema = object(
     }),
     courriel: string({ description: "Adresse mail de contact de l'apprenant" }),
     telephone: string({
-      description: `Dans le cas d'un numéro français, il n'est pas 
-      nécessaire de saisir le "0" car l'indicateur pays est 
+      description: `Dans le cas d'un numéro français, il n'est pas
+      nécessaire de saisir le "0" car l'indicateur pays est
       pré-renseigné.
       Il doit contenir 9 chiffres après l'indicatif.`,
       example: "+33908070605",
@@ -150,8 +150,8 @@ export const apprenantSchema = object(
       },
       courriel: string({ description: "Adresse mail de contact du representant légal" }),
       telephone: string({
-        description: `Dans le cas d'un numéro français, il n'est pas 
-      nécessaire de saisir le "0" car l'indicateur pays est 
+        description: `Dans le cas d'un numéro français, il n'est pas
+      nécessaire de saisir le "0" car l'indicateur pays est
       pré-renseigné.
       Il doit contenir 9 chiffres après l'indicatif.`,
         example: "+33908070605",

@@ -1,10 +1,11 @@
+import { strict as assert } from "assert";
+
+import { AxiosInstance } from "axiosist";
 import jwt from "jsonwebtoken";
 
-import { strict as assert } from "assert";
-import config from "../../../../src/config.js";
-import { initTestApp } from "../../../utils/testUtils.js";
-import { createUserLegacy } from "../../../../src/common/actions/legacy/users.legacy.actions.js";
-import { AxiosInstance } from "axiosist";
+import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
+import config from "@/config";
+import { initTestApp } from "@tests/utils/testUtils";
 
 let httpClient: AxiosInstance;
 

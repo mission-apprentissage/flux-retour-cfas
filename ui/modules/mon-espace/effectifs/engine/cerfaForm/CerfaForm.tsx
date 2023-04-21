@@ -1,15 +1,16 @@
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack, Text } from "@chakra-ui/react";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack, Text } from "@chakra-ui/react";
 
 import { EffectifApprenant } from "./blocks/apprenant/EffectifApprenant";
-import { PlainArrowRight } from "../../../../../theme/components/icons/PlainArrowRight";
-import EffectifStatuts from "./blocks/statuts/EffectifStatuts";
 import { ApprenantContrats } from "./blocks/contrats/EffectifContrats";
 import { EffectifFormation } from "./blocks/formation/EffectifFormation";
-import { effectifStateSelector, valuesSelector } from "../formEngine/atoms";
-import { ErrorPill } from "../../../../../theme/components/icons/ErrorPill";
-import { effectifIdAtom } from "../atoms";
+import EffectifStatuts from "./blocks/statuts/EffectifStatuts";
+
+import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+import { effectifStateSelector, valuesSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
+import { ErrorPill } from "@/theme/components/icons/ErrorPill";
+import { PlainArrowRight } from "@/theme/components/icons/PlainArrowRight";
 
 const useOpenAccordionToLocation = () => {
   const scrolledRef = useRef(false);
@@ -39,7 +40,7 @@ const useOpenAccordionToLocation = () => {
   return { accordionIndex, setAccordionIndex };
 };
 
-// eslint-disable-next-line react/display-name
+// eslint-disable-next-line react/display-name, @typescript-eslint/no-unused-vars
 export const CerfaForm = memo(({ modeSifa = false }: { modeSifa: boolean }) => {
   const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
 

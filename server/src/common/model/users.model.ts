@@ -1,5 +1,6 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } from "./json-schema/jsonSchemaTypes.js";
+
+import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "users";
 

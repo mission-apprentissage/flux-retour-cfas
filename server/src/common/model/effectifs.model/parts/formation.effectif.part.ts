@@ -1,7 +1,8 @@
 import Joi from "joi";
-import { schemaValidation } from "../../../utils/schemaUtils.js";
-import { object, string, integer, arrayOf, objectId, date } from "../../json-schema/jsonSchemaTypes.js";
-import { CFD_REGEX_PATTERN, RNCP_REGEX_PATTERN } from "@/common/constants/organisme.js";
+
+import { CFD_REGEX_PATTERN, RNCP_REGEX_PATTERN } from "@/common/constants/organisme";
+import { object, string, integer, arrayOf, objectId, date } from "@/common/model/json-schema/jsonSchemaTypes";
+import { schemaValidation } from "@/common/utils/schemaUtils";
 
 export const formationEffectifSchema = object(
   {

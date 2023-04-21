@@ -1,6 +1,6 @@
-import { createUserLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
-import logger from "../../common/logger.js";
-import { apiRoles } from "../../common/roles.js";
+import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
+import logger from "@/common/logger";
+import { apiRoles } from "@/common/roles";
 
 /**
  * Fonction de création d'un compte utilisateur

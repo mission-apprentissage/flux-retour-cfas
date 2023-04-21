@@ -1,11 +1,8 @@
 import { strict as assert } from "assert";
+
 import omit from "lodash.omit";
 import nock from "nock";
 
-import { nockGetCfdInfo } from "../../../utils/nockApis/nock-tablesCorrespondances.js";
-import { dataForGetCfdInfo } from "../../../data/apiTablesDeCorrespondances.js";
-import { nockGetMetiersByCfd } from "../../../utils/nockApis/nock-Lba.js";
-import { formationsDb, effectifsDb, organismesDb } from "../../../../src/common/model/collections.js";
 import {
   createFormation,
   existsFormation,
@@ -13,11 +10,15 @@ import {
   getFormationWithCfd,
   getNiveauFormationFromLibelle,
   searchFormations,
-} from "../../../../src/common/actions/formations.actions.js";
-import { createSampleEffectif } from "../../../data/randomizedSample.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/organisme.js";
-import { Organisme } from "../../../../src/common/model/@types/Organisme.js";
-import { Formation } from "../../../../src/common/model/@types/Formation.js";
+} from "@/common/actions/formations.actions";
+import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
+import { Formation } from "@/common/model/@types/Formation";
+import { Organisme } from "@/common/model/@types/Organisme";
+import { formationsDb, effectifsDb, organismesDb } from "@/common/model/collections";
+import { dataForGetCfdInfo } from "@tests/data/apiTablesDeCorrespondances";
+import { createSampleEffectif } from "@tests/data/randomizedSample";
+import { nockGetMetiersByCfd } from "@tests/utils/nockApis/nock-Lba";
+import { nockGetCfdInfo } from "@tests/utils/nockApis/nock-tablesCorrespondances";
 
 describe("Tests des actions Formations", () => {
   describe("existsFormation", () => {

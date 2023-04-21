@@ -1,5 +1,5 @@
-import logger from "../../common/logger.js";
-import { createIndexes, dropIndexes } from "../../common/model/indexes/index.js";
+import logger from "@/common/logger";
+import { createIndexes, dropIndexes } from "@/common/model/indexes/index";
 
 export const recreateIndexes = async ({ drop } = { drop: false }) => {
   if (drop) {

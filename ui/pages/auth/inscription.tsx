@@ -1,8 +1,8 @@
-import React from "react";
 import { FormControl, FormLabel, Radio, RadioGroup, VStack } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import React from "react";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useRouter } from "next/router";
 import { categoriesCompteInscription } from "@/modules/auth/inscription/categories";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
 

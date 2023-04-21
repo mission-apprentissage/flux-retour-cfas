@@ -1,8 +1,8 @@
-import React from "react";
 import Head from "next/head";
+import React from "react";
 
-import { Cgu } from "@/components/legal/Cgu";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import { Cgu } from "@/components/legal/Cgu";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 

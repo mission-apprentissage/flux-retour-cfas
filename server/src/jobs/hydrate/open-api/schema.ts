@@ -1,9 +1,9 @@
-import { z } from "zod";
 import { OpenAPIRegistry, OpenAPIGenerator, RouteConfig } from "@asteasolutions/zod-to-openapi";
+import { z } from "zod";
 
-import loginSchemaLegacy from "../../../common/validation/loginSchemaLegacy.js";
-import dossierApprenantSchema from "../../../common/validation/dossierApprenantSchemaV1V2Zod.js";
-import dossierApprenantSchemaV3 from "../../../common/validation/dossierApprenantSchemaV3.js";
+import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2Zod";
+import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
+import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 
 const dossierApprenantSchemaWithErrors = dossierApprenantSchema().extend({
   validation_errors: z

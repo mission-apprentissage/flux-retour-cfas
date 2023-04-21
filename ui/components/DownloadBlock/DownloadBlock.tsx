@@ -2,7 +2,7 @@ import { Box, Center, Flex, Spinner, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import useDownloadClick from "../../hooks/useDownloadClick";
+import useDownloadClick from "@/hooks/useDownloadClick";
 
 const DownloadBlock = ({ title, description, fileName, getFile }) => {
   const { onClick, isLoading, error } = useDownloadClick(getFile, fileName);

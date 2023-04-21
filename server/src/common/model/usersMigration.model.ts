@@ -1,8 +1,10 @@
 import Joi from "joi";
-import { object, objectId, string, boolean, any, arrayOf, date } from "./json-schema/jsonSchemaTypes.js";
-import { schemaValidation } from "../utils/schemaUtils.js";
-import { passwordSchema } from "../utils/validationUtils.js";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
+import { object, objectId, string, boolean, any, arrayOf, date } from "./json-schema/jsonSchemaTypes";
+
+import { schemaValidation } from "@/common/utils/schemaUtils";
+import { passwordSchema } from "@/common/utils/validationUtils";
 
 export const collectionName = "usersMigration";
 

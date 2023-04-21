@@ -1,10 +1,8 @@
+import Boom from "boom";
 import express from "express";
 import Joi from "joi";
 import passport from "passport";
-import Boom from "boom";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";
-
-import config from "../../config.js";
 
 import {
   checkIfEmailExists,
@@ -13,7 +11,8 @@ import {
   markEmailAsFailed,
   markEmailAsDelivered,
   renderEmail,
-} from "../../common/actions/emails.actions.js";
+} from "@/common/actions/emails.actions";
+import config from "@/config";
 
 function checkWebhookKey() {
   passport.use(

@@ -1,4 +1,3 @@
-import React, { useCallback, useMemo, useState } from "react";
 import {
   Box,
   HStack,
@@ -13,16 +12,15 @@ import {
   Link,
   UnorderedList,
 } from "@chakra-ui/react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRecoilValue } from "recoil";
-import queryString from "query-string";
 
 import { _delete, _postFile } from "@/common/httpClient";
-import { Bin, DownloadLine, File } from "@/theme/components/icons";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import useServerEvents from "@/hooks/useServerEvents";
-
-import { useDocuments } from "../hooks/useDocuments";
+import { useDocuments } from "@/modules/mon-espace/effectifs/engine/TransmissionFichier/hooks/useDocuments";
+import { Bin, DownloadLine, File } from "@/theme/components/icons";
 
 const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
 const MAX_FILE_SIZE = 10_485_760; // 10MB

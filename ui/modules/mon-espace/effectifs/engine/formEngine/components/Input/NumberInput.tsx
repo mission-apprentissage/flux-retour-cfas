@@ -5,8 +5,8 @@ import {
   NumberInputField,
   NumberInputStepper,
 } from "@chakra-ui/react";
-
 import React, { useEffect, useState } from "react";
+
 import { InputWrapper } from "./InputWrapper";
 
 export const NumberInput = (props: any) => {

@@ -1,13 +1,14 @@
+import debounce from "lodash.debounce";
+import setWith from "lodash.setwith";
 import { useEffect, useRef } from "react";
 import { atom, useRecoilCallback, useRecoilValue, useSetRecoilState } from "recoil";
-import { isEmptyValue } from "../utils/isEmptyValue";
-import { getValues } from "../utils/getValues";
-import { apiService } from "../../services/api.service";
-import debounce from "lodash.debounce";
-import { effectifIdAtom } from "../../atoms";
-import setWith from "lodash.setwith";
-import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
-import { effectifStateSelector } from "../atoms";
+
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+import { effectifStateSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
+import { getValues } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/getValues";
+import { isEmptyValue } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/isEmptyValue";
+import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.service";
 
 const getIsLocked = (fields: Record<string, any>) => {
   if (!fields) return undefined;

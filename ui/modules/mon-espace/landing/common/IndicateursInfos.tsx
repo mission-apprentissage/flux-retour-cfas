@@ -1,10 +1,11 @@
-import React from "react";
 import { Stack, Text } from "@chakra-ui/react";
+import React from "react";
 
+import { useSimpleFiltersContext } from "./SimpleFiltersContext";
+
+import DateWithTooltipSelector from "@/components/Filters/DateWithTooltipSelector";
 import IndicateursGridStack from "@/components/IndicateursGridStack";
 import { useFetchOrganismeIndicateurs } from "@/hooks/organismes";
-import DateWithTooltipSelector from "@/components/Filters/DateWithTooltipSelector";
-import { useSimpleFiltersContext } from "./SimpleFiltersContext";
 
 // TODO : Voir si on conserve un seul composant commun avec filtre de date + autres filtres ?
 export default function IndicateursInfos({ organismeId }: { organismeId: string }) {

@@ -1,16 +1,16 @@
-import express from "express";
 import Boom from "boom";
+import express from "express";
 import { z } from "zod";
 
-import { getAllUsers, getDetailedUserById, removeUser, updateUser } from "../../../common/actions/users.actions.js";
-import paginationShema from "../../../common/validation/paginationSchema.js";
-import searchShema from "../../../common/validation/searchSchema.js";
-import objectIdSchema from "../../../common/validation/objectIdSchema.js";
-import userSchema from "../../../common/validation/userSchema.js";
-import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
-import { getWarningOnEmail } from "../../../common/model/organisations.model.js";
-import { returnResult } from "../../middlewares/helpers.js";
-import { rejectMembre, validateMembre } from "../../../common/actions/organisations.actions.js";
+import { rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
+import { getAllUsers, getDetailedUserById, removeUser, updateUser } from "@/common/actions/users.actions";
+import { getWarningOnEmail } from "@/common/model/organisations.model";
+import objectIdSchema from "@/common/validation/objectIdSchema";
+import paginationShema from "@/common/validation/paginationSchema";
+import searchShema from "@/common/validation/searchSchema";
+import userSchema from "@/common/validation/userSchema";
+import { returnResult } from "@/http/middlewares/helpers";
+import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const listSchema = paginationShema({ defaultSort: "created_at:-1" }).merge(searchShema()).strict();
 type ListSchema = z.infer<typeof listSchema>;

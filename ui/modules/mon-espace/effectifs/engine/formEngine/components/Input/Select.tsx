@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
 import { Select as ChakraSelect } from "@chakra-ui/react";
+import React, { useMemo } from "react";
+
 import { InputWrapper } from "./InputWrapper";
 
 export const Select = (props) => {

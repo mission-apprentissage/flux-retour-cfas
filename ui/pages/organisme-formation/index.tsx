@@ -1,14 +1,14 @@
-import React, { Fragment } from "react";
-import Head from "next/head";
 import { Box, Heading, HStack, Link, Text } from "@chakra-ui/react";
+import Head from "next/head";
+import React, { Fragment } from "react";
 
 import { ERPS } from "@/common/constants/erps";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
+import LinkCard from "@/components/LinkCard/LinkCard";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import LinkCard from "@/components/LinkCard/LinkCard";
-import { Checkbox } from "@/theme/components/icons";
 import AcquisitionCfaBarGraph from "@/modules/organisme-formation/AcquisitionCfaBarGraph";
+import { Checkbox } from "@/theme/components/icons";
 
 export default function OrganismeFormation() {
   const title = "Vous êtes un organisme de formation";

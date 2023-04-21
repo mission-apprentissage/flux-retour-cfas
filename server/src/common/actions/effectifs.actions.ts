@@ -1,18 +1,19 @@
 import { cloneDeep, isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
 
-import { effectifsDb } from "../model/collections.js";
-import { defaultValuesEffectif, validateEffectif } from "../model/effectifs.model/effectifs.model.js";
-import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant.part.js";
-import { defaultValuesFormationEffectif } from "../model/effectifs.model/parts/formation.effectif.part.js";
-import { transformToInternationalNumber } from "../validation/utils/frenchTelephoneNumber.js";
-import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters.js";
-import { getOrganismeById } from "./organismes/organismes.actions.js";
-import { AuthContext } from "../model/internal/AuthContext.js";
-import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions.js";
-import { Effectif } from "../model/@types/Effectif.js";
-import { EffectifsQueue } from "../model/@types/EffectifsQueue.js";
-import { stripEmptyFields } from "../utils/miscUtils.js";
+import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions";
+import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters";
+import { getOrganismeById } from "./organismes/organismes.actions";
+
+import { Effectif } from "@/common/model/@types/Effectif";
+import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
+import { effectifsDb } from "@/common/model/collections";
+import { defaultValuesEffectif, validateEffectif } from "@/common/model/effectifs.model/effectifs.model";
+import { defaultValuesApprenant } from "@/common/model/effectifs.model/parts/apprenant.part";
+import { defaultValuesFormationEffectif } from "@/common/model/effectifs.model/parts/formation.effectif.part";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
+import { transformToInternationalNumber } from "@/common/validation/utils/frenchTelephoneNumber";
 
 /**
  * Méthode de build d'un effectif

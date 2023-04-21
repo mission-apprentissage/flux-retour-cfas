@@ -2,13 +2,14 @@ import { Box, Divider, Heading } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import CfasList from "./CfasList";
+import useOrganismeSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useCfaSearch";
+
 import InputLegend from "@/components/InputLegend/InputLegend";
 import Loading from "@/components/Loading/Loading";
 import NoResults from "@/components/NoResults/NoResults";
 import SearchInput from "@/components/SearchInput/SearchInput";
-import CfasList from "./CfasList";
-import useOrganismeSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useCfaSearch";
+import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 
 const CfaPanel = ({ value, onCfaClick, filters }) => {
   const [searchTerm, setSearchTerm] = useState("");

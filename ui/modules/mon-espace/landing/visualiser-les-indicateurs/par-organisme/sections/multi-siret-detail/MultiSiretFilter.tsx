@@ -2,9 +2,10 @@ import { Box, Heading, List, ListItem } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import { useFiltersContext } from "../../../FiltersContext";
+
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
-import { useFiltersContext } from "../../../FiltersContext";
 
 const MultiSiretFilter = ({ onSiretClick, sirets }) => {
   const [isOpen, setIsOpen] = useState(false);

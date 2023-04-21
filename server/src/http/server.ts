@@ -1,76 +1,56 @@
-import express, { NextFunction, Request, RequestHandler, Response } from "express";
 import fs from "fs";
 import path from "path";
-import passport from "passport";
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
+
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
+import bodyParser from "body-parser";
 import Boom from "boom";
-import swaggerUi from "swagger-ui-express";
-import { ObjectId } from "mongodb";
+import cookieParser from "cookie-parser";
+import express, { Application, NextFunction, Request, RequestHandler, Response } from "express";
 import listEndpoints from "express-list-endpoints";
+import Joi from "joi";
+import { ObjectId } from "mongodb";
+import passport from "passport";
+import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
-import { apiRoles } from "@/common/roles.js";
-import { logMiddleware } from "./middlewares/logMiddleware.js";
-import errorMiddleware from "./middlewares/errorMiddleware.js";
-import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
-import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
-import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware.js";
-import { authOrgMiddleware } from "./middlewares/authOrgMiddleware.js";
-
-import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
-import organismesRouter from "./routes/specific.routes/organismes.routes.js";
-import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
-import { serverEventsHandler } from "./routes/specific.routes/server-events.routes.js";
-
-import emails from "./routes/emails.routes.js";
-import auth from "./routes/user.routes/auth.routes.js";
-
+import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
+import { authOrgMiddleware } from "./middlewares/authOrgMiddleware";
+import errorMiddleware from "./middlewares/errorMiddleware";
+import { requireAdministrator, returnResult } from "./middlewares/helpers";
+import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
+import { logMiddleware } from "./middlewares/logMiddleware";
+import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
+import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
+import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
+import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
+import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
+import organismesAdmin from "./routes/admin.routes/organismes.routes";
+import statsAdmin from "./routes/admin.routes/stats.routes";
+import usersAdmin from "./routes/admin.routes/users.routes";
+import emails from "./routes/emails.routes";
+import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
+import effectif from "./routes/specific.routes/effectif.routes";
+import indicateursRouter from "./routes/specific.routes/indicateurs.routes";
 import {
   getOrganismeByUAIAvecSousEtablissements,
   getOrganismeEffectifs,
-} from "./routes/specific.routes/organisme.routes.js";
-import effectif from "./routes/specific.routes/effectif.routes.js";
-import upload from "./routes/specific.routes/upload.routes.js";
+} from "./routes/specific.routes/organisme.routes";
+import organismesRouter from "./routes/specific.routes/organismes.routes";
+import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
+import upload from "./routes/specific.routes/upload.routes";
+import auth from "./routes/user.routes/auth.routes";
 
-import usersAdmin from "./routes/admin.routes/users.routes.js";
-import effectifsAdmin from "./routes/admin.routes/effectifs.routes.js";
-import organismesAdmin from "./routes/admin.routes/organismes.routes.js";
-import statsAdmin from "./routes/admin.routes/stats.routes.js";
-import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
-import config from "../config.js";
-
-import { requireAdministrator, returnResult } from "./middlewares/helpers.js";
-import { jobEventsDb, usersMigrationDb } from "@/common/model/collections.js";
-import { packageJson } from "@/common/utils/esmUtils.js";
-import logger from "@/common/logger.js";
-import { findMaintenanceMessages } from "@/common/actions/maintenances.actions.js";
-import {
-  findUserOrganismes,
-  searchOrganismes,
-  findOrganismesByUAI,
-  findOrganismesBySIRET,
-  getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
-  configureOrganismeERP,
-  getOrganismeById,
-} from "@/common/actions/organismes/organismes.actions.js";
-import {
-  passwordSchema,
-  uaiSchema,
-  validateFullObjectSchema,
-  validateFullZodObjectSchema,
-} from "@/common/utils/validationUtils.js";
-import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions.js";
-import Joi from "joi";
-import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions.js";
-import { createUserToken } from "@/common/utils/jwtUtils.js";
-import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions.js";
-import { Application } from "express-serve-static-core";
+import { sendForgotPasswordRequest, register, activateUser } from "@/common/actions/account.actions";
+import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
+import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
+import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions";
+import { legacyEffectifsFiltersSchema } from "@/common/actions/helpers/filters";
+import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
+import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
   getInvitationByToken,
@@ -82,24 +62,40 @@ import {
   removeUserFromOrganisation,
   resendInvitationEmail,
   validateMembre,
-} from "@/common/actions/organisations.actions.js";
-import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions.js";
-import { changePassword, updateUserProfile } from "@/common/actions/users.actions.js";
-import { registrationSchema } from "@/common/validation/registrationSchema.js";
-import { sendForgotPasswordRequest, register, activateUser } from "@/common/actions/account.actions.js";
-import { TETE_DE_RESEAUX } from "@/common/constants/networks.js";
-import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers.js";
-import validateRequestMiddleware from "./middlewares/validateRequestMiddleware.js";
-import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy.js";
-import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions.js";
-import { configurationERPSchema } from "@/common/validation/configurationERPSchema.js";
-import { legacyEffectifsFiltersSchema } from "@/common/actions/helpers/filters.js";
-import objectIdSchema from "@/common/validation/objectIdSchema.js";
-import userProfileSchema from "@/common/validation/userProfileSchema.js";
-import uploadedDocumentSchema from "@/common/validation/uploadedDocumentSchema.js";
-import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFormationSearchSchema.js";
-import uploadMappingSchema from "@/common/validation/uploadMappingSchema.js";
-import uploadUpdateDocumentSchema from "@/common/validation/uploadUpdateDocumentSchema.js";
+} from "@/common/actions/organisations.actions";
+import {
+  findUserOrganismes,
+  searchOrganismes,
+  findOrganismesByUAI,
+  findOrganismesBySIRET,
+  getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
+  configureOrganismeERP,
+  getOrganismeById,
+} from "@/common/actions/organismes/organismes.actions";
+import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
+import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
+import { TETE_DE_RESEAUX } from "@/common/constants/networks";
+import logger from "@/common/logger";
+import { jobEventsDb, usersMigrationDb } from "@/common/model/collections";
+import { apiRoles } from "@/common/roles";
+import { packageJson } from "@/common/utils/esmUtils";
+import { createUserToken } from "@/common/utils/jwtUtils";
+import {
+  passwordSchema,
+  uaiSchema,
+  validateFullObjectSchema,
+  validateFullZodObjectSchema,
+} from "@/common/utils/validationUtils";
+import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
+import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
+import objectIdSchema from "@/common/validation/objectIdSchema";
+import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFormationSearchSchema";
+import { registrationSchema } from "@/common/validation/registrationSchema";
+import uploadedDocumentSchema from "@/common/validation/uploadedDocumentSchema";
+import uploadMappingSchema from "@/common/validation/uploadMappingSchema";
+import uploadUpdateDocumentSchema from "@/common/validation/uploadUpdateDocumentSchema";
+import userProfileSchema from "@/common/validation/userProfileSchema";
+import config from "@/config";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 

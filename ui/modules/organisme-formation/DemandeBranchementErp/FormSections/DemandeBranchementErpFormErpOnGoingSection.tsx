@@ -2,7 +2,7 @@ import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Stack, Te
 import { Field } from "formik";
 import PropTypes from "prop-types";
 
-import { PRODUCT_NAME } from "../../../../common/constants/product";
+import { PRODUCT_NAME } from "@/common/constants/product";
 
 const DemandeBranchementErpFormErpOnGoingSection = ({ isSubmitting }) => {
   return (

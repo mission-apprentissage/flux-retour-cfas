@@ -1,5 +1,5 @@
-import React from "react";
 import { Icon } from "@chakra-ui/react";
+import React from "react";
 
 export function Check(/** @type {any} */ { isIndeterminate, isChecked, ...props }) {
   return isChecked || isIndeterminate ? (

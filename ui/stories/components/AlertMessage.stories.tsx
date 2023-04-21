@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
 
-import Component from "../../components/AlertMessage/AlertMessage";
+import Component from "@/components/AlertMessage/AlertMessage";
 
 function getMaintenanceMessages(response) {
   return [

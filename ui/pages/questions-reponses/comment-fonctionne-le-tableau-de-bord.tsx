@@ -1,14 +1,14 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Container, Heading, ListItem, Text, UnorderedList, Link as ChakraLink } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
-import Page from "@/components/Page/Page";
-import Section from "@/components/Section/Section";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
-import Link from "@/components/Links/Link";
+import { CONTACT_ADDRESS, PRODUCT_NAME } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
-import { CONTACT_ADDRESS, PRODUCT_NAME } from "@/common/constants/product";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Link from "@/components/Links/Link";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

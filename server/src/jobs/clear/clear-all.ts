@@ -1,6 +1,6 @@
-import { clearAllCollections, clearCollection } from "../../common/mongodb.js";
-import logger from "../../common/logger.js";
-import * as usersMigrationModelDescriptor from "../../common/model/usersMigration.model.js";
+import logger from "@/common/logger";
+import * as usersMigrationModelDescriptor from "@/common/model/usersMigration.model";
+import { clearAllCollections, clearCollection } from "@/common/mongodb";
 
 export const clearUsers = async () => {
   await clearCollection(usersMigrationModelDescriptor.collectionName);

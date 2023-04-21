@@ -1,6 +1,6 @@
-import React from "react";
 import { Text, HStack, StackProps } from "@chakra-ui/react";
 import { formatDistanceToNow } from "date-fns";
+import React from "react";
 
 import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";

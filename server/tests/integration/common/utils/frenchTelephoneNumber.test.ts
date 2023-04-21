@@ -1,5 +1,6 @@
 import { strict as assert } from "assert";
-import { transformToInternationalNumber } from "../../../../src/common/validation/utils/frenchTelephoneNumber.js";
+
+import { transformToInternationalNumber } from "@/common/validation/utils/frenchTelephoneNumber";
 
 describe("transformToInternationalNumber", () => {
   it("Transforme un numéro classique au format international", () => {

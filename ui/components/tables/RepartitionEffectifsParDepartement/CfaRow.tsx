@@ -2,11 +2,11 @@ import { Box, Link, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { isDateFuture } from "@/common/utils/dateUtils";
+import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
+import NumberValueCell from "@/components/tables/NumberValueCell";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { mapNatureOrganismeDeFormation } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
-import { isDateFuture } from "@/common/utils/dateUtils";
-import NatureOrganismeDeFormationWarning from "../../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
-import NumberValueCell from "../NumberValueCell";
 
 const CfaRow = ({
   uai_etablissement,

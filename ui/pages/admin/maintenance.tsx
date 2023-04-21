@@ -1,8 +1,3 @@
-import React from "react";
-import { useFormik } from "formik";
-import Head from "next/head";
-import NavLink from "next/link";
-import * as Yup from "yup";
 import {
   Box,
   Heading,
@@ -25,14 +20,19 @@ import {
   HStack,
   useToast,
 } from "@chakra-ui/react";
+import { useFormik } from "formik";
+import Head from "next/head";
+import NavLink from "next/link";
+import React from "react";
+import * as Yup from "yup";
 
 import { _post, _put, _delete } from "@/common/httpClient";
-import useMaintenanceMessages from "@/hooks/useMaintenanceMessages";
-import { ArrowDropRightLine, Trash } from "../../theme/components/icons";
-import Table from "@/components/tables/Table";
-import Page from "@/components/Page/Page";
-import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Page from "@/components/Page/Page";
+import Table from "@/components/tables/Table";
+import withAuth from "@/components/withAuth";
+import useMaintenanceMessages from "@/hooks/useMaintenanceMessages";
+import { ArrowDropRightLine, Trash } from "@/theme/components/icons";
 
 const ADMIN_MAINTENANCE_ENDPOINT = "/api/v1/admin/maintenanceMessages";
 

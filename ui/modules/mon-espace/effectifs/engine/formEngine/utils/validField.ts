@@ -1,5 +1,6 @@
-import { isEmptyValue } from "./isEmptyValue";
 import * as Yup from "yup";
+
+import { isEmptyValue } from "./isEmptyValue";
 
 export const validField = async ({ field, value }): Promise<{ error?: string }> => {
   if (field.required && isEmptyValue(value)) {

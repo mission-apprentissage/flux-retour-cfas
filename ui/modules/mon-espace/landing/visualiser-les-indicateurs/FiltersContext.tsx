@@ -1,7 +1,7 @@
+import { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import qs from "query-string";
 import { createContext, useContext, useEffect } from "react";
-import { useRouter } from "next/router";
 
 import { omitNullishValues } from "@/common/utils/omitNullishValues";
 

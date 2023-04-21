@@ -1,8 +1,10 @@
 import { strict as assert } from "assert";
-import config from "../../../src/config.js";
-import { initTestApp } from "../../utils/testUtils.js";
-import { packageJson } from "../../../src/common/utils/esmUtils.js";
+
 import { AxiosInstance } from "axiosist";
+
+import { packageJson } from "@/common/utils/esmUtils";
+import config from "@/config";
+import { initTestApp } from "@tests/utils/testUtils";
 
 let httpClient: AxiosInstance;
 

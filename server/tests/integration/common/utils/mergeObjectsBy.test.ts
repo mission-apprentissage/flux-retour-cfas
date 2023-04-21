@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 
-import { mergeObjectsBy } from "@/common/utils/mergeObjectsBy.js";
+import { mergeObjectsBy } from "@/common/utils/mergeObjectsBy";
 
 describe("mergeObjectsBy", () => {
   it("returns an empty array when given an empty array", async () => {

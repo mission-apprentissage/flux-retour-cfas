@@ -1,15 +1,16 @@
 import { strict as assert } from "assert";
-import axiosist from "axiosist";
 
 import { AxiosResponse } from "axios";
-import { createOrganisation } from "../../src/common/actions/organisations.actions.js";
-import { createSession } from "../../src/common/actions/sessions.actions.js";
-import { COOKIE_NAME } from "../../src/common/constants/cookieName.js";
-import { usersMigrationDb } from "../../src/common/model/collections.js";
-import { NewOrganisation, getOrganisationLabel } from "../../src/common/model/organisations.model.js";
-import server from "../../src/http/server.js";
-import { resetTime } from "../../src/common/utils/timeUtils.js";
-import { hash } from "../../src/common/utils/passwordUtils.js";
+import axiosist from "axiosist";
+
+import { createOrganisation } from "@/common/actions/organisations.actions";
+import { createSession } from "@/common/actions/sessions.actions";
+import { COOKIE_NAME } from "@/common/constants/cookieName";
+import { usersMigrationDb } from "@/common/model/collections";
+import { NewOrganisation, getOrganisationLabel } from "@/common/model/organisations.model";
+import { hash } from "@/common/utils/passwordUtils";
+import { resetTime } from "@/common/utils/timeUtils";
+import server from "@/http/server";
 
 export type RequestAsOrganisationFunc = <T>(
   organisation: NewOrganisation,

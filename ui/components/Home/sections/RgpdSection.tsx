@@ -1,8 +1,8 @@
-import React from "react";
-import NavLink from "next/link";
 import { Box, Button, Container, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import NavLink from "next/link";
+import React from "react";
 
-import { PRODUCT_NAME } from "../../../common/constants/product";
+import { PRODUCT_NAME } from "@/common/constants/product";
 
 const RgpdSection = (props) => {
   return (

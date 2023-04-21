@@ -1,10 +1,10 @@
 import { createRequire } from "module";
 import path from "path";
 import { fileURLToPath } from "url";
-const require = createRequire(import.meta.url);
 
-// eslint-disable-next-line import/no-commonjs
-export const packageJson = require("../../../package.json");
+const loadFile = createRequire(import.meta.url);
+
+export const packageJson = loadFile("../../../package.json");
 
 // add import.meta.url to filePath
 export const __dirname = (filePath) => {

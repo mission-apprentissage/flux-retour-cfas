@@ -1,12 +1,12 @@
 import { formatDuration, intervalToDuration } from "date-fns";
 
-import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb } from "../common/mongodb.js";
-import logger from "../common/logger.js";
-import { jobEventStatuts } from "../common/constants/jobs.js";
-import { modelDescriptors } from "../common/model/collections.js";
-import createGlobalServices from "../services.js";
-import config from "../config.js";
-import { createJobEvent, updateJobEvent } from "../common/actions/jobEvents.actions.js";
+import { createJobEvent, updateJobEvent } from "@/common/actions/jobEvents.actions";
+import { jobEventStatuts } from "@/common/constants/jobs";
+import logger from "@/common/logger";
+import { modelDescriptors } from "@/common/model/collections";
+import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb } from "@/common/mongodb";
+import config from "@/config";
+import createGlobalServices from "@/services";
 
 process.on("unhandledRejection", (e) => console.error(e));
 process.on("uncaughtException", (e) => console.error(e));

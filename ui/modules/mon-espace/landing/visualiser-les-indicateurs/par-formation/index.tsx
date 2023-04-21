@@ -1,7 +1,8 @@
 import React from "react";
 
-import { FiltersProvider } from "../FiltersContext";
 import IndicateursVueFormationPage from "./IndicateursVueFormationPage";
+
+import { FiltersProvider } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 
 const IndicateursVueFormationPageContainer = () => {
   return (

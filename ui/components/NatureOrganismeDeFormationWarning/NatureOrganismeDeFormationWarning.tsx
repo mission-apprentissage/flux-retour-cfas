@@ -1,5 +1,6 @@
-import React from "react";
 import { Box, Text, Tooltip } from "@chakra-ui/react";
+import React from "react";
+
 import Link from "@/components/Links/Link";
 
 const NatureOrganismeDeFormationWarning = () => {

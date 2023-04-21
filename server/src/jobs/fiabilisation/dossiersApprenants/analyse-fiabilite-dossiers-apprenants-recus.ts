@@ -2,23 +2,23 @@
 // import {
 //   // validateNomApprenant,
 //   normalizeNomApprenant,
-// } from "../../../common/validation/utils/apprenant/nomApprenant.js";
+// } from "@/common/utils/apprenant/nomApprenant";
 // import {
 //   // validatePrenomApprenant,
 //   normalizePrenomApprenant,
-// } from "../../../common/validation/utils/apprenant/prenomApprenant.js";
-// // import { validateIneApprenant } from "../../../common/validation/utils/apprenant/ineApprenant.js";
-// // import { validateDateDeNaissanceApprenant } from "../../../common/validation/utils/apprenant/dateDeNaissanceApprenant.js";
-// // import { validateCodeCommune } from "../../../common/validation/utils/codeCommune.js";
-// // import { validateFrenchTelephoneNumber } from "../../../common/validation/utils/frenchTelephoneNumber.js";
-// // import { validateEmail } from "../../../common/validation/utils/email.js";
-// // import { validateUai } from "../../../common/utils/validationUtils.js";
-// // import { validateSiret } from "../../../common/validation/utils/siret.js";
-// import logger from "../../../common/logger.js";
-// import { getDbCollection } from "../../../common/mongodb.js";
-// import { fetchOrganismesWithUai, fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna.js";
-// // import { createDossierApprenantApiInputFiabilite } from "./factories/dossierApprenantApiInputFiabilite.js";
-// import { createDossierApprenantApiInputFiabiliteReport } from "./factories/dossierApprenantApiInputFiabiliteReport.js";
+// } from "@/common/utils/apprenant/prenomApprenant";
+// // import { validateIneApprenant } from "@/common/utils/apprenant/ineApprenant";
+// // import { validateDateDeNaissanceApprenant } from "@/common/utils/apprenant/dateDeNaissanceApprenant";
+// // import { validateCodeCommune } from "@/common/utils/codeCommune";
+// // import { validateFrenchTelephoneNumber } from "@/common/utils/frenchTelephoneNumber";
+// // import { validateEmail } from "@/common/utils/email";
+// // import { validateUai } from "@/common/utils/validationUtils";
+// // import { validateSiret } from "@/common/utils/siret";
+// import logger from "@/common/logger";
+// import { getDbCollection } from "@/common/mongodb";
+// import { fetchOrganismesWithUai, fetchOrganismeWithSiret } from "@/common/apis/apiReferentielMna";
+// // import { createDossierApprenantApiInputFiabilite } from "./factories/dossierApprenantApiInputFiabilite";
+// import { createDossierApprenantApiInputFiabiliteReport } from "./factories/dossierApprenantApiInputFiabiliteReport";
 
 // const isSet = (value) => {
 //   return value !== null && value !== undefined && value !== "";

@@ -1,7 +1,8 @@
 import { strict as assert } from "assert";
-import { effectifsDb, organismesDb } from "../../../../../src/common/model/collections.js";
-import { createSampleEffectif } from "../../../../data/randomizedSample.js";
-import { getEffectifsDuplicatesFromOrganismes } from "../../../../../src/jobs/fiabilisation/uai-siret/update.utils.js";
+
+import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";
+import { createSampleEffectif } from "@tests/data/randomizedSample";
 
 describe("Job Update Fiabilisation UAI SIRET", () => {
   describe("getEffectifsDuplicatesFromOrganismes", async () => {

@@ -1,19 +1,19 @@
-import { Tabs } from "./tabs";
+import { Accordion } from "./accordion";
 import { Badge } from "./badge";
+import { Breadcrumb } from "./breadcrumb";
 import { Button } from "./button";
+import { Checkbox } from "./checkbox";
+import { Heading } from "./heading";
 import { Input } from "./input";
+import { Link } from "./link";
 import { NumberInput } from "./numberInput";
+import { Radio } from "./radio";
+import { Select } from "./select";
+import { Switch } from "./switch";
+import { Table } from "./table";
+import { Tabs } from "./tabs";
 import { Text } from "./text";
 import { Textarea } from "./textarea";
-import { Link } from "./link";
-import { Select } from "./select";
-import { Radio } from "./radio";
-import { Switch } from "./switch";
-import { Checkbox } from "./checkbox";
-import { Accordion } from "./accordion";
-import { Breadcrumb } from "./breadcrumb";
-import { Heading } from "./heading";
-import { Table } from "./table";
 
 const components = {
   Tabs,

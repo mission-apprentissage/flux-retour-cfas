@@ -1,5 +1,6 @@
 import { strict as assert } from "assert";
-import { validateSiret } from "../../../../../src/common/validation/utils/siret.js";
+
+import { validateSiret } from "@/common/validation/utils/siret";
 
 describe("Domain SIRET", () => {
   describe("validateSiret", () => {

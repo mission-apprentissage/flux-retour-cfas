@@ -1,6 +1,8 @@
-import { emitter } from "./emitter";
-import axios, { AxiosRequestConfig } from "axios";
 import * as https from "https";
+
+import axios, { AxiosRequestConfig } from "axios";
+
+import { emitter } from "./emitter";
 
 class AuthError extends Error {
   json: any;
@@ -31,7 +33,7 @@ class HTTPError extends Error {
 }
 
 const handleResponse = (path, response) => {
-  let statusCode = response.status;
+  const statusCode = response.status;
   if (statusCode >= 400 && statusCode < 600) {
     emitter.emit("http:error", response);
 

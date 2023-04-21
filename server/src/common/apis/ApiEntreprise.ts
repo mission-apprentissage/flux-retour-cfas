@@ -1,11 +1,12 @@
 import axiosRetry from "axios-retry";
 
-import config from "../../config.js";
-import logger from "../logger.js";
-import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
-import ApiEntEntreprise from "./@types/ApiEntEntreprise.js";
-import ApiEntEtablissement from "./@types/ApiEntEtablissement.js";
-import getApiClient from "./client.js";
+import ApiEntEntreprise from "./@types/ApiEntEntreprise";
+import ApiEntEtablissement from "./@types/ApiEntEtablissement";
+import getApiClient from "./client";
+
+import logger from "@/common/logger";
+import { ApiError, apiRateLimiter } from "@/common/utils/apiUtils";
+import config from "@/config";
 
 export const API_ENDPOINT = config.apiEntreprise.endpoint;
 

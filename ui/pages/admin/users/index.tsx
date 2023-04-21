@@ -1,7 +1,3 @@
-import React from "react";
-import { useRouter } from "next/router";
-import { useQuery } from "@tanstack/react-query";
-import Head from "next/head";
 import {
   Box,
   Button,
@@ -17,12 +13,16 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import React from "react";
 
 import { _get } from "@/common/httpClient";
-import Page from "@/components/Page/Page";
-import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import ModalClosingButton from "@/components/ModalClosingButton/ModalClosingButton";
+import Page from "@/components/Page/Page";
+import withAuth from "@/components/withAuth";
 import UserForm from "@/modules/admin/UserForm";
 import UsersList from "@/modules/admin/UsersList";
 

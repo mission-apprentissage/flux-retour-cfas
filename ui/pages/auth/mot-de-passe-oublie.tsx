@@ -11,16 +11,16 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
+import Head from "next/head";
+import NavLink from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 import * as Yup from "yup";
-import { useRouter } from "next/router";
-import NavLink from "next/link";
-import Head from "next/head";
 
-import Page from "@/components/Page/Page";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 import { _post } from "@/common/httpClient";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Page from "@/components/Page/Page";
+import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

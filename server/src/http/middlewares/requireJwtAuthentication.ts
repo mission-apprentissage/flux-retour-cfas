@@ -1,7 +1,8 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import config from "../../config.js";
-import { getUserLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
+
+import { getUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
+import config from "@/config";
 
 export default () => {
   const findUserOrCfa = async (usernameOrUai) => {

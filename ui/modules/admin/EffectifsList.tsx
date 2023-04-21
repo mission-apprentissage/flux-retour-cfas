@@ -1,11 +1,11 @@
-import React from "react";
-import { useRouter } from "next/router";
-import Link from "next/link";
 import { Text } from "@chakra-ui/react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React from "react";
 
+import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import Table from "@/components/Table/Table";
 import { ArrowRightLine } from "@/theme/components/icons";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 
 const EffectifsList = ({
   data,

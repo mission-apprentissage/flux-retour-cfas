@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -14,14 +14,14 @@ import {
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
+import React, { useState } from "react";
 import * as Yup from "yup";
 import YupPassword from "yup-password";
-import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 import { _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { ShowPassword } from "../../theme/components/icons";
 import useToaster from "@/hooks/useToaster";
+import { ShowPassword } from "@/theme/components/icons";
 
 YupPassword(Yup); // extend yup
 

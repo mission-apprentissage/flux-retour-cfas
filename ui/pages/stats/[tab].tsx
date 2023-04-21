@@ -1,8 +1,8 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { usePlausible } from "next-plausible";
+import React from "react";
 
 import Page from "@/components/Page/Page";
 

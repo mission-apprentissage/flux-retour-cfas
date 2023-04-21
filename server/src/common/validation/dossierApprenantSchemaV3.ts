@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { primitivesV1, primitivesV2 } from "./utils/zodPrimitives.js";
+
+import { primitivesV1, primitivesV2 } from "@/common/validation/utils/zodPrimitives";
 
 const dossierApprenantSchemaV3 = () =>
   z.object({

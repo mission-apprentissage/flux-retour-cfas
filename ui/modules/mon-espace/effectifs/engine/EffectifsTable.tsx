@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
 import { Box, Text, HStack, Button, Tooltip, UnorderedList, ListItem } from "@chakra-ui/react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
-
-import Table from "../../../../components/Table/Table";
-
-import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "../../../../theme/components/icons";
-import Effectif from "./Effectif";
-import { effectifIdAtom } from "./atoms";
 import { DateTime } from "luxon";
+import React, { useEffect, useRef, useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+
+import { effectifIdAtom } from "./atoms";
+import Effectif from "./Effectif";
 import { effectifStateSelector } from "./formEngine/atoms";
+
+import Table from "@/components/Table/Table";
+import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "@/theme/components/icons";
 
 const EffectifDetails = ({ row, modeSifa = false, canEdit = false, effectifsSnapshot = false }) => {
   const queryClient = useQueryClient();

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
 import { Box, Button, Collapse, Text, List, ListItem, ListIcon, Link, Flex } from "@chakra-ui/react";
-import Ribbons from "../../../../../../components/Ribbons/Ribbons";
-import { ArrowRightLine, ErrorIcon } from "../../../../../../theme/components/icons";
+import React, { useState } from "react";
 import { useRecoilValue } from "recoil";
-import { cerfaStatusGetter } from "../atoms";
-import { useCerfaController } from "../CerfaControllerContext";
+
+import Ribbons from "@/components/Ribbons/Ribbons";
+import { cerfaStatusGetter } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
+import { useCerfaController } from "@/modules/mon-espace/effectifs/engine/formEngine/CerfaControllerContext";
+import { ArrowRightLine, ErrorIcon } from "@/theme/components/icons";
 
 // eslint-disable-next-line react/display-name
 const CheckEmptyFields = React.memo(({ schema, blocName }: { schema: any; blocName: string }) => {

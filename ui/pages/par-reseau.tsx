@@ -1,14 +1,14 @@
 import React from "react";
 
+import { OrganisationTeteReseau } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import withAuth from "@/components/withAuth";
+import useAuth from "@/hooks/useAuth";
 import {
   FiltersProvider,
   getDefaultState,
 } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import useAuth from "@/hooks/useAuth";
 import IndicateursVueReseauPage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-reseau/IndicateursVueReseauPage";
-import withAuth from "@/components/withAuth";
-import { OrganisationTeteReseau } from "@/common/internal/Organisation";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

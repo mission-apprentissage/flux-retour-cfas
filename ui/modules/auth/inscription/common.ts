@@ -1,5 +1,6 @@
-import { Organisation } from "@/common/internal/Organisation";
 import { DistributiveOmit } from "@emotion/react";
+
+import { Organisation } from "@/common/internal/Organisation";
 
 export type NewOrganisation = DistributiveOmit<Organisation, "_id" | "created_at">;
 

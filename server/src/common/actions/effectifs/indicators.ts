@@ -1,11 +1,13 @@
 import { addMonths } from "date-fns";
-import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenant.js";
+
+import { mapMongoObjectToCSVObject } from "./export";
+import { Indicator } from "./indicator";
+
+import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import {
   SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS,
   SEUIL_ALERTE_NB_MOIS_RUPTURANTS,
-} from "../../constants/effectif.js";
-import { mapMongoObjectToCSVObject } from "./export.js";
-import { Indicator } from "./indicator.js";
+} from "@/common/constants/effectif";
 
 export const apprentisIndicator = new Indicator({
   preStages: [

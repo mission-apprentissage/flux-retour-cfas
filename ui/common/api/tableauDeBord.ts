@@ -1,7 +1,7 @@
 // NOTE: ce fichier est obsoltète, préférer plutot l'utilisation de hooks dédiés
 
-import { _get, _post, _put } from "../httpClient";
-import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
+import { _get, _post, _put } from "@/common/httpClient";
+import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 
 export const fetchEffectifs = (filters) => {
   return _get("/api/indicateurs", { params: mapFiltersToApiFormat(filters) });

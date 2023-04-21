@@ -1,7 +1,9 @@
 import { strict as assert } from "assert";
-import config from "../../../src/config.js";
-import { initTestApp } from "../../utils/testUtils.js";
+
 import { AxiosInstance } from "axiosist";
+
+import config from "@/config";
+import { initTestApp } from "@tests/utils/testUtils";
 
 let httpClient: AxiosInstance;
 

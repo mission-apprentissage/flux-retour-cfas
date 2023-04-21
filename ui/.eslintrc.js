@@ -41,7 +41,7 @@ module.exports = {
       },
     ],
     "import/newline-after-import": "error",
-    "import/no-extraneous-dependencies": "error",
+    "import/no-extraneous-dependencies": ["error"],
     "import/no-mutable-exports": "error",
     "import/default": "off",
     "import/no-named-as-default-member": "off",

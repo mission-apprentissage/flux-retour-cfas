@@ -1,5 +1,5 @@
-import logger from "../../common/logger.js";
-import { getDbCollectionSchema, getDbCollection } from "../../common/mongodb.js";
+import logger from "@/common/logger";
+import { getDbCollectionSchema, getDbCollection } from "@/common/mongodb";
 
 export const findInvalidDocuments = async (name) => {
   logger.info("Search invalid documents...");

@@ -1,6 +1,7 @@
-import React, { memo } from "react";
 import { Box, Grid } from "@chakra-ui/react";
-import { InputController } from "../../../formEngine/components/Input/InputController";
+import React, { memo } from "react";
+
+import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
 export const EffectifFormation = memo(() => {

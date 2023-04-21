@@ -1,8 +1,9 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { schemaValidation } from "../utils/schemaUtils.js";
-import { cfdSchema } from "../utils/validationUtils.js";
-import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "./json-schema/jsonSchemaTypes.js";
+import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "./json-schema/jsonSchemaTypes";
+
+import { schemaValidation } from "@/common/utils/schemaUtils";
+import { cfdSchema } from "@/common/utils/validationUtils";
 
 const collectionName = "formations";
 

@@ -1,14 +1,15 @@
+import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
 
-import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import AnneeFormationRow from "./AnneeFormationRow";
+
 import { fetchEffectifsParAnneeFormation } from "@/common/api/tableauDeBord";
 import { QUERY_KEYS } from "@/common/constants/queryKeys";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import { pick } from "@/common/utils/pick";
 import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
-import AnneeFormationRow from "./AnneeFormationRow";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 
 const AnneeFormationRows = ({ formationCfd, niveauFormation }) => {
   const { state: filters } = useFiltersContext();

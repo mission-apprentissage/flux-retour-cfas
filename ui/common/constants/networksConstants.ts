@@ -1,4 +1,4 @@
-import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
+import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 /**
  * Noms des réseaux de CFAS

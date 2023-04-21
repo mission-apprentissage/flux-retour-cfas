@@ -1,5 +1,6 @@
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../constants/fiabilisation.js";
-import { object, date, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes.js";
+import { object, date, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes";
+
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
 
 const collectionName = "fiabilisationUaiSiret";
 

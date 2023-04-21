@@ -1,7 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { Flex, Link, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import PropTypes from "prop-types";
+import React from "react";
 
 const OrganismeFormationPagesMenu = (props) => {
   return (

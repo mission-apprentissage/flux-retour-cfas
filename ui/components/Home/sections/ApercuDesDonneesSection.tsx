@@ -1,12 +1,12 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { startOfHour } from "date-fns";
 import { Box, Container, Divider, Flex, Heading, HStack, Skeleton, Text } from "@chakra-ui/react";
+import { startOfHour } from "date-fns";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { ERPS } from "../../../common/constants/erps";
-import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
-import { Checkbox } from "../../../theme/components/icons";
-import useFetchIndicateursNational from "../../../hooks/useFetchIndicateursNational";
+import { ERPS } from "@/common/constants/erps";
+import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
+import useFetchIndicateursNational from "@/hooks/useFetchIndicateursNational";
+import { Checkbox } from "@/theme/components/icons";
 
 const Count = ({ count = 0, label }) => {
   return (

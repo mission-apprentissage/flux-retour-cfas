@@ -1,9 +1,10 @@
-import config from "./config.js";
-import { createClamav } from "./common/services/clamav.js";
-import { createMailerService } from "./common/services/mailer/mailer.js";
+import { createClamav } from "./common/services/clamav";
+import { createMailerService } from "./common/services/mailer/mailer";
 
-export let mailer: ReturnType<typeof createMailerService>;
-export let clamav: ReturnType<typeof createClamav>;
+import config from "@/config";
+
+export let mailer: ReturnType<typeof createMailerService>; // eslint-disable-line import/no-mutable-exports
+export let clamav: ReturnType<typeof createClamav>; // eslint-disable-line import/no-mutable-exports
 
 const createGlobalServices = async () => {
   // Hack pour rendre ces services globaux

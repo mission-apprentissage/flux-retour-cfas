@@ -1,8 +1,8 @@
-import logger from "../../../common/logger.js";
-import { createOrganisme, findOrganismeByUaiAndSiret } from "../../../common/actions/organismes/organismes.actions.js";
-import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
-import { register } from "../../../common/actions/account.actions.js";
-import { usersMigrationDb } from "../../../common/model/collections.js";
+import { register } from "@/common/actions/account.actions";
+import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
+import logger from "@/common/logger";
+import { usersMigrationDb } from "@/common/model/collections";
+import { buildAdresseFromUai } from "@/common/utils/uaiUtils";
 
 // TODO devrait désactiver l'envoi d'email globalement en mode CLI
 export const seedAdmin = async (email = "admin@test.fr") => {

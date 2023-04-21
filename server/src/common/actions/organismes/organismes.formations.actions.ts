@@ -1,10 +1,12 @@
 import { ObjectId } from "mongodb";
-import { getCatalogFormationsForOrganisme } from "../../apis/apiCatalogueMna.js";
-import { organismesDb } from "../../model/collections.js";
-import { asyncForEach } from "../../utils/asyncUtils.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/organisme.js";
-import { createFormation, getFormationWithCfd } from "../formations.actions.js";
-import { findOrganismeByUai } from "./organismes.actions.js";
+
+import { findOrganismeByUai } from "./organismes.actions";
+
+import { createFormation, getFormationWithCfd } from "@/common/actions/formations.actions";
+import { getCatalogFormationsForOrganisme } from "@/common/apis/apiCatalogueMna";
+import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
+import { organismesDb } from "@/common/model/collections";
+import { asyncForEach } from "@/common/utils/asyncUtils";
 
 /**
  * Méthode de récupération de l'arbre des formations issues du catalogue liées à un organisme

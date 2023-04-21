@@ -1,11 +1,12 @@
-import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import express from "express";
 import Joi from "joi";
+
 import {
   createMaintenanceMessage,
   updateMaintenanceMessage,
   removeMaintenanceMessage,
-} from "../../../common/actions/maintenances.actions.js";
+} from "@/common/actions/maintenances.actions";
+import { validateFullObjectSchema } from "@/common/utils/validationUtils";
 
 export default () => {
   const router = express.Router();

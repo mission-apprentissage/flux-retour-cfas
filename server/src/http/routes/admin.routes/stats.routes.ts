@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getStatOrganismes } from "../../../common/actions/organismes/organismes.actions.js";
+import { getStatOrganismes } from "@/common/actions/organismes/organismes.actions";
 
 export default () => {
   const router = express.Router();

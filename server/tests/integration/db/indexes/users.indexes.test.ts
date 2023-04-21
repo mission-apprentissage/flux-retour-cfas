@@ -1,8 +1,8 @@
 import { strict as assert } from "assert";
 
-import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
-import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
-import usersModelDescriptor from "../../../../src/common/model/users.model.js";
+import { createIndexes, dropIndexes } from "@/common/model/indexes/index";
+import usersModelDescriptor from "@/common/model/users.model";
+import { getDbCollectionIndexes } from "@/common/mongodb";
 
 describe("Users Indexes", () => {
   it("Vérifie l'existence des indexes", async () => {

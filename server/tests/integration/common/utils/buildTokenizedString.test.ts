@@ -1,5 +1,6 @@
 import { strict as assert } from "assert";
-import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
+
+import { buildTokenizedString } from "@/common/utils/buildTokenizedString";
 
 describe("buildTokenizedString", () => {
   it('returns "" when given undefined', () => {

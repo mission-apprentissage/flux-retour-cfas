@@ -1,7 +1,5 @@
 import { composeStories } from "@storybook/react";
-import { screen } from "@testing-library/react";
-
-import { act, render, waitFor } from "@testing-library/react";
+import { screen, render } from "@testing-library/react";
 
 import * as stories from "./TeleversementInProgress.stories";
 

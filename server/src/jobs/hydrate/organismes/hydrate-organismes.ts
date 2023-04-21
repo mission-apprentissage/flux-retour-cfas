@@ -1,13 +1,14 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import logger from "../../../common/logger.js";
+
+import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import {
   createOrganisme,
   findOrganismeByUaiAndSiret,
   updateOrganisme,
-} from "../../../common/actions/organismes/organismes.actions.js";
-import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
-import { organismesDb, organismesReferentielDb } from "../../../common/model/collections.js";
-import { STATUT_FIABILISATION_ORGANISME } from "../../../common/constants/fiabilisation.js";
+} from "@/common/actions/organismes/organismes.actions";
+import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import logger from "@/common/logger";
+import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 
 const JOB_NAME = "hydrate-organismes";
 

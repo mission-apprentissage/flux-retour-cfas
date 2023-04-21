@@ -1,37 +1,37 @@
-import "dotenv/config.js";
+import "@/config";
 import { Option, program } from "commander";
 
-import { runScript } from "./scriptWrapper.js";
-import { seedSample, seedAdmin } from "./seed/start/index.js";
-import { clear, clearUsers } from "./clear/clear-all.js";
-import { purgeEvents } from "./clear/purge-events.js";
-import { createErpUserLegacy } from "./users/create-user.js";
+import { clear, clearUsers } from "./clear/clear-all";
+import { purgeEvents } from "./clear/purge-events";
+import { findInvalidDocuments } from "./db/findInvalidDocuments";
+import { recreateIndexes } from "./db/recreateIndexes";
+import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenants/process-effectifs-queue";
+import { removeDuplicatesEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates";
+import { getStats } from "./fiabilisation/stats";
+import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
+import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
+import { hydrateEffectifsComputed } from "./hydrate/hydrate-effectifs-computed";
+import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
+import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
+import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
+import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
+import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis";
+import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
+import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index";
+import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index";
+import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index";
+import { runScript } from "./scriptWrapper";
+import { seedPlausibleGoals } from "./seed/plausible/goals";
+import { seedSample, seedAdmin } from "./seed/start/index";
+import { generateTypes } from "./seed/types/generate-types";
+import { createErpUserLegacy } from "./users/create-user";
 import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
-} from "./users/generate-password-update-token.js";
-import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes.js";
-import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
-import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
-import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
-import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count.js";
-import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
-import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index.js";
-// import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
-import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build.js";
-import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update.js";
-import { updateUserPassword } from "./users/update-user-password.js";
-import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index.js";
-import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index.js";
-import { seedPlausibleGoals } from "./seed/plausible/goals.js";
-import { getStats } from "./fiabilisation/stats.js";
-import { recreateIndexes } from "./db/recreateIndexes.js";
-import { findInvalidDocuments } from "./db/findInvalidDocuments.js";
-import { generateTypes } from "./seed/types/generate-types.js";
-import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenants/process-effectifs-queue.js";
-import { removeDuplicatesEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates.js";
-import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api.js";
-import { hydrateEffectifsComputed } from "./hydrate/hydrate-effectifs-computed.js";
+} from "./users/generate-password-update-token";
+import { updateUsersApiSeeders } from "./users/update-apiSeeders";
+// import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus";
+import { updateUserPassword } from "./users/update-user-password";
 
 program.configureHelp({
   sortSubcommands: true,

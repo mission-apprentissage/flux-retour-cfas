@@ -1,4 +1,4 @@
-import { object, boolean } from "../../json-schema/jsonSchemaTypes.js";
+import { object, boolean } from "@/common/model/json-schema/jsonSchemaTypes";
 
 const adresseLocker = object({
   numero: boolean(),

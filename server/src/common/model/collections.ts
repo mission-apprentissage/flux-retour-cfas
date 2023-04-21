@@ -1,16 +1,3 @@
-import { getDbCollection } from "../mongodb.js";
-import usersModelDescriptor from "./users.model.js";
-import formationsModelDescriptor from "./formations.model.js";
-import jobEventsModelDescriptor from "./jobEvents.model.js";
-import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model.js";
-import usersMigrationModelDescriptor from "./usersMigration.model.js";
-import JwtSessionsModelDescriptor from "./jwtSessions.model.js";
-import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model.js";
-import OrganismesModelDescriptor from "./organismes.model.js";
-import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model.js";
-import effectifsModelDescriptor from "./effectifs.model/effectifs.model.js";
-import effectifsQueueModelDescriptor from "./effectifsQueue.model.js";
-import uploadsModelDescriptor from "./uploads.model/uploads.model.js";
 import {
   Effectif,
   FiabilisationUaiSiret,
@@ -24,9 +11,23 @@ import {
   User,
   UsersMigration,
 } from "./@types";
-import { EffectifsQueue } from "./@types/EffectifsQueue.js";
-import invitationsModelDescriptor, { Invitation } from "./invitations.model.js";
-import organisationsModelDescriptor, { Organisation } from "./organisations.model.js";
+import { EffectifsQueue } from "./@types/EffectifsQueue";
+import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
+import effectifsQueueModelDescriptor from "./effectifsQueue.model";
+import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
+import formationsModelDescriptor from "./formations.model";
+import invitationsModelDescriptor, { Invitation } from "./invitations.model";
+import jobEventsModelDescriptor from "./jobEvents.model";
+import JwtSessionsModelDescriptor from "./jwtSessions.model";
+import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model";
+import organisationsModelDescriptor, { Organisation } from "./organisations.model";
+import OrganismesModelDescriptor from "./organismes.model";
+import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
+import uploadsModelDescriptor from "./uploads.model/uploads.model";
+import usersModelDescriptor from "./users.model";
+import usersMigrationModelDescriptor from "./usersMigration.model";
+
+import { getDbCollection } from "@/common/mongodb";
 
 export const modelDescriptors = [
   usersModelDescriptor,

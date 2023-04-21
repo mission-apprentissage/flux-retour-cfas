@@ -1,18 +1,18 @@
 import express from "express";
 import Joi from "joi";
-import { ObjectId } from "mongodb";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
+import { ObjectId } from "mongodb";
 
-import { schema } from "@/common/model/effectifs.model/effectifs.model.js";
-import { effectifsDb } from "@/common/model/collections.js";
-import { updateEffectif } from "@/common/actions/effectifs.actions.js";
-import { findDataFromSiret } from "@/common/actions/infoSiret.actions.js";
-import { getUploadByOrgId } from "@/common/actions/uploads.actions.js";
-import { algoUAI } from "@/common/utils/uaiUtils.js";
-import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances.js";
-import { CODE_POSTAL_REGEX } from "@/common/constants/organisme.js";
-import { legacyRequireManageEffectifsPermissionMiddleware } from "@/http/middlewares/legacyRequireManageEffectifsPermissionMiddleware.js";
-import { stripEmptyFields } from "@/common/utils/miscUtils.js";
+import { updateEffectif } from "@/common/actions/effectifs.actions";
+import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
+import { getUploadByOrgId } from "@/common/actions/uploads.actions";
+import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
+import { CODE_POSTAL_REGEX } from "@/common/constants/organisme";
+import { effectifsDb } from "@/common/model/collections";
+import { schema } from "@/common/model/effectifs.model/effectifs.model";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
+import { algoUAI } from "@/common/utils/uaiUtils";
+import { legacyRequireManageEffectifsPermissionMiddleware } from "@/http/middlewares/legacyRequireManageEffectifsPermissionMiddleware";
 
 const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)

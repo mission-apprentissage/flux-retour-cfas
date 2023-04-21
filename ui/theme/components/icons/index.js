@@ -21,7 +21,6 @@ export * from "./DoubleArrows";
 export * from "./ErrorIcon";
 export * from "./EmojiSmile";
 export * from "./EmojiFlat";
-export * from "./Question";
 export * from "./Tick";
 export * from "./Trash";
 export * from "./AccountFill";

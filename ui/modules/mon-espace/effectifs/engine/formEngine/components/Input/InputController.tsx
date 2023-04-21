@@ -1,9 +1,10 @@
 import { memo, useCallback } from "react";
 import { useRecoilValue } from "recoil";
-import { fieldSelector } from "../../atoms";
-import { useCerfaController } from "../../CerfaControllerContext";
 
 import { InputField } from "./Input";
+
+import { fieldSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
+import { useCerfaController } from "@/modules/mon-espace/effectifs/engine/formEngine/CerfaControllerContext";
 
 // eslint-disable-next-line react/display-name
 export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }: any) => {

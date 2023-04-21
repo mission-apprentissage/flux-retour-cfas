@@ -1,11 +1,11 @@
-import React from "react";
 import { Box, Button, Flex, RadioGroup, Radio, Text, VStack, Stack, HStack } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
+import React from "react";
 
-import { DownloadLine } from "../../../theme/components/icons/index";
-import { ERPS } from "../../../common/constants/erps";
-import { configureOrganismeERP } from "../../../common/api/tableauDeBord";
+import { configureOrganismeERP } from "@/common/api/tableauDeBord";
+import { ERPS } from "@/common/constants/erps";
+import { DownloadLine } from "@/theme/components/icons/index";
 
 const ConfigurationAPI = ({ organisme, isMine }) => {
   const router = useRouter();

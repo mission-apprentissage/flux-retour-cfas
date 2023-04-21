@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { toPrettyYearLabel } from "@/common/utils/stringUtils";
-import NumberValueCell from "../NumberValueCell";
+import NumberValueCell from "@/components/tables/NumberValueCell";
 
 const AnneeFormationRow = ({ anneeFormation, effectifs }) => {
   return (

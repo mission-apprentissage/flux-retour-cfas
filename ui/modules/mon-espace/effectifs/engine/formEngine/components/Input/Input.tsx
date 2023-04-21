@@ -1,14 +1,16 @@
-import React, { memo, useCallback, useMemo, useState } from "react";
-import { validField } from "../../utils/validField";
 import { Box, FormControl, FormErrorMessage, FormHelperText, FormLabel, HStack, InputGroup } from "@chakra-ui/react";
-import InfoTooltip from "../../../../../../../components/InfoTooltip/InfoTooltip";
-import { TextInput } from "./TextInput";
-import { PhoneInput } from "./PhoneInput";
+import React, { memo, useCallback, useMemo, useState } from "react";
+
+import { ConsentInput } from "./ConsentInput";
 import { DateInput } from "./DateInput";
+import { NumberInput } from "./NumberInput";
+import { PhoneInput } from "./PhoneInput";
 import { RadioInput } from "./RadioInput";
 import { Select } from "./Select";
-import { ConsentInput } from "./ConsentInput";
-import { NumberInput } from "./NumberInput";
+import { TextInput } from "./TextInput";
+
+import InfoTooltip from "@/components/InfoTooltip/InfoTooltip";
+import { validField } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/validField";
 
 // eslint-disable-next-line react/display-name
 export const Input = memo(

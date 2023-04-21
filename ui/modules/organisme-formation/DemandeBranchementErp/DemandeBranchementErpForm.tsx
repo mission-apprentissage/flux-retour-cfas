@@ -1,11 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { FormControl, FormErrorMessage, FormLabel, Select, Stack } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
+import PropTypes from "prop-types";
+import React from "react";
 import * as Yup from "yup";
 
-import { ERP_STATE, ERPS_FORM_CASES } from "../../../common/constants/erps";
-import { UAI_REGEX } from "../../../common/domain/uai";
 import {
   DemandeBranchementErpFormErpComingSection,
   DemandeBranchementErpFormErpOnGoingSection,
@@ -13,6 +11,9 @@ import {
   DemandeBranchementErpFormNoErpSection,
   DemandeBranchementErpFormOtherErpSection,
 } from "./FormSections";
+
+import { ERP_STATE, ERPS_FORM_CASES } from "@/common/constants/erps";
+import { UAI_REGEX } from "@/common/domain/uai";
 
 const formInitialValues = {
   erpIndex: 0,

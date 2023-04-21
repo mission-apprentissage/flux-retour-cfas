@@ -1,11 +1,11 @@
-import { compact, get } from "lodash-es";
 import Boom from "boom";
+import { compact, get } from "lodash-es";
 import { ObjectId } from "mongodb";
 
-import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions.js";
-import { findEffectifsByQuery } from "@/common/actions/effectifs.actions.js";
-import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions.js";
-import { Effectif } from "@/common/model/@types/Effectif.js";
+import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
+import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions";
+import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
+import { Effectif } from "@/common/model/@types/Effectif";
 
 export async function getOrganismeEffectifs(organismeId: ObjectId, anneeScolaire: string | undefined, sifa = false) {
   const filter: Partial<Effectif> = { organisme_id: organismeId };

@@ -1,9 +1,10 @@
-import React from "react";
-import { useRouter } from "next/router";
 import { Box, Text, Radio, RadioGroup, Stack } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import React from "react";
+
+import { InscriptionOrganistionChildProps } from "./common";
 import SearchBySIRETForm from "./components/SearchBySIRETForm";
 import SearchByUAIForm from "./components/SearchByUAIForm";
-import { InscriptionOrganistionChildProps } from "./common";
 
 type TypeOfSearch = "siret" | "uai" | undefined;
 

@@ -1,11 +1,11 @@
-import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import express from "express";
 import Joi from "joi";
 import pick from "lodash.pick";
 import { Filter } from "mongodb";
 
-import { organismesDb } from "../../../common/model/collections.js";
-import { returnResult } from "../../middlewares/helpers.js";
+import { organismesDb } from "@/common/model/collections";
+import { validateFullObjectSchema } from "@/common/utils/validationUtils";
+import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
   const router = express.Router();

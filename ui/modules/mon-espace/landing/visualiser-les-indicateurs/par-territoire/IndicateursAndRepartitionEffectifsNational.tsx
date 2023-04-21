@@ -1,17 +1,17 @@
-import { Stack } from "@chakra-ui/react";
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
+import { Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { fetchEffectifsDataListCsvExport } from "@/common/api/tableauDeBord";
-import Section from "@/components/Section/Section";
-import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
-import useFetchOrganismesCount from "@/hooks/useFetchOrganismesCount";
-import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { useFiltersContext } from "../FiltersContext";
-import IndicateursGridStack from "../IndicateursGridStack";
 import { indicateursEffectifsSchema } from "../indicateursEffectifsSchema";
+import IndicateursGridStack from "../IndicateursGridStack";
+
+import { fetchEffectifsDataListCsvExport } from "@/common/api/tableauDeBord";
+import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
+import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
+import Section from "@/components/Section/Section";
+import useFetchOrganismesCount from "@/hooks/useFetchOrganismesCount";
 
 const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading }) => {
   const { state: filters } = useFiltersContext();

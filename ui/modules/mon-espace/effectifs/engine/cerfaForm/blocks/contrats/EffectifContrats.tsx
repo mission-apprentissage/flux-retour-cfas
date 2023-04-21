@@ -1,9 +1,10 @@
-import React, { memo } from "react";
 import { Box, Button, Flex, FormLabel, HStack } from "@chakra-ui/react";
+import React, { memo } from "react";
 import { useRecoilValue } from "recoil";
-import { InputController } from "../../../formEngine/components/Input/InputController";
-import { fieldSelector } from "../../../formEngine/atoms";
-import { useCerfaController } from "../../../formEngine/CerfaControllerContext";
+
+import { fieldSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
+import { useCerfaController } from "@/modules/mon-espace/effectifs/engine/formEngine/CerfaControllerContext";
+import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
 export const ApprenantContrats = memo(({ contrats }: { contrats: any[] }) => {

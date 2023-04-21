@@ -1,4 +1,4 @@
-import { effectifsDb } from "../../../common/model/collections.js";
+import { effectifsDb } from "@/common/model/collections";
 
 /**
  * Récupération de la liste des doublons pour 2 organismes

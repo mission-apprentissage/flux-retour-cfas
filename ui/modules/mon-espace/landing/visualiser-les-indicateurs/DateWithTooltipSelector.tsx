@@ -1,9 +1,10 @@
 import { HStack, Text, Tooltip } from "@chakra-ui/react";
 import React from "react";
 
+import { useFiltersContext } from "./FiltersContext";
+
 import MonthSelect from "@/components/MonthSelect/MonthSelect";
 import { InfoLine } from "@/theme/components/icons";
-import { useFiltersContext } from "./FiltersContext";
 
 const DateWithTooltipSelector = ({ ...props }) => {
   const filtersContext = useFiltersContext();

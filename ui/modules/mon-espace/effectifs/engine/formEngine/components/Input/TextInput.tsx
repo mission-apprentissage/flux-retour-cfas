@@ -1,8 +1,8 @@
 import { Input as ChackraInput, InputProps } from "@chakra-ui/react";
-
 import React, { useMemo, useRef } from "react";
-import { InputWrapper } from "./InputWrapper";
 import { IMask, IMaskMixin } from "react-imask";
+
+import { InputWrapper } from "./InputWrapper";
 
 export const TextInput = (props) => {
   const {
@@ -97,7 +97,7 @@ const MaskedInput = (props) => {
     variant,
   } = props;
   const inputRef = useRef(null);
-  let blocks = useMemo(() => {
+  const blocks = useMemo(() => {
     return maskBlocks?.reduce((acc, item) => {
       if (item.mask === "MaskedRange")
         acc[item.name] = {

@@ -1,14 +1,14 @@
-import React from "react";
-import { useRouter } from "next/router";
-import Link from "next/link";
+import { Box, Button, Heading, HStack, Input, Stack, Spinner, Text, VStack, CloseButton } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
-import { Box, Button, Heading, HStack, Input, Stack, Spinner, Text, VStack, CloseButton } from "@chakra-ui/react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React from "react";
 
 import { _get } from "@/common/httpClient";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import EffectifsList from "@/modules/admin/EffectifsList";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });

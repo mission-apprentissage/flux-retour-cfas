@@ -1,6 +1,7 @@
 import bunyan from "bunyan";
 import PrettyStream from "bunyan-prettystream";
-import config from "../config.js";
+
+import config from "@/config";
 
 const createStreams = () => {
   const { type, level } = config.log;

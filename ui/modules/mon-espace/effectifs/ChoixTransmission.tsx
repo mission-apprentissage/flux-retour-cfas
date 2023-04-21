@@ -1,11 +1,10 @@
-import React from "react";
-import { useRouter } from "next/router";
-
 import { Box, Button, Center, Flex, Heading, HStack, Text } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import React from "react";
 
-import { ArrowDropRightLine } from "@/theme/components/icons";
+import { configureOrganismeERP } from "@/common/api/tableauDeBord";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { configureOrganismeERP } from "../../../common/api/tableauDeBord";
+import { ArrowDropRightLine } from "@/theme/components/icons";
 
 const ChoixTransmission = ({ organisme }) => {
   const router = useRouter();

@@ -1,16 +1,17 @@
 import Boom from "boom";
 
-import { invitationsDb, organisationsDb, usersMigrationDb } from "../model/collections.js";
-import { RegistrationSchema } from "../validation/registrationSchema.js";
-import { buildOrganisationLabel, createOrganisation } from "./organisations.actions.js";
-import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions.js";
-import { createSession } from "./sessions.actions.js";
-import { createOrganisme, getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions.js";
-import logger from "../logger.js";
-import { sendEmail } from "../services/mailer/mailer.js";
-import config from "../../config.js";
-import { createActivationToken, createResetPasswordToken } from "../utils/jwtUtils.js";
-import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisation.js";
+import { buildOrganisationLabel, createOrganisation } from "./organisations.actions";
+import { createOrganisme, getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
+import { createSession } from "./sessions.actions";
+import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
+
+import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import logger from "@/common/logger";
+import { invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { sendEmail } from "@/common/services/mailer/mailer";
+import { createActivationToken, createResetPasswordToken } from "@/common/utils/jwtUtils";
+import { RegistrationSchema } from "@/common/validation/registrationSchema";
+import config from "@/config";
 
 export async function register(registration: RegistrationSchema): Promise<{
   account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";

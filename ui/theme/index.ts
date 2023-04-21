@@ -1,7 +1,8 @@
 import { extendTheme } from "@chakra-ui/react";
 import { theme } from "@chakra-ui/theme";
-import { fonts, colors, fontSizes, space, rootFontSizePx, textStyles } from "./theme-beta";
+
 import { components } from "./components/index";
+import { fonts, colors, fontSizes, space, rootFontSizePx, textStyles } from "./theme-beta";
 
 const styles = {
   global: {

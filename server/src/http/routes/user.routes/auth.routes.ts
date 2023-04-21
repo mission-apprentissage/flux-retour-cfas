@@ -1,13 +1,13 @@
+import Boom from "boom";
 import express from "express";
 import Joi from "joi";
 
-import { responseWithCookie } from "../../../common/utils/httpUtils.js";
-import { COOKIE_NAME } from "../../../common/constants/cookieName.js";
-import { returnResult } from "../../middlewares/helpers.js";
-import Boom from "boom";
-import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
-import { login } from "../../../common/actions/account.actions.js";
-import { removeJwt } from "../../../common/actions/sessions.actions.js";
+import { login } from "@/common/actions/account.actions";
+import { removeJwt } from "@/common/actions/sessions.actions";
+import { COOKIE_NAME } from "@/common/constants/cookieName";
+import { responseWithCookie } from "@/common/utils/httpUtils";
+import { validateFullObjectSchema } from "@/common/utils/validationUtils";
+import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
   const router = express.Router();

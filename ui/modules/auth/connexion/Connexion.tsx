@@ -14,14 +14,14 @@ import {
   Heading,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
+import NavLink from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 import * as Yup from "yup";
-import { useRouter } from "next/router";
-import NavLink from "next/link";
 
-import useAuth from "../../../hooks/useAuth";
-import { _post } from "../../../common/httpClient";
-import { AlertRounded, ShowPassword } from "../../../theme/components/icons";
+import { _post } from "@/common/httpClient";
+import useAuth from "@/hooks/useAuth";
+import { AlertRounded, ShowPassword } from "@/theme/components/icons";
 
 const Login = (props) => {
   const { refreshSession } = useAuth();

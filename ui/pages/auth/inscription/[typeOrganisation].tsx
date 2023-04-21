@@ -1,16 +1,16 @@
-import React, { useState } from "react";
 import { Box, Button, HStack, Link, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
-
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useRouter } from "next/router";
+import React, { useState } from "react";
+
 import { CONTACT_ADDRESS } from "@/common/constants/product";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
+import { NewOrganisation, SetterOrganisation } from "@/modules/auth/inscription/common";
 import { InscriptionOF } from "@/modules/auth/inscription/InscriptionOF";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
-import { NewOrganisation, SetterOrganisation } from "@/modules/auth/inscription/common";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

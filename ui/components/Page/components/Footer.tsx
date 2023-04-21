@@ -1,9 +1,9 @@
-import React from "react";
 import { Box, Container, Flex, Grid, GridItem, Image, List, ListItem, Text } from "@chakra-ui/react";
 import { usePlausible } from "next-plausible";
+import React from "react";
 
-import { ExternalLinkLine } from "../../../theme/components/icons";
-import Link from "../../Links/Link";
+import Link from "@/components/Links/Link";
+import { ExternalLinkLine } from "@/theme/components/icons";
 
 const APP_VERSION = process.env.NEXT_PUBLIC_VERSION;
 

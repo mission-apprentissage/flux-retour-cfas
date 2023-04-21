@@ -1,10 +1,10 @@
 import express from "express";
 import Joi from "joi";
 
-import logger from "../../../common/logger.js";
-import { effectifsQueueDb } from "../../../common/model/collections.js";
-import { defaultValuesEffectifQueue } from "../../../common/model/effectifsQueue.model.js";
-import dossierApprenantSchema from "../../../common/validation/dossierApprenantSchema.js";
+import logger from "@/common/logger";
+import { effectifsQueueDb } from "@/common/model/collections";
+import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
+import dossierApprenantSchema from "@/common/validation/dossierApprenantSchema";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 

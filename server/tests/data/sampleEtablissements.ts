@@ -1,4 +1,4 @@
-import { NATURE_ORGANISME_DE_FORMATION } from "../../src/common/constants/organisme.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 
 export default {
   19040492100016: {

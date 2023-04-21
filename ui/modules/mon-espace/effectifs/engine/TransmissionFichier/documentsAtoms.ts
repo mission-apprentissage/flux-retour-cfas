@@ -1,5 +1,6 @@
 import { selector } from "recoil";
-import { uploadsAtom } from "../atoms";
+
+import { uploadsAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 
 export const documentsGetter = selector({
   key: "documentsGetter",

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Button,
@@ -16,16 +15,17 @@ import {
   Text,
   Image,
 } from "@chakra-ui/react";
+import React from "react";
 
-import Link from "../../Links/Link";
-import { PRODUCT_NAME_TITLE } from "../../../common/constants/product";
-import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill";
-import { AccountFill } from "../../../theme/components/icons/AccountFill";
-import useAuth from "../../../hooks/useAuth";
-import { _post } from "../../../common/httpClient";
-import MenuItem from "../../Links/MenuItem";
-import { Parametre } from "../../../theme/components/icons/Parametre";
-import { Settings4Fill, UserFill } from "../../../theme/components/icons";
+import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
+import { _post } from "@/common/httpClient";
+import Link from "@/components/Links/Link";
+import MenuItem from "@/components/Links/MenuItem";
+import useAuth from "@/hooks/useAuth";
+import { Settings4Fill, UserFill } from "@/theme/components/icons";
+import { AccountFill } from "@/theme/components/icons/AccountFill";
+import { AccountUnfill } from "@/theme/components/icons/AccountUnfill";
+import { Parametre } from "@/theme/components/icons/Parametre";
 
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();

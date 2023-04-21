@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Organisation } from "./Organisation";
 
 export interface AuthContext<IOrganisation = Organisation> {

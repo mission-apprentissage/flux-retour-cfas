@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
 import { HStack, Radio, RadioGroup } from "@chakra-ui/react";
+import React, { useMemo } from "react";
 
 export const RadioInput = (props) => {
   const { name, onChange, value, locked, options = [] } = props;

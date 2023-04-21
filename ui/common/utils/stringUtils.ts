@@ -1,4 +1,4 @@
-import { validateSiret } from "../domain/siret";
+import { validateSiret } from "@/common/domain/siret";
 
 /**
  * Returns true if substring is found in given string. Case insensitive.

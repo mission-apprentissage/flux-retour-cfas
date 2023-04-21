@@ -1,4 +1,3 @@
-import React, { memo } from "react";
 import {
   Icon,
   Popover,
@@ -18,11 +17,13 @@ import {
   Link,
   Box,
 } from "@chakra-ui/react";
+import ChakraUIRenderer from "chakra-ui-markdown-renderer";
+import React, { memo } from "react";
+import ReactMarkdown from "react-markdown";
+
 import { prettyPrintDate } from "@/common/utils/dateUtils";
 import { replaceLinks } from "@/common/utils/markdownUtils";
-import { ExternalLinkLine } from "../../theme/components/icons";
-import ChakraUIRenderer from "chakra-ui-markdown-renderer";
-import ReactMarkdown from "react-markdown";
+import { ExternalLinkLine } from "@/theme/components/icons";
 
 const TooltipIcon = (props) => (
   <Icon viewBox="0 0 24 24" w="24px" h="24px" {...props}>

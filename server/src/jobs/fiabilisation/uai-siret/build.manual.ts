@@ -1,5 +1,5 @@
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../common/constants/fiabilisation.js";
-import { fiabilisationUaiSiretDb } from "../../../common/model/collections.js";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
+import { fiabilisationUaiSiretDb } from "@/common/model/collections";
 
 /**
  * Fonction d'ajout/update des couples de fiabilisation manuelles

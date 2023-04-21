@@ -1,5 +1,5 @@
-import logger from "../../common/logger.js";
-import { effectifsDb } from "../../common/model/collections.js";
+import logger from "@/common/logger";
+import { effectifsDb } from "@/common/model/collections";
 
 export async function hydrateEffectifsComputed() {
   logger.info("Hydrating effectifs._computed...");

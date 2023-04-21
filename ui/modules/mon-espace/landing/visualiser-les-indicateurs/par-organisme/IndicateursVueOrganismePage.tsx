@@ -1,16 +1,18 @@
 import { Box, Flex, Heading, HStack } from "@chakra-ui/react";
+import Head from "next/head";
 import PropTypes from "prop-types";
 import React from "react";
-import Head from "next/head";
 
-import CfasFilter from "@/components/CfasFilter/CfasFilter";
-import Page from "@/components/Page/Page";
-import Section from "@/components/Section/Section";
-import CfaPanel from "@/components/CfasFilter/CfasPanel";
-import useFetchOrganismeInfo from "@/hooks/useFetchOrganismeInfo";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
+
 import OrganismeViewContent from "./OrganismeViewContent";
+
+import CfasFilter from "@/components/CfasFilter/CfasFilter";
+import CfaPanel from "@/components/CfasFilter/CfasPanel";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import useFetchOrganismeInfo from "@/hooks/useFetchOrganismeInfo";
 
 const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();

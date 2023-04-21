@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
 import { Box, Flex, Text } from "@chakra-ui/react";
+import PropTypes from "prop-types";
+import React, { useState } from "react";
 
 const Question = ({ question, answer }) => {
   const [showAnswer, setShowAnswer] = useState(false);

@@ -1,4 +1,5 @@
-import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Box, Button, Divider, HStack, Text } from "@chakra-ui/react";
+import { rankItem } from "@tanstack/match-sorter-utils";
 import {
   createColumnHelper,
   flexRender,
@@ -9,8 +10,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Box, Button, Divider, HStack, Text } from "@chakra-ui/react";
-import { rankItem } from "@tanstack/match-sorter-utils";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
   // Rank the item

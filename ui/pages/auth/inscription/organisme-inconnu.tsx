@@ -1,6 +1,7 @@
-import React from "react";
-import { useRouter } from "next/router";
 import { Link, Text } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import React from "react";
+
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
 
 export default function InscriptionOrganismeInconnu() {

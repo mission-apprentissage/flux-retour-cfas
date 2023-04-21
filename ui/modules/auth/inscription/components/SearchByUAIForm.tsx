@@ -1,6 +1,3 @@
-import React, { useState } from "react";
-import { Field, Form, Formik } from "formik";
-import * as Yup from "yup";
 import {
   Accordion,
   AccordionButton,
@@ -17,11 +14,16 @@ import {
   Spinner,
   Text,
 } from "@chakra-ui/react";
+import { Field, Form, Formik } from "formik";
+import React, { useState } from "react";
+import * as Yup from "yup";
+
+import OrganismeDetails from "./OrganismeDetails";
+
 import { searchOrganismesByUAI } from "@/common/api/tableauDeBord";
 import { UAI_REGEX } from "@/common/domain/uai";
-import OrganismeDetails from "./OrganismeDetails";
-import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "../common";
 import { sleep } from "@/common/utils/misc";
+import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
 
 export default function SearchByUAIForm({ organisation, setOrganisation }: InscriptionOrganistionChildProps) {
   const [organismes, setOrganismes] = useState<any[] | null>(null);

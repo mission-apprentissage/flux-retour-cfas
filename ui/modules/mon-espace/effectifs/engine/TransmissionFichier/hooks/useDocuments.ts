@@ -1,10 +1,10 @@
-import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { uploadsAtom } from "../../atoms";
-import { documentsGetter } from "../documentsAtoms";
-import { _get } from "../../../../../../common/httpClient";
+import { _get } from "@/common/httpClient";
+import { uploadsAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+import { documentsGetter } from "@/modules/mon-espace/effectifs/engine/TransmissionFichier/documentsAtoms";
 
 export function useFetchUploads(organismeId) {
   const [, setUploads] = useRecoilState(uploadsAtom);

@@ -1,8 +1,9 @@
-import { uploadsDb } from "../model/collections.js";
-import { ObjectId, WithId } from "mongodb";
 import { find, findIndex } from "lodash-es";
-import { defaultValuesUpload } from "../model/uploads.model/uploads.model.js";
-import { Upload } from "../model/@types/Upload.js";
+import { ObjectId, WithId } from "mongodb";
+
+import { Upload } from "@/common/model/@types/Upload";
+import { uploadsDb } from "@/common/model/collections";
+import { defaultValuesUpload } from "@/common/model/uploads.model/uploads.model";
 
 /**
  * Méthode de création d'un set d'uploads pour un organisme

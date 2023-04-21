@@ -1,8 +1,9 @@
 import { Spinner, HStack, Flex, Heading } from "@chakra-ui/react";
+import Head from "next/head";
 import React from "react";
+
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
-import Head from "next/head";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

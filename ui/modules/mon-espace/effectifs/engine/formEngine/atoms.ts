@@ -1,7 +1,9 @@
 import { atom, selector, selectorFamily } from "recoil";
+
 import { getValues } from "./utils/getValues";
-// import { getFormStatus } from "../cerfaForm/completion";
-import { effectifsStateAtom } from "../atoms";
+
+// import { getFormStatus } from "@/modules/mon-espace/effectifs/engine/cerfaForm/completion";
+import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 
 export const cerfaAtom = atom({
   key: "cerfaAtom",
@@ -28,7 +30,7 @@ export const effectifStateSelector = selectorFamily({
       set(effectifsStateAtom, (prevEffectifsState: any) => {
         // eslint-disable-next-line no-undef
         const newEffectifsState = new Map<any, any>(JSON.parse(JSON.stringify(Array.from(prevEffectifsState))));
-        let validation_errors: any[] = [];
+        const validation_errors: any[] = [];
         const {
           validation_errors: prevValidationErrors,
           requiredSifa: prevRequiredSifa,
@@ -38,7 +40,7 @@ export const effectifStateSelector = selectorFamily({
             validation_errors.push(validation_error);
           }
         }
-        let requiredSifa: any[] = [];
+        const requiredSifa: any[] = [];
         for (const currentRequiredSifa of prevRequiredSifa) {
           if (!inputNames.includes(currentRequiredSifa)) {
             requiredSifa.push(currentRequiredSifa);

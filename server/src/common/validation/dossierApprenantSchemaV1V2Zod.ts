@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { primitivesV1 } from "./utils/zodPrimitives.js";
+
+import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 
 /**
  * Note: ce schema est seulement utilisé pour generer la documentation OpenAPI poour l'API v1.
