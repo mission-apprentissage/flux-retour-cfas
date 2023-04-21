@@ -79,7 +79,7 @@ services:
       - 3310:3310
 
   smtp:
-    image: mailhog/mailhog
+    image: axllent/mailpit:v1.5.5
     container_name: flux_retour_cfas_smtp
     mem_limit: 128m
     ports:
@@ -87,11 +87,9 @@ services:
     networks:
       - flux_retour_cfas_network
     environment:
-      - MH_UI_WEB_PATH=smtp
-      - MH_STORAGE=mongodb
-      - MH_MONGO_URI=mongodb:27017
-      - MH_MONGO_DB=flux_retour_cfas
-      - MH_MONGO_COLLECTION=mailhog
+      - MP_DATA_FILE=/data/mailpit.db
+    volumes:
+      - flux_retour_cfas_smtp_data:/data
     depends_on:
       - mongodb
 
@@ -102,3 +100,6 @@ volumes:
   flux_retour_cfas_nginx_data:
     driver: local
     name: flux_retour_cfas_nginx_data
+  flux_retour_cfas_smtp_data:
+    driver: local
+    name: flux_retour_cfas_smtp_data
