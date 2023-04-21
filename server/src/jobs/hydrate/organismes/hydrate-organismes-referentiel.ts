@@ -119,7 +119,7 @@ const insertUaiAcceReferentiel = async (uaiAcceReferentiel) => {
 
   // Ajout de l'organisme dans la collection
   try {
-    await uaisAccesReferentielDb().insertOne({ uai } as UaisAcceReferentiel);
+    await uaisAccesReferentielDb().updateOne({ uai }, { $set: { uai } }, { upsert: true });
     nbUaiAcceCreated++;
   } catch (error) {
     nbUaiAcceNotCreated++;
