@@ -4,7 +4,12 @@ import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
 } from "@/common/constants/fiabilisation";
-import { organismesReferentielDb, fiabilisationUaiSiretDb, organismesDb } from "@/common/model/collections";
+import {
+  organismesReferentielDb,
+  fiabilisationUaiSiretDb,
+  organismesDb,
+  uaisAccesReferentielDb,
+} from "@/common/model/collections";
 import { buildFiabilisationCoupleForTdbCouple } from "@/jobs/fiabilisation/uai-siret/build";
 import {
   checkCoupleFiable,
