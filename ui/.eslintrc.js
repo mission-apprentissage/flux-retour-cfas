@@ -60,7 +60,6 @@ module.exports = {
     {
       files: "*.js",
       rules: {
-        // autorise l'import des devDependencies
         "@typescript-eslint/no-var-requires": "off",
       },
     },
