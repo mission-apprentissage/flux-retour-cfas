@@ -72,7 +72,7 @@ export const primitivesV1 = {
         enum: CODES_STATUT_APPRENANT_ENUM,
         type: "integer",
       }),
-    date_metier_mise_a_jour_statut: extensions.iso8601Datetime().openapi({
+    date_metier_mise_a_jour_statut: extensions.iso8601Date().openapi({
       description: "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
     }),
     id_erp: z.string().openapi({
