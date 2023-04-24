@@ -18,13 +18,13 @@ import { Field, Form, Formik } from "formik";
 import React, { useState } from "react";
 import * as Yup from "yup";
 
-import OrganismeDetails from "./OrganismeDetails";
-
 import { searchOrganismesBySIRET } from "@/common/api/tableauDeBord";
 import { SIRET_REGEX } from "@/common/domain/siret";
 import { sleep } from "@/common/utils/misc";
 import Link from "@/components/Links/Link";
 import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
+
+import OrganismeDetails from "./OrganismeDetails";
 
 export default function SearchBySIRETForm({ organisation, setOrganisation }: InscriptionOrganistionChildProps) {
   const [organismes, setOrganismes] = useState<any[] | null>(null);

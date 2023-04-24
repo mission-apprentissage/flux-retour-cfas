@@ -2,11 +2,11 @@ import { Tbody } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import NiveauFormationRow from "./NiveauFormationRow";
-
 import { isDateFuture } from "@/common/utils/dateUtils";
 import Table from "@/components/tables/Table";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+
+import NiveauFormationRow from "./NiveauFormationRow";
 
 const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error }) => {
   const filtersContext = useFiltersContext();

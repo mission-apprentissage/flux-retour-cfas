@@ -1,12 +1,12 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import FormationFilterMenu from "./FormationFilterMenu";
-
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+
+import FormationFilterMenu from "./FormationFilterMenu";
 
 const FormationFilter = ({ filters, onFormationChange, variant = "primary" }) => {
   const [isOpen, setIsOpen] = useState(false);

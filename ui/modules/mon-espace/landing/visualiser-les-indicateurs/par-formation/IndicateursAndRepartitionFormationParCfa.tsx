@@ -2,11 +2,6 @@ import { Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react
 import PropTypes from "prop-types";
 import React from "react";
 
-import DateWithTooltipSelector from "../DateWithTooltipSelector";
-import { filtersPropTypes } from "../FiltersContext";
-import { indicateursEffectifsSchema } from "../indicateursEffectifsSchema";
-import IndicateursGridStack from "../IndicateursGridStack";
-
 import { fetchEffectifsDataListCsvExport } from "@/common/api/tableauDeBord";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
@@ -14,6 +9,11 @@ import Section from "@/components/Section/Section";
 import RepartitionEffectifsParCfa from "@/components/tables/RepartitionEffectifsParCfa";
 import useFetchEffectifsParCfa from "@/hooks/useFetchEffectifsParCfa";
 import useFetchOrganismesCount from "@/hooks/useFetchOrganismesCount";
+
+import DateWithTooltipSelector from "../DateWithTooltipSelector";
+import { filtersPropTypes } from "../FiltersContext";
+import { indicateursEffectifsSchema } from "../indicateursEffectifsSchema";
+import IndicateursGridStack from "../IndicateursGridStack";
 
 const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading }) => {
   const { data, isLoading, error } = useFetchEffectifsParCfa(filters);

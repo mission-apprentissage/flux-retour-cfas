@@ -1,10 +1,5 @@
 import Boom from "boom";
 
-import { buildOrganisationLabel, createOrganisation } from "./organisations.actions";
-import { createOrganisme, getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
-import { createSession } from "./sessions.actions";
-import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
-
 import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import logger from "@/common/logger";
 import { invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
@@ -12,6 +7,11 @@ import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken, createResetPasswordToken } from "@/common/utils/jwtUtils";
 import { RegistrationSchema } from "@/common/validation/registrationSchema";
 import config from "@/config";
+
+import { buildOrganisationLabel, createOrganisation } from "./organisations.actions";
+import { createOrganisme, getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
+import { createSession } from "./sessions.actions";
+import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
 
 export async function register(registration: RegistrationSchema): Promise<{
   account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";

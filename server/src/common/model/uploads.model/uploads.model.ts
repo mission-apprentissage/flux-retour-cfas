@@ -1,7 +1,5 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { documentSchema } from "./parts/document.part";
-
 import { preDefinedModels } from "@/common/constants/models/upload.models.part";
 import {
   object,
@@ -13,6 +11,8 @@ import {
   string,
   boolean,
 } from "@/common/model/json-schema/jsonSchemaTypes";
+
+import { documentSchema } from "./parts/document.part";
 
 const collectionName = "uploads";
 

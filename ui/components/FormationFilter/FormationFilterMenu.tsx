@@ -2,14 +2,14 @@ import { Box, Divider, Heading } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import FormationsList from "./FormationsList";
-import useFormationSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useFormationSearch";
-
 import InputLegend from "@/components/InputLegend/InputLegend";
 import Loading from "@/components/Loading/Loading";
 import NoResults from "@/components/NoResults/NoResults";
 import SearchInput from "@/components/SearchInput/SearchInput";
 import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+
+import FormationsList from "./FormationsList";
+import useFormationSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useFormationSearch";
 
 const FormationFilterMenu = ({ filters, onFormationClick }) => {
   const [searchTerm, setSearchTerm] = useState("");

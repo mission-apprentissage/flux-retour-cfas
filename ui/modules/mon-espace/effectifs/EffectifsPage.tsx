@@ -3,14 +3,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef } from "react";
 import { useSetRecoilState, useRecoilValue } from "recoil";
 
+import { _get } from "@/common/httpClient";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+
 import ChoixTransmission from "./ChoixTransmission";
 import { effectifsStateAtom } from "./engine/atoms";
 import Effectifs from "./engine/Effectifs";
 import Televersements from "./Televersements";
 import TransmissionAPI from "./TransmissionAPI";
-
-import { _get } from "@/common/httpClient";
-import { organismeAtom } from "@/hooks/organismeAtoms";
 
 function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);

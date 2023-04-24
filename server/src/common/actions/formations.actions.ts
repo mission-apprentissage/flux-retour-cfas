@@ -1,13 +1,13 @@
 import { ObjectId } from "mongodb";
 
-import { buildMongoPipelineFilterStages } from "./helpers/filters";
-
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
 import logger from "@/common/logger";
 import { formationsDb, effectifsDb } from "@/common/model/collections";
 import { validateFormation } from "@/common/model/formations.model";
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { validateCfd } from "@/common/validation/utils/cfd";
+
+import { buildMongoPipelineFilterStages } from "./helpers/filters";
 
 const SEARCH_RESULTS_LIMIT = 50;
 

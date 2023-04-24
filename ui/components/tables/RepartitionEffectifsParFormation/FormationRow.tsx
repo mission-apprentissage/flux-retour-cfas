@@ -2,11 +2,11 @@ import { Box, Flex, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import AnneeFormationRows from "./AnneeFormationRows";
-
 import { isDateFuture } from "@/common/utils/dateUtils";
 import NumberValueCell from "@/components/tables/NumberValueCell";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+
+import AnneeFormationRows from "./AnneeFormationRows";
 
 const FormationRow = ({ formationCfd, intitule, effectifs, niveauFormation }) => {
   const [isOpen, setIsOpen] = useState<boolean>();

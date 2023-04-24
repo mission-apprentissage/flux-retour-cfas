@@ -2,12 +2,12 @@ import { faker } from "@faker-js/faker/locale/fr";
 import { subMonths, addYears } from "date-fns";
 import RandExp from "randexp";
 
-import sampleEtablissements from "./sampleEtablissements";
-import { sampleLibelles } from "./sampleLibelles";
-
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { CFD_REGEX, INE_REGEX, RNCP_REGEX } from "@/common/constants/organisme";
 import { omit } from "@/common/utils/miscUtils";
+
+import sampleEtablissements from "./sampleEtablissements";
+import { sampleLibelles } from "./sampleLibelles";
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();

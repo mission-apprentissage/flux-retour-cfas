@@ -1,11 +1,11 @@
 import { Box, Flex, FormLabel, HStack, Text } from "@chakra-ui/react";
 import React, { memo } from "react";
 
-import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
-import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
-
 import { CollapseController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/CollapseController";
 import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
+
+import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
+import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 
 // eslint-disable-next-line react/display-name
 export const EffectifApprenant = memo(({ apprenant }: { apprenant: any }) => {

@@ -3,13 +3,6 @@ import { format } from "date-fns";
 import { ObjectId } from "mongodb";
 
 import {
-  abandonsIndicator,
-  apprentisIndicator,
-  inscritsSansContratsIndicator,
-  rupturantsIndicator,
-} from "./indicators";
-
-import {
   buildMongoPipelineFilterStages,
   EffectifsFiltersWithRestriction,
   LegacyEffectifsFilters,
@@ -26,6 +19,13 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
 import { tryCachedExecution } from "@/common/utils/cacheUtils";
 import { mergeObjectsBy } from "@/common/utils/mergeObjectsBy";
+
+import {
+  abandonsIndicator,
+  apprentisIndicator,
+  inscritsSansContratsIndicator,
+  rupturantsIndicator,
+} from "./indicators";
 
 // ce helper est principalement appelé dans les routes des indicateurs agrégés et non scopés à un organisme, mais aussi pour un organisme :
 // - si organisme_id, uai ou siret, indicateurs pour un organisme, on vérifie que l'organisation y a accès

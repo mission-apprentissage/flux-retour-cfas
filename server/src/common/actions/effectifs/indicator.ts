@@ -1,7 +1,7 @@
-import { exportedMongoFieldsProjection } from "./export";
-
 import { organismeLookup } from "@/common/actions/helpers/filters";
 import { effectifsDb } from "@/common/model/collections";
+
+import { exportedMongoFieldsProjection } from "./export";
 
 /**
   Indicator s'occupe de construire un pipeline d'aggrégation pour obtenir un indicateur

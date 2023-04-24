@@ -10,8 +10,6 @@ import { ObjectId, WithId } from "mongodb";
 import multiparty from "multiparty";
 import { accumulateData, oleoduc, writeData } from "oleoduc";
 
-import { sendServerEventsForUser } from "./server-events.routes";
-
 import { createEffectif, findEffectifs, updateEffectif } from "@/common/actions/effectifs.actions";
 import { hydrateEffectif } from "@/common/actions/engine/engine.actions";
 import { getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
@@ -33,6 +31,8 @@ import * as crypto from "@/common/utils/cryptoUtils";
 import { getFromStorage, uploadToStorage, deleteFromStorage } from "@/common/utils/ovhUtils";
 import { getJsonFromXlsxData } from "@/common/utils/xlsxUtils";
 import { clamav } from "@/services";
+
+import { sendServerEventsForUser } from "./server-events.routes";
 
 const MAX_FILE_SIZE = 10_485_760; // 10MB
 

@@ -1,9 +1,9 @@
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
 import React from "react";
 
-import { InscriptionOrganistionChildProps } from "./common";
-
 import { TETE_DE_RESEAUX } from "@/common/constants/networksConstants";
+
+import { InscriptionOrganistionChildProps } from "./common";
 
 export const InscriptionTeteDeReseau = ({ setOrganisation }: InscriptionOrganistionChildProps) => {
   return (

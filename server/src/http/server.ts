@@ -17,33 +17,6 @@ import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
-import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
-import { authOrgMiddleware } from "./middlewares/authOrgMiddleware";
-import errorMiddleware from "./middlewares/errorMiddleware";
-import { requireAdministrator, returnResult } from "./middlewares/helpers";
-import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
-import { logMiddleware } from "./middlewares/logMiddleware";
-import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
-import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
-import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
-import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
-import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
-import organismesAdmin from "./routes/admin.routes/organismes.routes";
-import statsAdmin from "./routes/admin.routes/stats.routes";
-import usersAdmin from "./routes/admin.routes/users.routes";
-import emails from "./routes/emails.routes";
-import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
-import effectif from "./routes/specific.routes/effectif.routes";
-import indicateursRouter from "./routes/specific.routes/indicateurs.routes";
-import {
-  getOrganismeByUAIAvecSousEtablissements,
-  getOrganismeEffectifs,
-} from "./routes/specific.routes/organisme.routes";
-import organismesRouter from "./routes/specific.routes/organismes.routes";
-import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
-import upload from "./routes/specific.routes/upload.routes";
-import auth from "./routes/user.routes/auth.routes";
-
 import { sendForgotPasswordRequest, register, activateUser } from "@/common/actions/account.actions";
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
 import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
@@ -96,6 +69,33 @@ import uploadMappingSchema from "@/common/validation/uploadMappingSchema";
 import uploadUpdateDocumentSchema from "@/common/validation/uploadUpdateDocumentSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import config from "@/config";
+
+import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
+import { authOrgMiddleware } from "./middlewares/authOrgMiddleware";
+import errorMiddleware from "./middlewares/errorMiddleware";
+import { requireAdministrator, returnResult } from "./middlewares/helpers";
+import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
+import { logMiddleware } from "./middlewares/logMiddleware";
+import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
+import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
+import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
+import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
+import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
+import organismesAdmin from "./routes/admin.routes/organismes.routes";
+import statsAdmin from "./routes/admin.routes/stats.routes";
+import usersAdmin from "./routes/admin.routes/users.routes";
+import emails from "./routes/emails.routes";
+import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
+import effectif from "./routes/specific.routes/effectif.routes";
+import indicateursRouter from "./routes/specific.routes/indicateurs.routes";
+import {
+  getOrganismeByUAIAvecSousEtablissements,
+  getOrganismeEffectifs,
+} from "./routes/specific.routes/organisme.routes";
+import organismesRouter from "./routes/specific.routes/organismes.routes";
+import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
+import upload from "./routes/specific.routes/upload.routes";
+import auth from "./routes/user.routes/auth.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 

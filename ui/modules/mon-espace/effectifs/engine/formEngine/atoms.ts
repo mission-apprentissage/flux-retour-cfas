@@ -1,9 +1,10 @@
 import { atom, selector, selectorFamily } from "recoil";
 
+import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+
 import { getValues } from "./utils/getValues";
 
 // import { getFormStatus } from "@/modules/mon-espace/effectifs/engine/cerfaForm/completion";
-import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 
 export const cerfaAtom = atom({
   key: "cerfaAtom",

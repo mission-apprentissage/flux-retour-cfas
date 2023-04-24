@@ -1,10 +1,10 @@
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
 import React, { useState } from "react";
 
-import { InscriptionOrganistionChildProps } from "./common";
-
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
 import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoiresConstants";
+
+import { InscriptionOrganistionChildProps } from "./common";
 
 const typesOrganisation = [
   {

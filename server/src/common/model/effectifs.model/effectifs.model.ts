@@ -1,6 +1,13 @@
 import { uniqBy } from "lodash-es";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
+import { TETE_DE_RESEAUX } from "@/common/constants/networks";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
+import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
+import { Effectif } from "@/common/model/@types/Effectif";
+import { object, objectId, string, date, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
+import { schemaValidation } from "@/common/utils/schemaUtils";
+
 import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part";
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
 import {
@@ -8,13 +15,6 @@ import {
   formationEffectifSchema,
   validateFormationEffectif,
 } from "./parts/formation.effectif.part";
-
-import { TETE_DE_RESEAUX } from "@/common/constants/networks";
-import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
-import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
-import { Effectif } from "@/common/model/@types/Effectif";
-import { object, objectId, string, date, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
-import { schemaValidation } from "@/common/utils/schemaUtils";
 
 const collectionName = "effectifs";
 

@@ -1,9 +1,9 @@
 import Joi from "joi";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { object, objectId, objectIdOrNull, string, date, boolean } from "./json-schema/jsonSchemaTypes";
-
 import { schemaValidation } from "@/common/utils/schemaUtils";
+
+import { object, objectId, objectIdOrNull, string, date, boolean } from "./json-schema/jsonSchemaTypes";
 
 export const collectionName = "permissions";
 

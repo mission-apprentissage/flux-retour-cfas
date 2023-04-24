@@ -1,8 +1,8 @@
+import { nockGetFormations } from "@tests/utils/nockApis/nock-apiCatalogue";
+
 import { nockGetEntreprise, nockGetEtablissement } from "./nock-apiEntreprise";
 import { nockGetMetiersByCfd, nockGetMetiersBySiret } from "./nock-Lba";
 import { nockGetCodePostalInfo, nockGetCfdInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
-
-import { nockGetFormations } from "@tests/utils/nockApis/nock-apiCatalogue";
 
 export const nockExternalApis = () => {
   // nok API tablesCorrespondances

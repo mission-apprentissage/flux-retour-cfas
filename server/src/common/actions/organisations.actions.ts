@@ -1,9 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "mongodb";
 
-import { requireOrganisationOF } from "./helpers/permissions";
-import { getUserById } from "./users.actions";
-
 import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "@/common/constants/territoires";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
@@ -15,6 +12,9 @@ import { NewOrganisation, Organisation } from "@/common/model/organisations.mode
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
+
+import { requireOrganisationOF } from "./helpers/permissions";
+import { getUserById } from "./users.actions";
 
 export async function createOrganisation(organisation: NewOrganisation): Promise<ObjectId> {
   const { insertedId } = await organisationsDb().insertOne({

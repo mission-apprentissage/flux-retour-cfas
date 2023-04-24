@@ -1,7 +1,7 @@
-import getApiClient from "./client";
-
 import parentLogger from "@/common/logger";
 import config from "@/config";
+
+import getApiClient from "./client";
 
 // Cf Documentation : https://catalogue.apprentissage.beta.gouv.fr/api/v1/docs
 

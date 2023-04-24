@@ -16,11 +16,11 @@ import { useFormik } from "formik";
 import React from "react";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 
-import userSchema from "./userSchema";
-
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _delete, _put, _post } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
+
+import userSchema from "./userSchema";
 
 const UserForm = ({
   user,

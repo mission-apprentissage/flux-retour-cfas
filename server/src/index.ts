@@ -1,11 +1,11 @@
 import "dotenv/config";
-import { connectToMongodb, configureDbSchemaValidation } from "./common/mongodb";
-import server from "./http/server";
-import createGlobalServices from "./services";
-
 import logger from "@/common/logger";
 import { modelDescriptors } from "@/common/model/collections";
 import config from "@/config";
+
+import { connectToMongodb, configureDbSchemaValidation } from "./common/mongodb";
+import server from "./http/server";
+import createGlobalServices from "./services";
 
 process.on("unhandledRejection", (err) => logger.error(err, "unhandledRejection"));
 process.on("uncaughtException", (err) => logger.error(err, "uncaughtException"));

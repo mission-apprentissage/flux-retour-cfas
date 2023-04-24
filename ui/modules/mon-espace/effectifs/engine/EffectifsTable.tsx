@@ -4,12 +4,12 @@ import { DateTime } from "luxon";
 import React, { useEffect, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
+import Table from "@/components/Table/Table";
+import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "@/theme/components/icons";
+
 import { effectifIdAtom } from "./atoms";
 import Effectif from "./Effectif";
 import { effectifStateSelector } from "./formEngine/atoms";
-
-import Table from "@/components/Table/Table";
-import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "@/theme/components/icons";
 
 const EffectifDetails = ({ row, modeSifa = false, canEdit = false, effectifsSnapshot = false }) => {
   const queryClient = useQueryClient();

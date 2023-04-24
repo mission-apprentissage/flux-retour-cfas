@@ -2,15 +2,15 @@ import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack,
 import React, { memo, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 
-import { EffectifApprenant } from "./blocks/apprenant/EffectifApprenant";
-import { ApprenantContrats } from "./blocks/contrats/EffectifContrats";
-import { EffectifFormation } from "./blocks/formation/EffectifFormation";
-import EffectifStatuts from "./blocks/statuts/EffectifStatuts";
-
 import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import { effectifStateSelector, valuesSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
 import { ErrorPill } from "@/theme/components/icons/ErrorPill";
 import { PlainArrowRight } from "@/theme/components/icons/PlainArrowRight";
+
+import { EffectifApprenant } from "./blocks/apprenant/EffectifApprenant";
+import { ApprenantContrats } from "./blocks/contrats/EffectifContrats";
+import { EffectifFormation } from "./blocks/formation/EffectifFormation";
+import EffectifStatuts from "./blocks/statuts/EffectifStatuts";
 
 const useOpenAccordionToLocation = () => {
   const scrolledRef = useRef(false);

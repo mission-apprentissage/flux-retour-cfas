@@ -1,6 +1,8 @@
 import PropTypes from "prop-types";
 import React from "react";
 
+import useEffectifs from "@/hooks/useEffectifs";
+
 import { filtersPropTypes } from "../FiltersContext";
 
 import { infosCfaPropType } from "./propTypes";
@@ -10,8 +12,6 @@ import {
   MultiSiretDetailInformationSection,
   RepartitionEffectifsParSiretSection,
 } from "./sections";
-
-import useEffectifs from "@/hooks/useEffectifs";
 
 const OrganismeViewContent = ({ infosCfa, loading, error, filters }: any) => {
   const [effectifs, effectifsLoading] = useEffectifs();

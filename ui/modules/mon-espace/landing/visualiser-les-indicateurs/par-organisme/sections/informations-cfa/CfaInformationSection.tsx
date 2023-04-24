@@ -2,14 +2,14 @@ import { Badge, Box, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import CfaInformationSkeleton from "./CfaInformationSkeleton";
-import DomainesMetiers from "./DomainesMetiers";
-import OrganismeDeFormationReseauAndAdresse from "./OrganismeDeFormationReseauAndAdresse";
-
 import { formatSiretSplitted } from "@/common/utils/stringUtils";
 import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import Section from "@/components/Section/Section";
 import { infosCfaPropType } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/propTypes";
+
+import CfaInformationSkeleton from "./CfaInformationSkeleton";
+import DomainesMetiers from "./DomainesMetiers";
+import OrganismeDeFormationReseauAndAdresse from "./OrganismeDeFormationReseauAndAdresse";
 
 export const mapNatureOrganismeDeFormation = (nature) => {
   switch (nature) {

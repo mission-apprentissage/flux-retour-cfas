@@ -1,13 +1,13 @@
 import { Box, Container } from "@chakra-ui/react";
 import React from "react";
 
-import Footer from "./components/Footer";
-import Header from "./components/Header";
-import NavigationMenu from "./components/NavigationMenu";
-
 import Link from "@/components/Links/Link";
 import Section from "@/components/Section/Section";
 import { Interrogation } from "@/theme/components/icons";
+
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import NavigationMenu from "./components/NavigationMenu";
 
 function Page({ children, ...rest }) {
   return (

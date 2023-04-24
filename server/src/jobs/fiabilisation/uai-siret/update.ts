@@ -1,8 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool";
 import { MongoServerError } from "mongodb";
 
-import { getEffectifsDuplicatesFromOrganismes } from "./update.utils";
-
 import {
   createOrganisme,
   deleteOrganismeAndEffectifs,
@@ -20,6 +18,8 @@ import {
   organismesDb,
   organismesReferentielDb,
 } from "@/common/model/collections";
+
+import { getEffectifsDuplicatesFromOrganismes } from "./update.utils";
 
 let nbOrganismesReferentielFiables: number;
 let nbOrganismesFiabilises: number;

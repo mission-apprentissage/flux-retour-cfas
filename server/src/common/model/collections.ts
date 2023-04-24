@@ -1,3 +1,5 @@
+import { getDbCollection } from "@/common/mongodb";
+
 import {
   Effectif,
   FiabilisationUaiSiret,
@@ -26,8 +28,6 @@ import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model"
 import uploadsModelDescriptor from "./uploads.model/uploads.model";
 import usersModelDescriptor from "./users.model";
 import usersMigrationModelDescriptor from "./usersMigration.model";
-
-import { getDbCollection } from "@/common/mongodb";
 
 export const modelDescriptors = [
   usersModelDescriptor,

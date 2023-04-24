@@ -1,8 +1,8 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { object, string, date, arrayOf, any, objectId } from "./json-schema/jsonSchemaTypes";
-
 import { CODES_STATUT_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
+
+import { object, string, date, arrayOf, any, objectId } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "effectifsQueue";
 

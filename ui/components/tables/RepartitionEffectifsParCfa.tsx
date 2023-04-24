@@ -3,14 +3,14 @@ import { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import React from "react";
 
-import NumberValueCell from "./NumberValueCell";
-import Table from "./Table";
-
 import { isDateFuture } from "@/common/utils/dateUtils";
 import { navigateToOrganismePage } from "@/common/utils/routing";
 import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { mapNatureOrganismeDeFormation } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
+
+import NumberValueCell from "./NumberValueCell";
+import Table from "./Table";
 
 const RepartitionEffectifsParCfa = ({
   repartitionEffectifsParCfa,

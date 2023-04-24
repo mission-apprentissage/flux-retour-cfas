@@ -16,18 +16,18 @@ import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import { useSetRecoilState } from "recoil";
 
+import { _get, _post, _put } from "@/common/httpClient";
+import { sortByNormalizedLabels } from "@/common/utils/array";
+import Ribbons from "@/components/Ribbons/Ribbons";
+import useServerEvents from "@/hooks/useServerEvents";
+import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon, ArrowRightLong } from "@/theme/components/icons";
+
 import { effectifsStateAtom } from "./engine/atoms";
 import EffectifsTable from "./engine/EffectifsTable";
 import { Input } from "./engine/formEngine/components/Input/Input";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
 import TeleversementInProgress from "./TeleversementInProgress";
-
-import { _get, _post, _put } from "@/common/httpClient";
-import { sortByNormalizedLabels } from "@/common/utils/array";
-import Ribbons from "@/components/Ribbons/Ribbons";
-import useServerEvents from "@/hooks/useServerEvents";
-import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon, ArrowRightLong } from "@/theme/components/icons";
 
 const Televersements = ({ organisme }) => {
   const { documents, uploads, onDocumentsChanged } = useDocuments();

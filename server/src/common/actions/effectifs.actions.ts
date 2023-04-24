@@ -1,10 +1,6 @@
 import { cloneDeep, isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
 
-import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions";
-import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters";
-import { getOrganismeById } from "./organismes/organismes.actions";
-
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb } from "@/common/model/collections";
@@ -14,6 +10,10 @@ import { defaultValuesFormationEffectif } from "@/common/model/effectifs.model/p
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { transformToInternationalNumber } from "@/common/validation/utils/frenchTelephoneNumber";
+
+import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions";
+import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters";
+import { getOrganismeById } from "./organismes/organismes.actions";
 
 /**
  * Méthode de build d'un effectif

@@ -1,12 +1,12 @@
 import { ObjectId } from "mongodb";
 
-import { findOrganismeByUai } from "./organismes.actions";
-
 import { createFormation, getFormationWithCfd } from "@/common/actions/formations.actions";
 import { getCatalogFormationsForOrganisme } from "@/common/apis/apiCatalogueMna";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { organismesDb } from "@/common/model/collections";
 import { asyncForEach } from "@/common/utils/asyncUtils";
+
+import { findOrganismeByUai } from "./organismes.actions";
 
 /**
  * Méthode de récupération de l'arbre des formations issues du catalogue liées à un organisme

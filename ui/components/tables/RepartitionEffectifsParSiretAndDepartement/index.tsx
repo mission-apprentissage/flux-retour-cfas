@@ -2,12 +2,12 @@ import { Box, Tbody, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import EffectifBySiretRow from "./EffectifBySiretRow";
-
 import { isDateFuture } from "@/common/utils/dateUtils";
 import Loading from "@/components/Loading/Loading";
 import Table from "@/components/tables/Table";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+
+import EffectifBySiretRow from "./EffectifBySiretRow";
 
 const RepartitionEffectifsParSiret = ({
   effectifs,

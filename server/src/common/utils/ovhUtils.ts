@@ -1,8 +1,8 @@
 import axios from "axios";
 
-import { createRequestStream, createUploadStream } from "./httpUtils";
-
 import config from "@/config";
+
+import { createRequestStream, createUploadStream } from "./httpUtils";
 
 async function authenticate(uri) {
   let regExp = new RegExp(/^(https:\/\/)(.+):(.+):(.+)@(.*)$/);

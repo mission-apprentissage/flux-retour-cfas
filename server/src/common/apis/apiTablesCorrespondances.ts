@@ -1,7 +1,7 @@
-import getApiClient from "./client";
-
 import logger from "@/common/logger";
 import config from "@/config";
+
+import getApiClient from "./client";
 
 // Cf Documentation : https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
 

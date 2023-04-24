@@ -1,6 +1,9 @@
 import { useMemo, useRef } from "react";
 import { useRecoilCallback, useSetRecoilState } from "recoil";
 
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import { dossierAtom, effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+
 import { cerfaAtom, cerfaSetter, cerfaStatusGetter, fieldSelector, valuesSelector } from "./atoms";
 import { indexedDependencies, indexedDependencesRevalidationRules, indexedRules } from "./cerfaSchema";
 import { findDefinition } from "./utils";
@@ -8,9 +11,6 @@ import { findLogicErrors } from "./utils/findLogicErrors";
 import { getValues } from "./utils/getValues";
 import { isEmptyValue } from "./utils/isEmptyValue";
 import { validField } from "./utils/validField";
-
-import { organismeAtom } from "@/hooks/organismeAtoms";
-import { dossierAtom, effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 
 export const useCerfa = ({ schema }: { schema: any }) => {
   const setCerfa = useSetRecoilState<any>(cerfaAtom);

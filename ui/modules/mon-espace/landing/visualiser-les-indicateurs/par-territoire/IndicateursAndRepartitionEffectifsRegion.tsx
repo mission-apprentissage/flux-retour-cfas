@@ -2,11 +2,6 @@ import { Stack, TabPanel } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import DateWithTooltipSelector from "../DateWithTooltipSelector";
-import { filtersPropTypes } from "../FiltersContext";
-import { indicateursEffectifsSchema } from "../indicateursEffectifsSchema";
-import IndicateursGridStack from "../IndicateursGridStack";
-
 import { fetchEffectifsDataListCsvExport } from "@/common/api/tableauDeBord";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
@@ -17,6 +12,11 @@ import RepartitionEffectifsParNiveauFormation from "@/components/tables/Repartit
 import useFetchEffectifsParDepartement from "@/hooks/useFetchEffectifsParDepartement";
 import useFetchEffectifsParNiveauFormation from "@/hooks/useFetchEffectifsParNiveauFormation";
 import useFetchOrganismesCount from "@/hooks/useFetchOrganismesCount";
+
+import DateWithTooltipSelector from "../DateWithTooltipSelector";
+import { filtersPropTypes } from "../FiltersContext";
+import { indicateursEffectifsSchema } from "../indicateursEffectifsSchema";
+import IndicateursGridStack from "../IndicateursGridStack";
 
 const IndicateursAndRepartitionEffectifsRegion = ({ filters, effectifs, loading }) => {
   const {

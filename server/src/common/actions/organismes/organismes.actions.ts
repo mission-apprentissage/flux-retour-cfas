@@ -1,8 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "mongodb";
 
-import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
-
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 import {
   findOrganismesAccessiblesByOrganisation,
@@ -23,6 +21,8 @@ import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
+
+import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
 
 const SEARCH_RESULTS_LIMIT = 50;
 

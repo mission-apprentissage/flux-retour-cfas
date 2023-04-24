@@ -1,14 +1,6 @@
 import Boom from "boom";
 import { Parser } from "json2csv";
 
-import { exportedFields } from "./export";
-import {
-  abandonsIndicator,
-  apprentisIndicator,
-  inscritsSansContratsIndicator,
-  rupturantsIndicator,
-} from "./indicators";
-
 import {
   EffectifsFiltersWithRestriction,
   LegacyEffectifsFilters,
@@ -21,6 +13,14 @@ import {
 import { EFFECTIF_INDICATOR_NAMES } from "@/common/constants/dossierApprenant";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+
+import { exportedFields } from "./export";
+import {
+  abandonsIndicator,
+  apprentisIndicator,
+  inscritsSansContratsIndicator,
+  rupturantsIndicator,
+} from "./indicators";
 
 // Parse to french localized CSV with specific fields order & labels (; as delimiter and UTF8 using withBOM)
 const CSV_DEFAULT_FIELDS = [

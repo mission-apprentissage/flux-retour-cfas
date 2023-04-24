@@ -1,5 +1,10 @@
 import { PromisePool } from "@supercharge/promise-pool";
 
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
+import logger from "@/common/logger";
+import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "@/common/model/collections";
+import { getPercentage } from "@/common/utils/miscUtils";
+
 import { addFiabilisationsManuelles } from "./build.manual";
 import {
   checkCoupleFiable,
@@ -11,11 +16,6 @@ import {
   checkUaiLieuReferentiel,
   checkUaiMultiplesRelationsAndLieux,
 } from "./build.rules";
-
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
-import logger from "@/common/logger";
-import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "@/common/model/collections";
-import { getPercentage } from "@/common/utils/miscUtils";
 
 // Filtres année scolaire pour récupération des couples UAI-SIRET
 const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] } };

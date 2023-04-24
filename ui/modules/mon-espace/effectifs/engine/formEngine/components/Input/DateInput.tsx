@@ -6,9 +6,9 @@ import React, { forwardRef, useMemo } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { IMask, IMaskMixin } from "react-imask";
 
-import { InputWrapper } from "./InputWrapper";
-
 import { IoArrowBackward, IoArrowForward } from "@/theme/components/icons";
+
+import { InputWrapper } from "./InputWrapper";
 
 registerLocale("fr", fr);
 

@@ -3,8 +3,6 @@ import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
 import { ObjectId } from "mongodb";
 
-import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils";
-
 import { buildEffectif, findEffectifByQuery, validateEffectifObject } from "@/common/actions/effectifs.actions";
 import {
   findOrganismeBySiret,
@@ -16,6 +14,8 @@ import { ACADEMIES, REGIONS, DEPARTEMENTS } from "@/common/constants/territoires
 import { Effectif } from "@/common/model/@types/Effectif";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "@/common/utils/formatterUtils";
 import { telephoneConverter } from "@/common/validation/utils/frenchTelephoneNumber";
+
+import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils";
 
 const dateConverter = (date) => {
   // TODO If more than year 4000 error

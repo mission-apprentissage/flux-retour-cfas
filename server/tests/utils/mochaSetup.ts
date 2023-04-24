@@ -1,11 +1,11 @@
 import nock from "nock";
 
-import { startAndConnectMongodb, stopMongodb } from "./mongoUtils";
-import { nockExternalApis } from "./nockApis/index";
-
 import { modelDescriptors } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes/index";
 import { clearAllCollections, configureDbSchemaValidation } from "@/common/mongodb";
+
+import { startAndConnectMongodb, stopMongodb } from "./mongoUtils";
+import { nockExternalApis } from "./nockApis/index";
 
 const LOCAL_HOST = "127.0.0.1";
 const MONGODB_MEMORY_SERVER_DL_HOST = "fastdl.mongodb.org";

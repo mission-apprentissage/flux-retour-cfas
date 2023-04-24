@@ -1,9 +1,9 @@
-import { controls } from "./controls";
-
 import { apprenantSchema } from "@/modules/mon-espace/effectifs/engine/cerfaForm/blocks/apprenant/apprenantSchema";
 import { contratsSchema } from "@/modules/mon-espace/effectifs/engine/cerfaForm/blocks/contrats/contratsSchema";
 import { formationSchema } from "@/modules/mon-espace/effectifs/engine/cerfaForm/blocks/formation/formationSchema";
 import { statutsSchema } from "@/modules/mon-espace/effectifs/engine/cerfaForm/blocks/statuts/statutSchema";
+
+import { controls } from "./controls";
 
 export const cerfaSchema = {
   fields: {

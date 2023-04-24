@@ -3,8 +3,6 @@ import { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import React from "react";
 
-import CfaRow from "./CfaRow";
-
 import { fetchEffectifsParCfa } from "@/common/api/tableauDeBord";
 import { QUERY_KEYS } from "@/common/constants/queryKeys";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
@@ -12,6 +10,8 @@ import { navigateToOrganismePage } from "@/common/utils/routing";
 import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 import RowsSkeleton from "@/components/skeletons/RowsSkeleton";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+
+import CfaRow from "./CfaRow";
 
 const CfasRows = ({ departementCode }) => {
   const filtersContext = useFiltersContext();

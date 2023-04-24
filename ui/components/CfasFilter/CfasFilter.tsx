@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import CfaPanel from "./CfasPanel";
-
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
 import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+
+import CfaPanel from "./CfasPanel";
 
 const CfasFilter = ({ onCfaChange, filters, defaultButtonLabel = "Sélectionner un organisme" }) => {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,6 +1,7 @@
+import { INDICE_DE_REPETITION_OPTIONS } from "@/modules/mon-espace/effectifs/engine/cerfaForm/domain/indiceDeRepetionOptions";
+
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 
-import { INDICE_DE_REPETITION_OPTIONS } from "@/modules/mon-espace/effectifs/engine/cerfaForm/domain/indiceDeRepetionOptions";
 // import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
 
 export const apprenantSchema = {

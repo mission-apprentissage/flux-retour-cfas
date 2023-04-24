@@ -1,6 +1,9 @@
 import { Box, FormControl, FormErrorMessage, FormHelperText, FormLabel, HStack, InputGroup } from "@chakra-ui/react";
 import React, { memo, useCallback, useMemo, useState } from "react";
 
+import InfoTooltip from "@/components/InfoTooltip/InfoTooltip";
+import { validField } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/validField";
+
 import { ConsentInput } from "./ConsentInput";
 import { DateInput } from "./DateInput";
 import { NumberInput } from "./NumberInput";
@@ -8,9 +11,6 @@ import { PhoneInput } from "./PhoneInput";
 import { RadioInput } from "./RadioInput";
 import { Select } from "./Select";
 import { TextInput } from "./TextInput";
-
-import InfoTooltip from "@/components/InfoTooltip/InfoTooltip";
-import { validField } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/validField";
 
 // eslint-disable-next-line react/display-name
 export const Input = memo(
