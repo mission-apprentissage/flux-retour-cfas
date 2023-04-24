@@ -3,66 +3,49 @@ import { formatDuration, intervalToDuration } from "date-fns";
 import { createJobEvent, updateJobEvent } from "@/common/actions/jobEvents.actions";
 import { jobEventStatuts } from "@/common/constants/jobs";
 import logger from "@/common/logger";
-import { modelDescriptors } from "@/common/model/collections";
-import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb } from "@/common/mongodb";
-import config from "@/config";
-import createGlobalServices from "@/services";
-
-process.on("unhandledRejection", (e) => console.error(e));
-process.on("uncaughtException", (e) => console.error(e));
+import { closeMongodbConnection } from "@/common/mongodb";
 
 /**
- * Fonction de sortie du script
- * @param {*} rawError
+ * Wrapper pour l'exécution de jobs avec création de JobEvents en base
+ * pour sauvegarder le résultat du job
  */
-const exit = async (rawError) => {
-  let error = rawError;
-  if (rawError) {
-    logger.error(rawError.constructor.name === "EnvVarError" ? rawError.message : rawError);
-  }
+export const runJob = (jobFunc: (...args: any[]) => Promise<any>) => {
+  return async function actionFunc(args: any, options: any) {
+    const startDate = new Date();
+    const jobEventId = await createJobEvent({ jobname: options._name, action: jobEventStatuts.started });
+    let error: Error | undefined = undefined;
+    let result = undefined;
 
-  setTimeout(() => {
-    //Waiting logger to flush all logs (MongoDB)
-    closeMongodbConnection().catch((closeError) => {
-      error = closeError;
-      console.error(error);
-    });
-  }, 500);
+    try {
+      result = await jobFunc(args);
+    } catch (e: any) {
+      console.error(e);
+      error = e?.toString();
+      await updateJobEvent(jobEventId, {
+        action: jobEventStatuts.error,
+        data: { error: e?.toString() },
+      });
+    }
 
-  process.exitCode = error ? 1 : 0;
-};
-
-/**
- * Wrapper pour l'execution de scripts
- * @param {*} job
- * @param {*} jobName
- */
-export const runScript = async (job, jobName) => {
-  await connectToMongodb(config.mongodb.uri);
-  await configureDbSchemaValidation(modelDescriptors);
-
-  const startDate = new Date();
-  const jobEventId = await createJobEvent({ jobname: jobName, action: jobEventStatuts.started });
-  let error = undefined;
-  let result = undefined;
-  try {
-    const services = await createGlobalServices();
-    result = await job(services);
-  } catch (e: any) {
-    console.error(e);
-    error = e?.toString();
+    const endDate = new Date();
+    const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
     await updateJobEvent(jobEventId, {
-      action: jobEventStatuts.error,
-      data: { error: e?.toString() },
+      action: error ? jobEventStatuts.error : jobEventStatuts.ended,
+      data: { startDate, endDate, duration, result, error },
     });
-  }
 
-  const endDate = new Date();
-  const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
+    if (error) {
+      logger.error(error.constructor.name === "EnvVarError" ? error.message : error);
+    }
 
-  await updateJobEvent(jobEventId, {
-    action: error ? jobEventStatuts.error : jobEventStatuts.ended,
-    data: { startDate, endDate, duration, result, error },
-  });
-  await exit(error);
+    //Waiting logger to flush all logs (MongoDB)
+    setTimeout(async () => {
+      try {
+        await closeMongodbConnection();
+      } catch (err) {
+        logger.error({ err }, "close mongodb connection error");
+      }
+      process.exit(error ? 1 : 0); // eslint-disable-line no-process-exit
+    }, 500);
+  };
 };

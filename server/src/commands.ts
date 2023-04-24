@@ -1,81 +1,117 @@
 import { Option, program } from "commander";
+import HttpTerminator from "lil-http-terminator";
 
-import "@/config";
-
-import { clear, clearUsers } from "./clear/clear-all";
-import { purgeEvents } from "./clear/purge-events";
-import { findInvalidDocuments } from "./db/findInvalidDocuments";
-import { recreateIndexes } from "./db/recreateIndexes";
-import { processEffectifsQueueEndlessly } from "./fiabilisation/dossiersApprenants/process-effectifs-queue";
-import { removeDuplicatesEffectifsQueue } from "./fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates";
-import { getStats } from "./fiabilisation/stats";
-import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
-import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
-import { hydrateEffectifsComputed } from "./hydrate/hydrate-effectifs-computed";
-import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
-import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
-import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
-import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
-import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis";
-import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
-import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index";
-import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs/index";
-import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates/index";
-import { runScript } from "./scriptWrapper";
-import { seedPlausibleGoals } from "./seed/plausible/goals";
-import { seedSample, seedAdmin } from "./seed/start/index";
-import { generateTypes } from "./seed/types/generate-types";
-import { createErpUserLegacy } from "./users/create-user";
+import logger from "./common/logger";
+import { closeMongodbConnection } from "./common/mongodb";
+import createServer from "./http/server";
+import { clear, clearUsers } from "./jobs/clear/clear-all";
+import { purgeEvents } from "./jobs/clear/purge-events";
+import { findInvalidDocuments } from "./jobs/db/findInvalidDocuments";
+import { recreateIndexes } from "./jobs/db/recreateIndexes";
+import { processEffectifsQueueEndlessly } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
+import { removeDuplicatesEffectifsQueue } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates";
+import { getStats } from "./jobs/fiabilisation/stats";
+import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
+import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
+import { hydrateEffectifsComputed } from "./jobs/hydrate/hydrate-effectifs-computed";
+import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
+import { hydrateOrganismesEffectifsCount } from "./jobs/hydrate/organismes/hydrate-effectifs_count";
+import { hydrateOrganismesFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes";
+import { hydrateFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes-referentiel";
+import { updateOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
+import { hydrateReseaux } from "./jobs/hydrate/reseaux/hydrate-reseaux";
+import { removeOrganismeAndEffectifs } from "./jobs/patches/remove-organisme-effectifs-dossiersApprenants/index";
+import { removeOrganismesSansSiretSansEffectifs } from "./jobs/patches/remove-organismes-sansSiret-sansEffectifs/index";
+import { updateLastTransmissionDateForOrganismes } from "./jobs/patches/update-lastTransmissionDates/index";
+import { runJob } from "./jobs/scriptWrapper";
+import { clearSeedAssets } from "./jobs/seed/clearAssets";
+import { seedPlausibleGoals } from "./jobs/seed/plausible/goals";
+import { seedSample, seedAdmin } from "./jobs/seed/start/index";
+import { generateTypes } from "./jobs/seed/types/generate-types";
+import { createErpUserLegacy } from "./jobs/users/create-user";
 import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
-} from "./users/generate-password-update-token";
-import { updateUsersApiSeeders } from "./users/update-apiSeeders";
+} from "./jobs/users/generate-password-update-token";
+import { updateUsersApiSeeders } from "./jobs/users/update-apiSeeders";
 // import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus";
-import { updateUserPassword } from "./users/update-user-password";
+import { updateUserPassword } from "./jobs/users/update-user-password";
 
 program.configureHelp({
   sortSubcommands: true,
 });
 
 program
+  .command("start")
+  .description("Démarre le serveur HTTP")
+  .action(async () => {
+    const server = await createServer();
+    const httpServer = server.listen(5000, () => logger.info(`Server ready and listening on port ${5000}`));
+
+    let shutdownInProgress = false;
+    ["SIGINT", "SIGTERM", "SIGQUIT"].forEach((signal) => {
+      (process as NodeJS.EventEmitter).on(signal, async () => {
+        try {
+          if (shutdownInProgress) {
+            logger.warn(`application shut down (FORCED) (signal=${signal})`);
+            process.exit(0); // eslint-disable-line no-process-exit
+          }
+          shutdownInProgress = true;
+          logger.warn(`application shutting down (signal=${signal})`);
+          await HttpTerminator({
+            server: httpServer,
+            maxWaitTimeout: 50_000,
+            logger: logger,
+          }).terminate();
+          await closeMongodbConnection();
+          logger.warn("application shut down");
+          process.exit(0); // eslint-disable-line no-process-exit
+        } catch (err) {
+          logger.error({ err }, "error during shutdown");
+          process.exit(1); // eslint-disable-line no-process-exit
+        }
+      });
+    });
+  });
+
+program
   .command("indexes:create")
   .description("Creation des indexes mongo")
   .option("-d, --drop", "Supprime les indexes existants avant de les recréer")
-  .action(async ({ drop }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ drop }) => {
       await recreateIndexes({ drop });
-    }, options._name)
+    })
   );
 
 program
   .command("db:find-invalid-documents")
   .argument("<collectionName>", "collection to search for invalid documents")
   .description("Recherche des documents invalides")
-  .action(async (collectionName, _, options) => {
-    return runScript(async () => {
+  .action(
+    runJob(async (collectionName) => {
       await findInvalidDocuments(collectionName);
-    }, options._name);
-  });
+    })
+  );
 
 program
   .command("process:effectifs-queue")
   .description("Process la queue des effectifs")
   .option("--id <string>", "ID de l'effectifQueue à traiter")
   .option("-f, --force", "Force le re-traitement des effectifs déjà traités")
-  .action(async ({ id, force }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ id, force }) => {
       await processEffectifsQueueEndlessly({ id, force });
-    }, options._name)
+    })
   );
 
 program
   .command("process:effectifs-queue:remove-duplicates")
   .description("Process la queue des effectifs")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       await removeDuplicatesEffectifsQueue();
-    }, options._name)
+    })
   );
 
 /**
@@ -86,10 +122,10 @@ program
   .description("[TEMPORAIRE] Suppression d'un organisme avec ses effectifs")
   .requiredOption("--uai <string>", "Uai de l'organisme")
   .requiredOption("--siret <string>", "Siret de l'organisme")
-  .action(async ({ uai, siret }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ uai, siret }) => {
       return removeOrganismeAndEffectifs({ uai, siret });
-    }, options._name)
+    })
   );
 
 /**
@@ -98,10 +134,10 @@ program
 program
   .command("tmp:patches:remove-organismes-sansSiret-sansEffectifs")
   .description("[TEMPORAIRE] Suppression des organismes sans siret & sans effectifs")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return removeOrganismesSansSiretSansEffectifs();
-    }, options._name)
+    })
   );
 
 /**
@@ -110,10 +146,10 @@ program
 program
   .command("tmp:patches:update-lastTransmissionDate-organismes")
   .description("[TEMPORAIRE] Mise à jour des date de dernières transmissions d'un organisme à partir de ses effectifs")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return updateLastTransmissionDateForOrganismes();
-    }, options._name)
+    })
   );
 
 /**
@@ -122,10 +158,10 @@ program
 program
   .command("seed:sample")
   .description("Seed sample data")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return seedSample();
-    }, options._name)
+    })
   );
 
 /**
@@ -136,10 +172,10 @@ program
   .command("seed:admin")
   .description("Seed user admin")
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .action(async ({ email }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ email }) => {
       return seedAdmin(email?.toLowerCase());
-    }, options._name)
+    })
   );
 
 /**
@@ -149,10 +185,19 @@ program
 program
   .command("seed:plausible:goals")
   .description("Seed plausible goals")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return seedPlausibleGoals();
-    }, options._name)
+    })
+  );
+
+program
+  .command("seed:assets:clear")
+  .description("Seed plausible goals")
+  .action(
+    runJob(async () => {
+      await clearSeedAssets();
+    })
   );
 
 /**
@@ -162,28 +207,28 @@ program
   .command("clear")
   .description("Clear projet")
   .option("-a, --all", "Tout supprimer")
-  .action(({ all }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ all }) => {
       return clear({ clearAll: all });
-    }, options._name)
+    })
   );
 
 program
   .command("clear:users")
   .description("Clear users")
-  .action((_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return clearUsers();
-    }, options._name)
+    })
   );
 
 program
   .command("hydrate:effectifs-computed")
   .description("Remplissage du champ effectifs._computed avec les attributs des organismes")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return hydrateEffectifsComputed();
-    }, options._name)
+    })
   );
 
 /**
@@ -192,19 +237,19 @@ program
 program
   .command("hydrate:organismes-referentiel")
   .description("Remplissage des organismes du référentiel")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return hydrateFromReferentiel();
-    }, options._name)
+    })
   );
 
 program
   .command("hydrate:open-api")
   .description("Création/maj du fichier open-api.json")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return hydrateOpenApi();
-    }, options._name)
+    })
   );
 
 /**
@@ -214,10 +259,10 @@ program
 program
   .command("hydrate:organismes")
   .description("Remplissage des organismes via le référentiel")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return hydrateOrganismesFromReferentiel();
-    }, options._name)
+    })
   );
 
 /**
@@ -227,10 +272,10 @@ program
 program
   .command("hydrate:organismes-effectifs-count")
   .description("Mise à jour des organismes avec le nombre d'effectifs")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return hydrateOrganismesEffectifsCount();
-    }, options._name)
+    })
   );
 
 /**
@@ -242,10 +287,10 @@ program
 program
   .command("update:organismes-with-apis")
   .description("Mise à jour des organismes via API externes")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return updateOrganismesWithApis();
-    }, options._name)
+    })
   );
 
 /**
@@ -254,10 +299,10 @@ program
 program
   .command("hydrate:reseaux")
   .description("Remplissage des réseaux pour les organismes et dossiersApprenants")
-  .action(async (_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       return hydrateReseaux();
-    }, options._name)
+    })
   );
 
 /**
@@ -267,10 +312,10 @@ program
   .command("purge:events")
   .description("Purge des logs inutiles")
   .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
-  .action(async ({ nbDaysToKeep }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ nbDaysToKeep }) => {
       return purgeEvents(nbDaysToKeep);
-    }, options._name)
+    })
   );
 
 /**
@@ -282,14 +327,14 @@ program
 //   .requiredOption("--email <string>", "Email de l'utilisateur")
 //   .option("--prenom <string>", "Prénom de l'utilisateur")
 //   .option("--nom <string>", "Nom de l'utilisateur")
-//   .action(async ({ email, prenom, nom }, options) =>
-//     runScript(async () => {
+//   .action(
+//     runJob(async ({ email, prenom, nom }) => {
 //       return createUserAccount({
 //         email,
 //         prenom,
 //         nom,
 //       });
-//     }, options._name)
+//     })
 //   );
 
 /**
@@ -299,10 +344,10 @@ program
   .command("create:erp-user-legacy")
   .description("Création d'un utilisateur ERP legacy")
   .requiredOption("--username <string>", "Nom de l'utilisateur")
-  .action(async ({ username }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ username }) => {
       return createErpUserLegacy(username);
-    }, options._name)
+    })
   );
 
 /**
@@ -312,10 +357,10 @@ program
   .command("generate:password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur")
   .requiredOption("--email <string>", "Email de l'utilisateur")
-  .action(async ({ email }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ email }) => {
       return generatePasswordUpdateTokenForUser(email);
-    }, options._name)
+    })
   );
 
 /**
@@ -325,10 +370,10 @@ program
   .command("generate-legacy:password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur legacy")
   .requiredOption("--username <string>", "username de l'utilisateur")
-  .action(async ({ username }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ username }) => {
       return generatePasswordUpdateTokenForUserLegacy(username);
-    }, options._name)
+    })
   );
 
 /**
@@ -339,10 +384,10 @@ program
   .description("Modification du mot de passe d'un utilisateur legacy via son token de MAJ ")
   .requiredOption("--token <string>", "token d'update de password")
   .requiredOption("--password <string>", "nouveau mot de passe")
-  .action(async ({ token, password }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ token, password }) => {
       return updateUserPassword(token, password);
-    }, options._name)
+    })
   );
 
 /**
@@ -354,10 +399,10 @@ program
   .command("tmp:users:update-apiSeeders")
   .description("[TEMPORAIRE] Modification des utilisateurs fournisseurs de données")
   .addOption(new Option("--mode <mode>", "Mode de mise à jour").choices(["active", "inactive"]).makeOptionMandatory())
-  .action(async ({ mode }, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async ({ mode }) => {
       return updateUsersApiSeeders(mode);
-    }, options._name)
+    })
   );
 
 /**
@@ -366,8 +411,8 @@ program
 program
   .command("fiabilisation:uai-siret:run")
   .description("Lancement des scripts de fiabilisation des couples UAI SIRET")
-  .action((_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       // On lance séquentiellement 2 fois de suite la construction (build) de la collection fiabilisation suivi de la MAJ des données liées (apply)
       // Nécessaire pour le bon fonctionnement de l'algo
       await buildFiabilisationUaiSiret();
@@ -376,7 +421,7 @@ program
       const updateResults = await updateOrganismesFiabilisationUaiSiret();
 
       return { buildResults, updateResults };
-    }, options._name)
+    })
   );
 
 /**
@@ -385,10 +430,10 @@ program
 // program
 //   .command("fiabilisation:analyse:dossiersApprenants-recus")
 //   .description("Analyse de la fiabilité des dossiersApprenants reçus")
-//   .action((_, options) =>
-//     runScript(async () => {
+//   .action(
+//     runJob(async () => {
 //       return analyseFiabiliteDossierApprenantsRecus();
-//     }, options._name)
+//     })
 //   );
 
 /**
@@ -397,10 +442,10 @@ program
 program
   .command("fiabilisation:stats")
   .description("Affichage de stats sur le service")
-  .action((_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       await getStats();
-    }, options._name)
+    })
   );
 
 /**
@@ -409,10 +454,12 @@ program
 program
   .command("dev:generate-ts-types")
   .description("Generation des types TS à partir des schemas de la base de données")
-  .action((_, options) =>
-    runScript(async () => {
+  .action(
+    runJob(async () => {
       await generateTypes();
-    }, options._name)
+    })
   );
 
-program.parse(process.argv);
+export async function startCLI() {
+  await program.parseAsync(process.argv);
+}

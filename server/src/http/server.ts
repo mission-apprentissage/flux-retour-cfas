@@ -101,9 +101,8 @@ const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/
 
 /**
  * Create the express app
- * @returns {Promise<Object>} Express app
  */
-export default async () => {
+export default async function createServer(): Promise<Application> {
   const app = express();
 
   // Configure Sentry
@@ -141,7 +140,7 @@ export default async () => {
   app.use(errorMiddleware());
 
   return app;
-};
+}
 
 function setupRoutes(app: Application) {
   /********************************
