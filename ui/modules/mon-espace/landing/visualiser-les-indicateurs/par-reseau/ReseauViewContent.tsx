@@ -2,7 +2,9 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import useEffectifs from "@/hooks/useEffectifs";
+
 import { useFiltersContext } from "../FiltersContext";
+
 import IndicateursAndRepartitionEffectifsReseau from "./IndicateursAndRepartitionEffectifsReseau";
 import ReseauUpdateContactSection from "./ReseauUpdateContactSection";
 

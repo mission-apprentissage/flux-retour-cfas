@@ -1,19 +1,20 @@
-import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { uniqBy } from "lodash-es";
-import { schemaValidation } from "../../utils/schemaUtils.js";
-import { object, objectId, string, date, boolean, arrayOf } from "../json-schema/jsonSchemaTypes.js";
-import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part.js";
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part.js";
+import { TETE_DE_RESEAUX } from "@/common/constants/networks";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
+import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
+import { Effectif } from "@/common/model/@types/Effectif";
+import { object, objectId, string, date, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
+import { schemaValidation } from "@/common/utils/schemaUtils";
+
+import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part";
+import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
 import {
   defaultValuesFormationEffectif,
   formationEffectifSchema,
   validateFormationEffectif,
-} from "./parts/formation.effectif.part.js";
-import { TETE_DE_RESEAUX } from "../../constants/networks.js";
-import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../../constants/territoires.js";
-import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme.js";
-import { Effectif } from "../@types/Effectif.js";
+} from "./parts/formation.effectif.part";
 
 const collectionName = "effectifs";
 

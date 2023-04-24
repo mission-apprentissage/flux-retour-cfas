@@ -1,5 +1,5 @@
-import logger from "../../../common/logger.js";
-import { organismesDb } from "../../../common/model/collections.js";
+import logger from "@/common/logger";
+import { organismesDb } from "@/common/model/collections";
 
 /**
  * Fonction "patch" de suppression des organismes sans siret et sans aucun effectif

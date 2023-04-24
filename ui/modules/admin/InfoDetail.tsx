@@ -1,6 +1,6 @@
-import React from "react";
 import { Box, VStack, HStack } from "@chakra-ui/react";
 import get from "lodash.get";
+import React from "react";
 
 /**
  * A handy component to display a list of key/value pairs

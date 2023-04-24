@@ -1,10 +1,10 @@
-import "dotenv/config.js";
-import server from "./http/server.js";
-import logger from "./common/logger.js";
-import config from "./config.js";
-import createGlobalServices from "./services.js";
-import { connectToMongodb, configureDbSchemaValidation } from "./common/mongodb.js";
-import { modelDescriptors } from "./common/model/collections.js";
+import logger from "@/common/logger";
+import { modelDescriptors } from "@/common/model/collections";
+import config from "@/config";
+
+import { connectToMongodb, configureDbSchemaValidation } from "./common/mongodb";
+import server from "./http/server";
+import createGlobalServices from "./services";
 
 process.on("unhandledRejection", (err) => logger.error(err, "unhandledRejection"));
 process.on("uncaughtException", (err) => logger.error(err, "uncaughtException"));

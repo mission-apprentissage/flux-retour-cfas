@@ -1,14 +1,16 @@
 import { Box, Heading, HStack, Text } from "@chakra-ui/react";
+import Head from "next/head";
 import PropTypes from "prop-types";
 import React from "react";
-import Head from "next/head";
 
 import FormationFilter from "@/components/FormationFilter/FormationFilter";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import TerritoireFilter from "@/components/TerritoireFilter/TerritoireFilter";
+
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
+
 import ReseauSelect from "./ReseauSelect/ReseauSelect";
 import ReseauSelectPanel from "./ReseauSelect/ReseauSelectPanel";
 import ReseauViewContent from "./ReseauViewContent";

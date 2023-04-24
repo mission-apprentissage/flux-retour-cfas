@@ -1,5 +1,5 @@
-import { updatePasswordLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
-import logger from "../../common/logger.js";
+import { updatePasswordLegacy } from "@/common/actions/legacy/users.legacy.actions";
+import logger from "@/common/logger";
 
 export const updateUserPassword = async (token, password) => {
   await updatePasswordLegacy(token, password);

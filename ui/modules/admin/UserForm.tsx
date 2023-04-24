@@ -1,6 +1,3 @@
-import React from "react";
-import { useFormik } from "formik";
-import { toFormikValidationSchema } from "zod-formik-adapter";
 import {
   Box,
   Button,
@@ -15,14 +12,17 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { useFormik } from "formik";
+import React from "react";
+import { toFormikValidationSchema } from "zod-formik-adapter";
 
+import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _delete, _put, _post } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
-import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 
 import userSchema from "./userSchema";
 
-export const UserForm = ({
+const UserForm = ({
   user,
   onCreate,
   onDelete,

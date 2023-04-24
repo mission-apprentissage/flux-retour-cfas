@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Button,
   Modal,
@@ -10,7 +9,9 @@ import {
   Text,
   HStack,
 } from "@chakra-ui/react";
-import { ArrowRightLine, Close } from "../../theme/components/icons";
+import React from "react";
+
+import { ArrowRightLine, Close } from "@/theme/components/icons";
 
 const PromptModal = ({
   isOpen,

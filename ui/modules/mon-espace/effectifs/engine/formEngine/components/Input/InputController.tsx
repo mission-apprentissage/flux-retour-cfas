@@ -1,7 +1,8 @@
 import { memo, useCallback } from "react";
 import { useRecoilValue } from "recoil";
-import { fieldSelector } from "../../atoms";
-import { useCerfaController } from "../../CerfaControllerContext";
+
+import { fieldSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
+import { useCerfaController } from "@/modules/mon-espace/effectifs/engine/formEngine/CerfaControllerContext";
 
 import { InputField } from "./Input";
 

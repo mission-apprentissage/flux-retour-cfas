@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from "react";
-import Head from "next/head";
 import { Badge, Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
-import { format, formatISO } from "date-fns";
-import fr from "date-fns/locale/fr";
+import { format, formatISO } from "date-fns"; // eslint-disable-line import/no-duplicates
+// besoin de date-fns 3 pour import esm, voir https://github.com/date-fns/date-fns/issues/2629
+import fr from "date-fns/locale/fr"; // eslint-disable-line import/no-duplicates
+import Head from "next/head";
+import React, { useEffect, useState } from "react";
 
-import Page from "@/components/Page/Page";
-import Sommaire from "@/components/Sommaire/Sommaire";
 import { getUniquesMonthAndYearFromDatesList } from "@/common/utils/dateUtils";
 import { capitalize } from "@/common/utils/stringUtils";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import Sommaire from "@/components/Sommaire/Sommaire";
 import JournalDesEvolutionsTagFilter from "@/modules/journal-des-evolutions/JournalDesEvolutionsTagFilter";
 import {
   JOURNAL_DES_EVOLUTIONS_DATA,
   JOURNAL_DES_EVOLUTIONS_TAGS,
 } from "@/modules/journal-des-evolutions/JournalEvolutionsData";
-import Section from "@/components/Section/Section";
 
 const JournalDesEvolutions = () => {
   const title = "Journal des évolutions";

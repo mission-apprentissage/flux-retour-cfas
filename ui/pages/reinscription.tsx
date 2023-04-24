@@ -1,10 +1,10 @@
 import { Box, Button, Center, Container, Heading, Stack, Text } from "@chakra-ui/react";
-import React from "react";
 import Head from "next/head";
 import NavLink from "next/link";
+import React from "react";
 
 import Page from "@/components/Page/Page";
-import { Support } from "../theme/components/icons/Support";
+import { Support } from "@/theme/components/icons/Support";
 
 const Reinscription = () => {
   const title = "Réinscription";

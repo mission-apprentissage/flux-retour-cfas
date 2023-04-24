@@ -1,6 +1,7 @@
 import get from "lodash.get";
-import { findDefinition } from "./utils";
 import { DateTime } from "luxon";
+
+import { findDefinition } from "./utils";
 import { isEmptyValue } from "./utils/isEmptyValue";
 
 let requiredFieldsSifa = [
@@ -32,7 +33,7 @@ const requiredApprenantAdresseFieldsSifa = [
 
 export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
   const createField = createFieldFactory({ modeSifa, schema });
-  let fields = {};
+  const fields = {};
   const isAPITransmission = organisme.mode_de_transmission === "API";
 
   if (!cerfa.apprenant.adresse.complete.value)

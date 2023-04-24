@@ -1,11 +1,11 @@
-import React from "react";
-import NavLink from "next/link";
 import { Text } from "@chakra-ui/react";
+import NavLink from "next/link";
 import { useRouter } from "next/router";
+import React from "react";
 
+import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import Table from "@/components/Table/Table";
 import { ArrowRightLine } from "@/theme/components/icons";
-import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 
 const UsersList = ({ data, pagination, sorting, searchValue }: any) => {
   const router = useRouter();

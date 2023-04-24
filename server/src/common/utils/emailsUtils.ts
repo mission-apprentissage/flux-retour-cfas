@@ -1,7 +1,9 @@
-import mjml from "mjml";
 import { promisify } from "util";
+
 import ejs from "ejs";
-import config from "../../config.js";
+import mjml from "mjml";
+
+import config from "@/config";
 
 const renderFile = promisify(ejs.renderFile);
 

@@ -1,19 +1,19 @@
-import React from "react";
-import { useRouter } from "next/router";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import Head from "next/head";
 import { Box, Heading, Stack, Spinner, Text, VStack, HStack, Button } from "@chakra-ui/react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import useToaster from "@/hooks/useToaster";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import React from "react";
 
 import { _get, _put } from "@/common/httpClient";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 import Page from "@/components/Page/Page";
-import withAuth from "@/components/withAuth";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Table from "@/components/Table/Table";
+import withAuth from "@/components/withAuth";
+import useToaster from "@/hooks/useToaster";
+import OrganismeDetail, { ExternalLinks } from "@/modules/admin/OrganismeDetail";
 import OrganismesList from "@/modules/admin/OrganismesList";
-import OrganismeDetail, { ExternalLinks } from "../../../modules/admin/OrganismeDetail";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

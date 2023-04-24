@@ -1,7 +1,7 @@
-import { Meta, StoryObj } from "@storybook/react";
 import { Text } from "@chakra-ui/react";
+import { Meta, StoryObj } from "@storybook/react";
 
-import Component from "../../modules/mon-espace/effectifs/TeleversementInProgress";
+import Component from "@/modules/mon-espace/effectifs/TeleversementInProgress";
 
 const meta: Meta<typeof Component> = {
   title: "Modules / Effectifs / Televersements En cours",

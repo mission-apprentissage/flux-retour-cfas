@@ -1,6 +1,5 @@
-import { legacyEffectifsFiltersSchema } from "../../../common/actions/helpers/filters.js";
 import express from "express";
-import { getNbDistinctOrganismes } from "../../../common/actions/effectifs.actions.js";
+
 import {
   getEffectifsCountByAnneeFormationAtDate,
   getEffectifsCountByCfaAtDate,
@@ -9,9 +8,11 @@ import {
   getEffectifsCountByNiveauFormationAtDate,
   getEffectifsCountBySiretAtDate,
   getIndicateurs,
-} from "../../../common/actions/effectifs/effectifs.actions.js";
-import { validateFullZodObjectSchema } from "../../../common/utils/validationUtils.js";
-import { returnResult } from "../../middlewares/helpers.js";
+} from "@/common/actions/effectifs/effectifs.actions";
+import { getNbDistinctOrganismes } from "@/common/actions/effectifs.actions";
+import { legacyEffectifsFiltersSchema } from "@/common/actions/helpers/filters";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
   const router = express.Router();

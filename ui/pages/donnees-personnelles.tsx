@@ -1,10 +1,10 @@
-import React from "react";
 import Head from "next/head";
+import React from "react";
 
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import DonneesPersonnelles from "@/components/legal/DonneesPersonnelles";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import DonneesPersonnelles from "@/components/legal/DonneesPersonnelles";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
 export const getServerSideProps = async (context) => {
   return { props: { ...(await getAuthServerSideProps(context)) } };

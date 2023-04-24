@@ -1,6 +1,8 @@
 import { strict as assert } from "assert";
+
 import { ObjectId } from "mongodb";
-import { buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters.js";
+
+import { buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 
 const currentDate = new Date("2023-02-14T10:00:00Z");
 

@@ -1,6 +1,6 @@
 import { Box, Center, Container, Heading, Link, Stack, Text } from "@chakra-ui/react";
-import React from "react";
 import Head from "next/head";
+import React from "react";
 
 import Page from "@/components/Page/Page";
 import { NotFound } from "@/theme/components/icons";

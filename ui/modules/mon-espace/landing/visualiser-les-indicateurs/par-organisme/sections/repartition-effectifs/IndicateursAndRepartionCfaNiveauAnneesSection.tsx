@@ -3,23 +3,18 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { fetchEffectifsDataListCsvExport } from "@/common/api/tableauDeBord";
-import Section from "@/components/Section/Section";
-import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
-import RepartitionEffectifsParFormation from "@/components/tables/RepartitionEffectifsParFormation";
-import useAuth from "@/hooks/useAuth";
-import useFetchEffectifsParNiveauFormation from "@/hooks/useFetchEffectifsParNiveauFormation";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
+import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
+import Section from "@/components/Section/Section";
+import RepartitionEffectifsParFormation from "@/components/tables/RepartitionEffectifsParFormation";
+import useFetchEffectifsParNiveauFormation from "@/hooks/useFetchEffectifsParNiveauFormation";
+
 import DateWithTooltipSelector from "../../../DateWithTooltipSelector";
 import { filtersPropTypes } from "../../../FiltersContext";
-import IndicateursGridStack from "../../../IndicateursGridStack";
 import { indicateursEffectifsSchema } from "../../../indicateursEffectifsSchema";
+import IndicateursGridStack from "../../../IndicateursGridStack";
 
-const IndicateursAndRepartionCfaNiveauAnneesSection = ({
-  filters,
-  effectifs,
-  loading,
-  hasMultipleSirets = false,
-}) => {
+const IndicateursAndRepartionCfaNiveauAnneesSection = ({ filters, effectifs, loading, hasMultipleSirets = false }) => {
   const { data, isLoading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
 
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;

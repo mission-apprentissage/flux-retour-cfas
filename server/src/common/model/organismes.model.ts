@@ -1,12 +1,13 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes.js";
-import { adresseSchema } from "./json-schema/adresseSchema.js";
-import { TETE_DE_RESEAUX } from "../constants/networks.js";
-import { NATURE_ORGANISME_DE_FORMATION, SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "../constants/organisme.js";
-import { schemaValidation } from "../utils/schemaUtils.js";
-import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
-import { STATUT_FIABILISATION_ORGANISME } from "../constants/fiabilisation.js";
+import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import { TETE_DE_RESEAUX } from "@/common/constants/networks";
+import { NATURE_ORGANISME_DE_FORMATION, SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
+import { schemaValidation } from "@/common/utils/schemaUtils";
+import { siretSchema, uaiSchema } from "@/common/utils/validationUtils";
+
+import { adresseSchema } from "./json-schema/adresseSchema";
+import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismes";
 

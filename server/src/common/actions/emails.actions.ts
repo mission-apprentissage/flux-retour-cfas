@@ -1,9 +1,10 @@
-import { mailer } from "../../services.js";
 import { v4 as uuidv4 } from "uuid";
-import logger from "../logger.js";
-import { usersMigrationDb } from "../model/collections.js";
-import { getEmailInfos, TemplateName, TemplatePayloads } from "../services/mailer/mailer.js";
-import { generateHtml } from "../utils/emailsUtils.js";
+
+import logger from "@/common/logger";
+import { usersMigrationDb } from "@/common/model/collections";
+import { getEmailInfos, TemplateName, TemplatePayloads } from "@/common/services/mailer/mailer";
+import { generateHtml } from "@/common/utils/emailsUtils";
+import { mailer } from "@/services";
 
 function addEmail(userEmail: string, token: string, templateName: string, payload: any) {
   return usersMigrationDb().findOneAndUpdate(

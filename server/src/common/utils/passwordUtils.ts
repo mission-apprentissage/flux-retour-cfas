@@ -1,6 +1,8 @@
 import crypto from "crypto";
+
 import { sha512crypt } from "sha512crypt-node";
-import config from "../../config.js";
+
+import config from "@/config";
 
 export function hash(password: string, rounds = config.auth.passwordHashRounds): string {
   const salt = crypto.randomBytes(16).toString("hex");

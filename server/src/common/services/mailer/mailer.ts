@@ -1,11 +1,13 @@
 import path from "path";
-import nodemailer from "nodemailer";
+
 import { omit } from "lodash-es";
+import nodemailer from "nodemailer";
 import { htmlToText } from "nodemailer-html-to-text";
-import config from "../../../config.js";
-import { getPublicUrl, generateHtml } from "../../utils/emailsUtils.js";
-import { __dirname } from "../../utils/esmUtils.js";
-import { sendStoredEmail } from "../../actions/emails.actions.js";
+
+import { sendStoredEmail } from "@/common/actions/emails.actions";
+import { getPublicUrl, generateHtml } from "@/common/utils/emailsUtils";
+import { __dirname } from "@/common/utils/esmUtils";
+import config from "@/config";
 
 function createTransporter(smtp) {
   const needsAuthentication = !!smtp.auth.user;

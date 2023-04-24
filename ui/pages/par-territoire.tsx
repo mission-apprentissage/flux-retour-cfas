@@ -1,16 +1,18 @@
 import React from "react";
 
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { FiltersProvider } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import IndicateursVueTerritoirePage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-territoire/IndicateursVueTerritoirePage";
-import withAuth from "@/components/withAuth";
-import { getDefaultState } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { DEPARTEMENTS_BY_ID, REGIONS_BY_ID } from "@/common/constants/territoiresConstants";
-import useAuth from "@/hooks/useAuth";
 import {
   OrganisationOperateurPublicDepartement,
   OrganisationOperateurPublicRegion,
 } from "@/common/internal/Organisation";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import withAuth from "@/components/withAuth";
+import useAuth from "@/hooks/useAuth";
+import {
+  FiltersProvider,
+  getDefaultState,
+} from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import IndicateursVueTerritoirePage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-territoire/IndicateursVueTerritoirePage";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

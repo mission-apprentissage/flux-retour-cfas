@@ -1,5 +1,6 @@
 import { strict as assert } from "assert";
-import { validateEmail } from "../../../../../src/common/validation/utils/email.js";
+
+import { validateEmail } from "@/common/validation/utils/email";
 
 describe("Domain Email", () => {
   describe("validateEmail", () => {

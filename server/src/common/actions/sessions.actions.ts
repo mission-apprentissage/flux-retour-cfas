@@ -1,5 +1,5 @@
-import { jwtSessionsDb } from "../model/collections.js";
-import { createUserTokenSimple } from "../utils/jwtUtils.js";
+import { jwtSessionsDb } from "@/common/model/collections";
+import { createUserTokenSimple } from "@/common/utils/jwtUtils";
 
 export async function createSession(email: string): Promise<string> {
   const token = createUserTokenSimple({ payload: { email } });

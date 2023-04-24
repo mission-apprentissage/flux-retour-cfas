@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 
-import { getCurrentTime, resetTime, setTime, sleep } from "../../../../src/common/utils/timeUtils.js";
+import { getCurrentTime, resetTime, setTime, sleep } from "@/common/utils/timeUtils";
 
 describe("utils/timeUtils", () => {
   beforeEach(() => {

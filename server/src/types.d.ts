@@ -1,4 +1,4 @@
-import { AuthContext } from "./common/model/internal/AuthContext";
+import { AuthContext } from "@/common/model/internal/AuthContext";
 
 // to make the file a module and avoid the TypeScript error
 export {};

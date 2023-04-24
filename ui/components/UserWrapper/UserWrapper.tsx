@@ -1,14 +1,14 @@
-import React, { useState, useEffect, createContext, useRef } from "react";
-import { useRouter } from "next/router";
 import { Box, Flex, Spinner, Text } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import React, { useState, useEffect, createContext, useRef } from "react";
 
-import { _get, _put } from "../../common/httpClient";
-import useAuth from "../../hooks/useAuth";
-import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
-import { emitter } from "../../common/emitter";
+import { emitter } from "@/common/emitter";
+import { _get, _put } from "@/common/httpClient";
 import { IAuthenticationContext } from "@/common/internal/AuthContext";
-import { Cgu, CGU_VERSION } from "../legal/Cgu";
-import AcknowledgeModal from "../Modals/AcknowledgeModal";
+import { Cgu, CGU_VERSION } from "@/components/legal/Cgu";
+import AcknowledgeModal from "@/components/Modals/AcknowledgeModal";
+import useAuth from "@/hooks/useAuth";
+import useMaintenanceMessages from "@/hooks/useMaintenanceMessages";
 
 const ForceAcceptCGU = ({ children }) => {
   const { auth, refreshSession } = useAuth();

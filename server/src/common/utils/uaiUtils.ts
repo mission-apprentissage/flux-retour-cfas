@@ -1,6 +1,8 @@
 import { find } from "lodash-es";
-import { validateUai } from "./validationUtils.js";
-import { DEPARTEMENTS } from "../constants/territoires.js";
+
+import { DEPARTEMENTS } from "@/common/constants/territoires";
+
+import { validateUai } from "./validationUtils";
 
 const SPECIFIC_UAI_CODES_CORSE1 = { code: "2A", uaiCode: "620" };
 const SPECIFIC_UAI_CODES_CORSE2 = { code: "2B", uaiCode: "720" };

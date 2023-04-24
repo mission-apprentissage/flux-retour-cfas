@@ -1,6 +1,7 @@
-import React from "react";
 import { Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, Text } from "@chakra-ui/react";
-import { ArrowRightLine, Close } from "../../theme/components/icons";
+import React from "react";
+
+import { ArrowRightLine, Close } from "@/theme/components/icons";
 
 const AcknowledgeModal = ({
   isOpen,

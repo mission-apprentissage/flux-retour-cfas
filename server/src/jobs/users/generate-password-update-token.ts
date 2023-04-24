@@ -1,7 +1,7 @@
-import { generatePasswordUpdateTokenLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
-import { generatePasswordUpdateToken } from "../../common/actions/users.actions.js";
-import logger from "../../common/logger.js";
-import config from "../../config.js";
+import { generatePasswordUpdateTokenLegacy } from "@/common/actions/legacy/users.legacy.actions";
+import { generatePasswordUpdateToken } from "@/common/actions/users.actions";
+import logger from "@/common/logger";
+import config from "@/config";
 
 /**
  *

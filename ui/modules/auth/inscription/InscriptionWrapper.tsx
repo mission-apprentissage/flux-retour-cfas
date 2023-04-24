@@ -1,7 +1,8 @@
-import Page from "@/components/Page/Page";
 import { Box, Heading } from "@chakra-ui/react";
 import Head from "next/head";
 import { ReactNode } from "react";
+
+import Page from "@/components/Page/Page";
 
 export default function InscriptionWrapper({ children }: { children: ReactNode }) {
   return (

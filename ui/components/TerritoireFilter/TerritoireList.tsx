@@ -2,11 +2,12 @@ import { List, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import { TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
 import { stringContains, stringEqualsCaseInsensitive } from "@/common/utils/stringUtils";
 import FilterOption from "@/components/FilterOption/FilterOption";
 import SearchInput from "@/components/SearchInput/SearchInput";
+
 import TouteLaFranceOption from "./TouteLaFranceOption";
-import { TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
 
 const findTerritoire = (config) => (searchTerm) => {
   const regionMatches = config.regions.filter((region) => {

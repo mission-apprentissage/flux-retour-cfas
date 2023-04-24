@@ -1,8 +1,10 @@
-import { NewOrganisation } from "@/common/model/organisations.model.js";
-import { Organisme } from "@/common/model/@types/Organisme.js";
 import { ObjectId } from "mongodb";
-import { id } from "./testUtils.js";
-import { Effectif } from "@/common/model/@types/Effectif.js";
+
+import { Effectif } from "@/common/model/@types/Effectif";
+import { Organisme } from "@/common/model/@types/Organisme";
+import { NewOrganisation } from "@/common/model/organisations.model";
+
+import { id } from "./testUtils";
 
 /*
 Quelques sirets générés à utiliser pour une meilleure lisibilité :

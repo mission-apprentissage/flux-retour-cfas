@@ -1,10 +1,10 @@
-import { ObjectId } from "mongodb";
 import { RequestHandler } from "express";
+import { ObjectId } from "mongodb";
 
 import {
   requireManageOrganismeEffectifsPermission,
   requireOrganismeIndicateursAccess,
-} from "@/common/actions/helpers/permissions.js";
+} from "@/common/actions/helpers/permissions";
 
 interface MyLocals {
   organismeId: ObjectId;

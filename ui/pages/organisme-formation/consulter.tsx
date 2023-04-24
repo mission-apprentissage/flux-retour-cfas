@@ -1,12 +1,12 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
+import Link from "@/components/Links/Link";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import Link from "@/components/Links/Link";
-import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 import CheckCfaTransmissionContent from "@/modules/organisme-formation/CheckCfaTransmission/CheckCfaTransmissionContent";
+import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 
 export default function CommentConsulterEtVerifierLesDonnees() {
   const title = "Comment vérifier les données que vous transmettez ?";

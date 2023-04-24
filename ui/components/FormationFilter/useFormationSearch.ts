@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import useDebounce from "@/hooks/useDebounce";
-import { omitNullishValues } from "@/common/utils/omitNullishValues";
 import { _post } from "@/common/httpClient";
+import { omitNullishValues } from "@/common/utils/omitNullishValues";
+import useDebounce from "@/hooks/useDebounce";
 
 export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;
 const SEARCH_DEBOUNCE_TIME = 300;

@@ -1,7 +1,9 @@
-import React, { useState } from "react";
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
-import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoiresConstants";
+import React, { useState } from "react";
+
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
+import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoiresConstants";
+
 import { InscriptionOrganistionChildProps } from "./common";
 
 const typesOrganisation = [

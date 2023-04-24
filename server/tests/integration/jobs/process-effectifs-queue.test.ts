@@ -1,10 +1,9 @@
 import { strict as assert } from "assert";
 
-import { createOrganisme } from "@/common/actions/organismes/organismes.actions.js";
-import { processEffectifsQueue } from "@/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue.js";
-import { effectifsQueueDb, effectifsDb } from "@/common/model/collections.js";
-
-import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "../../data/randomizedSample.js";
+import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
+import { effectifsQueueDb, effectifsDb } from "@/common/model/collections";
+import { processEffectifsQueue } from "@/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
+import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
 
 const uai = "0802004U";
 const siret = "77937827200016";

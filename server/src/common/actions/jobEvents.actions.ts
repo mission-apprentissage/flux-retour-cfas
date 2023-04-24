@@ -1,4 +1,4 @@
-import { jobEventsDb } from "../model/collections.js";
+import { jobEventsDb } from "@/common/model/collections";
 
 /**
  * Création d'un job event

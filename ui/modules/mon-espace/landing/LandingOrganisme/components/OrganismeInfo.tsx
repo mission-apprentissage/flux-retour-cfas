@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Badge,
   Box,
@@ -11,14 +10,15 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react";
+import React from "react";
 
-import Section from "@/components/Section/Section";
-import Ribbons from "@/components/Ribbons/Ribbons";
-import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
-import IndicateursInfos from "../../common/IndicateursInfos";
-import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext";
 import { Organisme } from "@/common/internal/Organisme";
+import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
+import Ribbons from "@/components/Ribbons/Ribbons";
+import Section from "@/components/Section/Section";
+import IndicateursInfos from "@/modules/mon-espace/landing/common/IndicateursInfos";
+import { SimpleFiltersProvider } from "@/modules/mon-espace/landing/common/SimpleFiltersContext";
 
 export const natureOrganismeDeFormationLabel = {
   responsable: "Responsable",

@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 
-import { generateRandomAlphanumericPhrase, stripEmptyFields } from "@/common/utils/miscUtils.js";
+import { generateRandomAlphanumericPhrase, stripEmptyFields } from "@/common/utils/miscUtils";
 
 describe("generateRandomAlphanumericPhrase", () => {
   it("crée une chaîne de caractère aléatoire de longueur demandée", () => {

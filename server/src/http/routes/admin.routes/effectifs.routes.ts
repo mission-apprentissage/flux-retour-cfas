@@ -1,13 +1,13 @@
-import express from "express";
 import Boom from "boom";
+import express from "express";
 import { z } from "zod";
 
-import { getAllEffectifs, getDetailedEffectifById } from "../../../common/actions/effectifs/effectifs.actions.js";
-import paginationShema from "../../../common/validation/paginationSchema.js";
-import searchShema from "../../../common/validation/searchSchema.js";
-import objectIdSchema from "../../../common/validation/objectIdSchema.js";
-import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
-import effectifsFilterSchema from "../../../common/validation/effectifsFilterSchema.js";
+import { getAllEffectifs, getDetailedEffectifById } from "@/common/actions/effectifs/effectifs.actions";
+import effectifsFilterSchema from "@/common/validation/effectifsFilterSchema";
+import objectIdSchema from "@/common/validation/objectIdSchema";
+import paginationShema from "@/common/validation/paginationSchema";
+import searchShema from "@/common/validation/searchSchema";
+import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const listSchema = paginationShema({ defaultSort: "created_at:-1" })
   .merge(searchShema())

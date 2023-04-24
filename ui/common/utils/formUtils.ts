@@ -1,9 +1,10 @@
 import { DateTime } from "luxon";
-import { _post } from "../httpClient";
+
+import { _post } from "@/common/httpClient";
 
 export const convertValueToOption = (field) => {
   let valueOpt = "";
-  let valueDb = field.value;
+  const valueDb = field.value;
   for (let i = 0; i < field.options.length; i++) {
     const options = field.options[i];
     if (options.value === field.value) {
@@ -19,7 +20,7 @@ export const convertValueToOption = (field) => {
 
 export const convertValueToMultipleSelectOption = (field) => {
   let valueOpt = "";
-  let valueDb = field.value;
+  const valueDb = field.value;
   for (let i = 0; i < field.options.length; i++) {
     const options = field.options[i];
     for (let j = 0; j < options.options.length; j++) {

@@ -1,4 +1,4 @@
-import ApiEntEtablissement from "./ApiEntEtablissement.js";
+import ApiEntEtablissement from "./ApiEntEtablissement";
 
 type ApiEntEtablissementResponse = {
   etablissement: ApiEntEtablissement;

@@ -1,6 +1,6 @@
 import nock from "nock";
 
-import config from "../../../src/config.js";
+import config from "@/config";
 
 export const nockGetFormations = (callback?: any) => {
   nock(config.mnaCatalogApi.endpoint)

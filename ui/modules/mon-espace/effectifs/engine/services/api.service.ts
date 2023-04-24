@@ -1,4 +1,4 @@
-import { _post, _put } from "../../../../../common/httpClient";
+import { _post, _put } from "@/common/httpClient";
 
 // eslint-disable-next-line no-unused-vars
 const saveCerfa = async ({ organisme_id, effectifId, data, inputNames }) => {

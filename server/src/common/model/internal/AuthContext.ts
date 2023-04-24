@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
-import { Organisation } from "../organisations.model";
+
+import { Organisation } from "@/common/model/organisations.model";
 
 export interface AuthContext<IOrganisation = Organisation> {
   _id: ObjectId;

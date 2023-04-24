@@ -1,4 +1,4 @@
-import { apiService } from "../../services/api.service";
+import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.service";
 
 export const apprenantCodePostalDeNaissanceControl = [
   {

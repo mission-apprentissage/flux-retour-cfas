@@ -1,4 +1,4 @@
-import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
+import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 export const ORGANISATIONS_NATIONALES = sortAlphabeticallyBy("nom", [
   {

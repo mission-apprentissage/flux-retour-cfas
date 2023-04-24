@@ -1,9 +1,9 @@
 import React from "react";
 import { Box, Text, Center } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
-import Tooltip from "../../../components/Tooltip/Tooltip";
-import { InputController } from "../formEngine/components/Input/InputController";
-import { valueSelector } from "../formEngine/atoms";
+import Tooltip from "@/components/Tooltip/Tooltip";
+import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
+import { valueSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
 import { documentsIsRequired } from "./domain/documentsIsRequired";
 import UploadFiles from "./components/UploadFiles";
 

@@ -1,5 +1,3 @@
-import React, { useState } from "react";
-import { useRouter } from "next/router";
 import {
   Box,
   Flex,
@@ -13,19 +11,21 @@ import {
   Circle,
   Switch,
 } from "@chakra-ui/react";
-import { useRecoilValue } from "recoil";
 import groupBy from "lodash.groupby";
+import { useRouter } from "next/router";
+import React, { useState, useMemo } from "react";
+import { useRecoilValue } from "recoil";
 
-import { DownloadLine } from "../../../../theme/components/icons";
-import { organismeAtom } from "../../../../hooks/organismeAtoms";
+import { _getBlob } from "@/common/httpClient";
+import Ribbons from "@/components/Ribbons/Ribbons";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import useDownloadClick from "@/hooks/useDownloadClick";
+import { DownloadLine } from "@/theme/components/icons";
+import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
+
 import AjoutApprenantModal from "./AjoutApprenantModal";
 import EffectifsTable from "./EffectifsTable";
-import useDownloadClick from "../../../../hooks/useDownloadClick";
-import { _getBlob } from "../../../../common/httpClient";
 import { Input } from "./formEngine/components/Input/Input";
-import { useMemo } from "react";
-import { DoubleChevrons } from "../../../../theme/components/icons/DoubleChevrons";
-import Ribbons from "../../../../components/Ribbons/Ribbons";
 
 const DownloadButton = ({ title, fileName, getFile }) => {
   const { onClick, isLoading } = useDownloadClick(getFile, fileName);

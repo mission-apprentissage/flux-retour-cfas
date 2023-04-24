@@ -1,22 +1,20 @@
 import { Heading, HStack, Stack, Text, Tooltip } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { fetchEffectifsDataListCsvExport } from "@/common/api/tableauDeBord";
+import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
+import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
 import MonthSelect from "@/components/MonthSelect/MonthSelect";
 import Section from "@/components/Section/Section";
-import DownloadBlock from "@/components/DownloadBlock/DownloadBlock";
 import RepartitionEffectifsParSiret from "@/components/tables/RepartitionEffectifsParSiretAndDepartement";
-import useAuth from "@/hooks/useAuth";
 import useFetchEffectifsParSiret from "@/hooks/useFetchEffectifsParSiret";
-import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
-import { InfoLine } from "@/theme/components/icons";
 import {
   filtersPropTypes,
   useFiltersContext,
 } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import { InfoLine } from "@/theme/components/icons";
 
-const RepartitionEffectifsParSiretSection = ({ filters}) => {
+const RepartitionEffectifsParSiretSection = ({ filters }) => {
   const { data, loading, error } = useFetchEffectifsParSiret(filters);
   const filtersContext = useFiltersContext();
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;

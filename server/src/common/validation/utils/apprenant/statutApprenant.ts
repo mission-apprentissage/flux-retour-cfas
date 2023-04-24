@@ -1,5 +1,6 @@
 import Joi from "joi";
-import { CODES_STATUT_APPRENANT } from "../../../constants/dossierApprenant.js";
+
+import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 
 export const schema = Joi.number()
   .strict()

@@ -1,19 +1,20 @@
 import Boom from "boom";
 import { ObjectId } from "mongodb";
-import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "../constants/territoires.js";
-import { UsersMigration } from "../model/@types/UsersMigration.js";
 
-import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "../model/collections.js";
-import { AuthContext } from "../model/internal/AuthContext.js";
-import { NewOrganisation, Organisation } from "../model/organisations.model.js";
-import { sendEmail } from "../services/mailer/mailer.js";
-import logger from "../logger.js";
-import { Organisme } from "../model/@types/Organisme.js";
-import { requireOrganisationOF } from "./helpers/permissions.js";
-import { Invitation } from "../model/invitations.model.js";
-import { generateKey } from "../utils/cryptoUtils.js";
-import { getUserById } from "./users.actions.js";
-import { getCurrentTime } from "../utils/timeUtils.js";
+import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "@/common/constants/territoires";
+import logger from "@/common/logger";
+import { Organisme } from "@/common/model/@types/Organisme";
+import { UsersMigration } from "@/common/model/@types/UsersMigration";
+import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import { Invitation } from "@/common/model/invitations.model";
+import { NewOrganisation, Organisation } from "@/common/model/organisations.model";
+import { sendEmail } from "@/common/services/mailer/mailer";
+import { generateKey } from "@/common/utils/cryptoUtils";
+import { getCurrentTime } from "@/common/utils/timeUtils";
+
+import { requireOrganisationOF } from "./helpers/permissions";
+import { getUserById } from "./users.actions";
 
 export async function createOrganisation(organisation: NewOrganisation): Promise<ObjectId> {
   const { insertedId } = await organisationsDb().insertOne({

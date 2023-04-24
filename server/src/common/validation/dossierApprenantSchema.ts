@@ -1,13 +1,13 @@
 import Joi from "joi";
 
-import { schema as anneeScolaireSchema } from "./utils/anneeScolaire.js";
-import { schema as ISO8601DateSchema } from "./utils/date.js";
-import { schema as statutApprenantSchema } from "./utils/apprenant/statutApprenant.js";
-import { uaiSchema } from "../../common/utils/validationUtils.js";
-import { schema as cfdSchema } from "./utils/cfd.js";
-import { schema as nomApprenantSchema } from "./utils/apprenant/nomApprenant.js";
-import { schema as prenomApprenantSchema } from "./utils/apprenant/prenomApprenant.js";
-import { schema as siretSchema } from "./utils/siret.js";
+import { uaiSchema } from "@/common/utils/validationUtils";
+import { schema as anneeScolaireSchema } from "@/common/validation/utils/anneeScolaire";
+import { schema as nomApprenantSchema } from "@/common/validation/utils/apprenant/nomApprenant";
+import { schema as prenomApprenantSchema } from "@/common/validation/utils/apprenant/prenomApprenant";
+import { schema as statutApprenantSchema } from "@/common/validation/utils/apprenant/statutApprenant";
+import { schema as cfdSchema } from "@/common/validation/utils/cfd";
+import { schema as ISO8601DateSchema } from "@/common/validation/utils/date";
+import { schema as siretSchema } from "@/common/validation/utils/siret";
 
 /**
  * @deprecated

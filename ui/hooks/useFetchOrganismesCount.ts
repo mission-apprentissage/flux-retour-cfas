@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { _get } from "@/common/httpClient";
 import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import { pick } from "@/common/utils/pick";
-import { _get } from "@/common/httpClient";
 
 const useFetchOrganismesCount = (filters: any = {}) => {
   const requestFilters = pick(mapFiltersToApiFormat(filters), [

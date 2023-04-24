@@ -1,23 +1,26 @@
+import Boom from "boom";
 import { Parser } from "json2csv";
 
-import { AuthContext } from "../../model/internal/AuthContext.js";
 import {
   EffectifsFiltersWithRestriction,
   LegacyEffectifsFilters,
   buildMongoPipelineFilterStages,
-} from "../helpers/filters.js";
-import { exportedFields } from "./export.js";
-import { getEffectifsAnonymesRestriction } from "../helpers/permissions.js";
-import { requireOrganismeIndicateursAccess } from "../helpers/permissions.js";
-import { organismesDb } from "../../model/collections.js";
-import Boom from "boom";
+} from "@/common/actions/helpers/filters";
+import {
+  getEffectifsAnonymesRestriction,
+  requireOrganismeIndicateursAccess,
+} from "@/common/actions/helpers/permissions";
+import { EFFECTIF_INDICATOR_NAMES } from "@/common/constants/dossierApprenant";
+import { organismesDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+
+import { exportedFields } from "./export";
 import {
   abandonsIndicator,
   apprentisIndicator,
   inscritsSansContratsIndicator,
   rupturantsIndicator,
-} from "./indicators.js";
-import { EFFECTIF_INDICATOR_NAMES } from "../../constants/dossierApprenant.js";
+} from "./indicators";
 
 // Parse to french localized CSV with specific fields order & labels (; as delimiter and UTF8 using withBOM)
 const CSV_DEFAULT_FIELDS = [

@@ -1,5 +1,5 @@
-import logger from "../../../common/logger.js";
-import { effectifsQueueDb } from "../../../common/model/collections.js";
+import logger from "@/common/logger";
+import { effectifsQueueDb } from "@/common/model/collections";
 
 export const removeDuplicatesEffectifsQueue = async () => {
   logger.info("Find duplicates in effectifs queue...");

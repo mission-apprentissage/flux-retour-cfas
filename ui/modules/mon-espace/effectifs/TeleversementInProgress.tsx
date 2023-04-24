@@ -1,5 +1,5 @@
-import React from "react";
 import { Heading, Text, VStack } from "@chakra-ui/react";
+import React from "react";
 
 const TeleversementInProgress = ({ message, children }: { message: string; children?: React.ReactNode }) => {
   return (

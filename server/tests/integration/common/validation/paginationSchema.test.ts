@@ -1,8 +1,8 @@
 import { strict as assert } from "assert";
 
-import paginationShema from "../../../../src/common/validation/paginationSchema.js";
-import searchShema from "../../../../src/common/validation/searchSchema.js";
-import organismesFilterSchema from "../../../../src/common/validation/organismesFilterSchema.js";
+import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
+import paginationShema from "@/common/validation/paginationSchema";
+import searchShema from "@/common/validation/searchSchema";
 
 const listSchema = paginationShema({ defaultSort: "created_at:-1" })
   .merge(searchShema())

@@ -1,13 +1,13 @@
 import React from "react";
 
-import IndicateursVueOrganismePage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/IndicateursVueOrganismePage";
+import { OrganisationTeteReseau } from "@/common/internal/Organisation";
+import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import {
   FiltersProvider,
   getDefaultState,
 } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import withAuth from "@/components/withAuth";
-import { OrganisationTeteReseau } from "@/common/internal/Organisation";
+import IndicateursVueOrganismePage from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/IndicateursVueOrganismePage";
 
 const IndicateursVueOrganismePageContainer = () => {
   const { auth, organisationType } = useAuth();

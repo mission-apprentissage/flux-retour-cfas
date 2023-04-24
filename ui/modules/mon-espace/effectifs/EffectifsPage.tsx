@@ -1,15 +1,16 @@
-import React, { useEffect, useRef } from "react";
 import { Center, Spinner } from "@chakra-ui/react";
-import Effectifs from "./engine/Effectifs";
-
-import { organismeAtom } from "../../../hooks/organismeAtoms";
-import { _get } from "../../../common/httpClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useRef } from "react";
 import { useSetRecoilState, useRecoilValue } from "recoil";
+
+import { _get } from "@/common/httpClient";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+
 import ChoixTransmission from "./ChoixTransmission";
-import TransmissionAPI from "./TransmissionAPI";
-import Televersements from "./Televersements";
 import { effectifsStateAtom } from "./engine/atoms";
+import Effectifs from "./engine/Effectifs";
+import Televersements from "./Televersements";
+import TransmissionAPI from "./TransmissionAPI";
 
 function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);

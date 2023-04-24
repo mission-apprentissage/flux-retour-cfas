@@ -1,8 +1,9 @@
-import React from "react";
 import { Box, Heading, Text, Flex, HStack, Link } from "@chakra-ui/react";
-import Sommaire from "../Sommaire/Sommaire";
-import Section from "../Section/Section";
-import { PRODUCT_NAME_TITLE } from "../../common/constants/product";
+import React from "react";
+
+import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
+import Section from "@/components/Section/Section";
+import Sommaire from "@/components/Sommaire/Sommaire";
 
 const DonneesPersonnelles = () => {
   const title = PRODUCT_NAME_TITLE;

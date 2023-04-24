@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
 import { Box, HStack, Heading, Text, Link, Flex } from "@chakra-ui/react";
+import React, { useEffect } from "react";
 
-import Sommaire from "../Sommaire/Sommaire";
-import Section from "../Section/Section";
+import Section from "@/components/Section/Section";
+import Sommaire from "@/components/Sommaire/Sommaire";
 
 export const CGU_VERSION = "v0.1";
 

@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import Section from "@/components/Section/Section";
+
 import { useFiltersContext } from "../../../FiltersContext";
+
 import MultiSiretFilter from "./MultiSiretFilter";
 
 const MultiSiretDetailInformationSection = ({ sirets }) => {

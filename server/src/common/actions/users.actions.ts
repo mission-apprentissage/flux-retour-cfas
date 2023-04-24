@@ -1,16 +1,15 @@
 import Boom from "boom";
 import { addHours } from "date-fns";
-import { ObjectId } from "mongodb";
-import { UsersMigration } from "../model/@types/UsersMigration.js";
+import { ObjectId, WithId } from "mongodb";
 
-import { usersMigrationDb } from "../model/collections.js";
-import { AuthContext } from "../model/internal/AuthContext.js";
-import { validateUser } from "../model/usersMigration.model.js";
-import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
-import { hash, compare, isTooWeak } from "../utils/passwordUtils.js";
-import { getOrganisationLabel } from "../model/organisations.model.js";
-import { WithId } from "mongodb";
-import { getCurrentTime } from "../utils/timeUtils.js";
+import { UsersMigration } from "@/common/model/@types/UsersMigration";
+import { usersMigrationDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import { getOrganisationLabel } from "@/common/model/organisations.model";
+import { validateUser } from "@/common/model/usersMigration.model";
+import { generateRandomAlphanumericPhrase } from "@/common/utils/miscUtils";
+import { hash, compare, isTooWeak } from "@/common/utils/passwordUtils";
+import { getCurrentTime } from "@/common/utils/timeUtils";
 
 interface UserRegistration {
   email: string;

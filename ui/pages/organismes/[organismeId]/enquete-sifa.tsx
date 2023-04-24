@@ -1,13 +1,13 @@
-import React from "react";
 import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
-import Page from "@/components/Page/Page";
-
-import withAuth from "@/components/withAuth";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import SIFAPage from "@/modules/mon-espace/SIFA/SIFAPage";
-import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 import { useRouter } from "next/router";
+import React from "react";
+
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Page from "@/components/Page/Page";
+import withAuth from "@/components/withAuth";
+import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
+import SIFAPage from "@/modules/mon-espace/SIFA/SIFAPage";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

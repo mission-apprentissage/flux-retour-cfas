@@ -1,10 +1,11 @@
-import { endOfMonth, format, isThisMonth } from "date-fns";
-import fr from "date-fns/locale/fr";
+import { endOfMonth, format, isThisMonth } from "date-fns"; // eslint-disable-line import/no-duplicates
+// besoin de date-fns 3 pour import esm, voir https://github.com/date-fns/date-fns/issues/2629
+import fr from "date-fns/locale/fr"; // eslint-disable-line import/no-duplicates
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 
-import PrimarySelectButton from "../SelectButton/PrimarySelectButton";
+import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
 
 registerLocale("fr", fr);
 

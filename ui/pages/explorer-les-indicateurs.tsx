@@ -1,14 +1,13 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Container, Heading, Text } from "@chakra-ui/react";
 import { startOfHour } from "date-fns";
+import Head from "next/head";
+import React from "react";
 
-import Page from "@/components/Page/Page";
-import Section from "@/components/Section/Section";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import IndicateursGridStack from "@/components/IndicateursGridStack";
-
-import useFetchIndicateursNational from "../hooks/useFetchIndicateursNational";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import useFetchIndicateursNational from "@/hooks/useFetchIndicateursNational";
 
 const ExplorerLesIndicateursPage = () => {
   const title = "Visualiser les indicateurs en temps réel";

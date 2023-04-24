@@ -1,4 +1,4 @@
-import { INDICE_DE_REPETITION_OPTIONS } from "../../domain/indiceDeRepetionOptions";
+import { INDICE_DE_REPETITION_OPTIONS } from "@/modules/mon-espace/effectifs/engine/cerfaForm/domain/indiceDeRepetionOptions";
 
 export const contratsSchema = {
   "apprenant.nouveau_contrat": {

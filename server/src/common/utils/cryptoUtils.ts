@@ -1,7 +1,8 @@
 import crypto from "crypto";
+
 import checksumStream from "checksum-stream";
 
-import config from "../../config.js";
+import config from "@/config";
 
 const KEY = config.ovhStorage.encryptionKey;
 

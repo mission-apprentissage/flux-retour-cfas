@@ -1,20 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Center, Heading, Spinner, Box, Flex, Text, HStack, Button, VStack, Switch } from "@chakra-ui/react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRecoilValue, useSetRecoilState } from "recoil";
 import { usePlausible } from "next-plausible";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 
-import { organismeAtom } from "@/hooks/organismeAtoms";
 import { _get, _getBlob } from "@/common/httpClient";
+import { organismeAtom } from "@/hooks/organismeAtoms";
 import useDownloadClick from "@/hooks/useDownloadClick";
+import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+import EffectifsTable from "@/modules/mon-espace/effectifs/engine/EffectifsTable";
+import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import { DownloadLine } from "@/theme/components/icons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
-
-import EffectifsTable from "../effectifs/engine/EffectifsTable";
-import { effectifsStateAtom } from "../effectifs/engine/atoms";
-import { Input } from "../effectifs/engine/formEngine/components/Input/Input";
 
 const currentYear = new Date().getFullYear();
 const previousYear = currentYear - 1;

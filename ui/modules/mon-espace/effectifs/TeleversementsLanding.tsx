@@ -1,6 +1,6 @@
-import React from "react";
-import NextLink from "next/link";
 import { Button, Flex, Heading, Link, Text } from "@chakra-ui/react";
+import NextLink from "next/link";
+import React from "react";
 
 import { ArrowDropRightLine } from "@/theme/components/icons";
 

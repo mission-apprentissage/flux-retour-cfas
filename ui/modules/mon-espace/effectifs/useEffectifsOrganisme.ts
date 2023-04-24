@@ -1,7 +1,8 @@
-import { organismeAtom } from "@/hooks/organismeAtoms";
-import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
 import { useEffect } from "react";
 import { useRecoilState } from "recoil";
+
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
 
 // version qui renvoie l'organisme une fois enregistré dans recoil
 // utilisé pour les pages effectifs et enquete-sifa

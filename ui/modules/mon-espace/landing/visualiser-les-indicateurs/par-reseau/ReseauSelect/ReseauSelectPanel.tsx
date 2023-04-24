@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import FilterOption from "@/components/FilterOption/FilterOption";
+
 import useReseauxData from "./useReseauxData";
 
 const ReseauSelectPanel = ({ onReseauClick, value }: { onReseauClick: (_reseau: any) => void; value: any }) => {

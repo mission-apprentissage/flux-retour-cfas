@@ -1,6 +1,7 @@
-import logger from "../logger.js";
-import config from "../../config.js";
-import getApiClient from "./client.js";
+import logger from "@/common/logger";
+import config from "@/config";
+
+import getApiClient from "./client";
 
 // Cf Documentation : https://referentiel.apprentissage.onisep.fr/api/v1/doc/#/
 

@@ -1,12 +1,12 @@
-import React from "react";
 import { Box, Button, Flex, RadioGroup, Radio, Text, VStack } from "@chakra-ui/react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import { useRouter } from "next/router";
+import React from "react";
+import * as Yup from "yup";
 
-import { InfoCircle } from "../../../theme/components/icons/index";
-import { ERPS } from "../../../common/constants/erps";
-import { configureOrganismeERP } from "../../../common/api/tableauDeBord";
+import { configureOrganismeERP } from "@/common/api/tableauDeBord";
+import { ERPS } from "@/common/constants/erps";
+import { InfoCircle } from "@/theme/components/icons/index";
 
 const TransmissionAPI = ({ organisme, isMine }) => {
   const router = useRouter();

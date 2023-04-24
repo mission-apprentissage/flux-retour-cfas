@@ -1,9 +1,9 @@
-import React from "react";
 import { Box, Button, Flex, Input, Heading } from "@chakra-ui/react";
+import { useFormik } from "formik";
+import React from "react";
+import { object, string } from "yup";
 
 import { _post } from "@/common/httpClient";
-import { object, string } from "yup";
-import { useFormik } from "formik";
 import useToaster from "@/hooks/useToaster";
 
 async function inviteUserToOrganisation(email: string) {

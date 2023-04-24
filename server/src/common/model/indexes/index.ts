@@ -1,6 +1,6 @@
-import logger from "../../logger.js";
-import { getDbCollection, getCollectionList } from "../../mongodb.js";
-import { modelDescriptors } from "../collections.js";
+import logger from "@/common/logger";
+import { modelDescriptors } from "@/common/model/collections";
+import { getDbCollection, getCollectionList } from "@/common/mongodb";
 
 export const createIndexes = async () => {
   for (const descriptor of modelDescriptors) {

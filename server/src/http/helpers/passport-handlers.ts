@@ -1,16 +1,15 @@
-import config from "../../config.js";
-import passport from "passport";
-import { Strategy, ExtractJwt } from "passport-jwt";
-import { getUserByEmail, updateUser } from "../../common/actions/users.actions.js";
-import { AuthContext } from "../../common/model/internal/AuthContext.js";
-import { getOrganisationById } from "../../common/actions/organisations.actions.js";
-import { Strategy as JWTStrategy } from "passport-jwt";
-import { compose } from "compose-middleware";
-
-import * as sessions from "../../common/actions/sessions.actions.js";
-import { COOKIE_NAME } from "../../common/constants/cookieName.js";
-import { ObjectId } from "mongodb";
 import Boom from "boom";
+import { compose } from "compose-middleware";
+import { ObjectId } from "mongodb";
+import passport from "passport";
+import { Strategy, ExtractJwt, Strategy as JWTStrategy } from "passport-jwt";
+
+import { getOrganisationById } from "@/common/actions/organisations.actions";
+import * as sessions from "@/common/actions/sessions.actions";
+import { getUserByEmail, updateUser } from "@/common/actions/users.actions";
+import { COOKIE_NAME } from "@/common/constants/cookieName";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import config from "@/config";
 
 export const authMiddleware = () => {
   passport.use(

@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import Head from "next/head";
 import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
+import Head from "next/head";
+import React, { useState } from "react";
 
-import { ArrowDropRightLine } from "@/theme/components/icons";
 import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation";
-import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
-import Page from "@/components/Page/Page";
+import { OrganisationType } from "@/common/internal/Organisation";
+import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import Link from "@/components/Links/Link";
+import Page from "@/components/Page/Page";
 import Table from "@/components/Table/Table";
 import withAuth from "@/components/withAuth";
-import useAuth from "@/hooks/useAuth";
 import { useOrganisationOrganismes } from "@/hooks/organismes";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
-import { OrganisationType } from "@/common/internal/Organisation";
+import useAuth from "@/hooks/useAuth";
+import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import { ArrowDropRightLine } from "@/theme/components/icons";
 
 const natures = {
   responsable: "Responsable",

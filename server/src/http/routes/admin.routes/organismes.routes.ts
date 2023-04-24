@@ -1,5 +1,5 @@
-import express from "express";
 import Boom from "boom";
+import express from "express";
 import { z } from "zod";
 
 import {
@@ -7,12 +7,12 @@ import {
   getAllOrganismes,
   getDetailedOrganismeById,
   updateOrganisme,
-} from "../../../common/actions/organismes/organismes.actions.js";
-import paginationShema from "../../../common/validation/paginationSchema.js";
-import searchShema from "../../../common/validation/searchSchema.js";
-import objectIdSchema from "../../../common/validation/objectIdSchema.js";
-import validateRequestMiddleware from "../../middlewares/validateRequestMiddleware.js";
-import organismesFilterSchema from "../../../common/validation/organismesFilterSchema.js";
+} from "@/common/actions/organismes/organismes.actions";
+import objectIdSchema from "@/common/validation/objectIdSchema";
+import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
+import paginationShema from "@/common/validation/paginationSchema";
+import searchShema from "@/common/validation/searchSchema";
+import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const listSchema = paginationShema({ defaultSort: "created_at:-1" })
   .merge(searchShema())

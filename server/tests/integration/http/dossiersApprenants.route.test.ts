@@ -1,12 +1,13 @@
 import { strict as assert } from "assert";
 
-import { initTestApp } from "../../utils/testUtils.js";
-import { apiRoles } from "../../../src/common/roles.js";
-import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "../../data/randomizedSample.js";
-import { effectifsQueueDb, usersDb } from "../../../src/common/model/collections.js";
-import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
-import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
 import { AxiosInstance } from "axiosist";
+
+import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
+import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
+import { effectifsQueueDb, usersDb } from "@/common/model/collections";
+import { apiRoles } from "@/common/roles";
+import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
+import { initTestApp } from "@tests/utils/testUtils";
 
 const user = {
   name: "userApi",

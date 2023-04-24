@@ -1,7 +1,9 @@
 import Joi from "joi";
 import { joiPasswordExtendCore } from "joi-password";
 import { z } from "zod";
-import { SIRET_REGEX, UAI_REGEX } from "../constants/organisme";
+
+import { SIRET_REGEX, UAI_REGEX } from "@/common/constants/organisme";
+
 const joiPassword = Joi.extend(joiPasswordExtendCore);
 
 export function passwordSchema(isAdmin = false) {

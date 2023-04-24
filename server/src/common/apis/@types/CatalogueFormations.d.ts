@@ -1,4 +1,4 @@
-import CatalogueFormation from "./CatalogueFormation.js";
+import CatalogueFormation from "./CatalogueFormation";
 
 type CatalogueFormations = {
   formations: Array<CatalogueFormation>;

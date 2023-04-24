@@ -1,6 +1,7 @@
-import React from "react";
 import { Flex, Box, Spinner } from "@chakra-ui/react";
-import { ErrorIcon, ValidateIcon, Alert, InfoCircle, Warning } from "../../theme/components/icons/index";
+import React from "react";
+
+import { ErrorIcon, ValidateIcon, Alert, InfoCircle, Warning } from "@/theme/components/icons/index";
 
 const stylesMap = {
   success: { color: "flatsuccess", bg: "white", borderColor: "flatsuccess", borderWidth: 1 },

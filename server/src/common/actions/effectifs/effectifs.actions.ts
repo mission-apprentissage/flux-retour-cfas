@@ -1,3 +1,5 @@
+import Boom from "boom";
+import { format } from "date-fns";
 import { ObjectId } from "mongodb";
 
 import {
@@ -5,26 +7,25 @@ import {
   EffectifsFiltersWithRestriction,
   LegacyEffectifsFilters,
   organismeLookup,
-} from "../helpers/filters.js";
-import { mergeObjectsBy } from "../../utils/mergeObjectsBy.js";
-import { DEPARTEMENTS_BY_ID } from "../../constants/territoires.js";
+} from "@/common/actions/helpers/filters";
+import {
+  getEffectifsAnonymesRestriction,
+  getIndicateursRestriction,
+  requireOrganismeIndicateursAccess,
+} from "@/common/actions/helpers/permissions";
+import { DEPARTEMENTS_BY_ID } from "@/common/constants/territoires";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
+import { tryCachedExecution } from "@/common/utils/cacheUtils";
+import { mergeObjectsBy } from "@/common/utils/mergeObjectsBy";
+
 import {
   abandonsIndicator,
   apprentisIndicator,
   inscritsSansContratsIndicator,
   rupturantsIndicator,
-} from "./indicators.js";
-import { effectifsDb, organismesDb } from "../../model/collections.js";
-import { AuthContext } from "../../model/internal/AuthContext.js";
-import {
-  getEffectifsAnonymesRestriction,
-  getIndicateursRestriction,
-  requireOrganismeIndicateursAccess,
-} from "../helpers/permissions.js";
-import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
-import Boom from "boom";
-import { tryCachedExecution } from "@/common/utils/cacheUtils.js";
-import { format } from "date-fns";
+} from "./indicators";
 
 // ce helper est principalement appelé dans les routes des indicateurs agrégés et non scopés à un organisme, mais aussi pour un organisme :
 // - si organisme_id, uai ou siret, indicateurs pour un organisme, on vérifie que l'organisation y a accès

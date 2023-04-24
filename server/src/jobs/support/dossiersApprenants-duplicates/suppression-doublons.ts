@@ -1,6 +1,6 @@
-// import { runScript } from "../../scriptWrapper.js";
-// import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-// import logger from "../../../common/logger.js";
+// import { runScript } from "../../scriptWrapper";
+// import { asyncForEach } from "@/common/utils/asyncUtils";
+// import logger from "@/common/logger";
 
 // runScript(async () => {
 //   const idErpApprenantNotNullStage = {

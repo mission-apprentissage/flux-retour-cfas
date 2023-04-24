@@ -1,22 +1,23 @@
 import { strict as assert } from "assert";
 
+import { AxiosInstance } from "axiosist";
+
+import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
+import { createSampleEffectif } from "@tests/data/randomizedSample";
+import {
+  PermissionsTestConfig,
+  commonEffectifsAttributes,
+  organismes,
+  testPermissions,
+} from "@tests/utils/permissions";
 import {
   RequestAsOrganisationFunc,
   expectForbiddenError,
   expectUnauthorizedError,
   id,
   initTestApp,
-} from "../../utils/testUtils.js";
-import { createSampleEffectif } from "../../data/randomizedSample.js";
-import { effectifsDb, organismesDb } from "../../../src/common/model/collections.js";
-import { historySequenceInscritToApprenti } from "../../data/historySequenceSamples.js";
-import { AxiosInstance } from "axiosist";
-import {
-  PermissionsTestConfig,
-  commonEffectifsAttributes,
-  organismes,
-  testPermissions,
-} from "../../utils/permissions.js";
+} from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;

@@ -1,10 +1,10 @@
-import { z } from "zod";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
 import { capitalize } from "lodash-es";
+import { z } from "zod";
 
-import { CODES_STATUT_APPRENANT_ENUM } from "@/common/constants/dossierApprenant.js";
-import { CFD_REGEX, RNCP_REGEX, SIRET_REGEX, UAI_REGEX } from "@/common/constants/organisme.js";
+import { CODES_STATUT_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
+import { CFD_REGEX, RNCP_REGEX, SIRET_REGEX, UAI_REGEX } from "@/common/constants/organisme";
 
 extendZodWithOpenApi(z);
 

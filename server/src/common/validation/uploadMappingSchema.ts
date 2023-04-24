@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { REQUIRED_KEYS, OPTIONAL_KEYS } from "../constants/upload";
+import { REQUIRED_KEYS, OPTIONAL_KEYS } from "@/common/constants/upload";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { CFD, RNCP, ...otherRequiredFields } = REQUIRED_KEYS;

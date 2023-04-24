@@ -1,7 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
+
 import { _get } from "@/common/httpClient";
 import { omitNullishValues } from "@/common/utils/omitNullishValues";
 import { useSimpleFiltersContext } from "@/modules/mon-espace/landing/common/SimpleFiltersContext";
-import { useQuery } from "@tanstack/react-query";
 
 // récupère un organisme
 export function useOrganisme(organismeId: string) {

@@ -1,5 +1,23 @@
 import { strict as assert } from "assert";
 
+import { AxiosInstance } from "axiosist";
+import { beforeEach } from "mocha";
+
+import { effectifsDb, organismesDb } from "@/common/model/collections";
+import {
+  historySequenceApprenti,
+  historySequenceApprentiToAbandon,
+  historySequenceApprentiToInscrit,
+  historySequenceInscrit,
+} from "@tests/data/historySequenceSamples";
+import { createSampleEffectif } from "@tests/data/randomizedSample";
+import {
+  PermissionsTestConfig,
+  commonEffectifsAttributes,
+  organismes,
+  testPermissions,
+  userOrganisme,
+} from "@tests/utils/permissions";
 import {
   stringifyMongoFields,
   expectForbiddenError,
@@ -8,24 +26,7 @@ import {
   initTestApp,
   RequestAsOrganisationFunc,
   generate,
-} from "../../utils/testUtils.js";
-import { AxiosInstance } from "axiosist";
-import { effectifsDb, organismesDb } from "../../../src/common/model/collections.js";
-import {
-  PermissionsTestConfig,
-  commonEffectifsAttributes,
-  organismes,
-  testPermissions,
-  userOrganisme,
-} from "../../utils/permissions.js";
-import { beforeEach } from "mocha";
-import {
-  historySequenceApprenti,
-  historySequenceApprentiToAbandon,
-  historySequenceApprentiToInscrit,
-  historySequenceInscrit,
-} from "../../data/historySequenceSamples.js";
-import { createSampleEffectif } from "../../data/randomizedSample.js";
+} from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;

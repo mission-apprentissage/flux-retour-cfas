@@ -2,11 +2,12 @@ import { Box, Divider, Heading } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import InputLegend from "@/components/InputLegend/InputLegend";
+import Loading from "@/components/Loading/Loading";
+import NoResults from "@/components/NoResults/NoResults";
+import SearchInput from "@/components/SearchInput/SearchInput";
 import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import InputLegend from "../InputLegend/InputLegend";
-import Loading from "../Loading/Loading";
-import NoResults from "../NoResults/NoResults";
-import SearchInput from "../SearchInput/SearchInput";
+
 import FormationsList from "./FormationsList";
 import useFormationSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useFormationSearch";
 

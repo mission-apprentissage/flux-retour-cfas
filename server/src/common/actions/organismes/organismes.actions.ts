@@ -1,27 +1,28 @@
+import Boom from "boom";
 import { ObjectId } from "mongodb";
 
-import { getMetiersBySiret } from "@/common/apis/apiLba.js";
-import { organismesDb, effectifsDb } from "@/common/model/collections.js";
-import { defaultValuesOrganisme, validateOrganisme } from "@/common/model/organismes.model.js";
-import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils.js";
-import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/uaiUtils.js";
-import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
-import { findDataFromSiret } from "../infoSiret.actions.js";
-import logger from "@/common/logger.js";
-import { escapeRegExp } from "@/common/utils/regexUtils.js";
-import { Organisme } from "@/common/model/@types/Organisme.js";
-import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "../helpers/filters.js";
-import Boom from "boom";
-import { AuthContext } from "@/common/model/internal/AuthContext.js";
-import { getOrganisationOrganisme } from "../organisations.actions.js";
-import { ConfigurationERP } from "@/common/validation/configurationERPSchema.js";
-import { OrganisationOrganismeFormation } from "@/common/model/organisations.model.js";
-import { stripEmptyFields } from "@/common/utils/miscUtils.js";
+import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 import {
   findOrganismesAccessiblesByOrganisation,
   getOrganismeRestriction,
   isOrganisationOF,
-} from "../helpers/permissions.js";
+} from "@/common/actions/helpers/permissions";
+import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
+import { getOrganisationOrganisme } from "@/common/actions/organisations.actions";
+import { getMetiersBySiret } from "@/common/apis/apiLba";
+import logger from "@/common/logger";
+import { Organisme } from "@/common/model/@types/Organisme";
+import { organismesDb, effectifsDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
+import { defaultValuesOrganisme, validateOrganisme } from "@/common/model/organismes.model";
+import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
+import { escapeRegExp } from "@/common/utils/regexUtils";
+import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
+import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
+
+import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
 
 const SEARCH_RESULTS_LIMIT = 50;
 

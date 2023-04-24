@@ -1,10 +1,12 @@
 import { strict as assert } from "assert";
-import { id, initTestApp, testPasswordHash } from "../../utils/testUtils.js";
+
 import { AxiosInstance } from "axiosist";
-import { organisationsDb, usersMigrationDb } from "../../../src/common/model/collections.js";
-import { UsersMigration } from "../../../src/common/model/@types/UsersMigration.js";
-import { setTime } from "../../../src/common/utils/timeUtils.js";
 import { ObjectId, WithId } from "mongodb";
+
+import { UsersMigration } from "@/common/model/@types/UsersMigration";
+import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { setTime } from "@/common/utils/timeUtils";
+import { id, initTestApp, testPasswordHash } from "@tests/utils/testUtils";
 
 const date = "2022-10-10T00:00:00.000Z";
 

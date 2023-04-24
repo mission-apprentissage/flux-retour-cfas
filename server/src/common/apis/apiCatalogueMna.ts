@@ -1,6 +1,7 @@
-import parentLogger from "../logger.js";
-import config from "../../config.js";
-import getApiClient from "./client.js";
+import parentLogger from "@/common/logger";
+import config from "@/config";
+
+import getApiClient from "./client";
 
 // Cf Documentation : https://catalogue.apprentissage.beta.gouv.fr/api/v1/docs
 

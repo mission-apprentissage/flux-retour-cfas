@@ -2,10 +2,10 @@ import { Tbody, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { isDateFuture } from "@/common/utils/dateUtils";
+import NumberValueCell from "@/components/tables/NumberValueCell";
+import Table from "@/components/tables/Table";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import { isDateFuture } from "../../../common/utils/dateUtils";
-import NumberValueCell from "../NumberValueCell";
-import Table from "../Table";
 
 const RepartitionEffectifsParNiveauFormation = ({
   repartitionEffectifs,

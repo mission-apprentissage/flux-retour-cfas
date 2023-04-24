@@ -1,17 +1,18 @@
 import { strict as assert } from "assert";
+
 import { subDays } from "date-fns";
 
-import { createRandomOrganisme } from "../../../data/randomizedSample.js";
+import { mapFiabilizedOrganismeUaiSiretCouple } from "@/common/actions/engine/engine.organismes.utils";
 import {
   createOrganisme,
   findOrganismeById,
   setOrganismeTransmissionDates,
   updateOrganisme,
-} from "../../../../src/common/actions/organismes/organismes.actions.js";
-import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
-import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "../../../../src/common/constants/fiabilisation.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/constants/organisme.js";
+} from "@/common/actions/organismes/organismes.actions";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
+import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
+import { fiabilisationUaiSiretDb } from "@/common/model/collections";
+import { createRandomOrganisme } from "@tests/data/randomizedSample";
 
 const sampleOrganismeWithoutUai = {
   siret: "41461021200014",

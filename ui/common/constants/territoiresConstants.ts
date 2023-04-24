@@ -1,7 +1,7 @@
 // données à synchroniser avec /server/src/common/constants/territoiresConstants.js
 // en attendant un import partagé
 
-import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
+import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 /**
  * Liste des régions du territoire national

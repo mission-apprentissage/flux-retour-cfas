@@ -1,12 +1,13 @@
 import Boom from "boom";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../constants/organisme.js";
-import logger from "../../logger.js";
-import { organismesDb } from "../../model/collections.js";
-import { AuthContext } from "../../model/internal/AuthContext.js";
-import { OrganisationOrganismeFormation, OrganisationType } from "../../model/organisations.model.js";
-import { getOrganismeById } from "../organismes/organismes.actions.js";
 import { ObjectId } from "mongodb";
-import { Organisme } from "../../model/@types/Organisme.js";
+
+import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
+import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
+import logger from "@/common/logger";
+import { Organisme } from "@/common/model/@types/Organisme";
+import { organismesDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import { OrganisationOrganismeFormation, OrganisationType } from "@/common/model/organisations.model";
 
 export async function requireOrganismeIndicateursAccess(ctx: AuthContext, organismeId: ObjectId): Promise<void> {
   if (!(await canAccessOrganismeIndicateurs(ctx, organismeId))) {

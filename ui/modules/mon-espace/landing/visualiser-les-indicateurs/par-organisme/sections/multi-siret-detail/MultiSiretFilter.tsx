@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
+
 import { useFiltersContext } from "../../../FiltersContext";
 
 const MultiSiretFilter = ({ onSiretClick, sirets }) => {

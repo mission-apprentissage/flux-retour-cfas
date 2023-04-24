@@ -1,8 +1,8 @@
 import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import NavLink from "next/link";
+import PropTypes from "prop-types";
 
-import { PRODUCT_NAME } from "../../../../common/constants/product";
+import { PRODUCT_NAME } from "@/common/constants/product";
 
 const DemandeBranchementErpFormErpReadySection = ({ helpFilePath }) => {
   return (

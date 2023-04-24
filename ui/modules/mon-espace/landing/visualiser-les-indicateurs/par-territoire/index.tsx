@@ -1,6 +1,7 @@
 import React from "react";
 
 import { FiltersProvider } from "../FiltersContext";
+
 import IndicateursVueTerritoirePage from "./IndicateursVueTerritoirePage";
 
 const IndicateursVueTerritoirePageContainer = () => {

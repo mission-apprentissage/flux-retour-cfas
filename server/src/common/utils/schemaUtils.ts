@@ -1,6 +1,7 @@
-import logger from "../logger.js";
-import Joi from "joi";
 import Enjoi from "enjoi";
+import Joi from "joi";
+
+import logger from "@/common/logger";
 
 const applySchemaValidation = (entity: any, schema: any, extensions: any = [], abortEarly = true) => {
   let schemaDesc = JSON.parse(JSON.stringify(schema).replaceAll("bsonType", "type"));

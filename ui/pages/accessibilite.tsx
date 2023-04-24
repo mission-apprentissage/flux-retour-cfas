@@ -1,10 +1,10 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Container, Heading } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
-import Page from "@/components/Page/Page";
-import Accessibilite from "@/components/legal/Accessibilite";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Accessibilite from "@/components/legal/Accessibilite";
+import Page from "@/components/Page/Page";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

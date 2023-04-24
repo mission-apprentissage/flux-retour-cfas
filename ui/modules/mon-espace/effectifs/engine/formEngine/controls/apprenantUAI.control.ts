@@ -1,4 +1,4 @@
-import { apiService } from "../../services/api.service";
+import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.service";
 
 const uaiRegex = new RegExp("^[0-9]{7}[a-zA-Z]$");
 export const apprenantDernierOrganismeUaiControl = [
@@ -7,8 +7,7 @@ export const apprenantDernierOrganismeUaiControl = [
     process: async ({ values, organisme, signal }) => {
       const userUai = values.apprenant.dernier_organisme_uai;
       if (uaiRegex.test(userUai)) {
-        // eslint-disable-next-line no-unused-vars
-        const { uai, error } = await apiService.fetchUAI({
+        const { error } = await apiService.fetchUAI({
           uai: userUai,
           organisme_id: organisme._id,
           signal,

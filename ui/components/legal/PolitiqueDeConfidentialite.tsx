@@ -1,9 +1,10 @@
-import React from "react";
 import { Box, Flex, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
-import Link from "../Links/Link";
-import Sommaire from "../Sommaire/Sommaire";
-import Section from "../Section/Section";
-import { CONTACT_ADDRESS } from "../../common/constants/product";
+import React from "react";
+
+import { CONTACT_ADDRESS } from "@/common/constants/product";
+import Link from "@/components/Links/Link";
+import Section from "@/components/Section/Section";
+import Sommaire from "@/components/Sommaire/Sommaire";
 
 const anchors = {
   Finalite: "finalite",

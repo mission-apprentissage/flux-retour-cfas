@@ -1,15 +1,13 @@
 import fs from "fs";
 import path from "path";
+
+// FIXME à déplacer en dehors de la codebase car dépendances de dev
+import { compileBSON, getDatabaseSchemas } from "bson-schema-to-typescript"; // eslint-disable-line node/no-unpublished-import
+import traverse from "json-schema-traverse"; // eslint-disable-line node/no-unpublished-import
 import { upperFirst } from "lodash-es";
+import prettier from "prettier"; // eslint-disable-line node/no-unpublished-import
 
-// eslint-disable-next-line node/no-unpublished-import
-import prettier from "prettier";
-// eslint-disable-next-line node/no-unpublished-import
-import { compileBSON, getDatabaseSchemas } from "bson-schema-to-typescript";
-// eslint-disable-next-line node/no-unpublished-import
-import traverse from "json-schema-traverse";
-
-import config from "../../../config.js";
+import config from "@/config";
 
 export async function prettierOptions(path: string): Promise<prettier.Options> {
   const options = await prettier.resolveConfig(path);
@@ -20,7 +18,7 @@ export async function prettierOptions(path: string): Promise<prettier.Options> {
   };
 }
 
-const OUTPUT_DIR = "src/common/model/@types";
+const OUTPUT_DIR = "@/common/model/@types";
 const IGNORE_COLLECTIONS = [
   "archiveDossiersApprenants",
   "cfas",

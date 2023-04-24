@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Heading,
@@ -13,11 +12,13 @@ import {
   Radio,
   Divider,
 } from "@chakra-ui/react";
-import PhoneInput from "react-phone-input-2";
 import { useFormik } from "formik";
+import React from "react";
+import PhoneInput from "react-phone-input-2";
 import * as Yup from "yup";
-import useAuth from "../../hooks/useAuth";
-import { _put } from "../../common/httpClient";
+
+import { _put } from "@/common/httpClient";
+import useAuth from "@/hooks/useAuth";
 import useToaster from "@/hooks/useToaster";
 
 const ProfileInformation = () => {

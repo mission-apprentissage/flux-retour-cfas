@@ -1,7 +1,7 @@
-import { ObjectId } from "mongodb";
 import { NextFunction, Request, Response } from "express";
+import { ObjectId } from "mongodb";
 
-import { requireManageOrganismeEffectifsPermission } from "../../common/actions/helpers/permissions.js";
+import { requireManageOrganismeEffectifsPermission } from "@/common/actions/helpers/permissions";
 
 export async function legacyRequireManageEffectifsPermissionMiddleware(
   req: Request,

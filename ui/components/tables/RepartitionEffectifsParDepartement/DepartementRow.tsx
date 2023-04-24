@@ -2,7 +2,8 @@ import { Box, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import NumberValueCell from "../NumberValueCell";
+import NumberValueCell from "@/components/tables/NumberValueCell";
+
 import CfasRows from "./CfasRows";
 
 const DepartementRow = ({ departementCode, departementNom, effectifs, isPeriodInvalid }) => {

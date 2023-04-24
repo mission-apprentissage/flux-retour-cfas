@@ -1,7 +1,8 @@
-import config from "../../config.js";
-import logger from "../logger.js";
-import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
-import getApiClient from "./client.js";
+import logger from "@/common/logger";
+import { ApiError, apiRateLimiter } from "@/common/utils/apiUtils";
+import config from "@/config";
+
+import getApiClient from "./client";
 
 const axiosClient = getApiClient({
   baseURL: config.cfadockApi.endpoint,

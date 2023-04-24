@@ -1,13 +1,13 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Button, Container, Divider, Heading, HStack, Stack, Text } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
-import { CONTACT_ADDRESS } from "@/common/constants/product";
-import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 import Question from "@/modules/organisme-formation/aide/Question";
 import { questions } from "@/modules/organisme-formation/aide/questions";
+import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 
 export default function Aide() {
   const title = "Page d'aide";

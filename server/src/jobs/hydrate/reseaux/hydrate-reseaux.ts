@@ -1,14 +1,15 @@
 import path from "path";
 
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
-import { __dirname } from "../../../common/utils/esmUtils.js";
-import { findOrganismeByUaiAndSiret } from "../../../common/actions/organismes/organismes.actions.js";
-import { arraysContainSameValues } from "../../../common/utils/miscUtils.js";
-import { organismesDb } from "../../../common/model/collections.js";
 import { WithId } from "mongodb";
-import { STATUT_FIABILISATION_ORGANISME } from "../../../common/constants/fiabilisation.js";
+
+import { findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
+import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import logger from "@/common/logger";
+import { organismesDb } from "@/common/model/collections";
+import { asyncForEach } from "@/common/utils/asyncUtils";
+import { __dirname } from "@/common/utils/esmUtils";
+import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
+import { arraysContainSameValues } from "@/common/utils/miscUtils";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",

@@ -1,5 +1,6 @@
-import { isInitialServerSideProps } from "./isInitialServerSideProps";
 import axios from "axios";
+
+import { isInitialServerSideProps } from "./isInitialServerSideProps";
 
 export const getAuthServerSideProps = async (context) => {
   if (!isInitialServerSideProps(context)) {

@@ -1,6 +1,7 @@
-import { effectifsDb } from "../../model/collections.js";
-import { organismeLookup } from "../helpers/filters.js";
-import { exportedMongoFieldsProjection } from "./export.js";
+import { organismeLookup } from "@/common/actions/helpers/filters";
+import { effectifsDb } from "@/common/model/collections";
+
+import { exportedMongoFieldsProjection } from "./export";
 
 /**
   Indicator s'occupe de construire un pipeline d'aggrégation pour obtenir un indicateur

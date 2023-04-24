@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 
-import { _get } from "../../../../../../common/httpClient";
-import { initFields } from "../initFields";
-import { cerfaSchema } from "../cerfaSchema";
-import { effectifIdAtom } from "../../atoms";
-import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
+import { _get } from "@/common/httpClient";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+import { cerfaSchema } from "@/modules/mon-espace/effectifs/engine/formEngine/cerfaSchema";
+import { initFields } from "@/modules/mon-espace/effectifs/engine/formEngine/initFields";
 
 // eslint-disable-next-line no-undef
 // const sleep = (m) => new Promise((r) => setTimeout(r, m));

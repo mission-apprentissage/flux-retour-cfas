@@ -1,11 +1,11 @@
-import React from "react";
 import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import React from "react";
 
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useRouter } from "next/router";
 import TeleversementsLanding from "@/modules/mon-espace/effectifs/TeleversementsLanding";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });

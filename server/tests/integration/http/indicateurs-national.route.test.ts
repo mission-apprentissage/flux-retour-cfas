@@ -1,6 +1,8 @@
 import { strict as assert } from "assert";
-import { initTestApp } from "../../utils/testUtils.js";
+
 import { AxiosInstance } from "axiosist";
+
+import { initTestApp } from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;

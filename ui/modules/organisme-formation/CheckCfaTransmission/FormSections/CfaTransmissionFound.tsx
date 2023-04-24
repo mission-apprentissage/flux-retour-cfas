@@ -1,6 +1,6 @@
 import { Box, Flex, HStack, Text } from "@chakra-ui/react";
 
-import Link from "../../../../components/Links/Link";
+import Link from "@/components/Links/Link";
 
 const CfaTransmissionFound = () => {
   return (

@@ -1,25 +1,19 @@
-import Joi from "joi";
-import { createWriteStream } from "fs";
-import { ObjectId, WithId } from "mongodb";
-import { DateTime } from "luxon";
-import csvToJson from "convert-csv-to-json";
-import { accumulateData, oleoduc, writeData } from "oleoduc";
-import multiparty from "multiparty";
 import { EventEmitter } from "events";
+import { createWriteStream } from "fs";
 import { PassThrough } from "stream";
-import { cloneDeep, find, get, set, uniqBy } from "lodash-es";
 
-import { getFromStorage, uploadToStorage, deleteFromStorage } from "@/common/utils/ovhUtils.js";
-import logger from "@/common/logger.js";
-import * as crypto from "@/common/utils/cryptoUtils.js";
-import { getJsonFromXlsxData } from "@/common/utils/xlsxUtils.js";
-import { hydrateEffectif } from "@/common/actions/engine/engine.actions.js";
-import { uploadsDb } from "@/common/model/collections.js";
-import { createEffectif, findEffectifs, updateEffectif } from "@/common/actions/effectifs.actions.js";
-import { getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions.js";
-import { findOrganismeById, setOrganismeTransmissionDates } from "@/common/actions/organismes/organismes.actions.js";
-import { sendServerEventsForUser } from "./server-events.routes.js";
-import { clamav } from "@/services.js";
+import csvToJson from "convert-csv-to-json";
+import Joi from "joi";
+import { cloneDeep, find, get, set, uniqBy } from "lodash-es";
+import { DateTime } from "luxon";
+import { ObjectId, WithId } from "mongodb";
+import multiparty from "multiparty";
+import { accumulateData, oleoduc, writeData } from "oleoduc";
+
+import { createEffectif, findEffectifs, updateEffectif } from "@/common/actions/effectifs.actions";
+import { hydrateEffectif } from "@/common/actions/engine/engine.actions";
+import { getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
+import { findOrganismeById, setOrganismeTransmissionDates } from "@/common/actions/organismes/organismes.actions";
 import {
   addDocument,
   getDocument,
@@ -27,10 +21,18 @@ import {
   getUploadByOrgId,
   removeDocument,
   updateDocument,
-} from "@/common/actions/uploads.actions.js";
-import { AuthContext } from "@/common/model/internal/AuthContext.js";
-import { getMapping } from "@/common/constants/upload.js";
-import { Formation } from "@/common/model/@types/Formation.js";
+} from "@/common/actions/uploads.actions";
+import { getMapping } from "@/common/constants/upload";
+import logger from "@/common/logger";
+import { Formation } from "@/common/model/@types/Formation";
+import { uploadsDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
+import * as crypto from "@/common/utils/cryptoUtils";
+import { getFromStorage, uploadToStorage, deleteFromStorage } from "@/common/utils/ovhUtils";
+import { getJsonFromXlsxData } from "@/common/utils/xlsxUtils";
+import { clamav } from "@/services";
+
+import { sendServerEventsForUser } from "./server-events.routes";
 
 const MAX_FILE_SIZE = 10_485_760; // 10MB
 

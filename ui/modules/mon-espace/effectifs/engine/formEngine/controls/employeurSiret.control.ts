@@ -1,4 +1,4 @@
-import { apiService } from "../../services/api.service";
+import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.service";
 
 const unlockAllCascade = {
   "apprenant.contrats[0].denomination": { locked: false, reset: true },

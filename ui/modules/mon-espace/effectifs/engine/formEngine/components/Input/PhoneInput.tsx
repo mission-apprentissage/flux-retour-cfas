@@ -1,6 +1,7 @@
-import { InputWrapper } from "./InputWrapper";
 import React from "react";
 import PInput from "react-phone-input-2";
+
+import { InputWrapper } from "./InputWrapper";
 
 const getStatusClass = (props) => {
   if (props.locked) return "disabled";

@@ -1,6 +1,6 @@
-import { findOrganismeByUaiAndSiret } from "../../../common/actions/organismes/organismes.actions.js";
-import logger from "../../../common/logger.js";
-import { effectifsDb, organismesDb } from "../../../common/model/collections.js";
+import { findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
+import logger from "@/common/logger";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
 
 /**
  * Fonction "patch" de suppression d'un organisme via son uai et son siret

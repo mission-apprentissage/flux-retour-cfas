@@ -1,9 +1,9 @@
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
-} from "../../../common/constants/fiabilisation.js";
-import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "../../../common/model/collections.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/constants/organisme.js";
+} from "@/common/constants/fiabilisation";
+import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
+import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "@/common/model/collections";
 
 /**
  * Règle de vérification des couples fiables

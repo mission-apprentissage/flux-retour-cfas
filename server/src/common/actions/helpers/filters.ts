@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 
-import { getAnneesScolaireListFromDate } from "../../utils/anneeScolaireUtils.js";
+import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
 
 // version legacy des filtres indicateurs/effectifs avec organisme_id / siret / uai
 // devra être changée avec les nouveaux écrans pour sortir ces paramètres

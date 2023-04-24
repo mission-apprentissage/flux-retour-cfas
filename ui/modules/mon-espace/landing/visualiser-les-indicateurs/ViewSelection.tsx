@@ -2,9 +2,9 @@ import { HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { OrganisationTeteReseau } from "@/common/internal/Organisation";
 import LinkCard from "@/components/LinkCard/LinkCard";
 import useAuth from "@/hooks/useAuth";
-import { OrganisationTeteReseau } from "@/common/internal/Organisation";
 
 const ViewOptionCard = ({ navigationPageData }) => {
   return (

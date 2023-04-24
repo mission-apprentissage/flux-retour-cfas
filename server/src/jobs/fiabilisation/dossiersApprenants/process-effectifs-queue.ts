@@ -1,26 +1,26 @@
 import { PromisePool } from "@supercharge/promise-pool";
 
-import logger from "@/common/logger.js";
-import { effectifsQueueDb } from "@/common/model/collections.js";
-import {
-  buildNewHistoriqueStatutApprenant,
-  hydrateEffectif,
-  resolveOrganisme,
-} from "@/common/actions/engine/engine.actions.js";
 import {
   insertEffectif,
   structureEffectifFromDossierApprenant,
   updateEffectifAndLock,
-} from "@/common/actions/effectifs.actions.js";
+} from "@/common/actions/effectifs.actions";
+import {
+  buildNewHistoriqueStatutApprenant,
+  hydrateEffectif,
+  resolveOrganisme,
+} from "@/common/actions/engine/engine.actions";
 import {
   createOrganisme,
   setOrganismeTransmissionDates,
   structureOrganisme,
-} from "@/common/actions/organismes/organismes.actions.js";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue.js";
-import { Effectif } from "@/common/model/@types/Effectif.js";
-import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod.js";
-import { sleep } from "@/common/utils/timeUtils.js";
+} from "@/common/actions/organismes/organismes.actions";
+import logger from "@/common/logger";
+import { Effectif } from "@/common/model/@types/Effectif";
+import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
+import { effectifsQueueDb } from "@/common/model/collections";
+import { sleep } from "@/common/utils/timeUtils";
+import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
 
 const sleepDuration = 10_000;
 

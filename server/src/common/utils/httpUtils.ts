@@ -1,9 +1,11 @@
-import { parse as parseUrl } from "url"; // eslint-disable-line node/no-deprecated-api
 import https from "https";
-import { oleoduc, compose, transformIntoJSON } from "oleoduc";
-import logger from "../logger.js";
-import { COOKIE_NAME } from "../constants/cookieName.js";
+import { parse as parseUrl } from "url"; // eslint-disable-line node/no-deprecated-api
+
 import { Response } from "express";
+import { oleoduc, compose, transformIntoJSON } from "oleoduc";
+
+import { COOKIE_NAME } from "@/common/constants/cookieName";
+import logger from "@/common/logger";
 
 export const sendTransformedPaginatedJsonStream = (stream, arrayPropertyName, pagination, res) => {
   res.setHeader("Content-Type", "application/json");

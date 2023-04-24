@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifs } from "@/common/api/tableauDeBord";
+import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 
 const mapEffectifsData = (effectifsData) => {
   return {

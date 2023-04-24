@@ -1,6 +1,7 @@
-import React from "react";
 import { Box, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
-import { ExternalLinkLine } from "../../theme/components/icons";
+import React from "react";
+
+import { ExternalLinkLine } from "@/theme/components/icons";
 
 const Accessibilite = () => {
   return (

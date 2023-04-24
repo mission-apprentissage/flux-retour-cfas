@@ -1,6 +1,6 @@
-import logger from "../../../common/logger.js";
-import { updateEffectifsCount } from "../../../common/actions/organismes/organismes.actions.js";
-import { organismesDb } from "../../../common/model/collections.js";
+import { updateEffectifsCount } from "@/common/actions/organismes/organismes.actions";
+import logger from "@/common/logger";
+import { organismesDb } from "@/common/model/collections";
 
 export const hydrateOrganismesEffectifsCount = async () => {
   const organismes = await organismesDb().find({}).toArray();

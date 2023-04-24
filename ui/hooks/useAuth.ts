@@ -1,7 +1,8 @@
+import { useContext } from "react";
+
 import { _get } from "@/common/httpClient";
 import { IAuthenticationContext } from "@/common/internal/AuthContext";
-import { useContext } from "react";
-import { AuthenticationContext } from "../components/UserWrapper/UserWrapper";
+import { AuthenticationContext } from "@/components/UserWrapper/UserWrapper";
 
 export default function useAuth() {
   // FIXME loading state ?

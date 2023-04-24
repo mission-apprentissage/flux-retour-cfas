@@ -1,15 +1,16 @@
-import React, { useCallback } from "react";
 import { Text } from "@chakra-ui/react";
-import { _post } from "../../../../common/httpClient";
-import PromptModal from "../../../../components/Modals/PromptModal";
-import { organismeAtom } from "../../../../hooks/organismeAtoms";
+import React, { useCallback } from "react";
 import { useRecoilValue } from "recoil";
+
+import { _post } from "@/common/httpClient";
+import PromptModal from "@/components/Modals/PromptModal";
+import { organismeAtom } from "@/hooks/organismeAtoms";
 
 // TODO https://github.com/mission-apprentissage/flux-retour-cfas/issues/2387
 // ce composant a été partiellement développé, et n'est pas encore utilisé
 const AjoutApprenantModal = (modal) => {
   const organisme = useRecoilValue<any>(organismeAtom);
-  let onCreateEffectifClicked = useCallback(async () => {
+  const onCreateEffectifClicked = useCallback(async () => {
     try {
       await _post("/api/v1/effectif", {
         organisme_id: organisme._id,

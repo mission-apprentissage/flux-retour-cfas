@@ -1,9 +1,10 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import logger from "../../../common/logger.js";
-import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
-import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
-import { organismesReferentielDb } from "../../../common/model/collections.js";
-import { OrganismesReferentiel } from "../../../common/model/@types/OrganismesReferentiel.js";
+
+import { createJobEvent } from "@/common/actions/jobEvents.actions";
+import { fetchOrganismes } from "@/common/apis/apiReferentielMna";
+import logger from "@/common/logger";
+import { OrganismesReferentiel } from "@/common/model/@types/OrganismesReferentiel";
+import { organismesReferentielDb } from "@/common/model/collections";
 
 const JOB_NAME = "hydrate-organismes-referentiel";
 let nbOrganismeCreated = 0;

@@ -1,11 +1,11 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Flex, Heading, HStack, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
+import { PRODUCT_NAME } from "@/common/constants/product";
 import Page from "@/components/Page/Page";
 import Section from "@/components/Section/Section";
 import Sommaire from "@/components/Sommaire/Sommaire";
-import { PRODUCT_NAME } from "@/common/constants/product";
 
 const ComprendreLesDonneesPage = () => {
   const title = "Comprendre les données";

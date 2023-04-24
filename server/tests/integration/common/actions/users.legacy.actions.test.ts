@@ -1,6 +1,8 @@
 import { strict as assert } from "assert";
+
 import { subMinutes, differenceInCalendarDays, differenceInSeconds } from "date-fns";
 import mongodb from "mongodb";
+
 import {
   authenticateLegacy,
   createUserLegacy,
@@ -9,9 +11,9 @@ import {
   removeUserLegacy,
   updatePasswordLegacy,
   updateUserLegacy,
-} from "../../../../src/common/actions/legacy/users.legacy.actions.js";
-import { usersDb } from "../../../../src/common/model/collections.js";
-import { apiRoles } from "../../../../src/common/roles.js";
+} from "@/common/actions/legacy/users.legacy.actions";
+import { usersDb } from "@/common/model/collections";
+import { apiRoles } from "@/common/roles";
 
 describe("Components Users Test", () => {
   describe("createUserLegacy", () => {

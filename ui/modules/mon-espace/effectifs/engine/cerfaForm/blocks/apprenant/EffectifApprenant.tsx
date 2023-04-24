@@ -1,8 +1,9 @@
-import React, { memo } from "react";
 import { Box, Flex, FormLabel, HStack, Text } from "@chakra-ui/react";
+import React, { memo } from "react";
 
-import { InputController } from "../../../formEngine/components/Input/InputController";
-import { CollapseController } from "../../../formEngine/components/CollapseController";
+import { CollapseController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/CollapseController";
+import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
+
 import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 

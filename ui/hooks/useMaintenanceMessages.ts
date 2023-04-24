@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { _get } from "../common/httpClient";
+import { _get } from "@/common/httpClient";
 
 const useMaintenanceMessages = () => {
   const {

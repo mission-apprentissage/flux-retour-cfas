@@ -1,6 +1,6 @@
 import { Box, Img, Stack, Text } from "@chakra-ui/react";
 
-import Link from "../../../components/Links/Link";
+import Link from "@/components/Links/Link";
 
 export const questions = [
   {

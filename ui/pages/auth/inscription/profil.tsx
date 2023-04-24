@@ -1,10 +1,4 @@
-import React, { useEffect, useState } from "react";
-import * as Yup from "yup";
-import YupPassword from "yup-password";
-
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useRouter } from "next/router";
-import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
+import { CheckIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -24,18 +18,23 @@ import {
   Spinner,
   Text,
 } from "@chakra-ui/react";
-import Ribbons from "@/components/Ribbons/Ribbons";
+import { Field, Form, Formik } from "formik";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
+import * as Yup from "yup";
+import YupPassword from "yup-password";
+
+import { getOrganismeByUAIAndSIRET } from "@/common/api/tableauDeBord";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
-import { Organisation } from "@/common/internal/Organisation";
 import { ACADEMIES_BY_ID, REGIONS_BY_ID, DEPARTEMENTS_BY_ID } from "@/common/constants/territoiresConstants";
 import { _get, _post } from "@/common/httpClient";
-import useToaster from "@/hooks/useToaster";
-import { Field, Form, Formik } from "formik";
-import { Check } from "@/theme/components/icons";
-import { CheckIcon, ExternalLinkIcon } from "@chakra-ui/icons";
-import { ShowPassword } from "@/theme/components/icons";
+import { Organisation } from "@/common/internal/Organisation";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { CGU_VERSION } from "@/components/legal/Cgu";
-import { getOrganismeByUAIAndSIRET } from "@/common/api/tableauDeBord";
+import Ribbons from "@/components/Ribbons/Ribbons";
+import useToaster from "@/hooks/useToaster";
+import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
+import { Check, ShowPassword } from "@/theme/components/icons";
 
 YupPassword(Yup); // extend yup
 

@@ -1,19 +1,18 @@
-import React, { useMemo } from "react";
-import { Box, Container, Heading, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
-import Head from "next/head";
+import { Box, Container, Heading, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-
-import withAuth from "@/components/withAuth";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import InvitationForm from "@/modules/mon-espace/organisation/InvitationForm";
-import useAuth from "@/hooks/useAuth";
-import Page from "@/components/Page/Page";
+import Head from "next/head";
+import React, { useMemo } from "react";
 
 import { _delete, _get, _post } from "@/common/httpClient";
-import Table from "@/components/Table/Table";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
+import Page from "@/components/Page/Page";
+import Table from "@/components/Table/Table";
+import withAuth from "@/components/withAuth";
+import useAuth from "@/hooks/useAuth";
 import useToaster from "@/hooks/useToaster";
+import InvitationForm from "@/modules/mon-espace/organisation/InvitationForm";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

@@ -1,4 +1,4 @@
-import { Tab, TabList, TabPanels, Tabs } from "@chakra-ui/tabs";
+import { Tab, TabList, TabPanels, Tabs } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 

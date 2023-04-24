@@ -1,7 +1,9 @@
-import React from "react";
 import { Heading, Stack } from "@chakra-ui/react";
-import OrganismeInfo from "./LandingOrganisme/components/OrganismeInfo";
+import React from "react";
+
 import { useOrganisationOrganisme } from "@/hooks/organismes";
+
+import OrganismeInfo from "./LandingOrganisme/components/OrganismeInfo";
 
 const DashboardOrganisme = () => {
   const { organisme } = useOrganisationOrganisme();

@@ -1,5 +1,3 @@
-import React, { useCallback, useState } from "react";
-import { useSetRecoilState } from "recoil";
 import {
   Box,
   Button,
@@ -8,27 +6,27 @@ import {
   HStack,
   Radio,
   RadioGroup,
-  Spinner,
   Text,
   Tooltip,
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { useRouter } from "next/router";
 import uniq from "lodash.uniq";
+import { useRouter } from "next/router";
+import React, { useCallback, useState } from "react";
+import { useSetRecoilState } from "recoil";
 
-import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon } from "@/theme/components/icons";
 import { _get, _post, _put } from "@/common/httpClient";
-import useServerEvents from "@/hooks/useServerEvents";
-import { ArrowRightLong } from "@/theme/components/icons";
-import { Input } from "./engine/formEngine/components/Input/Input";
+import { sortByNormalizedLabels } from "@/common/utils/array";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import useServerEvents from "@/hooks/useServerEvents";
+import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon, ArrowRightLong } from "@/theme/components/icons";
 
+import { effectifsStateAtom } from "./engine/atoms";
+import EffectifsTable from "./engine/EffectifsTable";
+import { Input } from "./engine/formEngine/components/Input/Input";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
-import EffectifsTable from "./engine/EffectifsTable";
-import { effectifsStateAtom } from "./engine/atoms";
-import { sortByNormalizedLabels } from "@/common/utils/array";
 import TeleversementInProgress from "./TeleversementInProgress";
 
 const Televersements = ({ organisme }) => {

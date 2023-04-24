@@ -1,16 +1,16 @@
-import { useRecoilCallback, useSetRecoilState } from "recoil";
 import { useMemo, useRef } from "react";
+import { useRecoilCallback, useSetRecoilState } from "recoil";
+
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import { dossierAtom, effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 
 import { cerfaAtom, cerfaSetter, cerfaStatusGetter, fieldSelector, valuesSelector } from "./atoms";
-import { validField } from "./utils/validField";
-import { dossierAtom, effectifIdAtom } from "../atoms";
-import { isEmptyValue } from "./utils/isEmptyValue";
-import { indexedDependencies } from "./cerfaSchema";
+import { indexedDependencies, indexedDependencesRevalidationRules, indexedRules } from "./cerfaSchema";
 import { findDefinition } from "./utils";
-import { getValues } from "./utils/getValues";
-import { indexedDependencesRevalidationRules, indexedRules } from "./cerfaSchema";
 import { findLogicErrors } from "./utils/findLogicErrors";
-import { organismeAtom } from "../../../../../hooks/organismeAtoms";
+import { getValues } from "./utils/getValues";
+import { isEmptyValue } from "./utils/isEmptyValue";
+import { validField } from "./utils/validField";
 
 export const useCerfa = ({ schema }: { schema: any }) => {
   const setCerfa = useSetRecoilState<any>(cerfaAtom);
@@ -68,7 +68,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
     const computeGlobal = async ({ name }) => {
       abortControllers.current[name] = new AbortController();
       const rules: any[] = indexedRules[name] ?? [];
-      for (let logic of rules) {
+      for (const logic of rules) {
         const { values, dossier, organisme, effectifId, fields } = await getData();
         try {
           const signal = abortControllers.current[name].signal;
@@ -110,8 +110,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
     };
 
     const validDeps = async ({ name }) => {
-      const { values, dossier, organisme, effectifId, fields } = await getData();
-      // eslint-disable-next-line no-undef
+      const { values, dossier, fields } = await getData();
       await Promise.all(
         (indexedDependencies[name] ?? []).map(async (dep) => {
           const field = fields[dep];
@@ -188,7 +187,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
     const triggerValidation = async (fieldNames) => {
       const { fields } = await getData();
       const patch = {};
-      for (let name of fieldNames) {
+      for (const name of fieldNames) {
         const field = fields[name];
         if (!field) continue;
         const { error } = await validField({ field, value: field.value });

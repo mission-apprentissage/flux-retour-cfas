@@ -3,11 +3,12 @@
 // import { maitreSchema } from "./blocks/maitre/maitreSchema";
 // import { apprentiSchema } from "./blocks/apprenti/apprentiSchema";
 // import { employerSchema } from "./blocks/employer/employerSchema";
-import { apprenantSchema } from "./blocks/apprenant/apprenantSchema";
 
-import { cerfaSchema } from "../formEngine/cerfaSchema";
-import { getValues } from "../formEngine/utils/getValues";
-import { isEmptyValue } from "../formEngine/utils/isEmptyValue";
+import { cerfaSchema } from "@/modules/mon-espace/effectifs/engine/formEngine/cerfaSchema";
+import { getValues } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/getValues";
+import { isEmptyValue } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/isEmptyValue";
+
+import { apprenantSchema } from "./blocks/apprenant/apprenantSchema";
 
 export const getFormStatus = ({ fields, values }) => {
   const formErrors = getBlocErrors({ fields, values });

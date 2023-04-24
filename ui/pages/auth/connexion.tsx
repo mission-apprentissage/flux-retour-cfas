@@ -1,11 +1,10 @@
 import { Flex } from "@chakra-ui/react";
-import React from "react";
 import Head from "next/head";
-
-import Page from "@/components/Page/Page";
-import Login from "@/modules/auth/connexion/Connexion";
+import React from "react";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Page from "@/components/Page/Page";
+import Login from "@/modules/auth/connexion/Connexion";
 import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });

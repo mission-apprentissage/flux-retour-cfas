@@ -1,14 +1,15 @@
-import { Box, Center, Heading, HStack, Image, Spinner, Text } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
-import React, { useEffect } from "react";
+import { Box, Center, Heading, HStack, Image, Spinner, Text } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import Head from "next/head";
 import { useRouter } from "next/router";
+import React, { useEffect } from "react";
+
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useQuery } from "@tanstack/react-query";
-import { CONTACT_ADDRESS } from "@/common/constants/product";
-import Page from "@/components/Page/Page";
-import Head from "next/head";
 import Link from "@/components/Links/Link";
+import Page from "@/components/Page/Page";
 import useToaster from "@/hooks/useToaster";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });

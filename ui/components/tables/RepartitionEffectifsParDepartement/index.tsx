@@ -2,9 +2,10 @@ import { Tbody } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { isDateFuture } from "@/common/utils/dateUtils";
+import Table from "@/components/tables/Table";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import { isDateFuture } from "../../../common/utils/dateUtils";
-import Table from "../Table";
+
 import DepartementRow from "./DepartementRow";
 
 const RepartitionEffectifsParDepartement = ({

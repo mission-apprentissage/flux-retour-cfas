@@ -1,15 +1,15 @@
-import React, { useEffect } from "react";
-import Head from "next/head";
 import { Box, Center, HStack, Heading, Link, Text } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import ReactMarkdown from "react-markdown";
 import ChakraUIMarkdownRenderer from "chakra-ui-markdown-renderer";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
-import { ExternalLinkLine } from "../theme/components/icons";
-import useAuth from "../hooks/useAuth";
-import useMaintenanceMessages from "../hooks/useMaintenanceMessages";
+import useAuth from "@/hooks/useAuth";
+import useMaintenanceMessages from "@/hooks/useMaintenanceMessages";
+import { ExternalLinkLine } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

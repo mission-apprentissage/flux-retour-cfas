@@ -2,13 +2,14 @@ import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
 
-import { findEffectifsByQuery } from "../effectifs.actions.js";
-import { findFormationById, getFormationWithCfd } from "../formations.actions.js";
-import { findOrganismeById } from "../organismes/organismes.actions.js";
-import { SIFA_FIELDS } from "./sifaCsvFields.js";
-import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
-import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenant.js";
-import { Effectif } from "../../model/@types/Effectif.js";
+import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
+import { findFormationById, getFormationWithCfd } from "@/common/actions/formations.actions";
+import { findOrganismeById } from "@/common/actions/organismes/organismes.actions";
+import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
+import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
+import { Effectif } from "@/common/model/@types/Effectif";
+
+import { SIFA_FIELDS } from "./sifaCsvFields";
 
 const formatStringForSIFA = (str) => {
   if (!str) return undefined;

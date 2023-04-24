@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react";
 
-import Page from "../../../pages/auth/finalisation";
-import { authArgTypes } from "../../../.storybook/utils";
+import { authArgTypes } from "@/.storybook/utils";
+import Page from "@/pages/auth/finalisation";
 
 const meta: Meta<typeof Page> = {
   title: "Pages / auth / finalisation",

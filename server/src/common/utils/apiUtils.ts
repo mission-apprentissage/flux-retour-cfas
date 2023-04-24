@@ -1,5 +1,6 @@
 import { RateLimiterMemory, RateLimiterQueue } from "rate-limiter-flexible";
-import { timeout } from "./asyncUtils.js";
+
+import { timeout } from "./asyncUtils";
 
 export const apiRateLimiter = (name, options: any = {}) => {
   let rateLimiter = new RateLimiterMemory({

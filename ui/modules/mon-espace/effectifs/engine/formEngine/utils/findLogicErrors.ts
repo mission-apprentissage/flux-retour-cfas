@@ -11,7 +11,7 @@ export const findLogicErrors = async ({
   dossier: any;
   fields: any;
 }) => {
-  for (let logic of logics) {
+  for (const logic of logics) {
     try {
       const { error } = (await logic.process({ fields, values, dossier, name, cache: logic.cache })) ?? {};
       if (error) return error;

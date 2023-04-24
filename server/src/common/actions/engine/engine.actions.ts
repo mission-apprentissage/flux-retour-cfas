@@ -1,20 +1,21 @@
-import Joi from "joi";
 import { isEqual } from "date-fns";
+import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
+import { ObjectId } from "mongodb";
 
-import { getCodePostalInfo } from "../../apis/apiTablesCorrespondances.js";
-import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoires.js";
-import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
-import { telephoneConverter } from "../../validation/utils/frenchTelephoneNumber.js";
-import { buildEffectif, findEffectifByQuery, validateEffectifObject } from "../effectifs.actions.js";
+import { buildEffectif, findEffectifByQuery, validateEffectifObject } from "@/common/actions/effectifs.actions";
 import {
   findOrganismeBySiret,
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
-} from "../organismes/organismes.actions.js";
-import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
-import { Effectif } from "@/common/model/@types/Effectif.js";
-import { ObjectId } from "mongodb";
+} from "@/common/actions/organismes/organismes.actions";
+import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
+import { ACADEMIES, REGIONS, DEPARTEMENTS } from "@/common/constants/territoires";
+import { Effectif } from "@/common/model/@types/Effectif";
+import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "@/common/utils/formatterUtils";
+import { telephoneConverter } from "@/common/validation/utils/frenchTelephoneNumber";
+
+import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils";
 
 const dateConverter = (date) => {
   // TODO If more than year 4000 error

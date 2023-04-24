@@ -1,20 +1,25 @@
-import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
+import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool";
 import { MongoServerError } from "mongodb";
-import { createOrganisme, deleteOrganismeAndEffectifs } from "../../../common/actions/organismes/organismes.actions.js";
+
+import {
+  createOrganisme,
+  deleteOrganismeAndEffectifs,
+  findOrganismeById,
+} from "@/common/actions/organismes/organismes.actions";
 import {
   STATUT_CREATION_ORGANISME,
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
-} from "../../../common/constants/fiabilisation.js";
-import logger from "../../../common/logger.js";
+} from "@/common/constants/fiabilisation";
+import logger from "@/common/logger";
 import {
   effectifsDb,
   fiabilisationUaiSiretDb,
   organismesDb,
   organismesReferentielDb,
-} from "../../../common/model/collections.js";
-import { getEffectifsDuplicatesFromOrganismes } from "./update.utils.js";
-import { findOrganismeById } from "../../../common/actions/organismes/organismes.actions.js";
+} from "@/common/model/collections";
+
+import { getEffectifsDuplicatesFromOrganismes } from "./update.utils";
 
 let nbOrganismesReferentielFiables: number;
 let nbOrganismesFiabilises: number;

@@ -1,10 +1,10 @@
-import React from "react";
 import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
+import React from "react";
 
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
-import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import ConfigurationAPI from "@/modules/mon-espace/effectifs/ConfigurationAPI";
 import { useEffectifsOrganismeOrganisation } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 

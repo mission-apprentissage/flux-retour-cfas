@@ -1,9 +1,9 @@
-import React from "react";
 import { Box, Alert, AlertIcon, AlertTitle, AlertDescription, Text, Link } from "@chakra-ui/react";
-import ReactMarkdown from "react-markdown";
 import ChakraUIMarkdownRenderer from "chakra-ui-markdown-renderer";
+import React from "react";
+import ReactMarkdown from "react-markdown";
 
-import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
+import useMaintenanceMessages from "@/hooks/useMaintenanceMessages";
 
 const chakraUIMarkdownRendererTheme: any = {
   // we override anchors to reformat the link (aka remove the '##') and add an icon.
