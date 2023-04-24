@@ -18,6 +18,5 @@ try {
   startCLI();
 } catch (err) {
   logger.error({ err }, "startup error");
-  console.log("main exit 1");
   process.exit(1); // eslint-disable-line no-process-exit
 }
