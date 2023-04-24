@@ -38,6 +38,13 @@ module.exports = {
           order: "asc",
           caseInsensitive: true,
         },
+        groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object"],
+        pathGroups: [
+          {
+            pattern: "@/**",
+            group: "internal",
+          },
+        ],
       },
     ],
     "import/newline-after-import": "error",
