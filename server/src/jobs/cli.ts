@@ -1,5 +1,6 @@
-import "@/config";
 import { Option, program } from "commander";
+
+import "@/config";
 
 import { clear, clearUsers } from "./clear/clear-all";
 import { purgeEvents } from "./clear/purge-events";

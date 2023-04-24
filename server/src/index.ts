@@ -1,4 +1,3 @@
-import "dotenv/config";
 import logger from "@/common/logger";
 import { modelDescriptors } from "@/common/model/collections";
 import config from "@/config";
