@@ -1,8 +1,9 @@
 import { Option, program } from "commander";
+import HttpTerminator from "lil-http-terminator";
 
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
-import server from "./http/server";
+import createServer from "./http/server";
 import { clear, clearUsers } from "./jobs/clear/clear-all";
 import { purgeEvents } from "./jobs/clear/purge-events";
 import { findInvalidDocuments } from "./jobs/db/findInvalidDocuments";
@@ -44,21 +45,26 @@ program
   .command("start")
   .description("Démarre le serveur HTTP")
   .action(async () => {
-    const http = await server();
-    http.listen(5000, () => logger.info(`Server ready and listening on port ${5000}`));
+    const server = await createServer();
+    const httpServer = server.listen(5000, () => logger.info(`Server ready and listening on port ${5000}`));
 
     let shutdownInProgress = false;
     ["SIGINT", "SIGTERM", "SIGQUIT"].forEach((signal) => {
       (process as NodeJS.EventEmitter).on(signal, async () => {
         try {
           if (shutdownInProgress) {
-            logger.warn(`application shutting down (FORCED) (signal=${signal})`);
+            logger.warn(`application shut down (FORCED) (signal=${signal})`);
             process.exit(0); // eslint-disable-line no-process-exit
           }
           shutdownInProgress = true;
           logger.warn(`application shutting down (signal=${signal})`);
-          // TODO close http server
+          await HttpTerminator({
+            server: httpServer,
+            maxWaitTimeout: 50_000,
+            logger: logger,
+          }).terminate();
           await closeMongodbConnection();
+          logger.warn("application shut down");
           process.exit(0); // eslint-disable-line no-process-exit
         } catch (err) {
           logger.error({ err }, "error during shutdown");
