@@ -15,7 +15,7 @@ import { hydrateEffectifsComputed } from "./hydrate/hydrate-effectifs-computed";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
-import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
+import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis";
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants/index";
