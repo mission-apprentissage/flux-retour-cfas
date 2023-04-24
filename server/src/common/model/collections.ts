@@ -14,6 +14,7 @@ import {
   UsersMigration,
 } from "./@types";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
+import { UaisAcceReferentiel } from "./@types/UaisAcceReferentiel.js";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
@@ -25,6 +26,7 @@ import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model";
 import organisationsModelDescriptor, { Organisation } from "./organisations.model";
 import OrganismesModelDescriptor from "./organismes.model";
 import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
+import uaisAcceReferentielModelDescriptor from "./uaisAcceReferentiel.model";
 import uploadsModelDescriptor from "./uploads.model/uploads.model";
 import usersModelDescriptor from "./users.model";
 import usersMigrationModelDescriptor from "./usersMigration.model";
@@ -56,6 +58,8 @@ export const invitationsDb = () => getDbCollection<Invitation>(invitationsModelD
 export const organisationsDb = () => getDbCollection<Organisation>(organisationsModelDescriptor.collectionName);
 export const organismesReferentielDb = () =>
   getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
+export const uaisAccesReferentielDb = () =>
+  getDbCollection<UaisAcceReferentiel>(uaisAcceReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
   getDbCollection<MaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);

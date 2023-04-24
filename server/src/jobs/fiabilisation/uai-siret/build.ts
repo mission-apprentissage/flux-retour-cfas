@@ -11,6 +11,7 @@ import {
   checkCoupleNonFiabilisable,
   checkMatchReferentielSiretUaiDifferent,
   checkMatchReferentielUaiUniqueSiretDifferent,
+  checkOrganismeInexistant,
   checkSiretMultiplesRelationsAndLieux,
   checkUaiAucunLieuReferentiel,
   checkUaiLieuReferentiel,
@@ -75,10 +76,16 @@ export const buildFiabilisationUaiSiret = async () => {
   const nbCouplesNonFiabilisablesPbCollecte = await fiabilisationUaiSiretDb().countDocuments({
     type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE,
   });
+  const nbCouplesNonFiabilisablesInexistants = await fiabilisationUaiSiretDb().countDocuments({
+    type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_INEXISTANT,
+  });
 
   let percentageCouplesFiables = getPercentage(nbCouplesFiablesFound, allCouplesUaiSiretTdb.length);
   let nbCouplesNonFiabilisables =
-    nbCouplesNonFiabilisablesUaiNonValidee + nbCouplesNonFiabilisablesUaiValidee + nbCouplesNonFiabilisablesPbCollecte;
+    nbCouplesNonFiabilisablesUaiNonValidee +
+    nbCouplesNonFiabilisablesUaiValidee +
+    nbCouplesNonFiabilisablesPbCollecte +
+    nbCouplesNonFiabilisablesInexistants;
   let percentageCouplesNonFiabilisables = getPercentage(nbCouplesNonFiabilisables, allCouplesUaiSiretTdb.length);
 
   logger.info(` -> ${nbCouplesFiablesFound} couples déjà fiables (${percentageCouplesFiables}%)`);
@@ -87,6 +94,7 @@ export const buildFiabilisationUaiSiret = async () => {
   logger.info(`  -> dont ${nbCouplesNonFiabilisablesUaiNonValidee} non fiabilisables > UAI non validée Référentiel`);
   logger.info(`  -> dont ${nbCouplesNonFiabilisablesUaiValidee} non fiabilisables > UAI validée Référentiel`);
   logger.info(`  -> dont ${nbCouplesNonFiabilisablesPbCollecte} non fiabilisables > problème de collecte`);
+  logger.info(`  -> dont ${nbCouplesNonFiabilisablesInexistants} non fiabilisables > inexistants`);
 
   return {
     nbCouplesDejaFiables: nbCouplesFiablesFound,
@@ -97,6 +105,7 @@ export const buildFiabilisationUaiSiret = async () => {
     nbCouplesNonFiabilisablesUaiNonValidee,
     nbCouplesNonFiabilisablesUaiValidee,
     nbCouplesNonFiabilisablesPbCollecte,
+    nbCouplesNonFiabilisablesInexistants,
   };
 };
 
@@ -151,12 +160,15 @@ export const buildFiabilisationCoupleForTdbCouple = async (
   )
     return;
 
-  // Règle n°6 on vérifie les UAI non trouvées dans les lieux du référentiel
+  // Règle n°6 on vérifie les organismes inexistants
+  if (await checkOrganismeInexistant(coupleUaiSiretTdbToCheck)) return;
+
+  // Règle n°7 on vérifie les UAI non trouvées dans les lieux du référentiel
   if (await checkUaiAucunLieuReferentiel(coupleUaiSiretTdbToCheck)) return;
 
-  // Règle n°7 on vérifie les UAI trouvées dans les lieux du référentiel
+  // Règle n°8 on vérifie les UAI trouvées dans les lieux du référentiel
   if (await checkUaiLieuReferentiel(coupleUaiSiretTdbToCheck)) return;
 
-  // Règle n°8 on vérifie les couples non fiabilisables, si l'UAI est validée cotée référentiel
+  // Règle n°9 on vérifie les couples non fiabilisables, si l'UAI est validée cotée référentiel
   if (await checkCoupleNonFiabilisable(coupleUaiSiretTdbToCheck)) return;
 };
