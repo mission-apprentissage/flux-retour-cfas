@@ -103,9 +103,6 @@ const Footer = () => {
                 <Link href={"/cgu"}>Conditions générales d&apos;utilisation</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/donnees-personnelles"}>Données personnelles</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="/stats" onClick={() => plausible("clic_statistiques")}>
                   Statistiques
                 </Link>
@@ -120,7 +117,7 @@ const Footer = () => {
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/politique-confidentialite"}>Politique de confidentialité</Link>
+                <Link href={"/protection-des-donnees"}>Protection des données</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="https://beta.gouv.fr/startups/tdb-apprentissage.html" isExternal>
