@@ -60,6 +60,11 @@ const nextConfig = {
         destination: "/reinscription",
         permanent: true,
       },
+      {
+        source: "/politique-confidentialite",
+        destination: "/protection-des-donnees",
+        permanent: true,
+      },
     ];
   },
 };

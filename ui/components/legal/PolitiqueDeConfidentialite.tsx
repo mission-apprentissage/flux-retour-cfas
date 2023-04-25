@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { Box, Flex, Grid, GridItem, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import React from "react";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
@@ -7,17 +7,19 @@ import Section from "@/components/Section/Section";
 import Sommaire from "@/components/Sommaire/Sommaire";
 
 const anchors = {
-  Finalite: "finalite",
+  Finalites: "finalites",
   DonneesACaracterePersonelTraitees: "donnees-a-caractere-personel-traitees",
   BaseJuridiqueDuTraitementDeDonnees: "base-juridique-du-traitement-de-donnees",
   DureeDeConservation: "duree-de-conservation",
   DroitDesPersonnesConcernees: "droit-des-personnes-concernees",
   DestinatairesDesDonnees: "destinataires-des-donnees",
   SecuriteEtConfidentialiteDesDonnees: "securite-et-confidentialite-des-donnees",
+  SousTraitants: "sous-traitants",
+  Cookies: "cookies",
 };
 
 const SommaireData = [
-  { anchorTitle: "1", anchorName: "Finalité", anchorLink: "finalite" },
+  { anchorTitle: "1", anchorName: "Finalités", anchorLink: "finalites" },
   {
     anchorTitle: "2",
     anchorName: "Données à caractère personnel traitées",
@@ -30,22 +32,26 @@ const SommaireData = [
   },
   {
     anchorTitle: "4",
-    anchorName: "Durée de conservation",
+    anchorName: "Durée de conservation des données",
     anchorLink: "duree-de-conservation",
   },
   { anchorTitle: "5", anchorName: "Droit des personnes concernées", anchorLink: "droit-des-personnes-concernees" },
   { anchorTitle: "6", anchorName: "Destinataires des données", anchorLink: "destinataires-des-donnees" },
   {
     anchorTitle: "7",
-    anchorName: "Sécurité et confidentialité des données",
-    anchorLink: "securite-et-confidentialite-des-donnees",
+    anchorName: "Sous-traitants",
+    anchorLink: "sous-traitants",
+  },
+  {
+    anchorTitle: "8",
+    anchorName: "Cookies",
+    anchorLink: "cookies",
   },
 ];
 
 const PolitiqueDeConfidentialite = () => {
   return (
     <HStack
-      mt="4w"
       spacing={["0", "0", "0", "6w"]}
       flexDirection={["column", "column", "column", "row"]}
       alignItems={["normal", "normal", "normal", "center"]}
@@ -71,19 +77,25 @@ const PolitiqueDeConfidentialite = () => {
       </Sommaire>
       <Box>
         <Section pt="0">
-          <Heading textStyle="h2" color="grey.800" mt={5}>
-            Politique de confidentialité
+          <Text color="grey.400" fontWeight="bold" align="right" float="right">
+            Mise à jour : 7 avril 2023
+          </Text>
+          <Heading as="h1" color="grey.800" mb={5}>
+            Protection des données
           </Heading>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as="h3" fontSize="beta" mb={2}>
             Traitement des données à caractère personnel
           </Heading>
+        </Section>
+
+        <Section>
           <Text>
-            Le tableau de bord de l’apprentissage est développé par la Mission nationale pour l’apprentissage, mandatée
-            par le ministère du Travail.
+            Le tableau de bord de l’apprentissage est développé par la Mission interministérielle pour l’apprentissage.
           </Text>
         </Section>
-        <Section mt={4} id={anchors.Finalite}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+
+        <Section id={anchors.Finalites}>
+          <Heading as={"h3"} fontSize="beta" mb={2}>
             Finalités
           </Heading>
           <Text>
@@ -92,30 +104,26 @@ const PolitiqueDeConfidentialite = () => {
           </Text>
           <UnorderedList ml="30px !important" mt="1w">
             <ListItem>
-              Produire sous la forme d’un tableau de bord les données synthétiques des effectifs de l&apos;apprentissage
-              afin de contribuer au pilotage de l’apprentissage au niveau national et territorial par les acteurs
-              publics ou avec délégation de service public ;
+              Permettre aux pouvoirs publics de piloter au mieux la politique de l’apprentissage nationalement et
+              localement ;
             </ListItem>
             <ListItem>
-              Identifier les jeunes en recherche de contrat ou en situation de décrochage pour améliorer leur
-              accompagnement ;
+              Aider ceux qui peuvent agir à accompagner les apprentis en situation de rupture ou sans contrat ;
             </ListItem>
             <ListItem>
-              Produire les données nécessaires aux organismes de formation pour répondre aux enquêtes (notamment SIFA) ;
+              Simplifier la délivrance d’informations par les CFA, en utilisant la donnée pour pré-remplir les enquêtes
+              nationales qui leur sont demandées.
             </ListItem>
-            <ListItem>Créer un compte pour accéder ou fournir des données;</ListItem>
-            <ListItem>
-              Suivre et piloter l&apos;usage du tableau de bord par l&apos;équipe Mission apprentissage ;
-            </ListItem>
-            <ListItem>Identifier les organismes de formation et leurs réseaux (référentiel).</ListItem>
           </UnorderedList>
         </Section>
-        <Section mt={4} id={anchors.DonneesACaracterePersonelTraitees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+
+        <Section id={anchors.DonneesACaracterePersonelTraitees}>
+          <Heading as={"h3"} fontSize="beta" mb={2}>
             Données à caractère personnel traitées
           </Heading>
           <Text>
-            Nous traitons les données à caractère personnel et catégories de données à caractère personnel suivantes :
+            Nous traitons les données à caractère personnel et catégories de données à caractère personnel
+            suivantes&nbsp;:
           </Text>
           <UnorderedList ml="30px !important" mt="1w">
             <ListItem>
@@ -124,56 +132,60 @@ const PolitiqueDeConfidentialite = () => {
             </ListItem>
             <ListItem>Données relatives au représentant légal du jeune (nom, numéro de téléphone) ;</ListItem>
             <ListItem>
-              Données relatives aux évènements du parcours des apprenants (date de début et de fin, date de début fin de
-              contrat, et rupture, organisme de formation et département) ;
+              Données relatives aux événements du parcours des apprenants (date de début et de fin du parcours, date de
+              début et de fin de contrat, et rupture, organisme de formation et département) ;
             </ListItem>
-            <ListItem>Informations relatives au souhait de formation des candidats ;</ListItem>
-            <ListItem>Données de contact des organisme de formation (adresse e-mail) ;</ListItem>
+            <ListItem>Informations relatives au souhait de formation des candidats;</ListItem>
+            <ListItem>Données de contact des organismes de formation (adresse e-mail) ;</ListItem>
             <ListItem>Données de contact des entreprises (adresse e-mail).</ListItem>
           </UnorderedList>
         </Section>
+
         <Section mt={4} id={anchors.BaseJuridiqueDuTraitementDeDonnees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} fontSize="beta" mb={2}>
             Base juridique du traitement de données
           </Heading>
           <Text>
             Nous sommes autorisés à traiter vos données dans le cadre d’une mission d’intérêt public ou relevant de
-            l’exercice de l’autorité publique dont est investi le responsable de traitement au sens de l’article 6-e du
-            RPGD. Cette mission est notamment précisée dans la lettre de Mission de la Mission nationale pour
+            l’exercice de l’autorité publique dont est investi le responsable de traitement au sens de l’article 6-1 e)
+            du RPGD. Cette mission est notamment précisée dans la lettre de Mission de la Mission nationale pour
             l’apprentissage du 10 septembre 2019 et décision gouvernementale du 26 novembre 2019.
           </Text>
         </Section>
+
         <Section mt={4} id={anchors.DureeDeConservation}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
-            Durée de conservation
+          <Heading as={"h3"} fontSize="beta" mb={2}>
+            Durée de conservation des données
           </Heading>
           <Text>
             Nous conservons vos données pour une durée de 2 ans à compter de la dernière modification liée aux
-            informations sur un candidat.
+            informations sur un candidat pour réaliser des analyses comparatives d’une année sur l’autre dans le cadre
+            de la finalité de pilotage.
           </Text>
         </Section>
+
         <Section mt={4} id={anchors.DroitDesPersonnesConcernees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} fontSize="beta" mb={2}>
             Droit des personnes concernées
           </Heading>
           <Text>Vous disposez des droits suivants concernant vos données à caractère personnel :</Text>
           <UnorderedList ml="30px !important" mt="1w">
             <ListItem>Droit d’information et droit d’accès aux données ;</ListItem>
-            <ListItem>Droit de rectification des données ;</ListItem>
-            <ListItem>Droit d’opposition au traitement de données ;</ListItem>
-            <ListItem>Droit à la limitation des données.</ListItem>
+            <ListItem>Droit de rectification et le cas échéant de suppression des données ;</ListItem>
+            <ListItem>Droit d’opposition au traitement des données ;</ListItem>
+            <ListItem>Droit à la portabilité des données ;</ListItem>
+            <ListItem>Droit à la limitation du traitement.</ListItem>
           </UnorderedList>
-          <Text>
-            <br />
+          <Text mt={4}>
             Pour les exercer, faites-nous parvenir une demande en précisant la date et l’heure précise de la requête –
             ces éléments sont indispensables pour nous permettre de retrouver votre recherche – par voie électronique à
-            l’adresse suivante :{" "}
+            l’adresse suivante&nbsp;:{" "}
             <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance">
               {CONTACT_ADDRESS}
             </Link>
-            <br />
-            <br />
-            Par voie postale :
+          </Text>
+          <Text mt={4}>
+            Par voie postale&nbsp;:
             <br />
             <br />
             Délégation générale à l’emploi et à la formation professionnelle
@@ -181,153 +193,115 @@ const PolitiqueDeConfidentialite = () => {
             14 avenue Duquesne
             <br />
             75350 Paris SP 07
-            <br />
-            <br />
+          </Text>
+          <Text mt={4}>
             En raison de l’obligation de sécurité et de confidentialité dans le traitement des données à caractère
             personnel qui incombe au responsable de traitement, votre demande ne sera traitée que si vous apportez la
-            preuve de votre identité. <br />
-            Pour vous aider dans votre démarche, vous trouverez ici
-            <br />
+            preuve de votre identité.
+          </Text>
+          <Text mt={4}>
+            Pour vous aider dans votre démarche, vous trouverez un modèle de courrier élaboré par la CNIL ici :{" "}
             <Link href="https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces" color="primary">
               https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces
             </Link>
-            , un modèle de courrier élaboré par la CNIL.
-            <br />
-            <br />
+          </Text>
+          <Text mt={4}>
             Le responsable de traitement s’engage à répondre dans un délai raisonnable qui ne saurait dépasser 1 mois à
             compter de la réception de votre demande.
           </Text>
+          <Text mt={4}>
+            Si vous estimez, après avoir contacté la DGEFP, que vos droits ne sont pas respectés ou que le traitement
+            n’est pas conforme au Règlement Général sur la Protection des Données, vous pouvez adresser une réclamation
+            auprès de la Commission Nationale de l’Informatique et des Libertés (CNIL).
+          </Text>
         </Section>
+
         <Section mt={4} id={anchors.DestinatairesDesDonnees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} fontSize="beta" mb={2}>
             Destinataires des données
           </Heading>
           <Text>
-            Nous nous engageons à ce que les données à caractères personnels soient traitées par les seules personnes
-            autorisées.
+            Nous nous engageons à ce que les données à caractère personnel soient traitées par les seules personnes
+            autorisées à savoir :
           </Text>
-          <br />
-          <Text>Ont accès aux données :</Text>
-          <UnorderedList ml="30px !important" mt="1w">
+          <UnorderedList ml="30px">
+            <ListItem>Les membres de l’équipe de la Mission interministérielle pour l’apprentissage ;</ListItem>
             <ListItem>Les agents autorisés des DREETS, dans le cadre de leurs missions de service public ;</ListItem>
-            <ListItem>Les organismes de formation ;</ListItem>
-            <ListItem>Les réseaux d’organismes de formation ;</ListItem>
-            <ListItem>Les Régions ;</ListItem>
-            <ListItem>
-              Les personnes autorisées au sein des Rectorats, dans le cadre de leurs missions de service public ;
-            </ListItem>
-            <ListItem>
-              Les personnes autorisées au sein des Académies, dans le cadre de leurs missions de service public ;
-            </ListItem>
-            <ListItem>
-              Les personnes autorisées travaillant pour le compte de la mission interministérielle pour l’apprentissage
-              dans le cadre de la conception des services numériques ;
-            </ListItem>
-            <ListItem>
-              Les personnes travaillant pour le compte de la mission interministérielle pour l’apprentissage dans le
-              cadre de propositions ciblées d&apos;offres d’emploi ou d’alternance ;
-            </ListItem>
+            <ListItem>Les organismes de formation.</ListItem>
           </UnorderedList>
         </Section>
-        <Section mt={4} id={anchors.SecuriteEtConfidentialiteDesDonnees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
-            Sécurité et confidentialité des données
-          </Heading>
-          <Text>
-            Les mesures techniques et organisationnelles de sécurité adoptées pour assurer la confidentialité,
-            l’intégrité et protéger l’accès des données sont notamment :
-          </Text>
-          <UnorderedList ml="30px !important" mt="1w">
-            <ListItem>Anonymisation ;</ListItem>
-            <ListItem>Stockage des données en base de données ;</ListItem>
-            <ListItem>Stockage des mots de passe en base sont hachés ;</ListItem>
-            <ListItem>Cloisonnement des données ;</ListItem>
-            <ListItem>Mesures de traçabilité ;</ListItem>
-            <ListItem>Surveillance ;</ListItem>
-            <ListItem>Protection contre les virus, malwares et logiciels espions ;</ListItem>
-            <ListItem>Protection des réseaux ;</ListItem>
-            <ListItem>Sauvegarde ;</ListItem>
-            <ListItem>Mesures restrictives limitant l’accès physiques aux données à caractère personnel.</ListItem>
-          </UnorderedList>
-          <Text as={"h4"} fontSize="30px" fontWeight="700" my={5}>
+
+        <Section mt={4} id={anchors.SousTraitants}>
+          <Heading as={"h3"} fontSize="beta" mb={2}>
             Sous-traitants
-          </Text>
-          <Flex flexDirection={["column", "column", "column", "row"]} w="full">
-            <Flex flexDirection={"column"}>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
-                <strong>
-                  Partenaire <br />
-                  <br />
-                </strong>
-              </Flex>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="70px" p={5}>
-                <Text>OVH SAS</Text>
-              </Flex>
-            </Flex>
-            <Flex flexDirection={"column"}>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
-                <strong>Pays destinataire</strong>
-              </Flex>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="70px" p={5}>
-                <Text>France</Text>
-              </Flex>
-              <Flex border="1px solid" h="70px" borderRightWidth={[1, 1, 1, 0]} p={5}>
-                <Text>Union européenne</Text>
-              </Flex>
-            </Flex>
-            <Flex flexDirection={"column"}>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
-                <strong>Traitement réalisé</strong>
-              </Flex>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="70px" p={5}>
-                <Text>Hébergement</Text>
-              </Flex>
-              <Flex border="1px solid" h="70px" borderRightWidth={[1, 1, 1, 0]} p={5}>
-                <Text>Chat de support</Text>
-              </Flex>
-            </Flex>
-            <Flex flexDirection={"column"}>
-              <Flex border="1px solid" borderBottomWidth={0} p={5}>
-                <strong>
-                  Garanties <br />
-                  <br />
-                </strong>
-              </Flex>
-              <Flex border="1px solid" borderBottomWidth={0} h="70px" p={5}>
-                <Link color="primary" href="https://www.ovhcloud.com/fr/personal-data-protection">
-                  https://www.ovhcloud.com/fr/personal-data-protection
-                </Link>
-              </Flex>
-            </Flex>
-          </Flex>
-          <Text as={"h4"} fontSize="30px" fontWeight="700" my={5}>
-            Cookies et autres traceurs
-          </Text>
+          </Heading>
+          <Grid gridTemplateRows={{ base: "repeat(8, auto)", md: "repeat(2, auto)" }} gridAutoFlow="column">
+            <GridItem border="1px" p={2} bg="grey.200">
+              Sous-traitant
+            </GridItem>
+            <GridItem border="1px" p={2}>
+              OVH SAS
+            </GridItem>
+            <GridItem border="1px" p={2} bg="grey.200">
+              Traitement réalisé
+            </GridItem>
+            <GridItem border="1px" p={2}>
+              Hébergement
+            </GridItem>
+            <GridItem border="1px" p={2} bg="grey.200">
+              Pays destinataire
+            </GridItem>
+            <GridItem border="1px" p={2}>
+              France
+            </GridItem>
+            <GridItem border="1px" p={2} bg="grey.200">
+              Garanties
+            </GridItem>
+            <GridItem border="1px" p={2}>
+              <Link color="primary" href="https://www.ovhcloud.com/fr/personal-data-protection">
+                https://www.ovhcloud.com/fr/personal-data-protection
+              </Link>
+            </GridItem>
+          </Grid>
+        </Section>
+
+        <Section mt={4} id={anchors.Cookies}>
+          <Heading as={"h3"} fontSize="beta" mb={2}>
+            Cookies
+          </Heading>
           <Text>
             Un cookie est un fichier déposé sur votre terminal lors de la visite d’un site. Il a pour but de collecter
             des informations relatives à votre navigation et de vous adresser des services adaptés à votre terminal
             (ordinateur, mobile ou tablette).
-            <br />
-            <br />
-            Le site ne dépose pas de cookies de mesure d’audience (nombre de visites, pages consultées). Néanmoins, nous
-            utilisons Plausible qui permet de suivre les tendances d’utilisation de notre site. L’outil ne permet pas
-            d’identifier les personnes, ni de tracer votre usage d’internet, dans ou en dehors du site.
-            <br />
-            <br />
-            Pour plus d’information à propos de Plausible :
-            <br />
-            <Link
-              color="primary"
-              href="https://plausible.io/data-policy#first-thing-first-what-we-collect-and-what-we-use-it-for"
-            >
-              https://plausible.io/data-policy#first-thing-first-what-we-collect-and-what-we-use-it-for
-            </Link>{" "}
-            et{" "}
-            <Link color="primary" href="https://plausible.io/privacy">
-              https://plausible.io/privacy
-            </Link>
-            .
           </Text>
+          <Text mt={4}>
+            Le site du tableau de bord de l’apprentissage ne dépose pas de cookies de mesure d’audience. Néanmoins, nous
+            utilisons Plausible qui permet de suivre les tendances d’utilisation de notre site. L’outil ne collecte
+            aucune donnée à caractère personnel et ne dépose aucun cookie. Il ne permet ni d’identifier les personnes,
+            ni de tracer leur usage d’internet dans ou en dehors du site.
+          </Text>
+          <Text mt={4}>Pour plus d’informations sur Plausible : </Text>
+
+          <UnorderedList ml="30px !important" mt="1w">
+            <ListItem>
+              <Link
+                color="primary"
+                href="https://plausible.io/data-policy#first-thing-first-what-we-collect-and-what-we-use-it-for"
+              >
+                https://plausible.io/data-policy#first-thing-first-what-we-collect-and-what-we-use-it-for
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link color="primary" href="https://plausible.io/privacy">
+                https://plausible.io/privacy
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link color="primary" href="https://plausible.io/data-policy#how-we-count-unique-users-without-cookies">
+                https://plausible.io/data-policy#how-we-count-unique-users-without-cookies
+              </Link>
+            </ListItem>
+          </UnorderedList>
         </Section>
       </Box>
     </HStack>
