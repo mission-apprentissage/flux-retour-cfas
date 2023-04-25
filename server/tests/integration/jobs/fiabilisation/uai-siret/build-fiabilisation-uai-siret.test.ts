@@ -594,9 +594,9 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
     });
   });
 
-  // TODO Reactiver & update les tests
   describe("buildFiabilisationCoupleForTdbCouple", async () => {
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation FIABLE pour un couple du TDB dont le SIRET et l'UAI sont trouvés dans le Référentiel", async () => {
+    // Règle 1
+    it("Vérifie l'ajout d'une entrée de fiabilisation FIABLE pour un couple du TDB dont le SIRET et l'UAI sont trouvés dans le Référentiel", async () => {
       // Construction de la collection de fiabilisation pour ce couple,
       // avec une liste de couples du TDB simple et une liste d'organismes du référentiel simple
       const coupleTdb = { uai: UAI_REFERENTIEL, siret: SIRET_REFERENTIEL };
@@ -613,7 +613,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       assert.deepEqual(nbCoupleFiabilisationValid, 1);
     });
 
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation A_FIABILISER pour un couple du TDB pour lequel on trouve un organisme unique dans le Référentiel avec l'UAI du TDB mais que le SIRET du TDB est vide et que l'UAI est unique dans tous les couples du TDB", async () => {
+    // Règle 2
+    it("Vérifie l'ajout d'une entrée de fiabilisation A_FIABILISER pour un couple du TDB pour lequel on trouve un organisme unique dans le Référentiel avec l'UAI du TDB mais que le SIRET du TDB est vide et que l'UAI est unique dans tous les couples du TDB", async () => {
       // Construction de la collection de fiabilisation pour un couple avec cet UAI mais sans siret
       // avec une liste de couples du TDB simple et une liste d'organismes du référentiel simple
       const coupleTdb = { uai: UAI_REFERENTIEL, siret: null };
@@ -632,26 +633,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       assert.deepEqual(nbCoupleFiabilisationValid, 1);
     });
 
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_UAI_VALIDEE pour un couple du TDB pour lequel on trouve un organisme unique dans le Référentiel avec l'UAI du TDB mais que le SIRET du TDB est vide et que l'UAI n'est pas unique dans tous les couples du TDB", async () => {
-      // Construction de la collection de fiabilisation pour un couple avec cet UAI mais sans siret
-      // avec une liste de couples du TDB contenant des doublons d'UAI et une liste d'organismes du référentiel simple
-      const coupleTdb = { uai: UAI_REFERENTIEL, siret: null };
-      const coupleTdb2 = { uai: UAI_REFERENTIEL, siret: "77370584100099" };
-      const coupleTdb3 = { uai: UAI_REFERENTIEL, siret: "88370584100099" };
-      const allTdbCouples = [coupleTdb, coupleTdb2, coupleTdb3];
-      const allReferentielOrganismes = [organismeReferentiel];
-      await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
-
-      // Vérification de la création du couple en tant que NON_FIABILISABLE_UAI_VALIDEE car l'UAI existe bien dans le référentiel
-      const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
-        uai: UAI_REFERENTIEL,
-        siret: null,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_VALIDEE,
-      });
-      assert.deepEqual(nbCoupleFiabilisationValid, 1);
-    });
-
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation A_FIABILISER pour un couple du TDB pour lequel on trouve un organisme unique dans le Référentiel avec l'UAI du TDB mais que le SIRET du TDB n'est pas le même dans le Référentiel et que l'UAI est unique dans tous les couples du TDB", async () => {
+    // Règle 2
+    it("Vérifie l'ajout d'une entrée de fiabilisation A_FIABILISER pour un couple du TDB pour lequel on trouve un organisme unique dans le Référentiel avec l'UAI du TDB mais que le SIRET du TDB n'est pas le même dans le Référentiel et que l'UAI est unique dans tous les couples du TDB", async () => {
       const SIRET_TDB = "11110584101111";
 
       // Construction de la collection de fiabilisation pour un couple avec cet UAI mais un siret différent
@@ -672,28 +655,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       assert.deepEqual(nbCoupleFiabilisationValid, 1);
     });
 
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_UAI_VALIDEE pour un couple du TDB pour lequel on trouve un organisme unique dans le Référentiel avec l'UAI du TDB mais que le SIRET du TDB n'est pas le même dans le Référentiel et que l'UAI n'est pas unique dans tous les couples du TDB", async () => {
-      const SIRET_TDB = "11110584101111";
-
-      // Construction de la collection de fiabilisation pour un couple avec cet UAI mais un siret différent
-      // avec une liste de couples du TDB contenant des doublons de cet UAI et une liste d'organismes du référentiel simple
-      const coupleTdb = { uai: UAI_REFERENTIEL, siret: SIRET_TDB };
-      const coupleTdb2 = { uai: UAI_REFERENTIEL, siret: "22110584101111" };
-      const coupleTdb3 = { uai: UAI_REFERENTIEL, siret: "33110584101111" };
-      const allTdbCouples = [coupleTdb, coupleTdb2, coupleTdb3];
-      const allReferentielOrganismes = [organismeReferentiel];
-      await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
-
-      // Vérification de la création du couple en tant que NON_FIABILISABLE_UAI_VALIDEE car l'UAI existe bien dans le référentiel
-      const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
-        uai: UAI_REFERENTIEL,
-        siret: SIRET_TDB,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_VALIDEE,
-      });
-      assert.deepEqual(nbCoupleFiabilisationValid, 1);
-    });
-
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation A_FIABILISER pour un couple du TDB pour lequel on trouve un organisme unique dans le référentiel avec le SIRET du TDB mais que l'UAI du Référentiel est différent de celui du TDB et que le SIRET est unique dans tous les couples du TDB", async () => {
+    // Règle 3
+    it("Vérifie l'ajout d'une entrée de fiabilisation A_FIABILISER pour un couple du TDB pour lequel on trouve un organisme unique dans le référentiel avec le SIRET du TDB mais que l'UAI du Référentiel est différent de celui du TDB et que le SIRET est unique dans tous les couples du TDB", async () => {
       const UAI_TDB = "9933672E";
 
       // Construction de la collection de fiabilisation pour un couple avec le SIRET du référentiel et un UAI différent du référentiel
@@ -714,105 +677,165 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       assert.deepEqual(nbCoupleFiabilisationValid, 1);
     });
 
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_UAI_NON_VALIDEE pour un couple du TDB pour lequel on trouve un organisme unique dans le référentiel avec le SIRET du TDB mais que l'UAI du Référentiel est différent de celui du TDB et que le SIRET n'est pas unique dans tous les couples du TDB", async () => {
-      const UAI_TDB = "9933672E";
+    // Règle 6
+    it("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_INEXISTANT pour un couple du TDB pour lequel l'UAI n'est pas dans ACCE (Référentiel) et le SIRET n'est pas dans le Référentiel", async () => {
+      const UAI_TEST = "9933672E";
+      const SIRET_TEST = "12340584100000";
+      const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
+      const allTdbCouples = [coupleTdb];
+      const allReferentielOrganismes = [organismeReferentiel];
+      await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
 
-      // Ajout d'un organisme dans le référentiel ayant l'UAI TDB en lieu de formation
+      const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
+        uai: UAI_TEST,
+        siret: SIRET_TEST,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_INEXISTANT,
+      });
+      assert.deepEqual(nbCoupleFiabilisationValid, 1);
+    });
+
+    // Règle 7
+    it("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_PB_COLLECTE pour un couple du TDB pour lequel l'UAI n'est dans aucun lieu du Référentiel", async () => {
+      const UAI_TEST = "9933666E";
+      const SIRET_TEST = "66370584166699";
+
+      // Ajout de l'UAI dans ACCE
+      await uaisAccesReferentielDb().insertOne({ uai: UAI_TEST });
+
+      // Ajout d'un organisme pour le couple
+      await organismesDb().insertOne({
+        uai: UAI_TEST,
+        siret: SIRET_TEST,
+        nature: "responsable",
+        relatedFormations: [],
+      });
+
+      const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
+      const allTdbCouples = [coupleTdb];
+      const allReferentielOrganismes = [organismeReferentiel];
+      await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
+
+      const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
+        uai: UAI_TEST,
+        siret: SIRET_TEST,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE,
+      });
+
+      const nbOrganismePbCollecte = await organismesDb().countDocuments({
+        uai: UAI_TEST,
+        siret: SIRET_TEST,
+        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_PB_COLLECTE,
+      });
+
+      assert.deepEqual(nbCoupleFiabilisationValid, 1);
+      assert.deepEqual(nbOrganismePbCollecte, 1);
+    });
+
+    // Règle 8
+    it("Vérifie l'ajout d'une entrée de fiabilisation A_FIABILISER pour un couple du TDB pour lequel l'UAI est présent dans les lieux du référentiel", async () => {
+      const UAI_TEST = "9933666E";
+      const SIRET_TEST = "66370584166699";
+      const SIRET_OF_FIABLE = "11370584166699";
+
+      // Ajout de l'UAI dans ACCE
+      await uaisAccesReferentielDb().insertOne({ uai: UAI_TEST });
+
+      // Ajout d'un organisme ayant cet UAI dans ses lieux
       await organismesReferentielDb().findOneAndUpdate(
-        { uai: "7733672E", siret: "77370584100099", nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_TDB }], relations: [] } },
+        { uai: "1133666E", siret: SIRET_OF_FIABLE, nature: "formateur" },
+        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
         { upsert: true }
       );
 
-      // Construction de la collection de fiabilisation pour un couple avec le SIRET du référentiel et un UAI différent du référentiel
-      // avec une liste de couples du TDB simple et une liste d'organismes du référentiel simple
-      const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };
-      const coupleTdb2 = { uai: "1133672E", siret: SIRET_REFERENTIEL };
-      const coupleTdb3 = { uai: "2233672E", siret: SIRET_REFERENTIEL };
-      const allTdbCouples = [coupleTdb, coupleTdb2, coupleTdb3];
+      const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
+      const allTdbCouples = [coupleTdb];
       const allReferentielOrganismes = [organismeReferentiel];
       await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
 
-      // Vérification de la création du couple en tant que NON_FIABILISABLE_UAI_NON_VALIDEE car l'UAI n'est pas dans le Référentiel
       const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
-        uai: UAI_TDB,
-        siret: SIRET_REFERENTIEL,
+        uai: UAI_TEST,
+        siret: SIRET_TEST,
+        uai_fiable: UAI_TEST,
+        siret_fiable: SIRET_OF_FIABLE,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+      });
+
+      assert.deepEqual(nbCoupleFiabilisationValid, 1);
+    });
+
+    // Règle 9
+    it("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_UAI_VALIDEE pour un couple du TDB pour lequel on trouve un organisme unique dans le Référentiel avec l'UAI du TDB mais que le SIRET du TDB est vide et que l'UAI n'est pas unique dans tous les couples du TDB", async () => {
+      const UAI_TEST = "9933666E";
+      const SIRET_TEST = "77370584100099";
+      const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
+
+      // Ajout de l'UAI dans ACCE
+      await uaisAccesReferentielDb().insertOne({ uai: UAI_TEST });
+
+      // Ajout d'organismes ayant cet UAI dans ses lieux
+      await organismesReferentielDb().findOneAndUpdate(
+        { uai: "1133666E", siret: "88880584100099", nature: "formateur" },
+        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+        { upsert: true }
+      );
+      await organismesReferentielDb().findOneAndUpdate(
+        { uai: "1144666E", siret: "66660584100099", nature: "formateur" },
+        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+        { upsert: true }
+      );
+
+      const allTdbCouples = [coupleTdb];
+      const allReferentielOrganismes = [organismeReferentiel];
+      await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
+
+      // Vérification de la création du couple en tant que NON_FIABILISABLE_UAI_NON_VALIDEE
+      const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
+        uai: UAI_TEST,
+        siret: SIRET_TEST,
         type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
       });
       assert.deepEqual(nbCoupleFiabilisationValid, 1);
     });
 
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_UAI_VALIDEE pour un couple du TDB pour lequel on trouve un organisme unique dans le référentiel avec le SIRET du TDB mais que l'UAI du Référentiel est différent de celui du TDB et que le SIRET n'est pas unique dans tous les couples du TDB mais que l'UAI est présente dans le référentiel", async () => {
-      const UAI_TDB = "9933672E";
-      const SIRET_REFERENTIEL2 = "12000000000000";
+    // Règle 9
+    it("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_UAI_VALIDEE pour un couple du TDB pour lequel on trouve un organisme unique dans le Référentiel avec l'UAI du TDB mais que le SIRET du TDB est vide et que l'UAI n'est pas unique dans tous les couples du TDB", async () => {
+      const UAI_TEST = "9933666E";
+      const SIRET_TEST = "77370584100099";
+      const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
 
-      // Création d'un autre organisme dans le Référentiel avec le couple contenant l'UAI du TDB
+      // Création d'un organisme dans le Référentiel avec le couple contenant l'UAI du TDB
       await organismesReferentielDb().insertOne({
-        uai: UAI_TDB,
-        siret: SIRET_REFERENTIEL2,
+        uai: UAI_TEST,
+        siret: "00000584100099",
         nature: "formateur",
-        lieux_de_formation: [{ uai: UAI_TDB }],
+        lieux_de_formation: [],
         relations: [],
       });
 
-      // Construction de la collection de fiabilisation pour un couple avec le SIRET du référentiel et un UAI différent du référentiel
-      // avec une liste de couples du TDB simple et une liste d'organismes du référentiel simple
-      const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };
-      const coupleTdb2 = { uai: "1133672E", siret: SIRET_REFERENTIEL };
-      const coupleTdb3 = { uai: "2233672E", siret: SIRET_REFERENTIEL };
-      const allTdbCouples = [coupleTdb, coupleTdb2, coupleTdb3];
-      const allReferentielOrganismes = [organismeReferentiel];
-      await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
+      // Ajout de l'UAI dans ACCE
+      await uaisAccesReferentielDb().insertOne({ uai: UAI_TEST });
 
-      // Vérification de la création du couple en tant que NON_FIABILISABLE_UAI_VALIDEE car l'UAI est dans le Référentiel
-      const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
-        uai: UAI_TDB,
-        siret: SIRET_REFERENTIEL,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_VALIDEE,
-      });
-      assert.deepEqual(nbCoupleFiabilisationValid, 1);
-    });
-
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_UAI_NON_VALIDEE pour un couple du TDB pour lequel on trouve un organisme unique dans le référentiel avec le SIRET du TDB mais que dans le Référentiel il n'y a aucune UAI", async () => {
-      const SIRET_REFERENTIEL = "123450584100099";
-      const UAI_TDB = "3355672E";
-
-      // Création d'un organisme dans le référentiel avec un couple
-      const { value: organismeReferentielSansUai } = await organismesReferentielDb().findOneAndUpdate(
-        { siret: SIRET_REFERENTIEL, nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_TDB }] } },
-        { upsert: true, returnDocument: "after" }
+      // Ajout d'organismes ayant cet UAI dans ses lieux
+      await organismesReferentielDb().findOneAndUpdate(
+        { uai: "1133666E", siret: "88880584100099", nature: "formateur" },
+        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+        { upsert: true }
+      );
+      await organismesReferentielDb().findOneAndUpdate(
+        { uai: "1144666E", siret: "66660584100099", nature: "formateur" },
+        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+        { upsert: true }
       );
 
-      // Construction de la collection de fiabilisation pour un couple avec le SIRET du référentiel et un UAI différent du référentiel
-      // avec une liste de couples du TDB simple et une liste d'organismes du référentiel simple
-      const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };
-      const allTdbCouples = [coupleTdb];
-      const allReferentielOrganismes = [organismeReferentielSansUai];
-      await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
-
-      // Vérification de la création du couple en tant que NON_FIABILISABLE_UAI_NON_VALIDEE car l'UAI n'est pas dans le référentiel
-      const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
-        uai: UAI_TDB,
-        siret: SIRET_REFERENTIEL,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,
-      });
-      assert.deepEqual(nbCoupleFiabilisationValid, 1);
-    });
-
-    it.skip("Vérifie l'ajout d'une entrée de fiabilisation FIABLE pour un couple du TDB pour lequel on trouve un organisme unique dans le référentiel avec le SIRET du TDB et que dans le Référentiel l'UAI est le même que dans le TDB", async () => {
-      // Construction de la collection de fiabilisation pour un couple avec le SIRET du référentiel et un UAI différent du référentiel
-      // avec une liste de couples du TDB simple et une liste d'organismes du référentiel simple
-      const coupleTdb = { uai: UAI_REFERENTIEL, siret: SIRET_REFERENTIEL };
       const allTdbCouples = [coupleTdb];
       const allReferentielOrganismes = [organismeReferentiel];
       await buildFiabilisationCoupleForTdbCouple(coupleTdb, allTdbCouples, allReferentielOrganismes);
 
-      // Vérification de la création du couple en tant que NON_FIABILISABLE_UAI_NON_VALIDEE car l'UAI n'est pas dans le référentiel
+      // Vérification de la création du couple en tant que NON_FIABILISABLE_UAI_VALIDEE
       const nbCoupleFiabilisationValid = await fiabilisationUaiSiretDb().countDocuments({
-        uai: UAI_REFERENTIEL,
-        siret: SIRET_REFERENTIEL,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE,
+        uai: UAI_TEST,
+        siret: SIRET_TEST,
+        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_VALIDEE,
       });
       assert.deepEqual(nbCoupleFiabilisationValid, 1);
     });
