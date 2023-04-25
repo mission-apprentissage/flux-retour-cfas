@@ -111,22 +111,16 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
             />
           )}
 
-          {!(organisme.mode_de_transmission === "API" && organismesEffectifs.length === 0) && (
-            <>
-              <Button
-                size="md"
-                fontSize={{ base: "sm", md: "md" }}
-                p={{ base: 2, md: 4 }}
-                h={{ base: 8, md: 10 }}
-                onClick={() => {
-                  router.push(`${router.asPath}/televersement`);
-                }}
-                variant="secondary"
-              >
-                <Text as="span">+ Ajouter</Text>
-              </Button>
-            </>
-          )}
+          <Button
+            size="md"
+            variant="secondary"
+            onClick={() => {
+              router.push(`${router.asPath}/televersement`);
+            }}
+          >
+            <Text as="span">+ Ajouter</Text>
+          </Button>
+
           {organisme.mode_de_transmission !== "API" && (
             <>
               {/* TODO TMP <Button
