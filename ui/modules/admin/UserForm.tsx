@@ -137,6 +137,18 @@ const UserForm = ({
     }
   };
 
+  const resendConfirmationEmail = async () => {
+    try {
+      await _post(`/api/v1/admin/users/${user._id}/resend-confirmation-email`);
+      toastSuccess("L'email de confirmation a été renvoyé.");
+    } catch (e) {
+      console.error(e);
+      toastError("Erreur lors de l'envoi de l'email.", {
+        description: "Merci de réessayer plus tard",
+      });
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <VStack gap={2} alignItems="baseline" my={8}>
@@ -205,6 +217,16 @@ const UserForm = ({
               <Text as="span" bgColor="galt2">
                 {USER_STATUS_LABELS[user.account_status] || user.account_status}
               </Text>
+
+              <HStack spacing={5}>
+                {user.account_status === "PENDING_EMAIL_VALIDATION" && (
+                  <HStack spacing={8} alignSelf="start">
+                    <Button type="button" variant="primary" onClick={() => resendConfirmationEmail()}>
+                      Renvoyer l’email de confirmation
+                    </Button>
+                  </HStack>
+                )}
+              </HStack>
             </HStack>
 
             <HStack spacing={5}>

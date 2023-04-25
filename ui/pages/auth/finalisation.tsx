@@ -26,13 +26,16 @@ function useActivation(activationToken: string) {
     isLoading,
     isError,
     account_status: data?.account_status,
+    validationByGestionnaire: data?.validationByGestionnaire,
   };
 }
 
 const ConfirmationPage = () => {
   const router = useRouter();
   const { toastSuccess } = useToaster();
-  const { isLoading, isError, account_status } = useActivation(router.query.activationToken as string);
+  const { isLoading, isError, account_status, validationByGestionnaire } = useActivation(
+    router.query.activationToken as string
+  );
 
   useEffect(() => {
     if (account_status === "CONFIRMED") {
@@ -84,11 +87,20 @@ const ConfirmationPage = () => {
             <Heading as="h2" fontSize="2xl" my={[3, 6]}>
               Finalisation de votre inscription.
             </Heading>
-            {/** FIXME gérer l'affichage de la validation par le gestionnaire de l'organisation également (si au moins un utilisateur confirmé) */}
             <Text textAlign="center">
-              Votre demande est en cours d’étude par nos services.
-              <br />
-              Pour des raisons de sécurité, un de nos administrateurs va examiner votre demande.
+              {validationByGestionnaire ? (
+                <>
+                  Votre demande est en cours d’étude par un gestionnaire de votre organisation.
+                  <br />
+                  Pour des raisons de sécurité, un des gestionnaires de votre organisation va examiner votre demande.
+                </>
+              ) : (
+                <>
+                  Votre demande est en cours d’étude par nos services.
+                  <br />
+                  Pour des raisons de sécurité, un de nos administrateurs va examiner votre demande.
+                </>
+              )}
               <br />
               Vous serez notifié par courriel dès que votre demande aura été validée (n’oubliez pas de vérifier vos
               spams).

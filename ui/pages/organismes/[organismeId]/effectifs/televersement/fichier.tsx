@@ -6,24 +6,24 @@ import React from "react";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
-import TeleversementsLanding from "@/modules/mon-espace/effectifs/TeleversementsLanding";
+import Televersements from "@/modules/mon-espace/effectifs/Televersements";
+import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const PageImportEffectifsDeSonOrganisme = () => {
+const PageImportEffectifsDeSonOrganismeFichier = () => {
   const router = useRouter();
+  const { organisme } = useEffectifsOrganisme(router.query.organismeId as string);
   return (
     <Page>
       <Head>
         <title>Ses effectifs - Import</title>
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
-        <Container maxW="xl">
-          <TeleversementsLanding importUrl={`${router.asPath}/fichier`} />
-        </Container>
+        <Container maxW="xl">{organisme && <Televersements organisme={organisme} />}</Container>
       </Box>
     </Page>
   );
 };
 
-export default withAuth(PageImportEffectifsDeSonOrganisme);
+export default withAuth(PageImportEffectifsDeSonOrganismeFichier);

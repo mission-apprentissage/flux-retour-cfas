@@ -3,7 +3,13 @@ import express from "express";
 import { z } from "zod";
 
 import { rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
-import { getAllUsers, getDetailedUserById, removeUser, updateUser } from "@/common/actions/users.actions";
+import {
+  getAllUsers,
+  getDetailedUserById,
+  removeUser,
+  resendConfirmationEmail,
+  updateUser,
+} from "@/common/actions/users.actions";
 import { getWarningOnEmail } from "@/common/model/organisations.model";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import paginationShema from "@/common/validation/paginationSchema";
@@ -102,6 +108,16 @@ export default () => {
 
       res.json({ ok: true, message: `User ${id} deleted !` });
     }
+  );
+
+  router.post(
+    "/:id/resend-confirmation-email",
+    validateRequestMiddleware({
+      params: objectIdSchema("id"),
+    }),
+    returnResult(async (req) => {
+      await resendConfirmationEmail(req.params.id as string);
+    })
   );
 
   return router;

@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 import config from "@/config";
 
-const createToken = (type: string, subject = null, options: any = {}): string => {
+const createToken = (type: string, subject: string | null = null, options: any = {}): string => {
   const defaults = config.auth[type];
   const secret = options.secret || defaults.jwtSecret;
   const expiresIn = options.expiresIn || defaults.expiresIn;
@@ -18,12 +18,12 @@ const createToken = (type: string, subject = null, options: any = {}): string =>
   return jwt.sign(payload, secret, opts);
 };
 
-export function createResetPasswordToken(username, options: any = {}) {
-  return createToken("resetPasswordToken", username, options);
+export function createResetPasswordToken(email: string) {
+  return createToken("resetPasswordToken", email);
 }
 
-export function createActivationToken(subject, options: any = {}) {
-  return createToken("activation", subject, options);
+export function createActivationToken(email: string) {
+  return createToken("activation", email);
 }
 
 export function createUserTokenSimple(options = {}) {

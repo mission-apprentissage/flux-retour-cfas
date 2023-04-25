@@ -1,4 +1,5 @@
 import Boom from "boom";
+import { format } from "date-fns";
 import { ObjectId } from "mongodb";
 
 import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "@/common/constants/territoires";
@@ -82,6 +83,7 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
     organisation_id: ctx.organisation_id,
     email,
     token: invitationToken,
+    author_id: ctx._id,
     created_at: getCurrentTime(),
   });
 
@@ -205,6 +207,34 @@ export async function getInvitationByToken(token: string): Promise<any> {
   }
   const organisation = await getOrganisationById(invitation.organisation_id);
   return { ...invitation, organisation };
+}
+
+export async function rejectInvitation(token: string): Promise<void> {
+  const invitation = await invitationsDb().findOne({
+    token,
+  });
+  if (!invitation) {
+    throw Boom.notFound("Jeton d'invitation non valide");
+  }
+  // peut être non défini avec les anciennes invitations
+  // condition à supprimer quand author_id sera défini pour toutes les invitations en prod
+  if (invitation.author_id) {
+    const author = await getUserById(invitation.author_id);
+    await sendEmail(author.email, "notify_invitation_rejected", {
+      recipient: {
+        civility: author.civility,
+        nom: author.nom,
+        prenom: author.prenom,
+      },
+      invitation: {
+        date: format(invitation.created_at, "dd/MM/yyyy"),
+        email: invitation.email,
+      },
+    });
+  }
+  await invitationsDb().deleteOne({
+    token,
+  });
 }
 
 // utilitaires

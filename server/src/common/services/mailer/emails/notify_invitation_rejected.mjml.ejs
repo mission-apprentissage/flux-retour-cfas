@@ -1,0 +1,34 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text>
+            Bonjour
+            <strong><%= data.recipient.civility %> <%= data.recipient.prenom %> <%= data.recipient.nom %></strong>,
+          </mj-text>
+          <mj-text>
+            Vous avez envoyé le <%= data.invitation.date %> une invitation à l'adresse <%= data.invitation.email %> pour
+            accéder au
+            <strong>tableau de bord de l'apprentissage</strong>.
+          </mj-text>
+          <mj-text>
+            Le destinataire de cette invitation n'a pas donné suite.
+            <br />
+            Nous vous invitons à le contacter pour en connaître la raison.
+          </mj-text>
+
+          <mj-button href="<%= utils.getPublicUrl(`/`) %>" background-color="#0e4194" color="white">
+            Accéder au tableau de bord
+          </mj-button>
+
+          <%- include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>

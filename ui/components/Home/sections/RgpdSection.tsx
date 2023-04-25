@@ -19,7 +19,7 @@ const RgpdSection = (props) => {
             <Heading as="h2" fontSize="1.9em">
               Protection des données à caractère personnel
             </Heading>
-            <Button variant="secondary" href="/donnees-personnelles" marginTop="2w" as={NavLink}>
+            <Button variant="secondary" href="/protection-des-donnees" marginTop="2w" as={NavLink}>
               En savoir plus
             </Button>
           </Box>

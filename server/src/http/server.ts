@@ -31,6 +31,7 @@ import {
   inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
+  rejectInvitation,
   rejectMembre,
   removeUserFromOrganisation,
   resendInvitationEmail,
@@ -49,7 +50,7 @@ import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import logger from "@/common/logger";
-import { jobEventsDb, usersMigrationDb } from "@/common/model/collections";
+import { jobEventsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { packageJson } from "@/common/utils/esmUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
@@ -222,20 +223,7 @@ function setupRoutes(app: Application) {
       // l'utilisateur est authentifié par JWT envoyé par email
       checkActivationToken(),
       returnResult(async (req) => {
-        // tant que l'utilisateur n'est pas confirmé
-        if (req.user.account_status === "PENDING_EMAIL_VALIDATION") {
-          await activateUser(req.user.email);
-        }
-        // renvoi du statut du compte pour rediriger l'utilisateur si son statut change
-        return await usersMigrationDb().findOne(
-          { email: req.user.email },
-          {
-            projection: {
-              _id: 0,
-              account_status: 1,
-            },
-          }
-        );
+        return await activateUser(req.user);
       })
     )
     .post(
@@ -279,6 +267,12 @@ function setupRoutes(app: Application) {
       "/api/v1/invitations/:token",
       returnResult(async (req) => {
         return await getInvitationByToken(req.params.token);
+      })
+    )
+    .post(
+      "/api/v1/invitations/:token/reject",
+      returnResult(async (req) => {
+        await rejectInvitation(req.params.token);
       })
     );
 

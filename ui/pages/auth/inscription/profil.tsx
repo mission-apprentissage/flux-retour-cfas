@@ -176,9 +176,9 @@ const PageFormulaireProfil = () => {
           const invitation = await _get(`/api/v1/invitations/${router.query.invitationToken}`);
           setOrganisation(invitation.organisation);
           setFixedEmail(invitation.email);
-          // TODO il faudra gérer le refus de l'invitation
         } catch (err) {
-          toastError(err?.message);
+          toastError(err?.json?.data?.message || err.message);
+          await router.push("/auth/inscription");
         }
       })();
     }

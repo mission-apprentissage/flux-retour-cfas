@@ -66,6 +66,7 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `${payload.author.civility} ${payload.author.nom} vous invite à rejoindre le tableau de bord de l'apprentissage`,
   notify_access_granted: () => "Votre demande d'accès a été acceptée",
   notify_access_rejected: () => "Votre demande d'accès a été refusée",
+  notify_invitation_rejected: () => "Votre invitation à rejoindre le tableau de bord de l'apprentissage n'a pas abouti",
   reset_password: () => "Réinitialisation du mot de passe",
   validation_user_by_orga_gestionnaire: (payload) =>
     `Demande d'accès à votre organisation ${payload.organisationLabel}`,
@@ -109,6 +110,17 @@ export type TemplatePayloads = {
       prenom: string;
     };
     organisationLabel: string;
+  };
+  notify_invitation_rejected: {
+    recipient: {
+      civility: string;
+      nom: string;
+      prenom: string;
+    };
+    invitation: {
+      date: string;
+      email: string;
+    };
   };
   reset_password: {
     recipient: {

@@ -13,6 +13,7 @@ export interface Invitation {
   token: string;
   email: string;
   organisation_id: ObjectId;
+  author_id: ObjectId;
   created_at: Date;
 }
 
@@ -24,9 +25,12 @@ const schema = object(
     organisation_id: objectId({
       description: "Organisation cible de l'invitation",
     }),
+    author_id: objectId({
+      description: "Auteur de l'invitation",
+    }),
     created_at: date({ description: "Date de création en base de données" }),
   },
-  { required: ["token", "email", "organisation_id"], additionalProperties: true }
+  { required: ["token", "email", "organisation_id", "author_id", "created_at"], additionalProperties: true }
 );
 
 export default { schema, indexes, collectionName };
