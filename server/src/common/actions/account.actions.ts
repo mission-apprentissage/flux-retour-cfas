@@ -77,7 +77,7 @@ export async function register(registration: RegistrationSchema): Promise<{
         prenom: registration.user.prenom,
       },
       tdbEmail: config.email,
-      activationToken: createActivationToken(registration.user.email, { payload: {} }),
+      activationToken: createActivationToken(registration.user.email),
     });
     return {
       account_status: "PENDING_EMAIL_VALIDATION",

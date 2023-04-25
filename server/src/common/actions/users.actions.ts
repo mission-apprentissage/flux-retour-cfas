@@ -385,6 +385,6 @@ export async function resendConfirmationEmail(userId: string): Promise<void> {
       prenom: user.prenom,
     },
     tdbEmail: config.email,
-    activationToken: createActivationToken(user.email, { payload: {} }),
+    activationToken: createActivationToken(user.email),
   });
 }
