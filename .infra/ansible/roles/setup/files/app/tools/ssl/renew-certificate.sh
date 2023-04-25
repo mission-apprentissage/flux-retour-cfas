@@ -5,12 +5,11 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly DNS_NAME=${1:?"Merci de préciser le nom de domaine"}; shift;
 
 start_reverse_proxy() {
-  bash /opt/flux-retour-cfas/start-app.sh "$(git --git-dir=/opt/flux-retour-cfas/repository/.git rev-parse --abbrev-ref HEAD)" \
-    --no-deps reverse_proxy
+  docker start flux_retour_cfas_reverse_proxy
 }
 
 stop_reverse_proxy() {
-  bash /opt/flux-retour-cfas/stop-app.sh flux_retour_cfas_reverse_proxy --no-deps reverse_proxy
+  docker stop flux_retour_cfas_reverse_proxy
 }
 
 renew_certificate() {
