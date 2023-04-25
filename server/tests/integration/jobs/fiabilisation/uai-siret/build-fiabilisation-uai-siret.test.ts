@@ -699,16 +699,17 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       const UAI_TEST = "9933666E";
       const SIRET_TEST = "66370584166699";
 
-      // Ajout de l'UAI dans ACCE
-      await uaisAccesReferentielDb().insertOne({ uai: UAI_TEST });
-
-      // Ajout d'un organisme pour le couple
-      await organismesDb().insertOne({
-        uai: UAI_TEST,
-        siret: SIRET_TEST,
-        nature: "responsable",
-        relatedFormations: [],
-      });
+      await Promise.all([
+        // Ajout de l'UAI dans ACCE
+        uaisAccesReferentielDb().insertOne({ uai: UAI_TEST }),
+        // Ajout d'un organisme pour le couple
+        organismesDb().insertOne({
+          uai: UAI_TEST,
+          siret: SIRET_TEST,
+          nature: "responsable",
+          relatedFormations: [],
+        }),
+      ]);
 
       const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
       const allTdbCouples = [coupleTdb];
@@ -737,15 +738,17 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       const SIRET_TEST = "66370584166699";
       const SIRET_OF_FIABLE = "11370584166699";
 
-      // Ajout de l'UAI dans ACCE
-      await uaisAccesReferentielDb().insertOne({ uai: UAI_TEST });
+      await Promise.all([
+        // Ajout de l'UAI dans ACCE
+        uaisAccesReferentielDb().insertOne({ uai: UAI_TEST }),
 
-      // Ajout d'un organisme ayant cet UAI dans ses lieux
-      await organismesReferentielDb().findOneAndUpdate(
-        { uai: "1133666E", siret: SIRET_OF_FIABLE, nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
-        { upsert: true }
-      );
+        // Ajout d'un organisme ayant cet UAI dans ses lieux
+        organismesReferentielDb().findOneAndUpdate(
+          { uai: "1133666E", siret: SIRET_OF_FIABLE, nature: "formateur" },
+          { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+          { upsert: true }
+        ),
+      ]);
 
       const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
       const allTdbCouples = [coupleTdb];
@@ -769,20 +772,23 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       const SIRET_TEST = "77370584100099";
       const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
 
-      // Ajout de l'UAI dans ACCE
-      await uaisAccesReferentielDb().insertOne({ uai: UAI_TEST });
+      await Promise.all([
+        // Ajout de l'UAI dans ACCE
+        uaisAccesReferentielDb().insertOne({ uai: UAI_TEST }),
 
-      // Ajout d'organismes ayant cet UAI dans ses lieux
-      await organismesReferentielDb().findOneAndUpdate(
-        { uai: "1133666E", siret: "88880584100099", nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
-        { upsert: true }
-      );
-      await organismesReferentielDb().findOneAndUpdate(
-        { uai: "1144666E", siret: "66660584100099", nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
-        { upsert: true }
-      );
+        // Ajout d'organismes ayant cet UAI dans ses lieux
+        organismesReferentielDb().findOneAndUpdate(
+          { uai: "1133666E", siret: "88880584100099", nature: "formateur" },
+          { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+          { upsert: true }
+        ),
+
+        organismesReferentielDb().findOneAndUpdate(
+          { uai: "1144666E", siret: "66660584100099", nature: "formateur" },
+          { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+          { upsert: true }
+        ),
+      ]);
 
       const allTdbCouples = [coupleTdb];
       const allReferentielOrganismes = [organismeReferentiel];
@@ -803,29 +809,32 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
       const SIRET_TEST = "77370584100099";
       const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
 
-      // Création d'un organisme dans le Référentiel avec le couple contenant l'UAI du TDB
-      await organismesReferentielDb().insertOne({
-        uai: UAI_TEST,
-        siret: "00000584100099",
-        nature: "formateur",
-        lieux_de_formation: [],
-        relations: [],
-      });
+      await Promise.all([
+        // Création d'un organisme dans le Référentiel avec le couple contenant l'UAI du TDB
+        organismesReferentielDb().insertOne({
+          uai: UAI_TEST,
+          siret: "00000584100099",
+          nature: "formateur",
+          lieux_de_formation: [],
+          relations: [],
+        }),
 
-      // Ajout de l'UAI dans ACCE
-      await uaisAccesReferentielDb().insertOne({ uai: UAI_TEST });
+        // Ajout de l'UAI dans ACCE
+        uaisAccesReferentielDb().insertOne({ uai: UAI_TEST }),
 
-      // Ajout d'organismes ayant cet UAI dans ses lieux
-      await organismesReferentielDb().findOneAndUpdate(
-        { uai: "1133666E", siret: "88880584100099", nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
-        { upsert: true }
-      );
-      await organismesReferentielDb().findOneAndUpdate(
-        { uai: "1144666E", siret: "66660584100099", nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
-        { upsert: true }
-      );
+        // Ajout d'organismes ayant cet UAI dans ses lieux
+        organismesReferentielDb().findOneAndUpdate(
+          { uai: "1133666E", siret: "88880584100099", nature: "formateur" },
+          { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+          { upsert: true }
+        ),
+
+        organismesReferentielDb().findOneAndUpdate(
+          { uai: "1144666E", siret: "66660584100099", nature: "formateur" },
+          { $set: { lieux_de_formation: [{ uai: UAI_TEST }], relations: [] } },
+          { upsert: true }
+        ),
+      ]);
 
       const allTdbCouples = [coupleTdb];
       const allReferentielOrganismes = [organismeReferentiel];
