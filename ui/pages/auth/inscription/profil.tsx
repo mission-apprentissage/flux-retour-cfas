@@ -177,7 +177,8 @@ const PageFormulaireProfil = () => {
           setOrganisation(invitation.organisation);
           setFixedEmail(invitation.email);
         } catch (err) {
-          toastError(err?.message);
+          toastError(err?.json?.data?.message || err.message);
+          await router.push("/auth/inscription");
         }
       })();
     }
