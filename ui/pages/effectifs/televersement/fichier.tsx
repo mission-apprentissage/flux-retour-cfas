@@ -10,7 +10,7 @@ import { useEffectifsOrganismeOrganisation } from "@/modules/mon-espace/effectif
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const PageImportEffectifsDeMonOrganisme = () => {
+const PageImportEffectifsDeMonOrganismeFichier = () => {
   const { organisme } = useEffectifsOrganismeOrganisation();
   return (
     <Page>
@@ -24,4 +24,4 @@ const PageImportEffectifsDeMonOrganisme = () => {
   );
 };
 
-export default withAuth(PageImportEffectifsDeMonOrganisme);
+export default withAuth(PageImportEffectifsDeMonOrganismeFichier);
