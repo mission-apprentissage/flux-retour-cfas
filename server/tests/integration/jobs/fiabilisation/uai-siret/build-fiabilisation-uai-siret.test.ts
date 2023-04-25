@@ -319,7 +319,20 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
     });
   });
 
-  // TODO describe("checkUaiMultiplesRelationsAndLieux")
+  describe("checkUaiMultiplesRelationsAndLieux", async () => {
+    it("Vérifie un retour FALSE pour un couple du TDB pour lequel le SIRET du TDB est unique", async () => {
+      // TODO
+    });
+    it("Vérifie un retour FALSE pour un couple du TDB pour lequel il n'y a pas de match sur le SIRET du TDB", async () => {
+      // TODO
+    });
+    it("Vérifie un retour FALSE pour un couple du TDB pour lequel il y a pas de match sur le SIRET du TDB et SIRET n'est pas unique dans le TDB mais qu'on ne trouve aucun organisme responsable/resp formateur pour les UAIs multiples", async () => {
+      // TODO
+    });
+    it("Vérifie un retour FALSE pour un couple du TDB pour lequel il y a pas de match sur le SIRET du TDB et SIRET n'est pas unique dans le TDB mais qu'on trouve plusieurs organismes responsable/resp formateur pour les UAIs multiples", async () => {
+      // TODO
+    });
+  });
   // TODO describe("checkSiretMultiplesRelationsAndLieux")
 
   describe("checkUaiAucunLieuReferentiel", async () => {
