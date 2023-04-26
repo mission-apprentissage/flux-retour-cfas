@@ -144,14 +144,14 @@ export default () => {
   });
 
   router.get("/:id/snapshot", async ({ params, query }, res) => {
-    let { id, organisme_id } = await Joi.object({
+    const { id, organisme_id } = await Joi.object({
       id: Joi.string().required(),
       organisme_id: Joi.string().required(),
     })
       .unknown()
       .validateAsync({ ...params, ...query }, { abortEarly: false });
 
-    const uploads = await getUploadByOrgId(organisme_id);
+    const uploads = await getUploadByOrgId(new ObjectId(organisme_id));
 
     const effectif = uploads.last_snapshot_effectifs.find(({ _id }) => _id.toString() === id);
 

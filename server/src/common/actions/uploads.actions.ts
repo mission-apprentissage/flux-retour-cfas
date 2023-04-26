@@ -1,3 +1,4 @@
+import Boom from "boom";
 import { find, findIndex } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
 
@@ -23,7 +24,7 @@ export const createUpload = async ({ organisme_id }) => {
 export const getUploadByOrgId = async (organisme_id: ObjectId, projection = {}) => {
   const upload = await uploadsDb().findOne({ organisme_id }, { projection });
   if (!upload) {
-    throw new Error(`Unable to find upload ${organisme_id.toString()}`);
+    throw Boom.notFound(`Unable to find upload with organisme ${organisme_id.toString()}`);
   }
 
   return upload as WithId<Required<Upload>>;
