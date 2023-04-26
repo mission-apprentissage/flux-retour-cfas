@@ -10,10 +10,9 @@ const SOURCE_FILTER = { $ne: "scform" }; // TODO Gestion spécifique SC FORM à 
 
 /**
  * Méthode de suppression des effectifs inscrits sans contrats pour les années scolaires courantes, qui n'ont pas été envoyé au TDB
- * depuis la date fournie en paramètre (il y a 3 mois par défaut)
+ * depuis la date fournie en paramètre (il y a 3 semaines par défaut)
  * On filtre sur un historique ayant un seul élément = INSCRIT
  * On ne prends pas en compte les effectifs fournis par SCFORM car ils ont une gestion spécifique (à valider coté métier)
- * @param {*} dateDerniereReception
  */
 export const removeInscritsSansContratsNonRecusDepuis = async (dateDerniereReception = DATE_MOINS_3SEMAINES) => {
   const inscritsSansContratsNonRecusDepuisQuery = {
@@ -24,11 +23,6 @@ export const removeInscritsSansContratsNonRecusDepuis = async (dateDerniereRecep
     source: SOURCE_FILTER,
   };
 
-  const effectifsToRemoveCount = await effectifsDb().countDocuments(inscritsSansContratsNonRecusDepuisQuery);
-  logger.info(
-    `Suppression de ${effectifsToRemoveCount} effectifs non recus depuis le ${dateDerniereReception.toISOString()}...`
-  );
-
-  await effectifsDb().deleteMany(inscritsSansContratsNonRecusDepuisQuery);
-  logger.info("Suppression réalisée avec succès !");
+  const { deletedCount } = await effectifsDb().deleteMany(inscritsSansContratsNonRecusDepuisQuery);
+  logger.info(`Suppression de ${deletedCount} effectifs non recus depuis le ${dateDerniereReception.toISOString()}...`);
 };
