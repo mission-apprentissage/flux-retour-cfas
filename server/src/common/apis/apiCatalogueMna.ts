@@ -1,6 +1,7 @@
 import parentLogger from "@/common/logger";
 import config from "@/config";
 
+import CatalogueFormation from "./@types/CatalogueFormation";
 import getApiClient from "./client";
 
 // Cf Documentation : https://catalogue.apprentissage.beta.gouv.fr/api/v1/docs
@@ -15,11 +16,8 @@ const axiosClient = getApiClient({
 
 /**
  * Méthode de récupération depuis l'API Catalogue des formations liées à un UAI d'organisme
- * @param {string} uai
- * @param {number} [page=1]
- * @returns {Promise<import("./@types/CatalogueFormation").default[]>}
  */
-export const getCatalogFormationsForOrganisme = async (uai, page = 1) => {
+export const getCatalogFormationsForOrganisme = async (uai: string, page = 1): Promise<CatalogueFormation[]> => {
   try {
     // On cherche parmi les formations publiées ayant soit l'UAI formateur soit l'UAI gestionnaire
     const response = await axiosClient.get("/entity/formations", {

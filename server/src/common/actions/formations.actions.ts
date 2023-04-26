@@ -67,7 +67,15 @@ export const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
  * @param {string|null} [formation.annee] - Année de la formation issue du catalogue si fournie
  * @returns {Promise<ObjectId>} Id de la formation crée en base
  */
-export const createFormation = async ({ cfd, duree = null, annee = null }) => {
+export const createFormation = async ({
+  cfd,
+  duree = null,
+  annee = null,
+}: {
+  cfd: string;
+  duree?: string | null;
+  annee?: string | null;
+}) => {
   if (!validateCfd(cfd)) {
     throw Error("Invalid CFD");
   }

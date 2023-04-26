@@ -4,7 +4,6 @@ import { createFormation, getFormationWithCfd } from "@/common/actions/formation
 import { getCatalogFormationsForOrganisme } from "@/common/apis/apiCatalogueMna";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { organismesDb } from "@/common/model/collections";
-import { asyncForEach } from "@/common/utils/asyncUtils";
 
 import { findOrganismeByUai } from "./organismes.actions";
 
@@ -29,43 +28,43 @@ export const getFormationsTreeForOrganisme = async (uai) => {
   let nbFormationsCreatedForOrganisme = 0;
   let nbFormationsNotCreatedForOrganisme = 0;
 
-  if (catalogFormationsForOrganisme?.length) {
-    await asyncForEach(catalogFormationsForOrganisme, async (currentFormation) => {
-      let currentFormationId;
+  for (const currentFormation of catalogFormationsForOrganisme) {
+    let currentFormationId: ObjectId;
 
-      // Récupération de la formation du catalogue dans le TDB, si pas présente on la crée
-      // On compte les formations créées / non créées (erreur)
-      const formationFoundInTdb = await getFormationWithCfd(currentFormation.cfd);
-      if (!formationFoundInTdb) {
-        try {
-          currentFormationId = await createFormation(currentFormation);
-          nbFormationsCreatedForOrganisme++;
-        } catch (error) {
-          nbFormationsNotCreatedForOrganisme++;
-        }
-      } else {
-        currentFormationId = formationFoundInTdb._id;
+    // Récupération de la formation du catalogue dans le TDB, si pas présente on la crée
+    // On compte les formations créées / non créées (erreur)
+    const formationFoundInTdb = await getFormationWithCfd(currentFormation.cfd);
+    if (!formationFoundInTdb) {
+      try {
+        currentFormationId = await createFormation(currentFormation);
+        nbFormationsCreatedForOrganisme++;
+      } catch (error) {
+        nbFormationsNotCreatedForOrganisme++;
+        continue;
       }
+    } else {
+      currentFormationId = formationFoundInTdb._id;
+    }
 
-      // Ajout à la liste des formation de l'organisme d'un item contenant
-      // formation_id si trouvé dans le tdb
-      // année & durée trouvé dans le catalog & formatted
-      // ainsi que la liste des organismes construite depuis l'API Catalogue
-      // unicité sur la formation_id
+    // Ajout à la liste des formation de l'organisme d'un item contenant
+    // formation_id si trouvé dans le tdb
+    // année & durée trouvé dans le catalog & formatted
+    // ainsi que la liste des organismes construite depuis l'API Catalogue
+    // unicité sur la formation_id
 
-      const formationAlreadyInOrganismeArray = formationsForOrganismeArray.some(
-        (item) => item.formation_id.toString() === currentFormationId.toString()
-      );
+    const formationAlreadyInOrganismeArray = formationsForOrganismeArray.some(
+      (item) => item.formation_id.toString() === currentFormationId.toString()
+    );
 
-      if (currentFormationId && !formationAlreadyInOrganismeArray) {
-        formationsForOrganismeArray.push({
-          ...(currentFormationId ? { formation_id: currentFormationId } : {}),
-          annee_formation: parseInt(currentFormation.annee) || -1,
-          duree_formation_theorique: parseInt(currentFormation.duree) || -1,
-          organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
-        });
-      }
-    });
+    if (currentFormationId && !formationAlreadyInOrganismeArray) {
+      formationsForOrganismeArray.push({
+        ...(currentFormationId ? { formation_id: currentFormationId } : {}),
+        annee_formation: parseInt(currentFormation.annee) || -1,
+        cle_ministere_educatif: currentFormation.cle_ministere_educatif,
+        duree_formation_theorique: parseInt(currentFormation.duree) || -1,
+        organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
+      });
+    }
   }
 
   return {

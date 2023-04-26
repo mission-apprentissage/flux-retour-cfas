@@ -74,6 +74,9 @@ const schema = object(
       object(
         {
           formation_id: objectId(),
+          cle_ministere_educatif: string({
+            description: "Clé unique de la formation",
+          }),
           annee_formation: integer({
             description: "Année millésime de la formation pour cet organisme",
           }),
