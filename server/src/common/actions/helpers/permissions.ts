@@ -174,13 +174,19 @@ export async function findOFLinkedOrganismesIds(userOrganisme: Organisme) {
         if (
           subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.LIEU &&
           subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.INCONNUE &&
-          userOrganisme.siret !== subOrganismeCatalog.siret
+          userOrganisme.siret !== subOrganismeCatalog.siret &&
+          userOrganisme.uai !== subOrganismeCatalog.uai
         ) {
-          // FIXME ici find pas unique. or on doit avoir l'uai en plus du siret
-          const subOrganisme = await organismesDb().findOne({ siret: subOrganismeCatalog.siret as string });
+          const subOrganisme = await organismesDb().findOne({
+            siret: subOrganismeCatalog.siret as string,
+            uai: subOrganismeCatalog.uai as string,
+          });
           if (!subOrganisme) {
-            logger.error({ siret: subOrganismeCatalog.siret }, "sous-organisme non trouvé");
-            throw new Error("organisme de l'organisation non trouvé");
+            logger.error(
+              { siret: subOrganismeCatalog.siret, uai: subOrganismeCatalog.uai },
+              "sous-organisme non trouvé"
+            );
+            throw new Error("sous-organisme non trouvé");
           } else {
             subOrganismesIds.add(subOrganisme._id.toString());
           }
