@@ -11,6 +11,7 @@ import { findInvalidDocuments } from "./jobs/db/findInvalidDocuments";
 import { recreateIndexes } from "./jobs/db/recreateIndexes";
 import { processEffectifsQueueEndlessly } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
 import { removeDuplicatesEffectifsQueue } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates";
+import { removeInscritsSansContratsNonRecusDepuis } from "./jobs/fiabilisation/dossiersApprenants/remove-inscritsSansContrats-nonRecus-depuis";
 import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
@@ -449,6 +450,17 @@ program
       const updateResults = await updateOrganismesFiabilisationUaiSiret();
 
       return { buildResults, updateResults };
+    })
+  );
+/**
+ * Job d'analyse de la fiabilité des dossiersApprenants reçus
+ */
+program
+  .command("fiabilisation:effectifs:remove-inscritsSansContrats-nonRecus-depuis")
+  .description("Suppression des inscrits sans contrats non reçus depuis une date donnée")
+  .action(
+    runJob(async () => {
+      return removeInscritsSansContratsNonRecusDepuis();
     })
   );
 
