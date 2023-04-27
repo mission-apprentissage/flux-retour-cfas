@@ -14,6 +14,7 @@ import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
 import { hydrateEffectifsComputed } from "./jobs/hydrate/hydrate-effectifs-computed";
+import { hydrateFormationsCatalogue } from "./jobs/hydrate/hydrate-formations-catalogue";
 import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./jobs/hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes";
@@ -240,6 +241,18 @@ program
   .action(
     runJob(async () => {
       return hydrateFromReferentiel();
+    })
+  );
+
+/**
+ * Job de remplissage des formations du catalogue
+ */
+program
+  .command("hydrate:formations-catalogue")
+  .description("Remplissage des formations du catalogue")
+  .action(
+    runJob(async () => {
+      await hydrateFormationsCatalogue();
     })
   );
 

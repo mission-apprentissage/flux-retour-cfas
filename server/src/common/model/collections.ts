@@ -1,5 +1,7 @@
 import { getDbCollection } from "@/common/mongodb";
 
+import CatalogueFormation from "../apis/@types/CatalogueFormation";
+
 import {
   Effectif,
   FiabilisationUaiSiret,
@@ -19,6 +21,7 @@ import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
 import formationsModelDescriptor from "./formations.model";
+import formationsCatalogueModelDescriptor from "./formationsCatalogue.model";
 import invitationsModelDescriptor, { Invitation } from "./invitations.model";
 import jobEventsModelDescriptor from "./jobEvents.model";
 import JwtSessionsModelDescriptor from "./jwtSessions.model";
@@ -34,6 +37,7 @@ import usersMigrationModelDescriptor from "./usersMigration.model";
 export const modelDescriptors = [
   usersModelDescriptor,
   formationsModelDescriptor,
+  formationsCatalogueModelDescriptor,
   jobEventsModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
@@ -49,6 +53,8 @@ export const modelDescriptors = [
 ];
 
 export const formationsDb = () => getDbCollection<Formation>(formationsModelDescriptor.collectionName);
+export const formationsCatalogueDb = () =>
+  getDbCollection<CatalogueFormation>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<User>(usersModelDescriptor.collectionName);
 export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<UsersMigration>(usersMigrationModelDescriptor.collectionName);
