@@ -1,3 +1,28 @@
+# [3.22.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.21.0...v3.22.0) (2023-04-27)
+
+
+### Bug Fixes
+
+* fix esbuild multi plafforms issue with tsx ([#2948](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2948)) ([c13fa99](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c13fa99cdcc96bc463e86346feecd30ba243cc75))
+* lien entre organismes avec uai et siret ([#2965](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2965)) ([5e82a66](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5e82a661b2853bc0c9ba1bd0eeaf83b020d93b17))
+* **renew-certificate:** arrêt/démarrage nginx uniquement ([#2962](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2962)) ([87d2a8d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/87d2a8d4314bfb177af56ec44fa77381ff1ff83b))
+* suppression du préfixe /smtp/ avant appel à mailpit ([cc8e439](https://github.com/mission-apprentissage/flux-retour-cfas/commit/cc8e4398162516acddf9c10e695d0368d1975a51))
+* upload/snapshot route ([#2969](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2969)) ([05a67ed](https://github.com/mission-apprentissage/flux-retour-cfas/commit/05a67ede66c4ff730fca6e7b615253fdf004e891))
+
+
+### Features
+
+* add eslint organize imports ([#2956](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2956)) ([6e11a24](https://github.com/mission-apprentissage/flux-retour-cfas/commit/6e11a2423768e53dfe517367af40b257e283981e))
+* ajout du champ cle_ministere_educatif dans formations ([#2734](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2734)) ([339411a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/339411a740141712453bb5befb6fcf6ef45416dd))
+* amelioration du process d'upload et divers typings ([#2936](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2936)) ([9b22a8c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9b22a8c39c4b546603ad8f38f6f0fcda64932497))
+* changement du calcul des années scolaires pour les indicateurs ([#2946](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2946)) ([92b6c12](https://github.com/mission-apprentissage/flux-retour-cfas/commit/92b6c12affb20c93d0649467d248368d673f1cb2))
+* déplacement section question dans un onglet ([#2935](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2935)) ([e4130b9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e4130b9d7ef267015f821ee4f676ae7fbb60d9e2))
+* maj page protection des données ([#2960](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2960)) ([ff9cde5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ff9cde577e3a4ebcec4b68bbc4988c4ebfe8a8f9))
+* peaufinage workflow incription ([#2964](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2964)) ([a2cecd7](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a2cecd75639efcca9a13023c4ab6096d831049f2))
+* suppression redis ([#2950](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2950)) ([aebcd83](https://github.com/mission-apprentissage/flux-retour-cfas/commit/aebcd832cda10c817bc532d772a0cfe8638d7dce))
+* swich from mailhog (unmaintained) to mailpit ([#2954](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2954)) ([c11cc96](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c11cc96c4df893b0de8172f3e4f5d40e2b797b07))
+* utilisation d'un seul point d'entrée pour le serveur ([#2957](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2957)) ([455998c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/455998cb8042ea0d8363e0378f9a14c82d1b1ea8))
+
 # [3.21.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.20.1...v3.21.0) (2023-04-18)
 
 
