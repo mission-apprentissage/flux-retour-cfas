@@ -1,3 +1,10 @@
+# [3.24.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.23.0...v3.24.0) (2023-04-27)
+
+
+### Features
+
+* suppression bandeau non pertinent ([1e37b78](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1e37b78e88bd6321df11c9ca9b50949956defa10))
+
 # [3.23.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.22.0...v3.23.0) (2023-04-27)
 
 
