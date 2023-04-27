@@ -1,3 +1,10 @@
+# [3.23.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.22.0...v3.23.0) (2023-04-27)
+
+
+### Features
+
+* ajout d'un bandeau de warning sur l'upload d'effectifs ([1ce5167](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1ce5167acb141633b382efaf0bba9927cef75738))
+
 # [3.22.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.21.0...v3.22.0) (2023-04-27)
 
 
