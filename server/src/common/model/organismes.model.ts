@@ -42,7 +42,12 @@ const schema = object(
       maxLength: 8,
       minLength: 8,
     }),
-    siret: string({ description: "N° SIRET", pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
+    siret: string({
+      description: "N° SIRET de l'établissement",
+      pattern: SIRET_REGEX_PATTERN,
+      maxLength: 14,
+      minLength: 14,
+    }),
     reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) }), {
       description: "Réseaux du CFA, s'ils existent",
     }),

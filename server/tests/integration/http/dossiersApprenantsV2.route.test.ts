@@ -14,6 +14,8 @@ const user = {
   password: "password",
 };
 
+const API_ENDPOINT_URL = "/api/dossiers-apprenants";
+
 const createApiUser = () =>
   createUserLegacy({
     username: user.name,
@@ -64,7 +66,7 @@ describe("Dossiers Apprenants Route", () => {
 
       // Call Api Route
       const response = await httpClient.post(
-        "/api/dossiers-apprenants/test",
+        `${API_ENDPOINT_URL}/test`,
         {},
         {
           headers: {
@@ -85,19 +87,19 @@ describe("Dossiers Apprenants Route", () => {
       const accessToken = await getJwtForUser(httpClient);
 
       // Call Api Route
-      const response = await httpClient.post("/api/dossiers-apprenants", [], {
+      const response = await httpClient.post(API_ENDPOINT_URL, [], {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
 
       // Check Api Route data
-      assert.equal(response.status, 200);
+      expect(response.status).toBe(200);
       assert.equal(response.data.status, "OK");
     });
 
     it("Vérifie que la route /dossiers-apprenants renvoie une 401 pour un user non authentifié", async () => {
-      const response = await httpClient.post("/api/dossiers-apprenants", [], {
+      const response = await httpClient.post(API_ENDPOINT_URL, [], {
         headers: {
           Authorization: "",
         },
@@ -122,7 +124,7 @@ describe("Dossiers Apprenants Route", () => {
       });
 
       // Call Api Route
-      const response = await httpClient.post("/api/dossiers-apprenants", [], {
+      const response = await httpClient.post(API_ENDPOINT_URL, [], {
         headers: {
           Authorization: `Bearer ${data.access_token}`,
         },
@@ -144,7 +146,7 @@ describe("Dossiers Apprenants Route", () => {
       }
 
       // Call Api Route
-      const response = await httpClient.post("/api/dossiers-apprenants", inputList, {
+      const response = await httpClient.post(API_ENDPOINT_URL, inputList, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -168,13 +170,13 @@ describe("Dossiers Apprenants Route", () => {
       }
 
       // Call Api Route
-      const response = await httpClient.post("/api/dossiers-apprenants", inputList, {
+      const response = await httpClient.post(API_ENDPOINT_URL, inputList, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
       // Check Api Response
-      assert.equal(response.status, 200);
+      expect(response.status).toBe(200);
       assert.equal(response.data.status, "OK");
       assert.equal(response.data.message, "Queued");
       assert.equal(response.data.data.length, 20);
@@ -193,17 +195,18 @@ describe("Dossiers Apprenants Route", () => {
       const dossier = {
         ...createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret }),
         date_de_naissance_apprenant: "invalid date",
+        tel_apprenant: "invalid phone",
       };
 
       // Call Api Route
-      const response = await httpClient.post("/api/dossiers-apprenants", [dossier], {
+      const response = await httpClient.post(API_ENDPOINT_URL, [dossier], {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
       // Check Api Response
-      assert.equal(response.status, 200);
-      assert.deepEqual(response.data, {
+      expect(response.status).toBe(200);
+      expect(response.data).toMatchObject({
         status: "OK",
         message: "Queued",
         detail: "Some data are invalid",
@@ -216,6 +219,10 @@ describe("Dossiers Apprenants Route", () => {
                 message: "Format invalide",
                 path: ["date_de_naissance_apprenant"],
               },
+              {
+                message: "Format invalide",
+                path: ["tel_apprenant"],
+              },
             ],
             _id: response.data.data[0]._id,
             updated_at: response.data.data[0].updated_at,
@@ -226,7 +233,7 @@ describe("Dossiers Apprenants Route", () => {
       });
 
       // Check Nb Items added
-      assert.deepEqual(await effectifsQueueDb().countDocuments({}), 1);
+      expect(await effectifsQueueDb().countDocuments({})).toBe(1);
     });
   });
 });

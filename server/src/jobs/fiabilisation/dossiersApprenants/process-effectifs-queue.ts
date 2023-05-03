@@ -65,7 +65,6 @@ export const processEffectifsQueue = async (options?: Options) => {
         const result = dossierApprenantSchemaV1V2Zod().safeParse(effectifQueued);
         if (!result.success) {
           const prettyValidationError = result.error.issues.map(({ path, message }) => ({ message, path }));
-
           dataToUpdate = { validation_errors: prettyValidationError };
         } else {
           totalValidItems++;
@@ -127,6 +126,7 @@ export const processEffectifsQueue = async (options?: Options) => {
                 effectifData.apprenant?.historique_statut[0]?.valeur_statut,
                 effectifData.apprenant?.historique_statut[0]?.date_statut
               );
+
               await updateEffectifAndLock(effectifId, effectif);
             } else {
               // FIXME intégrer dans une fonction globale insertEffectif
@@ -150,7 +150,7 @@ export const processEffectifsQueue = async (options?: Options) => {
 
             dataToUpdate = { effectif_id: effectifId };
           } catch (error: any) {
-            logger.info(` Error with item ${effectifQueued._id}: ${error.toString()}`);
+            logger.error(` Error with item ${effectifQueued._id}: ${error.toString()}`);
             dataToUpdate = { error: error.toString() };
           }
         }
@@ -186,5 +186,9 @@ export const processEffectifsQueue = async (options?: Options) => {
     logger.info(`${dataIn.length - totalValidItems} items invalides`);
   }
 
-  return { totalProcessed: dataIn.length, totalValidItems, totalInvalidItems: dataIn.length - totalValidItems };
+  return {
+    totalProcessed: dataIn.length,
+    totalValidItems,
+    totalInvalidItems: dataIn.length - totalValidItems,
+  };
 };

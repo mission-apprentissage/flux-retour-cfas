@@ -154,7 +154,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       INE: wrapNumString(effectif.apprenant.ine) ?? "ine",
       TEL_JEUNE: wrapNumString(effectif.apprenant.telephone?.replace("+33", "0")),
       MAIL_JEUNE: effectif.apprenant.courriel,
-      HANDI: effectif.apprenant.handicap ? "1" : "0",
+      HANDI: effectif.apprenant.rqth ? "1" : "0",
       NATIO: effectif.apprenant.nationalite,
       COD_POST: wrapNumString(effectif.apprenant.adresse?.code_postal),
       COM_RESID: wrapNumString(effectif.apprenant.adresse?.code_insee),
@@ -169,7 +169,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
         : "",
     };
 
-    const dernierContratActif = effectif.apprenant.contrats?.[0];
+    const dernierContratActif = effectif.contrats?.[0];
     const employeurFields = {
       SIRET_EMP: dernierContratActif?.siret,
       TYPE_EMP: dernierContratActif?.type_employeur,

@@ -151,38 +151,33 @@ describe("Tests des actions Formations", () => {
     ];
 
     beforeEach(async () => {
-      try {
-        await organismesDb().insertOne(organisme);
-        await organismesDb().insertOne(organisme2);
+      await organismesDb().insertOne(organisme);
+      await organismesDb().insertOne(organisme2);
 
-        nock.cleanAll();
-        nockGetCfdInfo((cfd) =>
-          formationsSeed
-            .filter((f) => f.cfd === cfd)
-            .map((o) => ({
-              cfd: o.cfd,
-              intitule_long: o.libelle,
-              intitule_court: o.libelle,
-            }))
-            .pop()
-        );
-        await Promise.all(
-          formationsSeed.map(async ({ cfd }) => {
-            await Promise.all([
-              createFormation({ cfd }),
-              effectifsDb().insertOne(
-                createSampleEffectif({
-                  formation: { cfd },
-                  organisme: organisme2,
-                })
-              ),
-            ]);
-          })
-        );
-      } catch (e) {
-        console.log(JSON.stringify(e, null, 2));
-        throw e;
-      }
+      nock.cleanAll();
+      nockGetCfdInfo((cfd) =>
+        formationsSeed
+          .filter((f) => f.cfd === cfd)
+          .map((o) => ({
+            cfd: o.cfd,
+            intitule_long: o.libelle,
+            intitule_court: o.libelle,
+          }))
+          .pop()
+      );
+      await Promise.all(
+        formationsSeed.map(async ({ cfd }) => {
+          await Promise.all([
+            createFormation({ cfd }),
+            effectifsDb().insertOne(
+              createSampleEffectif({
+                formation: { cfd },
+                organisme: organisme2,
+              })
+            ),
+          ]);
+        })
+      );
     });
 
     const validCases = [

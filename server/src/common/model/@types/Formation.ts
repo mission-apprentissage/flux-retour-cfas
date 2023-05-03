@@ -2,7 +2,7 @@
 
 export interface Formation {
   /**
-   * Code cfd de l'établissement
+   * Code CFD de la formation
    */
   cfd: string;
   /**

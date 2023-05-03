@@ -15,7 +15,7 @@ describe("Update Password route", () => {
   //         token,
   //         newPassword: "strong long password 1234",
   //       });
-  //       assert.equal(response.status, 200);
+  //       expect(response.status).toBe(200);
   //       const userAfterRequest = await components.users.getUser(username);
   //       assert.equal(userAfterRequest.password_update_token, null);
   //       assert.equal(userAfterRequest.password_update_token_expiry, null);

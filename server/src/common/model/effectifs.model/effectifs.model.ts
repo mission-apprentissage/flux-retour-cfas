@@ -1,4 +1,4 @@
-import { uniqBy } from "lodash-es";
+import uniqBy from "lodash-es/uniqBy";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
@@ -9,6 +9,7 @@ import { object, objectId, string, date, boolean, arrayOf } from "@/common/model
 import { schemaValidation } from "@/common/utils/schemaUtils";
 
 import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part";
+import { contratSchema } from "./parts/contrat.part";
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
 import {
   defaultValuesFormationEffectif,
@@ -87,23 +88,20 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 
 export const schema = object(
   {
-    _id: objectId(),
-    organisme_id: objectId({
-      description: "Organisme id",
-    }),
+    _id: objectId({ description: "Identifiant MongoDB de l'effectif" }),
+    organisme_id: objectId({ description: "Organisme id" }),
     id_erp_apprenant: string({ description: "Identifiant de l'apprenant dans l'erp" }),
-    source: string({
-      description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
-    }),
-
+    source: string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),
     annee_scolaire: string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
       pattern: "^\\d{4}-\\d{4}$",
     }),
-
     apprenant: apprenantSchema,
     formation: formationEffectifSchema,
-
+    contrats: arrayOf(contratSchema, {
+      // Note: anciennement dans apprenant.contrats
+      description: "Historique des contrats de l'apprenant",
+    }),
     is_lock: effectifFieldsLockerSchema,
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),

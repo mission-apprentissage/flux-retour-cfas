@@ -1,13 +1,15 @@
 import Joi from "joi";
-import { flattenDeep } from "lodash-es";
 
-import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
-import { CODE_POSTAL_PATTERN, SIRET_REGEX_PATTERN } from "@/common/constants/organisme";
+import {
+  CODES_STATUT_APPRENANT,
+  NATIONALITE_APPRENANT_ENUM,
+  SEXE_APPRENANT_ENUM,
+} from "@/common/constants/dossierApprenant";
+import { CODE_POSTAL_PATTERN } from "@/common/constants/organisme";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 import { object, string, date, integer, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
 import { schemaValidation } from "@/common/utils/schemaUtils";
-import { siretSchema } from "@/common/utils/validationUtils";
 
 export const apprenantSchema = object(
   {
@@ -19,8 +21,8 @@ export const apprenantSchema = object(
     nom: string({ description: "Nom de l'apprenant", pattern: "^.+$" }),
     prenom: string({ description: "Prénom de l'apprenant", pattern: "^.+$" }),
     sexe: string({
-      description: `**Sexe de l'apprenant**\r\n  M : Homme\r\n  F : Femme`,
-      enum: ["M", "F"],
+      description: "Sexe de l'apprenant (M: Homme, F: Femme)",
+      enum: SEXE_APPRENANT_ENUM,
     }),
     date_de_naissance: date({ description: "Date de naissance de l'apprenant" }),
     code_postal_de_naissance: string({
@@ -32,26 +34,36 @@ export const apprenantSchema = object(
     }),
     nationalite: integer({
       description: "Apprenant étranger, non citoyen européen",
-      enum: [1, 2, 3],
+      enum: NATIONALITE_APPRENANT_ENUM,
     }),
     regime_scolaire: string({
-      description:
-        "**Régime scolaire** :\r\n  I : Interne\r\n  D : Demi-pensionnaire\r\n E : Externe\r\n IE : Interne externé",
+      description: "Régime scolaire (I : Interne, D : Demi-pensionnaire, E : Externe, IE : Interne externé)",
       enum: ["I", "D", "E", "IE"],
     }),
-    handicap: boolean({
+    rqth: boolean({
+      // note: anciennement "handicap", mais aucun record en base
       description: "Apprenant en situation d'handicape (RQTH)",
     }),
+    date_rqth: date({
+      description: "Date de la reconnaissance travailleur handicapé",
+    }),
+    affelnet: arrayOf(
+      string({
+        description: "voeux affelnet de l'apprenant", //  a priori, CMEs (clé ministère éducatif), à confirmer
+      })
+    ),
+    parcoursup: arrayOf(
+      string({
+        description: "voeux parcoursup de l'apprenant", //  a priori, CMEs (clé ministère éducatif), à confirmer
+      })
+    ),
     inscription_sportif_haut_niveau: boolean({
       description:
         "Apprenant inscrit sur la liste des sportifs, entraîneurs, arbitres et juges sportifs de haut niveau",
     }),
     courriel: string({ description: "Adresse mail de contact de l'apprenant" }),
     telephone: string({
-      description: `Dans le cas d'un numéro français, il n'est pas
-      nécessaire de saisir le "0" car l'indicateur pays est
-      pré-renseigné.
-      Il doit contenir 9 chiffres après l'indicatif.`,
+      description: "Téléphone de l'apprenant", // Dans le cas d'un numéro français, il n'est pas nécessaire de saisir le "0" car l'indicateur pays est pré-renseigné. Il doit contenir 9 chiffres après l'indicatif.,
       example: "+33908070605",
       pattern: "^([+])?(\\d{7,12})$",
       maxLength: 13,
@@ -93,6 +105,7 @@ export const apprenantSchema = object(
         {
           valeur_statut: integer({
             enum: Object.values(CODES_STATUT_APPRENANT),
+            description: "Statut de l'apprenant",
           }),
           date_statut: date(),
           date_reception: date(),
@@ -108,7 +121,7 @@ export const apprenantSchema = object(
     ),
     situation_avant_contrat: integer({
       enum: [11, 12, 21, 31, 41, 51, 52, 53, 54, 90, 99],
-      description: `**Situation de l'apprenant avant le contrat`,
+      description: "Situation de l'apprenant avant le contrat",
     }),
     derniere_situation: integer({
       enum: [
@@ -117,7 +130,7 @@ export const apprenantSchema = object(
         4003, 4103, 4005, 4105, 4007, 4107, 4009, 4011, 4111, 4013, 4113, 4015, 4115, 4017, 4117, 4019, 4119, 4021,
         4121, 5901, 5903, 5905, 5907, 5909, 9900, 9999,
       ],
-      description: `**Situation de l'apprenant n-1`,
+      description: "Situation de l'apprenant N-1",
     }),
     dernier_organisme_uai: string({
       description:
@@ -126,18 +139,18 @@ export const apprenantSchema = object(
     }),
     organisme_gestionnaire: integer({
       enum: [11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 24, 25],
-      description: "**Organisme gestionnaire de l’établissement",
+      description: "Organisme gestionnaire de l’établissement",
     }),
 
     dernier_diplome: integer({
       enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99],
-      description: "**Dernier diplome obtenu",
+      description: "Dernier diplôme obtenu",
     }),
     mineur: boolean({
       description: "l'apprenant(e) sera-t-il(elle) mineur(e) ? (calc)",
     }),
     mineur_emancipe: boolean({
-      description: `Un mineur émancipé peut accomplir seul les actes nécessitant la majorité légale. Plus d'informations à propos de l'émancipation sur [le site du Service public.](https://www.service-public.fr/particuliers/vosdroits/F1194) `,
+      description: "Un mineur émancipé peut accomplir seul les actes nécessitant la majorité légale.", // Plus d'informations à propos de l'émancipation sur [le site du Service public.](https://www.service-public.fr/particuliers/vosdroits/F1194)
     }),
     representant_legal: object({
       nom: string({ description: "Nom du representant légal" }),
@@ -164,53 +177,9 @@ export const apprenantSchema = object(
           10, 21, 22, 23, 31, 33, 34, 37, 38, 42, 43, 44, 45, 46, 47, 48, 52, 53, 54, 55, 56, 61, 66, 69, 71, 72, 73,
           76, 81, 82, 99,
         ],
-        description: "**Nomenclatures des professions et catégories socioprofessionnelles",
+        description: "Nomenclatures des professions et catégories socioprofessionnelles",
       }),
     }),
-    contrats: arrayOf(
-      object(
-        {
-          siret: string({
-            description: "N° SIRET de l'employeur",
-            pattern: SIRET_REGEX_PATTERN,
-            maxLength: 14,
-            minLength: 14,
-          }),
-          denomination: string({
-            description: "La dénomination sociale doit être celle de l'établissement dans lequel le contrat s'exécute.",
-          }),
-          type_employeur: integer({
-            enum: [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29],
-            description: "Le type d'employeur doit être en adéquation avec son statut juridique.",
-          }),
-          naf: string({
-            maxLength: 6,
-            description:
-              "Le Code NAF est composé de 4 chiffres et 1 lettre. Il est délivré par l'INSEE.[Informations sur le Code NAF.](https://www.economie.gouv.fr/entreprises/activite-entreprise-code-ape-code-naf)",
-            example: "1031Z",
-            pattern: "^([0-9]){2}\\.?([0-9]){0,2}([a-zA-Z]){0,1}$",
-          }),
-          nombre_de_salaries: integer({
-            description:
-              "L'effectif salarié rempli automatiquement correspond à l'estimation de la base Entreprises de l'INSEE. <br/>L'effectif renseigné est celui de l’entreprise dans sa globalité (et non seulement l’effectif de l’établissement d’exécution du contrat).",
-            example: 123,
-          }),
-          adresse: {
-            ...adresseSchema,
-          },
-          date_debut: date({ description: "Date de début du contrat" }),
-          date_fin: date({ description: "Date de fin du contrat" }),
-          date_rupture: date({ description: "Date de rupture du contrat" }),
-        },
-        {
-          required: ["date_debut", "date_fin"], // TODO siret // Removed required date_rupture car on contrat peut ne pas avoir de rupture
-          additionalProperties: true,
-        }
-      ),
-      {
-        description: "Historique des contrats de l'apprenant",
-      }
-    ),
   },
   {
     required: ["nom", "prenom", "historique_statut"],
@@ -227,48 +196,22 @@ export function defaultValuesApprenant() {
 }
 
 // Extra validation
-export function validateApprenant({ contrats, ...props }: Partial<Effectif["apprenant"]>, getErrors = false) {
-  const contratsValidation = contrats?.map((contrat, i) => {
-    return schemaValidation({
-      entity: contrat,
-      schema: apprenantSchema.properties.contrats.items,
-      extensions: [
-        {
-          name: "siret",
-          base: siretSchema(),
-        },
-        {
-          name: "date_debut",
-          base: Joi.date().iso(),
-        },
-        {
-          name: "date_fin",
-          base: Joi.date().iso(),
-        },
-        {
-          name: "date_rupture",
-          base: Joi.date().iso(),
-        },
-      ],
-      getErrors,
-      prefix: `apprenant.contrats[${i}].`,
-    });
-  });
-  let representantLegalValidation = null;
-  if (props.representant_legal) {
-    representantLegalValidation = schemaValidation({
-      entity: props.representant_legal,
-      schema: apprenantSchema.properties.representant_legal,
-      extensions: [
-        {
-          name: "courriel",
-          base: Joi.string().email(),
-        },
-      ],
-      getErrors,
-      prefix: "apprenant.representant_legal.",
-    });
-  }
+export function validateApprenant(props: Partial<Effectif["apprenant"]>, getErrors = false) {
+  const representantLegalValidation = props.representant_legal
+    ? schemaValidation({
+        entity: props.representant_legal,
+        schema: apprenantSchema.properties.representant_legal,
+        extensions: [
+          {
+            name: "courriel",
+            base: Joi.string().email(),
+          },
+        ],
+        getErrors,
+        prefix: "apprenant.representant_legal.",
+      })
+    : undefined;
+
   const entityValidation = schemaValidation({
     entity: props,
     schema: apprenantSchema,
@@ -287,13 +230,12 @@ export function validateApprenant({ contrats, ...props }: Partial<Effectif["appr
   });
 
   if (getErrors) {
-    let errors = [...entityValidation, ...(representantLegalValidation ?? []), ...flattenDeep(contratsValidation)];
+    const errors = [...entityValidation, ...(representantLegalValidation || [])];
     return errors;
   }
 
   return {
     ...entityValidation,
     ...(representantLegalValidation ? { representant_legal: representantLegalValidation } : {}),
-    contrats: contratsValidation,
   };
 }

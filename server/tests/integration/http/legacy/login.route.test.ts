@@ -24,7 +24,7 @@ describe("POST /login - Login [LEGACY]", () => {
       password: "password",
     });
 
-    assert.equal(response.status, 200);
+    expect(response.status).toBe(200);
     const decoded = jwt.verify(response.data.access_token, config.auth.user.jwtSecret);
     assert.ok(decoded.iat);
     assert.ok(decoded.exp);

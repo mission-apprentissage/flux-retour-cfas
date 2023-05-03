@@ -3,7 +3,7 @@ import { subDays } from "date-fns";
 import { capitalize } from "lodash-es";
 import { z } from "zod";
 
-import { CODES_STATUT_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
+import { CODES_STATUT_APPRENANT_ENUM, SEXE_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
 import { CFD_REGEX, RNCP_REGEX, SIRET_REGEX, UAI_REGEX } from "@/common/constants/organisme";
 
 extendZodWithOpenApi(z);
@@ -36,11 +36,7 @@ const extensions = {
       format: "YYYY-MM-DD00:00:00Z",
     }),
 
-  codeCommuneInsee: () =>
-    z
-      .string()
-      .length(5)
-      .regex(/^([0-9]{2}|2A|2B)[0-9]{3}$/),
+  codeCommuneInsee: () => z.string().regex(/^([0-9]{2}|2A|2B)[0-9]{3}$/, "Format invalide"),
 };
 
 export const primitivesV1 = {
@@ -60,7 +56,7 @@ export const primitivesV1 = {
     }),
     statut: z
       .preprocess(
-        (v: any) => (CODES_STATUT_APPRENANT_ENUM.includes(parseInt(v, 10)) ? parseInt(v, 10) : v),
+        (v: any) => (CODES_STATUT_APPRENANT_ENUM.includes(parseInt(v, 10) as any) ? parseInt(v, 10) : v),
         z
           .number({ invalid_type_error: `Valeurs possibles: ${CODES_STATUT_APPRENANT_ENUM.join(",")}` })
           .int()
@@ -75,23 +71,19 @@ export const primitivesV1 = {
     date_metier_mise_a_jour_statut: extensions.iso8601Datetime().openapi({
       description: "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
     }),
-    id_erp: z.string().openapi({
-      description: "Identifiant de l'apprenant dans l'erp",
-    }),
-    ine: z.string().openapi({
-      description: "Identifiant National Élève de l'apprenant",
-    }),
-    email: z.string().email("Email non valide").openapi({
-      description: "Email de l'apprenant",
+    id_erp: z.string().describe("Identifiant de l'apprenant dans l'ERP"),
+    ine: z.string().describe("Identifiant National Élève de l'apprenant"),
+    email: z.string().email("Email non valide").describe("Email de l'apprenant").openapi({
       example: "gaston.lenotre@domain.tld",
     }),
-    tel: z.string().openapi({
-      description: "Téléphone de l'apprenant",
-      example: "628000000",
-    }),
-    code_commune_insee: extensions.codeCommuneInsee().openapi({
-      description: "Code Insee de la commune de résidence de l'apprenant",
-    }),
+    telephone: z
+      .string()
+      .regex(/.*[0-9].*/, "Format invalide") // check it contains at least one digit
+      .describe("Téléphone de l'apprenant")
+      .openapi({
+        example: "628000000",
+      }),
+    code_commune_insee: extensions.codeCommuneInsee().describe("Code Insee de la commune de résidence de l'apprenant"),
   },
   etablissement_responsable: {
     nom: z.string().openapi({
@@ -140,81 +132,71 @@ export const primitivesV1 = {
     code_cfd: z.string().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
       description: "Code Formation Diplôme (CFD)", // aussi appelé id_formation
     }),
-    libelle_court: z.string().openapi({
-      description: "Libéllé court de la formation",
+    libelle_court: z.string().describe("Libellé court de la formation").openapi({
+      description: "Libellé court de la formation",
       example: "CAP PATISSIER",
     }),
-    libelle_long: z.string().openapi({
-      description: "Libéllé complet de la formation",
+    libelle_long: z.string().describe("Libellé complet de la formation").openapi({
       example: "CAP PATISSIER",
     }),
-    periode: z.string().openapi({
-      description: "Période de la formation, en année",
+    // TO_DISCUSS: redondant avec année_scolaire ?
+    periode: z.string().describe("Période de la formation, en année").openapi({
       example: "2022-2024",
     }),
     annee_scolaire: z
       .string()
       .regex(/^\d{4}-\d{4}$/, "Format invalide")
+      .describe("Période scolaire")
       .openapi({
-        description: "Période scolaire",
         examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`],
       }),
     annee: z
-      .number()
-      .min(0)
-      .max(3)
-      // Question: à quoi correspond l'année 0 ?
+      .preprocess((v: any) => v?.toString(), z.string())
+      .describe("Année de la formation")
+      // TO_DISCUSS: à quoi correspond l'année 0 ?
       .openapi({
-        description: "Année de la formation",
-        type: "integer",
-        enum: [0, 1, 2, 3, 4, 5],
-        example: 1,
+        enum: ["0", "1", "2", "3", "4", "5"],
+        example: "1",
       }),
   },
   contrat: {
-    date_debut: extensions.iso8601Date().openapi({
-      description: "Date de début de contrat de l'apprenant, au format ISO-8601",
-      example: sixMonthAgo.toISOString(),
-    }),
-    date_fin: extensions.iso8601Date().openapi({
-      description: "Date de fin de contrat de l'apprenant, au format ISO-8601",
+    date_debut: extensions
+      .iso8601Date()
+      .describe("Date de début de contrat de l'apprenant, au format ISO-8601")
+      .openapi({
+        example: sixMonthAgo.toISOString(),
+      }),
+    date_fin: extensions.iso8601Date().describe("Date de fin de contrat de l'apprenant, au format ISO-8601").openapi({
       example: aMonthAgo.toISOString(),
     }),
-    date_rupture: extensions.iso8601Date().openapi({
-      description: "Date de rupture du contrat de l'apprenant, au format ISO-8601",
-      example: aMonthAgo.toISOString(),
-    }),
+    date_rupture: extensions
+      .iso8601Date()
+      .describe("Date de rupture du contrat de l'apprenant, au format ISO-8601")
+      .openapi({
+        example: aMonthAgo.toISOString(),
+      }),
   },
 };
 
 export const primitivesV2 = {
   apprenant: {
     // addresse: TODO à discuter
-    sexe: z.string().openapi({
-      description: "Sexe de l'apprenant",
-      enum: ["M", "F"],
+    sexe: z.string().describe("Sexe de l'apprenant").openapi({
+      enum: SEXE_APPRENANT_ENUM,
       example: "M",
     }),
-    rqth: z.boolean().openapi({
-      description: "Reconnaissance de la Qualité de Travailleur Handicapé",
-      example: true,
-    }),
-    date_rqth: extensions.iso8601Date().openapi({
-      description: "Date de la reconnaissance travailleur handicapé",
-      example: "2010-10-28T00:00:00.000Z",
-    }),
-    affelnet: z.boolean().openapi({
-      description: "Voeu en apprentissage formulé sur Affelnet",
-    }),
-    parcoursup: z.boolean().openapi({
-      description: "Voeu en apprentissage formulé sur Parcoursup",
-    }),
+    rqth: z.boolean().describe("Reconnaissance de la Qualité de Travailleur Handicapé").openapi({ example: true }),
+    date_rqth: extensions
+      .iso8601Date()
+      .describe("Date de la reconnaissance travailleur handicapé")
+      .openapi({ example: "2010-10-28T00:00:00.000Z" }),
   },
   responsable: {
     email: z
       .string()
       .email("Email non valide")
-      .openapi({ description: "Email du responsable de l'apprenant", example: "escoffier@domain.tld" }),
+      .describe("Email du responsable de l'apprenant")
+      .openapi({ example: "escoffier@domain.tld" }),
   },
   etablissement_formateur: {
     siret: extensions.siret().openapi({
@@ -276,29 +258,27 @@ export const primitivesV2 = {
     // date_declaration_2e_absence: TODO? (a priori diversement disponible)
   },
   contrat: {
-    cause_rupture: z.string().openapi({
-      description: "Cause de la rupture du contrat de l'apprenant",
-      examples: [
-        "démission",
-        "résiliation",
-        "force majeure",
-        "obtention du diplôme",
-        "faute lourde",
-        "inaptitude constatée par la médecine du travail",
-      ],
-    }),
+    cause_rupture: z
+      .string()
+      .describe("Cause de la rupture du contrat de l'apprenant")
+      .openapi({
+        examples: [
+          "démission",
+          "résiliation",
+          "force majeure",
+          "obtention du diplôme",
+          "faute lourde",
+          "inaptitude constatée par la médecine du travail",
+        ],
+      }),
     // date_declaration_1ere_absence: TODO? (a priori non disponible)
     // date_declaration_2e_absence: TODO? (a priori non disponible)
   },
   employeur: {
-    siret: extensions.siret().openapi({
-      description: "SIRET de l'employeur",
-    }),
-    code_commune_insee: extensions.codeCommuneInsee().openapi({
-      description: "Code Insee de la commune de l'établissement de l'employeur",
-    }),
-    code_naf: z.string().length(5).openapi({
-      description: "Code NAF de l'employeur",
-    }),
+    siret: extensions.siret().describe("SIRET de l'employeur"),
+    code_commune_insee: extensions
+      .codeCommuneInsee()
+      .describe("Code Insee de la commune de l'établissement de l'employeur"),
+    code_naf: z.string().length(5, "Format invalide").describe("Code NAF de l'employeur"),
   },
 };

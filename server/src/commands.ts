@@ -258,7 +258,7 @@ program
   );
 
 program
-  .command("hydrate:open-api")
+  .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .action(
     runJob(async () => {

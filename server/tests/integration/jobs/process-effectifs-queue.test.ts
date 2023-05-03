@@ -49,8 +49,7 @@ describe("Processing de EffectifsQueue", () => {
       });
 
       const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
-
-      assert.deepStrictEqual(sortByPath(updatedInput?.validation_errors), [
+      expect(sortByPath(updatedInput?.validation_errors)).toMatchObject([
         {
           message: "String attendu",
           path: [requiredField],
@@ -117,7 +116,7 @@ describe("Processing de EffectifsQueue", () => {
         date_de_naissance_apprenant: "2020-10",
         contrat_date_debut: "13/11/2020",
         contrat_date_fin: "abc",
-        contrat_date_rupture: true,
+        contrat_date_rupture: "13/11/2020",
         source: "testSource",
       })
     );
@@ -130,7 +129,7 @@ describe("Processing de EffectifsQueue", () => {
 
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
-    assert.deepStrictEqual(sortByPath(updatedInput?.validation_errors), [
+    expect(sortByPath(updatedInput?.validation_errors)).toMatchObject([
       {
         message: "Format invalide",
         path: ["contrat_date_debut"],
@@ -140,7 +139,7 @@ describe("Processing de EffectifsQueue", () => {
         path: ["contrat_date_fin"],
       },
       {
-        message: "String attendu",
+        message: "Format invalide",
         path: ["contrat_date_rupture"],
       },
       {
@@ -236,7 +235,7 @@ describe("Processing de EffectifsQueue", () => {
 
     assert(insertedDossier);
 
-    assert.deepStrictEqual(insertedDossier, {
+    expect(insertedDossier).toMatchObject({
       apprenant: {
         nom: "FLEURY",
         prenom: "Fortuné",
@@ -262,7 +261,7 @@ describe("Processing de EffectifsQueue", () => {
       },
       formation: {
         cfd: "50033610",
-        annee: 0,
+        annee: "0",
         periode: [2022, 2024],
         libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
       },

@@ -304,6 +304,13 @@ function setupRoutes(app: Application) {
     dossierApprenantRouter()
   );
 
+  app.use(
+    ["/api/v3/dossiers-apprenants"],
+    requireJwtAuthenticationMiddleware(),
+    legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    dossierApprenantRouter()
+  );
+
   /*********************************************************
    * API authentifié par clé utilisé pour le réferentiel   *
    *********************************************************/

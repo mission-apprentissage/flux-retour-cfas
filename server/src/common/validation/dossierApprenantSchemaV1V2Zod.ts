@@ -25,7 +25,7 @@ const dossierApprenantSchemaV1V2Zod = () =>
     // OPTIONAL FIELDS
     ine_apprenant: primitivesV1.apprenant.ine.optional(),
     email_contact: primitivesV1.apprenant.email.optional(),
-    tel_apprenant: primitivesV1.apprenant.tel.nullish(),
+    tel_apprenant: primitivesV1.apprenant.telephone.nullish(),
     code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
     siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
     libelle_court_formation: primitivesV1.formation.libelle_court.optional(),

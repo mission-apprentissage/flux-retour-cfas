@@ -186,7 +186,7 @@ describe("Route indicateurs Route", () => {
     //     headers: bearerToken,
     //   });
 
-    //   assert.equal(response.status, 200);
+    //   expect(response.status).toBe(200);
     //   const indices = response.data;
     //   assert.deepEqual(indices.inscritsSansContrat + indices.rupturants, expectedResults.nbInscrits);
     //   assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
@@ -286,7 +286,7 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
+  //       expect(response.status).toBe(200);
   //       assert.equal(response.data.length, 2);
   //       const sortByNiveauFormation = (a, b) => (Number(a.niveau_formation) > Number(b.niveau_formation) ? 1 : -1);
   //       assert.deepStrictEqual(response.data.sort(sortByNiveauFormation), [
@@ -329,8 +329,8 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
-  //       assert.deepEqual(response.data, { nbOrganismes: 1 });
+  //       expect(response.status).toBe(200);
+  //       expect(response.data).toMatchObject({ nbOrganismes: 1 });
 
   //       const badRegionResponse = await httpClient.get("/api/indicateurs/total-organismes", {
   //         params: {
@@ -368,8 +368,8 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
-  //       assert.deepEqual(response.data, { nbOrganismes: 1 });
+  //       expect(response.status).toBe(200);
+  //       expect(response.data).toMatchObject({ nbOrganismes: 1 });
   //     });
 
   //     it("Vérifie qu'on ne peut pas récupérer le bon nombre d'organismes transmettant de la donnée sur une formation pour une mauvaise année scolaire", async () => {
@@ -396,8 +396,8 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
-  //       assert.deepEqual(response.data, { nbOrganismes: 0 });
+  //       expect(response.status).toBe(200);
+  //       expect(response.data).toMatchObject({ nbOrganismes: 0 });
   //     });
   //   });
 
@@ -434,7 +434,7 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
+  //       expect(response.status).toBe(200);
   //       assert.equal(response.data.length, 2);
   //     });
   //   });
@@ -465,7 +465,7 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
+  //       expect(response.status).toBe(200);
   //       assert.equal(response.data.length, 2);
   //     });
   //   });
@@ -527,7 +527,7 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
+  //       expect(response.status).toBe(200);
   //       assert.equal(response.data.length, 2);
   //     });
   //   });
@@ -559,7 +559,7 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
+  //       expect(response.status).toBe(200);
   //       assert.equal(response.data.length, 2);
   //     });
   //   });
@@ -590,7 +590,7 @@ describe("Route indicateurs Route", () => {
   //         headers: bearerToken,
   //       });
 
-  //       assert.equal(response.status, 200);
+  //       expect(response.status).toBe(200);
   //       assert.equal(response.data.length, 2);
   //     });
   //   });
