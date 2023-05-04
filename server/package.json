@@ -12,7 +12,8 @@
     "start": "tsx src/main.ts start",
     "start:dev": "tsx watch src/main.ts start",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:coverage": "c8 --check-coverage yarn test",
+    "test:ci": "yarn test --ci",
+    "test:coverage": "yarn test --coverage",
     "lint": "eslint --cache . --ext .ts",
     "build": "tsc --build",
     "migration:create": "migrate-mongo create",
@@ -101,18 +102,6 @@
     "bracketSpacing": true,
     "trailingComma": "es5"
   },
-  "c8": {
-    "all": true,
-    "lines": 40,
-    "functions": 45,
-    "branches": 65,
-    "statements": 40,
-    "exclude": [
-      "tests/**",
-      "migrations/**",
-      ".history/**"
-    ]
-  },
   "devDependencies": {
     "@faker-js/faker": "7.6.0",
     "@types/boom": "7.3.2",
@@ -124,7 +113,6 @@
     "@typescript-eslint/parser": "5.59.0",
     "axiosist": "0.10.0",
     "bson-schema-to-typescript": "0.0.26",
-    "c8": "7.12.0",
     "cross-env": "7.0.3",
     "eslint": "8.38.0",
     "eslint-config-prettier": "8.8.0",
