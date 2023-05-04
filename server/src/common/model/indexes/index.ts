@@ -13,7 +13,7 @@ export const createIndexes = async () => {
         try {
           await getDbCollection(descriptor.collectionName).createIndex(index, options);
         } catch (err) {
-          console.error(`Error creating indexes for descriptor.collectionName: ${err}`);
+          console.error(`Error creating indexes for ${descriptor.collectionName}: ${err}`);
         }
       })
     );
