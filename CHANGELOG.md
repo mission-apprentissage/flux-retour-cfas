@@ -1,3 +1,18 @@
+# [3.25.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.24.0...v3.25.0) (2023-05-04)
+
+
+### Bug Fixes
+
+*  suppression du pre-push qui bloque le bump version ([32b2af9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/32b2af9a96c455676a9c0553323a7b38193aa559))
+* tests ([#2980](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2980)) ([566ad46](https://github.com/mission-apprentissage/flux-retour-cfas/commit/566ad46e3240a40f5a277032d378b62d048c2636))
+* tsx devient dependance obligatoire ([67be716](https://github.com/mission-apprentissage/flux-retour-cfas/commit/67be7166cae5826c8d7b1f0bcc26f151c72b9075))
+
+
+### Features
+
+* add collection formations catalogue ([#2975](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2975)) ([9cbfdc1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9cbfdc17975624f0678bdd6ca7ae04c203d1e8c4))
+* log de l'utilisateur connecté pour chaque requête ([#2978](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2978)) ([3d2ba06](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3d2ba061f9d8928f6aea28eb5ceb80f7a0bebd90))
+
 # [3.24.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.23.0...v3.24.0) (2023-04-27)
 
 
