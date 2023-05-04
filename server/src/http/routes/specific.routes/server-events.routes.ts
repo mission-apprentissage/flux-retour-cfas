@@ -27,7 +27,6 @@ export function serverEventsHandler(req, res) {
   });
 
   req.on("close", () => {
-    console.log(`${userId} Connection closed`);
     clients = clients.filter((client) => client.requestId !== req.id);
   });
 }

@@ -41,13 +41,6 @@ export const getPercentage = (count = 0, total = 0) => {
 };
 
 /**
- * Debug helper to pretty print an object
- */
-export const debug = (label, object) => {
-  console.log(label, JSON.stringify(object, null, 2));
-};
-
-/**
  * Creates an object composed of the own and inherited enumerable property paths
  * of *object* that are not omitted.
  */

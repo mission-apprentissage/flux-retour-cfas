@@ -78,7 +78,7 @@ async function createFirewall(client, ip) {
     console.info("Firewall already created");
     return;
   }
-  console.log(`Creating firewall for ip '${ip}'...`);
+  console.info(`Creating firewall for ip '${ip}'...`);
   return client.request("POST", `/ip/${ipBlock}/firewall`, { ipOnFirewall: ip });
 }
 
@@ -86,11 +86,11 @@ async function addRule(client, ip, rule) {
   let ipBlock = asIpBlock(ip);
 
   if (await ruleExists(client, ip, rule)) {
-    console.log(`Rule ${rule.sequence} already exists`);
+    console.info(`Rule ${rule.sequence} already exists`);
     return;
   }
 
-  console.log(`Creating rule ${rule.sequence}...`);
+  console.info(`Creating rule ${rule.sequence}...`);
   return client.request("POST", `/ip/${ipBlock}/firewall/${ip}/rule`, rule);
 }
 
@@ -98,10 +98,10 @@ async function removeRule(client, ip, rule) {
   let ipBlock = asIpBlock(ip);
 
   if (await ruleExists(client, ip, rule)) {
-    console.log(`Deleting rule ${rule.sequence}...`);
+    console.info(`Deleting rule ${rule.sequence}...`);
     return client.request("DELETE", `/ip/${ipBlock}/firewall/${ip}/rule/${rule.sequence}`);
   } else {
-    console.log(`Rule ${rule.sequence} does not exists !`);
+    console.info(`Rule ${rule.sequence} does not exists !`);
   }
 }
 

@@ -18,7 +18,6 @@ export default () => {
       boomError = Boom.badRequest("Erreur de validation");
       boomError.output.payload.details = rawError.details;
     } else {
-      console.log(rawError);
       boomError = Boom.boomify(rawError, {
         statusCode: rawError.status || 500,
         ...(!rawError.message ? { message: "Une erreur est survenue" } : {}),

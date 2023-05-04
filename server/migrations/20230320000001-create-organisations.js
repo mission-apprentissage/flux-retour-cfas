@@ -26,7 +26,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
         fiabilisation_statut: "FIABLE",
       });
       if (organisme) {
-        console.log(`organisme fiable trouvé pour SIRET/UAI ${siret}/${uai}`);
+        console.info(`organisme fiable trouvé pour SIRET/UAI ${siret}/${uai}`);
         return organisme;
       }
     }
@@ -36,7 +36,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
         fiabilisation_statut: "FIABLE",
       });
       if (organisme) {
-        console.log(`organisme fiable trouvé pour SIRET ${siret}`);
+        console.info(`organisme fiable trouvé pour SIRET ${siret}`);
         return organisme;
       }
     }
@@ -46,7 +46,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
         fiabilisation_statut: "FIABLE",
       });
       if (organisme) {
-        console.log(`organisme fiable trouvé pour UAI ${uai}`);
+        console.info(`organisme fiable trouvé pour UAI ${uai}`);
         return organisme;
       }
     }
@@ -54,7 +54,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   }
 
   {
-    console.log("MAJ ORGANISME_FORMATION");
+    console.info("MAJ ORGANISME_FORMATION");
     const users = await db
       .collection("usersMigration")
       .find({
@@ -70,7 +70,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
         usersWithoutOrganisation.push(user);
         continue;
       }
-      console.log(
+      console.info(
         `Affectation ${user.email} ${user.siret}/${user.uai} à l'organisation ${organisme.siret}/${organisme.uai}`
       );
       let organisation = organisations[`${organisme.siret}/${organisme.uai}`];
@@ -85,7 +85,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
       organisation.membres.push(user._id);
     }
     usersWithoutOrganisation.forEach((user) => {
-      console.log(`Aucun organisme fiable trouvé pour ${user.email} (SIRET/UAI=${user.siret}/${user.uai})`);
+      console.info(`Aucun organisme fiable trouvé pour ${user.email} (SIRET/UAI=${user.siret}/${user.uai})`);
     });
 
     const natureOFToOrganisationType = {
@@ -120,7 +120,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   }
 
   {
-    console.log("MAJ TETE_DE_RESEAU");
+    console.info("MAJ TETE_DE_RESEAU");
     const users = await db
       .collection("usersMigration")
       .find({
@@ -162,7 +162,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   }
 
   {
-    console.log("MAJ DREETS");
+    console.info("MAJ DREETS");
     const users = await db
       .collection("usersMigration")
       .find({
@@ -207,7 +207,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   }
 
   {
-    console.log("MAJ DEETS");
+    console.info("MAJ DEETS");
     const users = await db
       .collection("usersMigration")
       .find({
@@ -252,7 +252,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   }
 
   {
-    console.log("MAJ DRAAF");
+    console.info("MAJ DRAAF");
     const users = await db
       .collection("usersMigration")
       .find({
@@ -297,7 +297,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   }
 
   {
-    console.log("MAJ CONSEIL_REGIONAL");
+    console.info("MAJ CONSEIL_REGIONAL");
     const users = await db
       .collection("usersMigration")
       .find({
@@ -342,7 +342,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   }
 
   {
-    console.log("MAJ DDETS");
+    console.info("MAJ DDETS");
     const users = await db
       .collection("usersMigration")
       .find({
@@ -387,7 +387,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
   }
 
   {
-    console.log("MAJ ACADEMIE");
+    console.info("MAJ ACADEMIE");
     const users = await db
       .collection("usersMigration")
       .find({
@@ -433,7 +433,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
 
   // organisation spécifique pour les administrateurs de la plateforme
   {
-    console.log("MAJ Admins");
+    console.info("MAJ Admins");
     const { insertedId } = await db.collection("organisations").insertOne({
       type: "ADMINISTRATEUR",
     });
@@ -449,7 +449,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     );
   }
 
-  console.log("MAJ organisation.created_at");
+  console.info("MAJ organisation.created_at");
   await db.collection("organisations").updateMany(
     {},
     {
@@ -467,11 +467,11 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
       },
     })
     .toArray();
-  console.log(`> Utilisateurs non migrés : ${users.length}`);
+  console.info(`> Utilisateurs non migrés : ${users.length}`);
   users.forEach((user) => {
-    console.log(`${user.email} : ${user.nom} ${user.prenom} (ancienne organisation = '${user.organisation}')`);
+    console.info(`${user.email} : ${user.nom} ${user.prenom} (ancienne organisation = '${user.organisation}')`);
   });
-  console.log("> Il faudra contacter manuellement ces personnes pour recréer leur compte !");
+  console.info("> Il faudra contacter manuellement ces personnes pour recréer leur compte !");
 
   await db.collection("usersMigration").deleteMany({
     organisation_id: {
@@ -491,9 +491,9 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
         },
       })
       .toArray();
-    console.log("> Utilisateurs dont il faudra leur communiquer de reset leur MDP :");
+    console.info("> Utilisateurs dont il faudra leur communiquer de reset leur MDP :");
     users.forEach((user) => {
-      console.log(
+      console.info(
         `${user.email} : ${user.nom} ${user.prenom} (ancienne organisation='${user.organisation}', ancien statut='${user.account_status}')`
       );
     });

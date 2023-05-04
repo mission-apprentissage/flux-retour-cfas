@@ -20,7 +20,7 @@ describe("Processing de EffectifsQueue", () => {
         callLbaApi: false,
       });
     } catch (e) {
-      console.log("Oups", e);
+      console.error("Oups", e);
       throw e;
     }
   });

@@ -22,7 +22,7 @@ function waitReady(callback, options = {}) {
         if (retries++ > maxRetries) {
           reject(e);
         } else {
-          console.log(`Not yet ready. Retrying in ${delay}ms...`);
+          console.info(`Not yet ready. Retrying in ${delay}ms...`);
           setTimeout(() => retry(delay, maxRetries), delay);
         }
       }

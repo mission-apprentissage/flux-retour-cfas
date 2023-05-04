@@ -1,7 +1,7 @@
 const { resourceExists, waitReady } = require("./utils");
 
 async function getNasName(client) {
-  let [nasName] = await client.request("GET", `/dedicated/nasha`);
+  let [nasName] = await client.request("GET", "/dedicated/nasha");
   return nasName;
 }
 
@@ -19,11 +19,11 @@ async function ipExists(client, nasName, partitionName, ip) {
 
 async function createPartition(client, nasName, partitionName) {
   if (await partitionExists(client, nasName, partitionName)) {
-    console.log(`Partition ${partitionName} already exists`);
+    console.info(`Partition ${partitionName} already exists`);
     return;
   }
 
-  console.log(`Creating new partition ${partitionName}...`);
+  console.info(`Creating new partition ${partitionName}...`);
   await client.request("POST", `/dedicated/nasha/${nasName}/partition`, {
     partitionName,
     protocol: "NFS",
@@ -35,11 +35,11 @@ async function createPartition(client, nasName, partitionName) {
 
 async function allowIp(client, nasName, partitionName, ip) {
   if (await ipExists(client, nasName, partitionName, ip)) {
-    console.log(`IP ${ip} already allowed for the partition ${partitionName}`);
+    console.info(`IP ${ip} already allowed for the partition ${partitionName}`);
     return;
   }
 
-  console.log(`Allow ip ${ip} to access to the partition ${partitionName}...`);
+  console.info(`Allow ip ${ip} to access to the partition ${partitionName}...`);
   return client.request("POST", `/dedicated/nasha/${nasName}/partition/${partitionName}/access`, {
     ip,
     type: "readwrite",
