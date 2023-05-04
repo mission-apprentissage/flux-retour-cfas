@@ -1,8 +1,9 @@
+import Logger from "bunyan";
+
 import { updateEffectifsCount } from "@/common/actions/organismes/organismes.actions";
-import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 
-export const hydrateOrganismesEffectifsCount = async () => {
+export const hydrateOrganismesEffectifsCount = async (logger: Logger) => {
   const organismes = await organismesDb().find({}).toArray();
 
   logger.info(`Processing ${organismes.length} organismes`);

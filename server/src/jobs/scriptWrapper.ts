@@ -1,3 +1,4 @@
+import Logger from "bunyan";
 import { formatDuration, intervalToDuration } from "date-fns";
 
 import { createJobEvent, updateJobEvent } from "@/common/actions/jobEvents.actions";
@@ -7,17 +8,23 @@ import { closeMongodbConnection } from "@/common/mongodb";
 
 /**
  * Wrapper pour l'exécution de jobs avec création de JobEvents en base
- * pour sauvegarder le résultat du job
+ * pour sauvegarder le résultat du job.
+ * Attention, limitation d'utiliser uniquement des paramètres en options avec commander
+ * et non des paramètres positionnels.
  */
-export const runJob = (jobFunc: (...args: any[]) => Promise<any>) => {
+export const runJob = (jobFunc: (logger: Logger, ...args: any[]) => Promise<any>) => {
   return async function actionFunc(args: any, options: any) {
     const startDate = new Date();
     const jobEventId = await createJobEvent({ jobname: options._name, action: jobEventStatuts.started });
     let error: Error | undefined = undefined;
     let result = undefined;
 
+    const jobLogger = logger.child({
+      module: `job:${options._name}`,
+    });
+
     try {
-      result = await jobFunc(args);
+      result = await jobFunc(jobLogger, args);
     } catch (err: any) {
       logger.error({ err, writeErrors: err.writeErrors }, "job error");
       error = err?.toString();

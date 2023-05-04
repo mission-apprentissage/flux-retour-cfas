@@ -1,7 +1,8 @@
-import logger from "@/common/logger";
+import Logger from "bunyan";
+
 import { createIndexes, dropIndexes } from "@/common/model/indexes/index";
 
-export const recreateIndexes = async ({ drop } = { drop: false }) => {
+export const recreateIndexes = async (logger: Logger, { drop } = { drop: false }) => {
   if (drop) {
     logger.info("Drop all existing indexes...");
     await dropIndexes();

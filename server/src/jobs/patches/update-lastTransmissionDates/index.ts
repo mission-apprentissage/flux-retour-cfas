@@ -1,6 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool";
+import Logger from "bunyan";
 
-import logger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 
 let nbOrganismesUpdated = 0;
@@ -8,7 +8,7 @@ let nbOrganismesUpdated = 0;
 /**
  * Fonction de MAJ de la last_transmission_date des organismes avec effectifs
  */
-export const updateLastTransmissionDateForOrganismes = async () => {
+export const updateLastTransmissionDateForOrganismes = async (logger: Logger) => {
   logger.info("MAJ de la last_transmission_date des organismes liés a des effectifs ... ");
 
   // Récupération de la liste des organismes id ayant des effectifs liés

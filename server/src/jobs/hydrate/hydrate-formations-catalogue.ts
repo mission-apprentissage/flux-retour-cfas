@@ -1,17 +1,13 @@
 import { IncomingMessage } from "node:http";
 
 import axios from "axios";
+import Logger from "bunyan";
 import JSONStream from "JSONStream";
 import { ObjectId } from "mongodb";
 
-import parentLogger from "@/common/logger";
 import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb } from "@/common/model/collections";
 import config from "@/config";
-
-const logger = parentLogger.child({
-  module: "job:hydrate:formations-catalogue",
-});
 
 const INSERT_BATCH_SIZE = 100;
 
@@ -19,7 +15,7 @@ const INSERT_BATCH_SIZE = 100;
  * Ce job récupère toutes les formations du catalogue et les insert en brut dans la collection formationsCatalogue
  * en vue d'une future utilisation.
  */
-export const hydrateFormationsCatalogue = async () => {
+export const hydrateFormationsCatalogue = async (logger: Logger) => {
   logger.info("récupération des formations depuis le catalogue");
   const res = await axios.get<IncomingMessage>(`${config.mnaCatalogApi.endpoint}/v1/entity/formations.json`, {
     responseType: "stream",

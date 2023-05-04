@@ -1,4 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
+import Logger from "bunyan";
 
 import {
   insertEffectif,
@@ -15,7 +16,6 @@ import {
   setOrganismeTransmissionDates,
   structureOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
-import logger from "@/common/logger";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsQueueDb } from "@/common/model/collections";
@@ -26,13 +26,13 @@ const sleepDuration = 10_000;
 
 type Options = { id?: string; force?: boolean };
 
-export const processEffectifsQueueEndlessly = async (options: Options) => {
+export const processEffectifsQueueEndlessly = async (logger: Logger, options: Options) => {
   logger.info("Process effectifs queue");
 
   // the inc is here to avoid infinite loop and memory leak
   let inc = 0;
   do {
-    const { totalProcessed } = await processEffectifsQueue({ ...options });
+    const { totalProcessed } = await processEffectifsQueue(logger, { ...options });
     if (sleepDuration && totalProcessed === 0 && !options.id) {
       await sleep(sleepDuration);
     }
@@ -40,7 +40,7 @@ export const processEffectifsQueueEndlessly = async (options: Options) => {
   } while (!options.id && inc < 100);
 };
 
-export const processEffectifsQueue = async (options?: Options) => {
+export const processEffectifsQueue = async (logger: Logger, options?: Options) => {
   const { id, force } = options || { id: undefined, force: false };
 
   const filter: Record<string, any> = force ? {} : { processed_at: { $exists: false } };

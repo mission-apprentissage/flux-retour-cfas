@@ -1,4 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
+import Logger from "bunyan";
 
 import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import {
@@ -7,7 +8,6 @@ import {
   updateOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
 import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
-import logger from "@/common/logger";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 
 const JOB_NAME = "hydrate-organismes";
@@ -24,9 +24,9 @@ let nbOrganismeNotUpdated = 0;
  * Le format adresse des organismes du référentiel est différent du format tdb donc on va transformer le champ adresse
  * En cas d'erreurs on log via un createJobEvent()
  */
-export const hydrateOrganismesFromReferentiel = async () => {
+export const hydrateOrganismesFromReferentiel = async (logger: Logger) => {
   // On remet à 0 l'information de présence dans le référentiel
-  await resetOrganismesReferentielPresence();
+  await resetOrganismesReferentielPresence(logger);
 
   // On récupère l'intégralité des organismes depuis le référentiel
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
@@ -52,7 +52,7 @@ export const hydrateOrganismesFromReferentiel = async () => {
 /**
  * Reset du flag est_dans_le_referentiel pour tous les organismes ayant au moins un siret
  */
-const resetOrganismesReferentielPresence = async () => {
+const resetOrganismesReferentielPresence = async (logger: Logger) => {
   logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
   await organismesDb().updateMany(
     { siret: { $exists: true } },

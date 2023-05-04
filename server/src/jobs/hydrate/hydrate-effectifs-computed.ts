@@ -1,7 +1,8 @@
-import logger from "@/common/logger";
+import Logger from "bunyan";
+
 import { effectifsDb } from "@/common/model/collections";
 
-export async function hydrateEffectifsComputed() {
+export async function hydrateEffectifsComputed(logger: Logger) {
   logger.info("Hydrating effectifs._computed...");
   while (
     (await effectifsDb()

@@ -1,10 +1,11 @@
-import logger from "@/common/logger";
+import Logger from "bunyan";
+
 import { organismesDb } from "@/common/model/collections";
 
 /**
  * Fonction "patch" de suppression des organismes sans siret et sans aucun effectif
  */
-export const removeOrganismesSansSiretSansEffectifs = async () => {
+export const removeOrganismesSansSiretSansEffectifs = async (logger: Logger) => {
   logger.info("Suppression des organismes sans siret et sans aucun effectif ... ");
 
   const organismesIdSansSiretSansEffectifs = (

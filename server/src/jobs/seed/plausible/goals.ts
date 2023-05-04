@@ -1,4 +1,5 @@
 import axios from "axios";
+import Logger from "bunyan";
 
 const plausibleDomains = [
   "cfas.apprentissage.beta.gouv.fr",
@@ -42,10 +43,10 @@ const goals = [
 ];
 
 const PLAUSIBLE_TOKEN = process.env.PLAUSIBLE_TOKEN;
-export const seedPlausibleGoals = async () => {
+export const seedPlausibleGoals = async (logger: Logger) => {
   try {
     for (const domain of plausibleDomains) {
-      console.info(`Seeding plausible goals for ${domain}...`);
+      logger.info(`Seeding plausible goals for ${domain}...`);
       for (const goal of goals) {
         await axios.put(
           "https://plausible.io/api/v1/sites/goals",
@@ -60,10 +61,10 @@ export const seedPlausibleGoals = async () => {
             },
           }
         );
-        console.info(` - goal ${goal} created/updated`);
+        logger.info(` - goal ${goal} created/updated`);
       }
     }
   } catch (error: any) {
-    console.error(error?.response?.data);
+    logger.error(error?.response?.data);
   }
 };
