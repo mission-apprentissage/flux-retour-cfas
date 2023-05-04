@@ -152,7 +152,7 @@ export function defaultValuesOrganisme() {
     metiers: [],
     reseaux: [],
     erps: [],
-    formations: [],
+    relatedFormations: [],
     fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
     created_at: new Date(),
     updated_at: new Date(),

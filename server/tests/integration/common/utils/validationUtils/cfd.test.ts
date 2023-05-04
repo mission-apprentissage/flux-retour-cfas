@@ -25,12 +25,12 @@ describe("Domain CFD", () => {
       assert.equal(validateCfd(input), expectedOutput);
     });
     it("Vérifie qu'un cfd alphanumérique de longueur < 8 est invalide", () => {
-      const input = "abc123";
+      const input = "ABC123";
       const expectedOutput = false;
       assert.equal(validateCfd(input), expectedOutput);
     });
     it("Vérifie qu'un cfd alphanumérique de longueur > 8 est invalide", () => {
-      const input = "abc123456";
+      const input = "ABC123456";
       const expectedOutput = false;
       assert.equal(validateCfd(input), expectedOutput);
     });
@@ -40,12 +40,12 @@ describe("Domain CFD", () => {
       assert.equal(validateCfd(input), expectedOutput);
     });
     it("Vérifie qu'un cfd contenant 8 lettres est valide", () => {
-      const input = "abcdefgh";
+      const input = "ABCDEFGH";
       const expectedOutput = true;
       assert.equal(validateCfd(input), expectedOutput);
     });
     it("Vérifie qu'un cfd contenant 8 caractère alphanumériques est valide", () => {
-      const input = "abcd1234";
+      const input = "ABCD1234";
       const expectedOutput = true;
       assert.equal(validateCfd(input), expectedOutput);
     });

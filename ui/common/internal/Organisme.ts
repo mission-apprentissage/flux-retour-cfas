@@ -57,10 +57,6 @@ export interface Organisme {
    */
   raison_sociale?: string;
   /**
-   * Nom de l'organisme de formation tokenized pour la recherche textuelle
-   */
-  nom_tokenized?: string;
-  /**
    * Adresse de l'établissement
    */
   adresse?: {

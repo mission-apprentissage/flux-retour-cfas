@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 
 import { subMinutes, differenceInCalendarDays, differenceInSeconds } from "date-fns";
-import mongodb from "mongodb";
+import { ObjectId } from "mongodb";
 
 import {
   authenticateLegacy,
@@ -237,10 +237,10 @@ describe("Components Users Test", () => {
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found?.username === usernameTest, true);
-      assert.equal(found?._id !== null, true);
+      assert(found);
 
       // update user with bad id
-      const objectId = new mongodb.ObjectId();
+      const objectId = new ObjectId();
       await assert.rejects(updateUserLegacy(objectId, { username: "UPDATED" }), { message: "Unable to find user" });
     });
 
@@ -253,7 +253,7 @@ describe("Components Users Test", () => {
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found?.username === usernameTest, true);
-      assert.equal(found?._id !== null, true);
+      assert(found);
 
       // update user
       const updatedUserName = "UPDATED";
@@ -272,8 +272,8 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
+      assert(found);
       assert.equal(found?.email === "test@test.fr", true);
-      assert.equal(found?._id !== null, true);
 
       // update user
       const updateValue = "UPDATED@test.fr";
@@ -292,7 +292,7 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found?._id !== null, true);
+      assert(found);
       assert.equal(found?.network === "TEST_RESEAU", true);
 
       // update user
@@ -312,7 +312,7 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found?._id !== null, true);
+      assert(found);
       assert.equal(found?.region === "TEST_REGION", true);
 
       // update user
@@ -332,7 +332,7 @@ describe("Components Users Test", () => {
 
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found?._id !== null, true);
+      assert(found);
       assert.equal(found?.organisme === "TEST_ORGANISME", true);
 
       // update user
@@ -355,7 +355,7 @@ describe("Components Users Test", () => {
       // find user
       const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found?.username === usernameTest, true);
-      assert.equal(found?._id !== null, true);
+      assert(found);
 
       // get user with bad id
       const objectId = "^pkazd^pkazd";

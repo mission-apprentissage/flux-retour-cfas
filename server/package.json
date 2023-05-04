@@ -11,7 +11,7 @@
     "cli": "tsx src/main.ts",
     "start": "tsx src/main.ts start",
     "start:dev": "tsx watch src/main.ts start",
-    "test": "yarn test:cmd tests/integration/**/*.ts",
+    "test": "yarn test:cmd 'tests/**/*.test.ts'",
     "test:coverage": "c8 --check-coverage yarn test",
     "test:cmd": "cross-env NODE_ENV=test DOTENV_CONFIG_PATH=.env.test ts-mocha -r tsx",
     "lint": "eslint --cache . --ext .ts",

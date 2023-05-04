@@ -17,6 +17,7 @@ export default {
       region: "93",
       voie: "AVREGIS RYCKEBUSH",
     },
+    reseaux: ["AGRI"],
   },
   41461021200014: {
     uai: "0611175W",

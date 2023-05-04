@@ -23,9 +23,19 @@ describe("Formations Indexes", () => {
         { v: 2, key: { cfd: 1 }, name: "cfd", unique: true },
         {
           v: 2,
-          key: { _fts: "text", _ftsx: 1 },
-          name: "libelle_text_tokenized_libelle_text",
-          weights: { libelle: 1, tokenized_libelle: 1 },
+          key: { libelle: 1 },
+          name: "libelle",
+        },
+        {
+          v: 2,
+          key: {
+            _fts: "text",
+            _ftsx: 1,
+          },
+          name: "libelle_text",
+          weights: {
+            libelle: 1,
+          },
           default_language: "french",
           language_override: "language",
           textIndexVersion: 3,
