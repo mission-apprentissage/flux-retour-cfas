@@ -184,5 +184,49 @@ describe("Dossiers Apprenants Route", () => {
       // Check source is set
       assert.deepEqual((await effectifsQueueDb().findOne({}))?.source, "userApi");
     });
+
+    it("Vérifie l'ajout via route /dossiers-apprenants de dossiers contenant des erreurs", async function () {
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
+
+      // Create input list with uai / siret for organisme created
+      const dossier = {
+        ...createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret }),
+        date_de_naissance_apprenant: "invalid date",
+      };
+
+      // Call Api Route
+      const response = await httpClient.post("/api/dossiers-apprenants", [dossier], {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      // Check Api Response
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, {
+        status: "OK",
+        message: "Queued",
+        detail: "Some data are invalid",
+        data: [
+          {
+            ...dossier,
+            source: "userApi",
+            validation_errors: [
+              {
+                message: "Format invalide",
+                path: ["date_de_naissance_apprenant"],
+              },
+            ],
+            _id: response.data.data[0]._id,
+            updated_at: response.data.data[0].updated_at,
+            created_at: response.data.data[0].created_at,
+            processed_at: response.data.data[0].processed_at,
+          },
+        ],
+      });
+
+      // Check Nb Items added
+      assert.deepEqual(await effectifsQueueDb().countDocuments({}), 1);
+    });
   });
 });
