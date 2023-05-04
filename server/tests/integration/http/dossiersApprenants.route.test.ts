@@ -32,7 +32,7 @@ const getJwtForUser = async (httpClient) => {
 let httpClient: AxiosInstance;
 
 describe("Dossiers Apprenants Route", () => {
-  before(async () => {
+  beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;
   });

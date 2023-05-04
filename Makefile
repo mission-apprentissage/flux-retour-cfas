@@ -27,10 +27,7 @@ test-ui:
 	yarn --cwd ui test:ci
 
 test-server:
-	yarn --cwd server test
-
-coverage:
-	yarn --cwd server test:coverage
+	yarn --cwd server test:ci
 
 lint:
 	yarn lint

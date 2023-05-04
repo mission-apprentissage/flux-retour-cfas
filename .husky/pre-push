@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+yarn --cwd server cli dev:generate-ts-types

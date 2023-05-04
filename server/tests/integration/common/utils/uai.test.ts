@@ -63,7 +63,7 @@ describe("Domain UAI", () => {
 
     it("Vérifie que la fonction throw une erreur lorsqu'un UAI invalide est passé", () => {
       const input = "abc";
-      assert.throws(() => getDepartementCodeFromUai(input), new Error("invalid uai passed"));
+      expect(() => getDepartementCodeFromUai(input)).toThrowError("invalid uai passed");
     });
   });
 });

@@ -15,7 +15,8 @@ if grep -q vault ".infra/ansible/roles/setup/vars/main/vault.yml"; then
   exit 1
 fi
 
-files=$(git diff --cached --name-only | grep -v -E "$exception" | grep -E "$sensible_files_pattern")
+# Note: we remove deleted files from the list (name-status starting with D)
+files=$(git diff --cached --name-status | grep "^[^D]" | grep -v -E "$exception" | grep -E "$sensible_files_pattern")
 if [ -z "$files" ]; then
   echo "No sensible files in commit. Good job!"
   exit 0

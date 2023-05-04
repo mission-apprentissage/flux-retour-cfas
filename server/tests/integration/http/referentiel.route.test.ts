@@ -9,7 +9,7 @@ let httpClient: AxiosInstance;
 
 // FIXME route authentifiée
 xdescribe("Referentiel Route", () => {
-  before(async () => {
+  beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;
   });

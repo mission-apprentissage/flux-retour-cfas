@@ -24,7 +24,7 @@ let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
 
 describe("Route indicateurs Route", () => {
-  before(async () => {
+  beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
     requestAsOrganisation = app.requestAsOrganisation;
