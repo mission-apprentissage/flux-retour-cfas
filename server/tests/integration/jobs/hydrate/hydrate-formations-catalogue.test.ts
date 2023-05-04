@@ -4,19 +4,22 @@ import { Readable } from "node:stream";
 import { ObjectId } from "mongodb";
 import nock from "nock";
 
+import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb } from "@/common/model/collections";
 import config from "@/config";
 import { hydrateFormationsCatalogue } from "@/jobs/hydrate/hydrate-formations-catalogue";
 import { id } from "@tests/utils/testUtils";
 
 describe("Job hydrateFormationsCatalogue", () => {
-  const formationsCatalogue = [
+  const formationsCatalogue: FormationsCatalogue[] = [
     {
       _id: id(1),
+      cle_ministere_educatif: "AAA",
       intitule_long: "CHIMIE (MASTER)",
     },
     {
       _id: id(2),
+      cle_ministere_educatif: "BBB",
       intitule_long: "COUVREUR (CAP)",
     },
   ];
@@ -31,6 +34,7 @@ describe("Job hydrateFormationsCatalogue", () => {
 
     await formationsCatalogueDb().insertOne({
       _id: new ObjectId(id(123)),
+      cle_ministere_educatif: "CCC",
       intitule_long: "JARDINIER PAYSAGISTE (CAPA)",
     } as any);
 

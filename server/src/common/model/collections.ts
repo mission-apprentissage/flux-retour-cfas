@@ -1,7 +1,5 @@
 import { getDbCollection } from "@/common/mongodb";
 
-import CatalogueFormation from "../apis/@types/CatalogueFormation";
-
 import {
   Effectif,
   FiabilisationUaiSiret,
@@ -16,6 +14,7 @@ import {
   UsersMigration,
 } from "./@types";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
+import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { UaisAcceReferentiel } from "./@types/UaisAcceReferentiel.js";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
@@ -54,7 +53,7 @@ export const modelDescriptors = [
 
 export const formationsDb = () => getDbCollection<Formation>(formationsModelDescriptor.collectionName);
 export const formationsCatalogueDb = () =>
-  getDbCollection<CatalogueFormation>(formationsCatalogueModelDescriptor.collectionName);
+  getDbCollection<FormationsCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<User>(usersModelDescriptor.collectionName);
 export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<UsersMigration>(usersMigrationModelDescriptor.collectionName);

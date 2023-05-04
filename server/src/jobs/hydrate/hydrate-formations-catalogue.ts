@@ -4,8 +4,8 @@ import axios from "axios";
 import JSONStream from "JSONStream";
 import { ObjectId } from "mongodb";
 
-import CatalogueFormation from "@/common/apis/@types/CatalogueFormation";
 import parentLogger from "@/common/logger";
+import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb } from "@/common/model/collections";
 import config from "@/config";
 
@@ -40,7 +40,7 @@ export const hydrateFormationsCatalogue = async () => {
 
   const queriesInProgress: Promise<any>[] = [];
   let totalFormations = 0;
-  let pendingFormations: CatalogueFormation[] = [];
+  let pendingFormations: FormationsCatalogue[] = [];
 
   function flushPendingFormations() {
     totalFormations += pendingFormations.length;
@@ -54,7 +54,7 @@ export const hydrateFormationsCatalogue = async () => {
   return new Promise<void>((resolve, reject) => {
     const parser = JSONStream.parse("*");
     res.data.pipe(parser);
-    parser.on("data", (formation) => {
+    parser.on("data", (formation: FormationsCatalogue) => {
       formation._id = new ObjectId(formation._id);
       pendingFormations.push(formation);
       if (pendingFormations.length === INSERT_BATCH_SIZE) {
