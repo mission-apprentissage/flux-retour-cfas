@@ -15,7 +15,11 @@ export interface Invitation {
    */
   organisation_id: any;
   /**
+   * Auteur de l'invitation
+   */
+  author_id: any;
+  /**
    * Date de création en base de données
    */
-  created_at?: Date;
+  created_at: Date;
 }

@@ -474,6 +474,10 @@ export interface Organisme {
   relatedFormations?: {
     formation_id?: any;
     /**
+     * Clé unique de la formation
+     */
+    cle_ministere_educatif?: string;
+    /**
      * Année millésime de la formation pour cet organisme
      */
     annee_formation?: number;
@@ -935,10 +939,10 @@ export interface Organisme {
    */
   fiabilisation_statut?:
     | "FIABLE"
-    | "NON_FIABILISABLE_INEXISTANT"
     | "NON_FIABILISABLE_PB_COLLECTE"
     | "NON_FIABILISABLE_UAI_NON_VALIDEE"
     | "NON_FIABILISABLE_UAI_VALIDEE"
+    | "NON_FIABILISABLE_INEXISTANT"
     | "A_CONTACTER"
     | "INCONNU"
     | "INCONNU_INSCRIPTION";
