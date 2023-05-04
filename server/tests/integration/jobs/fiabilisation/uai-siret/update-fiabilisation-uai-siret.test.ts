@@ -5,7 +5,7 @@ import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-s
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 
 describe("Job Update Fiabilisation UAI SIRET", () => {
-  describe("getEffectifsDuplicatesFromOrganismes", async () => {
+  describe("getEffectifsDuplicatesFromOrganismes", () => {
     let organisme1Id;
     let organisme2Id;
     let sampleEffectif1;

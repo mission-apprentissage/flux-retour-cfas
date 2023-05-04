@@ -9,7 +9,7 @@ import { initTestApp } from "@tests/utils/testUtils";
 let httpClient: AxiosInstance;
 
 describe("Routes diverses", () => {
-  before(async () => {
+  beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;
   });

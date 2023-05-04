@@ -10,7 +10,7 @@ import { initTestApp } from "@tests/utils/testUtils";
 let httpClient: AxiosInstance;
 
 describe("POST /login - Login [LEGACY]", () => {
-  before(async () => {
+  beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;
   });

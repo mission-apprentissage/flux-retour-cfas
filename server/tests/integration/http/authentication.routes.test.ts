@@ -33,7 +33,7 @@ let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 
 describe("Authentification", () => {
-  before(async () => {
+  beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
     setTime(new Date(date));

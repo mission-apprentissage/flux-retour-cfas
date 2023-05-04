@@ -70,7 +70,7 @@ describe("Tests des actions Formations", () => {
 
   describe("createFormation", () => {
     it("throws when given cfd is invalid", async () => {
-      await assert.rejects(() => createFormation({ cfd: "invalid" }), new Error("Invalid CFD"));
+      await expect(createFormation({ cfd: "invalid" })).rejects.toThrowError("Invalid CFD");
     });
 
     it("throws when formation with given cfd already exists", async () => {
@@ -78,7 +78,7 @@ describe("Tests des actions Formations", () => {
       // create formation in db
       await formationsDb().insertOne({ cfd });
 
-      await assert.rejects(() => createFormation({ cfd }), new Error("A Formation with CFD 2502000D already exists"));
+      await expect(createFormation({ cfd })).rejects.toThrowError("A Formation with CFD 2502000D already exists");
     });
 
     it("throws when formation data is not valid", async () => {
@@ -89,7 +89,7 @@ describe("Tests des actions Formations", () => {
       }));
 
       const cfd = "2502000D";
-      await assert.rejects(() => createFormation({ cfd }));
+      await expect(createFormation({ cfd })).rejects.toThrowError();
     });
 
     it("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {

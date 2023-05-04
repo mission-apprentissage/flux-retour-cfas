@@ -1,7 +1,7 @@
 import nock from "nock";
 
 import { modelDescriptors } from "@/common/model/collections";
-// import { createIndexes } from "@/common/model/indexes/index";
+import { createIndexes } from "@/common/model/indexes";
 import { clearAllCollections, configureDbSchemaValidation } from "@/common/mongodb";
 import { stopMongodb, startAndConnectMongodb } from "@tests/utils/mongoUtils";
 
@@ -20,7 +20,7 @@ beforeAll(async () => {
   });
 
   await startAndConnectMongodb();
-  // await createIndexes();
+  await createIndexes();
 });
 
 afterAll(async () => {

@@ -7,7 +7,7 @@ import { initTestApp } from "@tests/utils/testUtils";
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 describe("GET /indicateurs-national", () => {
-  before(async () => {
+  beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
   });

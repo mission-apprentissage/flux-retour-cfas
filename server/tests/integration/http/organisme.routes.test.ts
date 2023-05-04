@@ -1,7 +1,6 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
-import { beforeEach } from "mocha";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import {
@@ -33,7 +32,7 @@ let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
 
 describe("Routes /organismes/:id", () => {
-  before(async () => {
+  beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
     requestAsOrganisation = app.requestAsOrganisation;

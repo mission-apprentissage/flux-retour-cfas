@@ -8,7 +8,7 @@ import { initTestApp } from "@tests/utils/testUtils";
 let httpClient: AxiosInstance;
 
 describe("Routes Organismes for API referentiel", () => {
-  before(async () => {
+  beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;
   });

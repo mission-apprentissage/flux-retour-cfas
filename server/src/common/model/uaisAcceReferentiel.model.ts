@@ -1,6 +1,6 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { object, objectId, string } from "./json-schema/jsonSchemaTypes.js";
+import { object, objectId, string } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "uaisAcceReferentiel";
 
