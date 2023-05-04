@@ -36,6 +36,9 @@
     "xkeysib",
     "ymag"
   ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "eslint.workingDirectories": [
@@ -72,5 +75,5 @@
     "**/*/build": true,
     "**/.webpack": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
 }
