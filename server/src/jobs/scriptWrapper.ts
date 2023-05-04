@@ -18,12 +18,12 @@ export const runJob = (jobFunc: (...args: any[]) => Promise<any>) => {
 
     try {
       result = await jobFunc(args);
-    } catch (e: any) {
-      console.error(e);
-      error = e?.toString();
+    } catch (err: any) {
+      logger.error({ err, writeErrors: err.writeErrors }, "job error");
+      error = err?.toString();
       await updateJobEvent(jobEventId, {
         action: jobEventStatuts.error,
-        data: { error: e?.toString() },
+        data: { error: err?.toString() },
       });
     }
 

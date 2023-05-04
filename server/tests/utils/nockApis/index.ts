@@ -1,5 +1,3 @@
-import { nockGetFormations } from "@tests/utils/nockApis/nock-apiCatalogue";
-
 import { nockGetEntreprise, nockGetEtablissement } from "./nock-apiEntreprise";
 import { nockGetMetiersByCfd, nockGetMetiersBySiret } from "./nock-Lba";
 import { nockGetCodePostalInfo, nockGetCfdInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
@@ -23,5 +21,6 @@ export const nockExternalApis = () => {
 
   // nok API catalogue
   // aka https://catalogue.apprentissage.beta.gouv.fr/api
-  nockGetFormations();
+  // pas assez précis, c'est mieux de mocker précisément dans chaque test.
+  // nockGetFormations();
 };
