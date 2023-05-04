@@ -1,8 +1,8 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import Logger from "bunyan";
 
 import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import { fetchOrganismes, fetchUaisAcce } from "@/common/apis/apiReferentielMna";
+import logger from "@/common/logger";
 import { OrganismesReferentiel } from "@/common/model/@types/OrganismesReferentiel";
 import { organismesReferentielDb, uaisAccesReferentielDb } from "@/common/model/collections";
 
@@ -15,8 +15,8 @@ let nbUaiAcceNotCreated = 0;
 /**
  * Script qui initialise les données du référentiel
  */
-export const hydrateFromReferentiel = async (logger: Logger) => {
-  await Promise.all([hydrateOrganismesReferentiel(logger), hydrateUaisAcceReferentiel(logger)]);
+export const hydrateFromReferentiel = async () => {
+  await Promise.all([hydrateOrganismesReferentiel(), hydrateUaisAcceReferentiel()]);
 
   // Log & stats
   logger.info(`--> ${nbOrganismeCreated} organismesReferentiel créés depuis le référentiel`);
@@ -35,7 +35,7 @@ export const hydrateFromReferentiel = async (logger: Logger) => {
 /**
  * Récupération des organismes du référentiel dans la collection organismesReferentiel
  */
-const hydrateOrganismesReferentiel = async (logger: Logger) => {
+const hydrateOrganismesReferentiel = async () => {
   logger.info("Clear des organismes du référentiel...");
   await organismesReferentielDb().deleteMany({});
 
@@ -48,7 +48,7 @@ const hydrateOrganismesReferentiel = async (logger: Logger) => {
 /**
  * Récupération des uais ACCE du référentiel dans la collection uaisAccesReferentiel
  */
-const hydrateUaisAcceReferentiel = async (logger: Logger) => {
+const hydrateUaisAcceReferentiel = async () => {
   logger.info("Clear des uais ACCE du référentiel...");
   await uaisAccesReferentielDb().deleteMany({});
 

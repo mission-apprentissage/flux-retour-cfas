@@ -1,13 +1,12 @@
-import Logger from "bunyan";
-
 import { findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
+import logger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 
 /**
  * Fonction "patch" de suppression d'un organisme via son uai et son siret
  * Suppression des effectifs liés s'ils existent
  */
-export const removeOrganismeAndEffectifs = async (logger: Logger, { uai, siret }) => {
+export const removeOrganismeAndEffectifs = async ({ uai, siret }) => {
   logger.info(`Suppression de l'organisme d'uai ${uai} et siret ${siret} ...`);
 
   // Identification de l'organisme et suppression des effectifs liés

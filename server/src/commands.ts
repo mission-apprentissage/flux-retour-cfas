@@ -79,25 +79,41 @@ program
   .command("indexes:create")
   .description("Creation des indexes mongo")
   .option("-d, --drop", "Supprime les indexes existants avant de les recréer")
-  .action(runJob(recreateIndexes));
+  .action(
+    runJob(async ({ drop }) => {
+      await recreateIndexes({ drop });
+    })
+  );
 
 program
   .command("db:find-invalid-documents")
+  .argument("<collectionName>", "collection to search for invalid documents")
   .description("Recherche des documents invalides")
-  .requiredOption("-c, --collection", "collection to search for invalid documents")
-  .action(runJob(findInvalidDocuments));
+  .action(
+    runJob(async (collectionName) => {
+      await findInvalidDocuments(collectionName);
+    })
+  );
 
 program
   .command("process:effectifs-queue")
   .description("Process la queue des effectifs")
   .option("--id <string>", "ID de l'effectifQueue à traiter")
   .option("-f, --force", "Force le re-traitement des effectifs déjà traités")
-  .action(runJob(processEffectifsQueueEndlessly));
+  .action(
+    runJob(async ({ id, force }) => {
+      await processEffectifsQueueEndlessly({ id, force });
+    })
+  );
 
 program
   .command("process:effectifs-queue:remove-duplicates")
   .description("Process la queue des effectifs")
-  .action(runJob(removeDuplicatesEffectifsQueue));
+  .action(
+    runJob(async () => {
+      await removeDuplicatesEffectifsQueue();
+    })
+  );
 
 /**
  * Job (temporaire) de suppression d'un organisme et de ses effectifs
@@ -107,7 +123,11 @@ program
   .description("[TEMPORAIRE] Suppression d'un organisme avec ses effectifs")
   .requiredOption("--uai <string>", "Uai de l'organisme")
   .requiredOption("--siret <string>", "Siret de l'organisme")
-  .action(runJob(removeOrganismeAndEffectifs));
+  .action(
+    runJob(async ({ uai, siret }) => {
+      return removeOrganismeAndEffectifs({ uai, siret });
+    })
+  );
 
 /**
  * Job (temporaire) de suppression des organismes sans siret & sans effectifs
@@ -115,7 +135,11 @@ program
 program
   .command("tmp:patches:remove-organismes-sansSiret-sansEffectifs")
   .description("[TEMPORAIRE] Suppression des organismes sans siret & sans effectifs")
-  .action(runJob(removeOrganismesSansSiretSansEffectifs));
+  .action(
+    runJob(async () => {
+      return removeOrganismesSansSiretSansEffectifs();
+    })
+  );
 
 /**
  * Job (temporaire) de MAJ des date de dernières transmission des effectifs
@@ -123,12 +147,23 @@ program
 program
   .command("tmp:patches:update-lastTransmissionDate-organismes")
   .description("[TEMPORAIRE] Mise à jour des date de dernières transmissions d'un organisme à partir de ses effectifs")
-  .action(runJob(updateLastTransmissionDateForOrganismes));
+  .action(
+    runJob(async () => {
+      return updateLastTransmissionDateForOrganismes();
+    })
+  );
 
 /**
  * Job d'initialisation de données de test
  */
-program.command("seed:sample").description("Seed sample data").action(runJob(seedSample));
+program
+  .command("seed:sample")
+  .description("Seed sample data")
+  .action(
+    runJob(async () => {
+      return seedSample();
+    })
+  );
 
 /**
  * Job d'initialisation d'un user admin
@@ -138,15 +173,33 @@ program
   .command("seed:admin")
   .description("Seed user admin")
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .action(runJob(seedAdmin));
+  .action(
+    runJob(async ({ email }) => {
+      return seedAdmin(email?.toLowerCase());
+    })
+  );
 
 /**
  * Job de seed des goals dans plausible,
  * sur les envs de dev, recette et production
  */
-program.command("seed:plausible:goals").description("Seed plausible goals").action(runJob(seedPlausibleGoals));
+program
+  .command("seed:plausible:goals")
+  .description("Seed plausible goals")
+  .action(
+    runJob(async () => {
+      return seedPlausibleGoals();
+    })
+  );
 
-program.command("seed:assets:clear").description("Seed plausible goals").action(runJob(clearSeedAssets));
+program
+  .command("seed:assets:clear")
+  .description("Seed plausible goals")
+  .action(
+    runJob(async () => {
+      await clearSeedAssets();
+    })
+  );
 
 /**
  * Job de nettoyage de db
@@ -156,17 +209,28 @@ program
   .description("Clear projet")
   .option("-a, --all", "Tout supprimer")
   .action(
-    runJob(async (logger, { all }) => {
-      return clear(logger, { clearAll: all });
+    runJob(async ({ all }) => {
+      return clear({ clearAll: all });
     })
   );
 
-program.command("clear:users").description("Clear users").action(runJob(clearUsers));
+program
+  .command("clear:users")
+  .description("Clear users")
+  .action(
+    runJob(async () => {
+      return clearUsers();
+    })
+  );
 
 program
   .command("hydrate:effectifs-computed")
   .description("Remplissage du champ effectifs._computed avec les attributs des organismes")
-  .action(runJob(hydrateEffectifsComputed));
+  .action(
+    runJob(async () => {
+      return hydrateEffectifsComputed();
+    })
+  );
 
 /**
  * Job de remplissage des organismes du référentiel
@@ -174,7 +238,11 @@ program
 program
   .command("hydrate:organismes-referentiel")
   .description("Remplissage des organismes du référentiel")
-  .action(runJob(hydrateFromReferentiel));
+  .action(
+    runJob(async () => {
+      return hydrateFromReferentiel();
+    })
+  );
 
 /**
  * Job de remplissage des formations du catalogue
@@ -182,9 +250,20 @@ program
 program
   .command("hydrate:formations-catalogue")
   .description("Remplissage des formations du catalogue")
-  .action(runJob(hydrateFormationsCatalogue));
+  .action(
+    runJob(async () => {
+      await hydrateFormationsCatalogue();
+    })
+  );
 
-program.command("hydrate:open-api").description("Création/maj du fichier open-api.json").action(runJob(hydrateOpenApi));
+program
+  .command("hydrate:open-api")
+  .description("Création/maj du fichier open-api.json")
+  .action(
+    runJob(async () => {
+      return hydrateOpenApi();
+    })
+  );
 
 /**
  * Job de remplissage des organismes en allant ajouter / maj aux organismes existants (issus de la transmission)
@@ -193,7 +272,11 @@ program.command("hydrate:open-api").description("Création/maj du fichier open-a
 program
   .command("hydrate:organismes")
   .description("Remplissage des organismes via le référentiel")
-  .action(runJob(hydrateOrganismesFromReferentiel));
+  .action(
+    runJob(async () => {
+      return hydrateOrganismesFromReferentiel();
+    })
+  );
 
 /**
  * Job de remplissage des organismes en allant ajouter / maj aux organismes existants (issus de la transmission)
@@ -202,7 +285,11 @@ program
 program
   .command("hydrate:organismes-effectifs-count")
   .description("Mise à jour des organismes avec le nombre d'effectifs")
-  .action(runJob(hydrateOrganismesEffectifsCount));
+  .action(
+    runJob(async () => {
+      return hydrateOrganismesEffectifsCount();
+    })
+  );
 
 /**
  * Job de mise à jour des organismes en allant appeler des API externes pour remplir
@@ -213,7 +300,11 @@ program
 program
   .command("update:organismes-with-apis")
   .description("Mise à jour des organismes via API externes")
-  .action(runJob(updateOrganismesWithApis));
+  .action(
+    runJob(async () => {
+      return updateOrganismesWithApis();
+    })
+  );
 
 /**
  * Job de remplissage & maj des d'organismes / dossiersApprenants pour les réseaux avec le nouveau format
@@ -221,7 +312,11 @@ program
 program
   .command("hydrate:reseaux")
   .description("Remplissage des réseaux pour les organismes et dossiersApprenants")
-  .action(runJob(hydrateReseaux));
+  .action(
+    runJob(async () => {
+      return hydrateReseaux();
+    })
+  );
 
 /**
  * Job de purge des events
@@ -229,8 +324,12 @@ program
 program
   .command("purge:events")
   .description("Purge des logs inutiles")
-  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
-  .action(runJob(purgeEvents));
+  .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
+  .action(
+    runJob(async ({ nbDaysToKeep }) => {
+      return purgeEvents(nbDaysToKeep);
+    })
+  );
 
 /**
  * Job de création d'un utilisateur
@@ -259,8 +358,8 @@ program
   .description("Création d'un utilisateur ERP legacy")
   .requiredOption("--username <string>", "Nom de l'utilisateur")
   .action(
-    runJob(async (logger, { username }) => {
-      return createErpUserLegacy(logger, username);
+    runJob(async ({ username }) => {
+      return createErpUserLegacy(username);
     })
   );
 
@@ -272,8 +371,8 @@ program
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur")
   .requiredOption("--email <string>", "Email de l'utilisateur")
   .action(
-    runJob(async (logger, { email }) => {
-      return generatePasswordUpdateTokenForUser(logger, email);
+    runJob(async ({ email }) => {
+      return generatePasswordUpdateTokenForUser(email);
     })
   );
 
@@ -285,8 +384,8 @@ program
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur legacy")
   .requiredOption("--username <string>", "username de l'utilisateur")
   .action(
-    runJob(async (logger, { username }) => {
-      return generatePasswordUpdateTokenForUserLegacy(logger, username);
+    runJob(async ({ username }) => {
+      return generatePasswordUpdateTokenForUserLegacy(username);
     })
   );
 
@@ -299,8 +398,8 @@ program
   .requiredOption("--token <string>", "token d'update de password")
   .requiredOption("--password <string>", "nouveau mot de passe")
   .action(
-    runJob(async (logger, { token, password }) => {
-      return updateUserPassword(logger, token, password);
+    runJob(async ({ token, password }) => {
+      return updateUserPassword(token, password);
     })
   );
 
@@ -314,8 +413,8 @@ program
   .description("[TEMPORAIRE] Modification des utilisateurs fournisseurs de données")
   .addOption(new Option("--mode <mode>", "Mode de mise à jour").choices(["active", "inactive"]).makeOptionMandatory())
   .action(
-    runJob(async (logger, { mode }) => {
-      return updateUsersApiSeeders(logger, mode);
+    runJob(async ({ mode }) => {
+      return updateUsersApiSeeders(mode);
     })
   );
 
@@ -368,7 +467,11 @@ program
 program
   .command("dev:generate-ts-types")
   .description("Generation des types TS à partir des schemas de la base de données")
-  .action(runJob(generateTypes));
+  .action(
+    runJob(async () => {
+      await generateTypes();
+    })
+  );
 
 export async function startCLI() {
   await program.parseAsync(process.argv);

@@ -4,7 +4,6 @@ import { Readable } from "node:stream";
 import { ObjectId } from "mongodb";
 import nock from "nock";
 
-import logger from "@/common/logger";
 import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb } from "@/common/model/collections";
 import config from "@/config";
@@ -39,7 +38,7 @@ describe("Job hydrateFormationsCatalogue", () => {
       intitule_long: "JARDINIER PAYSAGISTE (CAPA)",
     } as any);
 
-    await hydrateFormationsCatalogue(logger);
+    await hydrateFormationsCatalogue();
 
     assert.deepStrictEqual(
       await formationsCatalogueDb().find().toArray(),
@@ -349,6 +348,6 @@ describe("Job hydrateFormationsCatalogue", () => {
         "content-type": "application/json",
       });
 
-    await hydrateFormationsCatalogue(logger);
+    await hydrateFormationsCatalogue();
   });
 });

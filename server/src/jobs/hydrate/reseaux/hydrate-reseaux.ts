@@ -1,10 +1,10 @@
 import path from "path";
 
-import Logger from "bunyan";
 import { WithId } from "mongodb";
 
 import { findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
 import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 import { asyncForEach } from "@/common/utils/asyncUtils";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -71,7 +71,7 @@ const mapFileOrganisme = (organismeFromFile) => {
 /**
  * Fonction de remise à zero des réseaux dans la collection organismes
  */
-const clearReseauxInOrganismes = async (logger: Logger) => {
+const clearReseauxInOrganismes = async () => {
   logger.info("Remise à zero des réseaux pour tous les organismes...");
   await organismesDb().updateMany({ siret: { $exists: true } }, { $set: { reseaux: [] } });
 };
@@ -79,11 +79,11 @@ const clearReseauxInOrganismes = async (logger: Logger) => {
 /**
  * Fonction de remplissage des réseaux
  */
-export const hydrateReseaux = async (logger: Logger) => {
-  await clearReseauxInOrganismes(logger);
+export const hydrateReseaux = async () => {
+  await clearReseauxInOrganismes();
 
   for (const currentReseauFile of INPUT_FILES) {
-    await hydrateReseauFile(logger, currentReseauFile);
+    await hydrateReseauFile(currentReseauFile);
   }
 };
 
@@ -91,7 +91,7 @@ export const hydrateReseaux = async (logger: Logger) => {
  * Fonction de remplissage des données d'un fichier réseau
  * @param {*} filename
  */
-const hydrateReseauFile = async (logger: Logger, filename: string) => {
+const hydrateReseauFile = async (filename) => {
   logger.info("Import des données réseaux de ", filename);
 
   // read référentiel file from réseau and convert it to JSON

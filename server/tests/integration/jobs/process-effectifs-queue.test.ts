@@ -1,7 +1,6 @@
 import { strict as assert } from "assert";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
-import logger from "@/common/logger";
 import { effectifsQueueDb, effectifsDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
@@ -42,7 +41,7 @@ describe("Processing de EffectifsQueue", () => {
       const { insertedId } = await effectifsQueueDb().insertOne(
         createRandomDossierApprenantApiInput({ [requiredField]: undefined, source: "testSource" })
       );
-      const result = await processEffectifsQueue(logger);
+      const result = await processEffectifsQueue();
       assert.deepStrictEqual(result, {
         totalProcessed: 1,
         totalValidItems: 0,
@@ -75,7 +74,7 @@ describe("Processing de EffectifsQueue", () => {
       })
     );
 
-    const result = await processEffectifsQueue(logger);
+    const result = await processEffectifsQueue();
     assert.deepStrictEqual(result, {
       totalProcessed: 1,
       totalValidItems: 0,
@@ -122,7 +121,7 @@ describe("Processing de EffectifsQueue", () => {
         source: "testSource",
       })
     );
-    const result = await processEffectifsQueue(logger);
+    const result = await processEffectifsQueue();
     assert.deepStrictEqual(result, {
       totalProcessed: 1,
       totalValidItems: 0,
@@ -182,7 +181,7 @@ describe("Processing de EffectifsQueue", () => {
     };
 
     await effectifsQueueDb().insertOne(sampleData);
-    const result = await processEffectifsQueue(logger);
+    const result = await processEffectifsQueue();
     assert.deepStrictEqual(result, {
       totalProcessed: 1,
       totalValidItems: 1,
@@ -217,7 +216,7 @@ describe("Processing de EffectifsQueue", () => {
     };
 
     const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
-    const result = await processEffectifsQueue(logger);
+    const result = await processEffectifsQueue();
     assert.deepStrictEqual(result, {
       totalProcessed: 1,
       totalValidItems: 1,

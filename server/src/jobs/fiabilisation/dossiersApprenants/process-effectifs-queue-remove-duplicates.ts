@@ -1,8 +1,7 @@
-import Logger from "bunyan";
-
+import logger from "@/common/logger";
 import { effectifsQueueDb } from "@/common/model/collections";
 
-export const removeDuplicatesEffectifsQueue = async (logger: Logger) => {
+export const removeDuplicatesEffectifsQueue = async () => {
   logger.info("Find duplicates in effectifs queue...");
 
   const duplicates = await effectifsQueueDb()

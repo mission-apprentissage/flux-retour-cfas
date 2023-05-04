@@ -1,7 +1,6 @@
-import Logger from "bunyan";
-
 import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import { updateOrganisme } from "@/common/actions/organismes/organismes.actions";
+import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 
 const JOB_NAME = "update-organismes-with-apis";
@@ -17,7 +16,7 @@ const DELAY_BETWEEN_UPDATES = 250;
  * - On va récupérer les métiers associés via l'API LaBonneAlternance
  * Pas de promisePool pour pouvoir respecter les rateLimits des API
  */
-export const updateOrganismesWithApis = async (logger: Logger) => {
+export const updateOrganismesWithApis = async () => {
   // On récupère l'intégralité des organismes depuis le référentiel ayant un siret (nécessaire pour un update valide)
   const organismesToUpdate = await organismesDb()
     .find({ siret: { $exists: true } })

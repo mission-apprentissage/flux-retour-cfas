@@ -1,5 +1,3 @@
-import Logger from "bunyan";
-
 import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import logger from "@/common/logger";
 import { apiRoles } from "@/common/roles";
@@ -33,7 +31,7 @@ export const createUserAccount = async ({ email }) => {
  * Fonction de création d'un compte ERP utilisateur via l'ancien modèle
  * @param {*} username
  */
-export const createErpUserLegacy = async (logger: Logger, username: string) => {
+export const createErpUserLegacy = async (username) => {
   await createUserLegacy({
     username,
     permissions: [apiRoles.apiStatutsSeeder],

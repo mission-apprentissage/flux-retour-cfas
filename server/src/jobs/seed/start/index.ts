@@ -1,16 +1,15 @@
-import Logger from "bunyan";
-
 import { register } from "@/common/actions/account.actions";
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
+import logger from "@/common/logger";
 import { usersMigrationDb } from "@/common/model/collections";
 import { buildAdresseFromUai } from "@/common/utils/uaiUtils";
 
 // TODO devrait désactiver l'envoi d'email globalement en mode CLI
-export const seedAdmin = async (logger: Logger, { email = "admin@test.fr" }) => {
+export const seedAdmin = async (email = "admin@test.fr") => {
   // Create user Admin
   await register({
     user: {
-      email: email.toLowerCase(),
+      email,
       password: "Secret!Password1",
       civility: "Monsieur",
       nom: "Admin",
@@ -37,12 +36,12 @@ export const seedAdmin = async (logger: Logger, { email = "admin@test.fr" }) => 
   logger.info(`Admin User ${email} with password 'Secret!Password1' is successfully created `);
 };
 
-export const seedSample = async (logger: Logger) => {
-  await seedSampleOrganismes(logger);
+export const seedSample = async () => {
+  await seedSampleOrganismes();
   await seedSampleUsers();
 };
 
-const seedSampleOrganismes = async (logger: Logger) => {
+const seedSampleOrganismes = async () => {
   // Create Organisme A reseau A erp A
   // Create Organisme B reseau A erp B
   // Create Organisme C reseau B erp A
