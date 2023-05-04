@@ -86,6 +86,7 @@ yarn --cwd server imports
 ### Serveur Nodes & Nginx - Reverse Proxy
 
 Le serveur nginx écoute sur le port 80 et fait office de reverse proxy pour les services :
+
 - server
 - ui
 - smtp
@@ -137,9 +138,7 @@ yarn lint
 
 ## Tests
 
-Des tests sont mis en place en utilisant le framework Mocha.
-
-_Pour en savoir plus sur Mocha : https://mochajs.org/_
+Des tests sont mis en place en utilisant le framework Jest.
 
 Les tests sont en règle général découpés en 3 dossiers :
 
@@ -183,7 +182,6 @@ Il vous faudra créer une application dans Slack et récupérer le lien de la We
 ### Utilitaires
 
 Certains modules utilitaires sont présents dans `server/src/common/utils`
-
 
 ## Debugger sous VSCode
 

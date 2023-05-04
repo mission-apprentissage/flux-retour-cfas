@@ -180,9 +180,7 @@ yarn lint
 
 ## Tests
 
-Des tests sont mis en place en utilisant le framework Mocha.
-
-_Pour en savoir plus sur Mocha : https://mochajs.org/_
+Des tests sont mis en place en utilisant le framework Jest.
 
 Les tests sont en règle général découpés en 3 dossiers :
 
