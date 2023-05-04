@@ -12,7 +12,7 @@ module.exports = {
     // spécifique server
     "plugin:node/recommended-module",
   ],
-  plugins: ["mocha", "import", "@typescript-eslint"],
+  plugins: ["import", "@typescript-eslint"],
   rules: {
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/ban-ts-comment": 0,
