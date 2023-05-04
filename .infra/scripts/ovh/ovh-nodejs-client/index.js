@@ -17,7 +17,7 @@ cli
   .action(async ({ key }) => {
     let client = await getClient(key);
 
-    await client.request("GET", `/auth/time`);
+    await client.request("GET", "/auth/time");
   });
 
 cli
@@ -30,7 +30,7 @@ cli
     await configureFirewall(client, ip);
     await activateMitigation(client, ip);
 
-    console.log(`Firewall and mitigation activated for VPS ${ip}`);
+    console.info(`Firewall and mitigation activated for VPS ${ip}`);
   });
 
 cli
@@ -42,7 +42,7 @@ cli
 
     await createBackupPartition(client, ip, partitionName);
 
-    console.log(`NAS partition '${partitionName}' created`);
+    console.info(`NAS partition '${partitionName}' created`);
   });
 
 cli
@@ -54,7 +54,7 @@ cli
 
     await closeService(client, ip);
 
-    console.log(`Service closed on port 80/443 for VPS ${ip}.`);
+    console.info(`Service closed on port 80/443 for VPS ${ip}.`);
   });
 
 cli.parse(process.argv);

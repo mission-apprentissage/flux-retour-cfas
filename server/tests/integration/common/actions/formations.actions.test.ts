@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import omit from "lodash.omit";
+import { ObjectId } from "mongodb";
 import nock from "nock";
 
 import {
@@ -11,14 +12,24 @@ import {
   getNiveauFormationFromLibelle,
   searchFormations,
 } from "@/common/actions/formations.actions";
-import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { Formation } from "@/common/model/@types/Formation";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { formationsDb, effectifsDb, organismesDb } from "@/common/model/collections";
 import { dataForGetCfdInfo } from "@tests/data/apiTablesDeCorrespondances";
-import { createSampleEffectif } from "@tests/data/randomizedSample";
+import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { nockGetMetiersByCfd } from "@tests/utils/nockApis/nock-Lba";
 import { nockGetCfdInfo } from "@tests/utils/nockApis/nock-tablesCorrespondances";
+import { id } from "@tests/utils/testUtils";
+
+const organisme: Organisme = {
+  _id: new ObjectId(id(1)),
+  ...createRandomOrganisme({ siret: "19040492100016" }),
+};
+
+const organisme2: Organisme = {
+  _id: new ObjectId(id(2)),
+  ...createRandomOrganisme({ siret: "41461021200014" }),
+};
 
 describe("Tests des actions Formations", () => {
   describe("existsFormation", () => {
@@ -141,32 +152,38 @@ describe("Tests des actions Formations", () => {
     ];
 
     beforeEach(async () => {
-      nock.cleanAll();
-      nockGetCfdInfo((cfd) =>
-        formationsSeed
-          .filter((f) => f.cfd === cfd)
-          .map((o) => ({
-            cfd: o.cfd,
-            intitule_long: o.libelle,
-            intitule_court: o.libelle,
-          }))
-          .pop()
-      );
+      try {
+        await organismesDb().insertOne(organisme);
+        await organismesDb().insertOne(organisme2);
 
-      await Promise.all(
-        formationsSeed.map(async ({ cfd }) => {
-          await Promise.all([
-            createFormation({ cfd }),
-            effectifsDb().insertOne(
-              createSampleEffectif({
-                formation: {
-                  cfd,
-                },
-              })
-            ),
-          ]);
-        })
-      );
+        nock.cleanAll();
+        nockGetCfdInfo((cfd) =>
+          formationsSeed
+            .filter((f) => f.cfd === cfd)
+            .map((o) => ({
+              cfd: o.cfd,
+              intitule_long: o.libelle,
+              intitule_court: o.libelle,
+            }))
+            .pop()
+        );
+        await Promise.all(
+          formationsSeed.map(async ({ cfd }) => {
+            await Promise.all([
+              createFormation({ cfd }),
+              effectifsDb().insertOne(
+                createSampleEffectif({
+                  formation: { cfd },
+                  organisme: organisme2,
+                })
+              ),
+            ]);
+          })
+        );
+      } catch (e) {
+        console.log(JSON.stringify(e, null, 2));
+        throw e;
+      }
     });
 
     const validCases = [
@@ -226,36 +243,13 @@ describe("Tests des actions Formations", () => {
       });
     });
 
-    const organisme: Organisme = {
-      uai: "0040533H",
-      siret: "19040492100016",
-      nom: "LYCEE POLYVALENT LES ISCLES",
-      nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
-      adresse: {
-        academie: "2",
-        code_insee: "04112",
-        code_postal: "04100",
-        commune: "MANOSQUE",
-        complete: "LYCEE POLYVALENT LES ISCLES\r\n" + "116 AV REGIS RYCKEBUSH\r\n" + "04100 MANOSQUE\r\n" + "FRANCE",
-        departement: "04",
-        numero: 116,
-        region: "93",
-        voie: "AVREGIS RYCKEBUSH",
-      },
-      reseaux: ["AGRI"],
-      relatedFormations: [],
-    };
-
     it("returns results matching libelle and etablissement_num_region", async () => {
       const searchTerm = "decoration";
 
-      const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
       await effectifsDb().insertOne(
         createSampleEffectif({
-          formation: {
-            cfd: formationsSeed[2].cfd,
-          },
-          organisme_id,
+          formation: { cfd: formationsSeed[2].cfd },
+          organisme,
         })
       );
 
@@ -268,13 +262,13 @@ describe("Tests des actions Formations", () => {
     it("returns results matching libelle and etablissement_num_departement", async () => {
       const searchTerm = "decoration";
 
-      const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
+      // const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
       await effectifsDb().insertOne(
         createSampleEffectif({
           formation: {
             cfd: formationsSeed[2].cfd,
           },
-          organisme_id,
+          organisme,
         })
       );
 
@@ -290,13 +284,13 @@ describe("Tests des actions Formations", () => {
     it("returns results matching libelle and etablissement_reseau", async () => {
       const searchTerm = "decoration";
 
-      const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
+      // const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
       await effectifsDb().insertOne(
         createSampleEffectif({
           formation: {
             cfd: formationsSeed[2].cfd,
           },
-          organisme_id,
+          organisme,
         })
       );
 
@@ -309,13 +303,13 @@ describe("Tests des actions Formations", () => {
     it("returns results matching libelle and uai_etablissement", async () => {
       const searchTerm = "decoration";
 
-      const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
+      // const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
       await effectifsDb().insertOne(
         createSampleEffectif({
           formation: {
             cfd: formationsSeed[2].cfd,
           },
-          organisme_id,
+          organisme,
         })
       );
 

@@ -1,7 +1,6 @@
 import { ObjectId } from "mongodb";
 
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
-import logger from "@/common/logger";
 import { formationsDb, effectifsDb } from "@/common/model/collections";
 import { validateFormation } from "@/common/model/formations.model";
 import { escapeRegExp } from "@/common/utils/regexUtils";
@@ -117,14 +116,11 @@ export const createFormation = async ({
  * @return {Promise<Object[]>} Array of formations
  */
 export const searchFormations = async (searchCriteria) => {
-  let start = Date.now();
   const eligibleCfds = (
     await effectifsDb()
       .aggregate([...buildMongoPipelineFilterStages(searchCriteria), { $group: { _id: "$formation.cfd" } }])
       .toArray()
   ).map((row) => row._id);
-  logger.info({ elapsted: Date.now() - start, eligibleCfds: eligibleCfds.length }, "searchFormations_eligibleCfds");
-
   const matchStage = searchCriteria.searchTerm
     ? {
         $or: [
@@ -144,12 +140,9 @@ export const searchFormations = async (searchCriteria) => {
       }
     : { libelle: 1 };
 
-  start = Date.now();
-
   const formations = await formationsDb()
     .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
     .toArray();
 
-  logger.info({ elapsted: Date.now() - start, formations: formations.length }, "searchFormations_formations");
   return formations;
 };

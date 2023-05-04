@@ -107,7 +107,7 @@ export const employerSiretLogic = [
     deps: ["apprenant.nouveau_contrat"],
     process: async ({ values, organisme, effectifId }) => {
       try {
-        const cerfa = await apiService.saveCerfa({
+        await apiService.saveCerfa({
           organisme_id: organisme._id,
           effectifId,
           data: {
@@ -155,7 +155,6 @@ export const employerSiretLogic = [
             "apprenantnouveau_contrat.adresse.region",
           ],
         });
-        console.log(cerfa);
         window.location.reload(); // TODO tmp
       } catch (e) {
         console.error(e);

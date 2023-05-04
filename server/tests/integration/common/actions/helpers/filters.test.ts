@@ -16,7 +16,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
           },
         },
@@ -34,7 +34,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             organisme_id: new ObjectId("635acdad5e798f12bd919861"),
           },
@@ -53,7 +53,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             "_computed.organisme.departement": "56",
           },
@@ -72,7 +72,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             "_computed.organisme.region": "25",
           },
@@ -91,7 +91,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             "_computed.organisme.reseaux": "AGRI",
           },
@@ -110,7 +110,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             "_computed.organisme.siret": "84412312300008",
           },
@@ -129,7 +129,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             "_computed.organisme.uai": "0112233A",
           },
@@ -148,7 +148,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             "formation.cfd": "25021000",
           },
@@ -167,7 +167,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             "formation.niveau": "2",
           },
@@ -193,7 +193,7 @@ describe("Filtres Indicateurs", () => {
         {
           $match: {
             annee_scolaire: {
-              $in: ["2022-2022", "2022-2023"],
+              $in: ["2023-2023", "2022-2023"],
             },
             "formation.cfd": "25021000",
             "formation.niveau": "2",
@@ -228,7 +228,7 @@ describe("Filtres Indicateurs", () => {
           {
             $match: {
               annee_scolaire: {
-                $in: ["2022-2022", "2022-2023"],
+                $in: ["2023-2023", "2022-2023"],
               },
               "formation.cfd": "25021000",
               "formation.niveau": "2",

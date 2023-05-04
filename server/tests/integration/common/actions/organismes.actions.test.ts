@@ -37,7 +37,7 @@ const sampleOrganismeWithoutUAIOutput = {
   metiers: [],
   reseaux: [],
   erps: [],
-  formations: [],
+  relatedFormations: [],
   fiabilisation_statut: "INCONNU",
   adresse: { departement: "01", region: "84", academie: "10" },
   ferme: false,
@@ -231,7 +231,6 @@ describe("Test des actions Organismes", () => {
       assert.deepEqual(updated, {
         ...sampleOrganismeWithUAIOutput,
         nom: "UPDATED",
-        nom_tokenized: "UPDA UPDAT UPDATE UPDATED",
         _id: updated?._id || "should not be null",
         created_at: updated?.created_at || "should not be null",
         updated_at: updated?.updated_at || "should not be null",

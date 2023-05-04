@@ -2,9 +2,11 @@ import express from "express";
 import Joi from "joi";
 
 import logger from "@/common/logger";
+import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
-import dossierApprenantSchema from "@/common/validation/dossierApprenantSchema";
+import { formatError } from "@/common/utils/errorUtils";
+import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
@@ -17,36 +19,47 @@ export default () => {
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
   router.post("/", async ({ user, body }, res) => {
-    const effectifsToQueue = (
-      await Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).validateAsync(body, { abortEarly: false })
-    ).map((dossierApprenant) => {
-      const validation_errors = dossierApprenantSchema.validate(dossierApprenant, {
-        allowUnknown: true,
-        abortEarly: false,
-      })?.error;
+    const bodyItems = await Joi.array()
+      .max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)
+      .validateAsync(body, { abortEarly: false });
+    const source = user.username;
+    const effectifsToQueue: EffectifsQueue[] = bodyItems.map((dossierApprenant) => {
+      const result = dossierApprenantSchemaV1V2Zod().safeParse({
+        source,
+        ...dossierApprenant,
+      });
+      let prettyValidationError;
+      if (!result.success) {
+        prettyValidationError = result.error.issues.map(({ path, message }) => ({ message, path }));
+      }
+
       return {
+        source,
         ...dossierApprenant,
         ...defaultValuesEffectifQueue(),
-        source: user.username,
-        ...(validation_errors ? { process_at: new Date() } : {}),
-        validation_errors: validation_errors || [],
+        ...(prettyValidationError ? { processed_at: new Date() } : {}),
+        validation_errors: prettyValidationError || [],
       };
     });
 
     try {
-      if (effectifsToQueue.length) {
+      if (effectifsToQueue.length === 1) {
+        await effectifsQueueDb().insertOne(effectifsToQueue[0]);
+      } else if (effectifsToQueue.length) {
         await effectifsQueueDb().insertMany(effectifsToQueue);
       }
       res.json({
         status: "OK",
         message: "Queued",
-        detail: effectifsToQueue.some((effectif) => effectif.validation_errors.length)
+        detail: effectifsToQueue.some((effectif) => effectif.validation_errors?.length)
           ? "Some data are invalid"
           : undefined,
         data: effectifsToQueue,
       });
-    } catch (err: any) {
+    } catch (e: any) {
+      const err = formatError(e);
       logger.error({ err }, "POST /dossiers-apprenants error");
+
       res.status(500).json({
         status: "ERROR",
         message: err.message,

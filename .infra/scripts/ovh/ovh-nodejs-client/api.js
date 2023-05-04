@@ -30,7 +30,7 @@ async function getClient(key) {
     ],
   });
 
-  console.log(`Waiting 20 sec for the key ${consumerKey} to be validated...`);
+  console.info(`Waiting 20 sec for the key ${consumerKey} to be validated...`);
   await open(validationUrl);
 
   return new Promise((resolve) => {

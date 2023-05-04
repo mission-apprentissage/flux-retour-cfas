@@ -1,6 +1,7 @@
 import { addHours, isBefore } from "date-fns";
 import { ObjectId } from "mongodb";
 
+import { User } from "@/common/model/@types";
 import { usersDb } from "@/common/model/collections";
 import { generateRandomAlphanumericPhrase } from "@/common/utils/miscUtils";
 import { compare, isTooWeak, hash } from "@/common/utils/passwordUtils";
@@ -187,26 +188,11 @@ export const removeUserLegacy = async (username) => {
  * @param {*} id
  * @param {*} param1
  */
-export const updateUserLegacy = async (id: any, { username, email, network, region, organisme }: any) => {
-  const _id = new ObjectId(id);
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
+export const updateUserLegacy = async (_id: ObjectId, data: Partial<User>) => {
   const user = await usersDb().findOne({ _id });
 
   if (!user) {
     throw new Error("Unable to find user");
   }
-
-  await usersDb().updateOne(
-    { _id },
-    {
-      $set: {
-        username,
-        email,
-        network,
-        region,
-        organisme,
-      },
-    }
-  );
+  await usersDb().updateOne({ _id }, { $set: data });
 };

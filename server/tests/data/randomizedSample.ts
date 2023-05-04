@@ -13,7 +13,7 @@ const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
 const getRandomFormationCfd = () => new RandExp(CFD_REGEX).gen().toUpperCase();
 const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
-const getRandomEtablissement = (siret?: any) =>
+const getRandomEtablissement = (siret?: string) =>
   siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
 
@@ -113,8 +113,21 @@ export const createSampleEffectif = (params: any = {}) => {
     id_erp_apprenant: faker.datatype.uuid(),
     source: faker.random.word(),
     annee_scolaire,
-    organisme_id: null,
-    ...omit(params, ["apprenant", "formation"]),
+    organisme_id: params.organisme?._id || null,
+    _computed: params.organisme
+      ? {
+          organisme: {
+            region: params.organisme.adresse.region,
+            departement: params.organisme.adresse.departement,
+            academie: params.organisme.adresse.academie,
+            reseaux: params.organisme.reseaux || [],
+            uai: params.organisme.uai,
+            siret: params.organisme.siret,
+          },
+        }
+      : {},
+
+    ...omit(params, ["organisme", "apprenant", "formation"]),
   };
 };
 
