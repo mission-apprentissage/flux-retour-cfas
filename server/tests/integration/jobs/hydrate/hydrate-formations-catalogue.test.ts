@@ -6,12 +6,13 @@ import nock from "nock";
 
 import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb } from "@/common/model/collections";
+import { WithStringId } from "@/common/model/types";
 import config from "@/config";
 import { hydrateFormationsCatalogue } from "@/jobs/hydrate/hydrate-formations-catalogue";
 import { id } from "@tests/utils/testUtils";
 
 describe("Job hydrateFormationsCatalogue", () => {
-  const formationsCatalogue: FormationsCatalogue[] = [
+  const formationsCatalogue: WithStringId<FormationsCatalogue>[] = [
     {
       _id: id(1),
       cle_ministere_educatif: "AAA",
@@ -49,7 +50,8 @@ describe("Job hydrateFormationsCatalogue", () => {
     );
   });
 
-  const formationsCatalogueCompletes = [
+  // type issue with arrayOfOrNull and bson-schema-to-typescript
+  const formationsCatalogueCompletes: WithStringId<any>[] = [
     {
       _id: id(1),
       cle_ministere_educatif: "082581P012X1300279230016313002792300171-33063#L01",

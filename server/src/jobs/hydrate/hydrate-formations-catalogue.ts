@@ -2,11 +2,12 @@ import { IncomingMessage } from "node:http";
 
 import axios from "axios";
 import JSONStream from "JSONStream";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 import parentLogger from "@/common/logger";
 import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb } from "@/common/model/collections";
+import { WithStringId } from "@/common/model/types";
 import config from "@/config";
 
 const logger = parentLogger.child({
@@ -40,7 +41,7 @@ export const hydrateFormationsCatalogue = async () => {
 
   const queriesInProgress: Promise<any>[] = [];
   let totalFormations = 0;
-  let pendingFormations: FormationsCatalogue[] = [];
+  let pendingFormations: WithId<FormationsCatalogue>[] = [];
 
   function flushPendingFormations() {
     totalFormations += pendingFormations.length;
@@ -54,9 +55,11 @@ export const hydrateFormationsCatalogue = async () => {
   return new Promise<void>((resolve, reject) => {
     const parser = JSONStream.parse("*");
     res.data.pipe(parser);
-    parser.on("data", (formation: FormationsCatalogue) => {
-      formation._id = new ObjectId(formation._id);
-      pendingFormations.push(formation);
+    parser.on("data", (formation: WithStringId<FormationsCatalogue>) => {
+      pendingFormations.push({
+        ...formation,
+        _id: new ObjectId(formation._id),
+      });
       if (pendingFormations.length === INSERT_BATCH_SIZE) {
         flushPendingFormations();
       }

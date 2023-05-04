@@ -176,11 +176,10 @@ describe("Components Users Test", () => {
       const createdId = await createUserLegacy({ username: "user" });
       // generate update token
       const token = await generatePasswordUpdateTokenLegacy("user");
-      // force password_update_token_expiry to 10 minutes ago
-      const user = await usersDb().findOne({ _id: createdId });
 
+      // force password_update_token_expiry to 10 minutes ago
       await usersDb().updateOne(
-        { _id: user?._id },
+        { _id: createdId },
         { $set: { password_update_token_expiry: subMinutes(new Date(), 10) } }
       );
 

@@ -12,7 +12,6 @@ import {
   getNiveauFormationFromLibelle,
   searchFormations,
 } from "@/common/actions/formations.actions";
-import { Formation } from "@/common/model/@types/Formation";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { formationsDb, effectifsDb, organismesDb } from "@/common/model/collections";
 import { dataForGetCfdInfo } from "@tests/data/apiTablesDeCorrespondances";
@@ -63,8 +62,8 @@ describe("Tests des actions Formations", () => {
       const cfd = "2502000D";
       const { insertedId } = await formationsDb().insertOne({ cfd });
 
-      const found = (await getFormationWithCfd(cfd)) as Formation;
-      assert.equal(insertedId.equals(found._id), true);
+      const found = await getFormationWithCfd(cfd);
+      assert.equal(found?._id.equals(insertedId), true);
     });
   });
 

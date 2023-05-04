@@ -63,7 +63,10 @@ export const schema = object(
     ),
     unsubscribe: boolean({ description: "unsubscribe email" }),
   },
-  { required: ["email", "civility", "nom", "prenom", "password", "account_status"], additionalProperties: true }
+  {
+    required: ["email", "civility", "nom", "prenom", "password", "account_status", "organisation_id"],
+    additionalProperties: true,
+  }
 );
 
 // Extra validation

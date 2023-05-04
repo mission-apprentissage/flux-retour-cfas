@@ -170,7 +170,7 @@ export const findOrganismeFormationByCfd = async (organisme_id: string, cfd: str
 
   return formationFound
     ? organisme.relatedFormations?.find(
-        (formation) => formation.formation_id.toString() === formationFound._id.toString()
+        (formation) => formation.formation_id?.toString() === formationFound._id.toString()
       )
     : null;
 };

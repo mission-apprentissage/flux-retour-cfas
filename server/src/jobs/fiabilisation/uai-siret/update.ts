@@ -1,5 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool";
-import { MongoServerError } from "mongodb";
+import { MongoServerError, WithId } from "mongodb";
 
 import {
   createOrganisme,
@@ -12,6 +12,7 @@ import {
   STATUT_FIABILISATION_ORGANISME,
 } from "@/common/constants/fiabilisation";
 import logger from "@/common/logger";
+import { Organisme } from "@/common/model/@types";
 import {
   effectifsDb,
   fiabilisationUaiSiretDb,
@@ -190,7 +191,7 @@ export const updateOrganismesNonFiablesUaiFermee = async () => {
     // s'il existe un organisme dans le référentiel avec l'uai non fiable fermée
     if (organismesFiableForSiret.length === 1) {
       const organismeFiable = organismesFiableForSiret[0];
-      const organismeNonFiable = await organismesDb().findOne({ uai, siret });
+      const organismeNonFiable = (await organismesDb().findOne({ uai, siret })) as WithId<Organisme>;
 
       const countOrganismeReferentielForUaiFerme = await organismesReferentielDb().countDocuments({
         uai,
@@ -207,7 +208,7 @@ export const updateOrganismesNonFiablesUaiFermee = async () => {
 
         if (duplicatesForFiableAndNonFiable.length > 0) {
           // On déplace les effectifs du non fiable vers le fiable
-          const effectifsToMoveToFiable = await effectifsDb().find({ organisme_id: organismeNonFiable?._id }).toArray();
+          const effectifsToMoveToFiable = await effectifsDb().find({ organisme_id: organismeNonFiable._id }).toArray();
           for (const currentEffectifToUpdate of effectifsToMoveToFiable) {
             try {
               const { modifiedCount } = await effectifsDb().updateOne(

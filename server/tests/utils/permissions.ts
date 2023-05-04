@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 import { Effectif } from "@/common/model/@types/Effectif";
 import { Organisme } from "@/common/model/@types/Organisme";
@@ -46,7 +46,7 @@ const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key]
   updated_at: new Date("2023-04-12T18:00:00.000Z"),
 };
 
-export const organismes: Organisme[] = [
+export const organismes: WithId<Organisme>[] = [
   // owner
   {
     _id: new ObjectId(id(1)),
