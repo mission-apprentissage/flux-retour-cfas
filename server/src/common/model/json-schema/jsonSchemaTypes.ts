@@ -6,6 +6,10 @@ export function number(custom = {}) {
   return { bsonType: "number", ...custom };
 }
 
+export function numberOrNull(custom = {}) {
+  return { bsonType: ["number", "null"], ...custom };
+}
+
 export function integer(custom = {}) {
   return { bsonType: "int", ...custom };
 }
@@ -35,6 +39,10 @@ export function boolean(custom = {}) {
   return { bsonType: "bool", ...custom };
 }
 
+export function booleanOrNull(custom = {}) {
+  return { bsonType: ["bool", "null"], ...custom };
+}
+
 export function date(custom = {}) {
   return { bsonType: "date", ...custom };
 }
@@ -51,6 +59,14 @@ export function arrayOf(items, custom = {}) {
   };
 }
 
+export function arrayOfOrNull(items, custom = {}) {
+  return {
+    bsonType: ["array", "null"],
+    ...custom,
+    items,
+  };
+}
+
 export function array(custom = {}) {
   return {
     bsonType: "array",
@@ -61,6 +77,14 @@ export function array(custom = {}) {
 export function object(properties, custom = {}) {
   return {
     bsonType: "object",
+    additionalProperties: false,
+    ...custom,
+    properties,
+  };
+}
+export function objectOrNull(properties, custom = {}) {
+  return {
+    bsonType: ["object", "null"],
     additionalProperties: false,
     ...custom,
     properties,
