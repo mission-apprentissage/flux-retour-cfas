@@ -23,8 +23,9 @@ call_daily_jobs_with_logs(){
   # Mise à jour des organismes via APIs externes
   docker exec flux_retour_cfas_server bash -c "yarn cli update:organismes-with-apis" || true
 
-  # Purge des données inutiles
+  # Purge des collections events et queues
   docker exec flux_retour_cfas_server bash -c "yarn cli purge:events" || true
+  docker exec flux_retour_cfas_server bash -c "yarn cli purge:queues" || true
 
   # Mise a jour du nb d'effectifs
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes-effectifs-count" || true
