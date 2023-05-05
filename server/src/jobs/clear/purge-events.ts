@@ -4,7 +4,7 @@ import logger from "@/common/logger";
 import { jobEventsDb } from "@/common/model/collections";
 
 /**
- * Ce script de purger des données inutiles : les jobEvents et les usersEvents de post de dossiers
+ * purge de la collection jobEvents
  */
 export const purgeEvents = async (NB_DAYS_TO_KEEP = 15) => {
   const lastDateToKeep = subDays(new Date(), NB_DAYS_TO_KEEP);

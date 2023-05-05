@@ -6,6 +6,7 @@ import { closeMongodbConnection } from "./common/mongodb";
 import createServer from "./http/server";
 import { clear, clearUsers } from "./jobs/clear/clear-all";
 import { purgeEvents } from "./jobs/clear/purge-events";
+import { purgeQueues } from "./jobs/clear/purge-queues";
 import { findInvalidDocuments } from "./jobs/db/findInvalidDocuments";
 import { recreateIndexes } from "./jobs/db/recreateIndexes";
 import { processEffectifsQueueEndlessly } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
@@ -324,10 +325,23 @@ program
 program
   .command("purge:events")
   .description("Purge des logs inutiles")
-  .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
+  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
   .action(
     runJob(async ({ nbDaysToKeep }) => {
       return purgeEvents(nbDaysToKeep);
+    })
+  );
+
+/**
+ * Job de purge des queues
+ */
+program
+  .command("purge:queues")
+  .description("Purge des queues")
+  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
+  .action(
+    runJob(async ({ nbDaysToKeep }) => {
+      return purgeQueues(nbDaysToKeep);
     })
   );
 
