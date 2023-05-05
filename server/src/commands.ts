@@ -325,7 +325,7 @@ program
 program
   .command("purge:events")
   .description("Purge des logs inutiles")
-  .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
+  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
   .action(
     runJob(async ({ nbDaysToKeep }) => {
       return purgeEvents(nbDaysToKeep);
@@ -338,7 +338,7 @@ program
 program
   .command("purge:queues")
   .description("Purge des queues")
-  .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
+  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
   .action(
     runJob(async ({ nbDaysToKeep }) => {
       return purgeQueues(nbDaysToKeep);
