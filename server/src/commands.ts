@@ -87,11 +87,11 @@ program
 
 program
   .command("db:find-invalid-documents")
-  .argument("<collectionName>", "collection to search for invalid documents")
+  .requiredOption("-c, --collection", "the collection to search for invalid documents")
   .description("Recherche des documents invalides")
   .action(
-    runJob(async (collectionName) => {
-      await findInvalidDocuments(collectionName);
+    runJob(async ({ collection }) => {
+      await findInvalidDocuments(collection);
     })
   );
 
@@ -472,6 +472,14 @@ program
       await generateTypes();
     })
   );
+
+program.hook("preAction", (_, actionCommand) => {
+  const command = actionCommand.name();
+  // on définit le module du logger en global pour distinguer les logs des jobs
+  if (command !== "start") {
+    logger.fields.module = `job:${command}`;
+  }
+});
 
 export async function startCLI() {
   await program.parseAsync(process.argv);
