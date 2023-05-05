@@ -1,5 +1,5 @@
 import Boom from "boom";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 import {
@@ -302,7 +302,7 @@ export const updateOrganisme = async (
  * @param {*} organisme
  * @returns
  */
-export const setOrganismeTransmissionDates = async (organisme: Organisme) =>
+export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) =>
   organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {

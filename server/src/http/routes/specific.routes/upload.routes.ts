@@ -373,7 +373,7 @@ export default {
         }
 
         const isItAFormationGivenByOrganisme = organisme.relatedFormations?.find(
-          (f) => f.formation_id.toString() === (formationFound as any)._id.toString()
+          (f) => f.formation_id?.toString() === (formationFound as any)._id.toString()
         );
 
         if (!isItAFormationGivenByOrganisme) {

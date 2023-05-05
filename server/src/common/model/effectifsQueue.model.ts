@@ -20,6 +20,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
  */
 export const schema = object(
   {
+    _id: objectId(),
     // required fields to create an effectif
     nom_apprenant: any(),
     prenom_apprenant: any(),

@@ -1,6 +1,6 @@
 import Boom from "boom";
 import { format } from "date-fns";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "@/common/constants/territoires";
 import logger from "@/common/logger";
@@ -182,7 +182,7 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
   }
 }
 
-export async function getOrganisationOrganisme(ctx: AuthContext): Promise<Organisme> {
+export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId<Organisme>> {
   const organisationOF = requireOrganisationOF(ctx);
 
   const organisme = await organismesDb().findOne({
