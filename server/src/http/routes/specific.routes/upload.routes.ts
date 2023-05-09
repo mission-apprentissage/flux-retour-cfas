@@ -434,7 +434,7 @@ export default {
                       !find(found.validation_errors, { fieldName: currentError.fieldName })
                     ) {
                       // we don't want errors on previously ok field
-                      cleanedUpErrors.push({ ...currentError, willNotBeModify: true });
+                      cleanedUpErrors.push({ ...currentError, willNotBeModified: true });
                     } else {
                       cleanedUpErrors.push(currentError);
                     }
@@ -465,15 +465,21 @@ export default {
             }
           }
 
+          // TO_DISCUSS A quoi cela sert ?
           for (const validation_error of effectifToSave.validation_errors) {
             const { fieldName } = validation_error;
             if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
-              validation_error.willNotBeModify = true;
+              // @ts-ignore
+              validation_error.willNotBeModified = true;
             } else if (fieldName === "contrats[0].date_debut" || fieldName === "contrats[0].date_fin") {
-              validation_error.willNotBeModify = true;
+              // @ts-ignore
+              validation_error.willNotBeModified = true;
+              // @ts-ignore
               validation_error.isRequired = true;
-            } else if (fieldName.includes("apprenant.historique_statut")) {
-              validation_error.willNotBeModify = true;
+            } else if (fieldName?.includes("apprenant.historique_statut")) {
+              // @ts-ignore
+              validation_error.willNotBeModified = true;
+              // @ts-ignore
               validation_error.isRequired = true;
             }
           }
@@ -590,7 +596,7 @@ export default {
         `Import en cours: ${index + 1} sur ${uploads.last_snapshot_effectifs.length} effectifs`
       );
 
-      let errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
+      let errorsToKeep = validation_errors.filter(({ willNotBeModified }) => !willNotBeModified);
 
       for (const [key, validation_error] of errorsToKeep.entries()) {
         let { fieldName } = validation_error;

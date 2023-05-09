@@ -3,7 +3,8 @@ import { PromisePool } from "@supercharge/promise-pool";
 import {
   insertEffectif,
   structureEffectifFromDossierApprenant,
-  updateEffectifAndLock,
+  lockEffectif,
+  updateEffectif,
 } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
@@ -127,8 +128,10 @@ export const processEffectifsQueue = async (options?: Options) => {
                 effectifData.apprenant?.historique_statut[0]?.valeur_statut,
                 effectifData.apprenant?.historique_statut[0]?.date_statut
               );
-
-              await updateEffectifAndLock(effectifId, effectif);
+              const updatedEffectif = await updateEffectif(effectifId, effectif);
+              if (updatedEffectif) {
+                await lockEffectif(updatedEffectif);
+              }
             } else {
               // FIXME intégrer dans une fonction globale insertEffectif
               effectif._computed = {
@@ -142,11 +145,7 @@ export const processEffectifsQueue = async (options?: Options) => {
                 },
               };
               const effectifCreated = await insertEffectif(effectif);
-              effectifId = effectifCreated._id;
-              await updateEffectifAndLock(effectifId, {
-                apprenant: effectifCreated.apprenant,
-                formation: effectifCreated.formation,
-              });
+              await lockEffectif(effectifCreated);
             }
 
             dataToUpdate = { effectif_id: effectifId };
