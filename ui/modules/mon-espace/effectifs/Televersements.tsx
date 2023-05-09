@@ -187,13 +187,14 @@ const Televersements = ({ organisme }) => {
       setRequireKeysSettled(reqKeys);
       let error = false;
       for (const value of reqKeys) {
-        if (value !== "RNCP" && value !== "CFD")
-          try {
-            const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
+        if (value !== "RNCP" && value !== "CFD") {
+          const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
+          if (keyToLock) {
             keyToLock.locked = true;
-          } catch (err) {
+          } else {
             error = true;
           }
+        }
       }
 
       if (error) {
