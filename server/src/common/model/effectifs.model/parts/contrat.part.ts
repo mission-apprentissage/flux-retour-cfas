@@ -1,4 +1,4 @@
-import { SIRET_REGEX_PATTERN } from "@/common/constants/organisme";
+import { SIRET_REGEX_PATTERN } from "@/common/constants/validations";
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 import { object, string, date, integer } from "@/common/model/json-schema/jsonSchemaTypes";
 

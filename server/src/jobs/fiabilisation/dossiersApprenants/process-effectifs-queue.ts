@@ -1,4 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
+import { ObjectId } from "mongodb";
 
 import {
   insertEffectif,
@@ -17,14 +18,12 @@ import {
   structureOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
-import { Effectif } from "@/common/model/@types/Effectif";
+import { Organisme } from "@/common/model/@types";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsQueueDb } from "@/common/model/collections";
 import { formatError } from "@/common/utils/errorUtils";
 import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
-import { ObjectId } from "mongodb";
-import { Organisme } from "@/common/model/@types";
 
 const sleepDuration = 10_000;
 
@@ -76,7 +75,7 @@ export const processEffectifsQueue = async (options?: Options) => {
 
           try {
             // Construction d'un historique à partir du statut et de la date_metier_mise_a_jour_statut
-            const effectifData = structureEffectifFromDossierApprenant(dossierApprenant) as any as Effectif;
+            const effectifData = structureEffectifFromDossierApprenant(dossierApprenant);
 
             let { organisme, error } = await resolveOrganisme({
               uai: dossierApprenant.uai_etablissement,
@@ -143,6 +142,7 @@ export const processEffectifsQueue = async (options?: Options) => {
                 },
               };
               const effectifCreated = await insertEffectif(effectif);
+              effectifId = effectifCreated._id;
               await lockEffectif(effectifCreated);
             }
 

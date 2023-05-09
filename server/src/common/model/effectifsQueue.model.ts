@@ -51,7 +51,10 @@ export const internalFields = {
 };
 
 /**
- * this schema doesn't contain any constraint
+ * Ce schéma est utilisé pour stocker et valider les données reçues.
+ * Il ne contient aucune contrainte afin de pouvoir stocker toutes les données reçues.
+ * Une premiere validation est effectuée lors de la réception des données, et les erreurs sont stockées dans le champ `validation_errors`.
+ * Une 2eme validation plus poussée (SIRET, formation, ...) est effectuée au moment de la creation de l'effectif et l'erreur est stockée dans le champ `error`.
  */
 export const schema = object(
   {
@@ -74,7 +77,7 @@ export const schema = object(
     code_commune_insee_apprenant: any({ description: apprenantProps.adresse.properties.code_insee.description }),
     siret_etablissement: any({ description: organismeProps.siret.description }),
     libelle_long_formation: any({ description: formationProps.libelle_long.description }),
-    periode_formation: any(),
+    periode_formation: any({ description: formationProps.periode.description }),
     annee_formation: any({ description: formationProps.annee.description }),
     formation_rncp: any({ description: formationProps.rncp.description }),
 
@@ -86,6 +89,7 @@ export const schema = object(
     ...internalFields,
   },
   {
+    required: ["source"],
     additionalProperties: true,
   }
 );

@@ -212,17 +212,18 @@ describe("Processing de EffectifsQueue", () => {
 
     const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
     const result = await processEffectifsQueue();
-    assert.deepStrictEqual(result, {
-      totalProcessed: 1,
-      totalValidItems: 1,
-      totalInvalidItems: 0,
-    });
 
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
     assert.equal(updatedInput?.validation_errors, undefined);
     assert.equal(updatedInput?.error, undefined);
     assert.equal(!!updatedInput?.processed_at, true);
+
+    assert.deepStrictEqual(result, {
+      totalProcessed: 1,
+      totalValidItems: 1,
+      totalInvalidItems: 0,
+    });
 
     // Check Nb Items added
     assert.deepEqual(await effectifsDb().countDocuments({}), 1);
@@ -245,6 +246,7 @@ describe("Processing de EffectifsQueue", () => {
         ine: "402957826QH",
         date_de_naissance: new Date("1999-08-31T16:21:32"),
         courriel: "Clandre34@hotmail.fr",
+        telephone: "+33534648662",
         adresse: {
           code_insee: "05109",
           code_postal: "05109",
@@ -272,7 +274,7 @@ describe("Processing de EffectifsQueue", () => {
           nationalite: false,
           handicap: false,
           courriel: true,
-          telephone: false,
+          telephone: true,
           adresse: {
             numero: false,
             repetition_voie: false,

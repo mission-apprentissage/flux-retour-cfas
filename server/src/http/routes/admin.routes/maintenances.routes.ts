@@ -1,22 +1,22 @@
 import express from "express";
-import Joi from "joi";
+import { z } from "zod";
 
 import {
   createMaintenanceMessage,
   updateMaintenanceMessage,
   removeMaintenanceMessage,
 } from "@/common/actions/maintenances.actions";
-import { validateFullObjectSchema } from "@/common/utils/validationUtils";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 
 export default () => {
   const router = express.Router();
 
   router.post("/", async (req, res) => {
-    const { msg, type, enabled, context } = await validateFullObjectSchema(req.body, {
-      msg: Joi.string().required(),
-      type: Joi.string().required(),
-      enabled: Joi.boolean().required(),
-      context: Joi.string().required(),
+    const { msg, type, enabled, context } = await validateFullZodObjectSchema(req.body, {
+      msg: z.string(),
+      type: z.string(),
+      enabled: z.boolean(),
+      context: z.string(),
     });
 
     if (!msg || enabled === undefined) {

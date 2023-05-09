@@ -87,7 +87,7 @@ describe("Tests des actions Formations", () => {
         date_ouverture: "invalid",
       }));
 
-      const cfd = "2502000D";
+      const cfd = "25020000D";
       await expect(createFormation({ cfd })).rejects.toThrowError();
     });
 

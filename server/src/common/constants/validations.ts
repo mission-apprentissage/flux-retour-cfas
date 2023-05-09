@@ -1,11 +1,3 @@
-export const NATURE_ORGANISME_DE_FORMATION = {
-  RESPONSABLE: "responsable",
-  FORMATEUR: "formateur",
-  RESPONSABLE_FORMATEUR: "responsable_formateur",
-  LIEU: "lieu_formation",
-  INCONNUE: "inconnue",
-} as const;
-
 export const REPETITION_VOIE_MAPPING = { Bis: "B", Ter: "T", Quater: "Q", ["Quinquiès"]: "C" };
 
 export const CFD_REGEX_PATTERN = "^[A-Z0-9]{8}$";

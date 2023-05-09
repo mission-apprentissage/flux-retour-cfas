@@ -1,6 +1,5 @@
 import { isEqual } from "date-fns";
-import Joi from "joi";
-import { capitalize, cloneDeep, get } from "lodash-es";
+import { cloneDeep, get } from "lodash-es";
 import { ObjectId } from "mongodb";
 
 import { buildEffectif, findEffectifByQuery } from "@/common/actions/effectifs.actions";
@@ -12,19 +11,8 @@ import {
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "@/common/constants/territoires";
 import { Effectif } from "@/common/model/@types/Effectif";
-import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "@/common/utils/formatterUtils";
-import { telephoneConverter } from "@/common/validation/utils/frenchTelephoneNumber";
 
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils";
-
-const dateConverter = (date) => {
-  // TODO If more than year 4000 error
-  if (date instanceof Date) return jsDateToLuxon(date).toISO();
-  else {
-    const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
-    return date_ISO ?? date;
-  }
-};
 
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
@@ -93,71 +81,18 @@ export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: O
     source,
     id_erp_apprenant,
     apprenant: { nom, prenom },
-    formation: { cfd },
-  } = await Joi.object({
-    organisme_id: Joi.any().required(),
-    annee_scolaire: Joi.string().required(),
-    source: Joi.string().required(),
-    id_erp_apprenant: Joi.string().required(),
-    apprenant: Joi.object({
-      nom: Joi.string().allow("").required(),
-      prenom: Joi.string().allow("").required(),
-    }).unknown(),
-    formation: Joi.object({
-      cfd: Joi.string().allow("").required(),
-    }).unknown(),
-  })
-    .unknown()
-    .validateAsync(effectifData, { abortEarly: false });
+    formation: { cfd } = {},
+  } = effectifData;
 
   let convertedEffectif = cloneDeep(effectifData);
-
-  if (effectifData.apprenant.date_de_naissance) {
-    convertedEffectif.apprenant.date_de_naissance = dateConverter(effectifData.apprenant.date_de_naissance);
-  }
-
-  if (effectifData.contrats?.length) {
-    for (const [key, contrat] of effectifData.contrats.entries()) {
-      if (contrat.date_debut) {
-        convertedEffectif.contrats[key].date_debut = dateConverter(contrat.date_debut);
-      }
-      if (contrat.date_fin) {
-        convertedEffectif.contrats[key].date_fin = dateConverter(contrat.date_fin);
-      }
-      if (contrat.date_rupture) {
-        convertedEffectif.contrats[key].date_rupture = dateConverter(contrat.date_rupture);
-      }
-    }
-  }
 
   if (effectifData.apprenant.historique_statut?.length) {
     for (const [key, contrat] of effectifData.apprenant.historique_statut.entries()) {
       if (contrat.date_statut) {
-        convertedEffectif.apprenant.historique_statut[key].date_statut = dateConverter(contrat.date_statut);
+        convertedEffectif.apprenant.historique_statut[key].date_statut = contrat.date_statut;
       }
     }
   }
-
-  if (effectifData?.formation?.date_debut_formation) {
-    convertedEffectif.formation.date_debut_formation = dateConverter(effectifData.formation.date_debut_formation);
-  }
-  if (effectifData?.formation?.date_fin_formation) {
-    convertedEffectif.formation.date_fin_formation = dateConverter(effectifData.formation.date_fin_formation);
-  }
-  if (effectifData?.formation?.date_obtention_diplome) {
-    convertedEffectif.formation.date_obtention_diplome = dateConverter(effectifData.formation.date_obtention_diplome);
-  }
-
-  const repetitionVoieConverter = (repetition_voie) => {
-    const fullRep = { Bis: "B", Ter: "T", Quater: "Q", ["Quinquiès"]: "C" };
-    return fullRep[capitalize(repetition_voie)] ?? repetition_voie;
-  };
-  if (effectifData.apprenant.adresse?.repetition_voie) {
-    convertedEffectif.apprenant.adresse.repetition_voie = repetitionVoieConverter(
-      effectifData.apprenant.adresse.repetition_voie.trim()
-    );
-  }
-  // TODO other repetition_voie
 
   /**
    * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
@@ -208,15 +143,6 @@ export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: O
     await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_insee);
   } else if (effectifData.apprenant.adresse?.code_postal) {
     await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_postal);
-  }
-
-  if (effectifData.apprenant.telephone) {
-    convertedEffectif.apprenant.telephone = telephoneConverter(effectifData.apprenant.telephone);
-  }
-  if (effectifData.apprenant.representant_legal?.telephone) {
-    convertedEffectif.apprenant.representant_legal.telephone = telephoneConverter(
-      effectifData.apprenant.representant_legal.telephone
-    );
   }
 
   const effectif = buildEffectif(

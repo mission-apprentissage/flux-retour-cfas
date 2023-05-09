@@ -1,8 +1,8 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
-import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
 import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN, YEAR_RANGE_PATTERN } from "@/common/constants/validations";
 import { object, objectId, string, date, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
 
 import { apprenantSchema, defaultValuesApprenant } from "./parts/apprenant.part";
@@ -87,7 +87,7 @@ export const schema = object(
     source: string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),
     annee_scolaire: string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
-      pattern: "^\\d{4}-\\d{4}$",
+      pattern: YEAR_RANGE_PATTERN,
     }),
     apprenant: apprenantSchema,
     formation: formationEffectifSchema,

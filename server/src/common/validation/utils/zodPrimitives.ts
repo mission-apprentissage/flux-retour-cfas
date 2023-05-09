@@ -4,7 +4,9 @@ import { capitalize } from "lodash-es";
 import { z } from "zod";
 
 import { CODES_STATUT_APPRENANT_ENUM, SEXE_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
-import { CFD_REGEX, RNCP_REGEX, SIRET_REGEX, UAI_REGEX } from "@/common/constants/organisme";
+import { CFD_REGEX, RNCP_REGEX, SIRET_REGEX, UAI_REGEX, YEAR_RANGE_REGEX } from "@/common/constants/validations";
+
+import { telephoneConverter } from "./frenchTelephoneNumber";
 
 extendZodWithOpenApi(z);
 
@@ -22,35 +24,56 @@ const aMonthAgo = subDays(new Date(), 30);
 const sixMonthAgo = subDays(new Date(), 30 * 6);
 
 const extensions = {
-  siret: () => z.string().regex(SIRET_REGEX, "SIRET invalide"), // e.g 01234567890123
-  uai: () => z.string().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
+  phone: () =>
+    z.preprocess(
+      (v: any) => telephoneConverter(v),
+      z
+        .string()
+        .regex(/.*[0-9].*/, "Format invalide") // check it contains at least one digit
+        .openapi({
+          example: "628000000",
+        })
+    ),
+  siret: () => z.string().trim().regex(SIRET_REGEX, "SIRET invalide"), // e.g 01234567890123
+  uai: () => z.string().trim().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
   iso8601Date: () =>
     z
       .string()
+      .trim()
       .regex(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/, "Format invalide") // make sure the passed date contains at least YYYY-MM-DD
+      .transform((v) => new Date(v))
+      .pipe(z.date())
       .openapi({
+        type: "string",
         format: "YYYY-MM-DD",
       }),
   iso8601Datetime: () =>
-    z.string().datetime("Format invalide").openapi({
-      format: "YYYY-MM-DD00:00:00Z",
-    }),
-
+    z
+      .string()
+      .trim()
+      .datetime("Format invalide")
+      .transform((v) => new Date(v))
+      .pipe(z.coerce.date())
+      .openapi({
+        type: "string",
+        format: "YYYY-MM-DD00:00:00Z",
+      }),
   codeCommuneInsee: () => z.string().regex(/^([0-9]{2}|2A|2B)[0-9]{3}$/, "Format invalide"),
 };
 
 export const primitivesV1 = {
   source: z.string().min(1), // configured by API
   apprenant: {
-    nom: z.string().min(1).trim().toUpperCase().openapi({
+    nom: z.string().trim().min(1).toUpperCase().openapi({
       description: "nom de l'apprenant",
       example: "Lenôtre",
     }),
-    prenom: z.string().min(1).trim().openapi({
+    prenom: z.string().trim().min(1).openapi({
       description: "prénom de l'apprenant",
       example: "Gaston",
     }),
     date_de_naissance: extensions.iso8601Date().openapi({
+      type: "string",
       description: "Date de naissance de l'apprenant, au format ISO-8601",
       example: "2000-10-28T00:00:00.000Z",
     }),
@@ -71,22 +94,16 @@ export const primitivesV1 = {
     date_metier_mise_a_jour_statut: extensions.iso8601Datetime().openapi({
       description: "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
     }),
-    id_erp: z.string().describe("Identifiant de l'apprenant dans l'ERP"),
-    ine: z.string().describe("Identifiant National Élève de l'apprenant"),
-    email: z.string().email("Email non valide").describe("Email de l'apprenant").openapi({
+    id_erp: z.string().trim().describe("Identifiant de l'apprenant dans l'ERP"),
+    ine: z.string().trim().toUpperCase().describe("Identifiant National Élève de l'apprenant"),
+    email: z.string().trim().email("Email non valide").describe("Email de l'apprenant").openapi({
       example: "gaston.lenotre@domain.tld",
     }),
-    telephone: z
-      .string()
-      .regex(/.*[0-9].*/, "Format invalide") // check it contains at least one digit
-      .describe("Téléphone de l'apprenant")
-      .openapi({
-        example: "628000000",
-      }),
+    telephone: extensions.phone().describe("Téléphone de l'apprenant"),
     code_commune_insee: extensions.codeCommuneInsee().describe("Code Insee de la commune de résidence de l'apprenant"),
   },
   etablissement_responsable: {
-    nom: z.string().openapi({
+    nom: z.string().trim().openapi({
       description: "Nom l'établissement responsable",
     }),
     uai: extensions.uai().openapi({
@@ -102,7 +119,7 @@ export const primitivesV1 = {
     }),
   },
   etablissement_formateur: {
-    nom: z.string().openapi({
+    nom: z.string().trim().openapi({
       description: "Nom l'établissement formateur",
     }),
     uai: extensions.uai().openapi({
@@ -122,36 +139,45 @@ export const primitivesV1 = {
     code_rncp: z
       .preprocess(
         // certains organismes n'envoient pas le prefix RNCP
-        (v: any) => (v?.toString().toUpperCase().startsWith("RNCP") ? v : `RNCP${v}`),
+        (v: any) => (v?.toString().trim().toUpperCase().startsWith("RNCP") ? v : `RNCP${v}`),
         z.string().toUpperCase().regex(RNCP_REGEX, "Code RNCP invalide")
       )
       .openapi({
         description: "Code RNCP de la formation",
         examples: ["RNCP35316", "35316"],
       }),
-    code_cfd: z.string().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
+    code_cfd: z.string().trim().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
       description: "Code Formation Diplôme (CFD)", // aussi appelé id_formation
     }),
-    libelle_court: z.string().describe("Libellé court de la formation").openapi({
+    libelle_court: z.string().trim().describe("Libellé court de la formation").openapi({
       description: "Libellé court de la formation",
       example: "CAP PATISSIER",
     }),
-    libelle_long: z.string().describe("Libellé complet de la formation").openapi({
+    libelle_long: z.string().trim().describe("Libellé complet de la formation").openapi({
       example: "CAP PATISSIER",
     }),
-    // TO_DISCUSS: redondant avec année_scolaire ?
-    periode: z.string().describe("Période de la formation, en année").openapi({
-      example: "2022-2024",
-    }),
+    periode: z
+      .string()
+      .trim()
+      .regex(YEAR_RANGE_REGEX, "Format invalide")
+      .describe("Période de la formation, en année (peut être sur plusieurs années)")
+      // periode is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020,2022]
+      .transform((v) => (v ? v.split("-").map(Number) : []))
+      .openapi({
+        type: "string",
+        example: `${currentYear - 2}-${currentYear + 1}`,
+      } as any),
     annee_scolaire: z
       .string()
-      .regex(/^\d{4}-\d{4}$/, "Format invalide")
+      .trim()
+      .regex(YEAR_RANGE_REGEX, "Format invalide")
       .describe("Période scolaire")
       .openapi({
+        type: "string",
         examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`],
-      }),
+      } as any),
     annee: z
-      .preprocess((v: any) => v?.toString(), z.string())
+      .preprocess((v: any) => v?.toString().trim(), z.string())
       .describe("Année de la formation")
       // TO_DISCUSS: à quoi correspond l'année 0 ?
       .openapi({
@@ -181,7 +207,7 @@ export const primitivesV1 = {
 export const primitivesV3 = {
   apprenant: {
     // addresse: TODO à discuter
-    sexe: z.string().describe("Sexe de l'apprenant").openapi({
+    sexe: z.string().trim().describe("Sexe de l'apprenant").openapi({
       enum: SEXE_APPRENANT_ENUM,
       example: "M",
     }),
@@ -194,6 +220,7 @@ export const primitivesV3 = {
   responsable: {
     email: z
       .string()
+      .trim()
       .email("Email non valide")
       .describe("Email du responsable de l'apprenant")
       .openapi({ example: "escoffier@domain.tld" }),

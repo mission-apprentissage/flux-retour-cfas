@@ -955,6 +955,10 @@ export interface Organisme {
    */
   setup_step_courante?: "STEP1" | "STEP2" | "STEP3" | "COMPLETE";
   /**
+   * Flag pour identifier que c'est un organisme créé à partir d'un lieu
+   */
+  creation_statut?: "ORGANISME_LIEU_FORMATION";
+  /**
    * Date de mise à jour en base de données
    */
   updated_at?: Date;

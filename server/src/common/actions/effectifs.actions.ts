@@ -9,7 +9,6 @@ import { defaultValuesApprenant } from "@/common/model/effectifs.model/parts/app
 import { defaultValuesFormationEffectif } from "@/common/model/effectifs.model/parts/formation.effectif.part";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
-import { transformToInternationalNumber } from "@/common/validation/utils/frenchTelephoneNumber";
 
 import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions";
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters";
@@ -120,19 +119,18 @@ export const structureEffectifFromDossierApprenant = (dossiersApprenant: Effecti
       prenom,
       date_de_naissance,
       courriel,
-      telephone: transformToInternationalNumber(telephone),
-      // Build adresse with code_commune_insee
-      ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
+      telephone,
+      adresse: { code_insee: code_commune_insee_apprenant },
     },
     // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
     contrats:
       contrat_date_debut || contrat_date_fin || contrat_date_rupture
         ? [
-            {
-              ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
-              ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
-              ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
-            },
+            stripEmptyFields({
+              date_debut: contrat_date_debut,
+              date_fin: contrat_date_fin,
+              date_rupture: contrat_date_rupture,
+            }),
           ]
         : [],
     formation: {
@@ -140,8 +138,7 @@ export const structureEffectifFromDossierApprenant = (dossiersApprenant: Effecti
       cfd,
       rncp,
       libelle_long,
-      // periode is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
-      periode: periode ? periode.split("-").map(Number) : [],
+      periode,
       annee,
     },
   });

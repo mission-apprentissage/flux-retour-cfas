@@ -54,12 +54,7 @@ import { jobEventsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { packageJson } from "@/common/utils/esmUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
-import {
-  passwordSchema,
-  uaiSchema,
-  validateFullObjectSchema,
-  validateFullZodObjectSchema,
-} from "@/common/utils/validationUtils";
+import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
@@ -69,6 +64,7 @@ import uploadedDocumentSchema from "@/common/validation/uploadedDocumentSchema";
 import uploadMappingSchema from "@/common/validation/uploadMappingSchema";
 import uploadUpdateDocumentSchema from "@/common/validation/uploadUpdateDocumentSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
+import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
@@ -182,8 +178,8 @@ function setupRoutes(app: Application) {
     .post(
       "/api/v1/organismes/search-by-siret",
       returnResult(async (req) => {
-        const { siret } = await validateFullObjectSchema(req.body, {
-          siret: Joi.string().required(),
+        const { siret } = await validateFullZodObjectSchema(req.body, {
+          siret: primitivesV1.etablissement_formateur.siret,
         });
         return await findOrganismesBySIRET(siret);
       })
@@ -229,9 +225,10 @@ function setupRoutes(app: Application) {
     .post(
       "/api/v1/password/forgotten-password",
       returnResult(async (req) => {
-        const { email } = await validateFullObjectSchema(req.body, {
-          email: Joi.string().email().required().lowercase().trim(),
+        const { email } = await validateFullZodObjectSchema(req.query, {
+          email: z.string().email().toLowerCase().trim(),
         });
+
         await sendForgotPasswordRequest(email);
       })
     )
@@ -473,8 +470,8 @@ function setupRoutes(app: Application) {
     .get(
       "/api/v1/organisme/:uai", // FIXME SECURITE openbar pour la recherche
       returnResult(async (req) => {
-        const { uai } = await validateFullObjectSchema(req.params, {
-          uai: uaiSchema(),
+        const { uai } = await validateFullZodObjectSchema(req.params, {
+          uai: primitivesV1.etablissement_formateur.uai,
         });
         return await getOrganismeByUAIAvecSousEtablissements(uai);
       })

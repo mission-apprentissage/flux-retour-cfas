@@ -4,22 +4,15 @@ import merge from "lodash-es/merge";
 import { WithId } from "mongodb";
 import RandExp from "randexp";
 import type { PartialDeep } from "type-fest";
-import { z } from "zod";
 
 import { CODES_STATUT_APPRENANT, SEXE_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
-import { CFD_REGEX, INE_REGEX, RNCP_REGEX } from "@/common/constants/organisme";
+import { CFD_REGEX, INE_REGEX, RNCP_REGEX } from "@/common/constants/validations";
 import { Effectif, Organisme } from "@/common/model/@types";
-import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
-import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
+import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
+import { EffectifsV3Queue } from "@/common/model/@types/EffectifsV3Queue";
 
 import sampleEtablissements from "./sampleEtablissements";
 import { sampleLibelles } from "./sampleLibelles";
-
-const dossierApprenantSchemaV1V2ZodSchema = dossierApprenantSchemaV1V2Zod();
-type DossierApprenantSchemaV1V2ZodType = z.infer<typeof dossierApprenantSchemaV1V2ZodSchema>;
-
-const dossierApprenantSchemaV3ZodSchema = dossierApprenantSchemaV3();
-type DossierApprenantSchemaV3ZodType = z.infer<typeof dossierApprenantSchemaV3ZodSchema>;
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
@@ -138,9 +131,7 @@ export const createSampleEffectif = ({
 };
 
 // random DossierApprenant shaped along our REST API schema
-export const createRandomDossierApprenantApiInput = (
-  params: Partial<DossierApprenantSchemaV1V2ZodType> = {}
-): Partial<DossierApprenantSchemaV1V2ZodType> => {
+export const createRandomDossierApprenantApiInput = (params: Partial<EffectifsQueue> = {}): EffectifsQueue => {
   const isStudentPresent = isPresent();
   const annee_scolaire = getRandomAnneeScolaire();
   const { uai, siret } = getRandomEtablissement();
@@ -163,19 +154,19 @@ export const createRandomDossierApprenantApiInput = (
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
     annee_formation: formation.annee,
-    periode_formation: isStudentPresent ? formation.periode.join("-") : "",
+    periode_formation: isStudentPresent ? formation.periode.join("-") : null,
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
     tel_apprenant: faker.helpers.arrayElement([faker.phone.number(), undefined]),
     code_commune_insee_apprenant: faker.address.zipCode(),
-
+    source: "api",
     ...params,
   };
 };
 
 export const createRandomDossierApprenantApiV3Input = (
-  params: PartialDeep<DossierApprenantSchemaV3ZodType> = {}
-): DossierApprenantSchemaV3ZodType => {
+  params: PartialDeep<EffectifsV3Queue> = {}
+): EffectifsV3Queue => {
   const annee_scolaire = getRandomAnneeScolaire();
   const isStudentPresent = isPresent();
   const etablissement_formateur = getRandomEtablissement();
@@ -250,7 +241,7 @@ export const createRandomDossierApprenantApiV3Input = (
         code_commune_insee: employeur.code_commune_insee,
         code_naf: employeur.code_naf,
       },
-    } as DossierApprenantSchemaV3ZodType,
+    },
     params
   );
 };

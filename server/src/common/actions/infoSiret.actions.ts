@@ -1,6 +1,6 @@
 import * as apiCfaDock from "@/common/apis/ApiCfaDock";
 import * as apiEntreprise from "@/common/apis/ApiEntreprise";
-import { SIRET_REGEX } from "@/common/constants/organisme";
+import { SIRET_REGEX } from "@/common/constants/validations";
 import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "@/common/utils/adresseUtils";
 
 export const findDataFromSiret = async (providedSiret, non_diffusables = true, getConventionCollective = true) => {

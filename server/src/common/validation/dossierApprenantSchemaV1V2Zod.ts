@@ -30,7 +30,7 @@ const dossierApprenantSchemaV1V2Zod = () =>
     siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
     libelle_court_formation: primitivesV1.formation.libelle_court.optional(),
     libelle_long_formation: primitivesV1.formation.libelle_long.optional(),
-    periode_formation: primitivesV1.formation.periode.optional(),
+    periode_formation: primitivesV1.formation.periode.nullish(),
     annee_formation: primitivesV1.formation.annee.optional(),
     formation_rncp: primitivesV1.formation.code_rncp.optional(),
     contrat_date_debut: primitivesV1.contrat.date_debut.optional(),

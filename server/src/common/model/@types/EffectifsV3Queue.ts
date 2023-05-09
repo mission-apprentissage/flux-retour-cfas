@@ -101,7 +101,7 @@ export interface EffectifsV3Queue {
      */
     libelle_long?: any;
     /**
-     * Année scolaire
+     * Période de la formation, en année (peut être sur plusieurs années)
      */
     periode?: any;
     /**

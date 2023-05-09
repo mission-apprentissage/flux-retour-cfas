@@ -2,7 +2,7 @@ import Joi from "joi";
 import { joiPasswordExtendCore } from "joi-password";
 import { z } from "zod";
 
-import { SIRET_REGEX, UAI_REGEX } from "@/common/constants/organisme";
+import { UAI_REGEX } from "@/common/constants/validations";
 
 const joiPassword = Joi.extend(joiPasswordExtendCore);
 
@@ -16,32 +16,8 @@ export function passwordSchema(isAdmin = false) {
     .minOfNumeric(1);
 }
 
-export function cfdSchema() {
-  return Joi.string().regex(/^[0-9A-Z]{8}[A-Z]?$/);
-}
-
-export function siretSchema() {
-  return Joi.string()
-    .regex(SIRET_REGEX)
-    .creditCard()
-    .error((errors) => {
-      // @ts-ignore
-      const error = errors[0].local;
-      return new Error(
-        error.code === "string.base"
-          ? `Error: schema not valid : ValidationError: ${error.key} must be a string`
-          : error.value
-          ? `Error: schema not valid : ValidationError: ${error.key} must follow Luhn algorithm`
-          : `Error: schema not valid : ValidationError: empty ${error.key}`
-      );
-    });
-}
-export function uaiSchema() {
-  return Joi.string().regex(UAI_REGEX);
-}
-
-export function validateUai(uai) {
-  return uaiSchema().required().validate(uai);
+export function isValidUAI(uai: string) {
+  return UAI_REGEX.test(uai);
 }
 
 export async function validateFullObjectSchema<T = any>(object, schema): Promise<T> {

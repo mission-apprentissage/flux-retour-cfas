@@ -3,7 +3,8 @@ import { ObjectId } from "mongodb";
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
 import { formationsDb, effectifsDb } from "@/common/model/collections";
 import { escapeRegExp } from "@/common/utils/regexUtils";
-import { validateCfd } from "@/common/validation/utils/cfd";
+
+import { isValidCFD } from "../constants/validations";
 
 import { buildMongoPipelineFilterStages } from "./helpers/filters";
 
@@ -74,7 +75,7 @@ export const createFormation = async ({
   duree?: string | null;
   annee?: string | null;
 }) => {
-  if (!validateCfd(cfd)) {
+  if (!isValidCFD(cfd)) {
     throw Error("Invalid CFD");
   }
 

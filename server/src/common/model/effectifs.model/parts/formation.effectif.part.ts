@@ -1,4 +1,4 @@
-import { RNCP_REGEX_PATTERN } from "@/common/constants/organisme";
+import { RNCP_REGEX_PATTERN } from "@/common/constants/validations";
 import { object, string, integer, arrayOf, objectId, date, boolean } from "@/common/model/json-schema/jsonSchemaTypes";
 
 import formationsModel from "../../formations.model";
@@ -26,7 +26,7 @@ export const formationEffectifSchema = object(
     date_fin_formation: date({ description: "Date de fin de la formation" }),
     date_obtention_diplome: date({ description: "Date d'obtention du diplôme" }),
     duree_formation_relle: integer({ description: "Durée réelle de la formation en mois" }),
-    periode: arrayOf(integer(), { description: "Année scolaire" }),
+    periode: arrayOf(integer(), { description: "Période de la formation, en année (peut être sur plusieurs années)" }),
     // V3 - REQUIRED FIELDS (optionel pour l'instant pour supporter V2)
     date_inscription: date({ description: "Date d'inscription" }),
     // V3 - OPTIONAL FIELDS
