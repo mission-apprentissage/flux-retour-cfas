@@ -1,4 +1,48 @@
-function CarteFrance() {
+import { Box, VStack } from "@chakra-ui/react";
+import { MouseEventHandler, useState } from "react";
+
+interface Props<Data> {
+  donneesParDepartement: { [key: string]: Data };
+  tooltipContent: (donnees: Data) => JSX.Element;
+  // TODO scale
+}
+
+function CarteFrance<Data>(props: Props<Data>) {
+  const [tooltipInfos, setTooltipInfos] = useState({
+    x: 0,
+    y: 0,
+    visible: false,
+    content: <></>,
+  });
+
+  const onMouseMove: MouseEventHandler = (event) => {
+    const target = event.target as HTMLElement;
+    const offset = 20;
+    const donnees = props.donneesParDepartement[target.dataset?.numerodepartement as any];
+    setTooltipInfos({
+      x: event.pageX + offset,
+      y: event.pageY + offset,
+      visible: target.tagName === "path",
+      content: (
+        <VStack>
+          <Box fontWeight="bold" fontSize="16px">
+            {target.dataset.nom}
+          </Box>
+          {props.tooltipContent(donnees)}
+        </VStack>
+      ),
+    });
+  };
+
+  const onMouseOut: MouseEventHandler = () => {
+    setTooltipInfos({
+      x: 0,
+      y: 0,
+      visible: false,
+      content: <></>,
+    });
+  };
+
   return (
     <>
       <style type="text/css">
@@ -13,7 +57,7 @@ function CarteFrance() {
             stroke-linecap: round;
             stroke-linejoin: round;
             stroke-opacity: .25;
-            fill: #86aae0;
+            fill: #ffffff;
           }
           .carte g:hover path {
             fill: #86cce0;
@@ -23,7 +67,7 @@ function CarteFrance() {
           }
         `}
       </style>
-      <div className="carte">
+      <div className="carte" onMouseMove={onMouseMove} onMouseOut={onMouseOut}>
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 667 578">
           <g className="region region-01" data-nom="Guadeloupe" data-code_insee="01">
             <path
@@ -668,6 +712,25 @@ function CarteFrance() {
             ></path>
           </g>
         </svg>
+        <Box
+          zIndex="4"
+          visibility={tooltipInfos.visible ? "visible" : "hidden"}
+          bg="#1e1b39cc"
+          color="#ffffff"
+          borderRadius="13px"
+          boxShadow="0 4px 10px rgba(0, 0, 0, 0.13)"
+          pointerEvents="none"
+          position="absolute"
+          fontSize="13px"
+          lineHeight="18px"
+          top="0"
+          left="0"
+          px="12px"
+          py="10px"
+          transform={`translate3d(${tooltipInfos.x}px, ${tooltipInfos.y}px, 0px)`}
+        >
+          {tooltipInfos.content}
+        </Box>
       </div>
     </>
   );

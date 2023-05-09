@@ -6,10 +6,46 @@ import useAuth from "@/hooks/useAuth";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import CarteFrance from "./CarteFrance";
+import { IndicateursEffectifsParDepartement, IndicateursOrganismesParDepartement } from "./indicateurs";
 import IndicateursGrid from "./IndicateursGrid";
 
 const NewDashboardTransverse = () => {
   const { auth } = useAuth();
+
+  // reactquery or useeffect
+
+  const indicateursEffectifsParDepartement: IndicateursEffectifsParDepartement = {
+    29: {
+      apprenants: 43765,
+      apprentis: 31080,
+      inscritsSansContrat: 705,
+      abandons: 1733,
+      rupturants: 580,
+    },
+    56: {
+      apprenants: 43765,
+      apprentis: 31080,
+      inscritsSansContrat: 705,
+      abandons: 1733,
+      rupturants: 580,
+    },
+  };
+
+  const indicateursOrganismesParDepartement: IndicateursOrganismesParDepartement = {
+    29: {
+      tauxCouverture: 34.69,
+      totalOrganismes: 245,
+      organismesTransmetteurs: 45,
+      organismesNonTransmetteurs: 200,
+    },
+    56: {
+      tauxCouverture: 34.69,
+      totalOrganismes: 245,
+      organismesTransmetteurs: 45,
+      organismesNonTransmetteurs: 200,
+    },
+  };
+
   return (
     <Box>
       <Box
@@ -55,13 +91,42 @@ const NewDashboardTransverse = () => {
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Répartition des effectifs dans votre territoire
             </Heading>
-            <CarteFrance />
+            <CarteFrance
+              donneesParDepartement={indicateursEffectifsParDepartement}
+              tooltipContent={(indicateurs) =>
+                indicateurs ? (
+                  <>
+                    <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
+                    <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
+                    <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
+                    <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
+                    <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
+                  </>
+                ) : (
+                  <Box>Données non disponibles</Box>
+                )
+              }
+            />
           </GridItem>
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Taux de couverture des organismes
             </Heading>
-            <CarteFrance />
+            <CarteFrance
+              donneesParDepartement={indicateursOrganismesParDepartement}
+              tooltipContent={(indicateurs) =>
+                indicateurs ? (
+                  <>
+                    <Box>Taux de couverture&nbsp;: {indicateurs.tauxCouverture}</Box>
+                    <Box>Total des organismes&nbsp;: {indicateurs.totalOrganismes}</Box>
+                    <Box>Organismes transmetteurs&nbsp;: {indicateurs.organismesTransmetteurs}</Box>
+                    <Box>Organismes non-transmetteurs&nbsp;: {indicateurs.organismesNonTransmetteurs}</Box>
+                  </>
+                ) : (
+                  <Box>Données non disponibles</Box>
+                )
+              }
+            />
           </GridItem>
         </Grid>
       </Container>
