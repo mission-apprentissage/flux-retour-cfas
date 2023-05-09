@@ -109,7 +109,7 @@ program
 
 program
   .command("process:effectifs-queue:remove-duplicates")
-  .description("Process la queue des effectifs")
+  .description("Supprime les dossiers en doublons des effectifs, en ne gardant que le plus récent")
   .action(
     runJob(async () => {
       await removeDuplicatesEffectifsQueue();
