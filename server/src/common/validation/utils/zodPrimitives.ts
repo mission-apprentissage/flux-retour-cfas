@@ -279,6 +279,6 @@ export const primitivesV3 = {
     code_commune_insee: extensions
       .codeCommuneInsee()
       .describe("Code Insee de la commune de l'établissement de l'employeur"),
-    code_naf: z.string().length(5, "Format invalide").describe("Code NAF de l'employeur"),
+    code_naf: z.string().length(5, "Format invalide").describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
   },
 };
