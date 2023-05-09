@@ -2,7 +2,6 @@ import { ObjectId } from "mongodb";
 
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
 import { formationsDb, effectifsDb } from "@/common/model/collections";
-import { validateFormation } from "@/common/model/formations.model";
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { validateCfd } from "@/common/validation/utils/cfd";
 
@@ -90,22 +89,20 @@ export const createFormation = async ({
   // Libelle
   const libelleFormationBuilt = formationInfo?.intitule_long || "";
 
-  const { insertedId } = await formationsDb().insertOne(
-    validateFormation({
-      cfd,
-      cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
-      cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
-      rncps: formationInfo?.rncps?.map((item) => item.code_rncp) || [], // Returned by TCO
-      libelle: libelleFormationBuilt,
-      niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
-      niveau_libelle: formationInfo?.niveau,
-      metiers: [],
-      duree,
-      annee,
-      created_at: new Date(),
-      updated_at: null,
-    })
-  );
+  const { insertedId } = await formationsDb().insertOne({
+    cfd,
+    cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
+    cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
+    rncps: formationInfo?.rncps?.map((item) => item.code_rncp) || [], // Returned by TCO
+    libelle: libelleFormationBuilt,
+    niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
+    niveau_libelle: formationInfo?.niveau,
+    metiers: [],
+    duree,
+    annee,
+    created_at: new Date(),
+    updated_at: null,
+  });
 
   return insertedId;
 };

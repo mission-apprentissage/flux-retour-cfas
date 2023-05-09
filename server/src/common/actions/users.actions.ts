@@ -6,7 +6,6 @@ import { UsersMigration } from "@/common/model/@types/UsersMigration";
 import { usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { getOrganisationLabel } from "@/common/model/organisations.model";
-import { validateUser } from "@/common/model/usersMigration.model";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken } from "@/common/utils/jwtUtils";
 import { generateRandomAlphanumericPhrase } from "@/common/utils/miscUtils";
@@ -261,10 +260,10 @@ export const updateUser = async (_id, data: Partial<UsersMigration>) => {
   const updated = await usersMigrationDb().findOneAndUpdate(
     { _id: user._id },
     {
-      $set: validateUser({
+      $set: {
         email: user.email,
         ...data,
-      }),
+      },
     },
     { returnDocument: "after" }
   );

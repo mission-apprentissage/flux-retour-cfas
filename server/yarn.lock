@@ -1266,12 +1266,7 @@
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-7.6.0.tgz#9ea331766084288634a9247fcd8b84f16ff4ba07"
   integrity sha512-XK6BTq1NDMo9Xqw/YkYyGjSsg44fbNwYRx7QK2CuoQgyy+f1rrTDHoExVM5PsyXCtfl2vs2vVJ0MN0yN6LppRw==
 
-"@hapi/bourne@^2.0.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/bourne/-/bourne-2.1.0.tgz#66aff77094dc3080bd5df44ec63881f2676eb020"
-  integrity sha512-i1BpaNDVLJdRBEKeJWkVO6tYX6DMFBuwMhSuWqLsY4ufeTKGVuV5rBsUhxPayXqnnWHgXUAmWK16H/ykO5Wj4Q==
-
-"@hapi/hoek@^9.0.0", "@hapi/hoek@^9.0.3":
+"@hapi/hoek@^9.0.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.3.0.tgz#8368869dcb735be2e7f5cb7647de78e167a251fb"
   integrity sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==
@@ -3427,14 +3422,6 @@ enhanced-resolve@^5.12.0:
   dependencies:
     graceful-fs "^4.2.4"
     tapable "^2.2.0"
-
-enjoi@9.0.1:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/enjoi/-/enjoi-9.0.1.tgz#b940c3e4bf243658c380783c014fe4e9bf91ff5d"
-  integrity sha512-yD2NGiD54egxlGkTWbtZST+FAdJ2XOQC6cWIblyL4zRFdCZ6YEhWHaMxKrQQCfUwUZ/xvdqyCVIltzH8n+U86Q==
-  dependencies:
-    "@hapi/bourne" "^2.0.0"
-    "@hapi/hoek" "^9.0.3"
 
 entities@^2.0.0:
   version "2.2.0"

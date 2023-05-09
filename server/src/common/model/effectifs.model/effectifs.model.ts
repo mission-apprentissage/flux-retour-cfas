@@ -1,21 +1,14 @@
-import uniqBy from "lodash-es/uniqBy";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
 import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
-import { Effectif } from "@/common/model/@types/Effectif";
 import { object, objectId, string, date, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
-import { schemaValidation } from "@/common/utils/schemaUtils";
 
-import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part";
+import { apprenantSchema, defaultValuesApprenant } from "./parts/apprenant.part";
 import { contratSchema } from "./parts/contrat.part";
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
-import {
-  defaultValuesFormationEffectif,
-  formationEffectifSchema,
-  validateFormationEffectif,
-} from "./parts/formation.effectif.part";
+import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part";
 
 const collectionName = "effectifs";
 
@@ -167,30 +160,6 @@ export function defaultValuesEffectif({ lockAtCreate = false }) {
     updated_at: new Date(),
     created_at: new Date(),
   };
-}
-
-// TODO Extra validation
-export function validateEffectif(props: Effectif, getErrors = false) {
-  if (getErrors) {
-    const errorsApprenant = validateApprenant(props.apprenant, getErrors);
-    const errorsFormation = validateFormationEffectif(props.formation, getErrors);
-    const entityValidation = schemaValidation({
-      entity: props,
-      schema,
-      getErrors,
-    });
-    return uniqBy([...entityValidation, ...errorsApprenant, ...errorsFormation], "fieldName");
-  }
-
-  return schemaValidation({
-    entity: {
-      ...props,
-      apprenant: validateApprenant(props.apprenant, getErrors),
-      formation: validateFormationEffectif(props.formation, getErrors),
-    },
-    schema,
-    getErrors,
-  });
 }
 
 export default { schema, indexes, collectionName };

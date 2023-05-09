@@ -1,8 +1,5 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { schemaValidation } from "@/common/utils/schemaUtils";
-import { cfdSchema } from "@/common/utils/validationUtils";
-
 import { CFD_REGEX_PATTERN } from "../constants/organisme";
 
 import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "./json-schema/jsonSchemaTypes";
@@ -39,18 +36,5 @@ const schema = object(
   },
   { required: ["cfd"] }
 );
-
-export function validateFormation(props) {
-  return schemaValidation({
-    entity: props,
-    schema,
-    extensions: [
-      {
-        name: "cfd",
-        base: cfdSchema(),
-      },
-    ],
-  });
-}
 
 export default { schema, indexes, collectionName };

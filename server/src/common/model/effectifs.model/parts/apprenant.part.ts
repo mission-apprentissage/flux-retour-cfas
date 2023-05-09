@@ -1,15 +1,11 @@
-import Joi from "joi";
-
 import {
   CODES_STATUT_APPRENANT,
   NATIONALITE_APPRENANT_ENUM,
   SEXE_APPRENANT_ENUM,
 } from "@/common/constants/dossierApprenant";
 import { CODE_POSTAL_PATTERN } from "@/common/constants/organisme";
-import { Effectif } from "@/common/model/@types/Effectif";
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 import { object, string, date, integer, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
-import { schemaValidation } from "@/common/utils/schemaUtils";
 
 export const apprenantSchema = object(
   {
@@ -191,50 +187,5 @@ export const apprenantSchema = object(
 export function defaultValuesApprenant() {
   return {
     historique_statut: [],
-  };
-}
-
-// Extra validation
-export function validateApprenant(props: Partial<Effectif["apprenant"]>, getErrors = false) {
-  const representantLegalValidation = props.representant_legal
-    ? schemaValidation({
-        entity: props.representant_legal,
-        schema: apprenantSchema.properties.representant_legal,
-        extensions: [
-          {
-            name: "courriel",
-            base: Joi.string().email(),
-          },
-        ],
-        getErrors,
-        prefix: "apprenant.representant_legal.",
-      })
-    : undefined;
-
-  const entityValidation = schemaValidation({
-    entity: props,
-    schema: apprenantSchema,
-    extensions: [
-      {
-        name: "courriel",
-        base: Joi.string().email(),
-      },
-      {
-        name: "date_de_naissance",
-        base: Joi.date().iso(),
-      },
-    ],
-    getErrors,
-    prefix: "apprenant.",
-  });
-
-  if (getErrors) {
-    const errors = [...entityValidation, ...(representantLegalValidation || [])];
-    return errors;
-  }
-
-  return {
-    ...entityValidation,
-    ...(representantLegalValidation ? { representant_legal: representantLegalValidation } : {}),
   };
 }

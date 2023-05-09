@@ -15,7 +15,7 @@ import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb, effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
-import { defaultValuesOrganisme, validateOrganisme } from "@/common/model/organismes.model";
+import { defaultValuesOrganisme } from "@/common/model/organismes.model";
 import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
@@ -52,7 +52,7 @@ export const createOrganisme = async (
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
     ? await getOrganismeInfosFromSiret(siret)
     : { nom: nomIn?.trim(), adresse: adresseIn, ferme: fermeIn, enseigne: undefined, raison_sociale: undefined };
-  const dataToInsert = validateOrganisme({
+  const dataToInsert = {
     ...defaultValuesOrganisme(),
     ...stripEmptyFields({
       uai,
@@ -66,7 +66,8 @@ export const createOrganisme = async (
       ...(enseigne ? { enseigne } : {}),
       ...(raison_sociale ? { raison_sociale } : {}),
     }),
-  });
+  };
+
   const { insertedId } = await organismesDb().insertOne(dataToInsert);
 
   return {
@@ -276,9 +277,8 @@ export const updateOrganisme = async (
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
-      $set: validateOrganisme({
+      $set: {
         ...organisme,
-        ...(organisme.uai ? { uai: organisme.uai } : {}),
         ...(siret ? { siret } : {}),
         ...data,
         ...(nom ? { nom: nom.trim() } : {}),
@@ -289,7 +289,7 @@ export const updateOrganisme = async (
         ...(enseigne ? { enseigne } : {}),
         ...(raison_sociale ? { raison_sociale } : {}),
         updated_at: new Date(),
-      }),
+      },
     },
     { returnDocument: "after" }
   );

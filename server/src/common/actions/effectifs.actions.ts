@@ -1,10 +1,10 @@
-import { cloneDeep, isObject, merge, reduce, set, uniqBy } from "lodash-es";
+import { isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
 
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb } from "@/common/model/collections";
-import { defaultValuesEffectif, validateEffectif } from "@/common/model/effectifs.model/effectifs.model";
+import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 import { defaultValuesApprenant } from "@/common/model/effectifs.model/parts/apprenant.part";
 import { defaultValuesFormationEffectif } from "@/common/model/effectifs.model/parts/formation.effectif.part";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -47,62 +47,21 @@ export const createEffectif = async (
   const dataToInsert = buildEffectif(dataEffectif, lockAtCreate);
 
   const organisme = await getOrganismeById(dataEffectif.organisme_id);
-  (dataToInsert as any)._computed = {
-    organisme: {
-      region: organisme.adresse?.region,
-      departement: organisme.adresse?.departement,
-      academie: organisme.adresse?.academie,
-      reseaux: organisme.reseaux,
-      uai: organisme.uai,
-      siret: organisme.siret,
-    },
-  };
-  const { insertedId } = await effectifsDb().insertOne(validateEffectif(dataToInsert));
+  if (organisme) {
+    dataToInsert._computed = {
+      organisme: {
+        ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
+        ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
+        ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
+        ...(organisme.uai ? { uai: organisme.uai } : {}),
+        ...(organisme.siret ? { siret: organisme.siret } : {}),
+        ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
+      },
+    };
+  }
+  const { insertedId } = await effectifsDb().insertOne(dataToInsert);
 
   return insertedId;
-};
-
-/**
- * Validation d'un object effectif
- * @param {*} effectif
- * @returns
- */
-export const validateEffectifObject = (effectif) => {
-  // Vérification si erreurs de validation sur l'effectif
-  const effectifValidationErrors = validateEffectif(effectif, true);
-
-  let effectifMandate = cloneDeep(effectif);
-  for (const validationError of effectifValidationErrors) {
-    set(effectifMandate, validationError.fieldName, undefined);
-
-    if (
-      validationError.fieldName.includes("apprenant.historique_statut") &&
-      (validationError.fieldName.includes("valeur_statut") || validationError.fieldName.includes("date_statut"))
-    ) {
-      const [, index] =
-        RegExp(/^apprenant.historique_statut\[([0-9]{1})\].(valeur_statut|date_statut)$/, "g").exec(
-          validationError.fieldName
-        ) || [];
-      effectifMandate.apprenant.historique_statut = [
-        ...effectifMandate.apprenant.historique_statut.slice(0, index),
-        ...effectifMandate.apprenant.historique_statut.slice(index + 1),
-      ];
-    }
-    if (
-      validationError.fieldName.includes("contrats") &&
-      (validationError.fieldName.includes("date_debut") || validationError.fieldName.includes("date_fin"))
-    ) {
-      const [, index] =
-        RegExp(/^contrats\[([0-9]{1})\].(date_debut|date_fin)$/, "g").exec(validationError.fieldName) || [];
-      effectifMandate.contrats = [
-        ...effectifMandate.contrats.slice(0, index),
-        ...effectifMandate.contrats.slice(index + 1),
-      ];
-    }
-  }
-
-  // TODO Suppression des erreurs sur date de naissance si nécéssaire
-  return { ...stripEmptyFields(effectifMandate), validation_errors: effectifValidationErrors };
 };
 
 /**
@@ -110,9 +69,8 @@ export const validateEffectifObject = (effectif) => {
  * @returns
  */
 export const insertEffectif = async (data: Effectif) => {
-  const dataSanitized = validateEffectif(data);
-  const { insertedId } = await effectifsDb().insertOne(dataSanitized);
-  return { _id: insertedId, ...dataSanitized };
+  const { insertedId } = await effectifsDb().insertOne(data);
+  return { _id: insertedId, ...data };
 };
 
 /**
@@ -247,7 +205,7 @@ export const updateEffectif = async (_id: ObjectId, data, opt = { keepPreviousEr
     { _id: effectif._id },
     {
       $set: {
-        ...validateEffectif(data),
+        ...data,
         ...(opt.keepPreviousErrors
           ? {
               validation_errors: uniqBy(
@@ -309,7 +267,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation, validati
     { _id: effectif._id },
     {
       $set: {
-        ...validateEffectif({ ...effectif, apprenant, formation }),
+        ...{ ...effectif, apprenant, formation },
         validation_errors,
         is_lock: newLocker,
         updated_at: new Date(),

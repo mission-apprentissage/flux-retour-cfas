@@ -3,7 +3,7 @@ import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
 import { ObjectId } from "mongodb";
 
-import { buildEffectif, findEffectifByQuery, validateEffectifObject } from "@/common/actions/effectifs.actions";
+import { buildEffectif, findEffectifByQuery } from "@/common/actions/effectifs.actions";
 import {
   findOrganismeBySiret,
   findOrganismeByUai,
@@ -239,8 +239,6 @@ export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: O
     false
   );
 
-  const validatedEffectif = validateEffectifObject(effectif);
-
   let found: any = null;
   if (checkIfExist) {
     // Recherche de l'effectif via sa clé d'unicité
@@ -248,7 +246,7 @@ export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: O
     found = await findEffectifByQuery(query);
   }
 
-  return { effectif: validatedEffectif, found };
+  return { effectif, found };
 };
 
 /**
