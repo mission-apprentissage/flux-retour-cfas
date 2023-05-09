@@ -48,7 +48,7 @@ services:
     container_name: flux_retour_cfas_server
     build:
       context: server
-    mem_limit: 2g
+    mem_limit: 3g
     restart: unless-stopped
     networks:
       - flux_retour_cfas_network
@@ -65,7 +65,7 @@ services:
     container_name: flux_retour_cfas_processor
     build:
       context: server
-    command: ["yarn", "cli", "process:effectifs-queue"]
+    command: [ "yarn", "cli", "process:effectifs-queue" ]
     mem_limit: 2g
     restart: always
     networks:
@@ -94,7 +94,7 @@ services:
     networks:
       - flux_retour_cfas_network
     healthcheck:
-      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      test: [ "CMD", "/usr/local/bin/clamdcheck.sh" ]
       interval: 60s
       retries: 3
       start_period: 120s
