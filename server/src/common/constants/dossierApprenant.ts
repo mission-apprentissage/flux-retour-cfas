@@ -5,7 +5,7 @@ export const CODES_STATUT_APPRENANT = {
   inscrit: 2,
   apprenti: 3,
   abandon: 0,
-};
+} as const;
 
 export const CODES_STATUT_APPRENANT_ENUM = [
   CODES_STATUT_APPRENANT.abandon,
@@ -13,6 +13,12 @@ export const CODES_STATUT_APPRENANT_ENUM = [
   CODES_STATUT_APPRENANT.apprenti,
 ];
 
+/**
+ * Sexe des apprenants (M=Homme, F=Femme)
+ */
+export const SEXE_APPRENANT_ENUM = ["M", "F"];
+
+export const NATIONALITE_APPRENANT_ENUM = [1, 2, 3];
 /**
  * Nom des statuts
  */

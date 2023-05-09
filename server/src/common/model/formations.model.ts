@@ -3,6 +3,8 @@ import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { schemaValidation } from "@/common/utils/schemaUtils";
 import { cfdSchema } from "@/common/utils/validationUtils";
 
+import { CFD_REGEX_PATTERN } from "../constants/organisme";
+
 import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "formations";
@@ -14,11 +16,10 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ rncps: 1 }, { name: "rncps" }],
 ];
 
-// TODO utiliser formationEffectifSchema ?
 const schema = object(
   {
     _id: objectId(),
-    cfd: string({ description: "Code cfd de l'établissement" }),
+    cfd: string({ description: "Code CFD de la formation", pattern: CFD_REGEX_PATTERN, maxLength: 8 }),
     cfd_start_date: dateOrNull({ description: "Date d'ouverture du CFD" }),
     cfd_end_date: dateOrNull({ description: "Date de fermeture du CFD" }),
     libelle: stringOrNull({ description: "Libellé normalisé depuis Tables de Correspondances" }),
@@ -39,7 +40,6 @@ const schema = object(
   { required: ["cfd"] }
 );
 
-// TODO Extra validation
 export function validateFormation(props) {
   return schemaValidation({
     entity: props,

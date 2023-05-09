@@ -39,8 +39,8 @@ const Televersements = ({ organisme }) => {
   const [lastMessage, resetServerEvent] = useServerEvents();
 
   const [availableKeys, setAvailableKeys] = useState({
-    in: [{ label: "", value: "" }],
-    out: [{ label: "", value: "" }],
+    in: [{ label: "", value: "", locked: false }],
+    out: [{ label: "", value: "", locked: false }],
   });
   const [lines, setLines] = useState<any[]>([]);
   const [requireKeysSettled, setRequireKeysSettled] = useState<any[]>([]);
@@ -110,8 +110,8 @@ const Televersements = ({ organisme }) => {
     ({ lineNum }) => {
       const currentLine = lines[lineNum];
       const newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
-      const currentInKeyLocked: any = newAvailableKeys.in.find((nAK) => nAK.value === currentLine.in.value);
-      const currentOutKeyLocked: any = newAvailableKeys.out.find((nAK) => nAK.value === currentLine.out.value);
+      const currentInKeyLocked = newAvailableKeys.in.find((nAK) => nAK.value === currentLine.in.value);
+      const currentOutKeyLocked = newAvailableKeys.out.find((nAK) => nAK.value === currentLine.out.value);
       if (currentInKeyLocked) currentInKeyLocked.locked = false;
       if (currentOutKeyLocked) currentOutKeyLocked.locked = false;
 
@@ -137,11 +137,15 @@ const Televersements = ({ organisme }) => {
     toast.closeAll();
     resetServerEvent();
     setStep("mapping");
-    const response: any = await _get(`/api/v1/organismes/${organisme._id}/upload/analyse`);
+    const response: {
+      inputKeys: { label: string; value: string }[];
+      outputKeys: { label: string; value: string }[];
+      requireKeys: { label: string; value: string }[];
+    } = await _get(`/api/v1/organismes/${organisme._id}/upload/analyse`);
 
     const currentAvailableKeys = {
-      in: sortByNormalizedLabels(Object.values(response.inputKeys)),
-      out: sortByNormalizedLabels(Object.values(response.outputKeys)),
+      in: sortByNormalizedLabels(Object.values(response.inputKeys).map((o) => ({ ...o, locked: false }))),
+      out: sortByNormalizedLabels(Object.values(response.outputKeys).map((o) => ({ ...o, locked: false }))),
     };
 
     let initLines: any[] = [];
@@ -168,38 +172,29 @@ const Televersements = ({ organisme }) => {
       };
 
       initLines = Object.entries(remap).map(([key, value]) => {
-        if (key === "annee_scolaire") {
-          return {
-            in: { value: "", hasError: false },
-            out: { value: key, hasError: false },
-          };
-        }
         return {
-          in: { value: value, hasError: false },
+          in: { value: key === "annee_scolaire" ? "" : value, hasError: false },
           out: { value: key, hasError: false },
         };
       });
 
       // TODO check if exist in current mapping
 
-      // TODO DO REFACTO RUSH LAST MINUTE
-      let reqKeys = Object.values(remap).splice(0, Object.keys(response.requireKeys).length);
-      reqKeys.shift();
-      reqKeys.shift();
-      reqKeys.shift();
+      let reqKeys = Object.values(remap).splice(3, Object.keys(response.requireKeys).length);
       reqKeys = [typeCodeDiplome, ...reqKeys];
 
       setTypeCodeDiplome(typeCodeDiplome);
       setRequireKeysSettled(reqKeys);
       let error = false;
       for (const value of reqKeys) {
-        if (value !== "RNCP" && value !== "CFD")
-          try {
-            const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
+        if (value !== "RNCP" && value !== "CFD") {
+          const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
+          if (keyToLock) {
             keyToLock.locked = true;
-          } catch (err) {
+          } else {
             error = true;
           }
+        }
       }
 
       if (error) {
@@ -212,13 +207,15 @@ const Televersements = ({ organisme }) => {
           isClosable: true,
         });
         onGoBackToUpload();
+        return;
       }
-    } else {
-      initLines = Object.values(response.requireKeys).map((requireKey: any) => ({
-        in: { value: "", hasError: false },
-        out: { value: requireKey.value, hasError: false },
-      }));
     }
+
+    initLines = Object.values(response.requireKeys).map((requireKey: any) => ({
+      in: { value: "", hasError: false },
+      out: { value: requireKey.value, hasError: false },
+    }));
+
     setAvailableKeys(currentAvailableKeys);
     setLines(initLines);
 

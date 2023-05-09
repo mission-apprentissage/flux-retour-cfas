@@ -116,16 +116,16 @@ export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: O
     convertedEffectif.apprenant.date_de_naissance = dateConverter(effectifData.apprenant.date_de_naissance);
   }
 
-  if (effectifData.apprenant.contrats?.length) {
-    for (const [key, contrat] of effectifData.apprenant.contrats.entries()) {
+  if (effectifData.contrats?.length) {
+    for (const [key, contrat] of effectifData.contrats.entries()) {
       if (contrat.date_debut) {
-        convertedEffectif.apprenant.contrats[key].date_debut = dateConverter(contrat.date_debut);
+        convertedEffectif.contrats[key].date_debut = dateConverter(contrat.date_debut);
       }
       if (contrat.date_fin) {
-        convertedEffectif.apprenant.contrats[key].date_fin = dateConverter(contrat.date_fin);
+        convertedEffectif.contrats[key].date_fin = dateConverter(contrat.date_fin);
       }
       if (contrat.date_rupture) {
-        convertedEffectif.apprenant.contrats[key].date_rupture = dateConverter(contrat.date_rupture);
+        convertedEffectif.contrats[key].date_rupture = dateConverter(contrat.date_rupture);
       }
     }
   }

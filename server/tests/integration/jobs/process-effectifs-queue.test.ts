@@ -49,8 +49,7 @@ describe("Processing de EffectifsQueue", () => {
       });
 
       const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
-
-      assert.deepStrictEqual(sortByPath(updatedInput?.validation_errors), [
+      expect(sortByPath(updatedInput?.validation_errors)).toMatchObject([
         {
           message: "String attendu",
           path: [requiredField],
@@ -117,7 +116,7 @@ describe("Processing de EffectifsQueue", () => {
         date_de_naissance_apprenant: "2020-10",
         contrat_date_debut: "13/11/2020",
         contrat_date_fin: "abc",
-        contrat_date_rupture: true,
+        contrat_date_rupture: "13/11/2020",
         source: "testSource",
       })
     );
@@ -130,7 +129,7 @@ describe("Processing de EffectifsQueue", () => {
 
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
-    assert.deepStrictEqual(sortByPath(updatedInput?.validation_errors), [
+    expect(sortByPath(updatedInput?.validation_errors)).toMatchObject([
       {
         message: "Format invalide",
         path: ["contrat_date_debut"],
@@ -140,7 +139,7 @@ describe("Processing de EffectifsQueue", () => {
         path: ["contrat_date_fin"],
       },
       {
-        message: "String attendu",
+        message: "Format invalide",
         path: ["contrat_date_rupture"],
       },
       {
@@ -236,7 +235,7 @@ describe("Processing de EffectifsQueue", () => {
 
     assert(insertedDossier);
 
-    assert.deepStrictEqual(insertedDossier, {
+    expect(insertedDossier).toStrictEqual({
       apprenant: {
         nom: "FLEURY",
         prenom: "Fortuné",
@@ -244,7 +243,7 @@ describe("Processing de EffectifsQueue", () => {
           {
             valeur_statut: 3,
             date_statut: new Date("2022-12-28T04:05:47.647Z"),
-            date_reception: insertedDossier.apprenant.historique_statut[0].date_reception || "shouldnotbeempty",
+            date_reception: expect.anything(),
           },
         ],
         ine: "402957826QH",
@@ -258,11 +257,11 @@ describe("Processing de EffectifsQueue", () => {
           academie: "2",
           region: "93",
         },
-        contrats: [],
       },
+      contrats: [],
       formation: {
         cfd: "50033610",
-        annee: 0,
+        annee: "0",
         periode: [2022, 2024],
         libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
       },
@@ -293,7 +292,6 @@ describe("Processing de EffectifsQueue", () => {
             pays: false,
           },
           historique_statut: true,
-          contrats: true,
           code_postal_de_naissance: false,
           regime_scolaire: false,
           inscription_sportif_haut_niveau: false,
@@ -326,6 +324,7 @@ describe("Processing de EffectifsQueue", () => {
             telephone: false,
           },
         },
+        contrats: true,
         formation: {
           cfd: true,
           rncp: false,

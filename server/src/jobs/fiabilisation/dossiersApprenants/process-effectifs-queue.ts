@@ -19,6 +19,7 @@ import logger from "@/common/logger";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsQueueDb } from "@/common/model/collections";
+import { formatError } from "@/common/utils/errorUtils";
 import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
 
@@ -65,7 +66,6 @@ export const processEffectifsQueue = async (options?: Options) => {
         const result = dossierApprenantSchemaV1V2Zod().safeParse(effectifQueued);
         if (!result.success) {
           const prettyValidationError = result.error.issues.map(({ path, message }) => ({ message, path }));
-
           dataToUpdate = { validation_errors: prettyValidationError };
         } else {
           totalValidItems++;
@@ -127,6 +127,7 @@ export const processEffectifsQueue = async (options?: Options) => {
                 effectifData.apprenant?.historique_statut[0]?.valeur_statut,
                 effectifData.apprenant?.historique_statut[0]?.date_statut
               );
+
               await updateEffectifAndLock(effectifId, effectif);
             } else {
               // FIXME intégrer dans une fonction globale insertEffectif
@@ -149,9 +150,10 @@ export const processEffectifsQueue = async (options?: Options) => {
             }
 
             dataToUpdate = { effectif_id: effectifId };
-          } catch (error: any) {
-            logger.info(` Error with item ${effectifQueued._id}: ${error.toString()}`);
-            dataToUpdate = { error: error.toString() };
+          } catch (e: any) {
+            const err = formatError(e);
+            logger.error({ err }, `Error with item ${effectifQueued._id}: ${err.toString()}`);
+            dataToUpdate = { error: err.toString() };
           }
         }
 
@@ -186,5 +188,9 @@ export const processEffectifsQueue = async (options?: Options) => {
     logger.info(`${dataIn.length - totalValidItems} items invalides`);
   }
 
-  return { totalProcessed: dataIn.length, totalValidItems, totalInvalidItems: dataIn.length - totalValidItems };
+  return {
+    totalProcessed: dataIn.length,
+    totalValidItems,
+    totalInvalidItems: dataIn.length - totalValidItems,
+  };
 };

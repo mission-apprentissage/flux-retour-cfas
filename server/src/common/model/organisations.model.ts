@@ -27,7 +27,7 @@ export const organisationTypes = [
   "ACADEMIE",
   "OPERATEUR_PUBLIC_NATIONAL",
   "ADMINISTRATEUR",
-] as const;
+];
 
 export type NewOrganisation =
   | OrganisationOrganismeFormation

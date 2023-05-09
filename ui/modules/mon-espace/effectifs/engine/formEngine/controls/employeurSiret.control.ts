@@ -1,24 +1,24 @@
 import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.service";
 
 const unlockAllCascade = {
-  "apprenant.contrats[0].denomination": { locked: false, reset: true },
-  "apprenant.contrats[0].naf": { locked: false, reset: true },
-  "apprenant.contrats[0].nombre_de_salaries": { locked: false, reset: true },
-  "apprenant.contrats[0].adresse.numero": { locked: false, reset: true },
-  "apprenant.contrats[0].adresse.repetition_voie": { locked: false, reset: true },
-  "apprenant.contrats[0].adresse.voie": { locked: false, reset: true },
-  "apprenant.contrats[0].adresse.complement": { locked: false, reset: true },
-  "apprenant.contrats[0].adresse.code_postal": { locked: false, reset: true },
-  "apprenant.contrats[0].adresse.commune": { locked: false, reset: true },
-  "apprenant.contrats[0].adresse.departement": { locked: false, reset: true },
-  "apprenant.contrats[0].adresse.region": { locked: false, reset: true },
+  "contrats[0].denomination": { locked: false, reset: true },
+  "contrats[0].naf": { locked: false, reset: true },
+  "contrats[0].nombre_de_salaries": { locked: false, reset: true },
+  "contrats[0].adresse.numero": { locked: false, reset: true },
+  "contrats[0].adresse.repetition_voie": { locked: false, reset: true },
+  "contrats[0].adresse.voie": { locked: false, reset: true },
+  "contrats[0].adresse.complement": { locked: false, reset: true },
+  "contrats[0].adresse.code_postal": { locked: false, reset: true },
+  "contrats[0].adresse.commune": { locked: false, reset: true },
+  "contrats[0].adresse.departement": { locked: false, reset: true },
+  "contrats[0].adresse.region": { locked: false, reset: true },
 };
 
 export const employerSiretLogic = [
   {
-    deps: ["apprenant.contrats[0].siret"],
+    deps: ["contrats[0].siret"],
     process: async ({ values, signal, organisme }: { values?: any; signal?: any; organisme?: any }) => {
-      const siret = values.apprenant.contrats[0].siret;
+      const siret = values.contrats[0].siret;
       const { messages, result } = await apiService.fetchSiret({
         siret,
         organisme_id: organisme._id,
@@ -50,52 +50,52 @@ export const employerSiretLogic = [
 
       return {
         cascade: {
-          "apprenant.contrats[0].denomination": {
+          "contrats[0].denomination": {
             value: result.enseigne || result.entreprise_raison_sociale,
             locked: false,
           },
-          "apprenant.contrats[0].naf": {
+          "contrats[0].naf": {
             value: result.naf_code,
             locked: false,
             cascade: false,
           },
-          "apprenant.contrats[0].nombre_de_salaries": {
+          "contrats[0].nombre_de_salaries": {
             value: result.entreprise_tranche_effectif_salarie?.de || undefined,
             locked: false,
           },
-          "apprenant.contrats[0].adresse.numero": {
+          "contrats[0].adresse.numero": {
             value: result.numero_voie || undefined,
             locked: false,
           },
-          "apprenant.contrats[0].adresse.repetition_voie": {
+          "contrats[0].adresse.repetition_voie": {
             reset: true,
             locked: false,
           },
-          "apprenant.contrats[0].adresse.voie": {
+          "contrats[0].adresse.voie": {
             value:
               result.type_voie || result.nom_voie
                 ? `${result.type_voie ? `${result.type_voie} ` : undefined}${result.nom_voie}`
                 : undefined,
             locked: false,
           },
-          "apprenant.contrats[0].adresse.complement": {
+          "contrats[0].adresse.complement": {
             value: result.complement_adresse || undefined,
             locked: false,
           },
-          "apprenant.contrats[0].adresse.code_postal": {
+          "contrats[0].adresse.code_postal": {
             value: result.code_postal || undefined,
             locked: false,
             cascade: false,
           },
-          "apprenant.contrats[0].adresse.commune": {
+          "contrats[0].adresse.commune": {
             value: result.commune_implantation_nom || undefined,
             locked: false,
           },
-          "apprenant.contrats[0].adresse.departement": {
+          "contrats[0].adresse.departement": {
             value: result.num_departement || undefined,
             locked: false,
           },
-          "apprenant.contrats[0].adresse.region": {
+          "contrats[0].adresse.region": {
             value: result.num_region || undefined,
             locked: true,
           },
@@ -112,27 +112,23 @@ export const employerSiretLogic = [
           effectifId,
           data: {
             nouveau_contrat: {
-              siret: values.apprenant.contrats[0].siret,
-              denomination: values.apprenant.contrats[0].denomination,
-              naf: values.apprenant.contrats[0].naf,
-              nombre_de_salaries: values.apprenant.contrats[0].nombre_de_salaries ?? 0,
-              ...(values.apprenant.contrats[0].type_employeur
-                ? { type_employeur: values.apprenant.contrats[0].type_employeur }
-                : {}),
-              date_debut: values.apprenant.contrats[0].date_debut,
-              date_fin: values.apprenant.contrats[0].date_fin,
-              ...(values.apprenant.contrats[0].date_rupture
-                ? { date_rupture: values.apprenant.contrats[0].date_rupture }
-                : {}),
+              siret: values.contrats[0].siret,
+              denomination: values.contrats[0].denomination,
+              naf: values.contrats[0].naf,
+              nombre_de_salaries: values.contrats[0].nombre_de_salaries ?? 0,
+              ...(values.contrats[0].type_employeur ? { type_employeur: values.contrats[0].type_employeur } : {}),
+              date_debut: values.contrats[0].date_debut,
+              date_fin: values.contrats[0].date_fin,
+              ...(values.contrats[0].date_rupture ? { date_rupture: values.contrats[0].date_rupture } : {}),
               adresse: {
-                numero: values.apprenant.contrats[0].adresse.numero,
-                repetition_voie: values.apprenant.contrats[0].adresse.repetition_voie,
-                voie: values.apprenant.contrats[0].adresse.voie,
-                complement: values.apprenant.contrats[0].adresse.complement,
-                code_postal: values.apprenant.contrats[0].adresse.code_postal,
-                commune: values.apprenant.contrats[0].adresse.commune,
-                departement: values.apprenant.contrats[0].adresse.departement,
-                region: values.apprenant.contrats[0].adresse.region,
+                numero: values.contrats[0].adresse.numero,
+                repetition_voie: values.contrats[0].adresse.repetition_voie,
+                voie: values.contrats[0].adresse.voie,
+                complement: values.contrats[0].adresse.complement,
+                code_postal: values.contrats[0].adresse.code_postal,
+                commune: values.contrats[0].adresse.commune,
+                departement: values.contrats[0].adresse.departement,
+                region: values.contrats[0].adresse.region,
               },
             },
           },

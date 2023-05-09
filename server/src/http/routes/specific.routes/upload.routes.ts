@@ -88,20 +88,20 @@ const mappingModel = {
   representant_legal_adresse_commune: "apprenant.representant_legal.adresse.commune",
   dernier_statut: "apprenant.historique_statut.valeur_statut",
   date_dernier_statut: "apprenant.historique_statut.date_statut",
-  dernier_contrat_siret: "apprenant.contrats.siret",
-  dernier_contrat_type_employeur: "apprenant.contrats.type_employeur",
-  dernier_contrat_nombre_de_salaries: "apprenant.contrats.nombre_de_salaries",
-  dernier_contrat_adresse_complete: "apprenant.contrats.adresse.complete",
-  dernier_contrat_adresse_numero: "apprenant.contrats.adresse.numero",
-  dernier_contrat_adresse_repetition_voie: "apprenant.contrats.adresse.repetition_voie",
-  dernier_contrat_adresse_voie: "apprenant.contrats.adresse.voie",
-  dernier_contrat_adresse_complement: "apprenant.contrats.adresse.complement",
-  dernier_contrat_adresse_code_postal: "apprenant.contrats.adresse.code_postal",
-  dernier_contrat_adresse_code_commune_insee: "apprenant.contrats.adresse.code_insee",
-  dernier_contrat_adresse_commune: "apprenant.contrats.adresse.commune",
-  dernier_contrat_date_debut: "apprenant.contrats.date_debut",
-  dernier_contrat_date_fin: "apprenant.contrats.date_fin",
-  dernier_contrat_date_rupture: "apprenant.contrats.date_rupture",
+  dernier_contrat_siret: "contrats.siret",
+  dernier_contrat_type_employeur: "contrats.type_employeur",
+  dernier_contrat_nombre_de_salaries: "contrats.nombre_de_salaries",
+  dernier_contrat_adresse_complete: "contrats.adresse.complete",
+  dernier_contrat_adresse_numero: "contrats.adresse.numero",
+  dernier_contrat_adresse_repetition_voie: "contrats.adresse.repetition_voie",
+  dernier_contrat_adresse_voie: "contrats.adresse.voie",
+  dernier_contrat_adresse_complement: "contrats.adresse.complement",
+  dernier_contrat_adresse_code_postal: "contrats.adresse.code_postal",
+  dernier_contrat_adresse_code_commune_insee: "contrats.adresse.code_insee",
+  dernier_contrat_adresse_commune: "contrats.adresse.commune",
+  dernier_contrat_date_debut: "contrats.date_debut",
+  dernier_contrat_date_fin: "contrats.date_fin",
+  dernier_contrat_date_rupture: "contrats.date_rupture",
 };
 
 function discard() {
@@ -388,7 +388,7 @@ export default {
           });
         } else {
           data.apprenant.historique_statut = data.apprenant.historique_statut ? [data.apprenant.historique_statut] : [];
-          data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
+          data.contrats = data.contrats ? [data.contrats] : [];
 
           data.formation.formation_id = formationFound._id;
           data.formation.annee = formationFound?.annee;
@@ -443,9 +443,9 @@ export default {
                 };
                 value = buildDiffValidationErrors(value, foundInDb);
               }
-              if (fieldName.includes("apprenant.contrats.")) {
-                const contratKey = fieldName.replace("apprenant.contrats.", "");
-                value = get(canBeImportEffectif.apprenant.contrats[0], contratKey);
+              if (fieldName.includes("contrats.")) {
+                const contratKey = fieldName.replace("contrats.", "");
+                value = get(canBeImportEffectif.contrats[0], contratKey);
                 if (value) set(tmpContrat, contratKey, value);
               } else if (fieldName.includes("apprenant.historique_statut.")) {
                 const historyKey = fieldName.replace("apprenant.historique_statut.", "");
@@ -455,7 +455,7 @@ export default {
             });
             if (Object.keys(tmpContrat).length) {
               if (tmpContrat.date_debut && tmpContrat.date_fin) {
-                effectifToSave.apprenant.contrats.push(tmpContrat);
+                effectifToSave.contrats.push(tmpContrat);
               }
             }
             if (Object.keys(tmpHistoryStatut).length) {
@@ -469,10 +469,7 @@ export default {
             const { fieldName } = validation_error;
             if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
               validation_error.willNotBeModify = true;
-            } else if (
-              fieldName === "apprenant.contrats[0].date_debut" ||
-              fieldName === "apprenant.contrats[0].date_fin"
-            ) {
+            } else if (fieldName === "contrats[0].date_debut" || fieldName === "contrats[0].date_fin") {
               validation_error.willNotBeModify = true;
               validation_error.isRequired = true;
             } else if (fieldName.includes("apprenant.historique_statut")) {
@@ -597,7 +594,7 @@ export default {
 
       for (const [key, validation_error] of errorsToKeep.entries()) {
         let { fieldName } = validation_error;
-        if (fieldName.includes("apprenant.contrats[0]")) {
+        if (fieldName.includes("contrats[0]")) {
           errorsToKeep[key].fieldName = fieldName.replace("contrats[0]", "contrats[1]");
           errorsToKeep[key].message = fieldName.replace("contrats[0]", "contrats[1]");
         }

@@ -26,7 +26,7 @@ describe("Maintenances Route", () => {
   //       const { email, password } = await createAdminUser();
   //       const { cookie } = await logUser(email, password);
   //       const response = await httpClient.post(ADMIN_MAINTENANCE_ENDPOINT, {}, { headers: { cookie } });
-  //       assert.deepEqual(response.data, {
+  //       expect(response.data).toMatchObject({
   //         error: "Bad Request",
   //         message: "Erreur de validation",
   //         details: [
@@ -65,7 +65,7 @@ describe("Maintenances Route", () => {
   //         headers: { cookie },
   //       });
   //       assert.equal(response.status, 201);
-  //       assert.deepEqual(response.data, {
+  //       expect(response.data).toMatchObject({
   //         ...SAMPLE_VALID_MAINTENANCE_MESSAGE,
   //         name: "admin@test.beta.gouv.fr",
   //         _id: response.data._id,
@@ -153,7 +153,7 @@ describe("Maintenances Route", () => {
   //     it("sends a 200 HTTP response when user is not authenticated", async () => {
   //       const { httpClient } = await startServer();
   //       const response = await httpClient.get(PUBLIC_MAINTENANCE_ENDPOINT, {});
-  //       assert.equal(response.status, 200);
+  //       expect(response.status).toBe(200);
   //       assert.deepEqual(response.data.length, 1);
   //       assert.deepEqual(response.data[0], {
   //         ...SAMPLE_VALID_MAINTENANCE_MESSAGE,

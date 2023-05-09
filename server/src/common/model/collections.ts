@@ -14,10 +14,12 @@ import {
   UsersMigration,
 } from "./@types";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
+import { EffectifsV3Queue } from "./@types/EffectifsV3Queue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { UaisAcceReferentiel } from "./@types/UaisAcceReferentiel.js";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
+import effectifsV3QueueModelDescriptor from "./effectifsV3Queue.model";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
 import formationsModelDescriptor from "./formations.model";
 import formationsCatalogueModelDescriptor from "./formationsCatalogue.model";
@@ -47,6 +49,7 @@ export const modelDescriptors = [
   OrganismesReferentielModelDescriptor,
   effectifsModelDescriptor,
   effectifsQueueModelDescriptor,
+  effectifsV3QueueModelDescriptor,
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
 ];
@@ -69,6 +72,8 @@ export const maintenanceMessageDb = () =>
   getDbCollection<MaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<EffectifsQueue>(effectifsQueueModelDescriptor.collectionName);
+export const effectifsV3QueueDb = () =>
+  getDbCollection<EffectifsV3Queue>(effectifsV3QueueModelDescriptor.collectionName);
 export const uploadsDb = () => getDbCollection<Upload>(uploadsModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);

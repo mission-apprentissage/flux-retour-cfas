@@ -3,6 +3,9 @@ import { ObjectId } from "mongodb";
 
 export interface Effectif {
   /**
+   * Identifiant MongoDB de l'effectif
+   */
+  /**
    * Organisme id
    */
   organisme_id: ObjectId;
@@ -32,9 +35,7 @@ export interface Effectif {
      */
     prenom: string;
     /**
-     * **Sexe de l'apprenant**
-     *   M : Homme
-     *   F : Femme
+     * Sexe de l'apprenant (M: Homme, F: Femme)
      */
     sexe?: "M" | "F";
     /**
@@ -50,17 +51,19 @@ export interface Effectif {
      */
     nationalite?: 1 | 2 | 3;
     /**
-     * **Régime scolaire** :
-     *   I : Interne
-     *   D : Demi-pensionnaire
-     *  E : Externe
-     *  IE : Interne externé
+     * Régime scolaire (I : Interne, D : Demi-pensionnaire, E : Externe, IE : Interne externé)
      */
     regime_scolaire?: "I" | "D" | "E" | "IE";
     /**
      * Apprenant en situation d'handicape (RQTH)
      */
-    handicap?: boolean;
+    rqth?: boolean;
+    /**
+     * Date de la reconnaissance travailleur handicapé
+     */
+    date_rqth?: Date;
+    affelnet?: string[];
+    parcoursup?: string[];
     /**
      * Apprenant inscrit sur la liste des sportifs, entraîneurs, arbitres et juges sportifs de haut niveau
      */
@@ -70,10 +73,7 @@ export interface Effectif {
      */
     courriel?: string;
     /**
-     * Dans le cas d'un numéro français, il n'est pas
-     *       nécessaire de saisir le "0" car l'indicateur pays est
-     *       pré-renseigné.
-     *       Il doit contenir 9 chiffres après l'indicatif.
+     * Téléphone de l'apprenant
      */
     telephone?: string;
     adresse?: {
@@ -481,16 +481,19 @@ export interface Effectif {
      * Historique du statut de l'apprenant
      */
     historique_statut: {
+      /**
+       * Statut de l'apprenant
+       */
       valeur_statut: 2 | 3 | 0;
       date_statut: Date;
       date_reception?: Date;
     }[];
     /**
-     * **Situation de l'apprenant avant le contrat
+     * Situation de l'apprenant avant le contrat
      */
     situation_avant_contrat?: 11 | 12 | 21 | 31 | 41 | 51 | 52 | 53 | 54 | 90 | 99;
     /**
-     * **Situation de l'apprenant n-1
+     * Situation de l'apprenant N-1
      */
     derniere_situation?:
       | 1003
@@ -560,11 +563,11 @@ export interface Effectif {
      */
     dernier_organisme_uai?: string;
     /**
-     * **Organisme gestionnaire de l’établissement
+     * Organisme gestionnaire de l’établissement
      */
     organisme_gestionnaire?: 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 21 | 23 | 24 | 25;
     /**
-     * **Dernier diplome obtenu
+     * Dernier diplôme obtenu
      */
     dernier_diplome?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 99;
     /**
@@ -572,7 +575,7 @@ export interface Effectif {
      */
     mineur?: boolean;
     /**
-     * Un mineur émancipé peut accomplir seul les actes nécessitant la majorité légale. Plus d'informations à propos de l'émancipation sur [le site du Service public.](https://www.service-public.fr/particuliers/vosdroits/F1194)
+     * Un mineur émancipé peut accomplir seul les actes nécessitant la majorité légale.
      */
     mineur_emancipe?: boolean;
     representant_legal?: {
@@ -1001,7 +1004,7 @@ export interface Effectif {
        */
       telephone?: string;
       /**
-       * **Nomenclatures des professions et catégories socioprofessionnelles
+       * Nomenclatures des professions et catégories socioprofessionnelles
        */
       pcs?:
         | 10
@@ -1036,450 +1039,36 @@ export interface Effectif {
         | 82
         | 99;
     };
-    /**
-     * Historique des contrats de l'apprenant
-     */
-    contrats?: {
-      /**
-       * N° SIRET de l'employeur
-       */
-      siret?: string;
-      /**
-       * La dénomination sociale doit être celle de l'établissement dans lequel le contrat s'exécute.
-       */
-      denomination?: string;
-      /**
-       * Le type d'employeur doit être en adéquation avec son statut juridique.
-       */
-      type_employeur?: 11 | 12 | 13 | 14 | 15 | 16 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29;
-      /**
-       * Le Code NAF est composé de 4 chiffres et 1 lettre. Il est délivré par l'INSEE.[Informations sur le Code NAF.](https://www.economie.gouv.fr/entreprises/activite-entreprise-code-ape-code-naf)
-       */
-      naf?: string;
-      /**
-       * L'effectif salarié rempli automatiquement correspond à l'estimation de la base Entreprises de l'INSEE. <br/>L'effectif renseigné est celui de l’entreprise dans sa globalité (et non seulement l’effectif de l’établissement d’exécution du contrat).
-       */
-      nombre_de_salaries?: number;
-      adresse?: {
-        /**
-         * N° de la voie
-         */
-        numero?: number;
-        /**
-         * Indice de répétition du numéro de voie
-         */
-        repetition_voie?: "B" | "T" | "Q" | "C";
-        /**
-         * Nom de voie
-         */
-        voie?: string;
-        /**
-         * Complément d'adresse
-         */
-        complement?: string;
-        /**
-         * Le code postal doit contenir 5 caractères
-         */
-        code_postal?: string;
-        /**
-         * Le code insee doit contenir 5 caractères
-         */
-        code_insee?: string;
-        /**
-         * Commune
-         */
-        commune?: string;
-        departement?:
-          | "01"
-          | "02"
-          | "03"
-          | "04"
-          | "05"
-          | "06"
-          | "07"
-          | "08"
-          | "09"
-          | "10"
-          | "11"
-          | "12"
-          | "13"
-          | "14"
-          | "15"
-          | "16"
-          | "17"
-          | "18"
-          | "19"
-          | "21"
-          | "22"
-          | "23"
-          | "24"
-          | "25"
-          | "26"
-          | "27"
-          | "28"
-          | "29"
-          | "2A"
-          | "2B"
-          | "30"
-          | "31"
-          | "32"
-          | "33"
-          | "34"
-          | "35"
-          | "36"
-          | "37"
-          | "38"
-          | "39"
-          | "40"
-          | "41"
-          | "42"
-          | "43"
-          | "44"
-          | "45"
-          | "46"
-          | "47"
-          | "48"
-          | "49"
-          | "50"
-          | "51"
-          | "52"
-          | "53"
-          | "54"
-          | "55"
-          | "56"
-          | "57"
-          | "58"
-          | "59"
-          | "60"
-          | "61"
-          | "62"
-          | "63"
-          | "64"
-          | "65"
-          | "66"
-          | "67"
-          | "68"
-          | "69"
-          | "70"
-          | "71"
-          | "72"
-          | "73"
-          | "74"
-          | "75"
-          | "76"
-          | "77"
-          | "78"
-          | "79"
-          | "80"
-          | "81"
-          | "82"
-          | "83"
-          | "84"
-          | "85"
-          | "86"
-          | "87"
-          | "88"
-          | "89"
-          | "90"
-          | "91"
-          | "92"
-          | "93"
-          | "94"
-          | "95"
-          | "971"
-          | "972"
-          | "973"
-          | "974"
-          | "976"
-          | "977"
-          | "978"
-          | "984"
-          | "986"
-          | "987"
-          | "988"
-          | "989";
-        region?:
-          | "01"
-          | "02"
-          | "03"
-          | "04"
-          | "06"
-          | "11"
-          | "24"
-          | "27"
-          | "28"
-          | "32"
-          | "44"
-          | "52"
-          | "53"
-          | "75"
-          | "76"
-          | "84"
-          | "93"
-          | "94"
-          | "978"
-          | "977"
-          | "00";
-        academie?:
-          | "10"
-          | "11"
-          | "12"
-          | "13"
-          | "14"
-          | "15"
-          | "16"
-          | "17"
-          | "18"
-          | "19"
-          | "20"
-          | "22"
-          | "23"
-          | "24"
-          | "25"
-          | "27"
-          | "28"
-          | "31"
-          | "32"
-          | "33"
-          | "43"
-          | "70"
-          | "77"
-          | "78"
-          | "1"
-          | "2"
-          | "3"
-          | "4"
-          | "6"
-          | "7"
-          | "8"
-          | "9";
-        /**
-         * Adresse complète
-         */
-        complete?: string;
-        /**
-         * Pays
-         */
-        pays?:
-          | "AF"
-          | "ZA"
-          | "AL"
-          | "DZ"
-          | "DE"
-          | "AD"
-          | "AO"
-          | "AG"
-          | "SA"
-          | "AR"
-          | "AM"
-          | "AU"
-          | "AT"
-          | "AZ"
-          | "BS"
-          | "BH"
-          | "BD"
-          | "BB"
-          | "BE"
-          | "BZ"
-          | "BJ"
-          | "BT"
-          | "BY"
-          | "MM"
-          | "BO"
-          | "BQ"
-          | "BA"
-          | "BW"
-          | "BR"
-          | "BN"
-          | "BG"
-          | "BF"
-          | "BI"
-          | "KH"
-          | "CM"
-          | "CA"
-          | "CV"
-          | "CF"
-          | "CL"
-          | "CN"
-          | "CY"
-          | "CO"
-          | "KM"
-          | "CG"
-          | "CD"
-          | "KR"
-          | "KP"
-          | "CR"
-          | "CI"
-          | "HR"
-          | "CU"
-          | "CW"
-          | "DK"
-          | "DJ"
-          | "DO"
-          | "DM"
-          | "EG"
-          | "SV"
-          | "AE"
-          | "EC"
-          | "ER"
-          | "ES"
-          | "EE"
-          | "SZ"
-          | "US"
-          | "ET"
-          | "MK"
-          | "FJ"
-          | "FI"
-          | "FR"
-          | "GA"
-          | "GM"
-          | "GE"
-          | "GH"
-          | "GR"
-          | "GD"
-          | "GT"
-          | "GN"
-          | "GQ"
-          | "GW"
-          | "GY"
-          | "HT"
-          | "HN"
-          | "HU"
-          | "IN"
-          | "ID"
-          | "IR"
-          | "IQ"
-          | "IE"
-          | "IS"
-          | "IL"
-          | "IT"
-          | "JM"
-          | "JP"
-          | "JO"
-          | "KZ"
-          | "KE"
-          | "KG"
-          | "KI"
-          | "XK"
-          | "KW"
-          | "LA"
-          | "LS"
-          | "LV"
-          | "LB"
-          | "LR"
-          | "LY"
-          | "LI"
-          | "LT"
-          | "LU"
-          | "MG"
-          | "MY"
-          | "MW"
-          | "MV"
-          | "ML"
-          | "MT"
-          | "MA"
-          | "MH"
-          | "MU"
-          | "MR"
-          | "MX"
-          | "FM"
-          | "MD"
-          | "MC"
-          | "MN"
-          | "ME"
-          | "MZ"
-          | "NA"
-          | "NR"
-          | "NP"
-          | "NI"
-          | "NE"
-          | "NG"
-          | "NO"
-          | "NZ"
-          | "OM"
-          | "UG"
-          | "UZ"
-          | "PK"
-          | "PW"
-          | "PS"
-          | "PA"
-          | "PG"
-          | "PY"
-          | "NL"
-          | "PE"
-          | "PH"
-          | "PL"
-          | "PT"
-          | "QA"
-          | "RO"
-          | "GB"
-          | "RU"
-          | "RW"
-          | "KN"
-          | "SM"
-          | "SX"
-          | "VC"
-          | "LC"
-          | "SB"
-          | "WS"
-          | "ST"
-          | "SN"
-          | "RS"
-          | "SC"
-          | "SL"
-          | "SG"
-          | "SK"
-          | "SI"
-          | "SO"
-          | "SD"
-          | "SS"
-          | "LK"
-          | "SE"
-          | "CH"
-          | "SR"
-          | "SY"
-          | "TJ"
-          | "TZ"
-          | "TD"
-          | "CZ"
-          | "TH"
-          | "TL"
-          | "TG"
-          | "TO"
-          | "TT"
-          | "TN"
-          | "TM"
-          | "TR"
-          | "TV"
-          | "UA"
-          | "UY"
-          | "VU"
-          | "VA"
-          | "VE"
-          | "VN"
-          | "YE"
-          | "ZM"
-          | "ZW";
-      };
-      /**
-       * Date de début du contrat
-       */
-      date_debut: Date;
-      /**
-       * Date de fin du contrat
-       */
-      date_fin: Date;
-      /**
-       * Date de rupture du contrat
-       */
-      date_rupture?: Date;
-    }[];
   };
   formation?: {
     /**
-     * formation id
+     * ID de la formation
      */
     formation_id?: ObjectId;
+    /**
+     * Code CFD de la formation
+     */
+    cfd: string;
+    /**
+     * Code RNCP de la formation à laquelle l'apprenant est inscrit
+     */
+    rncp?: string;
+    /**
+     * Libellé long de la formation visée
+     */
+    libelle_long?: string;
+    /**
+     * Niveau de formation récupéré via Tables de Correspondances
+     */
+    niveau?: string | null;
+    /**
+     * Libellé du niveau de formation récupéré via Tables de Correspondances
+     */
+    niveau_libelle?: string | null;
+    /**
+     * Année de la formation (cursus)
+     */
+    annee?: string | null;
     /**
      * Date de début de la formation
      */
@@ -1489,7 +1078,7 @@ export interface Effectif {
      */
     date_fin_formation?: Date;
     /**
-     * Date d'obtention du diplome
+     * Date d'obtention du diplôme
      */
     date_obtention_diplome?: Date;
     /**
@@ -1497,34 +1086,482 @@ export interface Effectif {
      */
     duree_formation_relle?: number;
     /**
-     * CFD de la formation à laquelle l'apprenant est inscrit
-     */
-    cfd: string;
-    /**
-     * Code RNCP de la formation à laquelle l'apprenant est inscrit
-     */
-    rncp?: string;
-    /**
-     * Libellé court de la formation visée
-     */
-    libelle_long?: string;
-    /**
-     * Le niveau de la formation (ex: 3)
-     */
-    niveau?: string;
-    /**
-     * Libellé du niveau de la formation (ex: '3 (BTS, DUT...)')
-     */
-    niveau_libelle?: string;
-    /**
-     * Date debut & date de fin de la formation
+     * Année scolaire
      */
     periode?: number[];
     /**
-     * Numéro de l'année dans la formation (promo)
+     * Date d'inscription
      */
-    annee?: number;
+    date_inscription?: Date;
+    /**
+     * Diplôme obtenu
+     */
+    obtention_diplome?: boolean;
+    /**
+     * Date d'exclusion
+     */
+    date_exclusion?: Date;
+    /**
+     * Cause de l'exclusion
+     */
+    cause_exclusion?: string;
+    referent_handicap?: {
+      /**
+       * Nom du référent handicap
+       */
+      nom?: string;
+      /**
+       * Prénom du référent handicap
+       */
+      prenom?: string;
+      /**
+       * Email du référent handicap
+       */
+      email?: string;
+    };
   };
+  /**
+   * Historique des contrats de l'apprenant
+   */
+  contrats?: {
+    /**
+     * N° SIRET de l'employeur
+     */
+    siret?: string;
+    /**
+     * La dénomination sociale doit être celle de l'établissement dans lequel le contrat s'exécute.
+     */
+    denomination?: string;
+    /**
+     * Le type d'employeur doit être en adéquation avec son statut juridique.
+     */
+    type_employeur?: 11 | 12 | 13 | 14 | 15 | 16 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29;
+    /**
+     * Le Code NAF est composé de 4 chiffres et 1 lettre. Il est délivré par l'INSEE.[Informations sur le Code NAF.](https://www.economie.gouv.fr/entreprises/activite-entreprise-code-ape-code-naf)
+     */
+    naf?: string;
+    /**
+     * L'effectif salarié rempli automatiquement correspond à l'estimation de la base Entreprises de l'INSEE. <br/>L'effectif renseigné est celui de l’entreprise dans sa globalité (et non seulement l’effectif de l’établissement d’exécution du contrat).
+     */
+    nombre_de_salaries?: number;
+    adresse?: {
+      /**
+       * N° de la voie
+       */
+      numero?: number;
+      /**
+       * Indice de répétition du numéro de voie
+       */
+      repetition_voie?: "B" | "T" | "Q" | "C";
+      /**
+       * Nom de voie
+       */
+      voie?: string;
+      /**
+       * Complément d'adresse
+       */
+      complement?: string;
+      /**
+       * Le code postal doit contenir 5 caractères
+       */
+      code_postal?: string;
+      /**
+       * Le code insee doit contenir 5 caractères
+       */
+      code_insee?: string;
+      /**
+       * Commune
+       */
+      commune?: string;
+      departement?:
+        | "01"
+        | "02"
+        | "03"
+        | "04"
+        | "05"
+        | "06"
+        | "07"
+        | "08"
+        | "09"
+        | "10"
+        | "11"
+        | "12"
+        | "13"
+        | "14"
+        | "15"
+        | "16"
+        | "17"
+        | "18"
+        | "19"
+        | "21"
+        | "22"
+        | "23"
+        | "24"
+        | "25"
+        | "26"
+        | "27"
+        | "28"
+        | "29"
+        | "2A"
+        | "2B"
+        | "30"
+        | "31"
+        | "32"
+        | "33"
+        | "34"
+        | "35"
+        | "36"
+        | "37"
+        | "38"
+        | "39"
+        | "40"
+        | "41"
+        | "42"
+        | "43"
+        | "44"
+        | "45"
+        | "46"
+        | "47"
+        | "48"
+        | "49"
+        | "50"
+        | "51"
+        | "52"
+        | "53"
+        | "54"
+        | "55"
+        | "56"
+        | "57"
+        | "58"
+        | "59"
+        | "60"
+        | "61"
+        | "62"
+        | "63"
+        | "64"
+        | "65"
+        | "66"
+        | "67"
+        | "68"
+        | "69"
+        | "70"
+        | "71"
+        | "72"
+        | "73"
+        | "74"
+        | "75"
+        | "76"
+        | "77"
+        | "78"
+        | "79"
+        | "80"
+        | "81"
+        | "82"
+        | "83"
+        | "84"
+        | "85"
+        | "86"
+        | "87"
+        | "88"
+        | "89"
+        | "90"
+        | "91"
+        | "92"
+        | "93"
+        | "94"
+        | "95"
+        | "971"
+        | "972"
+        | "973"
+        | "974"
+        | "976"
+        | "977"
+        | "978"
+        | "984"
+        | "986"
+        | "987"
+        | "988"
+        | "989";
+      region?:
+        | "01"
+        | "02"
+        | "03"
+        | "04"
+        | "06"
+        | "11"
+        | "24"
+        | "27"
+        | "28"
+        | "32"
+        | "44"
+        | "52"
+        | "53"
+        | "75"
+        | "76"
+        | "84"
+        | "93"
+        | "94"
+        | "978"
+        | "977"
+        | "00";
+      academie?:
+        | "10"
+        | "11"
+        | "12"
+        | "13"
+        | "14"
+        | "15"
+        | "16"
+        | "17"
+        | "18"
+        | "19"
+        | "20"
+        | "22"
+        | "23"
+        | "24"
+        | "25"
+        | "27"
+        | "28"
+        | "31"
+        | "32"
+        | "33"
+        | "43"
+        | "70"
+        | "77"
+        | "78"
+        | "1"
+        | "2"
+        | "3"
+        | "4"
+        | "6"
+        | "7"
+        | "8"
+        | "9";
+      /**
+       * Adresse complète
+       */
+      complete?: string;
+      /**
+       * Pays
+       */
+      pays?:
+        | "AF"
+        | "ZA"
+        | "AL"
+        | "DZ"
+        | "DE"
+        | "AD"
+        | "AO"
+        | "AG"
+        | "SA"
+        | "AR"
+        | "AM"
+        | "AU"
+        | "AT"
+        | "AZ"
+        | "BS"
+        | "BH"
+        | "BD"
+        | "BB"
+        | "BE"
+        | "BZ"
+        | "BJ"
+        | "BT"
+        | "BY"
+        | "MM"
+        | "BO"
+        | "BQ"
+        | "BA"
+        | "BW"
+        | "BR"
+        | "BN"
+        | "BG"
+        | "BF"
+        | "BI"
+        | "KH"
+        | "CM"
+        | "CA"
+        | "CV"
+        | "CF"
+        | "CL"
+        | "CN"
+        | "CY"
+        | "CO"
+        | "KM"
+        | "CG"
+        | "CD"
+        | "KR"
+        | "KP"
+        | "CR"
+        | "CI"
+        | "HR"
+        | "CU"
+        | "CW"
+        | "DK"
+        | "DJ"
+        | "DO"
+        | "DM"
+        | "EG"
+        | "SV"
+        | "AE"
+        | "EC"
+        | "ER"
+        | "ES"
+        | "EE"
+        | "SZ"
+        | "US"
+        | "ET"
+        | "MK"
+        | "FJ"
+        | "FI"
+        | "FR"
+        | "GA"
+        | "GM"
+        | "GE"
+        | "GH"
+        | "GR"
+        | "GD"
+        | "GT"
+        | "GN"
+        | "GQ"
+        | "GW"
+        | "GY"
+        | "HT"
+        | "HN"
+        | "HU"
+        | "IN"
+        | "ID"
+        | "IR"
+        | "IQ"
+        | "IE"
+        | "IS"
+        | "IL"
+        | "IT"
+        | "JM"
+        | "JP"
+        | "JO"
+        | "KZ"
+        | "KE"
+        | "KG"
+        | "KI"
+        | "XK"
+        | "KW"
+        | "LA"
+        | "LS"
+        | "LV"
+        | "LB"
+        | "LR"
+        | "LY"
+        | "LI"
+        | "LT"
+        | "LU"
+        | "MG"
+        | "MY"
+        | "MW"
+        | "MV"
+        | "ML"
+        | "MT"
+        | "MA"
+        | "MH"
+        | "MU"
+        | "MR"
+        | "MX"
+        | "FM"
+        | "MD"
+        | "MC"
+        | "MN"
+        | "ME"
+        | "MZ"
+        | "NA"
+        | "NR"
+        | "NP"
+        | "NI"
+        | "NE"
+        | "NG"
+        | "NO"
+        | "NZ"
+        | "OM"
+        | "UG"
+        | "UZ"
+        | "PK"
+        | "PW"
+        | "PS"
+        | "PA"
+        | "PG"
+        | "PY"
+        | "NL"
+        | "PE"
+        | "PH"
+        | "PL"
+        | "PT"
+        | "QA"
+        | "RO"
+        | "GB"
+        | "RU"
+        | "RW"
+        | "KN"
+        | "SM"
+        | "SX"
+        | "VC"
+        | "LC"
+        | "SB"
+        | "WS"
+        | "ST"
+        | "SN"
+        | "RS"
+        | "SC"
+        | "SL"
+        | "SG"
+        | "SK"
+        | "SI"
+        | "SO"
+        | "SD"
+        | "SS"
+        | "LK"
+        | "SE"
+        | "CH"
+        | "SR"
+        | "SY"
+        | "TJ"
+        | "TZ"
+        | "TD"
+        | "CZ"
+        | "TH"
+        | "TL"
+        | "TG"
+        | "TO"
+        | "TT"
+        | "TN"
+        | "TM"
+        | "TR"
+        | "TV"
+        | "UA"
+        | "UY"
+        | "VU"
+        | "VA"
+        | "VE"
+        | "VN"
+        | "YE"
+        | "ZM"
+        | "ZW";
+    };
+    /**
+     * Date de début du contrat
+     */
+    date_debut: Date;
+    /**
+     * Date de fin du contrat
+     */
+    date_fin: Date;
+    /**
+     * Date de rupture du contrat
+     */
+    date_rupture?: Date;
+    /**
+     * Cause de rupture du contrat
+     */
+    cause_rupture?: string;
+  }[];
   is_lock?: {
     apprenant?: {
       ine?: boolean;
@@ -1551,7 +1588,6 @@ export interface Effectif {
         pays?: boolean;
       };
       historique_statut?: boolean;
-      contrats?: boolean;
       code_postal_de_naissance?: boolean;
       regime_scolaire?: boolean;
       inscription_sportif_haut_niveau?: boolean;
@@ -1584,6 +1620,7 @@ export interface Effectif {
         telephone?: boolean;
       };
     };
+    contrats?: boolean;
     formation?: {
       cfd?: boolean;
       rncp?: boolean;

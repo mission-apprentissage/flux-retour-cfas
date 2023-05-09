@@ -2,7 +2,7 @@ import { JSONSchema4 } from "json-schema";
 
 export type JSONSchema = JSONSchema4;
 
-export function number(custom = {}) {
+export function number<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: "number", ...custom };
 }
 
@@ -10,11 +10,11 @@ export function numberOrNull(custom = {}) {
   return { bsonType: ["number", "null"], ...custom };
 }
 
-export function integer(custom = {}) {
+export function integer<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: "int", ...custom };
 }
 
-export function objectId(custom = {}) {
+export function objectId<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: "objectId", ...custom };
 }
 /**
@@ -23,19 +23,19 @@ export function objectId(custom = {}) {
  * @param custom
  * @returns
  */
-export function objectIdOrNull(custom = {}) {
+export function objectIdOrNull<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: ["objectId", "null"], ...custom };
 }
 
-export function string(custom = {}) {
+export function string<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: "string", ...custom };
 }
 
-export function stringOrNull(custom = {}) {
+export function stringOrNull<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: ["string", "null"], ...custom };
 }
 
-export function boolean(custom = {}) {
+export function boolean<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: "bool", ...custom };
 }
 
@@ -43,15 +43,15 @@ export function booleanOrNull(custom = {}) {
   return { bsonType: ["bool", "null"], ...custom };
 }
 
-export function date(custom = {}) {
+export function date<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: "date", ...custom };
 }
 
-export function dateOrNull(custom = {}) {
+export function dateOrNull<T extends JSONSchema>(custom: T = {} as T) {
   return { bsonType: ["date", "null"], ...custom };
 }
 
-export function arrayOf(items, custom = {}) {
+export function arrayOf<T extends JSONSchema>(items: JSONSchema4 | JSONSchema4[], custom: T = {} as T) {
   return {
     bsonType: "array",
     ...custom,
@@ -67,14 +67,14 @@ export function arrayOfOrNull(items, custom = {}) {
   };
 }
 
-export function array(custom = {}) {
+export function array<T extends JSONSchema>(custom: T = {} as T) {
   return {
     bsonType: "array",
     ...custom,
   };
 }
 
-export function object(properties, custom = {}) {
+export function object<P extends JSONSchema["properties"], T extends JSONSchema>(properties: P, custom: T = {} as T) {
   return {
     bsonType: "object",
     additionalProperties: false,
@@ -91,7 +91,7 @@ export function objectOrNull(properties, custom = {}) {
   };
 }
 
-export function any(custom = {}) {
+export function any(custom: { description?: string } = {}) {
   return {
     ...custom,
     bsonType: ["number", "string", "bool", "object", "array", "null"],

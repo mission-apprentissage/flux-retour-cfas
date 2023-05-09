@@ -101,7 +101,7 @@ export const CerfaForm = memo(({ modeSifa = false }: { modeSifa: boolean }) => {
               validationErrors={validationErrorsByBlock.contrats}
               requiredSifa={requiredSifaByBlock.contrats}
             >
-              <ApprenantContrats contrats={values?.apprenant.contrats} />
+              <ApprenantContrats contrats={values?.contrats} />
             </AccordionItemChild>
           )}
         </AccordionItem>

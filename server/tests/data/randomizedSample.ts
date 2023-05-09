@@ -1,13 +1,25 @@
 import { faker } from "@faker-js/faker/locale/fr";
 import { subMonths, addYears } from "date-fns";
+import merge from "lodash-es/merge";
+import { WithId } from "mongodb";
 import RandExp from "randexp";
+import type { PartialDeep } from "type-fest";
+import { z } from "zod";
 
-import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
+import { CODES_STATUT_APPRENANT, SEXE_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
 import { CFD_REGEX, INE_REGEX, RNCP_REGEX } from "@/common/constants/organisme";
-import { omit } from "@/common/utils/miscUtils";
+import { Effectif, Organisme } from "@/common/model/@types";
+import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
+import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
 
 import sampleEtablissements from "./sampleEtablissements";
 import { sampleLibelles } from "./sampleLibelles";
+
+const dossierApprenantSchemaV1V2ZodSchema = dossierApprenantSchemaV1V2Zod();
+type DossierApprenantSchemaV1V2ZodType = z.infer<typeof dossierApprenantSchemaV1V2ZodSchema>;
+
+const dossierApprenantSchemaV3ZodSchema = dossierApprenantSchemaV3();
+type DossierApprenantSchemaV3ZodType = z.infer<typeof dossierApprenantSchemaV3ZodSchema>;
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
@@ -16,11 +28,34 @@ const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
 const getRandomEtablissement = (siret?: string) =>
   siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
+const getRandomFormation = (annee_scolaire: string) => {
+  return {
+    cfd: getRandomFormationCfd(),
+    periode: getRandomPeriodeFormation(annee_scolaire),
+    rncp: getRandomRncpFormation(),
+    libelle_court: faker.helpers.arrayElement(sampleLibelles).intitule_court,
+    libelle_long: faker.helpers.arrayElement(sampleLibelles).intitule_long,
+    niveau: "5",
+    niveau_libelle: "5 (BTS, DUT...)",
+    annee: getRandomAnneeFormation().toString(),
+  };
+};
+const getRandomContrat = () => {
+  const date_rupture_contrat = getRandomDateRuptureContrat();
+  const cause_rupture_contrat = date_rupture_contrat ? getRandomCauseRuptureContrat() : undefined;
 
-const getRandomPeriodeFormation = (anneeScolaire) => {
+  return {
+    date_debut: getRandomDateDebutContrat(),
+    date_fin: getRandomDateFinContrat(),
+    date_rupture: getRandomDateRuptureContrat(),
+    cause_rupture: cause_rupture_contrat,
+  };
+};
+
+const getRandomPeriodeFormation = (anneeScolaire): [number, number] => {
   const yearToInclude = Number(anneeScolaire.slice(0, 4));
-  const startYear = faker.helpers.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
-  const endYear = startYear + faker.helpers.arrayElement([1, 2]);
+  const startYear = faker.helpers.arrayElement<number>([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
+  const endYear = startYear + faker.helpers.arrayElement<number>([1, 2]);
   return [startYear, endYear];
 };
 const getRandomAnneeFormation = () => faker.helpers.arrayElement([0, 1, 2, 3]);
@@ -36,6 +71,18 @@ const getRandomAnneeScolaire = () => {
 const getRandomDateDebutContrat = () => faker.date.between(subMonths(new Date(), 6), subMonths(new Date(), 1));
 const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
+const getRandomDateExclusion = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
+const getRandomCauseRuptureContrat = () =>
+  faker.helpers.arrayElement([
+    "démission",
+    "résiliation",
+    "force majeure",
+    "obtention du diplôme",
+    "faute lourde",
+    "inaptitude constatée par la médecine du travail",
+  ]);
+const getRandomCauseExclusion = () =>
+  faker.helpers.arrayElement(["démission", "résiliation", "force majeure", "faute lourde"]);
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
 export const createRandomOrganisme = (params: any = {}) => {
@@ -46,97 +93,58 @@ export const createRandomOrganisme = (params: any = {}) => {
   };
 };
 
-export const createRandomDossierApprenant = (params = {}) => {
+export const createSampleEffectif = ({
+  organisme,
+  ...params
+}: PartialDeep<Effectif & { organisme: WithId<Organisme> }> = {}): Effectif => {
   const annee_scolaire = getRandomAnneeScolaire();
-  const periode_formation = getRandomPeriodeFormation(annee_scolaire);
-  const isStudentPresent = isPresent();
-  const isContratPresent = isPresent();
 
-  const { siret, uai } = getRandomEtablissement();
-
-  return {
-    ine_apprenant: getRandomIne(),
-    nom_apprenant: faker.name.lastName().toUpperCase(),
-    prenom_apprenant: faker.name.firstName(),
-    email_contact: faker.internet.email(),
-    formation_cfd: getRandomFormationCfd(),
-    libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long,
-    uai_etablissement: uai,
-    siret_etablissement: isStudentPresent ? siret : null,
-    nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-    historique_statut_apprenant: [],
-    statut_apprenant: getRandomStatutApprenant(),
-    date_metier_mise_a_jour_statut: faker.date.past(),
-    periode_formation: isStudentPresent ? periode_formation : [],
-    annee_formation: getRandomAnneeFormation(),
-    annee_scolaire,
-    id_erp_apprenant: faker.datatype.uuid(),
-    tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
-    code_commune_insee_apprenant: faker.address.zipCode("#####"),
-    date_de_naissance_apprenant: getRandomDateNaissance(),
-    ...(isContratPresent ? { contrat_date_debut: getRandomDateDebutContrat() } : {}),
-    ...(isContratPresent ? { contrat_date_fin: getRandomDateFinContrat() } : {}),
-    ...(isContratPresent && faker.datatype.boolean() ? { contrat_date_rupture: getRandomDateRuptureContrat() } : {}),
-    ...(faker.datatype.boolean() ? { formation_rncp: getRandomRncpFormation() } : {}),
-    source: faker.random.word(),
-    ...params,
-  };
-};
-
-export const createSampleEffectif = (params: any = {}) => {
-  const annee_scolaire = getRandomAnneeScolaire();
-  return {
-    apprenant: {
-      ine_apprenant: getRandomIne(),
-      nom: faker.name.lastName().toUpperCase(),
-      prenom: faker.name.firstName(),
-      email_contact: faker.internet.email(),
-      date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
-      historique_statut: [],
+  return merge(
+    {
+      apprenant: {
+        ine: getRandomIne(),
+        nom: faker.name.lastName().toUpperCase(),
+        prenom: faker.name.firstName(),
+        courriel: faker.internet.email(),
+        date_de_naissance: getRandomDateNaissance(),
+        historique_statut: [],
+      },
       contrats: [],
-      ...params?.apprenant,
-    },
-    formation: {
-      annee_formation: getRandomAnneeFormation(),
-      cfd: getRandomFormationCfd(),
-      periode: getRandomPeriodeFormation(annee_scolaire),
-      rncp: getRandomRncpFormation(),
-      libelle_long: faker.helpers.arrayElement(sampleLibelles).intitule_long,
-      niveau: "5",
-      niveau_libelle: "5 (BTS, DUT...)",
-      annee: getRandomAnneeFormation(),
-      ...params?.formation,
-    },
-    validation_errors: [],
-    created_at: new Date(),
-    updated_at: new Date(),
-    id_erp_apprenant: faker.datatype.uuid(),
-    source: faker.random.word(),
-    annee_scolaire,
-    organisme_id: params.organisme?._id || null,
-    _computed: params.organisme
-      ? {
-          organisme: {
-            region: params.organisme.adresse.region,
-            departement: params.organisme.adresse.departement,
-            academie: params.organisme.adresse.academie,
-            reseaux: params.organisme.reseaux || [],
-            uai: params.organisme.uai,
-            siret: params.organisme.siret,
-          },
-        }
-      : {},
-
-    ...omit(params, ["organisme", "apprenant", "formation"]),
-  };
+      formation: getRandomFormation(annee_scolaire),
+      validation_errors: [],
+      created_at: new Date(),
+      updated_at: new Date(),
+      id_erp_apprenant: faker.datatype.uuid(),
+      source: faker.random.word(),
+      annee_scolaire,
+      organisme_id: organisme?._id,
+      ...{
+        _computed: organisme
+          ? {
+              organisme: {
+                ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
+                ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
+                ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
+                ...(organisme.uai ? { uai: organisme.uai } : {}),
+                ...(organisme.siret ? { siret: organisme.siret } : {}),
+                ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
+              },
+            }
+          : {},
+      },
+    } as Effectif,
+    params
+  );
 };
 
 // random DossierApprenant shaped along our REST API schema
-export const createRandomDossierApprenantApiInput = (params: any = {}) => {
-  const annee_scolaire = getRandomAnneeScolaire();
-  const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+export const createRandomDossierApprenantApiInput = (
+  params: Partial<DossierApprenantSchemaV1V2ZodType> = {}
+): Partial<DossierApprenantSchemaV1V2ZodType> => {
   const isStudentPresent = isPresent();
+  const annee_scolaire = getRandomAnneeScolaire();
   const { uai, siret } = getRandomEtablissement();
+  const formation = getRandomFormation(annee_scolaire);
 
   return {
     ine_apprenant: getRandomIne(),
@@ -154,13 +162,95 @@ export const createRandomDossierApprenantApiInput = (params: any = {}) => {
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
-    annee_formation: getRandomAnneeFormation(),
-    periode_formation: isStudentPresent ? periode_formation.join("-") : "",
+    annee_formation: formation.annee,
+    periode_formation: isStudentPresent ? formation.periode.join("-") : "",
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
-    tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
+    tel_apprenant: faker.helpers.arrayElement([faker.phone.number(), undefined]),
     code_commune_insee_apprenant: faker.address.zipCode(),
 
     ...params,
   };
+};
+
+export const createRandomDossierApprenantApiV3Input = (
+  params: PartialDeep<DossierApprenantSchemaV3ZodType> = {}
+): DossierApprenantSchemaV3ZodType => {
+  const annee_scolaire = getRandomAnneeScolaire();
+  const isStudentPresent = isPresent();
+  const etablissement_formateur = getRandomEtablissement();
+  const etablissement_responsable = getRandomEtablissement();
+  const employeur = getRandomEtablissement();
+  const rqth = faker.datatype.boolean();
+  const randomFormation = getRandomFormation(annee_scolaire);
+  const randomContrat = getRandomContrat();
+  const date_exclusion = getRandomDateExclusion();
+
+  return merge(
+    {
+      apprenant: {
+        nom: faker.name.lastName(),
+        prenom: faker.name.firstName(),
+        date_de_naissance: getRandomDateNaissance().toISOString().slice(0, -5),
+        statut: getRandomStatutApprenant(),
+        date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
+        id_erp: faker.datatype.uuid(),
+        // V1 - OPTIONAL FIELDS
+        ine: getRandomIne(),
+        email: faker.internet.email(),
+        telephone: faker.helpers.arrayElement([faker.phone.number(), undefined]),
+        code_commune_insee: faker.address.zipCode(),
+        // V3 - OPTIONAL FIELDS
+        sexe: faker.helpers.arrayElement([...SEXE_APPRENANT_ENUM, undefined]),
+        rqth,
+        date_rqth: rqth ? faker.date.past().toISOString().slice(0, -5) : undefined,
+      },
+      etablissement_responsable: {
+        siret: etablissement_responsable.siret,
+        uai: etablissement_responsable.uai,
+        nom: etablissement_responsable.nom,
+      },
+      etablissement_formateur: {
+        siret: etablissement_formateur.siret,
+        uai: etablissement_formateur.uai,
+        nom: etablissement_formateur.nom,
+        code_commune_insee: faker.address.zipCode(),
+      },
+      formation: {
+        code_cfd: randomFormation.cfd,
+        code_rncp: randomFormation.rncp,
+        periode: isStudentPresent ? randomFormation.periode.join("-") : "",
+        libelle_long: randomFormation.libelle_long,
+        annee: randomFormation.annee,
+        annee_scolaire,
+        // V3 - REQUIRED FIELDS
+        date_inscription: faker.date.past().toISOString(),
+        date_entree: faker.date.past().toISOString(),
+        date_fin: faker.date.future().toISOString(),
+        // V3 - OPTIONAL FIELDS
+        obtention_diplome: faker.datatype.boolean(),
+        date_obtention_diplome: faker.date.past().toISOString(),
+        date_exclusion: date_exclusion ? date_exclusion.toISOString() : undefined,
+        cause_exclusion: date_exclusion ? getRandomCauseExclusion() : undefined,
+        referent_handicap: {
+          nom: faker.name.lastName(),
+          prenom: faker.name.firstName(),
+          email: faker.internet.email(),
+        },
+      },
+      contrat: {
+        date_debut: randomContrat.date_debut.toISOString(),
+        date_fin: randomContrat.date_fin.toISOString(),
+        date_rupture: randomContrat.date_rupture.toISOString(),
+        // V3 - OPTIONAL FIELDS
+        cause_rupture: randomContrat.cause_rupture,
+      },
+      employeur: {
+        siret: employeur.siret,
+        code_commune_insee: employeur.code_commune_insee,
+        code_naf: employeur.code_naf,
+      },
+    } as DossierApprenantSchemaV3ZodType,
+    params
+  );
 };

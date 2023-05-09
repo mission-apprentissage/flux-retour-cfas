@@ -72,7 +72,7 @@ export const effectifStateSelector = selectorFamily({
         contrats: [],
       };
       for (const validation_error of validation_errors) {
-        if (validation_error.fieldName.includes("apprenant.contrats")) {
+        if (validation_error.fieldName.includes("contrats")) {
           validationErrorsByBlock.contrats.push(validation_error);
         } else if (validation_error.fieldName.includes("apprenant.historique_statut")) {
           validationErrorsByBlock.statuts.push(validation_error);
@@ -95,7 +95,7 @@ export const effectifStateSelector = selectorFamily({
         contrats: [],
       };
       for (const currentRequiredSifa of requiredSifa) {
-        if (currentRequiredSifa.includes("apprenant.contrats")) {
+        if (currentRequiredSifa.includes("contrats")) {
           requiredSifaByBlock.contrats.push(currentRequiredSifa);
         } else if (currentRequiredSifa.includes("apprenant.historique_statut")) {
           requiredSifaByBlock.statuts.push(currentRequiredSifa);

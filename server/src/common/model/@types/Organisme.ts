@@ -7,7 +7,7 @@ export interface Organisme {
    */
   uai?: string;
   /**
-   * N° SIRET
+   * N° SIRET de l'établissement
    */
   siret: string;
   /**

@@ -2,11 +2,11 @@ import express from "express";
 import Joi from "joi";
 
 import logger from "@/common/logger";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
-import { effectifsQueueDb } from "@/common/model/collections";
+import { effectifsQueueDb, effectifsV3QueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
 import { formatError } from "@/common/utils/errorUtils";
 import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
+import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
@@ -18,20 +18,24 @@ export default () => {
    * Une prévalidation des données est effectuée, afin de faire un retour immédiat à l'utilisateur
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
-  router.post("/", async ({ user, body }, res) => {
+  router.post("/", async ({ user, body, originalUrl }, res) => {
     const bodyItems = await Joi.array()
       .max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)
       .validateAsync(body, { abortEarly: false });
+
+    const isV3 = originalUrl.includes("/v3");
+    const collection = (isV3 ? effectifsV3QueueDb() : effectifsQueueDb()) as any;
+    const validationSchema = isV3 ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2Zod();
+
     const source = user.username;
-    const effectifsToQueue: EffectifsQueue[] = bodyItems.map((dossierApprenant) => {
-      const result = dossierApprenantSchemaV1V2Zod().safeParse({
+    const effectifsToQueue = bodyItems.map((dossierApprenant) => {
+      const result = validationSchema.safeParse({
         source,
         ...dossierApprenant,
       });
-      let prettyValidationError;
-      if (!result.success) {
-        prettyValidationError = result.error.issues.map(({ path, message }) => ({ message, path }));
-      }
+      const prettyValidationError = result.success
+        ? undefined
+        : result.error.issues.map(({ path, message }) => ({ message, path }));
 
       return {
         source,
@@ -44,9 +48,9 @@ export default () => {
 
     try {
       if (effectifsToQueue.length === 1) {
-        await effectifsQueueDb().insertOne(effectifsToQueue[0]);
+        await collection.insertOne(effectifsToQueue[0]);
       } else if (effectifsToQueue.length) {
-        await effectifsQueueDb().insertMany(effectifsToQueue);
+        await collection.insertMany(effectifsToQueue);
       }
       res.json({
         status: "OK",

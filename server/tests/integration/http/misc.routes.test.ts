@@ -17,7 +17,7 @@ describe("Routes diverses", () => {
   it("GET / - version du serveur", async () => {
     const response = await httpClient.get("/api");
 
-    assert.equal(response.status, 200);
+    expect(response.status).toBe(200);
     assert.deepStrictEqual(response.data, {
       name: "TDB Apprentissage API",
       version: packageJson.version,
@@ -28,7 +28,7 @@ describe("Routes diverses", () => {
   it("GET /healthcheck - version avec healthcheck MongoDB", async () => {
     const response = await httpClient.get("/api/healthcheck");
 
-    assert.equal(response.status, 200);
+    expect(response.status).toBe(200);
     assert.deepStrictEqual(response.data, {
       name: "TDB Apprentissage API",
       version: packageJson.version,

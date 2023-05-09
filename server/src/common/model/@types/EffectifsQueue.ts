@@ -2,18 +2,24 @@
 import { ObjectId } from "mongodb";
 
 export interface EffectifsQueue {
+  /**
+   * Nom de l'apprenant
+   */
   nom_apprenant?: any;
+  /**
+   * Prénom de l'apprenant
+   */
   prenom_apprenant?: any;
   /**
    * Date de naissance de l'apprenant
    */
   date_de_naissance_apprenant?: any;
   /**
-   * UAI de l'établissement
+   * Code UAI de l'établissement
    */
   uai_etablissement?: any;
   /**
-   * Nom de l'établissement
+   * Nom de l'organisme de formation
    */
   nom_etablissement?: any;
   /**
@@ -33,20 +39,50 @@ export interface EffectifsQueue {
    * Identifiant de l'apprenant dans l'erp
    */
   id_erp_apprenant?: any;
+  /**
+   * N° INE de l'apprenant
+   */
   ine_apprenant?: any;
+  /**
+   * Adresse mail de contact de l'apprenant
+   */
   email_contact?: any;
+  /**
+   * Téléphone de l'apprenant
+   */
   tel_apprenant?: any;
+  /**
+   * Code commune insee de l'apprenant
+   */
   code_commune_insee_apprenant?: any;
+  /**
+   * N° SIRET de l'établissement
+   */
   siret_etablissement?: any;
+  /**
+   * Libellé long de la formation visée
+   */
   libelle_long_formation?: any;
   periode_formation?: any;
   /**
-   * Année de formation
+   * Année de la formation (cursus)
    */
   annee_formation?: any;
+  /**
+   * Code RNCP de la formation à laquelle l'apprenant est inscrit
+   */
   formation_rncp?: any;
+  /**
+   * Date de début du contrat
+   */
   contrat_date_debut?: any;
+  /**
+   * Date de fin du contrat
+   */
   contrat_date_fin?: any;
+  /**
+   * Date de rupture du contrat
+   */
   contrat_date_rupture?: any;
   /**
    * Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)
@@ -69,7 +105,7 @@ export interface EffectifsQueue {
    */
   processed_at?: Date;
   /**
-   * Erreur rencontré lors de la création de l'effectif
+   * Erreur rencontrée lors de la création de l'effectif
    */
   error?: any;
   /**

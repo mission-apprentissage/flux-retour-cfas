@@ -28,7 +28,6 @@ export const effectifFieldsLockerSchema = object({
     telephone: boolean(),
     adresse: adresseLocker,
     historique_statut: boolean(),
-    contrats: boolean(),
 
     code_postal_de_naissance: boolean(),
     regime_scolaire: boolean(),
@@ -49,6 +48,7 @@ export const effectifFieldsLockerSchema = object({
       telephone: boolean(),
     }),
   }),
+  contrats: boolean(),
   formation: object({
     cfd: boolean(),
     rncp: boolean(),
@@ -94,7 +94,6 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
       telephone: lockAtCreate,
       adresse: defaultAdresseLock(lockAtCreate),
       historique_statut: lockAtCreate,
-      contrats: lockAtCreate,
       code_postal_de_naissance: lockAtCreate,
       regime_scolaire: lockAtCreate,
       inscription_sportif_haut_niveau: lockAtCreate,
@@ -114,6 +113,7 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
         telephone: lockAtCreate,
       },
     },
+    contrats: lockAtCreate,
     formation: {
       cfd: true,
       rncp: lockAtCreate,
