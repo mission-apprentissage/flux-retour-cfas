@@ -89,14 +89,14 @@ export const validateEffectifObject = (effectif) => {
       ];
     }
     if (
-      validationError.fieldName.includes("apprenant.contrats") &&
+      validationError.fieldName.includes("contrats") &&
       (validationError.fieldName.includes("date_debut") || validationError.fieldName.includes("date_fin"))
     ) {
       const [, index] =
-        RegExp(/^apprenant.contrats\[([0-9]{1})\].(date_debut|date_fin)$/, "g").exec(validationError.fieldName) || [];
-      effectifMandate.apprenant.contrats = [
-        ...effectifMandate.apprenant.contrats.slice(0, index),
-        ...effectifMandate.apprenant.contrats.slice(index + 1),
+        RegExp(/^contrats\[([0-9]{1})\].(date_debut|date_fin)$/, "g").exec(validationError.fieldName) || [];
+      effectifMandate.contrats = [
+        ...effectifMandate.contrats.slice(0, index),
+        ...effectifMandate.contrats.slice(index + 1),
       ];
     }
   }
@@ -291,7 +291,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation, validati
   // Handle manually array fields
   const updatePathsFiltered = updatePaths
     .filter((item) => !item.includes("apprenant.historique_statut"))
-    .filter((item) => !item.includes("apprenant.contrats"))
+    .filter((item) => !item.includes("contrats"))
     .filter((item) => !item.includes("formation.periode"));
 
   for (const path of updatePathsFiltered) {
@@ -302,7 +302,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation, validati
   // TODO Fix flattenKeys function for handling properly
   set(newLocker, "apprenant.date_de_naissance", true);
   set(newLocker, "apprenant.historique_statut", true);
-  set(newLocker, "apprenant.contrats", true);
+  set(newLocker, "contrats", true);
   set(newLocker, "formation.periode", true);
 
   const updated = await effectifsDb().findOneAndUpdate(

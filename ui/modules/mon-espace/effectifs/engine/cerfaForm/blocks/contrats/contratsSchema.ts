@@ -4,7 +4,7 @@ export const contratsSchema = {
   "apprenant.nouveau_contrat": {
     autosave: false,
   },
-  "apprenant.contrats[].siret": {
+  "contrats[].siret": {
     locked: true,
     showInfo: true,
     label: "N° SIRET de l'employeur :",
@@ -19,7 +19,7 @@ export const contratsSchema = {
       },
     ],
   },
-  "apprenant.contrats[].denomination": {
+  "contrats[].denomination": {
     label: "Dénomination :",
     showInfo: true,
     locked: true,
@@ -33,7 +33,7 @@ export const contratsSchema = {
       },
     ],
   },
-  "apprenant.contrats[].naf": {
+  "contrats[].naf": {
     showInfo: true,
     locked: true,
     label: "Code NAF de l'employeur :",
@@ -48,7 +48,7 @@ export const contratsSchema = {
       },
     ],
   },
-  "apprenant.contrats[].nombre_de_salaries": {
+  "contrats[].nombre_de_salaries": {
     fieldType: "number",
     showInfo: true,
     locked: true,
@@ -65,7 +65,7 @@ export const contratsSchema = {
       if (value > 9999999) return { error: "Le nombre de salariés ne peut excéder 9999999" };
     },
   },
-  "apprenant.contrats[].type_employeur": {
+  "contrats[].type_employeur": {
     label: "Type d'employeur :",
     showInfo: true,
     locked: true,
@@ -145,22 +145,22 @@ export const contratsSchema = {
       },
     ],
   },
-  "apprenant.contrats[].date_debut": {
+  "contrats[].date_debut": {
     label: "Date de début du contrat :",
     fieldType: "date",
     locked: true,
   },
-  "apprenant.contrats[].date_fin": {
+  "contrats[].date_fin": {
     label: "Date de fin du contrat :",
     fieldType: "date",
     locked: true,
   },
-  "apprenant.contrats[].date_rupture": {
+  "contrats[].date_rupture": {
     label: "Date de rupture du contrat :",
     fieldType: "date",
     locked: true,
   },
-  "apprenant.contrats[].adresse.numero": {
+  "contrats[].adresse.numero": {
     locked: true,
     precision: 0,
     fieldType: "number",
@@ -175,14 +175,14 @@ export const contratsSchema = {
       },
     ],
   },
-  "apprenant.contrats[].adresse.repetition_voie": {
+  "contrats[].adresse.repetition_voie": {
     locked: true,
     fieldType: "select",
     label: "Indice de répétition :",
     validateMessage: `n'est pas un indice de répétition valide`,
     options: INDICE_DE_REPETITION_OPTIONS,
   },
-  "apprenant.contrats[].adresse.voie": {
+  "contrats[].adresse.voie": {
     locked: true,
     label: "Voie :",
     mask: "C",
@@ -194,11 +194,11 @@ export const contratsSchema = {
       },
     ],
   },
-  "apprenant.contrats[].adresse.complement": {
+  "contrats[].adresse.complement": {
     label: "Complément d'adresse (optionnel):",
     locked: true,
   },
-  "apprenant.contrats[].adresse.code_postal": {
+  "contrats[].adresse.code_postal": {
     locked: true,
     label: "Code postal :",
     requiredMessage: "Le code postal est obligatoire",
@@ -212,7 +212,7 @@ export const contratsSchema = {
       },
     ],
   },
-  "apprenant.contrats[].adresse.commune": {
+  "contrats[].adresse.commune": {
     locked: true,
     label: "Commune: ",
     requiredMessage: "la commune est obligatoire",
@@ -225,13 +225,13 @@ export const contratsSchema = {
       },
     ],
   },
-  "apprenant.contrats[].adresse.departement": {
+  "contrats[].adresse.departement": {
     locked: true,
     label: "Département de l'employeur :",
     requiredMessage: "le département de l'employeur est obligatoire",
     validateMessage: "Le département doit contenir 2 à 3 chiffres",
   },
-  "apprenant.contrats[].adresse.region": {
+  "contrats[].adresse.region": {
     locked: true,
     fieldType: "select",
     label: "Région de l'employeur :",

@@ -16,13 +16,13 @@ let requiredFieldsSifa = [
 
   "formation.duree_formation_relle",
 
-  // "apprenant.contrats[0].siret",
-  // "apprenant.contrats[0].type_employeur",
-  // "apprenant.contrats[0].date_debut",
-  // "apprenant.contrats[0].date_rupture",
-  // "apprenant.contrats[0].naf",
-  // "apprenant.contrats[0].nombre_de_salaries",
-  // "apprenant.contrats[0].adresse.code_postal",
+  // "contrats[0].siret",
+  // "contrats[0].type_employeur",
+  // "contrats[0].date_debut",
+  // "contrats[0].date_rupture",
+  // "contrats[0].naf",
+  // "contrats[0].nombre_de_salaries",
+  // "contrats[0].adresse.code_postal",
 ];
 
 const requiredApprenantAdresseFieldsSifa = [
@@ -95,8 +95,8 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
 
   let contrats: any[] = [];
   let showAddContrat = true;
-  if ((modeSifa && !!cerfa.apprenant.contrats.value.length) || !canEdit || isAPITransmission) {
-    contrats = cerfa.apprenant.contrats.value;
+  if ((modeSifa && !!cerfa.contrats.value.length) || !canEdit || isAPITransmission) {
+    contrats = cerfa.contrats.value;
     showAddContrat = false;
   } else {
     fields["apprenant.nouveau_contrat"] = createField({
@@ -124,11 +124,11 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
           region: "",
         },
       },
-      ...cerfa.apprenant.contrats.value,
+      ...cerfa.contrats.value,
     ];
   }
   contrats.forEach((contrat, i) => {
-    const prefix = `apprenant.contrats[${i}]`;
+    const prefix = `contrats[${i}]`;
     const showAddContratFirstLine = i === 0 && showAddContrat;
     fields[`${prefix}.siret`] = {
       ...createField({

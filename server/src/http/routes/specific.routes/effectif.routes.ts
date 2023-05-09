@@ -224,7 +224,7 @@ export default () => {
       });
     }
     if (nouveau_contrat) {
-      dataToUpdate.apprenant.contrats.push(nouveau_contrat);
+      dataToUpdate.contrats.push(nouveau_contrat);
     }
 
     let validation_errors: any[] = [];
