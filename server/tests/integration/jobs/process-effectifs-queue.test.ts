@@ -14,11 +14,7 @@ const sortByPath = (array: { path?: string[] }[] | undefined) =>
 describe("Processing de EffectifsQueue", () => {
   beforeEach(async () => {
     try {
-      await createOrganisme(createRandomOrganisme({ uai, siret }), {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      });
+      await createOrganisme(createRandomOrganisme({ uai, siret }));
     } catch (e) {
       console.error("Oups", e);
       throw e;

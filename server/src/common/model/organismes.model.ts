@@ -157,6 +157,7 @@ export function defaultValuesOrganisme() {
     erps: [],
     relatedFormations: [],
     fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
+    ferme: false,
     created_at: new Date(),
     updated_at: new Date(),
   };

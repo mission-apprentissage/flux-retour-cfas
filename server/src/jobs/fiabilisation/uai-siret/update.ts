@@ -125,15 +125,12 @@ const updateOrganismeForCoupleFiabilise = async ({ uai, uai_fiable, siret, siret
   if (!organismeFiable) {
     // Si on ne trouve aucun organisme fiable pour l'uai fiable / siret_fiable c'est qu'on est dans le cas d'un couple d'un lieu
     // On peut alors créer l'organisme comme étant un organisme "lieu"
-    const organismeLieuToCreate = await createOrganisme(
-      {
-        uai: uai_fiable,
-        siret: siret_fiable,
-        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE,
-        creation_statut: STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION, // Ajout d'un flag pour identifier que c'est un organisme créé à partir d'un lieu
-      },
-      { callLbaApi: false, buildFormationTree: false, buildInfosFromSiret: false }
-    );
+    const organismeLieuToCreate = await createOrganisme({
+      uai: uai_fiable,
+      siret: siret_fiable,
+      fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE,
+      creation_statut: STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION, // Ajout d'un flag pour identifier que c'est un organisme créé à partir d'un lieu
+    });
 
     organismeFiable = await findOrganismeById(organismeLieuToCreate?._id);
   }

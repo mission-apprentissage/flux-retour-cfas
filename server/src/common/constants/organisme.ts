@@ -5,7 +5,7 @@ export const NATURE_ORGANISME_DE_FORMATION = {
   RESPONSABLE_FORMATEUR: "responsable_formateur" as const,
   LIEU: "lieu_formation" as const,
   INCONNUE: "inconnue" as const,
-};
+} as const;
 
 export const CFD_REGEX_PATTERN = "^[A-Z0-9]{8}$";
 export const CODE_INSEE_PATTERN = "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$";

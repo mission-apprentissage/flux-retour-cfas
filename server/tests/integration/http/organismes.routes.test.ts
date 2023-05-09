@@ -29,11 +29,7 @@ describe("Routes Organismes for API referentiel", () => {
 
     // TODO Tester la création d'un organisme + nock des API Entreprise & Catalog
     // const randomOrganisme = createRandomOrganisme();
-    // const { _id } = await createOrganisme(randomOrganisme, {
-    //   buildFormationTree: false,
-    //   buildInfosFromSiret: false,
-    //   callLbaApi: false,
-    // });
+    // const { _id } = await createOrganisme(randomOrganisme);
     // const created = await findOrganismeById(_id);
 
     // const expected = pick(created, [

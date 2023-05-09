@@ -27,7 +27,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
           siren: siret.substring(0, 9),
           enseigne: "",
           entreprise_raison_sociale: "",
-          numero_voie: "",
+          numero_voie: undefined,
           type_voie: "",
           nom_voie: "",
           code_postal: "",
@@ -48,7 +48,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
           siren: siret.substring(0, 9),
           enseigne: "",
           entreprise_raison_sociale: "",
-          numero_voie: "",
+          numero_voie: undefined,
           type_voie: "",
           nom_voie: "",
           code_postal: "",
@@ -142,7 +142,9 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
         ? etablissementApiInfo.enseigne?.trim()
         : entrepriseApiInfo?.enseigne?.trim(),
       adresse: buildAdresse(etablissementApiInfo.adresse),
-      numero_voie: etablissementApiInfo.adresse.numero_voie,
+      numero_voie: etablissementApiInfo.adresse.numero_voie
+        ? parseInt(etablissementApiInfo.adresse.numero_voie, 10)
+        : undefined,
       type_voie: etablissementApiInfo.adresse.type_voie,
       nom_voie: etablissementApiInfo.adresse.nom_voie,
       voie_complete: (etablissementApiInfo.adresse.type_voie ?? "") + (etablissementApiInfo.adresse.nom_voie ?? ""),

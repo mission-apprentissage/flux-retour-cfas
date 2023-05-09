@@ -23,6 +23,8 @@ import { effectifsQueueDb } from "@/common/model/collections";
 import { formatError } from "@/common/utils/errorUtils";
 import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
+import { ObjectId } from "mongodb";
+import { Organisme } from "@/common/model/@types";
 
 const sleepDuration = 10_000;
 
@@ -94,17 +96,13 @@ export const processEffectifsQueue = async (options?: Options) => {
                 ...organisme,
                 nom: dossierApprenant.nom_etablissement,
               });
-              organismeWithId = await createOrganisme(
-                { ...organismeData, ...organisme },
-                {
-                  buildFormationTree: false,
-                  buildInfosFromSiret: false,
-                  callLbaApi: false,
-                }
-              );
+              organismeWithId = await createOrganisme({
+                ...organismeData,
+                ...organisme,
+              } as Organisme);
             }
             await setOrganismeTransmissionDates(organismeWithId);
-            let effectifId: any = null;
+            let effectifId: ObjectId;
 
             // Gestion de l'effectif
             const { effectif, found } = await hydrateEffectif(

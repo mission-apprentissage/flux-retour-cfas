@@ -20,7 +20,7 @@ import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./jobs/hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes";
 import { hydrateFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes-referentiel";
-import { updateOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
+import { updateMultipleOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
 import { hydrateReseaux } from "./jobs/hydrate/reseaux/hydrate-reseaux";
 import { removeOrganismeAndEffectifs } from "./jobs/patches/remove-organisme-effectifs-dossiersApprenants/index";
 import { removeOrganismesSansSiretSansEffectifs } from "./jobs/patches/remove-organismes-sansSiret-sansEffectifs/index";
@@ -303,7 +303,7 @@ program
   .description("Mise à jour des organismes via API externes")
   .action(
     runJob(async () => {
-      return updateOrganismesWithApis();
+      return updateMultipleOrganismesWithApis();
     })
   );
 

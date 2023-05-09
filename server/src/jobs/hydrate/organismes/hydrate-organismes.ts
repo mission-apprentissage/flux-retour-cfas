@@ -76,23 +76,16 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
   // Ajout de l'organisme sans appels API si non existant dans le tdb
   if (!organismeInTdb) {
     try {
-      await createOrganisme(
-        {
-          ...(uai ? { uai } : {}),
-          siret,
-          ...(raison_sociale ? { nom: raison_sociale } : {}),
-          nature,
-          adresse: adresseFormatted,
-          ferme: isFerme,
-          qualiopi: qualiopi || false,
-          est_dans_le_referentiel: true,
-        },
-        {
-          buildFormationTree: false,
-          buildInfosFromSiret: false,
-          callLbaApi: false,
-        }
-      );
+      await createOrganisme({
+        ...(uai ? { uai } : {}),
+        siret,
+        ...(raison_sociale ? { nom: raison_sociale } : {}),
+        nature,
+        adresse: adresseFormatted,
+        ferme: isFerme,
+        qualiopi: qualiopi || false,
+        est_dans_le_referentiel: true,
+      });
       nbOrganismeCreated++;
     } catch (error) {
       nbOrganismeNotCreated++;
@@ -116,11 +109,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       est_dans_le_referentiel: true,
     };
     try {
-      await updateOrganisme(organismeInTdb._id, updatedOrganisme, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      });
+      await updateOrganisme(organismeInTdb._id, updatedOrganisme);
       nbOrganismeUpdated++;
     } catch (error) {
       nbOrganismeNotUpdated++;

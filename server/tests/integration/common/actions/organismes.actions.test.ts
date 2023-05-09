@@ -1,20 +1,24 @@
 import { strict as assert } from "assert";
 
 import { subDays } from "date-fns";
+import { ObjectId } from "mongodb";
 
 import { mapFiabilizedOrganismeUaiSiretCouple } from "@/common/actions/engine/engine.organismes.utils";
 import {
   createOrganisme,
   findOrganismeById,
+  getOrganismeInfosFromSiret,
   setOrganismeTransmissionDates,
   updateOrganisme,
+  updateOrganismeFromApis,
 } from "@/common/actions/organismes/organismes.actions";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
+import { Organisme } from "@/common/model/@types";
 import { fiabilisationUaiSiretDb } from "@/common/model/collections";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 
-const sampleOrganismeWithoutUai = {
+const sampleOrganismeWithoutUai: Organisme = {
   siret: "41461021200014",
   nom: "ETABLISSEMENT TEST",
   nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
@@ -30,20 +34,17 @@ const sampleOrganismeWithUAI = {
   ...sampleOrganismeWithoutUai,
 };
 
-const sampleOrganismeWithoutUAIOutput = {
-  siret: sampleOrganismeWithUAI.siret,
-  nom: sampleOrganismeWithUAI.nom,
-  nature: sampleOrganismeWithUAI.nature,
+const sampleOrganismeWithoutUAIOutput: Organisme = {
+  ...sampleOrganismeWithoutUai,
   metiers: [],
   reseaux: [],
   erps: [],
   relatedFormations: [],
   fiabilisation_statut: "INCONNU",
-  adresse: { departement: "01", region: "84", academie: "10" },
   ferme: false,
 };
 
-const sampleOrganismeWithUAIOutput = {
+const sampleOrganismeWithUAIOutput: Organisme = {
   uai: sampleOrganismeWithUAI.uai,
   ...sampleOrganismeWithoutUAIOutput,
 };
@@ -93,11 +94,7 @@ describe("Test des actions Organismes", () => {
   describe("createOrganisme", () => {
     it("throws when given organisme is null", async () => {
       try {
-        await createOrganisme(null, {
-          buildFormationTree: false,
-          buildInfosFromSiret: false,
-          callLbaApi: false,
-        });
+        await createOrganisme(null as any);
       } catch (err) {
         assert.notEqual(err, undefined);
       }
@@ -106,24 +103,10 @@ describe("Test des actions Organismes", () => {
     it("throws when cfa with given uai already exists", async () => {
       const uai = "0802004U";
       const randomOrganisme = createRandomOrganisme();
-      await createOrganisme(
-        { ...randomOrganisme, uai },
-        {
-          buildFormationTree: false,
-          buildInfosFromSiret: false,
-          callLbaApi: false,
-        }
-      );
+      await createOrganisme({ ...randomOrganisme, uai });
 
       try {
-        await createOrganisme(
-          { ...randomOrganisme, uai },
-          {
-            buildFormationTree: false,
-            buildInfosFromSiret: false,
-            callLbaApi: false,
-          }
-        );
+        await createOrganisme({ ...randomOrganisme, uai });
       } catch (err) {
         assert.notEqual(err, undefined);
       }
@@ -131,69 +114,70 @@ describe("Test des actions Organismes", () => {
 
     it("returns created organisme when valid with UAI & SIRET & no API Calls", async () => {
       // Création de l'organisme sans les appels API
-      const { _id } = await createOrganisme(sampleOrganismeWithUAI, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      });
+      const { _id } = await createOrganisme(sampleOrganismeWithUAI);
       const created = await findOrganismeById(_id);
 
-      assert.deepEqual(created, {
+      expect(created).toStrictEqual({
         ...sampleOrganismeWithUAIOutput,
-        _id: created?._id || "should not be null",
-        created_at: created?.created_at || "should not be null",
-        updated_at: created?.updated_at || "should not be null",
+        _id: expect.anything(),
+        created_at: expect.anything(),
+        updated_at: expect.anything(),
       });
     });
 
     it("returns created organisme when valid with SIRET and no UAI & no API Calls", async () => {
       // Création de l'organisme sans les appels API
-      const { _id } = await createOrganisme(sampleOrganismeWithoutUai, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      });
+      const { _id } = await createOrganisme(sampleOrganismeWithoutUai);
       const created = await findOrganismeById(_id);
 
-      assert.deepEqual(created, {
+      expect(created).toStrictEqual({
         ...sampleOrganismeWithoutUAIOutput,
-        _id: created?._id || "should not be null",
-        created_at: created?.created_at || "should not be null",
-        updated_at: created?.updated_at || "should not be null",
+        _id: expect.anything(),
+        created_at: expect.anything(),
+        updated_at: expect.anything(),
       });
     });
 
     it("returns created organisme when valid with UAI & SIRET & API Calls", async () => {
-      const { _id } = await createOrganisme(sampleOrganismeWithUAI, {
-        buildFormationTree: true,
-        buildInfosFromSiret: true,
-        callLbaApi: true,
-      });
-      const created = await findOrganismeById(_id);
+      const dataFromApiEntreprise = await getOrganismeInfosFromSiret(sampleOrganismeWithUAI.siret);
+      try {
+        const organisme = await createOrganisme({
+          ...sampleOrganismeWithUAI,
+          ...dataFromApiEntreprise,
+        });
+        await updateOrganismeFromApis(organisme);
+        const created = await findOrganismeById(organisme._id);
 
-      assert.deepEqual(created, {
-        ...sampleOrganismeWithUAIOutput,
-        ...fieldsAddedByApiCalls,
-        _id: created?._id || "should not be null",
-        created_at: created?.created_at || "should not be null",
-        updated_at: created?.updated_at || "should not be null",
-      });
+        expect(created).toStrictEqual({
+          ...sampleOrganismeWithUAIOutput,
+          ...fieldsAddedByApiCalls,
+          _id: expect.anything(),
+          created_at: expect.anything(),
+          updated_at: expect.anything(),
+        });
+      } catch (err) {
+        console.log(JSON.stringify(err, null, 2));
+
+        throw err;
+      }
     });
 
     it("returns created organisme when valid with SIRET & no UAI & API Calls", async () => {
-      const { _id } = await createOrganisme(sampleOrganismeWithoutUai, {
-        buildFormationTree: true,
-        buildInfosFromSiret: true,
-        callLbaApi: true,
+      const dataFromApiEntreprise = await getOrganismeInfosFromSiret(sampleOrganismeWithUAI.siret);
+      const organisme = await createOrganisme({
+        ...sampleOrganismeWithoutUai,
+        ...dataFromApiEntreprise,
       });
-      const created = await findOrganismeById(_id);
+      await updateOrganismeFromApis(organisme);
 
-      assert.deepEqual(created, {
+      const created = await findOrganismeById(organisme._id);
+
+      expect(created).toStrictEqual({
+        _id: expect.anything(),
         ...sampleOrganismeWithoutUAIOutput,
         ...fieldsAddedByApiCalls,
-        _id: created?._id || "should not be null",
-        created_at: created?.created_at || "should not be null",
-        updated_at: created?.updated_at || "should not be null",
+        created_at: expect.anything(),
+        updated_at: expect.anything(),
       });
     });
   });
@@ -212,85 +196,43 @@ describe("Test des actions Organismes", () => {
 
     it("throws when given id is not existant", async () => {
       const randomOrganisme = createRandomOrganisme();
-      await assert.rejects(() => updateOrganisme("random-id", randomOrganisme));
+      await assert.rejects(() => updateOrganisme(new ObjectId(), randomOrganisme));
     });
 
     it("returns updated organisme when id valid and no API Calls", async () => {
-      const { _id } = await createOrganisme(sampleOrganismeWithUAI, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      });
-      const toUpdateOrganisme = { ...sampleOrganismeWithUAI, nom: "UPDATED" };
-      const updated = await updateOrganisme(_id, toUpdateOrganisme, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
+      const createdOrganisme = await createOrganisme(sampleOrganismeWithUAI);
+      const updated = await updateOrganisme(createdOrganisme._id, {
+        ...createdOrganisme,
+        nom: "UPDATED",
       });
 
-      assert.deepEqual(updated, {
+      expect(updated).toStrictEqual({
         ...sampleOrganismeWithUAIOutput,
         nom: "UPDATED",
-        _id: updated?._id || "should not be null",
-        created_at: updated?.created_at || "should not be null",
-        updated_at: updated?.updated_at || "should not be null",
-      });
-    });
-
-    it("returns updated organisme when id valid and API Calls", async () => {
-      const { _id } = await createOrganisme(sampleOrganismeWithUAI, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      });
-      // Test d'update sur le champ api_key
-      const toUpdateOrganisme = { ...sampleOrganismeWithUAI, api_key: "UPDATED" };
-      const updated = await updateOrganisme(_id, toUpdateOrganisme);
-
-      assert.deepEqual(updated, {
-        ...sampleOrganismeWithUAIOutput,
-        ...fieldsAddedByApiCalls,
-        api_key: "UPDATED",
-        _id: updated?._id || "should not be null",
-        created_at: updated?.created_at || "should not be null",
-        updated_at: updated?.updated_at || "should not be null",
+        _id: expect.anything(),
+        created_at: expect.anything(),
+        updated_at: expect.anything(),
       });
     });
 
     it("returns updated organisme & update ferme field to false when id valid and no API Calls", async () => {
-      const { _id } = await createOrganisme(
-        { ...sampleOrganismeWithUAI, ferme: true },
-        {
-          buildFormationTree: false,
-          buildInfosFromSiret: false,
-          callLbaApi: false,
-        }
-      );
-      const updatedOrganisme = await updateOrganisme(
-        _id,
-        { ...sampleOrganismeWithUAI, ferme: false },
-        { buildFormationTree: false, buildInfosFromSiret: false, callLbaApi: false }
-      );
+      const createdOrganisme = await createOrganisme({ ...sampleOrganismeWithUAI, ferme: true });
+      const updatedOrganisme = await updateOrganisme(createdOrganisme._id, {
+        ...createdOrganisme,
+        ferme: false,
+      });
 
-      assert.equal(updatedOrganisme?.ferme, false);
+      expect(updatedOrganisme?.ferme).toBe(false);
     });
 
     it("returns updated organisme & does not update ferme field when id valid and no API Calls", async () => {
-      const { _id } = await createOrganisme(
-        { ...sampleOrganismeWithUAI, ferme: true },
-        {
-          buildFormationTree: false,
-          buildInfosFromSiret: false,
-          callLbaApi: false,
-        }
-      );
-      const updatedOrganisme = await updateOrganisme(
-        _id,
-        { ...sampleOrganismeWithUAI },
-        { buildFormationTree: false, buildInfosFromSiret: false, callLbaApi: false }
-      );
+      const createdOrganisme = await createOrganisme({ ...sampleOrganismeWithUAI, ferme: true });
+      const updatedOrganisme = await updateOrganisme(createdOrganisme._id, {
+        ...createdOrganisme,
+        ...sampleOrganismeWithUAI,
+      });
 
-      assert.equal(updatedOrganisme?.ferme, true);
+      expect(updatedOrganisme?.ferme).toBe(true);
     });
 
     it("returns updated organisme & update ferme field from API", async () => {
@@ -304,17 +246,17 @@ describe("Test des actions Organismes", () => {
           departement: "01",
           region: "84",
           academie: "10",
-        },
+        } as const,
       };
 
-      const { _id } = await createOrganisme(sampleOrganisme, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
+      const dataFromApiEntreprise = await getOrganismeInfosFromSiret(sampleOrganismeWithUAI.siret);
+      const createdOrganisme = await createOrganisme({
+        ...sampleOrganisme,
+        ...dataFromApiEntreprise,
       });
-      const updatedOrganisme = await updateOrganisme(_id, { ...sampleOrganisme });
+      const updatedOrganisme = await updateOrganismeFromApis(createdOrganisme);
 
-      assert.equal(updatedOrganisme?.ferme, false);
+      expect(updatedOrganisme?.ferme).toBe(false);
     });
   });
 
@@ -404,11 +346,7 @@ describe("Test des actions Organismes", () => {
   describe("setOrganismeTransmissionDates", () => {
     it("mets à jour les dates first_transmission_date et last_transmission_date pour un organisme sans first_transmission_date", async () => {
       // Création de l'organisme sans les appels API
-      const { _id } = await createOrganisme(sampleOrganismeWithUAI, {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      });
+      const { _id } = await createOrganisme(sampleOrganismeWithUAI);
 
       // Vérification de la création sans first_transmission_date
       const created = await findOrganismeById(_id);
@@ -426,14 +364,7 @@ describe("Test des actions Organismes", () => {
       const first_transmission_date = subDays(new Date(), 10);
 
       // Création de l'organisme sans les appels API
-      const { _id } = await createOrganisme(
-        { ...sampleOrganismeWithUAI, first_transmission_date },
-        {
-          buildFormationTree: false,
-          buildInfosFromSiret: false,
-          callLbaApi: false,
-        }
-      );
+      const { _id } = await createOrganisme({ ...sampleOrganismeWithUAI, first_transmission_date });
 
       // Vérification de la création avec first_transmission_date
       const created = await findOrganismeById(_id);

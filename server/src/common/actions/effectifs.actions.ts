@@ -1,6 +1,5 @@
 import { isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
-import { PartialDeep } from "type-fest";
 
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";

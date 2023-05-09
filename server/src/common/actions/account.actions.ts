@@ -11,7 +11,11 @@ import config from "@/config";
 import { AuthContext } from "../model/internal/AuthContext.js";
 
 import { buildOrganisationLabel, createOrganisation } from "./organisations.actions";
-import { createOrganisme, getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
+import {
+  createOrganisme,
+  getOrganismeByUAIAndSIRET,
+  getOrganismeInfosFromSiret,
+} from "./organismes/organismes.actions";
 import { createSession } from "./sessions.actions";
 import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
 
@@ -36,8 +40,13 @@ export async function register(registration: RegistrationSchema): Promise<{
     } catch (err) {
       // si pas d'organisme en base (et donc le référentiel), on en crée un à partir depuis API entreprise
       logger.warn({ action: "register", uai, siret }, "organisme inconnu créé");
+      // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
+      const data = await getOrganismeInfosFromSiret(siret);
+
+      // si aucun champ ferme fourni en entrée on récupère celui de l'organisme trouvé par son id
       await createOrganisme({
-        uai,
+        ...data,
+        ...(uai ? { uai } : {}),
         siret,
         fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU_INSCRIPTION,
       });
