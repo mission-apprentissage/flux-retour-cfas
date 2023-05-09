@@ -82,7 +82,7 @@ describe("Dossiers Apprenants Route V3", () => {
       },
     });
 
-    assert.deepEqual(response.status, 401);
+    expect(response.status).toBe(401);
   });
 
   it("La route renvoie une 403 pour un user n'ayant pas la permission", async () => {
@@ -107,7 +107,7 @@ describe("Dossiers Apprenants Route V3", () => {
       },
     });
 
-    assert.deepEqual(response.status, 403);
+    expect(response.status).toBe(403);
   });
 
   it("L'erreur d'ajout via route pour un trop grande nb de données randomisées (>100)", async () => {
@@ -137,7 +137,7 @@ describe("Dossiers Apprenants Route V3", () => {
     });
 
     // Check Api Route data & Data not added
-    assert.deepEqual(response.status, 413);
+    expect(response.status).toBe(413);
     assert.equal(await effectifsV3QueueDb().countDocuments({}), 0);
   });
 

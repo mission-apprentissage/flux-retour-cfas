@@ -96,7 +96,7 @@ describe("Routes /organismes/:id", () => {
       beforeEach(async () => {
         // FIXME revoir les statuts
         await effectifsDb().insertMany([
-          // 5 apprenti
+          // 5 apprentis
           ...generate(5, () =>
             createSampleEffectif({
               ...commonEffectifsAttributes,

@@ -160,6 +160,7 @@ export const schema = object(
 export function defaultValuesEffectif({ lockAtCreate = false }) {
   return {
     apprenant: defaultValuesApprenant(),
+    contrats: [],
     formation: defaultValuesFormationEffectif(),
     is_lock: defaultValuesEffectifFieldsLocker(lockAtCreate),
     validation_errors: [],

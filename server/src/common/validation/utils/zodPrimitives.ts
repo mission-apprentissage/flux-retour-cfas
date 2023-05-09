@@ -178,7 +178,7 @@ export const primitivesV1 = {
   },
 };
 
-export const primitivesV2 = {
+export const primitivesV3 = {
   apprenant: {
     // addresse: TODO à discuter
     sexe: z.string().describe("Sexe de l'apprenant").openapi({

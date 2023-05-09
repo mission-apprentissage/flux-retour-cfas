@@ -165,18 +165,18 @@ export const structureEffectifFromDossierApprenant = (dossiersApprenant: Effecti
       telephone: transformToInternationalNumber(telephone),
       // Build adresse with code_commune_insee
       ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
-      // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
-      contrats:
-        contrat_date_debut || contrat_date_fin || contrat_date_rupture
-          ? [
-              {
-                ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
-                ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
-                ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
-              },
-            ]
-          : [],
     },
+    // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
+    contrats:
+      contrat_date_debut || contrat_date_fin || contrat_date_rupture
+        ? [
+            {
+              ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
+              ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
+              ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
+            },
+          ]
+        : [],
     formation: {
       ...defaultValuesFormationEffectif(),
       cfd,

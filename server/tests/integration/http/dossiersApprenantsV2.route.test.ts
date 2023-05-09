@@ -76,7 +76,7 @@ describe("Dossiers Apprenants Route", () => {
       );
 
       // Check Api Route data
-      assert.deepEqual(response.status, 200);
+      expect(response.status).toBe(200);
       assert.deepEqual(response.data.msg, "ok");
     });
   });
@@ -105,7 +105,7 @@ describe("Dossiers Apprenants Route", () => {
         },
       });
 
-      assert.deepEqual(response.status, 401);
+      expect(response.status).toBe(401);
     });
 
     it("Vérifie que la route /dossiers-apprenants renvoie une 403 pour un user n'ayant pas la permission", async () => {
@@ -130,7 +130,7 @@ describe("Dossiers Apprenants Route", () => {
         },
       });
 
-      assert.deepEqual(response.status, 403);
+      expect(response.status).toBe(403);
     });
 
     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un trop grande nb de données randomisées (>100)", async () => {
@@ -153,7 +153,7 @@ describe("Dossiers Apprenants Route", () => {
       });
 
       // Check Api Route data & Data not added
-      assert.deepEqual(response.status, 413);
+      expect(response.status).toBe(413);
       assert.equal(await effectifsQueueDb().countDocuments({}), 0);
     });
 
@@ -206,7 +206,7 @@ describe("Dossiers Apprenants Route", () => {
       });
       // Check Api Response
       expect(response.status).toBe(200);
-      expect(response.data).toMatchObject({
+      expect(response.data).toStrictEqual({
         status: "OK",
         message: "Queued",
         detail: "Some data are invalid",

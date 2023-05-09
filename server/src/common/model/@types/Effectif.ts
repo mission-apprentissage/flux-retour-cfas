@@ -1588,7 +1588,6 @@ export interface Effectif {
         pays?: boolean;
       };
       historique_statut?: boolean;
-      contrats?: boolean;
       code_postal_de_naissance?: boolean;
       regime_scolaire?: boolean;
       inscription_sportif_haut_niveau?: boolean;
@@ -1621,6 +1620,7 @@ export interface Effectif {
         telephone?: boolean;
       };
     };
+    contrats?: boolean;
     formation?: {
       cfd?: boolean;
       rncp?: boolean;

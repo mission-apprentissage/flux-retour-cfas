@@ -19,6 +19,7 @@ import logger from "@/common/logger";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsQueueDb } from "@/common/model/collections";
+import { formatError } from "@/common/utils/errorUtils";
 import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
 
@@ -149,9 +150,10 @@ export const processEffectifsQueue = async (options?: Options) => {
             }
 
             dataToUpdate = { effectif_id: effectifId };
-          } catch (error: any) {
-            logger.error(` Error with item ${effectifQueued._id}: ${error.toString()}`);
-            dataToUpdate = { error: error.toString() };
+          } catch (e: any) {
+            const err = formatError(e);
+            logger.error({ err }, `Error with item ${effectifQueued._id}: ${err.toString()}`);
+            dataToUpdate = { error: err.toString() };
           }
         }
 

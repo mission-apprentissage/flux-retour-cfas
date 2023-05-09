@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { primitivesV1, primitivesV2 } from "@/common/validation/utils/zodPrimitives";
+import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
 const dossierApprenantSchemaV3 = () =>
   z.object({
@@ -17,9 +17,9 @@ const dossierApprenantSchemaV3 = () =>
       telephone: primitivesV1.apprenant.telephone.optional(),
       code_commune_insee: primitivesV1.apprenant.code_commune_insee.optional(),
       // V3 - OPTIONAL FIELDS
-      sexe: primitivesV2.apprenant.sexe.optional(),
-      rqth: primitivesV2.apprenant.rqth.optional(),
-      date_rqth: primitivesV2.apprenant.date_rqth.optional(),
+      sexe: primitivesV3.apprenant.sexe.optional(),
+      rqth: primitivesV3.apprenant.rqth.optional(),
+      date_rqth: primitivesV3.apprenant.date_rqth.optional(),
     }),
     etablissement_responsable: z.object({
       siret: primitivesV1.etablissement_responsable.siret.optional(),
@@ -42,19 +42,19 @@ const dossierApprenantSchemaV3 = () =>
         code_rncp: primitivesV1.formation.code_rncp.optional(),
         code_cfd: primitivesV1.formation.code_cfd.optional(), // ancien id_formation
         // V3 - REQUIRED FIELDS
-        date_inscription: primitivesV2.formation.date_inscription,
-        date_entree: primitivesV2.formation.date_entree,
-        date_fin: primitivesV2.formation.date_fin,
+        date_inscription: primitivesV3.formation.date_inscription,
+        date_entree: primitivesV3.formation.date_entree,
+        date_fin: primitivesV3.formation.date_fin,
         // V3 - OPTIONAL FIELDS
-        obtention_diplome: primitivesV2.formation.obtention_diplome.optional(),
-        date_obtention_diplome: primitivesV2.formation.date_obtention_diplome.optional(),
-        date_exclusion: primitivesV2.formation.date_exclusion.optional(),
-        cause_exclusion: primitivesV2.formation.cause_exclusion.optional(),
+        obtention_diplome: primitivesV3.formation.obtention_diplome.optional(),
+        date_obtention_diplome: primitivesV3.formation.date_obtention_diplome.optional(),
+        date_exclusion: primitivesV3.formation.date_exclusion.optional(),
+        cause_exclusion: primitivesV3.formation.cause_exclusion.optional(),
         referent_handicap: z
           .object({
-            nom: primitivesV2.formation.referent_handicap.nom.optional(),
-            prenom: primitivesV2.formation.referent_handicap.prenom.optional(),
-            email: primitivesV2.formation.referent_handicap.email.optional(),
+            nom: primitivesV3.formation.referent_handicap.nom.optional(),
+            prenom: primitivesV3.formation.referent_handicap.prenom.optional(),
+            email: primitivesV3.formation.referent_handicap.email.optional(),
           })
           .optional(),
       })
@@ -67,7 +67,7 @@ const dossierApprenantSchemaV3 = () =>
         date_fin: primitivesV1.contrat.date_fin.optional(),
         date_rupture: primitivesV1.contrat.date_rupture.optional(),
         // V3 - OPTIONAL FIELDS
-        cause_rupture: primitivesV2.contrat.cause_rupture.optional(),
+        cause_rupture: primitivesV3.contrat.cause_rupture.optional(),
       })
       .openapi({
         description: "Contrat en cours de l'apprenant",
@@ -75,9 +75,9 @@ const dossierApprenantSchemaV3 = () =>
       .optional(),
     employeur: z
       .object({
-        siret: primitivesV2.employeur.siret.optional(),
-        code_commune_insee: primitivesV2.employeur.code_commune_insee.optional(),
-        code_naf: primitivesV2.employeur.code_naf.optional(),
+        siret: primitivesV3.employeur.siret.optional(),
+        code_commune_insee: primitivesV3.employeur.code_commune_insee.optional(),
+        code_naf: primitivesV3.employeur.code_naf.optional(),
       })
       .optional()
       .openapi({

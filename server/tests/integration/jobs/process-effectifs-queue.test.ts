@@ -235,7 +235,7 @@ describe("Processing de EffectifsQueue", () => {
 
     assert(insertedDossier);
 
-    expect(insertedDossier).toMatchObject({
+    expect(insertedDossier).toStrictEqual({
       apprenant: {
         nom: "FLEURY",
         prenom: "Fortuné",
@@ -243,7 +243,7 @@ describe("Processing de EffectifsQueue", () => {
           {
             valeur_statut: 3,
             date_statut: new Date("2022-12-28T04:05:47.647Z"),
-            date_reception: insertedDossier.apprenant.historique_statut[0].date_reception || "shouldnotbeempty",
+            date_reception: expect.anything(),
           },
         ],
         ine: "402957826QH",
@@ -257,8 +257,8 @@ describe("Processing de EffectifsQueue", () => {
           academie: "2",
           region: "93",
         },
-        contrats: [],
       },
+      contrats: [],
       formation: {
         cfd: "50033610",
         annee: "0",
@@ -292,7 +292,6 @@ describe("Processing de EffectifsQueue", () => {
             pays: false,
           },
           historique_statut: true,
-          contrats: true,
           code_postal_de_naissance: false,
           regime_scolaire: false,
           inscription_sportif_haut_niveau: false,
@@ -325,6 +324,7 @@ describe("Processing de EffectifsQueue", () => {
             telephone: false,
           },
         },
+        contrats: true,
         formation: {
           cfd: true,
           rncp: false,

@@ -191,7 +191,6 @@ export const apprenantSchema = object(
 export function defaultValuesApprenant() {
   return {
     historique_statut: [],
-    contrats: [],
   };
 }
 

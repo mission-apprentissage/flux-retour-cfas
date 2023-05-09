@@ -2,10 +2,10 @@
  * Codes des statuts des apprenants
  */
 export const CODES_STATUT_APPRENANT = {
-  inscrit: 2 as const,
-  apprenti: 3 as const,
-  abandon: 0 as const,
-};
+  inscrit: 2,
+  apprenti: 3,
+  abandon: 0,
+} as const;
 
 export const CODES_STATUT_APPRENANT_ENUM = [
   CODES_STATUT_APPRENANT.abandon,
