@@ -41,6 +41,7 @@ describe("Test des actions Effectifs Duplicates", () => {
     // Vérification de la récupération d'une liste avec un doublon identifié 2 fois sur les champs de la clé d'unicité
     assert.equal(duplicates.length, 1);
     assert.equal(duplicates[0].count, 2);
+    assert.equal(duplicates[0].duplicatesIds.length, 2);
 
     assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectif.apprenant.nom.toLowerCase());
     assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), sampleEffectif.apprenant.prenom.toLowerCase());
@@ -59,6 +60,7 @@ describe("Test des actions Effectifs Duplicates", () => {
     // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
     assert.equal(duplicates.length, 1);
     assert.equal(duplicates[0].count, 5);
+    assert.equal(duplicates[0].duplicatesIds.length, 5);
 
     assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectif.apprenant.nom.toLowerCase());
     assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), sampleEffectif.apprenant.prenom.toLowerCase());
@@ -77,6 +79,7 @@ describe("Test des actions Effectifs Duplicates", () => {
     // Vérification de la récupération d'une liste avec un doublon identifié 2 fois sur les champs de la clé d'unicité
     assert.equal(duplicates.length, 1);
     assert.equal(duplicates[0].count, 2);
+    assert.equal(duplicates[0].duplicatesIds.length, 2);
 
     assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectif.apprenant.nom.toLowerCase());
     assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), sampleEffectif.apprenant.prenom.toLowerCase());
@@ -95,6 +98,7 @@ describe("Test des actions Effectifs Duplicates", () => {
     // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
     assert.equal(duplicates.length, 1);
     assert.equal(duplicates[0].count, 5);
+    assert.equal(duplicates[0].duplicatesIds.length, 5);
 
     assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectif.apprenant.nom.toLowerCase());
     assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), "jeanédouard"); // Transformation du prenom_apprenant en champ normalisé
@@ -113,6 +117,7 @@ describe("Test des actions Effectifs Duplicates", () => {
     // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
     assert.equal(duplicates.length, 1);
     assert.equal(duplicates[0].count, 5);
+    assert.equal(duplicates[0].duplicatesIds.length, 5);
 
     assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), "mbappé"); // Transformation du nom en champ normalisé
     assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), sampleEffectif.apprenant.prenom.toLowerCase());

@@ -44,6 +44,7 @@ export const getDuplicatesEffectifsForOrganismeId = async (organisme_id: ObjectI
             formation_cfd: "$formation.cfd",
           },
           count: { $sum: 1 },
+          duplicatesIds: { $addToSet: "$_id" },
         },
       },
       { $match: { count: { $gt: 1 } } },
