@@ -6,7 +6,7 @@ export interface IndicateursEffectifs {
   rupturants: number;
 }
 
-export type IndicateursEffectifsParDepartement = { [key: string]: IndicateursEffectifs };
+export type IndicateursEffectifsAvecDepartement = IndicateursEffectifs & { departement: string };
 
 export interface IndicateursOrganismes {
   tauxCouverture: number;
@@ -15,4 +15,4 @@ export interface IndicateursOrganismes {
   organismesNonTransmetteurs: number;
 }
 
-export type IndicateursOrganismesParDepartement = { [key: string]: IndicateursOrganismes };
+export type IndicateursOrganismesAvecDepartement = IndicateursOrganismes & { departement: string };

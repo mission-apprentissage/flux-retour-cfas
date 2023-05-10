@@ -1,21 +1,22 @@
-import { Box, Container, Grid, GridItem, Heading, Text } from "@chakra-ui/react";
+import { Box, Container, Divider, Grid, GridItem, Heading, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { _get } from "@/common/httpClient";
 import { getOrganisationLabel } from "@/common/internal/Organisation";
+import { prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import useAuth from "@/hooks/useAuth";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import CarteFrance from "./CarteFrance";
-import { IndicateursEffectifsParDepartement, IndicateursOrganismesParDepartement } from "./indicateurs";
+import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDepartement } from "./indicateurs";
 import IndicateursGrid from "./IndicateursGrid";
 
 const NewDashboardTransverse = () => {
   const { auth } = useAuth();
 
-  const { data: indicateursEffectifsParDepartement } = useQuery<IndicateursEffectifsParDepartement>(
+  const { data: indicateursEffectifsAvecDepartement } = useQuery<IndicateursEffectifsAvecDepartement[]>(
     ["indicateurs/effectifs"],
     () =>
       _get(`/api/v1/indicateurs/effectifs`, {
@@ -27,7 +28,7 @@ const NewDashboardTransverse = () => {
 
   const indicateursEffectifsNationaux = useMemo(
     () =>
-      Object.values(indicateursEffectifsParDepartement ?? []).reduce(
+      (indicateursEffectifsAvecDepartement ?? []).reduce(
         (acc, indicateursDepartement) => {
           acc.apprenants += indicateursDepartement.apprenants;
           acc.apprentis += indicateursDepartement.apprentis;
@@ -44,10 +45,10 @@ const NewDashboardTransverse = () => {
           rupturants: 0,
         }
       ),
-    [indicateursEffectifsParDepartement]
+    [indicateursEffectifsAvecDepartement]
   );
 
-  const { data: indicateursOrganismesParDepartement } = useQuery<IndicateursOrganismesParDepartement>(
+  const { data: indicateursOrganismesAvecDepartement } = useQuery<IndicateursOrganismesAvecDepartement[]>(
     ["indicateurs/organismes"],
     () =>
       _get(`/api/v1/indicateurs/organismes`, {
@@ -102,9 +103,13 @@ const NewDashboardTransverse = () => {
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Répartition des effectifs dans votre territoire
             </Heading>
-            {indicateursEffectifsParDepartement && (
+            <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
+            {indicateursEffectifsAvecDepartement && (
               <CarteFrance
-                donneesParDepartement={indicateursEffectifsParDepartement}
+                donneesAvecDepartement={indicateursEffectifsAvecDepartement}
+                dataKey="apprenants"
+                minColor="#DDEBFB"
+                maxColor="#366EC1"
                 tooltipContent={(indicateurs) =>
                   indicateurs ? (
                     <>
@@ -126,13 +131,17 @@ const NewDashboardTransverse = () => {
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Taux de couverture des organismes
             </Heading>
-            {indicateursOrganismesParDepartement && (
+            <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
+            {indicateursOrganismesAvecDepartement && (
               <CarteFrance
-                donneesParDepartement={indicateursOrganismesParDepartement}
+                donneesAvecDepartement={indicateursOrganismesAvecDepartement}
+                dataKey="tauxCouverture"
+                minColor="#ECF5E0"
+                maxColor="#4F6C21"
                 tooltipContent={(indicateurs) =>
                   indicateurs ? (
                     <>
-                      <Box>Taux de couverture&nbsp;: {indicateurs.tauxCouverture}</Box>
+                      <Box>Taux de couverture&nbsp;: {prettyFormatNumber(indicateurs.tauxCouverture)}%</Box>
                       <Box>Total des organismes&nbsp;: {indicateurs.totalOrganismes}</Box>
                       <Box>Organismes transmetteurs&nbsp;: {indicateurs.organismesTransmetteurs}</Box>
                       <Box>Organismes non-transmetteurs&nbsp;: {indicateurs.organismesNonTransmetteurs}</Box>

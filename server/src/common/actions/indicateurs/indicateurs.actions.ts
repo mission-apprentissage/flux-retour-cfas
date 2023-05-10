@@ -4,19 +4,19 @@ import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
-import { IndicateursEffectifsParDepartement } from "./indicateurs";
+import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDepartement } from "./indicateurs";
 
 // TODO ajouter les filtres
-// subira peut-être un refacto si organisation différente de par département
 export async function getIndicateursEffectifsParDepartement(
   ctx: AuthContext,
   filters: IndicateursFilters
-): Promise<IndicateursEffectifsParDepartement> {
+): Promise<IndicateursEffectifsAvecDepartement[]> {
   // amend filters with a restriction
   const restrictionMongo = await getIndicateursRestriction(ctx);
-  // const filterStages = buildMongoPipelineFilterStages(filtersWithRestriction);
 
-  const indicateurs = await effectifsDb()
+  // TODO filtrer
+
+  const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
@@ -173,19 +173,20 @@ export async function getIndicateursEffectifsParDepartement(
         },
       },
     ])
-    .toArray();
-  return indicateurs.reduce((acc, v) => ({ ...acc, [v.departement]: v }), {});
+    .toArray()) as IndicateursEffectifsAvecDepartement[];
+  return indicateurs;
 }
 
 export async function getIndicateursOrganismesParDepartement(
   ctx: AuthContext,
   _filters: IndicateursFilters
-): Promise<IndicateursEffectifsParDepartement> {
+): Promise<IndicateursOrganismesAvecDepartement[]> {
   // amend filters with a restriction
   const restrictionMongo = await getOrganismeRestriction(ctx);
 
   // TODO filtrer par date avec les effectifs... ?
-  const indicateurs = await organismesDb()
+
+  const indicateurs = (await organismesDb()
     .aggregate([
       {
         $match: {
@@ -223,6 +224,6 @@ export async function getIndicateursOrganismesParDepartement(
         },
       },
     ])
-    .toArray();
-  return indicateurs.reduce((acc, v) => ({ ...acc, [v.departement]: v }), {});
+    .toArray()) as IndicateursOrganismesAvecDepartement[];
+  return indicateurs;
 }
