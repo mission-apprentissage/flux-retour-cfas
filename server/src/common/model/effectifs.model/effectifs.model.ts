@@ -3,11 +3,11 @@ import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN, YEAR_RANGE_PATTERN } from "@/common/constants/validations";
-import { object, objectId, string, date, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
+import { object, objectId, string, date, boolean, arrayOf, any } from "@/common/model/json-schema/jsonSchemaTypes";
 
 import { apprenantSchema, defaultValuesApprenant } from "./parts/apprenant.part";
 import { contratSchema } from "./parts/contrat.part";
-import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
+import { defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
 import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part";
 
 const collectionName = "effectifs";
@@ -95,7 +95,7 @@ export const schema = object(
       // Note: anciennement dans apprenant.contrats
       description: "Historique des contrats de l'apprenant",
     }),
-    is_lock: effectifFieldsLockerSchema,
+    is_lock: any({ description: "Indique les champs verrouillés" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
     archive: boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }),
@@ -150,12 +150,12 @@ export const schema = object(
 );
 
 // Default value
-export function defaultValuesEffectif({ lockAtCreate = false }) {
+export function defaultValuesEffectif() {
   return {
     apprenant: defaultValuesApprenant(),
     contrats: [],
     formation: defaultValuesFormationEffectif(),
-    is_lock: defaultValuesEffectifFieldsLocker(lockAtCreate),
+    is_lock: defaultValuesEffectifFieldsLocker(),
     validation_errors: [],
     updated_at: new Date(),
     created_at: new Date(),

@@ -145,25 +145,22 @@ export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: O
     await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_postal);
   }
 
-  const effectif = buildEffectif(
-    {
-      organisme_id: effectifData.organisme_id,
-      annee_scolaire,
-      source,
-      id_erp_apprenant,
-      ...convertedEffectif,
-      apprenant: {
-        nom,
-        prenom,
-        ...convertedEffectif.apprenant,
-      },
-      formation: {
-        cfd,
-        ...convertedEffectif.formation,
-      },
+  const effectif = buildEffectif({
+    organisme_id: effectifData.organisme_id,
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
+    ...convertedEffectif,
+    apprenant: {
+      nom,
+      prenom,
+      ...convertedEffectif.apprenant,
     },
-    false
-  );
+    formation: {
+      cfd,
+      ...convertedEffectif.formation,
+    },
+  });
 
   let found: any = null;
   if (checkIfExist) {

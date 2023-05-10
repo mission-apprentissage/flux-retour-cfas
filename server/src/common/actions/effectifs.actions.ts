@@ -17,11 +17,10 @@ import { getOrganismeById } from "./organismes/organismes.actions";
 /**
  * Méthode de build d'un effectif
  * @param {any} effectif
- * @param {boolean} lockAtCreate
  * @returns
  */
-export const buildEffectif = (effectifData: Required<Effectif> & { organisme_id: ObjectId }, lockAtCreate = false) => {
-  const defaultValues = defaultValuesEffectif({ lockAtCreate });
+export const buildEffectif = (effectifData: Required<Effectif> & { organisme_id: ObjectId }) => {
+  const defaultValues = defaultValuesEffectif();
   return {
     ...defaultValues,
     ...effectifData,
@@ -39,11 +38,8 @@ export const buildEffectif = (effectifData: Required<Effectif> & { organisme_id:
 /**
  * Méthode de création d'un effectif
  */
-export const createEffectif = async (
-  dataEffectif: Required<Effectif> & { organisme_id: ObjectId },
-  lockAtCreate = false
-) => {
-  const dataToInsert = buildEffectif(dataEffectif, lockAtCreate);
+export const createEffectif = async (dataEffectif: Required<Effectif> & { organisme_id: ObjectId }) => {
+  const dataToInsert = buildEffectif(dataEffectif);
 
   const organisme = await getOrganismeById(dataEffectif.organisme_id);
   if (organisme) {
