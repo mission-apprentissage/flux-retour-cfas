@@ -53,38 +53,10 @@ export const getDuplicatesEffectifsForOrganismeId = async (organisme_id: ObjectI
 };
 
 /**
- * TODO : Clean
  * Récupération de la liste des doublons pour un SIREN
  * @param siren
  */
 export const getEffectifsDuplicatesFromSIREN = async (siren: string) => {
-  const sample = await effectifsDb()
-    .aggregate([
-      {
-        $lookup: {
-          from: "organismes",
-          localField: "organisme_id",
-          foreignField: "_id",
-          as: "organismes_info",
-        },
-      },
-      { $unwind: "$organismes_info" },
-      {
-        $project: {
-          organisme_uai: "$organismes_info.uai",
-          organisme_siren: { $substr: ["$organismes_info.siret", 0, 9] },
-          nom_apprenant: { $toUpper: "$sanitizedName" },
-          prenom_apprenant: { $toUpper: "$apprenant.prenom" },
-          date_de_naissance_apprenant: "$apprenant.date_de_naissance",
-          annee_scolaire: "$annee_scolaire",
-        },
-      },
-      { $match: { organisme_siren: "786384263" } },
-    ])
-    .toArray();
-
-  console.log(sample);
-
   return await effectifsDb()
     .aggregate([
       {
@@ -100,18 +72,49 @@ export const getEffectifsDuplicatesFromSIREN = async (siren: string) => {
         $project: {
           organisme_uai: "$organismes_info.uai",
           organisme_siren: { $substr: ["$organismes_info.siret", 0, 9] },
+          nom_apprenant: "$apprenant.nom",
+          prenom_apprenant: "$apprenant.prenom",
+          date_de_naissance_apprenant: "$apprenant.date_de_naissance",
+          annee_scolaire: "$annee_scolaire",
+          formation_cfd: "$formation.cfd",
         },
       },
       { $match: { organisme_siren: siren } },
       {
+        $addFields: {
+          sanitizedNom: { $regexFindAll: { input: { $toLower: "$nom_apprenant" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+        },
+      },
+      {
+        $addFields: {
+          sanitizedPrenom: { $regexFindAll: { input: { $toLower: "$prenom_apprenant" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+        },
+      },
+      {
+        $addFields: {
+          sanitizedNom: {
+            $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
+          },
+        },
+      },
+      {
+        $addFields: {
+          sanitizedPrenom: {
+            $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
+          },
+        },
+      },
+      {
         $group: {
           _id: {
-            nom_apprenant: "$apprenant.nom",
-            prenom_apprenant: { $toLower: "$apprenant.prenom" },
-            date_de_naissance_apprenant: "$apprenant.date_de_naissance",
+            nom_apprenant: "$sanitizedNom",
+            prenom_apprenant: "$sanitizedPrenom",
+            date_de_naissance_apprenant: "$date_de_naissance_apprenant",
             annee_scolaire: "$annee_scolaire",
+            formation_cfd: "$formation_cfd",
           },
           count: { $sum: 1 },
+          duplicatesIds: { $addToSet: "$_id" },
         },
       },
       { $match: { count: { $gt: 1 } } },
@@ -120,7 +123,6 @@ export const getEffectifsDuplicatesFromSIREN = async (siren: string) => {
 };
 
 /**
- * TODO : Clean
  * Récupération de la liste des doublons d'effectifs sur la base d'un SIREN commun
  * @returns
  */
@@ -143,13 +145,38 @@ export const getEffectifsDuplicatesOnSIREN = async () => {
         },
       },
       {
+        $addFields: {
+          sanitizedNom: { $regexFindAll: { input: { $toLower: "$apprenant.nom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+        },
+      },
+      {
+        $addFields: {
+          sanitizedPrenom: { $regexFindAll: { input: { $toLower: "$apprenant.prenom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+        },
+      },
+      {
+        $addFields: {
+          sanitizedNom: {
+            $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
+          },
+        },
+      },
+      {
+        $addFields: {
+          sanitizedPrenom: {
+            $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
+          },
+        },
+      },
+      {
         $group: {
           _id: {
             organisme_siren: "$organisme_siren",
-            nom_apprenant: "$apprenant.nom",
-            prenom_apprenant: "$apprenant.prenom",
+            nom_apprenant: "$sanitizedNom",
+            prenom_apprenant: "$sanitizedPrenom",
             date_de_naissance_apprenant: "$apprenant.date_de_naissance",
             annee_scolaire: "$annee_scolaire",
+            formation_cfd: "$formation.cfd",
           },
           count: { $sum: 1 },
         },
@@ -157,39 +184,4 @@ export const getEffectifsDuplicatesOnSIREN = async () => {
       { $match: { count: { $gt: 1 } } },
     ])
     .toArray();
-};
-
-/**
- * TODO : Clean
- * @returns
- */
-export const tmpSanitized = async () => {
-  const sanitizedTest = await effectifsDb().aggregate([
-    {
-      $addFields: {
-        sanitizedNom: { $regexFindAll: { input: { $toUpper: "$apprenant.nom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-      },
-    },
-    {
-      $addFields: {
-        sanitizedPrenom: { $regexFindAll: { input: { $toUpper: "$apprenant.prenom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-      },
-    },
-    {
-      $addFields: {
-        sanitizedNom: {
-          $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-        },
-      },
-    },
-    {
-      $addFields: {
-        sanitizedPrenom: {
-          $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-        },
-      },
-    },
-  ]);
-
-  return sanitizedTest;
 };
