@@ -1,5 +1,8 @@
 import { Box, Container, Grid, GridItem, Heading, Text } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
+import { _get } from "@/common/httpClient";
 import { getOrganisationLabel } from "@/common/internal/Organisation";
 import Link from "@/components/Links/Link";
 import useAuth from "@/hooks/useAuth";
@@ -12,39 +15,47 @@ import IndicateursGrid from "./IndicateursGrid";
 const NewDashboardTransverse = () => {
   const { auth } = useAuth();
 
-  // reactquery or useeffect
+  const { data: indicateursEffectifsParDepartement } = useQuery<IndicateursEffectifsParDepartement>(
+    ["indicateurs/effectifs"],
+    () =>
+      _get(`/api/v1/indicateurs/effectifs`, {
+        params: {
+          date: "2023-05-09",
+        },
+      }) // TODO filtres
+  );
 
-  const indicateursEffectifsParDepartement: IndicateursEffectifsParDepartement = {
-    29: {
-      apprenants: 43765,
-      apprentis: 31080,
-      inscritsSansContrat: 705,
-      abandons: 1733,
-      rupturants: 580,
-    },
-    56: {
-      apprenants: 43765,
-      apprentis: 31080,
-      inscritsSansContrat: 705,
-      abandons: 1733,
-      rupturants: 580,
-    },
-  };
+  const indicateursEffectifsNationaux = useMemo(
+    () =>
+      Object.values(indicateursEffectifsParDepartement ?? []).reduce(
+        (acc, indicateursDepartement) => {
+          acc.apprenants += indicateursDepartement.apprenants;
+          acc.apprentis += indicateursDepartement.apprentis;
+          acc.inscritsSansContrat += indicateursDepartement.inscritsSansContrat;
+          acc.abandons += indicateursDepartement.abandons;
+          acc.rupturants += indicateursDepartement.rupturants;
+          return acc;
+        },
+        {
+          apprenants: 0,
+          apprentis: 0,
+          inscritsSansContrat: 0,
+          abandons: 0,
+          rupturants: 0,
+        }
+      ),
+    [indicateursEffectifsParDepartement]
+  );
 
-  const indicateursOrganismesParDepartement: IndicateursOrganismesParDepartement = {
-    29: {
-      tauxCouverture: 34.69,
-      totalOrganismes: 245,
-      organismesTransmetteurs: 45,
-      organismesNonTransmetteurs: 200,
-    },
-    56: {
-      tauxCouverture: 34.69,
-      totalOrganismes: 245,
-      organismesTransmetteurs: 45,
-      organismesNonTransmetteurs: 200,
-    },
-  };
+  const { data: indicateursOrganismesParDepartement } = useQuery<IndicateursOrganismesParDepartement>(
+    ["indicateurs/organismes"],
+    () =>
+      _get(`/api/v1/indicateurs/organismes`, {
+        params: {
+          date: "2023-05-09",
+        },
+      }) // TODO filtres
+  );
 
   return (
     <Box>
@@ -80,7 +91,7 @@ const NewDashboardTransverse = () => {
         </Text>
         <Box>Filtrer par...</Box>
 
-        <IndicateursGrid />
+        {indicateursEffectifsNationaux && <IndicateursGrid indicateursEffectifs={indicateursEffectifsNationaux} />}
 
         <Link href="/indicateurs" color="action-high-blue-france" textDecoration="underline">
           Explorer plus d’indicateurs
@@ -91,42 +102,47 @@ const NewDashboardTransverse = () => {
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Répartition des effectifs dans votre territoire
             </Heading>
-            <CarteFrance
-              donneesParDepartement={indicateursEffectifsParDepartement}
-              tooltipContent={(indicateurs) =>
-                indicateurs ? (
-                  <>
-                    <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
-                    <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
-                    <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
-                    <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
-                    <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
-                  </>
-                ) : (
-                  <Box>Données non disponibles</Box>
-                )
-              }
-            />
+            {indicateursEffectifsParDepartement && (
+              <CarteFrance
+                donneesParDepartement={indicateursEffectifsParDepartement}
+                tooltipContent={(indicateurs) =>
+                  indicateurs ? (
+                    <>
+                      <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
+                      <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
+                      <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
+                      <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
+                      <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
+                    </>
+                  ) : (
+                    <Box>Données non disponibles</Box>
+                  )
+                }
+              />
+            )}
           </GridItem>
+
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Taux de couverture des organismes
             </Heading>
-            <CarteFrance
-              donneesParDepartement={indicateursOrganismesParDepartement}
-              tooltipContent={(indicateurs) =>
-                indicateurs ? (
-                  <>
-                    <Box>Taux de couverture&nbsp;: {indicateurs.tauxCouverture}</Box>
-                    <Box>Total des organismes&nbsp;: {indicateurs.totalOrganismes}</Box>
-                    <Box>Organismes transmetteurs&nbsp;: {indicateurs.organismesTransmetteurs}</Box>
-                    <Box>Organismes non-transmetteurs&nbsp;: {indicateurs.organismesNonTransmetteurs}</Box>
-                  </>
-                ) : (
-                  <Box>Données non disponibles</Box>
-                )
-              }
-            />
+            {indicateursOrganismesParDepartement && (
+              <CarteFrance
+                donneesParDepartement={indicateursOrganismesParDepartement}
+                tooltipContent={(indicateurs) =>
+                  indicateurs ? (
+                    <>
+                      <Box>Taux de couverture&nbsp;: {indicateurs.tauxCouverture}</Box>
+                      <Box>Total des organismes&nbsp;: {indicateurs.totalOrganismes}</Box>
+                      <Box>Organismes transmetteurs&nbsp;: {indicateurs.organismesTransmetteurs}</Box>
+                      <Box>Organismes non-transmetteurs&nbsp;: {indicateurs.organismesNonTransmetteurs}</Box>
+                    </>
+                  ) : (
+                    <Box>Données non disponibles</Box>
+                  )
+                }
+              />
+            )}
           </GridItem>
         </Grid>
       </Container>

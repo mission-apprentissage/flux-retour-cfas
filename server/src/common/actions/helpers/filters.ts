@@ -27,6 +27,15 @@ export type EffectifsFiltersWithRestriction = LegacyEffectifsFilters & {
   restrictionMongo?: any; // dirty, en attendant des routes propres
 };
 
+// dashboard simplifié
+export const indicateursFiltersSchema = {
+  date: z.preprocess((str: any) => new Date(str), z.date()),
+  organisme_region: z.string().optional(),
+  organisme_departement: z.string().optional(),
+};
+
+export type IndicateursFilters = z.infer<z.ZodObject<typeof indicateursFiltersSchema>>;
+
 export interface FilterConfiguration {
   matchKey: string;
 

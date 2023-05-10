@@ -21,7 +21,11 @@ import { sendForgotPasswordRequest, register, activateUser } from "@/common/acti
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
 import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
 import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions";
-import { legacyEffectifsFiltersSchema } from "@/common/actions/helpers/filters";
+import { indicateursFiltersSchema, legacyEffectifsFiltersSchema } from "@/common/actions/helpers/filters";
+import {
+  getIndicateursEffectifsParDepartement,
+  getIndicateursOrganismesParDepartement,
+} from "@/common/actions/indicateurs/indicateurs.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
@@ -488,6 +492,25 @@ function setupRoutes(app: Application) {
           )
       )
   );
+
+  /********************************
+   * Indicateurs aggrégés         *
+   ********************************/
+  authRouter
+    .get(
+      "/api/v1/indicateurs/effectifs",
+      returnResult(async (req) => {
+        const filters = await validateFullZodObjectSchema(req.query, indicateursFiltersSchema);
+        return await getIndicateursEffectifsParDepartement(req.user, filters);
+      })
+    )
+    .get(
+      "/api/v1/indicateurs/organismes",
+      returnResult(async (req) => {
+        const filters = await validateFullZodObjectSchema(req.query, indicateursFiltersSchema);
+        return await getIndicateursOrganismesParDepartement(req.user, filters);
+      })
+    );
 
   // LEGACY écrans indicateurs
   authRouter

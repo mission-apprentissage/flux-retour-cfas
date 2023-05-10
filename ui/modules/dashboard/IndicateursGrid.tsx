@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { formatNumber } from "@/common/utils/stringUtils";
 
 import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "./icons";
+import { IndicateursEffectifs } from "./indicateurs";
 
 interface CardProps {
   label: string;
@@ -45,21 +46,16 @@ function Card({ label, count, tooltipLabel, icon, big = false }: CardProps) {
   );
 }
 
-function IndicateursGrid() {
-  const effectifs = {
-    apprenants: 43765,
-    apprentis: 31080,
-    inscritsSansContrat: 705,
-    abandons: 1733,
-    rupturants: 580,
-  };
-
+interface IndicateursGridProps {
+  indicateursEffectifs: IndicateursEffectifs;
+}
+function IndicateursGrid({ indicateursEffectifs }: IndicateursGridProps) {
   return (
     <Grid h="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
       <GridItem bg="galt" colSpan={2} rowSpan={2}>
         <Card
           label="apprenants"
-          count={effectifs.apprenants}
+          count={indicateursEffectifs.apprenants}
           tooltipLabel={
             <div>
               <b>Nombre d&apos;apprenants en contrat d&apos;apprentissage</b> au dernier jour du mois (ou J-1 si mois en
@@ -74,7 +70,7 @@ function IndicateursGrid() {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="dont apprentis"
-          count={effectifs.apprentis}
+          count={indicateursEffectifs.apprentis}
           tooltipLabel={
             <div>
               <b>Nombre d&apos;apprentis en contrat d&apos;apprentissage</b> au dernier jour du mois (ou J-1 si mois en
@@ -88,7 +84,7 @@ function IndicateursGrid() {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="dont rupturants"
-          count={effectifs.rupturants}
+          count={indicateursEffectifs.rupturants}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants en recherche de contrat après une rupture</b> et toujours dans cette situation à la
@@ -101,7 +97,7 @@ function IndicateursGrid() {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="dont jeunes sans contrat"
-          count={effectifs.inscritsSansContrat}
+          count={indicateursEffectifs.inscritsSansContrat}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir jamais signé de contrat</b>{" "}
@@ -116,7 +112,7 @@ function IndicateursGrid() {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="dont sorties d’apprentissage"
-          count={effectifs.abandons}
+          count={indicateursEffectifs.abandons}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants ou d’apprentis qui ont définitivement quitté le centre de formation</b> à la date
