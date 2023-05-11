@@ -5,8 +5,6 @@ export default () => {
   return (rawError, req, res, next) => {
     req.err = rawError;
 
-    console.log("rawError", rawError);
-    console.log("raw", JSON.stringify(rawError, null, 2));
     let boomError;
 
     if (rawError.isBoom) {

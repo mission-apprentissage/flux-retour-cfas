@@ -1,34 +1,95 @@
-import { Box, Container, Divider, Grid, GridItem, Heading, Text } from "@chakra-ui/react";
+import { Box, Container, Divider, Grid, GridItem, Heading, HStack, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 import { _get } from "@/common/httpClient";
 import { getOrganisationLabel } from "@/common/internal/Organisation";
+import { formatDate } from "@/common/utils/dateUtils";
+import { stripEmptyFields } from "@/common/utils/misc";
 import { prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import useAuth from "@/hooks/useAuth";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import CarteFrance from "./CarteFrance";
+import DateFilter from "./filters/DateFilter";
+import TerritoireFilter from "./filters/TerritoireFilter";
 import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDepartement } from "./indicateurs";
 import IndicateursGrid from "./IndicateursGrid";
 
+interface EffectifsFiltersQuery {
+  date: string;
+  organisme_regions?: string;
+  organisme_departements?: string;
+  organisme_academies?: string;
+  organisme_bassinsEmploi?: string;
+}
+
+interface EffectifsFilters {
+  date: Date;
+  organisme_regions: string[];
+  organisme_departements: string[];
+  organisme_academies: string[];
+  organisme_bassinsEmploi: string[];
+}
+
+function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): EffectifsFilters {
+  return {
+    date: new Date(query.date ?? Date.now()),
+    organisme_regions: query.organisme_regions?.split(",") ?? [],
+    organisme_departements: query.organisme_departements?.split(",") ?? [],
+    organisme_academies: query.organisme_academies?.split(",") ?? [],
+    organisme_bassinsEmploi: query.organisme_bassinsEmploi?.split(",") ?? [],
+  };
+}
+
+function convertEffectifsFiltersToQuery(query: EffectifsFilters): EffectifsFiltersQuery {
+  return stripEmptyFields({
+    date: query.date.toISOString(),
+    organisme_regions: query.organisme_regions?.join(","),
+    organisme_departements: query.organisme_departements?.join(","),
+    organisme_academies: query.organisme_academies?.join(","),
+    organisme_bassinsEmploi: query.organisme_bassinsEmploi?.join(","),
+  });
+}
+
 const NewDashboardTransverse = () => {
   const { auth } = useAuth();
+  const router = useRouter();
+
+  const effectifsFilters = useMemo(
+    () => parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery),
+    [router.query]
+  );
 
   const { data: indicateursEffectifsAvecDepartement } = useQuery<IndicateursEffectifsAvecDepartement[]>(
-    ["indicateurs/effectifs"],
+    ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString() })],
     () =>
       _get(`/api/v1/indicateurs/effectifs`, {
         params: {
-          date: "2023-05-09",
+          date: effectifsFilters.date,
         },
-      }) // TODO filtres
+      }),
+    {
+      enabled: router.isReady,
+    }
+  );
+
+  const { data: indicateursEffectifsAvecDepartementFiltres } = useQuery<IndicateursEffectifsAvecDepartement[]>(
+    ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(effectifsFilters))],
+    () =>
+      _get(`/api/v1/indicateurs/effectifs`, {
+        params: convertEffectifsFiltersToQuery(effectifsFilters),
+      }),
+    {
+      enabled: router.isReady,
+    }
   );
 
   const indicateursEffectifsNationaux = useMemo(
     () =>
-      (indicateursEffectifsAvecDepartement ?? []).reduce(
+      (indicateursEffectifsAvecDepartementFiltres ?? []).reduce(
         (acc, indicateursDepartement) => {
           acc.apprenants += indicateursDepartement.apprenants;
           acc.apprentis += indicateursDepartement.apprentis;
@@ -45,16 +106,24 @@ const NewDashboardTransverse = () => {
           rupturants: 0,
         }
       ),
-    [indicateursEffectifsAvecDepartement]
+    [indicateursEffectifsAvecDepartementFiltres]
   );
 
   const { data: indicateursOrganismesAvecDepartement } = useQuery<IndicateursOrganismesAvecDepartement[]>(
     ["indicateurs/organismes"],
-    () =>
-      _get(`/api/v1/indicateurs/organismes`, {
-        params: {},
-      }) // TODO filtres
+    () => _get(`/api/v1/indicateurs/organismes`)
   );
+
+  function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
+    router.push(
+      {
+        pathname: router.pathname,
+        query: convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }) as any,
+      },
+      undefined,
+      { shallow: true }
+    );
+  }
 
   return (
     <Box>
@@ -82,13 +151,28 @@ const NewDashboardTransverse = () => {
           Aperçu des données de l’apprentissage
         </Heading>
         <Text fontSize={14} fontWeight="bold" mt="8">
-          Dans votre territoire, le DATE. {/* FIXME récupérer la date du filtre */}
+          Dans votre territoire, le {formatDate(effectifsFilters.date, "dd MMMM yyyy")}.
         </Text>
         <Text fontSize={14}>
           Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
           ne transmettent pas encore leurs données au tableau de bord.
         </Text>
-        <Box>Filtrer par...</Box>
+        <HStack mt={8}>
+          <Box>Filtrer par</Box>
+          <TerritoireFilter
+            value={{
+              regions: effectifsFilters.organisme_regions,
+              departements: effectifsFilters.organisme_departements,
+              academies: effectifsFilters.organisme_academies,
+              bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
+            }}
+            onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
+            onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
+            onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
+            onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
+          />
+          <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} />
+        </HStack>
 
         {indicateursEffectifsNationaux && <IndicateursGrid indicateursEffectifs={indicateursEffectifsNationaux} />}
 

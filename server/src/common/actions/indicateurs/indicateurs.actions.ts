@@ -5,7 +5,10 @@ import {
   effectifsFiltersConfigurations,
   organismesFiltersConfigurations,
 } from "@/common/actions/helpers/filters";
-import { getIndicateursRestriction, getOrganismeRestriction } from "@/common/actions/helpers/permissions";
+import {
+  getIndicateursEffectifsRestriction,
+  getIndicateursOrganismesRestriction,
+} from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -21,7 +24,7 @@ export async function getIndicateursEffectifsParDepartement(
       {
         $match: {
           ...buildMongoFilters(filters, effectifsFiltersConfigurations),
-          ...(await getIndicateursRestriction(ctx)),
+          ...(await getIndicateursEffectifsRestriction(ctx)),
           annee_scolaire: {
             $in: ["2023-2023", "2022-2023"],
           },
@@ -187,7 +190,7 @@ export async function getIndicateursOrganismesParDepartement(
       {
         $match: {
           ...buildMongoFilters(filters, organismesFiltersConfigurations),
-          ...(await getOrganismeRestriction(ctx)),
+          ...(await getIndicateursOrganismesRestriction(ctx)),
           est_dans_le_referentiel: true,
         },
       },

@@ -63,10 +63,41 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
   }
 }
 
+export async function getIndicateursOrganismesRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+      return {
+        _id: {
+          $in: linkedOrganismesIds,
+        },
+      };
+    }
+    case "TETE_DE_RESEAU":
+      return {
+        reseaux: organisation.reseau,
+      };
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return {};
+  }
+}
+
 /**
  * Restriction pour accéder aux indicateurs agrégés
  */
-export async function getIndicateursRestriction(ctx: AuthContext): Promise<any> {
+export async function getIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":

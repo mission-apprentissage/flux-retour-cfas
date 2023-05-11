@@ -27,13 +27,6 @@ export type EffectifsFiltersWithRestriction = LegacyEffectifsFilters & {
   restrictionMongo?: any; // dirty, en attendant des routes propres
 };
 
-export interface FilterConfiguration {
-  matchKey: string;
-
-  // optional transformer
-  transformValue?: (value: any) => any;
-}
-
 export type LegacyFilterConfigurations = { [key in keyof LegacyEffectifsFilters]: FilterConfiguration };
 
 export const organismeLookup = {
@@ -95,11 +88,39 @@ export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRest
   ];
 }
 
-// dashboard simplifié
+export interface FilterConfiguration {
+  matchKey: string;
+
+  // optional transformer
+  transformValue?: (value: any) => any;
+}
+
+export const organismesFiltersSchema = {
+  organisme_regions: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  organisme_academies: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+};
+
+export type OrganismesFilters = z.infer<z.ZodObject<typeof organismesFiltersSchema>>;
+
+export const organismesFiltersConfigurations: { [key in keyof Required<OrganismesFilters>]: FilterConfiguration } = {
+  organisme_departements: {
+    matchKey: "adresse.departement",
+    transformValue: (value) => ({ $in: value }),
+  },
+  organisme_regions: {
+    matchKey: "adresse.region",
+    transformValue: (value) => ({ $in: value }),
+  },
+  organisme_academies: {
+    matchKey: "adresse.academie",
+    transformValue: (value) => ({ $in: value }),
+  },
+};
+
 export const effectifsFiltersSchema = {
   date: z.preprocess((str: any) => new Date(str), z.date()),
-  organisme_region: z.string().optional(),
-  organisme_departement: z.string().optional(),
+  ...organismesFiltersSchema,
 };
 
 export type EffectifsFilters = z.infer<z.ZodObject<typeof effectifsFiltersSchema>>;
@@ -107,30 +128,19 @@ export type EffectifsFilters = z.infer<z.ZodObject<typeof effectifsFiltersSchema
 export const effectifsFiltersConfigurations: { [key in keyof Required<EffectifsFilters>]: FilterConfiguration } = {
   date: {
     matchKey: "annee_scolaire",
-    transformValue: (date) => ({ $in: getAnneesScolaireListFromDate(date) }),
+    transformValue: (value) => ({ $in: getAnneesScolaireListFromDate(value) }),
   },
-  organisme_departement: {
+  organisme_departements: {
     matchKey: "_computed.organisme.departement",
+    transformValue: (value) => ({ $in: value }),
   },
-  organisme_region: {
+  organisme_regions: {
     matchKey: "_computed.organisme.region",
+    transformValue: (value) => ({ $in: value }),
   },
-};
-
-// dashboard simplifié
-export const organismesFiltersSchema = {
-  organisme_region: z.string().optional(),
-  organisme_departement: z.string().optional(),
-};
-
-export type OrganismesFilters = z.infer<z.ZodObject<typeof organismesFiltersSchema>>;
-
-export const organismesFiltersConfigurations: { [key in keyof Required<OrganismesFilters>]: FilterConfiguration } = {
-  organisme_departement: {
-    matchKey: "adresse.departement",
-  },
-  organisme_region: {
-    matchKey: "adresse.region",
+  organisme_academies: {
+    matchKey: "_computed.organisme.academie",
+    transformValue: (value) => ({ $in: value }),
   },
 };
 

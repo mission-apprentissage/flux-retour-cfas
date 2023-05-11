@@ -45,6 +45,8 @@ const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key]
   relatedFormations: [],
   created_at: new Date("2023-04-12T18:00:00.000Z"),
   updated_at: new Date("2023-04-12T18:00:00.000Z"),
+  est_dans_le_referentiel: true,
+  last_transmission_date: new Date("2023-04-15T18:00:00.000Z"),
 };
 
 export const organismes: WithId<Organisme>[] = [
