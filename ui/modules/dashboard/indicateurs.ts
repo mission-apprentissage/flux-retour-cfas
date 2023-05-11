@@ -40,30 +40,6 @@ export function calculateBins(data: number[], numberOfBuckets: number, minColor:
   });
 }
 
-export function colorData<Data extends { value: number }>(
-  data: Data[],
-  numberOfBuckets: number,
-  minColor: string,
-  maxColor: string
-): (Data & {
-  color: string;
-})[] {
-  // Étape 1 : Calculer les bins avec les couleurs associées
-  const bins = calculateBins(
-    data.map((v) => v.value),
-    numberOfBuckets,
-    minColor,
-    maxColor
-  );
-
-  return [...data]
-    .sort((a, b) => a.value - b.value)
-    .map((d) => ({
-      ...d,
-      color: (bins.find((bin) => d.value >= bin.minValue) as Bin).color,
-    }));
-}
-
 // Fonction pour interpoler les couleurs
 function interpolateColor(color1: string, color2: string, ratio: number): string {
   const r = Math.ceil(parseInt(color1.slice(1, 3), 16) * (1 - ratio) + parseInt(color2.slice(1, 3), 16) * ratio);

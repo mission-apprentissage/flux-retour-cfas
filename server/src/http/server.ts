@@ -21,7 +21,11 @@ import { sendForgotPasswordRequest, register, activateUser } from "@/common/acti
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
 import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
 import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions";
-import { indicateursFiltersSchema, legacyEffectifsFiltersSchema } from "@/common/actions/helpers/filters";
+import {
+  effectifsFiltersSchema,
+  legacyEffectifsFiltersSchema,
+  organismesFiltersSchema,
+} from "@/common/actions/helpers/filters";
 import {
   getIndicateursEffectifsParDepartement,
   getIndicateursOrganismesParDepartement,
@@ -500,14 +504,14 @@ function setupRoutes(app: Application) {
     .get(
       "/api/v1/indicateurs/effectifs",
       returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, indicateursFiltersSchema);
+        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
         return await getIndicateursEffectifsParDepartement(req.user, filters);
       })
     )
     .get(
       "/api/v1/indicateurs/organismes",
       returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, indicateursFiltersSchema);
+        const filters = await validateFullZodObjectSchema(req.query, organismesFiltersSchema);
         return await getIndicateursOrganismesParDepartement(req.user, filters);
       })
     );

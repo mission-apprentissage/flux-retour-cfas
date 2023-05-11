@@ -27,15 +27,6 @@ export type EffectifsFiltersWithRestriction = LegacyEffectifsFilters & {
   restrictionMongo?: any; // dirty, en attendant des routes propres
 };
 
-// dashboard simplifié
-export const indicateursFiltersSchema = {
-  date: z.preprocess((str: any) => new Date(str), z.date()),
-  organisme_region: z.string().optional(),
-  organisme_departement: z.string().optional(),
-};
-
-export type IndicateursFilters = z.infer<z.ZodObject<typeof indicateursFiltersSchema>>;
-
 export interface FilterConfiguration {
   matchKey: string;
 
@@ -43,7 +34,7 @@ export interface FilterConfiguration {
   transformValue?: (value: any) => any;
 }
 
-export type FilterConfigurations = { [key in keyof LegacyEffectifsFilters]: FilterConfiguration };
+export type LegacyFilterConfigurations = { [key in keyof LegacyEffectifsFilters]: FilterConfiguration };
 
 export const organismeLookup = {
   from: "organismes",
@@ -51,7 +42,7 @@ export const organismeLookup = {
   foreignField: "_id",
   as: "organisme",
 };
-const filtersConfigurations: FilterConfigurations = {
+const legacyFiltersConfigurations: LegacyFilterConfigurations = {
   date: {
     matchKey: "annee_scolaire",
     transformValue: (date) => ({ $in: getAnneesScolaireListFromDate(date) }),
@@ -86,7 +77,7 @@ const filtersConfigurations: FilterConfigurations = {
 export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRestriction) {
   const matchFilters = {};
   for (const [filterName, filterValue] of Object.entries(filters)) {
-    const filterConfiguration = filtersConfigurations[filterName];
+    const filterConfiguration = legacyFiltersConfigurations[filterName];
     if (!filterConfiguration) {
       // allow unknown fields, we only care about those we know
       continue;
@@ -102,4 +93,54 @@ export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRest
     },
     { $match: filters.restrictionMongo ? filters.restrictionMongo : {} },
   ];
+}
+
+// dashboard simplifié
+export const effectifsFiltersSchema = {
+  date: z.preprocess((str: any) => new Date(str), z.date()),
+  organisme_region: z.string().optional(),
+  organisme_departement: z.string().optional(),
+};
+
+export type EffectifsFilters = z.infer<z.ZodObject<typeof effectifsFiltersSchema>>;
+
+export const effectifsFiltersConfigurations: { [key in keyof Required<EffectifsFilters>]: FilterConfiguration } = {
+  date: {
+    matchKey: "annee_scolaire",
+    transformValue: (date) => ({ $in: getAnneesScolaireListFromDate(date) }),
+  },
+  organisme_departement: {
+    matchKey: "_computed.organisme.departement",
+  },
+  organisme_region: {
+    matchKey: "_computed.organisme.region",
+  },
+};
+
+// dashboard simplifié
+export const organismesFiltersSchema = {
+  organisme_region: z.string().optional(),
+  organisme_departement: z.string().optional(),
+};
+
+export type OrganismesFilters = z.infer<z.ZodObject<typeof organismesFiltersSchema>>;
+
+export const organismesFiltersConfigurations: { [key in keyof Required<OrganismesFilters>]: FilterConfiguration } = {
+  organisme_departement: {
+    matchKey: "adresse.departement",
+  },
+  organisme_region: {
+    matchKey: "adresse.region",
+  },
+};
+
+export function buildMongoFilters<
+  Filters extends { [s: string]: any },
+  FiltersConfiguration = { [key in keyof Required<OrganismesFilters>]: FilterConfiguration }
+>(filters: Filters, filtersConfiguration: FiltersConfiguration): object {
+  return Object.entries(filters).reduce((matchFilters, [filterName, filterValue]) => {
+    const filterConfiguration = filtersConfiguration[filterName];
+    matchFilters[filterConfiguration.matchKey] = filterConfiguration.transformValue?.(filterValue) ?? filterValue;
+    return matchFilters;
+  }, {});
 }

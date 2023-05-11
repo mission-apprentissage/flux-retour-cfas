@@ -52,9 +52,7 @@ const NewDashboardTransverse = () => {
     ["indicateurs/organismes"],
     () =>
       _get(`/api/v1/indicateurs/organismes`, {
-        params: {
-          date: "2023-05-09",
-        },
+        params: {},
       }) // TODO filtres
   );
 

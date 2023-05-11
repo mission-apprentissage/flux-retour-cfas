@@ -1,4 +1,10 @@
-import { IndicateursFilters } from "@/common/actions/helpers/filters";
+import {
+  EffectifsFilters,
+  OrganismesFilters,
+  buildMongoFilters,
+  effectifsFiltersConfigurations,
+  organismesFiltersConfigurations,
+} from "@/common/actions/helpers/filters";
 import { getIndicateursRestriction, getOrganismeRestriction } from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
@@ -6,21 +12,16 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDepartement } from "./indicateurs";
 
-// TODO ajouter les filtres
 export async function getIndicateursEffectifsParDepartement(
   ctx: AuthContext,
-  filters: IndicateursFilters
+  filters: EffectifsFilters
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
-  // amend filters with a restriction
-  const restrictionMongo = await getIndicateursRestriction(ctx);
-
-  // TODO filtrer
-
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
-          ...restrictionMongo,
+          ...buildMongoFilters(filters, effectifsFiltersConfigurations),
+          ...(await getIndicateursRestriction(ctx)),
           annee_scolaire: {
             $in: ["2023-2023", "2022-2023"],
           },
@@ -179,19 +180,14 @@ export async function getIndicateursEffectifsParDepartement(
 
 export async function getIndicateursOrganismesParDepartement(
   ctx: AuthContext,
-  _filters: IndicateursFilters
+  filters: OrganismesFilters
 ): Promise<IndicateursOrganismesAvecDepartement[]> {
-  // amend filters with a restriction
-  const restrictionMongo = await getOrganismeRestriction(ctx);
-
-  // TODO filtrer par date avec les effectifs... ?
-
   const indicateurs = (await organismesDb()
     .aggregate([
       {
         $match: {
-          ...restrictionMongo,
-          // ...filters,
+          ...buildMongoFilters(filters, organismesFiltersConfigurations),
+          ...(await getOrganismeRestriction(ctx)),
           est_dans_le_referentiel: true,
         },
       },

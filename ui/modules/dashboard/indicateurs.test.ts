@@ -1,4 +1,4 @@
-import { calculateBins, colorData } from "./indicateurs";
+import { calculateBins } from "./indicateurs";
 
 const indicateurs = [
   1702, 123, 2227, 358, 51578, 32207, 2854, 38000, 44141, 24402, 36607, 31911, 33343, 40441, 28745, 747, 15976, 33456,
@@ -62,35 +62,3 @@ describe("calculateBins()", () => {
     ]);
   });
 });
-
-// describe("colorData()", () => {
-//   it("assigne la bonne couleur", () => {
-//     expect(
-//       colorData(
-//         indicateurs.map((value) => ({ value })),
-//         5,
-//         "#000000",
-//         "#ff0000"
-//       )
-//     ).toStrictEqual([
-//       { value: 123, color: "#000000" },
-//       { value: 358, color: "#000000" },
-//       { value: 747, color: "#000000" },
-//       { value: 1702, color: "#000000" },
-//       { value: 2227, color: "#000000" },
-//       { value: 2854, color: "#000000" },
-//       { value: 15976, color: "#400000" },
-//       { value: 24402, color: "#800000" },
-//       { value: 28745, color: "#800000" },
-//       { value: 31911, color: "#c00000" },
-//       { value: 32207, color: "#c00000" },
-//       { value: 33343, color: "#c00000" },
-//       { value: 33456, color: "#c00000" },
-//       { value: 36607, color: "#c00000" },
-//       { value: 38000, color: "#c00000" },
-//       { value: 40441, color: "#c00000" },
-//       { value: 44141, color: "#f00000" },
-//       { value: 51578, color: "#f00000" },
-//     ]);
-//   });
-// });
