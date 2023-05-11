@@ -89,7 +89,7 @@ export const schema = object(
     ...internalFields,
   },
   {
-    required: ["source"],
+    required: ["source", "created_at"],
     additionalProperties: true,
   }
 );

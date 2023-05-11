@@ -140,26 +140,21 @@ describe("Test des actions Organismes", () => {
 
     it("returns created organisme when valid with UAI & SIRET & API Calls", async () => {
       const dataFromApiEntreprise = await getOrganismeInfosFromSiret(sampleOrganismeWithUAI.siret);
-      try {
-        const organisme = await createOrganisme({
-          ...sampleOrganismeWithUAI,
-          ...dataFromApiEntreprise,
-        });
-        await updateOrganismeFromApis(organisme);
-        const created = await findOrganismeById(organisme._id);
 
-        expect(created).toStrictEqual({
-          ...sampleOrganismeWithUAIOutput,
-          ...fieldsAddedByApiCalls,
-          _id: expect.anything(),
-          created_at: expect.anything(),
-          updated_at: expect.anything(),
-        });
-      } catch (err) {
-        console.log(JSON.stringify(err, null, 2));
+      const organisme = await createOrganisme({
+        ...sampleOrganismeWithUAI,
+        ...dataFromApiEntreprise,
+      });
+      await updateOrganismeFromApis(organisme);
+      const created = await findOrganismeById(organisme._id);
 
-        throw err;
-      }
+      expect(created).toStrictEqual({
+        ...sampleOrganismeWithUAIOutput,
+        ...fieldsAddedByApiCalls,
+        _id: expect.anything(),
+        created_at: expect.anything(),
+        updated_at: expect.anything(),
+      });
     });
 
     it("returns created organisme when valid with SIRET & no UAI & API Calls", async () => {

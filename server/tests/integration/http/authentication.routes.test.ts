@@ -63,9 +63,7 @@ describe("Authentification", () => {
       assert.match(cookie, /^flux-retour-cfas-/);
 
       response = await httpClient.get("/api/v1/session", {
-        headers: {
-          cookie: cookie,
-        },
+        headers: { cookie },
       });
       assert.strictEqual(response.status, 200);
       assert.deepStrictEqual(response.data, {

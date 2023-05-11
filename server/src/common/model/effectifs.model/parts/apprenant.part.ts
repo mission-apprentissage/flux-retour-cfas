@@ -7,6 +7,8 @@ import { CODE_POSTAL_PATTERN, INE_REGEX_PATTERN } from "@/common/constants/valid
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 import { object, string, date, integer, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
 
+import { Effectif } from "../../@types";
+
 export const apprenantSchema = object(
   {
     ine: string({
@@ -184,7 +186,7 @@ export const apprenantSchema = object(
 );
 
 // Default value
-export function defaultValuesApprenant() {
+export function defaultValuesApprenant(): { historique_statut: Effectif["apprenant"]["historique_statut"] } {
   return {
     historique_statut: [],
   };

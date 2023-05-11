@@ -46,7 +46,7 @@ export const formationEffectifSchema = object(
 );
 
 // Default value
-export function defaultValuesFormationEffectif() {
+export function defaultValuesFormationEffectif(): { periode: number[] } {
   return {
     periode: [],
   };

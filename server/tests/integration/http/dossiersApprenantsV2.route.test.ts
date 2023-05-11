@@ -212,7 +212,7 @@ describe("Dossiers Apprenants Route", () => {
             source: "userApi",
             validation_errors: [
               {
-                message: "Format invalide",
+                message: "Date invalide",
                 path: ["date_de_naissance_apprenant"],
               },
               {

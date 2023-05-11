@@ -1,9 +1,12 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import { PartialDeep } from "type-fest";
 
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN, YEAR_RANGE_PATTERN } from "@/common/constants/validations";
 import { object, objectId, string, date, boolean, arrayOf, any } from "@/common/model/json-schema/jsonSchemaTypes";
+
+import { Effectif } from "../@types";
 
 import { apprenantSchema, defaultValuesApprenant } from "./parts/apprenant.part";
 import { contratSchema } from "./parts/contrat.part";
@@ -157,9 +160,10 @@ export function defaultValuesEffectif() {
     formation: defaultValuesFormationEffectif(),
     is_lock: defaultValuesEffectifFieldsLocker(),
     validation_errors: [],
+    _computed: {},
     updated_at: new Date(),
     created_at: new Date(),
-  };
+  } satisfies PartialDeep<Effectif>;
 }
 
 export default { schema, indexes, collectionName };

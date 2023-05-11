@@ -102,7 +102,7 @@ export interface EffectifsQueue {
   /**
    * Date d'ajout en base de données
    */
-  created_at?: Date;
+  created_at: Date;
   /**
    * Date de process des données
    */

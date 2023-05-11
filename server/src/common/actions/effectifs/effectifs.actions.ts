@@ -13,7 +13,7 @@ import {
   getIndicateursRestriction,
   requireOrganismeIndicateursAccess,
 } from "@/common/actions/helpers/permissions";
-import { DEPARTEMENTS_BY_ID } from "@/common/constants/territoires";
+import { DEPARTEMENTS_BY_CODE } from "@/common/constants/territoires";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
@@ -358,7 +358,7 @@ export const getEffectifsCountByDepartementAtDate = async (ctx: AuthContext, fil
 
   return effectifsCountByDepartement.map(({ _id: codeDepartement, ...effectifs }: any) => ({
     etablissement_num_departement: codeDepartement,
-    etablissement_nom_departement: DEPARTEMENTS_BY_ID[codeDepartement]?.nom || "Inconnu",
+    etablissement_nom_departement: DEPARTEMENTS_BY_CODE[codeDepartement]?.nom || "Inconnu",
     effectifs: {
       apprentis: effectifs.apprentis || 0,
       inscritsSansContrat: effectifs.inscritsSansContrat || 0,

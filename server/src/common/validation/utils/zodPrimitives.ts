@@ -4,7 +4,14 @@ import { capitalize } from "lodash-es";
 import { z } from "zod";
 
 import { CODES_STATUT_APPRENANT_ENUM, SEXE_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
-import { CFD_REGEX, RNCP_REGEX, SIRET_REGEX, UAI_REGEX, YEAR_RANGE_REGEX } from "@/common/constants/validations";
+import {
+  CFD_REGEX,
+  CODE_NAF_REGEX,
+  RNCP_REGEX,
+  SIRET_REGEX,
+  UAI_REGEX,
+  YEAR_RANGE_REGEX,
+} from "@/common/constants/validations";
 
 import { telephoneConverter } from "./frenchTelephoneNumber";
 
@@ -36,24 +43,33 @@ const extensions = {
     ),
   siret: () => z.string().trim().regex(SIRET_REGEX, "SIRET invalide"), // e.g 01234567890123
   uai: () => z.string().trim().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
+  code_naf: () =>
+    z.preprocess(
+      (v: any) => (typeof v === "string" ? v.replace(".", "") : v), // parfois, le code naf contient un point
+      z.string().trim().toUpperCase().regex(CODE_NAF_REGEX, "UAI invalide") // e.g 1071D
+    ),
   iso8601Date: () =>
     z
-      .string()
-      .trim()
-      .regex(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/, "Format invalide") // make sure the passed date contains at least YYYY-MM-DD
-      .transform((v) => new Date(v))
-      .pipe(z.date())
+      .preprocess(
+        (v: any) => (typeof v === "string" && v.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/) ? new Date(v.trim()) : v),
+        z.date({
+          invalid_type_error: "Date invalide",
+          required_error: "Champ obligatoire",
+        })
+      )
       .openapi({
         type: "string",
         format: "YYYY-MM-DD",
       }),
   iso8601Datetime: () =>
     z
-      .string()
-      .trim()
-      .datetime("Format invalide")
-      .transform((v) => new Date(v))
-      .pipe(z.coerce.date())
+      .preprocess(
+        (v: any) => (typeof v === "string" && v.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/) ? new Date(v.trim()) : v),
+        z.date({
+          invalid_type_error: "Date invalide",
+          required_error: "Champ obligatoire",
+        })
+      )
       .openapi({
         type: "string",
         format: "YYYY-MM-DD00:00:00Z",
@@ -147,26 +163,27 @@ export const primitivesV1 = {
         examples: ["RNCP35316", "35316"],
       }),
     code_cfd: z.string().trim().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
+      example: "50022141",
       description: "Code Formation Diplôme (CFD)", // aussi appelé id_formation
     }),
-    libelle_court: z.string().trim().describe("Libellé court de la formation").openapi({
+    libelle_court: z.string().trim().min(2).describe("Libellé court de la formation").openapi({
       description: "Libellé court de la formation",
       example: "CAP PATISSIER",
     }),
-    libelle_long: z.string().trim().describe("Libellé complet de la formation").openapi({
+    libelle_long: z.string().min(2).trim().describe("Libellé complet de la formation").openapi({
       example: "CAP PATISSIER",
     }),
     periode: z
-      .string()
-      .trim()
-      .regex(YEAR_RANGE_REGEX, "Format invalide")
+      .preprocess(
+        // periode is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020,2022]
+        (v: any) => (typeof v === "string" ? v.trim().split("-").map(Number) : v),
+        z.array(z.number().int().min(2000).max(2100)).length(2)
+      )
       .describe("Période de la formation, en année (peut être sur plusieurs années)")
-      // periode is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020,2022]
-      .transform((v) => (v ? v.split("-").map(Number) : []))
       .openapi({
         type: "string",
-        example: `${currentYear - 2}-${currentYear + 1}`,
-      } as any),
+        example: `${currentYear - 2}-${currentYear + 1}` as any,
+      }),
     annee_scolaire: z
       .string()
       .trim()
@@ -174,8 +191,8 @@ export const primitivesV1 = {
       .describe("Période scolaire")
       .openapi({
         type: "string",
-        examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`],
-      } as any),
+        examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`] as any,
+      }),
     annee: z
       .preprocess((v: any) => v?.toString().trim(), z.string())
       .describe("Année de la formation")
@@ -306,6 +323,6 @@ export const primitivesV3 = {
     code_commune_insee: extensions
       .codeCommuneInsee()
       .describe("Code Insee de la commune de l'établissement de l'employeur"),
-    code_naf: z.string().length(5, "Format invalide").describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
+    code_naf: extensions.code_naf().describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
   },
 };

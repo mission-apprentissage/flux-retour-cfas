@@ -7,7 +7,7 @@ import { createOrganisme } from "@/common/actions/organismes/organismes.actions"
 import { effectifsV3QueueDb, usersDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { createRandomDossierApprenantApiV3Input, createRandomOrganisme } from "@tests/data/randomizedSample";
-import { initTestApp } from "@tests/utils/testUtils";
+import { initTestApp, generate } from "@tests/utils/testUtils";
 
 const user = {
   name: "userApi",
@@ -34,16 +34,14 @@ const getJwtForUser = async (httpClient) => {
 let httpClient: AxiosInstance;
 
 describe("Dossiers Apprenants Route V3", () => {
-  beforeEach(async () => {
-    const app = await initTestApp();
-    httpClient = app.httpClient;
-  });
-
   const uai = "0802004U";
   const siret = "77937827200016";
   let randomOrganisme;
 
   beforeEach(async () => {
+    const app = await initTestApp();
+    httpClient = app.httpClient;
+
     // Create organisme
     randomOrganisme = createRandomOrganisme({ uai, siret });
 
@@ -109,28 +107,22 @@ describe("Dossiers Apprenants Route V3", () => {
   it("L'erreur d'ajout via route pour un trop grande nb de données randomisées (>100)", async () => {
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
-
     const nbItemsToTest = 200;
 
-    // Create input list with uai / siret for organisme created
-    let inputList: any[] = [];
-    for (let index = 0; index < nbItemsToTest; index++) {
-      inputList.push(
+    const response = await httpClient.post(
+      API_ENDPOINT_URL,
+      generate(nbItemsToTest, () =>
         createRandomDossierApprenantApiV3Input({
           etablissement_responsable: {
             uai,
             siret,
           },
         })
-      );
-    }
-
-    // Call Api Route
-    const response = await httpClient.post(API_ENDPOINT_URL, inputList, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+      ),
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
 
     // Check Api Route data & Data not added
     expect(response.status).toBe(413);
@@ -142,24 +134,21 @@ describe("Dossiers Apprenants Route V3", () => {
     const accessToken = await getJwtForUser(httpClient);
     const nbItemsToTest = 20;
 
-    // Create input list with uai / siret for organisme created
-    let inputList: any[] = [];
-    for (let index = 0; index < nbItemsToTest; index++) {
-      const dossier = createRandomDossierApprenantApiV3Input({
-        etablissement_responsable: {
-          uai,
-          siret,
-        },
-      });
-      inputList.push(dossier);
-    }
-
     // Call Api Route
-    const response = await httpClient.post(API_ENDPOINT_URL, inputList, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const response = await httpClient.post(
+      API_ENDPOINT_URL,
+      generate(nbItemsToTest, () =>
+        createRandomDossierApprenantApiV3Input({
+          etablissement_responsable: {
+            uai,
+            siret,
+          },
+        })
+      ),
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
     // Check Api Response
     expect(response.status).toBe(200);
     assert.equal(response.data.status, "OK");
@@ -196,6 +185,7 @@ describe("Dossiers Apprenants Route V3", () => {
     });
     // Check Api Response
     expect(response.status).toBe(200);
+
     expect(response.data).toMatchObject({
       status: "OK",
       message: "Queued",
@@ -206,7 +196,7 @@ describe("Dossiers Apprenants Route V3", () => {
           source: "userApi",
           validation_errors: [
             {
-              message: "Format invalide",
+              message: "Date invalide",
               path: ["apprenant", "date_de_naissance"],
             },
             {
@@ -214,7 +204,7 @@ describe("Dossiers Apprenants Route V3", () => {
               path: ["apprenant", "telephone"],
             },
             {
-              message: "Format invalide",
+              message: "Date invalide",
               path: ["apprenant", "date_rqth"],
             },
             {
@@ -222,7 +212,7 @@ describe("Dossiers Apprenants Route V3", () => {
               path: ["employeur", "code_commune_insee"],
             },
             {
-              message: "Format invalide",
+              message: "UAI invalide",
               path: ["employeur", "code_naf"],
             },
           ],

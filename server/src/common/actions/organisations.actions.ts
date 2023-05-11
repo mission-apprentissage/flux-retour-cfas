@@ -2,7 +2,7 @@ import Boom from "boom";
 import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 
-import { REGIONS_BY_ID, DEPARTEMENTS_BY_ID, ACADEMIES_BY_ID } from "@/common/constants/territoires";
+import { REGIONS_BY_ID, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_ID } from "@/common/constants/territoires";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { UsersMigration } from "@/common/model/@types/UsersMigration";
@@ -278,7 +278,7 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
     case "CONSEIL_REGIONAL":
       return `Conseil régional ${REGIONS_BY_ID[organisation.code_region]?.nom}`;
     case "DDETS":
-      return `DDETS ${DEPARTEMENTS_BY_ID[organisation.code_departement]?.nom}`;
+      return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom}`;
     case "ACADEMIE":
       return `Académie ${ACADEMIES_BY_ID[organisation.code_academie]?.nom}`;
 

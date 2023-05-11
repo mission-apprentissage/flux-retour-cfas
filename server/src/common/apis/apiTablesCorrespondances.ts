@@ -1,6 +1,7 @@
 import logger from "@/common/logger";
 import config from "@/config";
 
+import TabCoCodePostalInfo from "./@types/TabCoCodePostalInfo";
 import getApiClient from "./client";
 
 // Cf Documentation : https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
@@ -27,12 +28,8 @@ export const getCfdInfo = async (cfd) => {
   }
 };
 
-/**
- *
- * @param {string} codePostal
- * @returns {Promise<import("./@types/TabCoCodePostalInfo.js").default|null>}
- */
-export const getCodePostalInfo = async (codePostal) => {
+export const getCodePostalInfo = async (codePostal: string | null | undefined): Promise<TabCoCodePostalInfo | null> => {
+  if (!codePostal) return null;
   try {
     const { data } = await client.post("/code-postal", { codePostal });
     return data;

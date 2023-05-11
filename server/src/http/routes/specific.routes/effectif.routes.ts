@@ -183,9 +183,7 @@ export default () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
-      merge(effectifDb, {
-        ...stripEmptyFields(restData),
-      });
+      merge(effectifDb, stripEmptyFields(restData));
 
     // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
     if (dataToUpdate.formation.date_debut_formation)

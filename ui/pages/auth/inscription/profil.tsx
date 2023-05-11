@@ -26,7 +26,7 @@ import YupPassword from "yup-password";
 
 import { getOrganismeByUAIAndSIRET } from "@/common/api/tableauDeBord";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
-import { ACADEMIES_BY_ID, REGIONS_BY_ID, DEPARTEMENTS_BY_ID } from "@/common/constants/territoiresConstants";
+import { ACADEMIES_BY_CODE, REGIONS_BY_ID, DEPARTEMENTS_BY_CODE } from "@/common/constants/territoiresConstants";
 import { _get, _post } from "@/common/httpClient";
 import { Organisation } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -126,7 +126,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
                   <Text fontSize="20px" fontWeight="bold">
                     DDETS
                   </Text>
-                  <Text>Territoire : {DEPARTEMENTS_BY_ID[organisation.code_departement].nom}</Text>
+                  <Text>Territoire : {DEPARTEMENTS_BY_CODE[organisation.code_departement].nom}</Text>
                 </>
               );
 
@@ -136,7 +136,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
                   <Text fontSize="20px" fontWeight="bold">
                     Académie
                   </Text>
-                  <Text>Territoire : {ACADEMIES_BY_ID[organisation.code_academie].nom}</Text>
+                  <Text>Territoire : {ACADEMIES_BY_CODE[organisation.code_academie].nom}</Text>
                 </>
               );
 

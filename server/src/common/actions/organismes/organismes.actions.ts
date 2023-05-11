@@ -110,15 +110,7 @@ export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial
 /**
  * Création d'un objet organisme
  */
-export const structureOrganisme = async ({
-  uai,
-  siret,
-  nom,
-}: {
-  uai?: string | undefined;
-  siret?: string | undefined;
-  nom?: string;
-}) => {
+export const structureOrganisme = async <T extends Partial<Organisme>>({ uai, siret, nom }: T) => {
   let adresseForOrganisme = {};
   if (uai) {
     adresseForOrganisme = buildAdresseFromUai(uai);
@@ -261,8 +253,8 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
  * @param {*} organisme
  * @returns
  */
-export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) =>
-  organismesDb().findOneAndUpdate(
+export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) => {
+  const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
       $set: {
@@ -270,8 +262,14 @@ export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>
         last_transmission_date: new Date(),
         updated_at: new Date(),
       },
-    }
+    },
+    { returnDocument: "after" }
   );
+  if (!updated.value) {
+    throw new Error(`Could not set organisme transmission dates on organisme ${organisme._id.toString()}`);
+  }
+  return updated.value as WithId<Organisme>;
+};
 
 /**
  * Returns sous-établissements by siret for an uai
@@ -520,13 +518,11 @@ export const getDetailedOrganismeById = async (_id) => {
 
 /**
  * Met à jour le nombre d'effectifs d'un organisme
- * @param {*} _id
- * @returns
  */
-export const updateEffectifsCount = async (organisme_id) => {
-  const total = await effectifsDb().count({ organisme_id });
+export const updateEffectifsCount = async (organisme_id: ObjectId) => {
+  const total = await effectifsDb().countDocuments({ organisme_id });
   const currentYear = new Date().getFullYear();
-  const totalCurrentYear = await effectifsDb().count({
+  const totalCurrentYear = await effectifsDb().countDocuments({
     organisme_id,
     annee_scolaire: { $in: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`] },
   });

@@ -186,7 +186,7 @@ export interface EffectifsV3Queue {
   /**
    * Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)
    */
-  source?: string;
+  source: string;
   /**
    * Id de l'effectif associé
    */
@@ -198,7 +198,7 @@ export interface EffectifsV3Queue {
   /**
    * Date d'ajout en base de données
    */
-  created_at?: Date;
+  created_at: Date;
   /**
    * Date de process des données
    */

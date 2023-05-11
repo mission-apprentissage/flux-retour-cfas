@@ -2,31 +2,31 @@ import { isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
 
 import { Effectif } from "@/common/model/@types/Effectif";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
-import { defaultValuesApprenant } from "@/common/model/effectifs.model/parts/apprenant.part";
-import { defaultValuesFormationEffectif } from "@/common/model/effectifs.model/parts/formation.effectif.part";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { stripEmptyFields } from "@/common/utils/miscUtils";
+
+import { Organisme } from "../model/@types";
 
 import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions";
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters";
-import { getOrganismeById } from "./organismes/organismes.actions";
 
 /**
  * Méthode de build d'un effectif
- * @param {any} effectif
- * @returns
  */
-export const buildEffectif = (effectifData: Required<Effectif> & { organisme_id: ObjectId }) => {
+export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifData: T) => {
   const defaultValues = defaultValuesEffectif();
+  // note: I've tried to use ts-deepmerge, but typing doesn't work well
   return {
     ...defaultValues,
     ...effectifData,
     apprenant: {
       ...defaultValues.apprenant,
       ...effectifData.apprenant,
+    },
+    is_lock: {
+      ...defaultValues.is_lock,
+      ...effectifData.is_lock,
     },
     formation: {
       ...defaultValues.formation,
@@ -38,22 +38,16 @@ export const buildEffectif = (effectifData: Required<Effectif> & { organisme_id:
 /**
  * Méthode de création d'un effectif
  */
-export const createEffectif = async (dataEffectif: Required<Effectif> & { organisme_id: ObjectId }) => {
-  const dataToInsert = buildEffectif(dataEffectif);
+export const createEffectif = async <T extends Omit<Effectif, "organisme_id">>(
+  dataEffectif: T,
+  organisme: WithId<Organisme>
+) => {
+  const dataToInsert = mergeEffectifWithDefaults({
+    ...dataEffectif,
+    organisme_id: organisme._id,
+    _computed: addEffectifComputedFields(organisme),
+  });
 
-  const organisme = await getOrganismeById(dataEffectif.organisme_id);
-  if (organisme) {
-    dataToInsert._computed = {
-      organisme: {
-        ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
-        ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
-        ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
-        ...(organisme.uai ? { uai: organisme.uai } : {}),
-        ...(organisme.siret ? { siret: organisme.siret } : {}),
-        ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
-      },
-    };
-  }
   const { insertedId } = await effectifsDb().insertOne(dataToInsert);
 
   return insertedId;
@@ -66,78 +60,6 @@ export const createEffectif = async (dataEffectif: Required<Effectif> & { organi
 export const insertEffectif = async (data: Effectif) => {
   const { insertedId } = await effectifsDb().insertOne(data);
   return { _id: insertedId, ...data };
-};
-
-/**
- * Création d'un objet effectif depuis les données d'un dossierApprenant
- * @param {*} dossiersApprenant
- * @returns
- */
-export const structureEffectifFromDossierApprenant = (dossiersApprenant: EffectifsQueue) => {
-  const {
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-    id_formation: cfd,
-    formation_rncp: rncp,
-    libelle_long_formation: libelle_long,
-    periode_formation: periode,
-    annee_formation: annee,
-    code_commune_insee_apprenant,
-    contrat_date_debut,
-    contrat_date_fin,
-    contrat_date_rupture,
-    statut_apprenant,
-    date_metier_mise_a_jour_statut,
-    nom_apprenant: nom,
-    prenom_apprenant: prenom,
-    ine_apprenant: ine,
-    date_de_naissance_apprenant: date_de_naissance,
-    email_contact: courriel,
-    tel_apprenant: telephone,
-  } = dossiersApprenant;
-
-  return stripEmptyFields({
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-    apprenant: {
-      ...defaultValuesApprenant(),
-      historique_statut: [
-        {
-          valeur_statut: statut_apprenant,
-          date_statut: new Date(date_metier_mise_a_jour_statut),
-          date_reception: new Date(),
-        },
-      ],
-      ine,
-      nom,
-      prenom,
-      date_de_naissance,
-      courriel,
-      telephone,
-      adresse: { code_insee: code_commune_insee_apprenant },
-    },
-    // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
-    contrats:
-      contrat_date_debut || contrat_date_fin || contrat_date_rupture
-        ? [
-            stripEmptyFields({
-              date_debut: contrat_date_debut,
-              date_fin: contrat_date_fin,
-              date_rupture: contrat_date_rupture,
-            }),
-          ]
-        : [],
-    formation: {
-      ...defaultValuesFormationEffectif(),
-      cfd,
-      rncp,
-      libelle_long,
-      periode,
-      annee,
-    },
-  });
 };
 
 /**
@@ -280,4 +202,20 @@ export const getNbDistinctOrganismes = async (ctx: AuthContext, filters: LegacyE
     ])
     .toArray();
   return distinctOrganismes.length;
+};
+
+export const addEffectifComputedFields = (organisme: Organisme | null | undefined) => {
+  if (!organisme) {
+    return {};
+  }
+  return {
+    organisme: {
+      ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
+      ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
+      ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
+      ...(organisme.uai ? { uai: organisme.uai } : {}),
+      ...(organisme.siret ? { siret: organisme.siret } : {}),
+      ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
+    },
+  };
 };

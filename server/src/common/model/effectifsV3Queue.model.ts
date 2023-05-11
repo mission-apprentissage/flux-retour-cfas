@@ -115,6 +115,7 @@ export const schema = object(
     ...internalFields,
   },
   {
+    required: ["source", "created_at"],
     additionalProperties: true,
   }
 );
