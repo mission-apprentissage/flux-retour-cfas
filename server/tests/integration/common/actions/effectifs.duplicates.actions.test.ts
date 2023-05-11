@@ -3,11 +3,12 @@ import { strict as assert } from "assert";
 import { ObjectId } from "mongodb";
 
 import {
+  buildEffectifsDuplicatesForOrganismeId,
   getDuplicatesEffectifsForOrganismeId,
   getEffectifsDuplicatesFromSIREN,
 } from "@/common/actions/effectifs/effectifs.duplicates.actions";
 import { Organisme } from "@/common/model/@types";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDuplicatesGroupDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { id } from "@tests/utils/testUtils";
 
@@ -31,14 +32,19 @@ const sampleOrganisme2: Organisme = {
  * @param nbDuplicates
  */
 const insertDuplicateEffectifs = async (sampleEffectif, nbDuplicates = 2) => {
-  for (let index = 0; index < nbDuplicates; index++)
-    await effectifsDb().insertOne({ ...sampleEffectif, id_erp_apprenant: `ID_ERP_${index}` });
+  const insertedIdList: ObjectId[] = [];
+  for (let index = 0; index < nbDuplicates; index++) {
+    const { insertedId } = await effectifsDb().insertOne({ ...sampleEffectif, id_erp_apprenant: `ID_ERP_${index}` });
+    insertedIdList.push(insertedId);
+  }
+
+  return insertedIdList;
 };
 
 describe("Test des actions Effectifs Duplicates", () => {
   describe("getDuplicatesEffectifsForOrganismeId", () => {
     beforeEach(async () => {
-      // Création d'un organisme de test sans appels API externes
+      // Création d'un organisme de test
       await organismesDb().insertOne(sampleOrganisme);
     });
 
@@ -211,6 +217,46 @@ describe("Test des actions Effectifs Duplicates", () => {
 
       // Vérification de la récupération des doublons
       assert.equal(duplicates.length, 0);
+    });
+  });
+
+  describe("buildEffectifsDuplicatesForOrganismeId", () => {
+    beforeEach(async () => {
+      // Création d'un organisme de test
+      await organismesDb().insertOne(sampleOrganisme);
+    });
+
+    it("Permet de vérifier l'ajout à la collection effectifsDuplicatesGroup de doublons d'effectifs", async () => {
+      // Ajout de doublons d'effectifs à l'organisme & construction des doublons dans la collection effectifsDuplicatesGroup
+      const sampleEffectif = createSampleEffectif({ organisme: sampleOrganisme });
+      const insertedDuplicatesIds = await insertDuplicateEffectifs(sampleEffectif);
+      await buildEffectifsDuplicatesForOrganismeId(sampleOrganismeId);
+
+      const effectifsDuplicatesGroup = await effectifsDuplicatesGroupDb().find({}).toArray();
+
+      // Vérification de la récupération des doublons dans effectifsDuplicatesGroupDb
+      assert.equal(effectifsDuplicatesGroup.length, 1);
+      assert.deepStrictEqual(effectifsDuplicatesGroup[0].organisme_id, sampleOrganismeId);
+      assert.equal(effectifsDuplicatesGroup[0].duplicatesEffectifs?.length, 2);
+
+      for (let index = 0; index < insertedDuplicatesIds.length; index++) {
+        const currentDuplicateItem = effectifsDuplicatesGroup[0].duplicatesEffectifs[index];
+        assert.deepStrictEqual(currentDuplicateItem._id, insertedDuplicatesIds[index]);
+      }
+    });
+
+    it("Permet de vérifier le non ajout à la collection effectifsDuplicatesGroup de doublons d'effectifs sur un autre organisme", async () => {
+      // Ajout de doublons d'effectifs à l'organisme & construction des doublons dans la collection effectifsDuplicatesGroup
+      const sampleEffectif = createSampleEffectif({ organisme: sampleOrganisme });
+      await insertDuplicateEffectifs(sampleEffectif);
+      await buildEffectifsDuplicatesForOrganismeId(sampleOrganismeId);
+
+      const effectifsDuplicatesGroup = await effectifsDuplicatesGroupDb()
+        .find({ organisme_id: sampleOrganisme2Id })
+        .toArray();
+
+      // Vérification de la récupération des doublons dans effectifsDuplicatesGroupDb
+      assert.equal(effectifsDuplicatesGroup.length, 0);
     });
   });
 });

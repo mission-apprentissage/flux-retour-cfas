@@ -1,6 +1,88 @@
+import { PromisePool } from "@supercharge/promise-pool";
 import { ObjectId } from "mongodb";
 
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDuplicatesGroupDb } from "@/common/model/collections";
+import {
+  defaultValuesEffectifDuplicate,
+  defaultValuesEffectifDuplicatesGroup,
+} from "@/common/model/effectifsDuplicatesGroup.model";
+
+/**
+ * Méthode d'ajout à la collection des doublons d'effectifs de tous les doublons identifiés pour l'organisme spécifié
+ * @param organisme_id
+ */
+export const buildEffectifsDuplicatesForOrganismeId = async (organisme_id: ObjectId) => {
+  const duplicatesForOrganisme = await getDuplicatesEffectifsForOrganismeId(organisme_id);
+
+  // Pour chaque doublon on ajoute le groupe en base
+  await PromisePool.for(duplicatesForOrganisme).process(async (currentDuplicate) => {
+    await effectifsDuplicatesGroupDb().insertOne({
+      ...defaultValuesEffectifDuplicatesGroup(),
+      organisme_id,
+      duplicatesEffectifs: currentDuplicate.duplicatesIds.map((item) => ({
+        ...defaultValuesEffectifDuplicate(),
+        _id: item,
+      })),
+    });
+  });
+};
+
+/**
+ * Construction du pipeline d'aggregation du clean des noms / prenom pour identification des doublons
+ * @returns
+ */
+const getSanitizedNomPrenomPipeline = () => [
+  {
+    $addFields: {
+      sanitizedNom: { $regexFindAll: { input: { $toLower: "$apprenant.nom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+    },
+  },
+  {
+    $addFields: {
+      sanitizedPrenom: { $regexFindAll: { input: { $toLower: "$apprenant.prenom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+    },
+  },
+  {
+    $addFields: {
+      sanitizedNom: {
+        $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
+      },
+    },
+  },
+  {
+    $addFields: {
+      sanitizedPrenom: {
+        $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
+      },
+    },
+  },
+];
+
+/**
+ * Méthode de récupération de la liste des organismes ayant des doublons d'effectifs
+ * @param organisme_id
+ */
+export const getOrganismesHavingDuplicatesEffectifs = async () => {
+  return await effectifsDb()
+    .aggregate([
+      ...getSanitizedNomPrenomPipeline(),
+      {
+        $group: {
+          _id: {
+            nom_apprenant: "$sanitizedNom",
+            prenom_apprenant: "$sanitizedPrenom",
+            date_de_naissance_apprenant: "$apprenant.date_de_naissance",
+            annee_scolaire: "$annee_scolaire",
+            formation_cfd: "$formation.cfd",
+          },
+          count: { $sum: 1 },
+          organisme_id: { $addToSet: "$organisme_id" },
+        },
+      },
+      { $match: { count: { $gt: 1 } } },
+    ])
+    .toArray();
+};
 
 /**
  * Méthode de récupération de la liste des doublons au sein d'un organisme
@@ -80,30 +162,7 @@ export const getEffectifsDuplicatesFromSIREN = async (siren: string) => {
         },
       },
       { $match: { organisme_siren: siren } },
-      {
-        $addFields: {
-          sanitizedNom: { $regexFindAll: { input: { $toLower: "$nom_apprenant" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedPrenom: { $regexFindAll: { input: { $toLower: "$prenom_apprenant" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedNom: {
-            $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-          },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedPrenom: {
-            $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-          },
-        },
-      },
+      ...getSanitizedNomPrenomPipeline(),
       {
         $group: {
           _id: {
