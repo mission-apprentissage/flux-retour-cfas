@@ -81,6 +81,7 @@ services:
   smtp:
     image: axllent/mailpit:v1.5.5
     container_name: flux_retour_cfas_smtp
+    restart: unless-stopped
     mem_limit: 128m
     ports:
       - 1025:1025
