@@ -1,4 +1,4 @@
-import { Box, Center, Grid, GridItem, HStack, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
 import { formatNumber } from "@/common/utils/stringUtils";
@@ -48,8 +48,31 @@ function Card({ label, count, tooltipLabel, icon, big = false }: CardProps) {
 
 interface IndicateursGridProps {
   indicateursEffectifs: IndicateursEffectifs;
+  loading: boolean;
 }
-function IndicateursGrid({ indicateursEffectifs }: IndicateursGridProps) {
+function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps) {
+  if (loading) {
+    return (
+      <Grid h="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
+        <GridItem colSpan={2} rowSpan={2}>
+          <Skeleton w="100%" h="100%" startColor="grey.300" endColor="galt" />
+        </GridItem>
+        <GridItem colSpan={2}>
+          <Skeleton w="100%" h="100%" startColor="grey.300" endColor="galt" />
+        </GridItem>
+        <GridItem colSpan={2}>
+          <Skeleton w="100%" h="100%" startColor="grey.300" endColor="galt" />
+        </GridItem>
+        <GridItem colSpan={2}>
+          <Skeleton w="100%" h="100%" startColor="grey.300" endColor="galt" />
+        </GridItem>
+        <GridItem colSpan={2}>
+          <Skeleton w="100%" h="100%" startColor="grey.300" endColor="galt" />
+        </GridItem>
+      </Grid>
+    );
+  }
+
   return (
     <Grid h="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
       <GridItem bg="galt" colSpan={2} rowSpan={2}>

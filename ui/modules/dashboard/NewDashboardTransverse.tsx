@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Grid, GridItem, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Center, Container, Divider, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
@@ -88,7 +88,9 @@ const NewDashboardTransverse = () => {
     return filters;
   }, [router.query]);
 
-  const { data: indicateursEffectifsAvecDepartement } = useQuery<IndicateursEffectifsAvecDepartement[]>(
+  const { data: indicateursEffectifsAvecDepartement, isLoading: indicateursEffectifsAvecDepartementLoading } = useQuery<
+    IndicateursEffectifsAvecDepartement[]
+  >(
     ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString() })],
     () =>
       _get(`/api/v1/indicateurs/effectifs`, {
@@ -101,7 +103,10 @@ const NewDashboardTransverse = () => {
     }
   );
 
-  const { data: indicateursEffectifsAvecDepartementFiltres } = useQuery<IndicateursEffectifsAvecDepartement[]>(
+  const {
+    data: indicateursEffectifsAvecDepartementFiltres,
+    isLoading: indicateursEffectifsAvecDepartementFiltresLoading,
+  } = useQuery<IndicateursEffectifsAvecDepartement[]>(
     ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(effectifsFilters))],
     () =>
       _get(`/api/v1/indicateurs/effectifs`, {
@@ -134,10 +139,10 @@ const NewDashboardTransverse = () => {
     [indicateursEffectifsAvecDepartementFiltres]
   );
 
-  const { data: indicateursOrganismesAvecDepartement } = useQuery<IndicateursOrganismesAvecDepartement[]>(
-    ["indicateurs/organismes"],
-    () => _get(`/api/v1/indicateurs/organismes`)
-  );
+  const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
+    useQuery<IndicateursOrganismesAvecDepartement[]>(["indicateurs/organismes"], () =>
+      _get(`/api/v1/indicateurs/organismes`)
+    );
 
   function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
     router.push(
@@ -199,11 +204,18 @@ const NewDashboardTransverse = () => {
           <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} />
         </HStack>
 
-        {indicateursEffectifsNationaux && <IndicateursGrid indicateursEffectifs={indicateursEffectifsNationaux} />}
+        {indicateursEffectifsNationaux && (
+          <IndicateursGrid
+            indicateursEffectifs={indicateursEffectifsNationaux}
+            loading={indicateursEffectifsAvecDepartementFiltresLoading}
+          />
+        )}
 
         <Link href="/indicateurs" color="action-high-blue-france" textDecoration="underline">
           Explorer plus d’indicateurs
         </Link>
+
+        <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
 
         <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(2, 1fr)" gap={4} my={8}>
           <GridItem bg="galt" py="8" px="12">
@@ -211,6 +223,12 @@ const NewDashboardTransverse = () => {
               Répartition des effectifs dans votre territoire
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
+
+            {indicateursEffectifsAvecDepartementLoading && (
+              <Center h="100%">
+                <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
+              </Center>
+            )}
             {indicateursEffectifsAvecDepartement && (
               <CarteFrance
                 donneesAvecDepartement={indicateursEffectifsAvecDepartement}
@@ -239,6 +257,11 @@ const NewDashboardTransverse = () => {
               Taux de couverture des organismes
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
+            {indicateursOrganismesAvecDepartementLoading && (
+              <Center h="100%">
+                <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
+              </Center>
+            )}
             {indicateursOrganismesAvecDepartement && (
               <CarteFrance
                 donneesAvecDepartement={indicateursOrganismesAvecDepartement}
