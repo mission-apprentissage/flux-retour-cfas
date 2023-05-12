@@ -1,3 +1,18 @@
+# [3.26.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.25.0...v3.26.0) (2023-05-12)
+
+
+### Bug Fixes
+
+* fix script de migration ([c121629](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c12162990a65b5f05b2e45413a68895116a90f94))
+* régression acceptation cgu ([#3002](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3002)) ([446979c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/446979cd642ba8653d0423711d5b77318c13ea35))
+* typage des ObjectId ([#2987](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2987)) ([9cced1b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9cced1bb09d84bf177a7d23134a4abc9ed60d0fc))
+
+
+### Features
+
+* ajout d'un endpoint et qu'une queue de traitement pour api V3 ([#2982](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2982)) ([ca67017](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ca67017a546be338636ad86baed6aad65c7164cf))
+* refacto logger jobs ([#2983](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2983)) ([1992a22](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1992a225d3dc3ead182a59ab6b2e4c569aa7c561))
+
 # [3.25.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.24.0...v3.25.0) (2023-05-04)
 
 
