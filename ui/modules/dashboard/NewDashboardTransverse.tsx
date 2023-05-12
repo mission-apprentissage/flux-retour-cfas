@@ -4,7 +4,12 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 import { _get } from "@/common/httpClient";
-import { getOrganisationLabel } from "@/common/internal/Organisation";
+import {
+  getOrganisationLabel,
+  OrganisationOperateurPublicRegion,
+  OrganisationOperateurPublicDepartement,
+  OrganisationOperateurPublicAcademie,
+} from "@/common/internal/Organisation";
 import { formatDate } from "@/common/utils/dateUtils";
 import { stripEmptyFields } from "@/common/utils/misc";
 import { prettyFormatNumber } from "@/common/utils/stringUtils";
@@ -58,10 +63,29 @@ const NewDashboardTransverse = () => {
   const { auth } = useAuth();
   const router = useRouter();
 
-  const effectifsFilters = useMemo(
-    () => parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery),
-    [router.query]
-  );
+  const effectifsFilters = useMemo(() => {
+    const filters = parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery);
+
+    // filtre initial positionné sur le territoire de l'utilisateur
+    if (
+      (auth.organisation as OrganisationOperateurPublicRegion).code_region &&
+      filters.organisme_regions.length === 0
+    ) {
+      filters.organisme_regions = [(auth.organisation as OrganisationOperateurPublicRegion).code_region];
+    } else if (
+      (auth.organisation as OrganisationOperateurPublicDepartement).code_departement &&
+      filters.organisme_departements.length === 0
+    ) {
+      filters.organisme_departements = [(auth.organisation as OrganisationOperateurPublicDepartement).code_departement];
+    } else if (
+      (auth.organisation as OrganisationOperateurPublicAcademie).code_academie &&
+      filters.organisme_academies.length === 0
+    ) {
+      filters.organisme_academies = [(auth.organisation as OrganisationOperateurPublicAcademie).code_academie];
+    }
+
+    return filters;
+  }, [router.query]);
 
   const { data: indicateursEffectifsAvecDepartement } = useQuery<IndicateursEffectifsAvecDepartement[]>(
     ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString() })],
