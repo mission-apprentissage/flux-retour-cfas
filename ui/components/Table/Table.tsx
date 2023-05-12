@@ -176,7 +176,7 @@ export default function Table({
               <Fragment key={row.id}>
                 <Box
                   as="tr"
-                  bg={j % 2 === 0 ? "galt" : "white"}
+                  bg={j % 2 === 0 ? "#EEEEEE" : "white"}
                   py="3"
                   data-rowindex={row.id}
                   onClick={() => onRowClick?.(row.id)}

@@ -93,7 +93,7 @@ const NewDashboardTransverse = () => {
   >(
     ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString() })],
     () =>
-      _get(`/api/v1/indicateurs/effectifs`, {
+      _get("/api/v1/indicateurs/effectifs", {
         params: {
           date: effectifsFilters.date,
         },
@@ -109,7 +109,7 @@ const NewDashboardTransverse = () => {
   } = useQuery<IndicateursEffectifsAvecDepartement[]>(
     ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(effectifsFilters))],
     () =>
-      _get(`/api/v1/indicateurs/effectifs`, {
+      _get("/api/v1/indicateurs/effectifs", {
         params: convertEffectifsFiltersToQuery(effectifsFilters),
       }),
     {
@@ -141,7 +141,7 @@ const NewDashboardTransverse = () => {
 
   const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
     useQuery<IndicateursOrganismesAvecDepartement[]>(["indicateurs/organismes"], () =>
-      _get(`/api/v1/indicateurs/organismes`)
+      _get("/api/v1/indicateurs/organismes")
     );
 
   function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {

@@ -58,3 +58,16 @@ export function AbandonsIcon() {
     </Icon>
   );
 }
+
+export function GraphIcon() {
+  return (
+    <Icon viewBox="0 0 15 15" w="15px" h="15px">
+      <path
+        fill="#161616"
+        fill-rule="evenodd"
+        d="M6.333 1.366v7.3h7.3a6.667 6.667 0 1 1-7.3-7.3ZM7.666.362a7.668 7.668 0 0 1 6.972 6.971H7.666V.362Z"
+        clip-rule="evenodd"
+      />
+    </Icon>
+  );
+}

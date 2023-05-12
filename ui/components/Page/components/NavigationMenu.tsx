@@ -137,10 +137,9 @@ function NavBarTransverse(): ReactElement {
       <NavItem to="/" exactMatch>
         Mon tableau de bord
       </NavItem>
-      <NavItem to="/tableau-de-bord" exactMatch>
-        Nouveau tableau de bord
-      </NavItem>
+      <NavItem to="/tableau-de-bord">Ancien tableau de bord</NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
+      <NavItem to="/indicateurs">Mes indicateurs</NavItem>
     </>
   );
 }
