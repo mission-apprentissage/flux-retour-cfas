@@ -14,6 +14,7 @@ import { formatDate } from "@/common/utils/dateUtils";
 import { stripEmptyFields } from "@/common/utils/misc";
 import { prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
+import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
@@ -265,4 +266,4 @@ const NewDashboardTransverse = () => {
   );
 };
 
-export default NewDashboardTransverse;
+export default withAuth(NewDashboardTransverse);

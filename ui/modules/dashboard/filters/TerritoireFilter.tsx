@@ -20,8 +20,9 @@ import {
   DEPARTEMENTS_BY_ID,
   ACADEMIES_BY_ID,
 } from "@/common/constants/territoiresConstants";
-import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
+
+import SimpleOverlayMenu from "../SimpleOverlayMenu";
 
 interface Props {
   value: {
@@ -54,9 +55,9 @@ const TerritoireFilter = (props: Props) => {
       </SecondarySelectButton>
 
       {isOpen && (
-        <OverlayMenu onClose={() => setIsOpen(false)}>
+        <SimpleOverlayMenu onClose={() => setIsOpen(false)}>
           <Tabs variant="newsimple" fontSize="14px">
-            <TabList>
+            <TabList mx={8} mt={2}>
               <Tab fontSize="14px">Région ({REGIONS_SORTED.length})</Tab>
               <Tab fontSize="14px">Académies ({ACADEMIES_SORTED.length})</Tab>
               <Tab fontSize="14px">Départements ({DEPARTEMENTS_SORTED.length})</Tab>
@@ -64,7 +65,7 @@ const TerritoireFilter = (props: Props) => {
             </TabList>
             <TabIndicator mt="-1.5px" height="4px" bg="bluefrance" borderRadius="1px" />
             <Divider size="md" borderBottomWidth="2px" opacity="1" />
-            <TabPanels>
+            <TabPanels px={4}>
               <TabPanel>
                 <CheckboxGroup
                   defaultValue={regions}
@@ -123,7 +124,7 @@ const TerritoireFilter = (props: Props) => {
               </TabPanel> */}
             </TabPanels>
           </Tabs>
-        </OverlayMenu>
+        </SimpleOverlayMenu>
       )}
     </div>
   );
