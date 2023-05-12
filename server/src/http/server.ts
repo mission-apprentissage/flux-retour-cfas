@@ -342,7 +342,7 @@ function setupRoutes(app: Application) {
     .put(
       "/api/v1/profile/cgu/accept/:version",
       returnResult(async (req) => {
-        await updateUserProfile(req.user, { has_accepted_cgu: req.params.version });
+        await updateUserProfile(req.user, { has_accept_cgu_version: req.params.version });
       })
     );
 
