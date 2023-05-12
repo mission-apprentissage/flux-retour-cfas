@@ -1,10 +1,10 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import { STATUT_CREATION_ORGANISME, STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
-import { NATURE_ORGANISME_DE_FORMATION, SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
-import { schemaValidation } from "@/common/utils/schemaUtils";
-import { siretSchema, uaiSchema } from "@/common/utils/validationUtils";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
+
+import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
 import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes";
@@ -145,6 +145,10 @@ const schema = object(
       description: "Etape d'installation courante",
       enum: ["STEP1", "STEP2", "STEP3", "COMPLETE"],
     }),
+    creation_statut: string({
+      description: "Flag pour identifier que c'est un organisme créé à partir d'un lieu",
+      enum: [STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION],
+    }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
   },
@@ -159,27 +163,10 @@ export function defaultValuesOrganisme() {
     erps: [],
     relatedFormations: [],
     fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
+    ferme: false,
     created_at: new Date(),
     updated_at: new Date(),
   };
-}
-
-// Extra validation
-export function validateOrganisme(props) {
-  return schemaValidation({
-    entity: props,
-    schema,
-    extensions: [
-      {
-        name: "uai",
-        base: uaiSchema(),
-      },
-      {
-        name: "siret",
-        base: siretSchema(),
-      },
-    ],
-  });
 }
 
 export default { schema, indexes, collectionName };

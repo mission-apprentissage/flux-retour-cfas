@@ -28,7 +28,10 @@ const contratProps = contratSchema.properties;
 const apprenantProps = apprenantSchema.properties;
 
 /**
- * this schema doesn't contain any constraint
+ * Ce schéma est utilisé pour stocker et valider les données reçues.
+ * Il ne contient aucune contrainte afin de pouvoir stocker toutes les données reçues.
+ * Une premiere validation est effectuée lors de la réception des données, et les erreurs sont stockées dans le champ `validation_errors`.
+ * Une 2eme validation plus poussée (SIRET, formation, ...) est effectuée au moment de la creation de l'effectif et l'erreur est stockée dans le champ `error`.
  */
 export const schema = object(
   {
@@ -112,6 +115,7 @@ export const schema = object(
     ...internalFields,
   },
   {
+    required: ["source", "created_at"],
     additionalProperties: true,
   }
 );

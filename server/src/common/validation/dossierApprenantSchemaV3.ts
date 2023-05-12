@@ -4,6 +4,7 @@ import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimiti
 
 const dossierApprenantSchemaV3 = () =>
   z.object({
+    source: primitivesV1.source,
     apprenant: z.object({
       nom: primitivesV1.apprenant.nom,
       prenom: primitivesV1.apprenant.prenom,
@@ -21,17 +22,21 @@ const dossierApprenantSchemaV3 = () =>
       rqth: primitivesV3.apprenant.rqth.optional(),
       date_rqth: primitivesV3.apprenant.date_rqth.optional(),
     }),
-    etablissement_responsable: z.object({
-      siret: primitivesV1.etablissement_responsable.siret.optional(),
-      uai: primitivesV1.etablissement_responsable.uai.optional(),
-      nom: primitivesV1.etablissement_responsable.nom.optional(),
-    }),
-    etablissement_formateur: z.object({
-      siret: primitivesV1.etablissement_formateur.siret.optional(),
-      uai: primitivesV1.etablissement_formateur.uai.optional(),
-      nom: primitivesV1.etablissement_formateur.nom.optional(),
-      code_commune_insee: primitivesV1.etablissement_formateur.code_commune_insee.optional(),
-    }),
+    etablissement_responsable: z
+      .object({
+        siret: primitivesV1.etablissement_responsable.siret.optional(),
+        uai: primitivesV1.etablissement_responsable.uai.optional(),
+        nom: primitivesV1.etablissement_responsable.nom.optional(),
+      })
+      .refine((data) => data.siret || data.uai, "SIRET ou UAI requis"),
+    etablissement_formateur: z
+      .object({
+        siret: primitivesV1.etablissement_formateur.siret.optional(),
+        uai: primitivesV1.etablissement_formateur.uai.optional(),
+        nom: primitivesV1.etablissement_formateur.nom.optional(),
+        code_commune_insee: primitivesV1.etablissement_formateur.code_commune_insee.optional(),
+      })
+      .refine((data) => data.siret || data.uai, "SIRET ou UAI requis"),
     formation: z
       .object({
         libelle_court: primitivesV1.formation.libelle_court.optional(),
@@ -58,6 +63,7 @@ const dossierApprenantSchemaV3 = () =>
           })
           .optional(),
       })
+      .refine((data) => data.code_cfd || data.code_rncp, "RNCP ou CFD requis")
       .openapi({
         description: "Formation en cours de l'apprenant",
       }),
@@ -84,5 +90,7 @@ const dossierApprenantSchemaV3 = () =>
         description: "Informations sur l'employeur",
       }),
   });
+
+export type DossierApprenantSchemaV3ZodType = z.input<ReturnType<typeof dossierApprenantSchemaV3>>;
 
 export default dossierApprenantSchemaV3;

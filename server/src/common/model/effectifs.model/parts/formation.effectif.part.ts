@@ -1,8 +1,5 @@
-import Joi from "joi";
-
-import { RNCP_REGEX_PATTERN } from "@/common/constants/organisme";
+import { RNCP_REGEX_PATTERN } from "@/common/constants/validations";
 import { object, string, integer, arrayOf, objectId, date, boolean } from "@/common/model/json-schema/jsonSchemaTypes";
-import { schemaValidation } from "@/common/utils/schemaUtils";
 
 import formationsModel from "../../formations.model";
 
@@ -29,7 +26,7 @@ export const formationEffectifSchema = object(
     date_fin_formation: date({ description: "Date de fin de la formation" }),
     date_obtention_diplome: date({ description: "Date d'obtention du diplôme" }),
     duree_formation_relle: integer({ description: "Durée réelle de la formation en mois" }),
-    periode: arrayOf(integer(), { description: "Année scolaire" }),
+    periode: arrayOf(integer(), { description: "Période de la formation, en année (peut être sur plusieurs années)" }),
     // V3 - REQUIRED FIELDS (optionel pour l'instant pour supporter V2)
     date_inscription: date({ description: "Date d'inscription" }),
     // V3 - OPTIONAL FIELDS
@@ -49,39 +46,8 @@ export const formationEffectifSchema = object(
 );
 
 // Default value
-export function defaultValuesFormationEffectif() {
+export function defaultValuesFormationEffectif(): { periode: number[] } {
   return {
     periode: [],
   };
-}
-
-// Extra validation
-export function validateFormationEffectif(props, getErrors = false) {
-  const entityValidation = schemaValidation({
-    entity: props,
-    schema: formationEffectifSchema,
-    extensions: [
-      {
-        name: "date_debut_formation",
-        base: Joi.date().iso(),
-      },
-      {
-        name: "date_fin_formation",
-        base: Joi.date().iso(),
-      },
-      {
-        name: "date_obtention_diplome",
-        base: Joi.date().iso(),
-      },
-    ],
-    getErrors,
-    prefix: "formation.",
-  });
-
-  if (getErrors) {
-    let errors = [...entityValidation];
-    return errors;
-  }
-
-  return entityValidation;
 }

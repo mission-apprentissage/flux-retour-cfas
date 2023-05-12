@@ -7,7 +7,7 @@ import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
  * Les données entrantes de l'API V1 sont validées par dossierApprenantSchema (Joi).
  * @returns
  */
-const dossierApprenantSchemaV1V2Zod = () =>
+const dossierApprenantSchemaV1V2 = () =>
   z.object({
     // REQUIRED FIELDS
     nom_apprenant: primitivesV1.apprenant.nom,
@@ -30,7 +30,7 @@ const dossierApprenantSchemaV1V2Zod = () =>
     siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
     libelle_court_formation: primitivesV1.formation.libelle_court.optional(),
     libelle_long_formation: primitivesV1.formation.libelle_long.optional(),
-    periode_formation: primitivesV1.formation.periode.optional(),
+    periode_formation: primitivesV1.formation.periode.nullish(),
     annee_formation: primitivesV1.formation.annee.optional(),
     formation_rncp: primitivesV1.formation.code_rncp.optional(),
     contrat_date_debut: primitivesV1.contrat.date_debut.optional(),
@@ -38,4 +38,6 @@ const dossierApprenantSchemaV1V2Zod = () =>
     contrat_date_rupture: primitivesV1.contrat.date_rupture.optional(),
   });
 
-export default dossierApprenantSchemaV1V2Zod;
+export type DossierApprenantSchemaV1V2ZodType = z.input<ReturnType<typeof dossierApprenantSchemaV1V2>>;
+
+export default dossierApprenantSchemaV1V2;

@@ -4,27 +4,24 @@ import merge from "lodash-es/merge";
 import { WithId } from "mongodb";
 import RandExp from "randexp";
 import type { PartialDeep } from "type-fest";
-import { z } from "zod";
 
+import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
 import { CODES_STATUT_APPRENANT, SEXE_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
-import { CFD_REGEX, INE_REGEX, RNCP_REGEX } from "@/common/constants/organisme";
+import { CFD_REGEX, CODE_NAF_REGEX, INE_REGEX, RNCP_REGEX, SIRET_REGEX } from "@/common/constants/validations";
 import { Effectif, Organisme } from "@/common/model/@types";
-import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
-import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
+import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
+import { DossierApprenantSchemaV3ZodType } from "@/common/validation/dossierApprenantSchemaV3";
 
 import sampleEtablissements from "./sampleEtablissements";
 import { sampleLibelles } from "./sampleLibelles";
-
-const dossierApprenantSchemaV1V2ZodSchema = dossierApprenantSchemaV1V2Zod();
-type DossierApprenantSchemaV1V2ZodType = z.infer<typeof dossierApprenantSchemaV1V2ZodSchema>;
-
-const dossierApprenantSchemaV3ZodSchema = dossierApprenantSchemaV3();
-type DossierApprenantSchemaV3ZodType = z.infer<typeof dossierApprenantSchemaV3ZodSchema>;
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
 const getRandomFormationCfd = () => new RandExp(CFD_REGEX).gen().toUpperCase();
 const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
+const getRandomSiret = () => new RandExp(SIRET_REGEX).gen();
+const getRandomCodeNAF = () => new RandExp(CODE_NAF_REGEX).gen();
 const getRandomEtablissement = (siret?: string) =>
   siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
@@ -119,28 +116,16 @@ export const createSampleEffectif = ({
       annee_scolaire,
       organisme_id: organisme?._id,
       ...{
-        _computed: organisme
-          ? {
-              organisme: {
-                ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
-                ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
-                ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
-                ...(organisme.uai ? { uai: organisme.uai } : {}),
-                ...(organisme.siret ? { siret: organisme.siret } : {}),
-                ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
-              },
-            }
-          : {},
+        _computed: addEffectifComputedFields(organisme as Organisme),
       },
     } as Effectif,
     params
   );
 };
 
-// random DossierApprenant shaped along our REST API schema
 export const createRandomDossierApprenantApiInput = (
   params: Partial<DossierApprenantSchemaV1V2ZodType> = {}
-): Partial<DossierApprenantSchemaV1V2ZodType> => {
+): DossierApprenantSchemaV1V2ZodType => {
   const isStudentPresent = isPresent();
   const annee_scolaire = getRandomAnneeScolaire();
   const { uai, siret } = getRandomEtablissement();
@@ -163,12 +148,12 @@ export const createRandomDossierApprenantApiInput = (
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
     annee_formation: formation.annee,
-    periode_formation: isStudentPresent ? formation.periode.join("-") : "",
+    periode_formation: isStudentPresent ? formation.periode.join("-") : null,
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
     tel_apprenant: faker.helpers.arrayElement([faker.phone.number(), undefined]),
     code_commune_insee_apprenant: faker.address.zipCode(),
-
+    source: "userApi",
     ...params,
   };
 };
@@ -180,77 +165,81 @@ export const createRandomDossierApprenantApiV3Input = (
   const isStudentPresent = isPresent();
   const etablissement_formateur = getRandomEtablissement();
   const etablissement_responsable = getRandomEtablissement();
-  const employeur = getRandomEtablissement();
   const rqth = faker.datatype.boolean();
   const randomFormation = getRandomFormation(annee_scolaire);
   const randomContrat = getRandomContrat();
   const date_exclusion = getRandomDateExclusion();
 
-  return merge(
-    {
-      apprenant: {
+  return stripEmptyFields({
+    source: "userApi",
+    apprenant: {
+      nom: faker.name.lastName(),
+      prenom: faker.name.firstName(),
+      date_de_naissance: getRandomDateNaissance().toISOString().slice(0, -5),
+      statut: getRandomStatutApprenant(),
+      date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
+      id_erp: faker.datatype.uuid(),
+      // V1 - OPTIONAL FIELDS
+      ine: getRandomIne(),
+      email: faker.internet.email(),
+      telephone: faker.helpers.arrayElement([faker.phone.number(), undefined]),
+      code_commune_insee: faker.address.zipCode(),
+      // V3 - OPTIONAL FIELDS
+      sexe: faker.helpers.arrayElement([...SEXE_APPRENANT_ENUM, undefined]),
+      rqth,
+      date_rqth: rqth ? faker.date.past().toISOString().slice(0, -5) : undefined,
+      ...params?.apprenant,
+    },
+    etablissement_responsable: {
+      siret: etablissement_responsable.siret,
+      uai: etablissement_responsable.uai,
+      nom: etablissement_responsable.nom,
+      ...params?.etablissement_responsable,
+    },
+    etablissement_formateur: {
+      siret: etablissement_formateur.siret,
+      uai: etablissement_formateur.uai,
+      nom: etablissement_formateur.nom,
+      code_commune_insee: faker.address.zipCode(),
+      ...params?.etablissement_formateur,
+    },
+    formation: {
+      code_cfd: randomFormation.cfd,
+      code_rncp: randomFormation.rncp,
+      periode: isStudentPresent ? randomFormation.periode.join("-") : undefined,
+      libelle_long: randomFormation.libelle_long,
+      annee: randomFormation.annee,
+      annee_scolaire,
+      // V3 - REQUIRED FIELDS
+      date_inscription: faker.date.past().toISOString(),
+      date_entree: faker.date.past().toISOString(),
+      date_fin: faker.date.future().toISOString(),
+      // V3 - OPTIONAL FIELDS
+      obtention_diplome: faker.datatype.boolean(),
+      date_obtention_diplome: faker.date.past().toISOString(),
+      date_exclusion: date_exclusion ? date_exclusion.toISOString() : undefined,
+      cause_exclusion: date_exclusion ? getRandomCauseExclusion() : undefined,
+      ...params?.formation,
+      referent_handicap: {
         nom: faker.name.lastName(),
         prenom: faker.name.firstName(),
-        date_de_naissance: getRandomDateNaissance().toISOString().slice(0, -5),
-        statut: getRandomStatutApprenant(),
-        date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
-        id_erp: faker.datatype.uuid(),
-        // V1 - OPTIONAL FIELDS
-        ine: getRandomIne(),
         email: faker.internet.email(),
-        telephone: faker.helpers.arrayElement([faker.phone.number(), undefined]),
-        code_commune_insee: faker.address.zipCode(),
-        // V3 - OPTIONAL FIELDS
-        sexe: faker.helpers.arrayElement([...SEXE_APPRENANT_ENUM, undefined]),
-        rqth,
-        date_rqth: rqth ? faker.date.past().toISOString().slice(0, -5) : undefined,
+        ...params?.formation?.referent_handicap,
       },
-      etablissement_responsable: {
-        siret: etablissement_responsable.siret,
-        uai: etablissement_responsable.uai,
-        nom: etablissement_responsable.nom,
-      },
-      etablissement_formateur: {
-        siret: etablissement_formateur.siret,
-        uai: etablissement_formateur.uai,
-        nom: etablissement_formateur.nom,
-        code_commune_insee: faker.address.zipCode(),
-      },
-      formation: {
-        code_cfd: randomFormation.cfd,
-        code_rncp: randomFormation.rncp,
-        periode: isStudentPresent ? randomFormation.periode.join("-") : "",
-        libelle_long: randomFormation.libelle_long,
-        annee: randomFormation.annee,
-        annee_scolaire,
-        // V3 - REQUIRED FIELDS
-        date_inscription: faker.date.past().toISOString(),
-        date_entree: faker.date.past().toISOString(),
-        date_fin: faker.date.future().toISOString(),
-        // V3 - OPTIONAL FIELDS
-        obtention_diplome: faker.datatype.boolean(),
-        date_obtention_diplome: faker.date.past().toISOString(),
-        date_exclusion: date_exclusion ? date_exclusion.toISOString() : undefined,
-        cause_exclusion: date_exclusion ? getRandomCauseExclusion() : undefined,
-        referent_handicap: {
-          nom: faker.name.lastName(),
-          prenom: faker.name.firstName(),
-          email: faker.internet.email(),
-        },
-      },
-      contrat: {
-        date_debut: randomContrat.date_debut.toISOString(),
-        date_fin: randomContrat.date_fin.toISOString(),
-        date_rupture: randomContrat.date_rupture.toISOString(),
-        // V3 - OPTIONAL FIELDS
-        cause_rupture: randomContrat.cause_rupture,
-      },
-      employeur: {
-        siret: employeur.siret,
-        code_commune_insee: employeur.code_commune_insee,
-        code_naf: employeur.code_naf,
-      },
-    } as DossierApprenantSchemaV3ZodType,
-    params
-  );
+    },
+    contrat: {
+      date_debut: randomContrat.date_debut.toISOString(),
+      date_fin: randomContrat.date_fin.toISOString(),
+      date_rupture: randomContrat.date_rupture.toISOString(),
+      // V3 - OPTIONAL FIELDS
+      cause_rupture: randomContrat.cause_rupture,
+      ...params?.contrat,
+    },
+    employeur: {
+      siret: getRandomSiret(),
+      code_commune_insee: faker.address.zipCode(),
+      code_naf: getRandomCodeNAF(),
+      ...params?.employeur,
+    },
+  });
 };

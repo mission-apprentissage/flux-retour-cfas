@@ -1,34 +1,32 @@
-import { cloneDeep, isObject, merge, reduce, set, uniqBy } from "lodash-es";
-import { ObjectId } from "mongodb";
+import { isObject, merge, reduce, set, uniqBy } from "lodash-es";
+import { ObjectId, WithId } from "mongodb";
 
 import { Effectif } from "@/common/model/@types/Effectif";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb } from "@/common/model/collections";
-import { defaultValuesEffectif, validateEffectif } from "@/common/model/effectifs.model/effectifs.model";
-import { defaultValuesApprenant } from "@/common/model/effectifs.model/parts/apprenant.part";
-import { defaultValuesFormationEffectif } from "@/common/model/effectifs.model/parts/formation.effectif.part";
+import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { stripEmptyFields } from "@/common/utils/miscUtils";
-import { transformToInternationalNumber } from "@/common/validation/utils/frenchTelephoneNumber";
+
+import { Organisme } from "../model/@types";
 
 import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions";
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters";
-import { getOrganismeById } from "./organismes/organismes.actions";
 
 /**
  * Méthode de build d'un effectif
- * @param {any} effectif
- * @param {boolean} lockAtCreate
- * @returns
  */
-export const buildEffectif = (effectifData: Required<Effectif> & { organisme_id: ObjectId }, lockAtCreate = false) => {
-  const defaultValues = defaultValuesEffectif({ lockAtCreate });
+export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifData: T) => {
+  const defaultValues = defaultValuesEffectif();
+  // note: I've tried to use ts-deepmerge, but typing doesn't work well
   return {
     ...defaultValues,
     ...effectifData,
     apprenant: {
       ...defaultValues.apprenant,
       ...effectifData.apprenant,
+    },
+    is_lock: {
+      ...defaultValues.is_lock,
+      ...effectifData.is_lock,
     },
     formation: {
       ...defaultValues.formation,
@@ -40,69 +38,19 @@ export const buildEffectif = (effectifData: Required<Effectif> & { organisme_id:
 /**
  * Méthode de création d'un effectif
  */
-export const createEffectif = async (
-  dataEffectif: Required<Effectif> & { organisme_id: ObjectId },
-  lockAtCreate = false
+export const createEffectif = async <T extends Omit<Effectif, "organisme_id">>(
+  dataEffectif: T,
+  organisme: WithId<Organisme>
 ) => {
-  const dataToInsert = buildEffectif(dataEffectif, lockAtCreate);
+  const dataToInsert = mergeEffectifWithDefaults({
+    ...dataEffectif,
+    organisme_id: organisme._id,
+    _computed: addEffectifComputedFields(organisme),
+  });
 
-  const organisme = await getOrganismeById(dataEffectif.organisme_id);
-  (dataToInsert as any)._computed = {
-    organisme: {
-      region: organisme.adresse?.region,
-      departement: organisme.adresse?.departement,
-      academie: organisme.adresse?.academie,
-      reseaux: organisme.reseaux,
-      uai: organisme.uai,
-      siret: organisme.siret,
-    },
-  };
-  const { insertedId } = await effectifsDb().insertOne(validateEffectif(dataToInsert));
+  const { insertedId } = await effectifsDb().insertOne(dataToInsert);
 
   return insertedId;
-};
-
-/**
- * Validation d'un object effectif
- * @param {*} effectif
- * @returns
- */
-export const validateEffectifObject = (effectif) => {
-  // Vérification si erreurs de validation sur l'effectif
-  const effectifValidationErrors = validateEffectif(effectif, true);
-
-  let effectifMandate = cloneDeep(effectif);
-  for (const validationError of effectifValidationErrors) {
-    set(effectifMandate, validationError.fieldName, undefined);
-
-    if (
-      validationError.fieldName.includes("apprenant.historique_statut") &&
-      (validationError.fieldName.includes("valeur_statut") || validationError.fieldName.includes("date_statut"))
-    ) {
-      const [, index] =
-        RegExp(/^apprenant.historique_statut\[([0-9]{1})\].(valeur_statut|date_statut)$/, "g").exec(
-          validationError.fieldName
-        ) || [];
-      effectifMandate.apprenant.historique_statut = [
-        ...effectifMandate.apprenant.historique_statut.slice(0, index),
-        ...effectifMandate.apprenant.historique_statut.slice(index + 1),
-      ];
-    }
-    if (
-      validationError.fieldName.includes("contrats") &&
-      (validationError.fieldName.includes("date_debut") || validationError.fieldName.includes("date_fin"))
-    ) {
-      const [, index] =
-        RegExp(/^contrats\[([0-9]{1})\].(date_debut|date_fin)$/, "g").exec(validationError.fieldName) || [];
-      effectifMandate.contrats = [
-        ...effectifMandate.contrats.slice(0, index),
-        ...effectifMandate.contrats.slice(index + 1),
-      ];
-    }
-  }
-
-  // TODO Suppression des erreurs sur date de naissance si nécéssaire
-  return { ...stripEmptyFields(effectifMandate), validation_errors: effectifValidationErrors };
 };
 
 /**
@@ -110,83 +58,8 @@ export const validateEffectifObject = (effectif) => {
  * @returns
  */
 export const insertEffectif = async (data: Effectif) => {
-  const dataSanitized = validateEffectif(data);
-  const { insertedId } = await effectifsDb().insertOne(dataSanitized);
-  return { _id: insertedId, ...dataSanitized };
-};
-
-/**
- * Création d'un objet effectif depuis les données d'un dossierApprenant
- * @param {*} dossiersApprenant
- * @returns
- */
-export const structureEffectifFromDossierApprenant = (dossiersApprenant: EffectifsQueue) => {
-  const {
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-    id_formation: cfd,
-    formation_rncp: rncp,
-    libelle_long_formation: libelle_long,
-    periode_formation: periode,
-    annee_formation: annee,
-    code_commune_insee_apprenant,
-    contrat_date_debut,
-    contrat_date_fin,
-    contrat_date_rupture,
-    statut_apprenant,
-    date_metier_mise_a_jour_statut,
-    nom_apprenant: nom,
-    prenom_apprenant: prenom,
-    ine_apprenant: ine,
-    date_de_naissance_apprenant: date_de_naissance,
-    email_contact: courriel,
-    tel_apprenant: telephone,
-  } = dossiersApprenant;
-
-  return stripEmptyFields({
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-    apprenant: {
-      ...defaultValuesApprenant(),
-      historique_statut: [
-        {
-          valeur_statut: statut_apprenant,
-          date_statut: new Date(date_metier_mise_a_jour_statut),
-          date_reception: new Date(),
-        },
-      ],
-      ine,
-      nom,
-      prenom,
-      date_de_naissance,
-      courriel,
-      telephone: transformToInternationalNumber(telephone),
-      // Build adresse with code_commune_insee
-      ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
-    },
-    // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
-    contrats:
-      contrat_date_debut || contrat_date_fin || contrat_date_rupture
-        ? [
-            {
-              ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
-              ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
-              ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
-            },
-          ]
-        : [],
-    formation: {
-      ...defaultValuesFormationEffectif(),
-      cfd,
-      rncp,
-      libelle_long,
-      // periode is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
-      periode: periode ? periode.split("-").map(Number) : [],
-      annee,
-    },
-  });
+  const { insertedId } = await effectifsDb().insertOne(data);
+  return { _id: insertedId, ...data };
 };
 
 /**
@@ -247,7 +120,7 @@ export const updateEffectif = async (_id: ObjectId, data, opt = { keepPreviousEr
     { _id: effectif._id },
     {
       $set: {
-        ...validateEffectif(data),
+        ...data,
         ...(opt.keepPreviousErrors
           ? {
               validation_errors: uniqBy(
@@ -256,7 +129,6 @@ export const updateEffectif = async (_id: ObjectId, data, opt = { keepPreviousEr
               ),
             }
           : {}),
-        organisme_id: new ObjectId(data.organisme_id),
         updated_at: new Date(),
       },
     },
@@ -268,17 +140,11 @@ export const updateEffectif = async (_id: ObjectId, data, opt = { keepPreviousEr
 
 /**
  * Méthode de mise à jour d'un effectif avec lock
- * @param {*} id
+ * @param {*} effectif
  * @returns
  */
-export const updateEffectifAndLock = async (id, { apprenant, formation, validation_errors = [] }) => {
-  const _id = typeof id === "string" ? new ObjectId(id) : id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
-  const effectif = await effectifsDb().findOne({ _id });
-  if (!effectif) {
-    throw new Error(`Unable to find effectif ${_id.toString()}`);
-  }
+export const lockEffectif = async (effectif: WithId<Effectif>) => {
+  const { apprenant, formation } = effectif;
 
   // Lock field
   let newLocker = { ...effectif.is_lock };
@@ -309,8 +175,6 @@ export const updateEffectifAndLock = async (id, { apprenant, formation, validati
     { _id: effectif._id },
     {
       $set: {
-        ...validateEffectif({ ...effectif, apprenant, formation }),
-        validation_errors,
         is_lock: newLocker,
         updated_at: new Date(),
       },
@@ -338,4 +202,20 @@ export const getNbDistinctOrganismes = async (ctx: AuthContext, filters: LegacyE
     ])
     .toArray();
   return distinctOrganismes.length;
+};
+
+export const addEffectifComputedFields = (organisme: Organisme | null | undefined) => {
+  if (!organisme) {
+    return {};
+  }
+  return {
+    organisme: {
+      ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
+      ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
+      ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
+      ...(organisme.uai ? { uai: organisme.uai } : {}),
+      ...(organisme.siret ? { siret: organisme.siret } : {}),
+      ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
+    },
+  };
 };

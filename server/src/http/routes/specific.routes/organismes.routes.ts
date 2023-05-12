@@ -1,10 +1,10 @@
 import express from "express";
-import Joi from "joi";
 import pick from "lodash.pick";
 import { Filter } from "mongodb";
+import { z } from "zod";
 
 import { organismesDb } from "@/common/model/collections";
-import { validateFullObjectSchema } from "@/common/utils/validationUtils";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
@@ -17,10 +17,10 @@ export default () => {
   router.post(
     "/",
     returnResult(async (req) => {
-      const params = await validateFullObjectSchema(req.query, {
-        query: Joi.string(),
-        page: Joi.number(),
-        limit: Joi.number(),
+      const params = await validateFullZodObjectSchema(req.query, {
+        query: z.string().optional(),
+        page: z.number().optional(),
+        limit: z.number().optional(),
       });
 
       const query = params.query ?? "{}";

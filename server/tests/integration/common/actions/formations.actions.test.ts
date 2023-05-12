@@ -87,7 +87,7 @@ describe("Tests des actions Formations", () => {
         date_ouverture: "invalid",
       }));
 
-      const cfd = "2502000D";
+      const cfd = "25020000D";
       await expect(createFormation({ cfd })).rejects.toThrowError();
     });
 
@@ -256,7 +256,6 @@ describe("Tests des actions Formations", () => {
     it("returns results matching libelle and etablissement_num_departement", async () => {
       const searchTerm = "decoration";
 
-      // const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
       await effectifsDb().insertOne(
         createSampleEffectif({
           formation: {
@@ -278,7 +277,6 @@ describe("Tests des actions Formations", () => {
     it("returns results matching libelle and etablissement_reseau", async () => {
       const searchTerm = "decoration";
 
-      // const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
       await effectifsDb().insertOne(
         createSampleEffectif({
           formation: {
@@ -297,7 +295,6 @@ describe("Tests des actions Formations", () => {
     it("returns results matching libelle and uai_etablissement", async () => {
       const searchTerm = "decoration";
 
-      // const { insertedId: organisme_id } = await organismesDb().insertOne(organisme);
       await effectifsDb().insertOne(
         createSampleEffectif({
           formation: {

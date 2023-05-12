@@ -63,6 +63,9 @@ export interface EffectifsQueue {
    * Libellé long de la formation visée
    */
   libelle_long_formation?: any;
+  /**
+   * Période de la formation, en année (peut être sur plusieurs années)
+   */
   periode_formation?: any;
   /**
    * Année de la formation (cursus)
@@ -87,7 +90,7 @@ export interface EffectifsQueue {
   /**
    * Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)
    */
-  source?: string;
+  source: string;
   /**
    * Id de l'effectif associé
    */
@@ -99,7 +102,7 @@ export interface EffectifsQueue {
   /**
    * Date d'ajout en base de données
    */
-  created_at?: Date;
+  created_at: Date;
   /**
    * Date de process des données
    */

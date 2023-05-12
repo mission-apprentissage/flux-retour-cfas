@@ -1086,7 +1086,7 @@ export interface Effectif {
      */
     duree_formation_relle?: number;
     /**
-     * Année scolaire
+     * Période de la formation, en année (peut être sur plusieurs années)
      */
     periode?: number[];
     /**
@@ -1562,79 +1562,10 @@ export interface Effectif {
      */
     cause_rupture?: string;
   }[];
-  is_lock?: {
-    apprenant?: {
-      ine?: boolean;
-      nom?: boolean;
-      prenom?: boolean;
-      sexe?: boolean;
-      date_de_naissance?: boolean;
-      nationalite?: boolean;
-      handicap?: boolean;
-      courriel?: boolean;
-      telephone?: boolean;
-      adresse?: {
-        numero?: boolean;
-        repetition_voie?: boolean;
-        voie?: boolean;
-        complement?: boolean;
-        code_postal?: boolean;
-        code_insee?: boolean;
-        commune?: boolean;
-        departement?: boolean;
-        region?: boolean;
-        academie?: boolean;
-        complete?: boolean;
-        pays?: boolean;
-      };
-      historique_statut?: boolean;
-      code_postal_de_naissance?: boolean;
-      regime_scolaire?: boolean;
-      inscription_sportif_haut_niveau?: boolean;
-      situation_avant_contrat?: boolean;
-      derniere_situation?: boolean;
-      dernier_organisme_uai?: boolean;
-      organisme_gestionnaire?: boolean;
-      dernier_diplome?: boolean;
-      mineur_emancipe?: boolean;
-      representant_legal?: {
-        nom?: boolean;
-        prenom?: boolean;
-        pcs?: boolean;
-        meme_adresse?: boolean;
-        adresse?: {
-          numero?: boolean;
-          repetition_voie?: boolean;
-          voie?: boolean;
-          complement?: boolean;
-          code_postal?: boolean;
-          code_insee?: boolean;
-          commune?: boolean;
-          departement?: boolean;
-          region?: boolean;
-          academie?: boolean;
-          complete?: boolean;
-          pays?: boolean;
-        };
-        courriel?: boolean;
-        telephone?: boolean;
-      };
-    };
-    contrats?: boolean;
-    formation?: {
-      cfd?: boolean;
-      rncp?: boolean;
-      libelle_long?: boolean;
-      niveau?: boolean;
-      niveau_libelle?: boolean;
-      periode?: boolean;
-      annee?: boolean;
-      date_debut_formation?: boolean;
-      date_fin_formation?: boolean;
-      date_obtention_diplome?: boolean;
-      duree_formation_relle?: boolean;
-    };
-  };
+  /**
+   * Indique les champs verrouillés
+   */
+  is_lock?: any;
   /**
    * Date de mise à jour en base de données
    */

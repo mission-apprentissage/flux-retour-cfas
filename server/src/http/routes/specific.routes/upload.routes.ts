@@ -10,8 +10,13 @@ import { ObjectId, WithId } from "mongodb";
 import multiparty from "multiparty";
 import { accumulateData, oleoduc, writeData } from "oleoduc";
 
-import { createEffectif, findEffectifs, updateEffectif } from "@/common/actions/effectifs.actions";
-import { hydrateEffectif } from "@/common/actions/engine/engine.actions";
+import {
+  createEffectif,
+  findEffectifs,
+  mergeEffectifWithDefaults,
+  updateEffectif,
+} from "@/common/actions/effectifs.actions";
+import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
 import { getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
 import { findOrganismeById, setOrganismeTransmissionDates } from "@/common/actions/organismes/organismes.actions";
 import {
@@ -348,7 +353,8 @@ export default {
         formationFound = await getFormationWithCfd(data.formation.cfd, { rncps: 1 });
         data.formation.rncp = formationFound?.rncps?.[0] ?? data.formation?.rncp;
       }
-      const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
+
+      const canNotBeImportEffectif = mergeEffectifWithDefaults({
         organisme_id,
         source: document?.document_id.toString(),
         id_erp_apprenant: new ObjectId().toString(),
@@ -356,6 +362,7 @@ export default {
         apprenant: { nom: data.apprenant?.nom ?? "", prenom: data.apprenant?.prenom ?? "", historique_statut: [] },
         formation: { cfd: data.formation?.cfd ?? "", rncp: data.formation?.rncp ?? "" },
       });
+
       if (canNotBeImportEffectif.validation_errors.length) {
         canNotBeImportEffectifs.push({
           annee_scolaire: canNotBeImportEffectif.annee_scolaire,
@@ -393,16 +400,14 @@ export default {
           data.formation.formation_id = formationFound._id;
           data.formation.annee = formationFound?.annee;
           data.formation.libelle_long = formationFound?.libelle;
-          const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
-            {
-              organisme_id,
-              source: document?.document_id.toString(),
-              id_erp_apprenant: `${index}`,
-              annee_scolaire,
-              ...data,
-            },
-            { checkIfExist: true }
-          );
+          const canBeImportEffectif = mergeEffectifWithDefaults({
+            organisme_id,
+            source: document?.document_id.toString(),
+            id_erp_apprenant: `${index}`,
+            annee_scolaire,
+            ...data,
+          });
+          const foundInDb = await checkIfEffectifExists(canBeImportEffectif);
 
           let effectifToSave = canBeImportEffectif;
           if (foundInDb) {
@@ -434,7 +439,7 @@ export default {
                       !find(found.validation_errors, { fieldName: currentError.fieldName })
                     ) {
                       // we don't want errors on previously ok field
-                      cleanedUpErrors.push({ ...currentError, willNotBeModify: true });
+                      cleanedUpErrors.push({ ...currentError, willNotBeModified: true });
                     } else {
                       cleanedUpErrors.push(currentError);
                     }
@@ -465,15 +470,21 @@ export default {
             }
           }
 
+          // TO_DISCUSS A quoi cela sert ?
           for (const validation_error of effectifToSave.validation_errors) {
             const { fieldName } = validation_error;
             if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
-              validation_error.willNotBeModify = true;
+              // @ts-ignore
+              validation_error.willNotBeModified = true;
             } else if (fieldName === "contrats[0].date_debut" || fieldName === "contrats[0].date_fin") {
-              validation_error.willNotBeModify = true;
+              // @ts-ignore
+              validation_error.willNotBeModified = true;
+              // @ts-ignore
               validation_error.isRequired = true;
-            } else if (fieldName.includes("apprenant.historique_statut")) {
-              validation_error.willNotBeModify = true;
+            } else if ((fieldName as any)?.includes("apprenant.historique_statut")) {
+              // @ts-ignore
+              validation_error.willNotBeModified = true;
+              // @ts-ignore
               validation_error.isRequired = true;
             }
           }
@@ -590,7 +601,7 @@ export default {
         `Import en cours: ${index + 1} sur ${uploads.last_snapshot_effectifs.length} effectifs`
       );
 
-      let errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
+      let errorsToKeep = validation_errors.filter(({ willNotBeModified }) => !willNotBeModified);
 
       for (const [key, validation_error] of errorsToKeep.entries()) {
         let { fieldName } = validation_error;
@@ -607,7 +618,7 @@ export default {
           { keepPreviousErrors: true }
         );
       } else {
-        await createEffectif({ organisme_id, ...effectif, validation_errors: errorsToKeep });
+        await createEffectif({ ...effectif, validation_errors: errorsToKeep }, organisme);
       }
     }
 

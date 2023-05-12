@@ -20,7 +20,7 @@ import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./jobs/hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes";
 import { hydrateFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes-referentiel";
-import { updateOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
+import { updateMultipleOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
 import { hydrateReseaux } from "./jobs/hydrate/reseaux/hydrate-reseaux";
 import { removeOrganismeAndEffectifs } from "./jobs/patches/remove-organisme-effectifs-dossiersApprenants/index";
 import { removeOrganismesSansSiretSansEffectifs } from "./jobs/patches/remove-organismes-sansSiret-sansEffectifs/index";
@@ -101,15 +101,16 @@ program
   .description("Process la queue des effectifs")
   .option("--id <string>", "ID de l'effectifQueue à traiter")
   .option("-f, --force", "Force le re-traitement des effectifs déjà traités")
+  .option("--v3", "Process la queue effectifsV3Queue")
   .action(
-    runJob(async ({ id, force }) => {
-      await processEffectifsQueueEndlessly({ id, force });
+    runJob(async ({ id, force, v3 }) => {
+      await processEffectifsQueueEndlessly({ id, force, v3 });
     })
   );
 
 program
   .command("process:effectifs-queue:remove-duplicates")
-  .description("Process la queue des effectifs")
+  .description("Supprime les dossiers en doublons des effectifs, en ne gardant que le plus récent")
   .action(
     runJob(async () => {
       await removeDuplicatesEffectifsQueue();
@@ -303,7 +304,7 @@ program
   .description("Mise à jour des organismes via API externes")
   .action(
     runJob(async () => {
-      return updateOrganismesWithApis();
+      return updateMultipleOrganismesWithApis();
     })
   );
 

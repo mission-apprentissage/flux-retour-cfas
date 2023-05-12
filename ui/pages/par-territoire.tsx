@@ -1,6 +1,6 @@
 import React from "react";
 
-import { DEPARTEMENTS_BY_ID, REGIONS_BY_ID } from "@/common/constants/territoiresConstants";
+import { DEPARTEMENTS_BY_CODE, REGIONS_BY_ID } from "@/common/constants/territoiresConstants";
 import {
   OrganisationOperateurPublicDepartement,
   OrganisationOperateurPublicRegion,
@@ -25,7 +25,7 @@ const IndicateursVueTerritoirePageContainer = () => {
     defaultState.region = REGIONS_BY_ID[(auth.organisation as OrganisationOperateurPublicRegion).code_region];
   } else if ((auth.organisation as OrganisationOperateurPublicDepartement).code_departement) {
     defaultState.departement =
-      DEPARTEMENTS_BY_ID[(auth.organisation as OrganisationOperateurPublicDepartement).code_departement];
+      DEPARTEMENTS_BY_CODE[(auth.organisation as OrganisationOperateurPublicDepartement).code_departement];
   }
 
   return (

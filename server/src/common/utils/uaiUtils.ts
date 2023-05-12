@@ -2,7 +2,7 @@ import { find } from "lodash-es";
 
 import { DEPARTEMENTS } from "@/common/constants/territoires";
 
-import { validateUai } from "./validationUtils";
+import { isValidUAI } from "./validationUtils";
 
 const SPECIFIC_UAI_CODES_CORSE1 = { code: "2A", uaiCode: "620" };
 const SPECIFIC_UAI_CODES_CORSE2 = { code: "2B", uaiCode: "720" };
@@ -32,7 +32,7 @@ export const buildAdresseFromUai = (uai) => {
 };
 
 export const getDepartementCodeFromUai = (uai) => {
-  if (validateUai(uai).error) throw new Error("invalid uai passed");
+  if (!isValidUAI(uai)) throw new Error("invalid uai passed");
   const code = uai.slice(0, 3);
   return Number(code) < 10 ? `0${Number(code)}` : Number(code).toString();
 };

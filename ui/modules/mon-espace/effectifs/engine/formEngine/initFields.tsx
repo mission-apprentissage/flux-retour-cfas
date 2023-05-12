@@ -249,7 +249,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
       if (fields[validation_error.fieldName]) {
         fields[validation_error.fieldName] = {
           ...fields[validation_error.fieldName],
-          ...(validation_error.willNotBeModify
+          ...(validation_error.willNotBeModified
             ? validation_error.isRequired
               ? {
                   error: () => (

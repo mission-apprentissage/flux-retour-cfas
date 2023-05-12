@@ -1,9 +1,6 @@
-import { createJobEvent } from "@/common/actions/jobEvents.actions";
-import { updateOrganisme } from "@/common/actions/organismes/organismes.actions";
+import { updateOrganismeFromApis } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
-
-const JOB_NAME = "update-organismes-with-apis";
 
 let nbOrganismeUpdated = 0;
 let nbOrganismeNotUpdated = 0;
@@ -16,7 +13,7 @@ const DELAY_BETWEEN_UPDATES = 250;
  * - On va récupérer les métiers associés via l'API LaBonneAlternance
  * Pas de promisePool pour pouvoir respecter les rateLimits des API
  */
-export const updateOrganismesWithApis = async () => {
+export const updateMultipleOrganismesWithApis = async () => {
   // On récupère l'intégralité des organismes depuis le référentiel ayant un siret (nécessaire pour un update valide)
   const organismesToUpdate = await organismesDb()
     .find({ siret: { $exists: true } })
@@ -27,7 +24,13 @@ export const updateOrganismesWithApis = async () => {
   for (const organisme of organismesToUpdate) {
     logger.info(`Mise à jour de l'organisme UAI ${organisme.uai || "inconnu"} - SIRET ${organisme.siret} ...`);
 
-    await updateOrganismeWithApis(organisme);
+    try {
+      await updateOrganismeFromApis(organisme);
+      nbOrganismeUpdated++;
+    } catch (error: any) {
+      nbOrganismeNotUpdated++;
+      logger.error({ error }, `Erreur lors de la mise à jour de l'organisme ${organisme._id}: ${error.message}`);
+    }
 
     // Delai entre les updates pour limites API
     await new Promise((r) => setTimeout(r, DELAY_BETWEEN_UPDATES));
@@ -41,31 +44,4 @@ export const updateOrganismesWithApis = async () => {
     nbOrganismesMaj: nbOrganismeUpdated,
     nbOrganismesNonMajErreur: nbOrganismeNotUpdated,
   };
-};
-
-/**
- * Fonction de maj d'un organisme en appelant les APIs externes
- * @param {*} organisme
- */
-const updateOrganismeWithApis = async (organisme) => {
-  try {
-    await updateOrganisme(
-      organisme._id,
-      { ...organisme },
-      {
-        buildFormationTree: true,
-        buildInfosFromSiret: true,
-        callLbaApi: true,
-      }
-    );
-    nbOrganismeUpdated++;
-  } catch (error) {
-    nbOrganismeNotUpdated++;
-    await createJobEvent({
-      jobname: JOB_NAME,
-      date: new Date(),
-      action: "organisme-not-updated",
-      data: { organisme, error },
-    });
-  }
 };

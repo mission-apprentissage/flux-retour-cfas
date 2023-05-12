@@ -1,7 +1,7 @@
 import { OpenAPIRegistry, OpenAPIGenerator, RouteConfig } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 
-import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2Zod";
+import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2";
 import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 

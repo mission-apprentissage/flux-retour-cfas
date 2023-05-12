@@ -5,7 +5,7 @@ import logger from "@/common/logger";
 import { effectifsQueueDb, effectifsV3QueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
 import { formatError } from "@/common/utils/errorUtils";
-import dossierApprenantSchemaV1V2Zod from "@/common/validation/dossierApprenantSchemaV1V2Zod";
+import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
 import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
@@ -25,7 +25,7 @@ export default () => {
 
     const isV3 = originalUrl.includes("/v3");
     const collection = (isV3 ? effectifsV3QueueDb() : effectifsQueueDb()) as any;
-    const validationSchema = isV3 ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2Zod();
+    const validationSchema = isV3 ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2();
 
     const source = user.username;
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {

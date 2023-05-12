@@ -1,21 +1,17 @@
-import uniqBy from "lodash-es/uniqBy";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import { PartialDeep } from "type-fest";
 
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
-import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
 import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
-import { Effectif } from "@/common/model/@types/Effectif";
-import { object, objectId, string, date, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
-import { schemaValidation } from "@/common/utils/schemaUtils";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN, YEAR_RANGE_PATTERN } from "@/common/constants/validations";
+import { object, objectId, string, date, boolean, arrayOf, any } from "@/common/model/json-schema/jsonSchemaTypes";
 
-import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part";
+import { Effectif } from "../@types";
+
+import { apprenantSchema, defaultValuesApprenant } from "./parts/apprenant.part";
 import { contratSchema } from "./parts/contrat.part";
-import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
-import {
-  defaultValuesFormationEffectif,
-  formationEffectifSchema,
-  validateFormationEffectif,
-} from "./parts/formation.effectif.part";
+import { defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
+import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part";
 
 const collectionName = "effectifs";
 
@@ -94,7 +90,7 @@ export const schema = object(
     source: string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),
     annee_scolaire: string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
-      pattern: "^\\d{4}-\\d{4}$",
+      pattern: YEAR_RANGE_PATTERN,
     }),
     apprenant: apprenantSchema,
     formation: formationEffectifSchema,
@@ -102,7 +98,7 @@ export const schema = object(
       // Note: anciennement dans apprenant.contrats
       description: "Historique des contrats de l'apprenant",
     }),
-    is_lock: effectifFieldsLockerSchema,
+    is_lock: any({ description: "Indique les champs verrouillés" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
     archive: boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }),
@@ -157,40 +153,17 @@ export const schema = object(
 );
 
 // Default value
-export function defaultValuesEffectif({ lockAtCreate = false }) {
+export function defaultValuesEffectif() {
   return {
     apprenant: defaultValuesApprenant(),
     contrats: [],
     formation: defaultValuesFormationEffectif(),
-    is_lock: defaultValuesEffectifFieldsLocker(lockAtCreate),
+    is_lock: defaultValuesEffectifFieldsLocker(),
     validation_errors: [],
+    _computed: {},
     updated_at: new Date(),
     created_at: new Date(),
-  };
-}
-
-// TODO Extra validation
-export function validateEffectif(props: Effectif, getErrors = false) {
-  if (getErrors) {
-    const errorsApprenant = validateApprenant(props.apprenant, getErrors);
-    const errorsFormation = validateFormationEffectif(props.formation, getErrors);
-    const entityValidation = schemaValidation({
-      entity: props,
-      schema,
-      getErrors,
-    });
-    return uniqBy([...entityValidation, ...errorsApprenant, ...errorsFormation], "fieldName");
-  }
-
-  return schemaValidation({
-    entity: {
-      ...props,
-      apprenant: validateApprenant(props.apprenant, getErrors),
-      formation: validateFormationEffectif(props.formation, getErrors),
-    },
-    schema,
-    getErrors,
-  });
+  } satisfies PartialDeep<Effectif>;
 }
 
 export default { schema, indexes, collectionName };

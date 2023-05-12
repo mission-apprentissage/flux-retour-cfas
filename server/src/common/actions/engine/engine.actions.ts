@@ -1,30 +1,24 @@
 import { isEqual } from "date-fns";
-import Joi from "joi";
-import { capitalize, cloneDeep, get } from "lodash-es";
-import { ObjectId } from "mongodb";
+import { cloneDeep, get } from "lodash-es";
+import { PartialDeep } from "type-fest";
 
-import { buildEffectif, findEffectifByQuery, validateEffectifObject } from "@/common/actions/effectifs.actions";
+import { findEffectifByQuery } from "@/common/actions/effectifs.actions";
 import {
+  createOrganisme,
   findOrganismeBySiret,
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
+  structureOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
-import { ACADEMIES, REGIONS, DEPARTEMENTS } from "@/common/constants/territoires";
+import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_ID, REGIONS_BY_ID } from "@/common/constants/territoires";
+import { Organisme } from "@/common/model/@types";
 import { Effectif } from "@/common/model/@types/Effectif";
-import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "@/common/utils/formatterUtils";
-import { telephoneConverter } from "@/common/validation/utils/frenchTelephoneNumber";
+import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
+import { EffectifsV3Queue } from "@/common/model/@types/EffectifsV3Queue";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils";
-
-const dateConverter = (date) => {
-  // TODO If more than year 4000 error
-  if (date instanceof Date) return jsDateToLuxon(date).toISO();
-  else {
-    const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
-    return date_ISO ?? date;
-  }
-};
 
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
@@ -78,177 +72,202 @@ export const buildNewHistoriqueStatutApprenant = (
 };
 
 /**
- * Fonction de remplissage d'un effectif à créer ou à mettre à jour
- * Contrôle si l'effectif en entrée existe déja en base
- * Va créer un effectif structuré avec les erreurs éventuelles de modèle
- * @param {*} effectifData
- * @param {*} [options]
+ * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
  */
-export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: ObjectId }, options?: any) => {
-  const queryKeys = options?.queryKeys ?? ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"];
-  const checkIfExist = options?.checkIfExist ?? false;
+export const completeEffectifAddress = async <T extends Partial<Effectif>>(effectifData: T) => {
+  if (!effectifData.apprenant?.adresse) {
+    return effectifData;
+  }
+  const codePostalOrCodeInsee =
+    effectifData.apprenant?.adresse?.code_insee || effectifData.apprenant?.adresse?.code_postal;
 
-  let {
+  if (!codePostalOrCodeInsee) {
+    return effectifData;
+  }
+  const effectifDataWithAddress: T & { apprenant: Effectif["apprenant"] } = cloneDeep(effectifData);
+
+  const cpInfo = await getCodePostalInfo(codePostalOrCodeInsee);
+  const adresseInfo = cpInfo?.result;
+  if (!adresseInfo) {
+    return effectifData;
+  }
+
+  effectifDataWithAddress.apprenant.adresse = {
+    ...effectifDataWithAddress.apprenant.adresse,
+    commune: adresseInfo.commune,
+    code_insee: adresseInfo.code_commune_insee,
+    code_postal: adresseInfo.code_postal,
+    departement: DEPARTEMENTS_BY_CODE[adresseInfo.num_departement] ? (adresseInfo.num_departement as any) : undefined,
+    academie: ACADEMIES_BY_ID[adresseInfo.num_academie.toString()]
+      ? (adresseInfo.num_academie.toString() as any)
+      : undefined,
+    region: REGIONS_BY_ID[adresseInfo.num_region] ? (adresseInfo.num_region as any) : undefined,
+  };
+
+  return effectifDataWithAddress;
+};
+
+export const checkIfEffectifExists = async (
+  effectif: Effectif,
+  queryKeys = ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"]
+) => {
+  // Recherche de l'effectif via sa clé d'unicité
+  const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
+  return await findEffectifByQuery(query);
+};
+
+/**
+ * Création d'un objet effectif depuis les données d'un dossierApprenant
+ */
+export const mapEffectifQueueToEffectif = (dossiersApprenant: EffectifsQueue): PartialDeep<Effectif> => {
+  const {
     annee_scolaire,
     source,
     id_erp_apprenant,
-    apprenant: { nom, prenom },
-    formation: { cfd },
-  } = await Joi.object({
-    organisme_id: Joi.any().required(),
-    annee_scolaire: Joi.string().required(),
-    source: Joi.string().required(),
-    id_erp_apprenant: Joi.string().required(),
-    apprenant: Joi.object({
-      nom: Joi.string().allow("").required(),
-      prenom: Joi.string().allow("").required(),
-    }).unknown(),
-    formation: Joi.object({
-      cfd: Joi.string().allow("").required(),
-    }).unknown(),
-  })
-    .unknown()
-    .validateAsync(effectifData, { abortEarly: false });
+    id_formation: cfd,
+    formation_rncp: rncp,
+    libelle_long_formation: libelle_long,
+    periode_formation: periode,
+    annee_formation: annee,
+    code_commune_insee_apprenant,
+    contrat_date_debut,
+    contrat_date_fin,
+    contrat_date_rupture,
+    statut_apprenant,
+    date_metier_mise_a_jour_statut,
+    nom_apprenant: nom,
+    prenom_apprenant: prenom,
+    ine_apprenant: ine,
+    date_de_naissance_apprenant: date_de_naissance,
+    email_contact: courriel,
+    tel_apprenant: telephone,
+  } = dossiersApprenant;
 
-  let convertedEffectif = cloneDeep(effectifData);
-
-  if (effectifData.apprenant.date_de_naissance) {
-    convertedEffectif.apprenant.date_de_naissance = dateConverter(effectifData.apprenant.date_de_naissance);
-  }
-
-  if (effectifData.contrats?.length) {
-    for (const [key, contrat] of effectifData.contrats.entries()) {
-      if (contrat.date_debut) {
-        convertedEffectif.contrats[key].date_debut = dateConverter(contrat.date_debut);
-      }
-      if (contrat.date_fin) {
-        convertedEffectif.contrats[key].date_fin = dateConverter(contrat.date_fin);
-      }
-      if (contrat.date_rupture) {
-        convertedEffectif.contrats[key].date_rupture = dateConverter(contrat.date_rupture);
-      }
-    }
-  }
-
-  if (effectifData.apprenant.historique_statut?.length) {
-    for (const [key, contrat] of effectifData.apprenant.historique_statut.entries()) {
-      if (contrat.date_statut) {
-        convertedEffectif.apprenant.historique_statut[key].date_statut = dateConverter(contrat.date_statut);
-      }
-    }
-  }
-
-  if (effectifData?.formation?.date_debut_formation) {
-    convertedEffectif.formation.date_debut_formation = dateConverter(effectifData.formation.date_debut_formation);
-  }
-  if (effectifData?.formation?.date_fin_formation) {
-    convertedEffectif.formation.date_fin_formation = dateConverter(effectifData.formation.date_fin_formation);
-  }
-  if (effectifData?.formation?.date_obtention_diplome) {
-    convertedEffectif.formation.date_obtention_diplome = dateConverter(effectifData.formation.date_obtention_diplome);
-  }
-
-  const repetitionVoieConverter = (repetition_voie) => {
-    const fullRep = { Bis: "B", Ter: "T", Quater: "Q", ["Quinquiès"]: "C" };
-    return fullRep[capitalize(repetition_voie)] ?? repetition_voie;
-  };
-  if (effectifData.apprenant.adresse?.repetition_voie) {
-    convertedEffectif.apprenant.adresse.repetition_voie = repetitionVoieConverter(
-      effectifData.apprenant.adresse.repetition_voie.trim()
-    );
-  }
-  // TODO other repetition_voie
-
-  /**
-   * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
-   * @param {*} codePostalOrCodeInsee
-   */
-  const fillConvertedEffectifAdresseData = async (codePostalOrCodeInsee) => {
-    const cpInfo = await getCodePostalInfo(codePostalOrCodeInsee);
-    const adresseInfo = cpInfo?.result;
-    if (adresseInfo?.code_postal) {
-      convertedEffectif.apprenant.adresse.code_postal = adresseInfo.code_postal;
-    }
-
-    if (adresseInfo?.code_commune_insee) {
-      convertedEffectif.apprenant.adresse.code_insee = adresseInfo.code_commune_insee;
-    }
-
-    if (adresseInfo?.commune) {
-      convertedEffectif.apprenant.adresse.commune = adresseInfo.commune;
-    }
-
-    // Lookup département code in reference list
-    if (adresseInfo?.num_departement && DEPARTEMENTS.map(({ code }) => code).includes(adresseInfo.num_departement)) {
-      convertedEffectif.apprenant.adresse.departement = adresseInfo.num_departement;
-    }
-
-    // Lookup academie code in reference list
-    if (
-      adresseInfo?.num_academie &&
-      Object.values(ACADEMIES)
-        .map(({ code }) => `${code}`)
-        .includes(`${adresseInfo.num_academie}`)
-    ) {
-      convertedEffectif.apprenant.adresse.academie = `${adresseInfo.num_academie}`;
-    }
-
-    // Lookup région code in reference list
-    if (
-      adresseInfo?.num_region &&
-      Object.values(REGIONS)
-        .map(({ code }) => code)
-        .includes(adresseInfo.num_region)
-    ) {
-      convertedEffectif.apprenant.adresse.region = adresseInfo.num_region;
-    }
-  };
-
-  if (effectifData.apprenant.adresse?.code_insee) {
-    await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_insee);
-  } else if (effectifData.apprenant.adresse?.code_postal) {
-    await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_postal);
-  }
-
-  if (effectifData.apprenant.telephone) {
-    convertedEffectif.apprenant.telephone = telephoneConverter(effectifData.apprenant.telephone);
-  }
-  if (effectifData.apprenant.representant_legal?.telephone) {
-    convertedEffectif.apprenant.representant_legal.telephone = telephoneConverter(
-      effectifData.apprenant.representant_legal.telephone
-    );
-  }
-
-  const effectif = buildEffectif(
-    {
-      organisme_id: effectifData.organisme_id,
-      annee_scolaire,
-      source,
-      id_erp_apprenant,
-      ...convertedEffectif,
-      apprenant: {
-        nom,
-        prenom,
-        ...convertedEffectif.apprenant,
-      },
-      formation: {
-        cfd,
-        ...convertedEffectif.formation,
-      },
+  return stripEmptyFields({
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
+    apprenant: {
+      historique_statut: [
+        {
+          valeur_statut: statut_apprenant,
+          date_statut: new Date(date_metier_mise_a_jour_statut),
+          date_reception: new Date(),
+        },
+      ] as Effectif["apprenant"]["historique_statut"],
+      ine,
+      nom,
+      prenom,
+      date_de_naissance,
+      courriel,
+      telephone,
+      adresse: { code_insee: code_commune_insee_apprenant },
     },
-    false
-  );
+    // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
+    contrats:
+      contrat_date_debut || contrat_date_fin || contrat_date_rupture
+        ? [
+            stripEmptyFields({
+              date_debut: contrat_date_debut,
+              date_fin: contrat_date_fin,
+              date_rupture: contrat_date_rupture,
+            }),
+          ]
+        : [],
+    formation: {
+      cfd,
+      rncp,
+      libelle_long,
+      periode,
+      annee,
+    },
+  });
+};
 
-  const validatedEffectif = validateEffectifObject(effectif);
+export const mapEffectifQueueV3ToEffectif = (dossiersApprenant: EffectifsV3Queue): PartialDeep<Effectif> => {
+  const {
+    source,
+    apprenant: {
+      nom,
+      prenom,
+      date_de_naissance,
+      email: courriel,
+      id_erp: id_erp_apprenant,
+      ine,
+      code_commune_insee: code_commune_insee_apprenant,
+      statut: statut_apprenant,
+      date_metier_mise_a_jour_statut,
+      telephone,
+    } = {},
+    formation: { annee_scolaire, code_cfd: cfd, code_rncp: rncp, libelle_long, periode, annee } = {},
+    contrat: { date_debut: contrat_date_debut, date_fin: contrat_date_fin, date_rupture: contrat_date_rupture } = {},
+  } = dossiersApprenant;
 
-  let found: any = null;
-  if (checkIfExist) {
-    // Recherche de l'effectif via sa clé d'unicité
-    const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
-    found = await findEffectifByQuery(query);
-  }
+  return stripEmptyFields({
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
+    apprenant: {
+      historique_statut: [
+        {
+          valeur_statut: statut_apprenant,
+          date_statut: new Date(date_metier_mise_a_jour_statut),
+          date_reception: new Date(),
+        },
+      ] as Effectif["apprenant"]["historique_statut"],
+      ine,
+      nom,
+      prenom,
+      date_de_naissance,
+      courriel,
+      telephone,
+      adresse: { code_insee: code_commune_insee_apprenant },
+    },
+    // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
+    contrats:
+      contrat_date_debut || contrat_date_fin || contrat_date_rupture
+        ? [
+            stripEmptyFields({
+              date_debut: contrat_date_debut,
+              date_fin: contrat_date_fin,
+              date_rupture: contrat_date_rupture,
+            }),
+          ]
+        : [],
+    formation: {
+      cfd,
+      rncp,
+      libelle_long,
+      periode,
+      annee,
+    },
+  });
+};
 
-  return { effectif: validatedEffectif, found };
+/**
+ * Création d'un objet organisme depuis les données d'un dossierApprenant
+ */
+export const mapEffectifQueueToOrganisme = (
+  dossiersApprenant: EffectifsQueue
+): Pick<Partial<Organisme>, "nom" | "uai" | "siret"> => {
+  return {
+    uai: dossiersApprenant.uai_etablissement,
+    siret: dossiersApprenant.siret_etablissement,
+    nom: dossiersApprenant.nom_etablissement,
+  };
+};
+
+/**
+ * Création d'un objet organisme depuis les données d'un dossierApprenant V3
+ */
+export const mapEffectifV3QueueToOrganisme = (
+  dossiersApprenant: EffectifsV3Queue
+): Pick<Partial<Organisme>, "nom" | "uai" | "siret"> => {
+  return {
+    uai: dossiersApprenant.etablissement_formateur?.uai,
+    siret: dossiersApprenant.etablissement_formateur?.siret,
+    nom: dossiersApprenant.etablissement_formateur?.nom,
+  };
 };
 
 /**
@@ -259,8 +278,9 @@ export const hydrateEffectif = async (effectifData: Effectif & { organisme_id: O
  * ?? Pas besoin d'update car le runEngine ne va que créer / contrôler l'existant
  * ?? -> La MAJ d'un organisme ne doit pas se faire via l'API / migration ???
  */
-export const resolveOrganisme = async ({ uai, siret }: { uai?: string | undefined; siret?: string | undefined }) => {
+export const findOrCreateOrganisme = async (organisme: ReturnType<typeof mapEffectifQueueToOrganisme>) => {
   let error: string | null = null;
+  const { uai, siret } = organisme;
 
   // Applique le mapping de fiabilisation
   const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
@@ -274,23 +294,34 @@ export const resolveOrganisme = async ({ uai, siret }: { uai?: string | undefine
   // Applique les règles de rejection si pas dans la db
   const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
 
-  if (!organismeFoundWithUaiSiret) {
-    if (cleanSiret) {
-      const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
-      // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> erreur
-      if (organismeFoundWithSiret?._id)
-        error = `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`;
-    }
-    if (cleanUai) {
-      const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
-      // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> erreur
-      if (organismeFoundWithUai?._id)
-        error = `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`;
-    }
+  if (organismeFoundWithUaiSiret) {
+    return organismeFoundWithUaiSiret;
   }
 
-  return {
-    organisme: organismeFoundWithUaiSiret || { _id: undefined, uai: cleanUai, siret: cleanSiret },
-    error: error,
-  };
+  if (cleanSiret) {
+    const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
+    // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> erreur
+    if (organismeFoundWithSiret?._id)
+      error = `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`;
+  }
+  if (cleanUai) {
+    const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
+    // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> erreur
+    if (organismeFoundWithUai?._id)
+      error = `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`;
+  }
+
+  if (error) {
+    throw error;
+  }
+
+  // nouvelle organisme, on va récupérer les données avec l'API entreprise
+  const organismeData = await structureOrganisme({
+    ...organisme,
+    ...(cleanUai ? { uai: cleanUai } : {}),
+    ...(cleanSiret ? { siret: cleanSiret } : {}),
+  });
+  const newOrganisme = await createOrganisme(organismeData as Organisme);
+
+  return newOrganisme;
 };

@@ -1,7 +1,4 @@
-import Joi from "joi";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { schemaValidation } from "@/common/utils/schemaUtils";
 
 import { object, objectId, objectIdOrNull, string, date, boolean } from "./json-schema/jsonSchemaTypes";
 
@@ -38,20 +35,6 @@ export function defaultValuesPermission() {
     created_at: new Date(),
     updated_at: new Date(),
   };
-}
-
-// Extra validation
-export function validatePermission(props) {
-  return schemaValidation({
-    entity: props,
-    schema,
-    extensions: [
-      {
-        name: "userEmail",
-        base: Joi.string().email(),
-      },
-    ],
-  });
 }
 
 export default { schema, indexes, collectionName };

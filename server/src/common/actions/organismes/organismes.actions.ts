@@ -15,7 +15,7 @@ import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb, effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
-import { defaultValuesOrganisme, validateOrganisme } from "@/common/model/organismes.model";
+import { defaultValuesOrganisme } from "@/common/model/organismes.model";
 import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
@@ -32,43 +32,16 @@ const SEARCH_RESULTS_LIMIT = 50;
  * @param {*} organismeProps
  * @returns
  */
-export const createOrganisme = async (
-  { uai, siret, nom: nomIn, adresse: adresseIn, ferme: fermeIn, ...data }: any,
-  options: any = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
-) => {
-  if ((await organismesDb().countDocuments({ uai, siret })) > 0) {
-    throw new Error(`Un organisme avec l'UAI ${uai} et le siret ${siret} existe déjà`);
+export const createOrganisme = async (data: Organisme) => {
+  if ((await organismesDb().countDocuments({ ...(data.uai ? { uai: data.uai } : {}), siret: data.siret })) > 0) {
+    throw new Error(`Un organisme avec l'UAI ${data.uai} et le siret ${data.siret} existe déjà`);
   }
 
-  const { callLbaApi, buildFormationTree, buildInfosFromSiret } = options;
-
-  // Récupération des infos depuis API LBA si option active
-  const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
-
-  // Construction de l'arbre des formations de l'organisme si option active
-  const relatedFormations = buildFormationTree ? (await getFormationsTreeForOrganisme(uai))?.formations || [] : [];
-
-  // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
-  const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
-    ? await getOrganismeInfosFromSiret(siret)
-    : { nom: nomIn?.trim(), adresse: adresseIn, ferme: fermeIn, enseigne: undefined, raison_sociale: undefined };
-  const dataToInsert = validateOrganisme({
+  const dataToInsert = {
     ...defaultValuesOrganisme(),
-    ...stripEmptyFields({
-      uai,
-      nom,
-      siret,
-      ...(callLbaApi ? { metiers } : {}),
-      ...(buildFormationTree ? { relatedFormations } : {}),
-      ...(adresse ? { adresse } : {}),
-      ...data,
-      ferme: ferme || false,
-      ...(enseigne ? { enseigne } : {}),
-      ...(raison_sociale ? { raison_sociale } : {}),
-    }),
-  });
+    ...stripEmptyFields(data),
+  };
   const { insertedId } = await organismesDb().insertOne(dataToInsert);
-
   return {
     _id: insertedId,
     ...dataToInsert,
@@ -97,14 +70,14 @@ const getMetiersFromLba = async (siret) => {
  * @param {*} siret
  * @returns Object
  */
-const getOrganismeInfosFromSiret = async (siret: any) => {
-  let organismeInfos: any = {};
+export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial<Organisme>> => {
+  let organismeInfos: Partial<Organisme> = {};
 
   if (siret) {
     const dataSiret = await findDataFromSiret(siret, true, false);
 
     if (dataSiret.messages.api_entreprise === "Ok") {
-      organismeInfos.ferme = dataSiret.result.ferme;
+      organismeInfos.ferme = !!dataSiret.result.ferme;
 
       if (dataSiret.result.enseigne) {
         organismeInfos.enseigne = dataSiret.result.enseigne;
@@ -137,15 +110,7 @@ const getOrganismeInfosFromSiret = async (siret: any) => {
 /**
  * Création d'un objet organisme
  */
-export const structureOrganisme = async ({
-  uai,
-  siret,
-  nom,
-}: {
-  uai?: string | undefined;
-  siret?: string | undefined;
-  nom?: string;
-}) => {
+export const structureOrganisme = async <T extends Partial<Organisme>>({ uai, siret, nom }: T) => {
   let adresseForOrganisme = {};
   if (uai) {
     adresseForOrganisme = buildAdresseFromUai(uai);
@@ -234,67 +199,53 @@ export const findOrganismesByQuery = async (query, projection = {}) => {
 
 /**
  * Méthode de mise à jour d'un organisme depuis son id
+ *
  * @param {string|ObjectId} id
  * @param {Object} data
  * @param {Object} options
  * @returns
  */
-export const updateOrganisme = async (
-  id: string | ObjectId,
-  { nom: nomIn, adresse: adresseIn, ferme: fermeIn, siret, ...data }: any,
-  options: any = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
-) => {
-  const _id = typeof id === "string" ? new ObjectId(id) : id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-
+export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) => {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  const { callLbaApi, buildFormationTree, buildInfosFromSiret } = options;
-
-  // Récupération des infos depuis API LBA si option active
-  const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
-
-  // Construction de l'arbre des formations de l'organisme si option active
-  const relatedFormations = buildFormationTree
-    ? (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || []
-    : [];
-
-  // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
-  const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
-    ? await getOrganismeInfosFromSiret(siret)
-    : {
-        nom: nomIn,
-        adresse: adresseIn,
-        ferme: typeof fermeIn === "boolean" ? fermeIn : organisme.ferme,
-        enseigne: undefined,
-        raison_sociale: undefined,
-      }; // si aucun champ ferme fourni en entrée on récupère celui de l'organisme trouvé par son id
-
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
-      $set: validateOrganisme({
+      $set: {
         ...organisme,
-        ...(organisme.uai ? { uai: organisme.uai } : {}),
-        ...(siret ? { siret } : {}),
         ...data,
-        ...(nom ? { nom: nom.trim() } : {}),
-        ...(callLbaApi ? { metiers } : {}),
-        ...(buildFormationTree ? { relatedFormations } : {}),
-        ...(adresse ? { adresse } : {}),
-        ...(ferme ? { ferme } : { ferme: false }), // Si aucun champ ferme fourni false par défaut
-        ...(enseigne ? { enseigne } : {}),
-        ...(raison_sociale ? { raison_sociale } : {}),
         updated_at: new Date(),
-      }),
+      },
     },
     { returnDocument: "after" }
   );
 
-  return updated.value;
+  return updated.value as WithId<Organisme>;
+};
+
+export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
+  const data: Partial<Organisme> = {};
+
+  data.metiers = await getMetiersFromLba(organisme.siret);
+
+  // Construction de l'arbre des formations de l'organisme si option active
+  data.relatedFormations = (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [];
+
+  const updated = await organismesDb().findOneAndUpdate(
+    { _id: organisme._id },
+    {
+      $set: {
+        ...data,
+        updated_at: new Date(),
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value as WithId<Organisme>;
 };
 
 /**
@@ -302,8 +253,8 @@ export const updateOrganisme = async (
  * @param {*} organisme
  * @returns
  */
-export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) =>
-  organismesDb().findOneAndUpdate(
+export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) => {
+  const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
       $set: {
@@ -311,8 +262,14 @@ export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>
         last_transmission_date: new Date(),
         updated_at: new Date(),
       },
-    }
+    },
+    { returnDocument: "after" }
   );
+  if (!updated.value) {
+    throw new Error(`Could not set organisme transmission dates on organisme ${organisme._id.toString()}`);
+  }
+  return updated.value as WithId<Organisme>;
+};
 
 /**
  * Returns sous-établissements by siret for an uai
@@ -561,13 +518,11 @@ export const getDetailedOrganismeById = async (_id) => {
 
 /**
  * Met à jour le nombre d'effectifs d'un organisme
- * @param {*} _id
- * @returns
  */
-export const updateEffectifsCount = async (organisme_id) => {
-  const total = await effectifsDb().count({ organisme_id });
+export const updateEffectifsCount = async (organisme_id: ObjectId) => {
+  const total = await effectifsDb().countDocuments({ organisme_id });
   const currentYear = new Date().getFullYear();
-  const totalCurrentYear = await effectifsDb().count({
+  const totalCurrentYear = await effectifsDb().countDocuments({
     organisme_id,
     annee_scolaire: { $in: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`] },
   });

@@ -1,5 +1,6 @@
 import { ObjectId, WithId } from "mongodb";
 
+import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { NewOrganisation } from "@/common/model/organisations.model";
@@ -88,16 +89,8 @@ export const userOrganisme = organismes[0];
 export const commonEffectifsAttributes: Pick<{ [key in keyof Effectif]: Effectif[key] }, "organisme_id" | "_computed"> =
   {
     organisme_id: userOrganisme._id,
-    _computed: {
-      organisme: {
-        region: userOrganisme.adresse!.region!, // eslint-disable-line @typescript-eslint/no-non-null-assertion -- mauvais typage TS
-        departement: userOrganisme.adresse!.departement!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-        academie: userOrganisme.adresse!.academie!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-        reseaux: userOrganisme.reseaux!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-        uai: userOrganisme.uai as string,
-        siret: userOrganisme.siret,
-      },
-    },
+
+    _computed: addEffectifComputedFields(userOrganisme),
   };
 
 export interface ProfilPermission {

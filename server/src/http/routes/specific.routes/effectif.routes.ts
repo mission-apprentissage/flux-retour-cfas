@@ -7,7 +7,7 @@ import { updateEffectif } from "@/common/actions/effectifs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { getUploadByOrgId } from "@/common/actions/uploads.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
-import { CODE_POSTAL_REGEX } from "@/common/constants/organisme";
+import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
 import { effectifsDb } from "@/common/model/collections";
 import { schema } from "@/common/model/effectifs.model/effectifs.model";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
@@ -164,27 +164,6 @@ export default () => {
 
   // TODO https://github.com/mission-apprentissage/flux-retour-cfas/issues/2387
   // router.post("/", async ({ body }, res) => {
-  //   const { organisme_id, annee_scolaire, source, apprenant, formation } = await Joi.object({
-  //     organisme_id: Joi.string().required(),
-  //     annee_scolaire: Joi.string().required(),
-  //     source: Joi.string().required(),
-  //     apprenant: Joi.object({
-  //       nom: Joi.string().required(),
-  //       prenom: Joi.string().required(),
-  //     }).required(),
-  //     formation: Joi.object({
-  //       cfd: Joi.string().required(),
-  //     }).required(),
-  //   }).validateAsync(body, { abortEarly: false });
-
-  //   const effectif = await createEffectif({
-  //     organisme_id,
-  //     annee_scolaire,
-  //     source,
-  //     apprenant,
-  //     formation,
-  //   });
-  //   return res.json(effectif);
   // });
 
   router.put("/:id", async ({ body, params }, res) => {
@@ -204,9 +183,7 @@ export default () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
-      merge(effectifDb, {
-        ...stripEmptyFields(restData),
-      });
+      merge(effectifDb, stripEmptyFields(restData));
 
     // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
     if (dataToUpdate.formation.date_debut_formation)

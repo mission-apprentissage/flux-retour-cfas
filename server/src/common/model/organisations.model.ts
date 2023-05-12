@@ -2,15 +2,15 @@ import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
-import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/organisme";
 import {
   REGIONS,
   DEPARTEMENTS,
   ACADEMIES,
   ACADEMIES_BY_ID,
-  DEPARTEMENTS_BY_ID,
+  DEPARTEMENTS_BY_CODE,
   REGIONS_BY_ID,
 } from "@/common/constants/territoires";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
 import { date, object, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes";
 
@@ -105,7 +105,7 @@ export function getOrganisationLabel(organisation: NewOrganisation): string {
     case "CONSEIL_REGIONAL":
       return `Conseil régional ${REGIONS_BY_ID[organisation.code_region]?.nom || organisation.code_region}`;
     case "DDETS":
-      return `DDETS ${DEPARTEMENTS_BY_ID[organisation.code_departement]?.nom || organisation.code_departement}`;
+      return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement}`;
     case "ACADEMIE":
       return `Académie ${ACADEMIES_BY_ID[organisation.code_academie]?.nom || organisation.code_academie}`;
 

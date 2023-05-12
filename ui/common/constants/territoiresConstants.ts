@@ -1522,7 +1522,7 @@ export const DEPARTEMENTS = [
     },
   },
 ];
-export const DEPARTEMENTS_BY_ID = DEPARTEMENTS.reduce((acc, departement) => {
+export const DEPARTEMENTS_BY_CODE = DEPARTEMENTS.reduce((acc, departement) => {
   acc[departement.code] = departement;
   return acc;
 }, {});
@@ -1566,10 +1566,10 @@ export const ACADEMIES = {
   78: { nom: "Saint-Martin", code: 78 },
 };
 
-export const ACADEMIES_BY_ID = Object.values(ACADEMIES).reduce((acc, academie) => {
-  acc[academie.code] = academie;
+export const ACADEMIES_BY_CODE = Object.values(ACADEMIES).reduce((acc, academie) => {
+  acc[academie.code.toString()] = academie;
   return acc;
-});
+}, {});
 
 export const TERRITOIRE_TYPE = {
   REGION: "region",

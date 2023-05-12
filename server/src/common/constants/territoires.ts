@@ -1521,7 +1521,7 @@ export const DEPARTEMENTS = [
   },
 ];
 
-export const DEPARTEMENTS_BY_ID = DEPARTEMENTS.reduce((acc, departement) => {
+export const DEPARTEMENTS_BY_CODE = DEPARTEMENTS.reduce((acc, departement) => {
   acc[departement.code] = departement;
   return acc;
 }, {});
