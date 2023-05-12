@@ -35,6 +35,7 @@ services:
     build:
       context: ui
     mem_limit: 256m
+    restart: unless-stopped
     networks:
       - flux_retour_cfas_network
     depends_on:
@@ -67,7 +68,7 @@ services:
       context: server
     command: [ "yarn", "cli", "process:effectifs-queue" ]
     mem_limit: 2g
-    restart: always
+    restart: unless-stopped
     networks:
       - flux_retour_cfas_network
     depends_on:
