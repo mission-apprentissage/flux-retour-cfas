@@ -1,54 +1,72 @@
 import { InfoOutlineIcon } from "@chakra-ui/icons";
-import { Flex, Button, HStack, Text, Box, Heading, Divider } from "@chakra-ui/react";
+import { Flex, Button, HStack, Text, Box, Heading, Divider, Center, Spinner } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+import { useMemo } from "react";
 
+import { _get } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import Table from "@/components/Table/Table";
 
 import { InscritsSansContratsIcon, AbandonsIcon, RupturantsIcon, ApprentisIcon } from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
+import {
+  convertEffectifsFiltersToQuery,
+  EffectifsFiltersQuery,
+  parseEffectifsFiltersFromQuery,
+} from "../models/effectifs-filters";
+import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 
 import IndicateursFilter from "./FilterAccordion";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 
 function IndicateursForm() {
-  // DEBUG
-  const indicateursEffectifs = [
+  const router = useRouter();
+
+  const effectifsFilters = useMemo(() => {
+    const filters = parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery);
+
+    return filters;
+  }, [router.query]);
+
+  const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery<
+    IndicateursEffectifsAvecOrganisme[]
+  >(
+    ["indicateurs/effectifs/par-organisme", JSON.stringify(convertEffectifsFiltersToQuery(effectifsFilters))],
+    () =>
+      _get("/api/v1/indicateurs/effectifs/par-organisme", {
+        params: convertEffectifsFiltersToQuery(effectifsFilters),
+      }),
     {
-      nom: "Libellé de l'organisme",
-      uai: "0470815F",
-      siret: "19470019100035",
-      nature: "responsable_formateur",
-      apprentis: 9,
-      inscritsSansContrat: 2,
-      rupturants: 1,
-      abandons: 2,
-    },
-    {
-      nom: "Libellé de l'organisme 2",
-      uai: "0470815F",
-      siret: "19470019100035",
-      nature: "responsable_formateur",
-      apprentis: 9,
-      inscritsSansContrat: 2,
-      rupturants: 1,
-      abandons: 2,
-    },
-    {
-      nom: "Libellé de l'organisme 3",
-      uai: "0470815F",
-      siret: "19470019100035",
-      nature: "responsable_formateur",
-      apprentis: 9,
-      inscritsSansContrat: 2,
-      rupturants: 1,
-      abandons: 2,
-    },
-  ] as any;
-  const indicateursEffectifsLoading = true;
+      enabled: router.isReady,
+    }
+  );
+
+  const indicateursEffectifsTotaux = useMemo(
+    () =>
+      (indicateursEffectifs ?? []).reduce(
+        (acc, indicateursDepartement) => {
+          acc.apprenants += indicateursDepartement.apprenants;
+          acc.apprentis += indicateursDepartement.apprentis;
+          acc.inscritsSansContrat += indicateursDepartement.inscritsSansContrat;
+          acc.abandons += indicateursDepartement.abandons;
+          acc.rupturants += indicateursDepartement.rupturants;
+          return acc;
+        },
+        {
+          apprenants: 0,
+          apprentis: 0,
+          inscritsSansContrat: 0,
+          abandons: 0,
+          rupturants: 0,
+        }
+      ),
+    [indicateursEffectifs]
+  );
 
   return (
     <Flex gap={6}>
-      <Box w="280px" display="grid" gap={1}>
+      <Box minW="280px" display="grid" gap={1}>
         <HStack>
           <Heading as="h2" fontSize="24px" textTransform="uppercase">
             Filtrer par
@@ -126,114 +144,129 @@ function IndicateursForm() {
           </Text>
         </Ribbons>
 
-        <IndicateursGrid indicateursEffectifs={indicateursEffectifs} loading={indicateursEffectifsLoading} />
+        <IndicateursGrid indicateursEffectifs={indicateursEffectifsTotaux} loading={indicateursEffectifsLoading} />
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
 
-        <Table
-          mt={4}
-          data={indicateursEffectifs}
-          columns={{
-            nom: {
-              size: 1000,
-              header: () => (
-                <Text as="span" px={3} fontSize="sm" whiteSpace="nowrap" lineHeight="10">
-                  Nom de l’organisme
-                </Text>
-              ),
-              cell: ({ row }) => (
-                <>
-                  <Text fontSize="1rem" px={3} pt={2}>
-                    {row.original.nomOrga ?? row.original.nom}
+        {indicateursEffectifsLoading && (
+          <Center h="200px">
+            <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
+          </Center>
+        )}
+        {indicateursEffectifs && (
+          <Table
+            mt={4}
+            data={indicateursEffectifs}
+            columns={{
+              nom: {
+                size: 1000,
+                header: () => (
+                  <Text as="span" px={3} fontSize="sm" whiteSpace="nowrap" lineHeight="10">
+                    Nom de l’organisme
                   </Text>
-                  <Text fontSize="xs" px={3} py={2} color="#777777">
-                    UAI : {row.original.uai} - SIRET :{row.original.siret}
+                ),
+                cell: ({ row }) => (
+                  <>
+                    <Text
+                      fontSize="1rem"
+                      px={3}
+                      pt={2}
+                      whiteSpace="nowrap"
+                      textOverflow="ellipsis"
+                      overflow="hidden"
+                      title={row.original.nom}
+                    >
+                      {row.original.nom}
+                    </Text>
+                    <Text fontSize="xs" px={3} py={2} color="#777777">
+                      UAI : {row.original.uai} - SIRET :{row.original.siret}
+                    </Text>
+                  </>
+                ),
+              },
+              nature: {
+                size: 1,
+                header: () => (
+                  <Box px={2} whiteSpace="nowrap">
+                    <Text as="span" px={2} fontSize="sm">
+                      Nature
+                    </Text>
+                    <InfoOutlineIcon w="20px" h="20px" />
+                  </Box>
+                ),
+                cell: ({ getValue }) => (
+                  <Box px={2}>
+                    <NatureOrganismeTag nature={getValue()} />
+                  </Box>
+                ),
+              },
+              apprentis: {
+                size: 1,
+                header: () => (
+                  <Box px={2} whiteSpace="nowrap">
+                    <ApprentisIcon />
+                    <Text as="span" ml={2} fontSize="sm">
+                      Apprentis
+                    </Text>
+                  </Box>
+                ),
+                cell: ({ getValue }) => (
+                  <Text fontSize="1rem" px={2}>
+                    {getValue()}
                   </Text>
-                </>
-              ),
-            },
-            nature: {
-              size: 1,
-              header: () => (
-                <Box px={2} whiteSpace="nowrap">
-                  <Text as="span" px={2} fontSize="sm">
-                    Nature
+                ),
+              },
+              inscritsSansContrat: {
+                size: 1,
+                header: () => (
+                  <Box px={2} whiteSpace="nowrap">
+                    <InscritsSansContratsIcon />
+                    <Text as="span" ml={2} fontSize="sm">
+                      Sans contrat
+                    </Text>
+                  </Box>
+                ),
+                cell: ({ getValue }) => (
+                  <Text fontSize="1rem" px={2}>
+                    {getValue()}
                   </Text>
-                  <InfoOutlineIcon w="20px" h="20px" />
-                </Box>
-              ),
-              cell: ({ getValue }) => (
-                <Box px={2}>
-                  <NatureOrganismeTag nature={getValue()} />
-                </Box>
-              ),
-            },
-            apprentis: {
-              size: 1,
-              header: () => (
-                <Box px={2} whiteSpace="nowrap">
-                  <ApprentisIcon />
-                  <Text as="span" ml={2} fontSize="sm">
-                    Apprentis
+                ),
+              },
+              rupturants: {
+                size: 1,
+                header: () => (
+                  <Box px={2} whiteSpace="nowrap">
+                    <RupturantsIcon />
+                    <Text as="span" ml={2} fontSize="sm">
+                      Ruptures
+                    </Text>
+                  </Box>
+                ),
+                cell: ({ getValue }) => (
+                  <Text fontSize="1rem" px={2}>
+                    {getValue()}
                   </Text>
-                </Box>
-              ),
-              cell: ({ getValue }) => (
-                <Text fontSize="1rem" px={2}>
-                  {getValue()}
-                </Text>
-              ),
-            },
-            inscritsSansContrat: {
-              size: 1,
-              header: () => (
-                <Box px={2} whiteSpace="nowrap">
-                  <InscritsSansContratsIcon />
-                  <Text as="span" ml={2} fontSize="sm">
-                    Sans contrat
+                ),
+              },
+              abandons: {
+                size: 1,
+                header: () => (
+                  <Box px={2} whiteSpace="nowrap">
+                    <AbandonsIcon />
+                    <Text as="span" ml={2} fontSize="sm">
+                      Sorties
+                    </Text>
+                  </Box>
+                ),
+                cell: ({ getValue }) => (
+                  <Text fontSize="1rem" px={2}>
+                    {getValue()}
                   </Text>
-                </Box>
-              ),
-              cell: ({ getValue }) => (
-                <Text fontSize="1rem" px={2}>
-                  {getValue()}
-                </Text>
-              ),
-            },
-            rupturants: {
-              size: 1,
-              header: () => (
-                <Box px={2} whiteSpace="nowrap">
-                  <RupturantsIcon />
-                  <Text as="span" ml={2} fontSize="sm">
-                    Ruptures
-                  </Text>
-                </Box>
-              ),
-              cell: ({ getValue }) => (
-                <Text fontSize="1rem" px={2}>
-                  {getValue()}
-                </Text>
-              ),
-            },
-            abandons: {
-              size: 1,
-              header: () => (
-                <Box px={2} whiteSpace="nowrap">
-                  <AbandonsIcon />
-                  <Text as="span" ml={2} fontSize="sm">
-                    Sorties
-                  </Text>
-                </Box>
-              ),
-              cell: ({ getValue }) => (
-                <Text fontSize="1rem" px={2}>
-                  {getValue()}
-                </Text>
-              ),
-            },
-          }}
-        />
+                ),
+              },
+            }}
+          />
+        )}
       </Box>
     </Flex>
   );

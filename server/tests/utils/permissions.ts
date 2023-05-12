@@ -39,7 +39,7 @@ const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key]
   reseaux: ["CCI"],
   erps: ["YMAG"],
   nature: "responsable_formateur",
-  nom: "ADEN Formations (Caen)",
+  raison_sociale: "ADEN Formations (Caen)",
   fiabilisation_statut: "INCONNU",
   metiers: [],
   relatedFormations: [],

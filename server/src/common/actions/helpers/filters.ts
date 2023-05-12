@@ -119,8 +119,8 @@ export const organismesFiltersConfigurations: { [key in keyof Required<Organisme
 };
 
 export const effectifsFiltersSchema = {
-  date: z.preprocess((str: any) => new Date(str), z.date()),
   ...organismesFiltersSchema,
+  date: z.preprocess((str: any) => new Date(str), z.date()),
 };
 
 export type EffectifsFilters = z.infer<z.ZodObject<typeof effectifsFiltersSchema>>;
@@ -142,6 +142,55 @@ export const effectifsFiltersConfigurations: { [key in keyof Required<EffectifsF
     matchKey: "_computed.organisme.academie",
     transformValue: (value) => ({ $in: value }),
   },
+};
+
+/**
+ * Utilisé pour la recherche détaillée des indicateurs effectifs
+ */
+export const fullEffectifsFiltersSchema = {
+  ...effectifsFiltersSchema,
+  organisme_reseaux: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  // apprenant_genre: z.string(),
+  apprenant_tranchesAge: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  // apprenant_rqth: z.boolean().optional(),
+  formation_annees: z
+    .preprocess((str: any) => str.split(",").map((i) => parseInt(i, 10)), z.array(z.number()))
+    .optional(),
+  // formation_niveaux: z
+  //   .preprocess((str: any) => str.split(",").map((i) => parseInt(i, 10)), z.array(z.number()))
+  //   .optional(),
+};
+
+export type FullEffectifsFilters = z.infer<z.ZodObject<typeof fullEffectifsFiltersSchema>>;
+
+export const fullEffectifsFiltersConfigurations: {
+  [key in keyof Required<FullEffectifsFilters>]: FilterConfiguration;
+} = {
+  ...effectifsFiltersConfigurations,
+  organisme_reseaux: {
+    matchKey: "_computed.organisme.reseaux",
+    transformValue: (value) => ({ $in: value }),
+  },
+
+  // apprenant_genre: {
+  //   matchKey: "", // encore inconnu, INE ou civilité avec api v3 ?
+  // },
+  apprenant_tranchesAge: {
+    matchKey: "apprenant.date_de_naissance",
+    transformValue: (value) => ({ $in: value }), // TODO calculer les intervals
+  },
+  // apprenant_rqth: {
+  //   matchKey: "", // inconnu
+  // },
+
+  formation_annees: {
+    matchKey: "formation.annee",
+    transformValue: (value) => ({ $in: value }),
+  },
+  // formation_niveaux: {
+  //   matchKey: "formation.niveau",
+  //   transformValue: (value) => ({ $in: value }),
+  // },
 };
 
 export function buildMongoFilters<

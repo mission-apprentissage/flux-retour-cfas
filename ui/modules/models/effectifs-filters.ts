@@ -1,0 +1,49 @@
+import { stripEmptyFields } from "@/common/utils/misc";
+
+export interface EffectifsFiltersQuery {
+  date: string;
+  organisme_regions?: string;
+  organisme_departements?: string;
+  organisme_academies?: string;
+  organisme_bassinsEmploi?: string;
+  organisme_reseaux?: string;
+  apprenant_tranchesAge?: string;
+  formation_annees?: string;
+}
+
+export interface EffectifsFilters {
+  date: Date;
+  organisme_regions: string[];
+  organisme_departements: string[];
+  organisme_academies: string[];
+  organisme_bassinsEmploi: string[];
+  organisme_reseaux: string[];
+  apprenant_tranchesAge: string[];
+  formation_annees: number[];
+}
+
+export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): EffectifsFilters {
+  return {
+    date: new Date(query.date ?? Date.now()),
+    organisme_regions: query.organisme_regions?.split(",") ?? [],
+    organisme_departements: query.organisme_departements?.split(",") ?? [],
+    organisme_academies: query.organisme_academies?.split(",") ?? [],
+    organisme_bassinsEmploi: query.organisme_bassinsEmploi?.split(",") ?? [],
+    organisme_reseaux: query.organisme_reseaux?.split(",") ?? [],
+    apprenant_tranchesAge: query.apprenant_tranchesAge?.split(",") ?? [],
+    formation_annees: query.formation_annees?.split(",").map((i) => parseInt(i, 10)) ?? [],
+  };
+}
+
+export function convertEffectifsFiltersToQuery(query: EffectifsFilters): EffectifsFiltersQuery {
+  return stripEmptyFields({
+    date: query.date.toISOString(),
+    organisme_regions: query.organisme_regions?.join(","),
+    organisme_departements: query.organisme_departements?.join(","),
+    organisme_academies: query.organisme_academies?.join(","),
+    organisme_bassinsEmploi: query.organisme_bassinsEmploi?.join(","),
+    organisme_reseaux: query.organisme_reseaux?.join(","),
+    apprenant_tranchesAge: query.apprenant_tranchesAge?.join(","),
+    formation_annees: query.formation_annees?.join(","),
+  });
+}

@@ -23,11 +23,13 @@ import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/action
 import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions";
 import {
   effectifsFiltersSchema,
+  fullEffectifsFiltersSchema,
   legacyEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import {
   getIndicateursEffectifsParDepartement,
+  getIndicateursEffectifsParOrganisme,
   getIndicateursOrganismesParDepartement,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
@@ -506,6 +508,13 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
         return await getIndicateursEffectifsParDepartement(req.user, filters);
+      })
+    )
+    .get(
+      "/api/v1/indicateurs/effectifs/par-organisme",
+      returnResult(async (req) => {
+        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+        return await getIndicateursEffectifsParOrganisme(req.user, filters);
       })
     )
     .get(
