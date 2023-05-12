@@ -55,7 +55,7 @@ export const processEffectifsQueue = async (options?: Options) => {
     filter._id = id;
   }
 
-  const result = (await isV3)
+  const result = await (isV3
     ? processItems(
         filter,
         effectifsV3QueueDb(),
@@ -69,43 +69,54 @@ export const processEffectifsQueue = async (options?: Options) => {
         dossierApprenantSchemaV1V2(),
         mapEffectifQueueToEffectif,
         mapEffectifQueueToOrganisme
-      );
+      ));
   return result;
 };
 
+type ProcessItemsResult = {
+  totalProcessed: number;
+  totalValidItems: number;
+  totalInvalidItems: number;
+};
 async function processItems(
   filter: any,
   collection: ReturnType<typeof effectifsQueueDb>,
   validationSchema: ReturnType<typeof dossierApprenantSchemaV1V2>,
   mapItemToEffectif: typeof mapEffectifQueueToEffectif,
   mapItemToOrganisme: typeof mapEffectifQueueToOrganisme
-): Promise<any>;
+): Promise<ProcessItemsResult>;
 async function processItems(
   filter: any,
   collection: ReturnType<typeof effectifsV3QueueDb>,
   validationSchema: ReturnType<typeof dossierApprenantSchemaV3>,
   mapItemToEffectif: typeof mapEffectifQueueV3ToEffectif,
   mapItemToOrganisme: typeof mapEffectifV3QueueToOrganisme
-): Promise<any>;
+): Promise<ProcessItemsResult>;
 async function processItems(
   filter: any,
   collection: ReturnType<typeof effectifsV3QueueDb> | ReturnType<typeof effectifsQueueDb>,
   validationSchema: ReturnType<typeof dossierApprenantSchemaV3> | ReturnType<typeof dossierApprenantSchemaV1V2>,
   mapItemToEffectif: typeof mapEffectifQueueToEffectif | typeof mapEffectifQueueV3ToEffectif,
   mapItemToOrganisme: typeof mapEffectifQueueToOrganisme | typeof mapEffectifV3QueueToOrganisme
-): Promise<any> {
-  const count = await collection.countDocuments(filter);
+): Promise<ProcessItemsResult> {
+  const total = await collection.countDocuments(filter);
   let totalValidItems = 0;
 
-  const dataIn = await collection.find(filter).sort({ created_at: 1 }).limit(100).toArray();
+  const itemsToProcess = await collection.find(filter).sort({ created_at: 1 }).limit(100).toArray();
 
   logger.info(
-    `${dataIn.length}/${count} items à processer (dans la collection ${
+    {
+      collection: collection.collectionName,
+      filter,
+      count: itemsToProcess.length,
+      total,
+    },
+    `${itemsToProcess.length}/${total} items à processer (dans la collection ${
       collection.collectionName
     }, avec filtre ${JSON.stringify(filter)}})`
   );
   await PromisePool.withConcurrency(10)
-    .for(dataIn)
+    .for(itemsToProcess)
     .process(async (effectifQueued, index) => {
       try {
         const startDate = new Date();
@@ -184,21 +195,21 @@ async function processItems(
           return { validItem: result.success, error: undefined };
         }
       } catch (err: any) {
-        logger.error(`an error occured while processing effectif queue item ${index}: ${err.message}`);
+        logger.error({ err, index }, `an error occured while processing effectif queue item ${index}: ${err.message}`);
         logger.error(err);
         return { validItem: false, error: true };
       }
     });
 
-  logger.info(`${dataIn.length} items processés`);
-  if (dataIn.length > 0) {
+  logger.info(`${itemsToProcess.length} items processés`);
+  if (itemsToProcess.length > 0) {
     logger.info(`${totalValidItems} items valides`);
-    logger.info(`${dataIn.length - totalValidItems} items invalides`);
+    logger.info(`${itemsToProcess.length - totalValidItems} items invalides`);
   }
 
   return {
-    totalProcessed: dataIn.length,
+    totalProcessed: itemsToProcess.length,
     totalValidItems,
-    totalInvalidItems: dataIn.length - totalValidItems,
+    totalInvalidItems: itemsToProcess.length - totalValidItems,
   };
 }

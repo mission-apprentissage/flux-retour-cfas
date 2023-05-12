@@ -113,7 +113,6 @@ describe("Test des actions Organismes", () => {
     });
 
     it("returns created organisme when valid with UAI & SIRET & no API Calls", async () => {
-      // Création de l'organisme sans les appels API
       const { _id } = await createOrganisme(sampleOrganismeWithUAI);
       const created = await findOrganismeById(_id);
 
@@ -126,7 +125,6 @@ describe("Test des actions Organismes", () => {
     });
 
     it("returns created organisme when valid with SIRET and no UAI & no API Calls", async () => {
-      // Création de l'organisme sans les appels API
       const { _id } = await createOrganisme(sampleOrganismeWithoutUai);
       const created = await findOrganismeById(_id);
 
@@ -340,7 +338,6 @@ describe("Test des actions Organismes", () => {
 
   describe("setOrganismeTransmissionDates", () => {
     it("mets à jour les dates first_transmission_date et last_transmission_date pour un organisme sans first_transmission_date", async () => {
-      // Création de l'organisme sans les appels API
       const { _id } = await createOrganisme(sampleOrganismeWithUAI);
 
       // Vérification de la création sans first_transmission_date
@@ -358,7 +355,6 @@ describe("Test des actions Organismes", () => {
     it("mets à jour la date last_transmission_date pour un organisme avec first_transmission_date", async () => {
       const first_transmission_date = subDays(new Date(), 10);
 
-      // Création de l'organisme sans les appels API
       const { _id } = await createOrganisme({ ...sampleOrganismeWithUAI, first_transmission_date });
 
       // Vérification de la création avec first_transmission_date
