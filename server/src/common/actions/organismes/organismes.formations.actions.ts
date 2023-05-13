@@ -145,7 +145,7 @@ const getOrganismeNature = (defaultNature, formationCatalog, organismesLinkedToF
   const isResponsableEtFormateur =
     formationCatalog.etablissement_gestionnaire_uai === formationCatalog.etablissement_formateur_uai;
 
-  // Vérification s'il n'est pas déja dans la liste
+  // Vérification s'il n'est pas déjà dans la liste
   const isNotAlreadyInOrganismesLinkedToFormation = !organismesLinkedToFormation.some(
     (item) => item.uai === formationCatalog.etablissement_gestionnaire_uai
   );

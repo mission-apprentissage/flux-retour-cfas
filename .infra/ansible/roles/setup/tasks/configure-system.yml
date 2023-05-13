@@ -12,7 +12,7 @@
 - include_role:
     name: geerlingguy.docker
 
-- name: Vérification binaires ctop déja installés
+- name: Vérification binaires ctop déjà installés
   stat: path=/usr/local/bin/ctop
   register: ctop
 

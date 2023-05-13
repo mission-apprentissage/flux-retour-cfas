@@ -20,7 +20,7 @@ let nbOrganismeNotUpdated = 0;
 /**
  * Script qui initialise le stock des organismes
  * 1. On va créer tous les organismes "stock" non présents dans le tdb mais existants dans le référentiel
- * 2. Pour les organismes déja présents va MAJ les organismes présent
+ * 2. Pour les organismes déjà présents va MAJ les organismes présent
  * Le format adresse des organismes du référentiel est différent du format tdb donc on va transformer le champ adresse
  * En cas d'erreurs on log via un createJobEvent()
  */

@@ -492,7 +492,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
   });
 
   describe("checkCoupleNonFiabilisable", () => {
-    it("Vérifie un retour FALSE pour un couple du TDB pour lequel il existe déja une entrée dans la table de fiabilisation", async () => {
+    it("Vérifie un retour FALSE pour un couple du TDB pour lequel il existe déjà une entrée dans la table de fiabilisation", async () => {
       const UAI_TDB = "9933672E";
 
       // Ajout du couple à la collection fiabilisationUaiSiret

@@ -12,7 +12,7 @@ import {
 
 /**
  * Règle de vérification des couples fiables
- * Si le SIRET et l'UAI lié trouvés dans le référentiel sont ok, couple déja fiable, on le stocke et passe au suivant
+ * Si le SIRET et l'UAI lié trouvés dans le référentiel sont ok, couple déjà fiable, on le stocke et passe au suivant
  * @param organismeFoundInReferentielViaSiret
  * @param coupleUaiSiretTdbToCheck
  * @returns
@@ -425,7 +425,7 @@ export const checkUaiLieuReferentiel = async ({ uai, siret }) => {
  * Règle de vérification des couples non fiabilisables, si UAI est validée dans le référentiel ou non
  */
 export const checkCoupleNonFiabilisable = async (coupleUaiSiretTdbToCheck) => {
-  // Si aucune entrée déja ajoutée à la table de fiabilisation pour ce couple on marque le couple non fiabilisable selon le cas
+  // Si aucune entrée déjà ajoutée à la table de fiabilisation pour ce couple on marque le couple non fiabilisable selon le cas
   if (
     (await fiabilisationUaiSiretDb().countDocuments({
       uai: coupleUaiSiretTdbToCheck.uai,

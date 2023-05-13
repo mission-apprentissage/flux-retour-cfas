@@ -348,7 +348,7 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
 
 1. Affichage des stats pour vérifier que la base de données est vide.
 
-2. Seed des users défaut si pas déja fait
+2. Seed des users défaut si pas déjà fait
 
 3. Run des migration 'yarn migration:up' si non fait par Ansible
 

@@ -13,5 +13,5 @@ docker run --rm --name flux_retour_cfas_certbot \
   flux_retour_cfas_certbot generate "$@"
 cd -
 else
-  echo "Certificat SSL déja généré"
+  echo "Certificat SSL déjà généré"
 fi

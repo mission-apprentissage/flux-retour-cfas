@@ -38,7 +38,7 @@ export const buildNewHistoriqueStatutApprenant = (
 
   let newHistoriqueStatutApprenant = historique_statut_apprenant_existant;
 
-  // Vérification si le nouveau statut existe déja dans l'historique actuel
+  // Vérification si le nouveau statut existe déjà dans l'historique actuel
   const statutExistsInHistorique = historique_statut_apprenant_existant.find((historiqueItem) => {
     return (
       historiqueItem.valeur_statut === updated_statut_apprenant &&
@@ -46,7 +46,7 @@ export const buildNewHistoriqueStatutApprenant = (
     );
   });
 
-  // Si le statut n'existe pas déja on l'ajoute
+  // Si le statut n'existe pas déjà on l'ajoute
   if (!statutExistsInHistorique) {
     const newHistoriqueElement = {
       valeur_statut: updated_statut_apprenant,
