@@ -279,7 +279,6 @@ export const mapEffectifV3QueueToOrganisme = (
  * ?? -> La MAJ d'un organisme ne doit pas se faire via l'API / migration ???
  */
 export const findOrCreateOrganisme = async (organisme: ReturnType<typeof mapEffectifQueueToOrganisme>) => {
-  let error: string | null = null;
   const { uai, siret } = organisme;
 
   // Applique le mapping de fiabilisation
@@ -289,7 +288,9 @@ export const findOrCreateOrganisme = async (organisme: ReturnType<typeof mapEffe
   });
 
   // Si pas de siret après fiabilisation -> erreur
-  if (!cleanSiret) error = `Impossible de créer l'organisme d'uai ${uai} avec un SIRET vide`;
+  if (!cleanSiret) {
+    throw new Error("Impossible de créer l'organisme d'uai ${uai} avec un SIRET vide");
+  }
 
   // Applique les règles de rejection si pas dans la db
   const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
@@ -302,17 +303,17 @@ export const findOrCreateOrganisme = async (organisme: ReturnType<typeof mapEffe
     const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
     // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> erreur
     if (organismeFoundWithSiret?._id)
-      error = `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`;
+      throw new Error(
+        `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`
+      );
   }
   if (cleanUai) {
     const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
     // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> erreur
     if (organismeFoundWithUai?._id)
-      error = `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`;
-  }
-
-  if (error) {
-    throw error;
+      throw new Error(
+        `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`
+      );
   }
 
   // nouvelle organisme, on va récupérer les données avec l'API entreprise
