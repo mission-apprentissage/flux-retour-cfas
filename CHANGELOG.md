@@ -1,3 +1,16 @@
+# [3.27.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.26.0...v3.27.0) (2023-05-14)
+
+
+### Bug Fixes
+
+* démarrage automatique des services en dev ([#3003](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3003)) ([3e8069a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3e8069a804ad7cebe9f62988c6f3210bc8b4e835))
+* **server:** leve exception si SIRET vide dans api ([2b12ead](https://github.com/mission-apprentissage/flux-retour-cfas/commit/2b12eadb774a8b9410bc700e36b8e8a58eaf5a8e))
+
+
+### Features
+
+* ajout traitement des dossiers apprenants V3 ([#2993](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2993)) ([8842ff5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8842ff5cd0c991e69bb178c89aecb7db260fcd40))
+
 # [3.26.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.25.0...v3.26.0) (2023-05-12)
 
 
