@@ -98,8 +98,8 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
     code_insee: adresseInfo.code_commune_insee,
     code_postal: adresseInfo.code_postal,
     departement: DEPARTEMENTS_BY_CODE[adresseInfo.num_departement] ? (adresseInfo.num_departement as any) : undefined,
-    academie: ACADEMIES_BY_ID[adresseInfo.num_academie.toString()]
-      ? (adresseInfo.num_academie.toString() as any)
+    academie: ACADEMIES_BY_ID[adresseInfo.num_academie?.toString()]
+      ? (adresseInfo.num_academie?.toString() as any)
       : undefined,
     region: REGIONS_BY_ID[adresseInfo.num_region] ? (adresseInfo.num_region as any) : undefined,
   };
