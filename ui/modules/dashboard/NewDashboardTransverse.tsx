@@ -13,6 +13,7 @@ import {
 import { formatDate } from "@/common/utils/dateUtils";
 import { prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
+import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
@@ -170,8 +171,21 @@ const NewDashboardTransverse = () => {
             onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
             onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
             onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
+            button={({ isOpen, setIsOpen, buttonLabel }) => (
+              <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
+                {buttonLabel}
+              </SecondarySelectButton>
+            )}
           />
-          <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} />
+          <DateFilter
+            value={effectifsFilters.date}
+            onChange={(date) => updateState({ date })}
+            button={({ isOpen, setIsOpen, buttonLabel }) => (
+              <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
+                {buttonLabel}
+              </SecondarySelectButton>
+            )}
+          />
         </HStack>
 
         {indicateursEffectifsNationaux && (

@@ -10,7 +10,7 @@ import {
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 import {
   REGIONS_SORTED,
@@ -20,7 +20,6 @@ import {
   DEPARTEMENTS_BY_ID,
   ACADEMIES_BY_ID,
 } from "@/common/constants/territoiresConstants";
-import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 
 import SimpleOverlayMenu from "../SimpleOverlayMenu";
 
@@ -35,6 +34,15 @@ interface Props {
   onDepartementsChange: (departements: string[]) => void;
   onAcademiesChange: (academies: string[]) => void;
   onBassinsEmploiChange: (bassinsEmploi: string[]) => void;
+  button: ({
+    isOpen,
+    setIsOpen,
+    buttonLabel,
+  }: {
+    isOpen: boolean;
+    setIsOpen: Dispatch<SetStateAction<boolean>>;
+    buttonLabel: string;
+  }) => JSX.Element;
 }
 const TerritoireFilter = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,9 +58,7 @@ const TerritoireFilter = (props: Props) => {
 
   return (
     <div>
-      <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
-        {buttonLabel}
-      </SecondarySelectButton>
+      {props.button({ setIsOpen, isOpen, buttonLabel })}
 
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)}>

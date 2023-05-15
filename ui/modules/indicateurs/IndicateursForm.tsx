@@ -1,17 +1,21 @@
-import { InfoOutlineIcon } from "@chakra-ui/icons";
+import { AddIcon, InfoOutlineIcon, MinusIcon } from "@chakra-ui/icons";
 import { Flex, Button, HStack, Text, Box, Heading, Divider, Center, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { Dispatch, SetStateAction, useMemo } from "react";
 
 import { _get } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import Table from "@/components/Table/Table";
 
+import DateFilter from "../dashboard/filters/DateFilter";
+import TerritoireFilter from "../dashboard/filters/TerritoireFilter";
 import { InscritsSansContratsIcon, AbandonsIcon, RupturantsIcon, ApprentisIcon } from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
+  EffectifsFilters,
   EffectifsFiltersQuery,
   parseEffectifsFiltersFromQuery,
 } from "../models/effectifs-filters";
@@ -19,6 +23,34 @@ import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 
 import IndicateursFilter from "./FilterAccordion";
 import NatureOrganismeTag from "./NatureOrganismeTag";
+
+interface FilterButtonProps {
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
+  buttonLabel: string;
+}
+function FilterButton(props: FilterButtonProps) {
+  return (
+    <Button
+      bg="#F9F8F6"
+      variant="unstyled"
+      w="100%"
+      h={14}
+      px={4}
+      py={2}
+      _hover={{ bg: "var(--chakra-colors-blackAlpha-50);" }}
+      onClick={() => props.setIsOpen(!props.isOpen)}
+      isActive={props.isOpen}
+    >
+      <HStack>
+        <Box as="span" flex="1" textAlign="left">
+          {props.buttonLabel}
+        </Box>
+        {props.isOpen ? <MinusIcon fontSize="12px" color="#000091" /> : <AddIcon fontSize="12px" color="#000091" />}
+      </HStack>
+    </Button>
+  );
+}
 
 function IndicateursForm() {
   const router = useRouter();
@@ -64,9 +96,21 @@ function IndicateursForm() {
     [indicateursEffectifs]
   );
 
+  // TODO
+  function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
+    router.push(
+      {
+        pathname: router.pathname,
+        query: convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }) as any,
+      },
+      undefined,
+      { shallow: true }
+    );
+  }
+
   return (
     <Flex gap={6}>
-      <Box minW="280px" display="grid" gap={1}>
+      <Box minW="280px" display="grid" gap={1} height="fit-content">
         <HStack>
           <Heading as="h2" fontSize="24px" textTransform="uppercase">
             Filtrer par
@@ -81,17 +125,36 @@ function IndicateursForm() {
         <Text fontWeight="700" textTransform="uppercase">
           Date
         </Text>
-        <IndicateursFilter label="[5 avril 2023]">
-          <Box>Liste des filtres</Box>
-        </IndicateursFilter>
+
+        <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
+        <DateFilter
+          value={effectifsFilters.date}
+          onChange={(date) => updateState({ date })}
+          button={({ isOpen, setIsOpen, buttonLabel }) => (
+            <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
+              {buttonLabel}
+            </SecondarySelectButton>
+          )}
+        />
+        {/* <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} /> */}
 
         <Text fontWeight="700" textTransform="uppercase">
           Territoire
         </Text>
-        <IndicateursFilter label="Territoire">
-          {/* TODO TerritoireFilter */}
-          <Box>Liste des filtres</Box>
-        </IndicateursFilter>
+
+        <TerritoireFilter
+          button={FilterButton}
+          value={{
+            regions: effectifsFilters.organisme_regions,
+            departements: effectifsFilters.organisme_departements,
+            academies: effectifsFilters.organisme_academies,
+            bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
+          }}
+          onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
+          onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
+          onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
+          onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
+        />
 
         {/* <Text fontWeight="700" textTransform="uppercase">
           Domaine d’activité
