@@ -7,7 +7,9 @@ import {
   getDuplicatesEffectifsForOrganismeId,
   getEffectifsDuplicatesFromSIREN,
   getOrganismesHavingDuplicatesEffectifs,
+  updateDuplicateGroupStatut,
 } from "@/common/actions/effectifs/effectifs.duplicates.actions";
+import { EFFECTIF_DUPLICATES_STATUTS } from "@/common/constants/effectifDuplicate";
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, effectifsDuplicatesGroupDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
@@ -42,6 +44,8 @@ const insertDuplicateEffectifs = async (sampleEffectif, nbDuplicates = 2) => {
   return insertedIdList;
 };
 
+const sanitizeString = (string) => string.replace(/\s/g, "").toLowerCase();
+
 describe("Test des actions Effectifs Duplicates", () => {
   describe("getDuplicatesEffectifsForOrganismeId", () => {
     beforeEach(async () => {
@@ -61,8 +65,8 @@ describe("Test des actions Effectifs Duplicates", () => {
       assert.equal(duplicates[0].count, 2);
       assert.equal(duplicates[0].duplicatesIds.length, 2);
 
-      assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectif.apprenant.nom.toLowerCase());
-      assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), sampleEffectif.apprenant.prenom.toLowerCase());
+      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
+      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
       assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
       assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
       assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
@@ -89,8 +93,8 @@ describe("Test des actions Effectifs Duplicates", () => {
       assert.equal(duplicates[0].count, 5);
       assert.equal(duplicates[0].duplicatesIds.length, 5);
 
-      assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectif.apprenant.nom.toLowerCase());
-      assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), sampleEffectif.apprenant.prenom.toLowerCase());
+      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
+      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
       assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
       assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
       assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
@@ -108,8 +112,8 @@ describe("Test des actions Effectifs Duplicates", () => {
       assert.equal(duplicates[0].count, 2);
       assert.equal(duplicates[0].duplicatesIds.length, 2);
 
-      assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectif.apprenant.nom.toLowerCase());
-      assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), sampleEffectif.apprenant.prenom.toLowerCase());
+      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
+      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
       assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
       assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
       assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
@@ -130,8 +134,8 @@ describe("Test des actions Effectifs Duplicates", () => {
       assert.equal(duplicates[0].count, 5);
       assert.equal(duplicates[0].duplicatesIds.length, 5);
 
-      assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectif.apprenant.nom.toLowerCase());
-      assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), "jeanédouard"); // Transformation du prenom_apprenant en champ normalisé
+      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
+      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), "jeanédouard"); // Transformation du prenom_apprenant en champ normalisé
       assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
       assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
       assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
@@ -149,8 +153,8 @@ describe("Test des actions Effectifs Duplicates", () => {
       assert.equal(duplicates[0].count, 5);
       assert.equal(duplicates[0].duplicatesIds.length, 5);
 
-      assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), "mbappé"); // Transformation du nom en champ normalisé
-      assert.equal(duplicates[0]._id.prenom_apprenant.toLowerCase(), sampleEffectif.apprenant.prenom.toLowerCase());
+      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), "mbappé"); // Transformation du nom en champ normalisé
+      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
       assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
       assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
       assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
@@ -181,10 +185,13 @@ describe("Test des actions Effectifs Duplicates", () => {
       assert.equal(duplicates[0].count, 2);
       assert.equal(duplicates[0].duplicatesIds.length, 2);
 
-      assert.equal(duplicates[0]._id.nom_apprenant.toLowerCase(), sampleEffectifOrganisme1.apprenant.nom.toLowerCase());
       assert.equal(
-        duplicates[0]._id.prenom_apprenant.toLowerCase(),
-        sampleEffectifOrganisme1.apprenant.prenom.toLowerCase()
+        sanitizeString(duplicates[0]._id.nom_apprenant),
+        sanitizeString(sampleEffectifOrganisme1.apprenant.nom)
+      );
+      assert.equal(
+        sanitizeString(duplicates[0]._id.prenom_apprenant),
+        sanitizeString(sampleEffectifOrganisme1.apprenant.prenom)
       );
       assert.deepEqual(
         duplicates[0]._id.date_de_naissance_apprenant,
@@ -237,12 +244,12 @@ describe("Test des actions Effectifs Duplicates", () => {
 
       // Vérification de la récupération des doublons dans effectifsDuplicatesGroupDb
       assert.equal(effectifsDuplicatesGroup.length, 1);
-      assert.deepStrictEqual(effectifsDuplicatesGroup[0].organisme_id, sampleOrganismeId);
+      assert.equal(effectifsDuplicatesGroup[0].organisme_id.equals(sampleOrganismeId), true);
       assert.equal(effectifsDuplicatesGroup[0].duplicatesEffectifs?.length, 2);
 
       for (let index = 0; index < insertedDuplicatesIds.length; index++) {
         const currentDuplicateItem = effectifsDuplicatesGroup[0].duplicatesEffectifs[index];
-        assert.deepStrictEqual(currentDuplicateItem._id, insertedDuplicatesIds[index]);
+        assert.equal(currentDuplicateItem._id.equals(insertedDuplicatesIds[index]), true);
       }
     });
 
@@ -281,8 +288,82 @@ describe("Test des actions Effectifs Duplicates", () => {
       const organismesWithDuplicates = await getOrganismesHavingDuplicatesEffectifs();
 
       assert.equal(organismesWithDuplicates.length, 2);
-      assert.deepStrictEqual(organismesWithDuplicates[0]._id, sampleOrganismeId);
-      assert.deepStrictEqual(organismesWithDuplicates[1]._id, sampleOrganisme2Id);
+      assert.equal(
+        organismesWithDuplicates.some(({ _id }) => _id.equals(sampleOrganismeId)),
+        true
+      );
+      assert.equal(
+        organismesWithDuplicates.some(({ _id }) => _id.equals(sampleOrganisme2Id)),
+        true
+      );
+    });
+  });
+
+  describe("updateDuplicateGroupStatut", () => {
+    let insertedDuplicatesIds;
+
+    beforeEach(async () => {
+      // Création d'organisme, d'effectifs en doublon & ajout aux groupes des doublons
+      await organismesDb().insertOne(sampleOrganisme);
+      insertedDuplicatesIds = await insertDuplicateEffectifs(createSampleEffectif({ organisme: sampleOrganisme }));
+      await buildEffectifsDuplicatesForOrganismeId(sampleOrganismeId);
+    });
+
+    it("Permet de vérifier la MAJ d'un groupe de doublon en tant que a_conserver", async () => {
+      for (let index = 0; index < insertedDuplicatesIds.length; index++) {
+        // Vérification du statut après MAJ
+        await updateDuplicateGroupStatut(
+          sampleOrganismeId,
+          insertedDuplicatesIds[index],
+          EFFECTIF_DUPLICATES_STATUTS.a_conserver
+        );
+        const updatedDuplicate = await effectifsDuplicatesGroupDb().findOne({
+          "duplicatesEffectifs._id": insertedDuplicatesIds[index],
+        });
+
+        assert.equal(
+          updatedDuplicate?.duplicatesEffectifs.find(({ _id }) => _id.equals(insertedDuplicatesIds[index]))?.statut,
+          EFFECTIF_DUPLICATES_STATUTS.a_conserver
+        );
+      }
+    });
+
+    it("Permet de vérifier la MAJ d'un groupe de doublon en tant que a_ignorer", async () => {
+      for (let index = 0; index < insertedDuplicatesIds.length; index++) {
+        // Vérification du statut après MAJ
+        await updateDuplicateGroupStatut(
+          sampleOrganismeId,
+          insertedDuplicatesIds[index],
+          EFFECTIF_DUPLICATES_STATUTS.a_ignorer
+        );
+        const updatedDuplicate = await effectifsDuplicatesGroupDb().findOne({
+          "duplicatesEffectifs._id": insertedDuplicatesIds[index],
+        });
+
+        assert.equal(
+          updatedDuplicate?.duplicatesEffectifs.find(({ _id }) => _id.equals(insertedDuplicatesIds[index]))?.statut,
+          EFFECTIF_DUPLICATES_STATUTS.a_ignorer
+        );
+      }
+    });
+
+    it("Permet de vérifier la MAJ d'un groupe de doublon en tant que a_supprimer", async () => {
+      for (let index = 0; index < insertedDuplicatesIds.length; index++) {
+        // Vérification du statut après MAJ
+        await updateDuplicateGroupStatut(
+          sampleOrganismeId,
+          insertedDuplicatesIds[index],
+          EFFECTIF_DUPLICATES_STATUTS.a_supprimer
+        );
+        const updatedDuplicate = await effectifsDuplicatesGroupDb().findOne({
+          "duplicatesEffectifs._id": insertedDuplicatesIds[index],
+        });
+
+        assert.equal(
+          updatedDuplicate?.duplicatesEffectifs.find(({ _id }) => _id.equals(insertedDuplicatesIds[index]))?.statut,
+          EFFECTIF_DUPLICATES_STATUTS.a_supprimer
+        );
+      }
     });
   });
 });

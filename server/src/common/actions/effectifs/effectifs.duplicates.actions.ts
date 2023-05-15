@@ -1,6 +1,7 @@
 import { PromisePool } from "@supercharge/promise-pool";
 import { ObjectId } from "mongodb";
 
+import { EFFECTIF_DUPLICATES_STATUTS } from "@/common/constants/effectifDuplicate";
 import { effectifsDb, effectifsDuplicatesGroupDb } from "@/common/model/collections";
 import {
   defaultValuesEffectifDuplicate,
@@ -84,7 +85,6 @@ export const getOrganismesHavingDuplicatesEffectifs = async () => {
       },
       { $match: { count: { $gt: 1 } } },
       { $project: { _id: 0, organisme_id: 1 } },
-      { $sort: { organisme_id: 1 } },
       { $unwind: "$organisme_id" },
       { $group: { _id: "$organisme_id" } }, // Return uniques organismes id
     ])
@@ -204,4 +204,20 @@ export const getEffectifsDuplicatesOnSIREN = async () => {
       { $match: { count: { $gt: 1 } } },
     ])
     .toArray();
+};
+
+/**
+ * Mise à jour du statut d'un goupe de doublon
+ * @param _id
+ * @param toUpdateStatut
+ * @returns
+ */
+export const updateDuplicateGroupStatut = async (organisme_id, duplicateEffectifId, toUpdateStatut) => {
+  const updated = await effectifsDuplicatesGroupDb().findOneAndUpdate(
+    { organisme_id, "duplicatesEffectifs._id": duplicateEffectifId },
+    { $set: { "duplicatesEffectifs.$.statut": toUpdateStatut, updated_at: new Date() } },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
 };

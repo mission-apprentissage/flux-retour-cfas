@@ -9,9 +9,13 @@ export interface EffectifsDuplicatesGroup {
   /**
    * Liste des effectifs en doublon
    */
-  duplicatesEffectifs?: {
+  duplicatesEffectifs: {
     /**
      * Identifiant de l'effectif en doublon
+     */
+    _id: ObjectId;
+    /**
+     * Statut de l'effectif en doublon
      */
     statut?: 0 | 1 | 2 | 3;
   }[];
