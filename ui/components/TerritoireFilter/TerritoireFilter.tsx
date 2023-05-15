@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { REGIONS_SORTED, DEPARTEMENTS_SORTED, TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
+import { REGIONS_SORTED, DEPARTEMENTS_SORTED, TERRITOIRE_TYPE } from "@/common/constants/territoires";
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";

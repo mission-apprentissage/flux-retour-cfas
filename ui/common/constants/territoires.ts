@@ -1,11 +1,10 @@
-// données à synchroniser avec /server/src/common/constants/territoiresConstants.js
+// données à synchroniser avec /server/src/common/constants/territoires.ts
 // en attendant un import partagé
 
 import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
 
 /**
  * Liste des régions du territoire national
- * TODO : Rationaliser la liste des régions (point transverse tech ?)
  * https://fr.wikipedia.org/wiki/Code_officiel_g%C3%A9ographique
  */
 export const REGIONS = [
@@ -103,7 +102,7 @@ export const REGIONS = [
   },
 ];
 
-export const REGIONS_BY_ID = REGIONS.reduce((acc, region) => {
+export const REGIONS_BY_CODE = REGIONS.reduce((acc, region) => {
   acc[region.code] = region;
   return acc;
 }, {});
@@ -1522,52 +1521,49 @@ export const DEPARTEMENTS = [
     },
   },
 ];
+
 export const DEPARTEMENTS_BY_CODE = DEPARTEMENTS.reduce((acc, departement) => {
   acc[departement.code] = departement;
   return acc;
 }, {});
 
-/**
- * TODO Rationaliser / construire le référentiel des académies
- * FIXME Est-ce qu'on définit 01 comme clé ou 1 (en BDD il n'y a pas l'air d'avoir de padding dans organismes)
- */
-export const ACADEMIES = {
-  "01": { nom: "Paris", code: 1 },
-  "02": { nom: "Aix-Marseille", code: 2 },
-  "03": { nom: "Besançon", code: 3 },
-  "04": { nom: "Bordeaux", code: 4 },
-  "06": { nom: "Clermont-Ferrand", code: 6 },
-  "07": { nom: "Dijon", code: 7 },
-  "08": { nom: "Grenoble", code: 8 },
-  "09": { nom: "Lille", code: 9 },
-  10: { nom: "Lyon", code: 10 },
-  11: { nom: "Montpellier", code: 11 },
-  12: { nom: "Nancy-Metz", code: 12 },
-  13: { nom: "Poitiers", code: 13 },
-  14: { nom: "Rennes", code: 14 },
-  15: { nom: "Strasbourg", code: 15 },
-  16: { nom: "Toulouse", code: 16 },
-  17: { nom: "Nantes", code: 17 },
-  18: { nom: "Orléans-Tours", code: 18 },
-  19: { nom: "Reims", code: 19 },
-  20: { nom: "Amiens", code: 20 },
-  22: { nom: "Limoges", code: 22 },
-  23: { nom: "Nice", code: 23 },
-  24: { nom: "Créteil", code: 24 },
-  25: { nom: "Versailles", code: 25 },
-  27: { nom: "Corse", code: 27 },
-  28: { nom: "La Réunion", code: 28 },
-  31: { nom: "Martinique", code: 31 },
-  32: { nom: "Guadeloupe", code: 32 },
-  33: { nom: "Guyane", code: 33 },
-  43: { nom: "Mayotte", code: 43 },
-  70: { nom: "Normandie", code: 70 },
-  77: { nom: "Saint-Barthélemy", code: 77 },
-  78: { nom: "Saint-Martin", code: 78 },
-};
+export const ACADEMIES = [
+  { nom: "Paris", code: "1" },
+  { nom: "Aix-Marseille", code: "2" },
+  { nom: "Besançon", code: "3" },
+  { nom: "Bordeaux", code: "4" },
+  { nom: "Clermont-Ferrand", code: "6" },
+  { nom: "Dijon", code: "7" },
+  { nom: "Grenoble", code: "8" },
+  { nom: "Lille", code: "9" },
+  { nom: "Lyon", code: "10" },
+  { nom: "Montpellier", code: "11" },
+  { nom: "Nancy-Metz", code: "12" },
+  { nom: "Poitiers", code: "13" },
+  { nom: "Rennes", code: "14" },
+  { nom: "Strasbourg", code: "15" },
+  { nom: "Toulouse", code: "16" },
+  { nom: "Nantes", code: "17" },
+  { nom: "Orléans-Tours", code: "18" },
+  { nom: "Reims", code: "19" },
+  { nom: "Amiens", code: "20" },
+  { nom: "Limoges", code: "22" },
+  { nom: "Nice", code: "23" },
+  { nom: "Créteil", code: "24" },
+  { nom: "Versailles", code: "25" },
+  { nom: "Corse", code: "27" },
+  { nom: "La Réunion", code: "28" },
+  { nom: "Martinique", code: "31" },
+  { nom: "Guadeloupe", code: "32" },
+  { nom: "Guyane", code: "33" },
+  { nom: "Mayotte", code: "43" },
+  { nom: "Normandie", code: "70" },
+  { nom: "Saint-Barthélemy", code: "77" },
+  { nom: "Saint-Martin", code: "78" },
+];
 
-export const ACADEMIES_BY_CODE = Object.values(ACADEMIES).reduce((acc, academie) => {
-  acc[academie.code.toString()] = academie;
+export const ACADEMIES_BY_CODE = ACADEMIES.reduce((acc, academie) => {
+  acc[academie.code] = academie;
   return acc;
 }, {});
 

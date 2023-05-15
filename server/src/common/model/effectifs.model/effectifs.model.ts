@@ -127,7 +127,7 @@ export const schema = object(
             minLength: 1,
           }),
           academie: string({
-            enum: Object.values(ACADEMIES).map(({ code }) => `${code}`),
+            enum: ACADEMIES.map(({ code }) => code),
           }),
           reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) })),
 

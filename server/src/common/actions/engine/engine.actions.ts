@@ -11,7 +11,7 @@ import {
   structureOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
-import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_ID, REGIONS_BY_ID } from "@/common/constants/territoires";
+import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import { Organisme } from "@/common/model/@types";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
@@ -98,10 +98,10 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
     code_insee: adresseInfo.code_commune_insee,
     code_postal: adresseInfo.code_postal,
     departement: DEPARTEMENTS_BY_CODE[adresseInfo.num_departement] ? (adresseInfo.num_departement as any) : undefined,
-    academie: ACADEMIES_BY_ID[adresseInfo.num_academie.toString()]
-      ? (adresseInfo.num_academie.toString() as any)
+    academie: ACADEMIES_BY_CODE[adresseInfo.num_academie?.toString()]
+      ? (adresseInfo.num_academie?.toString() as any)
       : undefined,
-    region: REGIONS_BY_ID[adresseInfo.num_region] ? (adresseInfo.num_region as any) : undefined,
+    region: REGIONS_BY_CODE[adresseInfo.num_region] ? (adresseInfo.num_region as any) : undefined,
   };
 
   return effectifDataWithAddress;

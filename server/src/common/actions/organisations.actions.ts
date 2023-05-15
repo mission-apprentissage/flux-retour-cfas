@@ -2,7 +2,7 @@ import Boom from "boom";
 import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 
-import { REGIONS_BY_ID, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_ID } from "@/common/constants/territoires";
+import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE } from "@/common/constants/territoires";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { UsersMigration } from "@/common/model/@types/UsersMigration";
@@ -272,15 +272,15 @@ export async function buildOrganisationLabel(organisationId: ObjectId): Promise<
       return `Réseau ${organisation.reseau}`;
 
     case "DREETS":
-      return `DREETS ${REGIONS_BY_ID[organisation.code_region]?.nom}`;
+      return `DREETS ${REGIONS_BY_CODE[organisation.code_region]?.nom}`;
     case "DRAAF":
-      return `DRAAF ${REGIONS_BY_ID[organisation.code_region]?.nom}`;
+      return `DRAAF ${REGIONS_BY_CODE[organisation.code_region]?.nom}`;
     case "CONSEIL_REGIONAL":
-      return `Conseil régional ${REGIONS_BY_ID[organisation.code_region]?.nom}`;
+      return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom}`;
     case "DDETS":
       return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom}`;
     case "ACADEMIE":
-      return `Académie ${ACADEMIES_BY_ID[organisation.code_academie]?.nom}`;
+      return `Académie ${ACADEMIES_BY_CODE[organisation.code_academie]?.nom}`;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;

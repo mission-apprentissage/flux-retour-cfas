@@ -2,7 +2,7 @@ import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/reac
 import PropTypes from "prop-types";
 import React from "react";
 
-import { DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoiresConstants";
+import { DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoires";
 import { mapNatureOrganismeDeFormation } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
 
 const TERRITOIRES_DATA = { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED };

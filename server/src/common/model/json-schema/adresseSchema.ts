@@ -53,7 +53,7 @@ export const adresseSchema = object({
     enum: REGIONS.map(({ code }) => code),
   }),
   academie: string({
-    enum: Object.values(ACADEMIES).map(({ code }) => `${code}`),
+    enum: ACADEMIES.map(({ code }) => code),
   }),
   complete: string({
     description: "Adresse complète",
