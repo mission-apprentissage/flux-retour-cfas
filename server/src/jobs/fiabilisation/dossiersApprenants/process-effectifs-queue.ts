@@ -120,18 +120,24 @@ async function processItems(
     .process(async (effectifQueued, index) => {
       try {
         const startDate = new Date();
-        let dataToUpdate: Partial<EffectifsQueue>;
+        let dataToUpdate: Partial<EffectifsQueue> = {};
+        let result;
+        try {
+          result = await validationSchema
+            .transform(async (data) => ({
+              effectif: await pPipe(mapItemToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
+              organisme: await pPipe(mapItemToOrganisme, findOrCreateOrganisme, setOrganismeTransmissionDates)(data),
+            }))
+            .safeParseAsync(effectifQueued);
+        } catch (err) {
+          dataToUpdate.error = formatError(err).message;
+        }
 
-        const result = await validationSchema
-          .transform(async (data) => ({
-            effectif: await pPipe(mapItemToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
-            organisme: await pPipe(mapItemToOrganisme, findOrCreateOrganisme, setOrganismeTransmissionDates)(data),
-          }))
-          .safeParseAsync(effectifQueued);
-
-        if (!result.success) {
-          const prettyValidationError = result.error.issues.map(({ path, message }) => ({ message, path }));
-          dataToUpdate = { validation_errors: prettyValidationError };
+        if (!result) {
+          // Do nothing
+        } else if (!result.success) {
+          const prettyValidationError = result.error?.issues.map(({ path, message }) => ({ message, path })) || [];
+          dataToUpdate.validation_errors = prettyValidationError;
         } else {
           totalValidItems++;
           const { effectif: effectifData, organisme } = result.data as any;
@@ -166,34 +172,28 @@ async function processItems(
               await lockEffectif(effectifCreated);
             }
 
-            dataToUpdate = { effectif_id: effectifId };
+            dataToUpdate.effectif_id = effectifId;
           } catch (e: any) {
             const err = formatError(e);
             logger.error({ err }, `Error with item ${effectifQueued._id}: ${err.toString()}`);
-            dataToUpdate = { error: err.toString() };
+            dataToUpdate.error = err.toString();
           }
         }
 
-        if (dataToUpdate) {
-          await (collection as any).updateOne(
-            { _id: effectifQueued._id },
-            {
-              $set: {
-                ...dataToUpdate,
-                processed_at: new Date(),
-              },
-            }
-          );
 
-          const durationInMs = new Date().getTime() - startDate.getTime();
-          logger.info(
-            `#${index} Item ${
-              effectifQueued._id
-            } created at ${effectifQueued.created_at?.toISOString()} processed in ${durationInMs} ms`,
-            { duration: durationInMs }
-          );
-          return { validItem: result.success, error: undefined };
-        }
+        await (collection as any).updateOne(
+          { _id: effectifQueued._id },
+          { $set: { ...dataToUpdate, processed_at: new Date() } }
+        );
+
+        const durationInMs = new Date().getTime() - startDate.getTime();
+        logger.info(
+          `#${index} Item ${
+            effectifQueued._id
+          } created at ${effectifQueued.created_at?.toISOString()} processed in ${durationInMs} ms`,
+          { duration: durationInMs }
+        );
+        return { validItem: result.success, error: undefined };
       } catch (err: any) {
         logger.error({ err, index }, `an error occured while processing effectif queue item ${index}: ${err.message}`);
         logger.error(err);
