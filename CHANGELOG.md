@@ -1,3 +1,10 @@
+## [3.27.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.1...v3.27.2) (2023-05-15)
+
+
+### Bug Fixes
+
+* migration script pour fixer effectifs.contrats ([#3010](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3010)) ([8eaf2a1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8eaf2a1bd87754ec1c486c7120424bef18920e46))
+
 ## [3.27.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.0...v3.27.1) (2023-05-15)
 
 
