@@ -6,6 +6,7 @@ import {
   buildEffectifsDuplicatesForOrganismeId,
   getDuplicatesEffectifsForOrganismeId,
   getEffectifsDuplicatesFromSIREN,
+  getOrganismesHavingDuplicatesEffectifs,
 } from "@/common/actions/effectifs/effectifs.duplicates.actions";
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, effectifsDuplicatesGroupDb, organismesDb } from "@/common/model/collections";
@@ -257,6 +258,31 @@ describe("Test des actions Effectifs Duplicates", () => {
 
       // Vérification de la récupération des doublons dans effectifsDuplicatesGroupDb
       assert.equal(effectifsDuplicatesGroup.length, 0);
+    });
+  });
+
+  describe("getOrganismesHavingDuplicatesEffectifs", () => {
+    beforeEach(async () => {
+      await Promise.all([organismesDb().insertOne(sampleOrganisme), organismesDb().insertOne(sampleOrganisme2)]);
+    });
+
+    it("Permet de vérifier la non récupération d'organismes ayant des doublons d'effectifs", async () => {
+      const organismesWithDuplicates = await getOrganismesHavingDuplicatesEffectifs();
+      assert.equal(organismesWithDuplicates.length, 0);
+    });
+
+    it("Permet de vérifier la récupération d'organismes ayant des doublons d'effectifs", async () => {
+      // Ajout de doublons d'effectifs à l'organisme sampleOrganisme & sampleOrganisme2
+      await Promise.all([
+        insertDuplicateEffectifs(createSampleEffectif({ organisme: sampleOrganisme })),
+        insertDuplicateEffectifs(createSampleEffectif({ organisme: sampleOrganisme2 })),
+      ]);
+
+      const organismesWithDuplicates = await getOrganismesHavingDuplicatesEffectifs();
+
+      assert.equal(organismesWithDuplicates.length, 2);
+      assert.deepStrictEqual(organismesWithDuplicates[0].organisme_id, sampleOrganismeId);
+      assert.deepStrictEqual(organismesWithDuplicates[1].organisme_id, sampleOrganisme2Id);
     });
   });
 });
