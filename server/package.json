@@ -89,7 +89,7 @@
     "swagger-ui-express": "4.6.2",
     "tcp-port-used": "1.0.2",
     "ts-node": "10.9.1",
-    "tsx": "3.12.6",
+    "tsx": "3.12.7",
     "type-fest": "^3.10.0",
     "uuid": "8.3.2",
     "xlsx": "0.18.5",
