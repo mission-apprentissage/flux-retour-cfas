@@ -14,6 +14,7 @@ import { removeDuplicatesEffectifsQueue } from "./jobs/fiabilisation/dossiersApp
 import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
+import { hydrateDuplicatesEffectifs } from "./jobs/hydrate/duplicates-effectifs/hydrate-duplicates-effectifs";
 import { hydrateEffectifsComputed } from "./jobs/hydrate/hydrate-effectifs-computed";
 import { hydrateFormationsCatalogue } from "./jobs/hydrate/hydrate-formations-catalogue";
 import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
@@ -231,6 +232,15 @@ program
   .action(
     runJob(async () => {
       return hydrateEffectifsComputed();
+    })
+  );
+
+program
+  .command("hydrate:effectifs-duplicates")
+  .description("Remplissage de la collection des groupes de doublons d'effectifs (effectifsDuplicatesGroup)")
+  .action(
+    runJob(async () => {
+      return hydrateDuplicatesEffectifs();
     })
   );
 

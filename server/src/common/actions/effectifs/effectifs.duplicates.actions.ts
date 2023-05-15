@@ -86,6 +86,7 @@ export const getOrganismesHavingDuplicatesEffectifs = async () => {
       { $project: { _id: 0, organisme_id: 1 } },
       { $sort: { organisme_id: 1 } },
       { $unwind: "$organisme_id" },
+      { $group: { _id: "$organisme_id" } }, // Return uniques organismes id
     ])
     .toArray();
 };

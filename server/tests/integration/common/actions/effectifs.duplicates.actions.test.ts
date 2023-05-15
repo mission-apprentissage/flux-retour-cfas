@@ -281,8 +281,8 @@ describe("Test des actions Effectifs Duplicates", () => {
       const organismesWithDuplicates = await getOrganismesHavingDuplicatesEffectifs();
 
       assert.equal(organismesWithDuplicates.length, 2);
-      assert.deepStrictEqual(organismesWithDuplicates[0].organisme_id, sampleOrganismeId);
-      assert.deepStrictEqual(organismesWithDuplicates[1].organisme_id, sampleOrganisme2Id);
+      assert.deepStrictEqual(organismesWithDuplicates[0]._id, sampleOrganismeId);
+      assert.deepStrictEqual(organismesWithDuplicates[1]._id, sampleOrganisme2Id);
     });
   });
 });
