@@ -1,3 +1,11 @@
+## [3.27.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.0...v3.27.1) (2023-05-15)
+
+
+### Bug Fixes
+
+* network constants ([#3009](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3009)) ([8b9be23](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8b9be233e55ec30a58abcd7871793f605f5ed28a))
+* reverse du schéma mongo effectif.formation.annee ([#3007](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3007)) ([6db7ba3](https://github.com/mission-apprentissage/flux-retour-cfas/commit/6db7ba39ee5c7059f6c1f5dcac3a384b07137cfd))
+
 # [3.27.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.26.0...v3.27.0) (2023-05-14)
 
 
