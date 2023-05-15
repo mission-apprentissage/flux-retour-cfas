@@ -34,7 +34,7 @@ const getRandomFormation = (annee_scolaire: string) => {
     libelle_long: faker.helpers.arrayElement(sampleLibelles).intitule_long,
     niveau: "5",
     niveau_libelle: "5 (BTS, DUT...)",
-    annee: getRandomAnneeFormation().toString(),
+    annee: getRandomAnneeFormation(),
   };
 };
 const getRandomContrat = () => {

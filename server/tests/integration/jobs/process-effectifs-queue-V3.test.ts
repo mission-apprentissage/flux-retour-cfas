@@ -304,7 +304,7 @@ describe("Processing de EffectifsQueueV3", () => {
       formation: {
         cfd: "50033610",
         rncp: expect.any(String),
-        annee: "0",
+        annee: 0,
         periode: [2022, 2024],
         libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
       },

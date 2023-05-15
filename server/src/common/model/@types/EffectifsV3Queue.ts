@@ -109,7 +109,7 @@ export interface EffectifsV3Queue {
      */
     annee_scolaire?: any;
     /**
-     * Année de la formation (cursus)
+     * Numéro de l'année dans la formation (promo)
      */
     annee?: any;
     /**

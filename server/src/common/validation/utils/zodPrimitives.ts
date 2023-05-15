@@ -194,12 +194,15 @@ export const primitivesV1 = {
         examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`] as any,
       }),
     annee: z
-      .preprocess((v: any) => v?.toString().trim(), z.string())
+      .number()
+      .int()
+      .min(0)
+      .max(5)
       .describe("Année de la formation")
       // TO_DISCUSS: à quoi correspond l'année 0 ?
       .openapi({
-        enum: ["0", "1", "2", "3", "4", "5"],
-        example: "1",
+        enum: [0, 1, 2, 3, 4, 5],
+        type: "integer",
       }),
   },
   contrat: {
