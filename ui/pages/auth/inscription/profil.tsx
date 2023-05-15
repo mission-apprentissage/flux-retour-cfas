@@ -26,7 +26,7 @@ import YupPassword from "yup-password";
 
 import { getOrganismeByUAIAndSIRET } from "@/common/api/tableauDeBord";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
-import { ACADEMIES_BY_CODE, REGIONS_BY_ID, DEPARTEMENTS_BY_CODE } from "@/common/constants/territoiresConstants";
+import { ACADEMIES_BY_CODE, REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE } from "@/common/constants/territoires";
 import { _get, _post } from "@/common/httpClient";
 import { Organisation } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -108,7 +108,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
                   <Text fontSize="20px" fontWeight="bold">
                     {organisation.type}
                   </Text>
-                  <Text>Territoire : {REGIONS_BY_ID[organisation.code_region].nom}</Text>
+                  <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
                 </>
               );
             case "CONSEIL_REGIONAL":
@@ -117,7 +117,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
                   <Text fontSize="20px" fontWeight="bold">
                     Conseil régional
                   </Text>
-                  <Text>Territoire : {REGIONS_BY_ID[organisation.code_region].nom}</Text>
+                  <Text>Territoire : {REGIONS_BY_CODE[organisation.code_region].nom}</Text>
                 </>
               );
             case "DDETS":

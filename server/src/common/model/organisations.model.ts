@@ -6,9 +6,9 @@ import {
   REGIONS,
   DEPARTEMENTS,
   ACADEMIES,
-  ACADEMIES_BY_ID,
+  ACADEMIES_BY_CODE,
   DEPARTEMENTS_BY_CODE,
-  REGIONS_BY_ID,
+  REGIONS_BY_CODE,
 } from "@/common/constants/territoires";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
@@ -101,13 +101,13 @@ export function getOrganisationLabel(organisation: NewOrganisation): string {
 
     case "DREETS":
     case "DRAAF":
-      return `${organisation.type} ${REGIONS_BY_ID[organisation.code_region]?.nom || organisation.code_region}`;
+      return `${organisation.type} ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "CONSEIL_REGIONAL":
-      return `Conseil régional ${REGIONS_BY_ID[organisation.code_region]?.nom || organisation.code_region}`;
+      return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "DDETS":
       return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement}`;
     case "ACADEMIE":
-      return `Académie ${ACADEMIES_BY_ID[organisation.code_academie]?.nom || organisation.code_academie}`;
+      return `Académie ${ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie}`;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;
@@ -190,7 +190,7 @@ const schema = object(
 
     // si académie
     code_academie: string({
-      enum: Object.values(ACADEMIES).map(({ code }) => `${code}`),
+      enum: ACADEMIES.map(({ code }) => code),
       description: "Code académie",
     }),
 

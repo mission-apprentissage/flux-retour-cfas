@@ -1,6 +1,6 @@
 import React from "react";
 
-import { DEPARTEMENTS_BY_CODE, REGIONS_BY_ID } from "@/common/constants/territoiresConstants";
+import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import {
   OrganisationOperateurPublicDepartement,
   OrganisationOperateurPublicRegion,
@@ -22,7 +22,7 @@ const IndicateursVueTerritoirePageContainer = () => {
   // filtre initial positionné sur la région / département de l'utilisateur
   const defaultState = getDefaultState();
   if ((auth.organisation as OrganisationOperateurPublicRegion).code_region) {
-    defaultState.region = REGIONS_BY_ID[(auth.organisation as OrganisationOperateurPublicRegion).code_region];
+    defaultState.region = REGIONS_BY_CODE[(auth.organisation as OrganisationOperateurPublicRegion).code_region];
   } else if ((auth.organisation as OrganisationOperateurPublicDepartement).code_departement) {
     defaultState.departement =
       DEPARTEMENTS_BY_CODE[(auth.organisation as OrganisationOperateurPublicDepartement).code_departement];
