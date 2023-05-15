@@ -68,7 +68,7 @@ export interface EffectifsQueue {
    */
   periode_formation?: any;
   /**
-   * Année de la formation (cursus)
+   * Numéro de l'année dans la formation (promo)
    */
   annee_formation?: any;
   /**

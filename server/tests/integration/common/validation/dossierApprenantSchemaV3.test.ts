@@ -91,7 +91,7 @@ const invalidInput = {
     libelle_long: "",
     periode: "1000-20000",
     annee_scolaire: "2100-2200",
-    annee: "100",
+    annee: 100,
     code_rncp: "test",
     code_cfd: "test",
     // V3 - REQUIRED FIELDS

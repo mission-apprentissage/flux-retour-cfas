@@ -20,7 +20,7 @@ export const formationEffectifSchema = object(
     libelle_long: string({ description: "Libellé long de la formation visée" }),
     niveau: formationsProps.niveau,
     niveau_libelle: formationsProps.niveau_libelle,
-    annee: formationsProps.annee,
+    annee: integer({ description: "Numéro de l'année dans la formation (promo)" }),
     // FIN champs collectés
     date_debut_formation: date({ description: "Date de début de la formation" }),
     date_fin_formation: date({ description: "Date de fin de la formation" }),

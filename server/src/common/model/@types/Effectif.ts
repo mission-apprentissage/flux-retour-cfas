@@ -1066,9 +1066,9 @@ export interface Effectif {
      */
     niveau_libelle?: string | null;
     /**
-     * Année de la formation (cursus)
+     * Numéro de l'année dans la formation (promo)
      */
-    annee?: string | null;
+    annee?: number;
     /**
      * Date de début de la formation
      */

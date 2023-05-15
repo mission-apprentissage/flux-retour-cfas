@@ -234,6 +234,18 @@ exports[`dossierApprenantSchemaV3.test return all errors with a complete invalid
     "type": "number",
   },
   {
+    "code": "too_big",
+    "exact": false,
+    "inclusive": true,
+    "maximum": 5,
+    "message": "Number must be less than or equal to 5",
+    "path": [
+      "formation",
+      "annee",
+    ],
+    "type": "number",
+  },
+  {
     "code": "invalid_string",
     "message": "Code RNCP invalide",
     "path": [
