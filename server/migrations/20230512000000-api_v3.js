@@ -14,8 +14,5 @@ export const up = async (db) => {
   // migration du champ apprenant.contrats vers contrats
   await db
     .collection("effectifs")
-    .updateMany({}, { $set: { contrats: "$apprenant.contrats" } }, { bypassDocumentValidation: true });
-  await db
-    .collection("effectifs")
-    .updateMany({}, { $unset: { "apprenant.contrats": "" } }, { bypassDocumentValidation: true });
+    .updateMany({}, { $rename: { "apprenant.contrats": "contrats" } }, { bypassDocumentValidation: true });
 };
