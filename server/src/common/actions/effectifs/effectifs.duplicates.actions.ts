@@ -31,15 +31,18 @@ export const buildEffectifsDuplicatesForOrganismeId = async (organisme_id: Objec
  * Construction du pipeline d'aggregation du clean des noms / prenom pour identification des doublons
  * @returns
  */
-const getSanitizedNomPrenomPipeline = () => [
+const getSanitizedNomPrenomPipeline = (
+  nomApprenantField = "$apprenant.nom",
+  prenomApprenantField = "$apprenant.prenom"
+) => [
   {
     $addFields: {
-      sanitizedNom: { $regexFindAll: { input: { $toLower: "$apprenant.nom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+      sanitizedNom: { $regexFindAll: { input: { $toLower: nomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
     },
   },
   {
     $addFields: {
-      sanitizedPrenom: { $regexFindAll: { input: { $toLower: "$apprenant.prenom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+      sanitizedPrenom: { $regexFindAll: { input: { $toLower: prenomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
     },
   },
   {
@@ -92,30 +95,7 @@ export const getDuplicatesEffectifsForOrganismeId = async (organisme_id: ObjectI
   return await effectifsDb()
     .aggregate([
       { $match: { organisme_id } },
-      {
-        $addFields: {
-          sanitizedNom: { $regexFindAll: { input: { $toLower: "$apprenant.nom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedPrenom: { $regexFindAll: { input: { $toLower: "$apprenant.prenom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedNom: {
-            $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-          },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedPrenom: {
-            $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-          },
-        },
-      },
+      ...getSanitizedNomPrenomPipeline(),
       {
         $group: {
           _id: {
@@ -162,7 +142,7 @@ export const getEffectifsDuplicatesFromSIREN = async (siren: string) => {
         },
       },
       { $match: { organisme_siren: siren } },
-      ...getSanitizedNomPrenomPipeline(),
+      ...getSanitizedNomPrenomPipeline("$nom_apprenant", "$prenom_apprenant"),
       {
         $group: {
           _id: {
@@ -203,30 +183,7 @@ export const getEffectifsDuplicatesOnSIREN = async () => {
           organisme_siren: { $substr: ["$organismes_info.siret", 0, 9] },
         },
       },
-      {
-        $addFields: {
-          sanitizedNom: { $regexFindAll: { input: { $toLower: "$apprenant.nom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedPrenom: { $regexFindAll: { input: { $toLower: "$apprenant.prenom" }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedNom: {
-            $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-          },
-        },
-      },
-      {
-        $addFields: {
-          sanitizedPrenom: {
-            $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-          },
-        },
-      },
+      ...getSanitizedNomPrenomPipeline(),
       {
         $group: {
           _id: {
