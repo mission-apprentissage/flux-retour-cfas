@@ -7,7 +7,7 @@ interface Props {
 }
 function IndicateursFilter(props: Props) {
   return (
-    <Accordion>
+    <Accordion allowToggle>
       <AccordionItem borderTopWidth="0" borderBottomWidth="0 !important">
         {({ isExpanded }) => (
           <>
