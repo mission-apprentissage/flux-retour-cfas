@@ -7,7 +7,7 @@ import { apprenantSchema } from "./effectifs.model/parts/apprenant.part";
 import { contratSchema } from "./effectifs.model/parts/contrat.part";
 import { formationEffectifSchema } from "./effectifs.model/parts/formation.effectif.part";
 import { internalFields } from "./effectifsQueue.model";
-import { object, any } from "./json-schema/jsonSchemaTypes";
+import { object, any, objectId } from "./json-schema/jsonSchemaTypes";
 import organismesModel from "./organismes.model";
 
 const collectionName = "effectifsV3Queue";
@@ -35,6 +35,7 @@ const apprenantProps = apprenantSchema.properties;
  */
 export const schema = object(
   {
+    _id: objectId(),
     apprenant: object({
       nom: any({ description: apprenantProps.nom.description }),
       prenom: any({ description: apprenantProps.prenom.description }),
