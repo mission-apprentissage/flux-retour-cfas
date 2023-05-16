@@ -27,6 +27,7 @@ import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 import IndicateursFilter from "./FilterAccordion";
 import FiltreFormationAnnee from "./FiltreFormationAnnee";
 import FiltreFormationNiveau from "./FiltreFormationNiveau";
+import FiltreOrganismeReseau from "./FiltreOrganismeReseau";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
@@ -255,7 +256,10 @@ function IndicateursForm() {
           <Box>Liste des filtres</Box>
         </IndicateursFilter>
         <IndicateursFilter label="Réseaux d’organismes">
-          <Box>Liste des filtres</Box>
+          <FiltreOrganismeReseau
+            value={effectifsFilters.organisme_reseaux}
+            onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
+          />
         </IndicateursFilter>
       </Box>
 

@@ -1,3 +1,6 @@
+// données à synchroniser avec /ui/common/constants/networks.ts
+// en attendant un import partagé
+
 /**
  * Noms des réseaux de CFAS
  */
