@@ -1,5 +1,5 @@
-import { AddIcon, InfoOutlineIcon, MinusIcon } from "@chakra-ui/icons";
-import { Flex, Button, HStack, Text, Box, Heading, Divider, Center, Spinner } from "@chakra-ui/react";
+import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { Flex, Button, HStack, Text, Box, Heading, Divider } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useMemo } from "react";
@@ -7,9 +7,10 @@ import { Dispatch, SetStateAction, useMemo } from "react";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import { _get } from "@/common/httpClient";
 import { Organisation } from "@/common/internal/Organisation";
+import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import Table from "@/components/Table/Table";
 import useAuth from "@/hooks/useAuth";
+import { ArrowDropRightLine } from "@/theme/components/icons";
 
 import DateFilter from "../dashboard/filters/DateFilter";
 import TerritoireFilter, { TerritoireFilterConfig } from "../dashboard/filters/TerritoireFilter";
@@ -25,6 +26,7 @@ import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 
 import IndicateursFilter from "./FilterAccordion";
 import NatureOrganismeTag from "./NatureOrganismeTag";
+import NewTable from "./NewTable";
 
 interface FilterButtonProps {
   isOpen: boolean;
@@ -185,7 +187,6 @@ function IndicateursForm() {
         </Text>
 
         <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
-        {/* <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} /> */}
 
         <Text fontWeight="700" textTransform="uppercase">
           Territoire
@@ -261,125 +262,92 @@ function IndicateursForm() {
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
 
-        {indicateursEffectifsLoading && (
-          <Center h="200px">
-            <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
-          </Center>
-        )}
-        {indicateursEffectifs && (
-          <Table
-            mt={4}
-            data={indicateursEffectifs}
-            columns={{
-              nom: {
-                size: 1000,
-                header: () => (
-                  <Text as="span" px={3} fontSize="sm" whiteSpace="nowrap" lineHeight="10">
-                    Nom de l’organisme
+        <NewTable
+          mt={4}
+          data={indicateursEffectifs || []}
+          loading={indicateursEffectifsLoading}
+          columns={[
+            {
+              header: () => "Nom de l’organisme",
+              accessorKey: "nom",
+              cell: ({ row }) => (
+                <>
+                  <Text
+                    fontSize="1rem"
+                    whiteSpace="nowrap"
+                    textOverflow="ellipsis"
+                    overflow="hidden"
+                    title={row.original.nom}
+                  >
+                    {row.original.nom}
                   </Text>
-                ),
-                cell: ({ row }) => (
-                  <>
-                    <Text
-                      fontSize="1rem"
-                      px={3}
-                      pt={2}
-                      whiteSpace="nowrap"
-                      textOverflow="ellipsis"
-                      overflow="hidden"
-                      title={row.original.nom}
-                    >
-                      {row.original.nom}
-                    </Text>
-                    <Text fontSize="xs" px={3} py={2} color="#777777">
-                      UAI : {row.original.uai} - SIRET :{row.original.siret}
-                    </Text>
-                  </>
-                ),
-              },
-              nature: {
-                size: 1,
-                header: () => (
-                  <Box px={2} whiteSpace="nowrap">
-                    <Text as="span" px={2} fontSize="sm">
-                      Nature
-                    </Text>
-                    <InfoOutlineIcon w="20px" h="20px" />
-                  </Box>
-                ),
-                cell: ({ getValue }) => (
-                  <Box px={2}>
-                    <NatureOrganismeTag nature={getValue()} />
-                  </Box>
-                ),
-              },
-              apprentis: {
-                size: 1,
-                header: () => (
-                  <Box px={2} whiteSpace="nowrap">
-                    <ApprentisIcon />
-                    <Text as="span" ml={2} fontSize="sm">
-                      Apprentis
-                    </Text>
-                  </Box>
-                ),
-                cell: ({ getValue }) => (
-                  <Text fontSize="1rem" px={2}>
-                    {getValue()}
+                  <Text fontSize="xs" pt={2} color="#777777">
+                    UAI : {row.original.uai} - SIRET :{row.original.siret}
                   </Text>
-                ),
-              },
-              inscritsSansContrat: {
-                size: 1,
-                header: () => (
-                  <Box px={2} whiteSpace="nowrap">
-                    <InscritsSansContratsIcon />
-                    <Text as="span" ml={2} fontSize="sm">
-                      Sans contrat
-                    </Text>
-                  </Box>
-                ),
-                cell: ({ getValue }) => (
-                  <Text fontSize="1rem" px={2}>
-                    {getValue()}
+                </>
+              ),
+            },
+            {
+              accessorKey: "nature",
+              header: () => "Nature",
+              cell: ({ getValue }) => <NatureOrganismeTag nature={getValue()} />,
+            },
+            {
+              accessorKey: "apprentis",
+              header: () => (
+                <>
+                  <ApprentisIcon />
+                  <Text as="span" ml={2} fontSize="sm">
+                    Apprentis
                   </Text>
-                ),
-              },
-              rupturants: {
-                size: 1,
-                header: () => (
-                  <Box px={2} whiteSpace="nowrap">
-                    <RupturantsIcon />
-                    <Text as="span" ml={2} fontSize="sm">
-                      Ruptures
-                    </Text>
-                  </Box>
-                ),
-                cell: ({ getValue }) => (
-                  <Text fontSize="1rem" px={2}>
-                    {getValue()}
+                </>
+              ),
+            },
+            {
+              accessorKey: "inscritsSansContrat",
+              header: () => (
+                <>
+                  <InscritsSansContratsIcon />
+                  <Text as="span" ml={2} fontSize="sm">
+                    Sans contrat
                   </Text>
-                ),
-              },
-              abandons: {
-                size: 1,
-                header: () => (
-                  <Box px={2} whiteSpace="nowrap">
-                    <AbandonsIcon />
-                    <Text as="span" ml={2} fontSize="sm">
-                      Sorties
-                    </Text>
-                  </Box>
-                ),
-                cell: ({ getValue }) => (
-                  <Text fontSize="1rem" px={2}>
-                    {getValue()}
+                </>
+              ),
+            },
+            {
+              accessorKey: "rupturants",
+              header: () => (
+                <>
+                  <RupturantsIcon />
+                  <Text as="span" ml={2} fontSize="sm">
+                    Ruptures
                   </Text>
-                ),
-              },
-            }}
-          />
-        )}
+                </>
+              ),
+            },
+            {
+              accessorKey: "abandons",
+              header: () => (
+                <>
+                  <AbandonsIcon />
+                  <Text as="span" ml={2} fontSize="sm">
+                    Sorties
+                  </Text>
+                </>
+              ),
+            },
+            {
+              enableSorting: false,
+              id: "actions",
+              header: () => "Voir",
+              cell: ({ row }) => (
+                <Link href={`/organismes/${row.original.organisme_id}`}>
+                  <ArrowDropRightLine />
+                </Link>
+              ),
+            },
+          ]}
+        />
       </Box>
     </Flex>
   );

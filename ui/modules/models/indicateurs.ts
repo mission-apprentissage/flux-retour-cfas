@@ -7,7 +7,14 @@ export interface IndicateursEffectifs {
 }
 
 export type IndicateursEffectifsAvecDepartement = IndicateursEffectifs & { departement: string };
-export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & { departement: string };
+
+export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & {
+  organisme_id: string;
+  nom: string;
+  nature: string;
+  siret: string;
+  uai: string;
+};
 
 export interface IndicateursOrganismes {
   tauxCouverture: number;

@@ -1,4 +1,4 @@
-import { Icon } from "@chakra-ui/react";
+import { Icon, SystemProps } from "@chakra-ui/react";
 import React from "react";
 
 export function ApprenantsIcon() {
@@ -68,4 +68,27 @@ export function GraphIcon() {
       />
     </Icon>
   );
+}
+
+export function FirstPageIcon(props?: SystemProps) {
+  return (
+    <Icon viewBox="0 0 16 16" w="16px" h="16px" {...props}>
+      <path d="M5.333 4H4v8.487h1.333V4ZM11.852 11.543l-3.3-3.3 3.3-3.3L10.909 4 6.667 8.243l4.242 4.242.943-.942Z" />
+    </Icon>
+  );
+}
+export function LastPageIcon(props?: SystemProps) {
+  return <FirstPageIcon transform="rotate(180deg)" {...props} />;
+}
+
+export function ChevronLeftIcon(props?: SystemProps) {
+  return (
+    <Icon viewBox="0 0 16 16" w="16px" h="16px" {...props}>
+      <path d="m7.218 8 3.3 3.3-.942.943L5.333 8l4.243-4.243.942.943-3.3 3.3Z" />
+    </Icon>
+  );
+}
+
+export function ChevronRightIcon(props?: SystemProps) {
+  return <ChevronLeftIcon transform="rotate(180deg)" {...props} />;
 }
