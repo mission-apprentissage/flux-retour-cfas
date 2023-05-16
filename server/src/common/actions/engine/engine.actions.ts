@@ -304,7 +304,7 @@ export const findOrCreateOrganisme = async (organisme: ReturnType<typeof mapEffe
     // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> erreur
     if (organismeFoundWithSiret?._id)
       throw new Error(
-        `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`
+        `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai} (reçu ${uai})`
       );
   }
   if (cleanUai) {
@@ -312,7 +312,7 @@ export const findOrCreateOrganisme = async (organisme: ReturnType<typeof mapEffe
     // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> erreur
     if (organismeFoundWithUai?._id)
       throw new Error(
-        `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`
+        `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret} (reçu ${siret})`
       );
   }
 

@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { effectifsQueueDb, effectifsDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
+import { sample41461021200014 } from "@tests/data/entreprise.api.gouv.fr/sampleDataApiEntreprise";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
 
 const uai = "0802004U";
@@ -43,12 +44,15 @@ describe("Processing de EffectifsQueue", () => {
       });
 
       const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
-      expect(updatedInput?.validation_errors).toMatchObject([
-        {
-          message: requiredField.includes("date_") ? "Date invalide" : "String attendu",
-          path: [requiredField],
-        },
-      ]);
+      expect(updatedInput).toMatchObject({
+        processed_at: expect.any(Date),
+        validation_errors: [
+          {
+            message: requiredField.includes("date_") ? "Date invalide" : "String attendu",
+            path: [requiredField],
+          },
+        ],
+      });
 
       // check that no data was created
       expect(await effectifsDb().countDocuments({})).toBe(0);
@@ -78,6 +82,10 @@ describe("Processing de EffectifsQueue", () => {
 
     const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
+    expect(updatedInput).toMatchObject({
+      processed_at: expect.any(Date),
+    });
+
     expect(sortByPath(updatedInput?.validation_errors)).toStrictEqual([
       {
         message: "Format invalide",
@@ -105,7 +113,7 @@ describe("Processing de EffectifsQueue", () => {
     expect(await effectifsDb().countDocuments({})).toBe(0);
   });
 
-  it(`Vérifie qu'on ne crée pas de donnée et renvoie une erreur lorsque les champs date ne sont pas iso`, async () => {
+  it("Vérifie qu'on ne crée pas de donnée et renvoie une erreur lorsque les champs date ne sont pas iso", async () => {
     const { insertedId } = await effectifsQueueDb().insertOne({
       ...createRandomDossierApprenantApiInput({
         date_metier_mise_a_jour_statut: "2020",
@@ -149,6 +157,36 @@ describe("Processing de EffectifsQueue", () => {
         path: ["date_metier_mise_a_jour_statut"],
       },
     ]);
+
+    // check that no data was created
+    expect(await effectifsDb().countDocuments({})).toBe(0);
+  });
+
+  it("Vérifie qu'on ne crée pas de donnée et renvoie une erreur lorsque les données UAI / SIRET sont invalides", async () => {
+    const { insertedId } = await effectifsQueueDb().insertOne({
+      ...createRandomDossierApprenantApiInput({
+        uai_etablissement: uai,
+        siret_etablissement: sample41461021200014.etablissement.siret,
+      }),
+
+      created_at: new Date(),
+    });
+
+    const result = await processEffectifsQueue();
+
+    expect(result).toStrictEqual({
+      totalProcessed: 1,
+      totalValidItems: 0,
+      totalInvalidItems: 1,
+    });
+
+    const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
+
+    expect(updatedInput).toMatchObject({
+      error:
+        "L'organisme ayant l'UAI 0802004U existe déja en base avec un SIRET différent : 77937827200016 (reçu 41461021200014)",
+      processed_at: expect.any(Date),
+    });
 
     // check that no data was created
     expect(await effectifsDb().countDocuments({})).toBe(0);
