@@ -2,6 +2,7 @@ import Boom from "boom";
 import { compact, get } from "lodash-es";
 import { ObjectId } from "mongodb";
 
+import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs/effectifs.duplicates.actions";
 import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
 import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions";
 import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
@@ -91,3 +92,6 @@ export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {
     sousEtablissements,
   };
 }
+
+export const getOrganismeDuplicateEffectifs = async (organismeId: ObjectId) =>
+  getDuplicatesEffectifsForOrganismeId(organismeId);

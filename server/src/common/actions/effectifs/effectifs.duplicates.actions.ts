@@ -1,7 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool";
 import { ObjectId } from "mongodb";
 
-import { EFFECTIF_DUPLICATES_STATUTS } from "@/common/constants/effectifDuplicate";
 import { effectifsDb, effectifsDuplicatesGroupDb } from "@/common/model/collections";
 import {
   defaultValuesEffectifDuplicate,

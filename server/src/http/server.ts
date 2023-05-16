@@ -87,6 +87,7 @@ import effectif from "./routes/specific.routes/effectif.routes";
 import indicateursRouter from "./routes/specific.routes/indicateurs.routes";
 import {
   getOrganismeByUAIAvecSousEtablissements,
+  getOrganismeDuplicateEffectifs,
   getOrganismeEffectifs,
 } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
@@ -379,6 +380,13 @@ function setupRoutes(app: Application) {
             req.query.annee_scolaire as string | undefined,
             req.query.sifa === "true"
           );
+        })
+      )
+      .get(
+        "/duplicates-effectifs",
+        authOrgMiddleware("manager"),
+        returnResult(async (req, res) => {
+          return await getOrganismeDuplicateEffectifs(res.locals.organismeId);
         })
       )
       .get(
