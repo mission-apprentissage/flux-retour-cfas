@@ -18,6 +18,8 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
   [{ source: 1 }, { name: "source" }],
   [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
+  [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
+  [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
 ];
 
 const effectifsProps = effectifsModel.schema.properties;

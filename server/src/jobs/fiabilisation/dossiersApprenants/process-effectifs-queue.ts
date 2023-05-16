@@ -180,7 +180,6 @@ async function processItems(
           }
         }
 
-
         await (collection as any).updateOne(
           { _id: effectifQueued._id },
           { $set: { ...dataToUpdate, processed_at: new Date() } }
