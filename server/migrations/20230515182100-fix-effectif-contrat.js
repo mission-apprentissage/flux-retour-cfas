@@ -6,14 +6,17 @@ export const up = async (db) => {
   if (!collectionExistsInDb) {
     return;
   }
-  const effectifsWithContrat = (
-    await db
-      .collection(collectionName)
-      .find({ "apprenant.contrats": { $exists: true } })
-      .toArray()
-  ).map((item) => item._id);
+  const cursor = db.collection(collectionName).find({ "apprenant.contrats": { $exists: true } });
 
-  for (const effectif of effectifsWithContrat) {
-    await db.collection("effectifs").updateOne({ _id: effectif._id }, { $set: { contrats: effectif.contrats } });
+  while (await cursor.hasNext()) {
+    const effectifOld = await cursor.next();
+    console.info(`Migrating ${effectifOld._id}...`);
+    await db
+      .collection("effectifs")
+      .updateOne(
+        { _id: effectifOld._id },
+        { $set: { contrats: effectifOld.contrats } },
+        { bypassDocumentValidation: true }
+      );
   }
 };
