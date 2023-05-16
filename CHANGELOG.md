@@ -1,3 +1,10 @@
+## [3.27.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.2...v3.27.3) (2023-05-16)
+
+
+### Bug Fixes
+
+* **server:** catch les exceptions dans le transform du schema d'ingestion ([#3011](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3011)) ([7510c36](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7510c365f0d4870fdc5250d8da6154c9da0beaa6))
+
 ## [3.27.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.1...v3.27.2) (2023-05-15)
 
 
