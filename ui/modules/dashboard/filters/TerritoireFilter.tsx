@@ -16,10 +16,10 @@ import {
   REGIONS_SORTED,
   DEPARTEMENTS_SORTED,
   ACADEMIES_SORTED,
-  REGIONS_BY_ID,
-  DEPARTEMENTS_BY_ID,
-  ACADEMIES_BY_ID,
-} from "@/common/constants/territoiresConstants";
+  REGIONS_BY_CODE,
+  DEPARTEMENTS_BY_CODE,
+  ACADEMIES_BY_CODE,
+} from "@/common/constants/territoires";
 
 import SimpleOverlayMenu from "../SimpleOverlayMenu";
 
@@ -48,11 +48,11 @@ const TerritoireFilter = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const { regions, departements, academies } = props.value;
 
-  REGIONS_BY_ID[regions?.[0]]?.nom;
+  REGIONS_BY_CODE[regions?.[0]]?.nom;
   const buttonLabel = `${
-    REGIONS_BY_ID[regions?.[0]]?.nom ??
-    ACADEMIES_BY_ID[academies?.[0]]?.nom ??
-    DEPARTEMENTS_BY_ID[departements?.[0]]?.nom ??
+    REGIONS_BY_CODE[regions?.[0]]?.nom ??
+    ACADEMIES_BY_CODE[academies?.[0]]?.nom ??
+    DEPARTEMENTS_BY_CODE[departements?.[0]]?.nom ??
     "France"
   }${regions.length + academies.length + departements.length > 1 ? " + ..." : ""}`;
 

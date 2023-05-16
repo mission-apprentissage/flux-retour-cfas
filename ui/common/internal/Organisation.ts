@@ -1,5 +1,5 @@
-import { TETE_DE_RESEAUX_BY_ID } from "../constants/networksConstants";
-import { ACADEMIES_BY_ID, DEPARTEMENTS_BY_ID, REGIONS_BY_ID } from "../constants/territoiresConstants";
+import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
+import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 
 // types en doublon avec le serveur
 export const organisationTypes = [
@@ -99,13 +99,13 @@ export function getOrganisationLabel(organisation: Organisation): string {
 
     case "DREETS":
     case "DRAAF":
-      return `${organisation.type} ${REGIONS_BY_ID[organisation.code_region]?.nom || organisation.code_region}`;
+      return `${organisation.type} ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "CONSEIL_REGIONAL":
-      return `Conseil régional ${REGIONS_BY_ID[organisation.code_region]?.nom || organisation.code_region}`;
+      return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "DDETS":
-      return `DDETS ${DEPARTEMENTS_BY_ID[organisation.code_departement]?.nom || organisation.code_departement}`;
+      return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement}`;
     case "ACADEMIE":
-      return `Académie ${ACADEMIES_BY_ID[organisation.code_academie]?.nom || organisation.code_academie}`;
+      return `Académie ${ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie}`;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;
