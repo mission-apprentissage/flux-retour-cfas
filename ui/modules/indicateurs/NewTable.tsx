@@ -1,4 +1,4 @@
-import { Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Box, Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import {
   ColumnDef,
   SortingState,
@@ -54,10 +54,13 @@ function NewTable<T>(props: NewTableProps<T>) {
                     {header.isPlaceholder ? null : (
                       <>
                         {flexRender(header.column.columnDef.header, header.getContext())}
-                        {{
-                          asc: " 🔼",
-                          desc: " 🔽",
-                        }[header.column.getIsSorted() as string] ?? null}
+
+                        <Box as="span" display="inline-block" w="14px">
+                          {{
+                            asc: "▲",
+                            desc: "▼",
+                          }[header.column.getIsSorted() as string] ?? null}
+                        </Box>
                       </>
                     )}
                   </Th>
@@ -70,21 +73,19 @@ function NewTable<T>(props: NewTableProps<T>) {
           {props.loading ? (
             <RowsSkeleton nbRows={5} nbColumns={props.columns.length} height="50px" />
           ) : (
-            table
-              .getRowModel()
-              .rows.slice(0, 10)
-              .map((row) => {
-                return (
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>;
-                    })}
-                  </Tr>
-                );
-              })
+            table.getRowModel().rows.map((row) => {
+              return (
+                <Tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => {
+                    return <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>;
+                  })}
+                </Tr>
+              );
+            })
           )}
         </Tbody>
       </Table>
+
       <HStack mt={8} spacing={3} justifyContent="space-between">
         <HStack spacing={3}>
           <Button variant="unstyled" onClick={() => table.setPageIndex(0)} isDisabled={!table.getCanPreviousPage()}>

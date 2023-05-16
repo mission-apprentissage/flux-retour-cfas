@@ -25,6 +25,8 @@ import {
 import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 
 import IndicateursFilter from "./FilterAccordion";
+import FiltreFormationAnnee from "./FiltreFormationAnnee";
+import FiltreFormationNiveau from "./FiltreFormationNiveau";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
@@ -221,10 +223,16 @@ function IndicateursForm() {
           <Box>Liste des filtres</Box>
         </IndicateursFilter>
         <IndicateursFilter label="Niveau de formation">
-          <Box>Liste des filtres</Box>
+          <FiltreFormationNiveau
+            value={effectifsFilters.formation_niveaux}
+            onChange={(niveaux) => updateState({ formation_niveaux: niveaux })}
+          />
         </IndicateursFilter>
         <IndicateursFilter label="Année de formation">
-          <Box>Liste des filtres</Box>
+          <FiltreFormationAnnee
+            value={effectifsFilters.formation_annees}
+            onChange={(annees) => updateState({ formation_annees: annees })}
+          />
         </IndicateursFilter>
 
         <Text fontWeight="700" textTransform="uppercase">
