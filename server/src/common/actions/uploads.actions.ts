@@ -60,14 +60,14 @@ export const addDocument = async (
     taille_fichier,
     ext_fichier,
     hash_fichier,
-    userEmail,
+    userId,
   }: {
     nom_fichier: string;
     chemin_fichier: string;
     taille_fichier: number;
     ext_fichier: "xlsx" | "xls" | "csv";
     hash_fichier: string;
-    userEmail: string;
+    userId: string;
   }
 ) => {
   const found = await getOrCreateUploadByOrgId(organisme_id);
@@ -82,7 +82,7 @@ export const addDocument = async (
     confirm: false,
     created_at: new Date(),
     updated_at: new Date(),
-    added_by: userEmail.toLowerCase(),
+    added_by: userId,
   };
 
   let newDocuments = [...found.documents];

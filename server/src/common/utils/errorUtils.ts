@@ -17,6 +17,10 @@ class AppError extends Error {
  * @returns
  */
 export const formatError = (error: any) => {
+  console.log(JSON.stringify(error, null, 2));
+  console.log(error.message);
+  console.log(error?.errInfo?.details?.schemaRulesNotSatisfied);
+
   if (error.message === "Document failed validation") {
     const newError = new AppError("Document failed validation", { cause: error });
     newError.name = "DocumentFailedValidation";

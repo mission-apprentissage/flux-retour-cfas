@@ -1,6 +1,5 @@
 export const preDefinedModels = [
   {
-    type_document: "Fichier modèle fourni par le tableau de bord",
     mapping_column: {
       typeCodeDiplome: "CFD",
       annee_scolaire: "annee_scolaire",

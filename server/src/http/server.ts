@@ -62,7 +62,6 @@ import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFor
 import { registrationSchema } from "@/common/validation/registrationSchema";
 import uploadedDocumentSchema from "@/common/validation/uploadedDocumentSchema";
 import uploadMappingSchema from "@/common/validation/uploadMappingSchema";
-import uploadUpdateDocumentSchema from "@/common/validation/uploadUpdateDocumentSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
@@ -94,7 +93,8 @@ import { serverEventsHandler } from "./routes/specific.routes/server-events.rout
 import upload from "./routes/specific.routes/upload.routes";
 import auth from "./routes/user.routes/auth.routes";
 
-const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
+const openapiSpecsPath = path.join(process.cwd(), "./src/http/open-api.json");
+const openapiSpecs = JSON.parse(fs.readFileSync(openapiSpecsPath, "utf8"));
 
 /**
  * Create the express app
@@ -206,6 +206,7 @@ function setupRoutes(app: Application) {
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
     .use("/api/v1/auth", auth())
     .use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs))
+    .use("/api/openapi.json", express.static(openapiSpecsPath))
     .post(
       "/api/v1/auth/register",
       returnResult(async (req) => {
@@ -446,21 +447,12 @@ function setupRoutes(app: Application) {
               res.locals.documentId = new ObjectId(req.params.document_id);
               next();
             }) as RequestHandler<never, any, never, never, { documentId: ObjectId }>,
-            express
-              .Router()
-              .put(
-                "/setDocumentType",
-                validateRequestMiddleware({ body: uploadUpdateDocumentSchema() }),
-                returnResult(async (req, res) => {
-                  return upload.setDocumentType(res.locals.organismeId, res.locals.documentId, req.body.type_document);
-                })
-              )
-              .delete(
-                "",
-                returnResult(async (req, res) => {
-                  return upload.deleteUploadedDocument(res.locals.organismeId, res.locals.documentId);
-                })
-              )
+            express.Router().delete(
+              "",
+              returnResult(async (req, res) => {
+                return upload.deleteUploadedDocument(res.locals.organismeId, res.locals.documentId);
+              })
+            )
           )
       )
   );

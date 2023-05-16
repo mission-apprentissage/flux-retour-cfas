@@ -9,7 +9,7 @@ import { organismeAtom } from "@/hooks/organismeAtoms";
 import ChoixTransmission from "./ChoixTransmission";
 import { effectifsStateAtom } from "./engine/atoms";
 import Effectifs from "./engine/Effectifs";
-import Televersements from "./Televersements";
+import TeleversementsFichiers from "./TeleversementsFichiers";
 import TransmissionAPI from "./TransmissionAPI";
 
 function useOrganismesEffectifs(organismeId) {
@@ -70,7 +70,7 @@ const EffectifsPage = ({ isMine }) => {
       return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
     }
   } else if (organisme.mode_de_transmission === "MANUAL") {
-    return <Televersements organisme={organisme} />;
+    return <TeleversementsFichiers organismeId={organisme._id} />;
   } else {
     return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
   }

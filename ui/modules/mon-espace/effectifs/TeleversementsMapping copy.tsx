@@ -12,27 +12,31 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import uniq from "lodash.uniq";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import { useSetRecoilState } from "recoil";
 
 import { _get, _post, _put } from "@/common/httpClient";
-import { sortByNormalizedLabels } from "@/common/utils/array";
+import { Organisme } from "@/common/internal/Organisme";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import Stepper from "@/components/Stepper/Stepper";
 import useServerEvents from "@/hooks/useServerEvents";
+import useUploadAnalyser from "@/hooks/useUploadAnalyser";
 import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon, ArrowRightLong } from "@/theme/components/icons";
 
 import { effectifsStateAtom } from "./engine/atoms";
 import EffectifsTable from "./engine/EffectifsTable";
 import { Input } from "./engine/formEngine/components/Input/Input";
-import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
-import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
+import { useUploadedDocuments } from "./engine/TransmissionFichier/hooks/useUploadedDocuments";
 import TeleversementInProgress from "./TeleversementInProgress";
 
-const Televersements = ({ organisme }) => {
-  const { documents, uploads, onDocumentsChanged } = useDocuments();
-  const [step, setStep] = useState("upload");
-  useFetchUploads(organisme?._id);
+const TeleversementsMapping = ({ organisme }: { organisme: Organisme }) => {
+  const { documents, uploads } = useUploadedDocuments(organisme._id);
+  const data = useUploadAnalyser(organisme._id);
+
+  const [step, setStep] = useState("mapping");
+
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const [mapping, setMapping] = useState<any>(null);
   const router = useRouter();
@@ -46,28 +50,8 @@ const Televersements = ({ organisme }) => {
   const [requireKeysSettled, setRequireKeysSettled] = useState<any[]>([]);
 
   const [preEffectifs, setPreEffectifs] = useState({ canBeImport: [], canNotBeImport: [] });
-  const [typeDocument, setTypeDocument] = useState("");
   const [typeCodeDiplome, setTypeCodeDiplome] = useState("");
-  const [savedAsModel, setSavedAsModel] = useState(false);
-  const [modelAsChange, setModelAsChange] = useState(false);
   const toast = useToast();
-
-  const [mappingForThisType]: any[] =
-    uploads?.models?.filter(({ type_document }) => type_document === typeDocument) || [];
-
-  const onDefineFileType = useCallback(
-    async (type_document) => {
-      if (type_document?.length >= 4) {
-        const { document_id } = documents.unconfirmed[0];
-        const response = await _put(`/api/v1/organismes/${organisme._id}/upload/doc/${document_id}/setDocumentType`, {
-          type_document,
-        });
-        onDocumentsChanged(response.documents, response.models);
-      }
-      setTypeDocument(type_document);
-    },
-    [documents?.unconfirmed, onDocumentsChanged, organisme._id]
-  );
 
   const onLineChange = useCallback(
     ({ line, part }, { value, hasError, required = false }) => {
@@ -100,140 +84,10 @@ const Televersements = ({ organisme }) => {
         const keyToLock = newAvailableKeys[part].find((nAK) => nAK.value === value);
         keyToLock.locked = true;
         setAvailableKeys(newAvailableKeys);
-        if (mappingForThisType) setModelAsChange(true);
       }
     },
-    [availableKeys.in, availableKeys.out, lines, mappingForThisType, requireKeysSettled]
+    [availableKeys.in, availableKeys.out, lines, requireKeysSettled]
   );
-
-  const removeLine = useCallback(
-    ({ lineNum }) => {
-      const currentLine = lines[lineNum];
-      const newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
-      const currentInKeyLocked = newAvailableKeys.in.find((nAK) => nAK.value === currentLine.in.value);
-      const currentOutKeyLocked = newAvailableKeys.out.find((nAK) => nAK.value === currentLine.out.value);
-      if (currentInKeyLocked) currentInKeyLocked.locked = false;
-      if (currentOutKeyLocked) currentOutKeyLocked.locked = false;
-
-      const newLines = [...lines];
-      if (lineNum > -1) {
-        newLines.splice(lineNum, 1);
-      }
-
-      setLines(newLines);
-      setAvailableKeys(newAvailableKeys);
-    },
-    [availableKeys.in, availableKeys.out, lines]
-  );
-
-  const onGoBackToUpload = useCallback(async () => {
-    resetServerEvent();
-    setMapping(null);
-    setStep("upload");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const onGoToMappingStep = useCallback(async () => {
-    toast.closeAll();
-    resetServerEvent();
-    setStep("mapping");
-    const response: {
-      inputKeys: { label: string; value: string }[];
-      outputKeys: { label: string; value: string }[];
-      requireKeys: { label: string; value: string }[];
-    } = await _get(`/api/v1/organismes/${organisme._id}/upload/analyse`);
-
-    const currentAvailableKeys = {
-      in: sortByNormalizedLabels(Object.values(response.inputKeys).map((o) => ({ ...o, locked: false }))),
-      out: sortByNormalizedLabels(Object.values(response.outputKeys).map((o) => ({ ...o, locked: false }))),
-    };
-
-    let initLines: any[] = [];
-    // TODO REFACTOR THIS BELOW :vomit:
-    if (mappingForThisType?.mapping_column) {
-      const { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
-      userMapping[""] = typeCodeDiplome === "CFD" ? "RNCP" : "CFD";
-      let remap: any = Object.entries(userMapping).reduce(
-        (acc, [key, value]: any) => (key !== "annee_scolaire" ? { ...acc, [value]: key } : acc),
-        {}
-      );
-      const { CFD, RNCP, ...rest } = remap;
-      remap = {
-        annee_scolaire: "",
-        ...(typeCodeDiplome === "CFD"
-          ? {
-              CFD: CFD,
-              "": "RNCP",
-            }
-          : { "": "CFD", RNCP: RNCP }),
-        nom: "nom",
-        prenom: "prenom",
-        ...rest,
-      };
-
-      initLines = Object.entries(remap).map(([key, value]) => {
-        return {
-          in: { value: key === "annee_scolaire" ? "" : value, hasError: false },
-          out: { value: key, hasError: false },
-        };
-      });
-
-      // TODO check if exist in current mapping
-
-      let reqKeys = Object.values(remap).splice(3, Object.keys(response.requireKeys).length);
-      reqKeys = [typeCodeDiplome, ...reqKeys];
-
-      setTypeCodeDiplome(typeCodeDiplome);
-      setRequireKeysSettled(reqKeys);
-      let error = false;
-      for (const value of reqKeys) {
-        if (value !== "RNCP" && value !== "CFD") {
-          const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
-          if (keyToLock) {
-            keyToLock.locked = true;
-          } else {
-            error = true;
-          }
-        }
-      }
-
-      if (error) {
-        // Model does not match mapping on required field so gracefully reset
-        toast({
-          title:
-            "Le modèle que vous avez choisi ne correspond pas à ce fichier. Veuillez choisir un autre modèle ou en créer un nouveau",
-          status: "error",
-          duration: 10000,
-          isClosable: true,
-        });
-        onGoBackToUpload();
-        return;
-      }
-    }
-
-    initLines = Object.values(response.requireKeys).map((requireKey: any) => ({
-      in: { value: "", hasError: false },
-      out: { value: requireKey.value, hasError: false },
-    }));
-
-    setAvailableKeys(currentAvailableKeys);
-    setLines(initLines);
-
-    setMapping(response);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappingForThisType, organisme._id, toast]);
-
-  const onDefineAsModel = useCallback(async () => {
-    const keyToKeyMapping = lines.reduce((acc, line) => {
-      if (line.out.value === "annee_scolaire") return { ...acc, annee_scolaire: line.in.value };
-      return { ...acc, [line.in.value]: line.out.value };
-    }, {});
-    await _post(`/api/v1/organismes/${organisme._id}/upload/setModel`, {
-      type_document: typeDocument,
-      mapping: keyToKeyMapping,
-    });
-    setSavedAsModel(true);
-  }, [lines, organisme._id, typeDocument]);
 
   const onGoToPreImportStep = useCallback(async () => {
     setPreEffectifs({ canBeImport: [], canNotBeImport: [] });
@@ -276,74 +130,6 @@ const Televersements = ({ organisme }) => {
   return (
     <>
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
-        {step === "upload" && (
-          <>
-            <UploadFiles title="1. Importer votre fichier" />
-
-            <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-              2. Quel est le modèle de correspondance de ce fichier ?
-            </Heading>
-            <HStack justifyContent="center" spacing="4w" border="1px solid" borderColor="bluefrance" mb={8} py={4}>
-              <VStack w="33%" h="full" alignItems="baseline">
-                <Heading as="h4" fontSize="1rem">
-                  Modèle existant :
-                </Heading>
-                <Input
-                  name="type_document"
-                  fieldType="select"
-                  placeholder="Sélectionner un modèle de fichier"
-                  locked={!(documents?.unconfirmed?.length && uploads?.models?.length)}
-                  options={
-                    uploads?.models?.length
-                      ? uploads?.models?.map(({ type_document }) => ({
-                          label: type_document,
-                          value: type_document,
-                        }))
-                      : [{ label: "", value: "" }]
-                  }
-                  value={typeDocument}
-                  onSubmit={(value) => onDefineFileType(value)}
-                />
-              </VStack>
-
-              <Box>Ou</Box>
-              <VStack w="33%" alignItems="baseline">
-                <Heading as="h4" flexGrow="1" fontSize="1rem">
-                  Nouveau modèle de fichier :
-                </Heading>
-                <Input
-                  name="type_document"
-                  fieldType="text"
-                  minLength={4}
-                  mask="C"
-                  maskBlocks={[
-                    {
-                      name: "C",
-                      mask: "Pattern",
-                      pattern: "^.*$",
-                    },
-                  ]}
-                  placeholder="Nommez votre fichier"
-                  validateMessage="le modèle de fichier doit contenir au moins 4 caractères"
-                  locked={!documents?.unconfirmed?.length}
-                  onSubmit={(value) => onDefineFileType(value)}
-                  onError={(value) => onDefineFileType(value)}
-                  value={typeDocument}
-                />
-              </VStack>
-            </HStack>
-            <Button
-              onClick={onGoToMappingStep}
-              size={"md"}
-              variant="primary"
-              isDisabled={typeDocument === "" || !documents?.unconfirmed?.length}
-            >
-              Étape suivante
-              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
-            </Button>
-          </>
-        )}
-        {step === "mapping" && !mapping && <TeleversementInProgress message={lastMessage} />}
         {step === "mapping" && mapping && lines.length && (
           <>
             <Box my={10}>
@@ -584,15 +370,6 @@ const Televersements = ({ organisme }) => {
                                   w="33%"
                                   mb={0}
                                 />
-                                <Box
-                                  w="35px"
-                                  p={1}
-                                  mt="8px !important"
-                                  _hover={{ cursor: "pointer" }}
-                                  onClick={() => removeLine({ lineNum })}
-                                >
-                                  <Bin color="redmarianne" cursor="pointer" />
-                                </Box>
                               </HStack>
                             );
                           })}
@@ -602,30 +379,9 @@ const Televersements = ({ organisme }) => {
                 </>
               )}
             </Box>
-            {lines[0].in.value && modelAsChange && mappingForThisType && !mappingForThisType.lock && (
-              <VStack mb={8} alignItems="flex-start" border="1px solid" borderColor="bluefrance" p={2}>
-                <Heading as="h4" flexGrow="1" fontSize="1rem">
-                  Sauvegarder les modifcations du modéle (optionnel)
-                </Heading>
-                <Text>
-                  Sauvegarder ces correspondances comme modèle pour les prochains téléversements.
-                  <br /> Cette action remplacera le précédente modèle sauvegarder.
-                </Text>
-                <HStack>
-                  <Button
-                    onClick={() => onDefineAsModel()}
-                    size={"md"}
-                    variant="primary"
-                    isDisabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length || savedAsModel}
-                  >
-                    Sauvegarder
-                  </Button>
-                  {savedAsModel && <ValidateIcon color="flatsuccess" boxSize={4} />}
-                </HStack>
-              </VStack>
-            )}
+
             <HStack>
-              <Button onClick={onGoBackToUpload} size={"md"} variant="secondary">
+              <Link href={router.asPath.replace("/mapping", "")} as={Button} size={"md"} variant="secondary">
                 <ArrowDropRightLine
                   w={"0.75rem"}
                   h={"0.75rem"}
@@ -634,7 +390,7 @@ const Televersements = ({ organisme }) => {
                   transform="rotate(180deg)"
                 />
                 Étape précédente
-              </Button>
+              </Link>
 
               <Button
                 onClick={() => onGoToPreImportStep()}
@@ -807,4 +563,4 @@ const Televersements = ({ organisme }) => {
   );
 };
 
-export default Televersements;
+export default TeleversementsMapping;

@@ -33,6 +33,7 @@ import { Formation } from "@/common/model/@types/Formation";
 import { uploadsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import * as crypto from "@/common/utils/cryptoUtils";
+import { formatError } from "@/common/utils/errorUtils";
 import { getFromStorage, uploadToStorage, deleteFromStorage } from "@/common/utils/ovhUtils";
 import { getJsonFromXlsxData } from "@/common/utils/xlsxUtils";
 import { clamav } from "@/services";
@@ -154,10 +155,11 @@ function handleMultipartForm(req, res, organisme_id: ObjectId, callback) {
   // So instead of using form.on('close',...) we use a custom event to end response when everything is finished
   formEvents.on("terminated", async (e) => {
     if (e) {
-      logger.error(e);
+      const err = formatError(e);
+      logger.error({ err }, `Erreur lors de l'upload du fichier: ${err.message}`);
       return res.status(400).json({
         error:
-          e.message === "Le fichier est trop volumineux"
+          err.message === "Le fichier est trop volumineux"
             ? "Le fichier est trop volumineux"
             : "Le contenu du fichier est invalide",
       });
@@ -169,7 +171,9 @@ function handleMultipartForm(req, res, organisme_id: ObjectId, callback) {
     });
   });
 
-  form.on("error", () => {
+  form.on("error", (e) => {
+    const err = formatError(e);
+    logger.error({ err }, `Erreur lors de l'upload du fichier: ${err.message}`);
     return res.status(400).json({ error: "Le contenu du fichier est invalide" });
   });
   form.on("part", async (part) => {
@@ -234,7 +238,7 @@ export default {
 
           await deleteFromStorage(path);
         }
-        throw new Error("Le contenu du fichier est invalide");
+        throw new Error("Le fichier est infecté par un virus");
       }
 
       await addDocument(organisme_id, {
@@ -243,7 +247,7 @@ export default {
         nom_fichier: fileName,
         chemin_fichier: path,
         taille_fichier: part.byteCount,
-        userEmail: req.user.email,
+        userId: req.user._id,
       });
       sendServerEventsForUser(req.user._id, "Fichier téléversé avec succès");
     });
@@ -251,12 +255,6 @@ export default {
 
   getUpload: async (organisme_id) => {
     const upload = await getOrCreateUploadByOrgId(organisme_id, { last_snapshot_effectifs: 0 });
-    return upload;
-  },
-
-  setDocumentType: async (organisme_id: ObjectId, document_id: ObjectId, type_document: string) => {
-    const upload = await updateDocument(organisme_id, document_id, { type_document });
-
     return upload;
   },
 

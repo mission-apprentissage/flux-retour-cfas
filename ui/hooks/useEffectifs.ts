@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchEffectifs } from "@/common/api/tableauDeBord";
+import { _get } from "@/common/httpClient";
+import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 
 const mapEffectifsData = (effectifsData) => {
@@ -16,7 +17,7 @@ const useEffectifs = () => {
   const filtersContext = useFiltersContext();
 
   const { status, data, error } = useQuery<any, any>(["effectifs", filtersContext.state], () =>
-    fetchEffectifs(filtersContext.state)
+    _get("/api/indicateurs", { params: mapFiltersToApiFormat(filtersContext.state) })
   );
 
   const loading = status === "loading";

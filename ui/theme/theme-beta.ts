@@ -2,6 +2,8 @@ const rootFontSizePx = 16;
 
 const colors = {
   // doc https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-identite-de-l-etat/couleurs-palette/
+  // https://www.figma.com/file/0mofiw6xvEKFnvdIjl5Whl/DSFR-x-TdB?type=design&node-id=0-1&t=xrKZ14Hb12V38y34-0
+  // TODO aligner les couleurs (et les noms) avec le design system
   bluefrance: "#000091", // TODO replace by bluefrances.sun
   bluefrances: {
     main: "#000091",
@@ -15,6 +17,7 @@ const colors = {
   redmarianne: "#e1000f",
   openbluefrance: "#E3E3FD", // TODO replace by bluefrances.925
   bluefrance_light: "#5770BE",
+  bluefrance_light2: "#E3E3FD",
   bluefrance_hover: "#1414B2",
   success: "#0d6635",
   error: "#b60000",

@@ -37,7 +37,7 @@ export default function ContacterLequipeDuTdb() {
               Contacter l’équipe
             </Heading>
             <BaseAccordionGroup
-              AccordionItemsDetailList={[
+              items={[
                 {
                   title:
                     "J’ai constaté une erreur dans les chiffres affichés ou les informations concernant un établissement",

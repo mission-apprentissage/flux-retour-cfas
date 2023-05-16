@@ -59,7 +59,7 @@ export default function QuestionsReponses() {
         </Heading>
         <Box width={["100%", "100%", "70%", "70%"]}>
           <BaseAccordionGroup
-            AccordionItemsDetailList={[
+            items={[
               {
                 title: "Pourquoi transmettre les données de votre organisme au tableau de bord ?",
                 content: (

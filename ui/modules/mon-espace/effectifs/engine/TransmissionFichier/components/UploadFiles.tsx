@@ -2,27 +2,23 @@ import {
   Box,
   HStack,
   Button,
-  Heading,
   Input,
   ListItem,
   Text,
   List,
   useToast,
   Spinner,
-  Link,
   UnorderedList,
+  Heading,
 } from "@chakra-ui/react";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { useRecoilValue } from "recoil";
 
-import { _delete, _postFile } from "@/common/httpClient";
-import { organismeAtom } from "@/hooks/organismeAtoms";
 import useServerEvents from "@/hooks/useServerEvents";
-import { useDocuments } from "@/modules/mon-espace/effectifs/engine/TransmissionFichier/hooks/useDocuments";
 import { Bin, DownloadLine, File } from "@/theme/components/icons";
 
-const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
+import { UploadedDocument } from "../hooks/useUploadedDocuments";
+
 const MAX_FILE_SIZE = 10_485_760; // 10MB
 
 const baseStyle = {
@@ -54,12 +50,18 @@ function formatBytes(bytes, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
-const UploadFiles = ({ title }) => {
-  const organisme = useRecoilValue<any>(organismeAtom);
+type UploadFilesProps = {
+  organismeId: string;
+  documents: UploadedDocument[];
+  onDocumentDelete: (document_id: string) => void;
+  onDocumentUpload: (file: File) => void;
+};
+
+const UploadFiles = ({ organismeId, documents, onDocumentDelete, onDocumentUpload }: UploadFilesProps) => {
   const toast = useToast();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState<any>(null);
-  const { documents, onDocumentsChanged } = useDocuments();
   const [lastMessage, resetServerEvent] = useServerEvents();
 
   const maxFiles = 1;
@@ -73,10 +75,8 @@ const UploadFiles = ({ title }) => {
       setIsSubmitting(true);
 
       try {
-        const data = new FormData();
-        data.append("file", acceptedFiles[0]);
-        const { documents, models } = await _postFile(`${endpoint}/v1/organismes/${organisme._id}/upload`, data);
-        onDocumentsChanged(documents, models);
+        await onDocumentUpload(acceptedFiles[0]);
+
         toast({
           title: "Le fichier a bien été déposé",
           status: "success",
@@ -95,7 +95,7 @@ const UploadFiles = ({ title }) => {
         setIsSubmitting(false);
       }
     },
-    [organisme?._id, onDocumentsChanged, toast]
+    [organismeId, toast]
   );
 
   const onDropRejected = useCallback(
@@ -114,20 +114,11 @@ const UploadFiles = ({ title }) => {
     [toast]
   );
 
-  const onDeleteClicked = async (file) => {
+  const onDeleteClicked = async (file: UploadedDocument) => {
     resetServerEvent();
     const remove = confirm("Voulez-vous vraiment supprimer ce document ?");
     if (remove) {
-      setIsSubmitting(true);
-      try {
-        const { documents, models } = await _delete(
-          `${endpoint}/v1/organismes/${organisme._id}/upload/doc/${file.document_id}`
-        );
-        onDocumentsChanged(documents, models);
-        setIsSubmitting(false);
-      } catch (e) {
-        console.error(e);
-      }
+      onDocumentDelete(file.document_id);
     }
   };
 
@@ -136,9 +127,8 @@ const UploadFiles = ({ title }) => {
     onDrop,
     onDropRejected,
     accept: {
-      // TODO [Métier] RUSH SIFA 2022
-      // "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-      // "application/vnd.ms-excel": [".xls", ".csv"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+      "application/vnd.ms-excel": [".xls", ".csv"],
       "text/csv": [".csv"],
     },
     maxSize: MAX_FILE_SIZE,
@@ -154,15 +144,12 @@ const UploadFiles = ({ title }) => {
 
   return (
     <>
-      <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
-        {title}
-      </Heading>
-      <Text>Veuillez privilégier le format .csv</Text>
-      <Box>
-        <Text>
-          Avant de démarrer l’importation, votre fichier doit inclure obligatoirement une ligne d’en-tête avec les
-          champs suivants :
-        </Text>
+      <Box mb={10}>
+        <Heading as="h2" fontSize="gamma" color="labelgrey" mb={5}>
+          Sélectionner un document à importer
+        </Heading>
+        <Text mb={5}>Sélectionner un fichier contenant vos effectifs à importer.</Text>
+        <Text>Votre fichier doit inclure obligatoirement une ligne d’en-tête avec les champs suivants :</Text>
         <UnorderedList>
           <li>Code Formation Diplôme ou RNCP</li>
           <li>Année scolaire sur laquelle l’apprenant est positionné</li>
@@ -170,7 +157,7 @@ const UploadFiles = ({ title }) => {
           <li>Prénom de l’apprenant</li>
         </UnorderedList>
       </Box>
-      {documents?.unconfirmed?.length > 0 ? (
+      {documents?.length > 0 ? (
         <Box mb={8}>
           {uploadError && <Text color="error">{uploadError}</Text>}
           <>
@@ -181,19 +168,20 @@ const UploadFiles = ({ title }) => {
               </Box>
             ) : (
               <List>
-                {documents?.unconfirmed?.map((file) => {
+                {documents?.map((file: any) => {
                   return (
-                    <ListItem key={file.path || file.nom_fichier} borderBottom="solid 1px" borderColor="dgalt" pb={3}>
+                    <ListItem
+                      key={file.path || file.nom_fichier}
+                      border="solid 1px"
+                      borderColor="bluefrance_light2"
+                      borderRadius="4px"
+                      p={4}
+                    >
                       <HStack>
                         <File boxSize="5" color="bluefrance" />
                         <Box flexGrow={1}>
-                          <Link
-                            href={`/api/v1/organismes/${organisme._id}/upload?path=${file.chemin_fichier}&name=${file.nom_fichier}`}
-                            textDecoration={"underline"}
-                            isExternal
-                          >
-                            {file.path || file.nom_fichier} - {formatBytes(file.size || file.taille_fichier)}
-                          </Link>
+                          Nom du fichier : {file.path || file.nom_fichier} -{" "}
+                          {formatBytes(file.size || file.taille_fichier)}
                         </Box>
                         <Bin boxSize="5" color="redmarianne" cursor="pointer" onClick={() => onDeleteClicked(file)} />
                       </HStack>
@@ -223,7 +211,7 @@ const UploadFiles = ({ title }) => {
                     Glissez le fichier dans cette zone ou cliquez sur le bouton pour ajouter un document depuis votre
                     disque dur
                   </Text>
-                  <Text color="mgalt">(.csv, maximum 10mb)</Text>
+                  <Text color="mgalt">Formats acceptés : .csv (maximum 10mb)</Text>
                   <Button size="md" variant="secondary" mt={4}>
                     Ajouter un document
                   </Button>

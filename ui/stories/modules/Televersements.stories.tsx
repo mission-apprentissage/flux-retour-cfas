@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
 
-import Component from "@/modules/mon-espace/effectifs/Televersements";
+import Component from "@/modules/mon-espace/effectifs/TeleversementsFichiers";
 
 function getUploads(response) {
   return [

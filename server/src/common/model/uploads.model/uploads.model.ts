@@ -26,21 +26,12 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ organisme_id: 
 const schema = object(
   {
     _id: objectId(),
-    organisme_id: objectId({
-      description: "Organisme id",
-    }),
-    documents: arrayOf(documentSchema, {
-      description: "Historique des documents uploadés",
-    }),
+    organisme_id: objectId({ description: "Organisme id" }),
+    documents: arrayOf(documentSchema, { description: "Historique des documents uploadés" }),
 
     models: arrayOf(
       object({
-        type_document: string({
-          description: "Le type de document (exemple: SIFA-2021, gabarit-tableau-de-bord)",
-        }),
-        mapping_column: any({
-          description: "Mapping des colonnes du fichier",
-        }),
+        mapping_column: any({ description: "Mapping des colonnes du fichier" }),
         lock: boolean({ description: "Le modèle est vérouillé" }),
       }),
       {

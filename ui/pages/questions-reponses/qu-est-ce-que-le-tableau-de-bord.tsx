@@ -44,7 +44,7 @@ export default function QuestCeQueLeTdb() {
               Qu’est-ce que le {PRODUCT_NAME} ?
             </Heading>
             <BaseAccordionGroup
-              AccordionItemsDetailList={[
+              items={[
                 {
                   title: `Qu’est-ce que l’outil le ${PRODUCT_NAME} ?`,
                   content: (
@@ -181,7 +181,7 @@ export default function QuestCeQueLeTdb() {
               Si vous êtes organisme de formation (CFA ou UFA) :
             </Heading>
             <BaseAccordionGroup
-              AccordionItemsDetailList={[
+              items={[
                 {
                   title: "Pourquoi transmettre les données de votre organisme au tableau de bord ?",
                   content: (
@@ -238,7 +238,7 @@ export default function QuestCeQueLeTdb() {
               Si vous êtes une institution :
             </Heading>
             <BaseAccordionGroup
-              AccordionItemsDetailList={[
+              items={[
                 {
                   title: "Quelles institutions ont accès aux données du tableau de bord ?",
                   content: (

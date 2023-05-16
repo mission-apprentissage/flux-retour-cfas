@@ -5,23 +5,23 @@ import React from "react";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
-import TeleversementsFichiers from "@/modules/mon-espace/effectifs/TeleversementsFichiers";
+import TeleversementsVerification from "@/modules/mon-espace/effectifs/TeleversementsVerification";
 import { useEffectifsOrganismeOrganisation } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const PageImportEffectifsDeMonOrganismeChoixFichier = () => {
+const PageImportEffectifsDeMonOrganismeRapportFinal = () => {
   const { organisme } = useEffectifsOrganismeOrganisation();
   return (
     <Page>
       <Head>
-        <title>Mes effectifs - Import</title>
+        <title>Mes effectifs - Rapport Final</title>
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
-        <Container maxW="xl">{organisme && <TeleversementsFichiers organismeId={organisme._id} />}</Container>
+        <Container maxW="xl">{organisme && <TeleversementsRapportFinal organismeId={organisme._id} />}</Container>
       </Box>
     </Page>
   );
 };
 
-export default withAuth(PageImportEffectifsDeMonOrganismeChoixFichier);
+export default withAuth(PageImportEffectifsDeMonOrganismeRapportFinal);
