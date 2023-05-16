@@ -1,4 +1,4 @@
-import { calculateBins } from "./indicateurs";
+import { calculateBins } from "./graphs";
 
 const indicateurs = [
   1702, 123, 2227, 358, 51578, 32207, 2854, 38000, 44141, 24402, 36607, 31911, 33343, 40441, 28745, 747, 15976, 33456,

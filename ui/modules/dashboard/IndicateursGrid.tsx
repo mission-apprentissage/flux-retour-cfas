@@ -2,9 +2,9 @@ import { Box, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@c
 import { ReactNode } from "react";
 
 import { formatNumber } from "@/common/utils/stringUtils";
+import { IndicateursEffectifs } from "@/modules/models/indicateurs";
 
 import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "./icons";
-import { IndicateursEffectifs } from "./indicateurs";
 
 interface CardProps {
   label: string;
