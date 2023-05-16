@@ -6,7 +6,11 @@ import { configureOrganismeERP } from "@/common/api/tableauDeBord";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { ArrowDropRightLine } from "@/theme/components/icons";
 
-const ChoixTransmission = ({ organisme }) => {
+type ChoixTransmissionProps = {
+  organismeId: string;
+};
+
+const ChoixTransmission = ({ organismeId }: ChoixTransmissionProps) => {
   const router = useRouter();
 
   return (
@@ -45,7 +49,7 @@ const ChoixTransmission = ({ organisme }) => {
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  await configureOrganismeERP(organisme._id, { mode_de_transmission: "API" });
+                  await configureOrganismeERP(organismeId, { mode_de_transmission: "API" });
                   router.reload();
                 }}
                 size={"md"}
@@ -79,7 +83,7 @@ const ChoixTransmission = ({ organisme }) => {
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  await configureOrganismeERP(organisme._id, {
+                  await configureOrganismeERP(organismeId, {
                     mode_de_transmission: "MANUEL",
                     setup_step_courante: "COMPLETE",
                   });

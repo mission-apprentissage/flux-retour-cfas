@@ -7,10 +7,15 @@ import { configureOrganismeERP } from "@/common/api/tableauDeBord";
 import { ERPS } from "@/common/constants/erps";
 import { DownloadLine } from "@/theme/components/icons/index";
 
-const ConfigurationAPI = ({ organisme, isMine }) => {
+type ConfigurationAPIProps = {
+  organismeId: string;
+  isMine: boolean;
+  erpIdSelected: string | null | undefined;
+};
+
+const ConfigurationAPI = ({ organismeId, isMine, erpIdSelected }: ConfigurationAPIProps) => {
   const router = useRouter();
 
-  const erpIdSelected = router.query.erp;
   const erpSelected = ERPS.find((e) => e.id === erpIdSelected);
   const erpName = erpSelected?.name;
 
@@ -41,7 +46,7 @@ const ConfigurationAPI = ({ organisme, isMine }) => {
               padding={"2px"}
               alignItems="end"
               onClick={async () => {
-                await configureOrganismeERP(organisme._id, {
+                await configureOrganismeERP(organismeId, {
                   setup_step_courante: "STEP2",
                   erps: [erpIdSelected],
                 });
@@ -110,12 +115,12 @@ const ConfigurationAPI = ({ organisme, isMine }) => {
         </VStack>
         <Button
           onClick={async () => {
-            await configureOrganismeERP(organisme._id, {
+            await configureOrganismeERP(organismeId, {
               erps: [erpIdSelected],
               setup_step_courante: "COMPLETE",
               mode_de_transmission: "API",
             });
-            router.push(isMine ? "/effectifs" : `/organismes/${organisme._id}/effectifs`);
+            router.push(isMine ? "/effectifs" : `/organismes/${organismeId}/effectifs`);
           }}
           variant="secondary"
           padding={2}

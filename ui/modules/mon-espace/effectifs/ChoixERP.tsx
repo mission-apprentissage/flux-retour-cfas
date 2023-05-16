@@ -8,7 +8,7 @@ import { configureOrganismeERP } from "@/common/api/tableauDeBord";
 import { ERPS } from "@/common/constants/erps";
 import { InfoCircle } from "@/theme/components/icons/index";
 
-const TransmissionAPI = ({ organisme, isMine }) => {
+const ChoixERP = ({ organisme, isMine }) => {
   const router = useRouter();
 
   const { values, handleSubmit, handleChange, isSubmitting } = useFormik({
@@ -101,4 +101,4 @@ const TransmissionAPI = ({ organisme, isMine }) => {
   );
 };
 
-export default TransmissionAPI;
+export default ChoixERP;

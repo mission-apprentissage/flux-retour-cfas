@@ -10,7 +10,7 @@ import ChoixTransmission from "./ChoixTransmission";
 import { effectifsStateAtom } from "./engine/atoms";
 import Effectifs from "./engine/Effectifs";
 import Televersements from "./Televersements";
-import TransmissionAPI from "./TransmissionAPI";
+import ChoixERP from "./ChoixERP";
 
 function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -62,10 +62,10 @@ const EffectifsPage = ({ isMine }) => {
   if (!organisme) return null;
 
   if (!organisme.mode_de_transmission) {
-    return <ChoixTransmission organisme={organisme} />;
+    return <ChoixTransmission organismeId={organisme._id} />;
   } else if (organisme.mode_de_transmission === "API") {
     if (organisme.erps?.length === 0 && !organisme.first_transmission_date) {
-      return <TransmissionAPI isMine={isMine} organisme={organisme} />;
+      return <ChoixERP isMine={isMine} organisme={organisme} />;
     } else {
       return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
     }
