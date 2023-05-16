@@ -79,7 +79,7 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
   );
 };
 
-const Effectifs = ({ organismesEffectifs, isMine }) => {
+const Effectifs = ({ organismesEffectifs, organismesDuplicatesEffectifs, isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue<any>(organismeAtom);
   const ajoutModal = useDisclosure();
@@ -102,6 +102,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
         <Heading textStyle="h2" color="grey.800" mb={5}>
           {isMine ? "Mes effectifs" : "Ses effectifs"}
         </Heading>
+
         <HStack spacing={4}>
           {organismesEffectifs.length > 0 && (
             <DownloadButton
@@ -149,6 +150,26 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
             </Text>
           </Box>
         </Ribbons>
+
+        {organismesDuplicatesEffectifs.length > 0 && (
+          <Ribbons variant="alert" mb={6}>
+            <Box ml={3}>
+              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6}>
+                Vous avez peut-être {organismesDuplicatesEffectifs.length} apprenants en double.
+              </Text>
+
+              <Button
+                size="md"
+                variant="secondary"
+                onClick={() => {
+                  router.push(`${router.asPath}/doublons`);
+                }}
+              >
+                <Text as="span">Vérifier</Text>
+              </Button>
+            </Box>
+          </Ribbons>
+        )}
       </Flex>
 
       {organisme.mode_de_transmission === "MANUEL" && organismesEffectifs.length === 0 && (

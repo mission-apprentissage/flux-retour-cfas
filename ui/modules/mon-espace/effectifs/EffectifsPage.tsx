@@ -11,6 +11,7 @@ import { effectifsStateAtom } from "./engine/atoms";
 import Effectifs from "./engine/Effectifs";
 import Televersements from "./Televersements";
 import TransmissionAPI from "./TransmissionAPI";
+import { useOrganismesDuplicatesEffectifs } from "./useDuplicateEffectifsOrganisme";
 
 function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -50,6 +51,7 @@ function useOrganismesEffectifs(organismeId) {
 const EffectifsPage = ({ isMine }) => {
   const organisme = useRecoilValue<any>(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
+  const { organismesDuplicatesEffectifs } = useOrganismesDuplicatesEffectifs(organisme?._id);
 
   if (isLoading) {
     return (
@@ -67,12 +69,24 @@ const EffectifsPage = ({ isMine }) => {
     if (organisme.erps?.length === 0 && !organisme.first_transmission_date) {
       return <TransmissionAPI isMine={isMine} organisme={organisme} />;
     } else {
-      return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
+      return (
+        <Effectifs
+          isMine={isMine}
+          organismesEffectifs={organismesEffectifs}
+          organismesDuplicatesEffectifs={organismesDuplicatesEffectifs}
+        />
+      );
     }
   } else if (organisme.mode_de_transmission === "MANUAL") {
     return <Televersements organisme={organisme} />;
   } else {
-    return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
+    return (
+      <Effectifs
+        isMine={isMine}
+        organismesEffectifs={organismesEffectifs}
+        organismesDuplicatesEffectifs={organismesDuplicatesEffectifs}
+      />
+    );
   }
 };
 
