@@ -38,22 +38,26 @@ const NewDashboardTransverse = () => {
   const effectifsFilters = useMemo(() => {
     const filters = parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery);
 
-    // filtre initial positionné sur le territoire de l'utilisateur
-    if (
-      (auth.organisation as OrganisationOperateurPublicRegion).code_region &&
-      filters.organisme_regions.length === 0
-    ) {
-      filters.organisme_regions = [(auth.organisation as OrganisationOperateurPublicRegion).code_region];
-    } else if (
-      (auth.organisation as OrganisationOperateurPublicDepartement).code_departement &&
-      filters.organisme_departements.length === 0
-    ) {
-      filters.organisme_departements = [(auth.organisation as OrganisationOperateurPublicDepartement).code_departement];
-    } else if (
-      (auth.organisation as OrganisationOperateurPublicAcademie).code_academie &&
-      filters.organisme_academies.length === 0
-    ) {
-      filters.organisme_academies = [(auth.organisation as OrganisationOperateurPublicAcademie).code_academie];
+    // si aucun filtre, on positionne le filtre initial sur le territoire de l'utilisateur
+    if (router.asPath === "/") {
+      if (
+        (auth.organisation as OrganisationOperateurPublicRegion).code_region &&
+        filters.organisme_regions.length === 0
+      ) {
+        filters.organisme_regions = [(auth.organisation as OrganisationOperateurPublicRegion).code_region];
+      } else if (
+        (auth.organisation as OrganisationOperateurPublicDepartement).code_departement &&
+        filters.organisme_departements.length === 0
+      ) {
+        filters.organisme_departements = [
+          (auth.organisation as OrganisationOperateurPublicDepartement).code_departement,
+        ];
+      } else if (
+        (auth.organisation as OrganisationOperateurPublicAcademie).code_academie &&
+        filters.organisme_academies.length === 0
+      ) {
+        filters.organisme_academies = [(auth.organisation as OrganisationOperateurPublicAcademie).code_academie];
+      }
     }
 
     return filters;

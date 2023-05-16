@@ -8,6 +8,7 @@ import {
   organismesFiltersConfigurations,
 } from "@/common/actions/helpers/filters";
 import {
+  getEffectifsAnonymesRestriction,
   getIndicateursEffectifsRestriction,
   getIndicateursOrganismesRestriction,
 } from "@/common/actions/helpers/permissions";
@@ -29,9 +30,11 @@ export async function getIndicateursEffectifsParDepartement(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
+        $match: await getIndicateursEffectifsRestriction(ctx),
+      },
+      {
         $match: {
           ...buildMongoFilters(filters, effectifsFiltersConfigurations),
-          ...(await getIndicateursEffectifsRestriction(ctx)),
           annee_scolaire: {
             $in: getAnneesScolaireListFromDate(filters.date),
           },
@@ -241,9 +244,20 @@ export async function getIndicateursEffectifsParOrganisme(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
+        $match: await getEffectifsAnonymesRestriction(ctx),
+      },
+      {
         $match: {
           ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
-          ...(await getIndicateursEffectifsRestriction(ctx)),
+          annee_scolaire: {
+            $in: getAnneesScolaireListFromDate(filters.date),
+          },
+        },
+      },
+      {
+        $match: {
+          ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
+          ...(await getEffectifsAnonymesRestriction(ctx)),
           annee_scolaire: {
             $in: getAnneesScolaireListFromDate(filters.date),
           },

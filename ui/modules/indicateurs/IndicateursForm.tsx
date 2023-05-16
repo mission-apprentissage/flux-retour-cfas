@@ -4,13 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useMemo } from "react";
 
+import { ACADEMIES_BY_CODE, DEPARTEMENTS, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import { _get } from "@/common/httpClient";
+import { Organisation } from "@/common/internal/Organisation";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import Table from "@/components/Table/Table";
+import useAuth from "@/hooks/useAuth";
 
 import DateFilter from "../dashboard/filters/DateFilter";
-import TerritoireFilter from "../dashboard/filters/TerritoireFilter";
+import TerritoireFilter, { TerritoireFilterConfig } from "../dashboard/filters/TerritoireFilter";
 import { InscritsSansContratsIcon, AbandonsIcon, RupturantsIcon, ApprentisIcon } from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
@@ -52,7 +54,51 @@ function FilterButton(props: FilterButtonProps) {
   );
 }
 
+function getTerritoiresFilterConfig(organisation: Organisation): TerritoireFilterConfig {
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+    case "TETE_DE_RESEAU":
+      return {};
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+      return {
+        defaultLabel: REGIONS_BY_CODE[organisation.code_region]?.nom,
+        regions: [],
+        departements: DEPARTEMENTS.filter((departement) => departement.region.code === organisation.code_region).map(
+          (departement) => departement.code
+        ),
+        academies: [],
+        bassinsEmploi: [],
+      };
+
+    case "DDETS":
+      return {
+        defaultLabel: DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom,
+        disabled: true,
+      };
+    case "ACADEMIE":
+      return {
+        defaultLabel: ACADEMIES_BY_CODE[organisation.code_academie]?.nom,
+        regions: [],
+        departements: DEPARTEMENTS.filter(
+          (departement) => departement.academie.code === organisation.code_academie
+        ).map((departement) => departement.code),
+        academies: [],
+        bassinsEmploi: [],
+      };
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return {};
+  }
+  return {};
+}
+
 function IndicateursForm() {
+  const { auth } = useAuth();
   const router = useRouter();
 
   const effectifsFilters = useMemo(() => {
@@ -108,6 +154,16 @@ function IndicateursForm() {
     );
   }
 
+  function resetFilters() {
+    router.push(
+      {
+        pathname: router.pathname,
+      },
+      undefined,
+      { shallow: true }
+    );
+  }
+
   return (
     <Flex gap={6}>
       <Box minW="280px" display="grid" gap={1} height="fit-content">
@@ -115,7 +171,9 @@ function IndicateursForm() {
           <Heading as="h2" fontSize="24px" textTransform="uppercase">
             Filtrer par
           </Heading>
-          <Button variant="outline">Réinitialiser</Button>
+          <Button variant="outline" onClick={resetFilters}>
+            Réinitialiser
+          </Button>
         </HStack>
 
         {/* <Box bg="#F5F5FE;" p={4} my={2} textAlign="center">
@@ -127,15 +185,6 @@ function IndicateursForm() {
         </Text>
 
         <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
-        <DateFilter
-          value={effectifsFilters.date}
-          onChange={(date) => updateState({ date })}
-          button={({ isOpen, setIsOpen, buttonLabel }) => (
-            <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
-              {buttonLabel}
-            </SecondarySelectButton>
-          )}
-        />
         {/* <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} /> */}
 
         <Text fontWeight="700" textTransform="uppercase">
@@ -150,6 +199,7 @@ function IndicateursForm() {
             academies: effectifsFilters.organisme_academies,
             bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
           }}
+          config={getTerritoiresFilterConfig(auth.organisation)}
           onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
           onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
           onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
