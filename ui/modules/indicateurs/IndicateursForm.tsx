@@ -24,6 +24,7 @@ import {
 import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 
 import IndicateursFilter from "./FilterAccordion";
+import FiltreApprenantTrancheAge from "./FiltreApprenantTrancheAge";
 import FiltreFormationAnnee from "./FiltreFormationAnnee";
 import FiltreFormationNiveau from "./FiltreFormationNiveau";
 import FiltreOrganismeReseau from "./FiltreOrganismeReseau";
@@ -184,16 +185,16 @@ function IndicateursForm() {
           Récap des filtres
         </Box> */}
 
-        <Box>
-          <Text fontWeight="700" textTransform="uppercase" mb={2}>
+        <SimpleGrid gap={3}>
+          <Text fontWeight="700" textTransform="uppercase">
             Date
           </Text>
 
           <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
-        </Box>
+        </SimpleGrid>
 
-        <Box>
-          <Text fontWeight="700" textTransform="uppercase" mb={2}>
+        <SimpleGrid gap={3}>
+          <Text fontWeight="700" textTransform="uppercase">
             Territoire
           </Text>
 
@@ -211,7 +212,7 @@ function IndicateursForm() {
             onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
             onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
           />
-        </Box>
+        </SimpleGrid>
         {/* <Text fontWeight="700" textTransform="uppercase">
           Domaine d’activité
         </Text>
@@ -240,12 +241,15 @@ function IndicateursForm() {
           </IndicateursFilter>
         </SimpleGrid>
 
-        <Box>
+        <SimpleGrid gap={3}>
           <Text fontWeight="700" textTransform="uppercase">
             Apprenant
           </Text>
           <IndicateursFilter label="Tranche d’âge">
-            <Box>Liste des filtres</Box>
+            <FiltreApprenantTrancheAge
+              value={effectifsFilters.apprenant_tranchesAge}
+              onChange={(tranchesAge) => updateState({ apprenant_tranchesAge: tranchesAge })}
+            />
           </IndicateursFilter>
           {/* <IndicateursFilter label="Genre">
           <Box>Liste des filtres</Box>
@@ -253,7 +257,7 @@ function IndicateursForm() {
         <IndicateursFilter label="RQTH">
           <Box>Liste des filtres</Box>
         </IndicateursFilter> */}
-        </Box>
+        </SimpleGrid>
 
         <SimpleGrid gap={3}>
           <Text fontWeight="700" textTransform="uppercase">
@@ -300,9 +304,9 @@ function IndicateursForm() {
                     overflow="hidden"
                     title={row.original.nom}
                   >
-                    {row.original.nom}
+                    {row.original.nom ?? "Organisme inconnu"}
                   </Link>
-                  <Text fontSize="xs" pt={2} color="#777777">
+                  <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
                     UAI : {row.original.uai} - SIRET : {row.original.siret}
                   </Text>
                 </>

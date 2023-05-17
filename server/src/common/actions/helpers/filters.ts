@@ -1,3 +1,4 @@
+import { subYears } from "date-fns";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 
@@ -144,6 +145,14 @@ export const effectifsFiltersConfigurations: { [key in keyof Required<EffectifsF
   },
 };
 
+// [min, max[
+const intervalParTrancheAge = {
+  "-18": [0, 18],
+  "18-20": [18, 21],
+  "21-25": [21, 26],
+  "26+": [26, 999],
+};
+
 /**
  * Utilisé pour la recherche détaillée des indicateurs effectifs
  */
@@ -151,7 +160,12 @@ export const fullEffectifsFiltersSchema = {
   ...effectifsFiltersSchema,
   organisme_reseaux: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   // apprenant_genre: z.string(),
-  apprenant_tranchesAge: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  apprenant_tranchesAge: z
+    .preprocess(
+      (str: any) => str.split(","),
+      z.array(z.enum(Object.keys(intervalParTrancheAge) as [string, ...string[]]))
+    )
+    .optional(),
   // apprenant_rqth: z.boolean().optional(),
   formation_annees: z
     .preprocess((str: any) => str.split(",").map((i) => parseInt(i, 10)), z.array(z.number()))
@@ -174,8 +188,17 @@ export const fullEffectifsFiltersConfigurations: {
   //   matchKey: "", // encore inconnu, INE ou civilité avec api v3 ?
   // },
   apprenant_tranchesAge: {
-    matchKey: "apprenant.date_de_naissance",
-    transformValue: (value) => ({ $in: value }), // TODO calculer les intervals
+    matchKey: "$or", // un seul $or par $match
+    transformValue: (keys) =>
+      keys.map((key) => {
+        const [min, max] = intervalParTrancheAge[key];
+        return {
+          "apprenant.date_de_naissance": {
+            $lt: subYears(new Date(), min),
+            $gte: subYears(new Date(), max),
+          },
+        };
+      }),
   },
   // apprenant_rqth: {
   //   matchKey: "", // inconnu

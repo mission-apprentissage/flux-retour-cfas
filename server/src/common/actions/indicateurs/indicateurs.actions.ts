@@ -255,15 +255,6 @@ export async function getIndicateursEffectifsParOrganisme(
         },
       },
       {
-        $match: {
-          ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
-          ...(await getEffectifsAnonymesRestriction(ctx)),
-          annee_scolaire: {
-            $in: getAnneesScolaireListFromDate(filters.date),
-          },
-        },
-      },
-      {
         $project: {
           organisme_id: 1,
           "apprenant.historique_statut": {
