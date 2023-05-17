@@ -45,6 +45,7 @@ import {
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
   configureOrganismeERP,
   getOrganismeById,
+  generateApiKeyForOrg,
 } from "@/common/actions/organismes/organismes.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
@@ -462,6 +463,20 @@ function setupRoutes(app: Application) {
                 })
               )
           )
+      )
+      .use(
+        "/api-key",
+        authOrgMiddleware("manager"),
+        express
+          .Router()
+          .get("/", validateRequestMiddleware({ body: uploadedDocumentSchema() }), async (req, res) => {
+            const organisme = await getOrganismeById(res.locals.organismeId);
+            return organisme.api_key;
+          })
+          .post("/", async (req, res) => {
+            const generatedApiKey = await generateApiKeyForOrg(res.locals.organismeId);
+            return generatedApiKey;
+          })
       )
   );
 
