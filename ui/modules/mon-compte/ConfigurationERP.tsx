@@ -1,17 +1,21 @@
-import { Heading, Button, Text, OrderedList, ListItem, VStack } from "@chakra-ui/react";
+import { Heading, Button, Text, OrderedList, ListItem, VStack, Input } from "@chakra-ui/react";
 import React from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import { _put } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import useToaster from "@/hooks/useToaster";
 
 type ConfigurationERPProps = {
   apiKey: string | undefined | null;
 };
 
-const ConfigurationERP = ({ apiKey }: ConfigurationERPProps) => {
+const ConfigurationERP = ({ apiKey, onGenerate }: ConfigurationERPProps) => {
+  const { toastSuccess, toastError } = useToaster();
+
   return (
     <VStack w="100%" color="#1E1E1E" gap={10} alignItems="baseline">
-      <Ribbons variant="warning">
+      <Ribbons variant="warning" px={6}>
         <Heading as="h1" fontSize="gamma">
           Paramétrez votre clé d’échange dans votre ERP
         </Heading>
@@ -29,13 +33,27 @@ const ConfigurationERP = ({ apiKey }: ConfigurationERPProps) => {
         <Text>Au 15 juin 2023, notre API pour récolter les effectifs a évolué.</Text>
         {apiKey ? (
           <>
-            <input value={apiKey} />
-            <Button>Copier la clé</Button>
+            <Input type="text" name="apiKey" value={apiKey} required readOnly />
+            <CopyToClipboard text={apiKey} onCopy={() => toastSuccess("Copié!")}>
+              <Button variant="primary">Copier la clé</Button>
+            </CopyToClipboard>
           </>
         ) : (
           <>
             <Text>Cliquez sur le bouton ci-dessous pour générer votre nouvelle clé d’échange (API key).</Text>
-            <Button>Générer la clé d’échange</Button>
+            <Button
+              variant="primary"
+              onClick={() =>
+                onGenerate()
+                  .then(() => toastSuccess(""))
+                  .catch((err) => {
+                    console.error(err);
+                    toastError("Une erreur est survenue. Merci de réessayer plus tard.");
+                  })
+              }
+            >
+              Générer la clé d’échange
+            </Button>
           </>
         )}
       </VStack>

@@ -11,7 +11,7 @@ import NavigationMenu from "./components/NavigationMenu";
 
 type PageProps = {
   children: React.ReactNode;
-  childrenContainer?: React.ComponentType;
+  childrenContainer?: React.ComponentType | string;
 } & ContainerProps;
 
 function Page({ children, childrenContainer, ...rest }: PageProps) {

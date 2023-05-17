@@ -1,9 +1,9 @@
 import { Meta, StoryObj } from "@storybook/react";
 
-import Component from "@/modules/mon-compte/ConfigurationERP";
+import Component from "@/modules/mon-compte/ProfileInformation";
 
 const meta: Meta<typeof Component> = {
-  title: "Modules / Effectifs / Configuration ERP",
+  title: "Modules / Mon Compte / Profil",
   component: Component,
   parameters: {},
 };

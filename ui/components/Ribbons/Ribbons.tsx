@@ -46,7 +46,7 @@ type RibbonsProps = {
   children: React.ReactNode;
 } & BoxProps;
 
-const Ribbons = ({ variant = "info", oneLiner = true, children, ...rest }: RibbonsProps) => {
+const Ribbons = ({ variant = "info", oneLiner = true, children, px, py, ...rest }: RibbonsProps) => {
   return (
     <Box {...rest}>
       <Flex
@@ -67,8 +67,8 @@ const Ribbons = ({ variant = "info", oneLiner = true, children, ...rest }: Ribbo
           alignItems="flex-start"
           justifyContent="center"
           flexDirection="column"
-          py={3}
-          px={3}
+          py={py || 3}
+          px={px || 3}
         >
           {children}
         </Flex>
