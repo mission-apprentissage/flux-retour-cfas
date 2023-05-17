@@ -430,3 +430,132 @@ export async function getIndicateursEffectifsParOrganisme(
     .toArray()) as IndicateursEffectifsAvecOrganisme[];
   return indicateurs;
 }
+
+export const typesEffectifNominatif = ["inscritsSansContrat", "rupturants", "abandons"] as const;
+export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
+
+const pipelineByTypeEffectifNominatif: { [type in TypeEffectifNominatif]: any[] } = {
+  abandons: [
+    {
+      $match: {
+        "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
+      },
+    },
+  ],
+  inscritsSansContrat: [
+    {
+      $match: {
+        "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
+        "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
+      },
+    },
+  ],
+  rupturants: [
+    { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
+    // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
+    {
+      $addFields: {
+        previousStatutAtDate: {
+          $arrayElemAt: ["$apprenant.historique_statut", -2],
+        },
+      },
+    },
+    { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
+  ],
+};
+
+export async function getEffectifsNominatifs(
+  ctx: AuthContext,
+  filters: FullEffectifsFilters,
+  type: TypeEffectifNominatif
+): Promise<IndicateursEffectifsAvecOrganisme[]> {
+  const indicateurs = (await effectifsDb()
+    .aggregate([
+      {
+        $match: {
+          $and: [
+            await getEffectifsAnonymesRestriction(ctx),
+            ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
+          ],
+        },
+      },
+      {
+        $addFields: {
+          "apprenant.historique_statut": {
+            $sortArray: {
+              input: {
+                $filter: {
+                  input: "$apprenant.historique_statut",
+                  as: "statut",
+                  cond: {
+                    $lte: ["$$statut.date_statut", filters.date],
+                  },
+                },
+              },
+              sortBy: { date_statut: 1 },
+            },
+          },
+        },
+      },
+      {
+        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+      },
+      {
+        $addFields: {
+          statut_apprenant_at_date: {
+            $last: "$apprenant.historique_statut",
+          },
+        },
+      },
+      ...pipelineByTypeEffectifNominatif[type],
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "organisme_id",
+          foreignField: "_id",
+          as: "organisme",
+          pipeline: [
+            {
+              $project: {
+                uai: 1,
+                siret: 1,
+                nom: {
+                  $ifNull: ["$enseigne", "$raison_sociale"],
+                },
+                nature: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$organisme",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          organisme_uai: "$organisme.uai",
+          organisme_siret: "$organisme.siret",
+          organisme_nom: "$organisme.nom",
+          organisme_nature: "$organisme.nature",
+
+          apprenant_nom: "$apprenant.nom",
+          apprenant_prenom: "$apprenant.prenom",
+          apprenant_date_de_naissance: "$apprenant.date_de_naissance",
+
+          formation_cfd: "$formation.cfd",
+          formation_rncp: "$formation.rncp",
+          formation_libelle_long: "$formation.libelle_long",
+          formation_annee: "$formation.annee",
+          formation_niveau: "$formation.niveau",
+          formation_date_debut_formation: { $arrayElemAt: ["$formation.periode", 0] },
+          formation_date_fin_formation: { $arrayElemAt: ["$formation.periode", 1] },
+        },
+      },
+    ])
+    .toArray()) as IndicateursEffectifsAvecOrganisme[];
+  return indicateurs;
+}

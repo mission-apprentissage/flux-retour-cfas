@@ -28,9 +28,11 @@ import {
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import {
+  getEffectifsNominatifs,
   getIndicateursEffectifsParDepartement,
   getIndicateursEffectifsParOrganisme,
   getIndicateursOrganismesParDepartement,
+  typesEffectifNominatif,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
@@ -515,6 +517,14 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
         return await getIndicateursEffectifsParOrganisme(req.user, filters);
+      })
+    )
+    .get(
+      "/api/v1/indicateurs/effectifs/:type",
+      returnResult(async (req) => {
+        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+        const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
+        return await getEffectifsNominatifs(req.user, filters, type);
       })
     )
     .get(
