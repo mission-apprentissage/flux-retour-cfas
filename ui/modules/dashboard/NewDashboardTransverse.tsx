@@ -1,3 +1,4 @@
+import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Center, Container, Divider, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
@@ -10,7 +11,6 @@ import {
   OrganisationOperateurPublicDepartement,
   OrganisationOperateurPublicAcademie,
 } from "@/common/internal/Organisation";
-import { formatDate } from "@/common/utils/dateUtils";
 import { prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
@@ -155,12 +155,12 @@ const NewDashboardTransverse = () => {
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Aperçu des données de l’apprentissage
         </Heading>
-        <Text fontSize={14} fontWeight="bold" mt="8">
-          Dans votre territoire, le {formatDate(effectifsFilters.date, "dd MMMM yyyy")}.
-        </Text>
-        <Text fontSize={14}>
-          Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
-          ne transmettent pas encore leurs données au tableau de bord.
+        <Text fontSize={14} mt="8">
+          Ces chiffres reflètent partiellement les effectifs de l’apprentissage
+          <Text as="span" fontWeight="bold">
+            {auth.organisation.type === "TETE_DE_RESEAU" && " dans votre réseau"}
+          </Text>{" "}
+          : une partie des organismes de formation ne transmettent pas encore leurs données au tableau de bord.
         </Text>
         <HStack mt={8}>
           <Box>Filtrer par</Box>
@@ -199,8 +199,9 @@ const NewDashboardTransverse = () => {
           />
         )}
 
-        <Link href="/indicateurs" color="action-high-blue-france" textDecoration="underline">
+        <Link href="/indicateurs" color="action-high-blue-france" borderBottom="1px">
           Explorer plus d’indicateurs
+          <ArrowForwardIcon />
         </Link>
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
@@ -208,7 +209,7 @@ const NewDashboardTransverse = () => {
         <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(2, 1fr)" gap={4} my={8}>
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
-              Répartition des effectifs dans votre territoire
+              Répartition des effectifs au national
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
 

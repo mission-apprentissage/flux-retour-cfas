@@ -1,5 +1,5 @@
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
-import { Flex, Button, HStack, Text, Box, Heading, Divider } from "@chakra-ui/react";
+import { Flex, Button, HStack, Text, Box, Heading, Divider, SimpleGrid } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useMemo } from "react";
@@ -10,7 +10,6 @@ import { Organisation } from "@/common/internal/Organisation";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useAuth from "@/hooks/useAuth";
-import { ArrowDropRightLine } from "@/theme/components/icons";
 
 import DateFilter from "../dashboard/filters/DateFilter";
 import TerritoireFilter, { TerritoireFilterConfig } from "../dashboard/filters/TerritoireFilter";
@@ -171,7 +170,7 @@ function IndicateursForm() {
 
   return (
     <Flex gap={6}>
-      <Box minW="280px" display="grid" gap={1} height="fit-content">
+      <Box minW="280px" display="grid" gap={5} height="fit-content">
         <HStack>
           <Heading as="h2" fontSize="24px" textTransform="uppercase">
             Filtrer par
@@ -185,31 +184,34 @@ function IndicateursForm() {
           Récap des filtres
         </Box> */}
 
-        <Text fontWeight="700" textTransform="uppercase">
-          Date
-        </Text>
+        <Box>
+          <Text fontWeight="700" textTransform="uppercase" mb={2}>
+            Date
+          </Text>
 
-        <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
+          <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
+        </Box>
 
-        <Text fontWeight="700" textTransform="uppercase">
-          Territoire
-        </Text>
+        <Box>
+          <Text fontWeight="700" textTransform="uppercase" mb={2}>
+            Territoire
+          </Text>
 
-        <TerritoireFilter
-          button={FilterButton}
-          value={{
-            regions: effectifsFilters.organisme_regions,
-            departements: effectifsFilters.organisme_departements,
-            academies: effectifsFilters.organisme_academies,
-            bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
-          }}
-          config={getTerritoiresFilterConfig(auth.organisation)}
-          onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
-          onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
-          onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
-          onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
-        />
-
+          <TerritoireFilter
+            button={FilterButton}
+            value={{
+              regions: effectifsFilters.organisme_regions,
+              departements: effectifsFilters.organisme_departements,
+              academies: effectifsFilters.organisme_academies,
+              bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
+            }}
+            config={getTerritoiresFilterConfig(auth.organisation)}
+            onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
+            onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
+            onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
+            onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
+          />
+        </Box>
         {/* <Text fontWeight="700" textTransform="uppercase">
           Domaine d’activité
         </Text>
@@ -217,50 +219,56 @@ function IndicateursForm() {
           <Box>Liste des filtres</Box>
         </IndicateursFilter> */}
 
-        <Text fontWeight="700" textTransform="uppercase">
-          Formation
-        </Text>
-        <IndicateursFilter label="Type de formation">
-          <Box>Liste des filtres</Box>
-        </IndicateursFilter>
-        <IndicateursFilter label="Niveau de formation">
-          <FiltreFormationNiveau
-            value={effectifsFilters.formation_niveaux}
-            onChange={(niveaux) => updateState({ formation_niveaux: niveaux })}
-          />
-        </IndicateursFilter>
-        <IndicateursFilter label="Année de formation">
-          <FiltreFormationAnnee
-            value={effectifsFilters.formation_annees}
-            onChange={(annees) => updateState({ formation_annees: annees })}
-          />
-        </IndicateursFilter>
+        <SimpleGrid gap={3}>
+          <Text fontWeight="700" textTransform="uppercase">
+            Formation
+          </Text>
+          <IndicateursFilter label="Type de formation">
+            <Box>Liste des filtres</Box>
+          </IndicateursFilter>
+          <IndicateursFilter label="Niveau de formation">
+            <FiltreFormationNiveau
+              value={effectifsFilters.formation_niveaux}
+              onChange={(niveaux) => updateState({ formation_niveaux: niveaux })}
+            />
+          </IndicateursFilter>
+          <IndicateursFilter label="Année de formation">
+            <FiltreFormationAnnee
+              value={effectifsFilters.formation_annees}
+              onChange={(annees) => updateState({ formation_annees: annees })}
+            />
+          </IndicateursFilter>
+        </SimpleGrid>
 
-        <Text fontWeight="700" textTransform="uppercase">
-          Apprenant
-        </Text>
-        <IndicateursFilter label="Tranche d’âge">
-          <Box>Liste des filtres</Box>
-        </IndicateursFilter>
-        <IndicateursFilter label="Genre">
+        <Box>
+          <Text fontWeight="700" textTransform="uppercase">
+            Apprenant
+          </Text>
+          <IndicateursFilter label="Tranche d’âge">
+            <Box>Liste des filtres</Box>
+          </IndicateursFilter>
+          {/* <IndicateursFilter label="Genre">
           <Box>Liste des filtres</Box>
         </IndicateursFilter>
         <IndicateursFilter label="RQTH">
           <Box>Liste des filtres</Box>
-        </IndicateursFilter>
+        </IndicateursFilter> */}
+        </Box>
 
-        <Text fontWeight="700" textTransform="uppercase">
-          Organisme
-        </Text>
-        <IndicateursFilter label="Établissement">
-          <Box>Liste des filtres</Box>
-        </IndicateursFilter>
-        <IndicateursFilter label="Réseaux d’organismes">
-          <FiltreOrganismeReseau
-            value={effectifsFilters.organisme_reseaux}
-            onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
-          />
-        </IndicateursFilter>
+        <SimpleGrid gap={3}>
+          <Text fontWeight="700" textTransform="uppercase">
+            Organisme
+          </Text>
+          <IndicateursFilter label="Établissement">
+            <Box>Liste des filtres</Box>
+          </IndicateursFilter>
+          <IndicateursFilter label="Réseaux d’organismes">
+            <FiltreOrganismeReseau
+              value={effectifsFilters.organisme_reseaux}
+              onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
+            />
+          </IndicateursFilter>
+        </SimpleGrid>
       </Box>
 
       <Box flex="1">
@@ -284,7 +292,8 @@ function IndicateursForm() {
               accessorKey: "nom",
               cell: ({ row }) => (
                 <>
-                  <Text
+                  <Link
+                    href={`/organismes/${row.original.organisme_id}`}
                     fontSize="1rem"
                     whiteSpace="nowrap"
                     textOverflow="ellipsis"
@@ -292,9 +301,9 @@ function IndicateursForm() {
                     title={row.original.nom}
                   >
                     {row.original.nom}
-                  </Text>
+                  </Link>
                   <Text fontSize="xs" pt={2} color="#777777">
-                    UAI : {row.original.uai} - SIRET :{row.original.siret}
+                    UAI : {row.original.uai} - SIRET : {row.original.siret}
                   </Text>
                 </>
               ),
@@ -346,16 +355,6 @@ function IndicateursForm() {
                     Sorties
                   </Text>
                 </>
-              ),
-            },
-            {
-              enableSorting: false,
-              id: "actions",
-              header: () => "Voir",
-              cell: ({ row }) => (
-                <Link href={`/organismes/${row.original.organisme_id}`}>
-                  <ArrowDropRightLine />
-                </Link>
               ),
             },
           ]}
