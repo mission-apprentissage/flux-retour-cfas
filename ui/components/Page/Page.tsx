@@ -1,4 +1,4 @@
-import { Box, Container } from "@chakra-ui/react";
+import { Box, Container, ContainerProps } from "@chakra-ui/react";
 import React from "react";
 
 import Link from "@/components/Links/Link";
@@ -9,13 +9,20 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
 
-function Page({ children, ...rest }) {
+type PageProps = {
+  children: React.ReactNode;
+  childrenContainer?: React.ComponentType;
+} & ContainerProps;
+
+function Page({ children, childrenContainer, ...rest }: PageProps) {
+  const ChildrenContainer = childrenContainer || Section;
+
   return (
     <Container maxW="full" minH="100vh" display="flex" flexDirection="column" p={0} {...rest}>
       <Header />
       <NavigationMenu />
-      <Box minH={"40vh"} flexGrow="1" pb={8}>
-        <Section>{children}</Section>
+      <Box minH="40vh" flexGrow="1" pb={8}>
+        <ChildrenContainer>{children}</ChildrenContainer>
       </Box>
       <Link
         isExternal

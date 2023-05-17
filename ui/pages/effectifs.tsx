@@ -1,4 +1,3 @@
-import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
 
@@ -16,15 +15,11 @@ const PageEffectifsDeMonOrganisme = () => {
   const { organisme } = useEffectifsOrganismeOrganisation();
 
   return (
-    <Page>
+    <Page childrenContainer="div">
       <Head>
         <title>{title}</title>
       </Head>
-      <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
-        <Container maxW="xl" px={0}>
-          {organisme && <EffectifsPage isMine={true} />}
-        </Container>
-      </Box>
+      <EffectifsPage isMine={true} organisme={organisme} />
     </Page>
   );
 };

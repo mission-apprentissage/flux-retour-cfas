@@ -112,7 +112,7 @@ const Effectif = () => {
               <Text color="mgalt">Formation suivi par l&apos;apprenant</Text>
               {formationWarning && (
                 <Ribbons variant="warning" my={5}>
-                  <Box pl={3}>{formationWarning}</Box>
+                  {formationWarning}
                 </Ribbons>
               )}
 

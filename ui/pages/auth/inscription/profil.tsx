@@ -76,7 +76,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
     <Spinner />
   ) : (
     <Ribbons variant={error ? "error" : "success"} mt="0.5rem">
-      <Box ml={3} color="grey.800">
+      <Box color="grey.800">
         {(() => {
           switch (organisation.type) {
             case "ORGANISME_FORMATION_FORMATEUR":

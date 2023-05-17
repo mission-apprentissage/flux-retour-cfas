@@ -16,6 +16,7 @@ const colors = {
   openbluefrance: "#E3E3FD", // TODO replace by bluefrances.925
   bluefrance_light: "#5770BE",
   bluefrance_hover: "#1414B2",
+  blue_cumulus_main: "#3558A2",
   success: "#0d6635",
   error: "#b60000",
   warning: "#fa5c00",

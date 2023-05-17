@@ -669,35 +669,31 @@ const Televersements = ({ organisme }) => {
               </Text>
             </Box>
             <Ribbons variant="info" mt="0.5rem">
-              <Box ml={3}>
-                <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                  Vos données seront importées, selon vos choix ci-dessous :
-                </Text>
-                <Text color="grey.800" mt={2} textStyle="sm">
-                  Pour l&rsquo;année annéé scolaire : <Text as="strong">{lines[0].in.value}</Text>
-                  <br />
-                </Text>
-                <Text color="grey.800" mt={2} textStyle="sm">
-                  Code de référence pour les diplôme :{" "}
-                  <Text as="strong">{typeCodeDiplome === "CFD" ? "Code Formation Diplôme (CFD)" : "Code RNCP"}</Text>
-                  <br />
-                </Text>
-              </Box>
+              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                Vos données seront importées, selon vos choix ci-dessous :
+              </Text>
+              <Text color="grey.800" mt={2} textStyle="sm">
+                Pour l&rsquo;année annéé scolaire : <Text as="strong">{lines[0].in.value}</Text>
+                <br />
+              </Text>
+              <Text color="grey.800" mt={2} textStyle="sm">
+                Code de référence pour les diplôme :{" "}
+                <Text as="strong">{typeCodeDiplome === "CFD" ? "Code Formation Diplôme (CFD)" : "Code RNCP"}</Text>
+                <br />
+              </Text>
             </Ribbons>
 
             {!!preEffectifs.canNotBeImport.length && (
               <Box my={6}>
                 <Ribbons variant="alert" mt="0.5rem">
-                  <Box ml={3}>
-                    <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                      Les lignes du tableau ci-dessous ne pourront pas être importées car elles contiennent des erreurs.
-                    </Text>
-                    <Text color="grey.800" mt={2} textStyle="sm">
-                      Une fois votre importation terminée, vous pourrez : importer un nouveau fichier corrigé ou ajouter
-                      une à une les lignes en question.
-                      <br />
-                    </Text>
-                  </Box>
+                  <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                    Les lignes du tableau ci-dessous ne pourront pas être importées car elles contiennent des erreurs.
+                  </Text>
+                  <Text color="grey.800" mt={2} textStyle="sm">
+                    Une fois votre importation terminée, vous pourrez : importer un nouveau fichier corrigé ou ajouter
+                    une à une les lignes en question.
+                    <br />
+                  </Text>
                 </Ribbons>
 
                 <EffectifsTable
@@ -749,19 +745,17 @@ const Televersements = ({ organisme }) => {
             {!!preEffectifs.canBeImport.length && (
               <Box my={10}>
                 <Ribbons variant="warning" mt="0.5rem">
-                  <Box ml={3}>
-                    <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                      Les lignes du tableau ci-dessous pourront être importées.
-                    </Text>
-                    <Text mt={2} fontSize="0.9rem" color="grey.800" fontWeight="bold">
-                      Attention : Il est possible que des champs non obligatoires soient erronés. Une fois votre
-                    </Text>
-                    <Text color="grey.800" textStyle="sm">
-                      importation terminée, vous pourrez : importer un nouveau fichier corrigé ou les corriger sur votre
-                      tableau de bord
-                      <br />
-                    </Text>
-                  </Box>
+                  <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                    Les lignes du tableau ci-dessous pourront être importées.
+                  </Text>
+                  <Text mt={2} fontSize="0.9rem" color="grey.800" fontWeight="bold">
+                    Attention : Il est possible que des champs non obligatoires soient erronés. Une fois votre
+                  </Text>
+                  <Text color="grey.800" textStyle="sm">
+                    importation terminée, vous pourrez : importer un nouveau fichier corrigé ou les corriger sur votre
+                    tableau de bord
+                    <br />
+                  </Text>
                 </Ribbons>
                 <EffectifsTable
                   organismesEffectifs={preEffectifs.canBeImport}

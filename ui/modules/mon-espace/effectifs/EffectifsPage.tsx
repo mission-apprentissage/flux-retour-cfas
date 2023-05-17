@@ -1,22 +1,24 @@
-import { Center, Spinner } from "@chakra-ui/react";
+import { Box, Center, Container, Spinner } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef } from "react";
-import { useSetRecoilState, useRecoilValue } from "recoil";
+import { useSetRecoilState } from "recoil";
 
 import { _get } from "@/common/httpClient";
-import { organismeAtom } from "@/hooks/organismeAtoms";
+import { Organisme } from "@/common/internal/Organisme";
 
+import ChoixERP from "./ChoixERP";
 import ChoixTransmission from "./ChoixTransmission";
+import EffectifsBanner from "./EffectifsBanner";
+import EffectifsBannerERPNotConfigured from "./EffectifsBannerERPNotConfigured";
 import { effectifsStateAtom } from "./engine/atoms";
 import Effectifs from "./engine/Effectifs";
 import Televersements from "./Televersements";
-import ChoixERP from "./ChoixERP";
 
-function useOrganismesEffectifs(organismeId) {
+function useOrganismesEffectifs(organismeId: string | null | undefined) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
 
   const queryClient = useQueryClient();
-  const prevOrganismeId = useRef(null);
+  const prevOrganismeId = useRef<string | undefined | null>(null);
 
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
@@ -47,9 +49,17 @@ function useOrganismesEffectifs(organismeId) {
   return { isLoading: isFetching || isLoading, organismesEffectifs: data || [] };
 }
 
-const EffectifsPage = ({ isMine }) => {
-  const organisme = useRecoilValue<any>(organismeAtom);
+type EffectifsPageProps = {
+  isMine: boolean;
+  organisme: Organisme | null | undefined;
+};
+
+const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
+
+  if (!organisme) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -59,21 +69,36 @@ const EffectifsPage = ({ isMine }) => {
     );
   }
 
-  if (!organisme) return null;
-
+  let MainComponent;
   if (!organisme.mode_de_transmission) {
-    return <ChoixTransmission organismeId={organisme._id} />;
+    MainComponent = <ChoixTransmission organismeId={organisme._id} />;
   } else if (organisme.mode_de_transmission === "API") {
     if (organisme.erps?.length === 0 && !organisme.first_transmission_date) {
-      return <ChoixERP isMine={isMine} organisme={organisme} />;
+      MainComponent = <ChoixERP isMine={isMine} organisme={organisme} />;
     } else {
-      return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
+      MainComponent = <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
     }
-  } else if (organisme.mode_de_transmission === "MANUAL") {
-    return <Televersements organisme={organisme} />;
+  } else if (organisme.mode_de_transmission === "MANUEL") {
+    MainComponent = <Televersements organisme={organisme} />;
   } else {
-    return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
+    MainComponent = <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
   }
+
+  return (
+    <>
+      {organisme.mode_de_transmission ? (
+        <EffectifsBanner organisme={organisme} isMine={isMine} />
+      ) : (
+        <EffectifsBannerERPNotConfigured isMine={isMine} />
+      )}
+
+      <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
+        <Container maxW="xl" px={0}>
+          {MainComponent}
+        </Container>
+      </Box>
+    </>
+  );
 };
 
 export default EffectifsPage;

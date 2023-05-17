@@ -162,11 +162,9 @@ export default function OrganismeInfo({ organisme, isMine }: { organisme: Organi
 
           {organisme.ferme && (
             <Ribbons variant="alert" mt={10}>
-              <Box ml={3}>
-                <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                  Ce siret est connu comme correspondant à un établissement fermé.
-                </Text>
-              </Box>
+              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                Ce siret est connu comme correspondant à un établissement fermé.
+              </Text>
             </Ribbons>
           )}
         </Box>
@@ -175,24 +173,20 @@ export default function OrganismeInfo({ organisme, isMine }: { organisme: Organi
       <Box mt={5}>
         {!(organisme.first_transmission_date || organisme.mode_de_transmission) && (
           <Ribbons variant="warning" mt="0.5rem">
-            <Box ml={3}>
-              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                {isMine
-                  ? 'Vous ne nous transmettez pas encore vos effectifs. Veuillez cliquer dans l’onglet "Mes effectifs" pour démarrer l’import.'
-                  : "Cet organisme ne nous transmet pas encore ses effectifs."}
-              </Text>
-            </Box>
+            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+              {isMine
+                ? 'Vous ne nous transmettez pas encore vos effectifs. Veuillez cliquer dans l’onglet "Mes effectifs" pour démarrer l’import.'
+                : "Cet organisme ne nous transmet pas encore ses effectifs."}
+            </Text>
           </Ribbons>
         )}
         {!organisme.first_transmission_date && organisme.mode_de_transmission && (
           <Ribbons variant="warning" mt="0.5rem">
-            <Box ml={3}>
-              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                {isMine
-                  ? "Vos effectifs sont en cours de transmission."
-                  : "Les effectifs de cet organisme sont en cours de transmission."}
-              </Text>
-            </Box>
+            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+              {isMine
+                ? "Vos effectifs sont en cours de transmission."
+                : "Les effectifs de cet organisme sont en cours de transmission."}
+            </Text>
           </Ribbons>
         )}
       </Box>
