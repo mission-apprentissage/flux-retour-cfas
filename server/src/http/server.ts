@@ -225,7 +225,7 @@ function setupRoutes(app: Application) {
     .post(
       "/api/v1/password/forgotten-password",
       returnResult(async (req) => {
-        const { email } = await validateFullZodObjectSchema(req.query, {
+        const { email } = await validateFullZodObjectSchema(req.body, {
           email: z.string().email().toLowerCase().trim(),
         });
 
