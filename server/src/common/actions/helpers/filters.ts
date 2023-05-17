@@ -2,7 +2,10 @@ import { subYears } from "date-fns";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 
+import { SIRET_REGEX } from "@/common/constants/validations";
 import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
+import { escapeRegExp } from "@/common/utils/regexUtils";
+import { isValidUAI } from "@/common/utils/validationUtils";
 
 // version legacy des filtres indicateurs/effectifs avec organisme_id / siret / uai
 // devra être changée avec les nouveaux écrans pour sortir ces paramètres
@@ -158,6 +161,7 @@ const intervalParTrancheAge = {
  */
 export const fullEffectifsFiltersSchema = {
   ...effectifsFiltersSchema,
+  organisme_search: z.string().optional(),
   organisme_reseaux: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   // apprenant_genre: z.string(),
   apprenant_tranchesAge: z
@@ -179,6 +183,21 @@ export const fullEffectifsFiltersConfigurations: {
   [key in keyof Required<FullEffectifsFilters>]: FilterConfiguration;
 } = {
   ...effectifsFiltersConfigurations,
+  organisme_search: {
+    matchKey: "$or",
+    transformValue: (value) => {
+      if (isValidUAI(value)) {
+        return [{ "_computed.organisme.uai": value }];
+      }
+      if (SIRET_REGEX.test(value)) {
+        return [{ "_computed.organisme.siret": value }];
+      }
+      if (/^\d{3,}$/.test(value)) {
+        return [{ "_computed.organisme.siret": new RegExp(escapeRegExp(value)) }];
+      }
+      return [{ "_computed.organisme.nom": new RegExp(escapeRegExp(value)) }]; // FIXME rapatrier le nom (enseigne/raison_sociale) de l'organisme
+    },
+  },
   organisme_reseaux: {
     matchKey: "_computed.organisme.reseaux",
     transformValue: (value) => ({ $in: value }),
@@ -188,7 +207,7 @@ export const fullEffectifsFiltersConfigurations: {
   //   matchKey: "", // encore inconnu, INE ou civilité avec api v3 ?
   // },
   apprenant_tranchesAge: {
-    matchKey: "$or", // un seul $or par $match
+    matchKey: "$or",
     transformValue: (keys) =>
       keys.map((key) => {
         const [min, max] = intervalParTrancheAge[key];
@@ -217,10 +236,14 @@ export const fullEffectifsFiltersConfigurations: {
 export function buildMongoFilters<
   Filters extends { [s: string]: any },
   FiltersConfiguration = { [key in keyof Required<OrganismesFilters>]: FilterConfiguration }
->(filters: Filters, filtersConfiguration: FiltersConfiguration): object {
+>(filters: Filters, filtersConfiguration: FiltersConfiguration): any[] {
   return Object.entries(filters).reduce((matchFilters, [filterName, filterValue]) => {
     const filterConfiguration = filtersConfiguration[filterName];
-    matchFilters[filterConfiguration.matchKey] = filterConfiguration.transformValue?.(filterValue) ?? filterValue;
-    return matchFilters;
-  }, {});
+    return [
+      ...matchFilters,
+      {
+        [filterConfiguration.matchKey]: filterConfiguration.transformValue?.(filterValue) ?? filterValue,
+      },
+    ];
+  }, [] as any[]);
 }

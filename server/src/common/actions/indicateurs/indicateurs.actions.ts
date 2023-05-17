@@ -15,7 +15,6 @@ import {
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
 
 import {
   IndicateursEffectifsAvecDepartement,
@@ -30,14 +29,11 @@ export async function getIndicateursEffectifsParDepartement(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: await getIndicateursEffectifsRestriction(ctx),
-      },
-      {
         $match: {
-          ...buildMongoFilters(filters, effectifsFiltersConfigurations),
-          annee_scolaire: {
-            $in: getAnneesScolaireListFromDate(filters.date),
-          },
+          $and: [
+            await getIndicateursEffectifsRestriction(ctx),
+            ...buildMongoFilters(filters, effectifsFiltersConfigurations),
+          ],
         },
       },
       {
@@ -199,8 +195,10 @@ export async function getIndicateursOrganismesParDepartement(
     .aggregate([
       {
         $match: {
-          ...buildMongoFilters(filters, organismesFiltersConfigurations),
-          ...(await getIndicateursOrganismesRestriction(ctx)),
+          $and: [
+            await getIndicateursOrganismesRestriction(ctx),
+            ...buildMongoFilters(filters, organismesFiltersConfigurations),
+          ],
           est_dans_le_referentiel: true,
         },
       },
@@ -244,14 +242,11 @@ export async function getIndicateursEffectifsParOrganisme(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: await getEffectifsAnonymesRestriction(ctx),
-      },
-      {
         $match: {
-          ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
-          annee_scolaire: {
-            $in: getAnneesScolaireListFromDate(filters.date),
-          },
+          $and: [
+            await getEffectifsAnonymesRestriction(ctx),
+            ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
+          ],
         },
       },
       {
