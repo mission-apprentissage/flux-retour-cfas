@@ -28,6 +28,7 @@ import FiltreApprenantTrancheAge from "./FiltreApprenantTrancheAge";
 import FiltreFormationAnnee from "./FiltreFormationAnnee";
 import FiltreFormationNiveau from "./FiltreFormationNiveau";
 import FiltreOrganismeReseau from "./FiltreOrganismeReseau";
+import FiltreOrganismeSearch from "./FiltreOrganismeSearch";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
@@ -147,7 +148,6 @@ function IndicateursForm() {
     [indicateursEffectifs]
   );
 
-  // TODO
   function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
     router.push(
       {
@@ -264,7 +264,10 @@ function IndicateursForm() {
             Organisme
           </Text>
           <IndicateursFilter label="Établissement">
-            <Box>Liste des filtres</Box>
+            <FiltreOrganismeSearch
+              value={effectifsFilters.organisme_search}
+              onChange={(search) => updateState({ organisme_search: search })}
+            />
           </IndicateursFilter>
           <IndicateursFilter label="Réseaux d’organismes">
             <FiltreOrganismeReseau
@@ -321,7 +324,7 @@ function IndicateursForm() {
               accessorKey: "apprentis",
               header: () => (
                 <>
-                  <ApprentisIcon />
+                  <ApprentisIcon w="16px" />
                   <Text as="span" ml={2} fontSize="sm">
                     Apprentis
                   </Text>
@@ -332,7 +335,7 @@ function IndicateursForm() {
               accessorKey: "inscritsSansContrat",
               header: () => (
                 <>
-                  <InscritsSansContratsIcon />
+                  <InscritsSansContratsIcon w="16px" />
                   <Text as="span" ml={2} fontSize="sm">
                     Sans contrat
                   </Text>
@@ -343,7 +346,7 @@ function IndicateursForm() {
               accessorKey: "rupturants",
               header: () => (
                 <>
-                  <RupturantsIcon />
+                  <RupturantsIcon w="16px" />
                   <Text as="span" ml={2} fontSize="sm">
                     Ruptures
                   </Text>
@@ -354,7 +357,7 @@ function IndicateursForm() {
               accessorKey: "abandons",
               header: () => (
                 <>
-                  <AbandonsIcon />
+                  <AbandonsIcon w="16px" />
                   <Text as="span" ml={2} fontSize="sm">
                     Sorties
                   </Text>

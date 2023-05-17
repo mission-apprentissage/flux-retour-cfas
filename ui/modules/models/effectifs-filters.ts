@@ -7,6 +7,7 @@ export interface EffectifsFiltersQuery {
   organisme_academies?: string;
   organisme_bassinsEmploi?: string;
   organisme_reseaux?: string;
+  organisme_search: string;
   apprenant_tranchesAge?: string;
   formation_annees?: string;
   formation_niveaux?: string;
@@ -19,6 +20,7 @@ export interface EffectifsFilters {
   organisme_academies: string[];
   organisme_bassinsEmploi: string[];
   organisme_reseaux: string[];
+  organisme_search: string;
   apprenant_tranchesAge: string[];
   formation_annees: number[];
   formation_niveaux: string[];
@@ -32,6 +34,7 @@ export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): Ef
     organisme_academies: query.organisme_academies?.split(",") ?? [],
     organisme_bassinsEmploi: query.organisme_bassinsEmploi?.split(",") ?? [],
     organisme_reseaux: query.organisme_reseaux?.split(",") ?? [],
+    organisme_search: query.organisme_search ?? "",
     apprenant_tranchesAge: query.apprenant_tranchesAge?.split(",") ?? [],
     formation_annees: query.formation_annees?.split(",").map((i) => parseInt(i, 10)) ?? [],
     formation_niveaux: query.formation_niveaux?.split(",") ?? [],
@@ -46,6 +49,7 @@ export function convertEffectifsFiltersToQuery(query: EffectifsFilters): Effecti
     organisme_academies: query.organisme_academies?.join(","),
     organisme_bassinsEmploi: query.organisme_bassinsEmploi?.join(","),
     organisme_reseaux: query.organisme_reseaux?.join(","),
+    organisme_search: query.organisme_search,
     apprenant_tranchesAge: query.apprenant_tranchesAge?.join(","),
     formation_annees: query.formation_annees?.join(","),
     formation_niveaux: query.formation_niveaux?.join(","),
