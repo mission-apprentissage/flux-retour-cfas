@@ -19,8 +19,8 @@ export default () => {
     returnResult(async (req) => {
       const params = await validateFullZodObjectSchema(req.query, {
         query: z.string().optional(),
-        page: z.number().optional(),
-        limit: z.number().optional(),
+        page: z.coerce.number().optional(),
+        limit: z.coerce.number().optional(),
       });
 
       const query = params.query ?? "{}";
