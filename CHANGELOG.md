@@ -1,3 +1,11 @@
+## [3.27.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.3...v3.27.4) (2023-05-17)
+
+
+### Bug Fixes
+
+* **server:** fix validation zod sur /forgotten-password ([#3015](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3015)) ([62c138c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/62c138c732d3321fee0f30f7edf197e4e6921f2d))
+* **server:** validation req query string ([#3013](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3013)) ([7eb2b9b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7eb2b9befd3b7af72c8eeee43a812930d5abd51d))
+
 ## [3.27.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.2...v3.27.3) (2023-05-16)
 
 
