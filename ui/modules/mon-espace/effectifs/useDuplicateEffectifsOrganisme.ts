@@ -14,7 +14,7 @@ export const useOrganismesDuplicatesEffectifs = (organismeId) => {
     }
   }, [queryClient, organismeId]);
 
-  const { data } = useQuery<any, any>(
+  const { data, isLoading, error } = useQuery<any, any>(
     ["organismesDuplicatesEffectifs", organismeId],
     async () => {
       const duplicates = await _get(`/api/v1/organismes/${organismeId}/duplicates-effectifs`);
@@ -24,6 +24,8 @@ export const useOrganismesDuplicatesEffectifs = (organismeId) => {
   );
 
   return {
-    organismesDuplicatesEffectifs: data || [{ test: { valeur: "toto", valeur2: "toto" } }],
+    organismesDuplicatesEffectifs: data || [],
+    isLoading,
+    error,
   };
 };

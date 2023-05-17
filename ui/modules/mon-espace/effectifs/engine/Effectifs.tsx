@@ -154,7 +154,7 @@ const Effectifs = ({ organismesEffectifs, organismesDuplicatesEffectifs, isMine 
         {organismesDuplicatesEffectifs.length > 0 && (
           <Ribbons variant="alert" mb={6}>
             <Box ml={3}>
-              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6}>
+              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6} mb={4}>
                 Vous avez peut-être {organismesDuplicatesEffectifs.length} apprenants en double.
               </Text>
 
