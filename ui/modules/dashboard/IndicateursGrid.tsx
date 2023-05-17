@@ -81,9 +81,12 @@ function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps
           count={indicateursEffectifs.apprenants}
           tooltipLabel={
             <div>
-              <b>Nombre d&apos;apprenants en contrat d&apos;apprentissage</b> au dernier jour du mois (ou J-1 si mois en
-              cours). Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation. Il
-              est affiné par la prise en compte des dates de début de contrat saisie.
+              <b>Nombre d’apprenants en contrat d’apprentissage</b>
+              <br />
+              au dernier jour du mois (ou J-1 si mois en cours). Cet indicateur est basé sur la réception d’un statut
+              transmis par les organismes de formation. Il est affiné par la prise en compte des dates de début de
+              contrat saisies. Est considéré comme un apprenant, un jeune inscrit en formation dans un centre. Il peut
+              être soit déjà inscrit en entreprise (avec signature de contrat) soit en recherche d’une entreprise).
             </div>
           }
           icon={<ApprenantsIcon />}
@@ -96,9 +99,10 @@ function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps
           count={indicateursEffectifs.apprentis}
           tooltipLabel={
             <div>
-              <b>Nombre d&apos;apprentis en contrat d&apos;apprentissage</b> au dernier jour du mois (ou J-1 si mois en
-              cours). Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation. Il
-              est affiné par la prise en compte des dates de début de contrat saisie.
+              <b>Apprenti</b>
+              <br />
+              Un apprenti est un jeune apprenant inscrit dans le centre de formation, suivant la formation et accueilli
+              dans une entreprise qui la forme.
             </div>
           }
           icon={<ApprentisIcon />}
@@ -110,8 +114,11 @@ function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps
           count={indicateursEffectifs.rupturants}
           tooltipLabel={
             <div>
-              <b>Nombre d’apprenants en recherche de contrat après une rupture</b> et toujours dans cette situation à la
-              date affichée. Cet indicateur est déduit de plusieurs statuts transmis par les organismes de formation.
+              <b>Rupturant</b>
+              <br />
+              Un jeune est considéré en rupture lorsqu’il ne travaille plus dans l’entreprise qui l’accueillait.
+              Néanmoins, il reste inscrit dans le centre de formation et est en recherche d’une nouvelle entreprise avec
+              qui se former.
             </div>
           }
           icon={<RupturantsIcon />}
@@ -123,10 +130,10 @@ function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps
           count={indicateursEffectifs.inscritsSansContrat}
           tooltipLabel={
             <div>
-              <b>Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir jamais signé de contrat</b>{" "}
-              et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indicateur est
-              déduit de plusieurs statuts transmis par les organismes de formation. Il est affiné par la prise en compte
-              des dates d’enregistrement des inscriptions et de l’absence de dates de début de contrat.
+              <b>Jeune sans contrat</b>
+              <br />
+              Un jeune inscrit en formation dans un centre toujours en recherche d’une entreprise. Le délai est de 3
+              mois pour commencer son alternance.
             </div>
           }
           icon={<InscritsSansContratsIcon />}
@@ -138,8 +145,13 @@ function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps
           count={indicateursEffectifs.abandons}
           tooltipLabel={
             <div>
-              <b>Nombre d’apprenants ou d’apprentis qui ont définitivement quitté le centre de formation</b> à la date
-              affichée. Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation.
+              <b>Sorties d’apprentissage</b>
+              <br />
+              Il s’agit du nombre d’apprenants ou apprentis qui ont définitivement quitté le centre de formation à la
+              date affichée. Cette indication est basée sur un statut transmis par les organismes de formation. Ces
+              situations peuvent être consécutives à une rupture de contrat d’apprentissage avec départ du centre de
+              formation, à un départ du centre de formation sans que l’apprenant n’ait jamais eu de contrat, à un départ
+              du centre de formation pour intégrer une entreprise en CDI ou CDD plus rémunérateur.
             </div>
           }
           icon={<AbandonsIcon />}
