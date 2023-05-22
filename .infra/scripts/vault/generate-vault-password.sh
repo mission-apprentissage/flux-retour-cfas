@@ -2,7 +2,7 @@
 set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly ANSIBLE_DIR="$(realpath ${SCRIPT_DIR}/../../ansible)"
+readonly ANSIBLE_DIR="${SCRIPT_DIR}/../../ansible"
 readonly HABILITATIONS_FILE="${ANSIBLE_DIR}/roles/setup/vars/main/habilitations.yml"
 readonly VAULT_PASSWORD_FILE="${ANSIBLE_DIR}/.vault-password.gpg"
 
