@@ -464,19 +464,26 @@ function setupRoutes(app: Application) {
               )
           )
       )
+
       .use(
         "/api-key",
         authOrgMiddleware("manager"),
         express
           .Router()
-          .get("/", validateRequestMiddleware({ body: uploadedDocumentSchema() }), async (req, res) => {
-            const organisme = await getOrganismeById(res.locals.organismeId);
-            return organisme.api_key;
-          })
-          .post("/", async (req, res) => {
-            const generatedApiKey = await generateApiKeyForOrg(res.locals.organismeId);
-            return generatedApiKey;
-          })
+          .get(
+            "/",
+            returnResult(async (req, res) => {
+              const organisme = await getOrganismeById(res.locals.organismeId);
+              return { apiKey: organisme.api_key };
+            })
+          )
+          .post(
+            "/",
+            returnResult(async (req, res) => {
+              const generatedApiKey = await generateApiKeyForOrg(res.locals.organismeId);
+              return { apiKey: generatedApiKey };
+            })
+          )
       )
   );
 

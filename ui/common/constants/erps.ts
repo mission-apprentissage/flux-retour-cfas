@@ -61,6 +61,6 @@ export const ERPS = [
 
 export const ERPS_FORM_CASES = [
   ...ERPS,
-  { name: "Autre ERP", state: ERP_STATE.otherErp },
-  { name: "Je n'ai pas d'ERP", state: ERP_STATE.noErp },
+  { id: "AUTRE", name: "Autre ERP", state: ERP_STATE.otherErp },
+  { id: "NON", name: "Je n'ai pas d'ERP", state: ERP_STATE.noErp },
 ];
