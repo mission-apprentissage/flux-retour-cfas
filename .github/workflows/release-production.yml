@@ -45,7 +45,7 @@ jobs:
     with:
       environment: production
       server_ip: 146.59.226.70
-      user: sven
+      user: antoine
     secrets:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
