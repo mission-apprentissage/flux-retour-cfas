@@ -13,7 +13,7 @@ type EffectifsBannerProps = {
 const EffectifsBanner = ({ organisme, isMine }: EffectifsBannerProps) => {
   const erpId = organisme.erps?.[0];
   const mode_de_transmission = organisme.mode_de_transmission;
-  const erpName = ERPS.find((erp) => erp.id === erpId)?.name;
+  const erpName = ERPS.find((erp) => erp.id === erpId?.toUpperCase())?.name;
   const prefixOrganismeText = isMine ? "Votre" : "Cet";
 
   return (

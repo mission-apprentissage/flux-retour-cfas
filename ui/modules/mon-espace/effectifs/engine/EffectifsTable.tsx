@@ -354,7 +354,7 @@ const EffectifsTable = ({
                     };
                     return (
                       <HStack textAlign="left">
-                        <Text fontSize="1rem">{sources[source] ?? "Fichier"}</Text>
+                        <Text fontSize="1rem">{sources[source.toUpperCase()] ?? "Fichier"}</Text>
                       </HStack>
                     );
                   },
