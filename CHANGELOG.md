@@ -1,3 +1,10 @@
+# [3.28.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.4...v3.28.0) (2023-05-24)
+
+
+### Features
+
+* ajout page parametrage ERP ([#3016](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3016)) ([d560495](https://github.com/mission-apprentissage/flux-retour-cfas/commit/d560495021a028be63a236876148420290618140))
+
 ## [3.27.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.3...v3.27.4) (2023-05-17)
 
 
