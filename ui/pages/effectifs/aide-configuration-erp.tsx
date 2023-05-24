@@ -13,7 +13,7 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 const PageAideConfigurationErpMonOrganisme = () => {
   const router = useRouter();
-  const erpIdSelected = router.query.erp;
+  const erpIdSelected = router.query.erp as string;
 
   const { organisme } = useEffectifsOrganismeOrganisation();
   return (

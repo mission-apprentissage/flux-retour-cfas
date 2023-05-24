@@ -173,7 +173,7 @@ const PageFormulaireProfil = () => {
     if (router.query.invitationToken) {
       (async () => {
         try {
-          const invitation = await _get(`/api/v1/invitations/${router.query.invitationToken}`);
+          const invitation: any = (await _get(`/api/v1/invitations/${router.query.invitationToken}`)) as any;
           setOrganisation(invitation.organisation);
           setFixedEmail(invitation.email);
         } catch (err) {

@@ -38,7 +38,7 @@ function useOrganismesEffectifs(organismeId, anneeScolaire) {
     );
     // eslint-disable-next-line no-undef
     const newEffectifsState = new Map();
-    for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
+    for (const { id, validation_errors, requiredSifa } of organismesEffectifs as any) {
       newEffectifsState.set(id, { validation_errors, requiredSifa });
     }
     setCurrentEffectifsState(newEffectifsState);

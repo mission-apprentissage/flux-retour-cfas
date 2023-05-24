@@ -12,7 +12,7 @@ export function useFetchUploads(organismeId) {
     if (!organismeId) {
       return;
     }
-    const uploads = await _get(`/api/v1/organismes/${organismeId}/upload/get`);
+    const uploads: any = (await _get(`/api/v1/organismes/${organismeId}/upload/get`)) as any;
     if (uploads.documents.length) {
       setUploads({
         ...uploads,

@@ -15,7 +15,7 @@ const PageAideConfigurationErpSonOrganisme = () => {
   const router = useRouter();
   const { organisme } = useEffectifsOrganisme(router.query.organismeId as string);
 
-  const erpIdSelected = router.query.erp;
+  const erpIdSelected = router.query.erp as string;
 
   return (
     <Page>

@@ -7,7 +7,6 @@ import ReactMarkdown from "react-markdown";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
-import useAuth from "@/hooks/useAuth";
 import useMaintenanceMessages from "@/hooks/useMaintenanceMessages";
 import { ExternalLinkLine } from "@/theme/components/icons";
 
@@ -25,7 +24,6 @@ const chakraUIMarkdownRendererTheme: any = {
 
 const MaintenancePage = () => {
   const router = useRouter();
-  const { organisationType } = useAuth();
 
   const { messageMaintenance, isLoading } = useMaintenanceMessages();
 
@@ -38,7 +36,7 @@ const MaintenancePage = () => {
 
   const title = "Site en cours de maintenance";
   return (
-    <Page withoutDisplayNavigationBar={organisationType !== "ADMINISTRATEUR"}>
+    <Page>
       <Head>
         <title>{title}</title>
       </Head>
