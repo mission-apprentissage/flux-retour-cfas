@@ -39,14 +39,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.G_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
-  deploy:
-    needs: ["tests"]
-    uses: "./.github/workflows/_deploy.yml"
-    with:
-      environment: production
-      server_ip: 146.59.226.70
-      user: antoine
-    secrets:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+  # deploy:
+  #   needs: ["tests"]
+  #   uses: "./.github/workflows/_deploy.yml"
+  #   with:
+  #     environment: production
+  #     server_ip: 146.59.226.70
+  #     user: antoine
+  #   secrets:
+  #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  #     SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+  #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
