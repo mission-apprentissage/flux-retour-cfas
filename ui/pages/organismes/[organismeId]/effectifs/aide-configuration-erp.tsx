@@ -14,6 +14,9 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 const PageAideConfigurationErpSonOrganisme = () => {
   const router = useRouter();
   const { organisme } = useEffectifsOrganisme(router.query.organismeId as string);
+
+  const erpIdSelected = router.query.erp as string;
+
   return (
     <Page>
       <Head>
@@ -21,7 +24,7 @@ const PageAideConfigurationErpSonOrganisme = () => {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
         <Container maxW="xl" px={0}>
-          {organisme && <ConfigurationAPI organisme={organisme} isMine={false} />}
+          {organisme && <ConfigurationAPI organismeId={organisme._id} isMine={false} erpIdSelected={erpIdSelected} />}
         </Container>
       </Box>
     </Page>

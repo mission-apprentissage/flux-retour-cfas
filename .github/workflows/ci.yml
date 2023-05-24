@@ -28,7 +28,7 @@ jobs:
     with:
       environment: recette
       server_ip: 146.59.226.69
-      user: sven
+      user: antoine
     secrets:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}

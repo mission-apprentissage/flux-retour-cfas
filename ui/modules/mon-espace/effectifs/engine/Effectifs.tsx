@@ -137,47 +137,41 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
             </>
           )}
         </HStack>
-
-        <Ribbons variant="info" mb={6}>
-          <Box ml={3}>
-            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-              Service d’import de vos effectifs en version bêta.
-            </Text>
-            <Text color="grey.800" mt={4} textStyle="sm">
-              Nous listons actuellement toutes les informations qui peuvent empêcher l{"'"}import de fichier afin de
-              permettre par la suite une meilleure prise en charge de tout type de fichier.
-            </Text>
-          </Box>
-        </Ribbons>
       </Flex>
+
+      <Ribbons variant="info" mb={6}>
+        <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+          Service d’import de vos effectifs en version bêta.
+        </Text>
+        <Text color="grey.800" mt={4} textStyle="sm">
+          Nous listons actuellement toutes les informations qui peuvent empêcher l{"'"}import de fichier afin de
+          permettre par la suite une meilleure prise en charge de tout type de fichier.
+        </Text>
+      </Ribbons>
 
       {organisme.mode_de_transmission === "MANUEL" && organismesEffectifs.length === 0 && (
         <Ribbons variant="info" mt={5}>
-          <Box ml={3}>
-            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-              {isMine
-                ? `Vous n'avez pas encore ajouté d'effectifs`
-                : `Aucun effectif n'a été transmis pour cet organisme.`}
-            </Text>
-            <Text color="grey.800" mt={4} textStyle="sm">
-              Vous pouvez ajouter des effectifs à l&rsquo;aide du bouton &quot;Ajouter&quot; ci-dessus.
-              <br />
-            </Text>
-          </Box>
+          <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+            {isMine
+              ? `Vous n'avez pas encore ajouté d'effectifs`
+              : `Aucun effectif n'a été transmis pour cet organisme.`}
+          </Text>
+          <Text color="grey.800" mt={4} textStyle="sm">
+            Vous pouvez ajouter des effectifs à l&rsquo;aide du bouton &quot;Ajouter&quot; ci-dessus.
+            <br />
+          </Text>
         </Ribbons>
       )}
       {organisme.mode_de_transmission === "API" && organismesEffectifs.length === 0 && (
         <Ribbons variant="info" mt={5}>
-          <Box ml={3}>
-            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-              Aucun effectif n&rsquo;a été transmis depuis votre ERP.
-            </Text>
-            <Text color="grey.800" mt={4} textStyle="sm">
-              Merci de revenir ultérieurement. Si vous venez de configurer votre ERP, la transmission de vos effectifs
-              sera active demain matin.
-              <br />
-            </Text>
-          </Box>
+          <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+            Aucun effectif n&rsquo;a été transmis depuis votre ERP.
+          </Text>
+          <Text color="grey.800" mt={4} textStyle="sm">
+            Merci de revenir ultérieurement. Si vous venez de configurer votre ERP, la transmission de vos effectifs
+            sera active demain matin.
+            <br />
+          </Text>
         </Ribbons>
       )}
       {organismesEffectifs.length > 0 && (

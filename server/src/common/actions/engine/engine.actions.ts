@@ -88,6 +88,7 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
 
   const cpInfo = await getCodePostalInfo(codePostalOrCodeInsee);
   const adresseInfo = cpInfo?.result;
+  // TODO FIXME cpInfo.messages.error is NOT handle (example fail code 2B734)
   if (!adresseInfo) {
     return effectifData;
   }

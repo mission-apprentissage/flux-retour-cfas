@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Link, Text } from "@chakra-ui/react";
+import { Button, Flex, Heading, Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 import React from "react";
 
@@ -13,20 +13,18 @@ const TeleversementsLanding = ({ importUrl }: { importUrl: string }) => {
       </Heading>
 
       <Ribbons variant="info" mb={6}>
-        <Box mx={3}>
-          <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-            Service d’import de vos effectifs en version bêta.
-          </Text>
-          <Text color="grey.800" mt={4} textStyle="sm">
-            Ce service est en cours de refonte, nous travaillons actuellement à le rendre pleinement fonctionnel.
-            <br />
-            Si vous constatez un dysfonctionnement lors de son utilisation, cela signifie que votre fichier ne peut pas
-            être pris en charge pour le moment.
-            <br />
-            Nous vous prions de bien vouloir nous excuser pour l’éventuel désagrément rencontré et vous remercions de
-            votre patience.
-          </Text>
-        </Box>
+        <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+          Service d’import de vos effectifs en version bêta.
+        </Text>
+        <Text color="grey.800" mt={4} textStyle="sm">
+          Ce service est en cours de refonte, nous travaillons actuellement à le rendre pleinement fonctionnel.
+          <br />
+          Si vous constatez un dysfonctionnement lors de son utilisation, cela signifie que votre fichier ne peut pas
+          être pris en charge pour le moment.
+          <br />
+          Nous vous prions de bien vouloir nous excuser pour l’éventuel désagrément rencontré et vous remercions de
+          votre patience.
+        </Text>
       </Ribbons>
 
       <Button as={NextLink} href={importUrl} size={"md"} variant="primary">

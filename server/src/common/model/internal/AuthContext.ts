@@ -15,6 +15,8 @@ export interface AuthContext<IOrganisation = Organisation> {
   // populated via $lookup
   organisation: IOrganisation;
 
+  // field used for ERPs
+  source?: string;
   // legacy field used for ERPs
   username: string;
 }

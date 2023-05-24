@@ -1,5 +1,6 @@
 import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
+import { v4 as uuidv4 } from "uuid";
 
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 import {
@@ -539,6 +540,23 @@ export const updateEffectifsCount = async (organisme_id: ObjectId) => {
 };
 
 /**
+ * Génération d'une api key s'il n'existe pas
+ */
+export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
+  const updated = await organismesDb().findOneAndUpdate(
+    { _id: organismeId },
+    { $set: { api_key: uuidv4() } },
+    { returnDocument: "after" }
+  );
+
+  if (!updated.value) {
+    throw Boom.notFound(`Organisme ${organismeId} not found`);
+  }
+
+  return updated?.value.api_key;
+};
+
+/**
  * Méthode de récupération des stats sur la table organisme
  * @param {*} _id
  * @returns
@@ -626,9 +644,16 @@ export async function findUserOrganismes(ctx: AuthContext) {
 export async function getOrganismeById(_id: ObjectId) {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
-    throw Boom.notFound(`missing organisme ${_id}`);
+    throw Boom.notFound(`Organisme ${_id} not found`);
   }
   return organisme;
+}
+export async function getOrganismeByAPIKey(api_key: string) {
+  const organisme = await organismesDb().findOne({ api_key });
+  if (!organisme) {
+    throw Boom.notFound(`Organisme not found`);
+  }
+  return organisme as WithId<Organisme>;
 }
 
 export async function findOrganismesBySIRET(siret: string): Promise<Organisme[]> {

@@ -76,7 +76,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
     <Spinner />
   ) : (
     <Ribbons variant={error ? "error" : "success"} mt="0.5rem">
-      <Box ml={3} color="grey.800">
+      <Box color="grey.800">
         {(() => {
           switch (organisation.type) {
             case "ORGANISME_FORMATION_FORMATEUR":
@@ -173,7 +173,7 @@ const PageFormulaireProfil = () => {
     if (router.query.invitationToken) {
       (async () => {
         try {
-          const invitation = await _get(`/api/v1/invitations/${router.query.invitationToken}`);
+          const invitation: any = (await _get(`/api/v1/invitations/${router.query.invitationToken}`)) as any;
           setOrganisation(invitation.organisation);
           setFixedEmail(invitation.email);
         } catch (err) {

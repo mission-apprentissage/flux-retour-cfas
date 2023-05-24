@@ -45,6 +45,7 @@ import {
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
   configureOrganismeERP,
   getOrganismeById,
+  generateApiKeyForOrg,
 } from "@/common/actions/organismes/organismes.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
@@ -74,7 +75,9 @@ import { requireAdministrator, returnResult } from "./middlewares/helpers";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
+import requireBearerAuthenticationMiddleware from "./middlewares/requireBearerAuthentication";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
+import requireSendEffectifsPermissionMiddleware from "./middlewares/requireSendEffectifsPermissionMiddleware";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
@@ -303,8 +306,8 @@ function setupRoutes(app: Application) {
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
-    requireJwtAuthenticationMiddleware(),
-    legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    requireBearerAuthenticationMiddleware(),
+    requireSendEffectifsPermissionMiddleware(),
     dossierApprenantRouter()
   );
 
@@ -461,6 +464,27 @@ function setupRoutes(app: Application) {
                   return upload.deleteUploadedDocument(res.locals.organismeId, res.locals.documentId);
                 })
               )
+          )
+      )
+
+      .use(
+        "/api-key",
+        authOrgMiddleware("manager"),
+        express
+          .Router()
+          .get(
+            "/",
+            returnResult(async (req, res) => {
+              const organisme = await getOrganismeById(res.locals.organismeId);
+              return { apiKey: organisme.api_key };
+            })
+          )
+          .post(
+            "/",
+            returnResult(async (req, res) => {
+              const generatedApiKey = await generateApiKeyForOrg(res.locals.organismeId);
+              return { apiKey: generatedApiKey };
+            })
           )
       )
   );

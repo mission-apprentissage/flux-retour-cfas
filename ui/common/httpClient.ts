@@ -67,7 +67,7 @@ const getHttpsAgent = () => {
     : undefined;
 };
 
-export const _get = async (path: string, options?: AxiosRequestConfig<any>) => {
+export const _get = async <T>(path: string, options?: AxiosRequestConfig<any>): Promise<T> => {
   const response = await axios.get(path, {
     headers: getHeaders(),
     validateStatus: () => true,

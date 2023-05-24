@@ -102,10 +102,10 @@ export default () => {
                   effectif.apprenant.representant_legal ? effectif.apprenant.representant_legal.adresse : {},
                   customizer
                 ),
-                effectif.is_lock.apprenant.representant_legal.adresse,
+                effectif.is_lock.apprenant.representant_legal?.adresse,
                 customizerLock
               ),
-              paths.apprenant.representant_legal.adresse,
+              paths.apprenant.representant_legal?.adresse,
               customizerPath
             ),
           },
@@ -121,6 +121,12 @@ export default () => {
           paths.formation.adresse,
           customizerPath
         ),
+      },
+      contrats: {
+        ...effectifSchema.contrats,
+        value: effectif.contrats,
+        locked: effectif.is_lock.contrats || false,
+        path: paths.contrats,
       },
       annee_scolaire: effectif.annee_scolaire,
       id: effectif._id,
@@ -193,6 +199,19 @@ export default () => {
     if (dataToUpdate.formation.date_obtention_diplome)
       dataToUpdate.formation.date_obtention_diplome = new Date(dataToUpdate.formation.date_obtention_diplome);
 
+    if (dataToUpdate.apprenant.date_de_naissance)
+      dataToUpdate.apprenant.date_de_naissance = new Date(dataToUpdate.apprenant.date_de_naissance);
+
+    dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut.map((s) => {
+      const statut = stripEmptyFields(s);
+      if (statut.date_statut) {
+        statut.date_statut = new Date(statut.date_statut);
+      }
+      if (statut.date_reception) {
+        statut.date_reception = new Date(statut.date_reception);
+      }
+      return statut;
+    });
     if (nouveau_statut) {
       dataToUpdate.apprenant.historique_statut.push({
         valeur_statut: nouveau_statut.valeur_statut,
@@ -200,6 +219,20 @@ export default () => {
         date_reception: new Date(),
       });
     }
+
+    dataToUpdate.contrats = dataToUpdate.contrats.map((c) => {
+      const contrat = stripEmptyFields(c);
+      if (contrat.date_debut) {
+        contrat.date_debut = new Date(contrat.date_debut);
+      }
+      if (contrat.date_fin) {
+        contrat.date_fin = new Date(contrat.date_fin);
+      }
+      if (contrat.date_rupture) {
+        contrat.date_rupture = new Date(contrat.date_rupture);
+      }
+      return contrat;
+    });
     if (nouveau_contrat) {
       dataToUpdate.contrats.push(nouveau_contrat);
     }
@@ -214,7 +247,7 @@ export default () => {
     const effectifUpdated = await updateEffectif(effectifDb._id, {
       ...dataToUpdate,
       id_erp_apprenant,
-      organisme_id,
+      organisme_id: new ObjectId(organisme_id),
       annee_scolaire,
       source,
       validation_errors,

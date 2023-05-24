@@ -53,7 +53,7 @@ const User = () => {
             </Box>
             {warning && (
               <Ribbons variant="warning" mt={5}>
-                <Box pl={3}>{warning}</Box>
+                {warning}
               </Ribbons>
             )}
             <UserForm user={user} onDelete={() => router.push("/admin/users")} onUpdate={() => refetchUser()} />

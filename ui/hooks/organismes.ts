@@ -1,23 +1,44 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { _get } from "@/common/httpClient";
+import { _get, _post, _put } from "@/common/httpClient";
 import { omitNullishValues } from "@/common/utils/omitNullishValues";
 import { useSimpleFiltersContext } from "@/modules/mon-espace/landing/common/SimpleFiltersContext";
 
 // récupère un organisme
-export function useOrganisme(organismeId: string) {
+export function useOrganisme(organismeId: string | undefined | null) {
   const {
     data: organisme,
     isLoading,
     error,
+    refetch,
   } = useQuery<any, any>(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
     enabled: !!organismeId,
   });
+
+  const endpoint = `/api/v1/organismes/${organismeId}`;
+
+  const { mutateAsync: generateApiKey, isLoading: isGeneratingApiKey } = useMutation(async () => {
+    const { apiKey } = await _post(`${endpoint}/api-key`);
+    await refetch();
+    return apiKey;
+  });
+
+  const { mutateAsync: configureERP, isLoading: isConfiguringERP } = useMutation(
+    async (dataToUpdate: { erps: string[]; mode_de_transmission?: string; setup_step_courante?: string }) => {
+      const response = await _put(`${endpoint}/configure-erp`, dataToUpdate);
+      await refetch();
+      return response;
+    }
+  );
 
   return {
     organisme,
     isLoading,
     error,
+    generateApiKey,
+    isGeneratingApiKey,
+    configureERP,
+    isConfiguringERP,
   };
 }
 
