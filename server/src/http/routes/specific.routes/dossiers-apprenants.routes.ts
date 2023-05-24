@@ -27,7 +27,7 @@ export default () => {
     const collection = (isV3 ? effectifsV3QueueDb() : effectifsQueueDb()) as any;
     const validationSchema = isV3 ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2();
 
-    const source = user.username;
+    const source = user.username || user.source;
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {
       const result = validationSchema.safeParse({
         source,

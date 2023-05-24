@@ -24,18 +24,18 @@ const ConfigurationErpPage = () => {
   return (
     <Page>
       <Head>
-        <title>Paramétrage  ERP</title>
+        <title>Paramétrage ERP</title>
       </Head>
       <Flex>
         <NavigationCompte />
         <Box w="100%" pt={[4, 8]} mb={5}>
           {currentOrganisme && (
             <ConfigurationERP
-              apiKey={currentOrganisme.apiKey}
+              apiKey={currentOrganisme.api_key}
               erp={currentOrganisme.erps?.[0]}
               isGenerating={isGeneratingApiKey}
               onGenerate={() => generateApiKey()}
-              onSave={(selectedErp) => configureERP({ erp: selectedErp })}
+              onSave={(selectedErp) => configureERP({ erps: [selectedErp] })}
             />
           )}
         </Box>

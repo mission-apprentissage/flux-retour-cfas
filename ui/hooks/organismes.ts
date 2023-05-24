@@ -18,13 +18,13 @@ export function useOrganisme(organismeId: string | undefined | null) {
   const endpoint = `/api/v1/organismes/${organismeId}`;
 
   const { mutateAsync: generateApiKey, isLoading: isGeneratingApiKey } = useMutation(async () => {
-    const apiKey = await _post(`${endpoint}/api-key`);
+    const { apiKey } = await _post(`${endpoint}/api-key`);
     await refetch();
     return apiKey;
   });
 
   const { mutateAsync: configureERP, isLoading: isConfiguringERP } = useMutation(
-    async (dataToUpdate: { erps: string[]; mode_de_transmission: string; setup_step_courante: string }) => {
+    async (dataToUpdate: { erps: string[]; mode_de_transmission?: string; setup_step_courante?: string }) => {
       const response = await _put(`${endpoint}/configure-erp`, dataToUpdate);
       await refetch();
       return response;

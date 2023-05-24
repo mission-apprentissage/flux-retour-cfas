@@ -125,6 +125,36 @@ const seedSampleOrganismes = async () => {
 };
 
 const seedSampleUsers = async () => {
+  // Create user ofr
+  await register({
+    user: {
+      email: "ofr@test.fr",
+      password: "Secret!Password1",
+      civility: "Monsieur",
+      nom: "ofr",
+      prenom: "test",
+      fonction: "",
+      telephone: "",
+      has_accept_cgu_version: "",
+    },
+    organisation: {
+      type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+      uai: "0010856A",
+      siret: "77931004400028",
+    },
+  });
+
+  await usersMigrationDb().updateOne(
+    {
+      email: "ofr@test.fr",
+    },
+    {
+      $set: {
+        account_status: "CONFIRMED",
+      },
+    }
+  );
+
   // Création des roles si nécessaire
   // Create user Pilot
   // if (!(await getUserByEmail("pilot@test.fr"))) {

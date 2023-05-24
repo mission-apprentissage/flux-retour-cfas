@@ -76,7 +76,9 @@ import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissions
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
+import requireBearerAuthenticationMiddleware from "./middlewares/requireBearerAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
+import requireSendEffectifsPermissionMiddleware from "./middlewares/requireSendEffectifsPermissionMiddleware";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
@@ -304,8 +306,8 @@ function setupRoutes(app: Application) {
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
-    requireJwtAuthenticationMiddleware(),
-    legacyUserPermissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    requireBearerAuthenticationMiddleware(),
+    requireSendEffectifsPermissionMiddleware(),
     dossierApprenantRouter()
   );
 

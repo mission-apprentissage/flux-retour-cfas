@@ -648,6 +648,13 @@ export async function getOrganismeById(_id: ObjectId) {
   }
   return organisme;
 }
+export async function getOrganismeByAPIKey(api_key: string) {
+  const organisme = await organismesDb().findOne({ api_key });
+  if (!organisme) {
+    throw Boom.notFound(`Organisme not found`);
+  }
+  return organisme as WithId<Organisme>;
+}
 
 export async function findOrganismesBySIRET(siret: string): Promise<Organisme[]> {
   // FIXME projection à définir

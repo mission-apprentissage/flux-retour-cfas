@@ -1,9 +1,7 @@
 {
   "$schema": "./node_modules/rome/configuration_schema.json",
   "files": {
-    "ignore": [
-      "ui/.next"
-    ]
+    "ignore": ["ui/.next"]
   },
   "linter": {
     "enabled": true,
@@ -19,6 +17,9 @@
       },
       "complexity": {
         "useSimplifiedLogicExpression": "off"
+      },
+      "style": {
+        "noUnusedTemplateLiteral": "off"
       }
     }
   }

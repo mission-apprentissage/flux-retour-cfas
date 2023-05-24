@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import React, { useEffect, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
+import { ERPS } from "@/common/constants/erps";
 import Table from "@/components/Table/Table";
 import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "@/theme/components/icons";
 
@@ -346,9 +347,10 @@ const EffectifsTable = ({
                     const sources = {
                       TDB_MANUEL: "Saisie manuelle",
                       TDB_FILE: "Fichier",
-                      ymag: "Ypareo",
-                      gesti: "Gesti",
-                      scform: "SC form",
+                      ...ERPS.reduce((acc, item) => {
+                        acc[item.id] = item.name;
+                        return acc;
+                      }, {}),
                     };
                     return (
                       <HStack textAlign="left">

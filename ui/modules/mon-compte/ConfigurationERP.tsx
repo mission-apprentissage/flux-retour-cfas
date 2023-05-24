@@ -9,9 +9,7 @@ import {
   FormControl,
   FormLabel,
   Select,
-  FormErrorMessage,
 } from "@chakra-ui/react";
-import { Field, Form, Formik } from "formik";
 import React from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
@@ -24,8 +22,8 @@ type ConfigurationERPProps = {
   apiKey: string | undefined | null;
   erp: string | undefined | null;
   isGenerating: boolean;
-  onGenerate: () => Promise<void>;
-  onSave: (values: any) => Promise<void>;
+  onGenerate: () => Promise<string>;
+  onSave: (value: string) => Promise<void>;
 };
 
 const ErpSelectionList = [{ id: "", name: "Sélectionnez une option", state: null }].concat(ERPS_FORM_CASES as any);
@@ -79,7 +77,7 @@ const ConfigurationERP = ({ erp, apiKey, onGenerate, onSave, isGenerating }: Con
               isLoading={isGenerating}
               onClick={() =>
                 onGenerate()
-                  .then(() => toastSuccess(""))
+                  .then(() => toastSuccess("Votre clé d'échange a été correctement générée."))
                   .catch((err) => {
                     console.error(err);
                     toastError("Une erreur est survenue. Merci de réessayer plus tard.");
