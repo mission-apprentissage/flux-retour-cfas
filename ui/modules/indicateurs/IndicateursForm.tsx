@@ -113,12 +113,10 @@ function IndicateursForm() {
     return filters;
   }, [router.query]);
 
-  const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery<
-    IndicateursEffectifsAvecOrganisme[]
-  >(
+  const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery(
     ["indicateurs/effectifs/par-organisme", JSON.stringify(convertEffectifsFiltersToQuery(effectifsFilters))],
     () =>
-      _get("/api/v1/indicateurs/effectifs/par-organisme", {
+      _get<IndicateursEffectifsAvecOrganisme[]>("/api/v1/indicateurs/effectifs/par-organisme", {
         params: convertEffectifsFiltersToQuery(effectifsFilters),
       }),
     {
