@@ -126,7 +126,7 @@ function IndicateursGrid({
 }: IndicateursGridProps) {
   if (loading) {
     return (
-      <Grid h="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
+      <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
         <GridItem colSpan={2} rowSpan={2}>
           <Skeleton w="100%" h="100%" startColor="grey.300" endColor="galt" />
         </GridItem>
@@ -147,7 +147,7 @@ function IndicateursGrid({
   }
 
   return (
-    <Grid h="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
+    <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
       <GridItem bg="galt" colSpan={2} rowSpan={2}>
         <Card
           label="apprenants"
