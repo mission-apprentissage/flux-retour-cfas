@@ -1,6 +1,7 @@
 import { Box, Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import {
   ColumnDef,
+  PaginationState,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -19,17 +20,26 @@ interface NewTableProps<T> extends SystemProps {
   data: T[];
   loading?: boolean;
   initialSortingState?: SortingState;
+  initialPaginationState?: PaginationState;
 }
 
 function NewTable<T>(props: NewTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(props.initialSortingState ?? []);
+  const [pagination, setPagination] = useState<PaginationState>(
+    props.initialPaginationState ?? {
+      pageIndex: 0,
+      pageSize: 20,
+    }
+  );
 
   const table = useReactTable({
     data: props.data,
     columns: props.columns,
     state: {
       sorting,
+      pagination,
     },
+    onPaginationChange: setPagination,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
