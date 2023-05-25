@@ -1,4 +1,4 @@
-FROM node:16-stretch
+FROM node:16-bullseye
 
 RUN apt update && apt install -y certbot curl
 RUN yarn global add serve
