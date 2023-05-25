@@ -305,10 +305,12 @@ function IndicateursForm() {
                 <>
                   <Link
                     href={`/organismes/${row.original.organisme_id}`}
+                    display="block"
                     fontSize="1rem"
                     whiteSpace="nowrap"
                     textOverflow="ellipsis"
                     overflow="hidden"
+                    maxW="250px"
                     title={row.original.nom}
                   >
                     {row.original.nom ?? "Organisme inconnu"}

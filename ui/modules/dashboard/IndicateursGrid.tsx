@@ -22,7 +22,7 @@ interface CardProps {
 }
 function Card({ label, count, tooltipLabel, icon, big = false, children }: CardProps) {
   return (
-    <Center h="100%" justifyContent={big ? "center" : "start"} py="6" px="12">
+    <Center h="100%" justifyContent={big ? "center" : "start"} py="6" px="10">
       <HStack gap={3}>
         <Box alignSelf={"start"} pt="3">
           {icon}
@@ -31,7 +31,7 @@ function Card({ label, count, tooltipLabel, icon, big = false, children }: CardP
           <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
             {formatNumber(count)}
           </Text>
-          <Text fontSize={12}>
+          <Text fontSize={12} whiteSpace="nowrap">
             {label}
             <Tooltip
               background="bluefrance"
