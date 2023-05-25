@@ -18,10 +18,11 @@ interface NewTableProps<T> extends SystemProps {
   columns: ColumnDef<T, any>[];
   data: T[];
   loading?: boolean;
+  initialSortingState?: SortingState;
 }
 
 function NewTable<T>(props: NewTableProps<T>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>(props.initialSortingState ?? []);
 
   const table = useReactTable({
     data: props.data,

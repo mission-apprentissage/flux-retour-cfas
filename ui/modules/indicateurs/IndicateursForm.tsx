@@ -296,6 +296,7 @@ function IndicateursForm() {
           mt={4}
           data={indicateursEffectifs || []}
           loading={indicateursEffectifsLoading}
+          initialSortingState={[{ desc: false, id: "nom" }]}
           columns={[
             {
               header: () => "Nom de l’organisme",
