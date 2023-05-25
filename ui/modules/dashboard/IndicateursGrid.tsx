@@ -1,8 +1,14 @@
-import { Box, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
-import { ReactNode } from "react";
+import { DownloadIcon } from "@chakra-ui/icons";
+import { Box, Button, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { ReactNode, useState } from "react";
 
+import { _get } from "@/common/httpClient";
 import { formatNumber } from "@/common/utils/stringUtils";
+import useToaster from "@/hooks/useToaster";
+import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs } from "@/modules/models/indicateurs";
+
+import { downloadObject, exportEffectifsAsCSV } from "../indicateurs/effectifs-csv-export";
 
 import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "./icons";
 
@@ -12,12 +18,15 @@ interface CardProps {
   tooltipLabel: ReactNode;
   icon: ReactNode;
   big?: boolean;
+  children?: ReactNode;
 }
-function Card({ label, count, tooltipLabel, icon, big = false }: CardProps) {
+function Card({ label, count, tooltipLabel, icon, big = false, children }: CardProps) {
   return (
     <Center h="100%" justifyContent={big ? "center" : "start"} py="6" px="12">
       <HStack gap={3}>
-        {icon}
+        <Box alignSelf={"start"} pt="3">
+          {icon}
+        </Box>
         <Box>
           <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
             {formatNumber(count)}
@@ -40,17 +49,81 @@ function Card({ label, count, tooltipLabel, icon, big = false }: CardProps) {
               />
             </Tooltip>
           </Text>
+          {children}
         </Box>
       </HStack>
     </Center>
   );
 }
 
+function useAsyncAction(action: () => Promise<void>) {
+  const { toastError } = useToaster();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onClick = async () => {
+    try {
+      setIsLoading(true);
+      await action();
+    } catch (err) {
+      toastError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { onClick, isLoading };
+}
+
+interface DownloadButtonProps {
+  action: () => Promise<void>;
+}
+function DownloadButton({ action }: DownloadButtonProps) {
+  const { onClick, isLoading } = useAsyncAction(action);
+
+  return (
+    <Button
+      variant="link"
+      fontSize="sm"
+      mt="2"
+      borderBottom={isLoading ? "0" : "1px"}
+      borderRadius="0"
+      p="0"
+      onClick={onClick}
+      isLoading={isLoading}
+    >
+      Télécharger la liste
+      <DownloadIcon ml="2" />
+    </Button>
+  );
+}
+
+async function downloadCSV(
+  type: "inscritsSansContrat" | "rupturants" | "abandons",
+  effectifsFilters: EffectifsFilters
+) {
+  const effectifs = await _get(`/api/v1/indicateurs/effectifs/${type}`, {
+    params: convertEffectifsFiltersToQuery(effectifsFilters),
+  });
+
+  downloadObject(
+    exportEffectifsAsCSV(effectifs),
+    `tdb-effectifs-${type}-${effectifsFilters.date.toISOString().substring(0, 10)}.csv`,
+    "text/csv"
+  );
+}
+
 interface IndicateursGridProps {
   indicateursEffectifs: IndicateursEffectifs;
   loading: boolean;
+  showDownloadLinks?: boolean;
+  effectifsFilters?: EffectifsFilters;
 }
-function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps) {
+function IndicateursGrid({
+  indicateursEffectifs,
+  loading,
+  showDownloadLinks = false,
+  effectifsFilters,
+}: IndicateursGridProps) {
   if (loading) {
     return (
       <Grid h="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
@@ -122,7 +195,11 @@ function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps
             </div>
           }
           icon={<RupturantsIcon />}
-        />
+        >
+          {showDownloadLinks && (
+            <DownloadButton action={() => downloadCSV("rupturants", effectifsFilters as EffectifsFilters)} />
+          )}
+        </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
         <Card
@@ -137,7 +214,11 @@ function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps
             </div>
           }
           icon={<InscritsSansContratsIcon />}
-        />
+        >
+          {showDownloadLinks && (
+            <DownloadButton action={() => downloadCSV("inscritsSansContrat", effectifsFilters as EffectifsFilters)} />
+          )}
+        </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
         <Card
@@ -155,7 +236,11 @@ function IndicateursGrid({ indicateursEffectifs, loading }: IndicateursGridProps
             </div>
           }
           icon={<AbandonsIcon />}
-        />
+        >
+          {showDownloadLinks && (
+            <DownloadButton action={() => downloadCSV("abandons", effectifsFilters as EffectifsFilters)} />
+          )}
+        </Card>
       </GridItem>
     </Grid>
   );

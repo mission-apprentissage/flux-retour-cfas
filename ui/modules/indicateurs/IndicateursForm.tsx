@@ -285,7 +285,12 @@ function IndicateursForm() {
           </Text>
         </Ribbons>
 
-        <IndicateursGrid indicateursEffectifs={indicateursEffectifsTotaux} loading={indicateursEffectifsLoading} />
+        <IndicateursGrid
+          indicateursEffectifs={indicateursEffectifsTotaux}
+          loading={indicateursEffectifsLoading}
+          showDownloadLinks
+          effectifsFilters={effectifsFilters}
+        />
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
 

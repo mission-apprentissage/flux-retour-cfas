@@ -41,17 +41,17 @@ export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): Ef
   };
 }
 
-export function convertEffectifsFiltersToQuery(query: EffectifsFilters): EffectifsFiltersQuery {
+export function convertEffectifsFiltersToQuery(effectifsFilters: EffectifsFilters): EffectifsFiltersQuery {
   return stripEmptyFields({
-    date: query.date.toISOString(),
-    organisme_regions: query.organisme_regions?.join(","),
-    organisme_departements: query.organisme_departements?.join(","),
-    organisme_academies: query.organisme_academies?.join(","),
-    organisme_bassinsEmploi: query.organisme_bassinsEmploi?.join(","),
-    organisme_reseaux: query.organisme_reseaux?.join(","),
-    organisme_search: query.organisme_search,
-    apprenant_tranchesAge: query.apprenant_tranchesAge?.join(","),
-    formation_annees: query.formation_annees?.join(","),
-    formation_niveaux: query.formation_niveaux?.join(","),
+    date: effectifsFilters.date.toISOString(),
+    organisme_regions: effectifsFilters.organisme_regions?.join(","),
+    organisme_departements: effectifsFilters.organisme_departements?.join(","),
+    organisme_academies: effectifsFilters.organisme_academies?.join(","),
+    organisme_bassinsEmploi: effectifsFilters.organisme_bassinsEmploi?.join(","),
+    organisme_reseaux: effectifsFilters.organisme_reseaux?.join(","),
+    organisme_search: effectifsFilters.organisme_search,
+    apprenant_tranchesAge: effectifsFilters.apprenant_tranchesAge?.join(","),
+    formation_annees: effectifsFilters.formation_annees?.join(","),
+    formation_niveaux: effectifsFilters.formation_niveaux?.join(","),
   });
 }
