@@ -32,7 +32,7 @@ class HTTPError extends Error {
   }
 }
 
-const handleResponse = <T>(path: string, response: AxiosResponse): T => {
+const handleResponse = <T = any>(path: string, response: AxiosResponse): T => {
   const statusCode = response.status;
   if (statusCode >= 400 && statusCode < 600) {
     emitter.emit("http:error", response);
