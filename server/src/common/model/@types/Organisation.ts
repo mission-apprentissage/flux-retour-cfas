@@ -186,6 +186,14 @@ export interface Organisation {
    * Code académie
    */
   code_academie?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
     | "10"
     | "11"
     | "12"
@@ -209,15 +217,7 @@ export interface Organisation {
     | "43"
     | "70"
     | "77"
-    | "78"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "6"
-    | "7"
-    | "8"
-    | "9";
+    | "78";
   /**
    * Nom de l'organisation nationale
    */

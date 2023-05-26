@@ -2,12 +2,12 @@ import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { STATUT_CREATION_ORGANISME, STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
-import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
+import { CFD_REGEX_PATTERN, SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
-import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes";
+import { object, objectId, string, date, arrayOf, boolean, integer, stringOrNull } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismes";
 
@@ -84,6 +84,64 @@ const schema = object(
           }),
           annee_formation: integer({
             description: "Année millésime de la formation pour cet organisme",
+          }),
+          intitule_long: string({ description: "Intitulé long" }),
+          cfd: string({ description: "Code CFD de la formation", pattern: CFD_REGEX_PATTERN, maxLength: 8 }),
+          rncp: stringOrNull({
+            description: "Code RNCP de la formation",
+          }),
+          organismes: arrayOf(
+            object(
+              {
+                organisme_id: objectId(),
+                nature: string({
+                  enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
+                }),
+                uai: string({
+                  description: "Code UAI du lieu de formation (optionnel)",
+                  pattern: UAI_REGEX_PATTERN,
+                  maxLength: 8,
+                  minLength: 8,
+                }),
+                siret: string({
+                  description: "Siret du lieu de formation (optionnel)",
+                  pattern: SIRET_REGEX_PATTERN,
+                  maxLength: 14,
+                  minLength: 14,
+                }),
+                adresse: {
+                  ...adresseSchema,
+                  description: "Adresse du lieu de formation (optionnel)",
+                },
+              },
+              { additionalProperties: true }
+            )
+          ),
+          duree_formation_theorique: integer({
+            description: "Durée théorique de la formation en mois pour cet organisme",
+          }),
+        },
+        { additionalProperties: true }
+      ),
+      {
+        description: "Formations de cet organisme",
+      }
+    ),
+    // FIXME: temporaire, à supprimer une fois la validation faite sur les différences avec relatedFormations
+    relatedFormations2: arrayOf(
+      object(
+        {
+          formation_id: objectId(),
+          cle_ministere_educatif: string({
+            description: "Clé unique de la formation",
+          }),
+          annee_formation: integer({
+            description: "Année millésime de la formation pour cet organisme",
+          }),
+          intitule_long: string({ description: "Intitulé long" }),
+          cfd: string({ description: "Code CFD de la formation", pattern: CFD_REGEX_PATTERN, maxLength: 8 }),
+          rncp: stringOrNull({
+            description: "Code RNCP de la formation",
           }),
           organismes: arrayOf(
             object(

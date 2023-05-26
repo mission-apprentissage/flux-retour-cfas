@@ -15,13 +15,15 @@ const collectionName = "formationsCatalogue";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ cle_ministere_educatif: 1 }, { name: "cle_ministere_educatif", unique: true }],
+  [{ etablissement_formateur_uai: 1 }, { name: "etablissement_formateur_uai" }],
+  [{ etablissement_gestionnaire_uai: 1 }, { name: "etablissement_gestionnaire_uai" }],
 ];
 
 const schema = object(
   {
     _id: objectId(),
     cle_ministere_educatif: string(),
-    cfd: stringOrNull(),
+    cfd: string(),
     cfd_specialite: stringOrNull(),
     cfd_outdated: booleanOrNull(),
     cfd_date_fermeture: stringOrNull(),
@@ -36,7 +38,7 @@ const schema = object(
     localite: stringOrNull(),
     nom: stringOrNull(),
     intitule_rco: stringOrNull(),
-    intitule_long: stringOrNull(),
+    intitule_long: string(),
     intitule_court: stringOrNull(),
     diplome: stringOrNull(),
     niveau: stringOrNull(),
@@ -95,9 +97,9 @@ const schema = object(
     rome_codes: arrayOfOrNull(stringOrNull()),
     periode: arrayOfOrNull(stringOrNull()),
     capacite: stringOrNull(),
-    duree: stringOrNull(),
+    duree: string(),
     duree_incoherente: booleanOrNull(),
-    annee: stringOrNull(),
+    annee: string(),
     annee_incoherente: booleanOrNull(),
     published: booleanOrNull(),
     forced_published: booleanOrNull(),
@@ -123,7 +125,7 @@ const schema = object(
     modalites_entrees_sorties: arrayOfOrNull(booleanOrNull()),
     id_RCO: stringOrNull(),
     etablissement_gestionnaire_id: stringOrNull(),
-    etablissement_gestionnaire_siret: stringOrNull(),
+    etablissement_gestionnaire_siret: string(),
     etablissement_gestionnaire_enseigne: stringOrNull(),
     etablissement_gestionnaire_uai: stringOrNull(),
     etablissement_gestionnaire_published: booleanOrNull(),
@@ -145,7 +147,7 @@ const schema = object(
     etablissement_gestionnaire_nda: stringOrNull(),
     etablissement_gestionnaire_date_creation: stringOrNull(),
     etablissement_formateur_id: stringOrNull(),
-    etablissement_formateur_siret: stringOrNull(),
+    etablissement_formateur_siret: string(),
     etablissement_formateur_enseigne: stringOrNull(),
     etablissement_formateur_uai: stringOrNull(),
     etablissement_formateur_published: booleanOrNull(),
@@ -188,7 +190,21 @@ const schema = object(
     last_update_at: stringOrNull(),
     lieu_formation_geo_coordonnees_computed: stringOrNull(),
   },
-  { required: ["cle_ministere_educatif"], additionalProperties: true }
+  {
+    required: [
+      "cle_ministere_educatif",
+      "cfd",
+      "rncp_code",
+      "duree",
+      "annee",
+      "intitule_long",
+      "etablissement_gestionnaire_uai",
+      "etablissement_gestionnaire_siret",
+      "etablissement_formateur_uai",
+      "etablissement_formateur_siret",
+    ],
+    additionalProperties: true,
+  }
 );
 
 export default { schema, indexes, collectionName };

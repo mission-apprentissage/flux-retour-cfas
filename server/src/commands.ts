@@ -19,6 +19,7 @@ import { hydrateFormationsCatalogue } from "./jobs/hydrate/hydrate-formations-ca
 import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./jobs/hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes";
+import { hydrateOrganismesFormations } from "./jobs/hydrate/organismes/hydrate-organismes-formations";
 import { hydrateFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes-referentiel";
 import { updateMultipleOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
 import { hydrateReseaux } from "./jobs/hydrate/reseaux/hydrate-reseaux";
@@ -255,6 +256,15 @@ program
   .action(
     runJob(async () => {
       await hydrateFormationsCatalogue();
+    })
+  );
+
+program
+  .command("hydrate:organismes-formations")
+  .description("Remplissage des formations des organismes")
+  .action(
+    runJob(async () => {
+      await hydrateOrganismesFormations();
     })
   );
 
