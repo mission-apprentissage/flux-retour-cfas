@@ -1,12 +1,12 @@
-import { Box } from "@chakra-ui/react";
-import React, { useEffect, useRef, useState } from "react";
+import { Box, SystemProps } from "@chakra-ui/react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
-interface Props {
+interface SimpleOverlayMenuProps extends SystemProps {
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-function SimpleOverlayMenu({ onClose, children }: Props) {
+function SimpleOverlayMenu({ onClose, children, ...props }: SimpleOverlayMenuProps) {
   const menuRef = useRef<any>();
   const [menuMaxHeight, setMenuMaxHeight] = useState("100%");
 
@@ -45,6 +45,7 @@ function SimpleOverlayMenu({ onClose, children }: Props) {
         zIndex="100"
         ref={menuRef}
         maxHeight={menuMaxHeight}
+        {...props}
       >
         {children}
       </Box>

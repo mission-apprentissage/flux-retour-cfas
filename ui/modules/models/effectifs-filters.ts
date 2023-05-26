@@ -11,6 +11,7 @@ export interface EffectifsFiltersQuery {
   apprenant_tranchesAge?: string;
   formation_annees?: string;
   formation_niveaux?: string;
+  formation_cfds?: string;
 }
 
 export interface EffectifsFilters {
@@ -24,6 +25,7 @@ export interface EffectifsFilters {
   apprenant_tranchesAge: string[];
   formation_annees: number[];
   formation_niveaux: string[];
+  formation_cfds: string[];
 }
 
 export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): EffectifsFilters {
@@ -38,6 +40,7 @@ export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): Ef
     apprenant_tranchesAge: query.apprenant_tranchesAge?.split(",") ?? [],
     formation_annees: query.formation_annees?.split(",").map((i) => parseInt(i, 10)) ?? [],
     formation_niveaux: query.formation_niveaux?.split(",") ?? [],
+    formation_cfds: query.formation_cfds?.split(",") ?? [],
   };
 }
 
@@ -53,5 +56,6 @@ export function convertEffectifsFiltersToQuery(effectifsFilters: EffectifsFilter
     apprenant_tranchesAge: effectifsFilters.apprenant_tranchesAge?.join(","),
     formation_annees: effectifsFilters.formation_annees?.join(","),
     formation_niveaux: effectifsFilters.formation_niveaux?.join(","),
+    formation_cfds: effectifsFilters.formation_cfds?.join(","),
   });
 }

@@ -31,6 +31,7 @@ import {
 import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 
 import IndicateursFilter from "./FilterAccordion";
+import FiltreFormationCFD from "./filters/FiltreFormationCFD";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
@@ -224,9 +225,16 @@ function IndicateursForm() {
           <Text fontWeight="700" textTransform="uppercase">
             Formation
           </Text>
-          <IndicateursFilter label="Type de formation">
+
+          <FiltreFormationCFD
+            button={FilterButton}
+            value={effectifsFilters.formation_cfds}
+            onChange={(cfds) => updateState({ formation_cfds: cfds })}
+          />
+
+          {/* <IndicateursFilter label="Type de formation">
             <Box>Liste des filtres</Box>
-          </IndicateursFilter>
+          </IndicateursFilter> */}
           <IndicateursFilter label="Niveau de formation">
             <FiltreFormationNiveau
               value={effectifsFilters.formation_niveaux}
