@@ -263,16 +263,16 @@ function IndicateursForm() {
           <Text fontWeight="700" textTransform="uppercase">
             Organisme
           </Text>
-          <IndicateursFilter label="Établissement">
-            <FiltreOrganismeSearch
-              value={effectifsFilters.organisme_search}
-              onChange={(search) => updateState({ organisme_search: search })}
-            />
-          </IndicateursFilter>
           <IndicateursFilter label="Réseaux d’organismes">
             <FiltreOrganismeReseau
               value={effectifsFilters.organisme_reseaux}
               onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
+            />
+          </IndicateursFilter>
+          <IndicateursFilter label="Établissement">
+            <FiltreOrganismeSearch
+              value={effectifsFilters.organisme_search}
+              onChange={(search) => updateState({ organisme_search: search })}
             />
           </IndicateursFilter>
         </SimpleGrid>
