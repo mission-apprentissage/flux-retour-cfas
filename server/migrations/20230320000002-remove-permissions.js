@@ -25,8 +25,14 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     },
     { bypassDocumentValidation: true }
   );
-  await db.collection("permissions").drop();
-  await db.collection("roles").drop();
+  await db
+    .collection("permissions")
+    .drop()
+    .catch(() => {});
+  await db
+    .collection("roles")
+    .drop()
+    .catch(() => {});
 
   await db.collection("organismes").updateMany(
     {},
