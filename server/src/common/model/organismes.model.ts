@@ -7,7 +7,17 @@ import { CFD_REGEX_PATTERN, SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/com
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
-import { object, objectId, string, date, arrayOf, boolean, integer, stringOrNull } from "./json-schema/jsonSchemaTypes";
+import {
+  object,
+  objectId,
+  string,
+  date,
+  arrayOf,
+  boolean,
+  integer,
+  stringOrNull,
+  dateOrNull,
+} from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismes";
 
@@ -30,6 +40,9 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "adresse.departement": 1 }, { name: "departement" }], // FIXME n'a pas l'air d'améliorer les performances
   [{ "adresse.region": 1 }, { name: "region" }],
   [{ created_at: 1 }, { name: "created_at" }],
+  [{ "relatedFormations2.cfd": 1 }, { name: "relatedFormations2.cfd" }],
+  [{ "relatedFormations2.rncp": 1 }, { name: "relatedFormations2.rncp" }],
+  [{ "relatedFormations2.intitule_long": 1 }, { name: "relatedFormations2.intitule_long" }],
 ];
 
 // Si contributeurs = [] et !first_transmission_date Alors Organisme en stock "Non actif"
@@ -90,6 +103,8 @@ const schema = object(
           rncp: stringOrNull({
             description: "Code RNCP de la formation",
           }),
+          cfd_start_date: dateOrNull({ description: "Date d'ouverture du CFD" }),
+          cfd_end_date: dateOrNull({ description: "Date de fermeture du CFD" }),
           organismes: arrayOf(
             object(
               {
@@ -143,6 +158,8 @@ const schema = object(
           rncp: stringOrNull({
             description: "Code RNCP de la formation",
           }),
+          cfd_start_date: dateOrNull({ description: "Date d'ouverture du CFD" }),
+          cfd_end_date: dateOrNull({ description: "Date de fermeture du CFD" }),
           organismes: arrayOf(
             object(
               {

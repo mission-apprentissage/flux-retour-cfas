@@ -493,6 +493,14 @@ export interface Organisme {
      * Code RNCP de la formation
      */
     rncp?: string | null;
+    /**
+     * Date d'ouverture du CFD
+     */
+    cfd_start_date?: Date | null;
+    /**
+     * Date de fermeture du CFD
+     */
+    cfd_end_date?: Date | null;
     organismes?: {
       organisme_id?: ObjectId;
       nature?: "responsable" | "formateur" | "responsable_formateur" | "lieu_formation" | "inconnue";
@@ -939,6 +947,14 @@ export interface Organisme {
      * Code RNCP de la formation
      */
     rncp?: string | null;
+    /**
+     * Date d'ouverture du CFD
+     */
+    cfd_start_date?: Date | null;
+    /**
+     * Date de fermeture du CFD
+     */
+    cfd_end_date?: Date | null;
     organismes?: {
       organisme_id?: ObjectId;
       nature?: "responsable" | "formateur" | "responsable_formateur" | "lieu_formation" | "inconnue";

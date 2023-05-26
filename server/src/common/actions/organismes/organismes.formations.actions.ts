@@ -174,3 +174,78 @@ export const findOrganismeFormationByCfd = async (organisme_id: string, cfd: str
       )
     : null;
 };
+
+export async function searchOrganismesFormations(searchTerm: string): Promise<any[]> {
+  const formations = await organismesDb()
+    .aggregate([
+      {
+        $match: {
+          relatedFormations2: {
+            $elemMatch: {
+              $or: [
+                { intitule_long: { $regex: searchTerm, $options: "i" } },
+                { cfd: searchTerm },
+                { rncp: searchTerm },
+              ],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          relatedFormations2: {
+            $filter: {
+              input: "$relatedFormations2",
+              as: "formation",
+              cond: {
+                $or: [
+                  // { intitule_long: { $regex: searchTerm, $options: "i" } },
+                  { $eq: ["$$formation.cfd", searchTerm] },
+                  { $eq: ["$$formation.rncp", searchTerm] },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $unwind: "$relatedFormations2",
+      },
+      {
+        $replaceWith: "$relatedFormations2",
+      },
+      {
+        $group: {
+          _id: {
+            cfd: "$cfd",
+            rncp: "$rncp",
+          },
+          formation_id: { $last: "$formation_id" },
+          cle_ministere_educatif: { $last: "$cle_ministere_educatif" },
+          annee_formation: { $last: "$annee_formation" },
+          intitule_long: { $last: "$intitule_long" },
+          cfd: { $last: "$cfd" },
+          rncp: { $last: "$rncp" },
+          cfd_start_date: { $last: "$cfd_start_date" },
+          cfd_end_date: { $last: "$cfd_end_date" },
+          organismes: { $last: "$organismes" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+      {
+        $sort: {
+          intitule_long: 1,
+        },
+      },
+      {
+        $limit: 50,
+      },
+    ])
+    .toArray();
+
+  return formations;
+}

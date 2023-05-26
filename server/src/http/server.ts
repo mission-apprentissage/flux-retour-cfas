@@ -59,6 +59,7 @@ import {
   getOrganismeById,
   generateApiKeyForOrg,
 } from "@/common/actions/organismes/organismes.actions";
+import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
@@ -532,6 +533,15 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, organismesFiltersSchema);
         return await getIndicateursOrganismesParDepartement(req.user, filters);
+      })
+    )
+    .post(
+      "/api/v1/formations/search",
+      returnResult(async (req) => {
+        const { searchTerm } = await validateFullZodObjectSchema(req.body, {
+          searchTerm: z.string().min(3),
+        });
+        return await searchOrganismesFormations(searchTerm);
       })
     );
 

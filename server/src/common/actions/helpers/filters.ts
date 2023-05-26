@@ -175,6 +175,7 @@ export const fullEffectifsFiltersSchema = {
     .preprocess((str: any) => str.split(",").map((i) => parseInt(i, 10)), z.array(z.number()))
     .optional(),
   formation_niveaux: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  formation_cfds: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
 };
 
 export type FullEffectifsFilters = z.infer<z.ZodObject<typeof fullEffectifsFiltersSchema>>;
@@ -229,6 +230,10 @@ export const fullEffectifsFiltersConfigurations: {
   },
   formation_niveaux: {
     matchKey: "formation.niveau",
+    transformValue: (value) => ({ $in: value }),
+  },
+  formation_cfds: {
+    matchKey: "formation.cfd",
     transformValue: (value) => ({ $in: value }),
   },
 };

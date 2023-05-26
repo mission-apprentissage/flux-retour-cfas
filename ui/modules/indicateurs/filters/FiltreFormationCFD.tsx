@@ -1,5 +1,6 @@
 import {
   Box,
+  Checkbox,
   Divider,
   Heading,
   Input,
@@ -42,17 +43,26 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: formations, isLoading } = useQuery<any[]>(
+  const { data: formations, isFetching: isLoading } = useQuery<any[]>(
     ["formations", searchTerm],
     () =>
-      // TODO nouvelle route qui recherche dans oraganism
-      _post("/api/formations/search", {
+      _post("/api/v1/formations/search", {
         searchTerm,
       }),
     {
       enabled: searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH,
     }
   );
+  console.log(props.value);
+
+  function updateSelection(cfd: string) {
+    const index = props.value.indexOf(cfd);
+    if (index !== -1) {
+      props.onChange(props.value.filter((item) => item !== cfd));
+    } else {
+      props.onChange([...props.value, cfd]);
+    }
+  }
 
   return (
     <div>
@@ -63,7 +73,6 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
           <Heading as="h3" variant="h3" marginBottom="3w" marginTop="2w">
             Sélectionner une formation
           </Heading>
-
           <InputGroup>
             <InputLeftElement pointerEvents="none" fontSize="gamma" className="ri-search-line" as="i" marginTop="3px" />
             <Input
@@ -86,46 +95,39 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
             </Box>
           )}
           {searchTerm.length > 0 && formations?.length === 0 && (
-            <NoResults title="Il n'y a aucun résultat pour votre recherche sur le territoire sélectionné" />
+            <NoResults title="Il n'y a aucun résultat pour votre recherche" />
           )}
           {isLoading && <Loading />}
-          {formations?.length && formations.length > 0 && (
-            <TableContainer marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
+          {formations && formations.length > 0 && (
+            <TableContainer marginTop="1w" textAlign="left">
               <Table variant="primary">
                 <Thead>
                   <Tr>
                     <Th>Libellé de la formation</Th>
                     <Th>CFD</Th>
-                    <Th>RNCP(s)</Th>
+                    <Th>RNCP</Th>
                     <Th>Date de validité du CFD</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {formations?.map((formation) => {
-                    // const isRowSelected = formation.cfd === selectedValue?.cfd;
-                    const isRowSelected = false;
-                    const cfdStartDate = formation.cfd_start_date
-                      ? new Date(formation.cfd_start_date).toLocaleDateString()
-                      : null;
-                    const cfdEndDate = formation.cfd_end_date
-                      ? new Date(formation.cfd_end_date).toLocaleDateString()
-                      : null;
-
                     return (
-                      <Tr
-                        onClick={() => {
-                          props.onChange(formation);
-                        }}
-                        borderLeft={isRowSelected ? "solid 2px" : "none"}
-                        key={formation.cfd}
-                      >
+                      <Tr onClick={() => updateSelection(formation.cfd)} cursor="pointer" key={formation.cfd}>
                         <Td maxWidth="550px" whiteSpace={"pre-line"}>
-                          {formation.libelle || "N/A"}
+                          <Checkbox
+                            checked={props.value.includes(formation.cfd)}
+                            fontSize="caption"
+                            pointerEvents="none"
+                          >
+                            {formation.intitule_long || "N/A"} - {props.value.includes(formation.cfd) ? "OUI" : "NON"}
+                          </Checkbox>
                         </Td>
                         <Td>{formation.cfd}</Td>
-                        <Td whiteSpace={"pre-line"}>{formation.rncps?.join(", ") || "N/A"}</Td>
-                        {cfdStartDate && cfdEndDate ? (
-                          <Td>{`Du ${cfdStartDate} au ${cfdEndDate}`}</Td>
+                        <Td>{formation.rncp || "N/A"}</Td>
+                        {formation.cfd_start_date && formation.cfd_end_date ? (
+                          <Td>{`Du ${new Date(formation.cfd_start_date).toLocaleDateString()} au ${new Date(
+                            formation.cfd_end_date
+                          ).toLocaleDateString()}`}</Td>
                         ) : (
                           <Td fontStyle="italic">N/A</Td>
                         )}
