@@ -23,9 +23,9 @@ function IndicateursPage() {
         <Tabs isLazy lazyBehavior="keepMounted" mt={8}>
           <TabList>
             <Tab fontWeight="bold">Vue globale</Tab>
-            <Tab fontWeight="bold">
+            <Tab fontWeight="bold" isDisabled>
               <GraphIcon />
-              <Text ml={2}>Vue graphique</Text>
+              <Text ml={2}>Vue graphique (bientôt)</Text>
             </Tab>
           </TabList>
           <TabPanels>
