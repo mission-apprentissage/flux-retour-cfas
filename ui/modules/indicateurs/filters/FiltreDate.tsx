@@ -21,7 +21,7 @@ interface Props {
     buttonLabel: string;
   }) => JSX.Element;
 }
-function DateFilter(props: Props) {
+function FiltreDate(props: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -47,4 +47,4 @@ function DateFilter(props: Props) {
   );
 }
 
-export default DateFilter;
+export default FiltreDate;

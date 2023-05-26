@@ -20,10 +20,9 @@ import {
   DEPARTEMENTS_BY_CODE,
   ACADEMIES_BY_CODE,
 } from "@/common/constants/territoires";
+import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-import SimpleOverlayMenu from "../SimpleOverlayMenu";
-
-export interface TerritoireFilterConfig {
+export interface FiltreOrganismeTerritoireConfig {
   defaultLabel?: string;
   disabled?: boolean;
   regions?: string[];
@@ -32,14 +31,14 @@ export interface TerritoireFilterConfig {
   bassinsEmploi?: string[];
 }
 
-interface TerritoireFilterProps {
+interface FiltreOrganismeTerritoireProps {
   value: {
     regions: string[];
     departements: string[];
     academies: string[];
     bassinsEmploi: string[];
   };
-  config?: TerritoireFilterConfig;
+  config?: FiltreOrganismeTerritoireConfig;
   onRegionsChange: (regions: string[]) => void;
   onDepartementsChange: (departements: string[]) => void;
   onAcademiesChange: (academies: string[]) => void;
@@ -54,7 +53,7 @@ interface TerritoireFilterProps {
     buttonLabel: string;
   }) => JSX.Element;
 }
-const TerritoireFilter = (props: TerritoireFilterProps) => {
+const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { regions, departements, academies } = props.value;
 
@@ -180,4 +179,4 @@ const TerritoireFilter = (props: TerritoireFilterProps) => {
   );
 };
 
-export default TerritoireFilter;
+export default FiltreOrganismeTerritoire;

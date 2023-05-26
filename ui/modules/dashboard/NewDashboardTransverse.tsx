@@ -16,6 +16,8 @@ import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
+import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
+import FiltreOrganismeTerritoire from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import {
@@ -27,8 +29,6 @@ import {
 import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDepartement } from "../models/indicateurs";
 
 import CarteFrance from "./CarteFrance";
-import DateFilter from "./filters/DateFilter";
-import TerritoireFilter from "./filters/TerritoireFilter";
 import IndicateursGrid from "./IndicateursGrid";
 
 const NewDashboardTransverse = () => {
@@ -164,7 +164,7 @@ const NewDashboardTransverse = () => {
         </Text>
         <HStack mt={8}>
           <Box>Filtrer par</Box>
-          <TerritoireFilter
+          <FiltreOrganismeTerritoire
             value={{
               regions: effectifsFilters.organisme_regions,
               departements: effectifsFilters.organisme_departements,
@@ -181,7 +181,7 @@ const NewDashboardTransverse = () => {
               </SecondarySelectButton>
             )}
           />
-          <DateFilter
+          <FiltreDate
             value={effectifsFilters.date}
             onChange={(date) => updateState({ date })}
             button={({ isOpen, setIsOpen, buttonLabel }) => (

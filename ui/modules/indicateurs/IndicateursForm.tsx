@@ -10,9 +10,16 @@ import { Organisation } from "@/common/internal/Organisation";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useAuth from "@/hooks/useAuth";
+import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
+import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
+import FiltreFormationAnnee from "@/modules/indicateurs/filters/FiltreFormationAnnee";
+import FiltreFormationNiveau from "@/modules/indicateurs/filters/FiltreFormationNiveau";
+import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganismeReseau";
+import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
+import FiltreOrganismeTerritoire, {
+  FiltreOrganismeTerritoireConfig,
+} from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 
-import DateFilter from "../dashboard/filters/DateFilter";
-import TerritoireFilter, { TerritoireFilterConfig } from "../dashboard/filters/TerritoireFilter";
 import { InscritsSansContratsIcon, AbandonsIcon, RupturantsIcon, ApprentisIcon } from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
@@ -24,11 +31,6 @@ import {
 import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 
 import IndicateursFilter from "./FilterAccordion";
-import FiltreApprenantTrancheAge from "./FiltreApprenantTrancheAge";
-import FiltreFormationAnnee from "./FiltreFormationAnnee";
-import FiltreFormationNiveau from "./FiltreFormationNiveau";
-import FiltreOrganismeReseau from "./FiltreOrganismeReseau";
-import FiltreOrganismeSearch from "./FiltreOrganismeSearch";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
@@ -60,7 +62,7 @@ function FilterButton(props: FilterButtonProps) {
   );
 }
 
-function getTerritoiresFilterConfig(organisation: Organisation): TerritoireFilterConfig {
+function getFiltreTerritoiresConfig(organisation: Organisation): FiltreOrganismeTerritoireConfig {
   switch (organisation.type) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
@@ -188,7 +190,7 @@ function IndicateursForm() {
             Date
           </Text>
 
-          <DateFilter value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
+          <FiltreDate value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
         </SimpleGrid>
 
         <SimpleGrid gap={3}>
@@ -196,7 +198,7 @@ function IndicateursForm() {
             Territoire
           </Text>
 
-          <TerritoireFilter
+          <FiltreOrganismeTerritoire
             button={FilterButton}
             value={{
               regions: effectifsFilters.organisme_regions,
@@ -204,7 +206,7 @@ function IndicateursForm() {
               academies: effectifsFilters.organisme_academies,
               bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
             }}
-            config={getTerritoiresFilterConfig(auth.organisation)}
+            config={getFiltreTerritoiresConfig(auth.organisation)}
             onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
             onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
             onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
