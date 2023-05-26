@@ -1,3 +1,11 @@
+- name: Create /var/log/data-jobs
+  file:
+    path: /var/log/data-jobs
+    state: directory
+    owner: root
+    group: root
+    mode: 700
+
 - name: Add CRON to run jobs processing application data everyday at 02:30AM
   become: true
   cron:
