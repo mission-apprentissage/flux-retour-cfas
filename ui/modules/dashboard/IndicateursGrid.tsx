@@ -156,10 +156,9 @@ function IndicateursGrid({
             <div>
               <b>Nombre d’apprenants en contrat d’apprentissage</b>
               <br />
-              au dernier jour du mois (ou J-1 si mois en cours). Cet indicateur est basé sur la réception d’un statut
-              transmis par les organismes de formation. Il est affiné par la prise en compte des dates de début de
-              contrat saisies. Est considéré comme un apprenant, un jeune inscrit en formation dans un centre. Il peut
-              être soit déjà inscrit en entreprise (avec signature de contrat) soit en recherche d’une entreprise).
+              Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation. Est
+              considéré comme un apprenant, un jeune inscrit en formation dans un organisme de formation. Il peut être
+              soit déjà inscrit en entreprise (avec signature de contrat) soit en recherche d’une entreprise.
             </div>
           }
           icon={<ApprenantsIcon />}
@@ -174,8 +173,8 @@ function IndicateursGrid({
             <div>
               <b>Apprenti</b>
               <br />
-              Un apprenti est un jeune apprenant inscrit dans le centre de formation, suivant la formation et accueilli
-              dans une entreprise qui la forme.
+              Un apprenti est un jeune apprenant inscrit en centre de formation et ayant signé un contrat dans une
+              entreprise qui le forme.
             </div>
           }
           icon={<ApprentisIcon />}
@@ -190,8 +189,8 @@ function IndicateursGrid({
               <b>Rupturant</b>
               <br />
               Un jeune est considéré en rupture lorsqu’il ne travaille plus dans l’entreprise qui l’accueillait.
-              Néanmoins, il reste inscrit dans le centre de formation et est en recherche d’une nouvelle entreprise avec
-              qui se former.
+              Néanmoins, il reste inscrit dans le centre de formation et dispose d’un délai de 6 mois pour retrouver une
+              entreprise auprès de qui se former.
             </div>
           }
           icon={<RupturantsIcon />}
@@ -209,8 +208,8 @@ function IndicateursGrid({
             <div>
               <b>Jeune sans contrat</b>
               <br />
-              Un jeune inscrit en formation dans un centre toujours en recherche d’une entreprise. Le délai est de 3
-              mois pour commencer son alternance.
+              Un jeune sans contrat est un jeune inscrit qui débute sa formation sans contrat signé en entreprise. Le
+              jeune dispose d’un délai de 3 mois pour trouver son entreprise et continuer sereinement sa formation.
             </div>
           }
           icon={<InscritsSansContratsIcon />}
@@ -226,7 +225,7 @@ function IndicateursGrid({
           count={indicateursEffectifs.abandons}
           tooltipLabel={
             <div>
-              <b>Sorties d’apprentissage</b>
+              <b>Sorties d’apprentissage (anciennement “abandons”)</b>
               <br />
               Il s’agit du nombre d’apprenants ou apprentis qui ont définitivement quitté le centre de formation à la
               date affichée. Cette indication est basée sur un statut transmis par les organismes de formation. Ces
