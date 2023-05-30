@@ -199,7 +199,7 @@ export async function searchOrganismesFormations(searchTerm: string): Promise<an
               as: "formation",
               cond: {
                 $or: [
-                  // { intitule_long: { $regex: searchTerm, $options: "i" } },
+                  { $regexMatch: { input: "$$formation.intitule_long", regex: searchTerm, options: "i" } },
                   { $eq: ["$$formation.cfd", searchTerm] },
                   { $eq: ["$$formation.rncp", searchTerm] },
                 ],
