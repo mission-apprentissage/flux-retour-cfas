@@ -44,9 +44,11 @@ export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): Ef
   };
 }
 
-export function convertEffectifsFiltersToQuery(effectifsFilters: EffectifsFilters): EffectifsFiltersQuery {
+export function convertEffectifsFiltersToQuery(
+  effectifsFilters: Partial<EffectifsFilters>
+): Partial<EffectifsFiltersQuery> {
   return stripEmptyFields({
-    date: effectifsFilters.date.toISOString(),
+    date: effectifsFilters.date?.toISOString(),
     organisme_regions: effectifsFilters.organisme_regions?.join(","),
     organisme_departements: effectifsFilters.organisme_departements?.join(","),
     organisme_academies: effectifsFilters.organisme_academies?.join(","),

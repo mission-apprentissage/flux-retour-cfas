@@ -53,7 +53,6 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
       enabled: searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH,
     }
   );
-  console.log(props.value);
 
   function updateSelection(cfd: string) {
     const index = props.value.indexOf(cfd);

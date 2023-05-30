@@ -4,6 +4,7 @@ import {
   PaginationState,
   SortingState,
   flexRender,
+  functionalUpdate,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
@@ -19,14 +20,15 @@ interface NewTableProps<T> extends SystemProps {
   columns: ColumnDef<T, any>[];
   data: T[];
   loading?: boolean;
-  initialSortingState?: SortingState;
-  initialPaginationState?: PaginationState;
+  sortingState?: SortingState;
+  paginationState?: PaginationState;
+  onSortingChange?: (state: SortingState) => any;
+  onPaginationChange?: (state: PaginationState) => any;
 }
 
 function NewTable<T>(props: NewTableProps<T>) {
-  const [sorting, setSorting] = useState<SortingState>(props.initialSortingState ?? []);
   const [pagination, setPagination] = useState<PaginationState>(
-    props.initialPaginationState ?? {
+    props.paginationState ?? {
       pageIndex: 0,
       pageSize: 20,
     }
@@ -36,15 +38,27 @@ function NewTable<T>(props: NewTableProps<T>) {
     data: props.data,
     columns: props.columns,
     state: {
-      sorting,
-      pagination,
+      pagination: pagination,
+      sorting: props.sortingState,
     },
-    onPaginationChange: setPagination,
-    onSortingChange: setSorting,
+    onPaginationChange: (updater) => {
+      // const oldState = table.getState().pagination;
+      const newState = functionalUpdate(updater, table.getState().pagination);
+
+      // state externe désactivé au profit d'un state interne
+      // car ne fonctionne pas et réinitialise la table et la pagination
+      // if (newState.pageIndex !== oldState.pageIndex || newState.pageSize !== oldState.pageSize) {
+      //   props.onPaginationChange?.(newState);
+      // }
+      setPagination(newState);
+    },
+    onSortingChange: (updater) => {
+      const newState = functionalUpdate(updater, table.getState().sorting);
+      props.onSortingChange?.(newState);
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugTable: true,
   });
 
   return (

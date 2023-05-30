@@ -1,5 +1,5 @@
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
-import { Flex, Button, HStack, Text, Box, Heading, Divider, SimpleGrid } from "@chakra-ui/react";
+import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useMemo } from "react";
@@ -20,7 +20,7 @@ import FiltreOrganismeTerritoire, {
   FiltreOrganismeTerritoireConfig,
 } from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 
-import { InscritsSansContratsIcon, AbandonsIcon, RupturantsIcon, ApprentisIcon } from "../dashboard/icons";
+import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
@@ -29,6 +29,12 @@ import {
   parseEffectifsFiltersFromQuery,
 } from "../models/effectifs-filters";
 import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
+import {
+  convertPaginationInfosToQuery,
+  PaginationInfos,
+  PaginationInfosQuery,
+  parsePaginationInfosFromQuery,
+} from "../models/pagination";
 
 import IndicateursFilter from "./FilterAccordion";
 import FiltreFormationCFD from "./filters/FiltreFormationCFD";
@@ -110,14 +116,17 @@ function IndicateursForm() {
   const { auth } = useAuth();
   const router = useRouter();
 
-  const effectifsFilters = useMemo(() => {
-    const filters = parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery);
-
-    return filters;
-  }, [router.query]);
+  const { effectifsFilters, pagination, sort } = useMemo(() => {
+    const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
+    return {
+      effectifsFilters: parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery),
+      pagination: pagination,
+      sort: sort ?? [{ desc: false, id: "nom" }],
+    };
+  }, [JSON.stringify(router.query)]);
 
   const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery(
-    ["indicateurs/effectifs/par-organisme", JSON.stringify(convertEffectifsFiltersToQuery(effectifsFilters))],
+    ["indicateurs/effectifs/par-organisme", JSON.stringify(effectifsFilters)],
     () =>
       _get<IndicateursEffectifsAvecOrganisme[]>("/api/v1/indicateurs/effectifs/par-organisme", {
         params: convertEffectifsFiltersToQuery(effectifsFilters),
@@ -149,11 +158,14 @@ function IndicateursForm() {
     [indicateursEffectifs]
   );
 
-  function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
-    router.push(
+  function updateState(newParams: Partial<{ [key in keyof EffectifsFilters & PaginationInfos]: any }>) {
+    void router.push(
       {
         pathname: router.pathname,
-        query: convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }) as any,
+        query: {
+          ...convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }),
+          ...convertPaginationInfosToQuery({ pagination, sort, ...newParams }),
+        },
       },
       undefined,
       { shallow: true }
@@ -161,7 +173,7 @@ function IndicateursForm() {
   }
 
   function resetFilters() {
-    router.push(
+    void router.push(
       {
         pathname: router.pathname,
       },
@@ -306,7 +318,10 @@ function IndicateursForm() {
           mt={4}
           data={indicateursEffectifs || []}
           loading={indicateursEffectifsLoading}
-          initialSortingState={[{ desc: false, id: "nom" }]}
+          paginationState={pagination}
+          sortingState={sort}
+          onPaginationChange={(state) => updateState({ pagination: state })}
+          onSortingChange={(state) => updateState({ sort: state })}
           columns={[
             {
               header: () => "Nom de l’organisme",
