@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { createFormation, getFormationWithCfd } from "@/common/actions/formations.actions";
 import { getCatalogFormationsForOrganisme } from "@/common/apis/apiCatalogueMna";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
-import { organismesDb } from "@/common/model/collections";
+import { formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 
 import { findOrganismeByUai } from "./organismes.actions";
 
@@ -176,59 +176,103 @@ export const findOrganismeFormationByCfd = async (organisme_id: string, cfd: str
 };
 
 export async function searchOrganismesFormations(searchTerm: string): Promise<any[]> {
-  const formations = await organismesDb()
+  // TODO version basée sur organismes.relatedFormations pas très performante...
+  // const formations = await organismesDb()
+  //   .aggregate([
+  //     {
+  //       $match: {
+  //         relatedFormations2: {
+  //           $elemMatch: {
+  //             $or: [
+  //               { intitule_long: { $regex: searchTerm, $options: "i" } },
+  //               { cfd: searchTerm },
+  //               { rncp: searchTerm },
+  //             ],
+  //           },
+  //         },
+  //       },
+  //     },
+  //     {
+  //       $project: {
+  //         relatedFormations2: {
+  //           $filter: {
+  //             input: "$relatedFormations2",
+  //             as: "formation",
+  //             cond: {
+  //               $or: [
+  //                 { $regexMatch: { input: "$$formation.intitule_long", regex: searchTerm, options: "i" } },
+  //                 { $eq: ["$$formation.cfd", searchTerm] },
+  //                 { $eq: ["$$formation.rncp", searchTerm] },
+  //               ],
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     {
+  //       $unwind: "$relatedFormations2",
+  //     },
+  //     {
+  //       $replaceWith: "$relatedFormations2",
+  //     },
+  //     {
+  //       $group: {
+  //         _id: {
+  //           cfd: "$cfd",
+  //           rncp: "$rncp",
+  //         },
+  //         formation_id: { $last: "$formation_id" },
+  //         cle_ministere_educatif: { $last: "$cle_ministere_educatif" },
+  //         annee_formation: { $last: "$annee_formation" },
+  //         intitule_long: { $last: "$intitule_long" },
+  //         cfd: { $last: "$cfd" },
+  //         rncp: { $last: "$rncp" },
+  //         cfd_start_date: { $last: "$cfd_start_date" },
+  //         cfd_end_date: { $last: "$cfd_end_date" },
+  //         organismes: { $last: "$organismes" },
+  //       },
+  //     },
+  //     {
+  //       $project: {
+  //         _id: 0,
+  //       },
+  //     },
+  //     {
+  //       $sort: {
+  //         intitule_long: 1,
+  //       },
+  //     },
+  //     {
+  //       $limit: 50,
+  //     },
+  //   ])
+  //   .toArray();
+
+  // version plus simple et performance qui cherche directement dans les formations catalogue
+  // mais on pourrait avoir une collection intermédiaire qui aggrège les clés ministères + rncp ?)
+  const formations = await formationsCatalogueDb()
     .aggregate([
       {
         $match: {
-          relatedFormations2: {
-            $elemMatch: {
-              $or: [
-                { intitule_long: { $regex: searchTerm, $options: "i" } },
-                { cfd: searchTerm },
-                { rncp: searchTerm },
-              ],
-            },
-          },
+          $or: [
+            { intitule_long: { $regex: searchTerm, $options: "i" } },
+            { cfd: searchTerm },
+            { rncp_code: searchTerm },
+          ],
         },
-      },
-      {
-        $project: {
-          relatedFormations2: {
-            $filter: {
-              input: "$relatedFormations2",
-              as: "formation",
-              cond: {
-                $or: [
-                  { $regexMatch: { input: "$$formation.intitule_long", regex: searchTerm, options: "i" } },
-                  { $eq: ["$$formation.cfd", searchTerm] },
-                  { $eq: ["$$formation.rncp", searchTerm] },
-                ],
-              },
-            },
-          },
-        },
-      },
-      {
-        $unwind: "$relatedFormations2",
-      },
-      {
-        $replaceWith: "$relatedFormations2",
       },
       {
         $group: {
           _id: {
             cfd: "$cfd",
-            rncp: "$rncp",
+            rncp: "$rncp_code",
           },
-          formation_id: { $last: "$formation_id" },
           cle_ministere_educatif: { $last: "$cle_ministere_educatif" },
-          annee_formation: { $last: "$annee_formation" },
           intitule_long: { $last: "$intitule_long" },
           cfd: { $last: "$cfd" },
-          rncp: { $last: "$rncp" },
-          cfd_start_date: { $last: "$cfd_start_date" },
-          cfd_end_date: { $last: "$cfd_end_date" },
-          organismes: { $last: "$organismes" },
+          rncp: { $last: "$rncp_code" },
+          cfd_start_date: { $last: { $arrayElemAt: ["$periode", 0] } },
+          cfd_end_date: { $last: { $arrayElemAt: ["$periode", 1] } },
         },
       },
       {
