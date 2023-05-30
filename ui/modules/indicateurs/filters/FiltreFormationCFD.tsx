@@ -15,7 +15,7 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { _post } from "@/common/httpClient";
 import InputLegend from "@/components/InputLegend/InputLegend";
@@ -63,9 +63,14 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
     }
   }
 
+  const buttonLabel =
+    props.value.length === 0
+      ? "Type de formation"
+      : `${props.value.length} formation${props.value.length > 1 ? "s" : ""}`;
+
   return (
     <div>
-      {props.button({ setIsOpen, isOpen, buttonLabel: "Type de formation" })}
+      {props.button({ setIsOpen, isOpen, buttonLabel })}
 
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} px="8w" py="3w">
