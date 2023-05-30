@@ -53,7 +53,15 @@ describe("Job hydrateFormationsCatalogue", () => {
       _id: new ObjectId(id(123)),
       cle_ministere_educatif: "CCC",
       intitule_long: "JARDINIER PAYSAGISTE (CAPA)",
-    } as any);
+      cfd: "aa",
+      rncp_code: "aa",
+      duree: "2",
+      annee: "1",
+      etablissement_gestionnaire_siret: "1",
+      etablissement_gestionnaire_uai: "1",
+      etablissement_formateur_siret: "1",
+      etablissement_formateur_uai: "1",
+    });
 
     await hydrateFormationsCatalogue();
 
