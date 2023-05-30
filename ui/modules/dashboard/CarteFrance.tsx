@@ -1,5 +1,5 @@
 import { Box, HStack, VStack } from "@chakra-ui/react";
-import { MouseEventHandler, useMemo, useState } from "react";
+import { MouseEventHandler, useMemo, useRef, useState } from "react";
 
 import { prettyFormatNumber } from "@/common/utils/stringUtils";
 import { Bin, calculateBins } from "@/modules/models/graphs";
@@ -78,6 +78,11 @@ function CarteFrance<Data extends object>(props: Props<Data>) {
     });
   };
 
+  const regionCentre = useRef<SVGGElement>(null);
+  console.log("regionCentre", regionCentre.current);
+  const bbox = regionCentre.current?.getBBox();
+  const restrictedViewBox = regionCentre ? `${bbox?.x} ${bbox?.y} ${bbox?.width} ${bbox?.height}` : null;
+
   return (
     <>
       <style type="text/css">
@@ -119,8 +124,15 @@ function CarteFrance<Data extends object>(props: Props<Data>) {
         </Box>
 
         <Box className="carte" onMouseMove={onMouseMove} onMouseOut={onMouseOut}>
-          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 667 578">
-            <g className="region region-01" data-nom="Guadeloupe" data-code_insee="01">
+          {/* <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 667 578"> */}
+          <svg
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            x="0px"
+            y="0px"
+            viewBox={restrictedViewBox ?? "0 0 667 578"}
+          >
+            {/* <g className="region region-01" data-nom="Guadeloupe" data-code_insee="01">
               <path
                 data-nom="Guadeloupe"
                 data-numerodepartement="971"
@@ -222,8 +234,8 @@ function CarteFrance<Data extends object>(props: Props<Data>) {
                 className="region-11 departement departement-95 departement-val-doise"
                 d="m374.3,144l-9.5-0.8l4-9.5l1.6,3.2l5.6,1.1 l6.3-1.8l9.2,2.2l2.2-1.6l10.9,6.4l0.2,2l-1.7,2.3l-0.1,0.1c-1.5,1.1-3.1,2.2-4.7,3.3l-2.6-1.1l-3.3,1.3l-3.6,2.6l-5.5-6.1 L374.3,144z"
               />
-            </g>
-            <g className="region region-24" data-nom="Centre-Val de Loire" data-code_insee="24">
+            </g> */}
+            <g className="region region-24" data-nom="Centre-Val de Loire" data-code_insee="24" ref={regionCentre}>
               <path
                 data-nom="Cher"
                 data-numerodepartement="18"
@@ -267,7 +279,7 @@ function CarteFrance<Data extends object>(props: Props<Data>) {
                 d="m393.3,189.4l3.7,0.6l0.7,3.1l4.2,4.3l-0.6,2.7 l-2.6,1.5l9.2,0.7l11.2-2.7l6.7,7.5l0.4,5.8l-4.6,4.9l1.1,2.9l-1.6,2.4l-5.3,3.3l3,2.8l2.2,6.9l-2.8,0.7l-1.5,2.4l-9,1.7l-3.9-4.8 l-13.5-3.1l-0.8-2.6l-15.2-1.6l-1.9,2.3l-2.9-0.6l-1.1-3.8l-2.4-1.5l-3,1.3l-1.7-5.6l1.8-3.2l-2.5-7.1l-0.2-2.8l6-2.8l8.5-0.6 l4.8-10.8l0.5-1.5l6.9-0.7l1.9-2.9l1.5,2.7L393.3,189.4z"
               />
             </g>
-            <g className="region region-27" data-nom="Bourgogne-Franche-Comté" data-code_insee="27">
+            {/* <g className="region region-27" data-nom="Bourgogne-Franche-Comté" data-code_insee="27">
               <path
                 data-nom="Côte-d’Or"
                 data-numerodepartement="21"
@@ -862,7 +874,7 @@ function CarteFrance<Data extends object>(props: Props<Data>) {
                 className="region-94 departement departement-2B departement-haute-corse"
                 d="m643.7,551.5v1l-3.2,1.7l-3.8-0.5l-3.7-11 l-2.7-1.1l-0.5-3.2l-6-5.9l-6-3.4l-1.2-3.5l-13.6-2.1v-0.2l3.9-5l-0.3-3.4l2.2-2.8l2.8-0.3l0.9-2.9l10.7-4.2l3.5-4.9l8.6,1.3 l-0.5-17.4l2.4-2l2.9,1.1l0.18,0.89l1.52,8.21l-0.5,10.6l4,5.6l3.8,26l-5.4,11.9V551.5L643.7,551.5z"
               />
-            </g>
+            </g> */}
           </svg>
           <Box
             zIndex="4"
