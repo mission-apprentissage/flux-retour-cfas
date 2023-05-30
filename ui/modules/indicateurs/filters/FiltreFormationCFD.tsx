@@ -115,11 +115,11 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
                       <Tr onClick={() => updateSelection(formation.cfd)} cursor="pointer" key={formation.cfd}>
                         <Td maxWidth="550px" whiteSpace={"pre-line"}>
                           <Checkbox
-                            checked={props.value.includes(formation.cfd)}
+                            isChecked={props.value.includes(formation.cfd)}
                             fontSize="caption"
                             pointerEvents="none"
                           >
-                            {formation.intitule_long || "N/A"} - {props.value.includes(formation.cfd) ? "OUI" : "NON"}
+                            {formation.intitule_long || "N/A"}
                           </Checkbox>
                         </Td>
                         <Td>{formation.cfd}</Td>
