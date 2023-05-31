@@ -8,15 +8,15 @@ import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
 import {
+  arrayOf,
+  boolean,
+  date,
+  dateOrNull,
+  integer,
   object,
   objectId,
   string,
-  date,
-  arrayOf,
-  boolean,
-  integer,
   stringOrNull,
-  dateOrNull,
 } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismes";
