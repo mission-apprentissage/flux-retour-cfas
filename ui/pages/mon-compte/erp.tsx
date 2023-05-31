@@ -1,5 +1,6 @@
 import { Box, Flex } from "@chakra-ui/react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import React from "react";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -13,13 +14,9 @@ import { useEffectifsOrganismeOrganisation } from "@/modules/mon-espace/effectif
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const ConfigurationErpPage = () => {
+  const router = useRouter();
   const { organisme } = useEffectifsOrganismeOrganisation();
-  const {
-    organisme: currentOrganisme,
-    generateApiKey,
-    isGeneratingApiKey,
-    configureERP,
-  } = useOrganisme(organisme?._id);
+  const { organisme: currentOrganisme, generateApiKey, isGeneratingApiKey } = useOrganisme(organisme?._id);
 
   return (
     <Page>
@@ -31,11 +28,10 @@ const ConfigurationErpPage = () => {
         <Box w="100%" pt={[4, 8]} mb={5}>
           {currentOrganisme && (
             <ConfigurationERP
-              apiKey={currentOrganisme.api_key}
-              erp={currentOrganisme.erps?.[0]}
+              organisme={currentOrganisme}
+              erp={router.query.erp}
               isGenerating={isGeneratingApiKey}
               onGenerate={() => generateApiKey()}
-              onSave={(selectedErp) => configureERP({ erps: [selectedErp] })}
             />
           )}
         </Box>

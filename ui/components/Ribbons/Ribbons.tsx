@@ -11,7 +11,7 @@ const stylesMap = {
   info_clear: { color: "bluefrance", bg: "white", borderColor: undefined, borderWidth: undefined },
   loading: { color: "bluefrance", bg: "white", borderColor: "bluefrance", borderWidth: 1 },
   alert_clear: { color: "flaterror", bg: "white", borderColor: undefined, borderWidth: undefined },
-  alert: { color: "flaterror", bg: "white", borderColor: "flaterror", borderWidth: 1 },
+  alert: { color: "flatwarm", bg: "white", borderColor: "flatwarm", borderWidth: 1 },
   unstyled: { color: "grey", bg: "galt2", borderColor: undefined, borderWidth: undefined },
 };
 

@@ -133,6 +133,10 @@ const schema = object(
     // TODO [tech] TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
     api_key: string({ description: "API key pour envoi de données" }),
+    api_uai: string({ description: "Uai envoyé par l'erp" }),
+    api_siret: string({ description: "Siret envoyé par l'erp" }),
+    api_configuration_date: date({ description: "Date de l'interfaçage" }),
+
     fiabilisation_statut: string({
       description: "Statut de fiabilisation de l'organisme",
       enum: Object.values(STATUT_FIABILISATION_ORGANISME),
