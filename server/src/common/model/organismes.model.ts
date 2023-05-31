@@ -30,9 +30,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "adresse.departement": 1 }, { name: "departement" }], // FIXME n'a pas l'air d'améliorer les performances
   [{ "adresse.region": 1 }, { name: "region" }],
   [{ created_at: 1 }, { name: "created_at" }],
-  [{ "relatedFormations2.cfd": 1 }, { name: "relatedFormations2.cfd" }],
-  [{ "relatedFormations2.rncp": 1 }, { name: "relatedFormations2.rncp" }],
-  [{ "relatedFormations2.intitule_long": 1 }, { name: "relatedFormations2.intitule_long" }],
 ];
 
 // Si contributeurs = [] et !first_transmission_date Alors Organisme en stock "Non actif"
