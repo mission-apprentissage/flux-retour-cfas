@@ -116,7 +116,7 @@ function IndicateursForm() {
   const { auth } = useAuth();
   const router = useRouter();
 
-  const { effectifsFilters, pagination, sort } = useMemo(() => {
+  const { effectifsFilters, sort } = useMemo(() => {
     const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
     return {
       effectifsFilters: parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery),
@@ -164,7 +164,7 @@ function IndicateursForm() {
         pathname: router.pathname,
         query: {
           ...convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }),
-          ...convertPaginationInfosToQuery({ pagination, sort, ...newParams }),
+          ...convertPaginationInfosToQuery({ sort, ...newParams }),
         },
       },
       undefined,
@@ -318,9 +318,9 @@ function IndicateursForm() {
           mt={4}
           data={indicateursEffectifs || []}
           loading={indicateursEffectifsLoading}
-          paginationState={pagination}
+          // paginationState={pagination}
           sortingState={sort}
-          onPaginationChange={(state) => updateState({ pagination: state })}
+          // onPaginationChange={(state) => updateState({ pagination: state })}
           onSortingChange={(state) => updateState({ sort: state })}
           columns={[
             {

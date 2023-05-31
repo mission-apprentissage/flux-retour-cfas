@@ -21,7 +21,7 @@ export function parsePaginationInfosFromQuery(query: PaginationInfosQuery): Pagi
 
 export function convertPaginationInfosToQuery(infos: Partial<PaginationInfos>): PaginationInfosQuery {
   return stripEmptyFields({
-    pagination: JSON.stringify(infos.pagination ?? {}),
-    sort: JSON.stringify(infos.sort ?? []),
+    pagination: infos.pagination ? JSON.stringify(infos.pagination) : undefined,
+    sort: infos.sort ? JSON.stringify(infos.sort) : undefined,
   });
 }
