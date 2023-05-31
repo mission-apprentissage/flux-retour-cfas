@@ -1,4 +1,5 @@
 import { Option, program } from "commander";
+import { addDays } from "date-fns";
 import HttpTerminator from "lil-http-terminator";
 
 import logger from "./common/logger";
@@ -11,6 +12,7 @@ import { findInvalidDocuments } from "./jobs/db/findInvalidDocuments";
 import { recreateIndexes } from "./jobs/db/recreateIndexes";
 import { processEffectifsQueueEndlessly } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
 import { removeDuplicatesEffectifsQueue } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates";
+import { removeInscritsSansContratsNonRecusDepuis } from "./jobs/fiabilisation/dossiersApprenants/remove-nonRecus-depuis";
 import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
@@ -449,6 +451,20 @@ program
       const updateResults = await updateOrganismesFiabilisationUaiSiret();
 
       return { buildResults, updateResults };
+    })
+  );
+/**
+ * Job de suppression des inscrits sans contrats non reçus depuis une date donnée
+ */
+program
+  .command("fiabilisation:effectifs:remove-inscritsSansContrats-nonRecus-depuis")
+  .description("Suppression des inscrits sans contrats non reçus depuis une date donnée")
+  .addOption(new Option("--dateReception <date>", "Date de dernière réception"))
+  .action(
+    runJob(async ({ dateReception }) => {
+      // Lancement du script pour une date de réception il y a 90 jours par défaut
+      const dateDerniereReception = dateReception ? new Date(dateReception) : addDays(new Date(), -90);
+      return removeInscritsSansContratsNonRecusDepuis(dateDerniereReception);
     })
   );
 
