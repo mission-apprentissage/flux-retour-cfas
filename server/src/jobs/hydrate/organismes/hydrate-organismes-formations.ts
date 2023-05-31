@@ -53,11 +53,6 @@ async function formatFormation(formationCatalogue: WithId<FormationsCatalogue>):
   return {
     formation_id: formationCatalogue._id,
     cle_ministere_educatif: formationCatalogue.cle_ministere_educatif,
-    intitule_long: formationCatalogue.intitule_long,
-    cfd: formationCatalogue.cfd,
-    rncp: formationCatalogue.rncp_code,
-    cfd_start_date: formationCatalogue.periode?.[0] ? new Date(formationCatalogue.periode[0]) : null,
-    cfd_end_date: formationCatalogue.periode?.[1] ? new Date(formationCatalogue.periode[1]) : null,
     annee_formation: parseInt(formationCatalogue.annee, 10) || -1, // parfois annee === "X"
     duree_formation_theorique: parseInt(formationCatalogue.duree, 10),
     organismes: await buildOrganismesListFromFormationCatalogue(formationCatalogue),

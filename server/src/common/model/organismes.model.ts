@@ -2,22 +2,12 @@ import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { STATUT_CREATION_ORGANISME, STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
-import { CFD_REGEX_PATTERN, SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
+import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
-import {
-  arrayOf,
-  boolean,
-  date,
-  dateOrNull,
-  integer,
-  object,
-  objectId,
-  string,
-  stringOrNull,
-} from "./json-schema/jsonSchemaTypes";
+import { arrayOf, boolean, date, integer, object, objectId, string } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismes";
 
@@ -98,13 +88,6 @@ const schema = object(
           annee_formation: integer({
             description: "Année millésime de la formation pour cet organisme",
           }),
-          intitule_long: string({ description: "Intitulé long" }),
-          cfd: string({ description: "Code CFD de la formation", pattern: CFD_REGEX_PATTERN, maxLength: 8 }),
-          rncp: stringOrNull({
-            description: "Code RNCP de la formation",
-          }),
-          cfd_start_date: dateOrNull({ description: "Date d'ouverture du CFD" }),
-          cfd_end_date: dateOrNull({ description: "Date de fermeture du CFD" }),
           organismes: arrayOf(
             object(
               {
@@ -153,13 +136,6 @@ const schema = object(
           annee_formation: integer({
             description: "Année millésime de la formation pour cet organisme",
           }),
-          intitule_long: string({ description: "Intitulé long" }),
-          cfd: string({ description: "Code CFD de la formation", pattern: CFD_REGEX_PATTERN, maxLength: 8 }),
-          rncp: stringOrNull({
-            description: "Code RNCP de la formation",
-          }),
-          cfd_start_date: dateOrNull({ description: "Date d'ouverture du CFD" }),
-          cfd_end_date: dateOrNull({ description: "Date de fermeture du CFD" }),
           organismes: arrayOf(
             object(
               {
