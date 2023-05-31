@@ -41,7 +41,7 @@ describe("Job hydrateFormationsCatalogue", () => {
     },
   ];
 
-  it("Remplace tout le contenu de la collection formationsCatalogue", async () => {
+  it("Met à jour les formations de la collection formationsCatalogue", async () => {
     nock(config.mnaCatalogApi.endpoint)
       .persist()
       .get(new RegExp("v1/entity/formations.json.*"))
@@ -50,8 +50,8 @@ describe("Job hydrateFormationsCatalogue", () => {
       });
 
     await formationsCatalogueDb().insertOne({
-      _id: new ObjectId(id(123)),
-      cle_ministere_educatif: "CCC",
+      _id: new ObjectId(id(1)),
+      cle_ministere_educatif: "AAA",
       intitule_long: "JARDINIER PAYSAGISTE (CAPA)",
       cfd: "aa",
       rncp_code: "aa",
