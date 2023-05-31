@@ -21,6 +21,7 @@ import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
+import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
@@ -758,4 +759,44 @@ export async function configureOrganismeERP(
     throw Boom.forbidden("Permissions invalides");
   }
   await organismesDb().updateOne({ _id: new ObjectId(organismeId) }, { $set: stripEmptyFields(conf) as any });
+}
+
+export async function verifyOrganismeAPIKeyToUser(
+  ctx: AuthContext,
+  organismeId: ObjectId,
+  verif: IReqPostVerifyUser
+): Promise<any> {
+  if (!(await canConfigureOrganismeERP(ctx, organismeId))) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+  const organisme = (await organismesDb().findOne({ _id: organismeId })) as WithId<Organisme>;
+  if (!organisme) {
+    throw new Error("Aucun organisme trouvé");
+  }
+
+  if (organisme.api_key !== verif.api_key) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+
+  await organismesDb().updateOne(
+    { _id: new ObjectId(organismeId) },
+    {
+      $set: {
+        api_uai: verif.uai,
+        api_siret: verif.siret,
+        api_configuration_date: new Date(),
+      },
+    }
+  );
+
+  // if (organisme.siret !== verif.siret && organisme.uai !== verif.uai) {
+  //   // TODO WHAT DO WE DO
+  //   throw Boom.conflict("Siret/UAI");
+  // } else if (organisme.siret !== verif.siret) {
+  //   // TODO WHAT DO WE DO
+  //   throw Boom.conflict("Siret");
+  // } else if (organisme.uai !== verif.uai) {
+  //   // TODO WHAT DO WE DO
+  //   throw Boom.conflict("UAI");
+  // }
 }

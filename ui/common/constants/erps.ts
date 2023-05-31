@@ -64,3 +64,8 @@ export const ERPS_FORM_CASES = [
   { id: "AUTRE", name: "Autre ERP", state: ERP_STATE.otherErp },
   { id: "NON", name: "Je n'ai pas d'ERP", state: ERP_STATE.noErp },
 ];
+
+export const ERPS_BY_ID = ERPS_FORM_CASES.reduce((acc, item) => {
+  acc[item.id] = item;
+  return acc;
+}, {});

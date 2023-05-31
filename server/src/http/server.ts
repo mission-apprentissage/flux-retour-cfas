@@ -9,7 +9,7 @@ import cookieParser from "cookie-parser";
 import express, { Application, NextFunction, Request, RequestHandler, Response } from "express";
 import listEndpoints from "express-list-endpoints";
 import Joi from "joi";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
@@ -46,16 +46,20 @@ import {
   configureOrganismeERP,
   getOrganismeById,
   generateApiKeyForOrg,
+  getOrganismeByAPIKey,
+  verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import logger from "@/common/logger";
+import { Organisme } from "@/common/model/@types";
 import { jobEventsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { packageJson } from "@/common/utils/esmUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import { SReqPostDossiers, SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
@@ -75,9 +79,8 @@ import { requireAdministrator, returnResult } from "./middlewares/helpers";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
-import requireBearerAuthenticationMiddleware from "./middlewares/requireBearerAuthentication";
+import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
-import requireSendEffectifsPermissionMiddleware from "./middlewares/requireSendEffectifsPermissionMiddleware";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
@@ -306,8 +309,22 @@ function setupRoutes(app: Application) {
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
-    requireBearerAuthenticationMiddleware(),
-    requireSendEffectifsPermissionMiddleware(),
+    requireBearerAuthentication(),
+    async (req, res, next) => {
+      // POST /api/v3/dossiers-apprenants?siret=XXXXX&uai=YYYYY&erp=ZZZZ
+      const queryPayload = await validateFullZodObjectSchema(req.query, SReqPostDossiers);
+
+      const organisme = (await getOrganismeByAPIKey(res.locals.token)) as WithId<Organisme>;
+      if (!organisme) {
+        throw new Error("Non autoriser");
+      }
+
+      // @ts-ignore LEGACY Passport
+      req.user = {
+        source: queryPayload.erp,
+      };
+      next();
+    },
     dossierApprenantRouter()
   );
 
@@ -400,6 +417,15 @@ function setupRoutes(app: Application) {
         returnResult(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
+        })
+      )
+      .post(
+        "/verify-user",
+        authOrgMiddleware("manager"),
+        returnResult(async (req, res) => {
+          // POST /api/v1/organismes/:id/verify-user { siret=XXXXX, uai=YYYYY, erp=ZZZZ , api_key=TTTTT }
+          const verif = await validateFullZodObjectSchema(req.body, SReqPostVerifyUser);
+          await verifyOrganismeAPIKeyToUser(req.user, res.locals.organismeId, verif);
         })
       )
       .use(
