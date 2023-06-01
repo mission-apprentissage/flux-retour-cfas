@@ -93,7 +93,6 @@ const Button = {
       ...baseStyle,
       color: "bluefrance",
       border: "none",
-      borderRadius: "40px",
       padding: "3v",
       _hover: {
         textDecoration: null,

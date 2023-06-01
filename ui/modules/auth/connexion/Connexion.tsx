@@ -21,9 +21,11 @@ import * as Yup from "yup";
 
 import { _post } from "@/common/httpClient";
 import useAuth from "@/hooks/useAuth";
+import useLocalStorage from "@/hooks/userLocalStorage";
 import { AlertRounded, ShowPassword } from "@/theme/components/icons";
 
 const Login = (props) => {
+  const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl");
   const { refreshSession } = useAuth();
   const router = useRouter();
 
@@ -34,7 +36,12 @@ const Login = (props) => {
     try {
       await _post("/api/v1/auth/login", values);
       await refreshSession();
-      router.push("/");
+      if (originConnexionUrl) {
+        setOriginConnexionUrl("");
+        router.push(originConnexionUrl);
+      } else {
+        router.push("/");
+      }
     } catch (err) {
       const errorMessage = err?.json?.data?.message || err.message;
       setStatus({ error: errorMessage });

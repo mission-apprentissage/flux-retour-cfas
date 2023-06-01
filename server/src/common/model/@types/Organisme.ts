@@ -934,6 +934,10 @@ export interface Organisme {
    * API key pour envoi de données
    */
   api_key?: string;
+  api_uai?: string;
+  api_siret?: string;
+  api_configuration_date?: Date;
+
   /**
    * Statut de fiabilisation de l'organisme
    */
