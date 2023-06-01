@@ -103,6 +103,7 @@ export const organismesFiltersSchema = {
   organisme_regions: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   organisme_academies: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  organisme_bassinsEmploi: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
 };
 
 export type OrganismesFilters = z.infer<z.ZodObject<typeof organismesFiltersSchema>>;
@@ -118,6 +119,10 @@ export const organismesFiltersConfigurations: { [key in keyof Required<Organisme
   },
   organisme_academies: {
     matchKey: "adresse.academie",
+    transformValue: (value) => ({ $in: value }),
+  },
+  organisme_bassinsEmploi: {
+    matchKey: "adresse.bassinEmploi",
     transformValue: (value) => ({ $in: value }),
   },
 };
@@ -144,6 +149,10 @@ export const effectifsFiltersConfigurations: { [key in keyof Required<EffectifsF
   },
   organisme_academies: {
     matchKey: "_computed.organisme.academie",
+    transformValue: (value) => ({ $in: value }),
+  },
+  organisme_bassinsEmploi: {
+    matchKey: "_computed.organisme.bassinEmploi",
     transformValue: (value) => ({ $in: value }),
   },
 };

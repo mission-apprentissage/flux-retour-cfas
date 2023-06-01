@@ -10,15 +10,17 @@ import {
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
-import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
 
 import {
-  REGIONS_SORTED,
-  DEPARTEMENTS_SORTED,
-  ACADEMIES_SORTED,
-  REGIONS_BY_CODE,
-  DEPARTEMENTS_BY_CODE,
   ACADEMIES_BY_CODE,
+  ACADEMIES_SORTED,
+  BASSINS_EMPLOI_SORTED,
+  BASSIN_EMPLOI_BY_CODE,
+  DEPARTEMENTS_BY_CODE,
+  DEPARTEMENTS_SORTED,
+  REGIONS_BY_CODE,
+  REGIONS_SORTED,
 } from "@/common/constants/territoires";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
@@ -55,7 +57,7 @@ interface FiltreOrganismeTerritoireProps {
 }
 const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { regions, departements, academies } = props.value;
+  const { regions, departements, academies, bassinsEmploi } = props.value;
 
   const territoiresConfig = useMemo(() => {
     return {
@@ -73,6 +75,9 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
       academies: ACADEMIES_SORTED.filter(
         (academie) => !props.config?.academies || props.config?.academies?.includes(academie.code)
       ),
+      bassinsEmploi: BASSINS_EMPLOI_SORTED.filter(
+        (bassinEmploi) => !props.config?.bassinsEmploi || props.config?.bassinsEmploi?.includes(bassinEmploi.code)
+      ),
     };
   }, [props.config]);
 
@@ -82,6 +87,7 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
     REGIONS_BY_CODE[regions?.[0]]?.nom ??
     ACADEMIES_BY_CODE[academies?.[0]]?.nom ??
     DEPARTEMENTS_BY_CODE[departements?.[0]]?.nom ??
+    BASSIN_EMPLOI_BY_CODE[bassinsEmploi?.[0]]?.nom ??
     defaultLabel
   }${regions.length + academies.length + departements.length > 1 ? " + ..." : ""}`;
 
@@ -102,7 +108,9 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
               {territoiresConfig.departements.length > 0 && (
                 <Tab fontSize="14px">Départements ({territoiresConfig.departements.length})</Tab>
               )}
-              {/* <Tab fontSize="14px">Bassins d’emploi ({BASSINS_EMPLOI_SORTED.length})</Tab> */}
+              {territoiresConfig.bassinsEmploi.length > 0 && (
+                <Tab fontSize="14px">Bassins d’emploi ({territoiresConfig.bassinsEmploi.length})</Tab>
+              )}
             </TabList>
             <TabIndicator mt="-1.5px" height="4px" bg="bluefrance" borderRadius="1px" />
             <Divider size="md" borderBottomWidth="2px" opacity="1" />
@@ -157,20 +165,23 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
                   </CheckboxGroup>
                 </TabPanel>
               )}
-              {/* <TabPanel>
-                <CheckboxGroup
-                  defaultValue={bassinsEmploi}
-                  onChange={(selectedBassinsEmploi: string[]) => props.onBassinsEmploiChange(selectedBassinsEmploi)}
-                >
-                  <Stack>
-                    {BASSINS_EMPLOI_SORTED.map((bassinEmploi, i) => (
-                      <Checkbox value={bassinEmploi.code} key={i}>
-                        {bassinEmploi.nom}
-                      </Checkbox>
-                    ))}
-                  </Stack>
-                </CheckboxGroup>
-              </TabPanel> */}
+
+              {territoiresConfig.bassinsEmploi.length > 0 && (
+                <TabPanel>
+                  <CheckboxGroup
+                    defaultValue={bassinsEmploi}
+                    onChange={(selectedBassinsEmploi: string[]) => props.onBassinsEmploiChange(selectedBassinsEmploi)}
+                  >
+                    <Stack>
+                      {BASSINS_EMPLOI_SORTED.map((bassinEmploi, i) => (
+                        <Checkbox value={bassinEmploi.code} key={i}>
+                          {bassinEmploi.nom}
+                        </Checkbox>
+                      ))}
+                    </Stack>
+                  </CheckboxGroup>
+                </TabPanel>
+              )}
             </TabPanels>
           </Tabs>
         </SimpleOverlayMenu>

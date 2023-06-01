@@ -4,7 +4,7 @@ import { PartialDeep } from "type-fest";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN, YEAR_RANGE_PATTERN } from "@/common/constants/validations";
-import { object, objectId, string, date, boolean, arrayOf, any } from "@/common/model/json-schema/jsonSchemaTypes";
+import { any, arrayOf, boolean, date, object, objectId, string } from "@/common/model/json-schema/jsonSchemaTypes";
 
 import { Effectif } from "../@types";
 
@@ -74,6 +74,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.region": 1 }, {}],
   [{ "_computed.organisme.departement": 1 }, {}],
   [{ "_computed.organisme.academie": 1 }, {}],
+  [{ "_computed.organisme.bassinEmploi": 1 }, {}],
   [{ "_computed.organisme.reseaux": 1 }, {}],
   [{ "_computed.organisme.uai": 1 }, {}],
   [{ "_computed.organisme.siret": 1 }, {}],
@@ -127,6 +128,7 @@ export const schema = object(
             enum: ACADEMIES.map(({ code }) => code),
           }),
           reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) })),
+          bassinEmploi: string({}),
 
           // 2 champs utiles seulement pour les indicateurs v1
           // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id

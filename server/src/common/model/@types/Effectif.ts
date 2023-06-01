@@ -476,6 +476,10 @@ export interface Effectif {
         | "YE"
         | "ZM"
         | "ZW";
+      /**
+       * Code Bassin d'emploi
+       */
+      bassinEmploi?: string;
     };
     /**
      * Historique du statut de l'apprenant
@@ -991,6 +995,10 @@ export interface Effectif {
           | "YE"
           | "ZM"
           | "ZW";
+        /**
+         * Code Bassin d'emploi
+         */
+        bassinEmploi?: string;
       };
       /**
        * Adresse mail de contact du representant légal
@@ -1544,6 +1552,10 @@ export interface Effectif {
         | "YE"
         | "ZM"
         | "ZW";
+      /**
+       * Code Bassin d'emploi
+       */
+      bassinEmploi?: string;
     };
     /**
      * Date de début du contrat
@@ -1787,6 +1799,7 @@ export interface Effectif {
         | "EN_CFA_ACADEMIQUE"
         | "EN_EPLE"
       )[];
+      bassinEmploi?: string;
       uai?: string;
       siret?: string;
     };
