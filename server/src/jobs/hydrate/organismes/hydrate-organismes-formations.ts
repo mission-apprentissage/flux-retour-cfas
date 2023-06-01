@@ -21,15 +21,7 @@ export const hydrateOrganismesFormations = async () => {
 
   while (await organismesCursor.hasNext()) {
     const organisme = (await organismesCursor.next()) as WithId<Organisme>;
-    if (!organisme.uai) {
-      continue;
-    }
-    const formations = await formationsCatalogueDb()
-      .find({
-        $or: [{ etablissement_formateur_uai: organisme.uai }, { etablissement_gestionnaire_uai: organisme.uai }],
-      })
-      .toArray();
-
+    const formations = await getFormationsByUAIAndSIRET(organisme.siret, organisme.uai ?? null);
     logger.info(
       { uai: organisme.uai, siret: organisme.siret, formations: formations.length },
       "updating organisme related formations"
@@ -38,13 +30,80 @@ export const hydrateOrganismesFormations = async () => {
       { _id: organisme._id },
       {
         $set: {
-          relatedFormations2: await Promise.all(formations.map((formation) => formatFormation(formation))),
+          relatedFormations: await Promise.all(formations.map((formation) => formatFormation(formation))),
           updated_at: new Date(),
         },
       }
     );
   }
 };
+
+/**
+ * Retourne les formations en faisant la correspondance avec l'uai + siret d'un organisme
+ * Par priorité :
+ * - (siret et uai) gestionnaire ou formateur
+ * - (siret) gestionnaire ou formateur
+ * - (uai) gestionnaire ou formateur
+ */
+async function getFormationsByUAIAndSIRET(siret: string, uai: string | null): Promise<WithId<FormationsCatalogue>[]> {
+  {
+    const formations = await formationsCatalogueDb()
+      .find({
+        $or: [
+          {
+            etablissement_formateur_uai: uai,
+            etablissement_formateur_siret: siret,
+          },
+          {
+            etablissement_gestionnaire_uai: uai,
+            etablissement_gestionnaire_siret: siret,
+          },
+        ],
+      })
+      .toArray();
+    if (formations.length > 0) {
+      return formations;
+    }
+  }
+  {
+    const formations = await formationsCatalogueDb()
+      .find({
+        $or: [
+          {
+            etablissement_formateur_siret: siret,
+          },
+          {
+            etablissement_gestionnaire_siret: siret,
+          },
+        ],
+      })
+      .toArray();
+    if (formations.length > 0) {
+      return formations;
+    }
+  }
+  {
+    if (uai) {
+      const formations = await formationsCatalogueDb()
+        .find({
+          $or: [
+            {
+              etablissement_formateur_uai: uai,
+            },
+            {
+              etablissement_gestionnaire_uai: uai,
+            },
+          ],
+        })
+        .toArray();
+      if (formations.length > 0) {
+        return formations;
+      }
+    }
+  }
+
+  return [];
+}
 
 type OrganismeFormation = ArrayElement<Organisme["relatedFormations"]>;
 type FormationOrganisme = ArrayElement<OrganismeFormation["organismes"]>;

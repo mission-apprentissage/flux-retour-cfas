@@ -122,55 +122,6 @@ const schema = object(
         description: "Formations de cet organisme",
       }
     ),
-    // FIXME: temporaire, à supprimer une fois la validation faite sur les différences avec relatedFormations
-    relatedFormations2: arrayOf(
-      object(
-        {
-          formation_id: objectId(),
-          cle_ministere_educatif: string({
-            description: "Clé unique de la formation",
-          }),
-          annee_formation: integer({
-            description: "Année millésime de la formation pour cet organisme",
-          }),
-          organismes: arrayOf(
-            object(
-              {
-                organisme_id: objectId(),
-                nature: string({
-                  enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
-                }),
-                uai: string({
-                  description: "Code UAI du lieu de formation (optionnel)",
-                  pattern: UAI_REGEX_PATTERN,
-                  maxLength: 8,
-                  minLength: 8,
-                }),
-                siret: string({
-                  description: "Siret du lieu de formation (optionnel)",
-                  pattern: SIRET_REGEX_PATTERN,
-                  maxLength: 14,
-                  minLength: 14,
-                }),
-                adresse: {
-                  ...adresseSchema,
-                  description: "Adresse du lieu de formation (optionnel)",
-                },
-              },
-              { additionalProperties: true }
-            )
-          ),
-          duree_formation_theorique: integer({
-            description: "Durée théorique de la formation en mois pour cet organisme",
-          }),
-        },
-        { additionalProperties: true }
-      ),
-      {
-        description: "Formations de cet organisme",
-      }
-    ),
-
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     last_transmission_date: date({ description: "Date de la dernière transmission de données" }),

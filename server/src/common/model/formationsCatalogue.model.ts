@@ -15,11 +15,16 @@ const collectionName = "formationsCatalogue";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ cle_ministere_educatif: 1 }, { name: "cle_ministere_educatif", unique: true }],
-  [{ etablissement_formateur_uai: 1 }, { name: "etablissement_formateur_uai" }],
-  [{ etablissement_gestionnaire_uai: 1 }, { name: "etablissement_gestionnaire_uai" }],
   [{ intitule_long: 1 }, { name: "intitule_long" }],
   [{ cfd: 1 }, { name: "cfd" }],
   [{ rncp_code: 1 }, { name: "rncp_code" }],
+  [{ etablissement_formateur_siret: 1, etablissement_formateur_uai: 1 }, { name: "etablissement_formateur_siret_uai" }],
+  [
+    { etablissement_gestionnaire_siret: 1, etablissement_gestionnaire_uai: 1 },
+    { name: "etablissement_gestionnaire_siret_uai" },
+  ],
+  [{ etablissement_formateur_uai: 1 }, { name: "etablissement_formateur_uai" }],
+  [{ etablissement_gestionnaire_uai: 1 }, { name: "etablissement_gestionnaire_uai" }],
 ];
 
 const schema = object(
