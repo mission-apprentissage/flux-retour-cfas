@@ -11,7 +11,10 @@ import { findInvalidDocuments } from "./jobs/db/findInvalidDocuments";
 import { recreateIndexes } from "./jobs/db/recreateIndexes";
 import { processEffectifsQueueEndlessly } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
 import { removeDuplicatesEffectifsQueue } from "./jobs/fiabilisation/dossiersApprenants/process-effectifs-queue-remove-duplicates";
-import { removeInscritsSansContratsDepuis } from "./jobs/fiabilisation/dossiersApprenants/remove-nonRecus-depuis";
+import {
+  removeInscritsSansContratsDepuis,
+  transformRupturantsToAbandonsDepuis,
+} from "./jobs/fiabilisation/dossiersApprenants/remove-nonRecus-depuis";
 import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
@@ -462,6 +465,7 @@ program
       return { buildResults, updateResults };
     })
   );
+
 /**
  * Job de suppression des inscrits sans contrats dans ce statut depuis un nb de jours donné
  */
@@ -472,6 +476,19 @@ program
   .action(
     runJob(async ({ nbJours }) => {
       return removeInscritsSansContratsDepuis(nbJours);
+    })
+  );
+
+/**
+ * Job de transformation des rupturants en abandon dans ce statut depuis un nombre de jours donné
+ */
+program
+  .command("fiabilisation:effectifs:transform-rupturants-en-abandons-depuis")
+  .description("Transformation des rupturants en abandon dans ce statut depuis un nombre de jours donné")
+  .option("--nbJours <number>", "Nombre de jours dans le statut", (n) => parseInt(n, 10), 180)
+  .action(
+    runJob(async ({ nbJours }) => {
+      return transformRupturantsToAbandonsDepuis(nbJours);
     })
   );
 
