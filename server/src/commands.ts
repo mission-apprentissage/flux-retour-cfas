@@ -458,12 +458,10 @@ program
 program
   .command("fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours")
   .description("Suppression des inscrits sans contrats dans ce statut depuis un nombre de jours donné")
-  .addOption(new Option("--nbJours <nbJours>", "Nombre de jours dans le statut"))
+  .option("--nbJours <number>", "Nombre de jours dans le statut", (n) => parseInt(n, 10), 90)
   .action(
     runJob(async ({ nbJours }) => {
-      // Lancement du script pour 90 jours par défaut
-      const nbJoursDansLeStatut = nbJours ?? 90;
-      return removeInscritsSansContratsDepuis(nbJoursDansLeStatut);
+      return removeInscritsSansContratsDepuis(nbJours);
     })
   );
 

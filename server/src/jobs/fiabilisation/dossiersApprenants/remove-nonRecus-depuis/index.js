@@ -27,7 +27,7 @@ const getAggregateNbJoursDepuisStatutStages = (nbJours) => [
  * Méthode de suppression des effectifs inscrits sans contrats pour les années scolaires courantes
  * qui sont dans ce statut depuis nbJours
  */
-export const removeInscritsSansContratsDepuis = async (nbJours) => {
+export const removeInscritsSansContratsDepuis = async (nbJours = 90) => {
   const filterStages = [{ $match: { annee_scolaire: { $in: CURRENT_ANNEES_SCOLAIRES } } }];
 
   const inscritsSansContratsIdsToRemove = (
