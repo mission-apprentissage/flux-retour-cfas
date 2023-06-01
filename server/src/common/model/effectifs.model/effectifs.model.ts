@@ -75,9 +75,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.departement": 1 }, {}],
   [{ "_computed.organisme.academie": 1 }, {}],
   [{ "_computed.organisme.reseaux": 1 }, {}],
-
-  // 2 indexes utiles seulement pour les indicateurs v1
-  // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
   [{ "_computed.organisme.uai": 1 }, {}],
   [{ "_computed.organisme.siret": 1 }, {}],
 ];

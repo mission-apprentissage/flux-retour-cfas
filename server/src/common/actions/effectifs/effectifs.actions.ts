@@ -10,7 +10,7 @@ import {
 } from "@/common/actions/helpers/filters";
 import {
   getEffectifsAnonymesRestriction,
-  getIndicateursRestriction,
+  getIndicateursEffectifsRestriction,
   requireOrganismeIndicateursAccess,
 } from "@/common/actions/helpers/permissions";
 import { DEPARTEMENTS_BY_CODE } from "@/common/constants/territoires";
@@ -62,7 +62,7 @@ export async function checkIndicateursFiltersPermissions(
     await requireOrganismeIndicateursAccess(ctx, organisme._id);
   } else {
     // amend filters with a restriction
-    (filters as EffectifsFiltersWithRestriction).restrictionMongo = await getIndicateursRestriction(ctx);
+    (filters as EffectifsFiltersWithRestriction).restrictionMongo = await getIndicateursEffectifsRestriction(ctx);
   }
 
   return filters;

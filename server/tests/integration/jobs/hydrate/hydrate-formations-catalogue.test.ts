@@ -17,15 +17,31 @@ describe("Job hydrateFormationsCatalogue", () => {
       _id: id(1),
       cle_ministere_educatif: "AAA",
       intitule_long: "CHIMIE (MASTER)",
+      cfd: "aa",
+      rncp_code: "aa",
+      duree: "2",
+      annee: "1",
+      etablissement_gestionnaire_siret: "1",
+      etablissement_gestionnaire_uai: "1",
+      etablissement_formateur_siret: "1",
+      etablissement_formateur_uai: "1",
     },
     {
       _id: id(2),
       cle_ministere_educatif: "BBB",
       intitule_long: "COUVREUR (CAP)",
+      cfd: "aa",
+      rncp_code: "aa",
+      duree: "2",
+      annee: "1",
+      etablissement_gestionnaire_siret: "1",
+      etablissement_gestionnaire_uai: "1",
+      etablissement_formateur_siret: "1",
+      etablissement_formateur_uai: "1",
     },
   ];
 
-  it("Remplace tout le contenu de la collection formationsCatalogue", async () => {
+  it("Met à jour les formations de la collection formationsCatalogue", async () => {
     nock(config.mnaCatalogApi.endpoint)
       .persist()
       .get(new RegExp("v1/entity/formations.json.*"))
@@ -34,10 +50,18 @@ describe("Job hydrateFormationsCatalogue", () => {
       });
 
     await formationsCatalogueDb().insertOne({
-      _id: new ObjectId(id(123)),
-      cle_ministere_educatif: "CCC",
+      _id: new ObjectId(id(1)),
+      cle_ministere_educatif: "AAA",
       intitule_long: "JARDINIER PAYSAGISTE (CAPA)",
-    } as any);
+      cfd: "aa",
+      rncp_code: "aa",
+      duree: "2",
+      annee: "1",
+      etablissement_gestionnaire_siret: "1",
+      etablissement_gestionnaire_uai: "1",
+      etablissement_formateur_siret: "1",
+      etablissement_formateur_uai: "1",
+    });
 
     await hydrateFormationsCatalogue();
 

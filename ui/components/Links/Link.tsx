@@ -1,10 +1,15 @@
-import { Link as ChakraLink } from "@chakra-ui/react";
+import { Link as ChakraLink, SystemProps, LinkProps as ChakraLinkProps } from "@chakra-ui/react";
 import NavLink from "next/link";
-import React from "react";
+import { ReactNode } from "react";
 
-const Link = ({ children, href, shallow = false, ...rest }) => {
+interface LinkProps extends ChakraLinkProps, SystemProps {
+  href: string;
+  children: ReactNode;
+  shallow?: boolean;
+}
+const Link = ({ children, href, shallow, ...rest }: LinkProps) => {
   return (
-    <ChakraLink {...rest} as={NavLink} href={href} shallow={shallow}>
+    <ChakraLink {...rest} as={NavLink} href={href} shallow={shallow ?? false}>
       {children}
     </ChakraLink>
   );

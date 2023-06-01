@@ -1,7 +1,7 @@
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
 import React from "react";
 
-import { TETE_DE_RESEAUX } from "@/common/constants/networksConstants";
+import { TETE_DE_RESEAUX_SORTED } from "@/common/constants/networks";
 
 import { InscriptionOrganistionChildProps } from "./common";
 
@@ -19,7 +19,7 @@ export const InscriptionTeteDeReseau = ({ setOrganisation }: InscriptionOrganist
             })
           }
         >
-          {TETE_DE_RESEAUX.map((reseau, index) => (
+          {TETE_DE_RESEAUX_SORTED.map((reseau, index) => (
             <option value={reseau.key} key={index}>
               {reseau.nom}
             </option>

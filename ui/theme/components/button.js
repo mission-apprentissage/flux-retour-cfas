@@ -61,7 +61,7 @@ const Button = {
       ...baseStyle,
       borderRadius: "40px",
       paddingY: "3v",
-      backgroundColor: "grey.300",
+      backgroundColor: "#F5F5FE",
       color: "grey.700",
       _hover: {
         background: "grey.200",

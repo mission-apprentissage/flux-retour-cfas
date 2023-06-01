@@ -3,6 +3,7 @@ import Head from "next/head";
 import React, { useState } from "react";
 
 import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation";
+import { NATURE_ORGANISME } from "@/common/constants/organismes";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import Link from "@/components/Links/Link";
@@ -13,14 +14,6 @@ import { useOrganisationOrganismes } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import { ArrowDropRightLine } from "@/theme/components/icons";
-
-const natures = {
-  responsable: "Responsable",
-  formateur: "Formateur",
-  responsable_formateur: "Responsable Formateur",
-  lieu_formation: "Lieu de formation",
-  inconnue: "Inconnue",
-};
 
 function getHeaderTitleFromOrganisationType(type: OrganisationType) {
   switch (type) {
@@ -101,7 +94,7 @@ function MesOrganismes() {
                   nature: {
                     size: 100,
                     header: () => "Nature",
-                    cell: ({ getValue }) => <Text fontSize="1rem">{natures[getValue()] ?? "Inconnue"}</Text>,
+                    cell: ({ getValue }) => <Text fontSize="1rem">{NATURE_ORGANISME[getValue()] ?? "Inconnue"}</Text>,
                   },
                   adresse: {
                     size: 100,

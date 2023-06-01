@@ -1,7 +1,7 @@
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React, { ReactElement, useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { AuthContext } from "@/common/internal/AuthContext";
@@ -10,7 +10,7 @@ import Link from "@/components/Links/Link";
 import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
-import { MenuFill, Close, ParentGroupIcon } from "@/theme/components/icons";
+import { Close, MenuFill, ParentGroupIcon } from "@/theme/components/icons";
 
 function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): string {
   switch (type) {
@@ -138,6 +138,7 @@ function NavBarTransverse(): ReactElement {
         Mon tableau de bord
       </NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
+      <NavItem to="/indicateurs">Mes indicateurs</NavItem>
     </>
   );
 }

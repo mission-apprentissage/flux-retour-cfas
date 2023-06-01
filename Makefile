@@ -18,10 +18,10 @@ build-server:
 	yarn --cwd server build
 
 start:
-	docker-compose up --build --force-recreate -d
+	docker compose up --build --force-recreate -d
 
 stop:
-	docker-compose stop
+	docker compose stop
 
 test-ui:
 	yarn --cwd ui test:ci
@@ -33,6 +33,6 @@ lint:
 	yarn lint
 
 clean:
-	docker-compose down
+	docker compose down
 
 ci: install lint test build

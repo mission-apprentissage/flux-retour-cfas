@@ -1,3 +1,6 @@
+import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
+import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
+
 // types en doublon avec le serveur
 export const organisationTypes = [
   "ORGANISME_FORMATION_FORMATEUR",
@@ -74,4 +77,40 @@ export interface OrganisationAdministrateur extends AbstractOrganisation {
 export interface OrganisationAutre extends AbstractOrganisation {
   type: "AUTRE";
   nom: string;
+}
+
+const OFTypeLabelByType = {
+  ORGANISME_FORMATION_FORMATEUR: "OF",
+  ORGANISME_FORMATION_RESPONSABLE: "OFR",
+  ORGANISME_FORMATION_RESPONSABLE_FORMATEUR: "OFRF",
+};
+export function getOrganisationLabel(organisation: Organisation): string {
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      return `${OFTypeLabelByType[organisation.type]} UAI : ${organisation.uai || "Inconnu"} - SIRET : ${
+        organisation.siret
+      }`;
+    }
+
+    case "TETE_DE_RESEAU":
+      return `Réseau ${TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}`;
+
+    case "DREETS":
+    case "DRAAF":
+      return `${organisation.type} ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+    case "CONSEIL_REGIONAL":
+      return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+    case "DDETS":
+      return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement}`;
+    case "ACADEMIE":
+      return `Académie ${ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie}`;
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+      return organisation.nom;
+    case "ADMINISTRATEUR":
+      return "Administrateur";
+  }
+  return ""; // cas autre
 }

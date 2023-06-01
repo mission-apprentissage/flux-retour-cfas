@@ -36,9 +36,6 @@ export const hydrateFormationsCatalogue = async () => {
     },
   });
 
-  logger.info("suppression des formations du catalogue existantes");
-  await formationsCatalogueDb().deleteMany({});
-
   const queriesInProgress: Promise<any>[] = [];
   let totalFormations = 0;
   let pendingFormations: WithId<FormationsCatalogue>[] = [];
@@ -47,7 +44,22 @@ export const hydrateFormationsCatalogue = async () => {
     totalFormations += pendingFormations.length;
     logger.debug({ count: pendingFormations.length }, "insert formations");
     if (pendingFormations.length > 0) {
-      queriesInProgress.push(formationsCatalogueDb().insertMany(pendingFormations));
+      queriesInProgress.push(
+        ...pendingFormations.map(({ _id, ...formation }) =>
+          formationsCatalogueDb().updateOne(
+            {
+              cle_ministere_educatif: formation.cle_ministere_educatif,
+            },
+            {
+              $set: formation,
+              $setOnInsert: { _id },
+            },
+            {
+              upsert: true,
+            }
+          )
+        )
+      );
     }
     pendingFormations = [];
   }

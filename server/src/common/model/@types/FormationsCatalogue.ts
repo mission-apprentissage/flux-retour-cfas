@@ -2,7 +2,7 @@
 
 export interface FormationsCatalogue {
   cle_ministere_educatif: string;
-  cfd?: string | null;
+  cfd: string;
   cfd_specialite?: string | null;
   cfd_outdated?: boolean | null;
   cfd_date_fermeture?: string | null;
@@ -17,7 +17,7 @@ export interface FormationsCatalogue {
   localite?: string | null;
   nom?: string | null;
   intitule_rco?: string | null;
-  intitule_long?: string | null;
+  intitule_long: string;
   intitule_court?: string | null;
   diplome?: string | null;
   niveau?: string | null;
@@ -27,16 +27,16 @@ export interface FormationsCatalogue {
   onisep_lien_site_onisepfr?: string | null;
   onisep_discipline?: string | null;
   onisep_domaine_sousdomaine?: string | null;
-  rncp_code?: string | null;
+  rncp_code: string | null;
   rncp_intitule?: string | null;
   rncp_eligible_apprentissage?: boolean | null;
   rncp_details?: null;
   rome_codes?: null;
   periode?: null;
   capacite?: string | null;
-  duree?: string | null;
+  duree: string;
   duree_incoherente?: boolean | null;
-  annee?: string | null;
+  annee: string;
   annee_incoherente?: boolean | null;
   published?: boolean | null;
   forced_published?: boolean | null;
@@ -62,9 +62,9 @@ export interface FormationsCatalogue {
   modalites_entrees_sorties?: null;
   id_RCO?: string | null;
   etablissement_gestionnaire_id?: string | null;
-  etablissement_gestionnaire_siret?: string | null;
+  etablissement_gestionnaire_siret: string;
   etablissement_gestionnaire_enseigne?: string | null;
-  etablissement_gestionnaire_uai?: string | null;
+  etablissement_gestionnaire_uai: string | null;
   etablissement_gestionnaire_published?: boolean | null;
   etablissement_gestionnaire_habilite_rncp?: boolean | null;
   etablissement_gestionnaire_certifie_qualite?: boolean | null;
@@ -84,9 +84,9 @@ export interface FormationsCatalogue {
   etablissement_gestionnaire_nda?: string | null;
   etablissement_gestionnaire_date_creation?: string | null;
   etablissement_formateur_id?: string | null;
-  etablissement_formateur_siret?: string | null;
+  etablissement_formateur_siret: string;
   etablissement_formateur_enseigne?: string | null;
-  etablissement_formateur_uai?: string | null;
+  etablissement_formateur_uai: string | null;
   etablissement_formateur_published?: boolean | null;
   etablissement_formateur_habilite_rncp?: boolean | null;
   etablissement_formateur_certifie_qualite?: boolean | null;

@@ -1,6 +1,23 @@
 const Tabs = {
   parts: ["tablist", "tab", "tabpanel"],
   variants: {
+    newsimple: {
+      tab: {
+        color: "grey.500",
+        fontWeight: "400",
+        fontSize: "zeta",
+        padding: "16px",
+        _selected: {
+          color: "bluefrance",
+          fontWeight: "500",
+        },
+        _hover: {
+          background: "grey.100",
+        },
+        _focus: { boxShadow: "none", outlineColor: "none" },
+        _focusVisible: { boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" },
+      },
+    },
     line: {
       tab: {
         paddingX: "3w",

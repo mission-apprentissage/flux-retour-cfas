@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 
-import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
+import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { Organisme } from "@/common/internal/Organisme";
 import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import Ribbons from "@/components/Ribbons/Ribbons";

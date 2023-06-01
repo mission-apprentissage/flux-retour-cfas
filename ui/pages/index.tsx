@@ -1,13 +1,12 @@
-import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
 
 import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import Page from "@/components/Page/Page";
+import SimplePage from "@/components/Page/SimplePage";
 import useAuth from "@/hooks/useAuth";
+import NewDashboardTransverse from "@/modules/dashboard/NewDashboardTransverse";
 import DashboardOrganisme from "@/modules/mon-espace/landing/DashboardOrganisme";
-import DashboardTransverse from "@/modules/mon-espace/landing/DashboardTransverse";
 import PublicLandingPage from "@/modules/PublicLandingPage";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -29,27 +28,20 @@ function getDashboardComponent(organisationType: OrganisationType) {
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       // fourre-tout, mais on pourra avoir des différences plus tard
-      return <DashboardTransverse />;
+      return <NewDashboardTransverse />;
   }
 }
 
 function DashboardPage() {
   const { organisationType } = useAuth();
-  const title = "Tableau de bord";
 
   return (
-    <Page>
+    <SimplePage>
       <Head>
-        <title>{title}</title>
+        <title>Tableau de bord</title>
       </Head>
-      <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]} mb={16}>
-        <Container maxW="xl" px={0}>
-          {/* Landing page tableau de bord de chaque utilisateur */}
-          {/* On affiche les bons écrans / composants selon le type d'organisation */}
-          {getDashboardComponent(organisationType)}
-        </Container>
-      </Box>
-    </Page>
+      {getDashboardComponent(organisationType)}
+    </SimplePage>
   );
 }
 

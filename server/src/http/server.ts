@@ -21,7 +21,19 @@ import { sendForgotPasswordRequest, register, activateUser } from "@/common/acti
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
 import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
 import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions";
-import { legacyEffectifsFiltersSchema } from "@/common/actions/helpers/filters";
+import {
+  effectifsFiltersSchema,
+  fullEffectifsFiltersSchema,
+  legacyEffectifsFiltersSchema,
+  organismesFiltersSchema,
+} from "@/common/actions/helpers/filters";
+import {
+  getEffectifsNominatifs,
+  getIndicateursEffectifsParDepartement,
+  getIndicateursEffectifsParOrganisme,
+  getIndicateursOrganismesParDepartement,
+  typesEffectifNominatif,
+} from "@/common/actions/indicateurs/indicateurs.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
@@ -49,6 +61,7 @@ import {
   getOrganismeByAPIKey,
   verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
+import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
@@ -514,6 +527,49 @@ function setupRoutes(app: Application) {
           )
       )
   );
+
+  /********************************
+   * Indicateurs aggrégés         *
+   ********************************/
+  authRouter
+    .get(
+      "/api/v1/indicateurs/effectifs",
+      returnResult(async (req) => {
+        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
+        return await getIndicateursEffectifsParDepartement(req.user, filters);
+      })
+    )
+    .get(
+      "/api/v1/indicateurs/effectifs/par-organisme",
+      returnResult(async (req) => {
+        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+        return await getIndicateursEffectifsParOrganisme(req.user, filters);
+      })
+    )
+    .get(
+      "/api/v1/indicateurs/effectifs/:type",
+      returnResult(async (req) => {
+        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+        const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
+        return await getEffectifsNominatifs(req.user, filters, type);
+      })
+    )
+    .get(
+      "/api/v1/indicateurs/organismes",
+      returnResult(async (req) => {
+        const filters = await validateFullZodObjectSchema(req.query, organismesFiltersSchema);
+        return await getIndicateursOrganismesParDepartement(req.user, filters);
+      })
+    )
+    .post(
+      "/api/v1/formations/search",
+      returnResult(async (req) => {
+        const { searchTerm } = await validateFullZodObjectSchema(req.body, {
+          searchTerm: z.string().min(3),
+        });
+        return await searchOrganismesFormations(searchTerm);
+      })
+    );
 
   // LEGACY écrans indicateurs
   authRouter

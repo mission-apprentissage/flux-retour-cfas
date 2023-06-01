@@ -25,7 +25,7 @@ import * as Yup from "yup";
 import YupPassword from "yup-password";
 
 import { getOrganismeByUAIAndSIRET } from "@/common/api/tableauDeBord";
-import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networksConstants";
+import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { ACADEMIES_BY_CODE, REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE } from "@/common/constants/territoires";
 import { _get, _post } from "@/common/httpClient";
 import { Organisation } from "@/common/internal/Organisation";

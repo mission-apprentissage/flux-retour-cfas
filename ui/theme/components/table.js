@@ -5,22 +5,33 @@ export const Table = {
         fontFamily: "heading",
         fontWeight: "bold",
         fontSize: "zeta",
-        color: "grey.600",
+        color: "grey.800",
         textTransform: "none",
+        whiteSpace: "nowrap",
+        paddingY: "2",
+        paddingX: "3",
+        letterSpacing: "normal",
+      },
+      thead: {
+        tr: {
+          borderBottom: "3px solid",
+          borderBottomColor: "bluefrance",
+        },
       },
       tbody: {
         tr: {
           fontSize: "zeta",
           color: "grey.800",
-          borderColor: "bluefrance",
-          "&:nth-of-type(odd)": {
+          "&:nth-of-type(even)": {
             backgroundColor: "grey.100",
           },
           _hover: {
-            color: "bluefrance",
             backgroundColor: "grey.200",
-            cursor: "pointer",
           },
+        },
+        td: {
+          paddingY: "2",
+          paddingX: "3",
         },
       },
     },

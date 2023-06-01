@@ -1,6 +1,6 @@
 import * as https from "https";
 
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 import { emitter } from "./emitter";
 
@@ -32,7 +32,7 @@ class HTTPError extends Error {
   }
 }
 
-const handleResponse = (path, response) => {
+const handleResponse = <T = any>(path: string, response: AxiosResponse): T => {
   const statusCode = response.status;
   if (statusCode >= 400 && statusCode < 600) {
     emitter.emit("http:error", response);
@@ -67,14 +67,14 @@ const getHttpsAgent = () => {
     : undefined;
 };
 
-export const _get = async <T>(path: string, options?: AxiosRequestConfig<any>): Promise<T> => {
+export const _get = async <T = any>(path: string, options?: AxiosRequestConfig<any>): Promise<T> => {
   const response = await axios.get(path, {
     headers: getHeaders(),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
     ...options,
   });
-  return handleResponse(path, response);
+  return handleResponse<T>(path, response);
 };
 
 export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) => {

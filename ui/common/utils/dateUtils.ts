@@ -1,6 +1,4 @@
-import { endOfMonth, format } from "date-fns";
-
-const DATE_FORMAT = "dd/MM/yyyy";
+import fr, { endOfMonth, format } from "date-fns";
 
 // TODO [tech] TO REMOVE
 export const prettyPrintDate = (date) => {
@@ -17,10 +15,9 @@ export const prettyPrintDate = (date) => {
 };
 
 /**
- * Formate une date dans le format dd/MM/yyyy
- * @param {Date | number} date
+ * Formate une date selon le format en paramètre
  */
-export const formatDate = (date) => (date ? format(date, DATE_FORMAT) : "");
+export const formatDate = (date: Date, dateFormat: string) => format(date, dateFormat, { locale: fr });
 
 // Elle vérifie si la date est aprés le dernier jour du mois
 export const isDateFuture = (date) => date > endOfMonth(new Date());

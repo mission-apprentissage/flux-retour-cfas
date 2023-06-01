@@ -19,7 +19,7 @@ export const runJob = (jobFunc: (...args: any[]) => Promise<any>) => {
     try {
       result = await jobFunc(args);
     } catch (err: any) {
-      logger.error({ err, writeErrors: err.writeErrors }, "job error");
+      logger.error({ err, writeErrors: err.writeErrors, error: err }, "job error");
       error = err?.toString();
       await updateJobEvent(jobEventId, {
         action: jobEventStatuts.error,
