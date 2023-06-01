@@ -3,5 +3,5 @@ export const NATURE_ORGANISME = {
   formateur: "Formateur",
   responsable_formateur: "Responsable Formateur",
   lieu_formation: "Lieu de formation",
-  inconnue: "Inconnue",
+  inconnue: "⚠ Inconnue",
 } as const;

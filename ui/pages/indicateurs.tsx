@@ -1,6 +1,5 @@
 import { Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
 import Head from "next/head";
-import React from "react";
 
 import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
@@ -25,7 +24,7 @@ function IndicateursPage() {
             <Tab fontWeight="bold">Vue globale</Tab>
             <Tab fontWeight="bold" isDisabled>
               <GraphIcon />
-              <Text ml={2}>Vue graphique (bientôt)</Text>
+              <Text ml={2}>Vue graphique (bientôt disponible)</Text>
             </Tab>
           </TabList>
           <TabPanels>

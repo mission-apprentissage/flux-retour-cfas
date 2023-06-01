@@ -184,7 +184,7 @@ function IndicateursForm() {
 
   return (
     <Flex gap={6}>
-      <Box minW="280px" display="grid" gap={5} height="fit-content">
+      <Box minW="282px" display="grid" gap={5} height="fit-content">
         <HStack>
           <Heading as="h2" fontSize="24px" textTransform="uppercase">
             Filtrer par

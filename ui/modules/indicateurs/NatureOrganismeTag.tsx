@@ -7,7 +7,7 @@ interface NatureOrganismeTagProps extends SystemProps {
 }
 
 const natureToTagColor: Record<keyof typeof NATURE_ORGANISME, string> = {
-  formateur: "#E6FEDA",
+  formateur: "#FCEEAC",
   responsable: "#E3E3FD",
   responsable_formateur: "#E6FEDA",
   lieu_formation: "#FFE8E5",
@@ -16,8 +16,16 @@ const natureToTagColor: Record<keyof typeof NATURE_ORGANISME, string> = {
 
 function NatureOrganismeTag({ nature, ...props }: NatureOrganismeTagProps) {
   return (
-    <Tag bg={natureToTagColor[nature]} borderRadius="20px" px={3} py={1} maxWidth="min-content" {...props}>
-      {NATURE_ORGANISME[nature] ?? "Inconnue"}
+    <Tag
+      bg={natureToTagColor[nature] ?? natureToTagColor.inconnue}
+      borderRadius="20px"
+      px={3}
+      py={1}
+      maxWidth="min-content"
+      whiteSpace={nature === "inconnue" ? "nowrap" : "normal"}
+      {...props}
+    >
+      {NATURE_ORGANISME[nature] ?? "⚠ Inconnue"}
     </Tag>
   );
 }

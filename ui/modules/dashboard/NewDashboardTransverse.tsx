@@ -7,9 +7,9 @@ import { useMemo } from "react";
 import { _get } from "@/common/httpClient";
 import {
   getOrganisationLabel,
-  OrganisationOperateurPublicRegion,
-  OrganisationOperateurPublicDepartement,
   OrganisationOperateurPublicAcademie,
+  OrganisationOperateurPublicDepartement,
+  OrganisationOperateurPublicRegion,
 } from "@/common/internal/Organisation";
 import { prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
@@ -144,7 +144,7 @@ const NewDashboardTransverse = () => {
         <Container maxW="xl" p="8">
           <Heading textStyle="h2" color="grey.800" size="md">
             <DashboardWelcome mr="2" />
-            Bienvenue sur votre tableau de bord {auth.civility} {auth.prenom} {auth.nom}
+            Bienvenue sur votre tableau de bord, {auth.civility} {auth.prenom} {auth.nom}
           </Heading>
           <Text color="bluefrance" fontWeight={700} mt="4" textTransform="uppercase">
             {getOrganisationLabel(auth.organisation)}

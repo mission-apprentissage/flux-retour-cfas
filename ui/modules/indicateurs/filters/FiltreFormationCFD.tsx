@@ -1,15 +1,17 @@
 import {
   Box,
   Checkbox,
-  Divider,
   Heading,
   Input,
   InputGroup,
   InputLeftElement,
+  Skeleton,
+  Stack,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
@@ -19,8 +21,6 @@ import { Dispatch, SetStateAction, useState } from "react";
 
 import { _post } from "@/common/httpClient";
 import InputLegend from "@/components/InputLegend/InputLegend";
-import Loading from "@/components/Loading/Loading";
-import NoResults from "@/components/NoResults/NoResults";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 interface FiltreFormationCFDProps {
@@ -80,7 +80,7 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
           <InputGroup>
             <InputLeftElement pointerEvents="none" fontSize="gamma" className="ri-search-line" as="i" marginTop="3px" />
             <Input
-              placeholder="Intitulé de la formation, CFD, RNCP(s)"
+              placeholder="Intitulé de la formation, Code Formation Diplôme, RNCP(s)"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               variant="outline"
@@ -95,15 +95,24 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
               <InputLegend>
                 Merci de renseigner au minimum {MINIMUM_CHARS_TO_PERFORM_SEARCH} caractères pour lancer la recherche
               </InputLegend>
-              <Divider marginTop="3v" borderBottomColor="grey.300" orientation="horizontal" />
             </Box>
           )}
-          {searchTerm.length > 0 && formations?.length === 0 && (
-            <NoResults title="Il n'y a aucun résultat pour votre recherche" />
+          {!isLoading && searchTerm.length > 0 && formations?.length === 0 && (
+            <Text color="grey.800" fontWeight="700" marginTop="4w" paddingLeft="1w">
+              Il n’y a aucun résultat pour votre recherche
+            </Text>
           )}
-          {isLoading && <Loading />}
+          {isLoading && (
+            <Stack spacing="2w" paddingLeft="1w" marginTop="4w">
+              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+            </Stack>
+          )}
           {formations && formations.length > 0 && (
-            <TableContainer marginTop="1w" textAlign="left">
+            <TableContainer marginTop="4w" textAlign="left">
               <Table variant="primary">
                 <Thead>
                   <Tr>

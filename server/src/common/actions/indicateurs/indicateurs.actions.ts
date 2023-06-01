@@ -396,7 +396,9 @@ export async function getIndicateursEffectifsParOrganisme(
                 nom: {
                   $ifNull: ["$enseigne", "$raison_sociale"],
                 },
-                nature: 1,
+                nature: {
+                  $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+                },
               },
             },
           ],
@@ -522,7 +524,9 @@ export async function getEffectifsNominatifs(
                 nom: {
                   $ifNull: ["$enseigne", "$raison_sociale"],
                 },
-                nature: 1,
+                nature: {
+                  $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+                },
               },
             },
           ],
