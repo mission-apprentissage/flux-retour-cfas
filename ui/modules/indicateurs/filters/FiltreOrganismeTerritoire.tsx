@@ -64,14 +64,9 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
       regions: REGIONS_SORTED.filter(
         (region) => !props.config?.regions || props.config?.regions?.includes(region.code)
       ),
-      departements: [
-        ...DEPARTEMENTS_SORTED.filter(
-          (departement) => !props.config?.regions || props.config?.regions?.includes(departement.region.code)
-        ),
-        ...DEPARTEMENTS_SORTED.filter(
-          (departement) => !props.config?.departements || props.config?.departements?.includes(departement.code)
-        ),
-      ],
+      departements: DEPARTEMENTS_SORTED.filter(
+        (departement) => !props.config?.departements || props.config?.departements?.includes(departement.code)
+      ),
       academies: ACADEMIES_SORTED.filter(
         (academie) => !props.config?.academies || props.config?.academies?.includes(academie.code)
       ),
