@@ -37,14 +37,13 @@ function SimpleOverlayMenu({ onClose, children, ...props }: SimpleOverlayMenuPro
         position="absolute"
         background="white"
         overflow="auto"
-        left="15w"
-        right="15w"
         marginTop="2w"
         boxShadow="0px 0px 16px rgba(30, 30, 30, 0.16)"
         borderRadius="0.25rem"
         zIndex="100"
         ref={menuRef}
         maxHeight={menuMaxHeight}
+        maxWidth="var(--chakra-sizes-xl)"
         {...props}
       >
         {children}
@@ -52,5 +51,4 @@ function SimpleOverlayMenu({ onClose, children, ...props }: SimpleOverlayMenuPro
     </div>
   );
 }
-
 export default SimpleOverlayMenu;

@@ -90,7 +90,7 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
       {props.button({ setIsOpen, isOpen, buttonLabel })}
 
       {isOpen && (
-        <SimpleOverlayMenu onClose={() => setIsOpen(false)}>
+        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)">
           <Tabs variant="newsimple" fontSize="14px">
             <TabList mx={8} mt={2}>
               {territoiresConfig.regions.length > 0 && (
