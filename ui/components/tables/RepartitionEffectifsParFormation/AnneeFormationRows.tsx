@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
-import React from "react";
 
 import { fetchEffectifsParAnneeFormation } from "@/common/api/tableauDeBord";
 import { QUERY_KEYS } from "@/common/constants/queryKeys";
@@ -32,7 +31,7 @@ const AnneeFormationRows = ({ formationCfd, niveauFormation }) => {
 
   return (
     <>
-      {sortAlphabeticallyBy("annee_formation", data).map(({ annee_formation, effectifs }) => {
+      {sortAlphabeticallyBy("annee_formation", data).map(({ annee_formation, effectifs }: any) => {
         return <AnneeFormationRow key={annee_formation} anneeFormation={annee_formation} effectifs={effectifs} />;
       })}
     </>
