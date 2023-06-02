@@ -1,5 +1,5 @@
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
 import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "@/common/constants/territoires";
@@ -90,7 +90,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
           >
             {DEPARTEMENTS_SORTED.map((option, index) => (
               <option value={option.code} key={index}>
-                {option.nom}
+                {option.code} - {option.nom}
               </option>
             ))}
           </Select>
