@@ -1,5 +1,17 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons";
-import { Box, Center, Container, Divider, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Container,
+  Divider,
+  Grid,
+  GridItem,
+  Heading,
+  HStack,
+  Spinner,
+  Text,
+  Tooltip,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
@@ -244,6 +256,28 @@ const NewDashboardTransverse = () => {
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Taux de couverture des organismes
+              <Tooltip
+                background="bluefrance"
+                color="white"
+                label={
+                  <Box padding="1w">
+                    Ce taux traduit le nombre d’organismes (sauf responsables) qui transmettent au tableau de bord. Les
+                    organismes qui transmettent mais ne font pas partie du référentiel ne rentrent pas en compte dans ce
+                    taux. Il est conseillé d’avoir un minimum de 80% d’établissements transmetteurs afin de garantir la
+                    viabilité des enquêtes menées auprès de ces derniers.
+                  </Box>
+                }
+                aria-label="Informations sur le taux de couverture des organismes"
+              >
+                <Box
+                  as="i"
+                  className="ri-information-line"
+                  fontSize="epsilon"
+                  color="grey.500"
+                  marginLeft="1w"
+                  verticalAlign="middle"
+                />
+              </Tooltip>
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
             {indicateursOrganismesAvecDepartementLoading && (
