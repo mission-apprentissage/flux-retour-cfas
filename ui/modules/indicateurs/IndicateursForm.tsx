@@ -45,6 +45,7 @@ interface FilterButtonProps {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   buttonLabel: string;
+  isDisabled?: boolean;
 }
 function FilterButton(props: FilterButtonProps) {
   return (
@@ -58,6 +59,7 @@ function FilterButton(props: FilterButtonProps) {
       _hover={{ bg: "var(--chakra-colors-blackAlpha-50);" }}
       onClick={() => props.setIsOpen(!props.isOpen)}
       isActive={props.isOpen}
+      isDisabled={props.isDisabled}
     >
       <HStack>
         <Box as="span" flex="1" textAlign="left">

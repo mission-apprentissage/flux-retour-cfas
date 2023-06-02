@@ -49,10 +49,12 @@ interface FiltreOrganismeTerritoireProps {
     isOpen,
     setIsOpen,
     buttonLabel,
+    isDisabled,
   }: {
     isOpen: boolean;
     setIsOpen: Dispatch<SetStateAction<boolean>>;
     buttonLabel: string;
+    isDisabled?: boolean;
   }) => JSX.Element;
 }
 const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
@@ -88,7 +90,7 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
 
   return (
     <div>
-      {props.button({ setIsOpen, isOpen, buttonLabel })}
+      {props.button({ setIsOpen, isOpen, buttonLabel, isDisabled: props.config?.disabled })}
 
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)">
