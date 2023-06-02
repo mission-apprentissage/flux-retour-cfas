@@ -22,7 +22,7 @@ function NatureOrganismeTag({ nature, ...props }: NatureOrganismeTagProps) {
       px={3}
       py={1}
       maxWidth="min-content"
-      whiteSpace={nature === "inconnue" ? "nowrap" : "normal"}
+      whiteSpace={nature === "inconnue" || !NATURE_ORGANISME[nature] ? "nowrap" : "normal"}
       {...props}
     >
       {NATURE_ORGANISME[nature] ?? "⚠ Inconnue"}
