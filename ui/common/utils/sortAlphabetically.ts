@@ -1,12 +1,6 @@
-export function sortAlphabeticallyBy<T>(sortBy: string, array: readonly T[]): T[] {
-  return array.slice().sort((a, b) => {
-    // if values to compare are string, lowercase and trim it
-    const firstElem = typeof a[sortBy] === "string" ? a[sortBy].toLocaleLowerCase().trim() : a[sortBy];
-    const secondElem = typeof b[sortBy] === "string" ? b[sortBy].toLocaleLowerCase().trim() : b[sortBy];
-
-    if (firstElem < secondElem) return -1;
-    if (firstElem > secondElem) return 1;
-
-    return 0;
-  });
+export function sortAlphabeticallyBy<Key extends string, T extends { [key in Key]: any }>(
+  sortBy: Key,
+  array: readonly T[]
+): T[] {
+  return array.slice().sort((a, b) => Intl.Collator().compare(a[sortBy], b[sortBy])); // permet de gérer les accents
 }

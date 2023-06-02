@@ -23,9 +23,11 @@ import { hydrateFormationsCatalogue } from "./jobs/hydrate/hydrate-formations-ca
 import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./jobs/hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes";
+import { hydrateOrganismesBassinEmploi } from "./jobs/hydrate/organismes/hydrate-organismes-bassinEmploi";
 import { hydrateOrganismesFormations } from "./jobs/hydrate/organismes/hydrate-organismes-formations";
 import { hydrateFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes-referentiel";
 import { updateMultipleOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
+import { hydrateBassinsEmploi } from "./jobs/hydrate/reference/hydrate-bassins-emploi";
 import { hydrateReseaux } from "./jobs/hydrate/reseaux/hydrate-reseaux";
 import { removeOrganismeAndEffectifs } from "./jobs/patches/remove-organisme-effectifs-dossiersApprenants/index";
 import { removeOrganismesSansSiretSansEffectifs } from "./jobs/patches/remove-organismes-sansSiret-sansEffectifs/index";
@@ -33,7 +35,7 @@ import { updateLastTransmissionDateForOrganismes } from "./jobs/patches/update-l
 import { runJob } from "./jobs/scriptWrapper";
 import { clearSeedAssets } from "./jobs/seed/clearAssets";
 import { seedPlausibleGoals } from "./jobs/seed/plausible/goals";
-import { seedSample, seedAdmin } from "./jobs/seed/start/index";
+import { seedAdmin, seedSample } from "./jobs/seed/start/index";
 import { generateTypes } from "./jobs/seed/types/generate-types";
 import { createErpUserLegacy } from "./jobs/users/create-user";
 import {
@@ -227,6 +229,24 @@ program
   .action(
     runJob(async () => {
       return clearUsers();
+    })
+  );
+
+program
+  .command("hydrate:bassins-emploi")
+  .description("Remplissage de la collection bassinsEmploi")
+  .action(
+    runJob(async () => {
+      return hydrateBassinsEmploi();
+    })
+  );
+
+program
+  .command("hydrate:organismes-bassins-emploi")
+  .description("Remplissage du champ organismes.adresse.bassinEmploi")
+  .action(
+    runJob(async () => {
+      return hydrateOrganismesBassinEmploi();
     })
   );
 

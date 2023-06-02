@@ -467,6 +467,10 @@ export interface Organisme {
       | "YE"
       | "ZM"
       | "ZW";
+    /**
+     * Code Bassin d'emploi
+     */
+    bassinEmploi?: string;
   };
   /**
    * Formations de cet organisme
@@ -895,6 +899,10 @@ export interface Organisme {
           | "YE"
           | "ZM"
           | "ZW";
+        /**
+         * Code Bassin d'emploi
+         */
+        bassinEmploi?: string;
       };
     }[];
     /**
@@ -934,10 +942,18 @@ export interface Organisme {
    * API key pour envoi de données
    */
   api_key?: string;
+  /**
+   * Uai envoyé par l'erp
+   */
   api_uai?: string;
+  /**
+   * Siret envoyé par l'erp
+   */
   api_siret?: string;
+  /**
+   * Date de l'interfaçage
+   */
   api_configuration_date?: Date;
-
   /**
    * Statut de fiabilisation de l'organisme
    */

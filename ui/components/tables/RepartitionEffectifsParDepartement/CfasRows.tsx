@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import PropTypes from "prop-types";
-import React from "react";
 
 import { fetchEffectifsParCfa } from "@/common/api/tableauDeBord";
 import { QUERY_KEYS } from "@/common/constants/queryKeys";
@@ -33,7 +32,14 @@ const CfasRows = ({ departementCode }) => {
   return (
     <>
       {sortAlphabeticallyBy("nom_etablissement", data).map(
-        ({ uai_etablissement, siret_etablissement, nom_etablissement, nature, nature_validity_warning, effectifs }) => {
+        ({
+          uai_etablissement,
+          siret_etablissement,
+          nom_etablissement,
+          nature,
+          nature_validity_warning,
+          effectifs,
+        }: any) => {
           return (
             <CfaRow
               uai_etablissement={uai_etablissement}

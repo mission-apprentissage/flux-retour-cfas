@@ -13,10 +13,12 @@ import {
   User,
   UsersMigration,
 } from "./@types";
+import { BassinsEmploi } from "./@types/BassinsEmploi";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
 import { EffectifsV3Queue } from "./@types/EffectifsV3Queue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { UaisAcceReferentiel } from "./@types/UaisAcceReferentiel.js";
+import bassinsEmploiDescriptor from "./bassinsEmploi.model";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
 import effectifsV3QueueModelDescriptor from "./effectifsV3Queue.model";
@@ -52,6 +54,7 @@ export const modelDescriptors = [
   effectifsV3QueueModelDescriptor,
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
+  bassinsEmploiDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<Formation>(formationsModelDescriptor.collectionName);
@@ -77,3 +80,4 @@ export const effectifsV3QueueDb = () =>
 export const uploadsDb = () => getDbCollection<Upload>(uploadsModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
+export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmploiDescriptor.collectionName);

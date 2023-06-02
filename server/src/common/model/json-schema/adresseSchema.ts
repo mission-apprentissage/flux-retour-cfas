@@ -1,8 +1,8 @@
 import { PAYS } from "@/common/constants/pays";
-import { REGIONS, ACADEMIES, DEPARTEMENTS } from "@/common/constants/territoires";
+import { ACADEMIES, DEPARTEMENTS, REGIONS } from "@/common/constants/territoires";
 import { CODE_INSEE_PATTERN, CODE_POSTAL_PATTERN } from "@/common/constants/validations";
 
-import { object, string, integer } from "./jsonSchemaTypes";
+import { integer, object, string } from "./jsonSchemaTypes";
 
 export const adresseSchema = object({
   numero: integer({
@@ -62,6 +62,9 @@ export const adresseSchema = object({
   pays: string({
     enum: PAYS.map(({ code }) => code),
     description: "Pays",
+  }),
+  bassinEmploi: string({
+    description: "Code Bassin d'emploi",
   }),
 });
 

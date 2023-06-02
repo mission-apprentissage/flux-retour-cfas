@@ -24,6 +24,7 @@ export async function hydrateEffectifsComputed() {
                 reseaux: { $first: "$_organisme.reseaux" },
                 uai: { $first: "$_organisme.uai" },
                 siret: { $first: "$_organisme.siret" },
+                bassinEmploi: { $first: "$_organisme.adresse.bassinEmploi" },
               },
             },
           },
