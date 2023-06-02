@@ -73,7 +73,7 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
       {props.button({ setIsOpen, isOpen, buttonLabel })}
 
       {isOpen && (
-        <SimpleOverlayMenu onClose={() => setIsOpen(false)} px="8w" py="3w">
+        <SimpleOverlayMenu onClose={() => setIsOpen(false)} px="8w" py="3w" width="var(--chakra-sizes-xl)">
           <Heading as="h3" variant="h3" marginBottom="3w" marginTop="2w">
             Sélectionner une formation
           </Heading>
