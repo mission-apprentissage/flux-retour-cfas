@@ -5,7 +5,7 @@ import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import SimplePage from "@/components/Page/SimplePage";
 import useAuth from "@/hooks/useAuth";
 import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
-import NewDashboardTransverse from "@/modules/dashboard/NewDashboardTransverse";
+import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
 import PublicLandingPage from "@/modules/PublicLandingPage";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -26,7 +26,7 @@ function getDashboardComponent(organisationType: OrganisationType) {
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
-      return <NewDashboardTransverse />;
+      return <DashboardTransverse />;
   }
 }
 

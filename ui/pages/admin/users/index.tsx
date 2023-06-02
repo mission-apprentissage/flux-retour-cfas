@@ -1,26 +1,25 @@
 import {
   Box,
   Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Heading,
   HStack,
   Input,
-  Stack,
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
   Spinner,
+  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React from "react";
 
 import { _get } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import ModalClosingButton from "@/components/ModalClosingButton/ModalClosingButton";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import UserForm from "@/modules/admin/UserForm";
@@ -67,7 +66,10 @@ const Users = () => {
               Ajouter un nouvel utilisateur
             </Box>
           </ModalHeader>
-          <ModalClosingButton />
+          <ModalCloseButton width="80px">
+            fermer
+            <Box paddingLeft="1w" as="i" className="ri-close-line" />
+          </ModalCloseButton>
           <UserForm
             user={null}
             onCreate={async (_action, error) => {

@@ -1,7 +1,6 @@
 import { Box, Container, Heading, Text } from "@chakra-ui/react";
 import { startOfHour } from "date-fns";
 import Head from "next/head";
-import React from "react";
 
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import IndicateursGridStack from "@/components/IndicateursGridStack";

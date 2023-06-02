@@ -1,19 +1,18 @@
 import {
   Box,
-  Heading,
-  FormControl,
-  FormLabel,
-  Input,
-  FormErrorMessage,
   Button,
-  Flex,
-  HStack,
-  RadioGroup,
-  Radio,
   Divider,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  Heading,
+  Input,
+  Radio,
+  RadioGroup,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
-import React from "react";
 import PhoneInput from "react-phone-input-2";
 import * as Yup from "yup";
 
