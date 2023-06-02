@@ -35,6 +35,7 @@ const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key]
     departement: "56", // morbihan
     region: "53", // bretagne
     academie: "14", // rennes
+    bassinEmploi: "5315", // rennes
   },
   reseaux: ["CCI"],
   erps: ["YMAG"],
@@ -88,12 +89,11 @@ export const organismes: WithId<Organisme>[] = [
 
 export const userOrganisme = organismes[0];
 
-export const commonEffectifsAttributes: Pick<{ [key in keyof Effectif]: Effectif[key] }, "organisme_id" | "_computed"> =
-  {
-    organisme_id: userOrganisme._id,
+export const commonEffectifsAttributes: Pick<Effectif, "organisme_id" | "_computed"> = {
+  organisme_id: userOrganisme._id,
 
-    _computed: addEffectifComputedFields(userOrganisme),
-  };
+  _computed: addEffectifComputedFields(userOrganisme),
+};
 
 export interface ProfilPermission {
   label: string;

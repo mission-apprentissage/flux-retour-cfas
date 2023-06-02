@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker/locale/fr";
-import { subMonths, addYears } from "date-fns";
+import { addYears, subMonths } from "date-fns";
 import merge from "lodash-es/merge";
 import { WithId } from "mongodb";
 import RandExp from "randexp";
@@ -115,9 +115,7 @@ export const createSampleEffectif = ({
       source: faker.random.word(),
       annee_scolaire,
       organisme_id: organisme?._id,
-      ...{
-        _computed: addEffectifComputedFields(organisme as Organisme),
-      },
+      _computed: organisme ? addEffectifComputedFields(organisme as Organisme) : {},
     } as Effectif,
     params
   );

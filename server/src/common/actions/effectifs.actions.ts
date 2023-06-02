@@ -204,15 +204,13 @@ export const getNbDistinctOrganismes = async (ctx: AuthContext, filters: LegacyE
   return distinctOrganismes.length;
 };
 
-export const addEffectifComputedFields = (organisme: Organisme | null | undefined) => {
-  if (!organisme) {
-    return {};
-  }
+export const addEffectifComputedFields = (organisme: Organisme): Effectif["_computed"] => {
   return {
     organisme: {
       ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
       ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
       ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
+      ...(organisme.adresse?.bassinEmploi ? { bassinEmploi: organisme.adresse.bassinEmploi } : {}),
       ...(organisme.uai ? { uai: organisme.uai } : {}),
       ...(organisme.siret ? { siret: organisme.siret } : {}),
       ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),

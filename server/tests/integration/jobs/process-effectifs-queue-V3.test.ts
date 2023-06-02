@@ -2,7 +2,7 @@ import set from "lodash-es/set";
 import { ObjectId } from "mongodb";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
-import { effectifsV3QueueDb, effectifsDb } from "@/common/model/collections";
+import { effectifsDb, effectifsV3QueueDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
 import { createRandomDossierApprenantApiV3Input, createRandomOrganisme } from "@tests/data/randomizedSample";
 
