@@ -1,8 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { _get, _post, _put } from "@/common/httpClient";
-import { omitNullishValues } from "@/common/utils/omitNullishValues";
-import { useSimpleFiltersContext } from "@/modules/mon-espace/landing/common/SimpleFiltersContext";
 
 // récupère un organisme
 export function useOrganisme(organismeId: string | undefined | null) {
@@ -70,27 +68,4 @@ export function useOrganisationOrganismes() {
     isLoading,
     error,
   };
-}
-
-function mapSimpleFiltersToApiFormat(filtersValues) {
-  return omitNullishValues({
-    date: filtersValues?.date.toISOString(),
-    etablissement_num_departement: filtersValues?.departement?.code,
-    etablissement_num_region: filtersValues?.region?.code,
-  });
-}
-
-export function useFetchOrganismeIndicateurs(organismeId: string) {
-  const { filtersValues } = useSimpleFiltersContext();
-  const requestFilters = mapSimpleFiltersToApiFormat(filtersValues);
-
-  const {
-    data: indicateurs,
-    isLoading,
-    error,
-  } = useQuery<any, any>(["organismes", organismeId, "indicateurs", requestFilters], () =>
-    _get(`/api/v1/organismes/${organismeId}/indicateurs`, { params: requestFilters })
-  );
-
-  return { indicateurs, isLoading, error };
 }
