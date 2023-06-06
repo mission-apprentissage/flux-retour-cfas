@@ -359,6 +359,8 @@ program
   .description("Initialisation du projet en local")
   .action(
     runJob(async () => {
+      await seedSample();
+      await seedAdmin();
       await hydrateFromReferentiel();
       await hydrateFormationsCatalogue();
       await hydrateOrganismesFormations();
