@@ -9,6 +9,7 @@
   "type": "module",
   "scripts": {
     "cli": "tsx src/main.ts",
+    "init:dev": "tsx src/main.ts",
     "start": "tsx src/main.ts start",
     "start:dev": "tsx watch src/main.ts start",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",

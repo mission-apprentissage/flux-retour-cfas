@@ -354,6 +354,20 @@ program
     })
   );
 
+program
+  .command("init:dev")
+  .description("Initialisation du projet en local")
+  .action(
+    runJob(async () => {
+      await hydrateFromReferentiel();
+      await hydrateFormationsCatalogue();
+      await hydrateOrganismesFormations();
+      await hydrateOrganismesFromReferentiel();
+      await hydrateReseaux();
+      return;
+    })
+  );
+
 /**
  * Job de purge des events
  */
