@@ -89,13 +89,14 @@ function getFiltreTerritoiresConfig(organisation: Organisation): FiltreOrganisme
           (departement) => departement.code
         ),
         academies: [],
-        bassinsEmploi: [],
       };
 
     case "DDETS":
       return {
         defaultLabel: DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom,
-        disabled: true,
+        regions: [],
+        departements: [],
+        academies: [],
       };
     case "ACADEMIE":
       return {
@@ -105,7 +106,6 @@ function getFiltreTerritoiresConfig(organisation: Organisation): FiltreOrganisme
           (departement) => departement.academie.code === organisation.code_academie
         ).map((departement) => departement.code),
         academies: [],
-        bassinsEmploi: [],
       };
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
