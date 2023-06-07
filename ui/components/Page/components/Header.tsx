@@ -1,21 +1,20 @@
 import {
   Box,
   Button,
+  MenuItem as ChakraMenuItem,
   Container,
   Flex,
-  Heading,
   HStack,
+  Heading,
+  Image,
   Menu,
   MenuButton,
   MenuDivider,
   MenuGroup,
   MenuList,
-  MenuItem as ChakraMenuItem,
   Tag,
   Text,
-  Image,
 } from "@chakra-ui/react";
-import React from "react";
 
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { _post } from "@/common/httpClient";
@@ -119,9 +118,6 @@ const Header = () => {
                 BETA
               </Tag>
             </Heading>
-            <Text fontFamily="Marianne" color="grey.700" fontSize="zeta" mt={1}>
-              Mettre à disposition des différents acteurs les données clés de l&apos;apprentissage en temps réel
-            </Text>
           </Box>
 
           <Flex
