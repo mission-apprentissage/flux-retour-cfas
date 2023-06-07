@@ -124,7 +124,9 @@ const NavBarPublic = () => {
       <NavItem to="/" exactMatch>
         Accueil
       </NavItem>
-      <NavItem to="/explorer-les-indicateurs">Indicateurs en temps réel</NavItem>
+      {/* A réactiver une fois les nouvelles pages développées */}
+      {/* <NavItem to="/operateurs-publics">Opérateurs publics</NavItem>
+      <NavItem to="/organisme-formation">Organismes de formation</NavItem> */}
     </>
   );
 };
