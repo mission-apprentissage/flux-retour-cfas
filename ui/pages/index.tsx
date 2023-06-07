@@ -1,4 +1,4 @@
-import Head from "next/head";
+import { Box, Container, Heading } from "@chakra-ui/react";
 
 import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -6,7 +6,6 @@ import SimplePage from "@/components/Page/SimplePage";
 import useAuth from "@/hooks/useAuth";
 import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
 import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
-import PublicLandingPage from "@/modules/PublicLandingPage";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -33,12 +32,32 @@ function getDashboardComponent(organisationType: OrganisationType) {
 function DashboardPage() {
   const { organisationType } = useAuth();
 
+  return <SimplePage title="Tableau de bord de l’apprentissage">{getDashboardComponent(organisationType)}</SimplePage>;
+}
+
+function PublicLandingPage() {
   return (
-    <SimplePage>
-      <Head>
-        <title>Tableau de bord</title>
-      </Head>
-      {getDashboardComponent(organisationType)}
+    <SimplePage title="Tableau de bord de l’apprentissage">
+      <Box
+        borderTop="solid 1px"
+        borderTopColor="grey.300"
+        borderBottom="solid 1px"
+        borderBottomColor="grey.300"
+        backgroundColor="galt"
+        py="4"
+        px="8"
+      >
+        <Container maxW="xl" p="8">
+          <Heading textStyle="h2" color="grey.800" size="md">
+            {/* <DashboardWelcome mr="2" /> */}
+          </Heading>
+        </Container>
+      </Box>
+      <Container maxW="xl" p="8">
+        <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
+          Aperçu des données de l’apprentissage
+        </Heading>
+      </Container>
     </SimplePage>
   );
 }
