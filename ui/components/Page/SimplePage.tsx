@@ -1,4 +1,5 @@
 import { Box, Container } from "@chakra-ui/react";
+import Head from "next/head";
 import React from "react";
 
 import Link from "@/components/Links/Link";
@@ -12,11 +13,13 @@ import NavigationMenu from "./components/NavigationMenu";
  * Conteneur de page sans padding pour le contenu.
  */
 interface Props {
+  title?: string;
   children: React.ReactNode;
 }
-function SimplePage({ children }: Props) {
+function SimplePage({ title, children }: Props) {
   return (
     <Container maxW="full" minH="100vh" display="flex" flexDirection="column" p={0}>
+      <Head>{title && <title>{title}</title>}</Head>
       <Header />
       <NavigationMenu />
       <Box minH={"40vh"} flexGrow="1" pb={8}>
