@@ -23,6 +23,23 @@ const Link = {
       _hover: { textDecoration: "none", bg: "grey.200" },
       p: 2,
     },
+    primary: {
+      bg: "white",
+      color: "bluefrance",
+      whiteSpace: "nowrap",
+      px: 6,
+      py: 2,
+      _hover: { textDecoration: "none", bg: "grey.300" },
+    },
+    secondary: {
+      border: "1px solid white",
+      bg: "transparent",
+      color: "white",
+      whiteSpace: "nowrap",
+      px: 6,
+      py: 2,
+      _hover: { textDecoration: "none", bg: "#00000020" },
+    },
   },
 };
 
