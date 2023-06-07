@@ -17,7 +17,7 @@ import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
-import { sendForgotPasswordRequest, register, activateUser } from "@/common/actions/account.actions";
+import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
 import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
 import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions";
@@ -50,15 +50,15 @@ import {
   validateMembre,
 } from "@/common/actions/organisations.actions";
 import {
-  findUserOrganismes,
-  searchOrganismes,
-  findOrganismesByUAI,
-  findOrganismesBySIRET,
-  getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
   configureOrganismeERP,
-  getOrganismeById,
+  findOrganismesBySIRET,
+  findOrganismesByUAI,
+  findUserOrganismes,
   generateApiKeyForOrg,
   getOrganismeByAPIKey,
+  getOrganismeById,
+  getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
+  searchOrganismes,
   verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
@@ -103,11 +103,7 @@ import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import effectif from "./routes/specific.routes/effectif.routes";
-import indicateursRouter from "./routes/specific.routes/indicateurs.routes";
-import {
-  getOrganismeByUAIAvecSousEtablissements,
-  getOrganismeEffectifs,
-} from "./routes/specific.routes/organisme.routes";
+import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
 import upload from "./routes/specific.routes/upload.routes";
@@ -573,15 +569,6 @@ function setupRoutes(app: Application) {
 
   // LEGACY écrans indicateurs
   authRouter
-    .get(
-      "/api/v1/organisme/:uai", // FIXME SECURITE openbar pour la recherche
-      returnResult(async (req) => {
-        const { uai } = await validateFullZodObjectSchema(req.params, {
-          uai: primitivesV1.etablissement_formateur.uai,
-        });
-        return await getOrganismeByUAIAvecSousEtablissements(uai);
-      })
-    )
     .post(
       "/api/v1/organismes/search",
       validateRequestMiddleware({ body: organismeOrFormationSearchSchema() }),
@@ -591,7 +578,6 @@ function setupRoutes(app: Application) {
     )
     .use("/api/v1/effectif", effectif())
     .get("/api/v1/server-events", serverEventsHandler)
-    .use("/api/indicateurs", indicateursRouter())
     .get("/api/v1/indicateurs-export", async (req, res) => {
       const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
       const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
