@@ -35,7 +35,7 @@ import { updateLastTransmissionDateForOrganismes } from "./jobs/patches/update-l
 import { runJob } from "./jobs/scriptWrapper";
 import { clearSeedAssets } from "./jobs/seed/clearAssets";
 import { seedPlausibleGoals } from "./jobs/seed/plausible/goals";
-import { seedAdmin, seedSample } from "./jobs/seed/start/index";
+import { seedAdmin, seedSample, seedSampleOrganismes, seedSampleUsers } from "./jobs/seed/start/index";
 import { generateTypes } from "./jobs/seed/types/generate-types";
 import { createErpUserLegacy } from "./jobs/users/create-user";
 import {
@@ -351,6 +351,23 @@ program
   .action(
     runJob(async () => {
       return hydrateReseaux();
+    })
+  );
+
+program
+  .command("init:dev")
+  .description("Initialisation du projet en local")
+  .action(
+    runJob(async () => {
+      await seedSampleOrganismes();
+      await seedSampleUsers();
+      await seedAdmin();
+      await hydrateFromReferentiel();
+      await hydrateFormationsCatalogue();
+      await hydrateOrganismesFormations();
+      await hydrateOrganismesFromReferentiel();
+      await hydrateReseaux();
+      return;
     })
   );
 

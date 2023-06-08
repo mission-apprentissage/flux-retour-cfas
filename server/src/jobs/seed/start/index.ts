@@ -41,7 +41,7 @@ export const seedSample = async () => {
   await seedSampleUsers();
 };
 
-const seedSampleOrganismes = async () => {
+export const seedSampleOrganismes = async () => {
   // Create Organisme A reseau A erp A
   // Create Organisme B reseau A erp B
   // Create Organisme C reseau B erp A
@@ -124,7 +124,7 @@ const seedSampleOrganismes = async () => {
   }
 };
 
-const seedSampleUsers = async () => {
+export const seedSampleUsers = async () => {
   // Create user ofr
   await register({
     user: {
