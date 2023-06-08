@@ -569,6 +569,8 @@ function setupRoutes(app: Application) {
 
   // LEGACY écrans indicateurs
   authRouter
+    // à supprimer une fois les écrans /organisme-formation/* supprimés, (sans doute après la nouvelle page d'accueil + onglets développés)
+    // peut-être attendre les prochains écrans d'aide intégrés au TDB pour être sûr de supprimer ceux existants
     .post(
       "/api/v1/organismes/search",
       validateRequestMiddleware({ body: organismeOrFormationSearchSchema() }),
@@ -578,6 +580,8 @@ function setupRoutes(app: Application) {
     )
     .use("/api/v1/effectif", effectif())
     .get("/api/v1/server-events", serverEventsHandler)
+    // à supprimer au profit de la route /api/v1/organismes/:id/indicateurs JSON (+ CSV côté UI) une fois les écrans OF revus et le bouton
+    // export anonymisé potentiellement supprimé
     .get("/api/v1/indicateurs-export", async (req, res) => {
       const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
       const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
