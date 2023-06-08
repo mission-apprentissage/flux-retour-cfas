@@ -1,5 +1,4 @@
-import { VStack, Heading, Text, HStack, UnorderedList, ListItem } from "@chakra-ui/react";
-import React from "react";
+import { HStack, Heading, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
 
 import Ribbons from "@/components/Ribbons/Ribbons";
 import Section from "@/components/Section/Section";
@@ -12,20 +11,23 @@ type EffectifsBannerERPNotConfiguredProps = {
 const EffectifsBannerERPNotConfigured = ({ isMine }: EffectifsBannerERPNotConfiguredProps) => {
   return (
     <VStack alignItems="baseline" gap={2}>
-      <Heading as="h2" fontSize="gamma" color="blue_cumulus_main">
-        {isMine ? "Aperçu de vos effectifs transmis" : "Aperçu des effectifs transmis"}
-      </Heading>
-      <Text color="mgalt">
-        {isMine
-          ? "Vous n’avez pas encore transmis vos effectifs"
-          : "Cet organisme n'a pas encore transmis ses effectifs"}
-      </Text>
-      {isMine && (
-        <Text>
-          <InfoCircle />
-          Vous devez effectuer vos mises à jours <strong>entre le 1er et le 5 de chaque mois.</strong>
+      <Section>
+        <Heading as="h2" fontSize="gamma" color="blue_cumulus_main">
+          {isMine ? "Aperçu de vos effectifs transmis" : "Aperçu des effectifs transmis"}
+        </Heading>
+        <Text color="mgalt">
+          {isMine
+            ? "Vous n’avez pas encore transmis vos effectifs"
+            : "Cet organisme n'a pas encore transmis ses effectifs"}
         </Text>
-      )}
+        {isMine && (
+          <Text>
+            <InfoCircle />
+            Vous devez effectuer vos mises à jours <strong>entre le 1er et le 5 de chaque mois.</strong>
+          </Text>
+        )}
+      </Section>
+
       <Section
         borderTop="solid 1px"
         borderTopColor="grey.300"
