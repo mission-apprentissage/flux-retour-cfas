@@ -1,12 +1,10 @@
-import { strict as assert } from "assert";
-
 import { AxiosInstance } from "axiosist";
 
 import { initTestApp } from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
-describe("GET /indicateurs-national", () => {
+describe("GET /api/v1/indicateurs-national - liste des indicateurs sur les effectifs et organismes au national ", () => {
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
@@ -14,16 +12,9 @@ describe("GET /indicateurs-national", () => {
 
   it("Accès public", async () => {
     const date = "2020-10-10T00:00:00.000Z";
-    const response = await httpClient.get(`/api/indicateurs-national?date=${date}`);
+    const response = await httpClient.get(`/api/v1/indicateurs-national?date=${date}`);
 
-    assert.strictEqual(response.status, 200);
-    assert.deepStrictEqual(response.data, {
-      date: date,
-      apprentis: 0,
-      inscritsSansContrat: 0,
-      rupturants: 0,
-      abandons: 0,
-      totalOrganismes: 0,
-    });
+    expect(response.status).toEqual(200);
+    expect(response.status).toStrictEqual({ indicateursEffectifs: [], indicateursOrganismes: [] });
   });
 });

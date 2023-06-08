@@ -253,6 +253,9 @@ export function buildMongoFilters<
 >(filters: Filters, filtersConfiguration: FiltersConfiguration): any[] {
   return Object.entries(filters).reduce((matchFilters, [filterName, filterValue]) => {
     const filterConfiguration = filtersConfiguration[filterName];
+    if (!filterConfiguration) {
+      return matchFilters;
+    }
     return [
       ...matchFilters,
       {

@@ -3,25 +3,38 @@ import {
   Center,
   Container,
   Flex,
+  Grid,
+  GridItem,
   Heading,
   HStack,
   Image,
   List,
   ListItem,
+  Spinner,
   Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+import { ReactNode, useMemo, useState } from "react";
 
+import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDate } from "@/common/utils/dateUtils";
+import { prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import useAuth from "@/hooks/useAuth";
+import CarteFrance from "@/modules/dashboard/CarteFrance";
 import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
 import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
+import { convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
+import {
+  IndicateursEffectifsAvecDepartement,
+  IndicateursOrganismesAvecDepartement,
+} from "@/modules/models/indicateurs";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -171,21 +184,7 @@ function PublicLandingPage() {
           </VStack>
         </Stack>
 
-        <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
-          Aperçu des chiffres-clés de l’apprentissage
-        </Heading>
-        <Text fontSize="sm" fontWeight="bold">
-          Répartition des effectifs de l’apprentissage en temps réel.
-        </Text>
-        <Text fontSize="sm">
-          Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
-          ne transmettent pas encore leurs données au tableau de bord.
-        </Text>
-        <Text fontSize="sm">
-          Le <Text as="b">{formatDate(new Date(), "d MMMM yyyy")}</Text>, le tableau de bord de l’apprentissage recense{" "}
-          <Text as="b">43 765 apprenants</Text> dans votre territoire, dont <Text as="b">31 080 apprentis</Text>,{" "}
-          <Text as="b">580 rupturants</Text> et <Text as="b">705 jeunes sans contrat</Text>.
-        </Text>
+        <SectionApercuChiffresCles />
       </Container>
 
       <Box backgroundColor="galt" py="4" px="8">
@@ -315,6 +314,158 @@ function CardLabel({ children }: { children: ReactNode }) {
     </Box>
   );
 }
+
+interface IndicateursNationalFilters {
+  date: Date;
+  organisme_regions?: string[];
+}
+
+function SectionApercuChiffresCles() {
+  const router = useRouter();
+  const [indicateursFilters, setIndicateursFilters] = useState<IndicateursNationalFilters>({
+    date: new Date(),
+  });
+
+  const { data: indicateursNational, isLoading: indicateursNationalLoading } = useQuery<{
+    indicateursEffectifs: IndicateursEffectifsAvecDepartement[];
+    indicateursOrganismes: IndicateursOrganismesAvecDepartement[];
+  }>(
+    ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(indicateursFilters))],
+    () =>
+      _get("/api/v1/indicateurs-national", {
+        params: convertEffectifsFiltersToQuery(indicateursFilters),
+      }),
+    {
+      enabled: router.isReady,
+    }
+  );
+
+  const indicateursEffectifsNationaux = useMemo(
+    () =>
+      (indicateursNational?.indicateursEffectifs ?? []).reduce(
+        (acc, indicateursDepartement) => {
+          acc.apprenants += indicateursDepartement.apprenants;
+          acc.apprentis += indicateursDepartement.apprentis;
+          acc.inscritsSansContrat += indicateursDepartement.inscritsSansContrat;
+          acc.abandons += indicateursDepartement.abandons;
+          acc.rupturants += indicateursDepartement.rupturants;
+          return acc;
+        },
+        {
+          apprenants: 0,
+          apprentis: 0,
+          inscritsSansContrat: 0,
+          abandons: 0,
+          rupturants: 0,
+        }
+      ),
+    [indicateursNational?.indicateursEffectifs]
+  );
+
+  return (
+    <Container maxW="xl" py="8">
+      <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
+        Aperçu des chiffres-clés de l’apprentissage
+      </Heading>
+      <Text fontSize="sm" fontWeight="bold">
+        Répartition des effectifs de l’apprentissage au National en temps réel.
+      </Text>
+      <Text fontSize="sm">
+        Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
+        en apprentissage ne transmettent pas encore leurs données au tableau de bord.
+      </Text>
+      <Text fontSize="sm">
+        Le <Text as="b">{formatDate(new Date(), "d MMMM yyyy")}</Text>, le tableau de bord de l’apprentissage recense
+        sur le territoire national{" "}
+        <Text as="b">{prettyFormatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</Text>, dont{" "}
+        <Text as="b">{prettyFormatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</Text>,{" "}
+        <Text as="b">{prettyFormatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes sans contrat</Text>{" "}
+        et <Text as="b">{prettyFormatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</Text>.
+      </Text>
+
+      <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(2, 1fr)" gap={4} my={8}>
+        <GridItem bg="galt" py="8" px="12">
+          <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
+            Répartition des effectifs au national
+          </Heading>
+        </GridItem>
+
+        <GridItem bg="galt" py="8" px="12">
+          {indicateursNationalLoading && (
+            <Center h="100%">
+              <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
+            </Center>
+          )}
+          {indicateursNational?.indicateursEffectifs && (
+            <CarteFrance
+              donneesAvecDepartement={indicateursNational.indicateursEffectifs}
+              dataKey="apprenants"
+              minColor="#DDEBFB"
+              maxColor="#366EC1"
+              tooltipContent={(indicateurs) =>
+                indicateurs ? (
+                  <>
+                    <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
+                    <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
+                    <Box>Jeunes en formation sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
+                    <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
+                    <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
+                  </>
+                ) : (
+                  <Box>Données non disponibles</Box>
+                )
+              }
+            />
+          )}
+        </GridItem>
+      </Grid>
+    </Container>
+  );
+}
+
+// interface CardProps {
+//   label: string;
+//   count: number;
+//   tooltipLabel: ReactNode;
+//   icon: ReactNode;
+//   big?: boolean;
+//   children?: ReactNode;
+// }
+// function Card({ label, count, tooltipLabel, icon, big = false, children }: CardProps) {
+//   return (
+//     <Center h="100%" justifyContent={big ? "center" : "start"} py="6" px="10">
+//       <HStack gap={3}>
+//         <Box alignSelf={"start"} pt="3">
+//           {icon}
+//         </Box>
+//         <Box>
+//           <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
+//             {formatNumber(count)}
+//           </Text>
+//           <Text fontSize={12} whiteSpace="nowrap">
+//             {label}
+//             <Tooltip
+//               background="bluefrance"
+//               color="white"
+//               label={<Box padding="1w">{tooltipLabel}</Box>}
+//               aria-label={tooltipLabel as any}
+//             >
+//               <Box
+//                 as="i"
+//                 className="ri-information-line"
+//                 fontSize="epsilon"
+//                 color="grey.500"
+//                 marginLeft="1w"
+//                 verticalAlign="middle"
+//               />
+//             </Tooltip>
+//           </Text>
+//           {children}
+//         </Box>
+//       </HStack>
+//     </Center>
+//   );
+// }
 
 export default function Home() {
   const { auth } = useAuth();

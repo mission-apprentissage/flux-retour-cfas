@@ -19,13 +19,17 @@ import "express-async-errors";
 
 import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
-import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
+import { getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
 import {
   effectifsFiltersSchema,
   fullEffectifsFiltersSchema,
   legacyEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
+import {
+  getIndicateursNational,
+  indicateursNationalFiltersSchema,
+} from "@/common/actions/indicateurs/indicateurs-national.actions";
 import {
   getEffectifsNominatifs,
   getIndicateursEffectifsParDepartement,
@@ -266,12 +270,10 @@ function setupRoutes(app: Application) {
       })
     )
     .get(
-      "/api/indicateurs-national",
+      "/api/v1/indicateurs-national",
       returnResult(async (req) => {
-        const { date } = await validateFullZodObjectSchema(req.query, {
-          date: legacyEffectifsFiltersSchema.date,
-        });
-        return await getIndicateursNational(date);
+        const filters = await validateFullZodObjectSchema(req.query, indicateursNationalFiltersSchema);
+        return await getIndicateursNational(filters);
       })
     )
     .get(

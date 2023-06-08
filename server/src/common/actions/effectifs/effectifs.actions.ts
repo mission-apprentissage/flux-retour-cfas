@@ -1,5 +1,4 @@
 import Boom from "boom";
-import { format } from "date-fns";
 import { ObjectId } from "mongodb";
 
 import {
@@ -16,8 +15,6 @@ import {
 import { DEPARTEMENTS_BY_CODE } from "@/common/constants/territoires";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
-import { tryCachedExecution } from "@/common/utils/cacheUtils";
 import { mergeObjectsBy } from "@/common/utils/mergeObjectsBy";
 
 import { IndicateursEffectifs } from "../indicateurs/indicateurs";
@@ -372,41 +369,6 @@ export const getEffectifsCountByDepartementAtDate = async (ctx: AuthContext, fil
   }));
 };
 
-const indicateursNationalCacheExpirationMs = 3600 * 1000; // 1 hour
-
-export async function getIndicateursNational(date: Date) {
-  return await tryCachedExecution(
-    `indicateurs-national:${format(date, "yyyy-MM-dd")}`,
-    indicateursNationalCacheExpirationMs,
-    async () => {
-      const filterStages = [{ $match: { annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } } }];
-      const [indicateurs, totalOrganismes] = await Promise.all([
-        (async () => {
-          const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
-            apprentisIndicator.getCountAtDate(date, filterStages),
-            inscritsSansContratsIndicator.getCountAtDate(date, filterStages),
-            rupturantsIndicator.getCountAtDate(date, filterStages),
-            abandonsIndicator.getCountAtDate(date, filterStages),
-          ]);
-          return {
-            date,
-            apprentis,
-            inscritsSansContrat,
-            rupturants,
-            abandons,
-          };
-        })(),
-        (async () => {
-          const distinctOrganismes = await effectifsDb().distinct("organisme_id", {
-            annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-          });
-          return distinctOrganismes ? distinctOrganismes.length : 0;
-        })(),
-      ]);
-      return { ...indicateurs, totalOrganismes };
-    }
-  );
-}
 /**
  * Méthode de récupération de la liste des effectifs en base
  * @param {*} query
