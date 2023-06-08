@@ -1,4 +1,17 @@
-import { Box, Container, Heading, HStack, Image, Stack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Container,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  List,
+  ListItem,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 
 import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -76,8 +89,86 @@ function PublicLandingPage() {
       </Box>
       <Container maxW="xl" py="8">
         <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
-          Vous êtes un acteur de l’apprentissage ?
+          Vous êtes un acteur de l’apprentissage&nbsp;?
         </Heading>
+
+        <Stack direction={["column", "column", "column", "row"]} gap="4" mb="16" mt="8" mx={[0, 16, 32, 0]}>
+          <VStack flex="1" backgroundColor="galt2" px="4" py="8">
+            <Center>
+              <VStack>
+                <Image src="/images/landing-cards/school.svg" alt="" />
+                <CardLabel>OFA</CardLabel>
+                <Text fontSize="delta" fontWeight="bold">
+                  Simplifiez vos démarches
+                </Text>
+              </VStack>
+            </Center>
+            <List styleType="none" pt="8" spacing="2">
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="1" />
+                  Transmettez vos effectifs de manière sécurisée
+                </Flex>
+              </ListItem>
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="1" />
+                  Gagnez du temps pour vos démarches administratives
+                </Flex>
+              </ListItem>
+            </List>
+          </VStack>
+          <VStack flex="1" backgroundColor="galt2" p="8">
+            <Center>
+              <VStack>
+                <Image src="/images/landing-cards/network.svg" alt="" />
+                <CardLabel>RÉSEAU DE CFA</CardLabel>
+                <Text fontSize="delta" fontWeight="bold">
+                  Facilitez votre animation
+                </Text>
+              </VStack>
+            </Center>
+            <List styleType="none" pt="8" spacing="2">
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/team.svg" boxSize="16px" alt="" mr="1" />
+                  Informez-vous en temps réel pour suivre votre réseau
+                </Flex>
+              </ListItem>
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="1" />
+                  Pilotez votre réseau par la donnée en temps réel
+                </Flex>
+              </ListItem>
+            </List>
+          </VStack>
+          <VStack flex="1" backgroundColor="galt2" p="8">
+            <Center>
+              <VStack>
+                <Image src="/images/landing-cards/city-hall.svg" alt="" />
+                <CardLabel>OPÉRATEURS PUBLICS</CardLabel>
+                <Text fontSize="delta" fontWeight="bold">
+                  Pilotez efficacement
+                </Text>
+              </VStack>
+            </Center>
+            <List styleType="none" pt="8" spacing="2">
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/bar-chart.svg" boxSize="16px" alt="" mr="1" />
+                  Visualisez des données ciblées sur votre territoire
+                </Flex>
+              </ListItem>
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="1" />
+                  Identifiez rapidement des besoins d’accompagnement
+                </Flex>
+              </ListItem>
+            </List>
+          </VStack>
+        </Stack>
 
         <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Aperçu des chiffres-clés de l’apprentissage
@@ -205,6 +296,22 @@ function PublicLandingPage() {
         </Container>
       </Box>
     </SimplePage>
+  );
+}
+
+function CardLabel({ children }) {
+  return (
+    <Box
+      backgroundColor="purpleglycine.950"
+      color="purpleglycinesun.319"
+      px="2"
+      py="1"
+      fontSize="omega"
+      borderRadius="md"
+      fontWeight="bold"
+    >
+      {children}
+    </Box>
   );
 }
 

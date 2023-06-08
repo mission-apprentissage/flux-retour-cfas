@@ -184,6 +184,12 @@ const colors = {
     200: "#eef1f8",
     100: "#f9fafc",
   },
+  purpleglycine: {
+    950: "#fee7fc",
+  },
+  purpleglycinesun: {
+    319: "#6e445a",
+  },
 };
 
 // const fontSizes = {
