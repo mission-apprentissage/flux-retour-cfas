@@ -1,7 +1,6 @@
 import { strict as assert } from "assert";
 
 import omit from "lodash.omit";
-import { ObjectId } from "mongodb";
 import nock from "nock";
 
 import {
@@ -10,25 +9,11 @@ import {
   findFormationById,
   getFormationWithCfd,
   getNiveauFormationFromLibelle,
-  searchFormations,
 } from "@/common/actions/formations.actions";
-import { Organisme } from "@/common/model/@types/Organisme";
-import { formationsDb, effectifsDb, organismesDb } from "@/common/model/collections";
+import { formationsDb } from "@/common/model/collections";
 import { dataForGetCfdInfo } from "@tests/data/apiTablesDeCorrespondances";
-import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { nockGetMetiersByCfd } from "@tests/utils/nockApis/nock-Lba";
 import { nockGetCfdInfo } from "@tests/utils/nockApis/nock-tablesCorrespondances";
-import { id } from "@tests/utils/testUtils";
-
-const organisme: Organisme = {
-  _id: new ObjectId(id(1)),
-  ...createRandomOrganisme({ siret: "19040492100016" }),
-};
-
-const organisme2: Organisme = {
-  _id: new ObjectId(id(2)),
-  ...createRandomOrganisme({ siret: "41461021200014" }),
-};
 
 describe("Tests des actions Formations", () => {
   describe("existsFormation", () => {
@@ -137,177 +122,6 @@ describe("Tests des actions Formations", () => {
         annee: null,
         duree: null,
       });
-    });
-  });
-
-  describe("searchFormations", () => {
-    const formationsSeed = [
-      { cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" },
-      { cfd: "01022104", libelle: "ZINGUERIE (MC NIVEAU V)" },
-      { cfd: "01022999", libelle: "Peinture décoration extérieure (MC NIVEAU V)" },
-      { cfd: "01022111", libelle: "PEINTURE DECORATION (MC NIVEAU IV)" },
-      { cfd: "01022551", libelle: "PEINTURE dEcOrAtIoN (MC NIVEAU IV)" },
-      { cfd: "01026651", libelle: "PEINTURE DECORÀTION (MC NIVEAU IV)" },
-    ];
-
-    beforeEach(async () => {
-      await organismesDb().insertOne(organisme);
-      await organismesDb().insertOne(organisme2);
-
-      nock.cleanAll();
-      nockGetCfdInfo((cfd) =>
-        formationsSeed
-          .filter((f) => f.cfd === cfd)
-          .map((o) => ({
-            cfd: o.cfd,
-            intitule_long: o.libelle,
-            intitule_court: o.libelle,
-          }))
-          .pop()
-      );
-      await Promise.all(
-        formationsSeed.map(async ({ cfd }) => {
-          await Promise.all([
-            createFormation({ cfd }),
-            effectifsDb().insertOne(
-              createSampleEffectif({
-                formation: { cfd },
-                organisme: organisme2,
-              })
-            ),
-          ]);
-        })
-      );
-    });
-
-    const validCases = [
-      {
-        caseDescription: "when searchTerm does not anything",
-        searchTerm: "nope",
-        expectedResult: [],
-      },
-      {
-        caseDescription: "when searchTerm matches cfd perfectly",
-        searchTerm: formationsSeed[0].cfd,
-        expectedResult: [formationsSeed[0]],
-      },
-      {
-        caseDescription: "when searchTerm matches cfd partially",
-        searchTerm: formationsSeed[0].cfd.slice(0, 6),
-        expectedResult: [formationsSeed[0], formationsSeed[3], formationsSeed[1]],
-      },
-      {
-        caseDescription: "when searchTerm matches libelle perfectly",
-        searchTerm: formationsSeed[0].libelle,
-        expectedResult: [formationsSeed[0]],
-      },
-      {
-        caseDescription: "when searchTerm matches libelle partially",
-        searchTerm: formationsSeed[0].libelle.slice(0, 5),
-        expectedResult: [formationsSeed[0]],
-      },
-      {
-        caseDescription: "when searchTerm matches a word in libelle",
-        searchTerm: "ZINGUERIE",
-        expectedResult: [formationsSeed[1]],
-      },
-      {
-        caseDescription: "when searchTerm matches a word partially in libelle",
-        searchTerm: "ZINGU",
-        expectedResult: [formationsSeed[1]],
-      },
-      {
-        caseDescription: "when searchTerm matches a word with different case in libelle",
-        searchTerm: "zingu",
-        expectedResult: [formationsSeed[1]],
-      },
-      {
-        caseDescription: "when searchTerm matches a word with different diacritics in libelle",
-        searchTerm: "zingùéri",
-        expectedResult: [formationsSeed[1]],
-      },
-    ];
-
-    validCases.forEach(({ searchTerm, caseDescription, expectedResult }) => {
-      it(`returns results ${caseDescription} (search ${searchTerm})`, async () => {
-        const results = await searchFormations({ searchTerm });
-
-        const mapCfd = (result) => result.cfd;
-        assert.deepEqual(results.map(mapCfd), expectedResult.map(mapCfd));
-      });
-    });
-
-    it("returns results matching libelle and etablissement_num_region", async () => {
-      const searchTerm = "decoration";
-
-      await effectifsDb().insertOne(
-        createSampleEffectif({
-          formation: { cfd: formationsSeed[2].cfd },
-          organisme,
-        })
-      );
-
-      const results = await searchFormations({ searchTerm, etablissement_num_region: organisme.adresse?.region });
-
-      assert.equal(results.length, 1);
-      assert.ok(results[0].cfd, formationsSeed[2].cfd);
-    });
-
-    it("returns results matching libelle and etablissement_num_departement", async () => {
-      const searchTerm = "decoration";
-
-      await effectifsDb().insertOne(
-        createSampleEffectif({
-          formation: {
-            cfd: formationsSeed[2].cfd,
-          },
-          organisme,
-        })
-      );
-
-      const results = await searchFormations({
-        searchTerm,
-        etablissement_num_departement: organisme.adresse?.departement,
-      });
-
-      assert.equal(results.length, 1);
-      assert.ok(results[0].cfd, formationsSeed[2].cfd);
-    });
-
-    it("returns results matching libelle and etablissement_reseau", async () => {
-      const searchTerm = "decoration";
-
-      await effectifsDb().insertOne(
-        createSampleEffectif({
-          formation: {
-            cfd: formationsSeed[2].cfd,
-          },
-          organisme,
-        })
-      );
-
-      const results = await searchFormations({ searchTerm, etablissement_reseaux: organisme.reseaux?.[0] });
-
-      assert.equal(results.length, 1);
-      assert.ok(results[0].cfd, formationsSeed[2].cfd);
-    });
-
-    it("returns results matching libelle and uai_etablissement", async () => {
-      const searchTerm = "decoration";
-
-      await effectifsDb().insertOne(
-        createSampleEffectif({
-          formation: {
-            cfd: formationsSeed[2].cfd,
-          },
-          organisme,
-        })
-      );
-
-      const results = await searchFormations({ searchTerm, uai_etablissement: organisme.uai });
-
-      assert.equal(results.length, 1);
-      assert.ok(results[0].cfd, formationsSeed[2].cfd);
     });
   });
 

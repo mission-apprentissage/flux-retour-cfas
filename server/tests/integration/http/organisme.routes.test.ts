@@ -18,13 +18,13 @@ import {
   userOrganisme,
 } from "@tests/utils/permissions";
 import {
-  stringifyMongoFields,
+  RequestAsOrganisationFunc,
   expectForbiddenError,
   expectUnauthorizedError,
+  generate,
   id,
   initTestApp,
-  RequestAsOrganisationFunc,
-  generate,
+  stringifyMongoFields,
 } from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
@@ -63,7 +63,7 @@ describe("Routes /organismes/:id", () => {
   };
   describe("GET /organismes/:id - détail d'un organisme", () => {
     it("Erreur si non authentifié", async () => {
-      const response = await httpClient.get(`/api/v1/organisme/${id(1)}`);
+      const response = await httpClient.get(`/api/v1/organismes/${id(1)}`);
 
       expectUnauthorizedError(response);
     });
@@ -151,12 +151,11 @@ describe("Routes /organismes/:id", () => {
         if (allowed) {
           assert.strictEqual(response.status, 200);
           assert.deepStrictEqual(response.data, {
-            date: date,
+            apprenants: 15,
             apprentis: 5,
             inscritsSansContrat: 10,
             abandons: 15,
             rupturants: 20,
-            totalOrganismes: 0,
           });
         } else {
           expectForbiddenError(response);

@@ -4,7 +4,7 @@ import { Organisation } from "@/common/internal/Organisation";
 
 export type NewOrganisation = DistributiveOmit<Organisation, "_id" | "created_at">;
 
-export type SetterOrganisation = (o: NewOrganisation | null) => void; // eslint-disable-line no-unused-vars
+export type SetterOrganisation = (o: NewOrganisation | null) => void;
 
 // TODO plutôt supprimer ce système de formulaire un peu commun pour avoir des formulaires d'inscription séparés
 // plutôt que des propriétés facultatives juste pour le type OF

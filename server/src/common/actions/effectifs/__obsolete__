@@ -1,0 +1,6 @@
+**SVP utilisez les actions dans le dossier indicateurs/**
+
+Ce dossier contenait les fonctions utilisées pour calculer les anciens indicateurs (majoritairement sur les effectifs).
+Tout le système a été revus et simplifié (avec le passage à TS également).
+
+Ce dossier pourra être supprimé (et certaines actions déplacées), quand plus aucun écran n'appelera les dernières routes (export csv d'un organisme) et quand les batchs n'appeleront plus les fonctions (comme getListAtDate).

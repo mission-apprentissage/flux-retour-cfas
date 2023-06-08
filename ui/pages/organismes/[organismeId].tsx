@@ -1,13 +1,12 @@
-import { Box, Container, Stack, Heading } from "@chakra-ui/react";
+import { Box, Container, Heading, Stack } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React from "react";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { useOrganisme } from "@/hooks/organismes";
-import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/components/OrganismeInfo";
+import OrganismeInfo from "@/modules/dashboard/OrganismeInfo";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

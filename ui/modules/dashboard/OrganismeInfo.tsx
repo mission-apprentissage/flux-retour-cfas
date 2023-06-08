@@ -10,15 +10,16 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react";
-import React from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
+import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import Section from "@/components/Section/Section";
-import IndicateursInfos from "@/modules/mon-espace/landing/common/IndicateursInfos";
-import { SimpleFiltersProvider } from "@/modules/mon-espace/landing/common/SimpleFiltersContext";
+import IndicateursGrid from "@/modules/dashboard/IndicateursGrid";
+import { IndicateursEffectifs } from "@/modules/models/indicateurs";
 
 export const natureOrganismeDeFormationLabel = {
   responsable: "Responsable",
@@ -77,6 +78,19 @@ export const natureOrganismeDeFormationTooltip = {
 };
 
 export default function OrganismeInfo({ organisme, isMine }: { organisme: Organisme; isMine: boolean }) {
+  const { data: indicateurs, isLoading: indicateursLoading } = useQuery<IndicateursEffectifs>(
+    ["organismes", organisme?._id, "indicateurs"],
+    () =>
+      _get(`/api/v1/organismes/${organisme._id}/indicateurs`, {
+        params: {
+          date: new Date(),
+        },
+      }),
+    {
+      enabled: !!organisme?._id,
+    }
+  );
+
   if (!organisme) {
     return (
       <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
@@ -190,11 +204,7 @@ export default function OrganismeInfo({ organisme, isMine }: { organisme: Organi
           </Ribbons>
         )}
       </Box>
-      {organisme.first_transmission_date && (
-        <SimpleFiltersProvider>
-          <IndicateursInfos organismeId={organisme._id} />
-        </SimpleFiltersProvider>
-      )}
+      {indicateurs && <IndicateursGrid indicateursEffectifs={indicateurs} loading={indicateursLoading} />}
     </>
   );
 }

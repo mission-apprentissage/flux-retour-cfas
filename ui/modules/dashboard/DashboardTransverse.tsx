@@ -43,7 +43,7 @@ import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDeparteme
 import CarteFrance from "./CarteFrance";
 import IndicateursGrid from "./IndicateursGrid";
 
-const NewDashboardTransverse = () => {
+const DashboardTransverse = () => {
   const { auth } = useAuth();
   const router = useRouter();
 
@@ -312,4 +312,4 @@ const NewDashboardTransverse = () => {
   );
 };
 
-export default withAuth(NewDashboardTransverse);
+export default withAuth(DashboardTransverse);

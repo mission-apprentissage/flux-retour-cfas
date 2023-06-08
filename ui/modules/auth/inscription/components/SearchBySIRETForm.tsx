@@ -15,11 +15,11 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
-import React, { useState } from "react";
+import { useState } from "react";
 import * as Yup from "yup";
 
-import { searchOrganismesBySIRET } from "@/common/api/tableauDeBord";
 import { SIRET_REGEX } from "@/common/domain/siret";
+import { _post } from "@/common/httpClient";
 import { sleep } from "@/common/utils/misc";
 import Link from "@/components/Links/Link";
 import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
@@ -40,7 +40,7 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
       })}
       onSubmit={async ({ siret }, actions) => {
         try {
-          const organismes = await searchOrganismesBySIRET(siret);
+          const organismes = await _post("/api/v1/organismes/search-by-siret", { siret });
           await sleep(500); // attente pour ne pas paraitre trop instantané...
           setOrganismes(organismes);
         } catch (err) {

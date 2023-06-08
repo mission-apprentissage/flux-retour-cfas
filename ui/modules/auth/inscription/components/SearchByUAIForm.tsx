@@ -15,11 +15,11 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
-import React, { useState } from "react";
+import { useState } from "react";
 import * as Yup from "yup";
 
-import { searchOrganismesByUAI } from "@/common/api/tableauDeBord";
 import { UAI_REGEX } from "@/common/domain/uai";
+import { _post } from "@/common/httpClient";
 import { sleep } from "@/common/utils/misc";
 import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
 
@@ -39,7 +39,7 @@ export default function SearchByUAIForm({ organisation, setOrganisation }: Inscr
       })}
       onSubmit={async ({ uai }, actions) => {
         try {
-          const organismes = await searchOrganismesByUAI(uai);
+          const organismes = await _post("/api/v1/organismes/search-by-uai", { uai });
           await sleep(500); // attente pour ne pas paraitre trop instantané...
           setOrganismes(organismes);
         } catch (err) {

@@ -20,6 +20,8 @@ import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils
 import { tryCachedExecution } from "@/common/utils/cacheUtils";
 import { mergeObjectsBy } from "@/common/utils/mergeObjectsBy";
 
+import { IndicateursEffectifs } from "../indicateurs/indicateurs";
+
 import {
   abandonsIndicator,
   apprentisIndicator,
@@ -77,7 +79,10 @@ export async function getOrganismeIndicateurs(
   return await getIndicateurs(ctx, filters);
 }
 
-export const getIndicateurs = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
+export const getIndicateurs = async (
+  ctx: AuthContext,
+  filters: LegacyEffectifsFilters
+): Promise<IndicateursEffectifs> => {
   const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
   const filterStages = buildMongoPipelineFilterStages(filtersWithRestriction);
   const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
@@ -87,12 +92,11 @@ export const getIndicateurs = async (ctx: AuthContext, filters: LegacyEffectifsF
     abandonsIndicator.getCountAtDate(filters.date, filterStages),
   ]);
   return {
-    date: filters.date,
+    apprenants: apprentis + inscritsSansContrat,
     apprentis,
     inscritsSansContrat,
     rupturants,
     abandons,
-    totalOrganismes: 0,
   };
 };
 

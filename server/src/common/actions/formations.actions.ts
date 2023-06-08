@@ -1,14 +1,9 @@
 import { ObjectId } from "mongodb";
 
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
-import { formationsDb, effectifsDb } from "@/common/model/collections";
-import { escapeRegExp } from "@/common/utils/regexUtils";
+import { formationsDb } from "@/common/model/collections";
 
 import { isValidCFD } from "../constants/validations";
-
-import { buildMongoPipelineFilterStages } from "./helpers/filters";
-
-const SEARCH_RESULTS_LIMIT = 50;
 
 /**
  * Checks if formation with given CFD exists
@@ -106,41 +101,4 @@ export const createFormation = async ({
   });
 
   return insertedId;
-};
-
-/**
- * Returns list of formations whose matching search criteria
- * @param {Object} searchCriteria
- * @return {Promise<Object[]>} Array of formations
- */
-export const searchFormations = async (searchCriteria) => {
-  const eligibleCfds = (
-    await effectifsDb()
-      .aggregate([...buildMongoPipelineFilterStages(searchCriteria), { $group: { _id: "$formation.cfd" } }])
-      .toArray()
-  ).map((row) => row._id);
-  const matchStage = searchCriteria.searchTerm
-    ? {
-        $or: [
-          { $text: { $search: searchCriteria.searchTerm, $caseSensitive: false, $diacriticSensitive: false } },
-          { libelle: { $regex: searchCriteria.searchTerm, $options: "i" } },
-          { cfd: new RegExp(escapeRegExp(searchCriteria.searchTerm), "g") },
-          { rncps: new RegExp(escapeRegExp(searchCriteria.searchTerm), "gi") },
-        ],
-        cfd: { $in: eligibleCfds },
-      }
-    : { cfd: { $in: eligibleCfds } };
-
-  const sortStage = searchCriteria.searchTerm
-    ? {
-        score: { $meta: "textScore" },
-        libelle: 1,
-      }
-    : { libelle: 1 };
-
-  const formations = await formationsDb()
-    .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
-    .toArray();
-
-  return formations;
 };
