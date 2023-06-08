@@ -24,9 +24,8 @@ import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import YupPassword from "yup-password";
 
-import { getOrganismeByUAIAndSIRET } from "@/common/api/tableauDeBord";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
-import { ACADEMIES_BY_CODE, REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE } from "@/common/constants/territoires";
+import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import { _get, _post } from "@/common/httpClient";
 import { Organisation } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -55,7 +54,10 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
       (async () => {
         try {
           try {
-            const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
+            const organisme = await _post("/api/v1/organismes/get-by-uai-siret", {
+              uai: organisation.uai,
+              siret: organisation.siret,
+            });
             setOrganisationFormationLabel(organisme.raison_sociale || organisme.nom || organisme.enseigne);
           } catch (err) {
             const errorMessage: string = err?.json?.data?.message || err.message;
