@@ -20,7 +20,6 @@ import "express-async-errors";
 import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
 import { getIndicateursNational, getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
-import { getFormationWithCfd, searchFormations } from "@/common/actions/formations.actions";
 import {
   effectifsFiltersSchema,
   fullEffectifsFiltersSchema,
@@ -587,24 +586,6 @@ function setupRoutes(app: Application) {
       const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
       res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
     });
-
-  /*
-   * formations
-   */
-  authRouter
-    .post(
-      "/api/formations/search",
-      validateRequestMiddleware({ body: organismeOrFormationSearchSchema() }),
-      returnResult(async (req) => {
-        return await searchFormations(req.body);
-      })
-    )
-    .get(
-      "/api/formations/:cfd",
-      returnResult(async (req) => {
-        return await getFormationWithCfd(req.params.cfd);
-      })
-    );
 
   /*
    * referentiel
