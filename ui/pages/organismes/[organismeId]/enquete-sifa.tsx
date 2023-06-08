@@ -1,7 +1,6 @@
 import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React from "react";
 
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
@@ -33,4 +32,5 @@ export default withAuth(PageEnqueteSIFADeSonOrganisme, [
   "ORGANISME_FORMATION_FORMATEUR",
   "ORGANISME_FORMATION_RESPONSABLE",
   "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+  "ADMINISTRATEUR",
 ]);
