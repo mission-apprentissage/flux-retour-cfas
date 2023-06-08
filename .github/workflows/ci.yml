@@ -20,16 +20,18 @@ jobs:
       - name: "Build"
         run: make build
 
-  deploy-recette:
-    if: github.ref == 'refs/heads/master'
-    name: "Déploiement en recette"
-    needs: tests
-    uses: "./.github/workflows/_deploy.yml"
-    with:
-      environment: recette
-      server_ip: 146.59.226.69
-      user: antoine
-    secrets:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+  # This workflow is temporary disabled since we don't want to have a downtime each time we deploy.
+
+  # deploy-recette:
+  #   if: github.ref == 'refs/heads/master'
+  #   name: "Déploiement en recette"
+  #   needs: tests
+  #   uses: "./.github/workflows/_deploy.yml"
+  #   with:
+  #     environment: recette
+  #     server_ip: 146.59.226.69
+  #     user: antoine
+  #   secrets:
+  #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  #     SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+  #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
