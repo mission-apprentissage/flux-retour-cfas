@@ -295,12 +295,11 @@ function IndicateursForm() {
               onChange={(tranchesAge) => updateState({ apprenant_tranchesAge: tranchesAge })}
             />
           </IndicateursFilter>
-          {/* <IndicateursFilter label="Genre">
-          <Box>Liste des filtres</Box>
-        </IndicateursFilter>
-        <IndicateursFilter label="RQTH">
-          <Box>Liste des filtres</Box>
-        </IndicateursFilter> */}
+          <IndicateursFilter label="Genre">
+            <Text as="i" color="grey.600">
+              Filtre bientôt disponible
+            </Text>
+          </IndicateursFilter>
         </SimpleGrid>
 
         <SimpleGrid gap={3}>
