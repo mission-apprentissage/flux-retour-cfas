@@ -270,7 +270,7 @@ function setupRoutes(app: Application) {
       })
     )
     .get(
-      "/api/v1/indicateurs-national",
+      "/api/v1/indicateurs/national",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, indicateursNationalFiltersSchema);
         return await getIndicateursNational(filters);

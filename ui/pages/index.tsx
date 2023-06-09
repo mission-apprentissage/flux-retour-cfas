@@ -322,7 +322,7 @@ interface IndicateursNationalFilters {
 
 function SectionApercuChiffresCles() {
   const router = useRouter();
-  const [indicateursFilters, setIndicateursFilters] = useState<IndicateursNationalFilters>({
+  const [indicateursFilters] = useState<IndicateursNationalFilters>({
     date: new Date(),
   });
 
@@ -332,7 +332,7 @@ function SectionApercuChiffresCles() {
   }>(
     ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(indicateursFilters))],
     () =>
-      _get("/api/v1/indicateurs-national", {
+      _get("/api/v1/indicateurs/national", {
         params: convertEffectifsFiltersToQuery(indicateursFilters),
       }),
     {
