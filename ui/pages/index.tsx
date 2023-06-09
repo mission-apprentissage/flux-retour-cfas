@@ -311,7 +311,7 @@ function PublicLandingPage() {
 
       <Container maxW="xl" bg="#FEF9F7" px="14" py="10" my="12">
         <Text fontWeight="bold" color="blue_cumulus_main" fontSize="gamma">
-          Suivez nos actualités sur LinkedIn “Mission Interministérielle pour l’apprentissage”
+          Suivez nos actualités sur LinkedIn «&nbsp;Mission Interministérielle pour l’apprentissage&nbsp;»
         </Text>
         <Link
           variant="whiteBg"
