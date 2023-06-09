@@ -127,13 +127,13 @@ function PublicLandingPage() {
             <List styleType="none" pt="8" spacing="2">
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="1" />
+                  <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="2" />
                   Gagnez du temps pour vos démarches administratives
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="1" />
+                  <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="2" />
                   Transmettez vos effectifs de manière sécurisée
                 </Flex>
               </ListItem>
@@ -152,13 +152,13 @@ function PublicLandingPage() {
             <List styleType="none" pt="8" spacing="2">
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <TeamIcon boxSize="16px" mr="1" />
+                  <TeamIcon boxSize="16px" mr="2" />
                   Suivez l’activité de votre réseau en temps réel
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="1" />
+                  <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="2" />
                   Centraliser les informations utiles à l’animation de celui-ci
                 </Flex>
               </ListItem>
@@ -177,13 +177,13 @@ function PublicLandingPage() {
             <List styleType="none" pt="8" spacing="2">
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/bar-chart.svg" boxSize="16px" alt="" mr="1" />
+                  <Image src="/images/landing-cards/bar-chart.svg" boxSize="16px" alt="" mr="2" />
                   Visualisez des données ciblées sur votre territoire
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="1" />
+                  <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="2" />
                   <Text>
                     Mobiliser rapidement le{" "}
                     <Text as="abbr" title="SPIE : Service public de l’insertion et de l’emploi" cursor="help">
