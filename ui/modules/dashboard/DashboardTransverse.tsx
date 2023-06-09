@@ -23,6 +23,7 @@ import {
   OrganisationOperateurPublicDepartement,
   OrganisationOperateurPublicRegion,
 } from "@/common/internal/Organisation";
+import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
@@ -177,19 +178,13 @@ const DashboardTransverse = () => {
           effectifs de l’apprentissage
         </Text>
         <Text fontSize={14} mt="4">
-          Le{" "}
+          Le <strong>{formatDateDayMonthYear(effectifsFilters.date)}</strong>, le tableau de bord de l’apprentissage
+          recense <strong>{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</strong> dans votre
+          territoire, dont <strong>{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</strong>,{" "}
           <strong>
-            {effectifsFilters.date.toLocaleDateString(undefined, {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </strong>
-          , le tableau de bord de l’apprentissage recense{" "}
-          <strong>{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</strong> dans votre territoire,
-          dont <strong>{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</strong>,{" "}
-          <strong>{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</strong> et{" "}
-          <strong>{formatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes sans contrat</strong>.
+            {formatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes en formation sans contrat
+          </strong>{" "}
+          et <strong>{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</strong>.
         </Text>
         <HStack mt={8}>
           <Box>Filtrer par</Box>
