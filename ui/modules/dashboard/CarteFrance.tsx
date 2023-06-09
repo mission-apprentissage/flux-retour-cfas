@@ -98,7 +98,7 @@ function CarteFrance<Data extends object>(props: Props<Data>) {
           }
         `}
       </style>
-      <HStack>
+      <HStack flex="1">
         <Box>
           {bins?.map((bin, i) => (
             <Box
