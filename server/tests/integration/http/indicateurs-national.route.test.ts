@@ -1,8 +1,15 @@
 import { AxiosInstance } from "axiosist";
 
-import { organismesDb } from "@/common/model/collections";
-import { organismes } from "@tests/utils/permissions";
-import { initTestApp } from "@tests/utils/testUtils";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
+import {
+  historySequenceApprenti,
+  historySequenceApprentiToAbandon,
+  historySequenceApprentiToInscrit,
+  historySequenceInscrit,
+} from "@tests/data/historySequenceSamples";
+import { createSampleEffectif } from "@tests/data/randomizedSample";
+import { commonEffectifsAttributes, organismes } from "@tests/utils/permissions";
+import { generate, initTestApp } from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
@@ -11,16 +18,74 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
-    await organismesDb().insertMany(organismes);
+
+    const anneeScolaire = "2022-2023";
+    await Promise.all([
+      organismesDb().insertMany(organismes),
+      effectifsDb().insertMany([
+        // 5 apprentis
+        ...generate(5, () =>
+          createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceApprenti,
+            },
+          })
+        ),
+
+        // 10 Inscrit
+        ...generate(10, () =>
+          createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceInscrit,
+            },
+          })
+        ),
+
+        // 15 ApprentiToAbandon
+        ...generate(15, () =>
+          createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceApprentiToAbandon,
+            },
+          })
+        ),
+
+        // 20 ApprentiToInscrit
+        ...generate(20, () =>
+          createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceApprentiToInscrit,
+            },
+          })
+        ),
+      ]),
+    ]);
   });
 
   it("Accès public", async () => {
-    const date = "2020-10-10T00:00:00.000Z";
+    const date = "2023-04-13T10:00:00.000Z";
     const response = await httpClient.get(`/api/v1/indicateurs/national?date=${date}`);
 
     expect(response.status).toEqual(200);
     expect(response.data).toStrictEqual({
-      indicateursEffectifs: [],
+      indicateursEffectifs: [
+        {
+          departement: "56",
+          abandons: 15,
+          apprenants: 15, // FIXME après rebase master
+          apprentis: 5,
+          inscritsSansContrat: 10,
+          rupturants: 20,
+        },
+      ],
       indicateursOrganismes: {
         total: 4,
         responsablesFormateurs: 2,
