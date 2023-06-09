@@ -305,7 +305,7 @@ function IndicateursForm() {
           <Text color="grey.800" mx={3}>
             Retrouvez ici les indicateurs et les organismes de formation de votre territoire uniquement. Vous avez la
             possibilité de télécharger les listes <Text as="strong">nominatives</Text> pour les jeunes en formation sans
-            contrat, rupturants et sortis d’apprentissage.
+            contrat, rupturants et sorties d’apprentissage.
           </Text>
         </Ribbons>
 
