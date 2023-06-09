@@ -13,6 +13,7 @@ interface Props<Data extends object> {
   dataKey: string; // 1 seule via param pour l'instant, sera géré plus tard via filtre interne uniquement
   minColor: string;
   maxColor: string;
+  pourcentage?: boolean;
 }
 
 function CarteFrance<Data extends object>(props: Props<Data>) {
@@ -113,7 +114,9 @@ function CarteFrance<Data extends object>(props: Props<Data>) {
               }}
               whiteSpace="nowrap"
             >
-              {prettyFormatNumber(bin.minValue)} - {prettyFormatNumber(bin.maxValue)}
+              {prettyFormatNumber(bin.minValue)}
+              {props.pourcentage && "%"} - {prettyFormatNumber(bin.maxValue)}
+              {props.pourcentage && "%"}
             </Box>
           ))}
         </Box>

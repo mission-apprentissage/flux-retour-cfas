@@ -221,7 +221,7 @@ function IndicateursGrid({
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
         <Card
-          label="dont sorties d’apprentissage"
+          label="sorties d’apprentissage"
           count={indicateursEffectifs.abandons}
           tooltipLabel={
             <div>
