@@ -68,6 +68,12 @@ function DashboardPage() {
 function PublicLandingPage() {
   return (
     <SimplePage title="Tableau de bord de l’apprentissage">
+      <Center bg="#F5F5FE" color="plaininfo" h="14" fontWeight="bold" lineHeight="1.2em">
+        <Image src="/images/landing-cards/info.svg" alt="" userSelect="none" mr="3" />
+        Taux de fiabilisation des données exposées sur le tableau de bord&nbsp;: +&nbsp;90%. Si vous constatez des
+        erreurs résiduelles, merci de nous le signaler.
+      </Center>
+
       <Box
         borderTop="solid 1px"
         borderTopColor="grey.300"
