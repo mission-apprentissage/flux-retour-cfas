@@ -7,19 +7,19 @@ interface NiveauFormation {
 const niveaux: NiveauFormation[] = [
   {
     key: "3",
-    label: "Niveau 3 (CAP…)",
+    label: "Niveau 3 (CAP, BEP…)",
   },
   {
     key: "4",
-    label: "Niveau 4 (Bac…)",
+    label: "Niveau 4 (Baccalauréat)",
   },
   {
     key: "5",
-    label: "Niveau 5 (BTS, DUT…)",
+    label: "Niveau 5 (BTS, DUT, DEUG)",
   },
   {
     key: "6",
-    label: "Niveau 6 (Licence…)",
+    label: "Niveau 6 (Licence, Bachelor)",
   },
   {
     key: "7",
