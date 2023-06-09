@@ -118,7 +118,7 @@ function PublicLandingPage() {
             <Center>
               <VStack>
                 <Image src="/images/landing-cards/school.svg" alt="" />
-                <CardLabel>OFA</CardLabel>
+                <CardLabel>ORGANISME DE FORMATION (OFA)</CardLabel>
                 <Text fontSize="delta" fontWeight="bold">
                   Simplifiez vos démarches
                 </Text>
@@ -127,14 +127,14 @@ function PublicLandingPage() {
             <List styleType="none" pt="8" spacing="2">
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="1" />
-                  Transmettez vos effectifs de manière sécurisée
+                  <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="1" />
+                  Gagnez du temps pour vos démarches administratives
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="1" />
-                  Gagnez du temps pour vos démarches administratives
+                  <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="1" />
+                  Transmettez vos effectifs de manière sécurisée
                 </Flex>
               </ListItem>
             </List>
@@ -153,13 +153,13 @@ function PublicLandingPage() {
               <ListItem>
                 <Flex align="center" fontSize="omega">
                   <TeamIcon boxSize="16px" mr="1" />
-                  Informez-vous en temps réel pour suivre votre réseau
+                  Suivez l’activité de votre réseau en temps réel
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex align="center" fontSize="omega">
                   <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="1" />
-                  Pilotez votre réseau par la donnée en temps réel
+                  Centraliser les informations utiles à l’animation de celui-ci
                 </Flex>
               </ListItem>
             </List>
@@ -184,7 +184,13 @@ function PublicLandingPage() {
               <ListItem>
                 <Flex align="center" fontSize="omega">
                   <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="1" />
-                  Identifiez rapidement des besoins d’accompagnement
+                  <Text>
+                    Mobiliser rapidement le{" "}
+                    <Text as="abbr" title="SPIE : Service public de l’insertion et de l’emploi" cursor="help">
+                      SPIE
+                    </Text>{" "}
+                    en cas de difficultés des apprentis
+                  </Text>
                 </Flex>
               </ListItem>
             </List>
@@ -254,16 +260,16 @@ function PublicLandingPage() {
               </HStack>
               <Image
                 src="/images/landing-missions-organismes.svg"
-                alt="Simplifier les démarches"
+                alt="Simplifiez vos démarches"
                 userSelect="none"
                 h={["160px", "160px", "120px", "120px"]}
                 alignSelf="center"
               />
               <Heading as="h3" fontSize="gamma">
-                Simplifier les démarches
+                Simplifiez vos démarches
               </Heading>
               <Text color="#3A3A3A" fontSize="zeta">
-                Certaines démarches administratives pour les OFA et leurs réseaux
+                En permettant facilement de répondre aux multiples enquêtes pour lesquelles vous êtes sollicités.
               </Text>
             </VStack>
 
@@ -296,7 +302,7 @@ function PublicLandingPage() {
                 Piloter l’apprentissage
               </Heading>
               <Text color="#3A3A3A" fontSize="zeta">
-                Grâce aux données en temps réel dans un territoire ou un secteur économique
+                Pour adapter les besoins et l’offre de formation sur un territoire ou sur un secteur économique.
               </Text>
             </VStack>
           </Stack>
@@ -333,6 +339,7 @@ function CardLabel({ children }: { children: ReactNode }) {
       fontSize="omega"
       borderRadius="md"
       fontWeight="bold"
+      textAlign="center"
     >
       {children}
     </Box>
