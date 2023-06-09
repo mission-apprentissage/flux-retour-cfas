@@ -79,8 +79,8 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
       indicateursEffectifs: [
         {
           departement: "56",
+          apprenants: 35,
           abandons: 15,
-          apprenants: 15, // FIXME après rebase master
           apprentis: 5,
           inscritsSansContrat: 10,
           rupturants: 20,
