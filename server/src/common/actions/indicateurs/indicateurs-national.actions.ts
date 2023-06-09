@@ -1,10 +1,13 @@
 import { format } from "date-fns";
 import { z } from "zod";
 
+import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { tryCachedExecution } from "@/common/utils/cacheUtils";
 
-import { getIndicateursEffectifsParDepartement, getIndicateursOrganismesParDepartement } from "./indicateurs.actions";
+import { OrganismesFilters, buildMongoFilters, organismesFiltersConfigurations } from "../helpers/filters";
+
+import { getIndicateursEffectifsParDepartement } from "./indicateurs.actions";
 
 const indicateursNationalCacheExpirationMs = 3600 * 1000; // 1 hour
 
@@ -23,9 +26,55 @@ export async function getIndicateursNational(filters: IndicateursNationalFilters
       const ctx = { organisation: { type: "ADMINISTRATEUR" } } as AuthContext; // Hack le temps de refactorer
       const [indicateursEffectifs, indicateursOrganismes] = await Promise.all([
         getIndicateursEffectifsParDepartement(ctx, filters),
-        getIndicateursOrganismesParDepartement(ctx, filters),
+        getIndicateursOrganismesNature(filters),
       ]);
       return { indicateursEffectifs, indicateursOrganismes };
     }
   );
+}
+
+interface IndicateursOrganismesNature {
+  total: number;
+  responsables: number;
+  responsablesFormateurs: number;
+  formateurs: number;
+}
+
+export async function getIndicateursOrganismesNature(filters: OrganismesFilters): Promise<IndicateursOrganismesNature> {
+  const indicateurs = (await organismesDb()
+    .aggregate([
+      {
+        $match: {
+          $and: [...buildMongoFilters(filters, organismesFiltersConfigurations), { est_dans_le_referentiel: true }],
+        },
+      },
+      {
+        $project: {
+          responsables: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable"] }, 1, 0] },
+          responsablesFormateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable_formateur"] }, 1, 0] },
+          formateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "formateur"] }, 1, 0] },
+        },
+      },
+      {
+        $group: {
+          _id: "",
+          responsables: { $sum: "$responsables" },
+          responsablesFormateurs: { $sum: "$responsablesFormateurs" },
+          formateurs: { $sum: "$formateurs" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total: {
+            $add: ["$responsables", "$responsablesFormateurs", "$formateurs"],
+          },
+          responsables: 1,
+          responsablesFormateurs: 1,
+          formateurs: 1,
+        },
+      },
+    ])
+    .next()) as IndicateursOrganismesNature;
+  return indicateurs;
 }

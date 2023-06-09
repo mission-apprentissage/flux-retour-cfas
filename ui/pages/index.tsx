@@ -2,6 +2,7 @@ import {
   Box,
   Center,
   Container,
+  Divider,
   Flex,
   Grid,
   GridItem,
@@ -13,6 +14,7 @@ import {
   Spinner,
   Stack,
   Text,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
@@ -23,18 +25,17 @@ import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDate } from "@/common/utils/dateUtils";
-import { prettyFormatNumber } from "@/common/utils/stringUtils";
+import { formatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import useAuth from "@/hooks/useAuth";
 import CarteFrance from "@/modules/dashboard/CarteFrance";
 import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
 import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
+import { TeamIcon } from "@/modules/dashboard/icons";
 import { convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
-import {
-  IndicateursEffectifsAvecDepartement,
-  IndicateursOrganismesAvecDepartement,
-} from "@/modules/models/indicateurs";
+import { IndicateursEffectifsAvecDepartement } from "@/modules/models/indicateurs";
+import { LockFill } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -136,7 +137,7 @@ function PublicLandingPage() {
             <Center>
               <VStack>
                 <Image src="/images/landing-cards/network.svg" alt="" />
-                <CardLabel>RÉSEAU DE CFA</CardLabel>
+                <CardLabel>RÉSEAU D’OFA</CardLabel>
                 <Text fontSize="delta" fontWeight="bold">
                   Facilitez votre animation
                 </Text>
@@ -145,7 +146,7 @@ function PublicLandingPage() {
             <List styleType="none" pt="8" spacing="2">
               <ListItem>
                 <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/team.svg" boxSize="16px" alt="" mr="1" />
+                  <TeamIcon boxSize="16px" mr="1" />
                   Informez-vous en temps réel pour suivre votre réseau
                 </Flex>
               </ListItem>
@@ -256,7 +257,7 @@ function PublicLandingPage() {
                 Simplifier les démarches
               </Heading>
               <Text color="#3A3A3A" fontSize="zeta">
-                Certaines démarches administratives pour les CFA et leurs réseaux
+                Certaines démarches administratives pour les OFA et leurs réseaux
               </Text>
             </VStack>
 
@@ -320,6 +321,13 @@ interface IndicateursNationalFilters {
   organisme_regions?: string[];
 }
 
+interface IndicateursOrganismesNature {
+  total: number;
+  responsables: number;
+  responsablesFormateurs: number;
+  formateurs: number;
+}
+
 function SectionApercuChiffresCles() {
   const router = useRouter();
   const [indicateursFilters] = useState<IndicateursNationalFilters>({
@@ -328,7 +336,7 @@ function SectionApercuChiffresCles() {
 
   const { data: indicateursNational, isLoading: indicateursNationalLoading } = useQuery<{
     indicateursEffectifs: IndicateursEffectifsAvecDepartement[];
-    indicateursOrganismes: IndicateursOrganismesAvecDepartement[];
+    indicateursOrganismes: IndicateursOrganismesNature;
   }>(
     ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(indicateursFilters))],
     () =>
@@ -370,102 +378,153 @@ function SectionApercuChiffresCles() {
       <Text fontSize="sm" fontWeight="bold">
         Répartition des effectifs de l’apprentissage au National en temps réel.
       </Text>
-      <Text fontSize="sm">
+      <Text fontSize="sm" color="mgalt">
         Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
         en apprentissage ne transmettent pas encore leurs données au tableau de bord.
       </Text>
-      <Text fontSize="sm">
+      <Text fontSize="sm" mt="2">
         Le <Text as="b">{formatDate(new Date(), "d MMMM yyyy")}</Text>, le tableau de bord de l’apprentissage recense
         sur le territoire national{" "}
-        <Text as="b">{prettyFormatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</Text>, dont{" "}
-        <Text as="b">{prettyFormatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</Text>,{" "}
-        <Text as="b">{prettyFormatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes sans contrat</Text>{" "}
-        et <Text as="b">{prettyFormatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</Text>.
+        <Text as="b">{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</Text>, dont{" "}
+        <Text as="b">{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</Text>,{" "}
+        <Text as="b">{formatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes sans contrat</Text> et{" "}
+        <Text as="b">{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</Text>.
       </Text>
 
-      <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(2, 1fr)" gap={4} my={8}>
-        <GridItem bg="galt" py="8" px="12">
-          <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
-            Répartition des effectifs au national
-          </Heading>
+      <HStack mt="4">
+        <LockFill color="bluefrance" boxSize="4" />
+        <Text>
+          Pour visualiser l’intégralité des données consultables,{" "}
+          <Link href="/auth/connexion" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            connectez-vous
+          </Link>{" "}
+          ou{" "}
+          <Link href="/auth/inscription" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            créez un compte
+          </Link>
+          .
+        </Text>
+      </HStack>
+
+      <Grid templateColumns="1fr 2fr" gap={4} my={8}>
+        <GridItem bg="#F5F5FE">
+          <Center h="100%">
+            <HStack gap={3} py="10" px="12">
+              <Box alignSelf={"start"} pt="3">
+                <Image src="/images/landing-cards/community.svg" boxSize="10" alt="" userSelect="none" />
+              </Box>
+              <Box>
+                <Text fontSize="40px" fontWeight="700" color="bluefrance">
+                  {formatNumber(indicateursNational?.indicateursOrganismes?.total)}
+                </Text>
+                <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
+                  organismes de formation en apprentissage
+                  <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
+                    <Box
+                      as="i"
+                      className="ri-information-line"
+                      fontSize="epsilon"
+                      color="grey.500"
+                      marginLeft="1w"
+                      verticalAlign="middle"
+                    />
+                  </Tooltip>
+                </Text>
+                <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
+                <Text fontSize="zeta" color="mgalt">
+                  dont&nbsp;:
+                </Text>
+                <Text fontSize="zeta">
+                  <Text as="b">{formatNumber(indicateursNational?.indicateursOrganismes?.responsables)}</Text>{" "}
+                  responsables
+                </Text>
+                <Text fontSize="zeta">
+                  <Text as="b">{formatNumber(indicateursNational?.indicateursOrganismes?.responsablesFormateurs)}</Text>{" "}
+                  responsables et formateurs
+                </Text>
+                <Text fontSize="zeta">
+                  <Text as="b">{formatNumber(indicateursNational?.indicateursOrganismes?.formateurs)}</Text> formateurs
+                </Text>
+              </Box>
+            </HStack>
+          </Center>
         </GridItem>
 
-        <GridItem bg="galt" py="8" px="12">
-          {indicateursNationalLoading && (
+        <GridItem bg="#F5F5FE">
+          <HStack>
             <Center h="100%">
-              <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
+              <HStack gap={3} py="10" px="12">
+                <Box alignSelf={"start"} pt="3">
+                  <TeamIcon fill="bluefrance" />
+                </Box>
+                <Box>
+                  <Text fontSize="40px" fontWeight="700" color="bluefrance">
+                    {formatNumber(indicateursEffectifsNationaux?.apprenants)}
+                  </Text>
+                  <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
+                    apprenants
+                    <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
+                      <Box
+                        as="i"
+                        className="ri-information-line"
+                        fontSize="epsilon"
+                        color="grey.500"
+                        marginLeft="1w"
+                        verticalAlign="middle"
+                      />
+                    </Tooltip>
+                  </Text>
+                  <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
+                  <Text fontSize="zeta" color="mgalt">
+                    dont&nbsp;:
+                  </Text>
+                  <Text fontSize="zeta">
+                    <Text as="b">{formatNumber(indicateursEffectifsNationaux?.apprentis)}</Text> apprentis
+                  </Text>
+                  <Text fontSize="zeta">
+                    <Text as="b">{formatNumber(indicateursEffectifsNationaux?.inscritsSansContrat)}</Text> en formation
+                    sans contrat
+                  </Text>
+                  <Text fontSize="zeta">
+                    <Text as="b">{formatNumber(indicateursEffectifsNationaux?.rupturants)}</Text> rupturants
+                  </Text>
+                </Box>
+              </HStack>
             </Center>
-          )}
-          {indicateursNational?.indicateursEffectifs && (
-            <CarteFrance
-              donneesAvecDepartement={indicateursNational.indicateursEffectifs}
-              dataKey="apprenants"
-              minColor="#DDEBFB"
-              maxColor="#366EC1"
-              tooltipContent={(indicateurs) =>
-                indicateurs ? (
-                  <>
-                    <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
-                    <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
-                    <Box>Jeunes en formation sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
-                    <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
-                    <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
-                  </>
-                ) : (
-                  <Box>Données non disponibles</Box>
-                )
-              }
-            />
-          )}
+            {indicateursNationalLoading && (
+              <Center h="100%" w="100%">
+                <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
+              </Center>
+            )}
+            <Center h="100%" w="100%" p="8">
+              {indicateursNational?.indicateursEffectifs && (
+                <CarteFrance
+                  donneesAvecDepartement={indicateursNational.indicateursEffectifs}
+                  dataKey="apprenants"
+                  minColor="#DDEBFB"
+                  maxColor="#366EC1"
+                  tooltipContent={(indicateurs) =>
+                    indicateurs ? (
+                      <>
+                        <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
+                        <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
+                        <Box>Jeunes en formation sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
+                        <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
+                        <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
+                      </>
+                    ) : (
+                      <Box>Données non disponibles</Box>
+                    )
+                  }
+                />
+              )}
+            </Center>
+          </HStack>
         </GridItem>
       </Grid>
     </Container>
   );
 }
-
-// interface CardProps {
-//   label: string;
-//   count: number;
-//   tooltipLabel: ReactNode;
-//   icon: ReactNode;
-//   big?: boolean;
-//   children?: ReactNode;
-// }
-// function Card({ label, count, tooltipLabel, icon, big = false, children }: CardProps) {
-//   return (
-//     <Center h="100%" justifyContent={big ? "center" : "start"} py="6" px="10">
-//       <HStack gap={3}>
-//         <Box alignSelf={"start"} pt="3">
-//           {icon}
-//         </Box>
-//         <Box>
-//           <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
-//             {formatNumber(count)}
-//           </Text>
-//           <Text fontSize={12} whiteSpace="nowrap">
-//             {label}
-//             <Tooltip
-//               background="bluefrance"
-//               color="white"
-//               label={<Box padding="1w">{tooltipLabel}</Box>}
-//               aria-label={tooltipLabel as any}
-//             >
-//               <Box
-//                 as="i"
-//                 className="ri-information-line"
-//                 fontSize="epsilon"
-//                 color="grey.500"
-//                 marginLeft="1w"
-//                 verticalAlign="middle"
-//               />
-//             </Tooltip>
-//           </Text>
-//           {children}
-//         </Box>
-//       </HStack>
-//     </Center>
-//   );
-// }
 
 export default function Home() {
   const { auth } = useAuth();
