@@ -371,7 +371,7 @@ function SectionApercuChiffresCles() {
   );
 
   return (
-    <Container maxW="xl" py="8">
+    <Container maxW="xl" py="8" px="0">
       <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
         Aperçu des chiffres-clés de l’apprentissage
       </Heading>
