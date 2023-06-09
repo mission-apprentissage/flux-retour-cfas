@@ -12,6 +12,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { ReactNode } from "react";
 
 import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -299,7 +300,7 @@ function PublicLandingPage() {
   );
 }
 
-function CardLabel({ children }) {
+function CardLabel({ children }: { children: ReactNode }) {
   return (
     <Box
       backgroundColor="purpleglycine.950"
