@@ -302,6 +302,23 @@ function PublicLandingPage() {
           </Stack>
         </Container>
       </Box>
+
+      <Container maxW="xl" bg="#FEF9F7" px="14" py="10" my="12">
+        <Text fontWeight="bold" color="blue_cumulus_main" fontSize="gamma">
+          Suivez nos actualités sur LinkedIn “Mission Interministérielle pour l’apprentissage”
+        </Text>
+        <Link
+          variant="whiteBg"
+          mt="4"
+          display="inline-flex"
+          alignItems="center"
+          href="https://fr.linkedin.com/company/mission-apprentissage"
+          isExternal
+        >
+          <Image src="/images/landing-cards/linkedin.svg" alt="" userSelect="none" mr="3" />
+          Voir notre page
+        </Link>
+      </Container>
     </SimplePage>
   );
 }

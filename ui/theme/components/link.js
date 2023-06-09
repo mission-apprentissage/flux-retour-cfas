@@ -40,6 +40,16 @@ const Link = {
       py: 2,
       _hover: { textDecoration: "none", bg: "#00000020" },
     },
+    whiteBg: {
+      border: "1px solid",
+      borderColor: "bluefrance",
+      bg: "#ffffff",
+      color: "bluefrance",
+      whiteSpace: "nowrap",
+      px: 6,
+      py: 2,
+      _hover: { textDecoration: "none", bg: "#00000020" },
+    },
   },
 };
 
