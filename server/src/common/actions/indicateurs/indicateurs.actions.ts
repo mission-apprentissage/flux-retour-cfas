@@ -174,7 +174,7 @@ export async function getIndicateursEffectifsParDepartement(
           _id: 0,
           departement: "$_id",
           apprenants: {
-            $sum: ["$apprentis", "$inscritsSansContrat"],
+            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
           },
           apprentis: 1,
           inscritsSansContrat: 1,
@@ -420,7 +420,7 @@ export async function getIndicateursEffectifsParOrganisme(
           nature: "$organisme.nature",
 
           apprenants: {
-            $sum: ["$apprentis", "$inscritsSansContrat"],
+            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
           },
           apprentis: 1,
           inscritsSansContrat: 1,

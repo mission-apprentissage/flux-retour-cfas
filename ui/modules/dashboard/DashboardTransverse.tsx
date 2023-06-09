@@ -23,7 +23,8 @@ import {
   OrganisationOperateurPublicDepartement,
   OrganisationOperateurPublicRegion,
 } from "@/common/internal/Organisation";
-import { prettyFormatNumber } from "@/common/utils/stringUtils";
+import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
+import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import withAuth from "@/components/withAuth";
@@ -168,11 +169,22 @@ const DashboardTransverse = () => {
           Aperçu des données de l’apprentissage
         </Heading>
         <Text fontSize={14} mt="8">
-          Ces chiffres reflètent partiellement les effectifs de l’apprentissage
+          Ces chiffres reflètent partiellement les effectifs de l’apprentissage&nbsp;:
           <Text as="span" fontWeight="bold">
             {auth.organisation.type === "TETE_DE_RESEAU" && " dans votre réseau"}
-          </Text>{" "}
-          : une partie des organismes de formation ne transmettent pas encore leurs données au tableau de bord.
+          </Text>
+          &nbsp;: une partie des organismes de formation en apprentissage ne transmettent pas encore leurs données au
+          tableau de bord (voir carte “Taux de couverture” ci-dessous). Ces chiffres reflètent partiellement les
+          effectifs de l’apprentissage
+        </Text>
+        <Text fontSize={14} mt="4">
+          Le <strong>{formatDateDayMonthYear(effectifsFilters.date)}</strong>, le tableau de bord de l’apprentissage
+          recense <strong>{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</strong> dans votre
+          territoire, dont <strong>{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</strong>,{" "}
+          <strong>
+            {formatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes en formation sans contrat
+          </strong>{" "}
+          et <strong>{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</strong>.
         </Text>
         <HStack mt={8}>
           <Box>Filtrer par</Box>
@@ -261,10 +273,11 @@ const DashboardTransverse = () => {
                 color="white"
                 label={
                   <Box padding="1w">
-                    Ce taux traduit le nombre d’organismes (sauf responsables) qui transmettent au tableau de bord. Les
-                    organismes qui transmettent mais ne font pas partie du référentiel ne rentrent pas en compte dans ce
-                    taux. Il est conseillé d’avoir un minimum de 80% d’établissements transmetteurs afin de garantir la
-                    viabilité des enquêtes menées auprès de ces derniers.
+                    Ce taux traduit le nombre d’organismes dispensant une formation en apprentissage (sauf responsables)
+                    qui transmettent au tableau de bord. Les organismes qui transmettent mais ne font pas partie du
+                    référentiel ne rentrent pas en compte dans ce taux. Il est conseillé d’avoir un minimum de 80%
+                    d’établissements transmetteurs afin de garantir la viabilité des enquêtes menées auprès de ces
+                    derniers.
                   </Box>
                 }
                 aria-label="Informations sur le taux de couverture des organismes"
@@ -291,6 +304,7 @@ const DashboardTransverse = () => {
                 dataKey="tauxCouverture"
                 minColor="#ECF5E0"
                 maxColor="#4F6C21"
+                pourcentage
                 tooltipContent={(indicateurs) =>
                   indicateurs ? (
                     <>
