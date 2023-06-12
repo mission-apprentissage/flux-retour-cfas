@@ -313,6 +313,10 @@ function PublicLandingPage() {
         <Text fontWeight="bold" color="blue_cumulus_main" fontSize="gamma">
           Suivez nos actualités sur LinkedIn «&nbsp;Mission Interministérielle pour l’apprentissage&nbsp;»
         </Text>
+        <Text mt={4}>
+          La Mission interministérielle pour l’apprentissage et les trajectoires professionnelles construit des services
+          numériques qui facilitent les entrées en apprentissage.
+        </Text>
         <Link
           variant="whiteBg"
           mt="6"
