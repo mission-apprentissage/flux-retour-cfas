@@ -416,7 +416,7 @@ function SectionApercuChiffresCles() {
         Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
         en apprentissage ne transmettent pas encore leurs données au tableau de bord.
       </Text>
-      <Text fontSize="sm" mt="4" p="3" bg="#F9F8F6" borderRadius="4px">
+      <Text fontSize="sm" mt="4" p="3" bg="#F9F8F6" borderRadius="4px" lineHeight="1">
         Le <Text as="b">{formatDate(new Date(), "d MMMM yyyy")}</Text>, le tableau de bord de l’apprentissage recense
         sur le territoire national{" "}
         <Text as="b">{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</Text>, dont{" "}
