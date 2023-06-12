@@ -4,6 +4,7 @@ import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
 } from "@/common/constants/fiabilisation";
+import { OrganismesReferentiel } from "@/common/model/@types";
 import {
   organismesReferentielDb,
   fiabilisationUaiSiretDb,
@@ -48,7 +49,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         relatedFormations: [],
       });
 
-      const allReferentielOrganismes = [organismeReferentiel];
+      const allReferentielOrganismes: OrganismesReferentiel[] = [organismeReferentiel];
       const isCoupleFiable = await checkCoupleFiable(coupleTdb, allReferentielOrganismes);
       assert.deepEqual(isCoupleFiable, true);
 
@@ -82,7 +83,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         relatedFormations: [],
       });
 
-      const allReferentielOrganismes = [organismeReferentiel];
+      const allReferentielOrganismes: OrganismesReferentiel[] = [organismeReferentiel];
       const isCoupleFiable = await checkCoupleFiable(coupleTdb, allReferentielOrganismes);
 
       // Vérification de la non création du couple en tant que FIABLE
