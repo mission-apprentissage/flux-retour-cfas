@@ -1,0 +1,50 @@
+name: tableau-de-bord
+
+services:
+  traefik:
+    image: traefik:v2.9.6
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/:/etc/traefik/:ro
+
+  mongodb:
+    image: mongo:6.0.2-focal
+    restart: unless-stopped
+    mem_limit: 4g
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongodb:/data/db
+
+  clamav:
+    image: clamav/clamav:0.105.1
+    restart: unless-stopped
+    mem_limit: 3g
+    ports:
+      - "127.0.0.1:3310:3310"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      interval: 60s
+      retries: 3
+      start_period: 120s
+
+  mailpit:
+    image: axllent/mailpit:v1.5.5
+    restart: unless-stopped
+    mem_limit: 128m
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+    environment:
+      - MP_DATA_FILE=/data/mailpit.db
+    volumes:
+      - mailpit:/data
+
+volumes:
+  mailpit:
+  mongodb:
+  traefik:

@@ -1,2 +1,5 @@
-node_modules/
 .git/
+node_modules/
+coverage/
+# pas utilisé pour l'instant, on recompile via tsx en prod
+.build/

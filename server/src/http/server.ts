@@ -74,7 +74,6 @@ import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
-import { packageJson } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
@@ -170,7 +169,8 @@ function setupRoutes(app: Application) {
       returnResult(async () => {
         return {
           name: "TDB Apprentissage API",
-          version: packageJson.version,
+          date: config.APPLICATION_DATE,
+          version: config.APPLICATION_VERSION,
           env: config.env,
         };
       })
@@ -188,7 +188,8 @@ function setupRoutes(app: Application) {
 
         return {
           name: "TDB Apprentissage API",
-          version: packageJson.version,
+          date: config.APPLICATION_DATE,
+          version: config.APPLICATION_VERSION,
           env: config.env,
           healthcheck: {
             mongodb: mongodbHealthy,

@@ -1,0 +1,31 @@
+log:
+  level: INFO
+
+experimental:
+  http3: true
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entrypoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: ":443"
+    http3: {}
+    http:
+      middlewares:
+        - compress@file
+        - headers@file
+
+providers:
+  file:
+    filename: /etc/traefik/proxy.yml
+    watch: true
+
+metrics:
+  prometheus:
+    manualRouting: true

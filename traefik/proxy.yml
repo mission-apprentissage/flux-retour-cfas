@@ -1,0 +1,79 @@
+http:
+  middlewares:
+    compress:
+      compress: {}
+    headers:
+      headers:
+        # customFrameOptionsValue: sameorigin
+        contentTypeNosniff: true
+        browserXssFilter: true
+        forceSTSHeader: true
+        stsSeconds: 315360000
+        stsIncludeSubdomains: true
+        referrerPolicy: strict-origin-when-cross-origin
+        # stsPreload: true
+    stripprefix:
+      stripprefix:
+        prefixes:
+          - "/smtp"
+
+  routers:
+    ui:
+      rule: "Host(`tdb.local`)"
+      priority: 1
+      service: ui
+      tls:
+        domains:
+          - main: tdb.local
+
+    server:
+      rule: "Host(`tdb.local`) && PathPrefix(`/api/`)"
+      priority: 2
+      service: server
+      tls:
+        domains:
+          - main: tdb.local
+
+    mailpit:
+      rule: "Host(`tdb.local`) && PathPrefix(`/smtp/`)"
+      priority: 2
+      service: mailpit
+      middlewares:
+        - stripprefix
+      tls:
+        domains:
+          - main: tdb.local
+
+  services:
+    ui:
+      loadBalancer:
+        servers:
+          - url: http://127.0.0.1:3000
+    server:
+      loadBalancer:
+        servers:
+          - url: http://127.0.0.1:5000
+    mailpit:
+      loadBalancer:
+        servers:
+          - url: http://127.0.0.1:8025
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      sniStrict: true
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+  certificates:
+    - certFile: /etc/traefik/certs/tdb.local.crt
+      keyFile: /etc/traefik/certs/tdb.local.key

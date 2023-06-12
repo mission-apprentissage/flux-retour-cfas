@@ -11,11 +11,6 @@ exception="$exception|server/src/jobs/hydrate/reference/bassins_emploi_communes.
 exception="$exception|eslintrc.json|app.json|jsconfig.json|tsconfig.json|rome.json"
 exception="$exception)$|^server/tests)"
 
-if grep -q vault ".infra/ansible/roles/setup/vars/main/vault.yml"; then
-  echo "Oh no! Your vault.yml is not encryted!"
-  exit 1
-fi
-
 # Note: we remove deleted files from the list (name-status starting with D)
 files=$(git diff --cached --name-status | grep "^[^D]" | grep -v -E "$exception" | grep -E "$sensible_files_pattern")
 if [ -z "$files" ]; then

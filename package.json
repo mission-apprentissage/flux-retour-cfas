@@ -11,11 +11,10 @@
     "rome": "^11.0.0"
   },
   "scripts": {
-    "docker:start": "docker-compose up -d --build --force-recreate",
-    "docker:stop": "docker-compose stop",
-    "docker:down": "docker-compose down",
-    "docker:clean": "docker-compose kill && docker system prune --force --volumes",
-    "lint": "yarn --cwd server lint && yarn --cwd ui lint",
+    "start": "pnpm run --parallel dev",
+    "dev": "pnpm run --parallel dev",
+    "lint": "pnpm -r --workspace-concurrency=1 lint",
+    "test": "pnpm -r --workspace-concurrency=1 test",
     "lint:staged": "lint-staged",
     "prettier:fix": "prettier --write ./ui ./server",
     "prettier:check": "prettier --check ./ui ./server",

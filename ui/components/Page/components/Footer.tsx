@@ -2,10 +2,9 @@ import { Box, Container, Flex, Grid, GridItem, Image, List, ListItem, Text } fro
 import { usePlausible } from "next-plausible";
 import React from "react";
 
+import { config } from "@/common/config";
 import Link from "@/components/Links/Link";
 import { ExternalLinkLine } from "@/theme/components/icons";
-
-const APP_VERSION = process.env.NEXT_PUBLIC_VERSION;
 
 const Footer = () => {
   const plausible = usePlausible();
@@ -136,7 +135,11 @@ const Footer = () => {
               </ListItem>
             </List>
             <Text textStyle="xs" mt={[2, 2, 0]}>
-              {APP_VERSION && `v.${APP_VERSION} `}© République française {new Date().getFullYear()}
+              Dernière mise à jour le{" "}
+              <Text as="span" title={`#${config.APPLICATION_VERSION}`}>
+                {config.APPLICATION_DATE}
+              </Text>{" "}
+              © République française {new Date().getFullYear()}
             </Text>
           </Flex>
         </Container>

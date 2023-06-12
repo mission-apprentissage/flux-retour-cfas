@@ -1,25 +1,10 @@
 name: CI
 on: [push]
+
+env:
+  IMAGE_PREFIX: ghcr.io/mission-apprentissage
+
 jobs:
-  tests:
-    name: "Tests"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-
-      - name: "Installation des dépendances"
-        run: make install
-
-      - name: "Lint"
-        run: make lint
-
-      - name: "Tests"
-        run: make test
-
-      - name: "Build"
-        run: make build
-
   # This workflow is temporary disabled since we don't want to have a downtime each time we deploy.
 
   # deploy-recette:
@@ -35,3 +20,155 @@ jobs:
   #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   #     SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
   #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # server:
+  #   # if: false # DEBUG
+  #   name: "Build Server"
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     IMAGE_NAME: ${{ env.IMAGE_PREFIX }}/tdb-server
+  #     CONTEXT_PATH: server
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Install pnpm
+  #       uses: pnpm/action-setup@v2
+  #       with:
+  #         version: 8
+
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: "16"
+  #         cache: "pnpm"
+
+  #     # DEBUG
+  #     # - name: Install dependencies
+  #     #   run: pnpm install --frozen-lockfile --prefer-offline
+
+  #     # - name: Run lint
+  #     #   run: pnpm -F server lint
+
+  #     # - name: Run tests
+  #     #   run: pnpm -F server test:ci
+  #     #   env:
+  #     #     MONGOMS_PREFER_GLOBAL_PATH: false
+
+  #     - name: Save the git revision in the API
+  #       run: ./server/scripts/ci-update-version.sh
+
+  #     # - name: Compile
+  #     #   run: pnpm -F server build
+
+  #     - name: Login to GitHub Container Registry
+  #       if: github.event_name != 'pull_request'
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: Build and push Docker image
+  #       uses: docker/build-push-action@v4.1.0
+  #       with:
+  #         context: ${{ env.CONTEXT_PATH }}
+  #         push: ${{ github.event_name != 'pull_request' }}
+  #         tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  # ui:
+  #   # if: false # DEBUG
+  #   name: "Build UI"
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     IMAGE_NAME: ${{ env.IMAGE_PREFIX }}/tdb-ui
+  #     CONTEXT_PATH: ui
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Install pnpm
+  #       uses: pnpm/action-setup@v2
+  #       with:
+  #         version: 8
+
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: "16"
+  #         cache: "pnpm"
+
+  #     # DEBUG
+  #     # - name: Install dependencies
+  #     #   run: pnpm install --frozen-lockfile --prefer-offline
+
+  #     # - name: Run lint
+  #     #   run: pnpm -F ui lint
+
+  #     # - name: Run tests
+  #     #   run: pnpm -F ui test:ci
+  #     #   env:
+  #     #     MONGOMS_PREFER_GLOBAL_PATH: false
+
+  #     - name: Save the git revision in the UI
+  #       run: ./ui/scripts/ci-update-version.sh
+
+  #     # - name: Compile
+  #     #   run: pnpm -F ui build
+
+  #     - name: Login to GitHub Container Registry
+  #       if: github.event_name != 'pull_request'
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: Build and push Docker image
+  #       uses: docker/build-push-action@v4.1.0
+  #       with:
+  #         context: ${{ env.CONTEXT_PATH }}
+  #         push: ${{ github.event_name != 'pull_request' }}
+  #         tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  # publish-docker-images:
+  #   name: "Publication des images Docker"
+  #   needs:
+  #     - ui
+  #     - server
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Login to GitHub Container Registry
+  #       if: github.event_name != 'pull_request'
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: Tag Docker images
+  #       run: |
+  #         docker pull ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.sha }}
+  #         docker pull ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.sha }}
+
+  #         docker tag ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.sha }} ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.ref_name }}
+  #         docker push ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.ref_name }}
+
+  #         docker tag ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.sha }} ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.ref_name }}
+  #         docker push ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.ref_name }}
+
+  deploy-to-recette:
+    name: "Déploiement en recette"
+    if: github.ref == 'refs/heads/ci_build_docker_images'
+    # needs: publish-docker-images
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@334f9259f2f8eb3376d33fa4c684fff373f2c2a6 # v0.1.10
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          fingerprint: ${{ secrets.DEV_SSH_FINGERPRINT }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+          script: /srv/update.sh

@@ -1,6 +1,10 @@
+import { format } from "date-fns";
 import env from "env-var";
 
 const config = {
+  APPLICATION_DATE: valueOrDefault("{{APPLICATION_DATE}}", format(new Date(), "dd/MM/yyyy")),
+  APPLICATION_VERSION: valueOrDefault("{{APPLICATION_VERSION}}", "dev"),
+
   email: env.get("FLUX_RETOUR_CFAS_EMAIL").default("tableau-de-bord@apprentissage.beta.gouv.fr").asString(),
   email_from: env.get("FLUX_RETOUR_CFAS_EMAIL_FROM").default("Tableau de bord de l'apprentissage").asString(),
   appName: env.get("FLUX_RETOUR_CFAS_NAME").default("Flux Retour Cfas").asString(),
@@ -27,13 +31,6 @@ const config = {
   log: {
     type: env.get("FLUX_RETOUR_CFAS_LOG_TYPE").default("console").asString(),
     level: env.get("FLUX_RETOUR_CFAS_LOG_LEVEL").default("info").asString(),
-  },
-  users: {
-    defaultAdmin: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS").default([]).asArray(),
-    },
   },
   smtp: {
     host: env.get("FLUX_RETOUR_CFAS_SMTP_HOST").asString(),
@@ -90,3 +87,7 @@ const config = {
 };
 
 export default config;
+
+function valueOrDefault(value: string, defaultValue: any): string {
+  return !value.startsWith("{{") ? value : defaultValue;
+}

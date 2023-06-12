@@ -2,7 +2,6 @@ import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
 
-import { packageJson } from "@/common/utils/esmUtils";
 import config from "@/config";
 import { initTestApp } from "@tests/utils/testUtils";
 
@@ -20,7 +19,8 @@ describe("Routes diverses", () => {
     expect(response.status).toBe(200);
     assert.deepStrictEqual(response.data, {
       name: "TDB Apprentissage API",
-      version: packageJson.version,
+      date: config.APPLICATION_DATE,
+      version: config.APPLICATION_VERSION,
       env: config.env,
     });
   });
@@ -31,7 +31,8 @@ describe("Routes diverses", () => {
     expect(response.status).toBe(200);
     assert.deepStrictEqual(response.data, {
       name: "TDB Apprentissage API",
-      version: packageJson.version,
+      date: config.APPLICATION_DATE,
+      version: config.APPLICATION_VERSION,
       env: config.env,
       healthcheck: {
         mongodb: true,
