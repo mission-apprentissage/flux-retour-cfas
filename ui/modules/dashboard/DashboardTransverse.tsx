@@ -213,6 +213,29 @@ const DashboardTransverse = () => {
               </SecondarySelectButton>
             )}
           />
+
+          <Tooltip
+            background="bluefrance"
+            color="white"
+            label={
+              <Box padding="1w">
+                <Text as="p">La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois.</Text>
+                <Text as="p" mt="4">
+                  À noter&nbsp;: la période de référence pour l&apos;année scolaire court du 1er août au 31 juillet
+                </Text>
+              </Box>
+            }
+            aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+          >
+            <Box
+              as="i"
+              className="ri-information-line"
+              fontSize="epsilon"
+              color="grey.500"
+              ml="1w"
+              fontWeight="normal"
+            />
+          </Tooltip>
         </HStack>
 
         {indicateursEffectifsNationaux && (
