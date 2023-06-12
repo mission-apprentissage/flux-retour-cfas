@@ -174,8 +174,7 @@ const DashboardTransverse = () => {
             {auth.organisation.type === "TETE_DE_RESEAU" && " dans votre réseau"}
           </Text>
           &nbsp;: une partie des organismes de formation en apprentissage ne transmettent pas encore leurs données au
-          tableau de bord (voir carte “Taux de couverture” ci-dessous). Ces chiffres reflètent partiellement les
-          effectifs de l’apprentissage
+          tableau de bord (voir carte “Taux de couverture” ci-dessous).
         </Text>
         <Text fontSize={14} mt="4">
           Le <strong>{formatDateDayMonthYear(effectifsFilters.date)}</strong>, le tableau de bord de l’apprentissage
