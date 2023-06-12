@@ -169,7 +169,7 @@ const DashboardTransverse = () => {
           Aperçu des données de l’apprentissage
         </Heading>
         <Text fontSize={14} mt="8">
-          Ces chiffres reflètent partiellement les effectifs de l’apprentissage&nbsp;:
+          Ces chiffres reflètent partiellement les effectifs de l’apprentissage
           <Text as="span" fontWeight="bold">
             {auth.organisation.type === "TETE_DE_RESEAU" && " dans votre réseau"}
           </Text>
