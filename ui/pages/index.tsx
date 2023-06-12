@@ -108,13 +108,13 @@ function PublicLandingPage() {
           />
         </Container>
       </Box>
-      <Container maxW="xl" py="8">
+      <Container maxW="xl" py="16">
         <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Vous êtes un acteur de l’apprentissage&nbsp;?
         </Heading>
 
-        <Stack direction={["column", "column", "column", "row"]} gap="4" mb="16" mt="8" mx={[0, 16, 32, 0]}>
-          <VStack flex="1" backgroundColor="galt2" px="4" py="8">
+        <Stack direction={["column", "column", "column", "row"]} gap="4" mt="8" mx={[0, 16, 32, 0]}>
+          <VStack flex="1" backgroundColor="galt" px="4" py="8">
             <Center>
               <VStack>
                 <Image src="/images/landing-cards/school.svg" alt="" />
@@ -139,7 +139,7 @@ function PublicLandingPage() {
               </ListItem>
             </List>
           </VStack>
-          <VStack flex="1" backgroundColor="galt2" p="8">
+          <VStack flex="1" backgroundColor="galt" p="8">
             <Center>
               <VStack>
                 <Image src="/images/landing-cards/network.svg" alt="" />
@@ -164,7 +164,7 @@ function PublicLandingPage() {
               </ListItem>
             </List>
           </VStack>
-          <VStack flex="1" backgroundColor="galt2" p="8">
+          <VStack flex="1" backgroundColor="galt" p="8">
             <Center>
               <VStack>
                 <Image src="/images/landing-cards/city-hall.svg" alt="" />
@@ -200,8 +200,8 @@ function PublicLandingPage() {
         <SectionApercuChiffresCles />
       </Container>
 
-      <Box backgroundColor="galt" py="4" px="8">
-        <Container maxW="xl" py="8">
+      <Box backgroundColor="galt" px="8">
+        <Container maxW="xl" py="14">
           <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
             Nos missions de service public
           </Heading>
@@ -309,13 +309,13 @@ function PublicLandingPage() {
         </Container>
       </Box>
 
-      <Container maxW="xl" bg="#FEF9F7" px="14" py="10" my="12">
+      <Container maxW="xl" bg="#F5F5FE" px="14" py="10" my="20">
         <Text fontWeight="bold" color="blue_cumulus_main" fontSize="gamma">
           Suivez nos actualités sur LinkedIn «&nbsp;Mission Interministérielle pour l’apprentissage&nbsp;»
         </Text>
         <Link
           variant="whiteBg"
-          mt="4"
+          mt="6"
           display="inline-flex"
           alignItems="center"
           href="https://fr.linkedin.com/company/mission-apprentissage"
@@ -401,7 +401,7 @@ function SectionApercuChiffresCles() {
   );
 
   return (
-    <Container maxW="xl" py="8" px="0">
+    <Container maxW="xl" py="b" px="0" mt="20">
       <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
         Aperçu des chiffres-clés de l’apprentissage
       </Heading>
@@ -412,7 +412,7 @@ function SectionApercuChiffresCles() {
         Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
         en apprentissage ne transmettent pas encore leurs données au tableau de bord.
       </Text>
-      <Text fontSize="sm" mt="2">
+      <Text fontSize="sm" mt="4" p="3" bg="#F9F8F6" borderRadius="4px">
         Le <Text as="b">{formatDate(new Date(), "d MMMM yyyy")}</Text>, le tableau de bord de l’apprentissage recense
         sur le territoire national{" "}
         <Text as="b">{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</Text>, dont{" "}
