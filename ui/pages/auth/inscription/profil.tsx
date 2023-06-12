@@ -372,7 +372,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
                     />
                   </InputRightElement>
                 </InputGroup>
-                <PasswordConditions password={field.value} />
+                <PasswordConditions password={field.value} passwordMinLength={passwordMinLength} />
               </FormControl>
             )}
           </Field>
@@ -434,15 +434,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
   );
 }
 
-const passwordChecks = [
-  {
-    schema: Yup.string().min(12), // FIXME a-t-on vraiment besoin des 20c pour un admin ?...
-    label: (
-      <>
-        Le mot de passe doit contenir <strong>au moins {12} caractères</strong>
-      </>
-    ),
-  },
+const commonPasswordChecks = [
   {
     schema: Yup.string().matches(/[a-z]/),
     label: (
@@ -477,8 +469,18 @@ const passwordChecks = [
   },
 ];
 
-function PasswordConditions({ password }: { password: string }) {
-  const conditions = passwordChecks.map((check) => ({
+function PasswordConditions({ password, passwordMinLength }: { password: string; passwordMinLength: number }) {
+  const conditions = [
+    {
+      schema: Yup.string().min(passwordMinLength),
+      label: (
+        <>
+          Le mot de passe doit contenir <strong>au moins {passwordMinLength} caractères</strong>
+        </>
+      ),
+    },
+    ...commonPasswordChecks,
+  ].map((check) => ({
     ...check,
     valid: check.schema.isValidSync(password),
   }));
