@@ -153,13 +153,18 @@ function IndicateursGrid({
           label="apprenants"
           count={indicateursEffectifs.apprenants}
           tooltipLabel={
-            <div>
+            <>
               <b>Nombre d’apprenants en contrat d’apprentissage</b>
               <br />
               Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation. Est
-              considéré comme un apprenant, un jeune inscrit en formation dans un organisme de formation. Il peut être
-              soit déjà inscrit en entreprise (avec signature de contrat) soit en recherche d’une entreprise.
-            </div>
+              considéré comme un apprenant, un jeune inscrit en formation dans un organisme de formation en
+              apprentissage. Il peut être&nbsp;:
+              <br />
+              - en formation et en recherche d’une entreprise (pas de contrat de signé)
+              <br />
+              - apprenti en entreprise (son contrat est signé)
+              <br />- apprenti en rupture de contrat d’apprentissage et à la recherche d’un nouvel employeur
+            </>
           }
           icon={<ApprenantsIcon />}
           big={true}

@@ -449,7 +449,8 @@ function SectionApercuChiffresCles() {
                 </Text>
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                   organismes de formation en apprentissage
-                  <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
+                  {/* FIXME: à réintégrer dès que le contenu sera prêt */}
+                  {/* <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
                     <Box
                       as="i"
                       className="ri-information-line"
@@ -458,7 +459,7 @@ function SectionApercuChiffresCles() {
                       marginLeft="1w"
                       verticalAlign="middle"
                     />
-                  </Tooltip>
+                  </Tooltip> */}
                 </Text>
                 <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
                 <Text fontSize="zeta" color="mgalt">
@@ -493,7 +494,24 @@ function SectionApercuChiffresCles() {
                   </Text>
                   <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                     apprenants
-                    <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
+                    <Tooltip
+                      background="bluefrance"
+                      color="white"
+                      label={
+                        <Box padding="1w">
+                          <b>Nombre d’apprenants en contrat d’apprentissage</b>
+                          <br />
+                          Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation.
+                          Est considéré comme un apprenant, un jeune inscrit en formation dans un organisme de formation
+                          en apprentissage. Il peut être&nbsp;:
+                          <br />
+                          - en formation et en recherche d’une entreprise (pas de contrat de signé)
+                          <br />
+                          - apprenti en entreprise (son contrat est signé)
+                          <br />- apprenti en rupture de contrat d’apprentissage et à la recherche d’un nouvel employeur
+                        </Box>
+                      }
+                    >
                       <Box
                         as="i"
                         className="ri-information-line"
