@@ -425,22 +425,7 @@ function SectionApercuChiffresCles() {
         <Text as="b">{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</Text>.
       </Text>
 
-      <HStack mt="4">
-        <LockFill color="bluefrance" boxSize="4" />
-        <Text>
-          Pour visualiser l’intégralité des données consultables,{" "}
-          <Link href="/auth/connexion" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
-            connectez-vous
-          </Link>{" "}
-          ou{" "}
-          <Link href="/auth/inscription" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
-            créez un compte
-          </Link>
-          .
-        </Text>
-      </HStack>
-
-      <Grid templateColumns="1fr 2fr" gap={4} my={8}>
+      <Grid templateColumns="1fr 2fr" gap={4} my={4}>
         <GridItem bg="#F5F5FE">
           <Center h="100%">
             <HStack gap={3} py="10" px="12">
@@ -574,6 +559,21 @@ function SectionApercuChiffresCles() {
           </HStack>
         </GridItem>
       </Grid>
+
+      <HStack mt="4" justifyContent="end">
+        <LockFill color="bluefrance" boxSize="4" />
+        <Text>
+          Pour visualiser l’intégralité des données consultables,{" "}
+          <Link href="/auth/connexion" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            connectez-vous
+          </Link>{" "}
+          ou{" "}
+          <Link href="/auth/inscription" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            créez un compte
+          </Link>
+          .
+        </Text>
+      </HStack>
     </Container>
   );
 }
