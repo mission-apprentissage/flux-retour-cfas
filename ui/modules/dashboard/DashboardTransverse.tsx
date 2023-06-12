@@ -169,13 +169,12 @@ const DashboardTransverse = () => {
           Aperçu des données de l’apprentissage
         </Heading>
         <Text fontSize={14} mt="8">
-          Ces chiffres reflètent partiellement les effectifs de l’apprentissage&nbsp;:
+          Ces chiffres reflètent partiellement les effectifs de l’apprentissage
           <Text as="span" fontWeight="bold">
             {auth.organisation.type === "TETE_DE_RESEAU" && " dans votre réseau"}
           </Text>
           &nbsp;: une partie des organismes de formation en apprentissage ne transmettent pas encore leurs données au
-          tableau de bord (voir carte “Taux de couverture” ci-dessous). Ces chiffres reflètent partiellement les
-          effectifs de l’apprentissage
+          tableau de bord (voir carte “Taux de couverture” ci-dessous).
         </Text>
         <Text fontSize={14} mt="4">
           Le <strong>{formatDateDayMonthYear(effectifsFilters.date)}</strong>, le tableau de bord de l’apprentissage
@@ -214,6 +213,29 @@ const DashboardTransverse = () => {
               </SecondarySelectButton>
             )}
           />
+
+          <Tooltip
+            background="bluefrance"
+            color="white"
+            label={
+              <Box padding="1w">
+                <Text as="p">La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois.</Text>
+                <Text as="p" mt="4">
+                  À noter&nbsp;: la période de référence pour l&apos;année scolaire court du 1er août au 31 juillet
+                </Text>
+              </Box>
+            }
+            aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+          >
+            <Box
+              as="i"
+              className="ri-information-line"
+              fontSize="epsilon"
+              color="grey.500"
+              ml="1w"
+              fontWeight="normal"
+            />
+          </Tooltip>
         </HStack>
 
         {indicateursEffectifsNationaux && (

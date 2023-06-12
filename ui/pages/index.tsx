@@ -108,13 +108,13 @@ function PublicLandingPage() {
           />
         </Container>
       </Box>
-      <Container maxW="xl" py="8">
+      <Container maxW="xl" py="16">
         <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Vous êtes un acteur de l’apprentissage&nbsp;?
         </Heading>
 
-        <Stack direction={["column", "column", "column", "row"]} gap="4" mb="16" mt="8" mx={[0, 16, 32, 0]}>
-          <VStack flex="1" backgroundColor="galt2" px="4" py="8">
+        <Stack direction={["column", "column", "column", "row"]} gap="4" mt="8" mx={[0, 16, 32, 0]}>
+          <VStack flex="1" backgroundColor="galt" px="4" py="8">
             <Center>
               <VStack>
                 <Image src="/images/landing-cards/school.svg" alt="" />
@@ -139,7 +139,7 @@ function PublicLandingPage() {
               </ListItem>
             </List>
           </VStack>
-          <VStack flex="1" backgroundColor="galt2" p="8">
+          <VStack flex="1" backgroundColor="galt" p="8">
             <Center>
               <VStack>
                 <Image src="/images/landing-cards/network.svg" alt="" />
@@ -164,7 +164,7 @@ function PublicLandingPage() {
               </ListItem>
             </List>
           </VStack>
-          <VStack flex="1" backgroundColor="galt2" p="8">
+          <VStack flex="1" backgroundColor="galt" p="8">
             <Center>
               <VStack>
                 <Image src="/images/landing-cards/city-hall.svg" alt="" />
@@ -200,8 +200,8 @@ function PublicLandingPage() {
         <SectionApercuChiffresCles />
       </Container>
 
-      <Box backgroundColor="galt" py="4" px="8">
-        <Container maxW="xl" py="8">
+      <Box backgroundColor="galt" px="8">
+        <Container maxW="xl" py="14">
           <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
             Nos missions de service public
           </Heading>
@@ -309,13 +309,17 @@ function PublicLandingPage() {
         </Container>
       </Box>
 
-      <Container maxW="xl" bg="#FEF9F7" px="14" py="10" my="12">
+      <Container maxW="xl" bg="#F5F5FE" px="14" py="10" my="20">
         <Text fontWeight="bold" color="blue_cumulus_main" fontSize="gamma">
           Suivez nos actualités sur LinkedIn «&nbsp;Mission Interministérielle pour l’apprentissage&nbsp;»
         </Text>
+        <Text mt={4}>
+          La Mission interministérielle pour l’apprentissage et les trajectoires professionnelles construit des services
+          numériques qui facilitent les entrées en apprentissage.
+        </Text>
         <Link
           variant="whiteBg"
-          mt="4"
+          mt="6"
           display="inline-flex"
           alignItems="center"
           href="https://fr.linkedin.com/company/mission-apprentissage"
@@ -401,7 +405,7 @@ function SectionApercuChiffresCles() {
   );
 
   return (
-    <Container maxW="xl" py="8" px="0">
+    <Container maxW="xl" py="b" px="0" mt="20">
       <Heading as="h2" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
         Aperçu des chiffres-clés de l’apprentissage
       </Heading>
@@ -412,7 +416,7 @@ function SectionApercuChiffresCles() {
         Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
         en apprentissage ne transmettent pas encore leurs données au tableau de bord.
       </Text>
-      <Text fontSize="sm" mt="2">
+      <Text fontSize="sm" mt="4" p="3" bg="#F9F8F6" borderRadius="4px" lineHeight="1">
         Le <Text as="b">{formatDate(new Date(), "d MMMM yyyy")}</Text>, le tableau de bord de l’apprentissage recense
         sur le territoire national{" "}
         <Text as="b">{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</Text>, dont{" "}
@@ -421,22 +425,7 @@ function SectionApercuChiffresCles() {
         <Text as="b">{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</Text>.
       </Text>
 
-      <HStack mt="4">
-        <LockFill color="bluefrance" boxSize="4" />
-        <Text>
-          Pour visualiser l’intégralité des données consultables,{" "}
-          <Link href="/auth/connexion" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
-            connectez-vous
-          </Link>{" "}
-          ou{" "}
-          <Link href="/auth/inscription" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
-            créez un compte
-          </Link>
-          .
-        </Text>
-      </HStack>
-
-      <Grid templateColumns="1fr 2fr" gap={4} my={8}>
+      <Grid templateColumns="1fr 2fr" gap={4} my={4}>
         <GridItem bg="#F5F5FE">
           <Center h="100%">
             <HStack gap={3} py="10" px="12">
@@ -449,7 +438,8 @@ function SectionApercuChiffresCles() {
                 </Text>
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                   organismes de formation en apprentissage
-                  <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
+                  {/* FIXME: à réintégrer dès que le contenu sera prêt */}
+                  {/* <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
                     <Box
                       as="i"
                       className="ri-information-line"
@@ -458,7 +448,7 @@ function SectionApercuChiffresCles() {
                       marginLeft="1w"
                       verticalAlign="middle"
                     />
-                  </Tooltip>
+                  </Tooltip> */}
                 </Text>
                 <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
                 <Text fontSize="zeta" color="mgalt">
@@ -493,7 +483,24 @@ function SectionApercuChiffresCles() {
                   </Text>
                   <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                     apprenants
-                    <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
+                    <Tooltip
+                      background="bluefrance"
+                      color="white"
+                      label={
+                        <Box padding="1w">
+                          <b>Nombre d’apprenants en contrat d’apprentissage</b>
+                          <br />
+                          Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation.
+                          Est considéré comme un apprenant, un jeune inscrit en formation dans un organisme de formation
+                          en apprentissage. Il peut être&nbsp;:
+                          <br />
+                          - en formation et en recherche d’une entreprise (pas de contrat de signé)
+                          <br />
+                          - apprenti en entreprise (son contrat est signé)
+                          <br />- apprenti en rupture de contrat d’apprentissage et à la recherche d’un nouvel employeur
+                        </Box>
+                      }
+                    >
                       <Box
                         as="i"
                         className="ri-information-line"
@@ -552,6 +559,21 @@ function SectionApercuChiffresCles() {
           </HStack>
         </GridItem>
       </Grid>
+
+      <HStack mt="4" justifyContent="end">
+        <LockFill color="bluefrance" boxSize="4" />
+        <Text>
+          Pour visualiser l’intégralité des données consultables,{" "}
+          <Link href="/auth/connexion" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            connectez-vous
+          </Link>{" "}
+          ou{" "}
+          <Link href="/auth/inscription" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+            créez un compte
+          </Link>
+          .
+        </Text>
+      </HStack>
     </Container>
   );
 }
