@@ -1,25 +1,24 @@
 # Déploiement & Infrastructure de Partage Simplifié
 
-* [Prérequis](#prérequis)
-  * [SSH](#ssh)
-  * [GPG](#gpg)
-  * [Organisation des dossiers](#organisation-des-dossiers)
-* [Etape 1 : Configuration initiale](#configuration-initiale)
-* [Etape 2 : Lancement du playbook Ansible](#lancement-du-playbook-ansible)
-* [Etape 3 : Configuration OVH](#configuration-ovh)
-* [Utilitaires](#utilitaires)
-  * [Mise à jour et déploiement de l'application](#mise-à-jour-et-déploiement)
-  * [Requêtage de la base MongoDb](#Requetes-sur-la-base-mongodb)
-  * [Sauvegarde & restauration](#sauvegarde-&-restauration)
-    * [Sauvegarde & restauration de la base Mongodb](#sauvegarde-&-restauration-de-la-base-mongodb)
-    * [Sauvegarde complète cryptée](#sauvegarde-complète-cryptée)
-    * [Sauvegarde complète non cryptée](#sauvegarde-complète-non-cryptée)
-    * [Restauration de dump complet crypté](#restauration-de-dump-complet-crypté)
-    * [Sauvegarde & Restauration de Metabase](#sauvegarde-&-restauration-de-metabase)
-  * [Suppression d'un utilisateur de la VM](#supprimer-un-utilisateur-de-la-vm)
-  * [Fermeture du service](#fermeture-du-service)
-  * [Mode maintenance](#mode-maintenance)
-
+- [Prérequis](#prérequis)
+  - [SSH](#ssh)
+  - [GPG](#gpg)
+  - [Organisation des dossiers](#organisation-des-dossiers)
+- [Etape 1 : Configuration initiale](#configuration-initiale)
+- [Etape 2 : Lancement du playbook Ansible](#lancement-du-playbook-ansible)
+- [Etape 3 : Configuration OVH](#configuration-ovh)
+- [Utilitaires](#utilitaires)
+  - [Mise à jour et déploiement de l'application](#mise-à-jour-et-déploiement)
+  - [Requêtage de la base MongoDb](#Requetes-sur-la-base-mongodb)
+  - [Sauvegarde & restauration](#sauvegarde-&-restauration)
+    - [Sauvegarde & restauration de la base Mongodb](#sauvegarde-&-restauration-de-la-base-mongodb)
+    - [Sauvegarde complète cryptée](#sauvegarde-complète-cryptée)
+    - [Sauvegarde complète non cryptée](#sauvegarde-complète-non-cryptée)
+    - [Restauration de dump complet crypté](#restauration-de-dump-complet-crypté)
+    - [Sauvegarde & Restauration de Metabase](#sauvegarde-&-restauration-de-metabase)
+  - [Suppression d'un utilisateur de la VM](#supprimer-un-utilisateur-de-la-vm)
+  - [Fermeture du service](#fermeture-du-service)
+  - [Mode maintenance](#mode-maintenance)
 
 ## Prérequis
 
@@ -54,11 +53,10 @@ de la mission apprentissage, vous devez publier votre clé :
 gpg --send-key <identifiant>
 ```
 
-Il est conseillé de publier votre clé sur l'un des serveurs suivants : (elles pourront être récupérées par le reste de l'équipe via une commandé spécifique)
+Il est conseillé de publier votre clé sur le serveur suivant : (elles pourront être récupérées par le reste de l'équipe via une commandé spécifique)
 
 ```bash
 gpg --keyserver keyserver.ubuntu.com --send-keys <GPG_KEY>
-gpg --keyserver keys.gnupg.net --send-keys <GPG_KEY>
 ```
 
 Il est vivement conseillé de réaliser un backup des clés publique et privée qui viennent d'être créés.
@@ -69,8 +67,6 @@ gpg --export-secret-keys <identifiant> > private_key.gpg
 ```
 
 Ces deux fichiers peuvent, par exemple, être stockés sur une clé USB.
-
-
 
 ### Organisation des dossiers
 
@@ -125,10 +121,7 @@ Afin de pouvoir accéder à la VM sous votre nom d'utilisateur il est nécessair
 ```yml
 - include: create-sudoers.yml
   with_items:
-    - {
-        username: "<nom_utilisateur>",
-        authorized_key: "ssh-rsa <clé_ssh_personnelle>",
-      }
+    - { username: "<nom_utilisateur>", authorized_key: "ssh-rsa <clé_ssh_personnelle>" }
 ```
 
 A vous de saisir votre nom d'utilisateur et votre clé SSH.
@@ -214,9 +207,8 @@ Cette commande va créer le fichier `ansible/.vault-password.gpg`, vous devez le
 En cas d'erreur du type `gpg: keyserver receive failed: No data` essayez d'importer localement des clés GPG de chaque utilisateur via :
 
 ```bash
-  gpg --keyserver keys.gnupg.net --recv-keys <GPG_KEY_1> <GPG_KEY_2> ...
   gpg --keyserver keyserver.ubuntu.com --recv-keys <GPG_KEY_1> <GPG_KEY_2> ...
- ```
+```
 
 Le mot de passe contenu dans ce fichier va permettre de chiffrer le fichier `vault.yml`. Pour se
 faire, il faut lancer la commande suivante :
@@ -265,7 +257,6 @@ Toutes les variables du vault sont préfixées par `vault`
 vault:
   APP_VERSION: "1.0.0"
   APP_ENV: "recette"
-...
 ```
 
 Pour y faire référence dans un fichier il suffit d'utiliser la syntaxe `{{ vault.APP_VERSION }}`
@@ -290,17 +281,17 @@ l'environnement cible.
 #### Ajout d'un utilisateur
 
 Il est possible d'ajouter ou de supprimer des habilitations en éditant le
-fichier `ansible/roles/setup/vars/main/habilitations.yml`. Tous les utilistateurs présents dans ce fichier pourront se
+fichier `ansible/roles/setup/vars/main/habilitations.yml`. Tous les utilisateurs présents dans ce fichier pourront se
 connecter aux environnements via leurs clés SSH. Ils pourront également accéder au vault et déchiffrer les backups des
 environnements si une clé GPG est fournie.
 
 Une habilitation doit être de la forme suivante :
 
 ```yml
-  - username: <nom de l'utilisateur sur l'environnement>
-    name: <nom de la personne>
-    gpg_key: <identifiant de la clé GPG> (optionnel)
-    authorized_keys: <Liste des clés SSH> (il est possible de mettre une url github)
+- username: <nom de l'utilisateur sur l'environnement>
+  name: <nom de la personne>
+  gpg_key: <identifiant de la clé GPG> (optionnel)
+  authorized_keys: <Liste des clés SSH> (il est possible de mettre une url github)
 ```
 
 Une fois le fichier des habilitations mis à jour, vous devez renouveler le vault et relancer la configuration de
@@ -315,8 +306,8 @@ l'environnement.
 
 Pour supprimer une personne des habilitations, il faut :
 
-* enlever les informations renseignées à son sujet dans le fichier `ansible/roles/setup/vars/main/habilitations.yml`
-* ajouter le username de la personne dans le fichier `ansible/roles/clean/tasks/main.yml`
+- enlever les informations renseignées à son sujet dans le fichier `ansible/roles/setup/vars/main/habilitations.yml`
+- ajouter le username de la personne dans le fichier `ansible/roles/clean/tasks/main.yml`
 
 Une fois ces fichiers mis à jour, vous devez renouveler le vault et lancer la commande de nettoyage :
 
@@ -324,7 +315,6 @@ Une fois ces fichiers mis à jour, vous devez renouveler le vault et lancer la c
   bash scripts/vault/renew-vault.sh
   bash scripts/clean.sh <nom_environnement> --user <nom_utilisateur>
 ```
-
 
 ## Lancement du playbook Ansible
 
@@ -380,7 +370,6 @@ bash setup-vm.sh <nom_environnement> --user <nom_utilisateur> --ask-become-pass 
 ```
 
 Une fois le playbook terminé et lancé avec succès vous devriez voir un message vous indiquant que tout s'est déroulé avec succès.
-
 
 ### 3. Changement du mot de passe utilisateur
 
@@ -521,7 +510,6 @@ Les backups sont automatiquement sauvegardés en local dans le dossier `/opt/app
 Une fonction de purge automatique des sauvegardes de plus de 7 jours **en local** est executée.
 Le cryptage du dump est executé via age, et la clé de cryptage est propre à la VM.
 
-
 #### Sauvegarde complète non cryptée
 
 Il est possible de créer un dump de sauvegarde complète à la date du jour via :
@@ -543,14 +531,12 @@ bash restore-mongodb.sh <nomDuDump>
 
 Ce script va décrypter le dump dont le nom a été fourni et restaurer l'intégralité des données.
 
-
 #### Sauvegarde & restauration de Metabase
 
 Il est possible de sauvegarder / restaurer le contenu du volume METABASE via :
 
 - `/ansible/roles/setup/files/app/tools/metabase/backup-metabase.sh` pour la sauvegarde
 - `/ansible/roles/setup/files/app/tools/metabase/restore-metabase.sh` pour la restauration
-
 
 ### Supprimer un utilisateur de la vm
 
