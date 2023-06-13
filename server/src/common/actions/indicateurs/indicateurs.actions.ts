@@ -548,8 +548,7 @@ export async function getEffectifsNominatifs(
 
           apprenant_nom: "$apprenant.nom",
           apprenant_prenom: "$apprenant.prenom",
-          apprenant_date_de_naissance: "$apprenant.date_de_naissance",
-
+          apprenant_date_de_naissance: { $substr: ["$apprenant.date_de_naissance", 0, 10] },
           formation_cfd: "$formation.cfd",
           formation_rncp: "$formation.rncp",
           formation_libelle_long: "$formation.libelle_long",

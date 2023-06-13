@@ -1,13 +1,15 @@
 import { AxiosInstance } from "axiosist";
 
+import { Effectif } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
-import { historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
+import { historySequenceApprentiToAbandon, historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import {
   PermissionsTestConfig,
   commonEffectifsAttributes,
   organismes,
   testPermissions,
+  userOrganisme,
 } from "@tests/utils/permissions";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, id, initTestApp } from "@tests/utils/testUtils";
 
@@ -208,6 +210,86 @@ describe("Route indicateurs", () => {
                   inscritsSansContrat: 0,
                   rupturants: 0,
                   abandons: 0,
+                },
+              ]
+            : []
+        );
+      });
+    });
+
+    // TODO vérifier chaque filtre
+  });
+
+  describe("GET /api/v1/indicateurs/effectifs/:type - indicateurs sur les effectifs", () => {
+    const date = "2022-10-10T00:00:00.000Z";
+    const anneeScolaire = "2022-2023";
+
+    let effectif: Effectif;
+
+    beforeEach(async () => {
+      effectif = createSampleEffectif({
+        ...commonEffectifsAttributes,
+        annee_scolaire: anneeScolaire,
+        apprenant: {
+          historique_statut: historySequenceApprentiToAbandon,
+        },
+      });
+      await effectifsDb().insertOne(effectif);
+    });
+
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+      const response = await httpClient.get(`/api/v1/indicateurs/effectifs/abandons?date=${date}`);
+
+      expectUnauthorizedError(response);
+    });
+
+    describe("Permissions", () => {
+      const accesOrganisme: PermissionsTestConfig<boolean> = {
+        "OFF lié": true,
+        "OFF non lié": false,
+        "OFR lié": true,
+        "OFR responsable": true,
+        "OFR non lié": false,
+        "OFRF lié": true,
+        "OFRF responsable": true,
+        "OFRF non lié": false,
+        "Tête de réseau": true,
+        "Tête de réseau non liée": false,
+        "DREETS même région": true,
+        "DREETS autre région": false,
+        "DDETS même département": true,
+        "DDETS autre département": false,
+        "ACADEMIE même académie": true,
+        "ACADEMIE autre académie": false,
+        "Opérateur public national": true,
+        Administrateur: true,
+      };
+      testPermissions(accesOrganisme, async (organisation, hasAccess) => {
+        const response = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/indicateurs/effectifs/abandons?date=${date}`
+        );
+
+        expect(response.status).toStrictEqual(200);
+        expect(response.data).toStrictEqual(
+          hasAccess
+            ? [
+                {
+                  apprenant_date_de_naissance: effectif.apprenant.date_de_naissance?.toISOString().substring(0, 10),
+                  apprenant_nom: effectif.apprenant.nom,
+                  apprenant_prenom: effectif.apprenant.prenom,
+                  formation_annee: effectif.formation?.annee,
+                  formation_cfd: effectif.formation?.cfd,
+                  formation_date_debut_formation: effectif.formation?.periode?.[0],
+                  formation_date_fin_formation: effectif.formation?.periode?.[1],
+                  formation_libelle_long: effectif.formation?.libelle_long,
+                  formation_niveau: effectif.formation?.niveau,
+                  formation_rncp: effectif.formation?.rncp,
+                  organisme_nature: userOrganisme.nature,
+                  organisme_nom: userOrganisme.raison_sociale,
+                  organisme_siret: userOrganisme.siret,
+                  organisme_uai: userOrganisme.uai,
                 },
               ]
             : []
