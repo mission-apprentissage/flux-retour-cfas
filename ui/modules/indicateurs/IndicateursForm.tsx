@@ -377,6 +377,7 @@ function IndicateursForm() {
         <NewTable
           data={indicateursEffectifs || []}
           loading={indicateursEffectifsLoading}
+          noDataMessage="Aucun organisme ne semble correspondre aux filtres que vous avez sélectionnés"
           // paginationState={pagination}
           sortingState={sort}
           // onPaginationChange={(state) => updateState({ pagination: state })}
