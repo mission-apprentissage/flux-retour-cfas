@@ -26,10 +26,9 @@ export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret = null }
 
 /**
  * Fonction de vérification d'un couple UAI-SIRET correspondant à un organisme fiable
- * @param {Object} options
- * @param {string|null} options.uai
- * @param {string|null} options.siret
- * @param {OrganismesReferentiel[]|[]} options.organismesFromReferentiel
+ * @param {string|null} uai
+ * @param {string|null} siret
+ * @param {OrganismesReferentiel[]|[]} organismesFromReferentiel
  * @returns
  */
 export const isOrganismeFiableForCouple = async (
@@ -43,12 +42,11 @@ export const isOrganismeFiableForCouple = async (
       organismesFromReferentiel = await organismesReferentielDb().find().toArray();
     }
 
+    // Si uai ou siret non fourni alors non fiable
+    if (!uai || !siret) return false;
+
     // Si on trouve un organisme ouvert dans le référentiel avec ce couple uai / siret alors il est fiable
-    return organismesFromReferentiel.some(
-      (item) => item.siret === siret && item.uai === uai && item.etat_administratif !== "fermé"
-    )
-      ? true
-      : false;
+    return (await organismesReferentielDb().countDocuments({ siret, uai, etat_administratif: { $ne: "fermé" } })) > 0;
   } catch (err) {
     logger.warn({ uai, siret }, "organisme non trouvé pour ce couple");
     return false;

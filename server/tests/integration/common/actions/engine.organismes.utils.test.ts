@@ -12,62 +12,76 @@ describe("Tests des actions  engine utilitaires organismes", () => {
     const SIRET_REFERENTIEL_FERME = "44370584100099";
 
     beforeEach(async () => {
-      // Création d'un organisme dans le référentiel avec un couple fiable
-      await organismesReferentielDb().findOneAndUpdate(
-        { uai: UAI_REFERENTIEL, siret: SIRET_REFERENTIEL, nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_REFERENTIEL }], relations: [] } },
-        { upsert: true, returnDocument: "after" }
-      );
-
-      // Création d'un organisme FERME dans le référentiel avec un couple
-      await organismesReferentielDb().findOneAndUpdate(
-        { uai: UAI_REFERENTIEL_FERME, siret: SIRET_REFERENTIEL_FERME, nature: "formateur" },
-        { $set: { lieux_de_formation: [{ uai: UAI_REFERENTIEL_FERME }], relations: [], etat_administratif: "fermé" } },
-        { upsert: true, returnDocument: "after" }
-      );
+      // Création d'un organisme dans le référentiel avec un couple fiable et création d'un organisme ferme
+      await organismesReferentielDb().insertMany([
+        {
+          uai: UAI_REFERENTIEL,
+          siret: SIRET_REFERENTIEL,
+          nature: "formateur",
+          lieux_de_formation: [{ uai: UAI_REFERENTIEL }],
+          relations: [],
+        },
+        {
+          uai: UAI_REFERENTIEL_FERME,
+          siret: SIRET_REFERENTIEL_FERME,
+          nature: "formateur",
+          lieux_de_formation: [{ uai: UAI_REFERENTIEL_FERME }],
+          relations: [],
+          etat_administratif: "fermé",
+        },
+      ]);
     });
 
     describe("Vérification des cas de couples non fiables", () => {
-      it("Vérifie qu'on couple sans UAI fourni n'est pas fiable", async () => {
-        const isOrganismeFiable = await isOrganismeFiableForCouple(null, SIRET_REFERENTIEL);
-        assert.equal(isOrganismeFiable, false);
-      });
+      const testsCases = [
+        {
+          label: "Vérifie qu'on couple sans UAI fourni n'est pas fiable",
+          uai: null,
+          siret: SIRET_REFERENTIEL,
+          expectedFiable: false,
+        },
+        {
+          label: "Vérifie qu'on couple sans SIRET fourni n'est pas fiable",
+          uai: UAI_REFERENTIEL,
+          siret: null,
+          expectedFiable: false,
+        },
+        {
+          label: "Vérifie qu'on couple sans UAI ni SIRET fourni n'est pas fiable",
+          uai: null,
+          siret: null,
+          expectedFiable: false,
+        },
+        {
+          label: "Vérifie qu'on couple avec un UAI non présent dans le référentiel n'est pas fiable",
+          uai: "1111111A",
+          siret: SIRET_REFERENTIEL,
+          expectedFiable: false,
+        },
+        {
+          label: "Vérifie qu'on couple avec un SIRET non présent dans le référentiel n'est pas fiable",
+          uai: UAI_REFERENTIEL,
+          siret: "22222222220099",
+          expectedFiable: false,
+        },
+        {
+          label: "Vérifie qu'on couple fermé dans le référentiel n'est pas fiable",
+          uai: UAI_REFERENTIEL_FERME,
+          siret: SIRET_REFERENTIEL_FERME,
+          expectedFiable: false,
+        },
+      ];
 
-      it("Vérifie qu'on couple sans SIRET fourni n'est pas fiable", async () => {
-        const isOrganismeFiable = await isOrganismeFiableForCouple(UAI_REFERENTIEL, null);
-        assert.equal(isOrganismeFiable, false);
-      });
-
-      it("Vérifie qu'on couple sans UAI ni SIRET fourni n'est pas fiable", async () => {
-        const isOrganismeFiable = await isOrganismeFiableForCouple(null, null);
-        assert.equal(isOrganismeFiable, false);
-      });
-
-      it("Vérifie qu'on couple avec un UAI non présent dans le référentiel n'est pas fiable", async () => {
-        const UNKNOWN_UAI = "1111111A";
-        const isOrganismeFiable = await isOrganismeFiableForCouple(UNKNOWN_UAI, SIRET_REFERENTIEL);
-        assert.equal(isOrganismeFiable, false);
-      });
-
-      it("Vérifie qu'on couple avec un SIRET non présent dans le référentiel n'est pas fiable", async () => {
-        const UNKNOWN_SIRET = "22222222220099";
-        const isOrganismeFiable = await isOrganismeFiableForCouple(UAI_REFERENTIEL, UNKNOWN_SIRET);
-        assert.equal(isOrganismeFiable, false);
-      });
-
-      it("Vérifie qu'on couple fermé dans le référentiel n'est pas fiable", async () => {
-        const organismeFerme = await organismesReferentielDb().findOne({ uai: UAI_REFERENTIEL_FERME });
-        assert.equal(organismeFerme?.etat_administratif, "fermé");
-
-        const isOrganismeFiable = await isOrganismeFiableForCouple(UAI_REFERENTIEL_FERME, SIRET_REFERENTIEL_FERME);
-        assert.equal(isOrganismeFiable, false);
+      testsCases.forEach((test) => {
+        it(test.label, async () => {
+          expect(await isOrganismeFiableForCouple(test.uai, test.siret)).toBe(test.expectedFiable);
+        });
       });
     });
 
     describe("Vérification des cas de couples fiables", () => {
       it("Vérifie qu'on couple dont l'UAI et le SIRET matchent dans le référentiel est pas fiable", async () => {
-        const isOrganismeFiable = await isOrganismeFiableForCouple(UAI_REFERENTIEL, SIRET_REFERENTIEL);
-        assert.equal(isOrganismeFiable, true);
+        expect(await isOrganismeFiableForCouple(UAI_REFERENTIEL, SIRET_REFERENTIEL)).toBe(true);
       });
     });
   });
