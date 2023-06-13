@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { effectifsQueueDb, effectifsDb } from "@/common/model/collections";
-import { processEffectifsQueue } from "@/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
+import { processEffectifsQueue } from "@/jobs/ingestion/process-effectifs-queue";
 import { sample41461021200014 } from "@tests/data/entreprise.api.gouv.fr/sampleDataApiEntreprise";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
 
