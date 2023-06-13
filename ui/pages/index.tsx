@@ -516,11 +516,13 @@ function SectionApercuChiffresCles() {
                           Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation.
                           Est considéré comme un apprenant, un jeune inscrit en formation dans un organisme de formation
                           en apprentissage. Il peut être&nbsp;:
-                          <br />
-                          - en formation et en recherche d’une entreprise (pas de contrat de signé)
-                          <br />
-                          - apprenti en entreprise (son contrat est signé)
-                          <br />- apprenti en rupture de contrat d’apprentissage et à la recherche d’un nouvel employeur
+                          <UnorderedList>
+                            <ListItem>en formation et en recherche d’une entreprise (pas de contrat de signé)</ListItem>
+                            <ListItem>apprenti en entreprise (son contrat est signé)</ListItem>
+                            <ListItem>
+                              apprenti en rupture de contrat d’apprentissage et à la recherche d’un nouvel employeur
+                            </ListItem>
+                          </UnorderedList>
                         </Box>
                       }
                     >
