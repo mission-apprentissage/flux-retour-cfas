@@ -1,3 +1,5 @@
+import { escapeCSVField } from "@/common/utils/stringUtils";
+
 export function getEffectifsCSVColumns(): string[] {
   return [
     "organisme_uai",
@@ -45,37 +47,4 @@ export function exportEffectifsAsCSV(effectifs: any[]): string {
     getEffectifsCSVColumns().join(","),
     ...effectifs.map((effectif) => getEffectifsCSVFields(effectif).join(",")),
   ].join("\n");
-}
-
-/**
- * Escape a CSV field by replacing all " by "".
- */
-export function escapeCSVField(value: string): string {
-  if (typeof value === "string") {
-    return value ? `"${value?.replace(/"/g, '""')}"` : "";
-  } else {
-    return value ? `${value}` : "";
-  }
-}
-
-export function downloadObject(object: any, filename: string, type: string) {
-  const blob = new Blob([object], {
-    type,
-  });
-  downloadFile(URL.createObjectURL(blob), filename);
-}
-
-/**
- * Create an html element to save a file
- */
-export function downloadFile(url: string, filename: string) {
-  const link = document.createElement("a");
-  document.body.appendChild(link);
-  link.type = "hidden";
-  link.href = url;
-  link.download = filename;
-  link.target = "_blank";
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
 }

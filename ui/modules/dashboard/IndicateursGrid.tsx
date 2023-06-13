@@ -3,12 +3,13 @@ import { Box, Button, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } 
 import { ReactNode, useState } from "react";
 
 import { _get } from "@/common/httpClient";
+import { downloadObject } from "@/common/utils/browser";
 import { formatNumber } from "@/common/utils/stringUtils";
 import useToaster from "@/hooks/useToaster";
 import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs } from "@/modules/models/indicateurs";
 
-import { downloadObject, exportEffectifsAsCSV } from "../indicateurs/effectifs-csv-export";
+import { exportEffectifsAsCSV } from "../indicateurs/effectifs-csv-export";
 
 import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "./icons";
 

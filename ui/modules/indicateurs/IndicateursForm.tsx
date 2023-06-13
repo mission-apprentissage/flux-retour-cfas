@@ -7,6 +7,7 @@ import { Dispatch, SetStateAction, useMemo } from "react";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import { _get } from "@/common/httpClient";
 import { Organisation } from "@/common/internal/Organisation";
+import { downloadObject } from "@/common/utils/browser";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useAuth from "@/hooks/useAuth";
@@ -20,7 +21,13 @@ import FiltreOrganismeTerritoire, {
   FiltreOrganismeTerritoireConfig,
 } from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 
-import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
+import {
+  AbandonsIcon,
+  ApprentisIcon,
+  FileDownloadIcon,
+  InscritsSansContratsIcon,
+  RupturantsIcon,
+} from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
@@ -38,6 +45,7 @@ import {
 
 import IndicateursFilter from "./FilterAccordion";
 import FiltreFormationCFD from "./filters/FiltreFormationCFD";
+import { exportIndicateursParOrganismeAsCSV } from "./indicateurs-organismes-csv-export";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
@@ -339,8 +347,34 @@ function IndicateursForm() {
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
 
+        <HStack mb="9" justifyContent="space-between">
+          <Heading as="h3" fontSize="delta">
+            Répartition des effectifs par organismes
+          </Heading>
+
+          <Button
+            variant="link"
+            fontSize="md"
+            mt="2"
+            borderBottom="1px"
+            borderRadius="0"
+            lineHeight="6"
+            p="0"
+            isDisabled={!indicateursEffectifs || indicateursEffectifs.length === 0}
+            onClick={() =>
+              downloadObject(
+                exportIndicateursParOrganismeAsCSV(indicateursEffectifs ?? []),
+                `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.csv`,
+                "text/csv"
+              )
+            }
+          >
+            <FileDownloadIcon mr="2" />
+            Télécharger la liste
+          </Button>
+        </HStack>
+
         <NewTable
-          mt={4}
           data={indicateursEffectifs || []}
           loading={indicateursEffectifsLoading}
           // paginationState={pagination}
