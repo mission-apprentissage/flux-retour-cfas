@@ -1,5 +1,3 @@
-import { strict as assert } from "assert";
-
 import { isOrganismeFiableForCouple } from "@/common/actions/engine/engine.organismes.utils";
 import { organismesReferentielDb } from "@/common/model/collections";
 
