@@ -15,6 +15,7 @@ import {
   Stack,
   Text,
   Tooltip,
+  UnorderedList,
   VStack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
@@ -438,8 +439,30 @@ function SectionApercuChiffresCles() {
                 </Text>
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                   organismes de formation en apprentissage
-                  {/* FIXME: à réintégrer dès que le contenu sera prêt */}
-                  {/* <Tooltip background="bluefrance" color="white" label={<Box padding="1w">TODO</Box>}>
+                  <Tooltip
+                    background="bluefrance"
+                    color="white"
+                    label={
+                      <Box padding="1w">
+                        <b>Organismes de formation en apprentissage (OFA)</b>
+                        <Text as="p">Nombre d’organismes reconnus par le tableau de bord comme&nbsp;:</Text>
+                        <UnorderedList>
+                          <ListItem>
+                            trouvés dans le{" "}
+                            <Link href="https://catalogue-apprentissage.intercariforef.org/" textDecoration="underLine">
+                              Catalogue des formations en apprentissage
+                            </Link>{" "}
+                            (base des Carif-Oref)&nbsp;;
+                          </ListItem>
+                          <ListItem>identifiés par un SIRET (ouvert) et un UAI valable&nbsp;;</ListItem>
+                        </UnorderedList>
+                        <Text as="p">
+                          Ce nombre inclut&nbsp;: les OFA «&nbsp;historiques&nbsp;», les OFA académiques et
+                          d’entreprise, les lycées avec une section apprentissage, les prépa-apprentissage.
+                        </Text>
+                      </Box>
+                    }
+                  >
                     <Box
                       as="i"
                       className="ri-information-line"
@@ -448,7 +471,7 @@ function SectionApercuChiffresCles() {
                       marginLeft="1w"
                       verticalAlign="middle"
                     />
-                  </Tooltip> */}
+                  </Tooltip>
                 </Text>
                 <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
                 <Text fontSize="zeta" color="mgalt">
@@ -493,11 +516,13 @@ function SectionApercuChiffresCles() {
                           Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation.
                           Est considéré comme un apprenant, un jeune inscrit en formation dans un organisme de formation
                           en apprentissage. Il peut être&nbsp;:
-                          <br />
-                          - en formation et en recherche d’une entreprise (pas de contrat de signé)
-                          <br />
-                          - apprenti en entreprise (son contrat est signé)
-                          <br />- apprenti en rupture de contrat d’apprentissage et à la recherche d’un nouvel employeur
+                          <UnorderedList>
+                            <ListItem>en formation et en recherche d’une entreprise (pas de contrat de signé)</ListItem>
+                            <ListItem>apprenti en entreprise (son contrat est signé)</ListItem>
+                            <ListItem>
+                              apprenti en rupture de contrat d’apprentissage et à la recherche d’un nouvel employeur
+                            </ListItem>
+                          </UnorderedList>
                         </Box>
                       }
                     >
