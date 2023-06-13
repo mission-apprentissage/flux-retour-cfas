@@ -306,7 +306,7 @@ function IndicateursForm() {
           <Text fontWeight="700" textTransform="uppercase">
             Organisme
           </Text>
-          <IndicateursFilter label="Réseaux d’organismes">
+          <IndicateursFilter label="Réseau d’organismes">
             <FiltreOrganismeReseau
               value={effectifsFilters.organisme_reseaux}
               onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
