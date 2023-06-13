@@ -65,7 +65,8 @@ const resetOrganismesReferentielPresence = async () => {
  * @param {*} organismeFromReferentiel
  */
 const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
-  const { uai, siret, nature, raison_sociale, adresse, etat_administratif, qualiopi } = organismeFromReferentiel;
+  const { uai, siret, nature, raison_sociale, adresse, etat_administratif, qualiopi, enseigne } =
+    organismeFromReferentiel;
 
   const adresseFormatted = mapAdresseReferentielToAdresseTdb(adresse);
   const isFerme = etat_administratif ? (etat_administratif === "fermé" ? true : false) : false;
@@ -80,6 +81,8 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
         ...(uai ? { uai } : {}),
         siret,
         ...(raison_sociale ? { nom: raison_sociale } : {}),
+        ...(raison_sociale ? { raison_sociale } : {}),
+        ...(enseigne ? { enseigne } : {}),
         nature,
         adresse: adresseFormatted,
         ferme: isFerme,
@@ -101,6 +104,8 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
     const updatedOrganisme = {
       ...organismeInTdb,
       ...(raison_sociale ? { nom: raison_sociale } : {}),
+      ...(raison_sociale ? { raison_sociale } : {}),
+      ...(enseigne ? { enseigne } : {}),
       nature: nature,
       adresse: adresseFormatted,
       ferme: isFerme,
