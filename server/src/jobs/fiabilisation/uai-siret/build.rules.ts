@@ -1,8 +1,10 @@
+import { isOrganismeFiableForCouple } from "@/common/actions/engine/engine.organismes.utils";
 import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
 } from "@/common/constants/fiabilisation";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
+import { OrganismesReferentiel } from "@/common/model/@types";
 import {
   fiabilisationUaiSiretDb,
   organismesDb,
@@ -17,12 +19,17 @@ import {
  * @param coupleUaiSiretTdbToCheck
  * @returns
  */
-export const checkCoupleFiable = async (coupleUaiSiretTdbToCheck, organismesFromReferentiel) => {
-  const organismeFoundInReferentielViaSiret = organismesFromReferentiel.find(
-    (item) => item.siret === coupleUaiSiretTdbToCheck.siret
+export const checkCoupleFiable = async (
+  coupleUaiSiretTdbToCheck,
+  organismesFromReferentiel: OrganismesReferentiel[] = []
+) => {
+  const organismeFiableForCouple = await isOrganismeFiableForCouple(
+    coupleUaiSiretTdbToCheck.uai,
+    coupleUaiSiretTdbToCheck.siret,
+    organismesFromReferentiel
   );
 
-  if (organismeFoundInReferentielViaSiret && organismeFoundInReferentielViaSiret.uai === coupleUaiSiretTdbToCheck.uai) {
+  if (organismeFiableForCouple) {
     await fiabilisationUaiSiretDb().updateOne(
       { uai: coupleUaiSiretTdbToCheck.uai, siret: coupleUaiSiretTdbToCheck.siret },
       { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE } },
