@@ -9,7 +9,11 @@ export interface ExportColumn {
   width: number; // only used in xlsx documents
 }
 
-export function exportDataAsXlsx(filename: string, rows: any[], exportColumns: ExportColumn[]) {
+export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
+  filename: string,
+  rows: Record<Columns[number]["key"], any>[],
+  exportColumns: Columns
+) {
   const workbook = utils.book_new();
   const worksheet = utils.json_to_sheet(rows, {
     header: exportColumns.map((column) => column.key),
@@ -27,7 +31,11 @@ export function exportDataAsXlsx(filename: string, rows: any[], exportColumns: E
   writeFileXLSX(workbook, filename, { compression: true });
 }
 
-export function exportDataAsCSV(filename: string, rows: any[], exportColumns: ExportColumn[]) {
+export function exportDataAsCSV<Columns extends ReadonlyArray<ExportColumn>>(
+  filename: string,
+  rows: Record<Columns[number]["key"], any>[],
+  exportColumns: Columns
+) {
   downloadObject(
     [
       exportColumns.map((column) => column.label).join(","),

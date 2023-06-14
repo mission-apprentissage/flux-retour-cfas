@@ -1,6 +1,6 @@
 import { ExportColumn } from "./utils/exportUtils";
 
-export const indicateursParOrganismeExportColumns: ExportColumn[] = [
+export const indicateursParOrganismeExportColumns = [
   {
     label: "organisme_uai",
     key: "uai",
@@ -41,9 +41,9 @@ export const indicateursParOrganismeExportColumns: ExportColumn[] = [
     key: "abandons",
     width: 10,
   },
-];
+] as const satisfies ReadonlyArray<ExportColumn>;
 
-export const effectifsExportColumns: ExportColumn[] = [
+export const effectifsExportColumns = [
   {
     label: "organisme_uai",
     key: "organisme_uai",
@@ -114,4 +114,4 @@ export const effectifsExportColumns: ExportColumn[] = [
     key: "formation_date_fin_formation",
     width: 20,
   },
-];
+] as const satisfies ReadonlyArray<ExportColumn>;
