@@ -12,7 +12,6 @@ import {
 } from "@/common/actions/formations.actions";
 import { formationsDb } from "@/common/model/collections";
 import { dataForGetCfdInfo } from "@tests/data/apiTablesDeCorrespondances";
-import { nockGetMetiersByCfd } from "@tests/utils/nockApis/nock-Lba";
 import { nockGetCfdInfo } from "@tests/utils/nockApis/nock-tablesCorrespondances";
 
 describe("Tests des actions Formations", () => {
@@ -100,7 +99,6 @@ describe("Tests des actions Formations", () => {
 
     it("returns created formation when cfd was found in Tables de Correspondances without intitule_long (no rncps found)", async () => {
       nock.cleanAll();
-      nockGetMetiersByCfd();
       nockGetCfdInfo(() => {
         return dataForGetCfdInfo.withoutIntituleLong;
       });
