@@ -2,14 +2,13 @@ import { DownloadIcon } from "@chakra-ui/icons";
 import { Box, Button, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import { ReactNode, useState } from "react";
 
+import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { downloadObject } from "@/common/utils/browser";
+import { exportDataAsCSV } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import useToaster from "@/hooks/useToaster";
 import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs } from "@/modules/models/indicateurs";
-
-import { exportEffectifsAsCSV } from "../indicateurs/effectifs-csv-export";
 
 import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "./icons";
 
@@ -106,10 +105,10 @@ async function downloadCSV(
     params: convertEffectifsFiltersToQuery(effectifsFilters),
   });
 
-  downloadObject(
-    exportEffectifsAsCSV(effectifs),
+  exportDataAsCSV(
     `tdb-effectifs-${type}-${effectifsFilters.date.toISOString().substring(0, 10)}.csv`,
-    "text/csv"
+    effectifs,
+    effectifsExportColumns
   );
 }
 

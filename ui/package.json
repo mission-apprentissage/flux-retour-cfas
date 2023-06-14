@@ -56,6 +56,7 @@
     "react-phone-input-2": "2.15.1",
     "recoil": "0.7.7",
     "remixicon": "2.5.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz",
     "yup": "0.32.11",
     "yup-password": "0.2.2",
     "zod": "3.21.4",
