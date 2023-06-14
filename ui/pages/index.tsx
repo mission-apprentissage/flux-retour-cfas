@@ -92,10 +92,10 @@ function PublicLandingPage() {
               dans les territoires.
             </Text>
             <HStack gap={5} mt={5}>
-              <Link variant="primary" href="/auth/inscription">
+              <Link variant="primary" href="/auth/inscription" plausibleGoal="clic_homepage_inscription_bandeau">
                 Je m’inscris
               </Link>
-              <Link variant="secondary" href="/auth/connexion">
+              <Link variant="secondary" href="/auth/connexion" plausibleGoal="clic_homepage_connexion_bandeau">
                 J’ai déjà un compte
               </Link>
             </HStack>
@@ -324,6 +324,7 @@ function PublicLandingPage() {
           display="inline-flex"
           alignItems="center"
           href="https://fr.linkedin.com/company/mission-apprentissage"
+          plausibleGoal="clic_homepage_page_linkedin"
           isExternal
         >
           <Image src="/images/landing-cards/linkedin.svg" alt="" userSelect="none" mr="3" />
@@ -589,11 +590,21 @@ function SectionApercuChiffresCles() {
         <LockFill color="bluefrance" boxSize="4" />
         <Text>
           Pour visualiser l’intégralité des données consultables,{" "}
-          <Link href="/auth/connexion" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+          <Link
+            href="/auth/connexion"
+            plausibleGoal="clic_homepage_connexion_carto"
+            borderBottom="1px solid"
+            _hover={{ textDecoration: "none" }}
+          >
             connectez-vous
           </Link>{" "}
           ou{" "}
-          <Link href="/auth/inscription" borderBottom="1px solid" _hover={{ textDecoration: "none" }}>
+          <Link
+            href="/auth/inscription"
+            plausibleGoal="clic_homepage_inscription_carto"
+            borderBottom="1px solid"
+            _hover={{ textDecoration: "none" }}
+          >
             créez un compte
           </Link>
           .

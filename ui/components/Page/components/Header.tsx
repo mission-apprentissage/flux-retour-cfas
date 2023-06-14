@@ -39,13 +39,13 @@ const UserMenu = () => {
     <>
       {!auth && (
         <HStack>
-          <Link href="/auth/inscription" variant="pill" px={3} py={1}>
+          <Link href="/auth/inscription" plausibleGoal="clic_homepage_inscription_header" variant="pill" px={3} py={1}>
             <Text lineHeight={6}>
               <AccountUnfill boxSize={5} mr={2} />
               S&apos;inscrire
             </Text>
           </Link>
-          <Link href="/auth/connexion" variant="pill" px={3} py={1}>
+          <Link href="/auth/connexion" plausibleGoal="clic_homepage_connexion_header" variant="pill" px={3} py={1}>
             <Text lineHeight={6}>
               <AccountFill boxSize={5} mr={2} />
               Se connecter
