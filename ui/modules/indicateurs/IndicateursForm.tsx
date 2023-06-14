@@ -306,12 +306,14 @@ function IndicateursForm() {
           <Text fontWeight="700" textTransform="uppercase">
             Organisme
           </Text>
-          <IndicateursFilter label="Réseau d’organismes">
-            <FiltreOrganismeReseau
-              value={effectifsFilters.organisme_reseaux}
-              onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
-            />
-          </IndicateursFilter>
+          {auth.organisation.type !== "TETE_DE_RESEAU" && (
+            <IndicateursFilter label="Réseau d’organismes">
+              <FiltreOrganismeReseau
+                value={effectifsFilters.organisme_reseaux}
+                onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
+              />
+            </IndicateursFilter>
+          )}
           <IndicateursFilter label="Établissement">
             <FiltreOrganismeSearch
               value={effectifsFilters.organisme_search}
