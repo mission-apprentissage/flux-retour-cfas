@@ -160,7 +160,7 @@ function PublicLandingPage() {
               <ListItem>
                 <Flex align="center" fontSize="omega">
                   <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="2" />
-                  Centraliser les informations utiles à l’animation de celui-ci
+                  Centralisez les informations utiles à l’animation de celui-ci
                 </Flex>
               </ListItem>
             </List>
@@ -186,7 +186,7 @@ function PublicLandingPage() {
                 <Flex align="center" fontSize="omega">
                   <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="2" />
                   <Text>
-                    Mobiliser rapidement le{" "}
+                    Mobilisez rapidement le{" "}
                     <Text as="abbr" title="SPIE : Service public de l’insertion et de l’emploi" cursor="help">
                       SPIE
                     </Text>{" "}
