@@ -8,7 +8,7 @@ describe("calculateBins()", () => {
   it("create bins like metabase", () => {
     expect(calculateBins(indicateurs, 5, "#000000", "#ff0000")).toStrictEqual([
       {
-        minValue: 123,
+        minValue: 0,
         maxValue: 10414,
         color: "#000000",
       },

@@ -10,7 +10,7 @@ export function calculateBins(data: number[], numberOfBuckets: number, minColor:
   const dataMax = sortedData[sortedData.length - 1];
   const binSize = (dataMax - dataMin) / numberOfBuckets;
 
-  return Array.from({ length: numberOfBuckets }, (_, i) => {
+  const bins = Array.from({ length: numberOfBuckets }, (_, i) => {
     const minValue: number = dataMin + i * binSize;
     const maxValue: number = minValue + binSize;
 
@@ -19,6 +19,9 @@ export function calculateBins(data: number[], numberOfBuckets: number, minColor:
 
     return { minValue, maxValue, color };
   });
+  // borne min à zéro pour un meilleur affichage
+  bins[0].minValue = 0;
+  return bins;
 }
 
 // Fonction pour interpoler les couleurs
