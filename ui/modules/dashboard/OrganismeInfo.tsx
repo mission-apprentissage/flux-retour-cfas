@@ -15,7 +15,6 @@ import { useQuery } from "@tanstack/react-query";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
-import NatureOrganismeDeFormationWarning from "@/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import Section from "@/components/Section/Section";
 import IndicateursGrid from "@/modules/dashboard/IndicateursGrid";
@@ -160,7 +159,6 @@ export default function OrganismeInfo({ organisme, isMine }: { organisme: Organi
                   />
                 </Tooltip>
               )}
-              {organisme.nature_validity_warning && <NatureOrganismeDeFormationWarning />}
             </HStack>
           </HStack>
 

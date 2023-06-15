@@ -41,10 +41,6 @@ export interface Organisme {
    */
   nature: "responsable" | "formateur" | "responsable_formateur" | "lieu_formation" | "inconnue";
   /**
-   * Y a-t-il un doute sur la validité de la nature
-   */
-  nature_validity_warning?: boolean;
-  /**
    * Nom de l'organisme de formation
    */
   nom?: string;

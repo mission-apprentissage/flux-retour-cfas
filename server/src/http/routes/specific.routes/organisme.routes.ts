@@ -86,7 +86,6 @@ export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {
     domainesMetiers: organisme.metiers,
     uai: organisme.uai,
     nature: organisme.nature,
-    nature_validity_warning: organisme.nature_validity_warning,
     adresse: organisme.adresse,
     sousEtablissements,
   };

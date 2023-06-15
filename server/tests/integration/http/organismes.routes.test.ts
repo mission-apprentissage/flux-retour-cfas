@@ -37,7 +37,6 @@ describe("Routes Organismes for API referentiel", () => {
     //   "siret",
     //   "nom",
     //   "nature",
-    //   "nature_validity_warning",
     //   "reseaux",
     //   "adresse",
     //   "metiers",
