@@ -19,6 +19,7 @@ import { ChevronLeftIcon, ChevronRightIcon, FirstPageIcon, LastPageIcon } from "
 interface NewTableProps<T> extends SystemProps {
   columns: ColumnDef<T, any>[];
   data: T[];
+  noDataMessage?: string;
   loading?: boolean;
   sortingState?: SortingState;
   paginationState?: PaginationState;
@@ -97,6 +98,12 @@ function NewTable<T>(props: NewTableProps<T>) {
         <Tbody>
           {props.loading ? (
             <RowsSkeleton nbRows={5} nbColumns={props.columns.length} height="50px" />
+          ) : table.getRowModel().rows.length === 0 ? (
+            <Tr _hover={{ backgroundColor: "inherit !important" }}>
+              <Td colSpan={99} h="50px" textAlign="center">
+                {props.noDataMessage ?? "Aucun résultat"}
+              </Td>
+            </Tr>
           ) : (
             table.getRowModel().rows.map((row) => {
               return (

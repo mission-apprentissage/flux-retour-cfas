@@ -1,12 +1,28 @@
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
-import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Heading,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  SimpleGrid,
+  Text,
+  Tooltip,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useMemo } from "react";
 
 import { ACADEMIES_BY_CODE, DEPARTEMENTS, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
+import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisation } from "@/common/internal/Organisation";
+import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useAuth from "@/hooks/useAuth";
@@ -20,7 +36,13 @@ import FiltreOrganismeTerritoire, {
   FiltreOrganismeTerritoireConfig,
 } from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 
-import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
+import {
+  AbandonsIcon,
+  ApprentisIcon,
+  FileDownloadIcon,
+  InscritsSansContratsIcon,
+  RupturantsIcon,
+} from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
@@ -341,10 +363,67 @@ function IndicateursForm() {
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
 
+        <HStack mb="9" justifyContent="space-between">
+          <Heading as="h3" fontSize="delta">
+            Répartition des effectifs par organismes
+          </Heading>
+
+          <Menu>
+            <MenuButton
+              as={Button}
+              variant={"link"}
+              fontSize="md"
+              mt="2"
+              borderBottom="1px"
+              borderRadius="0"
+              lineHeight="6"
+              p="0"
+              isDisabled={!indicateursEffectifs || indicateursEffectifs.length === 0}
+              _active={{
+                color: "bluefrance",
+              }}
+            >
+              <FileDownloadIcon mr="2" />
+              Télécharger la liste
+            </MenuButton>
+
+            <MenuList>
+              <MenuItem
+                onClick={() => {
+                  const effectitsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
+                    ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
+                  );
+                  exportDataAsXlsx(
+                    `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
+                    effectitsWithoutOrganismeId,
+                    indicateursParOrganismeExportColumns
+                  );
+                }}
+              >
+                Excel (XLSX)
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  const effectitsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
+                    ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
+                  );
+                  exportDataAsCSV(
+                    `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.csv`,
+                    effectitsWithoutOrganismeId,
+                    indicateursParOrganismeExportColumns
+                  );
+                }}
+              >
+                CSV
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        </HStack>
+
         <NewTable
-          mt={4}
           data={indicateursEffectifs || []}
           loading={indicateursEffectifsLoading}
+          noDataMessage="Aucun organisme ne semble correspondre aux filtres que vous avez sélectionnés"
           // paginationState={pagination}
           sortingState={sort}
           // onPaginationChange={(state) => updateState({ pagination: state })}
