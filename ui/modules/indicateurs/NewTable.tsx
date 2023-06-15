@@ -76,6 +76,18 @@ function NewTable<T>(props: NewTableProps<T>) {
                     cursor={header.column.getCanSort() ? "pointer" : "default"}
                     userSelect={header.column.getCanSort() ? "none" : "initial"}
                     onClick={header.column.getToggleSortingHandler()}
+                    _hover={
+                      header.column.getCanSort() && !header.column.getIsSorted()
+                        ? {
+                            backgroundColor: "grey.100",
+                            "::after": {
+                              color: "grey.500",
+                              content: '"▼"',
+                              marginLeft: "-14px", // Negative margin to pull icon to the left, based on following Box
+                            },
+                          }
+                        : undefined
+                    }
                   >
                     {header.isPlaceholder ? null : (
                       <>
