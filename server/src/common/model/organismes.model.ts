@@ -67,7 +67,6 @@ const schema = object(
       description: "Nature de l'organisme de formation",
       enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
     }),
-    nature_validity_warning: boolean({ description: "Y a-t-il un doute sur la validité de la nature" }),
     nom: string({ description: "Nom de l'organisme de formation" }),
     enseigne: string({ description: "Enseigne de l'organisme de formation" }),
     raison_sociale: string({ description: "Raison sociale de l'organisme de formation" }),

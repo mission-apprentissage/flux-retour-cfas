@@ -110,7 +110,6 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       adresse: adresseFormatted,
       ferme: isFerme,
       qualiopi: qualiopi || false,
-      nature_validity_warning: false,
       est_dans_le_referentiel: true,
     };
     try {
