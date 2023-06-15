@@ -1,3 +1,45 @@
+# [3.29.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.28.0...v3.29.0) (2023-06-15)
+
+
+### Bug Fixes
+
+* affichage longueur min 20c pour les admins ([#3045](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3045)) ([7f34ef5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7f34ef596676ae8049723b706364a757b9af63fa))
+* borne min à 0 pour l'échelle des cartes ([#3060](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3060)) ([1c5091e](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1c5091e97dd381892267a96a220985ff6268a1d2))
+* bypass validation en attendant de corriger le schéma effectifs ([#3048](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3048)) ([76f60df](https://github.com/mission-apprentissage/flux-retour-cfas/commit/76f60df65b262811047d642051771a78fac2f50f))
+* cacher filtre réseau pour les têtes de réseau ([#3058](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3058)) ([b64dc9d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b64dc9da255ecadfacf07a6ea0eb411e26b63666))
+* certbot image ([4485f78](https://github.com/mission-apprentissage/flux-retour-cfas/commit/4485f787f9ecec30aa5b8fc2fb4b79fcf9a534ed))
+* changement de texte pour les indicateurs ([#3040](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3040)) ([b19ee0b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b19ee0be983c316ce67aa5ff41297326b6864222))
+* correction label réseau d'organismes ([#3049](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3049)) ([96ad5d9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/96ad5d9900531bc85898c9997aee3bffb39ec1a0))
+* corrections mineures ([#3047](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3047)) ([97b212c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/97b212cb662ec80f7b53709e1266440f6a818c4c))
+* corrections mineures sur les indicateurs et nouveau calcul sur les apprenants ([#3039](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3039)) ([23866df](https://github.com/mission-apprentissage/flux-retour-cfas/commit/23866dfe07d7f70f52eac70dd1491a43626b1b75))
+* corrige un problème de layout sur mes effectifs ([#3037](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3037)) ([fa5f3d5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fa5f3d5bee303b55cf9c8fd4136ef9061fd05922))
+* filtre bassins d'emploi pour les opérateurs publics territoriaux ([b13ffde](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b13ffde5fb6da66d6a7994079a40ebc3708d9262))
+* maj du chemin route lba ([#3059](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3059)) ([f7720ca](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f7720ca7a62d1d4b22f5d67caed9a15ec2cda7a1))
+* remise en place du tooltip de date avec le texte de janvier-février ([#3042](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3042)) ([420bde2](https://github.com/mission-apprentissage/flux-retour-cfas/commit/420bde26dac2479c1852bd462efcd8aa1099f044))
+* revue du format d'export des dates ([#3051](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3051)) ([5bfeed3](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5bfeed3f5c7cfe269ab6be872df75d8ee3fd18ac))
+* **server:** hydrate missing fields from referentiel ([#3054](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3054)) ([747ecc4](https://github.com/mission-apprentissage/flux-retour-cfas/commit/747ecc446cc02d2af24c90f1565a3e43f149da7d))
+* **server:** script de suppression des inscrits sans contrats dans ce statut depuis X jours ([#3023](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3023)) ([220cd5f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/220cd5f3fdbd5b89bfa51091b5408aeb1284617b))
+* **ui:** ajout d'un hover sur les tables ([#3064](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3064)) ([9b594dc](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9b594dc7b4bc7ee3200249eee51eab2a4e9108cb))
+* **ui:** en cas d'absence de nature d'organisme, le texte inconnu pouvait passer sur deux lignes ([#3029](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3029)) ([acd30ab](https://github.com/mission-apprentissage/flux-retour-cfas/commit/acd30abe3fa8f98f434e24159c4f1e00ea9b3b75))
+* **ui:** labels du niveau de formation ([#3043](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3043)) ([ee496f5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ee496f5560a11737e9f0f1abdffdad473f4394fc))
+* **ui:** largeur maximale à chakra-size-xl sur les modales ([#3027](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3027)) ([b472113](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b472113be6760ba7fd19fc005691e28ed673f6dc))
+* **ui:** nouveau tooltip sur l'accueil ([#3053](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3053)) ([83cc71e](https://github.com/mission-apprentissage/flux-retour-cfas/commit/83cc71ea986ca8ffebae502b5e2cf7fe3f0c7604))
+* **ui:** tooltip d'explication sur la carte du taux de couverture des organismes ([#3028](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3028)) ([f58ff29](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f58ff2966f8c4e4cd12d56c8d740663aacd0a23a))
+* **ui:** wording infinitif => impératif ([#3057](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3057)) ([b1772be](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b1772be9c2a2251bdb94d80ddf76ff9d68e087f4))
+
+
+### Features
+
+* add userflow api-key ([#3021](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3021)) ([eee6001](https://github.com/mission-apprentissage/flux-retour-cfas/commit/eee60019933349c67d1caba0c64c3fd23cd8d868))
+* affichage du code département à l'inscription ([#3026](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3026)) ([8ccbbc3](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8ccbbc31b409166e2edcca2bfe778cb15c5fe13b))
+* ajout bouton téléchargement de la liste des organismes + export XLSX ([#3056](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3056)) ([13ef4d3](https://github.com/mission-apprentissage/flux-retour-cfas/commit/13ef4d36cbebe6bd80bb6e28842f6da2352f325d))
+* ajout du filtre bassins d'emploi ([#3025](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3025)) ([8724acb](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8724acb4d5500bf8edf0a3914437ba0465572722))
+* ajout tracking plausible page d'accueil ([#3061](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3061)) ([55dccfc](https://github.com/mission-apprentissage/flux-retour-cfas/commit/55dccfc3bc53327297ab0e099b9eaa52d1d0a7b7))
+* nouveaux écrans indicateurs :bar_chart: ([#3019](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3019)) ([68cb9b9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/68cb9b916856bb799731828f9fada787c2d0e43f))
+* nouvelle page d'accueil ([#3036](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3036)) ([1789e2c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1789e2cc2a24a776d1f37eb2aa7571a95d1e1265))
+* suppression phrase d'accroche ([e4aecbd](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e4aecbd0a84690f775be692d1cca780169af43c6))
+* **ui:** ajout du filtre "genre" indiqué comme bientôt disponible ([#3044](https://github.com/mission-apprentissage/flux-retour-cfas/issues/3044)) ([a3ee136](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a3ee136ef66cd5d3095d6c3b5cc539f773275929))
+
 # [3.28.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.27.4...v3.28.0) (2023-05-24)
 
 

@@ -2,7 +2,7 @@
   "name": "mna-flux-retour-cfas",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
-  "version": "3.28.0",
+  "version": "3.29.0",
   "author": "MNA",
   "license": "MIT",
   "private": true,
