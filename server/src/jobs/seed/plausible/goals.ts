@@ -6,39 +6,32 @@ const plausibleDomains = [
   "cfas-dev.apprentissage.beta.gouv.fr",
 ];
 
+// https://www.notion.so/mission-apprentissage/Tracking-Plausible-TDB-86c1845affea4d759fc022093af95837
+// identique à la liste côté UI ui/common/plausible-goals.ts
 const goals = [
   // Page Statistiques
   "clic_statistiques",
   "clic_stats_visites",
-  "clic_stats_profil-utilisateur",
+  "clic_stats_profils-utilisateur",
   "clic_stats_acquisition",
   "clic_stats_qualite",
   "clic_stats_couverture",
 
-  // page aide
-  "clic_bouton_aide",
-  "clic_aide_footer",
+  // Header
+  "clic_homepage_inscription_header",
+  "clic_homepage_connexion_header",
 
-  // vue dreets
-  "clic_dreets_vue_territoriale",
-  "clic_dreets_vue_reseau",
-  "clic_dreets_vue_of",
-  "clic_dreets_vue_formation",
-  "clic_filtre_territoire",
-  "clic_selection_territoire",
-  "clic_onglet_vue_globale",
-  "clic_onglet_effectifs_organisme",
-  "clic_onglet_vue_effectifs_niveau",
-  "clic_organisme",
-  "telechargement_donnees_territoire_dreets",
+  // Page d'accueil
+  "clic_homepage_inscription_bandeau",
+  "clic_homepage_connexion_bandeau",
+  "clic_homepage_inscription_carto",
+  "clic_homepage_connexion_carto",
+  "clic_homepage_page_linkedin",
 
-  // Vue OF
-  "clic_organisme",
-  "telechargement_effectifs_of",
-  "clic_toggle",
-  "clic_filtre_annee_scolaire",
-  "clic_mes_parametres",
-  "clic_nb_lignes_liste",
+  // Menu
+  "clic_homepage_questions",
+  "clic_homepage_page_aide",
+  "clic_homepage_envoi_message",
 ];
 
 const PLAUSIBLE_TOKEN = process.env.PLAUSIBLE_TOKEN;

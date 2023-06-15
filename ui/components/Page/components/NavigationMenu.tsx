@@ -1,11 +1,13 @@
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { usePlausible } from "next-plausible";
 import { ReactElement, useState } from "react";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { OrganisationType } from "@/common/internal/Organisation";
+import { PlausibleGoalsEvents } from "@/common/plausible-goals";
 import Link from "@/components/Links/Link";
 import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
@@ -233,6 +235,7 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
 }
 
 const MenuQuestions = () => {
+  const plausible = usePlausible<PlausibleGoalsEvents>();
   return (
     <>
       <Menu>
@@ -243,6 +246,7 @@ const MenuQuestions = () => {
           borderColor="transparent"
           bg="transparent"
           _hover={{ textDecoration: "none", color: "grey.800", bg: "grey.200" }}
+          onClick={() => plausible("clic_homepage_questions")}
         >
           <Text display="block">
             Question ? <ChevronDownIcon />
@@ -254,10 +258,17 @@ const MenuQuestions = () => {
             href="https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => plausible("clic_homepage_page_aide")}
           >
             Page d’aide
           </MenuItem>
-          <MenuItem as="a" href={`mailto:${CONTACT_ADDRESS}`} target="_blank" rel="noopener noreferrer">
+          <MenuItem
+            as="a"
+            href={`mailto:${CONTACT_ADDRESS}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => plausible("clic_homepage_envoi_message")}
+          >
             Nous envoyer un message
           </MenuItem>
         </MenuList>
