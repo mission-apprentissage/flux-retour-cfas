@@ -255,7 +255,7 @@ const MenuQuestions = () => {
         <MenuList>
           <MenuItem
             as="a"
-            href="https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"
+            href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => plausible("clic_homepage_page_aide")}

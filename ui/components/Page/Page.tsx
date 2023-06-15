@@ -26,7 +26,7 @@ function Page({ children, childrenContainer, ...rest }: PageProps) {
       </Box>
       <Link
         isExternal
-        href="https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"
+        href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
         position="fixed"
         width="60px"
         height="60px"

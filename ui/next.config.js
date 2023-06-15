@@ -13,7 +13,7 @@ const contentSecurityPolicy = `
       font-src 'self' https: data:;
       frame-ancestors 'self' https://cfas.apprentissage.beta.gouv.fr;
       frame-src 'self'  https://plausible.io https://cfas.apprentissage.beta.gouv.fr;
-      img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://www.notion.so data: ${
+      img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://www.notion.so https://mission-apprentissage.notion.site data: ${
         process.env.NEXT_PUBLIC_ENV !== "production" ? "" : ""
       };
       object-src 'none';
