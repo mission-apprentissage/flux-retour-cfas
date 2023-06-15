@@ -1,21 +1,10 @@
 import nock from "nock";
 
 import config from "@/config";
-import { dataForGetMetiersByCfd, dataForGetMetiersBySiret } from "@tests/data/apiLba";
-
-const API_ENDPOINT = config.lbaApi.endpoint;
-
-export const nockGetMetiersByCfd = (data = dataForGetMetiersByCfd) => {
-  nock(`${API_ENDPOINT}/metiers/`)
-    .persist()
-    .get(/metiersParFormation.*$/)
-    .reply(200, {
-      metiers: data.metiers,
-    });
-};
+import { dataForGetMetiersBySiret } from "@tests/data/apiLba";
 
 export const nockGetMetiersBySiret = (data = dataForGetMetiersBySiret) => {
-  nock(`${API_ENDPOINT}/metiers/`)
+  nock(`${config.lbaApi.endpoint}/v1/metiers/`)
     .persist()
     .get(/metiersParEtablissement.*$/)
     .reply(200, {

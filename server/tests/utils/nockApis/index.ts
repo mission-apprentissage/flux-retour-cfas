@@ -1,6 +1,6 @@
 import { nockGetEntreprise, nockGetEtablissement } from "./nock-apiEntreprise";
-import { nockGetMetiersByCfd, nockGetMetiersBySiret } from "./nock-Lba";
-import { nockGetCodePostalInfo, nockGetCfdInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
+import { nockGetMetiersBySiret } from "./nock-Lba";
+import { nockGetCfdInfo, nockGetCodePostalInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
 
 export const nockExternalApis = () => {
   // nok API tablesCorrespondances
@@ -11,7 +11,6 @@ export const nockExternalApis = () => {
 
   // nok LBA
   // aka http://labonnealternance.apprentissage.beta.gouv.fr/api
-  nockGetMetiersByCfd();
   nockGetMetiersBySiret();
 
   // nock API entreprise

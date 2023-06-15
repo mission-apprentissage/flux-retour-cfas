@@ -16,11 +16,11 @@ const axiosClient = getApiClient({
  * @param  string siret
  * @returns
  */
-export const getMetiersBySiret = async (siret) => {
+export const getMetiersBySiret = async (siret: string) => {
   if (!siret) throw new Error("sirets param must be a specified");
 
   try {
-    const { data } = await axiosClient.get(`/metiers/metiersParEtablissement/${encodeURIComponent(siret)}`);
+    const { data } = await axiosClient.get(`/v1/metiers/metiersParEtablissement/${encodeURIComponent(siret)}`);
     return data?.metiers ?? [];
   } catch (err: any) {
     // 500 with specific message on this route means no métiers were found for those SIRET
