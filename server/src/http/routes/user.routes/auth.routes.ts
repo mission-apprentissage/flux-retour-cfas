@@ -3,7 +3,7 @@ import express from "express";
 import Joi from "joi";
 
 import { login } from "@/common/actions/account.actions";
-import { removeJwt } from "@/common/actions/sessions.actions";
+import { removeSession } from "@/common/actions/sessions.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { validateFullObjectSchema } from "@/common/utils/validationUtils";
@@ -30,7 +30,7 @@ export default () => {
       if (!req.cookies[COOKIE_NAME]) {
         throw Boom.unauthorized("invalid jwt");
       }
-      await removeJwt(req.cookies[COOKIE_NAME]);
+      await removeSession(req.cookies[COOKIE_NAME]);
       res.clearCookie(COOKIE_NAME);
     })
   );

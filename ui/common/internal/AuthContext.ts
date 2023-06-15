@@ -16,6 +16,9 @@ export interface AuthContext<IOrganisation = Organisation> {
 
   // legacy field used for ERPs
   username: string;
+
+  // only admins can impersonate organisations
+  impersonating?: boolean;
 }
 
 // contexte côté UI

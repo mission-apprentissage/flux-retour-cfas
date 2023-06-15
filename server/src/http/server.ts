@@ -65,6 +65,7 @@ import {
   verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
+import { createSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
@@ -73,6 +74,7 @@ import { Organisme } from "@/common/model/@types";
 import { jobEventsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { packageJson } from "@/common/utils/esmUtils";
+import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostDossiers, SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
@@ -676,6 +678,19 @@ function setupRoutes(app: Application) {
   /********************************
    * API droits administrateurs   *
    ********************************/
+
+  authRouter.delete(
+    "/api/v1/admin/impersonate",
+    returnResult(async (req, res) => {
+      if (!req.user.impersonating) {
+        throw Boom.forbidden("Permissions invalides");
+      }
+      // génère une session classique pour retrouver les permissions admin
+      const sessionToken = await createSession(req.user.email);
+      responseWithCookie(res, sessionToken);
+    })
+  );
+
   authRouter.use(
     "/api/v1/admin",
     express
@@ -686,6 +701,16 @@ function setupRoutes(app: Application) {
       .use("/effectifs", effectifsAdmin())
       .use("/stats", statsAdmin())
       .use("/maintenanceMessages", maintenancesAdmin())
+      .post(
+        "/impersonate",
+        returnResult(async (req, res) => {
+          const organisation = await registrationSchema.organisation.parseAsync(req.body);
+
+          // génère une nouvelle session avec l'organisation usurpée
+          const sessionToken = await createSession(req.user.email, { impersonatedOrganisation: organisation });
+          responseWithCookie(res, sessionToken);
+        })
+      )
   );
 
   app.use(authRouter);

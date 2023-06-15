@@ -5,7 +5,7 @@ import passport from "passport";
 import { Strategy, ExtractJwt, Strategy as JWTStrategy } from "passport-jwt";
 
 import { getOrganisationById } from "@/common/actions/organisations.actions";
-import * as sessions from "@/common/actions/sessions.actions";
+import { findSessionByToken, removeSession } from "@/common/actions/sessions.actions";
 import { getUserByEmail, updateUser } from "@/common/actions/users.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -37,7 +37,12 @@ export const authMiddleware = () => {
           if (user.account_status !== "CONFIRMED") {
             throw Boom.forbidden("Votre compte n'est pas encore validé.");
           }
-          (user as unknown as AuthContext).organisation = await getOrganisationById(user.organisation_id as ObjectId);
+
+          if (jwtPayload.impersonatedOrganisation) {
+            (user as unknown as AuthContext).impersonating = true;
+          }
+          (user as unknown as AuthContext).organisation =
+            jwtPayload.impersonatedOrganisation ?? (await getOrganisationById(user.organisation_id as ObjectId));
           done(null, user);
         } catch (err) {
           done(err);
@@ -48,13 +53,14 @@ export const authMiddleware = () => {
 
   return compose([
     passport.authenticate("jwtStrategy2", { session: false }),
+    // TODO stratégie à supprimer pour récupérer la session associée en BDD
     async (req, res, next) => {
-      const activeSession = await sessions.findJwt(req.cookies[COOKIE_NAME]);
+      const activeSession = await findSessionByToken(req.cookies[COOKIE_NAME]);
       if (!activeSession) {
         return res.status(401).json({ error: "Accès non autorisé" });
       }
       if (req.user.invalided_token) {
-        await sessions.removeJwt(req.cookies[COOKIE_NAME]);
+        await removeSession(req.cookies[COOKIE_NAME]);
         return res.clearCookie(COOKIE_NAME).status(401).json({
           error: "Invalid jwt",
         });
