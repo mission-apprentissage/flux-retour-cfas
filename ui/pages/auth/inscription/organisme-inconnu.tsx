@@ -30,7 +30,7 @@ export default function InscriptionOrganismeInconnu() {
         </Link>
         des entreprises. Vous pouvez aussi consulter la{" "}
         <Link
-          href={"https://www.notion.so/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"}
+          href={"https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"}
           fontWeight={700}
           color="bluefrance"
           whiteSpace="nowrap"

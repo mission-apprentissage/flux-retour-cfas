@@ -111,7 +111,7 @@ const Footer = () => {
                 <Link
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"
+                  href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
                 >
                   Page d&rsquo;aide
                 </Link>
