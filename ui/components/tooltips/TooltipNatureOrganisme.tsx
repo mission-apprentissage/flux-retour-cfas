@@ -21,9 +21,9 @@ export default function TooltipNatureOrganisme() {
             <ListItem>Les organismes formateurs</ListItem>
           </UnorderedList>
           <Text as="p">
-            Si la cellule contient «&nbsp;inconnue&nbsp;», cela signifie que l&quot;organisme n&quot;a pas déclaré son
-            offre de formation dans la base de son Carif-Oref : Inviter l&quot;organisme à référencer ses formations en
-            apprentissage auprès du{" "}
+            Si la cellule contient «&nbsp;inconnue&nbsp;», cela signifie que l’organisme n’a pas déclaré son offre de
+            formation dans la base de son Carif-Oref : Inviter l’organisme à référencer ses formations en apprentissage
+            auprès du{" "}
             <Link href="https://catalogue-apprentissage.intercariforef.org/" textDecoration="underLine">
               Carif-oref régional
             </Link>
@@ -31,7 +31,7 @@ export default function TooltipNatureOrganisme() {
           </Text>
         </Box>
       }
-      aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+      aria-label="La donnée Nature est déduite des relations entre les organismes (base des Carif-Oref)"
     >
       <Box
         as="i"

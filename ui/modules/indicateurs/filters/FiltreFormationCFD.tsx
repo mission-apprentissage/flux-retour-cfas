@@ -133,12 +133,13 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
                             <Text as="p">
                               Y sont ajoutés, en tant que de besoin et à la demande des centres de formation par
                               l’apprentissage, les autres diplômes et titres inscrits au répertoire national des
-                              certifications professionnelles (RNCP), dès lorsqu’ils sont préparés par la voie de
+                              certifications professionnelles (RNCP), dès lors qu’ils sont préparés par la voie de
                               l’apprentissage.
                             </Text>
                           </Box>
                         }
-                        aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+                        aria-label="Code Formation Diplôme. Codification qui concerne l’ensemble des diplômes technologiques et professionnels des
+                        ministères certificateurs."
                       >
                         <Box
                           as="i"

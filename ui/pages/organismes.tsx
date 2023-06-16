@@ -198,7 +198,8 @@ function MesOrganismes() {
                             </Text>
                           </Box>
                         }
-                        aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+                        aria-label="Indication de l’état administratif du SIRET de l’établissement, tel qu’il est renseigné
+                        sur l’INSEE."
                       >
                         <Box
                           as="i"
@@ -261,7 +262,8 @@ function MesOrganismes() {
                             </Text>
                           </Box>
                         }
-                        aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+                        aria-label="Nom de la commune, code postal et code commune INSEE de l’établissement qui accueille
+                        physiquement les apprentis et les forme."
                       >
                         <Box
                           as="i"
