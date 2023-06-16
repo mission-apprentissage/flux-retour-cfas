@@ -46,9 +46,7 @@ async function allowIp(client, nasName, partitionName, ip) {
   });
 }
 
-async function createBackupPartition(client, ip, partitionName) {
-  let nasName = await getNasName(client);
-
+async function createBackupPartition(client, ip, partitionName, nasName) {
   await createPartition(client, nasName, partitionName);
   await allowIp(client, nasName, partitionName, ip);
 }

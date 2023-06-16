@@ -12,7 +12,8 @@
     - name: Mount backup NFS partition
       when: backup_cron|bool == true
       ansible.posix.mount:
-        src: "{{nas_ip}}:{{nas_name}}/{{backup_partition_name}}"
+        src: "10.16.100.163:zpool-128310/{{backup_partition_name}}"
+        src: "10.201.16.96:zpool-129542/fluxretourcfas
         path: /mnt/backups
         opts: _netdev,mountproto=tcp
         state: mounted

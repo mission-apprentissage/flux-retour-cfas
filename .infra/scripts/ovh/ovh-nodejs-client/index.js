@@ -34,15 +34,15 @@ cli
   });
 
 cli
-  .command("createBackupPartition <ip> <partitionName>")
+  .command("createBackupPartition <ip> <partitionName> <nasName>")
   .description("Permet de créer une partition de backup sur le NAS")
   .option("--key <key>", "La consumer key")
-  .action(async (ip, partitionName, { key }) => {
+  .action(async (ip, partitionName, nasName, { key }) => {
     let client = await getClient(key);
 
-    await createBackupPartition(client, ip, partitionName);
+    await createBackupPartition(client, ip, partitionName, nasName);
 
-    console.info(`NAS partition '${partitionName}' created`);
+    console.info(`NAS partition '${partitionName}' on nas '${nasName}' for ip '${ip}' created`);
   });
 
 cli
