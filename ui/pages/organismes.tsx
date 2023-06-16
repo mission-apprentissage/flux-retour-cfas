@@ -1,12 +1,13 @@
 import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
 import { SortingState } from "@tanstack/react-table";
+import { isBefore, subMonths } from "date-fns";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
 
 import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
+import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import Link from "@/components/Links/Link";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
@@ -48,6 +49,12 @@ function isSortingState(value: any): value is SortingState {
   return Array.isArray(value) && value.every((item) => typeof item === "object" && "id" in item && "desc" in item);
 }
 
+function isMoreThanOrEqualOneMonthAgo(date: Date | string) {
+  const oneMonthAgo = subMonths(new Date(), 1);
+  const dateAsDate = typeof date === "string" ? new Date(date) : date;
+  return isBefore(dateAsDate, oneMonthAgo) || dateAsDate.getTime() === oneMonthAgo.getTime();
+}
+
 function MesOrganismes() {
   const title = "Mes organismes";
   const defaultSort: SortingState = [{ desc: false, id: "nom" }];
@@ -85,6 +92,8 @@ function MesOrganismes() {
     return (organismes || []).map((organisme) => ({
       ...organisme,
       normalizedName: (organisme.nom || "").trim().toLocaleLowerCase(),
+      normalizedUai: (organisme.uai || "").trim().toLocaleLowerCase(),
+      normalizedCommune: (organisme.adresse?.commune || "").trim().toLocaleLowerCase(),
     }));
   }, [organismes]);
 
@@ -93,8 +102,12 @@ function MesOrganismes() {
     if (searchValue.length < 2) return organismes;
 
     const normalizedSearchValue = searchValue.trim().toLocaleLowerCase();
-    return organismesWithNormalizedNames.filter((organisme) =>
-      organisme.normalizedName.includes(normalizedSearchValue)
+    return organismesWithNormalizedNames.filter(
+      (organisme) =>
+        organisme.normalizedName.includes(normalizedSearchValue) ||
+        organisme.normalizedUai?.startsWith(normalizedSearchValue) ||
+        organisme.siret?.startsWith(normalizedSearchValue) ||
+        organisme.normalizedCommune.startsWith(normalizedSearchValue)
     );
   }, [organismesWithNormalizedNames, searchValue]);
 
@@ -185,23 +198,34 @@ function MesOrganismes() {
                   {
                     accessorKey: "last_transmission_date",
                     header: () => "Transmission au tdb",
-                    cell: ({ getValue }) =>
-                      getValue() ? (
-                        <Text color="green">Le {formatDateDayMonthYear(getValue())}</Text>
-                      ) : (
-                        <Text color="tomato">Ne transmet pas</Text>
-                      ),
+                    cell: ({ getValue }) => {
+                      const lastTransmissionDate = getValue();
+                      if (!lastTransmissionDate) return <Text color="tomato">Ne transmet pas</Text>;
+                      if (isMoreThanOrEqualOneMonthAgo(lastTransmissionDate)) {
+                        return (
+                          <Text color="orange">
+                            Ne transmet plus <br />
+                            depuis le {formatDateNumericDayMonthYear(lastTransmissionDate)}
+                          </Text>
+                        );
+                      }
+                      return <Text color="green">{formatDateNumericDayMonthYear(lastTransmissionDate)}</Text>;
+                    },
                   },
                   {
                     accessorKey: "adresse",
                     header: () => "Localisation",
                     cell: ({ row }) => (
-                      <div>
+                      <Box>
                         {row.original.adresse?.commune || ""}
                         <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
                           {row.original.adresse.code_postal || ""}
+                          {row.original.adresse.code_insee &&
+                          row.original.adresse.code_postal !== row.original.adresse.code_insee
+                            ? ` (Insee: ${row.original.adresse.code_insee})`
+                            : ""}
                         </Text>
-                      </div>
+                      </Box>
                     ),
                   },
                   {
