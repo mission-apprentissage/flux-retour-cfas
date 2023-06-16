@@ -40,6 +40,7 @@ export const authMiddleware = () => {
 
           if (jwtPayload.impersonatedOrganisation) {
             (user as unknown as AuthContext).impersonating = true;
+            (user as unknown as AuthContext).organisation_id = new ObjectId(jwtPayload.impersonatedOrganisation._id);
           }
           (user as unknown as AuthContext).organisation =
             jwtPayload.impersonatedOrganisation ?? (await getOrganisationById(user.organisation_id as ObjectId));

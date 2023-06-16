@@ -142,6 +142,8 @@ it("End to end - imposture d'organisation", async () => {
     password_updated_at: expect.any(String),
     impersonating: true,
     organisation: {
+      _id: expect.any(String),
+      created_at: expect.any(String),
       code_region: "53",
       type: "DREETS",
     },

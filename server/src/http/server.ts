@@ -41,6 +41,7 @@ import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
+  createOrganisation,
   getInvitationByToken,
   getOrganisationOrganisme,
   inviteUserToOrganisation,
@@ -71,7 +72,7 @@ import { changePassword, updateUserProfile } from "@/common/actions/users.action
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
-import { jobEventsDb } from "@/common/model/collections";
+import { jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { packageJson } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
@@ -704,7 +705,12 @@ function setupRoutes(app: Application) {
       .post(
         "/impersonate",
         returnResult(async (req, res) => {
-          const organisation = await registrationSchema.organisation.parseAsync(req.body);
+          const organisationBody = await registrationSchema.organisation.parseAsync(req.body);
+          let organisation = await organisationsDb().findOne(organisationBody);
+          if (!organisation) {
+            await createOrganisation(organisationBody);
+            organisation = await organisationsDb().findOne(organisationBody);
+          }
 
           // génère une nouvelle session avec l'organisation usurpée
           const sessionToken = await createSession(req.user.email, { impersonatedOrganisation: organisation });
