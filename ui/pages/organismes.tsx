@@ -1,4 +1,4 @@
-import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
+import { Box, Center, Container, Heading, Spinner, Text, Tooltip } from "@chakra-ui/react";
 import { SortingState } from "@tanstack/react-table";
 import { isBefore, subMonths } from "date-fns";
 import { useRouter } from "next/router";
@@ -10,6 +10,7 @@ import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import { normalize } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
+import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganismes } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
@@ -172,12 +173,45 @@ function MesOrganismes() {
                 },
                 {
                   accessorKey: "nature",
-                  header: () => "Nature",
+                  header: () => (
+                    <>
+                      Nature
+                      <TooltipNatureOrganisme />
+                    </>
+                  ),
                   cell: ({ getValue }) => <NatureOrganismeTag nature={getValue()} />,
                 },
                 {
                   accessorKey: "ferme",
-                  header: () => "État",
+                  header: () => (
+                    <>
+                      État
+                      <Tooltip
+                        background="bluefrance"
+                        color="white"
+                        label={
+                          <Box padding="1w">
+                            <b>État de l’établissement</b>
+                            <Text as="p">
+                              Indication de l’état administratif du SIRET de l’établissement, tel qu’il est renseigné
+                              sur l’INSEE. Si cette information est erronée, merci de leur signaler.
+                            </Text>
+                          </Box>
+                        }
+                        aria-label="Indication de l’état administratif du SIRET de l’établissement, tel qu’il est renseigné
+                        sur l’INSEE."
+                      >
+                        <Box
+                          as="i"
+                          className="ri-information-line"
+                          fontSize="epsilon"
+                          color="grey.500"
+                          marginLeft="1v"
+                          verticalAlign="middle"
+                        />
+                      </Tooltip>
+                    </>
+                  ),
                   cell: ({ getValue }) => (
                     <div>
                       {getValue() ? (
@@ -214,7 +248,34 @@ function MesOrganismes() {
                     const communeB = b.original.adresse?.commune || "";
                     return communeA.localeCompare(communeB);
                   },
-                  header: () => "Localisation",
+                  header: () => (
+                    <>
+                      Localisation
+                      <Tooltip
+                        background="bluefrance"
+                        color="white"
+                        label={
+                          <Box padding="1w">
+                            <Text as="p">
+                              Nom de la commune, code postal et code commune INSEE de l’établissement qui accueille
+                              physiquement les apprentis et les forme.
+                            </Text>
+                          </Box>
+                        }
+                        aria-label="Nom de la commune, code postal et code commune INSEE de l’établissement qui accueille
+                        physiquement les apprentis et les forme."
+                      >
+                        <Box
+                          as="i"
+                          className="ri-information-line"
+                          fontSize="epsilon"
+                          color="grey.500"
+                          marginLeft="1v"
+                          verticalAlign="middle"
+                        />
+                      </Tooltip>
+                    </>
+                  ),
                   cell: ({ row }) => (
                     <Box>
                       {row.original.adresse?.commune || ""}

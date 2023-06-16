@@ -14,6 +14,7 @@ import {
   Text,
   Th,
   Thead,
+  Tooltip,
   Tr,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
@@ -117,8 +118,67 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
                 <Thead>
                   <Tr>
                     <Th>Libellé de la formation</Th>
-                    <Th>CFD</Th>
-                    <Th>RNCP</Th>
+                    <Th>
+                      CFD
+                      <Tooltip
+                        background="bluefrance"
+                        color="white"
+                        label={
+                          <Box padding="1w">
+                            <b>Code Formation Diplôme (CFD)</b>
+                            <Text as="p">
+                              Codification qui concerne l’ensemble des diplômes technologiques et professionnels des
+                              ministères certificateurs.
+                            </Text>
+                            <Text as="p">
+                              Y sont ajoutés, en tant que de besoin et à la demande des centres de formation par
+                              l’apprentissage, les autres diplômes et titres inscrits au répertoire national des
+                              certifications professionnelles (RNCP), dès lors qu’ils sont préparés par la voie de
+                              l’apprentissage.
+                            </Text>
+                          </Box>
+                        }
+                        aria-label="Code Formation Diplôme. Codification qui concerne l’ensemble des diplômes technologiques et professionnels des
+                        ministères certificateurs."
+                      >
+                        <Box
+                          as="i"
+                          className="ri-information-line"
+                          fontSize="epsilon"
+                          color="grey.500"
+                          marginLeft="1v"
+                          verticalAlign="middle"
+                        />
+                      </Tooltip>
+                    </Th>
+                    <Th>
+                      RNCP
+                      <Tooltip
+                        background="bluefrance"
+                        color="white"
+                        label={
+                          <Box padding="1w">
+                            <b>Répertoire national des certifications professionnelles (RNCP)</b>
+                            <Text as="p">
+                              Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la
+                              disposition de tous une information constamment à jour sur les diplômes et les titres à
+                              finalité professionnelle ainsi que sur les certificats de qualification. La mise à jour du
+                              RNCP est confiée à France compétences.
+                            </Text>
+                          </Box>
+                        }
+                        aria-label=" Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la disposition de tous une information constamment à jour sur les diplômes et les titres à finalité professionnelle ainsi que sur les certificats de qualification."
+                      >
+                        <Box
+                          as="i"
+                          className="ri-information-line"
+                          fontSize="epsilon"
+                          color="grey.500"
+                          marginLeft="1v"
+                          verticalAlign="middle"
+                        />
+                      </Tooltip>
+                    </Th>
                     <Th>Date de validité du CFD</Th>
                   </Tr>
                 </Thead>
