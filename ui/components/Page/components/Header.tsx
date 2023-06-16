@@ -26,6 +26,7 @@ import { AccountFill } from "@/theme/components/icons/AccountFill";
 import { AccountUnfill } from "@/theme/components/icons/AccountUnfill";
 import { ExitIcon } from "@/theme/components/icons/ExitIcon";
 import { Parametre } from "@/theme/components/icons/Parametre";
+import { SpyLineIcon } from "@/theme/components/icons/SpyLine";
 
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();
@@ -88,7 +89,7 @@ const UserMenu = () => {
                   <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
                     Message de maintenance
                   </MenuItem>
-                  <MenuItem href="/admin/impostures" icon={<Parametre boxSize={4} />}>
+                  <MenuItem href="/admin/impostures" icon={<SpyLineIcon boxSize={4} />}>
                     Impostures
                   </MenuItem>
                 </MenuGroup>
