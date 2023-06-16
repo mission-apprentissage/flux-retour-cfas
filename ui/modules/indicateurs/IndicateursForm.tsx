@@ -25,6 +25,7 @@ import { Organisation } from "@/common/internal/Organisation";
 import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
 import useAuth from "@/hooks/useAuth";
 import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
 import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
@@ -454,7 +455,12 @@ function IndicateursForm() {
             },
             {
               accessorKey: "nature",
-              header: () => "Nature",
+              header: () => (
+                <>
+                  Nature
+                  <TooltipNatureOrganisme />
+                </>
+              ),
               cell: ({ getValue }) => <NatureOrganismeTag nature={getValue()} />,
             },
             {
