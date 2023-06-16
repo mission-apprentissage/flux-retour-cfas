@@ -48,7 +48,7 @@ function ImposturesPage() {
         <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
           Organisme de formation
         </Heading>
-        Pour connaître des sirets, voir le{" "}
+        Pour connaître des SIRET d’OFA, voir le{" "}
         <Link
           href="https://referentiel.apprentissage.onisep.fr/organismes?uais=true"
           color="action-high-blue-france"
