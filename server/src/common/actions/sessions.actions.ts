@@ -1,26 +1,16 @@
 import { jwtSessionsDb } from "@/common/model/collections";
 import { createUserTokenSimple } from "@/common/utils/jwtUtils";
 
-export async function createSession(email: string): Promise<string> {
-  const token = createUserTokenSimple({ payload: { email } });
+export async function createSession(email: string, additionalProperties?: Record<string, any>): Promise<string> {
+  const token = createUserTokenSimple({ payload: { email, ...additionalProperties } });
   await jwtSessionsDb().insertOne({ jwt: token });
   return token;
 }
 
-/**
- * Méthode de vérification d'existance
- * @param {*} jwt
- * @returns
- */
-export const findJwt = async (jwt) => {
-  const session = await jwtSessionsDb().findOne({ jwt });
-  return !!session;
+export const findSessionByToken = async (token: string) => {
+  return await jwtSessionsDb().findOne({ jwt: token });
 };
 
-/**
- * Méthode de suppression de seesion
- * @param {*} jwt
- */
-export const removeJwt = async (jwt) => {
-  await jwtSessionsDb().deleteOne({ jwt });
+export const removeSession = async (token: string) => {
+  await jwtSessionsDb().deleteOne({ jwt: token });
 };

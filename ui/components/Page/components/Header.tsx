@@ -17,14 +17,16 @@ import {
 } from "@chakra-ui/react";
 
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
-import { _post } from "@/common/httpClient";
+import { _delete, _post } from "@/common/httpClient";
 import Link from "@/components/Links/Link";
 import MenuItem from "@/components/Links/MenuItem";
 import useAuth from "@/hooks/useAuth";
 import { Settings4Fill, UserFill } from "@/theme/components/icons";
 import { AccountFill } from "@/theme/components/icons/AccountFill";
 import { AccountUnfill } from "@/theme/components/icons/AccountUnfill";
+import { ExitIcon } from "@/theme/components/icons/ExitIcon";
 import { Parametre } from "@/theme/components/icons/Parametre";
+import { SpyLineIcon } from "@/theme/components/icons/SpyLine";
 
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();
@@ -87,6 +89,9 @@ const UserMenu = () => {
                   <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
                     Message de maintenance
                   </MenuItem>
+                  <MenuItem href="/admin/impostures" icon={<SpyLineIcon boxSize={4} />}>
+                    Impostures
+                  </MenuItem>
                 </MenuGroup>
               )}
               <MenuDivider />
@@ -100,6 +105,8 @@ const UserMenu = () => {
 };
 
 const Header = () => {
+  const { auth } = useAuth();
+
   return (
     <Container maxW={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
       <Container maxW="xl" py={[0, 2]} px={[0, 4]}>
@@ -120,6 +127,22 @@ const Header = () => {
             </Heading>
           </Box>
 
+          {auth?.impersonating && (
+            <Button
+              leftIcon={<ExitIcon />}
+              size="sm"
+              colorScheme="red"
+              px={4}
+              mt={["2w", "2w", "2w", "0"]}
+              mx={["0", "0", "2w", "2w"]}
+              onClick={async () => {
+                await _delete("/api/v1/admin/impersonate");
+                location.href = "/";
+              }}
+            >
+              Imposture en cours
+            </Button>
+          )}
           <Flex
             maxWidth="380px"
             h="42px"

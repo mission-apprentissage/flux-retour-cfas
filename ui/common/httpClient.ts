@@ -88,14 +88,18 @@ export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) 
   return handleResponse(path, response);
 };
 
-export const _post = async (path: string, body?: any, options?: AxiosRequestConfig<any>) => {
+export const _post = async <RequestBody = any, ResponseBody = any>(
+  path: string,
+  body?: RequestBody,
+  options?: AxiosRequestConfig<any>
+): Promise<ResponseBody> => {
   const response = await axios.post(path, body, {
     headers: getHeaders(),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
     ...options,
   });
-  return handleResponse(path, response);
+  return handleResponse<ResponseBody>(path, response);
 };
 
 export const _postFile = async (path: string, data, options?: AxiosRequestConfig<any>) => {

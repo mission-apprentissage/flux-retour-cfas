@@ -11,6 +11,7 @@ export interface AuthContext<IOrganisation = Organisation> {
   organisation_id: ObjectId;
   account_status: "PENDING_EMAIL_VALIDATION" | "PENDING_ADMIN_VALIDATION" | "CONFIRMED";
   has_accept_cgu_version: string;
+  invalided_token?: boolean;
 
   // populated via $lookup
   organisation: IOrganisation;
@@ -19,4 +20,7 @@ export interface AuthContext<IOrganisation = Organisation> {
   source?: string;
   // legacy field used for ERPs
   username: string;
+
+  // only admins can impersonate organisations
+  impersonating?: boolean;
 }

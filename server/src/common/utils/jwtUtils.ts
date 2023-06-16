@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 
 import config from "@/config";
 
+import { generateKey } from "./cryptoUtils";
+
 const createToken = (type: string, subject: string | null = null, options: any = {}): string => {
   const defaults = config.auth[type];
   const secret = options.secret || defaults.jwtSecret;
@@ -11,6 +13,7 @@ const createToken = (type: string, subject: string | null = null, options: any =
   let opts: any = {
     issuer: config.appName,
     expiresIn: expiresIn,
+    jwtid: generateKey(5, "hex"), // = 10c, fait en sorte que chaque token généré soit unique
   };
   if (subject) {
     opts.subject = subject;
