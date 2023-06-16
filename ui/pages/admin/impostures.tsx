@@ -1,4 +1,4 @@
-import { Heading, Container, Text } from "@chakra-ui/react";
+import { Heading, Container, Text, Box } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 import { _post, _put, _delete } from "@/common/httpClient";
@@ -34,32 +34,36 @@ function ImposturesPage() {
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Impostures
         </Heading>
+
         <Text>
           Cette page permet de vous faire passer pour un membre d’une organisation quelconque à des fins de test.
         </Text>
-        <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
-          Opérateur publique
-        </Heading>
-        <InscriptionOperateurPublic setOrganisation={setOrganisation} />
-        <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
-          Tête de réseau
-        </Heading>
-        <InscriptionTeteDeReseau setOrganisation={setOrganisation} />
-        <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
-          Organisme de formation
-        </Heading>
-        Pour connaître des SIRET d’OFA, voir le{" "}
-        <Link
-          href="https://referentiel.apprentissage.onisep.fr/organismes?uais=true"
-          color="action-high-blue-france"
-          isExternal
-          borderBottom="1px"
-        >
-          catalogue
-          <ExternalLinkLine w={".7em"} h={".7em"} ml={1} />
-        </Link>
-        .
-        <SearchBySIRETForm organisation={organisation} setOrganisation={setOrganisation} />
+
+        <Box maxW="fit-content">
+          <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
+            Opérateur publique
+          </Heading>
+          <InscriptionOperateurPublic setOrganisation={setOrganisation} />
+          <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
+            Tête de réseau
+          </Heading>
+          <InscriptionTeteDeReseau setOrganisation={setOrganisation} />
+          <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
+            Organisme de formation
+          </Heading>
+          Pour connaître des SIRET d’OFA, voir le{" "}
+          <Link
+            href="https://referentiel.apprentissage.onisep.fr/organismes?uais=true"
+            color="action-high-blue-france"
+            isExternal
+            borderBottom="1px"
+          >
+            catalogue
+            <ExternalLinkLine w={".7em"} h={".7em"} ml={1} />
+          </Link>
+          .
+          <SearchBySIRETForm organisation={organisation} setOrganisation={setOrganisation} />
+        </Box>
       </Container>
     </SimplePage>
   );
