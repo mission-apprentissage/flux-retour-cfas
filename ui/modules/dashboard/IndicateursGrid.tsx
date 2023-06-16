@@ -154,7 +154,7 @@ function IndicateursGrid({
   showDownloadLinks = false,
   effectifsFilters,
 }: IndicateursGridProps) {
-  if (loading || !effectifsFilters) {
+  if (loading) {
     return (
       <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
         <GridItem colSpan={2} rowSpan={2}>
@@ -230,7 +230,9 @@ function IndicateursGrid({
           }
           icon={<RupturantsIcon />}
         >
-          {showDownloadLinks && <DownloadMenuButton type="rupturants" effectifsFilters={effectifsFilters} />}
+          {showDownloadLinks && effectifsFilters && (
+            <DownloadMenuButton type="rupturants" effectifsFilters={effectifsFilters} />
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
@@ -247,7 +249,9 @@ function IndicateursGrid({
           }
           icon={<InscritsSansContratsIcon />}
         >
-          {showDownloadLinks && <DownloadMenuButton type="inscritsSansContrat" effectifsFilters={effectifsFilters} />}
+          {showDownloadLinks && effectifsFilters && (
+            <DownloadMenuButton type="inscritsSansContrat" effectifsFilters={effectifsFilters} />
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
@@ -267,7 +271,9 @@ function IndicateursGrid({
           }
           icon={<AbandonsIcon />}
         >
-          {showDownloadLinks && <DownloadMenuButton type="abandons" effectifsFilters={effectifsFilters} />}
+          {showDownloadLinks && effectifsFilters && (
+            <DownloadMenuButton type="abandons" effectifsFilters={effectifsFilters} />
+          )}
         </Card>
       </GridItem>
     </Grid>
