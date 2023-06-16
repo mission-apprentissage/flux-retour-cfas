@@ -167,7 +167,7 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
                             </Text>
                           </Box>
                         }
-                        aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+                        aria-label=" Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la disposition de tous une information constamment à jour sur les diplômes et les titres à finalité professionnelle ainsi que sur les certificats de qualification."
                       >
                         <Box
                           as="i"
