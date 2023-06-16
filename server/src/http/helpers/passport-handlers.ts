@@ -25,7 +25,7 @@ export const authMiddleware = () => {
           if (Date.now() > exp * 1000) {
             throw Boom.unauthorized("Vous n'êtes pas connecté");
           }
-          const user = await getUserByEmail(jwtPayload.email);
+          const user = (await getUserByEmail(jwtPayload.email)) as AuthContext | null;
           if (!user) {
             throw Boom.unauthorized("Vous n'êtes pas connecté");
           }
@@ -39,10 +39,10 @@ export const authMiddleware = () => {
           }
 
           if (jwtPayload.impersonatedOrganisation) {
-            (user as unknown as AuthContext).impersonating = true;
-            (user as unknown as AuthContext).organisation_id = new ObjectId(jwtPayload.impersonatedOrganisation._id);
+            user.impersonating = true;
+            user.organisation_id = new ObjectId(jwtPayload.impersonatedOrganisation._id);
           }
-          (user as unknown as AuthContext).organisation =
+          user.organisation =
             jwtPayload.impersonatedOrganisation ?? (await getOrganisationById(user.organisation_id as ObjectId));
           done(null, user);
         } catch (err) {
