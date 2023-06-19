@@ -41,7 +41,7 @@ function ImposturesPage() {
 
         <Box maxW="fit-content">
           <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
-            Opérateur publique
+            Opérateur public
           </Heading>
           <InscriptionOperateurPublic setOrganisation={setOrganisation} />
           <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
