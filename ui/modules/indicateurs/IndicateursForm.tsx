@@ -258,6 +258,31 @@ function IndicateursForm() {
             Territoire
           </Text>
 
+          <IndicateursFilter label="Région">
+            <FiltreFormationAnnee
+              value={effectifsFilters.formation_annees}
+              onChange={(annees) => updateState({ formation_annees: annees })}
+            />
+          </IndicateursFilter>
+          <IndicateursFilter label="Académies">
+            <FiltreFormationAnnee
+              value={effectifsFilters.formation_annees}
+              onChange={(annees) => updateState({ formation_annees: annees })}
+            />
+          </IndicateursFilter>
+          <IndicateursFilter label="Département">
+            <FiltreFormationAnnee
+              value={effectifsFilters.formation_annees}
+              onChange={(annees) => updateState({ formation_annees: annees })}
+            />
+          </IndicateursFilter>
+          <IndicateursFilter label="Bassins d'emploi">
+            <FiltreFormationAnnee
+              value={effectifsFilters.formation_annees}
+              onChange={(annees) => updateState({ formation_annees: annees })}
+            />
+          </IndicateursFilter>
+
           <FiltreOrganismeTerritoire
             button={FilterButton}
             value={{
@@ -294,13 +319,13 @@ function IndicateursForm() {
           {/* <IndicateursFilter label="Type de formation">
             <Box>Liste des filtres</Box>
           </IndicateursFilter> */}
-          <IndicateursFilter label="Niveau de formation">
+          <IndicateursFilter label="Niveau de formation" badge={effectifsFilters.formation_niveaux.length}>
             <FiltreFormationNiveau
               value={effectifsFilters.formation_niveaux}
               onChange={(niveaux) => updateState({ formation_niveaux: niveaux })}
             />
           </IndicateursFilter>
-          <IndicateursFilter label="Année de formation">
+          <IndicateursFilter label="Année de formation" badge={effectifsFilters.formation_annees.length}>
             <FiltreFormationAnnee
               value={effectifsFilters.formation_annees}
               onChange={(annees) => updateState({ formation_annees: annees })}
@@ -312,7 +337,7 @@ function IndicateursForm() {
           <Text fontWeight="700" textTransform="uppercase">
             Apprenant
           </Text>
-          <IndicateursFilter label="Tranche d’âge">
+          <IndicateursFilter label="Tranche d’âge" badge={effectifsFilters.apprenant_tranchesAge.length}>
             <FiltreApprenantTrancheAge
               value={effectifsFilters.apprenant_tranchesAge}
               onChange={(tranchesAge) => updateState({ apprenant_tranchesAge: tranchesAge })}
@@ -330,14 +355,14 @@ function IndicateursForm() {
             Organisme
           </Text>
           {auth.organisation.type !== "TETE_DE_RESEAU" && (
-            <IndicateursFilter label="Réseau d’organismes">
+            <IndicateursFilter label="Réseau d’organismes" badge={effectifsFilters.organisme_reseaux.length}>
               <FiltreOrganismeReseau
                 value={effectifsFilters.organisme_reseaux}
                 onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
               />
             </IndicateursFilter>
           )}
-          <IndicateursFilter label="Établissement">
+          <IndicateursFilter label="Établissement" badge={effectifsFilters.organisme_search ? 1 : undefined}>
             <FiltreOrganismeSearch
               value={effectifsFilters.organisme_search}
               onChange={(search) => updateState({ organisme_search: search })}
