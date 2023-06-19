@@ -1,4 +1,4 @@
-import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { AddIcon, EditIcon, MinusIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -25,6 +25,7 @@ import { Organisation } from "@/common/internal/Organisation";
 import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
 import useAuth from "@/hooks/useAuth";
 import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
@@ -254,7 +255,30 @@ function IndicateursForm() {
             </Tooltip>
           </Flex>
 
-          <FiltreDate value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
+          <FiltreDate
+            value={effectifsFilters.date}
+            onChange={(date) => updateState({ date })}
+            button={({ isOpen, setIsOpen, buttonLabel }) => (
+              <Button
+                bg="#F9F8F6"
+                variant="unstyled"
+                w="100%"
+                h={14}
+                px={4}
+                py={2}
+                _hover={{ bg: "var(--chakra-colors-blackAlpha-50);" }}
+                onClick={() => setIsOpen(!isOpen)}
+                isActive={isOpen}
+              >
+                <HStack>
+                  <Box as="span" flex="1" textAlign="left">
+                    {buttonLabel}
+                  </Box>
+                  <EditIcon fontSize="16px" color="#000091" />
+                </HStack>
+              </Button>
+            )}
+          />
         </SimpleGrid>
 
         <SimpleGrid gap={3}>
