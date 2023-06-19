@@ -280,10 +280,10 @@ function MesOrganismes() {
                     <Box>
                       {row.original.adresse?.commune || ""}
                       <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
-                        {row.original.adresse.code_postal || ""}
-                        {row.original.adresse.code_insee &&
-                        row.original.adresse.code_postal !== row.original.adresse.code_insee
-                          ? ` (Insee: ${row.original.adresse.code_insee})`
+                        {row.original.adresse?.code_postal || ""}
+                        {row.original.adresse?.code_insee &&
+                        row.original.adresse?.code_postal !== row.original.adresse?.code_insee
+                          ? ` (Insee: ${row.original.adresse?.code_insee})`
                           : ""}
                       </Text>
                     </Box>
