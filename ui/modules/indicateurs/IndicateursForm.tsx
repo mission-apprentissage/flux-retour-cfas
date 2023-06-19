@@ -61,6 +61,10 @@ import {
 
 import IndicateursFilter from "./FilterAccordion";
 import FiltreFormationCFD from "./filters/FiltreFormationCFD";
+import FiltreOrganismeAcademie from "./filters/FiltreOrganismeAcademie";
+import FiltreOrganismeBassinEmploi from "./filters/FiltreOrganismeBassinEmploi";
+import FiltreOrganismeDepartement from "./filters/FiltreOrganismeDepartement";
+import FiltreOrganismeRegion from "./filters/FiltreOrganismeRegion";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
@@ -258,44 +262,21 @@ function IndicateursForm() {
             Territoire
           </Text>
 
-          <IndicateursFilter label="Région">
-            <FiltreFormationAnnee
-              value={effectifsFilters.formation_annees}
-              onChange={(annees) => updateState({ formation_annees: annees })}
-            />
-          </IndicateursFilter>
-          <IndicateursFilter label="Académies">
-            <FiltreFormationAnnee
-              value={effectifsFilters.formation_annees}
-              onChange={(annees) => updateState({ formation_annees: annees })}
-            />
-          </IndicateursFilter>
-          <IndicateursFilter label="Département">
-            <FiltreFormationAnnee
-              value={effectifsFilters.formation_annees}
-              onChange={(annees) => updateState({ formation_annees: annees })}
-            />
-          </IndicateursFilter>
-          <IndicateursFilter label="Bassins d'emploi">
-            <FiltreFormationAnnee
-              value={effectifsFilters.formation_annees}
-              onChange={(annees) => updateState({ formation_annees: annees })}
-            />
-          </IndicateursFilter>
-
-          <FiltreOrganismeTerritoire
-            button={FilterButton}
-            value={{
-              regions: effectifsFilters.organisme_regions,
-              departements: effectifsFilters.organisme_departements,
-              academies: effectifsFilters.organisme_academies,
-              bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
-            }}
-            config={getFiltreTerritoiresConfig(auth.organisation)}
-            onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
-            onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
-            onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
-            onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
+          <FiltreOrganismeRegion
+            value={effectifsFilters.organisme_regions}
+            onChange={(regions) => updateState({ organisme_regions: regions })}
+          />
+          <FiltreOrganismeDepartement
+            value={effectifsFilters.organisme_departements}
+            onChange={(departements) => updateState({ organisme_departements: departements })}
+          />
+          <FiltreOrganismeAcademie
+            value={effectifsFilters.organisme_academies}
+            onChange={(academies) => updateState({ organisme_academies: academies })}
+          />
+          <FiltreOrganismeBassinEmploi
+            value={effectifsFilters.organisme_bassinsEmploi}
+            onChange={(organisme_bassinsEmploi) => updateState({ organisme_bassinsEmploi: organisme_bassinsEmploi })}
           />
         </SimpleGrid>
         {/* <Text fontWeight="700" textTransform="uppercase">
