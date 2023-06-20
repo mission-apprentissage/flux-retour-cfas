@@ -1,4 +1,4 @@
-import { AddIcon, EditIcon, MinusIcon } from "@chakra-ui/icons";
+import { EditIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -16,16 +16,13 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import { useMemo } from "react";
 
-import { ACADEMIES_BY_CODE, DEPARTEMENTS, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { Organisation } from "@/common/internal/Organisation";
 import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
 import useAuth from "@/hooks/useAuth";
 import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
@@ -34,9 +31,6 @@ import FiltreFormationAnnee from "@/modules/indicateurs/filters/FiltreFormationA
 import FiltreFormationNiveau from "@/modules/indicateurs/filters/FiltreFormationNiveau";
 import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganismeReseau";
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
-import FiltreOrganismeTerritoire, {
-  FiltreOrganismeTerritoireConfig,
-} from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 
 import {
   AbandonsIcon,
@@ -68,79 +62,6 @@ import FiltreOrganismeDepartement from "./filters/FiltreOrganismeDepartement";
 import FiltreOrganismeRegion from "./filters/FiltreOrganismeRegion";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
-
-interface FilterButtonProps {
-  isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-  buttonLabel: string;
-  isDisabled?: boolean;
-}
-function FilterButton(props: FilterButtonProps) {
-  return (
-    <Button
-      bg="#F9F8F6"
-      variant="unstyled"
-      w="100%"
-      h={14}
-      px={4}
-      py={2}
-      _hover={{ bg: "var(--chakra-colors-blackAlpha-50);" }}
-      onClick={() => props.setIsOpen(!props.isOpen)}
-      isActive={props.isOpen}
-      isDisabled={props.isDisabled}
-    >
-      <HStack>
-        <Box as="span" flex="1" textAlign="left">
-          {props.buttonLabel}
-        </Box>
-        {props.isOpen ? <MinusIcon fontSize="12px" color="#000091" /> : <AddIcon fontSize="12px" color="#000091" />}
-      </HStack>
-    </Button>
-  );
-}
-
-function getFiltreTerritoiresConfig(organisation: Organisation): FiltreOrganismeTerritoireConfig {
-  switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
-    case "TETE_DE_RESEAU":
-      return {};
-
-    case "DREETS":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-      return {
-        defaultLabel: REGIONS_BY_CODE[organisation.code_region]?.nom,
-        regions: [],
-        departements: DEPARTEMENTS.filter((departement) => departement.region.code === organisation.code_region).map(
-          (departement) => departement.code
-        ),
-        academies: [],
-      };
-
-    case "DDETS":
-      return {
-        defaultLabel: DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom,
-        regions: [],
-        departements: [],
-        academies: [],
-      };
-    case "ACADEMIE":
-      return {
-        defaultLabel: ACADEMIES_BY_CODE[organisation.code_academie]?.nom,
-        regions: [],
-        departements: DEPARTEMENTS.filter(
-          (departement) => departement.academie.code === organisation.code_academie
-        ).map((departement) => departement.code),
-        academies: [],
-      };
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "ADMINISTRATEUR":
-      return {};
-  }
-  return {};
-}
 
 function IndicateursForm() {
   const { auth } = useAuth();

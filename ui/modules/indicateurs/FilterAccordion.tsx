@@ -1,7 +1,5 @@
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
-import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Stack, Text } from "@chakra-ui/react";
-
-import RoundedBadge from "@/components/RoundedBadge/RoundedBadge";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Badge, Stack, Text } from "@chakra-ui/react";
 
 interface Props {
   label: string;
@@ -17,14 +15,18 @@ function IndicateursFilter(props: Props) {
           <>
             <h2>
               <AccordionButton bg="#F9F8F6">
-                <Stack direction="row" flex="1">
+                <Stack direction="row" flex="1" alignItems="center">
                   <Text
                     fontWeight={hasFilters ? "bold" : "normal"}
                     color={hasFilters ? "bluefrance" : "var(--chakra-colors-gray-800)"}
                   >
                     {props.label}
                   </Text>
-                  {props.badge && <RoundedBadge value={props.badge} />}
+                  {props.badge && (
+                    <Badge backgroundColor="openbluefrance" color="bluefrance">
+                      {props.badge}
+                    </Badge>
+                  )}
                 </Stack>
                 {isExpanded ? (
                   <MinusIcon fontSize="12px" color="#000091" />

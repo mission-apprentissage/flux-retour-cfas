@@ -2,7 +2,6 @@ import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
 import { BASSINS_EMPLOI_SORTED } from "@/common/constants/territoires";
-import useAuth from "@/hooks/useAuth";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 import { FilterButton } from "../FilterButton";
@@ -13,11 +12,7 @@ interface FiltreOrganismeBassinEmploiProps {
 }
 const FiltreOrganismeBassinEmploi = (props: FiltreOrganismeBassinEmploiProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { auth } = useAuth();
-  const isVisible = !["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS", "ACADEMIE"].includes(auth.organisation.type);
   const bassinsEmploi = props.value;
-
-  if (!isVisible) return null;
 
   return (
     <div>

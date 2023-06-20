@@ -1,8 +1,6 @@
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
-import { Button, HStack, Stack, Text } from "@chakra-ui/react";
+import { Badge, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { Dispatch, SetStateAction } from "react";
-
-import RoundedBadge from "@/components/RoundedBadge/RoundedBadge";
 
 interface FilterButtonProps {
   isOpen: boolean;
@@ -26,14 +24,18 @@ export function FilterButton(props: FilterButtonProps) {
       isActive={props.isOpen}
     >
       <HStack>
-        <Stack direction="row" flex="1">
+        <Stack direction="row" flex="1" alignItems="center">
           <Text
             fontWeight={hasFilters ? "bold" : "normal"}
             color={hasFilters ? "bluefrance" : "var(--chakra-colors-gray-800)"}
           >
             {props.buttonLabel}
           </Text>
-          {props.badge && <RoundedBadge value={props.badge} />}
+          {props.badge && (
+            <Badge backgroundColor="openbluefrance" color="bluefrance">
+              {props.badge}
+            </Badge>
+          )}
         </Stack>
         {props.isOpen ? <MinusIcon fontSize="12px" color="#000091" /> : <AddIcon fontSize="12px" color="#000091" />}
       </HStack>

@@ -1,11 +1,12 @@
 import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
-import { ACADEMIES_SORTED } from "@/common/constants/territoires";
+import { ACADEMIES_BY_CODE, ACADEMIES_SORTED } from "@/common/constants/territoires";
 import useAuth from "@/hooks/useAuth";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 import { FilterButton } from "../FilterButton";
+import FilterInfoLock from "../FilterInfoLock";
 
 interface FiltreOrganismeAcademieProps {
   value: string[];
@@ -14,10 +15,14 @@ interface FiltreOrganismeAcademieProps {
 const FiltreOrganismeAcademie = (props: FiltreOrganismeAcademieProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { auth } = useAuth();
-  const isVisible = !["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS", "ACADEMIE"].includes(auth.organisation.type);
+  const organisation = auth.organisation;
+  const isHidden = ["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS"].includes(organisation.type);
   const academies = props.value;
 
-  if (!isVisible) return null;
+  if (isHidden) return null;
+  if (organisation.type === "ACADEMIE") {
+    return <FilterInfoLock value={`Académie de ${ACADEMIES_BY_CODE[organisation.code_academie]?.nom}`} />;
+  }
 
   return (
     <div>

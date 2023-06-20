@@ -1,23 +1,46 @@
 import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { DEPARTEMENTS_SORTED } from "@/common/constants/territoires";
+import { DEPARTEMENTS_BY_CODE, DEPARTEMENTS_SORTED } from "@/common/constants/territoires";
 import useAuth from "@/hooks/useAuth";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 import { FilterButton } from "../FilterButton";
+import FilterInfoLock from "../FilterInfoLock";
 
 interface FiltreOrganismeDepartementProps {
   value: string[];
   onChange: (departements: string[]) => void;
 }
+
 const FiltreOrganismeDepartement = (props: FiltreOrganismeDepartementProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { auth } = useAuth();
-  const isVisible = !["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS", "ACADEMIE"].includes(auth.organisation.type);
   const departements = props.value;
+  const organisation = auth.organisation;
 
-  if (!isVisible) return null;
+  const configDepartements = useMemo(() => {
+    switch (organisation.type) {
+      case "DDETS":
+        return [];
+      case "DREETS":
+      case "DRAAF":
+      case "CONSEIL_REGIONAL":
+        return DEPARTEMENTS_SORTED.filter((departement) => departement.region.code === organisation.code_region);
+      case "ACADEMIE":
+        return DEPARTEMENTS_SORTED.filter((departement) => departement.academie.code === organisation.code_academie);
+      default:
+        return DEPARTEMENTS_SORTED;
+    }
+  }, []);
+
+  if (organisation.type === "DDETS") {
+    return (
+      <FilterInfoLock
+        value={`${organisation.code_departement} - ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom}`}
+      />
+    );
+  }
 
   return (
     <div>
@@ -30,7 +53,7 @@ const FiltreOrganismeDepartement = (props: FiltreOrganismeDepartementProps) => {
             onChange={(selectedDepartements: string[]) => props.onChange(selectedDepartements)}
           >
             <Stack>
-              {DEPARTEMENTS_SORTED.map((departement, i) => (
+              {configDepartements.map((departement, i) => (
                 <Checkbox iconSize="0.5rem" value={departement.code} key={i}>
                   {departement.code} - {departement.nom}
                 </Checkbox>

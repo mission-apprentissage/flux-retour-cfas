@@ -1,23 +1,33 @@
 import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
-import { REGIONS_SORTED } from "@/common/constants/territoires";
+import { REGIONS_BY_CODE, REGIONS_SORTED } from "@/common/constants/territoires";
+import { OrganisationOperateurPublicRegion } from "@/common/internal/Organisation";
 import useAuth from "@/hooks/useAuth";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 import { FilterButton } from "../FilterButton";
+import FilterInfoLock from "../FilterInfoLock";
 
 interface FiltreOrganismeRegionProps {
   value: string[];
   onChange: (regions: string[]) => void;
 }
+
+function isOrganisationOperateurPublicRegion(organisation): organisation is OrganisationOperateurPublicRegion {
+  return organisation.type === "DREETS" || organisation.type === "DRAAF" || organisation.type === "CONSEIL_REGIONAL";
+}
+
 const FiltreOrganismeRegion = (props: FiltreOrganismeRegionProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { auth } = useAuth();
-  const isVisible = !["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS", "ACADEMIE"].includes(auth.organisation.type);
+  const organisation = auth.organisation;
   const regions = props.value;
 
-  if (!isVisible) return null;
+  if (["DDETS", "ACADEMIE"].includes(organisation.type)) return null;
+  if (isOrganisationOperateurPublicRegion(organisation)) {
+    return <FilterInfoLock value={REGIONS_BY_CODE[organisation.code_region]?.nom} />;
+  }
 
   return (
     <div>
