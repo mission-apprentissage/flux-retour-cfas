@@ -9,12 +9,14 @@ shift
 function main() {
   local env_ip
   local partition_name
+  local nas_name
   env_ip="$(grep "\[${ENV_NAME}\]" -A 1 "${ANSIBLE_DIR}/env.ini" | tail -1)"
   partition_name="$(sed -n "/\[${ENV_NAME}:vars\]/,/\[/ p" "${ANSIBLE_DIR}/env.ini" | grep backup_partition_name | awk -F "=" '{print $2}')"
+  nas_name="$(sed -n "/\[${ENV_NAME}:vars\]/,/\[/ p" "${ANSIBLE_DIR}/env.ini" | grep nas_name | awk -F "=" '{print $2}')"
 
   cd "${MODULE_DIR}"
   yarn --silent install
-  yarn --silent cli createBackupPartition "${env_ip}" "${partition_name}" "$@"
+  yarn --silent cli createBackupPartition "${env_ip}" "${partition_name}" "${nas_name}" "$@"
   cd - >/dev/null
 }
 

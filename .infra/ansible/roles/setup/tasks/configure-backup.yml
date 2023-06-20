@@ -5,35 +5,35 @@
     mode: 700
 
 - block:
-  - name: Installation nfs-client package
-    apt:
-      name: nfs-client
+    - name: Installation nfs-client package
+      apt:
+        name: nfs-client
 
-  - name: Mount backup NFS partition
-    when: backup_cron|bool == true
-    ansible.posix.mount:
-      src: "10.16.100.163:zpool-128310/{{backup_partition_name}}"
-      path: /mnt/backups
-      opts: _netdev,mountproto=tcp
-      state: mounted
-      fstype: nfs
-      boot: yes
+    - name: Mount backup NFS partition
+      when: backup_cron|bool == true
+      ansible.posix.mount:
+        src: "{{nas_ip}}:{{nas_name}}/{{backup_partition_name}}"
+        path: /mnt/backups
+        opts: _netdev,mountproto=tcp
+        state: mounted
+        fstype: nfs
+        boot: yes
 
-  - name: Add mongodb backup cron
-    when: backup_cron|bool == true
-    cron:
-      name: "backup mongodb each day at 04h00"
-      minute: "0"
-      hour: "4"
-      job: "bash /opt/flux-retour-cfas/tools/backup-mongodb.sh >> /var/log/backup-mongodb.log 2>&1"
+    - name: Add mongodb backup cron
+      when: backup_cron|bool == true
+      cron:
+        name: "backup mongodb each day at 04h00"
+        minute: "0"
+        hour: "4"
+        job: "bash /opt/flux-retour-cfas/tools/backup-mongodb.sh >> /var/log/backup-mongodb.log 2>&1"
 
-  - name: Add metabase backup cron"
-    become: true
-    cron:
-      name: "backup metabase each day at 00h20"
-      minute: "20"
-      hour: "0"
-      job: "bash /opt/flux-retour-cfas/tools/backup-metabase.sh >> /var/log/backup-metabase.log 2>&1"
+    - name: Add metabase backup cron"
+      become: true
+      cron:
+        name: "backup metabase each day at 00h20"
+        minute: "20"
+        hour: "0"
+        job: "bash /opt/flux-retour-cfas/tools/backup-metabase.sh >> /var/log/backup-metabase.log 2>&1"
 
   when: backup_partition_name is defined
 
