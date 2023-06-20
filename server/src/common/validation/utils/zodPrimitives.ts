@@ -226,7 +226,9 @@ export const primitivesV1 = {
 
 export const primitivesV3 = {
   apprenant: {
-    // addresse: TODO à discuter
+    nir: z.string().trim().toUpperCase().describe("NIR de l'apprenant"),
+    adresse: z.string().trim().describe("Adresse de l'apprenant"),
+    code_postal: z.string().trim().describe("Code postal de l'apprenant"),
     sexe: z.string().trim().describe("Sexe de l'apprenant").openapi({
       enum: SEXE_APPRENANT_ENUM,
       example: "M",
@@ -270,6 +272,7 @@ export const primitivesV3 = {
       description: "Date de fin de la formation, au format ISO-8601",
       example: aMonthAgo.toISOString(),
     }),
+    duree_theorique: z.number().int().min(1).max(4).describe("Durée théorique de la formation"),
     date_exclusion: extensions.iso8601Date().openapi({
       description: "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
       example: aMonthAgo.toISOString(),
@@ -303,6 +306,7 @@ export const primitivesV3 = {
     },
     // date_declaration_1ere_absence: TODO? (a priori diversement disponible)
     // date_declaration_2e_absence: TODO? (a priori diversement disponible)
+    presentielle: z.boolean().describe("Formation 100% à distance ou non").openapi({ example: true }),
   },
   contrat: {
     cause_rupture: z

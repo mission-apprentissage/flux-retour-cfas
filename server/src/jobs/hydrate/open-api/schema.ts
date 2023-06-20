@@ -32,7 +32,7 @@ const httpAuth = registry.registerComponent("securitySchemes", "httpAuth", {
   scheme: "basic",
 });
 const apiKeyAuth = registry.registerComponent("securitySchemes", "apiKeyAuth", {
-  description: "Méthode d'authentification pour la V3 (à venir) avec une clé d'API",
+  description: "Méthode d'authentification pour la V3 avec une clé d'API",
   type: "apiKey",
   name: "api_key",
   in: "header",
@@ -191,7 +191,7 @@ export default generator.generateDocument({
     },
     {
       name: "v3",
-      description: "Version à venir (courant 1er semestre 2023). L'authentification se fera à l'aide d'une apiKey.",
+      description: "Version 2023. L'authentification se fait à l'aide d'une apiKey.",
     },
   ],
 });

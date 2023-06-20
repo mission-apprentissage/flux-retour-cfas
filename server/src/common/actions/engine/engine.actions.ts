@@ -15,7 +15,6 @@ import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "@/comm
 import { Organisme } from "@/common/model/@types";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
-import { EffectifsV3Queue } from "@/common/model/@types/EffectifsV3Queue";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils";
@@ -185,66 +184,6 @@ export const mapEffectifQueueToEffectif = (dossiersApprenant: EffectifsQueue): P
   });
 };
 
-export const mapEffectifQueueV3ToEffectif = (dossiersApprenant: EffectifsV3Queue): PartialDeep<Effectif> => {
-  const {
-    source,
-    apprenant: {
-      nom,
-      prenom,
-      date_de_naissance,
-      email: courriel,
-      id_erp: id_erp_apprenant,
-      ine,
-      code_commune_insee: code_commune_insee_apprenant,
-      statut: statut_apprenant,
-      date_metier_mise_a_jour_statut,
-      telephone,
-    } = {},
-    formation: { annee_scolaire, code_cfd: cfd, code_rncp: rncp, libelle_long, periode, annee } = {},
-    contrat: { date_debut: contrat_date_debut, date_fin: contrat_date_fin, date_rupture: contrat_date_rupture } = {},
-  } = dossiersApprenant;
-
-  return stripEmptyFields({
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-    apprenant: {
-      historique_statut: [
-        {
-          valeur_statut: statut_apprenant,
-          date_statut: new Date(date_metier_mise_a_jour_statut),
-          date_reception: new Date(),
-        },
-      ] as Effectif["apprenant"]["historique_statut"],
-      ine,
-      nom,
-      prenom,
-      date_de_naissance,
-      courriel,
-      telephone,
-      adresse: { code_insee: code_commune_insee_apprenant },
-    },
-    // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
-    contrats:
-      contrat_date_debut || contrat_date_fin || contrat_date_rupture
-        ? [
-            stripEmptyFields({
-              date_debut: contrat_date_debut,
-              date_fin: contrat_date_fin,
-              date_rupture: contrat_date_rupture,
-            }),
-          ]
-        : [],
-    formation: {
-      cfd,
-      rncp,
-      libelle_long,
-      periode,
-      annee,
-    },
-  });
-};
-
 /**
  * Création d'un objet organisme depuis les données d'un dossierApprenant
  */
@@ -255,19 +194,6 @@ export const mapEffectifQueueToOrganisme = (
     uai: dossiersApprenant.uai_etablissement,
     siret: dossiersApprenant.siret_etablissement,
     nom: dossiersApprenant.nom_etablissement,
-  };
-};
-
-/**
- * Création d'un objet organisme depuis les données d'un dossierApprenant V3
- */
-export const mapEffectifV3QueueToOrganisme = (
-  dossiersApprenant: EffectifsV3Queue
-): Pick<Partial<Organisme>, "nom" | "uai" | "siret"> => {
-  return {
-    uai: dossiersApprenant.etablissement_formateur?.uai,
-    siret: dossiersApprenant.etablissement_formateur?.siret,
-    nom: dossiersApprenant.etablissement_formateur?.nom,
   };
 };
 

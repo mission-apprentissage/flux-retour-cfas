@@ -2,7 +2,7 @@ import express from "express";
 import Joi from "joi";
 
 import logger from "@/common/logger";
-import { effectifsQueueDb, effectifsV3QueueDb } from "@/common/model/collections";
+import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
 import { formatError } from "@/common/utils/errorUtils";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
@@ -24,7 +24,6 @@ export default () => {
       .validateAsync(body, { abortEarly: false });
 
     const isV3 = originalUrl.includes("/v3");
-    const collection = (isV3 ? effectifsV3QueueDb() : effectifsQueueDb()) as any;
     const validationSchema = isV3 ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2();
 
     const source = user.username || user.source;
@@ -48,9 +47,9 @@ export default () => {
 
     try {
       if (effectifsToQueue.length === 1) {
-        await collection.insertOne(effectifsToQueue[0]);
+        await effectifsQueueDb().insertOne(effectifsToQueue[0]);
       } else if (effectifsToQueue.length) {
-        await collection.insertMany(effectifsToQueue);
+        await effectifsQueueDb().insertMany(effectifsToQueue);
       }
       res.json({
         status: "OK",

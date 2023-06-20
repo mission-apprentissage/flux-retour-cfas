@@ -79,23 +79,6 @@ services:
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
       - FLUX_RETOUR_CFAS_SENTRY_DSN=https://2c67929155a24fe2bdc16f61a67dab8e@o4504570758561792.ingest.sentry.io/4504570802798592
 
-  queue_processor_v3:
-    image: flux_retour_cfas_server
-    container_name: flux_retour_cfas_processor_v3
-    build:
-      context: server
-    command: ["yarn", "cli", "process:effectifs-queue", "--v3"]
-    restart: unless-stopped
-    networks:
-      - flux_retour_cfas_network
-    depends_on:
-      - mongodb
-      - clamav
-    environment:
-      - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
-      - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
-      - FLUX_RETOUR_CFAS_SENTRY_DSN=https://2c67929155a24fe2bdc16f61a67dab8e@o4504570758561792.ingest.sentry.io/4504570802798592
-
   mongodb:
     image: mongo:6.0.2-focal
     container_name: flux_retour_cfas_mongodb
