@@ -316,7 +316,6 @@ function IndicateursForm() {
           </Text>
 
           <FiltreFormationCFD
-            button={FilterButton}
             value={effectifsFilters.formation_cfds}
             onChange={(cfds) => updateState({ formation_cfds: cfds })}
           />
