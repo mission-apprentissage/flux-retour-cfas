@@ -1,4 +1,4 @@
-import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { EditIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -16,12 +16,10 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import { useMemo } from "react";
 
-import { ACADEMIES_BY_CODE, DEPARTEMENTS, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { Organisation } from "@/common/internal/Organisation";
 import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -33,9 +31,6 @@ import FiltreFormationAnnee from "@/modules/indicateurs/filters/FiltreFormationA
 import FiltreFormationNiveau from "@/modules/indicateurs/filters/FiltreFormationNiveau";
 import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganismeReseau";
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
-import FiltreOrganismeTerritoire, {
-  FiltreOrganismeTerritoireConfig,
-} from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 
 import {
   AbandonsIcon,
@@ -61,81 +56,12 @@ import {
 
 import IndicateursFilter from "./FilterAccordion";
 import FiltreFormationCFD from "./filters/FiltreFormationCFD";
+import FiltreOrganismeAcademie from "./filters/FiltreOrganismeAcademie";
+import FiltreOrganismeBassinEmploi from "./filters/FiltreOrganismeBassinEmploi";
+import FiltreOrganismeDepartement from "./filters/FiltreOrganismeDepartement";
+import FiltreOrganismeRegion from "./filters/FiltreOrganismeRegion";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
-
-interface FilterButtonProps {
-  isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-  buttonLabel: string;
-  isDisabled?: boolean;
-}
-function FilterButton(props: FilterButtonProps) {
-  return (
-    <Button
-      bg="#F9F8F6"
-      variant="unstyled"
-      w="100%"
-      h={14}
-      px={4}
-      py={2}
-      _hover={{ bg: "var(--chakra-colors-blackAlpha-50);" }}
-      onClick={() => props.setIsOpen(!props.isOpen)}
-      isActive={props.isOpen}
-      isDisabled={props.isDisabled}
-    >
-      <HStack>
-        <Box as="span" flex="1" textAlign="left">
-          {props.buttonLabel}
-        </Box>
-        {props.isOpen ? <MinusIcon fontSize="12px" color="#000091" /> : <AddIcon fontSize="12px" color="#000091" />}
-      </HStack>
-    </Button>
-  );
-}
-
-function getFiltreTerritoiresConfig(organisation: Organisation): FiltreOrganismeTerritoireConfig {
-  switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
-    case "TETE_DE_RESEAU":
-      return {};
-
-    case "DREETS":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-      return {
-        defaultLabel: REGIONS_BY_CODE[organisation.code_region]?.nom,
-        regions: [],
-        departements: DEPARTEMENTS.filter((departement) => departement.region.code === organisation.code_region).map(
-          (departement) => departement.code
-        ),
-        academies: [],
-      };
-
-    case "DDETS":
-      return {
-        defaultLabel: DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom,
-        regions: [],
-        departements: [],
-        academies: [],
-      };
-    case "ACADEMIE":
-      return {
-        defaultLabel: ACADEMIES_BY_CODE[organisation.code_academie]?.nom,
-        regions: [],
-        departements: DEPARTEMENTS.filter(
-          (departement) => departement.academie.code === organisation.code_academie
-        ).map((departement) => departement.code),
-        academies: [],
-      };
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "ADMINISTRATEUR":
-      return {};
-  }
-  return {};
-}
 
 function IndicateursForm() {
   const { auth } = useAuth();
@@ -250,7 +176,30 @@ function IndicateursForm() {
             </Tooltip>
           </Flex>
 
-          <FiltreDate value={effectifsFilters.date} onChange={(date) => updateState({ date })} button={FilterButton} />
+          <FiltreDate
+            value={effectifsFilters.date}
+            onChange={(date) => updateState({ date })}
+            button={({ isOpen, setIsOpen, buttonLabel }) => (
+              <Button
+                bg="#F9F8F6"
+                variant="unstyled"
+                w="100%"
+                h={14}
+                px={4}
+                py={2}
+                _hover={{ bg: "var(--chakra-colors-blackAlpha-50);" }}
+                onClick={() => setIsOpen(!isOpen)}
+                isActive={isOpen}
+              >
+                <HStack>
+                  <Box as="span" flex="1" textAlign="left">
+                    {buttonLabel}
+                  </Box>
+                  <EditIcon fontSize="16px" color="#000091" />
+                </HStack>
+              </Button>
+            )}
+          />
         </SimpleGrid>
 
         <SimpleGrid gap={3}>
@@ -258,19 +207,21 @@ function IndicateursForm() {
             Territoire
           </Text>
 
-          <FiltreOrganismeTerritoire
-            button={FilterButton}
-            value={{
-              regions: effectifsFilters.organisme_regions,
-              departements: effectifsFilters.organisme_departements,
-              academies: effectifsFilters.organisme_academies,
-              bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
-            }}
-            config={getFiltreTerritoiresConfig(auth.organisation)}
-            onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
-            onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
-            onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
-            onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
+          <FiltreOrganismeRegion
+            value={effectifsFilters.organisme_regions}
+            onChange={(regions) => updateState({ organisme_regions: regions })}
+          />
+          <FiltreOrganismeDepartement
+            value={effectifsFilters.organisme_departements}
+            onChange={(departements) => updateState({ organisme_departements: departements })}
+          />
+          <FiltreOrganismeAcademie
+            value={effectifsFilters.organisme_academies}
+            onChange={(academies) => updateState({ organisme_academies: academies })}
+          />
+          <FiltreOrganismeBassinEmploi
+            value={effectifsFilters.organisme_bassinsEmploi}
+            onChange={(organisme_bassinsEmploi) => updateState({ organisme_bassinsEmploi: organisme_bassinsEmploi })}
           />
         </SimpleGrid>
         {/* <Text fontWeight="700" textTransform="uppercase">
@@ -286,7 +237,6 @@ function IndicateursForm() {
           </Text>
 
           <FiltreFormationCFD
-            button={FilterButton}
             value={effectifsFilters.formation_cfds}
             onChange={(cfds) => updateState({ formation_cfds: cfds })}
           />
@@ -294,13 +244,13 @@ function IndicateursForm() {
           {/* <IndicateursFilter label="Type de formation">
             <Box>Liste des filtres</Box>
           </IndicateursFilter> */}
-          <IndicateursFilter label="Niveau de formation">
+          <IndicateursFilter label="Niveau de formation" badge={effectifsFilters.formation_niveaux.length}>
             <FiltreFormationNiveau
               value={effectifsFilters.formation_niveaux}
               onChange={(niveaux) => updateState({ formation_niveaux: niveaux })}
             />
           </IndicateursFilter>
-          <IndicateursFilter label="Année de formation">
+          <IndicateursFilter label="Année de formation" badge={effectifsFilters.formation_annees.length}>
             <FiltreFormationAnnee
               value={effectifsFilters.formation_annees}
               onChange={(annees) => updateState({ formation_annees: annees })}
@@ -312,7 +262,7 @@ function IndicateursForm() {
           <Text fontWeight="700" textTransform="uppercase">
             Apprenant
           </Text>
-          <IndicateursFilter label="Tranche d’âge">
+          <IndicateursFilter label="Tranche d’âge" badge={effectifsFilters.apprenant_tranchesAge.length}>
             <FiltreApprenantTrancheAge
               value={effectifsFilters.apprenant_tranchesAge}
               onChange={(tranchesAge) => updateState({ apprenant_tranchesAge: tranchesAge })}
@@ -330,14 +280,14 @@ function IndicateursForm() {
             Organisme
           </Text>
           {auth.organisation.type !== "TETE_DE_RESEAU" && (
-            <IndicateursFilter label="Réseau d’organismes">
+            <IndicateursFilter label="Réseau d’organismes" badge={effectifsFilters.organisme_reseaux.length}>
               <FiltreOrganismeReseau
                 value={effectifsFilters.organisme_reseaux}
                 onChange={(reseaux) => updateState({ organisme_reseaux: reseaux })}
               />
             </IndicateursFilter>
           )}
-          <IndicateursFilter label="Établissement">
+          <IndicateursFilter label="Établissement" badge={effectifsFilters.organisme_search ? 1 : undefined}>
             <FiltreOrganismeSearch
               value={effectifsFilters.organisme_search}
               onChange={(search) => updateState({ organisme_search: search })}

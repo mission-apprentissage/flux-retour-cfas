@@ -18,24 +18,17 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 
 import { _post } from "@/common/httpClient";
 import InputLegend from "@/components/InputLegend/InputLegend";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
+import { FilterButton } from "../FilterButton";
+
 interface FiltreFormationCFDProps {
   value: string[];
   onChange: (value: string[]) => void;
-  button: ({
-    isOpen,
-    setIsOpen,
-    buttonLabel,
-  }: {
-    isOpen: boolean;
-    setIsOpen: Dispatch<SetStateAction<boolean>>;
-    buttonLabel: string;
-  }) => JSX.Element;
 }
 
 const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;
@@ -64,14 +57,9 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
     }
   }
 
-  const buttonLabel =
-    props.value.length === 0
-      ? "Type de formation"
-      : `${props.value.length} formation${props.value.length > 1 ? "s" : ""}`;
-
   return (
     <div>
-      {props.button({ setIsOpen, isOpen, buttonLabel })}
+      <FilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Type de formation" badge={props.value.length} />
 
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} px="8w" py="3w" width="var(--chakra-sizes-xl)">

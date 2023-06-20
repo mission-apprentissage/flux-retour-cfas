@@ -15,7 +15,7 @@ function SimpleOverlayMenu({ onClose, children, ...props }: SimpleOverlayMenuPro
       const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
       // compute max-height for menu considering viewport, current y axis position and the 16px marginTop
       const menuHeight = menuRef?.current
-        ? `${viewportHeight - menuRef.current.getBoundingClientRect().y - 16}px`
+        ? `${Math.max(viewportHeight - menuRef.current.getBoundingClientRect().y - 16, 200)}px`
         : "100%";
       setMenuMaxHeight(menuHeight);
     }, 0);
