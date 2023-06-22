@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { effectifsDb, effectifsV3QueueDb } from "@/common/model/collections";
-import { processEffectifsQueue } from "@/jobs/ingestion/process-effectifs-queue";
+import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { createRandomDossierApprenantApiV3Input, createRandomOrganisme } from "@tests/data/randomizedSample";
 
 const uai = "0802004U";

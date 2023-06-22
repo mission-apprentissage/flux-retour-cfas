@@ -27,8 +27,8 @@ import { hydrateFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organi
 import { updateMultipleOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
 import { hydrateBassinsEmploi } from "./jobs/hydrate/reference/hydrate-bassins-emploi";
 import { hydrateReseaux } from "./jobs/hydrate/reseaux/hydrate-reseaux";
-import { processEffectifsQueueEndlessly } from "./jobs/ingestion/process-effectifs-queue";
 import { removeDuplicatesEffectifsQueue } from "./jobs/ingestion/process-effectifs-queue-remove-duplicates";
+import { processEffectifsQueueEndlessly } from "./jobs/ingestion/process-ingestion";
 import { removeOrganismeAndEffectifs } from "./jobs/patches/remove-organisme-effectifs-dossiersApprenants/index";
 import { removeOrganismesSansSiretSansEffectifs } from "./jobs/patches/remove-organismes-sansSiret-sansEffectifs/index";
 import { updateLastTransmissionDateForOrganismes } from "./jobs/patches/update-lastTransmissionDates/index";
