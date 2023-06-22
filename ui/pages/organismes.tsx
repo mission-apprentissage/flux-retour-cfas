@@ -157,7 +157,7 @@ function MesOrganismes() {
                   cell: ({ row }) => (
                     <>
                       <Link
-                        href={`/organismes/${organismes[row.id]._id}`}
+                        href={`/organismes/${(row.original as any)?._id}`}
                         display="block"
                         fontSize="1rem"
                         width="var(--chakra-sizes-lg)"
@@ -294,7 +294,7 @@ function MesOrganismes() {
                   enableSorting: false,
                   header: () => "Voir",
                   cell: ({ row }) => (
-                    <Link href={`/organismes/${organismes[row.id]._id}`} flexGrow={1}>
+                    <Link href={`/organismes/${(row.original as any)?._id}`} flexGrow={1}>
                       <ArrowDropRightLine />
                     </Link>
                   ),
