@@ -13,7 +13,6 @@ import {
 import {
   buildNewHistoriqueStatutApprenant,
   mapEffectifQueueToEffectif,
-  mapEffectifQueueToOrganisme,
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
@@ -31,7 +30,7 @@ import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
 
 const sleepDuration = 10_000;
-
+const NB_ITEMS_TO_PROCESS = 100;
 type Options = { id?: string; force?: boolean };
 
 /**
@@ -65,8 +64,7 @@ export const processEffectifsQueue = async (options?: Options) => {
     filter._id = id;
   }
 
-  const result = await processItems(filter, effectifsQueueDb(), dossierApprenantSchemaV1V2());
-
+  const result = await processItems(filter);
   return result;
 };
 
@@ -79,27 +77,20 @@ type ProcessItemsResult = {
 /**
  * Fonction de process des 100 derniers éléments de la queue
  * @param filter
- * @param collection
- * @param validationSchema
- * @param mapItemToEffectif
- * @param mapItemToOrganisme
  */
-async function processItems(filter: any, collection: ReturnType<typeof effectifsQueueDb>): Promise<ProcessItemsResult> {
-  const total = await collection.countDocuments(filter);
+async function processItems(filter: any): Promise<ProcessItemsResult> {
+  const total = await effectifsQueueDb().countDocuments(filter);
   let totalValidItems = 0;
 
-  const itemsToProcess = await collection.find(filter).sort({ created_at: 1 }).limit(100).toArray();
+  const itemsToProcess = await effectifsQueueDb()
+    .find(filter)
+    .sort({ created_at: 1 })
+    .limit(NB_ITEMS_TO_PROCESS)
+    .toArray();
 
   logger.info(
-    {
-      collection: collection.collectionName,
-      filter,
-      count: itemsToProcess.length,
-      total,
-    },
-    `${itemsToProcess.length}/${total} items à processer (dans la collection ${
-      collection.collectionName
-    }, avec filtre ${JSON.stringify(filter)}})`
+    { filter, count: itemsToProcess.length, total },
+    `${itemsToProcess.length}/${total} items à traiter (avec filtre ${JSON.stringify(filter)}})`
   );
 
   await PromisePool.withConcurrency(10)
@@ -107,25 +98,31 @@ async function processItems(filter: any, collection: ReturnType<typeof effectifs
     .process(async (effectifQueued, index) => {
       try {
         const startDate = new Date();
-        let dataToUpdate: Partial<EffectifsQueue> = {};
+        let effectifQueueToUpdate: Partial<EffectifsQueue> = {};
 
-        // Phase de contrôle et transformation d'une donnée de queue
-        const { errors, effectif } = await controlAndTransformEffectifQueueItem(effectifQueued, dataToUpdate);
+        // Phase de contrôle de l'organisme
+        const isOrganismeFiable = await controlOrganismeFiable(
+          effectifQueued.uai_etablissement,
+          effectifQueued.siret_etablissement,
+          effectifQueueToUpdate
+        );
 
-        if (errors) {
-          dataToUpdate.validation_errors = errors;
-          // TODO gestion des erreurs de validation & erreurs
-        } else if (effectif) {
-          totalValidItems++;
+        if (isOrganismeFiable) {
+          // Phase de transformation d'une donnée de queue
+          const { effectif } = await transformEffectifQueueItem(effectifQueued, effectifQueueToUpdate);
 
-          // Phase d'ajout ou update d'un effectif
-          await createOrUpdateEffectif(effectif, dataToUpdate);
+          if (effectif) {
+            totalValidItems++;
+
+            // Phase d'ajout ou update d'un effectif
+            await createOrUpdateEffectif(effectif, effectifQueueToUpdate);
+          }
         }
 
         // MAJ de la queue pour indiquer que les données ont été traitées
-        await (collection as any).updateOne(
+        await effectifsQueueDb().updateOne(
           { _id: effectifQueued._id },
-          { $set: { ...dataToUpdate, processed_at: new Date() } }
+          { $set: { ...effectifQueueToUpdate, processed_at: new Date() } }
         );
 
         const durationInMs = new Date().getTime() - startDate.getTime();
@@ -136,7 +133,10 @@ async function processItems(filter: any, collection: ReturnType<typeof effectifs
           { duration: durationInMs }
         );
 
-        return { validItem: errors.length === 0, error: undefined };
+        return {
+          validItem: effectifQueueToUpdate.validation_errors?.length === 0 && !effectifQueueToUpdate.error,
+          error: undefined,
+        };
       } catch (err: any) {
         logger.error({ err, index }, `an error occured while processing effectif queue item ${index}: ${err.message}`);
         logger.error(err);
@@ -144,7 +144,7 @@ async function processItems(filter: any, collection: ReturnType<typeof effectifs
       }
     });
 
-  logger.info(`${itemsToProcess.length} items processés`);
+  logger.info(`${itemsToProcess.length} items traités`);
   if (itemsToProcess.length > 0) {
     logger.info(`${totalValidItems} items valides`);
     logger.info(`${itemsToProcess.length - totalValidItems} items invalides`);
@@ -158,63 +158,70 @@ async function processItems(filter: any, collection: ReturnType<typeof effectifs
 }
 
 /**
- *
- * @param effectifQueued
- * @param mapItemToOrganisme
- * @param mapItemToEffectif
- * @param validationSchema
+ * Fonction contrôle de la fiabilité de l'organisme via le couple UAI / SIRET reçu
+ * @param uai
+ * @param siret
  * @returns
  */
-const controlAndTransformEffectifQueueItem = async (
-  effectifQueued: EffectifsQueue,
-  dataToUpdate: Partial<EffectifsQueue>
+const controlOrganismeFiable = async (
+  uai: string | undefined,
+  siret: string | undefined,
+  effectifQueueToUpdate: Partial<EffectifsQueue>
 ) => {
-  let errors;
+  if (!(await isOrganismeFiableForCouple(uai, siret))) {
+    effectifQueueToUpdate.error = `Organisme (uai : ${uai} et siret : ${siret}) non fiable`;
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ *
+ * @param effectifQueued
+ * @param dataToUpdate
+ * @returns
+ */
+const transformEffectifQueueItem = async (
+  effectifQueued: EffectifsQueue,
+  effectifQueueToUpdate: Partial<EffectifsQueue>
+) => {
   let result;
   let effectif;
 
   try {
-    const mappedOrganismeFields = mapEffectifQueueToOrganisme(effectifQueued);
+    // Vérification schéma & transformation en 2 objets effectif & organisme
+    result = await dossierApprenantSchemaV1V2()
+      .transform(async (data) => ({
+        effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
+        organisme: await pPipe(
+          () => findOrganismeByUaiAndSiret(effectifQueued?.uai_etablissement, effectifQueued?.siret_etablissement),
+          setOrganismeTransmissionDates
+        )(data),
+      }))
+      .safeParseAsync(effectifQueued);
 
-    // Contrôle de la fiabilité de l'organisme via les champs reçus
-    if (!(await isOrganismeFiableForCouple(mappedOrganismeFields?.uai, mappedOrganismeFields?.siret))) {
-      errors = [
-        {
-          message: `Organisme (uai : ${mappedOrganismeFields?.uai} et siret : ${mappedOrganismeFields?.siret}) non fiable`,
-        },
-      ];
+    if (result.error) {
+      effectifQueueToUpdate.validation_errors =
+        result.error?.issues.map(({ path, message }) => ({ message, path })) || [];
     } else {
-      // Vérification schéma & transformation en 2 objets effectif & organisme
-      result = await dossierApprenantSchemaV1V2()
-        .transform(async (data) => ({
-          effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
-          organisme: await pPipe(
-            () => findOrganismeByUaiAndSiret(mappedOrganismeFields?.uai, mappedOrganismeFields?.siret),
-            setOrganismeTransmissionDates
-          )(data),
-        }))
-        .safeParseAsync(effectifQueued);
+      const { effectif: effectifData, organisme } = result.data as any;
 
-      if (result.error) {
-        errors = result.error?.issues.map(({ path, message }) => ({ message, path })) || [];
-      } else {
-        // Complétion de l'objet effectif avec l'organisme id et le computed info
-        const { effectif: effectifData, organisme } = result.data as any;
+      // Complétion de l'objet effectif avec l'organisme id et le computed info
+      effectif = {
+        ...effectifData,
+        organisme_id: organisme._id,
+        _computed: addEffectifComputedFields(organisme),
+      };
 
-        effectif = {
-          ...effectifData,
-          organisme_id: organisme._id,
-          _computed: addEffectifComputedFields(organisme),
-        };
-
-        dataToUpdate.organisme_id = organisme._id;
-      }
+      // Complétion de l'objet dans la queue avec l'organisme id
+      effectifQueueToUpdate.organisme_id = organisme._id;
     }
   } catch (err) {
-    errors = formatError(err).message;
+    effectifQueueToUpdate.error = formatError(err).message;
   }
 
-  return { errors, effectif };
+  return { effectif };
 };
 
 /**
@@ -247,6 +254,7 @@ const createOrUpdateEffectif = async (effectif: Effectif, dataToUpdate: Partial<
       await lockEffectif(effectifCreated);
     }
 
+    // Complétion de l'objet dans la queue avec l'effectif id
     dataToUpdate.effectif_id = effectifId;
   } catch (e: any) {
     const err = formatError(e);

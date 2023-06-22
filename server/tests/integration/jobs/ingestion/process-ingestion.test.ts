@@ -383,9 +383,7 @@ describe("Processus d'ingestion", () => {
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
         expect(updatedInput).toMatchObject({
-          validation_errors: [
-            { message: `Organisme (uai : ${uai} et siret : ${sample41461021200014.etablissement.siret}) non fiable` },
-          ],
+          error: `Organisme (uai : ${uai} et siret : ${sample41461021200014.etablissement.siret}) non fiable`,
           processed_at: expect.any(Date),
         });
 
