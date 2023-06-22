@@ -65,13 +65,7 @@ export const processEffectifsQueue = async (options?: Options) => {
     filter._id = id;
   }
 
-  const result = await processItems(
-    filter,
-    effectifsQueueDb(),
-    dossierApprenantSchemaV1V2(),
-    mapEffectifQueueToEffectif,
-    mapEffectifQueueToOrganisme
-  );
+  const result = await processItems(filter, effectifsQueueDb(), dossierApprenantSchemaV1V2());
 
   return result;
 };
@@ -90,13 +84,7 @@ type ProcessItemsResult = {
  * @param mapItemToEffectif
  * @param mapItemToOrganisme
  */
-async function processItems(
-  filter: any,
-  collection: ReturnType<typeof effectifsQueueDb>,
-  validationSchema: ReturnType<typeof dossierApprenantSchemaV1V2>,
-  mapItemToEffectif: typeof mapEffectifQueueToEffectif,
-  mapItemToOrganisme: typeof mapEffectifQueueToOrganisme
-): Promise<ProcessItemsResult> {
+async function processItems(filter: any, collection: ReturnType<typeof effectifsQueueDb>): Promise<ProcessItemsResult> {
   const total = await collection.countDocuments(filter);
   let totalValidItems = 0;
 
@@ -122,12 +110,7 @@ async function processItems(
         let dataToUpdate: Partial<EffectifsQueue> = {};
 
         // Phase de contrôle et transformation d'une donnée de queue
-        const { errors, effectif } = await controlAndTransformEffectifQueueItem(
-          effectifQueued,
-          mapItemToOrganisme,
-          mapItemToEffectif,
-          validationSchema
-        );
+        const { errors, effectif } = await controlAndTransformEffectifQueueItem(effectifQueued, dataToUpdate);
 
         if (errors) {
           dataToUpdate.validation_errors = errors;
@@ -184,16 +167,14 @@ async function processItems(
  */
 const controlAndTransformEffectifQueueItem = async (
   effectifQueued: EffectifsQueue,
-  mapItemToOrganisme: typeof mapEffectifQueueToOrganisme,
-  mapItemToEffectif: typeof mapEffectifQueueToEffectif,
-  validationSchema: ReturnType<typeof dossierApprenantSchemaV1V2>
+  dataToUpdate: Partial<EffectifsQueue>
 ) => {
   let errors;
   let result;
   let effectif;
 
   try {
-    const mappedOrganismeFields = mapItemToOrganisme(effectifQueued);
+    const mappedOrganismeFields = mapEffectifQueueToOrganisme(effectifQueued);
 
     // Contrôle de la fiabilité de l'organisme via les champs reçus
     if (!(await isOrganismeFiableForCouple(mappedOrganismeFields?.uai, mappedOrganismeFields?.siret))) {
@@ -204,9 +185,9 @@ const controlAndTransformEffectifQueueItem = async (
       ];
     } else {
       // Vérification schéma & transformation en 2 objets effectif & organisme
-      result = await validationSchema
+      result = await dossierApprenantSchemaV1V2()
         .transform(async (data) => ({
-          effectif: await pPipe(mapItemToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
+          effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
           organisme: await pPipe(
             () => findOrganismeByUaiAndSiret(mappedOrganismeFields?.uai, mappedOrganismeFields?.siret),
             setOrganismeTransmissionDates
@@ -219,11 +200,14 @@ const controlAndTransformEffectifQueueItem = async (
       } else {
         // Complétion de l'objet effectif avec l'organisme id et le computed info
         const { effectif: effectifData, organisme } = result.data as any;
+
         effectif = {
           ...effectifData,
           organisme_id: organisme._id,
           _computed: addEffectifComputedFields(organisme),
         };
+
+        dataToUpdate.organisme_id = organisme._id;
       }
     }
   } catch (err) {

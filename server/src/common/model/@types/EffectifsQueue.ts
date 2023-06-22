@@ -96,6 +96,10 @@ export interface EffectifsQueue {
    */
   effectif_id?: ObjectId;
   /**
+   * Id de l'organisme associé
+   */
+  organisme_id?: ObjectId;
+  /**
    * Date de mise à jour en base de données
    */
   updated_at?: Date;

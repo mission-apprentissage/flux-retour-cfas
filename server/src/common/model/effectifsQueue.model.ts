@@ -13,6 +13,7 @@ const collectionName = "effectifsQueue";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ effectif_id: 1 }, { name: "effectif_id" }],
+  [{ organisme_id: 1 }, { name: "organisme_id" }],
   [{ processed_at: 1 }, { name: "processed_at" }],
   [{ created_at: 1 }, { name: "created_at" }],
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
@@ -32,6 +33,7 @@ const apprenantProps = apprenantSchema.properties;
 export const internalFields = {
   source: string({ description: effectifsProps.source.description }),
   effectif_id: objectId({ description: "Id de l'effectif associé" }),
+  organisme_id: objectId({ description: "Id de l'organisme associé" }),
   updated_at: date({ description: "Date de mise à jour en base de données" }),
   created_at: date({ description: "Date d'ajout en base de données" }),
   processed_at: date({ description: "Date de process des données" }),
