@@ -2,7 +2,6 @@ import { Box, Button, HStack, Input, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-import { QUERY_KEYS } from "@/common/constants/queryKeys";
 import { validateSiret } from "@/common/domain/siret";
 import { validateUai } from "@/common/domain/uai";
 import { _post } from "@/common/httpClient";
@@ -21,7 +20,7 @@ const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => 
       return;
     }
 
-    const data = await queryClient.fetchQuery(QUERY_KEYS.SEARCH_CFAS as any, () =>
+    const data = await queryClient.fetchQuery("search-cfas" as any, () =>
       _post("/api/v1/organismes/search", { searchTerm })
     );
 
