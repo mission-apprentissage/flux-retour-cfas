@@ -106,7 +106,7 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
                 <Tab fontSize="14px">Départements ({territoiresConfig.departements.length})</Tab>
               )}
               {territoiresConfig.bassinsEmploi.length > 0 && (
-                <Tab fontSize="14px">Bassins d’emploi ({territoiresConfig.bassinsEmploi.length})</Tab>
+                <Tab fontSize="14px">Zones d’emploi ({territoiresConfig.bassinsEmploi.length})</Tab>
               )}
             </TabList>
             <TabIndicator mt="-1.5px" height="4px" bg="bluefrance" borderRadius="1px" />
