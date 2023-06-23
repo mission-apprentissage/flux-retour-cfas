@@ -16,7 +16,7 @@ const FiltreOrganismeBassinEmploi = (props: FiltreOrganismeBassinEmploiProps) =>
 
   return (
     <div>
-      <FilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Bassins d’emploi" badge={bassinsEmploi.length} />
+      <FilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Zone d’emploi" badge={bassinsEmploi.length} />
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)" p="3w">
           <CheckboxGroup
