@@ -232,7 +232,7 @@ const transformEffectifQueueItem = async (
 const createOrUpdateEffectif = async (effectif: Effectif, dataToUpdate: Partial<EffectifsQueue>) => {
   try {
     let effectifId: ObjectId;
-    const found = await checkIfEffectifExists(effectif, ["id_erp_apprenant", "organisme_id", "annee_scolaire"]);
+    const found = await checkIfEffectifExists(effectif);
 
     // Gestion des MAJ d'effectif
     if (found) {

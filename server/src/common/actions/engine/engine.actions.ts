@@ -99,12 +99,23 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
   return effectifDataWithAddress;
 };
 
+/**
+ * Fonction de vérification de la présence d'un effectif via la clé d'unicité
+ * id_erp_apprenant : identifiant unique du jeune dans le CFA
+ * organisme_id : identifiant de l'organisme de formation en apprentissage
+ * formation.cfd : Code formation diplôme de la formation suivie par le jeune
+ * annee_scolaire : Année scolaire dans laquelle se trouve le jeune pour cette formation dans cet établissement
+ * @param effectif
+ * @param queryKeys
+ * @returns
+ */
 export const checkIfEffectifExists = async (
   effectif: Effectif,
-  queryKeys = ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"]
+  queryKeys = ["id_erp_apprenant", "organisme_id", "formation.cfd", "annee_scolaire"]
 ) => {
   // Recherche de l'effectif via sa clé d'unicité
   const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
+
   return await findEffectifByQuery(query);
 };
 
