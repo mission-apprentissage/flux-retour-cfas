@@ -34,20 +34,20 @@ describe("Tests des actions  engine utilitaires organismes", () => {
       const testsCases = [
         {
           label: "Vérifie qu'on couple sans UAI fourni n'est pas fiable",
-          uai: null,
+          uai: undefined,
           siret: SIRET_REFERENTIEL,
           expectedFiable: false,
         },
         {
           label: "Vérifie qu'on couple sans SIRET fourni n'est pas fiable",
           uai: UAI_REFERENTIEL,
-          siret: null,
+          siret: undefined,
           expectedFiable: false,
         },
         {
           label: "Vérifie qu'on couple sans UAI ni SIRET fourni n'est pas fiable",
-          uai: null,
-          siret: null,
+          uai: undefined,
+          siret: undefined,
           expectedFiable: false,
         },
         {

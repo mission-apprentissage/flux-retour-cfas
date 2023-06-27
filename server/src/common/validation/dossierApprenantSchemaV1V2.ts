@@ -3,7 +3,7 @@ import { z } from "zod";
 import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 
 /**
- * Note: ce schema est seulement utilisé pour generer la documentation OpenAPI poour l'API v1.
+ * Note: ce schema est seulement utilisé pour générer la documentation OpenAPI pour l'API v1.
  * Les données entrantes de l'API V1 sont validées par dossierApprenantSchema (Joi).
  * @returns
  */

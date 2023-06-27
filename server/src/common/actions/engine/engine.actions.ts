@@ -3,21 +3,12 @@ import { cloneDeep, get } from "lodash-es";
 import { PartialDeep } from "type-fest";
 
 import { findEffectifByQuery } from "@/common/actions/effectifs.actions";
-import {
-  createOrganisme,
-  findOrganismeBySiret,
-  findOrganismeByUai,
-  findOrganismeByUaiAndSiret,
-  structureOrganisme,
-} from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import { Organisme } from "@/common/model/@types";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
-
-import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils";
 
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
@@ -107,12 +98,23 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
   return effectifDataWithAddress;
 };
 
+/**
+ * Fonction de vérification de la présence d'un effectif via la clé d'unicité
+ * id_erp_apprenant : identifiant unique du jeune dans le CFA
+ * organisme_id : identifiant de l'organisme de formation en apprentissage
+ * formation.cfd : Code formation diplôme de la formation suivie par le jeune
+ * annee_scolaire : Année scolaire dans laquelle se trouve le jeune pour cette formation dans cet établissement
+ * @param effectif
+ * @param queryKeys
+ * @returns
+ */
 export const checkIfEffectifExists = async (
   effectif: Effectif,
-  queryKeys = ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"]
+  queryKeys = ["id_erp_apprenant", "organisme_id", "formation.cfd", "annee_scolaire"]
 ) => {
   // Recherche de l'effectif via sa clé d'unicité
   const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
+
   return await findEffectifByQuery(query);
 };
 
@@ -195,61 +197,4 @@ export const mapEffectifQueueToOrganisme = (
     siret: dossiersApprenant.siret_etablissement,
     nom: dossiersApprenant.nom_etablissement,
   };
-};
-
-/**
- * Fonction de remplissage et contrôle des données d'un organisme
- * Contrôle si l'organisme passe la fiabilisation
- * Contrôle si l'organisme existe déja
- * Si nécessaire va renvoyer un organisme fiabilisé à créer
- * ?? Pas besoin d'update car le runEngine ne va que créer / contrôler l'existant
- * ?? -> La MAJ d'un organisme ne doit pas se faire via l'API / migration ???
- */
-export const findOrCreateOrganisme = async (organisme: ReturnType<typeof mapEffectifQueueToOrganisme>) => {
-  const { uai, siret } = organisme;
-
-  // Applique le mapping de fiabilisation
-  const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
-    uai,
-    siret,
-  });
-
-  // Si pas de siret après fiabilisation -> erreur
-  if (!cleanSiret) {
-    throw new Error("Impossible de créer l'organisme d'uai ${uai} avec un SIRET vide");
-  }
-
-  // Applique les règles de rejection si pas dans la db
-  const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
-
-  if (organismeFoundWithUaiSiret) {
-    return organismeFoundWithUaiSiret;
-  }
-
-  if (cleanSiret) {
-    const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
-    // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> erreur
-    if (organismeFoundWithSiret?._id)
-      throw new Error(
-        `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai} (reçu ${uai})`
-      );
-  }
-  if (cleanUai) {
-    const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
-    // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> erreur
-    if (organismeFoundWithUai?._id)
-      throw new Error(
-        `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret} (reçu ${siret})`
-      );
-  }
-
-  // nouvelle organisme, on va récupérer les données avec l'API entreprise
-  const organismeData = await structureOrganisme({
-    ...organisme,
-    ...(cleanUai ? { uai: cleanUai } : {}),
-    ...(cleanSiret ? { siret: cleanSiret } : {}),
-  });
-  const newOrganisme = await createOrganisme(organismeData as Organisme);
-
-  return newOrganisme;
 };

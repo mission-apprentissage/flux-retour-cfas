@@ -32,8 +32,8 @@ export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret = null }
  * @returns
  */
 export const isOrganismeFiableForCouple = async (
-  uai: string | null,
-  siret: string | null,
+  uai: string | undefined,
+  siret: string | undefined,
   organismesFromReferentiel: OrganismesReferentiel[] = []
 ) => {
   try {
