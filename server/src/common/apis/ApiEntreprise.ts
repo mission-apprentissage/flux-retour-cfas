@@ -52,32 +52,3 @@ export const getEtablissement = async (siret: string): Promise<ApiEntEtablisseme
     }
   });
 };
-
-/**
- * TODO REMOVE
- * Exemple: https://entreprise.api.gouv.fr/v2/conventions_collectives/82161143100015
- * @param {string} siret
- * @param {boolean} non_diffusables
- * @returns {Promise<import("./@types/ApiEntConventionCollective").default|null>}
- */
-export const getConventionCollective = async (siret, non_diffusables = true) => {
-  return executeWithRateLimiting(async (client) => {
-    try {
-      let response = await client.get(`conventions_collectives/${siret}`, {
-        params: { ...apiParams, non_diffusables },
-      });
-      logger.debug(`[Entreprise API] Fetched convention collective ${siret} ${response.cached ? "(from cache)" : ""}`);
-
-      if (!response?.data?.conventions[0]) {
-        throw new ApiError("Api Entreprise", "error getConventionCollective");
-      }
-      return response.data.conventions[0];
-    } catch (e: any) {
-      if (e.response?.status === 404) {
-        return null;
-      } else {
-        throw new ApiError("Api Entreprise ConventionCollective", e.message, e.code || e.response?.status);
-      }
-    }
-  });
-};

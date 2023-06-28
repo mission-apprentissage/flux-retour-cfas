@@ -3,7 +3,7 @@ import * as apiEntreprise from "@/common/apis/ApiEntreprise";
 import { SIRET_REGEX } from "@/common/constants/validations";
 import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "@/common/utils/adresseUtils";
 
-export const findDataFromSiret = async (providedSiret, non_diffusables = true, getConventionCollective = true) => {
+export const findDataFromSiret = async (providedSiret, getConventionCollective = true) => {
   if (!providedSiret || !SIRET_REGEX.test(providedSiret.trim())) {
     return {
       result: {},
@@ -17,7 +17,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
 
   let etablissementApiInfo;
   try {
-    etablissementApiInfo = await apiEntreprise.getEtablissement(siret, non_diffusables);
+    etablissementApiInfo = await apiEntreprise.getEtablissement(siret);
   } catch (e: any) {
     console.error(e);
     if (e.reason === 451) {
@@ -86,18 +86,6 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   }
 
   const siren = siret.substring(0, 9);
-  let entrepriseApiInfo;
-  try {
-    entrepriseApiInfo = await apiEntreprise.getEntreprise(siren, non_diffusables);
-  } catch (e: any) {
-    console.error(e);
-    return {
-      result: {},
-      messages: {
-        error: `Le Siren ${siren} n'existe pas ou n'a été retrouvé`,
-      },
-    };
-  }
 
   if (getConventionCollective && conventionCollective.status === "ERROR") {
     try {
@@ -110,16 +98,6 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
         opco_siren: null,
         status: "ERROR",
       };
-    }
-  }
-
-  let complement_conventionCollective = {};
-  if (getConventionCollective && conventionCollective.status !== "ERROR") {
-    try {
-      complement_conventionCollective = (await apiEntreprise.getConventionCollective(siret, non_diffusables)) || {};
-      conventionCollective = { ...conventionCollective, ...complement_conventionCollective };
-    } catch (e: any) {
-      console.error(e);
     }
   }
 
