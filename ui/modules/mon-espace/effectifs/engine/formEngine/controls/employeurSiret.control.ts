@@ -1,3 +1,4 @@
+import { InfoSiret } from "@/common/types/infoSiret";
 import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.service";
 
 const unlockAllCascade = {
@@ -19,7 +20,7 @@ export const employerSiretLogic = [
     deps: ["contrats[0].siret"],
     process: async ({ values, signal, organisme }: { values?: any; signal?: any; organisme?: any }) => {
       const siret = values.contrats[0].siret;
-      const { messages, result, error } = await apiService.fetchSiret({
+      const { messages, result, error }: InfoSiret = await apiService.fetchSiret({
         siret,
         organisme_id: organisme._id,
         signal,

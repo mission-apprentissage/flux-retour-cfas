@@ -78,7 +78,7 @@ export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial
   let organismeInfos: Partial<Organisme> = {};
 
   if (siret) {
-    const dataSiret: InfoSiret = await findDataFromSiret(siret, false);
+    const dataSiret: InfoSiret = await findDataFromSiret(siret);
 
     if (dataSiret.messages.api_entreprise_status === "OK") {
       organismeInfos.ferme = !!dataSiret.result.ferme;

@@ -1,28 +1,12 @@
 type ApiEntEtablissement = {
   siret: string;
-  siege_social: boolean;
   etat_administratif: string;
-  date_fermeture: number;
   enseigne: any;
   activite_principale: {
     code: string;
-    nomenclature: string;
-    libelle: string;
   };
   tranche_effectif_salarie_etablissement: {
     de: number;
-    a: number;
-    code: string;
-    date_reference: string;
-    intitule: string;
-  };
-  diffusable_commercialement: boolean;
-  date_creation: number;
-  unite_legale: {
-    siret_siege_social: string;
-    personne_morale_attributs: {
-      raison_sociale: string;
-    };
   };
   adresse: {
     complement_adresse: any;
