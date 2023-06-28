@@ -1,53 +1,52 @@
 {
-    "etablissement": {
-        "siege_social": true,
-        "siret": "78354361400029",
-        "naf": "8532Z",
-        "libelle_naf": "Enseignement secondaire technique ou professionnel",
-        "date_mise_a_jour": 1661759154,
-        "tranche_effectif_salarie_etablissement": {
-            "de": 250,
-            "a": 499,
-            "code": "32",
-            "date_reference": "2020",
-            "intitule": "250 à 499 salariés"
-        },
-        "date_creation_etablissement": 1251756000,
-        "region_implantation": {
-            "code": "32",
-            "value": "Hauts-de-France"
-        },
-        "commune_implantation": {
-            "code": "59122",
-            "value": "Cambrai"
-        },
-        "pays_implantation": {
-            "code": "FR",
-            "value": "FRANCE"
-        },
-        "diffusable_commercialement": true,
-        "enseigne": null,
-        "adresse": {
-            "l1": "OGEC ST LUC CAMBRAI",
-            "l2": "LYCEE LA SAGESSE",
-            "l3": "L.P.E.S.",
-            "l4": "31 BD DE LA LIBERTE",
-            "l5": null,
-            "l6": "59400 CAMBRAI",
-            "l7": "FRANCE",
-            "numero_voie": "31",
-            "type_voie": "BD",
-            "nom_voie": "DE LA LIBERTE",
-            "complement_adresse": "L.P.E.S.",
-            "code_postal": "59400",
-            "localite": "CAMBRAI",
-            "code_insee_localite": "59122",
-            "cedex": null
-        },
-        "etat_administratif": {
-            "value": "A",
-            "date_fermeture": null
-        }
-    },
-    "gateway_error": false
+  "siege_social": true,
+  "siret": "78354361400029",
+  "activite_principale": {
+    "code": "85.31Z",
+    "nomenclature": "NAFRev2",
+    "libelle": "Enseignement secondaire général"
+  },
+  "tranche_effectif_salarie_etablissement": {
+    "de": 250,
+    "a": 499,
+    "code": "32",
+    "date_reference": "2020",
+    "intitule": "250 à 499 salariés"
+  },
+  "date_creation": 1251756000,
+  "unite_legale": {
+    "siren": "783543614",
+    "siret_siege_social": "78354361400029",
+    "personne_morale_attributs": {
+      "raison_sociale": "OGEC ST LUC CAMBRAI",
+      "sigle": null
+    }
+  },
+  "enseigne": null,
+  "adresse": {
+    "complement_adresse": "L.P.E.S.",
+    "numero_voie": "31",
+    "indice_repetition_voie": null,
+    "type_voie": "BOULEVARD",
+    "libelle_voie": "DE LA LIBERTE",
+    "code_postal": "59400",
+    "libelle_commune": "CAMBRAI",
+    "libelle_commune_etranger": null,
+    "distribution_speciale": null,
+    "code_commune": "59122",
+    "code_cedex": null,
+    "libelle_cedex": null,
+    "code_pays_etranger": null,
+    "libelle_pays_etranger": null,
+    "acheminement_postal": {
+      "l1": "OGEC ST LUC CAMBRAI LYCEE LA SAGESSE",
+      "l2": "",
+      "l3": "L.P.E.S.",
+      "l4": "31 BOULEVARD DE LA LIBERTE",
+      "l5": "",
+      "l6": "59400 CAMBRAI",
+      "l7": "FRANCE"
+    }
+  },
+  "etat_administratif": "A"
 }

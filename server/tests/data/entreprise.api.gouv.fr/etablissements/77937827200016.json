@@ -1,53 +1,52 @@
 {
-    "etablissement": {
-        "siege_social": true,
-        "siret": "77937827200016",
-        "naf": "8532Z",
-        "libelle_naf": "Enseignement secondaire technique ou professionnel",
-        "date_mise_a_jour": 1661759118,
-        "tranche_effectif_salarie_etablissement": {
-            "de": 20,
-            "a": 49,
-            "code": "12",
-            "date_reference": "2020",
-            "intitule": "20 à 49 salariés"
-        },
-        "date_creation_etablissement": 662684400,
-        "region_implantation": {
-            "code": "84",
-            "value": "Auvergne-Rhône-Alpes"
-        },
-        "commune_implantation": {
-            "code": "01386",
-            "value": "Saint-Sorlin-en-Bugey"
-        },
-        "pays_implantation": {
-            "code": "FR",
-            "value": "FRANCE"
-        },
-        "diffusable_commercialement": true,
-        "enseigne": null,
-        "adresse": {
-            "l1": "ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN",
-            "l2": null,
-            "l3": null,
-            "l4": "10 PL DE LA HALLE",
-            "l5": null,
-            "l6": "01150 SAINT-SORLIN-EN-BUGEY",
-            "l7": "FRANCE",
-            "numero_voie": "10",
-            "type_voie": "PL",
-            "nom_voie": "DE LA HALLE",
-            "complement_adresse": null,
-            "code_postal": "01150",
-            "localite": "SAINT-SORLIN-EN-BUGEY",
-            "code_insee_localite": "01386",
-            "cedex": null
-        },
-        "etat_administratif": {
-            "value": "A",
-            "date_fermeture": null
-        }
-    },
-    "gateway_error": false
+  "siege_social": true,
+  "siret": "77937827200016",
+  "activite_principale": {
+    "code": "85.31Z",
+    "nomenclature": "NAFRev2",
+    "libelle": "Enseignement secondaire général"
+  },
+  "tranche_effectif_salarie_etablissement": {
+    "de": 20,
+    "a": 49,
+    "code": "12",
+    "date_reference": "2020",
+    "intitule": "20 à 49 salariés"
+  },
+  "date_creation": 662684400,
+  "unite_legale": {
+    "siren": "779378272",
+    "siret_siege_social": "77937827200016",
+    "personne_morale_attributs": {
+      "raison_sociale": "ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN",
+      "sigle": null
+    }
+  },
+  "enseigne": null,
+  "adresse": {
+    "complement_adresse": null,
+    "numero_voie": "10",
+    "indice_repetition_voie": null,
+    "type_voie": "PLACE",
+    "libelle_voie": "DE LA HALLE",
+    "code_postal": "01150",
+    "libelle_commune": "SAINT-SORLIN-EN-BUGEY",
+    "libelle_commune_etranger": null,
+    "distribution_speciale": null,
+    "code_commune": "01386",
+    "code_cedex": null,
+    "libelle_cedex": null,
+    "code_pays_etranger": null,
+    "libelle_pays_etranger": null,
+    "acheminement_postal": {
+      "l1": "ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN",
+      "l2": "",
+      "l3": "",
+      "l4": "10 PLACE DE LA HALLE",
+      "l5": "",
+      "l6": "01150 SAINT-SORLIN-EN-BUGEY",
+      "l7": "FRANCE"
+    }
+  },
+  "etat_administratif": "A"
 }

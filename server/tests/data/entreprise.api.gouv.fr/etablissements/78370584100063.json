@@ -1,1 +1,52 @@
-{"etablissement":{"siege_social":false,"siret":"78370584100063","naf":"8542Z","libelle_naf":"Enseignement supérieur","date_mise_a_jour":1614093173,"tranche_effectif_salarie_etablissement":{"de":null,"a":null,"code":null,"date_reference":null,"intitule":null},"date_creation_etablissement":1609455600,"region_implantation":{"code":"11","value":"Île-de-France"},"commune_implantation":{"code":"92073","value":"Suresnes"},"pays_implantation":{"code":"FR","value":"FRANCE"},"diffusable_commercialement":true,"enseigne":"SKEMA","adresse":{"l1":"SKEMA BUSINESS SCHOOL","l2":"SKEMA","l3":null,"l4":"5 QUAI MARCEL DASSAULT","l5":null,"l6":"92150 SURESNES","l7":"FRANCE","numero_voie":"5","type_voie":"QUAI","nom_voie":"MARCEL DASSAULT","complement_adresse":null,"code_postal":"92150","localite":"SURESNES","code_insee_localite":"92073","cedex":null},"etat_administratif":{"value":"A","date_fermeture":null}},"gateway_error":false}
+{
+  "siege_social": false,
+  "siret": "78370584100063",
+  "activite_principale": {
+    "code": "85.31Z",
+    "nomenclature": "NAFRev2",
+    "libelle": "Enseignement secondaire général"
+  },
+  "tranche_effectif_salarie_etablissement": {
+    "de": null,
+    "a": null,
+    "code": null,
+    "date_reference": null,
+    "intitule": null
+  },
+  "date_creation": 1609455600,
+  "unite_legale": {
+    "siren": "783705841",
+    "siret_siege_social": "78370584100022",
+    "personne_morale_attributs": {
+      "raison_sociale": "SKEMA  BUSINESS SCHOOL",
+      "sigle": "SKEMA"
+    }
+  },
+  "enseigne": "SKEMA",
+  "adresse": {
+    "complement_adresse": null,
+    "numero_voie": "5",
+    "indice_repetition_voie": null,
+    "type_voie": "QUAI",
+    "libelle_voie": "MARCEL DASSAULT",
+    "code_postal": "92150",
+    "libelle_commune": "SURESNES",
+    "libelle_commune_etranger": null,
+    "distribution_speciale": null,
+    "code_commune": "92073",
+    "code_cedex": null,
+    "libelle_cedex": null,
+    "code_pays_etranger": null,
+    "libelle_pays_etranger": null,
+    "acheminement_postal": {
+      "l1": "SKEMA BUSINESS SCHOOL",
+      "l2": "",
+      "l3": "",
+      "l4": "5 QUAI MARCEL DASSAULT",
+      "l5": "",
+      "l6": "92150 SURESNES",
+      "l7": "FRANCE"
+    }
+  },
+  "etat_administratif": "A"
+}

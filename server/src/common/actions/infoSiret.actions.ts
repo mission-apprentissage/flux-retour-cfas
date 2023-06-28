@@ -68,7 +68,8 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
       siret: etablissementApiInfo.siret,
       naf_code: etablissementApiInfo.activite_principale.code,
       enseigne: etablissementApiInfo.enseigne?.trim(),
-      adresse: buildAdresse(etablissementApiInfo.adresse),
+      raison_sociale: etablissementApiInfo.unite_legale?.personne_morale_attributs?.raison_sociale,
+      adresse: buildAdresse(etablissementApiInfo.adresse?.acheminement_postal),
       numero_voie: etablissementApiInfo.adresse.numero_voie
         ? parseInt(etablissementApiInfo.adresse.numero_voie, 10)
         : undefined,

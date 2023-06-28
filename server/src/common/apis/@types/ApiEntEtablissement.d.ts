@@ -5,6 +5,11 @@ type ApiEntEtablissement = {
   activite_principale: {
     code: string;
   };
+  unite_legale: {
+    personne_morale_attributs: {
+      raison_sociale: string;
+    };
+  };
   tranche_effectif_salarie_etablissement: {
     de: number;
   };

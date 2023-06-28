@@ -1,4 +1,4 @@
-import { nockGetEntreprise, nockGetEtablissement } from "./nock-apiEntreprise";
+import { nockGetEtablissement } from "./nock-apiEntreprise";
 import { nockGetMetiersBySiret } from "./nock-Lba";
 import { nockGetCfdInfo, nockGetCodePostalInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
 
@@ -14,9 +14,8 @@ export const nockExternalApis = () => {
   nockGetMetiersBySiret();
 
   // nock API entreprise
-  // aka https://entreprise.api.gouv.fr/v2
+  // aka https://entreprise.api.gouv.fr
   nockGetEtablissement();
-  nockGetEntreprise();
 
   // nok API catalogue
   // aka https://catalogue.apprentissage.beta.gouv.fr/api

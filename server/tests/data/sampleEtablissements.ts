@@ -30,8 +30,7 @@ export default {
       code_postal: "61600",
       commune: "LA FERTE MACE",
       complete:
-        "CENTR FORMATION TECHNICIENS AGRICOLES\r\n" +
-        "CFTA CENTR FORMAT TECHNICIENS AGRICOLES\r\n" +
+        "CENTR FORMATION TECHNICIENS AGRICOLES CFTA CENTR FORMAT TECHNICIENS AGRICOLES\r\n" +
         "25 RUE PIERRE NEVEU\r\n" +
         "61600 LA FERTE MACE\r\n" +
         "FRANCE",

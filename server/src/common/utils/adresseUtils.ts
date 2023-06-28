@@ -14,7 +14,7 @@ export const buildAdresseFromApiEntreprise = async (siret) => {
   if (!etablissementApiInfo) return defaultValuesAdresse();
 
   // Handle departement
-  let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_insee_localite);
+  let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_commune);
 
   // Handle academie
   const { nom_academie } = findDataByDepartementNum(code_dept);
@@ -27,24 +27,20 @@ export const buildAdresseFromApiEntreprise = async (siret) => {
       ...(parseInt(etablissementApiInfo.adresse.numero_voie)
         ? { numero: parseInt(etablissementApiInfo.adresse.numero_voie) }
         : {}),
-      ...(etablissementApiInfo.adresse.nom_voie ? { voie: etablissementApiInfo.adresse.nom_voie } : {}),
+      ...(etablissementApiInfo.adresse.libelle_voie ? { voie: etablissementApiInfo.adresse.libelle_voie } : {}),
       ...(etablissementApiInfo.adresse.complement_adresse
         ? { complement: etablissementApiInfo.adresse.complement_adresse }
         : {}),
       ...(etablissementApiInfo.adresse.code_postal ? { code_postal: etablissementApiInfo.adresse.code_postal } : {}),
-      ...(etablissementApiInfo.adresse.code_insee_localite
-        ? { code_insee: etablissementApiInfo.adresse.code_insee_localite }
-        : {}),
-      ...(etablissementApiInfo.commune_implantation.value
-        ? { commune: etablissementApiInfo.commune_implantation.value }
+      ...(etablissementApiInfo.adresse.code_commune ? { code_insee: etablissementApiInfo.adresse.code_commune } : {}),
+      ...(etablissementApiInfo.adresse.libelle_commune
+        ? { commune: etablissementApiInfo.adresse.libelle_commune }
         : {}),
       ...(code_dept ? { departement: code_dept } : {}),
-      ...(etablissementApiInfo.region_implantation.value
-        ? { region: etablissementApiInfo.region_implantation.code }
-        : {}),
       ...(academie ? { academie: academie } : {}),
-      ...(buildAdresse(etablissementApiInfo.adresse) ? { complete: buildAdresse(etablissementApiInfo.adresse) } : {}),
-      ...(etablissementApiInfo.pays_implantation.code ? { pays: etablissementApiInfo.pays_implantation.code } : {}),
+      ...(buildAdresse(etablissementApiInfo.adresse)
+        ? { complete: buildAdresse(etablissementApiInfo.adresse.acheminement_postal) }
+        : {}),
     },
   };
 };
