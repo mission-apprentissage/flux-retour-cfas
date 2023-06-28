@@ -19,16 +19,17 @@ export const employerSiretLogic = [
     deps: ["contrats[0].siret"],
     process: async ({ values, signal, organisme }: { values?: any; signal?: any; organisme?: any }) => {
       const siret = values.contrats[0].siret;
-      const { messages, result } = await apiService.fetchSiret({
+      const { messages, result, error } = await apiService.fetchSiret({
         siret,
         organisme_id: organisme._id,
         signal,
       });
 
-      const resultLength = Object.keys(result).length;
-      if (resultLength === 0) return { error: messages.error };
+      if (error) return { error };
 
-      if (result.api_entreprise === "KO") {
+      if (!result || Object.keys(result).length === 0) return { error: messages?.api_entreprise_info };
+
+      if (messages?.api_entreprise_status === "KO") {
         return {
           warning:
             "Le service de récupération des informations Siret est momentanément indisponible. Nous ne pouvons pas pre-remplir le formulaire.",
@@ -36,11 +37,11 @@ export const employerSiretLogic = [
         };
       }
 
-      if (result.ferme) {
+      if (result?.ferme) {
         return { error: `Le Siret ${siret} est un établissement fermé.` };
       }
 
-      if (result.secretSiret) {
+      if (result?.secretSiret) {
         return {
           warning:
             "Votre siret est valide. En revanche, en raison de sa nature, nous ne pouvons pas récupérer les informations reliées.",
@@ -51,20 +52,20 @@ export const employerSiretLogic = [
       return {
         cascade: {
           "contrats[0].denomination": {
-            value: result.enseigne || result.entreprise_raison_sociale,
+            value: result?.enseigne || result?.raison_sociale,
             locked: false,
           },
           "contrats[0].naf": {
-            value: result.naf_code,
+            value: result?.naf_code,
             locked: false,
             cascade: false,
           },
           "contrats[0].nombre_de_salaries": {
-            value: result.entreprise_tranche_effectif_salarie?.de || undefined,
+            value: result?.tranche_effectif_salarie_etablissement?.de || undefined,
             locked: false,
           },
           "contrats[0].adresse.numero": {
-            value: result.numero_voie || undefined,
+            value: result?.numero_voie || undefined,
             locked: false,
           },
           "contrats[0].adresse.repetition_voie": {
@@ -73,30 +74,30 @@ export const employerSiretLogic = [
           },
           "contrats[0].adresse.voie": {
             value:
-              result.type_voie || result.nom_voie
+              result?.type_voie || result?.nom_voie
                 ? `${result.type_voie ? `${result.type_voie} ` : undefined}${result.nom_voie}`
                 : undefined,
             locked: false,
           },
           "contrats[0].adresse.complement": {
-            value: result.complement_adresse || undefined,
+            value: result?.complement_adresse || undefined,
             locked: false,
           },
           "contrats[0].adresse.code_postal": {
-            value: result.code_postal || undefined,
+            value: result?.code_postal || undefined,
             locked: false,
             cascade: false,
           },
           "contrats[0].adresse.commune": {
-            value: result.commune_implantation_nom || undefined,
+            value: result?.commune_implantation_nom || undefined,
             locked: false,
           },
           "contrats[0].adresse.departement": {
-            value: result.num_departement || undefined,
+            value: result?.num_departement || undefined,
             locked: false,
           },
           "contrats[0].adresse.region": {
-            value: result.num_region || undefined,
+            value: result?.num_region || undefined,
             locked: true,
           },
         },

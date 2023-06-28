@@ -24,6 +24,8 @@ import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/u
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
+import { InfoSiret } from "../infoSiret.actions-struct";
+
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
 
 const SEARCH_RESULTS_LIMIT = 50;
@@ -76,9 +78,9 @@ export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial
   let organismeInfos: Partial<Organisme> = {};
 
   if (siret) {
-    const dataSiret = await findDataFromSiret(siret, false);
+    const dataSiret: InfoSiret = await findDataFromSiret(siret, false);
 
-    if (dataSiret.messages.api_entreprise === "Ok") {
+    if (dataSiret.messages.api_entreprise_status === "OK") {
       organismeInfos.ferme = !!dataSiret.result.ferme;
 
       if (dataSiret.result.enseigne) {
@@ -86,8 +88,7 @@ export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial
         organismeInfos.nom = dataSiret.result.enseigne;
       }
 
-      if (dataSiret.result.entreprise_raison_sociale)
-        organismeInfos.raison_sociale = dataSiret.result.entreprise_raison_sociale;
+      if (dataSiret.result.raison_sociale) organismeInfos.raison_sociale = dataSiret.result.raison_sociale;
 
       organismeInfos.adresse = {
         ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
@@ -96,13 +97,13 @@ export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial
         ...(dataSiret.result.code_postal ? { code_postal: dataSiret.result.code_postal } : {}),
         ...(dataSiret.result.code_insee_localite ? { code_insee: dataSiret.result.code_insee_localite } : {}),
         ...(dataSiret.result.localite ? { commune: dataSiret.result.localite } : {}),
-        ...(dataSiret.result.num_departement ? { departement: dataSiret.result.num_departement } : {}),
-        ...(dataSiret.result.num_region ? { region: dataSiret.result.num_region } : {}),
-        ...(dataSiret.result.num_academie ? { academie: dataSiret.result.num_academie } : {}),
+        ...(dataSiret.result.num_departement ? { departement: dataSiret.result.num_departement as any } : {}),
+        ...(dataSiret.result.num_region ? { region: dataSiret.result.num_region as any } : {}),
+        ...(dataSiret.result.num_academie ? { academie: dataSiret.result.num_academie as any } : {}),
         ...(dataSiret.result.adresse ? { complete: dataSiret.result.adresse } : {}),
       };
     } else {
-      logger.error(`getOrganismeInfosFromSiret > Erreur sur le siret ${siret} via API Entreprise / API Cfa Dock`);
+      logger.error(`getOrganismeInfosFromSiret > Erreur > ${dataSiret.messages.api_entreprise_info}`);
     }
   }
 
@@ -714,8 +715,8 @@ export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: strin
  * Sert pour afficher sur l'UI à l'inscription
  */
 async function fetchFromAPIEntreprise(siret: string): Promise<any> {
-  const result = await findDataFromSiret(siret);
-  if (result.messages.api_entreprise !== "Ok") {
+  const result: InfoSiret = await findDataFromSiret(siret);
+  if (result.messages.api_entreprise_status !== "OK") {
     logger.warn({ module: "inscription", siret }, "aucun organisme trouvé sur api entreprise");
     throw Boom.badRequest("Aucun organisme trouvé");
   }
@@ -723,7 +724,7 @@ async function fetchFromAPIEntreprise(siret: string): Promise<any> {
     uai: null,
     siret: result.result.siret,
     ferme: result.result.ferme,
-    raison_sociale: result.result.entreprise_raison_sociale,
+    raison_sociale: result.result.raison_sociale,
     adresse: {
       complete: result.result.adresse,
     },
