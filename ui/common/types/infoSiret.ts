@@ -10,6 +10,7 @@ export type InfoSiret = {
       personne_morale_attributs: {
         raison_sociale: string;
       };
+    };
     numero_voie?: number;
     nom_voie?: string;
     commune_implantation_nom?: string;
