@@ -37,7 +37,7 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
           secretSiret: true,
         },
         messages: {
-          api_entreprise_info: `Le Siret ${siret} existe`,
+          api_entreprise_info: `Le Siret ${siret} existe mais est indisponible pour raisons légales`,
         },
       };
     } else if (/^5[0-9]{2}/.test(`${e.reason}`)) {
