@@ -8,6 +8,7 @@ export const SIRET_REGEX_PATTERN = "^[0-9]{14}$";
 export const CODE_NAF_REGEX_PATTERN = "^[0-9]{4}[A-Z]$";
 export const UAI_REGEX_PATTERN = "^[0-9]{7}[a-zA-Z]$";
 export const YEAR_RANGE_PATTERN = "^[12][0-9]{3}-[12][0-9]{3}$";
+export const NIR_REGEX_PATTERN = "^[0-9]{13}$";
 
 // Numero INE (Identifiant National Elève)
 // Le numero INE composé de 11 caractères,
@@ -28,6 +29,7 @@ export const SIRET_REGEX = new RegExp(SIRET_REGEX_PATTERN);
 export const CODE_NAF_REGEX = new RegExp(CODE_NAF_REGEX_PATTERN);
 export const UAI_REGEX = new RegExp(UAI_REGEX_PATTERN);
 export const YEAR_RANGE_REGEX = new RegExp(YEAR_RANGE_PATTERN);
+export const NIR_REGEX = new RegExp(NIR_REGEX_PATTERN);
 
 export const isValidCFD = (cfd) => typeof cfd === "string" && CFD_REGEX.test(cfd);
 export const isValidINE = (ine) => typeof ine === "string" && INE_REGEX.test(ine);

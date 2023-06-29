@@ -108,10 +108,9 @@ program
   .description("Process la queue des effectifs")
   .option("--id <string>", "ID de l'effectifQueue à traiter")
   .option("-f, --force", "Force le re-traitement des effectifs déjà traités")
-  .option("--v3", "Process la queue effectifsV3Queue")
   .action(
-    runJob(async ({ id, force, v3 }) => {
-      await processEffectifsQueueEndlessly({ id, force, v3 });
+    runJob(async ({ id, force }) => {
+      await processEffectifsQueueEndlessly({ id, force });
     })
   );
 

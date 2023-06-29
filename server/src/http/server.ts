@@ -78,7 +78,7 @@ import { packageJson } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
-import { SReqPostDossiers, SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
+import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
@@ -324,18 +324,12 @@ function setupRoutes(app: Application) {
     ["/api/v3/dossiers-apprenants"],
     requireBearerAuthentication(),
     async (req, res, next) => {
-      // POST /api/v3/dossiers-apprenants?siret=XXXXX&uai=YYYYY&erp=ZZZZ
-      const queryPayload = await validateFullZodObjectSchema(req.query, SReqPostDossiers);
-
       const organisme = (await getOrganismeByAPIKey(res.locals.token)) as WithId<Organisme>;
       if (!organisme) {
-        throw new Error("Non autoriser");
+        throw new Error("Unauthorized");
       }
 
-      // @ts-ignore LEGACY Passport
-      req.user = {
-        source: queryPayload.erp,
-      };
+      (req.user as any) = { source: "v3" };
       next();
     },
     dossierApprenantRouter()

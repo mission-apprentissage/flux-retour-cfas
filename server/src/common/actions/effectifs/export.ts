@@ -98,20 +98,6 @@ export const exportedFields: FieldExport[] = [
   },
 ];
 
-// TODO Voir sous quelle forme sortir la listes contrats en V3 (versus un seul contrat dans la V2)
-// {
-//   label: "Date de début du contrat en apprentissage",
-//   value: "apprenants.contrats.date_debut",
-// },
-// {
-//   label: "Date de fin du contrat en apprentissage",
-//   value: "apprenants.contrats.date_fin",
-// },
-// {
-//   label: "Date de rupture de contrat",
-//   value: "apprenants.contrats.date_rupture",
-// },
-
 /**
  * Contains the MongoDB projection with all exported fields
  * "apprenant.nom": 1,

@@ -17,13 +17,11 @@ import {
   mapEffectifQueueToOrganisme,
   completeEffectifAddress,
   checkIfEffectifExists,
-  mapEffectifQueueV3ToEffectif,
-  mapEffectifV3QueueToOrganisme,
 } from "@/common/actions/engine/engine.actions";
 import { setOrganismeTransmissionDates } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
-import { effectifsQueueDb, effectifsV3QueueDb } from "@/common/model/collections";
+import { effectifsQueueDb } from "@/common/model/collections";
 import { formatError } from "@/common/utils/errorUtils";
 import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
@@ -48,28 +46,20 @@ export const processEffectifsQueueEndlessly = async (options: Options) => {
 };
 
 export const processEffectifsQueue = async (options?: Options) => {
-  const { id, force, v3: isV3 } = options || { id: undefined, force: false, v3: false };
+  const { id, force } = options || { id: undefined, force: false };
 
   const filter: Record<string, any> = force ? {} : { processed_at: { $exists: false } };
   if (id) {
     filter._id = id;
   }
 
-  const result = await (isV3
-    ? processItems(
-        filter,
-        effectifsV3QueueDb(),
-        dossierApprenantSchemaV3(),
-        mapEffectifQueueV3ToEffectif,
-        mapEffectifV3QueueToOrganisme
-      )
-    : processItems(
-        filter,
-        effectifsQueueDb(),
-        dossierApprenantSchemaV1V2(),
-        mapEffectifQueueToEffectif,
-        mapEffectifQueueToOrganisme
-      ));
+  const result = await processItems(
+    filter,
+    effectifsQueueDb(),
+    dossierApprenantSchemaV1V2(),
+    mapEffectifQueueToEffectif,
+    mapEffectifQueueToOrganisme
+  );
   return result;
 };
 
@@ -81,23 +71,9 @@ type ProcessItemsResult = {
 async function processItems(
   filter: any,
   collection: ReturnType<typeof effectifsQueueDb>,
-  validationSchema: ReturnType<typeof dossierApprenantSchemaV1V2>,
+  validationSchema: ReturnType<typeof dossierApprenantSchemaV1V2> | ReturnType<typeof dossierApprenantSchemaV3>,
   mapItemToEffectif: typeof mapEffectifQueueToEffectif,
   mapItemToOrganisme: typeof mapEffectifQueueToOrganisme
-): Promise<ProcessItemsResult>;
-async function processItems(
-  filter: any,
-  collection: ReturnType<typeof effectifsV3QueueDb>,
-  validationSchema: ReturnType<typeof dossierApprenantSchemaV3>,
-  mapItemToEffectif: typeof mapEffectifQueueV3ToEffectif,
-  mapItemToOrganisme: typeof mapEffectifV3QueueToOrganisme
-): Promise<ProcessItemsResult>;
-async function processItems(
-  filter: any,
-  collection: ReturnType<typeof effectifsV3QueueDb> | ReturnType<typeof effectifsQueueDb>,
-  validationSchema: ReturnType<typeof dossierApprenantSchemaV3> | ReturnType<typeof dossierApprenantSchemaV1V2>,
-  mapItemToEffectif: typeof mapEffectifQueueToEffectif | typeof mapEffectifQueueV3ToEffectif,
-  mapItemToOrganisme: typeof mapEffectifQueueToOrganisme | typeof mapEffectifV3QueueToOrganisme
 ): Promise<ProcessItemsResult> {
   const total = await collection.countDocuments(filter);
   let totalValidItems = 0;
