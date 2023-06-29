@@ -235,32 +235,30 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) =
  * @returns
  */
 export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
-  const data: Partial<Organisme> = {};
+  let updatedData: Partial<Organisme> = {};
 
   // Récupération des métiers depuis l'API LBA
-  data.metiers = await getMetiersFromLba(organisme.siret);
+  const metiers = await getMetiersFromLba(organisme.siret);
 
-  // Construction de l'arbre des formations de l'organisme si option active
-  data.relatedFormations = (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [];
+  // Construction de l'arbre des formations de l'organisme
+  const relatedFormations = (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [];
 
   // Récupération des informations via API Entreprise
   const organismeInfosFromSiret = await getOrganismeInfosFromSiret(organisme.siret);
-  if (organismeInfosFromSiret) {
-    data.raison_sociale = organismeInfosFromSiret.raison_sociale;
-    data.enseigne = organismeInfosFromSiret.enseigne;
-    data.nom = organismeInfosFromSiret.nom;
-    data.ferme = organismeInfosFromSiret.ferme;
-    data.adresse = organismeInfosFromSiret.adresse;
-  }
+
+  updatedData = {
+    metiers,
+    relatedFormations,
+    ...(organismeInfosFromSiret?.raison_sociale ? { raison_sociale: organismeInfosFromSiret.raison_sociale } : {}),
+    ...(organismeInfosFromSiret?.enseigne ? { enseigne: organismeInfosFromSiret.enseigne } : {}),
+    ...(organismeInfosFromSiret?.nom ? { nom: organismeInfosFromSiret.nom } : {}),
+    ...(organismeInfosFromSiret?.ferme ? { ferme: organismeInfosFromSiret.ferme } : {}),
+    ...(organismeInfosFromSiret?.adresse ? { adresse: organismeInfosFromSiret.adresse } : {}),
+  };
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
-    {
-      $set: {
-        ...data,
-        updated_at: new Date(),
-      },
-    },
+    { $set: { ...updatedData, updated_at: new Date() } },
     { returnDocument: "after" }
   );
 
