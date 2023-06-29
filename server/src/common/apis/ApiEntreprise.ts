@@ -40,13 +40,13 @@ export const getEtablissement = async (siret: string): Promise<ApiEntEtablisseme
 
     try {
       let response = await client.get(`insee/sirene/etablissements/${siret}`, {
-        params: { ...apiParams },
+        params: apiParams,
       });
       logger.debug(`[Entreprise API] Fetched etablissement ${siret} ${response.cached ? "(from cache)" : ""}`);
-      if (!response?.data) {
+      if (!response?.data?.data) {
         throw new ApiError("Api Entreprise", "No etablissement data received");
       }
-      return response.data;
+      return response.data.data;
     } catch (e: any) {
       throw new ApiError("Api Entreprise getEtablissement", e.message, e.code || e.response?.status);
     }

@@ -307,7 +307,7 @@ program
  */
 program
   .command("hydrate:organismes")
-  .description("Remplissage des organismes via le référentiel")
+  .description("Remplissage des organismes du tableau de bord en utilisant le référentiel")
   .action(
     runJob(async () => {
       return hydrateOrganismesFromReferentiel();

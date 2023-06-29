@@ -229,19 +229,29 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) =
   return updated.value as WithId<Organisme>;
 };
 
+/**
+ * Fonction de MAJ d'un organisme en appelant les API externes
+ * @param organisme
+ * @returns
+ */
 export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
   const data: Partial<Organisme> = {};
 
+  // Récupération des métiers depuis l'API LBA
   data.metiers = await getMetiersFromLba(organisme.siret);
 
   // Construction de l'arbre des formations de l'organisme si option active
   data.relatedFormations = (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [];
+
+  // Récupération des informations via API Entreprise
+  const organismeInfosFromSiret = await getOrganismeInfosFromSiret(organisme.siret);
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
       $set: {
         ...data,
+        ...organismeInfosFromSiret,
         updated_at: new Date(),
       },
     },
