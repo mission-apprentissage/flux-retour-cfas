@@ -3,7 +3,6 @@ import { ObjectId } from "mongodb";
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { effectifsQueueDb, effectifsDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/fiabilisation/dossiersApprenants/process-effectifs-queue";
-import { sample41461021200014 } from "@tests/data/entreprise.api.gouv.fr/sampleDataApiEntreprise";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
 
 const uai = "0802004U";
@@ -164,11 +163,25 @@ describe("Processing de EffectifsQueue", () => {
 
   it("Vérifie qu'on ne crée pas de donnée et renvoie une erreur lorsque les données UAI / SIRET sont invalides", async () => {
     const { insertedId } = await effectifsQueueDb().insertOne({
-      ...createRandomDossierApprenantApiInput({
-        uai_etablissement: uai,
-        siret_etablissement: sample41461021200014.etablissement.siret,
-      }),
-
+      ine_apprenant: "402957826QH",
+      nom_apprenant: "FLEURY",
+      prenom_apprenant: "Fortuné",
+      date_de_naissance_apprenant: "1999-08-31T16:21:32",
+      email_contact: "Clandre34@hotmail.fr",
+      id_formation: "50033610",
+      libelle_long_formation: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
+      uai_etablissement: uai,
+      siret_etablissement: "41461021200014",
+      nom_etablissement: "ETABLISSEMENT EMPOWER",
+      statut_apprenant: 3,
+      date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
+      annee_formation: 0,
+      periode_formation: "2022-2024",
+      annee_scolaire: "2024-2025",
+      id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
+      tel_apprenant: "+33 534648662",
+      code_commune_insee_apprenant: "05109",
+      source: "apiUser",
       created_at: new Date(),
     });
 

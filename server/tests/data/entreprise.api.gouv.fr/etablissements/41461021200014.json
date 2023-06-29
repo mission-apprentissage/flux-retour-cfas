@@ -1,52 +1,54 @@
 {
-  "siege_social": true,
-  "siret": "41461021200014",
-  "activite_principale": {
-    "code": "85.31Z",
-    "nomenclature": "NAFRev2",
-    "libelle": "Enseignement secondaire général"
-  },
-  "tranche_effectif_salarie_etablissement": {
-    "de": 20,
-    "a": 49,
-    "code": "12",
-    "date_reference": "2020",
-    "intitule": "20 à 49 salariés"
-  },
-  "date_creation": 567990000,
-  "unite_legale": {
-    "siren": "414610212",
-    "siret_siege_social": "41461021200014",
-    "personne_morale_attributs": {
-      "raison_sociale": "CENTR FORMATION TECHNICIENS AGRICOLES",
-      "sigle": null
-    }
-  },
-  "enseigne": "ETABLISSEMENT TEST",
-  "adresse": {
-    "complement_adresse": null,
-    "numero_voie": "25",
-    "indice_repetition_voie": null,
-    "type_voie": "RUE",
-    "libelle_voie": "PIERRE NEVEU",
-    "code_postal": "61600",
-    "libelle_commune": "LA FERTE MACE",
-    "libelle_commune_etranger": null,
-    "distribution_speciale": null,
-    "code_commune": "61168",
-    "code_cedex": null,
-    "libelle_cedex": null,
-    "code_pays_etranger": null,
-    "libelle_pays_etranger": null,
-    "acheminement_postal": {
-      "l1": "CENTR FORMATION TECHNICIENS AGRICOLES CFTA CENTR FORMAT TECHNICIENS AGRICOLES",
-      "l2": "",
-      "l3": "",
-      "l4": "25 RUE PIERRE NEVEU",
-      "l5": "",
-      "l6": "61600 LA FERTE MACE",
-      "l7": "FRANCE"
-    }
-  },
-  "etat_administratif": "A"
+  "data": {
+    "siege_social": true,
+    "siret": "41461021200014",
+    "activite_principale": {
+      "code": "85.31Z",
+      "nomenclature": "NAFRev2",
+      "libelle": "Enseignement secondaire général"
+    },
+    "tranche_effectif_salarie_etablissement": {
+      "de": 20,
+      "a": 49,
+      "code": "12",
+      "date_reference": "2020",
+      "intitule": "20 à 49 salariés"
+    },
+    "date_creation": 567990000,
+    "unite_legale": {
+      "siren": "414610212",
+      "siret_siege_social": "41461021200014",
+      "personne_morale_attributs": {
+        "raison_sociale": "CENTR FORMATION TECHNICIENS AGRICOLES",
+        "sigle": null
+      }
+    },
+    "enseigne": "ETABLISSEMENT TEST",
+    "adresse": {
+      "complement_adresse": null,
+      "numero_voie": "25",
+      "indice_repetition_voie": null,
+      "type_voie": "RUE",
+      "libelle_voie": "PIERRE NEVEU",
+      "code_postal": "61600",
+      "libelle_commune": "LA FERTE MACE",
+      "libelle_commune_etranger": null,
+      "distribution_speciale": null,
+      "code_commune": "61168",
+      "code_cedex": null,
+      "libelle_cedex": null,
+      "code_pays_etranger": null,
+      "libelle_pays_etranger": null,
+      "acheminement_postal": {
+        "l1": "CENTR FORMATION TECHNICIENS AGRICOLES CFTA CENTR FORMAT TECHNICIENS AGRICOLES",
+        "l2": "",
+        "l3": "",
+        "l4": "25 RUE PIERRE NEVEU",
+        "l5": "",
+        "l6": "61600 LA FERTE MACE",
+        "l7": "FRANCE"
+      }
+    },
+    "etat_administratif": "A"
+  }
 }

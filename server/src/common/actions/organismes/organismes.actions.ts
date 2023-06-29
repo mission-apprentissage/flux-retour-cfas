@@ -245,13 +245,19 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
 
   // Récupération des informations via API Entreprise
   const organismeInfosFromSiret = await getOrganismeInfosFromSiret(organisme.siret);
+  if (organismeInfosFromSiret) {
+    data.raison_sociale = organismeInfosFromSiret.raison_sociale;
+    data.enseigne = organismeInfosFromSiret.enseigne;
+    data.nom = organismeInfosFromSiret.nom;
+    data.ferme = organismeInfosFromSiret.ferme;
+    data.adresse = organismeInfosFromSiret.adresse;
+  }
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
       $set: {
         ...data,
-        ...organismeInfosFromSiret,
         updated_at: new Date(),
       },
     },
