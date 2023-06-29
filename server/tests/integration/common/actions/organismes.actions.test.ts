@@ -80,8 +80,7 @@ const fieldsAddedByApiCalls = {
     region: "28",
     academie: "70",
     complete:
-      "CENTR FORMATION TECHNICIENS AGRICOLES\r\n" +
-      "CFTA CENTR FORMAT TECHNICIENS AGRICOLES\r\n" +
+      "CENTR FORMATION TECHNICIENS AGRICOLES CFTA CENTR FORMAT TECHNICIENS AGRICOLES\r\n" +
       "25 RUE PIERRE NEVEU\r\n" +
       "61600 LA FERTE MACE\r\n" +
       "FRANCE",

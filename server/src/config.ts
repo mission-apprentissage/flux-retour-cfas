@@ -80,12 +80,12 @@ const config = {
   mnaReferentielApi: {
     endpoint: "https://referentiel.apprentissage.onisep.fr/api/v1",
   },
-  cfadockApi: {
-    endpoint: "https://www.cfadock.fr/api",
-  },
   apiEntreprise: {
-    endpoint: "https://entreprise.api.gouv.fr/v2",
+    endpoint: "https://entreprise.api.gouv.fr/v3",
     key: env.get("FLUX_RETOUR_CFAS_API_ENTREPRISE_KEY").asString(),
+    defaultRecipient: "13002526500013", // Siret DINUM
+    object: "Consolidation des données",
+    context: "MNA",
   },
 };
 

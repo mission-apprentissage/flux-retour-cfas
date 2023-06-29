@@ -1,4 +1,5 @@
 import { _post, _put } from "@/common/httpClient";
+import { InfoSiret } from "@/common/types/infoSiret";
 
 // eslint-disable-next-line no-unused-vars
 const saveCerfa = async ({ organisme_id, effectifId, data, inputNames }) => {
@@ -13,7 +14,7 @@ const saveCerfa = async ({ organisme_id, effectifId, data, inputNames }) => {
   }
 };
 
-const fetchSiret = async ({ siret, organisme_id, organismeFormation = false, signal }) => {
+const fetchSiret = async ({ siret, organisme_id, organismeFormation = false, signal }): Promise<InfoSiret> => {
   try {
     return await _post("/api/v1/effectif/recherche-siret", { siret, organisme_id, organismeFormation }, { signal });
   } catch (e) {

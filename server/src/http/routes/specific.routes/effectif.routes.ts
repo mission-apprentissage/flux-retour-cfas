@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 
 import { updateEffectif } from "@/common/actions/effectifs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
+import { InfoSiret } from "@/common/actions/infoSiret.actions-struct";
 import { getUploadByOrgId } from "@/common/actions/uploads.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
@@ -266,7 +267,7 @@ export default () => {
       .unknown()
       .validateAsync(body, { abortEarly: false });
 
-    const data = await findDataFromSiret(siret);
+    const data: InfoSiret = await findDataFromSiret(siret);
 
     return res.json(data);
   });

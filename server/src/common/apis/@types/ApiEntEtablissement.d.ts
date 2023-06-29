@@ -1,51 +1,36 @@
 type ApiEntEtablissement = {
-  siege_social: boolean;
   siret: string;
-  naf: string;
-  libelle_naf: string;
-  date_mise_a_jour: number;
+  etat_administratif: string;
+  enseigne: any;
+  activite_principale: {
+    code: string;
+  };
+  unite_legale: {
+    personne_morale_attributs: {
+      raison_sociale: string;
+    };
+  };
   tranche_effectif_salarie_etablissement: {
     de: number;
-    a: number;
-    code: string;
-    date_reference: string;
-    intitule: string;
   };
-  date_creation_etablissement: number;
-  region_implantation: {
-    code: string;
-    value: string;
-  };
-  commune_implantation: {
-    code: string;
-    value: string;
-  };
-  pays_implantation: {
-    code: string;
-    value: string;
-  };
-  diffusable_commercialement: boolean;
-  enseigne: any;
   adresse: {
-    l1: string;
-    l2: any;
-    l3: any;
-    l4: string;
-    l5: any;
-    l6: string;
-    l7: string;
+    complement_adresse: any;
     numero_voie: string;
     type_voie: string;
-    nom_voie: string;
-    complement_adresse: any;
+    libelle_voie: string;
     code_postal: string;
-    localite: string;
-    code_insee_localite: string;
-    cedex: any;
-  };
-  etat_administratif: {
-    value: string;
-    date_fermeture: any;
+    libelle_commune: string;
+    code_commune: string;
+    code_cedex: any;
+    acheminement_postal: {
+      l1: string;
+      l2: any;
+      l3: any;
+      l4: string;
+      l5: any;
+      l6: string;
+      l7: string;
+    };
   };
 };
 
