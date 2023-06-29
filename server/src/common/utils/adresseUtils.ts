@@ -4,13 +4,15 @@ import * as apiEntreprise from "@/common/apis/ApiEntreprise";
 import { ACADEMIES, DEPARTEMENTS } from "@/common/constants/territoires";
 import { defaultValuesAdresse } from "@/common/model/json-schema/adresseSchema";
 
+import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement";
+
 export const getDepartementCodeFromCodeInsee = (codeInsee) => {
   let code_dept = codeInsee.substring(0, 2);
   return ["97", "98"].includes(code_dept) ? codeInsee.substring(0, 3) : code_dept;
 };
 
 export const buildAdresseFromApiEntreprise = async (siret) => {
-  const etablissementApiInfo = await apiEntreprise.getEtablissement(siret);
+  const etablissementApiInfo: ApiEntEtablissement = await apiEntreprise.getEtablissement(siret);
   if (!etablissementApiInfo) return defaultValuesAdresse();
 
   // Handle departement
