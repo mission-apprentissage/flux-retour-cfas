@@ -243,17 +243,12 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
   // Construction de l'arbre des formations de l'organisme
   const relatedFormations = (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [];
 
-  // Récupération des informations via API Entreprise
-  const organismeInfosFromSiret = await getOrganismeInfosFromSiret(organisme.siret);
+  // Eventuellement on pourrait récupérer des informations via API Entreprise
+  // const organismeInfosFromSiret = await getOrganismeInfosFromSiret(organisme.siret);
 
   updatedData = {
     metiers,
     relatedFormations,
-    ...(organismeInfosFromSiret?.raison_sociale ? { raison_sociale: organismeInfosFromSiret.raison_sociale } : {}),
-    ...(organismeInfosFromSiret?.enseigne ? { enseigne: organismeInfosFromSiret.enseigne } : {}),
-    ...(organismeInfosFromSiret?.nom ? { nom: organismeInfosFromSiret.nom } : {}),
-    ...(organismeInfosFromSiret?.ferme ? { ferme: organismeInfosFromSiret.ferme } : {}),
-    ...(organismeInfosFromSiret?.adresse ? { adresse: organismeInfosFromSiret.adresse } : {}),
   };
 
   const updated = await organismesDb().findOneAndUpdate(
