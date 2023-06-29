@@ -11,6 +11,7 @@ import {
   SIRET_REGEX,
   UAI_REGEX,
   YEAR_RANGE_REGEX,
+  NIR_REGEX,
 } from "@/common/constants/validations";
 
 import { telephoneConverter } from "./frenchTelephoneNumber";
@@ -226,7 +227,12 @@ export const primitivesV1 = {
 
 export const primitivesV3 = {
   apprenant: {
-    nir: z.string().trim().toUpperCase().describe("NIR de l'apprenant"),
+    nir: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(NIR_REGEX, "NIR invalide (13 chiffres attendus)")
+      .describe("NIR de l'apprenant"),
     adresse: z.string().trim().describe("Adresse de l'apprenant"),
     code_postal: z.string().trim().describe("Code postal de l'apprenant"),
     sexe: z.string().trim().describe("Sexe de l'apprenant").openapi({
