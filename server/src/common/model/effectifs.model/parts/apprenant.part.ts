@@ -178,6 +178,16 @@ export const apprenantSchema = object(
         description: "Nomenclatures des professions et catégories socioprofessionnelles",
       }),
     }),
+    // V3 fields
+    nir: string({
+      description: "Numéro de sécurité sociale de l'apprenant",
+    }),
+    responsable_mail1: string({
+      description: "Adresse mail du responsable 1",
+    }),
+    responsable_mail2: string({
+      description: "Adresse mail du responsable 2",
+    }),
   },
   {
     required: ["nom", "prenom", "historique_statut"],

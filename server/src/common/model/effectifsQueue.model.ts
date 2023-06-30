@@ -38,6 +38,7 @@ export const internalFields = {
   created_at: date({ description: "Date d'ajout en base de données" }),
   processed_at: date({ description: "Date de process des données" }),
   error: any({ description: "Erreur rencontrée lors de la création de l'effectif" }),
+  api_version: string({ description: "Version de l'api utilisée (v2 ou v3)" }),
   validation_errors: arrayOf(
     object(
       {
@@ -122,11 +123,8 @@ export const schema = object(
     siret_employeur: any({ description: organismeProps.siret.description }),
     siret_employeur_2: any({ description: organismeProps.siret.description }),
     siret_employeur_3: any({ description: organismeProps.siret.description }),
-    code_commune_insee_employeur: any({ description: organismeProps.adresse.properties.code_insee.description }),
-    code_naf_employeur: any({ description: "Code NAF de l'employeur" }),
+    siret_employeur_4: any({ description: organismeProps.siret.description }),
     formation_presentielle: any({ description: "Formation 100% à distance ou non" }),
-    obtention_diplome_annee_n: any({ description: "Le diplôme a été ou non obtenu à l'issue de la formation" }),
-    date_obtention_diplome_annee_n: any({ description: "Date d'obtention du diplôme" }),
 
     // REQUIRED FIELDS
     date_inscription_formation: any({ description: formationProps.date_debut_formation.description }),

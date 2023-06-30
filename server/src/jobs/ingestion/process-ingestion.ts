@@ -28,6 +28,7 @@ import { effectifsQueueDb } from "@/common/model/collections";
 import { formatError } from "@/common/utils/errorUtils";
 import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
+import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
 
 const sleepDuration = 10_000;
 const NB_ITEMS_TO_PROCESS = 100;
@@ -190,8 +191,13 @@ const transformEffectifQueueItem = async (
   let effectif;
 
   try {
-    // Vérification schéma & transformation en 2 objets effectif & organisme
-    result = await dossierApprenantSchemaV1V2()
+    // Vérification schéma & transformation en 2 objets effectif & organisme.
+
+    // Actuellement, on réutilise la validation de schéma, ce qui semble inutile,
+    // étant donné que la donnée a déjà été validée lors de l'insertion dans la queue.
+    // La seule différence est que c'est le résultat de la donnée transformée qui est retournée ici
+    // alors que c'est la donnée brute qui est retournée lors de l'insertion dans la queue.
+    result = await (effectifQueued.api_version === "v3" ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2())
       .transform(async (data) => ({
         effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
         organisme: await pPipe(

@@ -52,11 +52,8 @@ export interface EffectifsQueue {
   siret_employeur?: any; // N° SIRET de l'établissement
   siret_employeur_2?: any; // N° SIRET de l'établissement
   siret_employeur_3?: any; // N° SIRET de l'établissement
-  code_commune_insee_employeur?: any; // Le code insee doit contenir 5 caractères
-  code_naf_employeur?: any; // Code NAF de l'employeur
+  siret_employeur_4?: any; // N° SIRET de l'établissement
   formation_presentielle?: any; // Formation 100% à distance ou non
-  obtention_diplome_annee_n?: any; // Le diplôme a été ou non obtenu à l'issue de la formation
-  date_obtention_diplome_annee_n?: any; // Date d'obtention du diplôme
   date_inscription_formation?: any; // Date de début de la formation
   date_entree_formation?: any; // Date de début de la formation
   date_fin_formation?: any; // Date de fin de la formation
@@ -74,6 +71,7 @@ export interface EffectifsQueue {
   processed_at?: Date; // Date de process des données
   error?: any; // Erreur rencontrée lors de la création de l'effectif
   validation_errors?: ValidationError[]; // Erreurs de validation de cet effectif
+  api_version?: any; // Version de l'api utilisée pour l'import
 }
 
 export interface ValidationError {

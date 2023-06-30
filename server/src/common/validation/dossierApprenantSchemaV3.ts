@@ -68,11 +68,8 @@ const dossierApprenantSchemaV3 = () =>
     siret_employeur: primitivesV3.employeur.siret.optional(),
     siret_employeur_2: primitivesV3.employeur.siret.optional(),
     siret_employeur_3: primitivesV3.employeur.siret.optional(),
-    code_commune_insee_employeur: primitivesV3.employeur.code_commune_insee.optional(),
-    code_naf_employeur: primitivesV3.employeur.code_naf.optional(),
+    siret_employeur_4: primitivesV3.employeur.siret.optional(),
     formation_presentielle: primitivesV3.formation.presentielle.optional(),
-    obtention_diplome_annee_n: primitivesV3.formation.obtention_diplome.optional(),
-    date_obtention_diplome_annee_n: primitivesV3.formation.date_obtention_diplome.optional(),
 
     // REQUIRED FIELDS
     date_inscription_formation: primitivesV3.formation.date_inscription,
