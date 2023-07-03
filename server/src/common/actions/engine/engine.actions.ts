@@ -190,6 +190,19 @@ export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): Pa
     );
   }
 
+  let referent_handicap: { nom: string; prenom: string; email: string } | undefined = undefined;
+  if (
+    dossierApprenant.email_referent_handicap_formation ||
+    dossierApprenant.email_referent_handicap_formation ||
+    dossierApprenant.email_referent_handicap_formation
+  ) {
+    referent_handicap = stripEmptyFields({
+      nom: dossierApprenant.nom_referent_handicap_formation,
+      prenom: dossierApprenant.prenom_referent_handicap_formation,
+      email: dossierApprenant.email_referent_handicap_formation,
+    });
+  }
+
   return stripEmptyFields<PartialDeep<Effectif>>({
     annee_scolaire: dossierApprenant.annee_scolaire,
     source: dossierApprenant.source,
@@ -230,11 +243,7 @@ export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): Pa
         date_obtention_diplome: dossierApprenant.date_obtention_diplome_formation,
         date_exclusion: dossierApprenant.date_exclusion_formation,
         cause_exclusion: dossierApprenant.cause_exclusion_formation,
-        referent_handicap: stripEmptyFields({
-          nom: dossierApprenant.nom_referent_handicap_formation,
-          prenom: dossierApprenant.prenom_referent_handicap_formation,
-          email: dossierApprenant.email_referent_handicap_formation,
-        }),
+        referent_handicap,
         date_inscription: dossierApprenant.date_inscription_formation,
         // @ts-ignore
         duree_theorique: dossierApprenant.duree_theorique_formation,
