@@ -18,7 +18,7 @@ import { Field, Form, Formik } from "formik";
 import { useState } from "react";
 import * as Yup from "yup";
 
-import { SIRET_REGEX } from "@/common/domain/siret";
+import { siretRegex } from "@/common/domain/siret";
 import { _post } from "@/common/httpClient";
 import { sleep } from "@/common/utils/misc";
 import Link from "@/components/Links/Link";
@@ -34,7 +34,7 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
       initialValues={{ siret: "" }}
       validateOnBlur={false}
       validationSchema={Yup.object().shape({
-        siret: Yup.string().required("Le SIRET est obligatoire").matches(SIRET_REGEX, {
+        siret: Yup.string().required("Le SIRET est obligatoire").matches(siretRegex, {
           message: "SIRET invalide",
         }),
       })}
