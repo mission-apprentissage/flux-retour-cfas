@@ -1,7 +1,7 @@
 import { Icon } from "@chakra-ui/react";
 import React from "react";
 
-export function Check(/** @type {any} */ { isIndeterminate, isChecked, ...props }) {
+export function Check({ isIndeterminate, isChecked, ...props }: any) {
   return isChecked || isIndeterminate ? (
     <Icon viewBox="0 0 20 20" w="5" h="5" {...props}>
       <rect width="20" height="20" rx="4" fill="#000091" />
