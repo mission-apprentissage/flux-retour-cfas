@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { isInitialServerSideProps } from "./isInitialServerSideProps";
+const isInitialServerSideProps = (context) => context.req?.url?.indexOf("/_next/data/") === -1;
 
 export const getAuthServerSideProps = async (context) => {
   if (!isInitialServerSideProps(context)) {
