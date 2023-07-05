@@ -219,6 +219,14 @@ export async function findOFLinkedOrganismesIds(userOrganisme: Organisme) {
             );
             throw new Error("sous-organisme non trouvé");
           } else {
+            // FIX problème catalogue https://tableaudebord-apprentissage.atlassian.net/browse/TM-139
+            // à supprimer très prochainement... (:
+            if (
+              (userOrganisme.siret === "13002087800240" && subOrganisme.siret === "41352152700056") ||
+              (userOrganisme.siret === "41352152700056" && subOrganisme.siret === "13002087800240")
+            ) {
+              continue;
+            }
             subOrganismesIds.add(subOrganisme._id.toString());
           }
         }
