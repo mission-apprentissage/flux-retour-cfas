@@ -37,6 +37,7 @@
     "date-fns": "2.29.3",
     "formik": "2.2.9",
     "framer-motion": "7.6.1",
+    "jsonwebtoken": "8.5.1",
     "lodash.debounce": "4.0.8",
     "lodash.get": "4.4.2",
     "lodash.groupby": "4.6.0",
