@@ -29,6 +29,10 @@ call_daily_jobs_with_logs(){
 
   # Mise a jour du nb d'effectifs
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes-effectifs-count" || true
+
+  # Fiabilisation des effectifs : suppression des inscrits sans contrats depuis 90 jours & transformation des rupturants en abandon > 180 jours
+  docker exec flux_retour_cfas_server bash -c "yarn cli fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours" || true
+  docker exec flux_retour_cfas_server bash -c "yarn cli fiabilisation:effectifs:transform-rupturants-en-abandons-depuis" || true
 } 
 
 call_daily_jobs_with_logs >> ${LOG_FILEPATH}

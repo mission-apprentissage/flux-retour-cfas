@@ -9,10 +9,7 @@ import { purgeEvents } from "./jobs/clear/purge-events";
 import { purgeQueues } from "./jobs/clear/purge-queues";
 import { findInvalidDocuments } from "./jobs/db/findInvalidDocuments";
 import { recreateIndexes } from "./jobs/db/recreateIndexes";
-import {
-  removeInscritsSansContratsDepuis,
-  transformRupturantsToAbandonsDepuis,
-} from "./jobs/fiabilisation/dossiersApprenants/remove-nonRecus-depuis";
+import { removeInscritsSansContratsDepuis, transformRupturantsToAbandonsDepuis } from "./jobs/fiabilisation/effectifs";
 import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
