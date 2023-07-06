@@ -2,7 +2,7 @@ import { HStack, Heading, ListItem, Text, UnorderedList, VStack } from "@chakra-
 
 import Ribbons from "@/components/Ribbons/Ribbons";
 import Section from "@/components/Section/Section";
-import { InfoCircle } from "@/theme/components/icons/Info-circle";
+import { InfoCircle } from "@/theme/components/icons/InfoCircle";
 
 type EffectifsBannerERPNotConfiguredProps = {
   isMine: boolean;

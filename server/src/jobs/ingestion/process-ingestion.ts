@@ -16,7 +16,6 @@ import {
   completeEffectifAddress,
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
-import { isOrganismeFiableForCouple } from "@/common/actions/engine/engine.organismes.utils";
 import {
   findOrganismeByUaiAndSiret,
   setOrganismeTransmissionDates,
@@ -101,23 +100,14 @@ async function processItems(filter: any): Promise<ProcessItemsResult> {
         const startDate = new Date();
         let effectifQueueToUpdate: Partial<EffectifsQueue> = {};
 
-        // Phase de contrôle de l'organisme
-        const isOrganismeFiable = await controlOrganismeFiable(
-          effectifQueued.uai_etablissement,
-          effectifQueued.siret_etablissement,
-          effectifQueueToUpdate
-        );
+        // Phase de transformation d'une donnée de queue
+        const { effectif } = await transformEffectifQueueItem(effectifQueued, effectifQueueToUpdate);
 
-        if (isOrganismeFiable) {
-          // Phase de transformation d'une donnée de queue
-          const { effectif } = await transformEffectifQueueItem(effectifQueued, effectifQueueToUpdate);
+        if (effectif) {
+          totalValidItems++;
 
-          if (effectif) {
-            totalValidItems++;
-
-            // Phase d'ajout ou update d'un effectif
-            await createOrUpdateEffectif(effectif, effectifQueueToUpdate);
-          }
+          // Phase d'ajout ou update d'un effectif
+          await createOrUpdateEffectif(effectif, effectifQueueToUpdate);
         }
 
         // MAJ de la queue pour indiquer que les données ont été traitées
@@ -157,25 +147,6 @@ async function processItems(filter: any): Promise<ProcessItemsResult> {
     totalInvalidItems: itemsToProcess.length - totalValidItems,
   };
 }
-
-/**
- * Fonction contrôle de la fiabilité de l'organisme via le couple UAI / SIRET reçu
- * @param uai
- * @param siret
- * @returns
- */
-const controlOrganismeFiable = async (
-  uai: string | undefined,
-  siret: string | undefined,
-  effectifQueueToUpdate: Partial<EffectifsQueue>
-) => {
-  if (!(await isOrganismeFiableForCouple(uai, siret))) {
-    effectifQueueToUpdate.error = `Organisme (uai : ${uai} et siret : ${siret}) non fiable`;
-    return false;
-  }
-
-  return true;
-};
 
 /**
  *
