@@ -29,6 +29,7 @@
     "Simplifiees",
     "siret",
     "sirets",
+    "Soltea",
     "sortby",
     "tranmission",
     "uais",
@@ -41,10 +42,7 @@
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "eslint.workingDirectories": [
-    "./ui",
-    "./server"
-  ],
+  "eslint.workingDirectories": ["./ui", "./server"],
   "javascript.validate.enable": true,
   "files.eol": "\n",
   "files.insertFinalNewline": true,
@@ -75,5 +73,5 @@
     "**/*/build": true,
     "**/.webpack": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
