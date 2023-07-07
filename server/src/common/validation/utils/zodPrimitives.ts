@@ -152,6 +152,22 @@ export const primitivesV1 = {
       description: "Code Insee de la commune de l'établissement formateur",
     }),
   },
+  etablissement_lieu_de_formation: {
+    nom: z.string().trim().openapi({
+      description: "Nom l'établissement (lieu de formation)",
+    }),
+    uai: extensions.uai().openapi({
+      description: "UAI apprentissage de l'établissement (lieu de formation)",
+      example: "0123456A",
+    }),
+    siret: extensions.siret().openapi({
+      description: "SIRET de l'établissement (lieu de formation)",
+      example: "19750655300019",
+    }),
+    code_commune_insee: extensions.codeCommuneInsee().openapi({
+      description: "Code Insee de la commune de l'établissement (lieu de formation)",
+    }),
+  },
 
   formation: {
     code_rncp: z

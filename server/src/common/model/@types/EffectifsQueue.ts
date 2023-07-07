@@ -62,6 +62,8 @@ export interface EffectifsQueue {
   etablissement_responsable_siret?: any; // SIRET de l'établissement responsable
   etablissement_formateur_uai?: any; // UAI de l'établissement formateur
   etablissement_formateur_siret?: any; // SIRET de l'établissement formateur
+  etablissement_lieu_de_formation_uai?: any; // UAI de l'établissement de formation
+  etablissement_lieu_de_formation_siret?: any; // SIRET de l'établissement de formation
   formation_cfd?: any; // Code CFD de la formation
   source: string; // Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)
   effectif_id?: any; // Id de l'effectif associé, objectId

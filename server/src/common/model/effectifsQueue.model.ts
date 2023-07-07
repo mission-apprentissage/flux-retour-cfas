@@ -136,6 +136,8 @@ export const schema = object(
     etablissement_responsable_siret: any({ description: "SIRET de l'établissement responsable" }),
     etablissement_formateur_uai: any({ description: "UAI de l'établissement formateur" }),
     etablissement_formateur_siret: any({ description: "SIRET de l'établissement formateur" }),
+    etablissement_lieu_de_formation_uai: any({ description: "UAI de l'établissement (lieu de formation)" }),
+    etablissement_lieu_de_formation_siret: any({ description: "SIRET de l'établissement (lieu de formation)" }),
 
     formation_cfd: any({ description: formationProps.cfd.description }),
 

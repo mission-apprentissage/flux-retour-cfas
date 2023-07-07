@@ -82,6 +82,8 @@ const dossierApprenantSchemaV3 = () =>
     etablissement_responsable_siret: primitivesV1.etablissement_responsable.siret,
     etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai,
     etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret,
+    etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai,
+    etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret,
 
     formation_cfd: primitivesV1.formation.code_cfd,
   });

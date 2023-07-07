@@ -83,7 +83,10 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 export const schema = object(
   {
     _id: objectId({ description: "Identifiant MongoDB de l'effectif" }),
-    organisme_id: objectId({ description: "Organisme id" }),
+    organisme_id: objectId({ description: "Organisme id (lieu de formation de l'apprenant pour la v3)" }),
+    organisme_responsable_id: objectId({ description: "Organisme responsable id" }),
+    organisme_formateur_id: objectId({ description: "Organisme formateur id" }),
+
     id_erp_apprenant: string({ description: "Identifiant de l'apprenant dans l'erp" }),
     source: string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),
     annee_scolaire: string({

@@ -225,7 +225,6 @@ export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): Pa
         sexe: dossierApprenant.sexe_apprenant,
         rqth: dossierApprenant.rqth_apprenant,
         date_rqth: dossierApprenant.date_rqth_apprenant,
-        // @ts-ignore
         nir: dossierApprenant.nir_apprenant,
         responsable_mail1: dossierApprenant.responsable_apprenant_mail1,
         responsable_mail2: dossierApprenant.responsable_apprenant_mail2,
@@ -245,7 +244,6 @@ export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): Pa
         cause_exclusion: dossierApprenant.cause_exclusion_formation,
         referent_handicap,
         date_inscription: dossierApprenant.date_inscription_formation,
-        // @ts-ignore
         duree_theorique: dossierApprenant.duree_theorique_formation,
         presentielle: dossierApprenant.formation_presentielle,
         date_fin: dossierApprenant.date_fin_formation,

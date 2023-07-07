@@ -148,18 +148,12 @@ async function processItems(filter: any): Promise<ProcessItemsResult> {
   };
 }
 
-/**
- *
- * @param effectifQueued
- * @param dataToUpdate
- * @returns
- */
 const transformEffectifQueueItem = async (
   effectifQueued: EffectifsQueue,
   effectifQueueToUpdate: Partial<EffectifsQueue>
-) => {
+): Promise<{ effectif: Effectif | undefined }> => {
   let result;
-  let effectif;
+  let effectif: Effectif | undefined;
 
   try {
     // Vérification schéma & transformation en 2 objets effectif & organisme.
@@ -168,19 +162,59 @@ const transformEffectifQueueItem = async (
     // étant donné que la donnée a déjà été validée lors de l'insertion dans la queue.
     // La seule différence est que c'est le résultat de la donnée transformée qui est retournée ici
     // alors que c'est la donnée brute qui est retournée lors de l'insertion dans la queue.
-    result = await (effectifQueued.api_version === "v3" ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2())
-      .transform(async (data) => ({
-        effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
-        organisme: await pPipe(
-          () => findOrganismeByUaiAndSiret(effectifQueued?.uai_etablissement, effectifQueued?.siret_etablissement),
-          setOrganismeTransmissionDates
-        )(data),
-      }))
-      .safeParseAsync(effectifQueued);
+    if (effectifQueued.api_version === "v3") {
+      result = await dossierApprenantSchemaV3()
+        .transform(async (data) => ({
+          effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
+          organisme: await pPipe(
+            () =>
+              findOrganismeByUaiAndSiret(
+                effectifQueued?.etablissement_lieu_de_formation_uai,
+                effectifQueued?.etablissement_lieu_de_formation_siret
+              ),
+            setOrganismeTransmissionDates
+          )(data),
+          organisme_formateur: await findOrganismeByUaiAndSiret(
+            effectifQueued?.etablissement_formateur_uai,
+            effectifQueued?.etablissement_formateur_siret,
+            { _id: 1 }
+          ),
+          organisme_responsable: await findOrganismeByUaiAndSiret(
+            effectifQueued?.etablissement_responsable_uai,
+            effectifQueued?.etablissement_responsable_siret,
+            { _id: 1 }
+          ),
+        }))
+        .safeParseAsync(effectifQueued);
+    } else {
+      result = await dossierApprenantSchemaV1V2()
+        .transform(async (data) => ({
+          effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
+          organisme: await pPipe(
+            () => findOrganismeByUaiAndSiret(effectifQueued?.uai_etablissement, effectifQueued?.siret_etablissement),
+            setOrganismeTransmissionDates
+          )(data),
+        }))
+        .safeParseAsync(effectifQueued);
+    }
 
     if (result.error) {
       effectifQueueToUpdate.validation_errors =
         result.error?.issues.map(({ path, message }) => ({ message, path })) || [];
+    } else if (effectifQueued.api_version === "v3") {
+      const { effectif: effectifData, organisme, organisme_formateur, organisme_responsable } = result.data as any;
+
+      // Complétion de l'objet effectif avec l'organisme id et le computed info
+      effectif = {
+        ...effectifData,
+        organisme_id: organisme._id,
+        organisme_formateur_id: organisme_formateur?._id,
+        organisme_responsable_id: organisme_responsable?._id,
+        _computed: addEffectifComputedFields(organisme),
+      };
+
+      // Complétion de l'objet dans la queue avec l'organisme id
+      effectifQueueToUpdate.organisme_id = organisme._id;
     } else {
       const { effectif: effectifData, organisme } = result.data as any;
 
