@@ -11,26 +11,21 @@ import withAuth from "@/components/withAuth";
 export const getServerSideProps: GetServerSideProps<{ iframeUrl: string; auth: any }> = async (context) => {
   const { auth } = (await getAuthServerSideProps(context)) as { auth: AuthContext };
 
-  let iframeUrl = "";
-  if (
-    auth?.organisation.type === "DREETS" ||
-    auth?.organisation.type === "CONSEIL_REGIONAL" ||
-    auth?.organisation.type === "DRAAF"
-  ) {
-    const METABASE_SITE_URL = process.env.METABASE_SITE_URL;
-    const METABASE_SECRET_KEY = process.env.METABASE_SECRET_KEY;
+  const METABASE_SITE_URL = process.env.METABASE_SITE_URL;
+  const METABASE_SECRET_KEY = process.env.METABASE_SECRET_KEY;
 
-    const payload = {
-      resource: { dashboard: 86 },
-      params: {
-        "r%C3%A9gion": auth.organisation.code_region,
-      },
-      exp: Math.round(Date.now() / 1000) + 10 * 60, // 10 minute expiration
-    };
-    const token = sign(payload, METABASE_SECRET_KEY);
+  const payload = {
+    resource: { dashboard: 86 },
+    params: {
+      "r%C3%A9gion": (auth.organisation as any).code_region,
+      "d%C3%A9partement": (auth.organisation as any).code_departement,
+      "acad%C3%A9mie": (auth.organisation as any).code_academie,
+    },
+    exp: Math.round(Date.now() / 1000) + 10 * 60, // 10 minute expiration
+  };
+  const token = sign(payload, METABASE_SECRET_KEY);
 
-    iframeUrl = `${METABASE_SITE_URL}/embed/dashboard/${token}#bordered=true&titled=true`;
-  }
+  const iframeUrl = `${METABASE_SITE_URL}/embed/dashboard/${token}#bordered=true&titled=true`;
 
   return { props: { iframeUrl, auth } };
 };
