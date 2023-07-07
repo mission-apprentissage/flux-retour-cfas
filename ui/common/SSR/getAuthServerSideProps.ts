@@ -9,7 +9,9 @@ export const getAuthServerSideProps = async (context) => {
   }
   try {
     const res = await fetch(`${process.env.SERVER_URI}/api/v1/session`, {
-      headers: context.req.headers,
+      headers: {
+        cookie: context.req.headers.cookie,
+      },
     });
     return {
       auth: res.status === 200 ? await res.json() : null,

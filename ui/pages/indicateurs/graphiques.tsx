@@ -46,7 +46,7 @@ function IndicateursGraphiquesPage({ iframeUrl }: InferGetServerSidePropsType<ty
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Mes indicateurs
         </Heading>
-        <iframe src={iframeUrl} frameBorder="0" style={{ height: "1000px", width: "100%" }} allowTransparency />
+        <iframe src={iframeUrl} frameBorder="0" style={{ height: "1000px", width: "100%" }} allowtransparency="true" />
       </Container>
     </SimplePage>
   );
