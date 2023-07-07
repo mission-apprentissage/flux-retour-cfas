@@ -171,4 +171,5 @@ jobs:
           fingerprint: ${{ secrets.DEV_SSH_FINGERPRINT }}
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
-          script: /srv/update.sh
+          script: |
+            sudo /srv/update.sh
