@@ -70,7 +70,7 @@ const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
   }
 
   let MainComponent;
-  if (!organisme.mode_de_transmission) {
+  if (!organisme.mode_de_transmission && !organisme.last_transmission_date) {
     MainComponent = <ChoixTransmission organismeId={organisme._id} />;
   } else if (organisme.mode_de_transmission === "API") {
     if (organisme.erps?.length === 0 && !organisme.first_transmission_date) {
@@ -86,7 +86,7 @@ const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
 
   return (
     <>
-      {organisme.mode_de_transmission ? (
+      {organisme.mode_de_transmission || organisme.last_transmission_date ? (
         <EffectifsBanner organisme={organisme} isMine={isMine} />
       ) : (
         <EffectifsBannerERPNotConfigured isMine={isMine} />
