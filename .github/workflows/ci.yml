@@ -9,9 +9,6 @@ jobs:
     # if: false # DEBUG
     name: "Build Server"
     runs-on: ubuntu-latest
-    env:
-      IMAGE_NAME: ${{ env.IMAGE_PREFIX }}/tdb-server
-      CONTEXT_PATH: server
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -55,17 +52,14 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4.1.0
         with:
-          context: ${{ env.CONTEXT_PATH }}
+          context: server
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.sha }}
 
   ui:
     # if: false # DEBUG
     name: "Build UI"
     runs-on: ubuntu-latest
-    env:
-      IMAGE_NAME: ${{ env.IMAGE_PREFIX }}/tdb-ui
-      CONTEXT_PATH: ui
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -107,9 +101,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4.1.0
         with:
-          context: ${{ env.CONTEXT_PATH }}
+          context: ui
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.sha }}
 
   publish-docker-images:
     name: "Publication des images Docker"
