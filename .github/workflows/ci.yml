@@ -134,7 +134,7 @@ jobs:
   deploy-to-recette:
     name: "Déploiement en recette"
     if: github.ref == 'refs/heads/ci_build_docker_images'
-    # needs: publish-docker-images
+    needs: publish-docker-images
     runs-on: ubuntu-latest
     steps:
       - name: executing remote ssh commands using password
