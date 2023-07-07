@@ -5,157 +5,137 @@ env:
   IMAGE_PREFIX: ghcr.io/mission-apprentissage
 
 jobs:
-  # This workflow is temporary disabled since we don't want to have a downtime each time we deploy.
+  server:
+    # if: false # DEBUG
+    name: "Build Server"
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ${{ env.IMAGE_PREFIX }}/tdb-server
+      CONTEXT_PATH: server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  # deploy-recette:
-  #   if: github.ref == 'refs/heads/master'
-  #   name: "Déploiement en recette"
-  #   needs: tests
-  #   uses: "./.github/workflows/_deploy.yml"
-  #   with:
-  #     environment: recette
-  #     server_ip: 146.59.226.69
-  #     user: antoine
-  #   secrets:
-  #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  #     SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-  #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
-  # server:
-  #   # if: false # DEBUG
-  #   name: "Build Server"
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     IMAGE_NAME: ${{ env.IMAGE_PREFIX }}/tdb-server
-  #     CONTEXT_PATH: server
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "pnpm"
 
-  #     - name: Install pnpm
-  #       uses: pnpm/action-setup@v2
-  #       with:
-  #         version: 8
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
 
-  #     - name: Install Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: "16"
-  #         cache: "pnpm"
+      - name: Run lint
+        run: pnpm -F server lint
 
-  #     # DEBUG
-  #     # - name: Install dependencies
-  #     #   run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Run tests
+        run: pnpm -F server test:ci
+        env:
+          MONGOMS_PREFER_GLOBAL_PATH: false
 
-  #     # - name: Run lint
-  #     #   run: pnpm -F server lint
+      - name: Save the git revision in the API
+        run: ./server/scripts/ci-update-version.sh
 
-  #     # - name: Run tests
-  #     #   run: pnpm -F server test:ci
-  #     #   env:
-  #     #     MONGOMS_PREFER_GLOBAL_PATH: false
+      - name: Compile
+        run: pnpm -F server build
 
-  #     - name: Save the git revision in the API
-  #       run: ./server/scripts/ci-update-version.sh
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  #     # - name: Compile
-  #     #   run: pnpm -F server build
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4.1.0
+        with:
+          context: ${{ env.CONTEXT_PATH }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-  #     - name: Login to GitHub Container Registry
-  #       if: github.event_name != 'pull_request'
-  #       uses: docker/login-action@v2
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
+  ui:
+    # if: false # DEBUG
+    name: "Build UI"
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ${{ env.IMAGE_PREFIX }}/tdb-ui
+      CONTEXT_PATH: ui
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Build and push Docker image
-  #       uses: docker/build-push-action@v4.1.0
-  #       with:
-  #         context: ${{ env.CONTEXT_PATH }}
-  #         push: ${{ github.event_name != 'pull_request' }}
-  #         tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
-  # ui:
-  #   # if: false # DEBUG
-  #   name: "Build UI"
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     IMAGE_NAME: ${{ env.IMAGE_PREFIX }}/tdb-ui
-  #     CONTEXT_PATH: ui
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "pnpm"
 
-  #     - name: Install pnpm
-  #       uses: pnpm/action-setup@v2
-  #       with:
-  #         version: 8
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
 
-  #     - name: Install Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: "16"
-  #         cache: "pnpm"
+      - name: Run lint
+        run: pnpm -F ui lint
 
-  #     # DEBUG
-  #     # - name: Install dependencies
-  #     #   run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Run tests
+        run: pnpm -F ui test:ci
 
-  #     # - name: Run lint
-  #     #   run: pnpm -F ui lint
+      - name: Save the git revision in the UI
+        run: ./ui/scripts/ci-update-version.sh
 
-  #     # - name: Run tests
-  #     #   run: pnpm -F ui test:ci
-  #     #   env:
-  #     #     MONGOMS_PREFER_GLOBAL_PATH: false
+      - name: Compile
+        run: pnpm -F ui build
 
-  #     - name: Save the git revision in the UI
-  #       run: ./ui/scripts/ci-update-version.sh
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  #     # - name: Compile
-  #     #   run: pnpm -F ui build
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4.1.0
+        with:
+          context: ${{ env.CONTEXT_PATH }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-  #     - name: Login to GitHub Container Registry
-  #       if: github.event_name != 'pull_request'
-  #       uses: docker/login-action@v2
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
+  publish-docker-images:
+    name: "Publication des images Docker"
+    needs:
+      - ui
+      - server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - name: Build and push Docker image
-  #       uses: docker/build-push-action@v4.1.0
-  #       with:
-  #         context: ${{ env.CONTEXT_PATH }}
-  #         push: ${{ github.event_name != 'pull_request' }}
-  #         tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Tag Docker images
+        run: |
+          docker pull ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.sha }}
+          docker pull ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.sha }}
 
-  # publish-docker-images:
-  #   name: "Publication des images Docker"
-  #   needs:
-  #     - ui
-  #     - server
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Login to GitHub Container Registry
-  #       if: github.event_name != 'pull_request'
-  #       uses: docker/login-action@v2
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
+          docker tag ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.sha }} ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.ref_name }}
+          docker push ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.ref_name }}
 
-  #     - name: Tag Docker images
-  #       run: |
-  #         docker pull ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.sha }}
-  #         docker pull ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.sha }}
-
-  #         docker tag ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.sha }} ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.ref_name }}
-  #         docker push ${{ env.IMAGE_PREFIX }}/tdb-server:${{ github.ref_name }}
-
-  #         docker tag ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.sha }} ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.ref_name }}
-  #         docker push ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.ref_name }}
+          docker tag ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.sha }} ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.ref_name }}
+          docker push ${{ env.IMAGE_PREFIX }}/tdb-ui:${{ github.ref_name }}
 
   deploy-to-recette:
     name: "Déploiement en recette"
