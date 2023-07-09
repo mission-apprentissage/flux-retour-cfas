@@ -21,6 +21,7 @@ import { hydrateOrganismesFromReferentiel } from "./jobs/hydrate/organismes/hydr
 import { hydrateOrganismesBassinEmploi } from "./jobs/hydrate/organismes/hydrate-organismes-bassinEmploi";
 import { hydrateOrganismesFormations } from "./jobs/hydrate/organismes/hydrate-organismes-formations";
 import { hydrateFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes-referentiel";
+import { hydrateOrganismesSoltea } from "./jobs/hydrate/organismes/hydrate-organismes-soltea";
 import { updateMultipleOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
 import { hydrateBassinsEmploi } from "./jobs/hydrate/reference/hydrate-bassins-emploi";
 import { hydrateReseaux } from "./jobs/hydrate/reseaux/hydrate-reseaux";
@@ -285,6 +286,15 @@ program
   .action(
     runJob(async () => {
       await hydrateOrganismesFormations();
+    })
+  );
+
+program
+  .command("hydrate:organismes-soltea")
+  .description("Remplissage des organismes du fichier SOLTEA")
+  .action(
+    runJob(async () => {
+      await hydrateOrganismesSoltea();
     })
   );
 

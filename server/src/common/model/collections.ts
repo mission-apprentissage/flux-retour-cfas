@@ -16,6 +16,7 @@ import {
 import { BassinsEmploi } from "./@types/BassinsEmploi";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
+import { OrganismeSoltea } from "./@types/OrganismeSoltea";
 import { UaisAcceReferentiel } from "./@types/UaisAcceReferentiel.js";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
@@ -30,6 +31,7 @@ import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model";
 import organisationsModelDescriptor, { Organisation } from "./organisations.model";
 import OrganismesModelDescriptor from "./organismes.model";
 import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
+import organismesSolteaModelDescriptor from "./organismesSoltea.model";
 import uaisAcceReferentielModelDescriptor from "./uaisAcceReferentiel.model";
 import uploadsModelDescriptor from "./uploads.model/uploads.model";
 import usersModelDescriptor from "./users.model";
@@ -76,3 +78,5 @@ export const uploadsDb = () => getDbCollection<Upload>(uploadsModelDescriptor.co
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
 export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmploiDescriptor.collectionName);
+export const organismesSolteaDb = () =>
+  getDbCollection<OrganismeSoltea>(organismesSolteaModelDescriptor.collectionName);
