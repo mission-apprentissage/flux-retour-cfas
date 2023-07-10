@@ -119,69 +119,101 @@ export const checkIfEffectifExists = async (
 };
 
 /**
- * Création d'un objet effectif depuis les données d'un dossierApprenant
+ * Création d'un objet effectif depuis les données d'un dossierApprenant.
+ * Fonctionne pour l'API v2 et v3.
  */
-export const mapEffectifQueueToEffectif = (dossiersApprenant: EffectifsQueue): PartialDeep<Effectif> => {
-  const {
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-    id_formation: cfd,
-    formation_rncp: rncp,
-    libelle_long_formation: libelle_long,
-    periode_formation: periode,
-    annee_formation: annee,
-    code_commune_insee_apprenant,
-    contrat_date_debut,
-    contrat_date_fin,
-    contrat_date_rupture,
-    statut_apprenant,
-    date_metier_mise_a_jour_statut,
-    nom_apprenant: nom,
-    prenom_apprenant: prenom,
-    ine_apprenant: ine,
-    date_de_naissance_apprenant: date_de_naissance,
-    email_contact: courriel,
-    tel_apprenant: telephone,
-  } = dossiersApprenant;
+export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): PartialDeep<Effectif> => {
+  const newHistoriqueStatut = {
+    valeur_statut: dossierApprenant.statut_apprenant,
+    date_statut: new Date(dossierApprenant.date_metier_mise_a_jour_statut),
+    date_reception: new Date(),
+  };
+  let contrats: PartialDeep<Effectif["contrats"]> = [
+    stripEmptyFields({
+      date_debut: dossierApprenant.contrat_date_debut,
+      date_fin: dossierApprenant.contrat_date_fin,
+      date_rupture: dossierApprenant.contrat_date_rupture,
+      cause_rupture: dossierApprenant.cause_rupture_contrat,
+      siret: dossierApprenant.siret_employeur,
+    }),
+    stripEmptyFields({
+      date_debut: dossierApprenant.contrat_date_debut_2,
+      date_fin: dossierApprenant.contrat_date_fin_2,
+      date_rupture: dossierApprenant.contrat_date_rupture_2,
+      cause_rupture: dossierApprenant.cause_rupture_contrat_2,
+      siret: dossierApprenant.siret_employeur_2,
+    }),
+    stripEmptyFields({
+      date_debut: dossierApprenant.contrat_date_debut_3,
+      date_fin: dossierApprenant.contrat_date_fin_3,
+      date_rupture: dossierApprenant.contrat_date_rupture_3,
+      cause_rupture: dossierApprenant.cause_rupture_contrat_3,
+      siret: dossierApprenant.siret_employeur_3,
+    }),
+    stripEmptyFields({
+      date_debut: dossierApprenant.contrat_date_debut_4,
+      date_fin: dossierApprenant.contrat_date_fin_4,
+      date_rupture: dossierApprenant.contrat_date_rupture_4,
+      cause_rupture: dossierApprenant.cause_rupture_contrat_4,
+      siret: dossierApprenant.siret_employeur_4,
+    }),
+  ].filter((contrat) => contrat.date_debut || contrat.date_fin || contrat.date_rupture);
 
-  return stripEmptyFields({
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
+  return stripEmptyFields<PartialDeep<Effectif>>({
+    annee_scolaire: dossierApprenant.annee_scolaire,
+    source: dossierApprenant.source,
+    id_erp_apprenant: dossierApprenant.id_erp_apprenant,
     apprenant: {
-      historique_statut: [
-        {
-          valeur_statut: statut_apprenant,
-          date_statut: new Date(date_metier_mise_a_jour_statut),
-          date_reception: new Date(),
-        },
-      ] as Effectif["apprenant"]["historique_statut"],
-      ine,
-      nom,
-      prenom,
-      date_de_naissance,
-      courriel,
-      telephone,
-      adresse: { code_insee: code_commune_insee_apprenant },
+      historique_statut: [newHistoriqueStatut],
+      ine: dossierApprenant.ine_apprenant,
+      nom: dossierApprenant.nom_apprenant,
+      prenom: dossierApprenant.prenom_apprenant,
+      date_de_naissance: dossierApprenant.date_de_naissance_apprenant,
+      courriel: dossierApprenant.email_contact,
+      telephone: dossierApprenant.tel_apprenant,
+      adresse: stripEmptyFields({
+        code_insee: dossierApprenant.code_commune_insee_apprenant,
+        code_postal: dossierApprenant.code_postal_apprenant,
+        complete: dossierApprenant.adresse_apprenant,
+      }),
+      // Optional v3 fields
+      ...stripEmptyFields<PartialDeep<Effectif["apprenant"]>>({
+        sexe: dossierApprenant.sexe_apprenant,
+        rqth: dossierApprenant.rqth_apprenant,
+        date_rqth: dossierApprenant.date_rqth_apprenant,
+        nir: dossierApprenant.nir_apprenant,
+        responsable_mail1: dossierApprenant.responsable_apprenant_mail1,
+        responsable_mail2: dossierApprenant.responsable_apprenant_mail2,
+      }),
     },
-    // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
-    contrats:
-      contrat_date_debut || contrat_date_fin || contrat_date_rupture
-        ? [
-            stripEmptyFields({
-              date_debut: contrat_date_debut,
-              date_fin: contrat_date_fin,
-              date_rupture: contrat_date_rupture,
-            }),
-          ]
-        : [],
+    contrats,
     formation: {
-      cfd,
-      rncp,
-      libelle_long,
-      periode,
-      annee,
+      cfd: dossierApprenant.formation_cfd || dossierApprenant.id_formation,
+      rncp: dossierApprenant.formation_rncp,
+      libelle_long: dossierApprenant.libelle_long_formation,
+      periode: dossierApprenant.periode_formation,
+      annee: dossierApprenant.annee_formation,
+      ...stripEmptyFields<PartialDeep<NonNullable<Effectif["formation"]>>>({
+        obtention_diplome: dossierApprenant.obtention_diplome_formation,
+        date_obtention_diplome: dossierApprenant.date_obtention_diplome_formation,
+        date_exclusion: dossierApprenant.date_exclusion_formation,
+        cause_exclusion: dossierApprenant.cause_exclusion_formation,
+        referent_handicap:
+          dossierApprenant.email_referent_handicap_formation ||
+          dossierApprenant.prenom_referent_handicap_formation ||
+          dossierApprenant.email_referent_handicap_formation
+            ? stripEmptyFields({
+                nom: dossierApprenant.nom_referent_handicap_formation,
+                prenom: dossierApprenant.prenom_referent_handicap_formation,
+                email: dossierApprenant.email_referent_handicap_formation,
+              })
+            : undefined,
+        date_inscription: dossierApprenant.date_inscription_formation,
+        duree_theorique: dossierApprenant.duree_theorique_formation,
+        formation_presentielle: dossierApprenant.formation_presentielle,
+        date_fin: dossierApprenant.date_fin_formation,
+        date_entree: dossierApprenant.date_entree_formation,
+      }),
     },
   });
 };

@@ -23,6 +23,7 @@ const dossierApprenantSchemaV1V2 = () =>
     source: primitivesV1.source,
 
     // OPTIONAL FIELDS
+    api_version: primitivesV1.api_version.optional(),
     ine_apprenant: primitivesV1.apprenant.ine.optional(),
     email_contact: primitivesV1.apprenant.email.optional(),
     tel_apprenant: primitivesV1.apprenant.telephone.nullish(),

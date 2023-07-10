@@ -6,9 +6,17 @@ export interface Effectif {
    * Identifiant MongoDB de l'effectif
    */
   /**
-   * Organisme id
+   * Organisme id (lieu de formation de l'apprenant pour la v3)
    */
   organisme_id: ObjectId;
+  /**
+   * Organisme responsable id
+   */
+  organisme_responsable_id?: ObjectId;
+  /**
+   * Organisme formateur id
+   */
+  organisme_formateur_id?: ObjectId;
   /**
    * Identifiant de l'apprenant dans l'erp
    */
@@ -62,6 +70,9 @@ export interface Effectif {
      * Date de la reconnaissance travailleur handicapé
      */
     date_rqth?: Date;
+    nir?: string;
+    responsable_mail1?: string;
+    responsable_mail2?: string;
     affelnet?: string[];
     parcoursup?: string[];
     /**
@@ -1113,6 +1124,10 @@ export interface Effectif {
      * Cause de l'exclusion
      */
     cause_exclusion?: string;
+    duree_theorique?: number;
+    formation_presentielle?: boolean;
+    date_fin?: Date;
+    date_entree?: Date;
     referent_handicap?: {
       /**
        * Nom du référent handicap

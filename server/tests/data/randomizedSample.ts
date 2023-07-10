@@ -121,6 +121,7 @@ export const createRandomDossierApprenantApiInput = (
     tel_apprenant: faker.helpers.arrayElement([faker.phone.number(), undefined]),
     code_commune_insee_apprenant: faker.address.zipCode(),
     source: "userApi",
+    api_version: "v2",
     ...params,
   };
 };

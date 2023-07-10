@@ -19,6 +19,7 @@ const dossierApprenantSchemaV3 = () =>
     source: primitivesV1.source,
 
     // OPTIONAL FIELDS
+    api_version: primitivesV1.api_version.optional(),
     ine_apprenant: primitivesV1.apprenant.ine.optional(),
     email_contact: primitivesV1.apprenant.email.optional(),
     tel_apprenant: primitivesV1.apprenant.telephone.nullish(),
@@ -68,11 +69,8 @@ const dossierApprenantSchemaV3 = () =>
     siret_employeur: primitivesV3.employeur.siret.optional(),
     siret_employeur_2: primitivesV3.employeur.siret.optional(),
     siret_employeur_3: primitivesV3.employeur.siret.optional(),
-    code_commune_insee_employeur: primitivesV3.employeur.code_commune_insee.optional(),
-    code_naf_employeur: primitivesV3.employeur.code_naf.optional(),
+    siret_employeur_4: primitivesV3.employeur.siret.optional(),
     formation_presentielle: primitivesV3.formation.presentielle.optional(),
-    obtention_diplome_annee_n: primitivesV3.formation.obtention_diplome.optional(),
-    date_obtention_diplome_annee_n: primitivesV3.formation.date_obtention_diplome.optional(),
 
     // REQUIRED FIELDS
     date_inscription_formation: primitivesV3.formation.date_inscription,
@@ -84,6 +82,8 @@ const dossierApprenantSchemaV3 = () =>
     etablissement_responsable_siret: primitivesV1.etablissement_responsable.siret,
     etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai,
     etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret,
+    etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai,
+    etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret,
 
     formation_cfd: primitivesV1.formation.code_cfd,
   });

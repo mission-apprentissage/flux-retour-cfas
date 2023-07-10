@@ -80,6 +80,7 @@ const extensions = {
 
 export const primitivesV1 = {
   source: z.string().min(1), // configured by API
+  api_version: z.union([z.literal("v1"), z.literal("v2"), z.literal("v3"), z.literal(""), z.null()]), // configured by API
   apprenant: {
     nom: z.string().trim().min(1).toUpperCase().openapi({
       description: "nom de l'apprenant",
@@ -149,6 +150,22 @@ export const primitivesV1 = {
     }),
     code_commune_insee: extensions.codeCommuneInsee().openapi({
       description: "Code Insee de la commune de l'établissement formateur",
+    }),
+  },
+  etablissement_lieu_de_formation: {
+    nom: z.string().trim().openapi({
+      description: "Nom l'établissement (lieu de formation)",
+    }),
+    uai: extensions.uai().openapi({
+      description: "UAI apprentissage de l'établissement (lieu de formation)",
+      example: "0123456A",
+    }),
+    siret: extensions.siret().openapi({
+      description: "SIRET de l'établissement (lieu de formation)",
+      example: "19750655300019",
+    }),
+    code_commune_insee: extensions.codeCommuneInsee().openapi({
+      description: "Code Insee de la commune de l'établissement (lieu de formation)",
     }),
   },
 

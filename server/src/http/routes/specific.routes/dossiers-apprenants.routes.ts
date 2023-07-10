@@ -29,19 +29,20 @@ export default () => {
     const source = user.username || user.source;
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {
       const result = validationSchema.safeParse({
-        source,
         ...dossierApprenant,
+        source,
       });
       const prettyValidationError = result.success
         ? undefined
         : result.error.issues.map(({ path, message }) => ({ message, path }));
 
       return {
-        source,
         ...dossierApprenant,
         ...defaultValuesEffectifQueue(),
         ...(prettyValidationError ? { processed_at: new Date() } : {}),
         validation_errors: prettyValidationError || [],
+        source,
+        api_version: isV3 ? "v3" : "v2",
       };
     });
 
