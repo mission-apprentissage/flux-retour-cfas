@@ -1,4 +1,4 @@
-import * as apiEntreprise from "@/common/apis/ApiEntreprise";
+import * as apiEntreprise from "@/common/apis/apiEntreprise";
 import { SIRET_REGEX } from "@/common/constants/validations";
 import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "@/common/utils/adresseUtils";
 

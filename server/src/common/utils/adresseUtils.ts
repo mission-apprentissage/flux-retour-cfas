@@ -1,6 +1,6 @@
 import { find } from "lodash-es";
 
-import * as apiEntreprise from "@/common/apis/ApiEntreprise";
+import * as apiEntreprise from "@/common/apis/apiEntreprise";
 import { ACADEMIES, DEPARTEMENTS } from "@/common/constants/territoires";
 import { defaultValuesAdresse } from "@/common/model/json-schema/adresseSchema";
 
