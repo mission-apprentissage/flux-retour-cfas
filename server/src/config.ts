@@ -88,6 +88,11 @@ const config = {
     object: "Consolidation des données",
     context: "MNA",
   },
+  decaApi: {
+    endpoint: env.get("FLUX_RETOUR_CFAS_API_DECA_URL").asString(),
+    login: env.get("FLUX_RETOUR_CFAS_API_DECA_LOGIN").asString(),
+    password: env.get("FLUX_RETOUR_CFAS_API_DECA_PASSWORD").asString(),
+  },
 };
 
 export default config;
