@@ -17,9 +17,9 @@ export const getServerSideProps: GetServerSideProps<{ iframeUrl: string; auth: a
   const payload = {
     resource: { dashboard: 86 },
     params: {
-      "r%C3%A9gion": (auth.organisation as any).code_region,
-      "d%C3%A9partement": (auth.organisation as any).code_departement,
-      "acad%C3%A9mie": (auth.organisation as any).code_academie,
+      region: (auth.organisation as any).code_region ?? [],
+      departement: (auth.organisation as any).code_departement ?? [],
+      academie: (auth.organisation as any).code_academie ?? [],
     },
     exp: Math.round(Date.now() / 1000) + 10 * 60, // 10 minute expiration
   };
