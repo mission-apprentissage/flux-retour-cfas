@@ -1125,7 +1125,7 @@ export interface Effectif {
      */
     cause_exclusion?: string;
     duree_theorique?: number;
-    presentielle?: boolean;
+    formation_presentielle?: boolean;
     date_fin?: Date;
     date_entree?: Date;
     referent_handicap?: {

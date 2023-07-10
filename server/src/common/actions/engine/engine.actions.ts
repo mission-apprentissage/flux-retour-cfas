@@ -210,7 +210,7 @@ export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): Pa
             : undefined,
         date_inscription: dossierApprenant.date_inscription_formation,
         duree_theorique: dossierApprenant.duree_theorique_formation,
-        presentielle: dossierApprenant.formation_presentielle,
+        formation_presentielle: dossierApprenant.formation_presentielle,
         date_fin: dossierApprenant.date_fin_formation,
         date_entree: dossierApprenant.date_entree_formation,
       }),

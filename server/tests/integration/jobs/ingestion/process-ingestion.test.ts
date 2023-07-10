@@ -522,7 +522,7 @@ describe("Processus d'ingestion", () => {
             },
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
             duree_theorique: 2,
-            presentielle: true,
+            formation_presentielle: true,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
