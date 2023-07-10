@@ -329,7 +329,7 @@ function setupRoutes(app: Application) {
         throw new Error("Unauthorized");
       }
 
-      (req.user as any) = { source: String(organisme._id) };
+      (req.user as any) = { source: organisme._id.toString() };
       next();
     },
     dossierApprenantRouter()

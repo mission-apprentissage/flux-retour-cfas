@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
+import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
@@ -378,7 +379,7 @@ describe("Processus d'ingestion", () => {
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
 
-        const sampleData = {
+        const sampleData: EffectifsQueue = {
           nom_apprenant: "Doe",
           prenom_apprenant: "John",
           date_de_naissance_apprenant: "2000-10-28T00:00:00.000Z",
@@ -386,7 +387,7 @@ describe("Processus d'ingestion", () => {
           statut_apprenant: "2",
           date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
           id_erp_apprenant: "123456789",
-          source: String(organismeForInput._id),
+          source: organismeForInput._id.toString(),
           api_version: "v3",
           ine_apprenant: "1234567890A",
           email_contact: "johndoe@example.org",
@@ -442,10 +443,9 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
-        const effectifForInput = await effectifsDb().findOne({});
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
 
-        expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
-        expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
+        expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
 
         expect(result).toStrictEqual({
           totalProcessed: 1,
@@ -541,7 +541,7 @@ describe("Processus d'ingestion", () => {
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
-          source: String(organismeForInput._id),
+          source: organismeForInput._id.toString(),
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),

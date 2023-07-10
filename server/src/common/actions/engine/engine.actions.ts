@@ -128,80 +128,36 @@ export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): Pa
     date_statut: new Date(dossierApprenant.date_metier_mise_a_jour_statut),
     date_reception: new Date(),
   };
-  let contrats: PartialDeep<Effectif["contrats"]> = [];
-  if (
-    dossierApprenant.contrat_date_debut ||
-    dossierApprenant.contrat_date_fin ||
-    dossierApprenant.contrat_date_rupture
-  ) {
-    contrats.push(
-      stripEmptyFields({
-        date_debut: dossierApprenant.contrat_date_debut,
-        date_fin: dossierApprenant.contrat_date_fin,
-        date_rupture: dossierApprenant.contrat_date_rupture,
-        cause_rupture: dossierApprenant.cause_rupture_contrat,
-        siret: dossierApprenant.siret_employeur,
-      })
-    );
-  }
-  if (
-    dossierApprenant.contrat_date_debut_2 ||
-    dossierApprenant.contrat_date_fin_2 ||
-    dossierApprenant.contrat_date_rupture_2
-  ) {
-    contrats.push(
-      stripEmptyFields({
-        date_debut: dossierApprenant.contrat_date_debut_2,
-        date_fin: dossierApprenant.contrat_date_fin_2,
-        date_rupture: dossierApprenant.contrat_date_rupture_2,
-        cause_rupture: dossierApprenant.cause_rupture_contrat_2,
-        siret: dossierApprenant.siret_employeur_2,
-      })
-    );
-  }
-  if (
-    dossierApprenant.contrat_date_debut_3 ||
-    dossierApprenant.contrat_date_fin_3 ||
-    dossierApprenant.contrat_date_rupture_3
-  ) {
-    contrats.push(
-      stripEmptyFields({
-        date_debut: dossierApprenant.contrat_date_debut_3,
-        date_fin: dossierApprenant.contrat_date_fin_3,
-        date_rupture: dossierApprenant.contrat_date_rupture_3,
-        cause_rupture: dossierApprenant.cause_rupture_contrat_3,
-        siret: dossierApprenant.siret_employeur_3,
-      })
-    );
-  }
-  if (
-    dossierApprenant.contrat_date_debut_4 ||
-    dossierApprenant.contrat_date_fin_4 ||
-    dossierApprenant.contrat_date_rupture_4
-  ) {
-    contrats.push(
-      stripEmptyFields({
-        date_debut: dossierApprenant.contrat_date_debut_4,
-        date_fin: dossierApprenant.contrat_date_fin_4,
-        date_rupture: dossierApprenant.contrat_date_rupture_4,
-        cause_rupture: dossierApprenant.cause_rupture_contrat_4,
-        siret: dossierApprenant.siret_employeur_4,
-      })
-    );
-  }
-
-  let referent_handicap: { nom: string; prenom: string; email: string } | undefined = undefined;
-  if (
-    dossierApprenant.email_referent_handicap_formation ||
-    dossierApprenant.email_referent_handicap_formation ||
-    dossierApprenant.email_referent_handicap_formation
-  ) {
-    referent_handicap = stripEmptyFields({
-      nom: dossierApprenant.nom_referent_handicap_formation,
-      prenom: dossierApprenant.prenom_referent_handicap_formation,
-      email: dossierApprenant.email_referent_handicap_formation,
-    });
-  }
+  let contrats: PartialDeep<Effectif["contrats"]> = [
+    stripEmptyFields({
+      date_debut: dossierApprenant.contrat_date_debut,
+      date_fin: dossierApprenant.contrat_date_fin,
+      date_rupture: dossierApprenant.contrat_date_rupture,
+      cause_rupture: dossierApprenant.cause_rupture_contrat,
+      siret: dossierApprenant.siret_employeur,
+    }),
+    stripEmptyFields({
+      date_debut: dossierApprenant.contrat_date_debut_2,
+      date_fin: dossierApprenant.contrat_date_fin_2,
+      date_rupture: dossierApprenant.contrat_date_rupture_2,
+      cause_rupture: dossierApprenant.cause_rupture_contrat_2,
+      siret: dossierApprenant.siret_employeur_2,
+    }),
+    stripEmptyFields({
+      date_debut: dossierApprenant.contrat_date_debut_3,
+      date_fin: dossierApprenant.contrat_date_fin_3,
+      date_rupture: dossierApprenant.contrat_date_rupture_3,
+      cause_rupture: dossierApprenant.cause_rupture_contrat_3,
+      siret: dossierApprenant.siret_employeur_3,
+    }),
+    stripEmptyFields({
+      date_debut: dossierApprenant.contrat_date_debut_4,
+      date_fin: dossierApprenant.contrat_date_fin_4,
+      date_rupture: dossierApprenant.contrat_date_rupture_4,
+      cause_rupture: dossierApprenant.cause_rupture_contrat_4,
+      siret: dossierApprenant.siret_employeur_4,
+    }),
+  ].filter((contrat) => contrat.date_debut || contrat.date_fin || contrat.date_rupture);
 
   return stripEmptyFields<PartialDeep<Effectif>>({
     annee_scolaire: dossierApprenant.annee_scolaire,
@@ -242,7 +198,16 @@ export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): Pa
         date_obtention_diplome: dossierApprenant.date_obtention_diplome_formation,
         date_exclusion: dossierApprenant.date_exclusion_formation,
         cause_exclusion: dossierApprenant.cause_exclusion_formation,
-        referent_handicap,
+        referent_handicap:
+          dossierApprenant.email_referent_handicap_formation ||
+          dossierApprenant.prenom_referent_handicap_formation ||
+          dossierApprenant.email_referent_handicap_formation
+            ? stripEmptyFields({
+                nom: dossierApprenant.nom_referent_handicap_formation,
+                prenom: dossierApprenant.prenom_referent_handicap_formation,
+                email: dossierApprenant.email_referent_handicap_formation,
+              })
+            : undefined,
         date_inscription: dossierApprenant.date_inscription_formation,
         duree_theorique: dossierApprenant.duree_theorique_formation,
         presentielle: dossierApprenant.formation_presentielle,

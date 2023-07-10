@@ -13,6 +13,7 @@ export interface EffectifsQueue {
   email_contact?: any; // Adresse mail de contact de l'apprenant
   tel_apprenant?: any; // Téléphone de l'apprenant
   code_commune_insee_apprenant?: any; // Code commune insee de l'apprenant
+  libelle_court_formation?: any; // Libellé court de la formation visée
   siret_etablissement?: any; // N° SIRET de l'établissement
   libelle_long_formation?: any; // Libellé long de la formation visée
   periode_formation?: any; // Période de la formation, en année (peut être sur plusieurs années)
