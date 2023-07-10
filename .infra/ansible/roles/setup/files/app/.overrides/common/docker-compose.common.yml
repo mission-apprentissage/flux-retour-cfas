@@ -27,7 +27,7 @@ services:
     #   - "127.0.0.1:27017:27017"
 
   metabase:
-    image: metabase/metabase:v0.45.3
+    image: metabase/metabase:v0.46.6
     mem_limit: 2g
     container_name: flux_retour_cfas_metabase
     volumes:
