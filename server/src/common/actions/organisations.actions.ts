@@ -125,13 +125,16 @@ export async function cancelInvitation(ctx: AuthContext, invitationId: string): 
 
 export async function validateMembre(ctx: AuthContext, userId: string): Promise<void> {
   const user = await getUserById(new ObjectId(userId));
-  if (user.account_status !== "PENDING_ADMIN_VALIDATION") {
+  if (user.account_status === "CONFIRMED") {
     throw Boom.forbidden("Permissions invalides");
   }
 
   // seul un administrateur ou gestionnaire de l'organisation peut valider un utilisateur
-  if (!(ctx.organisation.type === "ADMINISTRATEUR" || user.organisation_id.equals(ctx.organisation_id))) {
-    throw Boom.forbidden("Permissions invalides");
+  // un administrateur peut aussi valider un compte non vérifié par email
+  if (ctx.organisation.type !== "ADMINISTRATEUR") {
+    if (user.account_status !== "PENDING_ADMIN_VALIDATION" || !user.organisation_id.equals(ctx.organisation_id)) {
+      throw Boom.forbidden("Permissions invalides");
+    }
   }
 
   await usersMigrationDb().updateOne(
@@ -154,13 +157,18 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
 
 export async function rejectMembre(ctx: AuthContext, userId: string): Promise<void> {
   const user = await getUserById(new ObjectId(userId));
-  if (user.account_status !== "PENDING_ADMIN_VALIDATION") {
+  if (user.account_status === "CONFIRMED") {
     throw Boom.forbidden("Permissions invalides");
   }
+
   // seul un administrateur ou gestionnaire de l'organisation peut valider un utilisateur
-  if (!(ctx.organisation.type === "ADMINISTRATEUR" || user.organisation_id.equals(ctx.organisation_id))) {
-    throw Boom.forbidden("Permissions invalides");
+  // un administrateur peut aussi valider un compte non vérifié par email
+  if (ctx.organisation.type !== "ADMINISTRATEUR") {
+    if (user.account_status !== "PENDING_ADMIN_VALIDATION" || !user.organisation_id.equals(ctx.organisation_id)) {
+      throw Boom.forbidden("Permissions invalides");
+    }
   }
+
   await usersMigrationDb().deleteOne({ _id: user._id });
   await sendEmail(user.email, "notify_access_rejected", {
     recipient: {
