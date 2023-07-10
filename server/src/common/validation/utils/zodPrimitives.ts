@@ -80,7 +80,7 @@ const extensions = {
 
 export const primitivesV1 = {
   source: z.string().min(1), // configured by API
-  api_version: z.string().min(1), // configured by API
+  api_version: z.union([z.literal("v1"), z.literal("v2"), z.literal(""), z.null(), z.undefined()]), // configured by API
   apprenant: {
     nom: z.string().trim().min(1).toUpperCase().openapi({
       description: "nom de l'apprenant",
