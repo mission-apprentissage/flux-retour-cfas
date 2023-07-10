@@ -236,7 +236,7 @@ const UserForm = ({
               </Text>
 
               <HStack spacing={5}>
-                {user.account_status === "PENDING_ADMIN_VALIDATION" && (
+                {user.account_status !== "CONFIRMED" && (
                   <HStack spacing={8} alignSelf="start">
                     <Button type="button" variant="primary" onClick={() => confirmUserAccess(true)}>
                       Confirmer
