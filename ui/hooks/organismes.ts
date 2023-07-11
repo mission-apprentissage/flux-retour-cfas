@@ -47,7 +47,7 @@ export function useOrganisationOrganisme() {
     data: organisme,
     isLoading,
     error,
-  } = useQuery<any, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {});
+  } = useQuery<Organisme, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {});
 
   return {
     organisme,
