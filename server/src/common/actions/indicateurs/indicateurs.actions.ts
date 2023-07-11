@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 import {
   EffectifsFilters,
   FullEffectifsFilters,
@@ -18,6 +20,7 @@ import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import {
+  IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
   IndicateursEffectifsAvecOrganisme,
   IndicateursOrganismesAvecDepartement,
@@ -565,5 +568,147 @@ export async function getEffectifsNominatifs(
       },
     ])
     .toArray()) as IndicateursEffectifsAvecOrganisme[];
+  return indicateurs;
+}
+
+export async function getOrganismeIndicateurs(
+  ctx: AuthContext,
+  organismeId: ObjectId,
+  filters: EffectifsFilters
+): Promise<IndicateursEffectifs> {
+  const indicateurs = (await effectifsDb()
+    .aggregate([
+      {
+        $match: {
+          $and: [...buildMongoFilters(filters, effectifsFiltersConfigurations)],
+          organisme_id: organismeId,
+        },
+      },
+      {
+        $project: {
+          "apprenant.historique_statut": {
+            $sortArray: {
+              input: {
+                $filter: {
+                  input: "$apprenant.historique_statut",
+                  as: "statut",
+                  cond: {
+                    $lte: ["$$statut.date_statut", filters.date],
+                  },
+                },
+              },
+              sortBy: { date_statut: 1 },
+            },
+          },
+        },
+      },
+      {
+        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+      },
+      {
+        $addFields: {
+          statut_apprenant_at_date: {
+            $last: "$apprenant.historique_statut",
+          },
+        },
+      },
+      {
+        $facet: {
+          apprentis: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti,
+              },
+            },
+            {
+              $count: "apprentis",
+            },
+          ],
+          abandons: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
+              },
+            },
+            {
+              $count: "abandons",
+            },
+          ],
+          inscritsSansContrat: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
+                "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
+              },
+            },
+            {
+              $count: "inscritsSansContrat",
+            },
+          ],
+          rupturants: [
+            { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
+            // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
+            {
+              $addFields: {
+                previousStatutAtDate: {
+                  $arrayElemAt: ["$apprenant.historique_statut", -2],
+                },
+              },
+            },
+            { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
+            {
+              $count: "rupturants",
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          items: {
+            $concatArrays: ["$apprentis", "$abandons", "$inscritsSansContrat", "$rupturants"],
+          },
+        },
+      },
+      {
+        $unwind: "$items",
+      },
+      {
+        $group: {
+          _id: "$items._id",
+          merge: {
+            $mergeObjects: "$items",
+          },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              {
+                apprenants: 0,
+                apprentis: 0,
+                inscritsSansContrat: 0,
+                abandons: 0,
+                rupturants: 0,
+              },
+              "$merge",
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          apprenants: {
+            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
+          },
+          apprentis: 1,
+          inscritsSansContrat: 1,
+          abandons: 1,
+          rupturants: 1,
+        },
+      },
+    ])
+    .next()) as IndicateursEffectifs;
   return indicateurs;
 }
