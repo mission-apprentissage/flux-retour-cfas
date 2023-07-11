@@ -63,8 +63,9 @@ export const natureOrganismeDeFormationTooltip = {
       <UnorderedList mt={4}>
         <ListItem>
           Dispense des actions de formation par apprentissage déclaré auprès des services de l{"'"}Etat (n° de
-          déclaration d{"'"}activité (NDA)) - Est signataire de la convention de formation ;
+          déclaration d{"'"}activité (NDA)) ;
         </ListItem>
+        <ListItem>Est signataire de la convention de formation ;</ListItem>
         <ListItem>Demande et reçoit les financements de l{"'"}OPCO ;</ListItem>
         <ListItem>Est responsable auprès de l{"'"}administration du respect de ses missions et obligations ;</ListItem>
         <ListItem>
