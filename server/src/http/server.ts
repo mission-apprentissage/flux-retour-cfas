@@ -19,7 +19,6 @@ import "express-async-errors";
 
 import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
-import { getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
 import {
   effectifsFiltersSchema,
   fullEffectifsFiltersSchema,
@@ -35,6 +34,7 @@ import {
   getIndicateursEffectifsParDepartement,
   getIndicateursEffectifsParOrganisme,
   getIndicateursOrganismesParDepartement,
+  getOrganismeIndicateurs,
   typesEffectifNominatif,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
@@ -393,7 +393,7 @@ function setupRoutes(app: Application) {
         "/indicateurs",
         authOrgMiddleware("reader"),
         returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
+          const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
           return await getOrganismeIndicateurs(req.user, res.locals.organismeId, filters);
         })
       )
