@@ -44,12 +44,12 @@ describe("Routes /organismes/:id", () => {
   const accesOrganisme: PermissionsTestConfig = {
     "OFF lié": true,
     "OFF non lié": false,
-    "OFR lié": true,
-    "OFR responsable": true,
-    "OFR non lié": false,
     "OFRF lié": true,
     "OFRF responsable": true,
     "OFRF non lié": false,
+    "OFR lié": true,
+    "OFR responsable": true,
+    "OFR non lié": false,
     "Tête de réseau": true,
     "Tête de réseau non liée": false,
     "DREETS même région": true,
@@ -73,8 +73,8 @@ describe("Routes /organismes/:id", () => {
         const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
 
         if (allowed) {
-          assert.strictEqual(response.status, 200);
-          assert.deepStrictEqual(response.data, stringifyMongoFields(userOrganisme));
+          expect(response.status).toStrictEqual(200);
+          expect(response.data).toStrictEqual(stringifyMongoFields(userOrganisme));
         } else {
           expectForbiddenError(response);
         }
@@ -82,12 +82,12 @@ describe("Routes /organismes/:id", () => {
     });
   });
 
-  describe("GET /organismes/:id/indicateurs - indicateurs d'un organisme", () => {
+  describe("GET /organismes/:id/indicateurs/effectifs - indicateurs effectifs d'un organisme", () => {
     const date = "2023-04-13T10:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
     it("Erreur si non authentifié", async () => {
-      const response = await httpClient.get(`/api/v1/organisme/${id(1)}/indicateurs?date=${date}`);
+      const response = await httpClient.get(`/api/v1/organisme/${id(1)}/indicateurs/effectifs?date=${date}`);
 
       expectUnauthorizedError(response);
     });
@@ -145,13 +145,13 @@ describe("Routes /organismes/:id", () => {
         const response = await requestAsOrganisation(
           organisation,
           "get",
-          `/api/v1/organismes/${id(1)}/indicateurs?date=${date}`
+          `/api/v1/organismes/${id(1)}/indicateurs/effectifs?date=${date}`
         );
 
         if (allowed) {
-          assert.strictEqual(response.status, 200);
-          assert.deepStrictEqual(response.data, {
-            apprenants: 15,
+          expect(response.status).toStrictEqual(200);
+          expect(response.data).toStrictEqual({
+            apprenants: 35,
             apprentis: 5,
             inscritsSansContrat: 10,
             abandons: 15,
@@ -160,6 +160,79 @@ describe("Routes /organismes/:id", () => {
         } else {
           expectForbiddenError(response);
         }
+      });
+    });
+  });
+
+  describe("GET /organismes/:id/indicateurs/organismes - indicateurs organismes d'un organisme", () => {
+    it("Erreur si non authentifié", async () => {
+      const response = await httpClient.get(`/api/v1/organisme/${id(3)}/indicateurs/organismes`);
+
+      expectUnauthorizedError(response);
+    });
+
+    describe("Permissions", () => {
+      // beforeEach(async () => {
+      //   await organismesDb().insertMany([]);
+      // });
+      testPermissions(accesOrganisme, async (organisation, allowed) => {
+        const response = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/organismes/${id(1)}/indicateurs/organismes`
+        );
+
+        if (allowed) {
+          expect(response.status).toStrictEqual(200);
+          expect(response.data).toStrictEqual({
+            tauxCouverture: 100,
+            totalOrganismes: 1,
+            organismesTransmetteurs: 1,
+            organismesNonTransmetteurs: 0,
+          });
+        } else {
+          expectForbiddenError(response);
+        }
+      });
+    });
+
+    it("agrégation OFRF", async () => {
+      const response = await requestAsOrganisation(
+        {
+          type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+          uai: "0000000B",
+          siret: "00000000000026",
+        },
+        "get",
+        `/api/v1/organismes/${id(2)}/indicateurs/organismes`
+      );
+
+      expect(response.status).toStrictEqual(200);
+      expect(response.data).toStrictEqual({
+        tauxCouverture: 100,
+        totalOrganismes: 2,
+        organismesTransmetteurs: 2,
+        organismesNonTransmetteurs: 0,
+      });
+    });
+
+    it("agrégation OFR", async () => {
+      const response = await requestAsOrganisation(
+        {
+          type: "ORGANISME_FORMATION_RESPONSABLE",
+          uai: "0000000C",
+          siret: "00000000000034",
+        },
+        "get",
+        `/api/v1/organismes/${id(3)}/indicateurs/organismes`
+      );
+
+      expect(response.status).toStrictEqual(200);
+      expect(response.data).toStrictEqual({
+        tauxCouverture: 100,
+        totalOrganismes: 3,
+        organismesTransmetteurs: 3,
+        organismesNonTransmetteurs: 0,
       });
     });
   });

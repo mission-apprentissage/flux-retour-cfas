@@ -34,7 +34,8 @@ import {
   getIndicateursEffectifsParDepartement,
   getIndicateursEffectifsParOrganisme,
   getIndicateursOrganismesParDepartement,
-  getOrganismeIndicateurs,
+  getOrganismeIndicateursEffectifs,
+  getOrganismeIndicateursOrganismes,
   typesEffectifNominatif,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
@@ -390,11 +391,21 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/indicateurs",
+        [
+          "/indicateurs", // legacy, à supprimer dans un futur déploiement
+          "/indicateurs/effectifs", // nouveau pour plus de cohérence
+        ],
         authOrgMiddleware("reader"),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
-          return await getOrganismeIndicateurs(req.user, res.locals.organismeId, filters);
+          return await getOrganismeIndicateursEffectifs(res.locals.organismeId, filters);
+        })
+      )
+      .get(
+        "/indicateurs/organismes",
+        authOrgMiddleware("reader"),
+        returnResult(async (req, res) => {
+          return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
         })
       )
       .get(

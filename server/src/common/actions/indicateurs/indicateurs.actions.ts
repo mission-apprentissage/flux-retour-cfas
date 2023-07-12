@@ -10,6 +10,7 @@ import {
   organismesFiltersConfigurations,
 } from "@/common/actions/helpers/filters";
 import {
+  findOrganismesAccessiblesByOrganisme,
   getEffectifsAnonymesRestriction,
   getEffectifsNominatifsRestriction,
   getIndicateursEffectifsRestriction,
@@ -23,6 +24,7 @@ import {
   IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
   IndicateursEffectifsAvecOrganisme,
+  IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
 } from "./indicateurs";
 
@@ -571,8 +573,7 @@ export async function getEffectifsNominatifs(
   return indicateurs;
 }
 
-export async function getOrganismeIndicateurs(
-  ctx: AuthContext,
+export async function getOrganismeIndicateursEffectifs(
   organismeId: ObjectId,
   filters: EffectifsFilters
 ): Promise<IndicateursEffectifs> {
@@ -580,7 +581,7 @@ export async function getOrganismeIndicateurs(
     .aggregate([
       {
         $match: {
-          $and: [...buildMongoFilters(filters, effectifsFiltersConfigurations)],
+          $and: buildMongoFilters(filters, effectifsFiltersConfigurations),
           organisme_id: organismeId,
         },
       },
@@ -710,5 +711,46 @@ export async function getOrganismeIndicateurs(
       },
     ])
     .next()) as IndicateursEffectifs;
+  return indicateurs;
+}
+
+export async function getOrganismeIndicateursOrganismes(organismeId: ObjectId): Promise<IndicateursOrganismes> {
+  const indicateurs = (await organismesDb()
+    .aggregate([
+      {
+        $match: {
+          _id: {
+            $in: await findOrganismesAccessiblesByOrganisme(organismeId),
+          },
+        },
+      },
+      {
+        $project: {
+          transmet: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 1, 0] },
+          ne_transmet_pas: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 0, 1] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total_transmet: { $sum: "$transmet" },
+          total_ne_transmet_pas: { $sum: "$ne_transmet_pas" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          tauxCouverture: {
+            $multiply: [100, { $divide: ["$total_transmet", { $add: ["$total_transmet", "$total_ne_transmet_pas"] }] }],
+          },
+          totalOrganismes: {
+            $add: ["$total_transmet", "$total_ne_transmet_pas"],
+          },
+          organismesTransmetteurs: "$total_transmet",
+          organismesNonTransmetteurs: "$total_ne_transmet_pas",
+        },
+      },
+    ])
+    .next()) as IndicateursOrganismes;
   return indicateurs;
 }
