@@ -211,7 +211,7 @@ const DashboardOrganisme = () => {
             </HStack>
 
             <HStack>
-              <Text>Sa domiciliation est&nbsp;:</Text>
+              <Text>Domiciliation&nbsp;:</Text>
               <Text fontWeight="bold">{organisme.adresse?.complete || "Inconnue"}</Text>
             </HStack>
           </VStack>
