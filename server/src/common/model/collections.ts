@@ -1,5 +1,7 @@
 import { getDbCollection } from "@/common/mongodb";
 
+import { ContratDeca } from "../apis/@types/ApiDeca";
+
 import {
   Effectif,
   FiabilisationUaiSiret,
@@ -19,6 +21,7 @@ import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { OrganismeSoltea } from "./@types/OrganismeSoltea";
 import { UaisAcceReferentiel } from "./@types/UaisAcceReferentiel.js";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
+import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
@@ -54,6 +57,7 @@ export const modelDescriptors = [
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
   bassinsEmploiDescriptor,
+  contratsDecaModelDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<Formation>(formationsModelDescriptor.collectionName);
@@ -80,3 +84,4 @@ export const fiabilisationUaiSiretDb = () =>
 export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmploiDescriptor.collectionName);
 export const organismesSolteaDb = () =>
   getDbCollection<OrganismeSoltea>(organismesSolteaModelDescriptor.collectionName);
+export const contratsDecaDb = () => getDbCollection<ContratDeca>(contratsDecaModelDescriptor.collectionName);

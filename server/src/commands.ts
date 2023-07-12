@@ -13,6 +13,7 @@ import { removeInscritsSansContratsDepuis, transformRupturantsToAbandonsDepuis }
 import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
+import { hydrateDeca } from "./jobs/hydrate/deca/hydrate-deca";
 import { hydrateEffectifsComputed } from "./jobs/hydrate/hydrate-effectifs-computed";
 import { hydrateFormationsCatalogue } from "./jobs/hydrate/hydrate-formations-catalogue";
 import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
@@ -304,6 +305,20 @@ program
   .action(
     runJob(async () => {
       return hydrateOpenApi();
+    })
+  );
+
+/**
+ * Job de remplissage des contrats Deca
+ */
+program
+  .command("hydrate:contratsDeca")
+  .description("Remplissage des contrats Deca")
+  .option("-d, --drop", "Supprime les contrats existants avant de les recréer")
+  .option("-f, --full", "Récupère l'intégralité des données disponibles via l'API Deca")
+  .action(
+    runJob(async ({ drop, full }) => {
+      return hydrateDeca({ drop, full });
     })
   );
 

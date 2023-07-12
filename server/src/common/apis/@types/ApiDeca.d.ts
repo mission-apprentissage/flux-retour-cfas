@@ -1,14 +1,14 @@
-interface Contrat {
+export interface Contrat {
   alternant: Alternant;
   formation: Formation;
   etablissementFormation: EtablissementFormation;
   organismeFormationResponsable: OrganismeFormationResponsable;
   detailsContrat: DetailsContrat;
-  rupture: Rupture?;
+  rupture?: Rupture;
   employeur: Employeur;
 }
 
-interface Alternant {
+export interface Alternant {
   nom: string;
   prenom: string;
   sexe: string;
@@ -22,30 +22,38 @@ interface Alternant {
   derniereClasse: string?;
 }
 
-interface Adresse {
+export interface Adresse {
   numero: number?;
   voie: string?;
   codePostal: string?;
 }
 
-interface DetailsContrat {
+export interface DetailsContrat {
   noContrat: string;
-  dateDebutContrat: string; // TODO Check DGEFP
-  statut: string; // TODO Check DGEFP
+  dateDebutContrat: string;
+  statut: Statut;
   dateFinContrat: string;
   dateEffetAvenant: string;
   noAvenant: string?;
 }
 
-interface Employeur {
+enum Statut {
+  Annule = "Annulé",
+  Corrige = "Corrigé",
+  Empty = "",
+  Rompu = "Rompu",
+  Supprime = "Supprimé",
+}
+
+export interface Employeur {
   codeIdcc: string;
 }
 
-interface EtablissementFormation {
+export interface EtablissementFormation {
   siret: string?; // Organisme responsable
 }
 
-interface Formation {
+export interface Formation {
   dateDebutFormation: string;
   dateFinFormation: string;
   codeDiplome: string;
@@ -53,12 +61,12 @@ interface Formation {
   intituleOuQualification: string;
 }
 
-interface OrganismeFormationResponsable {
+export interface OrganismeFormationResponsable {
   uaiCfa: string?;
   siret: string?;
 }
 
-interface Rupture {
+export interface Rupture {
   dateEffetRupture: string;
 }
 
