@@ -238,6 +238,11 @@ export async function findOrganismesAccessiblesByOrganisation(ctx: AuthContext<O
   return [userOrganisme._id, ...(await findOFLinkedOrganismesIds(userOrganisme))];
 }
 
+export async function findOrganismesAccessiblesByOrganisme(organismeId: ObjectId) {
+  const userOrganisme = await getOrganismeById(organismeId);
+  return [userOrganisme._id, ...(await findOFLinkedOrganismesIds(userOrganisme))];
+}
+
 /**
  * Informations en provenance du catalogue :
  * organismes(siret=siret de l'organisation, uai=uai de l'organisation).formations.organismes

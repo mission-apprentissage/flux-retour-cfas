@@ -120,30 +120,6 @@ const profilsOrganisation = [
     },
   },
   {
-    label: "OFR lié",
-    organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE",
-      uai: "0000000A",
-      siret: "00000000000018",
-    },
-  },
-  {
-    label: "OFR responsable",
-    organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE",
-      uai: "0000000B",
-      siret: "00000000000026",
-    },
-  },
-  {
-    label: "OFR non lié",
-    organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE",
-      uai: "1111111B",
-      siret: "11111111100006",
-    },
-  },
-  {
     label: "OFRF lié",
     organisation: {
       type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
@@ -155,14 +131,38 @@ const profilsOrganisation = [
     label: "OFRF responsable",
     organisation: {
       type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-      uai: "0000000C",
-      siret: "00000000000034",
+      uai: "0000000B",
+      siret: "00000000000026",
     },
   },
   {
     label: "OFRF non lié",
     organisation: {
       type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+      uai: "1111111B",
+      siret: "11111111100006",
+    },
+  },
+  {
+    label: "OFR lié",
+    organisation: {
+      type: "ORGANISME_FORMATION_RESPONSABLE",
+      uai: "0000000A",
+      siret: "00000000000018",
+    },
+  },
+  {
+    label: "OFR responsable",
+    organisation: {
+      type: "ORGANISME_FORMATION_RESPONSABLE",
+      uai: "0000000C",
+      siret: "00000000000034",
+    },
+  },
+  {
+    label: "OFR non lié",
+    organisation: {
+      type: "ORGANISME_FORMATION_RESPONSABLE",
       uai: "1111111B",
       siret: "11111111100006",
     },
