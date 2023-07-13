@@ -70,9 +70,6 @@ export interface Effectif {
      * Date de la reconnaissance travailleur handicapé
      */
     date_rqth?: Date;
-    nir?: string;
-    responsable_mail1?: string;
-    responsable_mail2?: string;
     affelnet?: string[];
     parcoursup?: string[];
     /**
@@ -1058,6 +1055,18 @@ export interface Effectif {
         | 82
         | 99;
     };
+    /**
+     * Numéro de sécurité sociale de l'apprenant
+     */
+    nir?: string;
+    /**
+     * Adresse mail du responsable 1
+     */
+    responsable_mail1?: string;
+    /**
+     * Adresse mail du responsable 2
+     */
+    responsable_mail2?: string;
   };
   formation?: {
     /**
@@ -1124,10 +1133,6 @@ export interface Effectif {
      * Cause de l'exclusion
      */
     cause_exclusion?: string;
-    duree_theorique?: number;
-    formation_presentielle?: boolean;
-    date_fin?: Date;
-    date_entree?: Date;
     referent_handicap?: {
       /**
        * Nom du référent handicap
@@ -1142,6 +1147,26 @@ export interface Effectif {
        */
       email?: string;
     };
+    /**
+     * Formation en présentiel
+     */
+    formation_presentielle?: boolean;
+    /**
+     * Durée théorique de la formation en mois
+     */
+    duree_theorique?: number;
+    /**
+     * Date de fin de la formation
+     */
+    date_fin?: Date;
+    /**
+     * Date de début de la formation
+     */
+    date_debut?: Date;
+    /**
+     * Date d'entrée en formation
+     */
+    date_entree?: Date;
   };
   /**
    * Historique des contrats de l'apprenant

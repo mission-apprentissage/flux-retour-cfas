@@ -33,9 +33,11 @@ export const formationEffectifSchema = object(
     obtention_diplome: boolean({ description: "Diplôme obtenu" }), // vrai si date_obtention_diplome non null
     date_exclusion: date({ description: "Date d'exclusion" }),
     cause_exclusion: string({ description: "Cause de l'exclusion" }),
-    referent_handicap_nom: string({ description: "Nom du référent handicap" }),
-    referent_handicap_prenom: string({ description: "Prénom du référent handicap" }),
-    referent_handicap_email: string({ description: "Email du référent handicap" }),
+    referent_handicap: object({
+      nom: string({ description: "Nom du référent handicap" }),
+      prenom: string({ description: "Prénom du référent handicap" }),
+      email: string({ description: "Email du référent handicap" }),
+    }),
     formation_presentielle: boolean({ description: "Formation en présentiel" }),
     duree_theorique: integer({ description: "Durée théorique de la formation en mois" }),
     date_fin: date({ description: "Date de fin de la formation" }),
