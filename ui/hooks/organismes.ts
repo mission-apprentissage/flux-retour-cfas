@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { _get, _post, _put } from "@/common/httpClient";
+import { Organisme } from "@/common/internal/Organisme";
 
 // récupère un organisme
 export function useOrganisme(organismeId: string | undefined | null) {
@@ -61,7 +62,7 @@ export function useOrganisationOrganismes() {
     data: organismes,
     isLoading,
     error,
-  } = useQuery<any, any>(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {});
+  } = useQuery<Organisme[], any>(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {});
 
   return {
     organismes,
