@@ -26,6 +26,7 @@ export async function hydrateEffectifsComputed() {
                   uai: { $first: "$_organisme.uai" },
                   siret: { $first: "$_organisme.siret" },
                   bassinEmploi: { $first: "$_organisme.adresse.bassinEmploi" },
+                  fiable: { $cond: [{ $eq: [{ $first: "$_organisme.fiabilisation_statut" }, "FIABLE"] }, true, false] },
                 },
               },
             },

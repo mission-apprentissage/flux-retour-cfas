@@ -1817,6 +1817,10 @@ export interface Effectif {
       bassinEmploi?: string;
       uai?: string;
       siret?: string;
+      /**
+       * = organismes.fiabilisation_statut == FIABLE
+       */
+      fiable?: boolean;
     };
   };
 }
