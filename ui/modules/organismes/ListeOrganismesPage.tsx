@@ -120,7 +120,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         >
           <TabList>
             <Tab fontWeight="bold">Organismes fiables ({organismesFiables.length})</Tab>
-            <Tab fontWeight="bold">Organismes non fiables ({organismesNonFiables.length})</Tab>
+            <Tab fontWeight="bold">Organismes à fiabiliser ({organismesNonFiables.length})</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
