@@ -30,6 +30,15 @@ export const formatSiretSplitted = (siret) => {
   return validateSiret(siret) ? `${siret.substr(0, 9)} ${siret.substr(9, siret.length)}` : "SIRET INVALIDE";
 };
 
+const civilityToAbbreviation = {
+  Madame: "Mme",
+  Monsieur: "M.",
+};
+
+export function formatCivility(civility: "Madame" | "Monsieur"): string {
+  return civilityToAbbreviation[civility] ?? "";
+}
+
 export const capitalize = (str) => {
   const firstLetter = str.charAt(0);
   return `${firstLetter.toUpperCase()}${str.substr(1)}`;

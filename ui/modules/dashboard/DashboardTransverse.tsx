@@ -24,7 +24,7 @@ import {
   OrganisationOperateurPublicRegion,
 } from "@/common/internal/Organisation";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
-import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
+import { formatCivility, formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import withAuth from "@/components/withAuth";
@@ -157,7 +157,7 @@ const DashboardTransverse = () => {
         <Container maxW="xl" p="8">
           <Heading textStyle="h2" color="grey.800" size="md">
             <DashboardWelcome mr="2" />
-            Bienvenue sur votre tableau de bord, {auth.civility} {auth.prenom} {auth.nom}
+            Bienvenue sur votre tableau de bord, {formatCivility(auth.civility)} {auth.prenom} {auth.nom}
           </Heading>
           <Text color="bluefrance" fontWeight={700} mt="4" textTransform="uppercase">
             {getOrganisationLabel(auth.organisation)}

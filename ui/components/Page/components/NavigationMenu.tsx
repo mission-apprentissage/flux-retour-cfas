@@ -194,6 +194,12 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
         </NavItem>
         {canManageEffectifsOrganisme(organisationType) && (
           <>
+            {/* <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
+              Ses organismes
+            </NavItem> */}
+            {/* <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
+              Ses indicateurs
+            </NavItem>  */}
             <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
               Ses effectifs
             </NavItem>

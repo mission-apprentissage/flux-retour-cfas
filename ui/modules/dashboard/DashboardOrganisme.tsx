@@ -1,12 +1,16 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Badge, Box, Button, Container, Divider, Flex, HStack, Heading, Text, Tooltip, VStack } from "@chakra-ui/react";
+import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import { useMemo } from "react";
 
 import { ERPS_BY_ID } from "@/common/constants/erps";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { _get } from "@/common/httpClient";
-import { formatSiretSplitted } from "@/common/utils/stringUtils";
+import { sleep } from "@/common/utils/misc";
+import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
+import DownloadLinkButton from "@/components/buttons/DownloadLink";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
@@ -16,20 +20,23 @@ import { Checkbox } from "@/theme/components/icons";
 import { CloseCircle } from "@/theme/components/icons/CloseCircle";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
-import { IndicateursEffectifs } from "../models/indicateurs";
+import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
 
 import IndicateursGrid from "./IndicateursGrid";
 import { natureOrganismeDeFormationLabel, natureOrganismeDeFormationTooltip } from "./OrganismeInfo";
 
-const DashboardOrganisme = () => {
+interface Props {
+  modePublique: boolean; // permet d'afficher plus d'informations, notamment les responsables, qualiopi
+}
+const DashboardOrganisme = ({ modePublique = false }: Props) => {
   const router = useRouter();
   const { auth } = useAuth();
   const { organisme } = useOrganisationOrganisme();
 
-  const { data: indicateurs, isLoading: indicateursLoading } = useQuery<IndicateursEffectifs>(
-    ["organismes", organisme?._id, "indicateurs"],
+  const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery<IndicateursEffectifs>(
+    ["organismes", organisme?._id, "indicateurs/effectifs"],
     () =>
-      _get(`/api/v1/organismes/${organisme!._id}/indicateurs`, {
+      _get(`/api/v1/organismes/${organisme!._id}/indicateurs/effectifs`, {
         params: {
           date: new Date(),
         },
@@ -39,12 +46,37 @@ const DashboardOrganisme = () => {
     }
   );
 
+  const { data: indicateursOrganismes } = useQuery<IndicateursOrganismes>(
+    ["organismes", organisme?._id, "indicateurs/organismes"],
+    () => _get(`/api/v1/organismes/${organisme!._id}/indicateurs/organismes`),
+    {
+      enabled: !!organisme?._id,
+    }
+  );
+
+  const indicateursOrganismesPieData = useMemo<any[]>(() => {
+    if (!indicateursOrganismes) {
+      return [];
+    }
+    return [
+      {
+        id: "Transmet",
+        value: indicateursOrganismes.organismesTransmetteurs,
+        color: "#00ac8c",
+      },
+      {
+        id: "Ne transmet pas",
+        value: indicateursOrganismes.organismesNonTransmetteurs,
+        color: "#ef5800",
+      },
+    ];
+  }, [indicateursOrganismes]);
+
   if (!organisme) {
     return <></>;
   }
 
-  // FIXME valider condition
-  const aucunEffectifTransmis = !(organisme.first_transmission_date || organisme.mode_de_transmission);
+  const aucunEffectifTransmis = !organisme.first_transmission_date;
 
   return (
     <Box>
@@ -60,7 +92,10 @@ const DashboardOrganisme = () => {
         <Container maxW="xl" p="8">
           <Heading textStyle="h2" color="grey.800" size="md">
             <DashboardWelcome mr="2" />
-            Bienvenue sur votre tableau de bord, {auth.civility} {auth.prenom} {auth.nom}
+            Bienvenue sur{" "}
+            {modePublique
+              ? "le tableau de bord de"
+              : `votre tableau de bord, ${formatCivility(auth.civility)} ${auth.prenom} ${auth.nom}`}
           </Heading>
 
           <Text color="bluefrance" fontWeight={700} mt="4" textTransform="uppercase">
@@ -70,7 +105,7 @@ const DashboardOrganisme = () => {
           <VStack gap={1} rowGap="1em" alignItems={"baseline"} mt="6">
             <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
               <HStack>
-                <Text>Code UAI&nbsp;:</Text>
+                <Text>UAI&nbsp;:</Text>
                 <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
                   {organisme.uai || "UAI INCONNUE"}
                 </Badge>
@@ -121,39 +156,41 @@ const DashboardOrganisme = () => {
                 </Badge>
               </HStack>
 
-              <HStack>
-                <Text>Certifié Qualiopi&nbsp;:</Text>
-                <Badge
-                  fontSize="epsilon"
-                  textColor="grey.800"
-                  paddingX="1w"
-                  paddingY="2px"
-                  backgroundColor="#ECEAE3"
-                  textTransform="none"
-                >
-                  {organisme.qualiopi ? "Oui" : "Non"}
-
-                  <Tooltip
-                    background="bluefrance"
-                    color="white"
-                    label={
-                      <Box padding="2w">
-                        La donnée Certifié qualiopi provient de la Liste Publique des Organismes de Formations. Si cette
-                        information est erronée, merci de leur signaler.
-                      </Box>
-                    }
+              {modePublique && (
+                <HStack>
+                  <Text>Certifié Qualiopi&nbsp;:</Text>
+                  <Badge
+                    fontSize="epsilon"
+                    textColor="grey.800"
+                    paddingX="1w"
+                    paddingY="2px"
+                    backgroundColor="#ECEAE3"
+                    textTransform="none"
                   >
-                    <Box
-                      as="i"
-                      className="ri-information-line"
-                      fontSize="epsilon"
-                      color="grey.500"
-                      marginLeft="1w"
-                      verticalAlign="middle"
-                    />
-                  </Tooltip>
-                </Badge>
-              </HStack>
+                    {organisme.qualiopi ? "Oui" : "Non"}
+
+                    <Tooltip
+                      background="bluefrance"
+                      color="white"
+                      label={
+                        <Box padding="2w">
+                          La donnée Certifié qualiopi provient de la Liste Publique des Organismes de Formations. Si
+                          cette information est erronée, merci de leur signaler.
+                        </Box>
+                      }
+                    >
+                      <Box
+                        as="i"
+                        className="ri-information-line"
+                        fontSize="epsilon"
+                        color="grey.500"
+                        marginLeft="1w"
+                        verticalAlign="middle"
+                      />
+                    </Tooltip>
+                  </Badge>
+                </HStack>
+              )}
 
               {/* FIXME TODO dans quel cas afficher ce bloc ? si configuration faite ou si au moins une transmission ? */}
               {organisme.erps?.[0] ? (
@@ -214,6 +251,23 @@ const DashboardOrganisme = () => {
               <Text>Domiciliation&nbsp;:</Text>
               <Text fontWeight="bold">{organisme.adresse?.complete || "Inconnue"}</Text>
             </HStack>
+
+            {modePublique && (
+              <>
+                {modePublique && (
+                  <HStack>
+                    <Text>Responsable identifié de l’établissement&nbsp;:</Text>
+                    <Text fontWeight="bold">{"Inconnu - Compte tableau de bord non créé à ce jour"}</Text>
+                  </HStack>
+                )}
+                {modePublique && (
+                  <HStack>
+                    <Text>Organisme responsable identifié&nbsp;:</Text>
+                    <Text fontWeight="bold">{"TODO"}</Text>
+                  </HStack>
+                )}
+              </>
+            )}
           </VStack>
         </Container>
       </Box>
@@ -233,7 +287,9 @@ const DashboardOrganisme = () => {
           </Ribbons>
         )}
 
-        {indicateurs && <IndicateursGrid indicateursEffectifs={indicateurs} loading={indicateursLoading} />}
+        {indicateursEffectifs && (
+          <IndicateursGrid indicateursEffectifs={indicateursEffectifs} loading={indicateursEffectifsLoading} />
+        )}
 
         {aucunEffectifTransmis ? (
           <Button
@@ -260,6 +316,94 @@ const DashboardOrganisme = () => {
             Voir mes indicateurs
           </Button>
         )}
+
+        <Box bg="galt" py="8" px="12" mt="8">
+          <Heading as="h3" color="#3558A2" fontSize="delta" fontWeight="700" mb={3}>
+            Nombre d’organismes de formation rattachés à votre établissement
+          </Heading>
+
+          <Text fontSize="zeta">
+            Taux de couverture des organismes transmetteurs / non-transmetteurs
+            <Tooltip
+              background="bluefrance"
+              color="white"
+              label={
+                <Box padding="1w">
+                  Ce taux traduit le nombre d’organismes dispensant une formation en apprentissage (sauf responsables)
+                  qui transmettent au tableau de bord. Les organismes qui transmettent mais ne font pas partie du
+                  référentiel ne rentrent pas en compte dans ce taux. Il est conseillé d’avoir un minimum de 80%
+                  d’établissements transmetteurs afin de garantir la viabilité des enquêtes menées auprès de ces
+                  derniers.
+                </Box>
+              }
+              aria-label="Informations sur le taux de couverture des organismes"
+            >
+              <Box
+                as="i"
+                className="ri-information-line"
+                fontSize="epsilon"
+                color="grey.500"
+                marginLeft="1w"
+                verticalAlign="middle"
+              />
+            </Tooltip>
+          </Text>
+
+          <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
+
+          {/* TODO OFR uniquement */}
+          <Flex justifyContent="space-between">
+            <VStack gap="2" justifyContent="center" alignItems="start">
+              <HStack>
+                <Box bg="#00ac8c" w={4} h={4} borderRadius={10} />
+                <Text color="mgalt" fontSize="zeta" fontWeight="bold">
+                  Transmettent les effectifs au tableau de bord
+                </Text>
+              </HStack>
+
+              <HStack>
+                <Box bg="#ef5800" w={4} h={4} borderRadius={10} />
+                <Text color="mgalt" fontSize="zeta" fontWeight="bold">
+                  Ne transmettent pas les effectifs au tableau de bord
+                </Text>
+              </HStack>
+
+              <DownloadLinkButton
+                action={async () => {
+                  await sleep(2000);
+                }}
+              >
+                Télécharger la liste des organismes qui ne transmettent pas
+              </DownloadLinkButton>
+            </VStack>
+
+            <Box flex="1" minH="250px">
+              <ResponsivePie
+                margin={{ top: 32, right: 32, bottom: 32, left: 32 }}
+                data={indicateursOrganismesPieData}
+                innerRadius={0.6}
+                cornerRadius={3}
+                activeOuterRadiusOffset={8}
+                enableArcLinkLabels={false}
+                colors={{ datum: "data.color" }}
+                enableArcLabels={false}
+                layers={["arcs", CenteredMetric]}
+              />
+            </Box>
+          </Flex>
+        </Box>
+
+        <Button
+          size="md"
+          variant="secondary"
+          display="block"
+          ml="auto"
+          onClick={() => {
+            router.push(`/organismes`);
+          }}
+        >
+          Voir la liste complète
+        </Button>
 
         {aucunEffectifTransmis && (
           <>
@@ -336,7 +480,7 @@ const DashboardOrganisme = () => {
                   mt="3"
                 >
                   <ArrowForwardIcon mr="2" />
-                  Consultez la liste des données collectées
+                  Consultez la liste des données collectées (TODO lien à mettre)
                 </Link>
               </Box>
             </Flex>
@@ -368,7 +512,7 @@ const DashboardOrganisme = () => {
                     alignItems="center"
                     mt="3"
                   >
-                    politique de l’apprentissage (TODO LIEN à mettre)
+                    politique de l’apprentissage
                   </Link>
                   .
                 </Text>
@@ -380,5 +524,31 @@ const DashboardOrganisme = () => {
     </Box>
   );
 };
+
+function CenteredMetric({ dataWithArc, centerX, centerY }: PieCustomLayerProps<any>) {
+  const total = dataWithArc.reduce((acc, datum) => acc + datum.value, 0);
+  return (
+    <>
+      <text
+        x={centerX}
+        y={centerY - 10}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{ fill: "#3A3A3A", fontSize: "28px", fontWeight: "bold" }}
+      >
+        {`${total}`}
+      </text>
+      <text
+        x={centerX}
+        y={centerY + 15}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{ fill: "#666666", fontSize: "14px" }}
+      >
+        OFA
+      </text>
+    </>
+  );
+}
 
 export default withAuth(DashboardOrganisme);
