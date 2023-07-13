@@ -237,6 +237,7 @@ describe("Processus d'ingestion", () => {
               reseaux: [],
               siret: "77937827200016",
               uai: "0802004U",
+              fiable: false,
             },
           },
         });
@@ -536,6 +537,7 @@ describe("Processus d'ingestion", () => {
               uai: "0802004U",
               siret: "77937827200016",
               reseaux: [],
+              fiable: false,
             },
           },
           updated_at: expect.any(Date),
