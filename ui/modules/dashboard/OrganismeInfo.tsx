@@ -81,7 +81,7 @@ export default function OrganismeInfo({ organisme, isMine }: { organisme: Organi
   const { data: indicateurs, isLoading: indicateursLoading } = useQuery<IndicateursEffectifs>(
     ["organismes", organisme?._id, "indicateurs"],
     () =>
-      _get(`/api/v1/organismes/${organisme._id}/indicateurs`, {
+      _get(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs`, {
         params: {
           date: new Date(),
         },

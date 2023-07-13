@@ -4,7 +4,7 @@ import { Organisation } from "./Organisation";
 
 export interface AuthContext<IOrganisation = Organisation> {
   _id: string;
-  civility: string;
+  civility: "Madame" | "Monsieur";
   nom: string;
   prenom: string;
   email: string;
