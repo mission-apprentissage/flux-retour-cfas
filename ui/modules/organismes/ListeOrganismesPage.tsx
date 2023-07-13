@@ -103,8 +103,9 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         <Text>Retrouver ci-dessous&nbsp;:</Text>
         <UnorderedList styleType="'- '">
           <ListItem>
-            les <strong>{organismesFiables.length}</strong> établissements <strong>fiables</strong> de votre territoire
-            et la nature de chacun (inclus les prépa-apprentissage, CFA académiques, d’entreprise, etc.)
+            les <strong>{organismesFiables.length}</strong> établissements <strong>fiables</strong>{" "}
+            {getTextContextFromOrganisationType(organisationType)} et la nature de chacun (inclus les
+            prépa-apprentissage, CFA académiques, d’entreprise, etc.)
           </ListItem>
           {organismesNonFiables.length !== 0 && (
             <ListItem>
@@ -246,6 +247,32 @@ function getHeaderTitleFromOrganisationType(type: OrganisationType) {
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";
+
+    default:
+      throw new Error(`Type ’${type}’ inconnu`);
+  }
+}
+
+function getTextContextFromOrganisationType(type: OrganisationType) {
+  switch (type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+      return "rattachés à votre organisme";
+
+    case "TETE_DE_RESEAU":
+      return "de votre réseau";
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+      return "de votre territoire";
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return "de l'ensemble du territoire";
 
     default:
       throw new Error(`Type ’${type}’ inconnu`);
