@@ -247,8 +247,8 @@ function OrganismesTable(props: OrganismesTableProps) {
         onSortingChange={(state) => setSort(state)}
         columns={
           props.modeNonFiable
-            ? organismesTableColumnsDefs.filter((column) => column.accessorKey !== "ferme")
-            : organismesTableColumnsDefs
+            ? organismesTableColumnsDefs
+            : organismesTableColumnsDefs.filter((column) => column.accessorKey !== "ferme")
         }
       />
     </>
