@@ -372,68 +372,72 @@ describe("Processus d'ingestion", () => {
     });
 
     describe("Ingestion de nouvelles données valides v3", () => {
+      const commonSampleData: EffectifsQueue = {
+        nom_apprenant: "Doe",
+        prenom_apprenant: "John",
+        date_de_naissance_apprenant: "2000-10-28T00:00:00.000Z",
+        annee_scolaire: "2021-2022",
+        statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
+        date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
+        id_erp_apprenant: "123456789",
+        api_version: "v3",
+        ine_apprenant: "1234567890A",
+        email_contact: "johndoe@example.org",
+        tel_apprenant: "0123456789",
+        libelle_court_formation: "CAP",
+        annee_formation: 1,
+        formation_rncp: "RNCP123",
+        contrat_date_debut: "2021-09-01T00:00:00.000Z",
+        contrat_date_fin: "2022-06-30T00:00:00.000Z",
+        contrat_date_rupture: "2022-06-30T00:00:00.000Z",
+        nir_apprenant: "1234567890123",
+        adresse_apprenant: "1 rue de la paix",
+        code_postal_apprenant: "75000",
+        sexe_apprenant: "F",
+        rqth_apprenant: true,
+        date_rqth_apprenant: "2021-09-01T00:00:00.000Z",
+        responsable_apprenant_mail1: "a1@example.org",
+        responsable_apprenant_mail2: "a2@example.org",
+        obtention_diplome_formation: true,
+        date_obtention_diplome_formation: "2022-06-30T00:00:00.000Z",
+        date_exclusion_formation: "2022-06-30T00:00:00.000Z",
+        cause_exclusion_formation: "absences répétées et injustifiées",
+        nom_referent_handicap_formation: "Doe",
+        prenom_referent_handicap_formation: "John",
+        email_referent_handicap_formation: "a3@example.org",
+        cause_rupture_contrat: "abandon",
+        contrat_date_debut_2: "2021-09-01T00:00:00.000Z",
+        contrat_date_fin_2: "2022-06-30T00:00:00.000Z",
+        contrat_date_rupture_2: "2022-06-30T00:00:00.000Z",
+        cause_rupture_contrat_2: "abandon",
+        siret_employeur: "12345678901234",
+        siret_employeur_2: "12345678901234",
+        formation_presentielle: true,
+        date_inscription_formation: "2021-09-01T00:00:00.000Z",
+        date_entree_formation: "2021-09-01T00:00:00.000Z",
+        date_fin_formation: "2022-06-30T00:00:00.000Z",
+        duree_theorique_formation: 2,
+        etablissement_responsable_uai: UAI_RESPONSABLE,
+        etablissement_responsable_siret: SIRET_RESPONSABLE,
+        etablissement_formateur_uai: UAI,
+        etablissement_formateur_siret: SIRET,
+        etablissement_lieu_de_formation_uai: UAI,
+        etablissement_lieu_de_formation_siret: SIRET,
+        formation_cfd: "1234ABCD",
+        created_at: new Date(),
+        source: "REPLACE_ME",
+      };
       it("Vérifie l'ingestion valide d'un nouveau dossier valide v3 pour un organisme fiable", async () => {
         const organismeForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
         if (!organismeForInput) throw new Error("Organisme non trouvé");
 
+        const sampleData: EffectifsQueue = {
+          ...commonSampleData,
+          source: organismeForInput._id.toString(),
+        };
+
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
-
-        const sampleData: EffectifsQueue = {
-          nom_apprenant: "Doe",
-          prenom_apprenant: "John",
-          date_de_naissance_apprenant: "2000-10-28T00:00:00.000Z",
-          annee_scolaire: "2021-2022",
-          statut_apprenant: "2",
-          date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
-          id_erp_apprenant: "123456789",
-          source: organismeForInput._id.toString(),
-          api_version: "v3",
-          ine_apprenant: "1234567890A",
-          email_contact: "johndoe@example.org",
-          tel_apprenant: "0123456789",
-          libelle_court_formation: "CAP",
-          annee_formation: 1,
-          formation_rncp: "RNCP123",
-          contrat_date_debut: "2021-09-01T00:00:00.000Z",
-          contrat_date_fin: "2022-06-30T00:00:00.000Z",
-          contrat_date_rupture: "2022-06-30T00:00:00.000Z",
-          nir_apprenant: "1234567890123",
-          adresse_apprenant: "1 rue de la paix",
-          code_postal_apprenant: "75000",
-          sexe_apprenant: "F",
-          rqth_apprenant: true,
-          date_rqth_apprenant: "2021-09-01T00:00:00.000Z",
-          responsable_apprenant_mail1: "a1@example.org",
-          responsable_apprenant_mail2: "a2@example.org",
-          obtention_diplome_formation: true,
-          date_obtention_diplome_formation: "2022-06-30T00:00:00.000Z",
-          date_exclusion_formation: "2022-06-30T00:00:00.000Z",
-          cause_exclusion_formation: "absences répétées et injustifiées",
-          nom_referent_handicap_formation: "Doe",
-          prenom_referent_handicap_formation: "John",
-          email_referent_handicap_formation: "a3@example.org",
-          cause_rupture_contrat: "abandon",
-          contrat_date_debut_2: "2021-09-01T00:00:00.000Z",
-          contrat_date_fin_2: "2022-06-30T00:00:00.000Z",
-          contrat_date_rupture_2: "2022-06-30T00:00:00.000Z",
-          cause_rupture_contrat_2: "abandon",
-          siret_employeur: "12345678901234",
-          siret_employeur_2: "12345678901234",
-          formation_presentielle: true,
-          date_inscription_formation: "2021-09-01T00:00:00.000Z",
-          date_entree_formation: "2021-09-01T00:00:00.000Z",
-          date_fin_formation: "2022-06-30T00:00:00.000Z",
-          duree_theorique_formation: 2,
-          etablissement_responsable_uai: UAI_RESPONSABLE,
-          etablissement_responsable_siret: SIRET_RESPONSABLE,
-          etablissement_formateur_uai: UAI,
-          etablissement_formateur_siret: SIRET,
-          etablissement_lieu_de_formation_uai: UAI,
-          etablissement_lieu_de_formation_siret: SIRET,
-          formation_cfd: "1234ABCD",
-          created_at: new Date(),
-        };
 
         const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
         const result = await processEffectifsQueue();
@@ -547,6 +551,69 @@ describe("Processus d'ingestion", () => {
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
           organisme_formateur_id: new ObjectId(organismeForInput._id),
         });
+      });
+
+      it("Vérifie l'ingestion et la mise à jour valide d'un dossier valide v3 déja existant pour un organisme fiable", async () => {
+        const organismeForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
+        if (!organismeForInput) throw new Error("Organisme non trouvé");
+
+        // Ingestion d'un premier dossier et traitement.
+        await effectifsQueueDb().insertOne({
+          ...commonSampleData,
+          id_erp_apprenant: "987654321",
+          source: organismeForInput._id.toString(),
+          statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
+          date_metier_mise_a_jour_statut: "2023-07-12T04:05:47.647Z",
+        });
+        await processEffectifsQueue();
+
+        // Création d'un dossier pour la même clé d'unicité envoyé le lendemain avec un nouveau statut et nouvelle date métier
+        const { insertedId } = await effectifsQueueDb().insertOne({
+          ...commonSampleData,
+          id_erp_apprenant: "987654321",
+          source: organismeForInput._id.toString(),
+          statut_apprenant: CODES_STATUT_APPRENANT.apprenti, // MAJ du statut
+          date_metier_mise_a_jour_statut: "2023-07-13T04:05:47.647Z", // MAJ de la date
+        });
+        const result = await processEffectifsQueue();
+        const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
+
+        expect(updatedInput?.error).toBeUndefined();
+        expect(updatedInput?.validation_errors).toBeUndefined();
+        expect(updatedInput?.processed_at).toBeInstanceOf(Date);
+
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
+
+        expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
+        expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
+
+        expect(result).toStrictEqual({
+          totalProcessed: 1,
+          totalValidItems: 1,
+          totalInvalidItems: 0,
+        });
+
+        // Check nb effectifsQueue
+        expect(await effectifsQueueDb().countDocuments({})).toBe(2);
+
+        // Check nb d'effectifs
+        expect(await effectifsDb().countDocuments({})).toBe(1);
+
+        // Check historique
+        const effectifInserted = await effectifsDb().findOne({ id_erp_apprenant: "987654321" });
+        console.log(effectifInserted?.apprenant.historique_statut);
+        expect(effectifInserted?.apprenant.historique_statut).toMatchObject([
+          {
+            date_reception: expect.any(Date),
+            date_statut: new Date("2023-07-12T04:05:47.647Z"),
+            valeur_statut: CODES_STATUT_APPRENANT.inscrit,
+          },
+          {
+            date_reception: expect.any(Date),
+            date_statut: new Date("2023-07-13T04:05:47.647Z"),
+            valeur_statut: CODES_STATUT_APPRENANT.apprenti,
+          },
+        ]);
       });
     });
   });
