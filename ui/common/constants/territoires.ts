@@ -1409,6 +1409,19 @@ export const DEPARTEMENTS = [
     },
   },
   {
+    nom: "Saint-Pierre-et-Miquelon",
+    code: "975",
+    uaiCode: "975",
+    region: {
+      code: "05",
+      nom: "Saint-Pierre-et-Miquelon",
+    },
+    academie: {
+      code: "44",
+      nom: "Saint-Pierre-et-Miquelon",
+    },
+  },
+  {
     nom: "Mayotte",
     code: "976",
     uaiCode: "976",
@@ -1557,6 +1570,7 @@ export const ACADEMIES = [
   { nom: "Guadeloupe", code: "32" },
   { nom: "Guyane", code: "33" },
   { nom: "Mayotte", code: "43" },
+  { nom: "Saint-Pierre-et-Miquelon", code: "44" },
   { nom: "Normandie", code: "70" },
   { nom: "Saint-Barthélemy", code: "77" },
   { nom: "Saint-Martin", code: "78" },

@@ -44,7 +44,7 @@ export const adresseSchema = object({
   }),
   departement: string({
     example: "1 Ain, 99 Étranger",
-    pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
+    pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[12345678]|98[46789])$",
     enum: DEPARTEMENTS.map(({ code }) => code),
     maxLength: 3,
     minLength: 1,
