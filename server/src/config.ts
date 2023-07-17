@@ -6,6 +6,7 @@ const config = {
   appName: env.get("FLUX_RETOUR_CFAS_NAME").default("Flux Retour Cfas").asString(),
   env: env.get("FLUX_RETOUR_CFAS_ENV").required().asString(),
   publicUrl: env.get("FLUX_RETOUR_CFAS_PUBLIC_URL").required().asString(),
+  bodyParserLimit: env.get("FLUX_RETOUR_CFAS_BODY_PARSER_LIMIT").default("10mb").asString(),
   mongodb: {
     uri: env.get("FLUX_RETOUR_CFAS_MONGODB_URI").required().asString(),
   },
