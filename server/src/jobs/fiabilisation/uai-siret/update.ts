@@ -80,11 +80,11 @@ export const updateOrganismesFiabilisationUaiSiret = async () => {
 // #region ORGANISMES REFERENTIEL FIABLES
 
 /**
- * Méthode maj des statuts de fiabilisation FIABLE pour les organismes avec UAI & présents dans le référentiel
+ * Méthode maj des statuts de fiabilisation FIABLE pour les organismes avec UAI, présents dans le référentiel et encore ouverts
  */
 const updateOrganismesReferentielFiables = async () => {
   const { modifiedCount } = await organismesDb().updateMany(
-    { uai: { $exists: true }, est_dans_le_referentiel: true },
+    { uai: { $exists: true }, est_dans_le_referentiel: true, ferme: false },
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
   );
   nbOrganismesReferentielFiables += modifiedCount;
