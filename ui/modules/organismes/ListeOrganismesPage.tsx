@@ -100,7 +100,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           {getHeaderTitleFromOrganisationType(organisationType)}
         </Heading>
 
-        <Text>Retrouver ci-dessous&nbsp;:</Text>
+        <Text>Retrouvez ci-dessous&nbsp;:</Text>
         <UnorderedList styleType="'- '">
           <ListItem>
             les <strong>{organismesFiables.length}</strong> établissements <strong>fiables</strong>{" "}
@@ -113,7 +113,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             </ListItem>
           )}
         </UnorderedList>
-        <Text fontStyle="italic">Source : Catalogue et Référentiel de l’apprentissage</Text>
+        <Text fontStyle="italic">Sources : Catalogue et Référentiel de l’apprentissage</Text>
 
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         {organismesNonFiables.length === 0 ? (
