@@ -145,7 +145,7 @@ export default async function createServer(): Promise<Application> {
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
 
-  app.use(bodyParser.json({ limit: "10mb" }));
+  app.use(bodyParser.json({ limit: config.bodyParserLimit }));
   app.use(logMiddleware);
   app.use(cookieParser());
   app.use(passport.initialize());
