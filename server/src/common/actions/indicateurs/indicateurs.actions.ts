@@ -34,6 +34,7 @@ export async function getIndicateursEffectifsParDepartement(
             await getIndicateursEffectifsRestriction(ctx),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
+          "_computed.organisme.fiable": true,
         },
       },
       {
@@ -199,7 +200,8 @@ export async function getIndicateursOrganismesParDepartement(
             await getIndicateursOrganismesRestriction(ctx),
             ...buildMongoFilters(filters, organismesFiltersConfigurations),
           ],
-          est_dans_le_referentiel: true,
+          fiabilisation_statut: "FIABLE",
+          ferme: false,
         },
       },
       {
@@ -247,6 +249,7 @@ export async function getIndicateursEffectifsParOrganisme(
             await getEffectifsAnonymesRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
+          "_computed.organisme.fiable": true,
         },
       },
       {
@@ -479,6 +482,7 @@ export async function getEffectifsNominatifs(
             await getEffectifsAnonymesRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
+          "_computed.organisme.fiable": true,
         },
       },
       {

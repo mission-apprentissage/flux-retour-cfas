@@ -157,7 +157,7 @@ function NavBarOrganismeFormation(): ReactElement {
         Mon tableau de bord
       </NavItem>
       {/* on s'assure qu'un organisme a accès à au moins un autre organisme */}
-      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && organismes?.length > 0 && (
+      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && organismes && organismes.length > 0 && (
         <NavItem to="/organismes">Mes organismes</NavItem>
       )}
       <NavItem to="/effectifs">Mes effectifs</NavItem>

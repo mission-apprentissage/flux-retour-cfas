@@ -45,7 +45,13 @@ export async function getIndicateursOrganismesNature(filters: OrganismesFilters)
     .aggregate([
       {
         $match: {
-          $and: [...buildMongoFilters(filters, organismesFiltersConfigurations), { est_dans_le_referentiel: true }],
+          $and: [
+            ...buildMongoFilters(filters, organismesFiltersConfigurations),
+            {
+              fiabilisation_statut: "FIABLE",
+              ferme: false,
+            },
+          ],
         },
       },
       {

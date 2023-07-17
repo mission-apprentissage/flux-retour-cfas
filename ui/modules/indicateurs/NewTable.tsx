@@ -139,9 +139,29 @@ function NewTable<T>(props: NewTableProps<T>) {
             <ChevronLeftIcon />
           </Button>
 
+          {table.getState().pagination.pageIndex - 1 > 0 && (
+            <Button variant="unstyled" onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 2)}>
+              {table.getState().pagination.pageIndex - 1}
+            </Button>
+          )}
+          {table.getState().pagination.pageIndex > 0 && (
+            <Button variant="unstyled" onClick={() => table.previousPage()}>
+              {table.getState().pagination.pageIndex}
+            </Button>
+          )}
           <Button bg="bluefrance" color="white" pointerEvents="none" fontSize="zeta">
             {table.getState().pagination.pageIndex + 1}
           </Button>
+          {table.getCanNextPage() && (
+            <Button variant="unstyled" onClick={() => table.nextPage()}>
+              {table.getState().pagination.pageIndex + 2}
+            </Button>
+          )}
+          {table.getState().pagination.pageIndex + 2 < table.getPageCount() && (
+            <Button variant="unstyled" onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 2)}>
+              {table.getState().pagination.pageIndex + 3}
+            </Button>
+          )}
 
           <Button variant="unstyled" onClick={() => table.nextPage()} isDisabled={!table.getCanNextPage()}>
             <ChevronRightIcon />
