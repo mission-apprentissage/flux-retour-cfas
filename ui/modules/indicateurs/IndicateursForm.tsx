@@ -219,10 +219,16 @@ function IndicateursForm() {
             value={effectifsFilters.organisme_academies}
             onChange={(academies) => updateState({ organisme_academies: academies })}
           />
-          <FiltreOrganismeBassinEmploi
-            value={effectifsFilters.organisme_bassinsEmploi}
-            onChange={(organisme_bassinsEmploi) => updateState({ organisme_bassinsEmploi: organisme_bassinsEmploi })}
-          />
+          {organisationType !== "ORGANISME_FORMATION_FORMATEUR" &&
+            organisationType !== "ORGANISME_FORMATION_RESPONSABLE" &&
+            organisationType !== "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR" && (
+              <FiltreOrganismeBassinEmploi
+                value={effectifsFilters.organisme_bassinsEmploi}
+                onChange={(organisme_bassinsEmploi) =>
+                  updateState({ organisme_bassinsEmploi: organisme_bassinsEmploi })
+                }
+              />
+            )}
         </SimpleGrid>
         {/* <Text fontWeight="700" textTransform="uppercase">
           Domaine d’activité
