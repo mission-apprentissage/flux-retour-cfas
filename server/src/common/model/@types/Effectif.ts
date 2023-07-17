@@ -1818,7 +1818,7 @@ export interface Effectif {
       uai?: string;
       siret?: string;
       /**
-       * = organismes.fiabilisation_statut == FIABLE
+       * organismes.fiabilisation_statut == "FIABLE" && ferme != false
        */
       fiable?: boolean;
     };

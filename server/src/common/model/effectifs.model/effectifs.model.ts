@@ -142,7 +142,7 @@ export const schema = object(
             minLength: 8,
           }),
           siret: string({ pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
-          fiable: boolean({ description: "= organismes.fiabilisation_statut == FIABLE" }),
+          fiable: boolean({ description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false` }),
         }),
       },
       {
