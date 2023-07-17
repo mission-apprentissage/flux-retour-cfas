@@ -1,7 +1,5 @@
 import { getDbCollection } from "@/common/mongodb";
 
-import { ContratDeca } from "../apis/@types/ApiDeca";
-
 import {
   Effectif,
   FiabilisationUaiSiret,
@@ -16,6 +14,7 @@ import {
   UsersMigration,
 } from "./@types";
 import { BassinsEmploi } from "./@types/BassinsEmploi";
+import { ContratDeca } from "./@types/ContratDeca";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { OrganismeSoltea } from "./@types/OrganismeSoltea";
