@@ -37,7 +37,7 @@ const SEARCH_RESULTS_LIMIT = 50;
  * @returns
  */
 export const createOrganisme = async (data: Organisme) => {
-  if ((await organismesDb().countDocuments({ ...(data.uai ? { uai: data.uai } : {}), siret: data.siret })) > 0) {
+  if ((await organismesDb().countDocuments({ uai: data.uai, siret: data.siret })) > 0) {
     throw new Error(`Un organisme avec l'UAI ${data.uai} et le siret ${data.siret} existe déjà`);
   }
 
