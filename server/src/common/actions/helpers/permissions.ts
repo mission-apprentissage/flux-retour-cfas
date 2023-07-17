@@ -181,7 +181,7 @@ export async function findOrganismesAccessiblesByOrganisation(ctx: AuthContext<O
   const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,
-    ...(organisation.uai ? { uai: organisation.uai } : {}),
+    uai: organisation.uai as string,
   });
   if (!userOrganisme) {
     logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
@@ -205,12 +205,11 @@ export async function findOFLinkedOrganismesIds(userOrganisme: Organisme) {
         if (
           subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.LIEU &&
           subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.INCONNUE &&
-          userOrganisme.siret !== subOrganismeCatalog.siret &&
-          userOrganisme.uai !== subOrganismeCatalog.uai
+          !(userOrganisme.siret === subOrganismeCatalog.siret && userOrganisme.uai === subOrganismeCatalog.uai)
         ) {
           const subOrganisme = await organismesDb().findOne({
-            siret: subOrganismeCatalog.siret as string,
-            uai: subOrganismeCatalog.uai as string,
+            siret: subOrganismeCatalog.siret,
+            uai: subOrganismeCatalog.uai,
           });
           if (!subOrganisme) {
             logger.error(
