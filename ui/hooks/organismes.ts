@@ -64,13 +64,6 @@ export function useOrganisationOrganismes() {
     error,
   } = useQuery<Organisme[], any>(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {});
 
-  // corrige les natures null en attendant une correction des données
-  organismes?.forEach((organisme) => {
-    if (!organisme.nature) {
-      organisme.nature = "inconnue";
-    }
-  });
-
   return {
     organismes,
     isLoading,
