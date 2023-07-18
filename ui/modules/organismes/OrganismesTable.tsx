@@ -38,7 +38,13 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
           {row.original.nom ?? "Organisme inconnu"}
         </Link>
         <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
-          UAI&nbsp;: {(row.original as any).uai} - SIRET&nbsp;: {(row.original as any).siret}
+          UAI&nbsp;:{" "}
+          {(row.original as any).uai ?? (
+            <Text as="span" color="error">
+              INCONNUE
+            </Text>
+          )}{" "}
+          - SIRET&nbsp;: {(row.original as any).siret}
         </Text>
       </>
     ),
