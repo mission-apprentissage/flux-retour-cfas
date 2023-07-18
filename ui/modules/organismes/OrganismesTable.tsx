@@ -51,6 +51,12 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
   },
   {
     accessorKey: "nature",
+    sortingFn: (a, b) => {
+      // déplace la nature inconnue en premier dans la liste
+      const natureA = a.original.nature === "inconnue" ? " " : a.original.nature;
+      const natureB = b.original.nature === "inconnue" ? " " : b.original.nature;
+      return natureA.localeCompare(natureB);
+    },
     header: () => (
       <>
         Nature
