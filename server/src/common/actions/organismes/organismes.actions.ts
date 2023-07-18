@@ -634,7 +634,9 @@ export async function findUserOrganismes(ctx: AuthContext) {
           enseigne: 1,
           raison_sociale: 1,
           ferme: 1,
-          nature: 1,
+          nature: {
+            $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+          },
           adresse: 1,
           siret: 1,
           uai: 1,

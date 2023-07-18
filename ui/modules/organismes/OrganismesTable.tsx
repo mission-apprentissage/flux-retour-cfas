@@ -38,13 +38,25 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
           {row.original.nom ?? "Organisme inconnu"}
         </Link>
         <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
-          UAI&nbsp;: {(row.original as any).uai} - SIRET&nbsp;: {(row.original as any).siret}
+          UAI&nbsp;:{" "}
+          {(row.original as any).uai ?? (
+            <Text as="span" color="error">
+              INCONNUE
+            </Text>
+          )}{" "}
+          - SIRET&nbsp;: {(row.original as any).siret}
         </Text>
       </>
     ),
   },
   {
     accessorKey: "nature",
+    sortingFn: (a, b) => {
+      // déplace la nature inconnue en premier dans la liste
+      const natureA = a.original.nature === "inconnue" ? " " : a.original.nature;
+      const natureB = b.original.nature === "inconnue" ? " " : b.original.nature;
+      return natureA.localeCompare(natureB);
+    },
     header: () => (
       <>
         Nature
