@@ -22,6 +22,7 @@ import { hydrateOrganismesFromReferentiel } from "./jobs/hydrate/organismes/hydr
 import { hydrateOrganismesBassinEmploi } from "./jobs/hydrate/organismes/hydrate-organismes-bassinEmploi";
 import { hydrateOrganismesFormations } from "./jobs/hydrate/organismes/hydrate-organismes-formations";
 import { hydrateFromReferentiel } from "./jobs/hydrate/organismes/hydrate-organismes-referentiel";
+import { hydrateOrganismesRelations } from "./jobs/hydrate/organismes/hydrate-organismes-relations";
 import { hydrateOrganismesSoltea } from "./jobs/hydrate/organismes/hydrate-organismes-soltea";
 import { updateMultipleOrganismesWithApis } from "./jobs/hydrate/organismes/update-organismes-with-apis";
 import { hydrateBassinsEmploi } from "./jobs/hydrate/reference/hydrate-bassins-emploi";
@@ -296,6 +297,15 @@ program
   .action(
     runJob(async () => {
       await hydrateOrganismesFormations();
+    })
+  );
+
+program
+  .command("hydrate:organismes-relations")
+  .description("Remplissage des relations organismes formateurs liés aux organismes")
+  .action(
+    runJob(async () => {
+      await hydrateOrganismesRelations();
     })
   );
 
