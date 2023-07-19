@@ -59,6 +59,7 @@ export interface OrganismesReferentiel {
   relations?: {
     type?: "formateur->responsable" | "responsable->formateur" | "entreprise";
     siret?: string;
+    uai?: string | null;
     referentiel?: boolean;
     label?: string;
     sources?: string[];
