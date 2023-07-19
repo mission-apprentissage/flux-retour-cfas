@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 import {
-  findOrganismesAccessiblesByOrganisation,
+  findOrganismesAccessiblesByOrganisationOF,
   getOrganismeRestriction,
   isOrganisationOF,
 } from "@/common/actions/helpers/permissions";
@@ -748,7 +748,7 @@ async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: ObjectId)
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
       return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());

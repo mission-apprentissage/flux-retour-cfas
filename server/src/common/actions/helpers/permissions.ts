@@ -2,7 +2,6 @@ import Boom from "boom";
 import { ObjectId } from "mongodb";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
-import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
@@ -28,7 +27,7 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
       return {
@@ -69,7 +68,7 @@ export async function getIndicateursOrganismesRestriction(ctx: AuthContext): Pro
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
       return {
@@ -103,7 +102,7 @@ export async function getIndicateursEffectifsRestriction(ctx: AuthContext): Prom
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
       return {
@@ -138,7 +137,7 @@ export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
       return {
@@ -225,7 +224,9 @@ export async function getEffectifsNominatifsRestriction(ctx: AuthContext): Promi
 /**
  * Liste tous les organismes accessibles pour une organisation (dont l'organisme lié à l'organisation)
  */
-export async function findOrganismesAccessiblesByOrganisation(ctx: AuthContext<OrganisationOrganismeFormation>) {
+export async function findOrganismesAccessiblesByOrganisationOF(
+  ctx: AuthContext<OrganisationOrganismeFormation>
+): Promise<ObjectId[]> {
   const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,
@@ -235,57 +236,19 @@ export async function findOrganismesAccessiblesByOrganisation(ctx: AuthContext<O
     logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
     throw new Error("organisme de l'organisation non trouvé");
   }
-  return [userOrganisme._id, ...(await findOrganismeFormateursIds(userOrganisme))];
+
+  return [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)];
 }
 
-export async function findOrganismesAccessiblesByOrganisme(organismeId: ObjectId) {
+export async function findOrganismesAccessiblesByOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
   const userOrganisme = await getOrganismeById(organismeId);
-  return [userOrganisme._id, ...(await findOrganismeFormateursIds(userOrganisme))];
+  return [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)];
 }
 
-/**
- * Informations en provenance du référentiel :
- * organismes(siret=siret de l'organisation, uai=uai de l'organisation).relations.type = "responsable->formateur"
- */
-export async function findOrganismeFormateursIds(userOrganisme: Organisme) {
-  const subOrganismesIds = new Set<string>();
-  if (
-    userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
-    userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
-  ) {
-    for (const { organismes } of userOrganisme.relatedFormations || []) {
-      for (const subOrganismeCatalog of organismes || []) {
-        if (
-          subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.LIEU &&
-          subOrganismeCatalog.nature !== NATURE_ORGANISME_DE_FORMATION.INCONNUE &&
-          !(userOrganisme.siret === subOrganismeCatalog.siret && userOrganisme.uai === subOrganismeCatalog.uai)
-        ) {
-          const subOrganisme = await organismesDb().findOne({
-            siret: subOrganismeCatalog.siret,
-            uai: subOrganismeCatalog.uai,
-          });
-          if (!subOrganisme) {
-            logger.error(
-              { siret: subOrganismeCatalog.siret, uai: subOrganismeCatalog.uai },
-              "sous-organisme non trouvé"
-            );
-            throw new Error("sous-organisme non trouvé");
-          } else {
-            // FIX problème catalogue https://tableaudebord-apprentissage.atlassian.net/browse/TM-139
-            // à supprimer très prochainement... (:
-            if (
-              (userOrganisme.siret === "13002087800240" && subOrganisme.siret === "41352152700056") ||
-              (userOrganisme.siret === "41352152700056" && subOrganisme.siret === "13002087800240")
-            ) {
-              continue;
-            }
-            subOrganismesIds.add(subOrganisme._id.toString());
-          }
-        }
-      }
-    }
-  }
-  return [...subOrganismesIds.values()].map((id) => new ObjectId(id));
+export function findOrganismeFormateursIds(userOrganisme: Organisme): ObjectId[] {
+  return (userOrganisme.organismesFormateurs ?? [])
+    .filter((organisme) => !!organisme._id)
+    .map((organisme) => organisme._id as ObjectId);
 }
 
 async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
@@ -295,10 +258,10 @@ async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: Obje
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
-      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());
+      return linkedOrganismesIds.some((linkedOrganismesId) => linkedOrganismesId.equals(organismeId));
     }
 
     case "TETE_DE_RESEAU":
@@ -333,10 +296,10 @@ export async function canManageOrganismeEffectifs(ctx: AuthContext, organismeId:
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
-      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());
+      return linkedOrganismesIds.some((linkedOrganismesId) => linkedOrganismesId.equals(organismeId));
     }
 
     case "OPERATEUR_PUBLIC_NATIONAL":
