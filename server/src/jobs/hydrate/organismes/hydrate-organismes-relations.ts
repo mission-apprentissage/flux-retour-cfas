@@ -1,7 +1,6 @@
-import { WithId } from "mongodb";
+import { PromisePool } from "@supercharge/promise-pool";
 
 import parentLogger from "@/common/logger";
-import { Organisme } from "@/common/model/@types";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 
 const logger = parentLogger.child({
@@ -10,13 +9,18 @@ const logger = parentLogger.child({
 
 /**
  * Ce job peuple le champ organisme.relatedOrganismes avec les relations du référentiel stockées dans la collection organismeReferentiel.
- *
  */
 export const hydrateOrganismesRelations = async () => {
-  const organismesCursor = organismesDb().find({}, { projection: { _id: 1, uai: 1, siret: 1 } });
+  const organismes = await organismesDb()
+    .find({}, { projection: { _id: 1, uai: 1, siret: 1 } })
+    .toArray();
 
-  while (await organismesCursor.hasNext()) {
-    const organisme = (await organismesCursor.next()) as WithId<Organisme>;
+  const organismeIdBySIRETAndUAI = organismes.reduce((acc, organisme) => {
+    acc[`${organisme.siret}-${organisme.uai}`] = organisme._id;
+    return acc;
+  }, {});
+
+  await PromisePool.for(organismes).process(async (organisme) => {
     const organismesLiés = await organismesReferentielDb()
       .aggregate([
         {
@@ -38,6 +42,9 @@ export const hydrateOrganismesRelations = async () => {
 
     const organismesFormateurs = organismesLiés.filter((organisme) => organisme.type === "responsable->formateur");
     const organismesResponsables = organismesLiés.filter((organisme) => organisme.type === "formateur->responsable");
+    [...organismesFormateurs, ...organismesResponsables].forEach((organisme) => {
+      organisme._id = organismeIdBySIRETAndUAI[`${organisme.siret}-${organisme.uai}`];
+    });
 
     logger.info(
       {
@@ -58,5 +65,5 @@ export const hydrateOrganismesRelations = async () => {
         },
       }
     );
-  }
+  });
 };
