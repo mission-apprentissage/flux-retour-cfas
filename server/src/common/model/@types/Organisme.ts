@@ -953,9 +953,9 @@ export interface Organisme {
    */
   last_transmission_date?: Date;
   /**
-   * Est dans le referentiel onisep des organismes
+   * Est dans le referentiel ONISEP des organismes
    */
-  est_dans_le_referentiel?: boolean;
+  est_dans_le_referentiel?: "absent" | "present" | "present_uai_multiples";
   /**
    * Le siret est fermé
    */

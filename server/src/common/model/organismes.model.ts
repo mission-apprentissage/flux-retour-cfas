@@ -1,10 +1,11 @@
+import { number } from "joi";
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { STATUT_CREATION_ORGANISME, STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
-import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
+import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
 import {
@@ -158,7 +159,10 @@ const schema = object(
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     last_transmission_date: date({ description: "Date de la dernière transmission de données" }),
-    est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
+    est_dans_le_referentiel: string({
+      enum: Object.values(STATUT_PRESENCE_REFERENTIEL),
+      description: "Présence dans le referentiel ONISEP des organismes",
+    }),
     ferme: boolean({ description: "Le siret est fermé" }),
     qualiopi: boolean({ description: "a la certification Qualiopi" }),
 
