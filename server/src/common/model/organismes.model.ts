@@ -7,7 +7,17 @@ import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/valid
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
-import { arrayOf, boolean, date, integer, object, objectId, string } from "./json-schema/jsonSchemaTypes";
+import {
+  arrayOf,
+  boolean,
+  date,
+  integer,
+  object,
+  objectId,
+  objectIdOrNull,
+  string,
+  stringOrNull,
+} from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismes";
 
@@ -121,8 +131,32 @@ const schema = object(
         description: "Formations de cet organisme",
       }
     ),
-    organismesFormateurs: arrayOf(object({}, { additionalProperties: true })),
-    organismesResponsables: arrayOf(object({}, { additionalProperties: true })),
+    organismesFormateurs: arrayOf(
+      object(
+        {
+          _id: objectIdOrNull(),
+          siret: string(),
+          uai: stringOrNull(),
+          referentiel: boolean(),
+          label: string(),
+          sources: arrayOf(string()),
+        },
+        { additionalProperties: true }
+      )
+    ),
+    organismesResponsables: arrayOf(
+      object(
+        {
+          _id: objectIdOrNull(),
+          siret: string(),
+          uai: stringOrNull(),
+          referentiel: boolean(),
+          label: string(),
+          sources: arrayOf(string()),
+        },
+        { additionalProperties: true }
+      )
+    ),
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     last_transmission_date: date({ description: "Date de la dernière transmission de données" }),
