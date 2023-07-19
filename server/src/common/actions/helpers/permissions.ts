@@ -235,19 +235,19 @@ export async function findOrganismesAccessiblesByOrganisation(ctx: AuthContext<O
     logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
     throw new Error("organisme de l'organisation non trouvé");
   }
-  return [userOrganisme._id, ...(await findOFLinkedOrganismesIds(userOrganisme))];
+  return [userOrganisme._id, ...(await findOrganismeFormateursIds(userOrganisme))];
 }
 
 export async function findOrganismesAccessiblesByOrganisme(organismeId: ObjectId) {
   const userOrganisme = await getOrganismeById(organismeId);
-  return [userOrganisme._id, ...(await findOFLinkedOrganismesIds(userOrganisme))];
+  return [userOrganisme._id, ...(await findOrganismeFormateursIds(userOrganisme))];
 }
 
 /**
- * Informations en provenance du catalogue :
- * organismes(siret=siret de l'organisation, uai=uai de l'organisation).formations.organismes
+ * Informations en provenance du référentiel :
+ * organismes(siret=siret de l'organisation, uai=uai de l'organisation).relations.type = "responsable->formateur"
  */
-export async function findOFLinkedOrganismesIds(userOrganisme: Organisme) {
+export async function findOrganismeFormateursIds(userOrganisme: Organisme) {
   const subOrganismesIds = new Set<string>();
   if (
     userOrganisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
