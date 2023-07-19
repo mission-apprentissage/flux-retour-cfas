@@ -910,6 +910,7 @@ export interface Organisme {
      */
     duree_formation_theorique?: number;
   }[];
+  relatedOrganismes?: any[];
   /**
    * Les domaines métiers rattachés à l'établissement
    */
