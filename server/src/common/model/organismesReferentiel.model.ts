@@ -1,6 +1,6 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { object, objectId, string, boolean, number, array, arrayOf } from "./json-schema/jsonSchemaTypes";
+import { object, objectId, string, boolean, number, array, arrayOf, stringOrNull } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismesReferentiel";
 
@@ -112,6 +112,7 @@ const schema = object(
             enum: ["formateur->responsable", "responsable->formateur", "entreprise"],
           }),
           siret: string(),
+          uai: stringOrNull(),
           referentiel: boolean(),
           label: string(),
           sources: arrayOf(string()),
