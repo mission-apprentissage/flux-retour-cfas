@@ -121,7 +121,8 @@ const schema = object(
         description: "Formations de cet organisme",
       }
     ),
-    relatedOrganismes: arrayOf(object({}, { additionalProperties: true })),
+    organismesFormateurs: arrayOf(object({}, { additionalProperties: true })),
+    organismesResponsables: arrayOf(object({}, { additionalProperties: true })),
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     last_transmission_date: date({ description: "Date de la dernière transmission de données" }),

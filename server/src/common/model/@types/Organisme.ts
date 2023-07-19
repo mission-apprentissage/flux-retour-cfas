@@ -910,7 +910,8 @@ export interface Organisme {
      */
     duree_formation_theorique?: number;
   }[];
-  relatedOrganismes?: any[];
+  organismesFormateurs?: any[];
+  organismesResponsables?: any[];
   /**
    * Les domaines métiers rattachés à l'établissement
    */
