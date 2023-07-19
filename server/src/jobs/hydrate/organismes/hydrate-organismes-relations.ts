@@ -20,27 +20,12 @@ export const hydrateOrganismesRelations = async () => {
 
   while (await organismesCursor.hasNext()) {
     const organisme = (await organismesCursor.next()) as WithId<Organisme>;
-    if (organisme.siret !== "30469122300156") {
-      continue;
-    }
-    const relatedOrganismes = await organismesReferentielDb()
+    const organismesLiés = await organismesReferentielDb()
       .aggregate([
         {
           $match: {
-            "relations.type": "responsable->formateur",
-          },
-        },
-        {
-          $project: {
-            relations: {
-              $filter: {
-                input: "$relations",
-                as: "relation",
-                cond: {
-                  $eq: ["$$relation.type", "responsable->formateur"],
-                },
-              },
-            },
+            siret: organisme.siret,
+            uai: organisme.uai,
           },
         },
         {
@@ -54,15 +39,24 @@ export const hydrateOrganismesRelations = async () => {
       ])
       .toArray();
 
+    const organismesFormateurs = organismesLiés.filter((organisme) => organisme.type === "responsable->formateur");
+    const organismesResponsables = organismesLiés.filter((organisme) => organisme.type === "formateur->responsable");
+
     logger.info(
-      { uai: organisme.uai, siret: organisme.siret, relatedOrganismes: relatedOrganismes.length },
-      "updating organisme related organismes"
+      {
+        uai: organisme.uai,
+        siret: organisme.siret,
+        organismesFormateurs: organismesFormateurs.length,
+        organismesResponsables: organismesResponsables.length,
+      },
+      "updating organisme organismesFormateurs"
     );
     await organismesDb().updateOne(
       { _id: organisme._id },
       {
         $set: {
-          relatedOrganismes,
+          organismesFormateurs,
+          organismesResponsables,
           updated_at: new Date(),
         },
       }
