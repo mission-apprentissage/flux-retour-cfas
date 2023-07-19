@@ -99,6 +99,8 @@ export const generateTypes = async () => {
         .replace(/\s+_id\??: any;/g, "")
         // fix ObjectIds
         .replace(/(\w*_id\??): any;/g, "$1: ObjectId;")
+        // fix ObjectIds Or null in nested fields
+        .replace(/(\w*_id\??): null;/g, "$1: ObjectId | null;")
         // remove additionalProperties
         .replace(/\s+\[k: string\]: unknown;/gi, "");
 
