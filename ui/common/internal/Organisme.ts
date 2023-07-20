@@ -886,6 +886,22 @@ export interface Organisme {
      */
     duree_formation_theorique?: number;
   }[];
+  organismesFormateurs?: {
+    _id?: string | null;
+    siret?: string;
+    uai?: string | null;
+    referentiel?: boolean;
+    label?: string;
+    sources?: string[];
+  }[];
+  organismesResponsables?: {
+    _id?: string | null;
+    siret?: string;
+    uai?: string | null;
+    referentiel?: boolean;
+    label?: string;
+    sources?: string[];
+  }[];
   /**
    * Les domaines métiers rattachés à l'établissement
    */

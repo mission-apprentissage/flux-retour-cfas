@@ -9,11 +9,11 @@ import {
   isOrganisationOF,
 } from "@/common/actions/helpers/permissions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { getOrganisationOrganisme } from "@/common/actions/organisations.actions";
+import { getOrganisationOrganisme, listContactsOrganisation } from "@/common/actions/organisations.actions";
 import { getMetiersBySiret } from "@/common/apis/apiLba";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
-import { organismesDb, effectifsDb } from "@/common/model/collections";
+import { organismesDb, effectifsDb, organisationsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
@@ -811,4 +811,13 @@ export async function verifyOrganismeAPIKeyToUser(
   //   // TODO WHAT DO WE DO
   //   throw Boom.conflict("UAI");
   // }
+}
+
+export async function listContactsOrganisme(organismeId: ObjectId) {
+  const organisme = await getOrganismeById(organismeId);
+  const organisation = await organisationsDb().findOne({
+    siret: organisme.siret,
+    uai: organisme.uai as string,
+  });
+  return organisation ? await listContactsOrganisation(organisation._id) : [];
 }

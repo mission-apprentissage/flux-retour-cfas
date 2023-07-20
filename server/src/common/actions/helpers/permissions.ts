@@ -240,9 +240,9 @@ export async function findOrganismesAccessiblesByOrganisationOF(
   return [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)];
 }
 
-export async function findOrganismesAccessiblesByOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
+export async function findOrganismesFormateursIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
   const userOrganisme = await getOrganismeById(organismeId);
-  return [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)];
+  return findOrganismeFormateursIds(userOrganisme);
 }
 
 export function findOrganismeFormateursIds(userOrganisme: Organisme): ObjectId[] {

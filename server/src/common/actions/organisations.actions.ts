@@ -58,6 +58,31 @@ export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial
     .toArray();
 }
 
+export async function listContactsOrganisation(organisationId: ObjectId): Promise<Partial<UsersMigration>[]> {
+  return await usersMigrationDb()
+    .find(
+      {
+        organisation_id: organisationId,
+        account_status: "CONFIRMED",
+      },
+      {
+        sort: {
+          created_at: 1,
+        },
+        projection: {
+          _id: 1,
+          nom: 1,
+          prenom: 1,
+          email: 1,
+          telephone: 1,
+          fonction: 1,
+          created_at: 1,
+        },
+      }
+    )
+    .toArray();
+}
+
 export async function listOrganisationPendingInvitations(ctx: AuthContext): Promise<any[]> {
   return await invitationsDb()
     .find({
@@ -195,7 +220,7 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId
 
   const organisme = await organismesDb().findOne({
     siret: organisationOF.siret,
-    ...(organisationOF.uai ? { uai: organisationOF.uai } : {}),
+    uai: organisationOF.uai as string,
   });
   if (!organisme) {
     throw Boom.notFound("organisme de l'organisation non trouvé", {
