@@ -8,13 +8,15 @@ import { useMemo } from "react";
 import { ERPS_BY_ID } from "@/common/constants/erps";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { _get } from "@/common/httpClient";
+import { Organisme } from "@/common/internal/Organisme";
+import { User } from "@/common/internal/User";
+import { formatDate } from "@/common/utils/dateUtils";
 import { sleep } from "@/common/utils/misc";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadLinkButton from "@/components/buttons/DownloadLink";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
-import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { Checkbox } from "@/theme/components/icons";
 import { CloseCircle } from "@/theme/components/icons/CloseCircle";
@@ -22,16 +24,25 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
 
+import ContactsModal from "./ContactsModal";
 import IndicateursGrid from "./IndicateursGrid";
 import { natureOrganismeDeFormationLabel, natureOrganismeDeFormationTooltip } from "./OrganismeInfo";
 
 interface Props {
+  organisme: Organisme;
   modePublique: boolean; // permet d'afficher plus d'informations, notamment les responsables, qualiopi
 }
-const DashboardOrganisme = ({ modePublique = false }: Props) => {
+const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const router = useRouter();
   const { auth } = useAuth();
-  const { organisme } = useOrganisationOrganisme();
+
+  const { data: contacts } = useQuery<User[]>(
+    ["organismes", organisme?._id, "contacts"],
+    () => _get(`/api/v1/organismes/${organisme!._id}/contacts`),
+    {
+      enabled: !!organisme?._id && modePublique,
+    }
+  );
 
   const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery<IndicateursEffectifs>(
     ["organismes", organisme?._id, "indicateurs/effectifs"],
@@ -77,6 +88,7 @@ const DashboardOrganisme = ({ modePublique = false }: Props) => {
   }
 
   const aucunEffectifTransmis = !organisme.first_transmission_date;
+  const erpName = ERPS_BY_ID[organisme.erps?.[0]?.toUpperCase() ?? ""]?.name;
 
   return (
     <Box>
@@ -204,7 +216,10 @@ const DashboardOrganisme = ({ modePublique = false }: Props) => {
                 >
                   <Checkbox />
                   {/* On ne traite pas le cas de multi-erp */}
-                  <Text>Données transmises via {ERPS_BY_ID[organisme.erps?.[0]?.toUpperCase() ?? ""]?.name}</Text>
+                  <Text>
+                    Données transmises
+                    {erpName && ` via ${erpName}`}
+                  </Text>
                 </HStack>
               ) : (
                 <HStack
@@ -254,16 +269,59 @@ const DashboardOrganisme = ({ modePublique = false }: Props) => {
 
             {modePublique && (
               <>
-                {modePublique && (
+                <Box>
+                  <Text display="inline-block">Responsable identifié de l’établissement&nbsp;:</Text>
+                  {contacts &&
+                    (contacts.length > 0 ? (
+                      <>
+                        <Text display="inline-block" ml={2} fontWeight="bold">
+                          {contacts[0].prenom}{" "}
+                          <Text as="span" textTransform="uppercase">
+                            {contacts[0].nom}
+                          </Text>
+                          , {contacts[0].fonction} - {contacts[0].telephone}
+                        </Text>
+                        <Link
+                          href={`mailto:${contacts[0].email}`}
+                          borderBottom="1px"
+                          _hover={{ textDecoration: "none" }}
+                          color="action-high-blue-france"
+                          display="inline-flex"
+                          alignItems="center"
+                          ml={6}
+                        >
+                          <ArrowForwardIcon mr={2} />
+                          Envoyer un courriel
+                        </Link>
+                        {contacts.length >= 2 && <ContactsModal contacts={contacts.slice(1)} ml={6} />}
+                      </>
+                    ) : (
+                      <Text display="inline-block" ml={2} fontWeight="bold">
+                        Inconnu - Compte tableau de bord non créé à ce jour
+                      </Text>
+                    ))}
+                </Box>
+                {contacts && contacts.length > 0 && (
                   <HStack>
-                    <Text>Responsable identifié de l’établissement&nbsp;:</Text>
-                    <Text fontWeight="bold">{"Inconnu - Compte tableau de bord non créé à ce jour"}</Text>
+                    <Text>Compte créé le&nbsp;:</Text>
+                    <Text fontWeight="bold">{formatDate(new Date(contacts[0].created_at), "dd/MM/yyyy")}</Text>
                   </HStack>
                 )}
-                {modePublique && (
+
+                {modePublique && organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (
                   <HStack>
                     <Text>Organisme responsable identifié&nbsp;:</Text>
-                    <Text fontWeight="bold">{"TODO"}</Text>
+                    <Link
+                      href={`/organismes/${organisme.organismesResponsables[0]._id}`}
+                      borderBottom="1px"
+                      color="action-high-blue-france"
+                      _hover={{ textDecoration: "none" }}
+                      display="inline-flex"
+                      alignItems="center"
+                      mt="3"
+                    >
+                      {organisme.organismesResponsables[0].label}
+                    </Link>
                   </HStack>
                 )}
               </>
@@ -274,15 +332,24 @@ const DashboardOrganisme = ({ modePublique = false }: Props) => {
 
       <Container maxW="xl" p="8">
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-          Aperçu de vos effectifs
+          Aperçu de {modePublique ? "ses" : "vos"} effectifs
         </Heading>
 
         {aucunEffectifTransmis && (
           <Ribbons variant="warning" mt="0.5rem">
             <Text color="grey.800">
-              Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs. Veuillez cliquer
-              dans l’onglet <em>Mes effectifs</em> pour démarrer l’interfaçage ERP ou transmettre manuellement vos
-              effectifs.
+              {modePublique ? (
+                "Cet établissement ne transmet pas encore ses effectifs au tableau de bord."
+              ) : (
+                <>
+                  Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs. Veuillez
+                  cliquer dans l’onglet{" "}
+                  <Link href="/effectifs" borderBottom="1px" _hover={{ textDecoration: "none" }}>
+                    Mes effectifs
+                  </Link>{" "}
+                  pour démarrer l’interfaçage ERP ou transmettre manuellement vos effectifs.
+                </>
+              )}
             </Text>
           </Ribbons>
         )}
@@ -292,17 +359,19 @@ const DashboardOrganisme = ({ modePublique = false }: Props) => {
         )}
 
         {aucunEffectifTransmis ? (
-          <Button
-            size="md"
-            variant="secondary"
-            display="block"
-            ml="auto"
-            onClick={() => {
-              router.push(`/effectifs/televersement`);
-            }}
-          >
-            Transmettre mes effectifs
-          </Button>
+          !modePublique && (
+            <Button
+              size="md"
+              variant="secondary"
+              display="block"
+              ml="auto"
+              onClick={() => {
+                router.push(`/effectifs/televersement`);
+              }}
+            >
+              Transmettre mes effectifs
+            </Button>
+          )
         ) : (
           <Button
             size="md"
@@ -310,16 +379,16 @@ const DashboardOrganisme = ({ modePublique = false }: Props) => {
             display="block"
             ml="auto"
             onClick={() => {
-              router.push(`/indicateurs`);
+              router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/indicateurs`);
             }}
           >
-            Voir mes indicateurs
+            Voir les indicateurs
           </Button>
         )}
 
         <Box bg="galt" py="8" px="12" mt="8">
           <Heading as="h3" color="#3558A2" fontSize="delta" fontWeight="700" mb={3}>
-            Nombre d’organismes de formation rattachés à votre établissement
+            Nombre d’organismes de formation rattachés à {modePublique ? "cet" : "votre"} établissement
           </Heading>
 
           <Text fontSize="zeta">
@@ -398,14 +467,15 @@ const DashboardOrganisme = ({ modePublique = false }: Props) => {
           variant="secondary"
           display="block"
           ml="auto"
+          mt="8"
           onClick={() => {
-            router.push(`/organismes`);
+            router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/organismes`);
           }}
         >
           Voir la liste complète
         </Button>
 
-        {aucunEffectifTransmis && (
+        {!modePublique && aucunEffectifTransmis && (
           <>
             <Divider size="md" my={8} />
 

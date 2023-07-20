@@ -63,6 +63,7 @@ import {
   getOrganismeByAPIKey,
   getOrganismeById,
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
+  listContactsOrganisme,
   searchOrganismes,
   verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
@@ -406,6 +407,13 @@ function setupRoutes(app: Application) {
         authOrgMiddleware("reader"),
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
+        })
+      )
+      .get(
+        "/contacts",
+        authOrgMiddleware("reader"),
+        returnResult(async (req, res) => {
+          return await listContactsOrganisme(res.locals.organismeId);
         })
       )
       .get(

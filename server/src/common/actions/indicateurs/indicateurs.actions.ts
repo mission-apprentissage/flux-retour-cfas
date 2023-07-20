@@ -10,7 +10,7 @@ import {
   organismesFiltersConfigurations,
 } from "@/common/actions/helpers/filters";
 import {
-  findOrganismesAccessiblesByOrganisme,
+  findOrganismesFormateursIdsOfOrganisme,
   getEffectifsAnonymesRestriction,
   getEffectifsNominatifsRestriction,
   getIndicateursEffectifsRestriction,
@@ -720,7 +720,7 @@ export async function getOrganismeIndicateursOrganismes(organismeId: ObjectId): 
       {
         $match: {
           _id: {
-            $in: await findOrganismesAccessiblesByOrganisme(organismeId),
+            $in: await findOrganismesFormateursIdsOfOrganisme(organismeId),
           },
         },
       },
@@ -752,5 +752,12 @@ export async function getOrganismeIndicateursOrganismes(organismeId: ObjectId): 
       },
     ])
     .next()) as IndicateursOrganismes;
-  return indicateurs;
+  return (
+    indicateurs ?? {
+      tauxCouverture: 0,
+      totalOrganismes: 0,
+      organismesTransmetteurs: 0,
+      organismesNonTransmetteurs: 0,
+    }
+  );
 }

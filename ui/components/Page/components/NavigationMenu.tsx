@@ -9,7 +9,7 @@ import { AuthContext } from "@/common/internal/AuthContext";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { PlausibleGoalsEvents } from "@/common/plausible-goals";
 import Link from "@/components/Links/Link";
-import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
+import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 import { Close, MenuFill, ParentGroupIcon } from "@/theme/components/icons";
@@ -148,16 +148,14 @@ function NavBarTransverse(): ReactElement {
 }
 
 function NavBarOrganismeFormation(): ReactElement {
-  const { organisationType } = useAuth();
   const { organisme } = useOrganisationOrganisme();
-  const { organismes } = useOrganisationOrganismes();
   return (
     <>
       <NavItem to="/" exactMatch>
         Mon tableau de bord
       </NavItem>
-      {/* on s'assure qu'un organisme a accès à au moins un autre organisme */}
-      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && organismes && organismes.length > 0 && (
+      {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
+      {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
         <NavItem to="/organismes">Mes organismes</NavItem>
       )}
       <NavItem to="/indicateurs" isDisabled={!(organisme?.first_transmission_date || organisme?.mode_de_transmission)}>
@@ -194,12 +192,15 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
         </NavItem>
         {canManageEffectifsOrganisme(organisationType) && (
           <>
-            {/* <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
-              Ses organismes
-            </NavItem> */}
-            {/* <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
+            {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
+            {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
+              <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
+                Ses organismes
+              </NavItem>
+            )}
+            <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
               Ses indicateurs
-            </NavItem>  */}
+            </NavItem>
             <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
               Ses effectifs
             </NavItem>
