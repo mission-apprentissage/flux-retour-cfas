@@ -79,7 +79,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
 
   // Recherche de l'organisme via le couple UAI - SIRET
   const organismeInTdb = await findOrganismeByUaiAndSiret(uai, siret);
-  const multipleOrganismesInReferentielWithSameSiret = (await organismesReferentielDb().countDocuments({ siret })) > 1;
+  const uaiMultiplesInTdb = (await organismesDb().countDocuments({ siret })) > 1;
 
   // Ajout de l'organisme sans appels API si non existant dans le tdb
   if (!organismeInTdb) {
@@ -94,8 +94,8 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
         adresse: adresseFormatted,
         ferme: isFerme,
         qualiopi: qualiopi || false,
-        est_dans_le_referentiel: multipleOrganismesInReferentielWithSameSiret
-          ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES
+        est_dans_le_referentiel: uaiMultiplesInTdb
+          ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
           : STATUT_PRESENCE_REFERENTIEL.PRESENT,
       });
       nbOrganismeCreated++;
@@ -119,8 +119,8 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       adresse: adresseFormatted,
       ferme: isFerme,
       qualiopi: qualiopi || false,
-      est_dans_le_referentiel: multipleOrganismesInReferentielWithSameSiret
-        ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES
+      est_dans_le_referentiel: uaiMultiplesInTdb
+        ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
         : STATUT_PRESENCE_REFERENTIEL.PRESENT,
     };
     try {
