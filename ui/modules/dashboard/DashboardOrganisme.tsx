@@ -23,6 +23,7 @@ import { Checkbox } from "@/theme/components/icons";
 import { CloseCircle } from "@/theme/components/icons/CloseCircle";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
+import { ExternalLinks } from "../admin/OrganismeDetail";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
 
 import ContactsModal from "./ContactsModal";
@@ -35,7 +36,7 @@ interface Props {
 }
 const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const router = useRouter();
-  const { auth } = useAuth();
+  const { auth, organisationType } = useAuth();
 
   const { data: contacts } = useQuery<User[]>(
     ["organismes", organisme?._id, "contacts"],
@@ -112,8 +113,13 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
           </Heading>
 
           <Text color="bluefrance" fontWeight={700} mt="4" textTransform="uppercase">
-            {organisme.enseigne || organisme.raison_sociale}
+            {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
           </Text>
+
+          {/* DEBUG pour les administrateurs */}
+          {organisationType === "ADMINISTRATEUR" && (
+            <ExternalLinks search={organisme.siret} siret={organisme.siret} fontSize={"omega"} mt={6} />
+          )}
 
           <VStack gap={1} rowGap="1em" alignItems={"baseline"} mt="6">
             <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
