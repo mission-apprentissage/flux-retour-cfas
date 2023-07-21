@@ -64,9 +64,10 @@ export default () => {
       const err = formatError(e);
       logger.error({ err }, "POST /dossiers-apprenants error");
 
-      res.status(500).json({
+      res.status(400).json({
         status: "ERROR",
         message: err.message,
+        details: err.details,
       });
     }
   });
