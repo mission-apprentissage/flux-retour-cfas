@@ -213,8 +213,8 @@ function OrganismesTable(props: OrganismesTableProps) {
   // Update router on search value or sort change.
   useEffect(() => {
     if (!router.isReady) return;
-    const query = { search: searchValue ?? undefined, ...convertPaginationInfosToQuery({ sort }) };
-    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
+    const query = { ...router.query, search: searchValue ?? undefined, ...convertPaginationInfosToQuery({ sort }) };
+    router.replace({ query }, undefined, { shallow: true });
   }, [searchValue, sort, router.isReady]);
 
   // Simple search: filter organismes by name that contains the search value.
