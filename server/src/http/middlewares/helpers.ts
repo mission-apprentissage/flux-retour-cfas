@@ -1,5 +1,6 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import { ObjectId } from "mongodb";
 
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
@@ -21,13 +22,6 @@ export function returnResult<TParams = any, TQuery = any, TBody = any, TLocals e
   };
 }
 
-export function indicateursPermissions() {
-  return async (req, _, next) => {
-    ensureValidUser(req.user);
-    next();
-  };
-}
-
 // helpers
 export function ensureValidUser(user: AuthContext) {
   if (user.account_status !== "CONFIRMED") {
@@ -41,4 +35,18 @@ export function requireAdministrator(req: Request, _res: Response, next: NextFun
     throw Boom.forbidden("Accès non autorisé");
   }
   next();
+}
+
+interface MyLocals {
+  organismeId: ObjectId;
+}
+
+export function ensurePermissionOrganisme<TParams = any, TQuery = any, TBody = any, TLocals = any>(
+  permissionFunc: (ctx: AuthContext, organismeId: ObjectId) => Promise<void>
+): RequestHandler<TParams, any, TBody, TQuery, TLocals & MyLocals> {
+  return (req, res, next) => {
+    permissionFunc(req.user, res.locals.organismeId)
+      .then(() => next())
+      .catch(next);
+  };
 }

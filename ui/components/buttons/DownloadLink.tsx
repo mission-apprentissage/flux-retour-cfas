@@ -2,6 +2,7 @@ import { DownloadIcon } from "@chakra-ui/icons";
 import { Button, ButtonProps } from "@chakra-ui/react";
 import { useState } from "react";
 
+import { sleep } from "@/common/utils/misc";
 import useToaster from "@/hooks/useToaster";
 
 type Props = {
@@ -20,6 +21,7 @@ function DownloadLinkButton({ children, action, ...props }: Props) {
     } catch (err) {
       toastError(err.message);
     } finally {
+      await sleep(300); // évite un changement instantané
       setIsLoading(false);
     }
   }
@@ -37,10 +39,10 @@ function DownloadLinkButton({ children, action, ...props }: Props) {
       }}
       isLoading={isLoading}
       onClick={onClick}
+      rightIcon={<DownloadIcon />}
       {...props}
     >
       {children}
-      <DownloadIcon ml="2" />
     </Button>
   );
 }

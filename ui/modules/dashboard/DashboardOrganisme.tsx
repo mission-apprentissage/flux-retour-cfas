@@ -7,11 +7,12 @@ import { useMemo } from "react";
 
 import { ERPS_BY_ID } from "@/common/constants/erps";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
+import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
-import { sleep } from "@/common/utils/misc";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadLinkButton from "@/components/buttons/DownloadLink";
 import Link from "@/components/Links/Link";
@@ -386,94 +387,104 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
           </Button>
         )}
 
-        <Box bg="galt" py="8" px="12" mt="8">
-          <Heading as="h3" color="#3558A2" fontSize="delta" fontWeight="700" mb={3}>
-            Nombre d’organismes de formation rattachés à {modePublique ? "cet" : "votre"} établissement
-          </Heading>
+        {organisme.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
+          <>
+            <Box bg="galt" py="8" px="12" mt="8">
+              <Heading as="h3" color="#3558A2" fontSize="delta" fontWeight="700" mb={3}>
+                Nombre d’organismes de formation rattachés à {modePublique ? "cet" : "votre"} établissement
+              </Heading>
 
-          <Text fontSize="zeta">
-            Taux de couverture des organismes transmetteurs / non-transmetteurs
-            <Tooltip
-              background="bluefrance"
-              color="white"
-              label={
-                <Box padding="1w">
-                  Ce taux traduit le nombre d’organismes dispensant une formation en apprentissage (sauf responsables)
-                  qui transmettent au tableau de bord. Les organismes qui transmettent mais ne font pas partie du
-                  référentiel ne rentrent pas en compte dans ce taux. Il est conseillé d’avoir un minimum de 80%
-                  d’établissements transmetteurs afin de garantir la viabilité des enquêtes menées auprès de ces
-                  derniers.
+              <Text fontSize="zeta">
+                Taux de couverture des organismes transmetteurs / non-transmetteurs
+                <Tooltip
+                  background="bluefrance"
+                  color="white"
+                  label={
+                    <Box padding="1w">
+                      Ce taux traduit le nombre d’organismes dispensant une formation en apprentissage (sauf
+                      responsables) qui transmettent au tableau de bord. Les organismes qui transmettent mais ne font
+                      pas partie du référentiel ne rentrent pas en compte dans ce taux. Il est conseillé d’avoir un
+                      minimum de 80% d’établissements transmetteurs afin de garantir la viabilité des enquêtes menées
+                      auprès de ces derniers.
+                    </Box>
+                  }
+                  aria-label="Informations sur le taux de couverture des organismes"
+                >
+                  <Box
+                    as="i"
+                    className="ri-information-line"
+                    fontSize="epsilon"
+                    color="grey.500"
+                    marginLeft="1w"
+                    verticalAlign="middle"
+                  />
+                </Tooltip>
+              </Text>
+
+              <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
+
+              <Flex justifyContent="space-between">
+                <VStack gap="2" justifyContent="center" alignItems="start">
+                  <HStack>
+                    <Box bg="#00ac8c" w={4} h={4} borderRadius={10} />
+                    <Text color="mgalt" fontSize="zeta" fontWeight="bold">
+                      Transmettent les effectifs au tableau de bord
+                    </Text>
+                  </HStack>
+
+                  <HStack>
+                    <Box bg="#ef5800" w={4} h={4} borderRadius={10} />
+                    <Text color="mgalt" fontSize="zeta" fontWeight="bold">
+                      Ne transmettent pas les effectifs au tableau de bord
+                    </Text>
+                  </HStack>
+
+                  <DownloadLinkButton
+                    action={async () => {
+                      const organismes = await _get<Organisme[]>(`/api/v1/organismes/${organisme._id}/organismes`);
+                      exportDataAsXlsx(
+                        `tdb-organismes-non-transmetteurs-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
+                        organismes
+                          .filter((organisme) => !organisme.last_transmission_date)
+                          .map((organisme) => convertOrganismeToExport(organisme)),
+                        organismesExportColumns
+                      );
+                    }}
+                  >
+                    Télécharger la liste des organismes qui ne transmettent pas
+                  </DownloadLinkButton>
+                </VStack>
+
+                <Box flex="1" minH="250px">
+                  <ResponsivePie
+                    margin={{ top: 32, right: 32, bottom: 32, left: 32 }}
+                    data={indicateursOrganismesPieData}
+                    innerRadius={0.6}
+                    cornerRadius={3}
+                    activeOuterRadiusOffset={8}
+                    enableArcLinkLabels={false}
+                    colors={{ datum: "data.color" }}
+                    enableArcLabels={false}
+                    layers={["arcs", CenteredMetric]}
+                  />
                 </Box>
-              }
-              aria-label="Informations sur le taux de couverture des organismes"
-            >
-              <Box
-                as="i"
-                className="ri-information-line"
-                fontSize="epsilon"
-                color="grey.500"
-                marginLeft="1w"
-                verticalAlign="middle"
-              />
-            </Tooltip>
-          </Text>
-
-          <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
-
-          {/* TODO OFR uniquement */}
-          <Flex justifyContent="space-between">
-            <VStack gap="2" justifyContent="center" alignItems="start">
-              <HStack>
-                <Box bg="#00ac8c" w={4} h={4} borderRadius={10} />
-                <Text color="mgalt" fontSize="zeta" fontWeight="bold">
-                  Transmettent les effectifs au tableau de bord
-                </Text>
-              </HStack>
-
-              <HStack>
-                <Box bg="#ef5800" w={4} h={4} borderRadius={10} />
-                <Text color="mgalt" fontSize="zeta" fontWeight="bold">
-                  Ne transmettent pas les effectifs au tableau de bord
-                </Text>
-              </HStack>
-
-              <DownloadLinkButton
-                action={async () => {
-                  await sleep(2000);
-                }}
-              >
-                Télécharger la liste des organismes qui ne transmettent pas
-              </DownloadLinkButton>
-            </VStack>
-
-            <Box flex="1" minH="250px">
-              <ResponsivePie
-                margin={{ top: 32, right: 32, bottom: 32, left: 32 }}
-                data={indicateursOrganismesPieData}
-                innerRadius={0.6}
-                cornerRadius={3}
-                activeOuterRadiusOffset={8}
-                enableArcLinkLabels={false}
-                colors={{ datum: "data.color" }}
-                enableArcLabels={false}
-                layers={["arcs", CenteredMetric]}
-              />
+              </Flex>
             </Box>
-          </Flex>
-        </Box>
 
-        <Button
-          size="md"
-          variant="secondary"
-          display="block"
-          ml="auto"
-          mt="8"
-          onClick={() => {
-            router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/organismes`);
-          }}
-        >
-          Voir la liste complète
-        </Button>
+            <Button
+              size="md"
+              variant="secondary"
+              display="block"
+              ml="auto"
+              mt="8"
+              onClick={() => {
+                router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/organismes`);
+              }}
+            >
+              Voir la liste complète
+            </Button>
+          </>
+        )}
 
         {!modePublique && aucunEffectifTransmis && (
           <>
