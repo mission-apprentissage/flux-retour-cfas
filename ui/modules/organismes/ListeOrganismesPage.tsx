@@ -90,15 +90,15 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     <SimplePage title={title}>
       <Container maxW="xl" p="8">
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb="4w">
-          {getHeaderTitleFromOrganisationType(organisationType)}
+          {props.modePublique ? "Ses organismes formateurs" : getHeaderTitleFromOrganisationType(organisationType)}
         </Heading>
 
         <Text>Retrouvez ci-dessous&nbsp;:</Text>
         <UnorderedList styleType="'- '">
           <ListItem>
             les <strong>{organismesFiables.length}</strong> établissements <strong>fiables</strong>{" "}
-            {getTextContextFromOrganisationType(organisationType)} et la nature de chacun (inclus les
-            prépa-apprentissage, CFA académiques, d’entreprise, etc.)
+            {props.modePublique ? "rattachés à cet organisme" : getTextContextFromOrganisationType(organisationType)} et
+            la nature de chacun (inclus les prépa-apprentissage, CFA académiques, d’entreprise, etc.)
           </ListItem>
           {organismesNonFiables.length !== 0 && (
             <ListItem>

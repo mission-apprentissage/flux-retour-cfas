@@ -40,6 +40,33 @@ function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): stri
   }
 }
 
+function canViewOrganismesFormateurs(type: OrganisationType): boolean {
+  switch (type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+      return false;
+
+    case "TETE_DE_RESEAU":
+      return true;
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+      return true;
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+      return true;
+    case "ADMINISTRATEUR":
+      return true;
+
+    default:
+      throw new Error(`Type '${type}' inconnu`);
+  }
+}
+
 function canManageEffectifsOrganisme(type: OrganisationType): boolean {
   switch (type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -190,9 +217,10 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
         <NavItem to={`/organismes/${organismeId}`} exactMatch colorActive="dsfr_lightprimary.bluefrance_850">
           Son tableau de bord
         </NavItem>
-        {canManageEffectifsOrganisme(organisationType) && (
+
+        {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
+        {canViewOrganismesFormateurs(organisationType) && (
           <>
-            {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
             {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
               <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
                 Ses organismes
@@ -201,6 +229,11 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
             <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
               Ses indicateurs
             </NavItem>
+          </>
+        )}
+
+        {canManageEffectifsOrganisme(organisationType) && (
+          <>
             <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
               Ses effectifs
             </NavItem>
