@@ -110,9 +110,9 @@ function DownloadMenuButton(props: DownloadMenuButtonProps) {
           color: "bluefrance",
         }}
         isLoading={isLoading}
+        rightIcon={<DownloadIcon />}
       >
         Télécharger la liste
-        <DownloadIcon ml="2" />
       </MenuButton>
 
       <MenuList>
