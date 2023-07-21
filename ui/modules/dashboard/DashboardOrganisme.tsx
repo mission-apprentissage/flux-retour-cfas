@@ -21,7 +21,7 @@ import { useMemo } from "react";
 import { ERPS_BY_ID } from "@/common/constants/erps";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
-import { _get } from "@/common/httpClient";
+import { _get, _post } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
@@ -37,6 +37,7 @@ import { CloseCircle } from "@/theme/components/icons/CloseCircle";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import { ExternalLinks } from "../admin/OrganismeDetail";
+import { NewOrganisation, getOrganisationTypeFromNature } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
 
 import ContactsModal from "./ContactsModal";
@@ -131,7 +132,33 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
           {/* DEBUG pour les administrateurs */}
           {organisationType === "ADMINISTRATEUR" && (
-            <ExternalLinks search={organisme.siret} siret={organisme.siret} fontSize={"omega"} mt={6} />
+            <>
+              <ExternalLinks
+                search={organisme.siret}
+                siret={organisme.siret}
+                fontSize={"omega"}
+                display="inline-block"
+                mt={6}
+              />
+
+              <Button
+                variant="outline"
+                borderColor="#B60000"
+                color="#B60000"
+                size="xs"
+                ml={4}
+                onClick={async () => {
+                  await _post<NewOrganisation>("/api/v1/admin/impersonate", {
+                    type: getOrganisationTypeFromNature(organisme.nature as any),
+                    siret: organisme.siret,
+                    uai: organisme.uai ?? (null as any), // peut être absent si non présent dans le référentiel
+                  });
+                  location.href = "/";
+                }}
+              >
+                Imposture
+              </Button>
+            </>
           )}
 
           <VStack gap={2} alignItems={"baseline"} mt="6">
