@@ -1,6 +1,8 @@
+import { ArrowForwardIcon } from "@chakra-ui/icons";
 import {
   Box,
   Container,
+  HStack,
   Heading,
   ListItem,
   Tab,
@@ -14,8 +16,9 @@ import {
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _get } from "@/common/httpClient";
-import { OrganisationType } from "@/common/internal/Organisation";
+import { OrganisationType, getOrganisationLabel } from "@/common/internal/Organisation";
 import { Organisme } from "@/common/internal/Organisme";
 import { normalize } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
@@ -53,7 +56,7 @@ interface ListeOrganismesPageProps {
 
 function ListeOrganismesPage(props: ListeOrganismesPageProps) {
   const router = useRouter();
-  const { organisationType } = useAuth();
+  const { auth, organisationType } = useAuth();
 
   const title = `${props.modePublique ? "Ses" : "Mes"} organismes${
     props.activeTab === "non-fiables" ? " non fiables" : ""
@@ -118,6 +121,19 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           )}
         </UnorderedList>
         <Text fontStyle="italic">Sources : Catalogue et Référentiel de l’apprentissage</Text>
+
+        <HStack justifyContent="space-between">
+          <Box />
+          <Link
+            href={`mailto:${CONTACT_ADDRESS}?subject=Anomalie TDB [${getOrganisationLabel(auth.organisation)}]`}
+            color="action-high-blue-france"
+            borderBottom="1px"
+            _hover={{ textDecoration: "none" }}
+          >
+            <ArrowForwardIcon mr={2} />
+            Signaler une anomalie
+          </Link>
+        </HStack>
 
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         {organismesNonFiables.length === 0 ? (
