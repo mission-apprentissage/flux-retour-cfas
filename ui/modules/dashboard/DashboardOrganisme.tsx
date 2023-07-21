@@ -1,5 +1,18 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons";
-import { Badge, Box, Button, Container, Divider, Flex, HStack, Heading, Text, Tooltip, VStack } from "@chakra-ui/react";
+import {
+  Badge,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Flex,
+  HStack,
+  Heading,
+  Text,
+  Tooltip,
+  VStack,
+  Wrap,
+} from "@chakra-ui/react";
 import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
@@ -121,8 +134,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
             <ExternalLinks search={organisme.siret} siret={organisme.siret} fontSize={"omega"} mt={6} />
           )}
 
-          <VStack gap={1} rowGap="1em" alignItems={"baseline"} mt="6">
-            <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
+          <VStack gap={2} alignItems={"baseline"} mt="6">
+            <Wrap fontSize="epsilon" textColor="grey.800">
               <HStack>
                 <Text>UAI&nbsp;:</Text>
                 <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
@@ -241,7 +254,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   <Text>Données non transmises</Text>
                 </HStack>
               )}
-            </HStack>
+            </Wrap>
 
             {organisme.reseaux && organisme.reseaux?.length > 0 && (
               <HStack>
