@@ -94,7 +94,7 @@ export function objectOrNull(properties, custom = {}) {
 export function any(custom: { description?: string } = {}) {
   return {
     ...custom,
-    bsonType: ["number", "string", "bool", "object", "array", "null"],
+    bsonType: ["number", "string", "bool", "object", "array", "null", "objectId", "date"],
     additionalProperties: true,
   };
 }
