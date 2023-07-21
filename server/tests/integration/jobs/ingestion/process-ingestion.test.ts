@@ -861,7 +861,7 @@ describe("Processus d'ingestion", () => {
 
         expect(sortByPath(updatedInput?.validation_errors)).toStrictEqual([
           {
-            message: "String attendu",
+            message: "Format invalide",
             path: ["annee_scolaire"],
           },
         ]);

@@ -12,7 +12,6 @@ import EffectifsBanner from "./EffectifsBanner";
 import EffectifsBannerERPNotConfigured from "./EffectifsBannerERPNotConfigured";
 import { effectifsStateAtom } from "./engine/atoms";
 import Effectifs from "./engine/Effectifs";
-import Televersements from "./Televersements";
 
 function useOrganismesEffectifs(organismeId: string | null | undefined) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -70,23 +69,17 @@ const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
   }
 
   let MainComponent;
-  if (!organisme.mode_de_transmission && !organisme.last_transmission_date) {
-    MainComponent = <ChoixTransmission organismeId={organisme._id} />;
-  } else if (organisme.mode_de_transmission === "API") {
-    if (organisme.erps?.length === 0 && !organisme.first_transmission_date) {
-      MainComponent = <ChoixERP isMine={isMine} organisme={organisme} />;
-    } else {
-      MainComponent = <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
-    }
-  } else if (organisme.mode_de_transmission === "MANUEL") {
-    MainComponent = <Televersements organisme={organisme} />;
-  } else {
+  if (organisme.last_transmission_date) {
     MainComponent = <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
+  } else if (organisme.mode_de_transmission === "API" && !organisme.erps?.length) {
+    MainComponent = <ChoixERP isMine={isMine} organisme={organisme} />;
+  } else {
+    MainComponent = <ChoixTransmission organismeId={organisme._id} isMine={isMine} />;
   }
 
   return (
     <>
-      {organisme.mode_de_transmission || organisme.last_transmission_date ? (
+      {organisme.last_transmission_date ? (
         <EffectifsBanner organisme={organisme} isMine={isMine} />
       ) : (
         <EffectifsBannerERPNotConfigured isMine={isMine} />

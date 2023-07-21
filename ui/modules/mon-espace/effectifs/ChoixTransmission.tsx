@@ -8,9 +8,10 @@ import { ArrowDropRightLine } from "@/theme/components/icons";
 
 type ChoixTransmissionProps = {
   organismeId: string;
+  isMine: boolean;
 };
 
-const ChoixTransmission = ({ organismeId }: ChoixTransmissionProps) => {
+const ChoixTransmission = ({ organismeId, isMine = false }: ChoixTransmissionProps) => {
   const router = useRouter();
 
   return (
@@ -76,18 +77,18 @@ const ChoixTransmission = ({ organismeId }: ChoixTransmissionProps) => {
                   Vous n&rsquo;avez pas d&rsquo;ERP ?
                 </Heading>
                 <Heading as="h5" fontSize="1rem" mb={4}>
-                  Importez vos effectifs avec un fichier (excel, csv)
+                  Importez vos effectifs avec un fichier Excel
                 </Heading>
               </Flex>
             </Box>
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  await configureOrganismeERP(organismeId, {
-                    mode_de_transmission: "MANUEL",
-                    setup_step_courante: "COMPLETE",
-                  });
-                  router.reload();
+                  if (!isMine) {
+                    router.push(`/organismes/${organismeId}/effectifs/televersement`);
+                  } else {
+                    router.push(`/effectifs/televersement`);
+                  }
                 }}
                 size={"md"}
                 variant={"secondary"}

@@ -6,7 +6,7 @@ import * as Tracing from "@sentry/tracing";
 import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
-import express, { Application, NextFunction, Request, RequestHandler, Response } from "express";
+import express, { Application } from "express";
 import listEndpoints from "express-list-endpoints";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
@@ -85,13 +85,11 @@ import { createUserToken } from "@/common/utils/jwtUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
+import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFormationSearchSchema";
 import { registrationSchema } from "@/common/validation/registrationSchema";
-import uploadedDocumentSchema from "@/common/validation/uploadedDocumentSchema";
-import uploadMappingSchema from "@/common/validation/uploadMappingSchema";
-import uploadUpdateDocumentSchema from "@/common/validation/uploadUpdateDocumentSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
@@ -116,7 +114,6 @@ import effectif from "./routes/specific.routes/effectif.routes";
 import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
-import upload from "./routes/specific.routes/upload.routes";
 import auth from "./routes/user.routes/auth.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
@@ -482,66 +479,23 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         express
           .Router()
-          .get("/", validateRequestMiddleware({ body: uploadedDocumentSchema() }), async (req, res) => {
-            return upload.getDocument(res.locals.organismeId, req.body, res);
-          })
-          .post("/", async (req, res) => {
-            return upload.createUpload(res.locals.organismeId, req, res);
-          })
-          .get(
-            "/get",
-            returnResult(async (req, res) => {
-              return upload.getUpload(res.locals.organismeId);
-            })
-          )
           .post(
-            "/pre-import",
-            validateRequestMiddleware({ body: uploadMappingSchema() }),
-            returnResult(async (req, res) => {
-              let userMapping = req.body;
-              return upload.preImport(res.locals.organismeId, req.user, userMapping);
+            "/validate",
+            returnResult(async (req) => {
+              const data = await z.array(dossierApprenantSchemaV3()).safeParseAsync(req.body);
+              return data;
             })
           )
-          .post(
-            "/import",
-            returnResult(async (req, res) => {
-              return upload.import(res.locals.organismeId, req.user);
-            })
-          )
-          .get(
-            "/analyse",
-            returnResult(async (req, res) => {
-              return upload.analyse(res.locals.organismeId, req.user);
-            })
-          )
-          // Manage uploaded documents (delete, set mapping modele)
           .use(
-            "/doc/:document_id",
-            requireOrganismePermission("manageEffectifs"),
-            validateRequestMiddleware({ params: objectIdSchema("document_id") }),
-            ((req: Request<{ document_id: ObjectId }>, res: Response, next: NextFunction) => {
-              // TODO investiguer pourquoi req.params.document_id est de type string ici
-              res.locals.documentId = new ObjectId(req.params.document_id);
+            // v3 is required in URL to consider the request as a v3 import
+            "/import/v3",
+            async (req, res, next) => {
+              (req.user as any) = { source: String(res.locals.organismeId) };
               next();
-            }) as RequestHandler<never, any, never, never, { documentId: ObjectId }>,
-            express
-              .Router()
-              .put(
-                "/setDocumentType",
-                validateRequestMiddleware({ body: uploadUpdateDocumentSchema() }),
-                returnResult(async (req, res) => {
-                  return upload.setDocumentType(res.locals.organismeId, res.locals.documentId, req.body.type_document);
-                })
-              )
-              .delete(
-                "",
-                returnResult(async (req, res) => {
-                  return upload.deleteUploadedDocument(res.locals.organismeId, res.locals.documentId);
-                })
-              )
+            },
+            dossierApprenantRouter()
           )
       )
-
       .use(
         "/api-key",
         requireOrganismePermission("manageEffectifs"),
