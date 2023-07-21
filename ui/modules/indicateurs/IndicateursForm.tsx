@@ -1,4 +1,4 @@
-import { EditIcon } from "@chakra-ui/icons";
+import { DownloadIcon, EditIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -32,13 +32,7 @@ import FiltreFormationNiveau from "@/modules/indicateurs/filters/FiltreFormation
 import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganismeReseau";
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
 
-import {
-  AbandonsIcon,
-  ApprentisIcon,
-  FileDownloadIcon,
-  InscritsSansContratsIcon,
-  RupturantsIcon,
-} from "../dashboard/icons";
+import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
@@ -339,8 +333,8 @@ function IndicateursForm() {
               _active={{
                 color: "bluefrance",
               }}
+              rightIcon={<DownloadIcon />}
             >
-              <FileDownloadIcon mr="2" />
               Télécharger la liste
             </MenuButton>
 
