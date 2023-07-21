@@ -711,7 +711,15 @@ export async function getOrganismeIndicateursEffectifs(
       },
     ])
     .next()) as IndicateursEffectifs;
-  return indicateurs;
+  return (
+    indicateurs ?? {
+      apprenants: 0,
+      apprentis: 0,
+      inscritsSansContrat: 0,
+      abandons: 0,
+      rupturants: 0,
+    }
+  );
 }
 
 export async function getOrganismeIndicateursOrganismes(organismeId: ObjectId): Promise<IndicateursOrganismes> {

@@ -26,6 +26,11 @@ import {
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import {
+  requireListOrganismesFormateursAccess,
+  requireManageOrganismeEffectifsPermission,
+  requireOrganismeIndicateursAccess,
+} from "@/common/actions/helpers/permissions";
+import {
   getIndicateursNational,
   indicateursNationalFiltersSchema,
 } from "@/common/actions/indicateurs/indicateurs-national.actions";
@@ -64,6 +69,7 @@ import {
   getOrganismeById,
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
   listContactsOrganisme,
+  listOrganismesFormateurs,
   searchOrganismes,
   verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
@@ -94,9 +100,8 @@ import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
-import { authOrgMiddleware } from "./middlewares/authOrgMiddleware";
 import errorMiddleware from "./middlewares/errorMiddleware";
-import { requireAdministrator, returnResult } from "./middlewares/helpers";
+import { ensurePermissionOrganisme, requireAdministrator, returnResult } from "./middlewares/helpers";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
@@ -386,17 +391,17 @@ function setupRoutes(app: Application) {
       .Router()
       .get(
         "",
-        authOrgMiddleware("reader"),
+        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
         returnResult(async (req, res) => {
           return await getOrganismeById(res.locals.organismeId); // double récupération avec les permissions mais pas très grave
         })
       )
       .get(
         [
-          "/indicateurs", // legacy, à supprimer dans un futur déploiement
+          "/indicateurs", // legacy car trop générique, à supprimer dans un futur déploiement
           "/indicateurs/effectifs", // nouveau pour plus de cohérence
         ],
-        authOrgMiddleware("reader"),
+        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
           return await getOrganismeIndicateursEffectifs(res.locals.organismeId, filters);
@@ -404,21 +409,28 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/indicateurs/organismes",
-        authOrgMiddleware("reader"),
+        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
         })
       )
       .get(
         "/contacts",
-        authOrgMiddleware("reader"),
+        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
         returnResult(async (req, res) => {
           return await listContactsOrganisme(res.locals.organismeId);
         })
       )
       .get(
+        "/organismes",
+        ensurePermissionOrganisme(requireListOrganismesFormateursAccess),
+        returnResult(async (req, res) => {
+          return await listOrganismesFormateurs(res.locals.organismeId);
+        })
+      )
+      .get(
         "/effectifs",
-        authOrgMiddleware("manager"),
+        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
         returnResult(async (req, res) => {
           return await getOrganismeEffectifs(
             res.locals.organismeId,
@@ -429,7 +441,7 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/sifa-export",
-        authOrgMiddleware("manager"),
+        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
         returnResult(async (req, res) => {
           const organismeId = res.locals.organismeId;
           const sifaCsv = await generateSifa(organismeId as any as ObjectId);
@@ -439,7 +451,7 @@ function setupRoutes(app: Application) {
       )
       .put(
         "/configure-erp",
-        authOrgMiddleware("manager"),
+        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
         returnResult(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
@@ -447,7 +459,7 @@ function setupRoutes(app: Application) {
       )
       .post(
         "/verify-user",
-        authOrgMiddleware("manager"),
+        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
         returnResult(async (req, res) => {
           // POST /api/v1/organismes/:id/verify-user { siret=XXXXX, uai=YYYYY, erp=ZZZZ , api_key=TTTTT }
           const verif = await validateFullZodObjectSchema(req.body, SReqPostVerifyUser);
@@ -456,7 +468,7 @@ function setupRoutes(app: Application) {
       )
       .use(
         "/upload",
-        authOrgMiddleware("manager"),
+        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
         express
           .Router()
           .get("/", validateRequestMiddleware({ body: uploadedDocumentSchema() }), async (req, res) => {
@@ -494,7 +506,7 @@ function setupRoutes(app: Application) {
           // Manage uploaded documents (delete, set mapping modele)
           .use(
             "/doc/:document_id",
-            authOrgMiddleware("manager"),
+            ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
             validateRequestMiddleware({ params: objectIdSchema("document_id") }),
             ((req: Request<{ document_id: ObjectId }>, res: Response, next: NextFunction) => {
               // TODO investiguer pourquoi req.params.document_id est de type string ici
@@ -521,7 +533,7 @@ function setupRoutes(app: Application) {
 
       .use(
         "/api-key",
-        authOrgMiddleware("manager"),
+        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
         express
           .Router()
           .get(

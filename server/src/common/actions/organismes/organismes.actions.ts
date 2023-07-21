@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 import {
   findOrganismesAccessiblesByOrganisationOF,
+  findOrganismesFormateursIdsOfOrganisme,
   getOrganismeRestriction,
   isOrganisationOF,
 } from "@/common/actions/helpers/permissions";
@@ -648,10 +649,7 @@ export async function findUserOrganismes(ctx: AuthContext) {
     )
     .toArray();
 
-  return organismes.map((organisme) => ({
-    ...organisme,
-    nomOrga: organisme.enseigne || organisme.raison_sociale,
-  }));
+  return organismes;
 }
 
 export async function getOrganismeById(_id: ObjectId) {
@@ -820,4 +818,36 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
     uai: organisme.uai as string,
   });
   return organisation ? await listContactsOrganisation(organisation._id) : [];
+}
+
+export async function listOrganismesFormateurs(organismeId: ObjectId): Promise<Organisme[]> {
+  const organismes = await organismesDb()
+    .find(
+      {
+        _id: {
+          $in: await findOrganismesFormateursIdsOfOrganisme(organismeId),
+        },
+      },
+      {
+        projection: {
+          _id: 1,
+          nom: 1,
+          enseigne: 1,
+          raison_sociale: 1,
+          ferme: 1,
+          nature: {
+            $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+          },
+          adresse: 1,
+          siret: 1,
+          uai: 1,
+          first_transmission_date: 1,
+          last_transmission_date: 1,
+          fiabilisation_statut: 1,
+        },
+      }
+    )
+    .toArray();
+
+  return organismes;
 }

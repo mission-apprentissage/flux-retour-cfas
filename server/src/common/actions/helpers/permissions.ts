@@ -282,6 +282,40 @@ async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: Obje
   }
 }
 
+export async function requireListOrganismesFormateursAccess(ctx: AuthContext, organismeId: ObjectId): Promise<void> {
+  if (!(await canAccessOrganismesFormateurs(ctx, organismeId))) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+}
+
+async function canAccessOrganismesFormateurs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
+  const organisme = await getOrganismeById(organismeId);
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      return organisme._id.equals(organismeId);
+    }
+
+    case "TETE_DE_RESEAU":
+      return (organisme.reseaux as string[])?.includes(organisation.reseau);
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+      return organisme.adresse?.region === organisation.code_region;
+    case "DDETS":
+      return organisme.adresse?.departement === organisation.code_departement;
+    case "ACADEMIE":
+      return organisme.adresse?.academie === organisation.code_academie;
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return true;
+  }
+}
+
 export function isOrganisationOF(type: OrganisationType): boolean {
   return (
     type === "ORGANISME_FORMATION_FORMATEUR" ||
