@@ -650,7 +650,9 @@ export async function findUserOrganismes(ctx: AuthContext) {
       {
         projection: {
           _id: 1,
-          nom: 1,
+          nom: {
+            $ifNull: ["$enseigne", "$raison_sociale"],
+          },
           enseigne: 1,
           raison_sociale: 1,
           ferme: 1,
@@ -850,7 +852,9 @@ export async function listOrganismesFormateurs(organismeId: ObjectId): Promise<O
       {
         projection: {
           _id: 1,
-          nom: 1,
+          nom: {
+            $ifNull: ["$enseigne", "$raison_sociale"],
+          },
           enseigne: 1,
           raison_sociale: 1,
           ferme: 1,
