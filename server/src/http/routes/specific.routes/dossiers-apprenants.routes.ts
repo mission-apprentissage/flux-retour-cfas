@@ -37,7 +37,7 @@ export default () => {
         : result.error.issues.map(({ path, message }) => ({ message, path }));
 
       return {
-        ...dossierApprenant,
+        ...(result.success ? result.data : dossierApprenant),
         ...defaultValuesEffectifQueue(),
         ...(prettyValidationError ? { processed_at: new Date() } : {}),
         validation_errors: prettyValidationError || [],
