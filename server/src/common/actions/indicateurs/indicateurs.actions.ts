@@ -9,6 +9,7 @@ import {
 } from "@/common/actions/helpers/filters";
 import {
   getEffectifsAnonymesRestriction,
+  getEffectifsNominatifsRestriction,
   getIndicateursEffectifsRestriction,
   getIndicateursOrganismesRestriction,
 } from "@/common/actions/helpers/permissions";
@@ -479,7 +480,7 @@ export async function getEffectifsNominatifs(
       {
         $match: {
           $and: [
-            await getEffectifsAnonymesRestriction(ctx),
+            await getEffectifsNominatifsRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true,
