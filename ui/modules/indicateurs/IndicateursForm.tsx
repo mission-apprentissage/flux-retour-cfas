@@ -64,7 +64,7 @@ import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
 function IndicateursForm() {
-  const { auth } = useAuth();
+  const { auth, organisationType } = useAuth();
   const router = useRouter();
 
   const { effectifsFilters, sort } = useMemo(() => {
@@ -308,7 +308,7 @@ function IndicateursForm() {
         <IndicateursGrid
           indicateursEffectifs={indicateursEffectifsTotaux}
           loading={indicateursEffectifsLoading}
-          showDownloadLinks
+          showDownloadLinks={organisationType !== "OPERATEUR_PUBLIC_NATIONAL"}
           effectifsFilters={effectifsFilters}
         />
 

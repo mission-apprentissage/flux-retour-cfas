@@ -261,7 +261,7 @@ describe("Route indicateurs", () => {
         "DDETS autre département": false,
         "ACADEMIE même académie": true,
         "ACADEMIE autre académie": false,
-        "Opérateur public national": true,
+        "Opérateur public national": false,
         Administrateur: true,
       };
       testPermissions(accesOrganisme, async (organisation, hasAccess) => {
