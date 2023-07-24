@@ -341,12 +341,12 @@ function IndicateursForm() {
             <MenuList>
               <MenuItem
                 onClick={() => {
-                  const effectitsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
+                  const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
                     ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
                   );
                   exportDataAsXlsx(
                     `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
-                    effectitsWithoutOrganismeId,
+                    effectifsWithoutOrganismeId,
                     indicateursParOrganismeExportColumns
                   );
                 }}
@@ -355,12 +355,12 @@ function IndicateursForm() {
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  const effectitsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
+                  const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
                     ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
                   );
                   exportDataAsCSV(
                     `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.csv`,
-                    effectitsWithoutOrganismeId,
+                    effectifsWithoutOrganismeId,
                     indicateursParOrganismeExportColumns
                   );
                 }}
