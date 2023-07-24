@@ -59,9 +59,10 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
 
   const title = `Mes organismes${props.activeTab === "non-fiables" ? " non fiables" : ""}`;
 
-  const { organismesFiables, organismesNonFiables } = useMemo(() => {
+  const { organismesFiables, organismesNonFiables, nbOrganimesFermes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesNonFiables: OrganismeNormalized[] = [];
+    let nbOrganimesFermes = 0;
     (organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
       organisme.normalizedName = normalize(organisme.nom ?? "");
@@ -72,12 +73,16 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         organismesFiables.push(organisme);
       } else {
         organismesNonFiables.push(organisme);
+        if (organisme.ferme) {
+          nbOrganimesFermes++;
+        }
       }
     });
 
     return {
       organismesFiables,
       organismesNonFiables,
+      nbOrganimesFermes,
     };
   }, [organismes]);
 
@@ -110,6 +115,17 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           {organismesNonFiables.length !== 0 && (
             <ListItem>
               les <strong>{organismesNonFiables.length}</strong> établissements <strong>non-fiabilisés</strong>
+              {nbOrganimesFermes > 0 && (
+                <>
+                  {" "}
+                  dont <strong>{nbOrganimesFermes}</strong> établissement{nbOrganimesFermes > 1 ? "s" : ""}{" "}
+                  <strong>
+                    fermé
+                    {nbOrganimesFermes > 1 ? "s" : ""}
+                  </strong>
+                  .
+                </>
+              )}
             </ListItem>
           )}
         </UnorderedList>
