@@ -358,17 +358,20 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 {modePublique && organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (
                   <HStack>
                     <Text>Organisme responsable identifié&nbsp;:</Text>
-                    <Link
-                      href={`/organismes/${organisme.organismesResponsables[0]._id}`}
-                      borderBottom="1px"
-                      color="action-high-blue-france"
-                      _hover={{ textDecoration: "none" }}
-                      display="inline-flex"
-                      alignItems="center"
-                      mt="3"
-                    >
-                      {organisme.organismesResponsables[0].label}
-                    </Link>
+                    {organisme.organismesResponsables.map((organisme) => (
+                      <Link
+                        key={organisme._id}
+                        href={`/organismes/${organisme._id}`}
+                        borderBottom="1px"
+                        color="action-high-blue-france"
+                        _hover={{ textDecoration: "none" }}
+                        display="inline-flex"
+                        alignItems="center"
+                        mt="3"
+                      >
+                        {organisme.label}
+                      </Link>
+                    ))}
                   </HStack>
                 )}
               </>
