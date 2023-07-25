@@ -57,7 +57,10 @@ import FiltreOrganismeRegion from "./filters/FiltreOrganismeRegion";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
-function IndicateursForm() {
+interface IndicateursFormProps {
+  organismeId?: string;
+}
+function IndicateursForm(props: IndicateursFormProps) {
   const { auth, organisationType } = useAuth();
   const router = useRouter();
 
@@ -71,11 +74,14 @@ function IndicateursForm() {
   }, [JSON.stringify(router.query)]);
 
   const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery(
-    ["indicateurs/effectifs/par-organisme", JSON.stringify(effectifsFilters)],
+    [props.organismeId, "indicateurs/effectifs/par-organisme", JSON.stringify(effectifsFilters)],
     () =>
-      _get<IndicateursEffectifsAvecOrganisme[]>("/api/v1/indicateurs/effectifs/par-organisme", {
-        params: convertEffectifsFiltersToQuery(effectifsFilters),
-      }),
+      _get<IndicateursEffectifsAvecOrganisme[]>(
+        `/api/v1/${props.organismeId ? `organismes/${props.organismeId}/` : ""}indicateurs/effectifs/par-organisme`,
+        {
+          params: convertEffectifsFiltersToQuery(effectifsFilters),
+        }
+      ),
     {
       enabled: router.isReady,
     }
@@ -108,6 +114,7 @@ function IndicateursForm() {
       {
         pathname: router.pathname,
         query: {
+          ...(props.organismeId ? { organismeId: props.organismeId } : {}),
           ...convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }),
           ...convertPaginationInfosToQuery({ sort, ...newParams }),
         },
@@ -121,6 +128,9 @@ function IndicateursForm() {
     void router.push(
       {
         pathname: router.pathname,
+        query: {
+          ...(props.organismeId ? { organismeId: props.organismeId } : {}),
+        },
       },
       undefined,
       { shallow: true }

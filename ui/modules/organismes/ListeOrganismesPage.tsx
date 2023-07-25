@@ -144,7 +144,18 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             lazyBehavior="keepMounted"
             index={tabs.find((tab) => tab.key === props.activeTab)?.index}
             onChange={(index) => {
-              router.push(tabs[index]?.route, undefined, { shallow: true });
+              router.push(
+                {
+                  pathname: `${props.modePublique ? "/organismes/[organismeId]" : ""}${tabs[index]?.route}`,
+                  query: {
+                    ...router.query,
+                  },
+                },
+                undefined,
+                {
+                  shallow: true,
+                }
+              );
             }}
             mt="12"
           >

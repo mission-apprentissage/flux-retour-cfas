@@ -81,6 +81,7 @@ import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
 import { apiRoles } from "@/common/roles";
 import { packageJson } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
@@ -405,6 +406,25 @@ function setupRoutes(app: Application) {
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
           return await getOrganismeIndicateursEffectifs(res.locals.organismeId, filters);
+        })
+      )
+      .get(
+        "/indicateurs/effectifs/par-organisme",
+        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
+        returnResult(async (req, res) => {
+          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+          // FIXME doit-on montrer la vue exacte d'un organisme ? ou bien filtrée avec les permissions du parent ?
+          const organisme = await getOrganismeById(res.locals.organismeId);
+          return await getIndicateursEffectifsParOrganisme(
+            {
+              organisation: {
+                type: "ORGANISME_FORMATION_FORMATEUR",
+                siret: organisme.siret,
+                uai: organisme.uai,
+              },
+            } as AuthContext,
+            filters
+          );
         })
       )
       .get(
