@@ -217,35 +217,39 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
           Son tableau de bord
         </NavItem>
 
-        {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
-        {canViewOrganismesFormateurs(organisationType) && (
+        {organisme?.permissions?.indicateursEffectifs && (
           <>
-            {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
-              <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
-                Ses organismes
-              </NavItem>
+            {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
+            {canViewOrganismesFormateurs(organisationType) && (
+              <>
+                {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
+                  <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
+                    Ses organismes
+                  </NavItem>
+                )}
+                <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
+                  Ses indicateurs
+                </NavItem>
+              </>
             )}
-            <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
-              Ses indicateurs
-            </NavItem>
-          </>
-        )}
 
-        {canManageEffectifsOrganisme(organisationType) && (
-          <>
-            <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
-              Ses effectifs
-            </NavItem>
-            {organisme && (
-              <NavItem
-                to={`/organismes/${organismeId}/enquete-sifa`}
-                isDisabled={!organisme.first_transmission_date}
-                disabledReason={
-                  !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
-                }
-              >
-                Son enquête SIFA
-              </NavItem>
+            {canManageEffectifsOrganisme(organisationType) && (
+              <>
+                <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
+                  Ses effectifs
+                </NavItem>
+                {organisme && (
+                  <NavItem
+                    to={`/organismes/${organismeId}/enquete-sifa`}
+                    isDisabled={!organisme.first_transmission_date}
+                    disabledReason={
+                      !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
+                    }
+                  >
+                    Son enquête SIFA
+                  </NavItem>
+                )}
+              </>
             )}
           </>
         )}

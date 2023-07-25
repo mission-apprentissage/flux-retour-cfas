@@ -251,7 +251,7 @@ export function findOrganismeFormateursIds(userOrganisme: Organisme): ObjectId[]
     .map((organisme) => organisme._id as ObjectId);
 }
 
-async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
+export async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
   const organisme = await getOrganismeById(organismeId);
   const organisation = ctx.organisation;
   switch (organisation.type) {
