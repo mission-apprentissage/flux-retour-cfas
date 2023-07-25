@@ -185,9 +185,8 @@ function NavBarOrganismeFormation(): ReactElement {
       {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
         <NavItem to="/organismes">Mes organismes</NavItem>
       )}
-      <NavItem to="/indicateurs" isDisabled={!(organisme?.first_transmission_date || organisme?.mode_de_transmission)}>
-        Mes indicateurs
-      </NavItem>
+      {/* <NavItem to="/indicateurs" isDisabled={!(organisme?.first_transmission_date || organisme?.mode_de_transmission)}> */}
+      <NavItem to="/indicateurs">Mes indicateurs</NavItem>
       <NavItem to="/effectifs">Mes effectifs</NavItem>
       {organisme && (
         <NavItem
