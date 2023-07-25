@@ -22,6 +22,7 @@ import { ERPS_BY_ID } from "@/common/constants/erps";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
+import { AuthContext } from "@/common/internal/AuthContext";
 import { Organisme } from "@/common/internal/Organisme";
 import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
@@ -251,36 +252,36 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 </HStack>
               )}
 
-              {/* FIXME TODO dans quel cas afficher ce bloc ? si configuration faite ou si au moins une transmission ? */}
-              {organisme.erps?.[0] ? (
-                <HStack
-                  paddingX="1w"
-                  paddingY="2px"
-                  borderRadius={6}
-                  fontWeight="bold"
-                  color="#22967e"
-                  backgroundColor="#E5F7F4"
-                >
-                  <Checkbox />
-                  {/* On ne traite pas le cas de multi-erp */}
-                  <Text>
-                    Données transmises
-                    {erpName && ` via ${erpName}`}
-                  </Text>
-                </HStack>
-              ) : (
-                <HStack
-                  paddingX="1w"
-                  paddingY="2px"
-                  borderRadius={6}
-                  fontWeight="bold"
-                  backgroundColor="#E1000F30"
-                  color="#B60000"
-                >
-                  <CloseCircle />
-                  <Text>Données non transmises</Text>
-                </HStack>
-              )}
+              {organisme.permissions?.indicateursEffectifs &&
+                (organisme.erps?.[0] ? (
+                  <HStack
+                    paddingX="1w"
+                    paddingY="2px"
+                    borderRadius={6}
+                    fontWeight="bold"
+                    color="#22967e"
+                    backgroundColor="#E5F7F4"
+                  >
+                    <Checkbox />
+                    {/* On ne traite pas le cas de multi-erp */}
+                    <Text>
+                      Données transmises
+                      {erpName && ` via ${erpName}`}
+                    </Text>
+                  </HStack>
+                ) : (
+                  <HStack
+                    paddingX="1w"
+                    paddingY="2px"
+                    borderRadius={6}
+                    fontWeight="bold"
+                    backgroundColor="#E1000F30"
+                    color="#B60000"
+                  >
+                    <CloseCircle />
+                    <Text>Données non transmises</Text>
+                  </HStack>
+                ))}
             </Wrap>
 
             {organisme.reseaux && organisme.reseaux?.length > 0 && (
@@ -314,7 +315,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               <Text fontWeight="bold">{organisme.adresse?.complete || "Inconnue"}</Text>
             </HStack>
 
-            {modePublique && (
+            {modePublique && organisme.permissions?.indicateursEffectifs && (
               <>
                 <Box>
                   <Text display="inline-block">Responsable identifié de l’établissement&nbsp;:</Text>
@@ -381,274 +382,282 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
       </Box>
 
       <Container maxW="xl" p="8">
-        <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-          Aperçu de {modePublique ? "ses" : "vos"} effectifs
-        </Heading>
-
-        {aucunEffectifTransmis && (
-          <Ribbons variant="warning" mt="0.5rem">
-            <Text color="grey.800">
-              {modePublique ? (
-                "Cet établissement ne transmet pas encore ses effectifs au tableau de bord."
-              ) : (
-                <>
-                  Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs. Veuillez
-                  cliquer dans l’onglet{" "}
-                  <Link href="/effectifs" borderBottom="1px" _hover={{ textDecoration: "none" }}>
-                    Mes effectifs
-                  </Link>{" "}
-                  pour démarrer l’interfaçage ERP ou transmettre manuellement vos effectifs.
-                </>
-              )}
-            </Text>
-          </Ribbons>
-        )}
-
-        {indicateursEffectifs && (
-          <IndicateursGrid indicateursEffectifs={indicateursEffectifs} loading={indicateursEffectifsLoading} />
-        )}
-
-        {aucunEffectifTransmis ? (
-          !modePublique && (
-            <Button
-              size="md"
-              variant="secondary"
-              display="block"
-              ml="auto"
-              onClick={() => {
-                router.push(`/effectifs/televersement`);
-              }}
-            >
-              Transmettre mes effectifs
-            </Button>
-          )
-        ) : (
-          <Button
-            size="md"
-            variant="secondary"
-            display="block"
-            ml="auto"
-            onClick={() => {
-              router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/indicateurs`);
-            }}
-          >
-            Voir les indicateurs
-          </Button>
-        )}
-
-        {organisme.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
+        {organisme.permissions?.indicateursEffectifs ? (
           <>
-            <Box bg="galt" py="8" px="12" mt="8">
-              <Heading as="h3" color="#3558A2" fontSize="delta" fontWeight="700" mb={3}>
-                Nombre d’organismes de formation rattachés à {modePublique ? "cet" : "votre"} établissement
-              </Heading>
-
-              <Text fontSize="zeta">
-                Taux de couverture des organismes transmetteurs / non-transmetteurs
-                <Tooltip
-                  background="bluefrance"
-                  color="white"
-                  label={
-                    <Box padding="1w">
-                      Ce taux traduit le nombre d’organismes dispensant une formation en apprentissage (sauf
-                      responsables) qui transmettent au tableau de bord. Les organismes qui transmettent mais ne font
-                      pas partie du référentiel ne rentrent pas en compte dans ce taux. Il est conseillé d’avoir un
-                      minimum de 80% d’établissements transmetteurs afin de garantir la viabilité des enquêtes menées
-                      auprès de ces derniers.
-                    </Box>
-                  }
-                  aria-label="Informations sur le taux de couverture des organismes"
-                >
-                  <Box
-                    as="i"
-                    className="ri-information-line"
-                    fontSize="epsilon"
-                    color="grey.500"
-                    marginLeft="1w"
-                    verticalAlign="middle"
-                  />
-                </Tooltip>
-              </Text>
-
-              <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
-
-              <Flex justifyContent="space-between">
-                <VStack gap="2" justifyContent="center" alignItems="start">
-                  <HStack>
-                    <Box bg="#00ac8c" w={4} h={4} borderRadius={10} />
-                    <Text color="mgalt" fontSize="zeta" fontWeight="bold">
-                      Transmettent les effectifs au tableau de bord
-                    </Text>
-                  </HStack>
-
-                  <HStack>
-                    <Box bg="#ef5800" w={4} h={4} borderRadius={10} />
-                    <Text color="mgalt" fontSize="zeta" fontWeight="bold">
-                      Ne transmettent pas les effectifs au tableau de bord
-                    </Text>
-                  </HStack>
-
-                  <DownloadLinkButton
-                    action={async () => {
-                      const organismes = await _get<Organisme[]>(`/api/v1/organismes/${organisme._id}/organismes`);
-                      exportDataAsXlsx(
-                        `tdb-organismes-non-transmetteurs-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
-                        organismes
-                          .filter((organisme) => !organisme.last_transmission_date)
-                          .map((organisme) => convertOrganismeToExport(organisme)),
-                        organismesExportColumns
-                      );
-                    }}
-                  >
-                    Télécharger la liste des organismes qui ne transmettent pas
-                  </DownloadLinkButton>
-                </VStack>
-
-                <Box flex="1" minH="250px">
-                  <ResponsivePie
-                    margin={{ top: 32, right: 32, bottom: 32, left: 32 }}
-                    data={indicateursOrganismesPieData}
-                    innerRadius={0.6}
-                    cornerRadius={3}
-                    activeOuterRadiusOffset={8}
-                    enableArcLinkLabels={false}
-                    colors={{ datum: "data.color" }}
-                    enableArcLabels={false}
-                    layers={["arcs", CenteredMetric]}
-                  />
-                </Box>
-              </Flex>
-            </Box>
-
-            <Button
-              size="md"
-              variant="secondary"
-              display="block"
-              ml="auto"
-              mt="8"
-              onClick={() => {
-                router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/organismes`);
-              }}
-            >
-              Voir la liste complète
-            </Button>
-          </>
-        )}
-
-        {!modePublique && aucunEffectifTransmis && (
-          <>
-            <Divider size="md" my={8} />
-
             <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-              En transmettant les données de votre organisme au tableau de bord...
+              Aperçu de {modePublique ? "ses" : "vos"} effectifs
             </Heading>
 
-            <Flex backgroundColor="galt" p="8" gap="6">
-              <Box
-                minW={12}
-                h={12}
-                border="1px solid #3558A2"
-                borderRadius="50%"
-                textAlign="center"
-                color="#3558A2"
-                fontSize="beta"
-                fontWeight="bold"
-                backgroundColor="white"
-              >
-                1
-              </Box>
-              <Box>
-                <Text color="#3A3A3A">
-                  Vous permettez aux acteurs publics de piloter les politiques publiques en ayant une meilleure vision
-                  de la situation de l’apprentissage au national et sur les territoires.
+            {aucunEffectifTransmis && (
+              <Ribbons variant="warning" mt="0.5rem">
+                <Text color="grey.800">
+                  {modePublique ? (
+                    "Cet établissement ne transmet pas encore ses effectifs au tableau de bord."
+                  ) : (
+                    <>
+                      Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs. Veuillez
+                      cliquer dans l’onglet{" "}
+                      <Link href="/effectifs" borderBottom="1px" _hover={{ textDecoration: "none" }}>
+                        Mes effectifs
+                      </Link>{" "}
+                      pour démarrer l’interfaçage ERP ou transmettre manuellement vos effectifs.
+                    </>
+                  )}
                 </Text>
+              </Ribbons>
+            )}
 
-                <Link
-                  href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  borderBottom="1px"
-                  color="action-high-blue-france"
-                  _hover={{ textDecoration: "none" }}
-                  display="inline-flex"
-                  alignItems="center"
-                  mt="3"
+            {indicateursEffectifs && (
+              <IndicateursGrid indicateursEffectifs={indicateursEffectifs} loading={indicateursEffectifsLoading} />
+            )}
+
+            {aucunEffectifTransmis ? (
+              !modePublique && (
+                <Button
+                  size="md"
+                  variant="secondary"
+                  display="block"
+                  ml="auto"
+                  onClick={() => {
+                    router.push(`/effectifs/televersement`);
+                  }}
                 >
-                  <ArrowForwardIcon mr="2" />
-                  Consultez la FAQ du tableau de bord
-                </Link>
-              </Box>
-            </Flex>
-
-            <Flex backgroundColor="galt" p="8" gap="6">
-              <Box
-                minW={12}
-                h={12}
-                border="1px solid #3558A2"
-                borderRadius="50%"
-                textAlign="center"
-                color="#3558A2"
-                fontSize="beta"
-                fontWeight="bold"
-                backgroundColor="white"
+                  Transmettre mes effectifs
+                </Button>
+              )
+            ) : (
+              <Button
+                size="md"
+                variant="secondary"
+                display="block"
+                ml="auto"
+                onClick={() => {
+                  router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/indicateurs`);
+                }}
               >
-                2
-              </Box>
-              <Box>
-                <Text color="#3A3A3A">
-                  Vous contribuez à l’identification des jeunes en difficulté afin qu’ils soient accompagnés au meilleur
-                  moment.
-                </Text>
+                Voir les indicateurs
+              </Button>
+            )}
 
-                <Link
-                  href="/protection-des-donnees"
-                  borderBottom="1px"
-                  color="action-high-blue-france"
-                  _hover={{ textDecoration: "none" }}
-                  display="inline-flex"
-                  alignItems="center"
-                  mt="3"
+            {organisme.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
+              <>
+                <Box bg="galt" py="8" px="12" mt="8">
+                  <Heading as="h3" color="#3558A2" fontSize="delta" fontWeight="700" mb={3}>
+                    Nombre d’organismes de formation rattachés à {modePublique ? "cet" : "votre"} établissement
+                  </Heading>
+
+                  <Text fontSize="zeta">
+                    Taux de couverture des organismes transmetteurs / non-transmetteurs
+                    <Tooltip
+                      background="bluefrance"
+                      color="white"
+                      label={
+                        <Box padding="1w">
+                          Ce taux traduit le nombre d’organismes dispensant une formation en apprentissage (sauf
+                          responsables) qui transmettent au tableau de bord. Les organismes qui transmettent mais ne
+                          font pas partie du référentiel ne rentrent pas en compte dans ce taux. Il est conseillé
+                          d’avoir un minimum de 80% d’établissements transmetteurs afin de garantir la viabilité des
+                          enquêtes menées auprès de ces derniers.
+                        </Box>
+                      }
+                      aria-label="Informations sur le taux de couverture des organismes"
+                    >
+                      <Box
+                        as="i"
+                        className="ri-information-line"
+                        fontSize="epsilon"
+                        color="grey.500"
+                        marginLeft="1w"
+                        verticalAlign="middle"
+                      />
+                    </Tooltip>
+                  </Text>
+
+                  <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
+
+                  <Flex justifyContent="space-between">
+                    <VStack gap="2" justifyContent="center" alignItems="start">
+                      <HStack>
+                        <Box bg="#00ac8c" w={4} h={4} borderRadius={10} />
+                        <Text color="mgalt" fontSize="zeta" fontWeight="bold">
+                          Transmettent les effectifs au tableau de bord
+                        </Text>
+                      </HStack>
+
+                      <HStack>
+                        <Box bg="#ef5800" w={4} h={4} borderRadius={10} />
+                        <Text color="mgalt" fontSize="zeta" fontWeight="bold">
+                          Ne transmettent pas les effectifs au tableau de bord
+                        </Text>
+                      </HStack>
+
+                      <DownloadLinkButton
+                        action={async () => {
+                          const organismes = await _get<Organisme[]>(`/api/v1/organismes/${organisme._id}/organismes`);
+                          exportDataAsXlsx(
+                            `tdb-organismes-non-transmetteurs-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
+                            organismes
+                              .filter((organisme) => !organisme.last_transmission_date)
+                              .map((organisme) => convertOrganismeToExport(organisme)),
+                            organismesExportColumns
+                          );
+                        }}
+                      >
+                        Télécharger la liste des organismes qui ne transmettent pas
+                      </DownloadLinkButton>
+                    </VStack>
+
+                    <Box flex="1" minH="250px">
+                      <ResponsivePie
+                        margin={{ top: 32, right: 32, bottom: 32, left: 32 }}
+                        data={indicateursOrganismesPieData}
+                        innerRadius={0.6}
+                        cornerRadius={3}
+                        activeOuterRadiusOffset={8}
+                        enableArcLinkLabels={false}
+                        colors={{ datum: "data.color" }}
+                        enableArcLabels={false}
+                        layers={["arcs", CenteredMetric]}
+                      />
+                    </Box>
+                  </Flex>
+                </Box>
+
+                <Button
+                  size="md"
+                  variant="secondary"
+                  display="block"
+                  ml="auto"
+                  mt="8"
+                  onClick={() => {
+                    router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/organismes`);
+                  }}
                 >
-                  <ArrowForwardIcon mr="2" />
-                  Consultez la liste des données collectées (TODO lien à mettre)
-                </Link>
-              </Box>
-            </Flex>
+                  Voir la liste complète
+                </Button>
+              </>
+            )}
 
-            <Flex backgroundColor="galt" p="8" gap="6">
-              <Box
-                minW={12}
-                h={12}
-                border="1px solid #3558A2"
-                borderRadius="50%"
-                textAlign="center"
-                color="#3558A2"
-                fontSize="beta"
-                fontWeight="bold"
-                backgroundColor="white"
-              >
-                3
-              </Box>
-              <Box>
-                <Text color="#3A3A3A">
-                  Vous pouvez produire facilement des statistiques afin de répondre à des enquêtes (comme SIFA). Vos
-                  données peuvent être consultées <strong>exclusivement</strong> par votre organisme et les
-                  administrations publiques dans le cadre de la{" "}
-                  <Link
-                    href="/protection-des-donnees"
-                    borderBottom="1px"
-                    _hover={{ textDecoration: "none" }}
-                    display="inline-flex"
-                    alignItems="center"
-                    mt="3"
+            {!modePublique && aucunEffectifTransmis && (
+              <>
+                <Divider size="md" my={8} />
+
+                <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+                  En transmettant les données de votre organisme au tableau de bord...
+                </Heading>
+
+                <Flex backgroundColor="galt" p="8" gap="6">
+                  <Box
+                    minW={12}
+                    h={12}
+                    border="1px solid #3558A2"
+                    borderRadius="50%"
+                    textAlign="center"
+                    color="#3558A2"
+                    fontSize="beta"
+                    fontWeight="bold"
+                    backgroundColor="white"
                   >
-                    politique de l’apprentissage
-                  </Link>
-                  .
-                </Text>
-              </Box>
-            </Flex>
+                    1
+                  </Box>
+                  <Box>
+                    <Text color="#3A3A3A">
+                      Vous permettez aux acteurs publics de piloter les politiques publiques en ayant une meilleure
+                      vision de la situation de l’apprentissage au national et sur les territoires.
+                    </Text>
+
+                    <Link
+                      href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      borderBottom="1px"
+                      color="action-high-blue-france"
+                      _hover={{ textDecoration: "none" }}
+                      display="inline-flex"
+                      alignItems="center"
+                      mt="3"
+                    >
+                      <ArrowForwardIcon mr="2" />
+                      Consultez la FAQ du tableau de bord
+                    </Link>
+                  </Box>
+                </Flex>
+
+                <Flex backgroundColor="galt" p="8" gap="6">
+                  <Box
+                    minW={12}
+                    h={12}
+                    border="1px solid #3558A2"
+                    borderRadius="50%"
+                    textAlign="center"
+                    color="#3558A2"
+                    fontSize="beta"
+                    fontWeight="bold"
+                    backgroundColor="white"
+                  >
+                    2
+                  </Box>
+                  <Box>
+                    <Text color="#3A3A3A">
+                      Vous contribuez à l’identification des jeunes en difficulté afin qu’ils soient accompagnés au
+                      meilleur moment.
+                    </Text>
+
+                    <Link
+                      href="/protection-des-donnees"
+                      borderBottom="1px"
+                      color="action-high-blue-france"
+                      _hover={{ textDecoration: "none" }}
+                      display="inline-flex"
+                      alignItems="center"
+                      mt="3"
+                    >
+                      <ArrowForwardIcon mr="2" />
+                      Consultez la liste des données collectées (TODO lien à mettre)
+                    </Link>
+                  </Box>
+                </Flex>
+
+                <Flex backgroundColor="galt" p="8" gap="6">
+                  <Box
+                    minW={12}
+                    h={12}
+                    border="1px solid #3558A2"
+                    borderRadius="50%"
+                    textAlign="center"
+                    color="#3558A2"
+                    fontSize="beta"
+                    fontWeight="bold"
+                    backgroundColor="white"
+                  >
+                    3
+                  </Box>
+                  <Box>
+                    <Text color="#3A3A3A">
+                      Vous pouvez produire facilement des statistiques afin de répondre à des enquêtes (comme SIFA). Vos
+                      données peuvent être consultées <strong>exclusivement</strong> par votre organisme et les
+                      administrations publiques dans le cadre de la{" "}
+                      <Link
+                        href="/protection-des-donnees"
+                        borderBottom="1px"
+                        _hover={{ textDecoration: "none" }}
+                        display="inline-flex"
+                        alignItems="center"
+                        mt="3"
+                      >
+                        politique de l’apprentissage
+                      </Link>
+                      .
+                    </Text>
+                  </Box>
+                </Flex>
+              </>
+            )}
           </>
+        ) : (
+          <Ribbons variant="warning" mt="0.5rem">
+            <Text color="grey.800">{getForbiddenErrorText(auth)}</Text>
+          </Ribbons>
         )}
       </Container>
     </Box>
@@ -682,3 +691,26 @@ function CenteredMetric({ dataWithArc, centerX, centerY }: PieCustomLayerProps<a
 }
 
 export default withAuth(DashboardOrganisme);
+
+export function getForbiddenErrorText(ctx: AuthContext): string {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+      return "Vous n'avez pas accès aux données de cet organisme.";
+
+    case "TETE_DE_RESEAU":
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre réseau.";
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre région.";
+    case "DDETS":
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre département.";
+    case "ACADEMIE":
+      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre académie.";
+  }
+  return "";
+}

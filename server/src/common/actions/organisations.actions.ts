@@ -228,6 +228,9 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId
       uai: organisationOF.uai,
     });
   }
+  (organisme as any).permissions = {
+    indicateursEffectifs: true,
+  };
   return organisme;
 }
 

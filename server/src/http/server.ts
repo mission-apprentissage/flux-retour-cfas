@@ -26,6 +26,7 @@ import {
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import {
+  canAccessOrganismeIndicateurs,
   requireListOrganismesFormateursAccess,
   requireManageOrganismeEffectifsPermission,
   requireOrganismeIndicateursAccess,
@@ -392,9 +393,12 @@ function setupRoutes(app: Application) {
       .Router()
       .get(
         "",
-        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
         returnResult(async (req, res) => {
-          return await getOrganismeById(res.locals.organismeId); // double récupération avec les permissions mais pas très grave
+          const organisme = await getOrganismeById(res.locals.organismeId);
+          (organisme as any).permissions = {
+            indicateursEffectifs: await canAccessOrganismeIndicateurs(req.user, res.locals.organismeId),
+          };
+          return organisme;
         })
       )
       .get(

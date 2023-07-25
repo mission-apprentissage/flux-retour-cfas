@@ -964,4 +964,8 @@ export interface Organisme {
    * Date d'ajout en base de données
    */
   created_at?: Date;
+
+  permissions?: {
+    indicateursEffectifs: boolean;
+  };
 }
