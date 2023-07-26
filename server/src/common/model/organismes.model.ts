@@ -5,6 +5,7 @@ import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
+import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../constants/territoires";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
 import {
@@ -18,6 +19,38 @@ import {
   string,
   stringOrNull,
 } from "./json-schema/jsonSchemaTypes";
+
+const relationOrganismeSchema = object(
+  {
+    // infos référentiel
+    siret: string(),
+    uai: stringOrNull(),
+    referentiel: boolean(),
+    label: string(),
+    sources: arrayOf(string()),
+
+    // infos TDB
+    _id: objectIdOrNull(),
+    enseigne: string(),
+    raison_sociale: string(),
+    commune: string(),
+    region: string({
+      enum: REGIONS.map(({ code }) => code),
+    }),
+    departement: string({
+      example: "1 Ain, 99 Étranger",
+      pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
+      enum: DEPARTEMENTS.map(({ code }) => code),
+      maxLength: 3,
+      minLength: 1,
+    }),
+    academie: string({
+      enum: ACADEMIES.map(({ code }) => code),
+    }),
+    reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) })),
+  },
+  { additionalProperties: true }
+);
 
 const collectionName = "organismes";
 
@@ -131,32 +164,8 @@ const schema = object(
         description: "Formations de cet organisme",
       }
     ),
-    organismesFormateurs: arrayOf(
-      object(
-        {
-          _id: objectIdOrNull(),
-          siret: string(),
-          uai: stringOrNull(),
-          referentiel: boolean(),
-          label: string(),
-          sources: arrayOf(string()),
-        },
-        { additionalProperties: true }
-      )
-    ),
-    organismesResponsables: arrayOf(
-      object(
-        {
-          _id: objectIdOrNull(),
-          siret: string(),
-          uai: stringOrNull(),
-          referentiel: boolean(),
-          label: string(),
-          sources: arrayOf(string()),
-        },
-        { additionalProperties: true }
-      )
-    ),
+    organismesFormateurs: arrayOf(relationOrganismeSchema),
+    organismesResponsables: arrayOf(relationOrganismeSchema),
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     last_transmission_date: date({ description: "Date de la dernière transmission de données" }),

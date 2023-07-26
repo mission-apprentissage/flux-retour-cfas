@@ -1,25 +1,65 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { ArrayElement } from "mongodb";
+import { ArrayElement, ObjectId } from "mongodb";
 
 import parentLogger from "@/common/logger";
 import { OrganismesReferentiel } from "@/common/model/@types";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 const logger = parentLogger.child({
   module: "job:hydrate:organismes-relations",
 });
 
+interface OrganismeInfos {
+  _id: ObjectId;
+  enseigne?: string;
+  raison_sociale?: string;
+  commune?: string;
+  region?: string;
+  departement?: string;
+  academie?: string;
+  reseaux?: string[];
+}
+
 /**
  * Ce job peuple le champ organisme.organismesFormateurs et organismesResponsables avec les relations du référentiel
  * stockées dans la collection organismeReferentiel.
+ * Ces relations sont complétées avec quelques données de l'organisme (collection organismes).
+ * La région, département, académie et réseaux sont notamment enregistrés afin qu'un utilisateur puisse savoir sur l'UI
+ * s'il a les droits d'accès aux organismes formateurs liés (indiquer que les effectifs agrégés sont partiels).
  */
 export const hydrateOrganismesRelations = async () => {
   const organismes = await organismesDb()
-    .find({}, { projection: { _id: 1, uai: 1, siret: 1 } })
+    .find(
+      {},
+      {
+        projection: {
+          _id: 1,
+          uai: 1,
+          siret: 1,
+          enseigne: 1,
+          raison_sociale: 1,
+          "adresse.commune": 1,
+          "adresse.region": 1,
+          "adresse.departement": 1,
+          "adresse.academie": 1,
+          reseaux: 1,
+        },
+      }
+    )
     .toArray();
 
-  const organismeIdBySIRETAndUAI = organismes.reduce((acc, organisme) => {
-    acc[getOrganismeKey(organisme)] = organisme._id;
+  const organismeInfosBySIRETAndUAI = organismes.reduce<{ [organismeId: string]: OrganismeInfos }>((acc, organisme) => {
+    acc[getOrganismeKey(organisme)] = stripEmptyFields({
+      _id: organisme._id,
+      enseigne: organisme.enseigne,
+      raison_sociale: organisme.raison_sociale,
+      commune: organisme.adresse?.commune,
+      region: organisme.adresse?.region,
+      departement: organisme.adresse?.departement,
+      academie: organisme.adresse?.academie,
+      reseaux: organisme.reseaux,
+    });
     return acc;
   }, {});
 
@@ -45,13 +85,25 @@ export const hydrateOrganismesRelations = async () => {
 
     const organismesFormateurs = organismesLiés.filter((organisme) => organisme.type === "responsable->formateur");
     const organismesResponsables = organismesLiés.filter((organisme) => organisme.type === "formateur->responsable");
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    [...organismesFormateurs, ...organismesResponsables].forEach(({ type, ...organisme }) => {
+
+    function addOrganismesInfos({
+      type,
+      ...organisme
+    }: ArrayElement<OrganismesReferentiel["relations"]>): OrganismeInfos {
+      const { _id, enseigne, raison_sociale, commune, region, departement, academie, reseaux } =
+        organismeInfosBySIRETAndUAI[getOrganismeKey(organisme)];
       return {
         ...organisme,
-        _id: organismeIdBySIRETAndUAI[getOrganismeKey(organisme)],
+        _id,
+        enseigne,
+        raison_sociale,
+        commune,
+        region,
+        departement,
+        academie,
+        reseaux,
       };
-    });
+    }
 
     logger.info(
       {
@@ -66,8 +118,8 @@ export const hydrateOrganismesRelations = async () => {
       { _id: organisme._id },
       {
         $set: {
-          organismesFormateurs,
-          organismesResponsables,
+          organismesFormateurs: organismesFormateurs.map((organisme) => addOrganismesInfos(organisme)),
+          organismesResponsables: organismesResponsables.map((organisme) => addOrganismesInfos(organisme)),
           updated_at: new Date(),
         },
       }
