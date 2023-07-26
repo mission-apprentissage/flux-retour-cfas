@@ -129,7 +129,7 @@ export async function getIndicateursEffectifsRestriction(ctx: AuthContext): Prom
 }
 
 /**
- * Restriction pour accéder aux effectifs anonymes
+ * Restriction pour accéder aux effectifs anonymes => FIXME devrait être supprimé ou changé pour indicateursEffectifs
  */
 export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
@@ -182,7 +182,7 @@ export async function getEffectifsNominatifsRestriction(ctx: AuthContext): Promi
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
       return {
@@ -214,7 +214,7 @@ export async function getEffectifsNominatifsRestriction(ctx: AuthContext): Promi
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return {
-        _id: new ObjectId("000000000000"),
+        _id: new ObjectId("000000000000"), // permet de tout rejeter
       };
     case "ADMINISTRATEUR":
       return {};
@@ -241,12 +241,12 @@ export async function findOrganismesAccessiblesByOrganisationOF(
 }
 
 export async function findOrganismesFormateursIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
-  const userOrganisme = await getOrganismeById(organismeId);
-  return findOrganismeFormateursIds(userOrganisme);
+  const organisme = await getOrganismeById(organismeId);
+  return findOrganismeFormateursIds(organisme);
 }
 
-export function findOrganismeFormateursIds(userOrganisme: Organisme): ObjectId[] {
-  return (userOrganisme.organismesFormateurs ?? [])
+export function findOrganismeFormateursIds(organisme: Organisme): ObjectId[] {
+  return (organisme.organismesFormateurs ?? [])
     .filter((organisme) => !!organisme._id)
     .map((organisme) => organisme._id as ObjectId);
 }
