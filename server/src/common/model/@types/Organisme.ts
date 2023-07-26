@@ -911,20 +911,34 @@ export interface Organisme {
     duree_formation_theorique?: number;
   }[];
   organismesFormateurs?: {
-    _id?: ObjectId | null;
     siret?: string;
     uai?: string | null;
     referentiel?: boolean;
     label?: string;
     sources?: string[];
+    _id?: ObjectId | null;
+    enseigne?: string;
+    raison_sociale?: string;
+    commune?: string;
+    region?: string;
+    departement?: string;
+    academie?: string;
+    reseaux?: string[];
   }[];
   organismesResponsables?: {
-    _id?: ObjectId | null;
     siret?: string;
     uai?: string | null;
     referentiel?: boolean;
     label?: string;
     sources?: string[];
+    _id?: ObjectId | null;
+    enseigne?: string;
+    raison_sociale?: string;
+    commune?: string;
+    region?: string;
+    departement?: string;
+    academie?: string;
+    reseaux?: string[];
   }[];
   /**
    * Les domaines métiers rattachés à l'établissement
