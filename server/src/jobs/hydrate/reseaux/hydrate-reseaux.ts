@@ -1,12 +1,10 @@
 import path from "path";
 
-import { WithId } from "mongodb";
+import { PromisePool } from "@supercharge/promise-pool";
 
-import { findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
-import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import { findOrganismesBySiret } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
-import { asyncForEach } from "@/common/utils/asyncUtils";
 import { __dirname } from "@/common/utils/esmUtils";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
 import { arraysContainSameValues } from "@/common/utils/miscUtils";
@@ -25,7 +23,6 @@ const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
  * Tri des fichiers réseaux à traiter pour appliquer les réseaux multiples sans erreurs
  */
 const INPUT_FILES = [
-  "assets/referentiel-reseau-excellence-pro.csv", // CFA_EC
   "assets/referentiel-reseau-mfr.csv", // MFR
   "assets/referentiel-reseau-cr-normandie.csv", // CR Normandie
   "assets/referentiel-reseau-aftral.csv", // AFTRAL
@@ -40,19 +37,16 @@ const INPUT_FILES = [
   "assets/referentiel-reseau-greta.csv", // GRETA
   "assets/referentiel-reseau-en.csv", // EDUC. NAT
   // "assets/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
+  "assets/referentiel-reseau-cfa-ec.csv", // CFA EC
 ];
 
 /**
  * Parse des réseaux depuis le csv
  * @param  {string} reseauText
- * @returns {string[]} List of parsed réseaux
  */
-const parseReseauxTextFromCsv = (reseauText) => {
-  if (!reseauText || RESEAU_NULL_VALUES.includes(reseauText)) {
-    return [];
-  }
-  const reseaux = reseauText.split(RESEAUX_LIST_SEPARATOR).map((reseau) => reseau.toUpperCase());
-  return reseaux;
+const parseReseauxTextFromCsv = (reseauText: string): string[] => {
+  if (!reseauText || RESEAU_NULL_VALUES.includes(reseauText)) return [];
+  return reseauText.split(RESEAUX_LIST_SEPARATOR).map((reseau) => reseau.toUpperCase().trim());
 };
 
 /**
@@ -60,7 +54,7 @@ const parseReseauxTextFromCsv = (reseauText) => {
  * @param {*} organismeFromFile
  * @returns
  */
-const mapFileOrganisme = (organismeFromFile) => {
+const mapFileOrganisme = (organismeFromFile: any) => {
   return {
     siret: organismeFromFile[INPUT_FILE_COLUMN_NAMES.SIRET],
     uai: organismeFromFile[INPUT_FILE_COLUMN_NAMES.UAI] || undefined,
@@ -82,112 +76,99 @@ const clearReseauxInOrganismes = async () => {
 export const hydrateReseaux = async () => {
   await clearReseauxInOrganismes();
 
-  for (const currentReseauFile of INPUT_FILES) {
-    await hydrateReseauFile(currentReseauFile);
-  }
+  let reseauxStats: any = [];
+
+  await PromisePool.for(INPUT_FILES).process(async (currentReseauFile) => {
+    const currentReseauStats = await hydrateReseauFile(currentReseauFile);
+    reseauxStats.push(currentReseauStats);
+  });
+
+  return reseauxStats;
 };
 
 /**
  * Fonction de remplissage des données d'un fichier réseau
- * @param {*} filename
  */
-const hydrateReseauFile = async (filename) => {
-  logger.info("Import des données réseaux de ", filename);
+const hydrateReseauFile = async (filename: string) => {
+  logger.info(`Import des données réseaux de ${filename}`);
 
-  // read référentiel file from réseau and convert it to JSON
+  // Lecture du fichier de référence + conversion JSON
   const filePath = path.join(__dirname(import.meta.url), filename);
   const reseauFile = readJsonFromCsvFile(filePath, ";");
 
-  // init counters for final log
-  let foundCount = 0;
-  let foundUniqueCount = 0;
+  // init des compteurs
+  let organismesFound: Array<{ uai: string; siret: string }> = [];
+  let organismesNotFound: Array<{ uai: string; siret: string }> = [];
   let organismeUpdatedCount = 0;
   let organismeUpdateErrorCount = 0;
 
   logger.info(reseauFile.length, "lignes dans le fichier", filename);
-  if (reseauFile.length === 0) {
-    throw new Error(`Le fichier ${filename} est vide`);
-  }
+  if (reseauFile.length === 0) throw new Error(`Le fichier ${filename} est vide`);
 
-  // iterate over every line (organisme de formation) in the réseau file
-  await asyncForEach(reseauFile, async (reseauFileLine) => {
-    const organismeParsedFromFile = mapFileOrganisme(reseauFileLine);
+  await PromisePool.for(reseauFile).process(async (reseauFileLine) => {
+    const organismeFromFile = mapFileOrganisme(reseauFileLine);
 
-    /*
-        1 - Add réseau information to organisme in TDB, if found unique
-      */
-    // try to retrieve organisme in our database with UAI and SIRET if UAI is provided
-    // if UAI not provided find organismes fiables with the SIRET
-    /** @type {(import("mongodb").WithId<any>)[]} */
-    const organismeInTdb = organismeParsedFromFile.uai
-      ? [await findOrganismeByUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)].filter((o) => o)
-      : await organismesDb()
-          .find({ siret: organismeParsedFromFile.siret, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE })
-          .toArray();
+    // Recherche des organismes présents dans le référentiel et ayant ce siret
+    const organismesForSiret = await findOrganismesBySiret(organismeFromFile.siret, {
+      est_dans_le_referentiel: true,
+    });
 
-    const found = organismeInTdb?.length !== 0;
-    const foundUnique = found && organismeInTdb?.length === 1;
+    const found = organismesForSiret?.length !== 0;
 
-    if (found) foundCount++;
+    if (found) {
+      organismesFound.push({ uai: organismeFromFile.uai, siret: organismeFromFile.siret });
+      logger.debug(`${organismesForSiret.length} organismes trouvés pour le SIRET ${organismeFromFile.siret}`);
 
-    logger.debug(
-      "Organisme with UAI",
-      organismeParsedFromFile.uai,
-      "and Siret",
-      organismeParsedFromFile.siret,
-      found ? "found" : "not found",
-      found && !foundUnique ? "multiple times" : ""
-    );
+      await PromisePool.for(organismesForSiret).process(async (currentOrganismeFound) => {
+        const reseauxFromDb = currentOrganismeFound.reseaux || [];
+        const reseauxFromFile = organismeFromFile.reseaux || [];
 
-    // if only one result, we compare reseaux between organisme in réseau file and the one we found in our database
-    // and update our organisme with the updated list of reseaux
-    if (foundUnique) {
-      foundUniqueCount++;
-      const uniqueOrganismeFromTdb: WithId<any> = organismeInTdb[0];
-
-      const reseauxFromDb = uniqueOrganismeFromTdb.reseaux || [];
-      const reseauxFromFile = organismeParsedFromFile.reseaux || [];
-
-      if (!arraysContainSameValues(reseauxFromDb, reseauxFromFile)) {
-        logger.info(
-          "Organisme with UAI",
-          uniqueOrganismeFromTdb.uai,
-          "and SIRET",
-          organismeParsedFromFile.siret,
-          "will be updated with list of reseaux",
-          reseauxFromFile.join(", ")
-        );
-        try {
-          const reseauxToUpdate = [...reseauxFromDb, ...reseauxFromFile];
-          await organismesDb().updateOne(
-            { _id: uniqueOrganismeFromTdb._id },
-            {
-              // we merge reseaux from db and file, in case an organism has several "reseaux"
-              $addToSet: {
+        if (!arraysContainSameValues(reseauxFromDb, reseauxFromFile)) {
+          logger.debug(`Mise à jour de l'organisme ${organismeFromFile.siret} avec : ${reseauxFromFile.join(", ")}`);
+          try {
+            const reseauxToUpdate = [...reseauxFromDb, ...reseauxFromFile];
+            await organismesDb().updateOne(
+              { _id: currentOrganismeFound._id },
+              {
+                // Fusion des réseaux dans le cas d'un organisme multi réseaux
                 // https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/#value-to-add-is-an-array
-                reseaux: { $each: reseauxToUpdate },
-              },
-            }
-          );
+                $addToSet: { reseaux: { $each: reseauxToUpdate } },
+              }
+            );
 
-          organismeUpdatedCount++;
-        } catch (err) {
-          organismeUpdateErrorCount++;
-          logger.error(err);
+            organismeUpdatedCount++;
+          } catch (err) {
+            logger.error(
+              `Erreur pour le fichier ${filename} lors de la mise à jour de l'organisme SIRET : ${
+                organismeFromFile.siret
+              } - UAI : ${organismeFromFile.uai} pour les réseaux : ${JSON.stringify(reseauxFromFile)}`
+            );
+            organismeUpdateErrorCount++;
+            logger.error(err);
+          }
         }
-      }
+      });
+    } else {
+      organismesNotFound.push({ uai: organismeFromFile.uai, siret: organismeFromFile.siret });
+      logger.debug(`Aucun organisme trouvé pour le SIRET ${organismeFromFile.siret}`);
     }
   });
 
-  logger.info("Organismes du fichier", filename, "trouvés en base TDB", foundCount, "/", reseauFile.length);
-  logger.info(
-    "Organismes du ficher",
-    filename,
-    "trouvés uniques en base TDB",
-    foundUniqueCount,
-    "/",
-    reseauFile.length
-  );
+  logger.info(`Organismes de ${filename} trouvés en base ${organismesFound.length} sur ${reseauFile.length}`);
+  logger.info(`Organismes de ${filename} non trouvés en base ${organismesNotFound.length} sur ${reseauFile.length}`);
+  if (organismesNotFound.length > 0) logger.info(`Organismes non trouvés : ${JSON.stringify(organismesNotFound)}`);
   logger.info("Organismes en base TDB dont les réseaux ont été mis à jour :", organismeUpdatedCount);
   logger.info("Organismes en base TDB n'ont pas pu être mis à jour :", organismeUpdateErrorCount);
+
+  return {
+    filename,
+    stats: {
+      reseauFileLength: reseauFile.length,
+      nbOrganismesFound: organismesFound.length,
+      nbOrganismesNotFound: organismesNotFound.length,
+      organismesNotFound,
+      organismeUpdatedCount,
+      organismeUpdateErrorCount,
+    },
+  };
 };
