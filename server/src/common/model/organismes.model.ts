@@ -5,7 +5,6 @@ import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
-import { ACADEMIES, DEPARTEMENTS, REGIONS } from "../constants/territoires";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
 import {
@@ -34,20 +33,10 @@ const relationOrganismeSchema = object(
     enseigne: string(),
     raison_sociale: string(),
     commune: string(),
-    region: string({
-      enum: REGIONS.map(({ code }) => code),
-    }),
-    departement: string({
-      example: "1 Ain, 99 Étranger",
-      pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
-      enum: DEPARTEMENTS.map(({ code }) => code),
-      maxLength: 3,
-      minLength: 1,
-    }),
-    academie: string({
-      enum: ACADEMIES.map(({ code }) => code),
-    }),
-    reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) })),
+    region: string(),
+    departement: string(),
+    academie: string(),
+    reseaux: arrayOf(string()),
   },
   { additionalProperties: true }
 );

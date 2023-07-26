@@ -50,7 +50,7 @@ export const hydrateOrganismesRelations = async () => {
     .toArray();
 
   const organismeInfosBySIRETAndUAI = organismes.reduce<{ [organismeId: string]: OrganismeInfos }>((acc, organisme) => {
-    acc[getOrganismeKey(organisme)] = stripEmptyFields({
+    acc[getOrganismeKey(organisme)] = {
       _id: organisme._id,
       enseigne: organisme.enseigne,
       raison_sociale: organisme.raison_sociale,
@@ -59,72 +59,79 @@ export const hydrateOrganismesRelations = async () => {
       departement: organisme.adresse?.departement,
       academie: organisme.adresse?.academie,
       reseaux: organisme.reseaux,
-    });
+    };
     return acc;
   }, {});
 
-  await PromisePool.for(organismes).process(async (organisme) => {
-    const organismesLiés = await organismesReferentielDb()
-      .aggregate<ArrayElement<OrganismesReferentiel["relations"]>>([
-        {
-          $match: {
-            siret: organisme.siret,
-            uai: organisme.uai,
+  await PromisePool.for(organismes)
+    .handleError(async (err, { _id, siret, uai }) => {
+      logger.error({ _id, siret, uai, err }, "erreur traitement organisme");
+      // throwing errors will stop PromisePool
+      throw err;
+    })
+    .process(async (organisme) => {
+      const organismesLiés = await organismesReferentielDb()
+        .aggregate<ArrayElement<OrganismesReferentiel["relations"]>>([
+          {
+            $match: {
+              siret: organisme.siret,
+              uai: organisme.uai,
+            },
           },
-        },
-        {
-          $unwind: "$relations",
-        },
-        {
-          $replaceRoot: {
-            newRoot: "$relations",
+          {
+            $unwind: "$relations",
           },
-        },
-      ])
-      .toArray();
+          {
+            $replaceRoot: {
+              newRoot: "$relations",
+            },
+          },
+        ])
+        .toArray();
 
-    const organismesFormateurs = organismesLiés.filter((organisme) => organisme.type === "responsable->formateur");
-    const organismesResponsables = organismesLiés.filter((organisme) => organisme.type === "formateur->responsable");
+      const organismesFormateurs = organismesLiés.filter((organisme) => organisme.type === "responsable->formateur");
+      const organismesResponsables = organismesLiés.filter((organisme) => organisme.type === "formateur->responsable");
 
-    function addOrganismesInfos({
-      type,
-      ...organisme
-    }: ArrayElement<OrganismesReferentiel["relations"]>): OrganismeInfos {
-      const { _id, enseigne, raison_sociale, commune, region, departement, academie, reseaux } =
-        organismeInfosBySIRETAndUAI[getOrganismeKey(organisme)];
-      return {
-        ...organisme,
-        _id,
-        enseigne,
-        raison_sociale,
-        commune,
-        region,
-        departement,
-        academie,
-        reseaux,
-      };
-    }
-
-    logger.info(
-      {
-        uai: organisme.uai,
-        siret: organisme.siret,
-        organismesFormateurs: organismesFormateurs.length,
-        organismesResponsables: organismesResponsables.length,
-      },
-      "updating organisme organismesFormateurs"
-    );
-    await organismesDb().updateOne(
-      { _id: organisme._id },
-      {
-        $set: {
-          organismesFormateurs: organismesFormateurs.map((organisme) => addOrganismesInfos(organisme)),
-          organismesResponsables: organismesResponsables.map((organisme) => addOrganismesInfos(organisme)),
-          updated_at: new Date(),
-        },
+      function addOrganismesInfos({
+        type,
+        ...organisme
+      }: ArrayElement<OrganismesReferentiel["relations"]>): ArrayElement<OrganismesReferentiel["relations"]> &
+        OrganismeInfos {
+        const { _id, enseigne, raison_sociale, commune, region, departement, academie, reseaux } =
+          organismeInfosBySIRETAndUAI[getOrganismeKey(organisme)] ?? {};
+        return stripEmptyFields({
+          ...organisme,
+          _id,
+          enseigne,
+          raison_sociale,
+          commune,
+          region,
+          departement,
+          academie,
+          reseaux,
+        });
       }
-    );
-  });
+
+      logger.info(
+        {
+          uai: organisme.uai,
+          siret: organisme.siret,
+          organismesFormateurs: organismesFormateurs.length,
+          organismesResponsables: organismesResponsables.length,
+        },
+        "updating organisme relations"
+      );
+      await organismesDb().updateOne(
+        { _id: organisme._id },
+        {
+          $set: {
+            organismesFormateurs: organismesFormateurs.map((organisme) => addOrganismesInfos(organisme)),
+            organismesResponsables: organismesResponsables.map((organisme) => addOrganismesInfos(organisme)),
+            updated_at: new Date(),
+          },
+        }
+      );
+    });
 };
 
 function getOrganismeKey(organisme: { siret?: string; uai?: string | null }): string {
