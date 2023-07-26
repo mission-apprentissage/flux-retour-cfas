@@ -245,13 +245,15 @@ export async function getIndicateursOrganismesParDepartement(
 
 export async function getIndicateursEffectifsParOrganisme(
   ctx: AuthContext,
-  filters: FullEffectifsFilters
+  filters: FullEffectifsFilters,
+  organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
           $and: [
+            await getOrganismeRestriction(organismeId),
             await getEffectifsAnonymesRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
@@ -478,13 +480,15 @@ const pipelineByTypeEffectifNominatif: { [type in TypeEffectifNominatif]: any[] 
 export async function getEffectifsNominatifs(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
-  type: TypeEffectifNominatif
+  type: TypeEffectifNominatif,
+  organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
           $and: [
+            await getOrganismeRestriction(organismeId),
             await getEffectifsNominatifsRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
@@ -768,4 +772,10 @@ export async function getOrganismeIndicateursOrganismes(organismeId: ObjectId): 
       organismesNonTransmetteurs: 0,
     }
   );
+}
+
+async function getOrganismeRestriction(organismeId?: ObjectId) {
+  return organismeId
+    ? { organisme_id: { $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId))] } }
+    : {};
 }
