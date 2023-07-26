@@ -23,6 +23,7 @@ module.exports = {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
         caughtErrorsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
       },
     ],
     "no-unused-vars": 0, // duplicated with @typescript-eslint/no-unused-vars
