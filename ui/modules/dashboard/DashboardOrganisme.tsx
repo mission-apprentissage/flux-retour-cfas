@@ -357,22 +357,27 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 )}
 
                 {modePublique && organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (
-                  <HStack>
-                    <Text>Organisme responsable identifié&nbsp;:</Text>
-                    {organisme.organismesResponsables.map((organisme) => (
-                      <Link
-                        key={organisme._id}
-                        href={`/organismes/${organisme._id}`}
-                        borderBottom="1px"
-                        color="action-high-blue-france"
-                        _hover={{ textDecoration: "none" }}
-                        display="inline-flex"
-                        alignItems="center"
-                        mt="3"
-                      >
-                        {organisme.label}
-                      </Link>
-                    ))}
+                  <HStack alignItems="flex-start">
+                    <Text whiteSpace="nowrap">
+                      Organisme{organisme.organismesResponsables.length > 1 ? "s" : ""} responsable
+                      {organisme.organismesResponsables.length > 1 ? "s" : ""} identifié
+                      {organisme.organismesResponsables.length > 1 ? "s" : ""}&nbsp;:
+                    </Text>
+                    <Box>
+                      {organisme.organismesResponsables.map((organisme) => (
+                        <Link
+                          key={organisme._id}
+                          href={`/organismes/${organisme._id}`}
+                          borderBottom="1px"
+                          color="action-high-blue-france"
+                          _hover={{ textDecoration: "none" }}
+                          display="inline-flex"
+                          alignItems="center"
+                        >
+                          {organisme.label}
+                        </Link>
+                      ))}
+                    </Box>
                   </HStack>
                 )}
               </>
