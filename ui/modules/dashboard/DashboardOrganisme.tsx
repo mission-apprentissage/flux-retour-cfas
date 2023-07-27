@@ -355,32 +355,30 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     <Text fontWeight="bold">{formatDate(new Date(contacts[0].created_at), "dd/MM/yyyy")}</Text>
                   </HStack>
                 )}
-
-                {modePublique && organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (
-                  <HStack alignItems="flex-start">
-                    <Text whiteSpace="nowrap">
-                      Organisme{organisme.organismesResponsables.length > 1 ? "s" : ""} responsable
-                      {organisme.organismesResponsables.length > 1 ? "s" : ""} identifié
-                      {organisme.organismesResponsables.length > 1 ? "s" : ""}&nbsp;:
-                    </Text>
-                    <Box>
-                      {organisme.organismesResponsables.map((organisme) => (
-                        <Link
-                          key={organisme._id}
-                          href={`/organismes/${organisme._id}`}
-                          borderBottom="1px"
-                          color="action-high-blue-france"
-                          _hover={{ textDecoration: "none" }}
-                          display="inline-flex"
-                          alignItems="center"
-                        >
-                          {organisme.label}
-                        </Link>
-                      ))}
-                    </Box>
-                  </HStack>
-                )}
               </>
+            )}
+
+            {organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (
+              <HStack alignItems="flex-start">
+                <Text whiteSpace="nowrap">
+                  Organisme{organisme.organismesResponsables.length > 1 ? "s" : ""} responsable
+                  {organisme.organismesResponsables.length > 1 ? "s" : ""} identifié
+                  {organisme.organismesResponsables.length > 1 ? "s" : ""}&nbsp;:
+                </Text>
+                <VStack alignItems="start">
+                  {organisme.organismesResponsables.map((organisme) => (
+                    <Link
+                      key={organisme._id}
+                      href={`/organismes/${organisme._id}`}
+                      borderBottom="1px"
+                      color="action-high-blue-france"
+                      _hover={{ textDecoration: "none" }}
+                    >
+                      {organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"}
+                    </Link>
+                  ))}
+                </VStack>
+              </HStack>
             )}
           </VStack>
         </Container>

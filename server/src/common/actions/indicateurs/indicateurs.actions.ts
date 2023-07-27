@@ -13,6 +13,7 @@ import {
   findOrganismesFormateursIdsOfOrganisme,
   getEffectifsAnonymesRestriction,
   getEffectifsNominatifsRestriction,
+  getOrganismeIndicateursEffectifsRestriction,
   getIndicateursEffectifsRestriction,
   getIndicateursOrganismesRestriction,
 } from "@/common/actions/helpers/permissions";
@@ -578,6 +579,7 @@ export async function getEffectifsNominatifs(
 }
 
 export async function getOrganismeIndicateursEffectifs(
+  ctx: AuthContext,
   organismeId: ObjectId,
   filters: EffectifsFilters
 ): Promise<IndicateursEffectifs> {
@@ -585,8 +587,12 @@ export async function getOrganismeIndicateursEffectifs(
     .aggregate([
       {
         $match: {
-          $and: buildMongoFilters(filters, effectifsFiltersConfigurations),
-          organisme_id: organismeId,
+          $and: [
+            await getOrganismeRestriction(organismeId),
+            await getOrganismeIndicateursEffectifsRestriction(ctx),
+            ...buildMongoFilters(filters, effectifsFiltersConfigurations),
+          ],
+          "_computed.organisme.fiable": true,
         },
       },
       {

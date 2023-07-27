@@ -173,6 +173,48 @@ export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise
   }
 }
 
+export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+      return {
+        organisme_id: {
+          $in: linkedOrganismesIds,
+        },
+      };
+    }
+
+    case "TETE_DE_RESEAU":
+      return {
+        "_computed.organisme.reseaux": organisation.reseau,
+      };
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+      return {
+        "_computed.organisme.region": organisation.code_region,
+      };
+    case "DDETS":
+      return {
+        "_computed.organisme.departement": organisation.code_departement,
+      };
+    case "ACADEMIE":
+      return {
+        "_computed.organisme.academie": organisation.code_academie,
+      };
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return {};
+  }
+}
+
 /**
  * Restriction pour accéder aux effectifs nominatifs
  */

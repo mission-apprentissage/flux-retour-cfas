@@ -40,33 +40,6 @@ function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): stri
   }
 }
 
-function canViewOrganismesFormateurs(type: OrganisationType): boolean {
-  switch (type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
-      return false;
-
-    case "TETE_DE_RESEAU":
-      return true;
-
-    case "DREETS":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-    case "DDETS":
-    case "ACADEMIE":
-      return true;
-
-    case "OPERATEUR_PUBLIC_NATIONAL":
-      return true;
-    case "ADMINISTRATEUR":
-      return true;
-
-    default:
-      throw new Error(`Type '${type}' inconnu`);
-  }
-}
-
 function canManageEffectifsOrganisme(type: OrganisationType): boolean {
   switch (type) {
     case "ORGANISME_FORMATION_FORMATEUR":
@@ -217,21 +190,18 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
           Son tableau de bord
         </NavItem>
 
+        {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
+          <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
+            Ses organismes
+          </NavItem>
+        )}
         {organisme?.permissions?.indicateursEffectifs && (
           <>
             {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
-            {canViewOrganismesFormateurs(organisationType) && (
-              <>
-                {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
-                  <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
-                    Ses organismes
-                  </NavItem>
-                )}
-                <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
-                  Ses indicateurs
-                </NavItem>
-              </>
-            )}
+            {/* {canViewOrganismesFormateurs(organisationType) && ( */}
+            <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
+              Ses indicateurs
+            </NavItem>
 
             {canManageEffectifsOrganisme(organisationType) && (
               <>
