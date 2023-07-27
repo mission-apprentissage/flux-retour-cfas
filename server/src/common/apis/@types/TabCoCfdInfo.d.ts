@@ -75,30 +75,5 @@ type TabCoCfdInfo = {
     url: any;
   };
 };
-{
-  string;
-  string;
-  string;
-  string;
-  string;
-  string;
-  string;
-  string;
-  Array<{
-    rncp: string;
-    messages: string;
-  }>;
-  {
-    string;
-    string;
-    string;
-    string;
-    string;
-    string;
-  }
-  {
-    string;
-  }
-}
 
 export default TabCoCfdInfo;
