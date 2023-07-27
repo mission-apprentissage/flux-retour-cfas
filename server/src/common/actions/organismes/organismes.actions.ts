@@ -20,11 +20,13 @@ import { OrganisationOrganismeFormation } from "@/common/model/organisations.mod
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
 import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
+import { cleanProjection } from "@/common/utils/mongoUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
+import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
 import { InfoSiret } from "../infoSiret.actions-struct";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
@@ -661,10 +663,43 @@ export async function getOrganismeById(_id: ObjectId) {
   }
   return organisme;
 }
+
+export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectId): Promise<OrganismeWithPermissions> {
+  const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
+  const organisme = await organismesDb().findOne(
+    { _id: organismeId },
+    {
+      projection: cleanProjection<Organisme>({
+        _id: 1,
+        siret: 1,
+        uai: 1,
+        ferme: 1,
+        nature: 1,
+        qualiopi: 1,
+        enseigne: 1,
+        raison_sociale: 1,
+        adresse: 1,
+        organismesResponsables: 1,
+        organismesFormateurs: 1,
+        first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
+        last_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
+      }),
+    }
+  );
+  if (!organisme) {
+    throw Boom.notFound(`Organisme ${organismeId} not found`);
+  }
+
+  return {
+    ...organisme,
+    permissions: permissionsOrganisme,
+  } as OrganismeWithPermissions;
+}
+
 export async function getOrganismeByAPIKey(api_key: string) {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
-    throw Boom.notFound(`Organisme not found`);
+    throw Boom.notFound("Organisme not found");
   }
   return organisme as WithId<Organisme>;
 }

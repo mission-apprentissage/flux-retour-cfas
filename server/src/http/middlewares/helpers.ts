@@ -2,6 +2,7 @@ import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
 
+import { PermissionsOrganisme, hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 // catch errors and return the result of the request handler
@@ -41,12 +42,17 @@ interface MyLocals {
   organismeId: ObjectId;
 }
 
-export function ensurePermissionOrganisme<TParams = any, TQuery = any, TBody = any, TLocals = any>(
-  permissionFunc: (ctx: AuthContext, organismeId: ObjectId) => Promise<void>
+export function requireOrganismePermission<TParams = any, TQuery = any, TBody = any, TLocals = any>(
+  permission: keyof PermissionsOrganisme
 ): RequestHandler<TParams, any, TBody, TQuery, TLocals & MyLocals> {
-  return (req, res, next) => {
-    permissionFunc(req.user, res.locals.organismeId)
-      .then(() => next())
-      .catch(next);
+  return async (req, res, next) => {
+    try {
+      if (!(await hasOrganismePermission(req.user, res.locals.organismeId, permission))) {
+        throw Boom.forbidden("Permissions invalides");
+      }
+      next();
+    } catch (err) {
+      next(err);
+    }
   };
 }

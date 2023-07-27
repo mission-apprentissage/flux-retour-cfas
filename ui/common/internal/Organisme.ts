@@ -887,20 +887,34 @@ export interface Organisme {
     duree_formation_theorique?: number;
   }[];
   organismesFormateurs?: {
-    _id?: string | null;
     siret?: string;
     uai?: string | null;
     referentiel?: boolean;
     label?: string;
     sources?: string[];
+    _id?: string | null;
+    enseigne?: string;
+    raison_sociale?: string;
+    commune?: string;
+    region?: string;
+    departement?: string;
+    academie?: string;
+    reseaux?: string[];
   }[];
   organismesResponsables?: {
-    _id?: string | null;
     siret?: string;
     uai?: string | null;
     referentiel?: boolean;
     label?: string;
     sources?: string[];
+    _id?: string | null;
+    enseigne?: string;
+    raison_sociale?: string;
+    commune?: string;
+    region?: string;
+    departement?: string;
+    academie?: string;
+    reseaux?: string[];
   }[];
   /**
    * Les domaines métiers rattachés à l'établissement
@@ -967,5 +981,8 @@ export interface Organisme {
 
   permissions?: {
     indicateursEffectifs: boolean;
+    viewContacts: boolean;
+    infoTransmissionEffectifs: boolean;
+    manageEffectifs: boolean;
   };
 }

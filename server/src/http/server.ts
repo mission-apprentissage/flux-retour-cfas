@@ -26,12 +26,6 @@ import {
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import {
-  canAccessOrganismeIndicateurs,
-  requireListOrganismesFormateursAccess,
-  requireManageOrganismeEffectifsPermission,
-  requireOrganismeIndicateursAccess,
-} from "@/common/actions/helpers/permissions";
-import {
   getIndicateursNational,
   indicateursNationalFiltersSchema,
 } from "@/common/actions/indicateurs/indicateurs-national.actions";
@@ -69,6 +63,7 @@ import {
   getOrganismeByAPIKey,
   getOrganismeById,
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
+  getOrganismeDetails,
   listContactsOrganisme,
   listOrganismesFormateurs,
   searchOrganismes,
@@ -102,7 +97,7 @@ import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
 import errorMiddleware from "./middlewares/errorMiddleware";
-import { ensurePermissionOrganisme, requireAdministrator, returnResult } from "./middlewares/helpers";
+import { requireAdministrator, requireOrganismePermission, returnResult } from "./middlewares/helpers";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
@@ -393,27 +388,20 @@ function setupRoutes(app: Application) {
       .get(
         "",
         returnResult(async (req, res) => {
-          const organisme = await getOrganismeById(res.locals.organismeId);
-          (organisme as any).permissions = {
-            indicateursEffectifs: await canAccessOrganismeIndicateurs(req.user, res.locals.organismeId),
-          };
-          return organisme;
+          return await getOrganismeDetails(req.user, res.locals.organismeId);
         })
       )
       .get(
-        [
-          "/indicateurs", // legacy car trop générique, à supprimer dans un futur déploiement
-          "/indicateurs/effectifs", // nouveau pour plus de cohérence
-        ],
-        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
+        "/indicateurs/effectifs",
+        requireOrganismePermission("indicateursEffectifs"),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
-          return await getOrganismeIndicateursEffectifs(res.locals.organismeId, filters);
+          return await getOrganismeIndicateursEffectifs(req.user, res.locals.organismeId, filters);
         })
       )
       .get(
         "/indicateurs/effectifs/par-organisme",
-        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
+        requireOrganismePermission("indicateursEffectifs"),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           return await getIndicateursEffectifsParOrganisme(req.user, filters, res.locals.organismeId);
@@ -429,28 +417,27 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/indicateurs/organismes",
-        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
+        // requireOrganismePermission(requireOrganismeIndicateursAccess), // TODO
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
         })
       )
       .get(
         "/contacts",
-        ensurePermissionOrganisme(requireOrganismeIndicateursAccess),
+        requireOrganismePermission("viewContacts"),
         returnResult(async (req, res) => {
           return await listContactsOrganisme(res.locals.organismeId);
         })
       )
       .get(
         "/organismes",
-        ensurePermissionOrganisme(requireListOrganismesFormateursAccess),
         returnResult(async (req, res) => {
           return await listOrganismesFormateurs(res.locals.organismeId);
         })
       )
       .get(
         "/effectifs",
-        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
+        requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           return await getOrganismeEffectifs(
             res.locals.organismeId,
@@ -461,7 +448,7 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/sifa-export",
-        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
+        requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           const organismeId = res.locals.organismeId;
           const sifaCsv = await generateSifa(organismeId as any as ObjectId);
@@ -471,7 +458,7 @@ function setupRoutes(app: Application) {
       )
       .put(
         "/configure-erp",
-        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
+        requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
@@ -479,7 +466,7 @@ function setupRoutes(app: Application) {
       )
       .post(
         "/verify-user",
-        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
+        requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           // POST /api/v1/organismes/:id/verify-user { siret=XXXXX, uai=YYYYY, erp=ZZZZ , api_key=TTTTT }
           const verif = await validateFullZodObjectSchema(req.body, SReqPostVerifyUser);
@@ -488,7 +475,7 @@ function setupRoutes(app: Application) {
       )
       .use(
         "/upload",
-        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
+        requireOrganismePermission("manageEffectifs"),
         express
           .Router()
           .get("/", validateRequestMiddleware({ body: uploadedDocumentSchema() }), async (req, res) => {
@@ -526,7 +513,7 @@ function setupRoutes(app: Application) {
           // Manage uploaded documents (delete, set mapping modele)
           .use(
             "/doc/:document_id",
-            ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
+            requireOrganismePermission("manageEffectifs"),
             validateRequestMiddleware({ params: objectIdSchema("document_id") }),
             ((req: Request<{ document_id: ObjectId }>, res: Response, next: NextFunction) => {
               // TODO investiguer pourquoi req.params.document_id est de type string ici
@@ -553,7 +540,7 @@ function setupRoutes(app: Application) {
 
       .use(
         "/api-key",
-        ensurePermissionOrganisme(requireManageOrganismeEffectifsPermission),
+        requireOrganismePermission("manageEffectifs"),
         express
           .Router()
           .get(
