@@ -13,7 +13,8 @@ import { removeInscritsSansContratsDepuis, transformRupturantsToAbandonsDepuis }
 import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
-import { hydrateEffectifsComputed } from "./jobs/hydrate/hydrate-effectifs-computed";
+import { hydrateEffectifsComputed } from "./jobs/hydrate/effectifs/hydrate-effectifs-computed";
+import { hydrateEffectifsFormationsNiveaux } from "./jobs/hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import { hydrateFormationsCatalogue } from "./jobs/hydrate/hydrate-formations-catalogue";
 import { hydrateOpenApi } from "./jobs/hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./jobs/hydrate/organismes/hydrate-effectifs_count";
@@ -253,6 +254,15 @@ program
   .action(
     runJob(async () => {
       return hydrateEffectifsComputed();
+    })
+  );
+
+program
+  .command("hydrate:effectifs-formation-niveaux")
+  .description("Remplissage du champ niveau des formations des effectifs")
+  .action(
+    runJob(async () => {
+      return hydrateEffectifsFormationsNiveaux();
     })
   );
 
