@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axiosist";
+import { ObjectId } from "mongodb";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import {
@@ -8,8 +9,8 @@ import {
   historySequenceInscrit,
 } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
-import { commonEffectifsAttributes, organismes } from "@tests/utils/permissions";
-import { generate, initTestApp } from "@tests/utils/testUtils";
+import { commonEffectifsAttributes, commonOrganismeAttributes } from "@tests/utils/permissions";
+import { generate, id, initTestApp } from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
@@ -21,7 +22,36 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
 
     const anneeScolaire = "2022-2023";
     await Promise.all([
-      organismesDb().insertMany(organismes),
+      organismesDb().insertMany([
+        {
+          ...commonOrganismeAttributes,
+          _id: new ObjectId(id(1)),
+          uai: "0000000A",
+          siret: "00000000000018",
+          nature: "formateur",
+        },
+        {
+          ...commonOrganismeAttributes,
+          _id: new ObjectId(id(2)),
+          uai: "0000000B",
+          siret: "00000000000026",
+          nature: "responsable_formateur",
+        },
+        {
+          ...commonOrganismeAttributes,
+          _id: new ObjectId(id(3)),
+          uai: "0000000C",
+          siret: "00000000000034",
+          nature: "responsable",
+        },
+        {
+          ...commonOrganismeAttributes,
+          _id: new ObjectId(id(10)),
+          uai: "1111111B",
+          siret: "11111111100006",
+          nature: "responsable_formateur",
+        },
+      ]),
       effectifsDb().insertMany([
         // 5 apprentis
         ...generate(5, () =>

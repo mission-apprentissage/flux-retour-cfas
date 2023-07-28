@@ -128,8 +128,8 @@ const DashboardTransverse = () => {
   );
 
   const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
-    useQuery<IndicateursOrganismesAvecDepartement[]>(["indicateurs/organismes"], () =>
-      _get("/api/v1/indicateurs/organismes")
+    useQuery<IndicateursOrganismesAvecDepartement[]>(["indicateurs/organismes/par-departement"], () =>
+      _get("/api/v1/indicateurs/organismes/par-departement")
     );
 
   function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {

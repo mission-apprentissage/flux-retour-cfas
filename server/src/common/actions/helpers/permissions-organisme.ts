@@ -64,14 +64,23 @@ export async function buildOrganismePermissions(
     }
 
     case "DREETS":
-    case "DRAAF":
+    case "DRAAF": {
+      const sameRegion = organisme.adresse?.region === organisation.code_region;
+      return {
+        viewContacts: true,
+        infoTransmissionEffectifs: true,
+        indicateursEffectifs: sameRegion,
+        effectifsNominatifs: sameRegion ? ["inscritSansContrat", "rupturant", "abandon"] : false,
+        manageEffectifs: false,
+      };
+    }
     case "CONSEIL_REGIONAL": {
       const sameRegion = organisme.adresse?.region === organisation.code_region;
       return {
         viewContacts: true,
         infoTransmissionEffectifs: true,
-        indicateursEffectifs: organisme.adresse?.region === organisation.code_region,
-        effectifsNominatifs: sameRegion ? ["inscritSansContrat", "rupturant", "abandon"] : false,
+        indicateursEffectifs: sameRegion,
+        effectifsNominatifs: false,
         manageEffectifs: false,
       };
     }
@@ -80,7 +89,7 @@ export async function buildOrganismePermissions(
       return {
         viewContacts: true,
         infoTransmissionEffectifs: true,
-        indicateursEffectifs: organisme.adresse?.departement === organisation.code_departement,
+        indicateursEffectifs: sameDepartement,
         effectifsNominatifs: sameDepartement ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
       };
@@ -91,7 +100,7 @@ export async function buildOrganismePermissions(
         viewContacts: true,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: sameAcademie,
-        effectifsNominatifs: sameAcademie ? ["inscritSansContrat", "rupturant", "abandon"] : false,
+        effectifsNominatifs: false,
         manageEffectifs: false,
       };
     }
