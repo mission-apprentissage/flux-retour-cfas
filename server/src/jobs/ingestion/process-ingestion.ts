@@ -61,7 +61,7 @@ export const processEffectifsQueue = async (options?: Options) => {
 
   const filter: Record<string, any> = force ? {} : { processed_at: { $exists: false } };
   if (id) {
-    filter._id = id;
+    filter._id = new ObjectId(id);
   }
 
   const result = await processItems(filter);
