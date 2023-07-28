@@ -195,7 +195,7 @@ export async function getEffectifsNominatifsRestriction(ctx: AuthContext): Promi
 
     case "TETE_DE_RESEAU":
       return {
-        "_computed.organisme.reseaux": organisation.reseau,
+        _id: new ObjectId("000000000000"),
       };
 
     case "DREETS":

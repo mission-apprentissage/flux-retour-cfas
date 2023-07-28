@@ -253,7 +253,7 @@ describe("Route indicateurs", () => {
         "OFRF lié": true,
         "OFRF responsable": true,
         "OFRF non lié": false,
-        "Tête de réseau": true,
+        "Tête de réseau": false,
         "Tête de réseau non liée": false,
         "DREETS même région": true,
         "DREETS autre région": false,
