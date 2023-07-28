@@ -70,9 +70,20 @@ function Card({ label, count, tooltipLabel, icon, big = false, children }: CardP
   );
 }
 
+export const typesEffectifNominatif = [
+  "apprenant",
+  "apprenti",
+  "inscritSansContrat",
+  "rupturant",
+  "abandon",
+  "inconnu",
+] as const;
+export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
+
 interface DownloadMenuButtonProps {
-  type: "inscritsSansContrat" | "rupturants" | "abandons";
+  type: TypeEffectifNominatif;
   effectifsFilters: EffectifsFilters;
+  organismeId?: string;
 }
 function DownloadMenuButton(props: DownloadMenuButtonProps) {
   const { toastError } = useToaster();
@@ -91,9 +102,12 @@ function DownloadMenuButton(props: DownloadMenuButtonProps) {
     };
   }
   async function fetchEffectifs() {
-    return await _get(`/api/v1/indicateurs/effectifs/${props.type}`, {
-      params: convertEffectifsFiltersToQuery(props.effectifsFilters),
-    });
+    return await _get(
+      `/api/v1${props.organismeId ? `/organismes/${props.organismeId}` : ""}/indicateurs/effectifs/${props.type}`,
+      {
+        params: convertEffectifsFiltersToQuery(props.effectifsFilters),
+      }
+    );
   }
 
   return (
@@ -145,14 +159,16 @@ function DownloadMenuButton(props: DownloadMenuButtonProps) {
 interface IndicateursGridProps {
   indicateursEffectifs: IndicateursEffectifs;
   loading: boolean;
-  showDownloadLinks?: boolean;
+  permissionEffectifsNominatifs?: boolean | Array<(typeof typesEffectifNominatif)[number]>;
   effectifsFilters?: EffectifsFilters;
+  organismeId?: string;
 }
 function IndicateursGrid({
   indicateursEffectifs,
   loading,
-  showDownloadLinks = false,
+  permissionEffectifsNominatifs = false,
   effectifsFilters,
+  organismeId,
 }: IndicateursGridProps) {
   if (loading) {
     return (
@@ -198,7 +214,14 @@ function IndicateursGrid({
           }
           icon={<ApprenantsIcon />}
           big={true}
-        />
+        >
+          {(permissionEffectifsNominatifs instanceof Array
+            ? permissionEffectifsNominatifs.includes("apprenant")
+            : permissionEffectifsNominatifs) &&
+            effectifsFilters && (
+              <DownloadMenuButton type="apprenant" effectifsFilters={effectifsFilters} organismeId={organismeId} />
+            )}
+        </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
         <Card
@@ -213,7 +236,14 @@ function IndicateursGrid({
             </div>
           }
           icon={<ApprentisIcon />}
-        />
+        >
+          {(permissionEffectifsNominatifs instanceof Array
+            ? permissionEffectifsNominatifs.includes("apprenti")
+            : permissionEffectifsNominatifs) &&
+            effectifsFilters && (
+              <DownloadMenuButton type="apprenti" effectifsFilters={effectifsFilters} organismeId={organismeId} />
+            )}
+        </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
         <Card
@@ -230,9 +260,12 @@ function IndicateursGrid({
           }
           icon={<RupturantsIcon />}
         >
-          {showDownloadLinks && effectifsFilters && (
-            <DownloadMenuButton type="rupturants" effectifsFilters={effectifsFilters} />
-          )}
+          {(permissionEffectifsNominatifs instanceof Array
+            ? permissionEffectifsNominatifs.includes("rupturant")
+            : permissionEffectifsNominatifs) &&
+            effectifsFilters && (
+              <DownloadMenuButton type="rupturant" effectifsFilters={effectifsFilters} organismeId={organismeId} />
+            )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
@@ -249,9 +282,16 @@ function IndicateursGrid({
           }
           icon={<InscritsSansContratsIcon />}
         >
-          {showDownloadLinks && effectifsFilters && (
-            <DownloadMenuButton type="inscritsSansContrat" effectifsFilters={effectifsFilters} />
-          )}
+          {(permissionEffectifsNominatifs instanceof Array
+            ? permissionEffectifsNominatifs.includes("inscritSansContrat")
+            : permissionEffectifsNominatifs) &&
+            effectifsFilters && (
+              <DownloadMenuButton
+                type="inscritSansContrat"
+                effectifsFilters={effectifsFilters}
+                organismeId={organismeId}
+              />
+            )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
@@ -271,9 +311,12 @@ function IndicateursGrid({
           }
           icon={<AbandonsIcon />}
         >
-          {showDownloadLinks && effectifsFilters && (
-            <DownloadMenuButton type="abandons" effectifsFilters={effectifsFilters} />
-          )}
+          {(permissionEffectifsNominatifs instanceof Array
+            ? permissionEffectifsNominatifs.includes("abandon")
+            : permissionEffectifsNominatifs) &&
+            effectifsFilters && (
+              <DownloadMenuButton type="abandon" effectifsFilters={effectifsFilters} organismeId={organismeId} />
+            )}
         </Card>
       </GridItem>
     </Grid>

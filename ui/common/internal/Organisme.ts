@@ -1,3 +1,5 @@
+import { typesEffectifNominatif } from "@/modules/dashboard/IndicateursGrid";
+
 // récupéré de l'API et adapté pour ne pas avoir certains champs optionnels
 export interface Organisme {
   _id: string;
@@ -980,9 +982,10 @@ export interface Organisme {
   created_at?: Date;
 
   permissions?: {
-    indicateursEffectifs: boolean;
     viewContacts: boolean;
     infoTransmissionEffectifs: boolean;
+    indicateursEffectifs: boolean; // pourrait peut-être être false | "partial" (restriction réseau/territoire) | "full"
+    effectifsNominatifs: boolean | Array<(typeof typesEffectifNominatif)[number]>;
     manageEffectifs: boolean;
   };
 }

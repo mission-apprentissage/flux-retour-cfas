@@ -20,10 +20,12 @@ import { useMemo } from "react";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
+import { OrganisationType } from "@/common/internal/Organisation";
 import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
+import { useOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
 import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
@@ -33,7 +35,7 @@ import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganisme
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
 
 import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
-import IndicateursGrid from "../dashboard/IndicateursGrid";
+import IndicateursGrid, { typesEffectifNominatif } from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
   EffectifsFilters,
@@ -64,6 +66,8 @@ function IndicateursForm(props: IndicateursFormProps) {
   const { auth, organisationType } = useAuth();
   const router = useRouter();
 
+  const { organisme } = useOrganisme(props.organismeId);
+
   const { effectifsFilters, sort } = useMemo(() => {
     const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
     return {
@@ -77,7 +81,7 @@ function IndicateursForm(props: IndicateursFormProps) {
     [props.organismeId, "indicateurs/effectifs/par-organisme", JSON.stringify(effectifsFilters)],
     () =>
       _get<IndicateursEffectifsAvecOrganisme[]>(
-        `/api/v1/${props.organismeId ? `organismes/${props.organismeId}/` : ""}indicateurs/effectifs/par-organisme`,
+        `/api/v1${props.organismeId ? `/organismes/${props.organismeId}` : ""}/indicateurs/effectifs/par-organisme`,
         {
           params: convertEffectifsFiltersToQuery(effectifsFilters),
         }
@@ -318,8 +322,13 @@ function IndicateursForm(props: IndicateursFormProps) {
         <IndicateursGrid
           indicateursEffectifs={indicateursEffectifsTotaux}
           loading={indicateursEffectifsLoading}
-          showDownloadLinks={organisationType !== "OPERATEUR_PUBLIC_NATIONAL" && organisationType !== "TETE_DE_RESEAU"}
+          permissionEffectifsNominatifs={
+            props.organismeId
+              ? organisme?.permissions?.effectifsNominatifs
+              : getPermissionsEffectifsNominatifs(organisationType)
+          }
           effectifsFilters={effectifsFilters}
+          organismeId={props.organismeId}
         />
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
@@ -475,3 +484,31 @@ function IndicateursForm(props: IndicateursFormProps) {
 }
 
 export default IndicateursForm;
+
+function getPermissionsEffectifsNominatifs(
+  organisationType: OrganisationType
+): boolean | Array<(typeof typesEffectifNominatif)[number]> {
+  switch (organisationType) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+      return true;
+
+    case "TETE_DE_RESEAU":
+      return false;
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+      return ["inscritSansContrat", "rupturant", "abandon"];
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+      return false;
+
+    case "ADMINISTRATEUR":
+      return true;
+  }
+  return false;
+}

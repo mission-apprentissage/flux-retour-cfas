@@ -445,38 +445,15 @@ export async function getIndicateursEffectifsParOrganisme(
   return indicateurs;
 }
 
-export const typesEffectifNominatif = ["inscritsSansContrat", "rupturants", "abandons"] as const;
+export const typesEffectifNominatif = [
+  "apprenant",
+  "apprenti",
+  "inscritSansContrat",
+  "rupturant",
+  "abandon",
+  "inconnu",
+] as const;
 export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
-
-const pipelineByTypeEffectifNominatif: { [type in TypeEffectifNominatif]: any[] } = {
-  abandons: [
-    {
-      $match: {
-        "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
-      },
-    },
-  ],
-  inscritsSansContrat: [
-    {
-      $match: {
-        "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-        "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
-      },
-    },
-  ],
-  rupturants: [
-    { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
-    // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
-    {
-      $addFields: {
-        previousStatutAtDate: {
-          $arrayElemAt: ["$apprenant.historique_statut", -2],
-        },
-      },
-    },
-    { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
-  ],
-};
 
 export async function getEffectifsNominatifs(
   ctx: AuthContext,
@@ -524,7 +501,62 @@ export async function getEffectifsNominatifs(
           },
         },
       },
-      ...pipelineByTypeEffectifNominatif[type],
+      {
+        $set: {
+          previousStatutAtDate: {
+            $arrayElemAt: ["$apprenant.historique_statut", -2],
+          },
+        },
+      },
+      {
+        $set: {
+          statut: {
+            // pipeline commun entre statuts plutôt que $facet limité à 16Mo
+            $switch: {
+              branches: [
+                // l'ordre important ici, du statut le plus spécifique au plus générique
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
+                      { $eq: ["$previousStatutAtDate.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                    ],
+                  },
+                  then: "rupturant" satisfies TypeEffectifNominatif,
+                },
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
+                      { $ne: ["$apprenant.historique_statut.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                    ],
+                  },
+                  then: "inscritSansContrat" satisfies TypeEffectifNominatif,
+                },
+                {
+                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                  then: "apprenti" satisfies TypeEffectifNominatif,
+                },
+                {
+                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
+                  then: "abandon" satisfies TypeEffectifNominatif,
+                },
+              ],
+              default: "inconnu" satisfies TypeEffectifNominatif,
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          statut:
+            type === "apprenant"
+              ? {
+                  $in: ["apprenti", "inscritSansContrat", "rupturant"] satisfies TypeEffectifNominatif[],
+                }
+              : { $eq: type },
+        },
+      },
       {
         $lookup: {
           from: "organismes",
@@ -561,6 +593,7 @@ export async function getEffectifsNominatifs(
           organisme_nom: "$organisme.nom",
           organisme_nature: "$organisme.nature",
 
+          apprenant_statut: "$statut",
           apprenant_nom: "$apprenant.nom",
           apprenant_prenom: "$apprenant.prenom",
           apprenant_date_de_naissance: { $substr: ["$apprenant.date_de_naissance", 0, 10] },
