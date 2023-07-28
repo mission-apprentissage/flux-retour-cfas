@@ -422,7 +422,6 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/indicateurs/organismes",
-        // requireOrganismePermission(requireOrganismeIndicateursAccess), // TODO
         returnResult(async (req, res) => {
           return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
         })
@@ -592,7 +591,7 @@ function setupRoutes(app: Application) {
       })
     )
     .get(
-      "/api/v1/indicateurs/organismes",
+      "/api/v1/indicateurs/organismes/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, organismesFiltersSchema);
         return await getIndicateursOrganismesParDepartement(req.user, filters);

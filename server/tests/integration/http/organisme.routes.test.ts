@@ -10,13 +10,7 @@ import {
   historySequenceInscrit,
 } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
-import {
-  PermissionsTestConfig,
-  commonEffectifsAttributes,
-  organismes,
-  testPermissions,
-  userOrganisme,
-} from "@tests/utils/permissions";
+import { commonEffectifsAttributes, organismes, testPermissions, userOrganisme } from "@tests/utils/permissions";
 import {
   RequestAsOrganisationFunc,
   expectForbiddenError,
@@ -41,26 +35,6 @@ describe("Routes /organismes/:id", () => {
     await organismesDb().insertMany(organismes);
   });
 
-  const accesOrganisme: PermissionsTestConfig = {
-    "OFF lié": true,
-    "OFF non lié": false,
-    "OFRF lié": true,
-    "OFRF responsable": true,
-    "OFRF non lié": false,
-    "OFR lié": true,
-    "OFR responsable": true,
-    "OFR non lié": false,
-    "Tête de réseau": true,
-    "Tête de réseau non liée": false,
-    "DREETS même région": true,
-    "DREETS autre région": false,
-    "DDETS même département": true,
-    "DDETS autre département": false,
-    "ACADEMIE même académie": true,
-    "ACADEMIE autre académie": false,
-    "Opérateur public national": true,
-    Administrateur: true,
-  };
   describe("GET /organismes/:id - détail d'un organisme", () => {
     it("Erreur si non authentifié", async () => {
       const response = await httpClient.get(`/api/v1/organismes/${id(1)}`);
@@ -69,16 +43,38 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      testPermissions(accesOrganisme, async (organisation, allowed) => {
-        const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
+      testPermissions(
+        {
+          "OF cible": true,
+          "OF non lié": true,
+          "OF formateur": true,
+          "OF responsable": true,
+          "Tête de réseau même réseau": true,
+          "Tête de réseau autre réseau": true,
+          "DREETS même région": true,
+          "DREETS autre région": true,
+          "DRAAF même région": true,
+          "DRAAF autre région": true,
+          "Conseil Régional même région": true,
+          "Conseil Régional autre région": true,
+          "DDETS même département": true,
+          "DDETS autre département": true,
+          "Académie même académie": true,
+          "Académie autre académie": true,
+          "Opérateur public national": true,
+          Administrateur: true,
+        },
+        async (organisation, allowed) => {
+          const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
 
-        if (allowed) {
-          expect(response.status).toStrictEqual(200);
-          expect(response.data).toStrictEqual(stringifyMongoFields(userOrganisme));
-        } else {
-          expectForbiddenError(response);
+          if (allowed) {
+            expect(response.status).toStrictEqual(200);
+            expect(response.data).toStrictEqual(stringifyMongoFields(userOrganisme)); // FIXME permissions différentes selon profil
+          } else {
+            expectForbiddenError(response);
+          }
         }
-      });
+      );
     });
   });
 
@@ -141,26 +137,48 @@ describe("Routes /organismes/:id", () => {
           ),
         ]);
       });
-      testPermissions(accesOrganisme, async (organisation, allowed) => {
-        const response = await requestAsOrganisation(
-          organisation,
-          "get",
-          `/api/v1/organismes/${id(1)}/indicateurs/effectifs?date=${date}`
-        );
+      testPermissions(
+        {
+          "OF cible": true,
+          "OF non lié": false,
+          "OF formateur": false,
+          "OF responsable": true,
+          "Tête de réseau même réseau": true,
+          "Tête de réseau autre réseau": false,
+          "DREETS même région": true,
+          "DREETS autre région": false,
+          "DRAAF même région": true,
+          "DRAAF autre région": false,
+          "Conseil Régional même région": true,
+          "Conseil Régional autre région": false,
+          "DDETS même département": true,
+          "DDETS autre département": false,
+          "Académie même académie": true,
+          "Académie autre académie": false,
+          "Opérateur public national": true,
+          Administrateur: true,
+        },
+        async (organisation, allowed) => {
+          const response = await requestAsOrganisation(
+            organisation,
+            "get",
+            `/api/v1/organismes/${id(1)}/indicateurs/effectifs?date=${date}`
+          );
 
-        if (allowed) {
-          expect(response.status).toStrictEqual(200);
-          expect(response.data).toStrictEqual({
-            apprenants: 35,
-            apprentis: 5,
-            inscritsSansContrat: 10,
-            abandons: 15,
-            rupturants: 20,
-          });
-        } else {
-          expectForbiddenError(response);
+          if (allowed) {
+            expect(response.status).toStrictEqual(200);
+            expect(response.data).toStrictEqual({
+              apprenants: 35,
+              apprentis: 5,
+              inscritsSansContrat: 10,
+              abandons: 15,
+              rupturants: 20,
+            });
+          } else {
+            expectForbiddenError(response);
+          }
         }
-      });
+      );
     });
   });
 
@@ -175,25 +193,47 @@ describe("Routes /organismes/:id", () => {
       // beforeEach(async () => {
       //   await organismesDb().insertMany([]);
       // });
-      testPermissions(accesOrganisme, async (organisation, allowed) => {
-        const response = await requestAsOrganisation(
-          organisation,
-          "get",
-          `/api/v1/organismes/${id(1)}/indicateurs/organismes`
-        );
+      testPermissions(
+        {
+          "OF cible": true,
+          "OF non lié": true,
+          "OF formateur": true,
+          "OF responsable": true,
+          "Tête de réseau même réseau": true,
+          "Tête de réseau autre réseau": true,
+          "DREETS même région": true,
+          "DREETS autre région": true,
+          "DRAAF même région": true,
+          "DRAAF autre région": true,
+          "Conseil Régional même région": true,
+          "Conseil Régional autre région": true,
+          "DDETS même département": true,
+          "DDETS autre département": true,
+          "Académie même académie": true,
+          "Académie autre académie": true,
+          "Opérateur public national": true,
+          Administrateur: true,
+        },
+        async (organisation, allowed) => {
+          const response = await requestAsOrganisation(
+            organisation,
+            "get",
+            `/api/v1/organismes/${id(1)}/indicateurs/organismes`
+          );
 
-        if (allowed) {
-          expect(response.status).toStrictEqual(200);
-          expect(response.data).toStrictEqual({
-            tauxCouverture: 100,
-            totalOrganismes: 1,
-            organismesTransmetteurs: 1,
-            organismesNonTransmetteurs: 0,
-          });
-        } else {
-          expectForbiddenError(response);
+          if (allowed) {
+            expect(response.status).toStrictEqual(200);
+            expect(response.data).toStrictEqual({
+              tauxCouverture: 100,
+              totalOrganismes: 1,
+              organismesTransmetteurs: 1,
+              organismesNonTransmetteurs: 0,
+            });
+          } else {
+            expectForbiddenError(response);
+          }
         }
-      });
+      );
     });
 
     it("agrégation OFRF", async () => {
@@ -237,26 +277,6 @@ describe("Routes /organismes/:id", () => {
     });
   });
 
-  const configurationERP: PermissionsTestConfig = {
-    "OFF lié": true,
-    "OFF non lié": false,
-    "OFR lié": true,
-    "OFR responsable": true,
-    "OFR non lié": false,
-    "OFRF lié": true,
-    "OFRF responsable": true,
-    "OFRF non lié": false,
-    "Tête de réseau": false,
-    "Tête de réseau non liée": false,
-    "DREETS même région": false,
-    "DREETS autre région": false,
-    "DDETS même département": false,
-    "DDETS autre département": false,
-    "ACADEMIE même académie": false,
-    "ACADEMIE autre académie": false,
-    "Opérateur public national": false,
-    Administrateur: true,
-  };
   describe("PUT /organismes/:id/configure-erp - configuration de l'ERP d'un organisme", () => {
     it("Erreur si non authentifié", async () => {
       const response = await httpClient.put(`/api/v1/organismes/${id(1)}/configure-erp`, {
@@ -268,21 +288,48 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      testPermissions(configurationERP, async (organisation, allowed) => {
-        const response = await requestAsOrganisation(organisation, "put", `/api/v1/organismes/${id(1)}/configure-erp`, {
-          mode_de_transmission: "MANUEL",
-          setup_step_courante: "COMPLETE",
-        });
+      testPermissions(
+        {
+          "OF cible": true,
+          "OF non lié": false,
+          "OF formateur": false,
+          "OF responsable": true,
+          "Tête de réseau même réseau": false,
+          "Tête de réseau autre réseau": false,
+          "DREETS même région": false,
+          "DREETS autre région": false,
+          "DRAAF même région": false,
+          "DRAAF autre région": false,
+          "Conseil Régional même région": false,
+          "Conseil Régional autre région": false,
+          "DDETS même département": false,
+          "DDETS autre département": false,
+          "Académie même académie": false,
+          "Académie autre académie": false,
+          "Opérateur public national": false,
+          Administrateur: true,
+        },
+        async (organisation, allowed) => {
+          const response = await requestAsOrganisation(
+            organisation,
+            "put",
+            `/api/v1/organismes/${id(1)}/configure-erp`,
+            {
+              mode_de_transmission: "MANUEL",
+              setup_step_courante: "COMPLETE",
+            }
+          );
 
-        if (allowed) {
-          assert.strictEqual(response.status, 200);
-          assert.deepStrictEqual(response.data, {
-            message: "success",
-          });
-        } else {
-          expectForbiddenError(response);
+          if (allowed) {
+            assert.strictEqual(response.status, 200);
+            assert.deepStrictEqual(response.data, {
+              message: "success",
+            });
+          } else {
+            expectForbiddenError(response);
+          }
         }
-      });
+      );
     });
   });
 });

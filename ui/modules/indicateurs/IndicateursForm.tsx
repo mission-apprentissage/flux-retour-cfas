@@ -499,10 +499,13 @@ function getPermissionsEffectifsNominatifs(
 
     case "DREETS":
     case "DRAAF":
-    case "CONSEIL_REGIONAL":
-    case "DDETS":
-    case "ACADEMIE":
       return ["inscritSansContrat", "rupturant", "abandon"];
+    case "CONSEIL_REGIONAL":
+      return false;
+    case "DDETS":
+      return ["inscritSansContrat", "rupturant", "abandon"];
+    case "ACADEMIE":
+      return false;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return false;

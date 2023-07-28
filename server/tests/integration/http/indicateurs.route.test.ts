@@ -51,22 +51,22 @@ describe("Route indicateurs", () => {
 
     describe("Permissions", () => {
       const accesOrganisme: PermissionsTestConfig<number> = {
-        "OFF lié": 1,
-        "OFF non lié": 0,
-        "OFR lié": 1,
-        "OFR responsable": 1,
-        "OFR non lié": 0,
-        "OFRF lié": 1,
-        "OFRF responsable": 1,
-        "OFRF non lié": 0,
-        "Tête de réseau": 1,
-        "Tête de réseau non liée": 0,
+        "OF cible": 1,
+        "OF non lié": 0,
+        "OF formateur": 0,
+        "OF responsable": 1,
+        "Tête de réseau même réseau": 1,
+        "Tête de réseau autre réseau": 0,
         "DREETS même région": 1,
         "DREETS autre région": 1,
+        "DRAAF même région": 1,
+        "DRAAF autre région": 1,
+        "Conseil Régional même région": 1,
+        "Conseil Régional autre région": 1,
         "DDETS même département": 1,
         "DDETS autre département": 1,
-        "ACADEMIE même académie": 1,
-        "ACADEMIE autre académie": 1,
+        "Académie même académie": 1,
+        "Académie autre académie": 1,
         "Opérateur public national": 1,
         Administrateur: 1,
       };
@@ -94,36 +94,40 @@ describe("Route indicateurs", () => {
     // TODO vérifier chaque filtre
   });
 
-  describe("GET /api/v1/indicateurs/organismes - indicateurs sur les effectifs", () => {
+  describe("GET /api/v1/indicateurs/organismes/par-departement - indicateurs sur les organismes par département", () => {
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-      const response = await httpClient.get("/api/v1/indicateurs/organismes");
+      const response = await httpClient.get("/api/v1/indicateurs/organismes/par-departement");
 
       expectUnauthorizedError(response);
     });
 
     describe("Permissions", () => {
       const accesOrganisme: PermissionsTestConfig<number> = {
-        "OFF lié": 1,
-        "OFF non lié": 1,
-        "OFRF lié": 1,
-        "OFRF responsable": 2,
-        "OFRF non lié": 1,
-        "OFR lié": 1,
-        "OFR responsable": 3,
-        "OFR non lié": 1,
-        "Tête de réseau": 4,
-        "Tête de réseau non liée": 0,
+        "OF cible": 2,
+        "OF non lié": 1,
+        "OF formateur": 1,
+        "OF responsable": 2,
+        "Tête de réseau même réseau": 4,
+        "Tête de réseau autre réseau": 0,
         "DREETS même région": 4,
         "DREETS autre région": 4,
+        "DRAAF même région": 4,
+        "DRAAF autre région": 4,
+        "Conseil Régional même région": 4,
+        "Conseil Régional autre région": 4,
         "DDETS même département": 4,
         "DDETS autre département": 4,
-        "ACADEMIE même académie": 4,
-        "ACADEMIE autre académie": 4,
+        "Académie même académie": 4,
+        "Académie autre académie": 4,
         "Opérateur public national": 4,
         Administrateur: 4,
       };
       testPermissions(accesOrganisme, async (organisation, nbOrganismes) => {
-        const response = await requestAsOrganisation(organisation, "get", "/api/v1/indicateurs/organismes");
+        const response = await requestAsOrganisation(
+          organisation,
+          "get",
+          "/api/v1/indicateurs/organismes/par-departement"
+        );
 
         expect(response.status).toStrictEqual(200);
         expect(response.data).toStrictEqual(
@@ -145,7 +149,7 @@ describe("Route indicateurs", () => {
     // TODO vérifier chaque filtre
   });
 
-  describe("GET /api/v1/indicateurs/effectifs/par-organisme - indicateurs sur les effectifs", () => {
+  describe("GET /api/v1/indicateurs/effectifs/par-organisme - indicateurs sur les effectifs par organisme", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
@@ -169,22 +173,22 @@ describe("Route indicateurs", () => {
 
     describe("Permissions", () => {
       const accesOrganisme: PermissionsTestConfig<number> = {
-        "OFF lié": 1,
-        "OFF non lié": 0,
-        "OFR lié": 1,
-        "OFR responsable": 1,
-        "OFR non lié": 0,
-        "OFRF lié": 1,
-        "OFRF responsable": 1,
-        "OFRF non lié": 0,
-        "Tête de réseau": 1,
-        "Tête de réseau non liée": 0,
+        "OF cible": 1,
+        "OF non lié": 0,
+        "OF formateur": 0,
+        "OF responsable": 1,
+        "Tête de réseau même réseau": 1,
+        "Tête de réseau autre réseau": 0,
         "DREETS même région": 1,
         "DREETS autre région": 0,
+        "DRAAF même région": 1,
+        "DRAAF autre région": 0,
+        "Conseil Régional même région": 1,
+        "Conseil Régional autre région": 0,
         "DDETS même département": 1,
         "DDETS autre département": 0,
-        "ACADEMIE même académie": 1,
-        "ACADEMIE autre académie": 0,
+        "Académie même académie": 1,
+        "Académie autre académie": 0,
         "Opérateur public national": 1,
         Administrateur: 1,
       };
@@ -202,7 +206,7 @@ describe("Route indicateurs", () => {
                 {
                   organisme_id: id(1),
                   nom: "ADEN Formations (Caen)",
-                  nature: "formateur",
+                  nature: "responsable_formateur",
                   siret: "00000000000018",
                   uai: "0000000A",
                   apprenants: nbApprentis,
@@ -220,7 +224,7 @@ describe("Route indicateurs", () => {
     // TODO vérifier chaque filtre
   });
 
-  describe("GET /api/v1/indicateurs/effectifs/:type - indicateurs sur les effectifs", () => {
+  describe("GET /api/v1/indicateurs/effectifs/:type - effectifs nominatifs", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
@@ -238,29 +242,29 @@ describe("Route indicateurs", () => {
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-      const response = await httpClient.get(`/api/v1/indicateurs/effectifs/abandons?date=${date}`);
+      const response = await httpClient.get(`/api/v1/indicateurs/effectifs/abandon?date=${date}`);
 
       expectUnauthorizedError(response);
     });
 
     describe("Permissions", () => {
       const accesOrganisme: PermissionsTestConfig<boolean> = {
-        "OFF lié": true,
-        "OFF non lié": false,
-        "OFR lié": true,
-        "OFR responsable": true,
-        "OFR non lié": false,
-        "OFRF lié": true,
-        "OFRF responsable": true,
-        "OFRF non lié": false,
-        "Tête de réseau": false,
-        "Tête de réseau non liée": false,
+        "OF cible": true,
+        "OF non lié": false,
+        "OF formateur": false,
+        "OF responsable": true,
+        "Tête de réseau même réseau": false,
+        "Tête de réseau autre réseau": false,
         "DREETS même région": true,
         "DREETS autre région": false,
+        "DRAAF même région": true,
+        "DRAAF autre région": false,
+        "Conseil Régional même région": false,
+        "Conseil Régional autre région": false,
         "DDETS même département": true,
         "DDETS autre département": false,
-        "ACADEMIE même académie": true,
-        "ACADEMIE autre académie": false,
+        "Académie même académie": false,
+        "Académie autre académie": false,
         "Opérateur public national": false,
         Administrateur: true,
       };
@@ -268,7 +272,7 @@ describe("Route indicateurs", () => {
         const response = await requestAsOrganisation(
           organisation,
           "get",
-          `/api/v1/indicateurs/effectifs/abandons?date=${date}`
+          `/api/v1/indicateurs/effectifs/abandon?date=${date}`
         );
 
         expect(response.status).toStrictEqual(200);
@@ -279,6 +283,7 @@ describe("Route indicateurs", () => {
                   apprenant_date_de_naissance: effectif.apprenant.date_de_naissance?.toISOString().substring(0, 10),
                   apprenant_nom: effectif.apprenant.nom,
                   apprenant_prenom: effectif.apprenant.prenom,
+                  apprenant_statut: "abandon",
                   formation_annee: effectif.formation?.annee,
                   formation_cfd: effectif.formation?.cfd,
                   formation_date_debut_formation: effectif.formation?.periode?.[0],

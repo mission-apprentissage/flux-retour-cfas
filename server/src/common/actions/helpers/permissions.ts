@@ -241,7 +241,6 @@ export async function getEffectifsNominatifsRestriction(ctx: AuthContext): Promi
 
     case "DREETS":
     case "DRAAF":
-    case "CONSEIL_REGIONAL":
       return {
         "_computed.organisme.region": organisation.code_region,
       };
@@ -249,11 +248,9 @@ export async function getEffectifsNominatifsRestriction(ctx: AuthContext): Promi
       return {
         "_computed.organisme.departement": organisation.code_departement,
       };
-    case "ACADEMIE":
-      return {
-        "_computed.organisme.academie": organisation.code_academie,
-      };
 
+    case "CONSEIL_REGIONAL":
+    case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
       return {
         _id: new ObjectId("000000000000"), // permet de tout rejeter
