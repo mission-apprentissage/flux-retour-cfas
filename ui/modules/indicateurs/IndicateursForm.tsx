@@ -308,7 +308,7 @@ function IndicateursForm() {
         <IndicateursGrid
           indicateursEffectifs={indicateursEffectifsTotaux}
           loading={indicateursEffectifsLoading}
-          showDownloadLinks={organisationType !== "OPERATEUR_PUBLIC_NATIONAL"}
+          showDownloadLinks={organisationType !== "OPERATEUR_PUBLIC_NATIONAL" && organisationType !== "TETE_DE_RESEAU"}
           effectifsFilters={effectifsFilters}
         />
 
