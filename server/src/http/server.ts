@@ -25,6 +25,7 @@ import {
   legacyEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
+import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
   indicateursNationalFiltersSchema,
@@ -410,8 +411,12 @@ function setupRoutes(app: Application) {
       .get(
         "/indicateurs/effectifs/:type",
         returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
+          const permissions = await hasOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
+          if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
+            throw Boom.forbidden("Permissions invalides");
+          }
+          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           return await getEffectifsNominatifs(req.user, filters, type, res.locals.organismeId);
         })
       )

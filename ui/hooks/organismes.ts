@@ -10,7 +10,7 @@ export function useOrganisme(organismeId: string | undefined | null) {
     isLoading,
     error,
     refetch,
-  } = useQuery<any, any>(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
+  } = useQuery<Organisme, any>(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
     enabled: !!organismeId,
   });
 

@@ -81,6 +81,11 @@ export const effectifsExportColumns = [
     width: 20,
   },
   {
+    label: "apprenant_statut",
+    key: "apprenant_statut",
+    width: 20,
+  },
+  {
     label: "formation_cfd",
     key: "formation_cfd",
     width: 15,

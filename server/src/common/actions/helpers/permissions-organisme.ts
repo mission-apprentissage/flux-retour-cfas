@@ -6,6 +6,8 @@ import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
+import { typesEffectifNominatif } from "../indicateurs/indicateurs.actions";
+
 import { findOrganismeFormateursIds } from "./permissions";
 
 export type OrganismeWithPermissions = Organisme & { permissions: PermissionsOrganisme };
@@ -14,6 +16,7 @@ export interface PermissionsOrganisme {
   viewContacts: boolean;
   infoTransmissionEffectifs: boolean;
   indicateursEffectifs: boolean; // pourrait peut-être être false | "partial" (restriction réseau/territoire) | "full"
+  effectifsNominatifs: boolean | Array<(typeof typesEffectifNominatif)[number]>;
   manageEffectifs: boolean;
 }
 
@@ -44,7 +47,8 @@ export async function buildOrganismePermissions(
         viewContacts: isOrganismeOrFormateur,
         infoTransmissionEffectifs: isOrganismeOrFormateur,
         indicateursEffectifs: isOrganismeOrFormateur,
-        manageEffectifs: userOrganisme._id.equals(organismeId),
+        effectifsNominatifs: isOrganismeOrFormateur,
+        manageEffectifs: isOrganismeOrFormateur, // FIXME à faire revalider, est-ce qu'un responsable peut gérer sifa / les effectifs d
       };
     }
 
@@ -54,39 +58,50 @@ export async function buildOrganismePermissions(
         viewContacts: sameReseau,
         infoTransmissionEffectifs: sameReseau,
         indicateursEffectifs: sameReseau,
+        effectifsNominatifs: false,
         manageEffectifs: false,
       };
     }
 
     case "DREETS":
     case "DRAAF":
-    case "CONSEIL_REGIONAL":
+    case "CONSEIL_REGIONAL": {
+      const sameRegion = organisme.adresse?.region === organisation.code_region;
       return {
         viewContacts: true,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: organisme.adresse?.region === organisation.code_region,
+        effectifsNominatifs: sameRegion ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
       };
-    case "DDETS":
+    }
+    case "DDETS": {
+      const sameDepartement = organisme.adresse?.departement === organisation.code_departement;
       return {
         viewContacts: true,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: organisme.adresse?.departement === organisation.code_departement,
+        effectifsNominatifs: sameDepartement ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
       };
-    case "ACADEMIE":
+    }
+    case "ACADEMIE": {
+      const sameAcademie = organisme.adresse?.academie === organisation.code_academie;
       return {
         viewContacts: true,
         infoTransmissionEffectifs: true,
-        indicateursEffectifs: organisme.adresse?.academie === organisation.code_academie,
+        indicateursEffectifs: sameAcademie,
+        effectifsNominatifs: sameAcademie ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
       };
+    }
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return {
         viewContacts: true,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: true,
+        effectifsNominatifs: false,
         manageEffectifs: false,
       };
     case "ADMINISTRATEUR":
@@ -94,6 +109,7 @@ export async function buildOrganismePermissions(
         viewContacts: true,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: true,
+        effectifsNominatifs: true,
         manageEffectifs: true,
       };
   }
@@ -103,7 +119,7 @@ export async function hasOrganismePermission(
   ctx: AuthContext,
   organismeId: ObjectId,
   permission: keyof PermissionsOrganisme
-): Promise<boolean> {
+) {
   const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
   return permissionsOrganisme[permission];
 }
