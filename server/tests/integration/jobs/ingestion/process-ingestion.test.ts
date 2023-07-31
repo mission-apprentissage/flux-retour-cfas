@@ -603,7 +603,6 @@ describe("Processus d'ingestion", () => {
 
         // Check historique
         const effectifInserted = await effectifsDb().findOne({ id_erp_apprenant: "987654321" });
-        console.log(effectifInserted?.apprenant.historique_statut);
         expect(effectifInserted?.apprenant.historique_statut).toMatchObject([
           {
             date_reception: expect.any(Date),
