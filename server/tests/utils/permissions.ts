@@ -248,14 +248,14 @@ const profilsOrganisation = [
   },
 ] as const satisfies ReadonlyArray<ProfilPermission>;
 
-type profilLabels = (typeof profilsOrganisation)[number]["label"];
+type ProfilLabel = (typeof profilsOrganisation)[number]["label"];
 
 export const profilsPermissionByLabel = profilsOrganisation.reduce(
   (acc, v) => ({ ...acc, [v.label]: v }),
-  {} as { [key in profilLabels]: ProfilPermission }
+  {} as { [key in ProfilLabel]: ProfilPermission }
 );
 
-export type PermissionsTestConfig<ExpectedResult = boolean> = { [key in profilLabels]: ExpectedResult };
+export type PermissionsTestConfig<ExpectedResult = boolean> = { [key in ProfilLabel]: ExpectedResult };
 
 type TestFunc<ExpectedResult> = (organisation: NewOrganisation, expectedResult: ExpectedResult) => Promise<any>;
 
