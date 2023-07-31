@@ -111,7 +111,7 @@ import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import effectif from "./routes/specific.routes/effectif.routes";
-import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
+import { getOrganismeDuplicateEffectifs, getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
 import auth from "./routes/user.routes/auth.routes";
@@ -445,6 +445,13 @@ function setupRoutes(app: Application) {
             req.query.annee_scolaire as string | undefined,
             req.query.sifa === "true"
           );
+        })
+      )
+      .get(
+        "/duplicates",
+        authOrgMiddleware("manager"),
+        returnResult(async (req, res) => {
+          return await getOrganismeDuplicateEffectifs(res.locals.organismeId);
         })
       )
       .get(
