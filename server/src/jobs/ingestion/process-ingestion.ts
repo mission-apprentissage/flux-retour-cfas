@@ -17,7 +17,7 @@ import {
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
 import {
-  findOrganismeByUaiAndSiret,
+  findOrganismeFiableByUaiAndSiret,
   setOrganismeTransmissionDates,
 } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
@@ -168,18 +168,18 @@ const transformEffectifQueueItem = async (
           effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
           organisme: await pPipe(
             () =>
-              findOrganismeByUaiAndSiret(
+              findOrganismeFiableByUaiAndSiret(
                 effectifQueued?.etablissement_lieu_de_formation_uai,
                 effectifQueued?.etablissement_lieu_de_formation_siret
               ),
             setOrganismeTransmissionDates
           )(data),
-          organisme_formateur: await findOrganismeByUaiAndSiret(
+          organisme_formateur: await findOrganismeFiableByUaiAndSiret(
             effectifQueued?.etablissement_formateur_uai,
             effectifQueued?.etablissement_formateur_siret,
             { _id: 1 }
           ),
-          organisme_responsable: await findOrganismeByUaiAndSiret(
+          organisme_responsable: await findOrganismeFiableByUaiAndSiret(
             effectifQueued?.etablissement_responsable_uai,
             effectifQueued?.etablissement_responsable_siret,
             { _id: 1 }
@@ -191,7 +191,8 @@ const transformEffectifQueueItem = async (
         .transform(async (data) => ({
           effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
           organisme: await pPipe(
-            () => findOrganismeByUaiAndSiret(effectifQueued?.uai_etablissement, effectifQueued?.siret_etablissement),
+            () =>
+              findOrganismeFiableByUaiAndSiret(effectifQueued?.uai_etablissement, effectifQueued?.siret_etablissement),
             setOrganismeTransmissionDates
           )(data),
         }))
