@@ -1,4 +1,4 @@
-import { WithId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 // Supprime toutes les attributs à false ou 0 pour éviter une erreur mongodb
 export function cleanProjection<
@@ -12,3 +12,11 @@ export function cleanProjection<
     return acc;
   }, {} as Projection);
 }
+
+export type MapObjectIdToString<Type> = Type extends ObjectId
+  ? string
+  : Type extends Record<any, any>
+  ? {
+      [K in keyof Type]: MapObjectIdToString<Type[K]>;
+    }
+  : Type;

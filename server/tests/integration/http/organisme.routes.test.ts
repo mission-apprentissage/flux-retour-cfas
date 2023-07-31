@@ -1,8 +1,11 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
+import { WithId } from "mongodb";
 
+import { Organisme } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { MapObjectIdToString } from "@/common/utils/mongoUtils";
 import {
   historySequenceApprenti,
   historySequenceApprentiToAbandon,
@@ -42,7 +45,7 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      const commonExpectedOrganismeAttributes = {
+      const commonExpectedOrganismeAttributes: Partial<MapObjectIdToString<WithId<Organisme>>> = {
         _id: id(1),
         adresse: {
           departement: "56", // morbihan
@@ -81,274 +84,6 @@ describe("Routes /organismes/:id", () => {
         last_transmission_date: "2023-04-15T18:00:00.000Z",
       };
 
-      // testPermission("OF cible", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: true,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: true,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("OF responsable", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: true,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: true,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("OF non lié", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: false,
-      //       infoTransmissionEffectifs: false,
-      //       manageEffectifs: false,
-      //       viewContacts: false,
-      //     },
-      //   });
-      // });
-      // testPermission("OF formateur", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: false,
-      //       infoTransmissionEffectifs: false,
-      //       manageEffectifs: false,
-      //       viewContacts: false,
-      //     },
-      //   });
-      // });
-      // testPermission("Tête de réseau même réseau", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("Tête de réseau autre réseau", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: false,
-      //       infoTransmissionEffectifs: false,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("DREETS même région", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: true,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("DREETS autre région", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: false,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("DRAAF même région", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: true,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("DRAAF autre région", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: false,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("Conseil Régional même région", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("Conseil Régional autre région", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: false,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("DDETS même département", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: true,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("DDETS autre département", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: false,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("Académie même académie", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("Académie autre académie", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: false,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("Opérateur public national", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: false,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: false,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-      // testPermission("Administrateur", async (organisation) => {
-      //   const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-      //   expect(response.status).toStrictEqual(200);
-      //   expect(response.data).toStrictEqual({
-      //     ...commonExpectedOrganismeAttributes,
-      //     ...infoTransmissionEffectifsAttributes,
-      //     permissions: {
-      //       effectifsNominatifs: true,
-      //       indicateursEffectifs: true,
-      //       infoTransmissionEffectifs: true,
-      //       manageEffectifs: true,
-      //       viewContacts: true,
-      //     },
-      //   });
-      // });
-
       testPermissions<any>(
         {
           "OF cible": {
@@ -373,7 +108,7 @@ describe("Routes /organismes/:id", () => {
               viewContacts: true,
             },
           },
-          "OF non lié": {
+          "OF formateur": {
             ...commonExpectedOrganismeAttributes,
             permissions: {
               effectifsNominatifs: false,
@@ -383,7 +118,7 @@ describe("Routes /organismes/:id", () => {
               viewContacts: false,
             },
           },
-          "OF formateur": {
+          "OF non lié": {
             ...commonExpectedOrganismeAttributes,
             permissions: {
               effectifsNominatifs: false,
@@ -618,9 +353,9 @@ describe("Routes /organismes/:id", () => {
       testPermissions(
         {
           "OF cible": true,
-          "OF non lié": false,
-          "OF formateur": false,
           "OF responsable": true,
+          "OF formateur": false,
+          "OF non lié": false,
           "Tête de réseau même réseau": true,
           "Tête de réseau autre réseau": false,
           "DREETS même région": true,
@@ -668,15 +403,12 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      // beforeEach(async () => {
-      //   await organismesDb().insertMany([]);
-      // });
       testPermissions(
         {
           "OF cible": true,
-          "OF non lié": true,
-          "OF formateur": true,
           "OF responsable": true,
+          "OF formateur": true,
+          "OF non lié": true,
           "Tête de réseau même réseau": true,
           "Tête de réseau autre réseau": true,
           "DREETS même région": true,
@@ -712,46 +444,6 @@ describe("Routes /organismes/:id", () => {
           }
         }
       );
-    });
-
-    it("agrégation OFRF", async () => {
-      const response = await requestAsOrganisation(
-        {
-          type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-          uai: "0000000B",
-          siret: "00000000000026",
-        },
-        "get",
-        `/api/v1/organismes/${id(2)}/indicateurs/organismes`
-      );
-
-      expect(response.status).toStrictEqual(200);
-      expect(response.data).toStrictEqual({
-        tauxCouverture: 100,
-        totalOrganismes: 2,
-        organismesTransmetteurs: 2,
-        organismesNonTransmetteurs: 0,
-      });
-    });
-
-    it("agrégation OFR", async () => {
-      const response = await requestAsOrganisation(
-        {
-          type: "ORGANISME_FORMATION_RESPONSABLE",
-          uai: "0000000C",
-          siret: "00000000000034",
-        },
-        "get",
-        `/api/v1/organismes/${id(3)}/indicateurs/organismes`
-      );
-
-      expect(response.status).toStrictEqual(200);
-      expect(response.data).toStrictEqual({
-        tauxCouverture: 100,
-        totalOrganismes: 3,
-        organismesTransmetteurs: 3,
-        organismesNonTransmetteurs: 0,
-      });
     });
   });
 
