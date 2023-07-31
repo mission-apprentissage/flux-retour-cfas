@@ -1,12 +1,12 @@
 import Boom from "boom";
 import express from "express";
-import Joi from "joi";
+import { z } from "zod";
 
 import { login } from "@/common/actions/account.actions";
 import { removeSession } from "@/common/actions/sessions.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import { responseWithCookie } from "@/common/utils/httpUtils";
-import { validateFullObjectSchema } from "@/common/utils/validationUtils";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
 export default () => {
@@ -15,11 +15,11 @@ export default () => {
   router.post(
     "/login",
     returnResult(async (req, res) => {
-      const { email, password } = await validateFullObjectSchema(req.body, {
-        email: Joi.string().email().required(),
-        password: Joi.string().required(),
+      const { email, password } = await validateFullZodObjectSchema(req.body, {
+        email: z.string().email().toLowerCase(),
+        password: z.string(),
       });
-      const sessionToken = await login(email.toLowerCase(), password);
+      const sessionToken = await login(email, password);
       responseWithCookie(res, sessionToken);
     })
   );
