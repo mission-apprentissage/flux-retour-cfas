@@ -70,6 +70,7 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
   {
     accessorKey: "last_transmission_date",
     header: () => "Transmission au tdb",
+    sortUndefined: 1,
     cell: ({ row, getValue }) => {
       if (!row.original.permissions?.infoTransmissionEffectifs) {
         return <Text color="grey">Inconnu</Text>;

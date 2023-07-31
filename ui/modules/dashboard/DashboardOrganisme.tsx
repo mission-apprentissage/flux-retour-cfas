@@ -252,7 +252,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 </HStack>
               )}
 
-              {organisme.permissions?.indicateursEffectifs &&
+              {organisme.permissions?.infoTransmissionEffectifs &&
                 (organisme.erps?.[0] ? (
                   <HStack
                     paddingX="1w"
@@ -315,7 +315,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               <Text fontWeight="bold">{organisme.adresse?.complete || "Inconnue"}</Text>
             </HStack>
 
-            {modePublique && organisme.permissions?.indicateursEffectifs && (
+            {modePublique && organisme.permissions?.viewContacts && (
               <>
                 <Box>
                   <Text display="inline-block">Responsable identifié de l’établissement&nbsp;:</Text>

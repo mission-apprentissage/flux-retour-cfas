@@ -912,16 +912,18 @@ function getOrganismeProjection(infoTransmissionEffectifsCondition: any): Partia
     organismesFormateurs: 1,
     fiabilisation_statut: 1,
     erps: {
-      $cond: [infoTransmissionEffectifsCondition, "$erps", 0],
+      $cond: [infoTransmissionEffectifsCondition, "$erps", undefined],
     },
     first_transmission_date: {
-      $cond: [infoTransmissionEffectifsCondition, "$first_transmission_date", 0],
+      $cond: [infoTransmissionEffectifsCondition, "$first_transmission_date", undefined],
     },
     last_transmission_date: {
-      $cond: [infoTransmissionEffectifsCondition, "$last_transmission_date", 0],
+      $cond: [infoTransmissionEffectifsCondition, "$last_transmission_date", undefined],
     },
     permissions: {
-      infoTransmissionEffectifs: infoTransmissionEffectifsCondition,
+      infoTransmissionEffectifs: {
+        $cond: [infoTransmissionEffectifsCondition, true, false],
+      },
     },
   });
 }
