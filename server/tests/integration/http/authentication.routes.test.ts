@@ -22,7 +22,7 @@ const testUser: WithId<UsersMigration> = {
   nom: "Dupont",
   prenom: "Jean",
   fonction: "Responsable administratif",
-  email: "user@test.local.fr",
+  email: "user@tdb.local",
   telephone: "",
   password: testPasswordHash,
   has_accept_cgu_version: "v0.1",
@@ -54,7 +54,7 @@ describe("Authentification", () => {
 
     it("Retourne un cookie de session", async () => {
       let response = await httpClient.post("/api/v1/auth/login", {
-        email: "user@test.local.fr",
+        email: "user@tdb.local",
         password: "MDP-azerty123",
       });
 
@@ -71,7 +71,7 @@ describe("Authentification", () => {
         account_status: "CONFIRMED",
         civility: "Madame",
         created_at: date,
-        email: "user@test.local.fr",
+        email: "user@tdb.local",
         fonction: "Responsable administratif",
         has_accept_cgu_version: "v0.1",
         invalided_token: false,
@@ -92,7 +92,7 @@ describe("Authentification", () => {
 
     it("Erreur si mauvais mot de passe", async () => {
       const response = await httpClient.post("/api/v1/auth/login", {
-        email: "user@test.local.fr",
+        email: "user@tdb.local",
         password: "wrong password",
       });
 
@@ -101,7 +101,7 @@ describe("Authentification", () => {
 
     it("Erreur si compte inconnu", async () => {
       const response = await httpClient.post("/api/v1/auth/login", {
-        email: "missing-user@test.local.fr",
+        email: "missing-user@tdb.local",
         password: "MDP-azerty123",
       });
 
@@ -112,11 +112,11 @@ describe("Authentification", () => {
       await usersMigrationDb().insertOne({
         ...testUser,
         _id: new ObjectId(id(2)),
-        email: "user2@test.local.fr",
+        email: "user2@tdb.local",
         account_status: "PENDING_EMAIL_VALIDATION",
       });
       const response = await httpClient.post("/api/v1/auth/login", {
-        email: "user2@test.local.fr",
+        email: "user2@tdb.local",
         password: "MDP-azerty123",
       });
 
@@ -131,11 +131,11 @@ describe("Authentification", () => {
       await usersMigrationDb().insertOne({
         ...testUser,
         _id: new ObjectId(id(2)),
-        email: "user2@test.local.fr",
+        email: "user2@tdb.local",
         account_status: "PENDING_ADMIN_VALIDATION",
       });
       const response = await httpClient.post("/api/v1/auth/login", {
-        email: "user2@test.local.fr",
+        email: "user2@tdb.local",
         password: "MDP-azerty123",
       });
 

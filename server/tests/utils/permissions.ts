@@ -257,7 +257,11 @@ export const profilsPermissionByLabel = profilsOrganisation.reduce(
 
 export type PermissionsTestConfig<ExpectedResult = boolean> = { [key in ProfilLabel]: ExpectedResult };
 
-type TestFunc<ExpectedResult> = (organisation: NewOrganisation, expectedResult: ExpectedResult) => Promise<any>;
+type TestFunc<ExpectedResult> = (
+  organisation: NewOrganisation,
+  expectedResult: ExpectedResult,
+  organisationLabel?: ProfilLabel
+) => Promise<any>;
 
 /**
  * Utilitaire pour exécuter un test avec tous les profils d'organisation
@@ -269,7 +273,7 @@ export function testPermissions<ExpectedResult>(
   Object.entries(permissionsConfig).forEach(([label, allowed]) => {
     const conf = profilsPermissionByLabel[label];
     it(`${conf.label} - ${allowed ? "ALLOWED" : "FORBIDDEN"}`, async () => {
-      await testFunc(conf.organisation, allowed);
+      await testFunc(conf.organisation, allowed, conf.label);
     });
   });
 }

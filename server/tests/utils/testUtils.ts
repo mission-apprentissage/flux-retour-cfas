@@ -6,7 +6,7 @@ import axiosist from "axiosist";
 import { createOrganisation } from "@/common/actions/organisations.actions";
 import { createSession } from "@/common/actions/sessions.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
-import { usersMigrationDb } from "@/common/model/collections";
+import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { NewOrganisation, getOrganisationLabel } from "@/common/model/organisations.model";
 import { hash } from "@/common/utils/passwordUtils";
 import { resetTime } from "@/common/utils/timeUtils";
@@ -37,8 +37,9 @@ export async function initTestApp() {
       url: string,
       body?: T
     ): Promise<AxiosResponse> {
-      const organisationId = await createOrganisation(organisation);
-      const userEmail = `${getOrganisationLabel(organisation)}@test.local`; // généré selon l'organisation
+      const existingOrganisation = await organisationsDb().findOne(organisation);
+      const organisationId = existingOrganisation ? existingOrganisation._id : await createOrganisation(organisation);
+      const userEmail = `${getOrganisationLabel(organisation)}@tdb.local`; // généré selon l'organisation
       await usersMigrationDb().insertOne({
         account_status: "CONFIRMED",
         invalided_token: false,
