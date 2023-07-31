@@ -124,11 +124,11 @@ export async function buildOrganismePermissions(
   }
 }
 
-export async function hasOrganismePermission(
+export async function hasOrganismePermission<Perm extends keyof PermissionsOrganisme>(
   ctx: AuthContext,
   organismeId: ObjectId,
-  permission: keyof PermissionsOrganisme
-) {
+  permission: Perm
+): Promise<PermissionsOrganisme[Perm]> {
   const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
   return permissionsOrganisme[permission];
 }
