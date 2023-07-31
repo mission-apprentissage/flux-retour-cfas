@@ -152,7 +152,8 @@ const ConfigurationERP = ({ erp, onGenerate, isGenerating, organisme }: Configur
               Félicitations ! L’opération est terminée.
             </Heading>
             <Text color="#3A3A3A" my={3}>
-              Votre établissement <strong>{organisme.nom}</strong> transmets bien les données au
+              Votre établissement <strong>{organisme.enseigne ?? organisme.raison_sociale}</strong> transmets bien les
+              données au
               <br />
               tableau de bord via la nouvelle API installée sur votre ERP.
               <br />

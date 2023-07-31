@@ -57,7 +57,7 @@ const Organisme = () => {
         <>
           <Stack spacing={10} w="100%">
             <Heading as="h1" mt={6}>
-              {organisme.nom || organisme.enseigne}
+              {organisme.enseigne || organisme.raison_sociale}
             </Heading>
             <Box color="mgalt" fontSize="sm" pb={8}>
               <p>

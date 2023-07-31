@@ -68,7 +68,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     let nbOrganimesFermes = 0;
     (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
-      organisme.normalizedName = normalize(organisme.nom ?? "");
+      organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
       organisme.normalizedUai = normalize(organisme.uai ?? "");
       organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
 

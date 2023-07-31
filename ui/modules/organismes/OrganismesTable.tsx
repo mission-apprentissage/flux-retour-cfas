@@ -35,9 +35,9 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
           display="block"
           fontSize="1rem"
           width="var(--chakra-sizes-lg)"
-          title={row.original.nom}
+          title={row.original.enseigne ?? row.original.raison_sociale}
         >
-          {row.original.nom ?? "Organisme inconnu"}
+          {row.original.enseigne ?? row.original.raison_sociale ?? "Organisme inconnu"}
         </Link>
         <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
           UAI&nbsp;:{" "}
@@ -70,7 +70,10 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
   {
     accessorKey: "last_transmission_date",
     header: () => "Transmission au tdb",
-    cell: ({ getValue }) => {
+    cell: ({ row, getValue }) => {
+      if (!row.original.permissions?.infoTransmissionEffectifs) {
+        return <Text color="grey">Inconnu</Text>;
+      }
       const lastTransmissionDate = getValue();
       if (!lastTransmissionDate) return <Text color="tomato">Ne transmet pas</Text>;
       if (isMoreThanOrEqualOneMonthAgo(lastTransmissionDate)) {

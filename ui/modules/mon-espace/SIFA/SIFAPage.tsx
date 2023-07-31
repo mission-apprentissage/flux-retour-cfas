@@ -100,7 +100,9 @@ const SIFAPage = ({ isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue<any>(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id, currentAnneeScolaire);
-  const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
+  const exportSifaFilename = `tdb-données-sifa-${
+    organisme.enseigne ?? organisme.raison_sociale
+  }-${new Date().toLocaleDateString()}.csv`;
 
   const [searchValue, setSearchValue] = useState("");
 
