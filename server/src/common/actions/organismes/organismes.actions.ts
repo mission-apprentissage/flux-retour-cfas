@@ -678,6 +678,8 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
         qualiopi: 1,
         enseigne: 1,
         raison_sociale: 1,
+        reseaux: 1,
+        erps: permissionsOrganisme.infoTransmissionEffectifs,
         adresse: 1,
         organismesResponsables: 1,
         organismesFormateurs: 1,
