@@ -192,17 +192,10 @@ describe("Routes /organismes/:id", () => {
           bassinEmploi: "5315", // rennes
         },
         reseaux: ["CCI"],
-        // erps: ["YMAG"],
         nature: "responsable_formateur",
         raison_sociale: "ADEN Formations (Caen)",
-        // fiabilisation_statut: "FIABLE",
+        fiabilisation_statut: "FIABLE",
         ferme: false,
-        // metiers: [],
-        // relatedFormations: [],
-        // created_at: new Date("2023-04-12T18:00:00.000Z"),
-        // updated_at: new Date("2023-04-12T18:00:00.000Z"),
-        // est_dans_le_referentiel: true,
-        // last_transmission_date: new Date("2023-04-15T18:00:00.000Z"),
         uai: "0000000A",
         siret: "00000000000018",
         organismesFormateurs: [
