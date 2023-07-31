@@ -24,6 +24,7 @@ import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/u
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
+import { mapFiabilizedOrganismeUaiSiretCouple } from "../engine/engine.organismes.utils";
 import { InfoSiret } from "../infoSiret.actions-struct";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
@@ -178,6 +179,24 @@ export const findOrganismeByUaiAndSiret = async (uai?: string, siret?: string, p
     throw new Error("missing parameter `uai` or `siret`");
   }
   return await organismesDb().findOne({ uai, siret } as any, { projection });
+};
+
+/**
+ * Méthode de récupération d'un organisme fiable depuis un UAI et un SIRET
+ * @param {string} uai
+ * @param {string} siret
+ * @param {*} projection
+ * @returns
+ */
+export const findOrganismeFiableByUaiAndSiret = async (uai?: string, siret?: string, projection = {}) => {
+  if (!uai && !siret) {
+    throw new Error("missing parameter `uai` or `siret`");
+  }
+
+  // Récupération du couple fiable depuis l'UAI / SIRET
+  const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+
+  return await organismesDb().findOne({ uai: cleanUai, siret: cleanSiret } as any, { projection });
 };
 
 /**
