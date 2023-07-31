@@ -389,6 +389,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
           <>
             <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
               Aperçu de {modePublique ? "ses" : "vos"} effectifs
+              {organisme.organismesFormateurs && organisme.organismesFormateurs?.length > 0 && " et établissements"}
             </Heading>
 
             {aucunEffectifTransmis && (
