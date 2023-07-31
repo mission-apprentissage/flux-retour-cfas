@@ -59,7 +59,7 @@ import {
   configureOrganismeERP,
   findOrganismesBySIRET,
   findOrganismesByUAI,
-  findUserOrganismes,
+  listOrganisationOrganismes,
   generateApiKeyForOrg,
   getOrganismeByAPIKey,
   getOrganismeById,
@@ -436,7 +436,7 @@ function setupRoutes(app: Application) {
       .get(
         "/organismes",
         returnResult(async (req, res) => {
-          return await listOrganismesFormateurs(res.locals.organismeId);
+          return await listOrganismesFormateurs(req.user, res.locals.organismeId);
         })
       )
       .get(
@@ -653,7 +653,7 @@ function setupRoutes(app: Application) {
       .get(
         "/organismes",
         returnResult(async (req) => {
-          return await findUserOrganismes(req.user);
+          return await listOrganisationOrganismes(req.user);
         })
       )
       .get(

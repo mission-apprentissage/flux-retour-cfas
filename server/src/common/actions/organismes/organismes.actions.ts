@@ -613,49 +613,6 @@ export const getStatOrganismes = async () => {
   return stats;
 };
 
-export async function findUserOrganismes(ctx: AuthContext) {
-  const restrictionOwnOrganisme = isOrganisationOF(ctx.organisation.type)
-    ? {
-        _id: {
-          $ne: (await getOrganisationOrganisme(ctx))._id,
-        },
-      }
-    : {};
-  const organismes = await organismesDb()
-    .find(
-      {
-        $and: [
-          await getOrganismeRestriction(ctx),
-          // cas particulier pour l'OF qui ne doit pas lister son propre organisme
-          restrictionOwnOrganisme,
-        ],
-      },
-      {
-        projection: {
-          _id: 1,
-          nom: {
-            $ifNull: ["$enseigne", "$raison_sociale"],
-          },
-          enseigne: 1,
-          raison_sociale: 1,
-          ferme: 1,
-          nature: {
-            $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
-          },
-          adresse: 1,
-          siret: 1,
-          uai: 1,
-          first_transmission_date: 1,
-          last_transmission_date: 1,
-          fiabilisation_statut: 1,
-        },
-      }
-    )
-    .toArray();
-
-  return organismes;
-}
-
 export async function getOrganismeById(_id: ObjectId) {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
@@ -674,15 +631,18 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
         siret: 1,
         uai: 1,
         ferme: 1,
-        nature: 1,
+        nature: {
+          $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+        },
         qualiopi: 1,
         enseigne: 1,
         raison_sociale: 1,
         reseaux: 1,
-        erps: permissionsOrganisme.infoTransmissionEffectifs,
         adresse: 1,
         organismesResponsables: 1,
         organismesFormateurs: 1,
+        fiabilisation_statut: 1,
+        erps: permissionsOrganisme.infoTransmissionEffectifs,
         first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
         last_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
       }),
@@ -859,8 +819,37 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
   return organisation ? await listContactsOrganisation(organisation._id) : [];
 }
 
-export async function listOrganismesFormateurs(organismeId: ObjectId): Promise<Organisme[]> {
-  const organismes = await organismesDb()
+export async function listOrganisationOrganismes(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>[]> {
+  const restrictionOwnOrganisme = isOrganisationOF(ctx.organisation.type)
+    ? {
+        _id: {
+          $ne: (await getOrganisationOrganisme(ctx))._id,
+        },
+      }
+    : {};
+  const organismes = (await organismesDb()
+    .find(
+      {
+        $and: [
+          await getOrganismeRestriction(ctx),
+          // cas particulier pour l'OF qui ne doit pas lister son propre organisme
+          restrictionOwnOrganisme,
+        ],
+      },
+      {
+        projection: getOrganismeProjection(true),
+      }
+    )
+    .toArray()) as WithId<OrganismeWithPermissions>[];
+
+  return organismes;
+}
+
+export async function listOrganismesFormateurs(
+  ctx: AuthContext,
+  organismeId: ObjectId
+): Promise<WithId<OrganismeWithPermissions>[]> {
+  const organismes = (await organismesDb()
     .find(
       {
         _id: {
@@ -868,27 +857,71 @@ export async function listOrganismesFormateurs(organismeId: ObjectId): Promise<O
         },
       },
       {
-        projection: {
-          _id: 1,
-          nom: {
-            $ifNull: ["$enseigne", "$raison_sociale"],
-          },
-          enseigne: 1,
-          raison_sociale: 1,
-          ferme: 1,
-          nature: {
-            $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
-          },
-          adresse: 1,
-          siret: 1,
-          uai: 1,
-          first_transmission_date: 1,
-          last_transmission_date: 1,
-          fiabilisation_statut: 1,
-        },
+        projection: getOrganismeProjection(await getInfoTransmissionEffectifsCondition(ctx)),
       }
     )
-    .toArray();
+    .toArray()) as WithId<OrganismeWithPermissions>[];
 
   return organismes;
+}
+
+async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+      return {
+        $in: ["$_id", linkedOrganismesIds],
+      };
+    }
+
+    case "TETE_DE_RESEAU": {
+      return { $eq: ["$reseaux", organisation.reseau] };
+    }
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return true;
+  }
+}
+
+function getOrganismeProjection(infoTransmissionEffectifsCondition: any): Partial<WithId<OrganismeWithPermissions>> {
+  return cleanProjection<WithId<OrganismeWithPermissions>>({
+    _id: 1,
+    siret: 1,
+    uai: 1,
+    ferme: 1,
+    nature: {
+      $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+    },
+    qualiopi: 1,
+    enseigne: 1,
+    raison_sociale: 1,
+    reseaux: 1,
+    adresse: 1,
+    organismesResponsables: 1,
+    organismesFormateurs: 1,
+    fiabilisation_statut: 1,
+    erps: {
+      $cond: [infoTransmissionEffectifsCondition, "$erps", 0],
+    },
+    first_transmission_date: {
+      $cond: [infoTransmissionEffectifsCondition, "$first_transmission_date", 0],
+    },
+    last_transmission_date: {
+      $cond: [infoTransmissionEffectifsCondition, "$last_transmission_date", 0],
+    },
+    permissions: {
+      infoTransmissionEffectifs: infoTransmissionEffectifsCondition,
+    },
+  });
 }
