@@ -1,11 +1,13 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
-import { WithId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
+import { PermissionsOrganisme } from "@/common/actions/helpers/permissions-organisme";
 import { Organisme } from "@/common/model/@types";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { MapObjectIdToString } from "@/common/utils/mongoUtils";
+import { getCurrentTime } from "@/common/utils/timeUtils";
 import {
   historySequenceApprenti,
   historySequenceApprentiToAbandon,
@@ -13,7 +15,13 @@ import {
   historySequenceInscrit,
 } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
-import { commonEffectifsAttributes, organismes, testPermissions } from "@tests/utils/permissions";
+import {
+  PermissionsTestConfig,
+  commonEffectifsAttributes,
+  organismes,
+  testPermissions,
+  userOrganisme,
+} from "@tests/utils/permissions";
 import {
   RequestAsOrganisationFunc,
   expectForbiddenError,
@@ -21,11 +29,141 @@ import {
   generate,
   id,
   initTestApp,
+  testPasswordHash,
 } from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
+
+const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
+  "OF cible": {
+    effectifsNominatifs: true,
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: true,
+    viewContacts: true,
+  },
+  "OF responsable": {
+    effectifsNominatifs: true,
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: true,
+    viewContacts: true,
+  },
+  "OF formateur": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: false,
+    infoTransmissionEffectifs: false,
+    manageEffectifs: false,
+    viewContacts: false,
+  },
+  "OF non lié": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: false,
+    infoTransmissionEffectifs: false,
+    manageEffectifs: false,
+    viewContacts: false,
+  },
+  "Tête de réseau même réseau": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "Tête de réseau autre réseau": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: false,
+    infoTransmissionEffectifs: false,
+    manageEffectifs: false,
+    viewContacts: false,
+  },
+  "DREETS même région": {
+    effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "DREETS autre région": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: false,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "DRAAF même région": {
+    effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "DRAAF autre région": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: false,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "Conseil Régional même région": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "Conseil Régional autre région": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: false,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "DDETS même département": {
+    effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "DDETS autre département": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: false,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "Académie même académie": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "Académie autre académie": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: false,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  "Opérateur public national": {
+    effectifsNominatifs: false,
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: false,
+    viewContacts: true,
+  },
+  Administrateur: {
+    effectifsNominatifs: true,
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: true,
+    viewContacts: true,
+  },
+};
 
 describe("Routes /organismes/:id", () => {
   beforeEach(async () => {
@@ -89,203 +227,204 @@ describe("Routes /organismes/:id", () => {
           "OF cible": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: true,
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: true,
-              viewContacts: true,
-            },
           },
           "OF responsable": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: true,
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: true,
-              viewContacts: true,
-            },
           },
           "OF formateur": {
             ...commonExpectedOrganismeAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: false,
-              infoTransmissionEffectifs: false,
-              manageEffectifs: false,
-              viewContacts: false,
-            },
           },
           "OF non lié": {
             ...commonExpectedOrganismeAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: false,
-              infoTransmissionEffectifs: false,
-              manageEffectifs: false,
-              viewContacts: false,
-            },
           },
           "Tête de réseau même réseau": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "Tête de réseau autre réseau": {
             ...commonExpectedOrganismeAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: false,
-              infoTransmissionEffectifs: false,
-              manageEffectifs: false,
-              viewContacts: false,
-            },
           },
           "DREETS même région": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "DREETS autre région": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: false,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "DRAAF même région": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "DRAAF autre région": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: false,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "Conseil Régional même région": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "Conseil Régional autre région": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: false,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "DDETS même département": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "DDETS autre département": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: false,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "Académie même académie": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "Académie autre académie": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: false,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           "Opérateur public national": {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: false,
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: false,
-              viewContacts: true,
-            },
           },
           Administrateur: {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
-            permissions: {
-              effectifsNominatifs: true,
-              indicateursEffectifs: true,
-              infoTransmissionEffectifs: true,
-              manageEffectifs: true,
-              viewContacts: true,
-            },
           },
         },
-        async (organisation, expectedBody) => {
+        async (organisation, expectedBody, organisationLabel) => {
           const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
           expect(response.status).toStrictEqual(200);
-          expect(response.data).toStrictEqual(expectedBody);
+          expect(response.data).toStrictEqual({
+            ...expectedBody,
+            permissions: permissionsByOrganisation[organisationLabel as string],
+          });
+        }
+      );
+    });
+  });
+
+  describe("GET /organismes/:id/contacts - liste des contacts d'un organisme", () => {
+    beforeEach(async () => {
+      await Promise.all([
+        organisationsDb().insertOne({
+          _id: new ObjectId(id(1)),
+          type: "ORGANISME_FORMATION_FORMATEUR",
+          uai: userOrganisme.uai as string,
+          siret: userOrganisme.siret,
+          created_at: getCurrentTime(),
+        }),
+        usersMigrationDb().insertMany([
+          {
+            account_status: "CONFIRMED",
+            invalided_token: false,
+            password_updated_at: new Date(),
+            connection_history: [],
+            emails: [],
+            created_at: new Date(),
+            civility: "Madame",
+            nom: "Boucher",
+            prenom: "Alice",
+            fonction: "Directrice",
+            email: "alice@tdb.local",
+            telephone: "0102030405",
+            password: testPasswordHash,
+            has_accept_cgu_version: "v0.1",
+            organisation_id: new ObjectId(id(1)),
+          },
+          {
+            account_status: "CONFIRMED",
+            invalided_token: false,
+            password_updated_at: new Date(),
+            connection_history: [],
+            emails: [],
+            created_at: new Date(),
+            civility: "Madame",
+            nom: "Jean",
+            prenom: "Corinne",
+            fonction: "Service administratif",
+            email: "corinne@tdb.local",
+            telephone: "0102030406",
+            password: testPasswordHash,
+            has_accept_cgu_version: "v0.1",
+            organisation_id: new ObjectId(id(1)),
+          },
+        ]),
+      ]);
+    });
+
+    it("Erreur si non authentifié", async () => {
+      const response = await httpClient.get(`/api/v1/organismes/${id(1)}/contacts`);
+
+      expectUnauthorizedError(response);
+    });
+
+    describe("Permissions", () => {
+      testPermissions(
+        {
+          "OF cible": true,
+          "OF responsable": true,
+          "OF formateur": false,
+          "OF non lié": false,
+          "Tête de réseau même réseau": true,
+          "Tête de réseau autre réseau": false,
+          "DREETS même région": true,
+          "DREETS autre région": true,
+          "DRAAF même région": true,
+          "DRAAF autre région": true,
+          "Conseil Régional même région": true,
+          "Conseil Régional autre région": true,
+          "DDETS même département": true,
+          "DDETS autre département": true,
+          "Académie même académie": true,
+          "Académie autre académie": true,
+          "Opérateur public national": true,
+          Administrateur: true,
+        },
+        async (organisation, allowed, organisationLabel) => {
+          const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}/contacts`);
+          if (allowed) {
+            expect(response.status).toStrictEqual(200);
+            expect(response.data).toStrictEqual([
+              {
+                _id: expect.any(String),
+                created_at: expect.any(String),
+                email: "alice@tdb.local",
+                fonction: "Directrice",
+                nom: "Boucher",
+                prenom: "Alice",
+                telephone: "0102030405",
+              },
+              {
+                _id: expect.any(String),
+                created_at: expect.any(String),
+                email: "corinne@tdb.local",
+                fonction: "Service administratif",
+                nom: "Jean",
+                prenom: "Corinne",
+                telephone: "0102030406",
+              },
+
+              // cas spécial quand on a créé l'utilisateur de test dans l'organisation cible
+              ...(organisationLabel === "OF cible"
+                ? [
+                    {
+                      _id: expect.any(String),
+                      created_at: expect.any(String),
+                      email: "OF UAI : 0000000A - SIRET : 00000000000018@tdb.local",
+                      fonction: "Responsable administratif",
+                      nom: "Dupont",
+                      prenom: "Jean",
+                      telephone: "",
+                    },
+                  ]
+                : []),
+            ]);
+          } else {
+            expectForbiddenError(response);
+          }
         }
       );
     });
