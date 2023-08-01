@@ -107,6 +107,10 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const aucunEffectifTransmis = !organisme.first_transmission_date;
   const erpName = ERPS_BY_ID[organisme.erps?.[0]?.toUpperCase() ?? ""]?.name;
 
+  const hasOrganismesFormateurs = organisme.organismesFormateurs && organisme.organismesFormateurs?.length > 0;
+  const indicateursEffectifsPartielsMessage =
+    organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
+
   return (
     <Box>
       <Box
@@ -389,8 +393,19 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
           <>
             <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
               Aperçu de {modePublique ? "ses" : "vos"} effectifs
-              {organisme.organismesFormateurs && organisme.organismesFormateurs?.length > 0 && " et établissements"}
+              {hasOrganismesFormateurs && " et établissements"}
             </Heading>
+
+            {indicateursEffectifsPartielsMessage && (
+              <Ribbons variant="warning" mt="0.5rem">
+                <Text color="grey.800">
+                  <>
+                    Les effectifs sont partiels car certains OFA formateurs de cet OFA sont situés en dehors de votre{" "}
+                    {indicateursEffectifsPartielsMessage}.
+                  </>
+                </Text>
+              </Ribbons>
+            )}
 
             {aucunEffectifTransmis && (
               <Ribbons variant="warning" mt="0.5rem">
@@ -717,4 +732,57 @@ export function getForbiddenErrorText(ctx: AuthContext): string {
       return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre académie.";
   }
   return "";
+}
+
+/**
+ * Retourne le type de restriction sous forme de label si l'organisme contient au moins un organisme formateur en dehors du territoire / réseau
+ * de l'utilisateur authentifié.
+ * @param ctx AuthContext
+ * @param organismesFormateurs
+ * @returns
+ */
+function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Organisme): false | string {
+  if (!organisme || !organisme.organismesFormateurs || organisme.organismesFormateurs.length === 0) {
+    return false;
+  }
+
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      return false;
+    }
+
+    case "TETE_DE_RESEAU":
+      return (
+        organisme.organismesFormateurs.some((organisme) => !organisme.reseaux?.includes(organisation.reseau)) &&
+        "réseau"
+      );
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+      return (
+        organisme.organismesFormateurs.some((organisme) => !organisme.region?.includes(organisation.code_region)) &&
+        "région"
+      );
+    case "DDETS":
+      return (
+        organisme.organismesFormateurs.some(
+          (organisme) => !organisme.departement?.includes(organisation.code_departement)
+        ) && "département"
+      );
+    case "ACADEMIE":
+      return (
+        organisme.organismesFormateurs.some((organisme) => !organisme.academie?.includes(organisation.code_academie)) &&
+        "académie"
+      );
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+      return false;
+    case "ADMINISTRATEUR":
+      return false;
+  }
+  return false; // cas autre
 }
