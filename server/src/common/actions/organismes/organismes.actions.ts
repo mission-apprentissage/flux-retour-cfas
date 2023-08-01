@@ -621,6 +621,13 @@ export async function getOrganismeById(_id: ObjectId) {
   return organisme;
 }
 
+/**
+ * Retourne les informations d'un organisme avec plus ou moins d'informations selon l'utilisateur authentifié.
+ * Les permissions de l'utilisateur authentifié sont également retournées
+ * @param ctx AuthContext
+ * @param organismeId
+ * @returns
+ */
 export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectId): Promise<OrganismeWithPermissions> {
   const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
   const organisme = await organismesDb().findOne(
