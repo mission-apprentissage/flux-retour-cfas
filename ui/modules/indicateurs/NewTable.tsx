@@ -1,7 +1,8 @@
-import { Box, Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Box, Button, Divider, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import {
   ColumnDef,
   PaginationState,
+  Row,
   SortingState,
   flexRender,
   functionalUpdate,
@@ -21,10 +22,14 @@ interface NewTableProps<T> extends SystemProps {
   data: T[];
   noDataMessage?: string;
   loading?: boolean;
+  isRowExpanded?: boolean;
   sortingState?: SortingState;
   paginationState?: PaginationState;
+  variant?: string;
   onSortingChange?: (state: SortingState) => any;
   onPaginationChange?: (state: PaginationState) => any;
+  renderSubComponent?: (row: Row<T>) => React.ReactElement;
+  renderDivider?: () => React.ReactElement;
 }
 
 function NewTable<T>(props: NewTableProps<T>) {
@@ -64,7 +69,7 @@ function NewTable<T>(props: NewTableProps<T>) {
 
   return (
     <>
-      <Table variant="primary">
+      <Table variant={props?.variant || "primary"}>
         <Thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <Tr key={headerGroup.id}>
@@ -119,11 +124,25 @@ function NewTable<T>(props: NewTableProps<T>) {
           ) : (
             table.getRowModel().rows.map((row) => {
               return (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    return <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>;
-                  })}
-                </Tr>
+                <>
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => {
+                      return <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>;
+                    })}
+                  </Tr>
+
+                  {props.isRowExpanded && (
+                    <Tr key={row.id}>
+                      <Td colSpan={row.getVisibleCells().length}>{props?.renderSubComponent?.(row)}</Td>
+                    </Tr>
+                  )}
+
+                  {props.renderDivider && (
+                    <Tr key={row.id}>
+                      <Td colSpan={row.getVisibleCells().length}>{props?.renderDivider?.()}</Td>
+                    </Tr>
+                  )}
+                </>
               );
             })
           )}
