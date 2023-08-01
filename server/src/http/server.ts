@@ -111,7 +111,7 @@ import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import effectif from "./routes/specific.routes/effectif.routes";
-import { getOrganismeDuplicateEffectifs, getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
+import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
 import auth from "./routes/user.routes/auth.routes";
@@ -451,7 +451,7 @@ function setupRoutes(app: Application) {
         "/duplicates",
         authOrgMiddleware("manager"),
         returnResult(async (req, res) => {
-          return await getOrganismeDuplicateEffectifs(res.locals.organismeId);
+          return await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
         })
       )
       .get(

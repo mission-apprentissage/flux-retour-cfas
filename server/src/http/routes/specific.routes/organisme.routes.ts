@@ -3,7 +3,6 @@ import { compact, get } from "lodash-es";
 import { ObjectId } from "mongodb";
 
 import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
-import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions";
 import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
 import { Effectif } from "@/common/model/@types/Effectif";
@@ -91,6 +90,3 @@ export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {
     sousEtablissements,
   };
 }
-
-export const getOrganismeDuplicateEffectifs = async (organismeId: ObjectId) =>
-  getDuplicatesEffectifsForOrganismeId(organismeId);
