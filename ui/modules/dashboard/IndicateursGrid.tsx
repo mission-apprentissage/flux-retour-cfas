@@ -1,26 +1,11 @@
-import { DownloadIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Button,
-  Center,
-  Grid,
-  GridItem,
-  HStack,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Skeleton,
-  Text,
-  Tooltip,
-} from "@chakra-ui/react";
-import { ReactNode, useState } from "react";
+import { Box, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { ReactNode } from "react";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
-import useToaster from "@/hooks/useToaster";
+import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs } from "@/modules/models/indicateurs";
 
@@ -80,82 +65,6 @@ export const typesEffectifNominatif = [
 ] as const;
 export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
 
-interface DownloadMenuButtonProps {
-  type: TypeEffectifNominatif;
-  effectifsFilters: EffectifsFilters;
-  organismeId?: string;
-}
-function DownloadMenuButton(props: DownloadMenuButtonProps) {
-  const { toastError } = useToaster();
-  const [isLoading, setIsLoading] = useState(false);
-
-  function asyncAction(action: () => Promise<void>): () => Promise<void> {
-    return async () => {
-      try {
-        setIsLoading(true);
-        await action();
-      } catch (err) {
-        toastError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  }
-  async function fetchEffectifs() {
-    return await _get(
-      `/api/v1${props.organismeId ? `/organismes/${props.organismeId}` : ""}/indicateurs/effectifs/${props.type}`,
-      {
-        params: convertEffectifsFiltersToQuery(props.effectifsFilters),
-      }
-    );
-  }
-
-  return (
-    <Menu>
-      <MenuButton
-        as={Button}
-        variant={"link"}
-        fontSize="sm"
-        mt="2"
-        borderBottom={isLoading ? "0" : "1px"}
-        borderRadius="0"
-        p="0"
-        _active={{
-          color: "bluefrance",
-        }}
-        isLoading={isLoading}
-        rightIcon={<DownloadIcon />}
-      >
-        Télécharger la liste
-      </MenuButton>
-
-      <MenuList>
-        <MenuItem
-          onClick={asyncAction(async () => {
-            exportDataAsXlsx(
-              `tdb-effectifs-${props.type}-${props.effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
-              await fetchEffectifs(),
-              effectifsExportColumns
-            );
-          })}
-        >
-          Excel (XLSX)
-        </MenuItem>
-        <MenuItem
-          onClick={asyncAction(async () => {
-            exportDataAsCSV(
-              `tdb-effectifs-${props.type}-${props.effectifsFilters.date.toISOString().substring(0, 10)}.csv`,
-              await fetchEffectifs(),
-              effectifsExportColumns
-            );
-          })}
-        >
-          CSV
-        </MenuItem>
-      </MenuList>
-    </Menu>
-  );
-}
 interface IndicateursGridProps {
   indicateursEffectifs: IndicateursEffectifs;
   loading: boolean;
@@ -192,6 +101,24 @@ function IndicateursGrid({
     );
   }
 
+  async function downloadEffectifsNominatifs(
+    type: (typeof typesEffectifNominatif)[number],
+    effectifsFilters: EffectifsFilters
+  ) {
+    const effectifs = await _get(
+      `/api/v1${organismeId ? `/organismes/${organismeId}` : ""}/indicateurs/effectifs/${type}`,
+      {
+        params: convertEffectifsFiltersToQuery(effectifsFilters),
+      }
+    );
+
+    exportDataAsXlsx(
+      `tdb-effectifs-${type}-${effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
+      effectifs,
+      effectifsExportColumns
+    );
+  }
+
   return (
     <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
       <GridItem bg="galt" colSpan={2} rowSpan={2}>
@@ -219,7 +146,12 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("apprenant")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadMenuButton type="apprenant" effectifsFilters={effectifsFilters} organismeId={organismeId} />
+              <DownloadLinkButton
+                fontSize="sm"
+                action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
+              >
+                Télécharger la liste
+              </DownloadLinkButton>
             )}
         </Card>
       </GridItem>
@@ -241,7 +173,12 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("apprenti")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadMenuButton type="apprenti" effectifsFilters={effectifsFilters} organismeId={organismeId} />
+              <DownloadLinkButton
+                fontSize="sm"
+                action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
+              >
+                Télécharger la liste
+              </DownloadLinkButton>
             )}
         </Card>
       </GridItem>
@@ -264,7 +201,12 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("rupturant")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadMenuButton type="rupturant" effectifsFilters={effectifsFilters} organismeId={organismeId} />
+              <DownloadLinkButton
+                fontSize="sm"
+                action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
+              >
+                Télécharger la liste
+              </DownloadLinkButton>
             )}
         </Card>
       </GridItem>
@@ -286,11 +228,12 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("inscritSansContrat")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadMenuButton
-                type="inscritSansContrat"
-                effectifsFilters={effectifsFilters}
-                organismeId={organismeId}
-              />
+              <DownloadLinkButton
+                fontSize="sm"
+                action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
+              >
+                Télécharger la liste
+              </DownloadLinkButton>
             )}
         </Card>
       </GridItem>
@@ -315,7 +258,12 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("abandon")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadMenuButton type="abandon" effectifsFilters={effectifsFilters} organismeId={organismeId} />
+              <DownloadLinkButton
+                fontSize="sm"
+                action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}
+              >
+                Télécharger la liste
+              </DownloadLinkButton>
             )}
         </Card>
       </GridItem>

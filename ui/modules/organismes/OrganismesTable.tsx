@@ -1,5 +1,4 @@
-import { DownloadIcon } from "@chakra-ui/icons";
-import { Box, Button, HStack, Input, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
+import { Box, HStack, Input, Text, Tooltip } from "@chakra-ui/react";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import { isBefore, subMonths } from "date-fns";
 import { useRouter } from "next/router";
@@ -9,8 +8,9 @@ import { convertOrganismeToExport, organismesExportColumns } from "@/common/expo
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDate, formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
-import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { normalize } from "@/common/utils/stringUtils";
+import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
 import NatureOrganismeTag from "@/modules/indicateurs/NatureOrganismeTag";
@@ -249,50 +249,18 @@ function OrganismesTable(props: OrganismesTableProps) {
           flex="1"
           mr="2"
         />
-        <Menu>
-          <MenuButton
-            as={Button}
-            variant={"link"}
-            fontSize="md"
-            mt="2"
-            borderBottom="1px"
-            borderRadius="0"
-            lineHeight="6"
-            p="0"
-            isDisabled={!props.organismes || filteredOrganismes.length === 0}
-            _active={{
-              color: "bluefrance",
-            }}
-            rightIcon={<DownloadIcon />}
-          >
-            Télécharger la liste
-          </MenuButton>
 
-          <MenuList>
-            <MenuItem
-              onClick={() => {
-                exportDataAsXlsx(
-                  `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
-                  filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
-                  organismesExportColumns
-                );
-              }}
-            >
-              Excel (XLSX)
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                exportDataAsCSV(
-                  `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.csv`,
-                  filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
-                  organismesExportColumns
-                );
-              }}
-            >
-              CSV
-            </MenuItem>
-          </MenuList>
-        </Menu>
+        <DownloadLinkButton
+          action={() => {
+            exportDataAsXlsx(
+              `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
+              filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
+              organismesExportColumns
+            );
+          }}
+        >
+          Télécharger la liste
+        </DownloadLinkButton>
       </HStack>
 
       <NewTable

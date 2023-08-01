@@ -28,7 +28,7 @@ import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
-import DownloadLinkButton from "@/components/buttons/DownloadLink";
+import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
