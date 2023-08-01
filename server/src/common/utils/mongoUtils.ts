@@ -1,6 +1,8 @@
 import { ObjectId, WithId } from "mongodb";
 
-// Supprime toutes les attributs à false ou 0 pour éviter une erreur mongodb
+/**
+ * Supprime toutes les attributs à false ou 0 pour éviter une erreur mongodb
+ */
 export function cleanProjection<
   Document = object,
   Projection = Partial<Record<keyof WithId<Document>, any | boolean | 0 | 1>>
@@ -13,6 +15,10 @@ export function cleanProjection<
   }, {} as Projection);
 }
 
+/**
+ * Crée un type qui convertit tous les ObjectId en string.
+ * Pour transformer un type de la BDD en type serialisé par exemple.
+ */
 export type MapObjectIdToString<Type> = Type extends ObjectId
   ? string
   : Type extends Record<any, any>
