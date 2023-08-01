@@ -170,7 +170,6 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
         {organisme?.permissions?.indicateursEffectifs && (
           <>
             {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
-            {/* {canViewOrganismesFormateurs(organisationType) && ( */}
             <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
               Ses indicateurs
             </NavItem>
