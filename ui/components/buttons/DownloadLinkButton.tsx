@@ -29,7 +29,6 @@ function DownloadLinkButton({ children, action, ...props }: Props) {
   return (
     <Button
       variant={"link"}
-      fontSize="sm"
       mt="2"
       borderBottom={isLoading ? "0" : "1px"}
       borderRadius="0"

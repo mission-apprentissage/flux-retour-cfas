@@ -31,6 +31,13 @@ export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
   writeFileXLSX(workbook, filename, { compression: true });
 }
 
+/**
+ * Non utilisé, car les utilisateurs préfèrent toujours les Excel.
+ * @param filename
+ * @param rows
+ * @param exportColumns
+ * @returns
+ */
 export function exportDataAsCSV<Columns extends ReadonlyArray<ExportColumn>>(
   filename: string,
   rows: Record<Columns[number]["key"], any>[],

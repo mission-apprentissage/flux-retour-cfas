@@ -1,19 +1,5 @@
-import { DownloadIcon, EditIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Heading,
-  HStack,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  SimpleGrid,
-  Text,
-  Tooltip,
-} from "@chakra-ui/react";
+import { EditIcon } from "@chakra-ui/icons";
+import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
@@ -21,7 +7,8 @@ import { useMemo } from "react";
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
-import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
+import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
@@ -338,56 +325,20 @@ function IndicateursForm(props: IndicateursFormProps) {
             Répartition des effectifs par organismes
           </Heading>
 
-          <Menu>
-            <MenuButton
-              as={Button}
-              variant={"link"}
-              fontSize="md"
-              mt="2"
-              borderBottom="1px"
-              borderRadius="0"
-              lineHeight="6"
-              p="0"
-              isDisabled={!indicateursEffectifs || indicateursEffectifs.length === 0}
-              _active={{
-                color: "bluefrance",
-              }}
-              rightIcon={<DownloadIcon />}
-            >
-              Télécharger la liste
-            </MenuButton>
-
-            <MenuList>
-              <MenuItem
-                onClick={() => {
-                  const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
-                    ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
-                  );
-                  exportDataAsXlsx(
-                    `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
-                    effectifsWithoutOrganismeId,
-                    indicateursParOrganismeExportColumns
-                  );
-                }}
-              >
-                Excel (XLSX)
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
-                    ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
-                  );
-                  exportDataAsCSV(
-                    `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.csv`,
-                    effectifsWithoutOrganismeId,
-                    indicateursParOrganismeExportColumns
-                  );
-                }}
-              >
-                CSV
-              </MenuItem>
-            </MenuList>
-          </Menu>
+          <DownloadLinkButton
+            action={async () => {
+              const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
+                ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
+              );
+              exportDataAsXlsx(
+                `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
+                effectifsWithoutOrganismeId,
+                indicateursParOrganismeExportColumns
+              );
+            }}
+          >
+            Télécharger la liste
+          </DownloadLinkButton>
         </HStack>
 
         <NewTable
