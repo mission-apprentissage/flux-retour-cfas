@@ -901,7 +901,9 @@ async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
   }
 }
 
-function getOrganismeProjection(infoTransmissionEffectifsCondition: any): Partial<WithId<OrganismeWithPermissions>> {
+export function getOrganismeProjection(
+  infoTransmissionEffectifsCondition: any
+): Partial<WithId<OrganismeWithPermissions>> {
   return cleanProjection<WithId<OrganismeWithPermissions>>({
     _id: 1,
     siret: 1,

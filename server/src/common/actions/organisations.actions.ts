@@ -4,7 +4,6 @@ import { ObjectId, WithId } from "mongodb";
 
 import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE } from "@/common/constants/territoires";
 import logger from "@/common/logger";
-import { Organisme } from "@/common/model/@types/Organisme";
 import { UsersMigration } from "@/common/model/@types/UsersMigration";
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -15,6 +14,8 @@ import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
 import { requireOrganisationOF } from "./helpers/permissions";
+import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
+import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
 
 export async function createOrganisation(organisation: NewOrganisation): Promise<ObjectId> {
@@ -215,23 +216,34 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
   }
 }
 
-export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId<Organisme>> {
+export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>> {
   const organisationOF = requireOrganisationOF(ctx);
 
-  const organisme = await organismesDb().findOne({
-    siret: organisationOF.siret,
-    uai: organisationOF.uai as string,
-  });
+  const organisme = await organismesDb().findOne(
+    {
+      siret: organisationOF.siret,
+      uai: organisationOF.uai as string,
+    },
+    {
+      projection: getOrganismeProjection(true),
+    }
+  );
   if (!organisme) {
     throw Boom.notFound("organisme de l'organisation non trouvé", {
       siret: organisationOF.siret,
       uai: organisationOF.uai,
     });
   }
-  (organisme as any).permissions = {
-    indicateursEffectifs: true,
+  return {
+    ...organisme,
+    permissions: {
+      viewContacts: true,
+      infoTransmissionEffectifs: true,
+      indicateursEffectifs: true,
+      effectifsNominatifs: true,
+      manageEffectifs: true,
+    },
   };
-  return organisme;
 }
 
 export async function getInvitationByToken(token: string): Promise<any> {
