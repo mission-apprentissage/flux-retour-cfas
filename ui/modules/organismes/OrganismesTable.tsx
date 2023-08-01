@@ -73,7 +73,7 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     sortUndefined: 1,
     cell: ({ row, getValue }) => {
       if (!row.original.permissions?.infoTransmissionEffectifs) {
-        return <Text color="grey">Inconnu</Text>;
+        return <Text color="grey">Non disponible</Text>;
       }
       const lastTransmissionDate = getValue();
       if (!lastTransmissionDate) return <Text color="tomato">Ne transmet pas</Text>;
