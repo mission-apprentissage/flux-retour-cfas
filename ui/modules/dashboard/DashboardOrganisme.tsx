@@ -55,7 +55,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
   const { data: contacts } = useQuery<User[]>(
     ["organismes", organisme?._id, "contacts"],
-    () => _get(`/api/v1/organismes/${organisme!._id}/contacts`),
+    () => _get(`/api/v1/organismes/${organisme._id}/contacts`),
     {
       enabled: !!organisme?._id && modePublique,
     }
@@ -64,7 +64,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery<IndicateursEffectifs>(
     ["organismes", organisme?._id, "indicateurs/effectifs"],
     () =>
-      _get(`/api/v1/organismes/${organisme!._id}/indicateurs/effectifs`, {
+      _get(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs`, {
         params: {
           date: new Date(),
         },
@@ -76,7 +76,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
   const { data: indicateursOrganismes } = useQuery<IndicateursOrganismes>(
     ["organismes", organisme?._id, "indicateurs/organismes"],
-    () => _get(`/api/v1/organismes/${organisme!._id}/indicateurs/organismes`),
+    () => _get(`/api/v1/organismes/${organisme._id}/indicateurs/organismes`),
     {
       enabled: !!organisme?._id,
     }
