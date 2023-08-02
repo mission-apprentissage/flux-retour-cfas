@@ -239,7 +239,7 @@ function OrganismesTable(props: OrganismesTableProps) {
 
   return (
     <>
-      <HStack>
+      <HStack mb="4">
         <Input
           type="text"
           name="search_organisme"
@@ -264,7 +264,6 @@ function OrganismesTable(props: OrganismesTableProps) {
       </HStack>
 
       <NewTable
-        mt={4}
         data={filteredOrganismes || []}
         loading={false}
         sortingState={sort}
