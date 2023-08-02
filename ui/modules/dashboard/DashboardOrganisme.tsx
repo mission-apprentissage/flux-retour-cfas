@@ -402,8 +402,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               <Ribbons variant="warning" mt="0.5rem">
                 <Text color="grey.800">
                   <>
-                    Les effectifs sont partiels car certains OFA formateurs de cet OFA sont situés en dehors de votre{" "}
-                    {indicateursEffectifsPartielsMessage}.
+                    Veuillez noter que certaines formations gérées par cet organisme se situent en dehors de votre{" "}
+                    {indicateursEffectifsPartielsMessage}, ce qui peut expliquer l’affichage partiel de données.
                   </>
                 </Text>
               </Ribbons>
