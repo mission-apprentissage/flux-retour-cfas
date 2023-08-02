@@ -131,9 +131,41 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               : `votre espace, ${formatCivility(auth.civility)} ${auth.prenom} ${auth.nom}`}
           </Heading>
 
-          <Text color="bluefrance" fontWeight={700} mt="4" textTransform="uppercase">
-            {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
-          </Text>
+          <Wrap mt="4">
+            <Text color="bluefrance" fontWeight={700} pr="4" textTransform="uppercase">
+              {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
+            </Text>
+            {organisme.permissions?.infoTransmissionEffectifs &&
+              (organisme.erps?.[0] ? (
+                <HStack
+                  paddingX="1w"
+                  paddingY="2px"
+                  borderRadius={6}
+                  fontWeight="bold"
+                  color="#22967e"
+                  backgroundColor="#E5F7F4"
+                >
+                  <Checkbox />
+                  {/* On ne traite pas le cas de multi-erp */}
+                  <Text>
+                    Données transmises
+                    {erpName && ` via ${erpName}`}
+                  </Text>
+                </HStack>
+              ) : (
+                <HStack
+                  paddingX="1w"
+                  paddingY="2px"
+                  borderRadius={6}
+                  fontWeight="bold"
+                  backgroundColor="#E1000F30"
+                  color="#B60000"
+                >
+                  <CloseCircle />
+                  <Text>Données non transmises</Text>
+                </HStack>
+              ))}
+          </Wrap>
 
           {/* DEBUG pour les administrateurs */}
           {organisationType === "ADMINISTRATEUR" && (
@@ -255,37 +287,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   </Badge>
                 </HStack>
               )}
-
-              {organisme.permissions?.infoTransmissionEffectifs &&
-                (organisme.erps?.[0] ? (
-                  <HStack
-                    paddingX="1w"
-                    paddingY="2px"
-                    borderRadius={6}
-                    fontWeight="bold"
-                    color="#22967e"
-                    backgroundColor="#E5F7F4"
-                  >
-                    <Checkbox />
-                    {/* On ne traite pas le cas de multi-erp */}
-                    <Text>
-                      Données transmises
-                      {erpName && ` via ${erpName}`}
-                    </Text>
-                  </HStack>
-                ) : (
-                  <HStack
-                    paddingX="1w"
-                    paddingY="2px"
-                    borderRadius={6}
-                    fontWeight="bold"
-                    backgroundColor="#E1000F30"
-                    color="#B60000"
-                  >
-                    <CloseCircle />
-                    <Text>Données non transmises</Text>
-                  </HStack>
-                ))}
             </Wrap>
 
             {organisme.reseaux && organisme.reseaux?.length > 0 && (
