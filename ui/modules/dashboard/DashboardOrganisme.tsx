@@ -469,30 +469,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   </Heading>
 
                   <Text fontSize="zeta">
-                    Taux de couverture des organismes transmetteurs / non-transmetteurs
-                    <Tooltip
-                      background="bluefrance"
-                      color="white"
-                      label={
-                        <Box padding="1w">
-                          Ce taux traduit le nombre d’organismes dispensant une formation en apprentissage (sauf
-                          responsables) qui transmettent au tableau de bord. Les organismes qui transmettent mais ne
-                          font pas partie du référentiel ne rentrent pas en compte dans ce taux. Il est conseillé
-                          d’avoir un minimum de 80% d’établissements transmetteurs afin de garantir la viabilité des
-                          enquêtes menées auprès de ces derniers.
-                        </Box>
-                      }
-                      aria-label="Informations sur le taux de couverture des organismes"
-                    >
-                      <Box
-                        as="i"
-                        className="ri-information-line"
-                        fontSize="epsilon"
-                        color="grey.500"
-                        marginLeft="1w"
-                        verticalAlign="middle"
-                      />
-                    </Tooltip>
+                    Répartition des OFA par statut de transmission des effectifs au tableau de bord
                   </Text>
 
                   <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
