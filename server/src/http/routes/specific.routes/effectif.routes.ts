@@ -9,7 +9,7 @@ import { InfoSiret } from "@/common/actions/infoSiret.actions-struct";
 import { getUploadByOrgId } from "@/common/actions/uploads.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDb, userEventsDb } from "@/common/model/collections";
 import { schema } from "@/common/model/effectifs.model/effectifs.model";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { algoUAI } from "@/common/utils/uaiUtils";
@@ -150,6 +150,17 @@ export default () => {
     return res.json(buildEffectifResult(effectif));
   });
 
+  router.get("/detail/:id", async ({ params }, res) => {
+    let { id } = await Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validateAsync(params, { abortEarly: false });
+
+    const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
+    return res.json(effectif);
+  });
+
   router.get("/:id/snapshot", async ({ params, query }, res) => {
     const { id, organisme_id } = await Joi.object({
       id: Joi.string().required(),
@@ -255,6 +266,18 @@ export default () => {
     });
 
     return res.json(buildEffectifResult(effectifUpdated));
+  });
+
+  router.delete("/:id", async ({ params }, res) => {
+    let { id } = await Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validateAsync(params, { abortEarly: false });
+
+    await effectifsDb().deleteOne({ _id: new ObjectId(id) });
+
+    return res.json({ status: "OK" });
   });
 
   router.post("/recherche-siret", async ({ body }, res) => {

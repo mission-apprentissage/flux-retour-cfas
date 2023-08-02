@@ -1,6 +1,7 @@
 import { Box, Button, Divider, HStack, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import { Row } from "@tanstack/react-table";
-import React from "react";
+import { string } from "prop-types";
+import React, { Fragment } from "react";
 
 import { DuplicateEffectif } from "@/common/types/duplicatesEffectifs";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
@@ -86,43 +87,39 @@ const EffectifsDoublonsList = ({ data }) => {
 };
 
 const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
   return (
     <Stack spacing={6} mt={4} mb={4} ml={10}>
       {row?.original?.duplicatesIds.map((item, index) => (
-        <>
-          <HStack spacing={4} key={index}>
+        <Fragment key={index}>
+          <HStack spacing={4}>
             <ArrowRightLine />
             <Text>
               <b>{`${transformNomPrenomToPascalCase(row)}`}</b>
             </Text>
             <Text>
-              <i>{`version ${index + 1} (${item})`}</i>
+              <i>{`(${item})`}</i>
             </Text>
 
-            <Button size="xs" variant="secondary" onClick={onOpen}>
-              <Box as="i" className="ri-eye-line" fontSize="epsilon" mr={2} />
-              <Text as="span">Voir en détail</Text>
-            </Button>
-
-            <Button size="xs" variant="secondary" onClick={() => {}}>
-              <Box as="i" className="ri-delete-bin-7-line" fontSize="epsilon" mr={2} />
-              <Text as="span">Supprimer le duplicat</Text>
-            </Button>
+            <EffectifDoublonDetailModalContainer key={`detailModal_${index}`} effectifId={item} />
           </HStack>
-          <EffectifDoublonDetailModal
-            title="Modal test"
-            isOpen={isOpen}
-            onClose={onClose}
-            canBeClosed={false}
-            bgOverlay="rgba(0, 0, 0, 0.28)"
-            currentEffectifId={item}
-            currentApprenantNomPrenom={transformNomPrenomToPascalCase(row)}
-          />
-        </>
+        </Fragment>
       ))}
     </Stack>
+  );
+};
+
+const EffectifDoublonDetailModalContainer = ({ key, effectifId }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <Fragment key={key}>
+      <Button size="xs" variant="secondary" onClick={onOpen}>
+        <Box as="i" className="ri-eye-line" fontSize="epsilon" mr={2} />
+        <Text as="span">Voir en détail</Text>
+      </Button>
+
+      <EffectifDoublonDetailModal isOpen={isOpen} onClose={onClose} effectifId={effectifId} />
+    </Fragment>
   );
 };
 

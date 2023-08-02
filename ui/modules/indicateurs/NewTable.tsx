@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import RowsSkeleton from "@/components/skeletons/RowsSkeleton";
 
@@ -71,12 +71,12 @@ function NewTable<T>(props: NewTableProps<T>) {
     <>
       <Table variant={props?.variant || "primary"}>
         <Thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <Tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
+          {table.getHeaderGroups().map((headerGroup, index) => (
+            <Tr key={`headerGroup_${index}`}>
+              {headerGroup.headers.map((header, index) => {
                 return (
                   <Th
-                    key={header.id}
+                    key={`header${index}`}
                     colSpan={header.colSpan}
                     cursor={header.column.getCanSort() ? "pointer" : "default"}
                     userSelect={header.column.getCanSort() ? "none" : "initial"}
@@ -116,33 +116,37 @@ function NewTable<T>(props: NewTableProps<T>) {
           {props.loading ? (
             <RowsSkeleton nbRows={5} nbColumns={props.columns.length} height="50px" />
           ) : table.getRowModel().rows.length === 0 ? (
-            <Tr _hover={{ backgroundColor: "inherit !important" }}>
-              <Td colSpan={99} h="50px" textAlign="center">
+            <Tr key="noDataRow" _hover={{ backgroundColor: "inherit !important" }}>
+              <Td key="noDataCell" colSpan={99} h="50px" textAlign="center">
                 {props.noDataMessage ?? "Aucun résultat"}
               </Td>
             </Tr>
           ) : (
-            table.getRowModel().rows.map((row) => {
+            table.getRowModel().rows.map((row, index) => {
               return (
-                <>
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>;
+                <Fragment key={`fragment_${index}`}>
+                  <Tr key={`row_${index}`}>
+                    {row.getVisibleCells().map((cell, index) => {
+                      return (
+                        <Td key={`cellContent_${index}`}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </Td>
+                      );
                     })}
                   </Tr>
 
                   {props.isRowExpanded && (
-                    <Tr key={row.id}>
+                    <Tr key={`rowExpanded_${index}`}>
                       <Td colSpan={row.getVisibleCells().length}>{props?.renderSubComponent?.(row)}</Td>
                     </Tr>
                   )}
 
                   {props.renderDivider && (
-                    <Tr key={row.id}>
+                    <Tr key={`rowDivider_${index}`}>
                       <Td colSpan={row.getVisibleCells().length}>{props?.renderDivider?.()}</Td>
                     </Tr>
                   )}
-                </>
+                </Fragment>
               );
             })
           )}
