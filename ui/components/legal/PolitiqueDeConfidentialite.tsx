@@ -180,7 +180,7 @@ const PolitiqueDeConfidentialite = () => {
             Pour les exercer, faites-nous parvenir une demande en précisant la date et l’heure précise de la requête –
             ces éléments sont indispensables pour nous permettre de retrouver votre recherche – par voie électronique à
             l’adresse suivante&nbsp;:{" "}
-            <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance">
+            <Link href={`mailto:${CONTACT_ADDRESS}`} target="_blank" rel="noopener noreferrer" color="bluefrance">
               {CONTACT_ADDRESS}
             </Link>
           </Text>

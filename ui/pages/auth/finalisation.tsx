@@ -77,7 +77,9 @@ const ConfirmationPage = () => {
               </Heading>
             </HStack>
             <Box p={4}>
-              <a href={`mailto:${CONTACT_ADDRESS}`}>{CONTACT_ADDRESS}</a>
+              <a href={`mailto:${CONTACT_ADDRESS}`} target="_blank" rel="noopener noreferrer">
+                {CONTACT_ADDRESS}
+              </a>
             </Box>
           </>
         )}

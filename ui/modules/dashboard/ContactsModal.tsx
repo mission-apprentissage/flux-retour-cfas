@@ -60,7 +60,13 @@ function ContactsModal({ contacts, ...props }: ContactsModalProps) {
                   <br />
                   {contact.fonction}
                   <br />
-                  <Link borderBottom="1px solid" _hover={{ textDecoration: "none" }} href={`mailto:${contact.email}`}>
+                  <Link
+                    borderBottom="1px solid"
+                    _hover={{ textDecoration: "none" }}
+                    href={`mailto:${contact.email}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     {contact.email}
                   </Link>
                   <br />

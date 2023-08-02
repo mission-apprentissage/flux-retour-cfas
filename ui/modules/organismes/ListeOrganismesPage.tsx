@@ -126,6 +126,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           <Box />
           <Link
             href={`mailto:${CONTACT_ADDRESS}?subject=Anomalie TDB [${getOrganisationLabel(auth.organisation)}]`}
+            target="_blank"
+            rel="noopener noreferrer"
             color="action-high-blue-france"
             borderBottom="1px"
             _hover={{ textDecoration: "none" }}

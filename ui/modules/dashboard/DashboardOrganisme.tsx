@@ -335,6 +335,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                         </Text>
                         <Link
                           href={`mailto:${contacts[0].email}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           borderBottom="1px"
                           _hover={{ textDecoration: "none" }}
                           color="action-high-blue-france"
