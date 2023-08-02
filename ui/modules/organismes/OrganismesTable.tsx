@@ -27,7 +27,7 @@ type OrganismeNormalized = Organisme & {
 const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>[] = [
   {
     header: () => "Nom de l’organisme",
-    accessorKey: "nom",
+    accessorKey: "normalizedName",
     cell: ({ row }) => (
       <>
         <Link
