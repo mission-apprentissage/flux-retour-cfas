@@ -1,3 +1,5 @@
+import { Formation } from "@/common/model/@types";
+
 export interface IndicateursEffectifs {
   apprenants: number;
   apprentis: number;
@@ -24,3 +26,5 @@ export interface IndicateursOrganismes {
 }
 
 export type IndicateursOrganismesAvecDepartement = IndicateursOrganismes & { departement: string };
+
+export type IndicateursEffectifsAvecFormation = IndicateursEffectifs & { formation: Formation };
