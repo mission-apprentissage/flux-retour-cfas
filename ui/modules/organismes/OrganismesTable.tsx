@@ -1,6 +1,5 @@
 import { Box, HStack, Input, Text, Tooltip } from "@chakra-ui/react";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
-import { isBefore, subMonths } from "date-fns";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 
@@ -18,7 +17,7 @@ import NewTable from "@/modules/indicateurs/NewTable";
 import { convertPaginationInfosToQuery } from "@/modules/models/pagination";
 import { ArrowDropRightLine } from "@/theme/components/icons";
 
-import InfoTextTransmissionDonnees from "./InfoTextTransmissionDonnees";
+import InfoTransmissionDonnees from "./InfoTransmissionDonnees";
 
 type OrganismeNormalized = Organisme & {
   normalizedName: string;
@@ -74,7 +73,7 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     header: () => "Transmission au tdb",
     sortUndefined: 1,
     cell: ({ row }) => (
-      <InfoTextTransmissionDonnees
+      <InfoTransmissionDonnees
         lastTransmissionDate={row.original.last_transmission_date}
         permissionInfoTransmissionEffectifs={row.original.permissions?.infoTransmissionEffectifs}
       />
@@ -274,10 +273,4 @@ export default OrganismesTable;
 
 function isSortingState(value: any): value is SortingState {
   return Array.isArray(value) && value.every((item) => typeof item === "object" && "id" in item && "desc" in item);
-}
-
-function isMoreThanOrEqualOneMonthAgo(date: Date | string) {
-  const oneMonthAgo = subMonths(new Date(), 1);
-  const dateAsDate = typeof date === "string" ? new Date(date) : date;
-  return isBefore(dateAsDate, oneMonthAgo) || dateAsDate.getTime() === oneMonthAgo.getTime();
 }

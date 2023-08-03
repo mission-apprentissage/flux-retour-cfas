@@ -38,7 +38,7 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation, getOrganisationTypeFromNature } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
-import BadgeTransmissionDonnees from "../organismes/BadgeTransmissionDonnees";
+import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
 import IndicateursGrid from "./IndicateursGrid";
@@ -162,7 +162,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
             </Text>
             {organisme.permissions?.infoTransmissionEffectifs && (
-              <BadgeTransmissionDonnees
+              <InfoTransmissionDonnees
+                modeBadge={true}
                 lastTransmissionDate={organisme.last_transmission_date}
                 permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
               />
