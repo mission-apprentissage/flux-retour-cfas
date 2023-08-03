@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
-import { formatDate, formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
+import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { normalize } from "@/common/utils/stringUtils";
 import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
@@ -17,6 +17,8 @@ import NatureOrganismeTag from "@/modules/indicateurs/NatureOrganismeTag";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { convertPaginationInfosToQuery } from "@/modules/models/pagination";
 import { ArrowDropRightLine } from "@/theme/components/icons";
+
+import InfoTextTransmissionDonnees from "./InfoTextTransmissionDonnees";
 
 type OrganismeNormalized = Organisme & {
   normalizedName: string;
@@ -71,22 +73,12 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     accessorKey: "last_transmission_date",
     header: () => "Transmission au tdb",
     sortUndefined: 1,
-    cell: ({ row, getValue }) => {
-      if (!row.original.permissions?.infoTransmissionEffectifs) {
-        return <Text color="grey">Non disponible</Text>;
-      }
-      const lastTransmissionDate = getValue();
-      if (!lastTransmissionDate) return <Text color="tomato">Ne transmet pas</Text>;
-      if (isMoreThanOrEqualOneMonthAgo(lastTransmissionDate)) {
-        return (
-          <Text color="orange">
-            Ne transmet plus <br />
-            depuis le {formatDateNumericDayMonthYear(lastTransmissionDate)}
-          </Text>
-        );
-      }
-      return <Text color="green">{formatDateNumericDayMonthYear(lastTransmissionDate)}</Text>;
-    },
+    cell: ({ row }) => (
+      <InfoTextTransmissionDonnees
+        lastTransmissionDate={row.original.last_transmission_date}
+        permissionInfoTransmissionEffectifs={row.original.permissions?.infoTransmissionEffectifs}
+      />
+    ),
   },
   {
     accessorKey: "ferme",

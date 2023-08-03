@@ -1,17 +1,11 @@
 import { WarningTwoIcon } from "@chakra-ui/icons";
 import { Box, HStack, SystemProps, Text } from "@chakra-ui/react";
-import { isBefore, subMonths, subWeeks } from "date-fns";
 
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import { Checkbox } from "@/theme/components/icons";
 import { CloseCircle } from "@/theme/components/icons/CloseCircle";
 
-type BadgeState =
-  | "donnees_non_disponibles"
-  | "donnees_non_transmises"
-  | "donnees_obsoletes"
-  | "donnees_anciennes"
-  | "donnees_recentes";
+import { getTranmissionDonneesState } from "./transmissionDonnees";
 
 interface BadgeTransmissionDonneesProps extends SystemProps {
   lastTransmissionDate?: string;
@@ -22,15 +16,7 @@ function BadgeTransmissionDonnees({
   permissionInfoTransmissionEffectifs,
   ...props
 }: BadgeTransmissionDonneesProps) {
-  const state: BadgeState = !permissionInfoTransmissionEffectifs
-    ? "donnees_non_disponibles"
-    : !lastTransmissionDate
-    ? "donnees_non_transmises"
-    : isBefore(new Date(lastTransmissionDate), subMonths(new Date(), 3))
-    ? "donnees_obsoletes"
-    : isBefore(new Date(lastTransmissionDate), subWeeks(new Date(), 1))
-    ? "donnees_anciennes"
-    : "donnees_recentes";
+  const state = getTranmissionDonneesState(lastTransmissionDate, permissionInfoTransmissionEffectifs);
 
   switch (state) {
     case "donnees_non_disponibles":
@@ -40,6 +26,7 @@ function BadgeTransmissionDonnees({
           paddingY="2px"
           borderRadius={6}
           fontWeight="bold"
+          lineHeight="2em"
           backgroundColor="dgalt"
           color="mgalt"
           {...props}
@@ -57,6 +44,7 @@ function BadgeTransmissionDonnees({
           paddingY="2px"
           borderRadius={6}
           fontWeight="bold"
+          lineHeight="2em"
           backgroundColor="#E1000F30"
           color="error"
           {...props}
