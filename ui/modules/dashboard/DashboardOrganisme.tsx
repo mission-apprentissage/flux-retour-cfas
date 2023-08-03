@@ -1,4 +1,4 @@
-import { ArrowForwardIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, ViewIcon } from "@chakra-ui/icons";
 import {
   Badge,
   Box,
@@ -129,6 +129,26 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
         px="8"
       >
         <Container maxW="xl" p="8">
+          {isOFviewingItsPublicPage && (
+            <HStack
+              paddingX="1w"
+              paddingY="2px"
+              display="inline-flex"
+              borderRadius={6}
+              backgroundColor="#0000911A"
+              color="bluefrance"
+              mb="6"
+            >
+              <ViewIcon boxSize="6" />
+              <Box>
+                <Text fontSize="epsilon" fontWeight="bold">
+                  Ceci est votre établissement
+                </Text>
+                <Text fontSize="small">Vue en page publique</Text>
+              </Box>
+            </HStack>
+          )}
+
           <Heading textStyle="h2" color="grey.800" size="md">
             <DashboardWelcome mr="2" />
             Bienvenue sur{" "}
@@ -148,8 +168,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               />
             )}
           </HStack>
-
-          {isOFviewingItsPublicPage && <>C'est votre page publique</>}
 
           {/* DEBUG pour les administrateurs */}
           {organisationType === "ADMINISTRATEUR" && (
