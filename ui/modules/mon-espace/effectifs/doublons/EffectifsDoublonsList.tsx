@@ -101,7 +101,7 @@ const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
                 <i>{`créé le ${prettyPrintDate(item.created_at)}`}</i>
               </Text>
 
-              <EffectifDoublonDetailModalContainer key={`detailModal_${index}`} effectifId={item.id} />
+              <EffectifDoublonDetailModalContainer index={index} effectifId={item.id} />
 
               {index === 0 && (
                 <HStack color="warning">
@@ -116,11 +116,11 @@ const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
   );
 };
 
-const EffectifDoublonDetailModalContainer = ({ key, effectifId }) => {
+const EffectifDoublonDetailModalContainer = ({ index, effectifId }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Fragment key={key}>
+    <Fragment key={`detailModal_${index}`}>
       <Button size="xs" variant="secondary" onClick={onOpen}>
         <Box as="i" className="ri-eye-line" fontSize="epsilon" mr={2} />
         <Text as="span">Voir en détail</Text>

@@ -451,8 +451,7 @@ function setupRoutes(app: Application) {
         "/duplicates",
         authOrgMiddleware("manager"),
         returnResult(async (req, res) => {
-          const result = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
-          return result;
+          return await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
         })
       )
       .get(

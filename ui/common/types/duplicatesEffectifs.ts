@@ -6,6 +6,5 @@ export type DuplicateEffectif = {
     annee_scolaire: string;
     formation_cfd: string;
   };
-  count: number;
   duplicates: [{ id: string; created_at: Date }];
 };
