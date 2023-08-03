@@ -16,12 +16,6 @@ const sampleOrganisme: Organisme = {
   ...createRandomOrganisme({ siret: `${TEST_SIREN}00016` }),
 };
 
-const sampleOrganisme2Id = new ObjectId(id(2));
-const sampleOrganisme2: Organisme = {
-  _id: sampleOrganisme2Id,
-  ...createRandomOrganisme({ siret: `${TEST_SIREN}00017` }),
-};
-
 /**
  * Fonction utilitaire d'ajout en doublon d'effectif
  * @param sampleEffectif
