@@ -697,19 +697,19 @@ export function getForbiddenErrorText(ctx: AuthContext): string {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
-      return "Vous n'avez pas accès aux données de cet organisme.";
+      return "Vous n’avez pas accès aux données de cet organisme.";
 
     case "TETE_DE_RESEAU":
-      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre réseau.";
+      return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre réseau.";
 
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
-      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre région.";
+      return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre région.";
     case "DDETS":
-      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre département.";
+      return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre département.";
     case "ACADEMIE":
-      return "Vous n'avez pas accès aux données de cet organisme car il n'est pas dans votre académie.";
+      return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre académie.";
   }
   return "";
 }
