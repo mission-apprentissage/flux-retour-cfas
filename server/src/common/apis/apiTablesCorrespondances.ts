@@ -1,6 +1,7 @@
 import logger from "@/common/logger";
 import config from "@/config";
 
+import TabCoCfdInfo from "./@types/TabCoCfdInfo";
 import TabCoCodePostalInfo from "./@types/TabCoCodePostalInfo";
 import getApiClient from "./client";
 
@@ -15,7 +16,7 @@ const client = getApiClient({ baseURL: API_ENDPOINT });
  * @param {string} cfd
  * @returns {Promise<(import("./@types/TabCoCfdInfo.js").default)['result']|null>}
  */
-export const getCfdInfo = async (cfd) => {
+export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
   try {
     const { data } = await client.post("/cfd", { cfd });
     return data.result;
