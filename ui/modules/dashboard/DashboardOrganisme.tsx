@@ -77,7 +77,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
         },
       }),
     {
-      enabled: !!organisme?._id,
+      enabled: !!organisme?._id && organisme?.permissions?.indicateursEffectifs,
     }
   );
 
