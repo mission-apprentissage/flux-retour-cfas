@@ -50,7 +50,7 @@ describe("Test des actions Effectifs Duplicates", () => {
       // Vérification de la récupération d'une liste avec un doublon identifié 2 fois sur les champs de la clé d'unicité
       assert.equal(duplicates.length, 1);
       assert.equal(duplicates[0].count, 2);
-      assert.equal(duplicates[0].duplicatesIds.length, 2);
+      assert.equal(duplicates[0].duplicates.length, 2);
 
       assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
       assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
@@ -78,7 +78,7 @@ describe("Test des actions Effectifs Duplicates", () => {
       // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
       assert.equal(duplicates.length, 1);
       assert.equal(duplicates[0].count, 5);
-      assert.equal(duplicates[0].duplicatesIds.length, 5);
+      assert.equal(duplicates[0].duplicates.length, 5);
 
       assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
       assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
@@ -97,7 +97,7 @@ describe("Test des actions Effectifs Duplicates", () => {
       // Vérification de la récupération d'une liste avec un doublon identifié 2 fois sur les champs de la clé d'unicité
       assert.equal(duplicates.length, 1);
       assert.equal(duplicates[0].count, 2);
-      assert.equal(duplicates[0].duplicatesIds.length, 2);
+      assert.equal(duplicates[0].duplicates.length, 2);
 
       assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
       assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
@@ -119,7 +119,7 @@ describe("Test des actions Effectifs Duplicates", () => {
       // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
       assert.equal(duplicates.length, 1);
       assert.equal(duplicates[0].count, 5);
-      assert.equal(duplicates[0].duplicatesIds.length, 5);
+      assert.equal(duplicates[0].duplicates.length, 5);
 
       assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
       assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), "jeanédouard"); // Transformation du prenom_apprenant en champ normalisé
@@ -138,7 +138,7 @@ describe("Test des actions Effectifs Duplicates", () => {
       // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
       assert.equal(duplicates.length, 1);
       assert.equal(duplicates[0].count, 5);
-      assert.equal(duplicates[0].duplicatesIds.length, 5);
+      assert.equal(duplicates[0].duplicates.length, 5);
 
       assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), "mbappé"); // Transformation du nom en champ normalisé
       assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
