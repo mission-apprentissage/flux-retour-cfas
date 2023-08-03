@@ -1,4 +1,4 @@
-import { Box, HStack, Input, Text, Tooltip } from "@chakra-ui/react";
+import { Box, HStack, Input, ListItem, Text, Tooltip, UnorderedList } from "@chakra-ui/react";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
@@ -70,7 +70,38 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
   },
   {
     accessorKey: "last_transmission_date",
-    header: () => "Transmission au tdb",
+    header: () => (
+      <>
+        Transmission au tableau
+        <Tooltip
+          background="bluefrance"
+          color="white"
+          label={
+            <Box padding="1w">
+              <b>État de la donnée</b>
+              <Text as="p">5 états concernant la donnée sont identifiés&nbsp;:</Text>
+              <UnorderedList>
+                <ListItem>l’OFA transmet des données depuis moins d’1 semaine (vert)</ListItem>
+                <ListItem>l’OFA transmet des données depuis moins de 3 mois (orange)</ListItem>
+                <ListItem>l’OFA transmet des données considérées obsolètes (depuis plus de 3 mois - rouge)</ListItem>
+                <ListItem>l’OFA ne transmet aucune donnée</ListItem>
+                <ListItem>Non-disponible&nbsp;: Les droits d’accès à cette information sont restreints.</ListItem>
+              </UnorderedList>
+            </Box>
+          }
+          aria-label="État de la donnée."
+        >
+          <Box
+            as="i"
+            className="ri-information-line"
+            fontSize="epsilon"
+            color="grey.500"
+            marginLeft="1v"
+            verticalAlign="middle"
+          />
+        </Tooltip>
+      </>
+    ),
     sortUndefined: 1,
     cell: ({ row }) => (
       <InfoTransmissionDonnees
