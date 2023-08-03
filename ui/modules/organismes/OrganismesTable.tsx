@@ -195,7 +195,7 @@ interface OrganismesTableProps {
   modeNonFiable?: boolean;
 }
 function OrganismesTable(props: OrganismesTableProps) {
-  const defaultSort: SortingState = [{ desc: false, id: "nom" }];
+  const defaultSort: SortingState = [{ desc: false, id: "normalizedName" }];
   const router = useRouter();
   const [searchValue, setSearchValue] = useState<string>(String(router.query.search ?? ""));
   const [sort, setSort] = useState<SortingState>(defaultSort);
