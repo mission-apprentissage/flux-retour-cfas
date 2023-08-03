@@ -245,7 +245,7 @@ function OrganismesTable(props: OrganismesTableProps) {
           name="search_organisme"
           placeholder="Rechercher un organisme par nom, UAI, SIRET ou ville (indiquez au moins deux caractères)"
           value={searchValue}
-          onChange={(event) => setSearchValue(event.target.value.trim())}
+          onChange={(event) => setSearchValue(event.target.value)}
           flex="1"
           mr="2"
         />
