@@ -71,8 +71,8 @@ function PublicLandingPage() {
     <SimplePage title="Tableau de bord de l’apprentissage">
       <Center bg="#F5F5FE" color="plaininfo" h="14" fontWeight="bold" lineHeight="1.2em">
         <Image src="/images/landing-cards/info.svg" alt="" userSelect="none" mr="3" />
-        Taux de fiabilisation des données exposées sur le tableau de bord&nbsp;: +&nbsp;90%. Si vous constatez des
-        erreurs résiduelles, merci de nous le signaler.
+        Informations actualisées ! Consultez les nouveaux effectifs d&apos;apprenants pour l&apos;année scolaire
+        démarrant en août, sur le tableau de bord de l&apos;apprentissage.
       </Center>
 
       <Box
