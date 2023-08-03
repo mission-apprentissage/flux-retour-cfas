@@ -22,6 +22,7 @@ export async function hydrateEffectifsFormationsNiveaux() {
 
   let nbEffectifsUpdated = 0;
   let nbEffectifsNotUpdated = 0;
+  let cfdNotFound: string[] = [];
 
   logger.info(`${effectifsCfdWithoutNiveau.length} codes CFD avec niveau vide dans les effectifs`);
 
@@ -46,6 +47,7 @@ export async function hydrateEffectifsFormationsNiveaux() {
         );
         nbEffectifsUpdated += modifiedCount;
       } else {
+        cfdNotFound.push(currentCfd);
         logger.error(`Aucune info du CFD ${currentCfd} trouvée dans formationsCatalogue !`);
         nbEffectifsNotUpdated++;
       }
@@ -58,8 +60,5 @@ export async function hydrateEffectifsFormationsNiveaux() {
   logger.info(`${nbEffectifsUpdated} effectifs avec niveau vide mis à jour.`);
   logger.info(`${nbEffectifsNotUpdated} effectifs non mis à jour !`);
 
-  return {
-    nbEffectifsUpdated,
-    nbEffectifsNotUpdated,
-  };
+  return { cfdNotFound, nbEffectifsUpdated, nbEffectifsNotUpdated };
 }
