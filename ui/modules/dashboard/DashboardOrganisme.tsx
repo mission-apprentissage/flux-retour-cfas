@@ -32,6 +32,7 @@ import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
+import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { Checkbox } from "@/theme/components/icons";
 import { CloseCircle } from "@/theme/components/icons/CloseCircle";
@@ -52,6 +53,14 @@ interface Props {
 const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const router = useRouter();
   const { auth, organisationType } = useAuth();
+
+  const { organisme: ownOrganisme } = useOrganisationOrganisme(
+    modePublique &&
+      (organisationType === "ORGANISME_FORMATION_FORMATEUR" ||
+        organisationType === "ORGANISME_FORMATION_RESPONSABLE" ||
+        organisationType === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR")
+  );
+  const isOFviewingItsPublicPage = modePublique && organisme?._id === ownOrganisme?._id;
 
   const { data: contacts } = useQuery<User[]>(
     ["organismes", organisme?._id, "contacts"],
@@ -166,6 +175,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 </HStack>
               ))}
           </Wrap>
+
+          {isOFviewingItsPublicPage && <>C'est votre page publique</>}
 
           {/* DEBUG pour les administrateurs */}
           {organisationType === "ADMINISTRATEUR" && (

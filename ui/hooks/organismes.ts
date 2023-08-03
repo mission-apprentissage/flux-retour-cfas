@@ -42,12 +42,14 @@ export function useOrganisme(organismeId: string | undefined | null) {
 }
 
 // récupère l'organisme lié à l'organisation pour un OF
-export function useOrganisationOrganisme() {
+export function useOrganisationOrganisme(enabled?: boolean) {
   const {
     data: organisme,
     isLoading,
     error,
-  } = useQuery<Organisme, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {});
+  } = useQuery<Organisme, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {
+    enabled: enabled ?? true,
+  });
 
   return {
     organisme,
