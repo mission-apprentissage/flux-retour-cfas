@@ -18,7 +18,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
-import { ERPS_BY_ID } from "@/common/constants/erps";
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
@@ -34,13 +33,12 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
-import { Checkbox } from "@/theme/components/icons";
-import { CloseCircle } from "@/theme/components/icons/CloseCircle";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation, getOrganisationTypeFromNature } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
+import BadgeTransmissionDonnees from "../organismes/BadgeTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
 import IndicateursGrid from "./IndicateursGrid";
@@ -114,7 +112,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   }
 
   const aucunEffectifTransmis = !organisme.first_transmission_date;
-  const erpName = ERPS_BY_ID[organisme.erps?.[0]?.toUpperCase() ?? ""]?.name;
 
   const hasOrganismesFormateurs = organisme.organismesFormateurs && organisme.organismesFormateurs?.length > 0;
   const indicateursEffectifsPartielsMessage =
@@ -140,41 +137,17 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               : `votre espace, ${formatCivility(auth.civility)} ${auth.prenom} ${auth.nom}`}
           </Heading>
 
-          <Wrap mt="4">
-            <Text color="bluefrance" fontWeight={700} pr="4" textTransform="uppercase">
+          <HStack mt="4" gap="4" alignItems="center">
+            <Text color="bluefrance" fontWeight={700} textTransform="uppercase">
               {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
             </Text>
-            {organisme.permissions?.infoTransmissionEffectifs &&
-              (organisme.erps?.[0] ? (
-                <HStack
-                  paddingX="1w"
-                  paddingY="2px"
-                  borderRadius={6}
-                  fontWeight="bold"
-                  color="#22967e"
-                  backgroundColor="#E5F7F4"
-                >
-                  <Checkbox />
-                  {/* On ne traite pas le cas de multi-erp */}
-                  <Text>
-                    Données transmises
-                    {erpName && ` via ${erpName}`}
-                  </Text>
-                </HStack>
-              ) : (
-                <HStack
-                  paddingX="1w"
-                  paddingY="2px"
-                  borderRadius={6}
-                  fontWeight="bold"
-                  backgroundColor="#E1000F30"
-                  color="#B60000"
-                >
-                  <CloseCircle />
-                  <Text>Données non transmises</Text>
-                </HStack>
-              ))}
-          </Wrap>
+            {organisme.permissions?.infoTransmissionEffectifs && (
+              <BadgeTransmissionDonnees
+                lastTransmissionDate={organisme.last_transmission_date}
+                permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
+              />
+            )}
+          </HStack>
 
           {isOFviewingItsPublicPage && <>C'est votre page publique</>}
 

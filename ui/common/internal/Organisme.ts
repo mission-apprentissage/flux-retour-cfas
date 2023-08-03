@@ -925,11 +925,11 @@ export interface Organisme {
   /**
    * Date de la première transmission de données
    */
-  first_transmission_date?: Date;
+  first_transmission_date?: string;
   /**
    * Date de la dernière transmission de données
    */
-  last_transmission_date?: Date;
+  last_transmission_date?: string;
   /**
    * Est dans le referentiel onisep des organismes
    */
@@ -952,7 +952,7 @@ export interface Organisme {
   api_key?: string;
   api_uai?: string;
   api_siret?: string;
-  api_configuration_date?: Date;
+  api_configuration_date?: string;
   /**
    * Statut de fiabilisation de l'organisme
    */
@@ -975,11 +975,11 @@ export interface Organisme {
   /**
    * Date de mise à jour en base de données
    */
-  updated_at?: Date;
+  updated_at?: string;
   /**
    * Date d'ajout en base de données
    */
-  created_at?: Date;
+  created_at?: string;
 
   permissions?: {
     viewContacts: boolean;
