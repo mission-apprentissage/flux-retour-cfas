@@ -1,10 +1,6 @@
 import { getNiveauFormationFromLibelle } from "@/common/actions/formations.actions";
-import TabCoCfdInfo from "@/common/apis/@types/TabCoCfdInfo";
-import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
 import logger from "@/common/logger";
-import { effectifsDb } from "@/common/model/collections";
-
-const DELAY_BETWEEN_API_CALLS = 250;
+import { effectifsDb, formationsCatalogueDb } from "@/common/model/collections";
 
 export async function hydrateEffectifsFormationsNiveaux() {
   logger.info("Hydrating effectifs.formation.niveaux ...");
@@ -32,9 +28,9 @@ export async function hydrateEffectifsFormationsNiveaux() {
   // Pour chaque CFD qui a son niveau vide on appelle l'API TCO et on update tous les effectifs concernés avec le niveau récupéré
   for (const currentCfd of effectifsCfdWithoutNiveau) {
     try {
-      const cfdInfo: TabCoCfdInfo | null = await getCfdInfo(currentCfd);
+      const formationInfo = await formationsCatalogueDb().findOne({ cfd: currentCfd });
 
-      if (cfdInfo) {
+      if (formationInfo) {
         // On MAJ le niveau pour les effectifs liés à ce CFD et n'ayant pas niveau
         const { modifiedCount } = await effectifsDb().updateMany(
           {
@@ -43,19 +39,16 @@ export async function hydrateEffectifsFormationsNiveaux() {
           },
           {
             $set: {
-              "formation.niveau": getNiveauFormationFromLibelle(cfdInfo.niveau),
-              "formation.niveau_libelle": cfdInfo.niveau,
+              "formation.niveau": getNiveauFormationFromLibelle(formationInfo.niveau),
+              "formation.niveau_libelle": formationInfo.niveau,
             },
           }
         );
         nbEffectifsUpdated += modifiedCount;
       } else {
-        logger.error(`Aucune info du CFD ${currentCfd} renvoyée par l'API TCO !`);
+        logger.error(`Aucune info du CFD ${currentCfd} trouvée dans formationsCatalogue !`);
         nbEffectifsNotUpdated++;
       }
-
-      // Délai entre les appels API
-      await new Promise((r) => setTimeout(r, DELAY_BETWEEN_API_CALLS));
     } catch (err) {
       nbEffectifsNotUpdated++;
       logger.error(JSON.stringify(err));
