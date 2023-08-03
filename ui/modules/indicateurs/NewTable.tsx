@@ -1,4 +1,4 @@
-import { Box, Button, Divider, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Box, Button, HStack, Select, SystemProps, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import {
   ColumnDef,
   PaginationState,

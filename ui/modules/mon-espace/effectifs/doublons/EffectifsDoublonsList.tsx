@@ -1,10 +1,20 @@
-import { Box, Button, Divider, HStack, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import {
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Button,
+  Divider,
+  HStack,
+  Stack,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { Row } from "@tanstack/react-table";
-import { string } from "prop-types";
 import React, { Fragment } from "react";
 
 import { DuplicateEffectif } from "@/common/types/duplicatesEffectifs";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
+import { formatDateDayMonthYear, prettyPrintDate } from "@/common/utils/dateUtils";
 import { toPascalCase } from "@/common/utils/stringUtils";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { Alert, ArrowRightLine } from "@/theme/components/icons";
@@ -73,11 +83,7 @@ const EffectifsDoublonsList = ({ data }) => {
           cell: ({ row }) => (
             <HStack>
               <Alert mt={2} />
-              <Text
-                fontSize="1rem"
-                pt={2}
-                whiteSpace="nowrap"
-              >{`${row?.original?.duplicatesIds.length} duplicats`}</Text>
+              <Text fontSize="1rem" pt={2} whiteSpace="nowrap">{`${row?.original?.duplicates.length} duplicats`}</Text>
             </HStack>
           ),
         },
@@ -89,21 +95,34 @@ const EffectifsDoublonsList = ({ data }) => {
 const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
   return (
     <Stack spacing={6} mt={4} mb={4} ml={10}>
-      {row?.original?.duplicatesIds.map((item, index) => (
-        <Fragment key={index}>
-          <HStack spacing={4}>
-            <ArrowRightLine />
-            <Text>
-              <b>{`${transformNomPrenomToPascalCase(row)}`}</b>
-            </Text>
-            <Text>
-              <i>{`(${item})`}</i>
-            </Text>
+      {row?.original?.duplicates
+        // Tri par date de création pour proposition de suppression du moins récent
+        ?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        .map((item, index) => (
+          <Fragment key={index}>
+            <HStack spacing={4}>
+              <ArrowRightLine />
+              <Text>
+                <b>{`${transformNomPrenomToPascalCase(row)}`}</b>
+              </Text>
+              <Text>
+                <i>{`(${item.id})`}</i>
+              </Text>
+              <Text>
+                <i>{`créé le ${prettyPrintDate(item.created_at)}`}</i>
+              </Text>
 
-            <EffectifDoublonDetailModalContainer key={`detailModal_${index}`} effectifId={item} />
-          </HStack>
-        </Fragment>
-      ))}
+              <EffectifDoublonDetailModalContainer key={`detailModal_${index}`} effectifId={item.id} />
+
+              {index === 0 && (
+                <HStack color="warning">
+                  <Alert boxSize={4} mt={1} />
+                  <Text fontSize="0.7rem"> Duplicat le plus ancien (à supprimer éventuellement)</Text>
+                </HStack>
+              )}
+            </HStack>
+          </Fragment>
+        ))}
     </Stack>
   );
 };

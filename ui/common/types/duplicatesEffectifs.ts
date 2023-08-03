@@ -7,5 +7,5 @@ export type DuplicateEffectif = {
     formation_cfd: string;
   };
   count: number;
-  duplicatesIds: string[];
+  duplicates: [{ id: string; created_at: Date }];
 };

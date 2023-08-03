@@ -9,7 +9,7 @@ import { InfoSiret } from "@/common/actions/infoSiret.actions-struct";
 import { getUploadByOrgId } from "@/common/actions/uploads.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
-import { effectifsDb, userEventsDb } from "@/common/model/collections";
+import { effectifsDb } from "@/common/model/collections";
 import { schema } from "@/common/model/effectifs.model/effectifs.model";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { algoUAI } from "@/common/utils/uaiUtils";
