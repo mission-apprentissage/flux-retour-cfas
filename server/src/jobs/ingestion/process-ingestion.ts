@@ -35,6 +35,12 @@ const logger = parentLogger.child({
   module: "processor",
 });
 
+type ProcessItemsResult = {
+  totalProcessed: number;
+  totalValidItems: number;
+  totalInvalidItems: number;
+};
+
 type EffectifQueueProcessorOptions = {
   force?: boolean;
   limit?: number;
@@ -48,19 +54,20 @@ export const startEffectifQueueProcessor = async () => {
   logger.warn("starting EffectifQueue processor");
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const hasProcessedItems = await processEffectifsQueue();
-    if (!hasProcessedItems) {
+    const processingResult = await processEffectifsQueue();
+    if (processingResult.totalProcessed > 0) {
       await sleep(5_000);
     }
   }
 };
+// {"totalInvalidItems": 1, "totalProcessed": 1, "totalValidItems": 0}
 
 /**
  * Fonction de traitement des 100 premiers éléments de la file d'attente des effectifs
  * @param options
  * @returns true si des effectifs ont été traités
  */
-export async function processEffectifsQueue(options?: EffectifQueueProcessorOptions): Promise<boolean> {
+export async function processEffectifsQueue(options?: EffectifQueueProcessorOptions): Promise<ProcessItemsResult> {
   const filter: Filter<EffectifsQueue> = {
     ...(options?.force ? {} : { processed_at: { $exists: false } }),
     ...(options?.since ? { created_at: { $gt: options.since } } : {}),
@@ -74,14 +81,16 @@ export async function processEffectifsQueue(options?: EffectifQueueProcessorOpti
 
   logger.info({ filter, count: itemsToProcess.length, total }, "traitement des effectifsQueue");
 
-  await PromisePool.withConcurrency(10)
+  const res = await PromisePool.withConcurrency(10)
     .for(itemsToProcess)
-    .process(async (effectifQueued) => {
-      await processEffectifQueueItem(effectifQueued);
-      // TODO peut-être try catch ici, dépendra de la CLI pour un effectif
-    });
+    .process(async (effectifQueued) => processEffectifQueueItem(effectifQueued));
+  const totalValidItems = res.results.filter((valid) => valid).length;
 
-  return itemsToProcess.length > 0;
+  return {
+    totalProcessed: itemsToProcess.length,
+    totalValidItems: totalValidItems,
+    totalInvalidItems: itemsToProcess.length - totalValidItems,
+  };
 }
 
 export async function processEffectifQueueById(effectifQueueId: ObjectId): Promise<void> {
@@ -92,7 +101,12 @@ export async function processEffectifQueueById(effectifQueueId: ObjectId): Promi
   await processEffectifQueueItem(effectifQueue);
 }
 
-async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): Promise<void> {
+/**
+ *
+ * @param effectifQueue
+ * @returns true si l'effectif est valide
+ */
+async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): Promise<boolean> {
   let itemLogger = logger.child({
     _id: effectifQueue._id,
     siret: effectifQueue.siret_etablissement,
@@ -130,7 +144,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       effectifQueueUpdate = {
         effectif_id: effectifId,
         organisme_id: organisme._id,
-        validation_errors: [],
+        // validation_errors: [],
       };
     } else {
       itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
@@ -157,6 +171,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
 
     // TODO infos sur le siret corrigé
     itemLogger.info({ duration: Date.now() - start }, "processed item");
+    return true;
   } catch (err: any) {
     itemLogger.error({ duration: Date.now() - start, err, detailedError: err }, "failed processing item");
     await effectifsQueueDb().updateOne(
@@ -169,6 +184,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
         },
       }
     );
+    return false;
   }
 }
 
@@ -194,6 +210,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
   return {
     result: await dossierApprenantSchemaV3()
       .transform(async (effectifQueued, ctx) => {
+        // FIXME TODO logs pour chaque organisme
         const [effectif, organismeLieu, organismeFormateur, organismeResponsable] = await Promise.all([
           (async () => {
             return await transformEffectifQueueToEffectif(effectifQueued as any);
@@ -314,15 +331,18 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: Effectifs
           })(),
           (async () => {
             const formation = await formationsCatalogueDb().findOne({ cfd: effectifQueued.id_formation });
-            if (!formation) {
-              ctx.addIssue({
-                code: ZodIssueCode.custom,
-                message: "formation non trouvée dans le catalogue",
-                params: {
-                  cfd: effectifQueued.id_formation,
-                },
-              });
-            }
+
+            // désactivé si non bloquant
+            // if (!formation) {
+            //   ctx.addIssue({
+            //     code: ZodIssueCode.custom,
+            //     message: "formation non trouvée dans le catalogue",
+            //     params: {
+            //       cfd: effectifQueued.id_formation,
+            //     },
+            //   });
+            // }
+
             itemProcessingInfos.formation_cfd = effectifQueued.id_formation;
             itemProcessingInfos.formation_found = !!formation;
           })(),
