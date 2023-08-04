@@ -9,6 +9,8 @@ import { Organisme } from "@/common/model/@types";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
+import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
+import { DossierApprenantSchemaV3ZodType } from "@/common/validation/dossierApprenantSchemaV3";
 
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
@@ -64,7 +66,7 @@ export const buildNewHistoriqueStatutApprenant = (
 /**
  * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
  */
-export const completeEffectifAddress = async <T extends Partial<Effectif>>(effectifData: T) => {
+export const completeEffectifAddress = async <T extends Partial<Effectif>>(effectifData: T): Promise<T> => {
   if (!effectifData.apprenant?.adresse) {
     return effectifData;
   }
@@ -122,13 +124,17 @@ export const checkIfEffectifExists = async (
  * Création d'un objet effectif depuis les données d'un dossierApprenant.
  * Fonctionne pour l'API v2 et v3.
  */
-export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): PartialDeep<Effectif> => {
+export const mapEffectifQueueToEffectif = (
+  // devrait être le schéma validé
+  // dossierApprenant: DossierApprenantSchemaV1V2ZodType | DossierApprenantSchemaV3ZodType
+  dossierApprenant: EffectifsQueue
+): PartialDeep<Effectif> => {
   const newHistoriqueStatut = {
     valeur_statut: dossierApprenant.statut_apprenant,
     date_statut: new Date(dossierApprenant.date_metier_mise_a_jour_statut),
     date_reception: new Date(),
   };
-  let contrats: PartialDeep<Effectif["contrats"]> = [
+  const contrats: PartialDeep<Effectif["contrats"]> = [
     stripEmptyFields({
       date_debut: dossierApprenant.contrat_date_debut,
       date_fin: dossierApprenant.contrat_date_fin,
@@ -216,17 +222,4 @@ export const mapEffectifQueueToEffectif = (dossierApprenant: EffectifsQueue): Pa
       }),
     },
   });
-};
-
-/**
- * Création d'un objet organisme depuis les données d'un dossierApprenant
- */
-export const mapEffectifQueueToOrganisme = (
-  dossiersApprenant: EffectifsQueue
-): Pick<Partial<Organisme>, "nom" | "uai" | "siret"> => {
-  return {
-    uai: dossiersApprenant.uai_etablissement,
-    siret: dossiersApprenant.siret_etablissement,
-    nom: dossiersApprenant.nom_etablissement,
-  };
 };

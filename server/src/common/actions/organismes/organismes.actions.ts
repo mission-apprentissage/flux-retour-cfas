@@ -265,6 +265,7 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
  * @param {*} organisme
  * @returns
  */
+// FIXME utiliser un organismeId ! On ne met à jour que updated_at et last_transmission_date
 export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) => {
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -282,6 +283,21 @@ export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>
   }
   return updated.value as WithId<Organisme>;
 };
+
+export async function updateOrganismeLastTransmissionDate(organismeId: ObjectId) {
+  const modifyResult = await organismesDb().findOneAndUpdate(
+    { _id: organismeId },
+    {
+      $set: {
+        last_transmission_date: new Date(),
+        updated_at: new Date(),
+      },
+    }
+  );
+  if (!modifyResult.ok) {
+    throw new Error(`Could not set organisme last transmission date on organisme ${organismeId.toString()}`);
+  }
+}
 
 /**
  * Returns sous-établissements by siret for an uai

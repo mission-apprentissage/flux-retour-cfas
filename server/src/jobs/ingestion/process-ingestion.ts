@@ -1,15 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { PromisePool } from "@supercharge/promise-pool";
-import { ObjectId } from "mongodb";
-import pPipe from "p-pipe";
+import { Filter, ObjectId, WithId } from "mongodb";
+import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
-import {
-  insertEffectif,
-  lockEffectif,
-  updateEffectif,
-  addEffectifComputedFields,
-  mergeEffectifWithDefaults,
-} from "@/common/actions/effectifs.actions";
+import { lockEffectif, addEffectifComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
   mapEffectifQueueToEffectif,
@@ -18,257 +12,394 @@ import {
 } from "@/common/actions/engine/engine.actions";
 import {
   findOrganismeByUaiAndSiret,
-  setOrganismeTransmissionDates,
+  updateOrganismeLastTransmissionDate,
 } from "@/common/actions/organismes/organismes.actions";
-import logger from "@/common/logger";
-import { Effectif } from "@/common/model/@types";
+import parentLogger from "@/common/logger";
+import { Effectif, FiabilisationUaiSiret, Organisme } from "@/common/model/@types";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
-import { effectifsQueueDb } from "@/common/model/collections";
-import { formatError } from "@/common/utils/errorUtils";
+import {
+  effectifsDb,
+  effectifsQueueDb,
+  fiabilisationUaiSiretDb,
+  formationsCatalogueDb,
+} from "@/common/model/collections";
 import { sleep } from "@/common/utils/timeUtils";
-import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
-import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
+import dossierApprenantSchemaV1V2, {
+  DossierApprenantSchemaV1V2ZodType,
+} from "@/common/validation/dossierApprenantSchemaV1V2";
+import dossierApprenantSchemaV3, {
+  DossierApprenantSchemaV3ZodType,
+} from "@/common/validation/dossierApprenantSchemaV3";
 
-const sleepDuration = 10_000;
-const NB_ITEMS_TO_PROCESS = 100;
-type Options = { id?: string; force?: boolean };
+const logger = parentLogger.child({
+  module: "processor",
+});
+
+type EffectifQueueProcessorOptions = {
+  force?: boolean;
+  limit?: number;
+  since: Date;
+};
 
 /**
  * Fonction de process de la file d'attente des effectifs en boucle
- * @param options
  */
-export const processEffectifsQueueEndlessly = async (options: Options) => {
-  logger.info(`Process effectifs queue with options ${JSON.stringify(options)}`);
-
-  // the inc is here to avoid infinite loop and memory leak
-  let inc = 0;
-  do {
-    const { totalProcessed } = await processEffectifsQueue(options);
-    if (sleepDuration && totalProcessed === 0 && !options.id) {
-      await sleep(sleepDuration);
+export const startEffectifQueueProcessor = async () => {
+  logger.warn("starting EffectifQueue processor");
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const hasProcessedItems = await processEffectifsQueue();
+    if (!hasProcessedItems) {
+      await sleep(5_000);
     }
-    inc++;
-  } while (!options.id && inc < 100);
-};
-
-/**
- * Fonction de process unitaire de la file d'attente des effectifs
- * @param options
- * @returns
- */
-export const processEffectifsQueue = async (options?: Options) => {
-  const { id, force } = options || { id: undefined, force: false };
-
-  const filter: Record<string, any> = force ? {} : { processed_at: { $exists: false } };
-  if (id) {
-    filter._id = new ObjectId(id);
   }
-
-  const result = await processItems(filter);
-  return result;
-};
-
-type ProcessItemsResult = {
-  totalProcessed: number;
-  totalValidItems: number;
-  totalInvalidItems: number;
 };
 
 /**
- * Fonction de process des 100 derniers éléments de la queue
- * @param filter
+ * Fonction de traitement des 100 premiers éléments de la file d'attente des effectifs
+ * @param options
+ * @returns true si des effectifs ont été traités
  */
-async function processItems(filter: any): Promise<ProcessItemsResult> {
+export async function processEffectifsQueue(options?: EffectifQueueProcessorOptions): Promise<boolean> {
+  const filter: Filter<EffectifsQueue> = {
+    ...(options?.force ? {} : { processed_at: { $exists: false } }),
+    ...(options?.since ? { created_at: { $gt: options.since } } : {}),
+  };
   const total = await effectifsQueueDb().countDocuments(filter);
-  let totalValidItems = 0;
-
   const itemsToProcess = await effectifsQueueDb()
     .find(filter)
     .sort({ created_at: 1 })
-    .limit(NB_ITEMS_TO_PROCESS)
+    .limit(options?.limit ?? 100)
     .toArray();
 
-  logger.info(
-    { filter, count: itemsToProcess.length, total },
-    `${itemsToProcess.length}/${total} items à traiter (avec filtre ${JSON.stringify(filter)}})`
-  );
+  logger.info({ filter, count: itemsToProcess.length, total }, "traitement des effectifsQueue");
 
   await PromisePool.withConcurrency(10)
     .for(itemsToProcess)
-    .process(async (effectifQueued, index) => {
-      try {
-        const startDate = new Date();
-        let effectifQueueToUpdate: Partial<EffectifsQueue> = {};
-
-        // Phase de transformation d'une donnée de queue
-        const { effectif } = await transformEffectifQueueItem(effectifQueued, effectifQueueToUpdate);
-
-        if (effectif) {
-          totalValidItems++;
-
-          // Phase d'ajout ou update d'un effectif
-          await createOrUpdateEffectif(effectif, effectifQueueToUpdate);
-        }
-
-        // MAJ de la queue pour indiquer que les données ont été traitées
-        await effectifsQueueDb().updateOne(
-          { _id: effectifQueued._id },
-          { $set: { ...effectifQueueToUpdate, processed_at: new Date() } }
-        );
-
-        const durationInMs = new Date().getTime() - startDate.getTime();
-        logger.info(
-          `#${index} Item ${
-            effectifQueued._id
-          } created at ${effectifQueued.created_at?.toISOString()} processed in ${durationInMs} ms`,
-          { duration: durationInMs }
-        );
-
-        return {
-          validItem: effectifQueueToUpdate.validation_errors?.length === 0 && !effectifQueueToUpdate.error,
-          error: undefined,
-        };
-      } catch (err: any) {
-        logger.error({ err, index }, `an error occured while processing effectif queue item ${index}: ${err.message}`);
-        logger.error(err);
-        return { validItem: false, error: true };
-      }
+    .process(async (effectifQueued) => {
+      await processEffectifQueueItem(effectifQueued);
+      // TODO peut-être try catch ici, dépendra de la CLI pour un effectif
     });
 
-  logger.info(`${itemsToProcess.length} items traités`);
-  if (itemsToProcess.length > 0) {
-    logger.info(`${totalValidItems} items valides`);
-    logger.info(`${itemsToProcess.length - totalValidItems} items invalides`);
-  }
+  return itemsToProcess.length > 0;
+}
 
+export async function processEffectifQueueById(effectifQueueId: ObjectId): Promise<void> {
+  const effectifQueue = await effectifsQueueDb().findOne({ _id: effectifQueueId });
+  if (!effectifQueue) {
+    throw Error(`effectifQueue(id=${effectifQueueId.toString()}) non trouvé`);
+  }
+  await processEffectifQueueItem(effectifQueue);
+}
+
+async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): Promise<void> {
+  let itemLogger = logger.child({
+    _id: effectifQueue._id,
+    siret: effectifQueue.siret_etablissement,
+    uai: effectifQueue.uai_etablissement,
+    created_at: effectifQueue.created_at,
+  });
+  // itemLogger.debug("process item");
+  const start = Date.now();
+  try {
+    // let effectifQueueToUpdate: Partial<EffectifsQueue> = {};
+
+    // Phase de transformation d'une donnée de queue
+
+    const { result, itemProcessingInfos } = await (effectifQueue.api_version === "v3"
+      ? transformEffectifQueueV3ToEffectif(effectifQueue)
+      : transformEffectifQueueV1V2ToEffectif(effectifQueue));
+
+    // ajout des informations sur le traitement au logger
+    itemLogger = itemLogger.child(itemProcessingInfos);
+
+    let effectifQueueUpdate: Pick<EffectifsQueue, "organisme_id" | "effectif_id" | "validation_errors">;
+
+    if (result.success) {
+      const { effectif, organisme } = result.data;
+
+      // céation ou mise à jour de l'effectif
+      const [{ effectifId, itemProcessingInfos }] = await Promise.all([
+        createOrUpdateEffectif(effectif),
+        updateOrganismeLastTransmissionDate(organisme._id),
+      ]);
+
+      // ajout des informations sur le traitement au logger
+      itemLogger = itemLogger.child(itemProcessingInfos);
+
+      effectifQueueUpdate = {
+        effectif_id: effectifId,
+        organisme_id: organisme._id,
+        validation_errors: [],
+      };
+    } else {
+      itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
+      effectifQueueUpdate = {
+        validation_errors: result.error?.issues.map(({ path, message }) => ({ message, path })) || [],
+      };
+    }
+
+    // MAJ de la queue pour indiquer que les données ont été traitées
+    await effectifsQueueDb().updateOne(
+      { _id: effectifQueue._id },
+      {
+        $set: {
+          ...effectifQueueUpdate,
+          updated_at: new Date(),
+          processed_at: new Date(),
+        },
+        $unset: {
+          error: 1,
+        },
+      }
+    );
+    // await sleep(3000);
+
+    // TODO infos sur le siret corrigé
+    itemLogger.info({ duration: Date.now() - start }, "processed item");
+  } catch (err: any) {
+    itemLogger.error({ duration: Date.now() - start, err, detailedError: err }, "failed processing item");
+    await effectifsQueueDb().updateOne(
+      { _id: effectifQueue._id },
+      {
+        $set: {
+          validation_errors: [],
+          error: err.message,
+          processed_at: new Date(),
+        },
+      }
+    );
+  }
+}
+
+interface ItemProcessingInfos {
+  effectif_id?: string;
+  effectif_new?: boolean;
+  organisme_id?: string;
+  organisme_uai?: string;
+  organisme_uai_corrige?: string;
+  organisme_siret?: string;
+  organisme_siret_corrige?: string;
+  organisme_fiabilisation?: FiabilisationUaiSiret["type"] | "INCONNU";
+  organisme_found?: boolean;
+  formation_cfd?: string;
+  formation_found?: boolean;
+}
+
+async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQueue): Promise<{
+  result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: WithId<Organisme> }>;
+  itemProcessingInfos: ItemProcessingInfos;
+}> {
+  const itemProcessingInfos: ItemProcessingInfos = {};
   return {
-    totalProcessed: itemsToProcess.length,
-    totalValidItems,
-    totalInvalidItems: itemsToProcess.length - totalValidItems,
+    result: await dossierApprenantSchemaV3()
+      .transform(async (effectifQueued, ctx) => {
+        const [effectif, organismeLieu, organismeFormateur, organismeResponsable] = await Promise.all([
+          (async () => {
+            return await transformEffectifQueueToEffectif(effectifQueued as any);
+          })(),
+          (async () => {
+            return await findOrganismeByUaiAndSiret(
+              effectifQueued?.etablissement_lieu_de_formation_uai,
+              effectifQueued?.etablissement_lieu_de_formation_siret
+            );
+          })(),
+          (async () => {
+            return await findOrganismeByUaiAndSiret(
+              effectifQueued?.etablissement_formateur_uai,
+              effectifQueued?.etablissement_formateur_siret,
+              { _id: 1 }
+            );
+          })(),
+          (async () => {
+            return await findOrganismeByUaiAndSiret(
+              effectifQueued?.etablissement_responsable_uai,
+              effectifQueued?.etablissement_responsable_siret,
+              { _id: 1 }
+            );
+          })(),
+          (async () => {
+            const formation = await formationsCatalogueDb().findOne({ cfd: effectifQueued.formation_cfd });
+            if (!formation) {
+              ctx.addIssue({
+                code: ZodIssueCode.custom,
+                message: "formation non trouvée dans le catalogue",
+                params: {
+                  cfd: effectifQueued.formation_cfd,
+                },
+              });
+            }
+          })(),
+        ]);
+
+        // TODO appel fiabilisation
+        // Récupération du couple fiable depuis l'UAI / SIRET
+
+        if (!organismeLieu) {
+          ctx.addIssue({
+            code: ZodIssueCode.custom,
+            message: "organisme non trouvé",
+          });
+          // throw new Error("organisme non trouvé");
+          return NEVER;
+        }
+
+        return {
+          effectif: {
+            ...effectif,
+            organisme_id: organismeLieu?._id,
+            organisme_formateur_id: organismeFormateur?._id,
+            organisme_responsable_id: organismeResponsable?._id,
+            _computed: addEffectifComputedFields(organismeLieu),
+          },
+          organisme: organismeLieu,
+        };
+      })
+      .safeParseAsync(rawEffectifQueued),
+    itemProcessingInfos,
   };
 }
 
-const transformEffectifQueueItem = async (
-  effectifQueued: EffectifsQueue,
-  effectifQueueToUpdate: Partial<EffectifsQueue>
-): Promise<{ effectif: Effectif | undefined }> => {
-  let result;
-  let effectif: Effectif | undefined;
+async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: EffectifsQueue): Promise<{
+  result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: WithId<Organisme> }>;
+  itemProcessingInfos: ItemProcessingInfos;
+}> {
+  const itemProcessingInfos: ItemProcessingInfos = {};
+  return {
+    result: await dossierApprenantSchemaV1V2()
+      .transform(async (effectifQueued, ctx) => {
+        const [effectif, organisme] = await Promise.all([
+          (async () => {
+            return await transformEffectifQueueToEffectif(effectifQueued);
+          })(),
+          (async () => {
+            // 1. On essaie de corriger l'UAI et le SIRET avec la collection fiabilisationUaiSiret
+            const result = await fiabilisationUaiSiretDb().findOne({
+              uai: effectifQueued.uai_etablissement,
+              siret: effectifQueued.siret_etablissement,
+            });
+            let uai: string;
+            let siret: string;
+            if (!result) {
+              uai = effectifQueued.uai_etablissement;
+              siret = effectifQueued.siret_etablissement as string;
+            } else if (result.type === "A_FIABILISER") {
+              // FIXME seulement 4 en prod !!! potentiellement prendre plus de choses
+              uai = result.uai_fiable as string;
+              siret = result.siret_fiable as string;
+            } else {
+              uai = effectifQueued.uai_etablissement;
+              siret = effectifQueued.siret_etablissement as string;
+            }
+            // TODO/FIXME peut-être vérifier dans fiabilisationUaiSiretDb, avec couple uai/siret, sinon uai, sinon siret ???
 
-  try {
-    // Vérification schéma & transformation en 2 objets effectif & organisme.
+            // 2. On cherche l'organisme avec le couple uai/siret
+            const organisme = await findOrganismeByUaiAndSiret(uai, siret);
 
-    // Actuellement, on réutilise la validation de schéma, ce qui semble inutile,
-    // étant donné que la donnée a déjà été validée lors de l'insertion dans la queue.
-    // La seule différence est que c'est le résultat de la donnée transformée qui est retournée ici
-    // alors que c'est la donnée brute qui est retournée lors de l'insertion dans la queue.
-    if (effectifQueued.api_version === "v3") {
-      result = await dossierApprenantSchemaV3()
-        .transform(async (data) => ({
-          effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
-          organisme: await pPipe(
-            () =>
-              findOrganismeByUaiAndSiret(
-                effectifQueued?.etablissement_lieu_de_formation_uai,
-                effectifQueued?.etablissement_lieu_de_formation_siret
-              ),
-            setOrganismeTransmissionDates
-          )(data),
-          organisme_formateur: await findOrganismeByUaiAndSiret(
-            effectifQueued?.etablissement_formateur_uai,
-            effectifQueued?.etablissement_formateur_siret,
-            { _id: 1 }
-          ),
-          organisme_responsable: await findOrganismeByUaiAndSiret(
-            effectifQueued?.etablissement_responsable_uai,
-            effectifQueued?.etablissement_responsable_siret,
-            { _id: 1 }
-          ),
-        }))
-        .safeParseAsync(effectifQueued);
-    } else {
-      result = await dossierApprenantSchemaV1V2()
-        .transform(async (data) => ({
-          effectif: await pPipe(mapEffectifQueueToEffectif, mergeEffectifWithDefaults, completeEffectifAddress)(data),
-          organisme: await pPipe(
-            () => findOrganismeByUaiAndSiret(effectifQueued?.uai_etablissement, effectifQueued?.siret_etablissement),
-            setOrganismeTransmissionDates
-          )(data),
-        }))
-        .safeParseAsync(effectifQueued);
-    }
+            // 3. Des indicateurs pour apporter des informations sur le traitement
+            itemProcessingInfos.organisme_uai = effectifQueued.uai_etablissement;
+            if (uai !== effectifQueued.uai_etablissement) {
+              itemProcessingInfos.organisme_uai_corrige = uai;
+            }
+            itemProcessingInfos.organisme_siret = effectifQueued.siret_etablissement;
+            if (siret !== effectifQueued.siret_etablissement) {
+              itemProcessingInfos.organisme_siret_corrige = siret;
+            }
+            itemProcessingInfos.organisme_fiabilisation = result?.type || "INCONNU";
+            itemProcessingInfos.organisme_found = !!organisme;
+            if (organisme) {
+              itemProcessingInfos.organisme_id = organisme._id.toString();
+            }
+            return organisme;
+          })(),
+          (async () => {
+            const formation = await formationsCatalogueDb().findOne({ cfd: effectifQueued.id_formation });
+            if (!formation) {
+              ctx.addIssue({
+                code: ZodIssueCode.custom,
+                message: "formation non trouvée dans le catalogue",
+                params: {
+                  cfd: effectifQueued.id_formation,
+                },
+              });
+            }
+            itemProcessingInfos.formation_cfd = effectifQueued.id_formation;
+            itemProcessingInfos.formation_found = !!formation;
+          })(),
+        ]);
 
-    if (result.error) {
-      effectifQueueToUpdate.validation_errors =
-        result.error?.issues.map(({ path, message }) => ({ message, path })) || [];
-    } else if (effectifQueued.api_version === "v3") {
-      const { effectif: effectifData, organisme, organisme_formateur, organisme_responsable } = result.data as any;
+        if (!organisme) {
+          ctx.addIssue({
+            code: ZodIssueCode.custom,
+            message: "organisme non trouvé",
+            params: {
+              uai: effectifQueued.uai_etablissement,
+              siret: effectifQueued.siret_etablissement,
+            },
+          });
+          return NEVER;
+        }
 
-      // Complétion de l'objet effectif avec l'organisme id et le computed info
-      effectif = {
-        ...effectifData,
-        organisme_id: organisme._id,
-        organisme_formateur_id: organisme_formateur?._id,
-        organisme_responsable_id: organisme_responsable?._id,
-        _computed: addEffectifComputedFields(organisme),
-      };
+        return {
+          effectif: {
+            ...effectif,
+            organisme_id: organisme?._id,
+            _computed: addEffectifComputedFields(organisme),
+          },
+          organisme: organisme,
+        };
+      })
+      .safeParseAsync(rawEffectifQueued),
+    itemProcessingInfos,
+  };
+}
 
-      // Complétion de l'objet dans la queue avec l'organisme id
-      effectifQueueToUpdate.organisme_id = organisme._id;
-    } else {
-      const { effectif: effectifData, organisme } = result.data as any;
-
-      // Complétion de l'objet effectif avec l'organisme id et le computed info
-      effectif = {
-        ...effectifData,
-        organisme_id: organisme._id,
-        _computed: addEffectifComputedFields(organisme),
-      };
-
-      // Complétion de l'objet dans la queue avec l'organisme id
-      effectifQueueToUpdate.organisme_id = organisme._id;
-    }
-  } catch (err) {
-    effectifQueueToUpdate.error = formatError(err).message;
-  }
-
-  return { effectif };
-};
+async function transformEffectifQueueToEffectif(
+  effectifQueue: DossierApprenantSchemaV1V2ZodType | DossierApprenantSchemaV3ZodType
+): Promise<Effectif> {
+  return await completeEffectifAddress(
+    mergeEffectifWithDefaults(mapEffectifQueueToEffectif(effectifQueue as any) as any)
+  );
+}
 
 /**
  * Fonction de création ou de MAJ de l'effectif depuis la queue
  * @param effectif
- * @param dataToUpdate
+ * @returns
  */
-const createOrUpdateEffectif = async (effectif: Effectif, dataToUpdate: Partial<EffectifsQueue>) => {
-  try {
-    let effectifId: ObjectId;
-    const found = await checkIfEffectifExists(effectif);
+const createOrUpdateEffectif = async (
+  effectif: Effectif
+): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
+  const itemProcessingInfos: ItemProcessingInfos = {};
+  let effectifDb = await checkIfEffectifExists(effectif);
+  itemProcessingInfos.effectif_new = !effectifDb;
 
-    // Gestion des MAJ d'effectif
-    if (found) {
-      effectifId = found._id;
-
-      // Update de l'historique
-      effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
-        found.apprenant.historique_statut,
-        effectif.apprenant?.historique_statut[0]?.valeur_statut,
-        effectif.apprenant?.historique_statut[0]?.date_statut
-      );
-      const updatedEffectif = await updateEffectif(effectifId, effectif);
-      if (updatedEffectif) {
-        await lockEffectif(updatedEffectif);
+  // Gestion des MAJ d'effectif
+  if (effectifDb) {
+    // Update de l'historique
+    effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
+      effectifDb.apprenant.historique_statut,
+      effectif.apprenant?.historique_statut[0]?.valeur_statut,
+      effectif.apprenant?.historique_statut[0]?.date_statut
+    );
+    await effectifsDb().findOneAndUpdate(
+      { _id: effectifDb._id },
+      {
+        $set: {
+          ...effectif,
+          updated_at: new Date(),
+        },
       }
-    } else {
-      const effectifCreated = await insertEffectif(effectif);
-      effectifId = effectifCreated._id;
-      await lockEffectif(effectifCreated);
-    }
-
-    // Complétion de l'objet dans la queue avec l'effectif id
-    dataToUpdate.effectif_id = effectifId;
-  } catch (e: any) {
-    const err = formatError(e);
-    dataToUpdate.error = err.toString();
+    );
+  } else {
+    const { insertedId } = await effectifsDb().insertOne(effectif);
+    effectifDb = { _id: insertedId, ...effectif };
   }
+  itemProcessingInfos.effectif_id = effectifDb._id.toString();
+
+  // lock de tous les champs mis à jour par l'API pour ne pas permettre la modification côté UI
+  // TODO vérifier que ça marche bien
+  await lockEffectif(effectifDb);
+
+  return { effectifId: effectifDb._id, itemProcessingInfos };
 };

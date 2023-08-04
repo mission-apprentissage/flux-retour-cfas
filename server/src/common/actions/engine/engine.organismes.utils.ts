@@ -13,6 +13,7 @@ import { fiabilisationUaiSiretDb, organismesReferentielDb } from "@/common/model
  */
 export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret = null }: any) => {
   // Construction d'un tableau de mapping à partir de la collection et du tableau mapping
+  console.time("mapFiabilizedOrganismeUaiSiretCouple");
   const fiabilisationUaiSiretFromCollection = await fiabilisationUaiSiretDb()
     .find({ type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER })
     .toArray();
@@ -21,6 +22,7 @@ export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret = null }
     .filter((item) => item.uai === uai && item.siret === siret)
     .map(({ uai_fiable, siret_fiable }) => ({ cleanUai: uai_fiable, cleanSiret: siret_fiable }));
 
+  console.timeEnd("mapFiabilizedOrganismeUaiSiretCouple");
   return foundCouple[0] || { cleanUai: uai, cleanSiret: siret }; // Take only first match
 };
 

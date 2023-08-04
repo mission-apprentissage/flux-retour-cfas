@@ -1,5 +1,6 @@
 import { Option, program } from "commander";
 import HttpTerminator from "lil-http-terminator";
+import { ObjectId } from "mongodb";
 
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
@@ -26,7 +27,11 @@ import { updateMultipleOrganismesWithApis } from "./jobs/hydrate/organismes/upda
 import { hydrateBassinsEmploi } from "./jobs/hydrate/reference/hydrate-bassins-emploi";
 import { hydrateReseaux } from "./jobs/hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./jobs/ingestion/process-effectifs-queue-remove-duplicates";
-import { processEffectifsQueueEndlessly } from "./jobs/ingestion/process-ingestion";
+import {
+  startEffectifQueueProcessor,
+  processEffectifQueueById,
+  processEffectifsQueue,
+} from "./jobs/ingestion/process-ingestion";
 import { removeOrganismeAndEffectifs } from "./jobs/patches/remove-organisme-effectifs-dossiersApprenants/index";
 import { removeOrganismesSansSiretSansEffectifs } from "./jobs/patches/remove-organismes-sansSiret-sansEffectifs/index";
 import { updateLastTransmissionDateForOrganismes } from "./jobs/patches/update-lastTransmissionDates/index";
@@ -102,13 +107,39 @@ program
   );
 
 program
-  .command("process:effectifs-queue")
-  .description("Process la queue des effectifs")
-  .option("--id <string>", "ID de l'effectifQueue à traiter")
-  .option("-f, --force", "Force le re-traitement des effectifs déjà traités")
+  .command("processor:start")
+  .description("Démarre le démon qui traite les effectifs en attente")
   .action(
-    runJob(async ({ id, force }) => {
-      await processEffectifsQueueEndlessly({ id, force });
+    runJob(async () => {
+      await startEffectifQueueProcessor();
+    })
+  );
+
+program
+  .command("process:effectifs-queue")
+  .description("Traite les effectifs en attente")
+  .option("-f, --force", "Force le re-traitement des effectifs déjà traités")
+  .option("-l, --limit <number>", "Limite le nombre d'éléments traités (100 par défaut, 0 pour  désactiver)", (value) =>
+    parseInt(value)
+  )
+  .option(
+    "-s, --since <date>",
+    "Prend les éléments à partir d'une certaine date (created_at)",
+    (value) => new Date(value)
+  )
+  .action(
+    runJob(async ({ force, limit, since }) => {
+      await processEffectifsQueue({ force, limit, since });
+    })
+  );
+
+program
+  .command("process:effectifs-queue:single")
+  .description("Traite un effectifQueue")
+  .requiredOption("--id <effectifQueueId>", "ID de l'effectifQueue à traiter", (value) => new ObjectId(value))
+  .action(
+    runJob(async ({ id }) => {
+      await processEffectifQueueById(new ObjectId(id));
     })
   );
 
