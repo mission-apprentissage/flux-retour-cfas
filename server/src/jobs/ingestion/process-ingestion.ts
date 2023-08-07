@@ -23,6 +23,7 @@ import {
   fiabilisationUaiSiretDb,
   formationsCatalogueDb,
 } from "@/common/model/collections";
+import { formatError } from "@/common/utils/errorUtils";
 import { AddPrefix, addPrefixToProperties } from "@/common/utils/miscUtils";
 import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2, {
@@ -182,7 +183,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       {
         $set: {
           validation_errors: [],
-          error: err.message,
+          error: formatError(err).toString(),
           processed_at: new Date(),
         },
       }
