@@ -31,7 +31,7 @@ export const getCfdInfo = async (cfd) => {
 export const getCodePostalInfo = async (codePostal: string | null | undefined): Promise<TabCoCodePostalInfo | null> => {
   if (!codePostal) return null;
   try {
-    const { data } = await client.post("/code-postal", { codePostal });
+    const { data } = await client.post("/code-postal", { codePostal }, { cache: { methods: ["post"] } });
     return data;
   } catch (error: any) {
     logger.error(
