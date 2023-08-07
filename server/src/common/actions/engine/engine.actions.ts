@@ -5,6 +5,7 @@ import { PartialDeep } from "type-fest";
 import { findEffectifByQuery } from "@/common/actions/effectifs.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
+import logger from "@/common/logger";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
@@ -77,8 +78,8 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
 
   const cpInfo = await getCodePostalInfo(codePostalOrCodeInsee);
   const adresseInfo = cpInfo?.result;
-  // TODO FIXME cpInfo.messages.error is NOT handle (example fail code 2B734)
-  if (!adresseInfo) {
+  if (!adresseInfo || cpInfo.messages.error) {
+    logger.warn({ code: codePostalOrCodeInsee, err: cpInfo?.messages.error }, "missing code postal in TCO");
     return effectifData;
   }
 
