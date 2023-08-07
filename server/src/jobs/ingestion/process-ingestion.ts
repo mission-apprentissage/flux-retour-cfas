@@ -122,7 +122,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       : transformEffectifQueueV1V2ToEffectif(effectifQueue));
 
     // ajout des informations sur le traitement au logger
-    itemLogger = itemLogger.child(itemProcessingInfos);
+    itemLogger = itemLogger.child({ ...itemProcessingInfos, format: effectifQueue.api_version });
 
     if (result.success) {
       const { effectif, organisme } = result.data;
