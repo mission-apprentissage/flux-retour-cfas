@@ -5,12 +5,9 @@ import { PartialDeep } from "type-fest";
 import { findEffectifByQuery } from "@/common/actions/effectifs.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
-import { Organisme } from "@/common/model/@types";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
-import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
-import { DossierApprenantSchemaV3ZodType } from "@/common/validation/dossierApprenantSchemaV3";
 
 /**
  * Méthode de construction d'un nouveau tableau d'historique de statut
