@@ -251,6 +251,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
           ctx.addIssue({
             code: ZodIssueCode.custom,
             message: "organisme non trouvé",
+            path: ["etablissement_lieu_de_formation_uai", "etablissement_lieu_de_formation_siret"],
             params: {
               uai: effectifQueued.etablissement_lieu_de_formation_uai,
               siret: effectifQueued.etablissement_lieu_de_formation_siret,
@@ -262,6 +263,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
           ctx.addIssue({
             code: ZodIssueCode.custom,
             message: "organisme formateur non trouvé",
+            path: ["etablissement_formateur_uai", "etablissement_formateur_siret"],
             params: {
               uai: effectifQueued.etablissement_formateur_uai,
               siret: effectifQueued.etablissement_formateur_siret,
@@ -273,6 +275,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
           ctx.addIssue({
             code: ZodIssueCode.custom,
             message: "organisme responsable non trouvé",
+            path: ["etablissement_responsable_uai", "etablissement_responsable_siret"],
             params: {
               uai: effectifQueued.etablissement_responsable_uai,
               siret: effectifQueued.etablissement_responsable_siret,
@@ -338,6 +341,7 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: Effectifs
           ctx.addIssue({
             code: ZodIssueCode.custom,
             message: "organisme non trouvé",
+            path: ["uai_etablissement", "siret_etablissement"],
             params: {
               uai: effectifQueued.uai_etablissement,
               siret: effectifQueued.siret_etablissement,
