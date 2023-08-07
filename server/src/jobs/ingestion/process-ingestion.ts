@@ -23,6 +23,7 @@ import {
   fiabilisationUaiSiretDb,
   formationsCatalogueDb,
 } from "@/common/model/collections";
+import { AddPrefix, addPrefixToProperties } from "@/common/utils/miscUtils";
 import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2, {
   DossierApprenantSchemaV1V2ZodType,
@@ -192,19 +193,16 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
   }
 }
 
-interface ItemProcessingInfos {
+type ItemProcessingInfos = {
   effectif_id?: string;
   effectif_new?: boolean;
-  organisme_id?: string;
-  organisme_uai?: string;
-  organisme_uai_corrige?: string;
-  organisme_siret?: string;
-  organisme_siret_corrige?: string;
-  organisme_fiabilisation?: FiabilisationUaiSiret["type"] | "INCONNU";
-  organisme_found?: boolean;
   formation_cfd?: string;
   formation_found?: boolean;
-}
+} & AddPrefix<"organisme_", OrganismeSearchStatsInfos> & // v2
+  // v3
+  AddPrefix<"organisme_lieu_", OrganismeSearchStatsInfos> &
+  AddPrefix<"organisme_formateur_", OrganismeSearchStatsInfos> &
+  AddPrefix<"organisme_responsable_", OrganismeSearchStatsInfos>;
 
 async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQueue): Promise<{
   result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: WithId<Organisme> }>;
@@ -214,56 +212,86 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
   return {
     result: await dossierApprenantSchemaV3()
       .transform(async (effectifQueued, ctx) => {
-        // FIXME TODO logs pour chaque organisme
         const [effectif, organismeLieu, organismeFormateur, organismeResponsable] = await Promise.all([
           (async () => {
             return await transformEffectifQueueToEffectif(effectifQueued as any);
           })(),
           (async () => {
-            return await findOrganismeByUaiAndSiret(
+            const { organisme, stats } = await findOrganismeWithStats(
               effectifQueued?.etablissement_lieu_de_formation_uai,
               effectifQueued?.etablissement_lieu_de_formation_siret
             );
+            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_lieu_", stats));
+            return organisme;
           })(),
           (async () => {
-            return await findOrganismeByUaiAndSiret(
+            const { organisme, stats } = await findOrganismeWithStats(
               effectifQueued?.etablissement_formateur_uai,
               effectifQueued?.etablissement_formateur_siret,
               { _id: 1 }
             );
+            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_formateur_", stats));
+            return organisme;
           })(),
           (async () => {
-            return await findOrganismeByUaiAndSiret(
+            const { organisme, stats } = await findOrganismeWithStats(
               effectifQueued?.etablissement_responsable_uai,
               effectifQueued?.etablissement_responsable_siret,
               { _id: 1 }
             );
+            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_responsable_", stats));
+            return organisme;
           })(),
           (async () => {
             const formation = await formationsCatalogueDb().findOne({ cfd: effectifQueued.formation_cfd });
-            if (!formation) {
-              ctx.addIssue({
-                code: ZodIssueCode.custom,
-                message: "formation non trouvée dans le catalogue",
-                params: {
-                  cfd: effectifQueued.formation_cfd,
-                },
-              });
-            }
+            itemProcessingInfos.formation_cfd = effectifQueued.formation_cfd;
+            itemProcessingInfos.formation_found = !!formation;
           })(),
         ]);
-
-        // TODO appel fiabilisation
-        // Récupération du couple fiable depuis l'UAI / SIRET
 
         if (!organismeLieu) {
           ctx.addIssue({
             code: ZodIssueCode.custom,
             message: "organisme non trouvé",
+            params: {
+              uai: effectifQueued.etablissement_lieu_de_formation_uai,
+              siret: effectifQueued.etablissement_lieu_de_formation_siret,
+            },
           });
-          // throw new Error("organisme non trouvé");
           return NEVER;
         }
+        if (!organismeFormateur) {
+          ctx.addIssue({
+            code: ZodIssueCode.custom,
+            message: "organisme formateur non trouvé",
+            params: {
+              uai: effectifQueued.etablissement_formateur_uai,
+              siret: effectifQueued.etablissement_formateur_siret,
+            },
+          });
+          return NEVER;
+        }
+        if (!organismeResponsable) {
+          ctx.addIssue({
+            code: ZodIssueCode.custom,
+            message: "organisme responsable non trouvé",
+            params: {
+              uai: effectifQueued.etablissement_responsable_uai,
+              siret: effectifQueued.etablissement_responsable_siret,
+            },
+          });
+          return NEVER;
+        }
+        // désactivé si non bloquant
+        // if (!formation) {
+        //   ctx.addIssue({
+        //     code: ZodIssueCode.custom,
+        //     message: "formation non trouvée dans le catalogue",
+        //     params: {
+        //       cfd: effectifQueued.formation_cfd,
+        //     },
+        //   });
+        // }
 
         return {
           effectif: {
@@ -294,59 +322,15 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: Effectifs
             return await transformEffectifQueueToEffectif(effectifQueued);
           })(),
           (async () => {
-            // 1. On essaie de corriger l'UAI et le SIRET avec la collection fiabilisationUaiSiret
-            const result = await fiabilisationUaiSiretDb().findOne({
-              uai: effectifQueued.uai_etablissement,
-              siret: effectifQueued.siret_etablissement,
-            });
-            let uai: string;
-            let siret: string;
-            if (!result) {
-              uai = effectifQueued.uai_etablissement;
-              siret = effectifQueued.siret_etablissement as string;
-            } else if (result.type === "A_FIABILISER") {
-              // FIXME seulement 4 en prod !!! potentiellement prendre plus de choses
-              uai = result.uai_fiable as string;
-              siret = result.siret_fiable as string;
-            } else {
-              uai = effectifQueued.uai_etablissement;
-              siret = effectifQueued.siret_etablissement as string;
-            }
-            // TODO/FIXME peut-être vérifier dans fiabilisationUaiSiretDb, avec couple uai/siret, sinon uai, sinon siret ???
-
-            // 2. On cherche l'organisme avec le couple uai/siret
-            const organisme = await findOrganismeByUaiAndSiret(uai, siret);
-
-            // 3. Des indicateurs pour apporter des informations sur le traitement
-            itemProcessingInfos.organisme_uai = effectifQueued.uai_etablissement;
-            if (uai !== effectifQueued.uai_etablissement) {
-              itemProcessingInfos.organisme_uai_corrige = uai;
-            }
-            itemProcessingInfos.organisme_siret = effectifQueued.siret_etablissement;
-            if (siret !== effectifQueued.siret_etablissement) {
-              itemProcessingInfos.organisme_siret_corrige = siret;
-            }
-            itemProcessingInfos.organisme_fiabilisation = result?.type || "INCONNU";
-            itemProcessingInfos.organisme_found = !!organisme;
-            if (organisme) {
-              itemProcessingInfos.organisme_id = organisme._id.toString();
-            }
+            const { organisme, stats } = await findOrganismeWithStats(
+              effectifQueued.uai_etablissement,
+              effectifQueued.siret_etablissement
+            );
+            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
             return organisme;
           })(),
           (async () => {
             const formation = await formationsCatalogueDb().findOne({ cfd: effectifQueued.id_formation });
-
-            // désactivé si non bloquant
-            // if (!formation) {
-            //   ctx.addIssue({
-            //     code: ZodIssueCode.custom,
-            //     message: "formation non trouvée dans le catalogue",
-            //     params: {
-            //       cfd: effectifQueued.id_formation,
-            //     },
-            //   });
-            // }
-
             itemProcessingInfos.formation_cfd = effectifQueued.id_formation;
             itemProcessingInfos.formation_found = !!formation;
           })(),
@@ -363,6 +347,16 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: Effectifs
           });
           return NEVER;
         }
+        // désactivé si non bloquant
+        // if (!formation) {
+        //   ctx.addIssue({
+        //     code: ZodIssueCode.custom,
+        //     message: "formation non trouvée dans le catalogue",
+        //     params: {
+        //       cfd: effectifQueued.id_formation,
+        //     },
+        //   });
+        // }
 
         return {
           effectif: {
@@ -427,3 +421,60 @@ const createOrUpdateEffectif = async (
 
   return { effectifId: effectifDb._id, itemProcessingInfos };
 };
+
+interface OrganismeSearchStatsInfos {
+  id?: string;
+  uai?: string;
+  uai_corrige?: string;
+  siret?: string;
+  siret_corrige?: string;
+  fiabilisation?: FiabilisationUaiSiret["type"] | "INCONNU";
+  found?: boolean;
+}
+
+async function findOrganismeWithStats(
+  uai_etablissement: string,
+  siret_etablissement?: string,
+  projection = {}
+): Promise<{ organisme: WithId<Organisme> | null; stats: OrganismeSearchStatsInfos }> {
+  const stats: OrganismeSearchStatsInfos = {};
+
+  // 1. On essaie de corriger l'UAI et le SIRET avec la collection fiabilisationUaiSiret
+  const fiabilisationResult = await fiabilisationUaiSiretDb().findOne({
+    uai: uai_etablissement,
+    siret: siret_etablissement,
+  });
+  let uai: string;
+  let siret: string;
+  if (!fiabilisationResult) {
+    uai = uai_etablissement;
+    siret = siret_etablissement as string;
+  } else if (fiabilisationResult.type === "A_FIABILISER") {
+    // FIXME seulement 4 en prod !!! potentiellement prendre plus de choses
+    uai = fiabilisationResult.uai_fiable as string;
+    siret = fiabilisationResult.siret_fiable as string;
+  } else {
+    uai = uai_etablissement;
+    siret = siret_etablissement as string;
+  }
+  // TODO/FIXME peut-être vérifier dans fiabilisationUaiSiretDb, avec couple uai/siret, sinon uai, sinon siret ???
+
+  // 2. On cherche l'organisme avec le couple uai/siret
+  const organisme = await findOrganismeByUaiAndSiret(uai, siret, projection);
+
+  // 3. Des indicateurs pour apporter des informations sur le traitement
+  stats.uai = uai_etablissement;
+  if (uai !== uai_etablissement) {
+    stats.uai_corrige = uai;
+  }
+  stats.siret = siret_etablissement;
+  if (siret !== siret_etablissement) {
+    stats.siret_corrige = siret;
+  }
+  stats.fiabilisation = fiabilisationResult?.type || "INCONNU";
+  stats.found = !!organisme;
+  if (organisme) {
+    stats.id = organisme._id.toString();
+  }
+  return { organisme, stats };
+}
