@@ -116,18 +116,13 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
   // itemLogger.debug("process item");
   const start = Date.now();
   try {
-    // let effectifQueueToUpdate: Partial<EffectifsQueue> = {};
-
     // Phase de transformation d'une donnée de queue
-
     const { result, itemProcessingInfos } = await (effectifQueue.api_version === "v3"
       ? transformEffectifQueueV3ToEffectif(effectifQueue)
       : transformEffectifQueueV1V2ToEffectif(effectifQueue));
 
     // ajout des informations sur le traitement au logger
     itemLogger = itemLogger.child(itemProcessingInfos);
-
-    let effectifQueueUpdate: Pick<EffectifsQueue, "organisme_id" | "effectif_id" | "validation_errors">;
 
     if (result.success) {
       const { effectif, organisme } = result.data;
@@ -141,37 +136,46 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       // ajout des informations sur le traitement au logger
       itemLogger = itemLogger.child(itemProcessingInfos);
 
-      effectifQueueUpdate = {
-        effectif_id: effectifId,
-        organisme_id: organisme._id,
-        // validation_errors: [],
-      };
+      // MAJ de la queue pour indiquer que les données ont été traitées
+      await effectifsQueueDb().updateOne(
+        { _id: effectifQueue._id },
+        {
+          $set: {
+            effectif_id: effectifId,
+            organisme_id: organisme._id,
+            updated_at: new Date(),
+            processed_at: new Date(),
+          },
+          $unset: {
+            error: 1,
+            validation_errors: 1,
+          },
+        }
+      );
+
+      itemLogger.info({ duration: Date.now() - start }, "processed item");
+
+      return true;
     } else {
+      // MAJ de la queue pour indiquer que les données ont été traitées
+      await effectifsQueueDb().updateOne(
+        { _id: effectifQueue._id },
+        {
+          $set: {
+            validation_errors: result.error?.issues.map(({ path, message }) => ({ message, path })) || [],
+            updated_at: new Date(),
+            processed_at: new Date(),
+          },
+          $unset: {
+            error: 1,
+          },
+        }
+      );
+
       itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
-      effectifQueueUpdate = {
-        validation_errors: result.error?.issues.map(({ path, message }) => ({ message, path })) || [],
-      };
+
+      return false;
     }
-
-    // MAJ de la queue pour indiquer que les données ont été traitées
-    await effectifsQueueDb().updateOne(
-      { _id: effectifQueue._id },
-      {
-        $set: {
-          ...effectifQueueUpdate,
-          updated_at: new Date(),
-          processed_at: new Date(),
-        },
-        $unset: {
-          error: 1,
-        },
-      }
-    );
-    // await sleep(3000);
-
-    // TODO infos sur le siret corrigé
-    itemLogger.info({ duration: Date.now() - start }, "processed item");
-    return true;
   } catch (err: any) {
     itemLogger.error({ duration: Date.now() - start, err, detailedError: err }, "failed processing item");
     await effectifsQueueDb().updateOne(
