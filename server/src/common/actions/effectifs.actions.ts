@@ -14,7 +14,7 @@ import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helper
 /**
  * Méthode de build d'un effectif
  */
-export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifData: T): T => {
+export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifData: T) => {
   const defaultValues = defaultValuesEffectif();
   // note: I've tried to use ts-deepmerge, but typing doesn't work well
   return {
