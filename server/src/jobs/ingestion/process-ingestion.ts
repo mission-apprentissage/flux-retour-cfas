@@ -113,7 +113,6 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
     uai: effectifQueue.uai_etablissement,
     created_at: effectifQueue.created_at,
   });
-  // itemLogger.debug("process item");
   const start = Date.now();
   try {
     // Phase de transformation d'une donnée de queue
