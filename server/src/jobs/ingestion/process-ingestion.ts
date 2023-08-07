@@ -56,7 +56,7 @@ export const startEffectifQueueProcessor = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const processingResult = await processEffectifsQueue();
-    if (processingResult.totalProcessed > 0) {
+    if (processingResult.totalProcessed === 0) {
       await sleep(5_000);
     }
   }
