@@ -119,8 +119,10 @@ program
   .command("process:effectifs-queue")
   .description("Traite les effectifs en attente")
   .option("-f, --force", "Force le re-traitement des effectifs déjà traités")
-  .option("-l, --limit <number>", "Limite le nombre d'éléments traités (100 par défaut, 0 pour  désactiver)", (value) =>
-    parseInt(value)
+  .option(
+    "-l, --limit <number>",
+    "Limite le nombre d'éléments traités (100 par défaut, 0 pour désactiver (attention, charge tous les effectifs en mémoire))",
+    (value) => parseInt(value)
   )
   .option(
     "-s, --since <date>",
@@ -139,7 +141,7 @@ program
   .requiredOption("--id <effectifQueueId>", "ID de l'effectifQueue à traiter", (value) => new ObjectId(value))
   .action(
     runJob(async ({ id }) => {
-      await processEffectifQueueById(new ObjectId(id));
+      await processEffectifQueueById(id);
     })
   );
 

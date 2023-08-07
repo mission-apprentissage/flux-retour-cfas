@@ -45,7 +45,7 @@ type ProcessItemsResult = {
 type EffectifQueueProcessorOptions = {
   force?: boolean;
   limit?: number;
-  since: Date;
+  since?: Date;
 };
 
 /**
@@ -61,7 +61,6 @@ export const startEffectifQueueProcessor = async () => {
     }
   }
 };
-// {"totalInvalidItems": 1, "totalProcessed": 1, "totalValidItems": 0}
 
 /**
  * Fonction de traitement des 100 premiers éléments de la file d'attente des effectifs
@@ -128,7 +127,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
     if (result.success) {
       const { effectif, organisme } = result.data;
 
-      // céation ou mise à jour de l'effectif
+      // création ou mise à jour de l'effectif
       const [{ effectifId, itemProcessingInfos }] = await Promise.all([
         createOrUpdateEffectif(effectif),
         updateOrganismeLastTransmissionDate(organisme._id),

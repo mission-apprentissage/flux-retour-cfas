@@ -264,8 +264,8 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
  * Méthode de maj des dates de transmission d'un organisme
  * @param {*} organisme
  * @returns
+ * @deprecated Utiliser updateOrganismeLastTransmissionDate
  */
-// FIXME utiliser un organismeId ! On ne met à jour que updated_at et last_transmission_date
 export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) => {
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -284,6 +284,10 @@ export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>
   return updated.value as WithId<Organisme>;
 };
 
+/**
+ * Met à jour la date de dernière transmission d'un organisme.
+ * @param organismeId
+ */
 export async function updateOrganismeLastTransmissionDate(organismeId: ObjectId) {
   const modifyResult = await organismesDb().findOneAndUpdate(
     { _id: organismeId },
