@@ -326,6 +326,7 @@ function IndicateursForm(props: IndicateursFormProps) {
           </Heading>
 
           <DownloadLinkButton
+            isDisabled={indicateursEffectifs?.length === 0}
             action={async () => {
               const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
                 ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars

@@ -148,6 +148,7 @@ function IndicateursGrid({
             effectifsFilters && (
               <DownloadLinkButton
                 fontSize="sm"
+                isDisabled={indicateursEffectifs.apprenants === 0}
                 action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
               >
                 Télécharger la liste
@@ -175,6 +176,7 @@ function IndicateursGrid({
             effectifsFilters && (
               <DownloadLinkButton
                 fontSize="sm"
+                isDisabled={indicateursEffectifs.apprentis === 0}
                 action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
               >
                 Télécharger la liste
@@ -203,6 +205,7 @@ function IndicateursGrid({
             effectifsFilters && (
               <DownloadLinkButton
                 fontSize="sm"
+                isDisabled={indicateursEffectifs.rupturants === 0}
                 action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
               >
                 Télécharger la liste
@@ -230,6 +233,7 @@ function IndicateursGrid({
             effectifsFilters && (
               <DownloadLinkButton
                 fontSize="sm"
+                isDisabled={indicateursEffectifs.inscritsSansContrat === 0}
                 action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
               >
                 Télécharger la liste
@@ -260,6 +264,7 @@ function IndicateursGrid({
             effectifsFilters && (
               <DownloadLinkButton
                 fontSize="sm"
+                isDisabled={indicateursEffectifs.abandons === 0}
                 action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}
               >
                 Télécharger la liste
