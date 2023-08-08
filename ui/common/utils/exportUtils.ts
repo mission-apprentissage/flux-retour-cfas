@@ -1,5 +1,7 @@
 import { utils, writeFileXLSX } from "xlsx";
 
+import { pick } from "./array";
+
 export interface ExportColumn {
   label: string;
   key: string;
@@ -12,9 +14,13 @@ export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
   exportColumns: Columns
 ) {
   const workbook = utils.book_new();
-  const worksheet = utils.json_to_sheet(rows, {
-    header: exportColumns.map((column) => column.key),
-  });
+  const headers = exportColumns.map((column) => column.key);
+  const worksheet = utils.json_to_sheet(
+    rows.map((row) => pick(row, headers as unknown as any)),
+    {
+      header: headers,
+    }
+  );
   utils.book_append_sheet(workbook, worksheet, "Liste");
 
   // rewrite the header line with good labels
