@@ -70,7 +70,10 @@ import {
   searchOrganismes,
   verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
-import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
+import {
+  listOrganismeFormations,
+  searchOrganismesFormations,
+} from "@/common/actions/organismes/organismes.formations.actions";
 import { createSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
@@ -434,6 +437,12 @@ function setupRoutes(app: Application) {
         "/organismes",
         returnResult(async (req, res) => {
           return await listOrganismesFormateurs(req.user, res.locals.organismeId);
+        })
+      )
+      .get(
+        "/formations",
+        returnResult(async (req, res) => {
+          return await listOrganismeFormations(res.locals.organismeId);
         })
       )
       .get(

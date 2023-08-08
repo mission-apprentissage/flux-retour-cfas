@@ -110,6 +110,7 @@ const schema = object(
       object(
         {
           formation_id: objectId(),
+          cfd: string({ description: "Code CFD de la formation" }),
           cle_ministere_educatif: string({
             description: "Clé unique de la formation",
           }),

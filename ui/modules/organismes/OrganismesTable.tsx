@@ -19,7 +19,7 @@ import { ArrowDropRightLine } from "@/theme/components/icons";
 
 import InfoTransmissionDonnees from "./InfoTransmissionDonnees";
 
-type OrganismeNormalized = Organisme & {
+export type OrganismeNormalized = Organisme & {
   normalizedName: string;
   normalizedUai: string;
   normalizedCommune: string;

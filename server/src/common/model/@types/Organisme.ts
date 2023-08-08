@@ -476,6 +476,10 @@ export interface Organisme {
   relatedFormations?: {
     formation_id?: ObjectId;
     /**
+     * Code CFD de la formation
+     */
+    cfd?: string;
+    /**
      * Clé unique de la formation
      */
     cle_ministere_educatif?: string;

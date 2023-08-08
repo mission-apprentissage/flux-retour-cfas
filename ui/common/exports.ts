@@ -179,3 +179,41 @@ export function convertOrganismeToExport(
     adresse: organisme.adresse?.complete ?? "",
   };
 }
+
+export const formationsExportColumns = [
+  {
+    label: "intitule_long",
+    key: "intitule_long",
+    width: 60,
+  },
+  {
+    label: "duree",
+    key: "duree",
+    width: 10,
+  },
+  {
+    label: "niveau",
+    key: "niveau",
+    width: 20,
+  },
+  {
+    label: "cfd",
+    key: "cfd",
+    width: 15,
+  },
+  {
+    label: "rncp",
+    key: "rncp_code",
+    width: 15,
+  },
+  {
+    label: "cle_ministere_educatif",
+    key: "cle_ministere_educatif",
+    width: 60,
+  },
+  {
+    label: "lieu_formation_adresse",
+    key: "lieu_formation_adresse",
+    width: 80,
+  },
+] as const satisfies ReadonlyArray<ExportColumn>;

@@ -22,11 +22,12 @@ import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
+import { Formation } from "@/common/internal/Formation";
 import { Organisme } from "@/common/internal/Organisme";
 import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
+import { formatCivility, formatSiretSplitted, normalize } from "@/common/utils/stringUtils";
 import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -38,6 +39,7 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation, getOrganisationTypeFromNature } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
+import FormationsTable, { FormationNormalized } from "../organismes/FormationsTable";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
@@ -84,6 +86,22 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const { data: indicateursOrganismes } = useQuery<IndicateursOrganismes>(
     ["organismes", organisme?._id, "indicateurs/organismes"],
     () => _get(`/api/v1/organismes/${organisme._id}/indicateurs/organismes`),
+    {
+      enabled: !!organisme?._id,
+    }
+  );
+
+  // TODO afficher toutes les formations par niveau par défaut
+  // éventuellement avec les effectifs en plus selon les permissions
+  const { data: formations } = useQuery<FormationNormalized[]>(
+    ["organismes", organisme?._id, "formations"],
+    async () => {
+      const formations = await _get<Formation[]>(`/api/v1/organismes/${organisme._id}/formations`);
+      return formations.map((formation) => ({
+        ...formation,
+        normalizedName: normalize(formation.intitule_long),
+      }));
+    },
     {
       enabled: !!organisme?._id,
     }
@@ -654,6 +672,25 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     </Text>
                   </Box>
                 </Flex>
+              </>
+            )}
+
+            {formations && (
+              <>
+                <Divider size="md" my={8} />
+
+                <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+                  Aperçu des formations associées à cet organisme
+                </Heading>
+                {/* <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+                  Répartition des effectifs par niveau et formations
+                </Heading> */}
+
+                <Text color="#3A3A3A" mb={4}>
+                  {formations?.length} formation{formations && formations?.length > 1 ? "s" : ""} (source : Catalogue de
+                  l’apprentissage)
+                </Text>
+                <FormationsTable formations={formations} />
               </>
             )}
           </>

@@ -26,13 +26,7 @@ import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useAuth from "@/hooks/useAuth";
 
-import OrganismesTable from "./OrganismesTable";
-
-type OrganismeNormalized = Organisme & {
-  normalizedName: string;
-  normalizedUai: string;
-  normalizedCommune: string;
-};
+import OrganismesTable, { OrganismeNormalized } from "./OrganismesTable";
 
 // L’ordre est celui des tabs
 const tabs = [
