@@ -55,8 +55,12 @@ type EffectifsPageProps = {
 
 const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
-  const { data: duplicates } = useQuery<any, any>([`duplicates-effectifs`, organisme?._id], () =>
-    _get(`/api/v1/organismes/${organisme?._id}/duplicates`)
+  const { data: duplicates } = useQuery<any, any>(
+    [`duplicates-effectifs`, organisme?._id],
+    () => _get(`/api/v1/organismes/${organisme?._id}/duplicates`),
+    {
+      enabled: !!organisme?._id,
+    }
   );
 
   if (!organisme) {
