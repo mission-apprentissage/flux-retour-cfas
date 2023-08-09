@@ -192,6 +192,16 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
   }
 }
 
+interface OrganismeSearchStatsInfos {
+  id?: string;
+  uai?: string;
+  uai_corrige?: string;
+  siret?: string;
+  siret_corrige?: string;
+  fiabilisation?: FiabilisationUaiSiret["type"] | "INCONNU";
+  found?: boolean;
+}
+
 type ItemProcessingInfos = {
   effectif_id?: string;
   effectif_new?: boolean;
@@ -424,16 +434,6 @@ const createOrUpdateEffectif = async (
 
   return { effectifId: effectifDb._id, itemProcessingInfos };
 };
-
-interface OrganismeSearchStatsInfos {
-  id?: string;
-  uai?: string;
-  uai_corrige?: string;
-  siret?: string;
-  siret_corrige?: string;
-  fiabilisation?: FiabilisationUaiSiret["type"] | "INCONNU";
-  found?: boolean;
-}
 
 async function findOrganismeWithStats(
   uai_etablissement: string,
