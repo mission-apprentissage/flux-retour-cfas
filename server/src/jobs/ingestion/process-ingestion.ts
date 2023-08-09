@@ -449,10 +449,7 @@ async function findOrganismeWithStats(
   });
   let uai: string;
   let siret: string;
-  if (!fiabilisationResult) {
-    uai = uai_etablissement;
-    siret = siret_etablissement as string;
-  } else if (fiabilisationResult.type === "A_FIABILISER") {
+  if (fiabilisationResult?.type === "A_FIABILISER") {
     // FIXME seulement 4 en prod !!! potentiellement prendre plus de choses
     uai = fiabilisationResult.uai_fiable as string;
     siret = fiabilisationResult.siret_fiable as string;
