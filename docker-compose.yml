@@ -66,7 +66,7 @@ services:
     container_name: flux_retour_cfas_processor
     build:
       context: server
-    command: ["yarn", "cli", "process:effectifs-queue"]
+    command: ["yarn", "cli", "processor:start"]
     mem_limit: 2g
     restart: unless-stopped
     networks:
