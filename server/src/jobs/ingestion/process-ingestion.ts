@@ -73,14 +73,13 @@ export async function processEffectifsQueue(options?: EffectifQueueProcessorOpti
     ...(options?.force ? {} : { processed_at: { $exists: false } }),
     ...(options?.since ? { created_at: { $gt: options.since } } : {}),
   };
-  const total = await effectifsQueueDb().countDocuments(filter);
   const itemsToProcess = await effectifsQueueDb()
     .find(filter)
     .sort({ created_at: 1 })
     .limit(options?.limit ?? 100)
     .toArray();
 
-  logger.info({ filter, count: itemsToProcess.length, total }, "traitement des effectifsQueue");
+  logger.info({ filter, count: itemsToProcess.length }, "traitement des effectifsQueue");
 
   const res = await PromisePool.withConcurrency(10)
     .for(itemsToProcess)
