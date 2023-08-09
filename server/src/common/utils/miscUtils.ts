@@ -58,3 +58,28 @@ export function stripEmptyFields<T extends object>(object: T): T {
     return acc;
   }, {}) as T;
 }
+
+/**
+ * Renvoie une copie de l'objet en paramètre dont les propriétés ont été préfixées.
+ * @param prefix
+ * @param obj
+ * @returns
+ */
+export function addPrefixToProperties<
+  Prefix extends string,
+  Obj extends Record<string, any>,
+  PrefixedObj = AddPrefix<Prefix, Obj>
+>(prefix: Prefix, obj: Obj): PrefixedObj {
+  const newObj = {} as PrefixedObj;
+
+  for (const key in obj) {
+    // @ts-expect-error
+    newObj[`${prefix}${key}`] = obj[key];
+  }
+
+  return newObj;
+}
+
+export type AddPrefix<Prefix extends string, T> = {
+  [K in keyof T as `${Prefix}${string & K}`]: T[K];
+};

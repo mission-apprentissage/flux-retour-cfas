@@ -11,6 +11,7 @@ type TabCoCodePostalInfo = {
     num_academie: number;
   };
   messages: {
+    error?: string;
     cp: string;
     update: string;
   };
