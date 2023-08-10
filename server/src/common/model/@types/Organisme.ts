@@ -914,6 +914,109 @@ export interface Organisme {
      */
     duree_formation_theorique?: number;
   }[];
+  formationsFormateur?: {
+    formation_id?: ObjectId;
+    /**
+     * Clé unique de la formation
+     */
+    cle_ministere_educatif?: string;
+    /**
+     * Code CFD de la formation
+     */
+    cfd?: string;
+    /**
+     * Code RNCP de la formation à laquelle l'apprenant est inscrit
+     */
+    rncp?: string;
+    /**
+     * Année millésime de la formation pour cet organisme
+     */
+    annee_formation?: number;
+    /**
+     * Niveau de formation récupéré via Tables de Correspondances
+     */
+    niveau?: string | null;
+    /**
+     * Durée théorique de la formation en mois pour cet organisme
+     */
+    duree_formation_theorique?: number;
+    organisme_responsable?: {
+      /**
+       * Code UAI du lieu de formation (optionnel)
+       */
+      uai?: string;
+      /**
+       * Siret du lieu de formation (optionnel)
+       */
+      siret?: string;
+      organisme_id?: ObjectId;
+    };
+  }[];
+  formationsResponsable?: {
+    formation_id?: ObjectId;
+    /**
+     * Clé unique de la formation
+     */
+    cle_ministere_educatif?: string;
+    /**
+     * Code CFD de la formation
+     */
+    cfd?: string;
+    /**
+     * Code RNCP de la formation à laquelle l'apprenant est inscrit
+     */
+    rncp?: string;
+    /**
+     * Année millésime de la formation pour cet organisme
+     */
+    annee_formation?: number;
+    /**
+     * Niveau de formation récupéré via Tables de Correspondances
+     */
+    niveau?: string | null;
+    /**
+     * Durée théorique de la formation en mois pour cet organisme
+     */
+    duree_formation_theorique?: number;
+    organisme_formateur?: {
+      /**
+       * Code UAI du lieu de formation (optionnel)
+       */
+      uai?: string;
+      /**
+       * Siret du lieu de formation (optionnel)
+       */
+      siret?: string;
+      organisme_id?: ObjectId;
+    };
+  }[];
+  formationsResponsableFormateur?: {
+    formation_id?: ObjectId;
+    /**
+     * Clé unique de la formation
+     */
+    cle_ministere_educatif?: string;
+    /**
+     * Code CFD de la formation
+     */
+    cfd?: string;
+    /**
+     * Code RNCP de la formation à laquelle l'apprenant est inscrit
+     */
+    rncp?: string;
+    /**
+     * Année millésime de la formation pour cet organisme
+     */
+    annee_formation?: number;
+    /**
+     * Niveau de formation récupéré via Tables de Correspondances
+     */
+    niveau?: string | null;
+    /**
+     * Durée théorique de la formation en mois pour cet organisme
+     */
+    duree_formation_theorique?: number;
+  }[];
   organismesFormateurs?: {
     siret?: string;
     uai?: string | null;

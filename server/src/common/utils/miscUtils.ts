@@ -1,5 +1,7 @@
 import crypto from "crypto";
 
+import { SetNonNullable } from "type-fest";
+
 /**
  * Generates a random password with a fixed length and made of characters belonging to a specified wishlist
  * @param {*} length
@@ -50,7 +52,7 @@ export const omit = (object, props) => {
   return copy;
 };
 
-export function stripEmptyFields<T extends object>(object: T): T {
+export function stripEmptyFields<T extends object>(object: T): SetNonNullable<T> {
   return Object.entries(object).reduce((acc, [key, value]) => {
     if (typeof value !== "undefined" && value !== null && value !== "") {
       acc[key] = value?.constructor?.name === "Object" ? stripEmptyFields(value) : value;

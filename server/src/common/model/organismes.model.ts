@@ -2,7 +2,12 @@ import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { STATUT_CREATION_ORGANISME, STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import { TETE_DE_RESEAUX } from "@/common/constants/networks";
-import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
+import {
+  CFD_REGEX_PATTERN,
+  RNCP_REGEX_PATTERN,
+  SIRET_REGEX_PATTERN,
+  UAI_REGEX_PATTERN,
+} from "@/common/constants/validations";
 
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
 
@@ -40,6 +45,64 @@ const relationOrganismeSchema = object(
   },
   { additionalProperties: true }
 );
+
+const formationOrganismeSchema = object(
+  {
+    uai: string({
+      description: "Code UAI du lieu de formation (optionnel)",
+      pattern: UAI_REGEX_PATTERN,
+      maxLength: 8,
+      minLength: 8,
+    }),
+    siret: string({
+      description: "Siret du lieu de formation (optionnel)",
+      pattern: SIRET_REGEX_PATTERN,
+      maxLength: 14,
+      minLength: 14,
+    }),
+    organisme_id: objectId(),
+  },
+  { additionalProperties: true }
+);
+
+const formationsBaseSchema = object(
+  {
+    formation_id: objectId(),
+    cle_ministere_educatif: string({
+      description: "Clé unique de la formation",
+    }),
+    cfd: string({ description: "Code CFD de la formation", pattern: CFD_REGEX_PATTERN, maxLength: 8 }),
+    rncp: string({
+      description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
+      pattern: RNCP_REGEX_PATTERN,
+      maxLength: 9,
+    }),
+    annee_formation: integer({
+      description: "Année millésime de la formation pour cet organisme",
+    }),
+    niveau: stringOrNull({ description: "Niveau de formation récupéré via Tables de Correspondances" }),
+    duree_formation_theorique: integer({
+      description: "Durée théorique de la formation en mois pour cet organisme",
+    }),
+  },
+  { additionalProperties: true }
+);
+
+const formationsFormateurSchema = object(
+  {
+    ...formationsBaseSchema.properties,
+    organisme_responsable: formationOrganismeSchema,
+  },
+  { additionalProperties: true }
+);
+const formationsResponsableSchema = object(
+  {
+    ...formationsBaseSchema.properties,
+    organisme_formateur: formationOrganismeSchema,
+  },
+  { additionalProperties: true }
+);
+const formationsResponsableFormateurSchema = formationsBaseSchema;
 
 const collectionName = "organismes";
 
@@ -154,6 +217,10 @@ const schema = object(
         description: "Formations de cet organisme",
       }
     ),
+    formationsFormateur: arrayOf(formationsFormateurSchema),
+    formationsResponsable: arrayOf(formationsResponsableSchema),
+    formationsResponsableFormateur: arrayOf(formationsResponsableFormateurSchema),
+
     organismesFormateurs: arrayOf(relationOrganismeSchema),
     organismesResponsables: arrayOf(relationOrganismeSchema),
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
