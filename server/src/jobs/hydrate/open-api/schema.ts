@@ -2,7 +2,7 @@ import { OpenAPIRegistry, OpenAPIGenerator, RouteConfig } from "@asteasolutions/
 import { z } from "zod";
 
 import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2";
-import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
+import { dossierApprenantSchemaV3Base } from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 
 const dossierApprenantSchemaWithErrors = dossierApprenantSchema().extend({
@@ -133,7 +133,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: z.array(dossierApprenantSchemaV3()),
+          schema: z.array(dossierApprenantSchemaV3Base()),
         },
       },
     },
