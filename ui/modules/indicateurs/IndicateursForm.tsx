@@ -53,7 +53,8 @@ function IndicateursForm(props: IndicateursFormProps) {
   const { auth, organisationType } = useAuth();
   const router = useRouter();
 
-  const { organisme } = useOrganisme(props.organismeId);
+  // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
+  const { organisme } = useOrganisme(props.organismeId); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const { effectifsFilters, sort } = useMemo(() => {
     const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
@@ -311,7 +312,8 @@ function IndicateursForm(props: IndicateursFormProps) {
           loading={indicateursEffectifsLoading}
           permissionEffectifsNominatifs={
             props.organismeId
-              ? organisme?.permissions?.effectifsNominatifs
+              ? // ? organisme?.permissions?.effectifsNominatifs
+                false // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
               : getPermissionsEffectifsNominatifs(organisationType)
           }
           effectifsFilters={effectifsFilters}
@@ -444,7 +446,8 @@ function getPermissionsEffectifsNominatifs(
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
-      return true;
+      // return true;
+      return false; // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
 
     case "TETE_DE_RESEAU":
       return false;
