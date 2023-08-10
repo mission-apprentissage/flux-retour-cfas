@@ -65,14 +65,3 @@ export function prettyFormatNumber(number: number): string {
   }
   return `${number % 1 !== 0 ? number.toFixed(1) : number}`;
 }
-
-/**
- * Escape a CSV field by replacing all " by "".
- */
-export function escapeCSVField(value: string): string {
-  if (typeof value === "string") {
-    return value ? `"${value?.replace(/"/g, '""')}"` : "";
-  } else {
-    return value ? `${value}` : "";
-  }
-}
