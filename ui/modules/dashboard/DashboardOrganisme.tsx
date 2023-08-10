@@ -605,7 +605,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       meilleur moment.
                     </Text>
 
-                    <Link
+                    {/* FIXME: En attente du lien */}
+                    {/* <Link
                       href="/protection-des-donnees"
                       borderBottom="1px"
                       color="action-high-blue-france"
@@ -616,7 +617,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     >
                       <ArrowForwardIcon mr="2" />
                       Consultez la liste des données collectées (TODO lien à mettre)
-                    </Link>
+                    </Link> */}
                   </Box>
                 </Flex>
 
