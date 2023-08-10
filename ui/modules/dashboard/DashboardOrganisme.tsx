@@ -720,9 +720,6 @@ export function getForbiddenErrorText(ctx: AuthContext): string {
 /**
  * Retourne le type de restriction sous forme de label si l'organisme contient au moins un organisme formateur en dehors du territoire / réseau
  * de l'utilisateur authentifié.
- * @param ctx AuthContext
- * @param organismesFormateurs
- * @returns
  */
 function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Organisme): false | string {
   if (!organisme || !organisme.organismesFormateurs || organisme.organismesFormateurs.length === 0) {
