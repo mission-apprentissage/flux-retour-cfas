@@ -225,7 +225,7 @@ function IndicateursGrid({
               <br />
               Un jeune est considéré en rupture lorsqu’il ne travaille plus dans l’entreprise qui l’accueillait.
               Néanmoins, il reste inscrit dans le centre de formation et dispose d’un délai de 6 mois pour retrouver une
-              entreprise auprès de qui se former.
+              entreprise auprès de qui se former. Il est considéré comme stagiaire de la formation professionnelle.
             </div>
           }
           icon={<RupturantsIcon />}
