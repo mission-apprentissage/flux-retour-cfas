@@ -133,7 +133,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: z.array(dossierApprenantSchemaV3()),
+          schema: z.array(dossierApprenantSchemaV3(true)),
         },
       },
     },
