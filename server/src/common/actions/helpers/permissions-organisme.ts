@@ -48,7 +48,7 @@ export async function buildOrganismePermissions(
         infoTransmissionEffectifs: isOrganismeOrFormateur,
         indicateursEffectifs: isOrganismeOrFormateur,
         effectifsNominatifs: isOrganismeOrFormateur,
-        manageEffectifs: isOrganismeOrFormateur, // FIXME à faire revalider, est-ce qu'un responsable peut gérer sifa / les effectifs d
+        manageEffectifs: isOrganismeOrFormateur, // FIXME à faire revalider, est-ce qu'un responsable peut gérer sifa / les effectifs de l'organisme
       };
     }
 
