@@ -1,10 +1,10 @@
+import { ArrowForwardIcon } from "@chakra-ui/icons";
 import {
   Box,
-  Center,
   Container,
+  HStack,
   Heading,
   ListItem,
-  Spinner,
   Tab,
   TabList,
   TabPanel,
@@ -16,14 +16,14 @@ import {
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _get } from "@/common/httpClient";
-import { OrganisationType } from "@/common/internal/Organisation";
+import { OrganisationType, getOrganisationLabel } from "@/common/internal/Organisation";
 import { Organisme } from "@/common/internal/Organisme";
 import { normalize } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { useOrganisationOrganismes } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 
 import OrganismesTable from "./OrganismesTable";
@@ -49,23 +49,26 @@ const tabs = [
 ] as const;
 
 interface ListeOrganismesPageProps {
+  organismes: Organisme[];
+  modePublique: boolean;
   activeTab: (typeof tabs)[number]["key"];
 }
 
 function ListeOrganismesPage(props: ListeOrganismesPageProps) {
   const router = useRouter();
-  const { organisationType } = useAuth();
-  const { isLoading, organismes } = useOrganisationOrganismes();
+  const { auth, organisationType } = useAuth();
 
-  const title = `Mes organismes${props.activeTab === "non-fiables" ? " non fiables" : ""}`;
+  const title = `${props.modePublique ? "Ses" : "Mes"} organismes${
+    props.activeTab === "non-fiables" ? " non fiables" : ""
+  }`;
 
   const { organismesFiables, organismesNonFiables, nbOrganimesFermes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesNonFiables: OrganismeNormalized[] = [];
     let nbOrganimesFermes = 0;
-    (organismes || []).forEach((organisme: OrganismeNormalized) => {
+    (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
-      organisme.normalizedName = normalize(organisme.nom ?? "");
+      organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
       organisme.normalizedUai = normalize(organisme.uai ?? "");
       organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
 
@@ -84,33 +87,21 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
       organismesNonFiables,
       nbOrganimesFermes,
     };
-  }, [organismes]);
-
-  if (isLoading && !organismes) {
-    return (
-      <SimplePage title={title}>
-        <Container maxW="xl" p="8">
-          <Center>
-            <Spinner />
-          </Center>
-        </Container>
-      </SimplePage>
-    );
-  }
+  }, [props.organismes]);
 
   return (
     <SimplePage title={title}>
       <Container maxW="xl" p="8">
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb="4w">
-          {getHeaderTitleFromOrganisationType(organisationType)}
+          {props.modePublique ? "Ses organismes formateurs" : getHeaderTitleFromOrganisationType(organisationType)}
         </Heading>
 
         <Text>Retrouvez ci-dessous&nbsp;:</Text>
         <UnorderedList styleType="'- '">
           <ListItem>
             les <strong>{organismesFiables.length}</strong> établissements <strong>fiables</strong>{" "}
-            {getTextContextFromOrganisationType(organisationType)} et la nature de chacun (inclus les
-            prépa-apprentissage, CFA académiques, d’entreprise, etc.)
+            {props.modePublique ? "rattachés à cet organisme" : getTextContextFromOrganisationType(organisationType)} et
+            la nature de chacun (inclus les prépa-apprentissage, CFA académiques, d’entreprise, etc.)
           </ListItem>
           {organismesNonFiables.length !== 0 && (
             <ListItem>
@@ -131,16 +122,42 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         </UnorderedList>
         <Text fontStyle="italic">Sources : Catalogue et Référentiel de l’apprentissage</Text>
 
+        <HStack justifyContent="space-between">
+          <Box />
+          <Link
+            href={`mailto:${CONTACT_ADDRESS}?subject=Anomalie TDB [${getOrganisationLabel(auth.organisation)}]`}
+            target="_blank"
+            rel="noopener noreferrer"
+            color="action-high-blue-france"
+            borderBottom="1px"
+            _hover={{ textDecoration: "none" }}
+          >
+            <ArrowForwardIcon mr={2} />
+            Signaler une anomalie
+          </Link>
+        </HStack>
+
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         {organismesNonFiables.length === 0 ? (
-          <OrganismesFiablesPanelContent organismesFiables={organismesFiables} />
+          <OrganismesFiablesPanelContent organismes={organismesFiables} />
         ) : (
           <Tabs
             isLazy
             lazyBehavior="keepMounted"
             index={tabs.find((tab) => tab.key === props.activeTab)?.index}
             onChange={(index) => {
-              router.push(tabs[index]?.route, undefined, { shallow: true });
+              router.push(
+                {
+                  pathname: `${props.modePublique ? "/organismes/[organismeId]" : ""}${tabs[index]?.route}`,
+                  query: {
+                    ...router.query,
+                  },
+                },
+                undefined,
+                {
+                  shallow: true,
+                }
+              );
             }}
             mt="12"
           >
@@ -150,57 +167,10 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             </TabList>
             <TabPanels>
               <TabPanel>
-                <OrganismesFiablesPanelContent organismesFiables={organismesFiables} />
+                <OrganismesFiablesPanelContent organismes={organismesFiables} />
               </TabPanel>
               <TabPanel>
-                <Ribbons variant="warning" my={8}>
-                  <Box color="grey.800">
-                    <Text>
-                      Un organisme (OFA) est considéré comme non-fiable lorsqu’il présente l’une des caractéristiques
-                      suivantes&nbsp;:
-                    </Text>
-                    <UnorderedList styleType="'- '">
-                      <ListItem>
-                        Son couple UAI-SIRET n’est pas <strong>validé</strong> dans le{" "}
-                        <Link
-                          href="https://referentiel.apprentissage.onisep.fr/"
-                          isExternal={true}
-                          borderBottom="1px"
-                          _hover={{ textDecoration: "none" }}
-                        >
-                          Référentiel de l’apprentissage
-                        </Link>
-                        .
-                      </ListItem>
-                      <ListItem>
-                        Son code UAI est répertorié comme <strong>inconnu</strong> ou non <strong>validé</strong> dans
-                        le{" "}
-                        <Link
-                          href="https://referentiel.apprentissage.onisep.fr/"
-                          isExternal={true}
-                          borderBottom="1px"
-                          _hover={{ textDecoration: "none" }}
-                        >
-                          Référentiel de l’apprentissage
-                        </Link>
-                        .
-                      </ListItem>
-                      <ListItem>
-                        L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE,
-                        est <strong>fermé</strong>.
-                      </ListItem>
-                    </UnorderedList>
-                    <Text>
-                      Un organisme est considéré comme non-fiable dès lors qu’il remplit au moins l’une de ces
-                      conditions.
-                    </Text>
-                    <Text fontWeight="bold">
-                      Veuillez contacter les organismes non-fiables pour encourager une action auprès de leur Carif-Oref
-                      ou de l’INSEE.
-                    </Text>
-                  </Box>
-                </Ribbons>
-                <OrganismesTable organismes={organismesNonFiables} modeNonFiable />
+                <OrganismesNonFiablesPanelContent organismes={organismesNonFiables} />
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -210,7 +180,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
   );
 }
 
-function OrganismesFiablesPanelContent({ organismesFiables }: { organismesFiables: OrganismeNormalized[] }) {
+function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
   return (
     <>
       <Ribbons variant="info" my={8}>
@@ -236,7 +206,60 @@ function OrganismesFiablesPanelContent({ organismesFiables }: { organismesFiable
           </UnorderedList>
         </Box>
       </Ribbons>
-      <OrganismesTable organismes={organismesFiables} />
+      <OrganismesTable organismes={organismes} />
+    </>
+  );
+}
+
+function OrganismesNonFiablesPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
+  return (
+    <>
+      <Ribbons variant="warning" my={8}>
+        <Box color="grey.800">
+          <Text>
+            Un organisme (OFA) est considéré comme non-fiable lorsqu’il présente l’une des caractéristiques
+            suivantes&nbsp;:
+          </Text>
+          <UnorderedList styleType="'- '">
+            <ListItem>
+              Son couple UAI-SIRET n’est pas <strong>validé</strong> dans le{" "}
+              <Link
+                href="https://referentiel.apprentissage.onisep.fr/"
+                isExternal={true}
+                borderBottom="1px"
+                _hover={{ textDecoration: "none" }}
+              >
+                Référentiel de l’apprentissage
+              </Link>
+              .
+            </ListItem>
+            <ListItem>
+              Son code UAI est répertorié comme <strong>inconnu</strong> ou non <strong>validé</strong> dans le{" "}
+              <Link
+                href="https://referentiel.apprentissage.onisep.fr/"
+                isExternal={true}
+                borderBottom="1px"
+                _hover={{ textDecoration: "none" }}
+              >
+                Référentiel de l’apprentissage
+              </Link>
+              .
+            </ListItem>
+            <ListItem>
+              L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE, est{" "}
+              <strong>fermé</strong>.
+            </ListItem>
+          </UnorderedList>
+          <Text>
+            Un organisme est considéré comme non-fiable dès lors qu’il remplit au moins l’une de ces conditions.
+          </Text>
+          <Text fontWeight="bold">
+            Veuillez contacter les organismes non-fiables pour encourager une action auprès de leur Carif-Oref ou de
+            l’INSEE.
+          </Text>
+        </Box>
+      </Ribbons>
+      <OrganismesTable organismes={organismes} modeNonFiable />
     </>
   );
 }

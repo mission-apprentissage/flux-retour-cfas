@@ -29,6 +29,7 @@ import { formatDate } from "@/common/utils/dateUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
+import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import CarteFrance from "@/modules/dashboard/CarteFrance";
 import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
@@ -40,12 +41,17 @@ import { LockFill } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
+function DashboardOwnOrganisme() {
+  const { organisme } = useOrganisationOrganisme();
+  return <DashboardOrganisme organisme={organisme} modePublique={false} />;
+}
+
 function getDashboardComponent(organisationType: OrganisationType) {
   switch (organisationType) {
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      return <DashboardOrganisme />;
+      return <DashboardOwnOrganisme />;
     }
 
     case "TETE_DE_RESEAU":

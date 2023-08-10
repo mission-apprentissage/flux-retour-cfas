@@ -1,6 +1,8 @@
 import logger from "@/common/logger";
 import config from "@/config";
 
+import { OrganismesReferentiel } from "../model/@types";
+
 import getApiClient from "./client";
 
 // Cf Documentation : https://referentiel.apprentissage.onisep.fr/api/v1/doc/#/
@@ -32,13 +34,31 @@ const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
  * @returns {Promise<{organismes: import("./@types/MnaOrganisme").default[]}>}
  */
 export const fetchOrganismes = async () => {
-  const { data } = await axiosClient.get("/organismes", {
+  const {
+    data: { organismes },
+  } = await axiosClient.get<{ organismes: OrganismesReferentiel[] }>("/organismes", {
     params: {
-      items_par_page: 10000,
+      items_par_page: 50000,
       champs: DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(","),
     },
   });
-  return data;
+
+  // comme le référentiel n'expose pas l'UAI directement dans les relations mais seulement le SIRET,
+  // on complète l'UAI des relations avec l'UAI stockées dans les organismes
+  const uaiBySiret = organismes.reduce((acc, organisme) => {
+    acc[organisme.siret] = organisme.uai;
+    return acc;
+  }, {});
+
+  organismes.forEach((organisme) => {
+    organisme?.relations?.forEach((relation) => {
+      if (relation.siret) {
+        relation.uai = uaiBySiret[relation.siret];
+      }
+    });
+  });
+
+  return organismes;
 };
 
 /**

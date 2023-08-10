@@ -27,7 +27,14 @@ const RegisterConfigurationOrganisationPage = () => {
             <Box p="2" h="7vh" borderLeft="4px solid bluefrances.525" />
             <Box>
               <Text>Contacter l&apos;équipe :</Text>
-              <Link fontWeight={700} href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
+              <Link
+                fontWeight={700}
+                href={`mailto:${CONTACT_ADDRESS}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                color="bluefrance"
+                whiteSpace="nowrap"
+              >
                 {CONTACT_ADDRESS}
               </Link>{" "}
             </Box>

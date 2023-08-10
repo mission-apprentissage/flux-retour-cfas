@@ -1,29 +1,18 @@
 import { EditIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Heading,
-  HStack,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  SimpleGrid,
-  Text,
-  Tooltip,
-} from "@chakra-ui/react";
+import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { exportDataAsCSV, exportDataAsXlsx } from "@/common/utils/exportUtils";
+import { OrganisationType } from "@/common/internal/Organisation";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
+import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
+import { useOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
 import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
@@ -32,14 +21,8 @@ import FiltreFormationNiveau from "@/modules/indicateurs/filters/FiltreFormation
 import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganismeReseau";
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
 
-import {
-  AbandonsIcon,
-  ApprentisIcon,
-  FileDownloadIcon,
-  InscritsSansContratsIcon,
-  RupturantsIcon,
-} from "../dashboard/icons";
-import IndicateursGrid from "../dashboard/IndicateursGrid";
+import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
+import IndicateursGrid, { typesEffectifNominatif } from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
   EffectifsFilters,
@@ -63,9 +46,15 @@ import FiltreOrganismeRegion from "./filters/FiltreOrganismeRegion";
 import NatureOrganismeTag from "./NatureOrganismeTag";
 import NewTable from "./NewTable";
 
-function IndicateursForm() {
+interface IndicateursFormProps {
+  organismeId?: string;
+}
+function IndicateursForm(props: IndicateursFormProps) {
   const { auth, organisationType } = useAuth();
   const router = useRouter();
+
+  // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
+  const { organisme } = useOrganisme(props.organismeId); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const { effectifsFilters, sort } = useMemo(() => {
     const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
@@ -77,11 +66,14 @@ function IndicateursForm() {
   }, [JSON.stringify(router.query)]);
 
   const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery(
-    ["indicateurs/effectifs/par-organisme", JSON.stringify(effectifsFilters)],
+    [props.organismeId, "indicateurs/effectifs/par-organisme", JSON.stringify(effectifsFilters)],
     () =>
-      _get<IndicateursEffectifsAvecOrganisme[]>("/api/v1/indicateurs/effectifs/par-organisme", {
-        params: convertEffectifsFiltersToQuery(effectifsFilters),
-      }),
+      _get<IndicateursEffectifsAvecOrganisme[]>(
+        `/api/v1${props.organismeId ? `/organismes/${props.organismeId}` : ""}/indicateurs/effectifs/par-organisme`,
+        {
+          params: convertEffectifsFiltersToQuery(effectifsFilters),
+        }
+      ),
     {
       enabled: router.isReady,
     }
@@ -114,6 +106,7 @@ function IndicateursForm() {
       {
         pathname: router.pathname,
         query: {
+          ...(props.organismeId ? { organismeId: props.organismeId } : {}),
           ...convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }),
           ...convertPaginationInfosToQuery({ sort, ...newParams }),
         },
@@ -127,6 +120,9 @@ function IndicateursForm() {
     void router.push(
       {
         pathname: router.pathname,
+        query: {
+          ...(props.organismeId ? { organismeId: props.organismeId } : {}),
+        },
       },
       undefined,
       { shallow: true }
@@ -219,10 +215,16 @@ function IndicateursForm() {
             value={effectifsFilters.organisme_academies}
             onChange={(academies) => updateState({ organisme_academies: academies })}
           />
-          <FiltreOrganismeBassinEmploi
-            value={effectifsFilters.organisme_bassinsEmploi}
-            onChange={(organisme_bassinsEmploi) => updateState({ organisme_bassinsEmploi: organisme_bassinsEmploi })}
-          />
+          {organisationType !== "ORGANISME_FORMATION_FORMATEUR" &&
+            organisationType !== "ORGANISME_FORMATION_RESPONSABLE" &&
+            organisationType !== "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR" && (
+              <FiltreOrganismeBassinEmploi
+                value={effectifsFilters.organisme_bassinsEmploi}
+                onChange={(organisme_bassinsEmploi) =>
+                  updateState({ organisme_bassinsEmploi: organisme_bassinsEmploi })
+                }
+              />
+            )}
         </SimpleGrid>
         {/* <Text fontWeight="700" textTransform="uppercase">
           Domaine d’activité
@@ -308,8 +310,14 @@ function IndicateursForm() {
         <IndicateursGrid
           indicateursEffectifs={indicateursEffectifsTotaux}
           loading={indicateursEffectifsLoading}
-          showDownloadLinks={organisationType !== "OPERATEUR_PUBLIC_NATIONAL" && organisationType !== "TETE_DE_RESEAU"}
+          permissionEffectifsNominatifs={
+            props.organismeId
+              ? // ? organisme?.permissions?.effectifsNominatifs
+                false // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
+              : getPermissionsEffectifsNominatifs(organisationType)
+          }
           effectifsFilters={effectifsFilters}
+          organismeId={props.organismeId}
         />
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
@@ -319,56 +327,21 @@ function IndicateursForm() {
             Répartition des effectifs par organismes
           </Heading>
 
-          <Menu>
-            <MenuButton
-              as={Button}
-              variant={"link"}
-              fontSize="md"
-              mt="2"
-              borderBottom="1px"
-              borderRadius="0"
-              lineHeight="6"
-              p="0"
-              isDisabled={!indicateursEffectifs || indicateursEffectifs.length === 0}
-              _active={{
-                color: "bluefrance",
-              }}
-            >
-              <FileDownloadIcon mr="2" />
-              Télécharger la liste
-            </MenuButton>
-
-            <MenuList>
-              <MenuItem
-                onClick={() => {
-                  const effectitsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
-                    ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
-                  );
-                  exportDataAsXlsx(
-                    `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
-                    effectitsWithoutOrganismeId,
-                    indicateursParOrganismeExportColumns
-                  );
-                }}
-              >
-                Excel (XLSX)
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  const effectitsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
-                    ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
-                  );
-                  exportDataAsCSV(
-                    `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.csv`,
-                    effectitsWithoutOrganismeId,
-                    indicateursParOrganismeExportColumns
-                  );
-                }}
-              >
-                CSV
-              </MenuItem>
-            </MenuList>
-          </Menu>
+          <DownloadLinkButton
+            isDisabled={indicateursEffectifs?.length === 0}
+            action={async () => {
+              const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
+                ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
+              );
+              exportDataAsXlsx(
+                `tdb-indicateurs-organismes-${effectifsFilters.date.toISOString().substring(0, 10)}.xlsx`,
+                effectifsWithoutOrganismeId,
+                indicateursParOrganismeExportColumns
+              );
+            }}
+          >
+            Télécharger la liste
+          </DownloadLinkButton>
         </HStack>
 
         <NewTable
@@ -465,3 +438,35 @@ function IndicateursForm() {
 }
 
 export default IndicateursForm;
+
+function getPermissionsEffectifsNominatifs(
+  organisationType: OrganisationType
+): boolean | Array<(typeof typesEffectifNominatif)[number]> {
+  switch (organisationType) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+      // return true;
+      return false; // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
+
+    case "TETE_DE_RESEAU":
+      return false;
+
+    case "DREETS":
+    case "DRAAF":
+      return ["inscritSansContrat", "rupturant", "abandon"];
+    case "CONSEIL_REGIONAL":
+      return false;
+    case "DDETS":
+      return ["inscritSansContrat", "rupturant", "abandon"];
+    case "ACADEMIE":
+      return false;
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+      return false;
+
+    case "ADMINISTRATEUR":
+      return true;
+  }
+  return false;
+}

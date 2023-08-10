@@ -1,6 +1,5 @@
 import { AxiosInstance } from "axiosist";
 
-import logger from "@/common/logger";
 import { PermissionsTestConfig, testPermissions } from "@tests/utils/permissions";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from "@tests/utils/testUtils";
 
@@ -25,22 +24,22 @@ describe("POST /api/v1/admin/impersonate - démarre une imposture d'organisation
 
   describe("Permissions", () => {
     const accesOrganisme: PermissionsTestConfig<boolean> = {
-      "OFF lié": false,
-      "OFF non lié": false,
-      "OFR lié": false,
-      "OFR responsable": false,
-      "OFR non lié": false,
-      "OFRF lié": false,
-      "OFRF responsable": false,
-      "OFRF non lié": false,
-      "Tête de réseau": false,
-      "Tête de réseau non liée": false,
+      "OF cible": false,
+      "OF non lié": false,
+      "OF formateur": false,
+      "OF responsable": false,
+      "Tête de réseau même réseau": false,
+      "Tête de réseau autre réseau": false,
       "DREETS même région": false,
       "DREETS autre région": false,
+      "DRAAF même région": false,
+      "DRAAF autre région": false,
+      "Conseil Régional même région": false,
+      "Conseil Régional autre région": false,
       "DDETS même département": false,
       "DDETS autre département": false,
-      "ACADEMIE même académie": false,
-      "ACADEMIE autre académie": false,
+      "Académie même académie": false,
+      "Académie autre académie": false,
       "Opérateur public national": false,
       Administrateur: true,
     };
@@ -66,22 +65,22 @@ describe("DELETE /api/v1/admin/impersonate - arrête l'imposture d'organisation"
 
   describe("Permissions", () => {
     const accesOrganisme: PermissionsTestConfig<boolean> = {
-      "OFF lié": false,
-      "OFF non lié": false,
-      "OFR lié": false,
-      "OFR responsable": false,
-      "OFR non lié": false,
-      "OFRF lié": false,
-      "OFRF responsable": false,
-      "OFRF non lié": false,
-      "Tête de réseau": false,
-      "Tête de réseau non liée": false,
+      "OF cible": false,
+      "OF non lié": false,
+      "OF formateur": false,
+      "OF responsable": false,
+      "Tête de réseau même réseau": false,
+      "Tête de réseau autre réseau": false,
       "DREETS même région": false,
       "DREETS autre région": false,
+      "DRAAF même région": false,
+      "DRAAF autre région": false,
+      "Conseil Régional même région": false,
+      "Conseil Régional autre région": false,
       "DDETS même département": false,
       "DDETS autre département": false,
-      "ACADEMIE même académie": false,
-      "ACADEMIE autre académie": false,
+      "Académie même académie": false,
+      "Académie autre académie": false,
       "Opérateur public national": false,
       Administrateur: true,
     };
@@ -110,7 +109,6 @@ describe("DELETE /api/v1/admin/impersonate - arrête l'imposture d'organisation"
 });
 
 it("End to end - imposture d'organisation", async () => {
-  logger.level("error");
   let response = await requestAsOrganisation(
     {
       type: "ADMINISTRATEUR",
@@ -133,7 +131,7 @@ it("End to end - imposture d'organisation", async () => {
     civility: "Madame",
     nom: "Dupont",
     prenom: "Jean",
-    email: "Administrateur@test.local",
+    email: "Administrateur@tdb.local",
     fonction: "Responsable administratif",
     has_accept_cgu_version: "v0.1",
     telephone: "",
@@ -163,7 +161,7 @@ it("End to end - imposture d'organisation", async () => {
     civility: "Madame",
     nom: "Dupont",
     prenom: "Jean",
-    email: "Administrateur@test.local",
+    email: "Administrateur@tdb.local",
     fonction: "Responsable administratif",
     has_accept_cgu_version: "v0.1",
     telephone: "",

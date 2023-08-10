@@ -30,7 +30,7 @@ Quelques sirets générés à utiliser pour une meilleure lisibilité :
   11111111100097
 */
 
-const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key] }, "_id" | "siret" | "uai"> = {
+export const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key] }, "_id" | "siret" | "uai"> = {
   adresse: {
     departement: "56", // morbihan
     region: "53", // bretagne
@@ -45,6 +45,8 @@ const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key]
   ferme: false,
   metiers: [],
   relatedFormations: [],
+  organismesFormateurs: [],
+  organismesResponsables: [],
   created_at: new Date("2023-04-12T18:00:00.000Z"),
   updated_at: new Date("2023-04-12T18:00:00.000Z"),
   est_dans_le_referentiel: true,
@@ -54,37 +56,49 @@ const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key]
 export const organismes: WithId<Organisme>[] = [
   // owner
   {
+    ...commonOrganismeAttributes,
     _id: new ObjectId(id(1)),
     uai: "0000000A",
     siret: "00000000000018",
-    ...commonOrganismeAttributes,
-    nature: "formateur",
+    organismesFormateurs: [
+      {
+        _id: new ObjectId(id(2)),
+      },
+    ],
+    organismesResponsables: [
+      {
+        _id: new ObjectId(id(3)),
+      },
+    ],
   },
   {
+    ...commonOrganismeAttributes,
     _id: new ObjectId(id(2)),
     uai: "0000000B",
     siret: "00000000000026",
-    ...commonOrganismeAttributes,
-    nature: "responsable_formateur",
-    relatedFormations: generateRelatedFormations([{ uai: "0000000A", siret: "00000000000018" }]),
+    organismesResponsables: [
+      {
+        _id: new ObjectId(id(1)),
+      },
+    ],
   },
   {
+    ...commonOrganismeAttributes,
     _id: new ObjectId(id(3)),
     uai: "0000000C",
     siret: "00000000000034",
-    ...commonOrganismeAttributes,
-    nature: "responsable",
-    relatedFormations: generateRelatedFormations([
-      { uai: "0000000A", siret: "00000000000018" },
-      { uai: "0000000B", siret: "00000000000026" },
-    ]),
+    organismesFormateurs: [
+      {
+        _id: new ObjectId(id(1)),
+      },
+    ],
   },
   // other
   {
+    ...commonOrganismeAttributes,
     _id: new ObjectId(id(10)),
     uai: "1111111B",
     siret: "11111111100006",
-    ...commonOrganismeAttributes,
   },
 ];
 
@@ -104,7 +118,7 @@ export interface ProfilPermission {
 // liste exhaustive des profils à tester pour les permissions
 const profilsOrganisation = [
   {
-    label: "OFF lié",
+    label: "OF cible",
     organisation: {
       type: "ORGANISME_FORMATION_FORMATEUR",
       uai: "0000000A",
@@ -112,70 +126,38 @@ const profilsOrganisation = [
     },
   },
   {
-    label: "OFF non lié",
+    label: "OF non lié",
     organisation: {
-      type: "ORGANISME_FORMATION_FORMATEUR",
+      type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
       uai: "1111111B",
       siret: "11111111100006",
     },
   },
   {
-    label: "OFR lié",
+    label: "OF formateur",
     organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE",
-      uai: "0000000A",
-      siret: "00000000000018",
-    },
-  },
-  {
-    label: "OFR responsable",
-    organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE",
+      type: "ORGANISME_FORMATION_FORMATEUR",
       uai: "0000000B",
       siret: "00000000000026",
     },
   },
   {
-    label: "OFR non lié",
+    label: "OF responsable",
     organisation: {
       type: "ORGANISME_FORMATION_RESPONSABLE",
-      uai: "1111111B",
-      siret: "11111111100006",
-    },
-  },
-  {
-    label: "OFRF lié",
-    organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-      uai: "0000000A",
-      siret: "00000000000018",
-    },
-  },
-  {
-    label: "OFRF responsable",
-    organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
       uai: "0000000C",
       siret: "00000000000034",
     },
   },
   {
-    label: "OFRF non lié",
-    organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-      uai: "1111111B",
-      siret: "11111111100006",
-    },
-  },
-  {
-    label: "Tête de réseau",
+    label: "Tête de réseau même réseau",
     organisation: {
       type: "TETE_DE_RESEAU",
       reseau: "CCI",
     },
   },
   {
-    label: "Tête de réseau non liée",
+    label: "Tête de réseau autre réseau",
     organisation: {
       type: "TETE_DE_RESEAU",
       reseau: "AGRI",
@@ -196,17 +178,31 @@ const profilsOrganisation = [
     },
   },
   {
-    label: "ACADEMIE même académie",
+    label: "DRAAF même région",
     organisation: {
-      type: "ACADEMIE",
-      code_academie: "14",
+      type: "DRAAF",
+      code_region: "53",
     },
   },
   {
-    label: "ACADEMIE autre académie",
+    label: "DRAAF autre région",
     organisation: {
-      type: "ACADEMIE",
-      code_academie: "16",
+      type: "DRAAF",
+      code_region: "76",
+    },
+  },
+  {
+    label: "Conseil Régional même région",
+    organisation: {
+      type: "CONSEIL_REGIONAL",
+      code_region: "53",
+    },
+  },
+  {
+    label: "Conseil Régional autre région",
+    organisation: {
+      type: "CONSEIL_REGIONAL",
+      code_region: "76",
     },
   },
   {
@@ -224,6 +220,20 @@ const profilsOrganisation = [
     },
   },
   {
+    label: "Académie même académie",
+    organisation: {
+      type: "ACADEMIE",
+      code_academie: "14",
+    },
+  },
+  {
+    label: "Académie autre académie",
+    organisation: {
+      type: "ACADEMIE",
+      code_academie: "16",
+    },
+  },
+  {
     label: "Opérateur public national",
     organisation: {
       type: "OPERATEUR_PUBLIC_NATIONAL",
@@ -238,16 +248,20 @@ const profilsOrganisation = [
   },
 ] as const satisfies ReadonlyArray<ProfilPermission>;
 
-type profilLabels = (typeof profilsOrganisation)[number]["label"];
+type ProfilLabel = (typeof profilsOrganisation)[number]["label"];
 
 export const profilsPermissionByLabel = profilsOrganisation.reduce(
   (acc, v) => ({ ...acc, [v.label]: v }),
-  {} as { [key in profilLabels]: ProfilPermission }
+  {} as { [key in ProfilLabel]: ProfilPermission }
 );
 
-export type PermissionsTestConfig<ExpectedResult = boolean> = { [key in profilLabels]: ExpectedResult };
+export type PermissionsTestConfig<ExpectedResult = boolean> = { [key in ProfilLabel]: ExpectedResult };
 
-type TestFunc<ExpectedResult> = (organisation: NewOrganisation, expectedResult: ExpectedResult) => Promise<any>;
+type TestFunc<ExpectedResult> = (
+  organisation: NewOrganisation,
+  expectedResult: ExpectedResult,
+  organisationLabel?: ProfilLabel
+) => Promise<any>;
 
 /**
  * Utilitaire pour exécuter un test avec tous les profils d'organisation
@@ -259,7 +273,7 @@ export function testPermissions<ExpectedResult>(
   Object.entries(permissionsConfig).forEach(([label, allowed]) => {
     const conf = profilsPermissionByLabel[label];
     it(`${conf.label} - ${allowed ? "ALLOWED" : "FORBIDDEN"}`, async () => {
-      await testFunc(conf.organisation, allowed);
+      await testFunc(conf.organisation, allowed, conf.label);
     });
   });
 }

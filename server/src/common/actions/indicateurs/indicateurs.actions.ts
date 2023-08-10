@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 import {
   EffectifsFilters,
   FullEffectifsFilters,
@@ -8,8 +10,10 @@ import {
   organismesFiltersConfigurations,
 } from "@/common/actions/helpers/filters";
 import {
+  findOrganismesFormateursIdsOfOrganisme,
   getEffectifsAnonymesRestriction,
   getEffectifsNominatifsRestriction,
+  getOrganismeIndicateursEffectifsRestriction,
   getIndicateursEffectifsRestriction,
   getIndicateursOrganismesRestriction,
 } from "@/common/actions/helpers/permissions";
@@ -18,8 +22,10 @@ import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import {
+  IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
   IndicateursEffectifsAvecOrganisme,
+  IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
 } from "./indicateurs";
 
@@ -240,13 +246,15 @@ export async function getIndicateursOrganismesParDepartement(
 
 export async function getIndicateursEffectifsParOrganisme(
   ctx: AuthContext,
-  filters: FullEffectifsFilters
+  filters: FullEffectifsFilters,
+  organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
           $and: [
+            await getOrganismeRestriction(organismeId),
             await getEffectifsAnonymesRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
@@ -437,49 +445,28 @@ export async function getIndicateursEffectifsParOrganisme(
   return indicateurs;
 }
 
-export const typesEffectifNominatif = ["inscritsSansContrat", "rupturants", "abandons"] as const;
+export const typesEffectifNominatif = [
+  "apprenant",
+  "apprenti",
+  "inscritSansContrat",
+  "rupturant",
+  "abandon",
+  "inconnu",
+] as const;
 export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
-
-const pipelineByTypeEffectifNominatif: { [type in TypeEffectifNominatif]: any[] } = {
-  abandons: [
-    {
-      $match: {
-        "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
-      },
-    },
-  ],
-  inscritsSansContrat: [
-    {
-      $match: {
-        "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-        "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
-      },
-    },
-  ],
-  rupturants: [
-    { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
-    // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
-    {
-      $addFields: {
-        previousStatutAtDate: {
-          $arrayElemAt: ["$apprenant.historique_statut", -2],
-        },
-      },
-    },
-    { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
-  ],
-};
 
 export async function getEffectifsNominatifs(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
-  type: TypeEffectifNominatif
+  type: TypeEffectifNominatif,
+  organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
           $and: [
+            await getOrganismeRestriction(organismeId),
             await getEffectifsNominatifsRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
@@ -514,7 +501,62 @@ export async function getEffectifsNominatifs(
           },
         },
       },
-      ...pipelineByTypeEffectifNominatif[type],
+      {
+        $set: {
+          previousStatutAtDate: {
+            $arrayElemAt: ["$apprenant.historique_statut", -2],
+          },
+        },
+      },
+      {
+        $set: {
+          statut: {
+            // pipeline commun entre statuts plutôt que $facet limité à 16Mo
+            $switch: {
+              branches: [
+                // l'ordre important ici, du statut le plus spécifique au plus générique
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
+                      { $eq: ["$previousStatutAtDate.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                    ],
+                  },
+                  then: "rupturant" satisfies TypeEffectifNominatif,
+                },
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
+                      { $ne: ["$apprenant.historique_statut.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                    ],
+                  },
+                  then: "inscritSansContrat" satisfies TypeEffectifNominatif,
+                },
+                {
+                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                  then: "apprenti" satisfies TypeEffectifNominatif,
+                },
+                {
+                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
+                  then: "abandon" satisfies TypeEffectifNominatif,
+                },
+              ],
+              default: "inconnu" satisfies TypeEffectifNominatif,
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          statut:
+            type === "apprenant"
+              ? {
+                  $in: ["apprenti", "inscritSansContrat", "rupturant"] satisfies TypeEffectifNominatif[],
+                }
+              : { $eq: type },
+        },
+      },
       {
         $lookup: {
           from: "organismes",
@@ -551,6 +593,7 @@ export async function getEffectifsNominatifs(
           organisme_nom: "$organisme.nom",
           organisme_nature: "$organisme.nature",
 
+          apprenant_statut: "$statut",
           apprenant_nom: "$apprenant.nom",
           apprenant_prenom: "$apprenant.prenom",
           apprenant_date_de_naissance: { $substr: ["$apprenant.date_de_naissance", 0, 10] },
@@ -566,4 +609,212 @@ export async function getEffectifsNominatifs(
     ])
     .toArray()) as IndicateursEffectifsAvecOrganisme[];
   return indicateurs;
+}
+
+export async function getOrganismeIndicateursEffectifs(
+  ctx: AuthContext,
+  organismeId: ObjectId,
+  filters: EffectifsFilters
+): Promise<IndicateursEffectifs> {
+  const indicateurs = (await effectifsDb()
+    .aggregate([
+      {
+        $match: {
+          $and: [
+            await getOrganismeRestriction(organismeId),
+            await getOrganismeIndicateursEffectifsRestriction(ctx),
+            ...buildMongoFilters(filters, effectifsFiltersConfigurations),
+          ],
+          "_computed.organisme.fiable": true,
+        },
+      },
+      {
+        $project: {
+          "apprenant.historique_statut": {
+            $sortArray: {
+              input: {
+                $filter: {
+                  input: "$apprenant.historique_statut",
+                  as: "statut",
+                  cond: {
+                    $lte: ["$$statut.date_statut", filters.date],
+                  },
+                },
+              },
+              sortBy: { date_statut: 1 },
+            },
+          },
+        },
+      },
+      {
+        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+      },
+      {
+        $addFields: {
+          statut_apprenant_at_date: {
+            $last: "$apprenant.historique_statut",
+          },
+        },
+      },
+      {
+        $facet: {
+          apprentis: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti,
+              },
+            },
+            {
+              $count: "apprentis",
+            },
+          ],
+          abandons: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
+              },
+            },
+            {
+              $count: "abandons",
+            },
+          ],
+          inscritsSansContrat: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
+                "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
+              },
+            },
+            {
+              $count: "inscritsSansContrat",
+            },
+          ],
+          rupturants: [
+            { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
+            // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
+            {
+              $addFields: {
+                previousStatutAtDate: {
+                  $arrayElemAt: ["$apprenant.historique_statut", -2],
+                },
+              },
+            },
+            { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
+            {
+              $count: "rupturants",
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          items: {
+            $concatArrays: ["$apprentis", "$abandons", "$inscritsSansContrat", "$rupturants"],
+          },
+        },
+      },
+      {
+        $unwind: "$items",
+      },
+      {
+        $group: {
+          _id: "$items._id",
+          merge: {
+            $mergeObjects: "$items",
+          },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              {
+                apprenants: 0,
+                apprentis: 0,
+                inscritsSansContrat: 0,
+                abandons: 0,
+                rupturants: 0,
+              },
+              "$merge",
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          apprenants: {
+            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
+          },
+          apprentis: 1,
+          inscritsSansContrat: 1,
+          abandons: 1,
+          rupturants: 1,
+        },
+      },
+    ])
+    .next()) as IndicateursEffectifs;
+  return (
+    indicateurs ?? {
+      apprenants: 0,
+      apprentis: 0,
+      inscritsSansContrat: 0,
+      abandons: 0,
+      rupturants: 0,
+    }
+  );
+}
+
+export async function getOrganismeIndicateursOrganismes(organismeId: ObjectId): Promise<IndicateursOrganismes> {
+  const indicateurs = (await organismesDb()
+    .aggregate([
+      {
+        $match: {
+          _id: {
+            $in: await findOrganismesFormateursIdsOfOrganisme(organismeId),
+          },
+        },
+      },
+      {
+        $project: {
+          transmet: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 1, 0] },
+          ne_transmet_pas: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 0, 1] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total_transmet: { $sum: "$transmet" },
+          total_ne_transmet_pas: { $sum: "$ne_transmet_pas" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          tauxCouverture: {
+            $multiply: [100, { $divide: ["$total_transmet", { $add: ["$total_transmet", "$total_ne_transmet_pas"] }] }],
+          },
+          totalOrganismes: {
+            $add: ["$total_transmet", "$total_ne_transmet_pas"],
+          },
+          organismesTransmetteurs: "$total_transmet",
+          organismesNonTransmetteurs: "$total_ne_transmet_pas",
+        },
+      },
+    ])
+    .next()) as IndicateursOrganismes;
+  return (
+    indicateurs ?? {
+      tauxCouverture: 0,
+      totalOrganismes: 0,
+      organismesTransmetteurs: 0,
+      organismesNonTransmetteurs: 0,
+    }
+  );
+}
+
+async function getOrganismeRestriction(organismeId?: ObjectId) {
+  return organismeId
+    ? { organisme_id: { $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId))] } }
+    : {};
 }

@@ -58,7 +58,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
               uai: organisation.uai,
               siret: organisation.siret,
             });
-            setOrganisationFormationLabel(organisme.raison_sociale || organisme.nom || organisme.enseigne);
+            setOrganisationFormationLabel(organisme.raison_sociale || organisme.enseigne);
           } catch (err) {
             const errorMessage: string = err?.json?.data?.message || err.message;
             setOrganisationFormationLabel(errorMessage);

@@ -1,3 +1,5 @@
+import { typesEffectifNominatif } from "@/modules/dashboard/IndicateursGrid";
+
 // récupéré de l'API et adapté pour ne pas avoir certains champs optionnels
 export interface Organisme {
   _id: string;
@@ -886,6 +888,36 @@ export interface Organisme {
      */
     duree_formation_theorique?: number;
   }[];
+  organismesFormateurs?: {
+    siret?: string;
+    uai?: string | null;
+    referentiel?: boolean;
+    label?: string;
+    sources?: string[];
+    _id?: string | null;
+    enseigne?: string;
+    raison_sociale?: string;
+    commune?: string;
+    region?: string;
+    departement?: string;
+    academie?: string;
+    reseaux?: string[];
+  }[];
+  organismesResponsables?: {
+    siret?: string;
+    uai?: string | null;
+    referentiel?: boolean;
+    label?: string;
+    sources?: string[];
+    _id?: string | null;
+    enseigne?: string;
+    raison_sociale?: string;
+    commune?: string;
+    region?: string;
+    departement?: string;
+    academie?: string;
+    reseaux?: string[];
+  }[];
   /**
    * Les domaines métiers rattachés à l'établissement
    */
@@ -893,11 +925,11 @@ export interface Organisme {
   /**
    * Date de la première transmission de données
    */
-  first_transmission_date?: Date;
+  first_transmission_date?: string;
   /**
    * Date de la dernière transmission de données
    */
-  last_transmission_date?: Date;
+  last_transmission_date?: string;
   /**
    * Est dans le referentiel onisep des organismes
    */
@@ -906,6 +938,10 @@ export interface Organisme {
    * Le siret est fermé
    */
   ferme?: boolean;
+  /**
+   * a la certification Qualiopi
+   */
+  qualiopi?: boolean;
   /**
    * Le token permettant l'accès au CFA à sa propre page
    */
@@ -916,7 +952,7 @@ export interface Organisme {
   api_key?: string;
   api_uai?: string;
   api_siret?: string;
-  api_configuration_date?: Date;
+  api_configuration_date?: string;
   /**
    * Statut de fiabilisation de l'organisme
    */
@@ -939,9 +975,17 @@ export interface Organisme {
   /**
    * Date de mise à jour en base de données
    */
-  updated_at?: Date;
+  updated_at?: string;
   /**
    * Date d'ajout en base de données
    */
-  created_at?: Date;
+  created_at?: string;
+
+  permissions?: {
+    viewContacts: boolean;
+    infoTransmissionEffectifs: boolean;
+    indicateursEffectifs: boolean; // pourrait peut-être être false | "partial" (restriction réseau/territoire) | "full"
+    effectifsNominatifs: boolean | Array<(typeof typesEffectifNominatif)[number]>;
+    manageEffectifs: boolean;
+  };
 }

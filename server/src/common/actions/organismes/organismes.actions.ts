@@ -4,26 +4,29 @@ import { v4 as uuidv4 } from "uuid";
 
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 import {
-  findOrganismesAccessiblesByOrganisation,
+  findOrganismesAccessiblesByOrganisationOF,
+  findOrganismesFormateursIdsOfOrganisme,
   getOrganismeRestriction,
   isOrganisationOF,
 } from "@/common/actions/helpers/permissions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { getOrganisationOrganisme } from "@/common/actions/organisations.actions";
+import { getOrganisationOrganisme, listContactsOrganisation } from "@/common/actions/organisations.actions";
 import { getMetiersBySiret } from "@/common/apis/apiLba";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
-import { organismesDb, effectifsDb } from "@/common/model/collections";
+import { organismesDb, effectifsDb, organisationsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
 import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
+import { cleanProjection } from "@/common/utils/mongoUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
+import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
 import { InfoSiret } from "../infoSiret.actions-struct";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
@@ -630,50 +633,6 @@ export const getStatOrganismes = async () => {
   return stats;
 };
 
-export async function findUserOrganismes(ctx: AuthContext) {
-  const restrictionOwnOrganisme = isOrganisationOF(ctx.organisation.type)
-    ? {
-        _id: {
-          $ne: (await getOrganisationOrganisme(ctx))._id,
-        },
-      }
-    : {};
-  const organismes = await organismesDb()
-    .find(
-      {
-        $and: [
-          await getOrganismeRestriction(ctx),
-          // cas particulier pour l'OF qui ne doit pas lister son propre organisme
-          restrictionOwnOrganisme,
-        ],
-      },
-      {
-        projection: {
-          _id: 1,
-          nom: 1,
-          enseigne: 1,
-          raison_sociale: 1,
-          ferme: 1,
-          nature: {
-            $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
-          },
-          adresse: 1,
-          siret: 1,
-          uai: 1,
-          first_transmission_date: 1,
-          last_transmission_date: 1,
-          fiabilisation_statut: 1,
-        },
-      }
-    )
-    .toArray();
-
-  return organismes.map((organisme) => ({
-    ...organisme,
-    nomOrga: organisme.enseigne || organisme.raison_sociale,
-  }));
-}
-
 export async function getOrganismeById(_id: ObjectId) {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
@@ -681,10 +640,52 @@ export async function getOrganismeById(_id: ObjectId) {
   }
   return organisme;
 }
+
+/**
+ * Retourne les informations d'un organisme avec plus ou moins d'informations selon l'utilisateur authentifié.
+ * Les permissions de l'utilisateur authentifié sont également retournées
+ */
+export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectId): Promise<OrganismeWithPermissions> {
+  const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
+  const organisme = await organismesDb().findOne(
+    { _id: organismeId },
+    {
+      projection: cleanProjection<Organisme>({
+        _id: 1,
+        siret: 1,
+        uai: 1,
+        ferme: 1,
+        nature: {
+          $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+        },
+        qualiopi: 1,
+        enseigne: 1,
+        raison_sociale: 1,
+        reseaux: 1,
+        adresse: 1,
+        organismesResponsables: 1,
+        organismesFormateurs: 1,
+        fiabilisation_statut: 1,
+        erps: permissionsOrganisme.infoTransmissionEffectifs,
+        first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
+        last_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
+      }),
+    }
+  );
+  if (!organisme) {
+    throw Boom.notFound(`Organisme ${organismeId} not found`);
+  }
+
+  return {
+    ...organisme,
+    permissions: permissionsOrganisme,
+  } as OrganismeWithPermissions;
+}
+
 export async function getOrganismeByAPIKey(api_key: string) {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
-    throw Boom.notFound(`Organisme not found`);
+    throw Boom.notFound("Organisme not found");
   }
   return organisme as WithId<Organisme>;
 }
@@ -768,7 +769,7 @@ async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: ObjectId)
     case "ORGANISME_FORMATION_FORMATEUR":
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisation(
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
       return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());
@@ -831,4 +832,124 @@ export async function verifyOrganismeAPIKeyToUser(
   //   // TODO WHAT DO WE DO
   //   throw Boom.conflict("UAI");
   // }
+}
+
+export async function listContactsOrganisme(organismeId: ObjectId) {
+  const organisme = await getOrganismeById(organismeId);
+  const organisation = await organisationsDb().findOne({
+    siret: organisme.siret,
+    uai: organisme.uai as string,
+  });
+  return organisation ? await listContactsOrganisation(organisation._id) : [];
+}
+
+export async function listOrganisationOrganismes(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>[]> {
+  const restrictionOwnOrganisme = isOrganisationOF(ctx.organisation.type)
+    ? {
+        _id: {
+          $ne: (await getOrganisationOrganisme(ctx))._id,
+        },
+      }
+    : {};
+  const organismes = (await organismesDb()
+    .find(
+      {
+        $and: [
+          await getOrganismeRestriction(ctx),
+          // cas particulier pour l'OF qui ne doit pas lister son propre organisme
+          restrictionOwnOrganisme,
+        ],
+      },
+      {
+        projection: getOrganismeProjection(true),
+      }
+    )
+    .toArray()) as WithId<OrganismeWithPermissions>[];
+
+  return organismes;
+}
+
+export async function listOrganismesFormateurs(
+  ctx: AuthContext,
+  organismeId: ObjectId
+): Promise<WithId<OrganismeWithPermissions>[]> {
+  const organismes = (await organismesDb()
+    .find(
+      {
+        _id: {
+          $in: await findOrganismesFormateursIdsOfOrganisme(organismeId),
+        },
+      },
+      {
+        projection: getOrganismeProjection(await getInfoTransmissionEffectifsCondition(ctx)),
+      }
+    )
+    .toArray()) as WithId<OrganismeWithPermissions>[];
+
+  return organismes;
+}
+
+async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+      return {
+        $in: ["$_id", linkedOrganismesIds],
+      };
+    }
+
+    case "TETE_DE_RESEAU": {
+      return { $eq: ["$reseaux", organisation.reseau] };
+    }
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return true;
+  }
+}
+
+export function getOrganismeProjection(
+  infoTransmissionEffectifsCondition: any
+): Partial<WithId<OrganismeWithPermissions>> {
+  return cleanProjection<WithId<OrganismeWithPermissions>>({
+    _id: 1,
+    siret: 1,
+    uai: 1,
+    ferme: 1,
+    nature: {
+      $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+    },
+    qualiopi: 1,
+    enseigne: 1,
+    raison_sociale: 1,
+    reseaux: 1,
+    adresse: 1,
+    organismesResponsables: 1,
+    organismesFormateurs: 1,
+    fiabilisation_statut: 1,
+    erps: {
+      $cond: [infoTransmissionEffectifsCondition, "$erps", undefined],
+    },
+    first_transmission_date: {
+      $cond: [infoTransmissionEffectifsCondition, "$first_transmission_date", undefined],
+    },
+    last_transmission_date: {
+      $cond: [infoTransmissionEffectifsCondition, "$last_transmission_date", undefined],
+    },
+    permissions: {
+      infoTransmissionEffectifs: {
+        $cond: [infoTransmissionEffectifsCondition, true, false],
+      },
+    },
+  });
 }

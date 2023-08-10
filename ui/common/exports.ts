@@ -1,3 +1,4 @@
+import { Organisme } from "./internal/Organisme";
 import { ExportColumn } from "./utils/exportUtils";
 
 export const indicateursParOrganismeExportColumns = [
@@ -80,6 +81,11 @@ export const effectifsExportColumns = [
     width: 20,
   },
   {
+    label: "apprenant_statut",
+    key: "apprenant_statut",
+    width: 20,
+  },
+  {
     label: "formation_cfd",
     key: "formation_cfd",
     width: 15,
@@ -115,3 +121,61 @@ export const effectifsExportColumns = [
     width: 20,
   },
 ] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const organismesExportColumns = [
+  {
+    label: "uai",
+    key: "uai",
+    width: 15,
+  },
+  {
+    label: "siret",
+    key: "siret",
+    width: 15,
+  },
+  {
+    label: "raison_sociale",
+    key: "raison_sociale",
+    width: 60,
+  },
+  {
+    label: "enseigne",
+    key: "enseigne",
+    width: 60,
+  },
+  {
+    label: "nature",
+    key: "nature",
+    width: 20,
+  },
+  {
+    label: "departement",
+    key: "departement",
+    width: 10,
+  },
+  {
+    label: "commune",
+    key: "commune",
+    width: 40,
+  },
+  {
+    label: "adresse",
+    key: "adresse",
+    width: 120,
+  },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export function convertOrganismeToExport(
+  organisme: Organisme
+): Record<(typeof organismesExportColumns)[number]["key"], string> {
+  return {
+    uai: organisme.uai ?? "",
+    siret: organisme.siret,
+    raison_sociale: organisme.raison_sociale ?? "",
+    enseigne: organisme.enseigne ?? "",
+    nature: organisme.nature,
+    departement: organisme.adresse?.departement ?? "",
+    commune: organisme.adresse?.commune ?? "",
+    adresse: organisme.adresse?.complete ?? "",
+  };
+}

@@ -1,8 +1,5 @@
 import { utils, writeFileXLSX } from "xlsx";
 
-import { downloadObject } from "./browser";
-import { escapeCSVField } from "./stringUtils";
-
 export interface ExportColumn {
   label: string;
   key: string;
@@ -29,25 +26,4 @@ export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
   worksheet["!cols"] = exportColumns.map((column) => ({ wch: column.width }));
 
   writeFileXLSX(workbook, filename, { compression: true });
-}
-
-export function exportDataAsCSV<Columns extends ReadonlyArray<ExportColumn>>(
-  filename: string,
-  rows: Record<Columns[number]["key"], any>[],
-  exportColumns: Columns
-) {
-  downloadObject(
-    [
-      exportColumns.map((column) => column.label).join(","),
-      ...rows.map((row) =>
-        exportColumns
-          .map((column) => `${row[column.key] ?? ""}`)
-          .map((v) => escapeCSVField(v))
-          .join(",")
-      ),
-    ].join("\n"),
-    filename,
-    "text/csv"
-  );
-  return;
 }

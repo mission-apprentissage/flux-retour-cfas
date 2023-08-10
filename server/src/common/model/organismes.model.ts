@@ -7,7 +7,39 @@ import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/valid
 import { NATURE_ORGANISME_DE_FORMATION } from "../constants/organisme";
 
 import { adresseSchema } from "./json-schema/adresseSchema";
-import { arrayOf, boolean, date, integer, object, objectId, string } from "./json-schema/jsonSchemaTypes";
+import {
+  arrayOf,
+  boolean,
+  date,
+  integer,
+  object,
+  objectId,
+  objectIdOrNull,
+  string,
+  stringOrNull,
+} from "./json-schema/jsonSchemaTypes";
+
+const relationOrganismeSchema = object(
+  {
+    // infos référentiel
+    siret: string(),
+    uai: stringOrNull(),
+    referentiel: boolean(),
+    label: string(),
+    sources: arrayOf(string()),
+
+    // infos TDB
+    _id: objectIdOrNull(),
+    enseigne: string(),
+    raison_sociale: string(),
+    commune: string(),
+    region: string(),
+    departement: string(),
+    academie: string(),
+    reseaux: arrayOf(string()),
+  },
+  { additionalProperties: true }
+);
 
 const collectionName = "organismes";
 
@@ -121,6 +153,8 @@ const schema = object(
         description: "Formations de cet organisme",
       }
     ),
+    organismesFormateurs: arrayOf(relationOrganismeSchema),
+    organismesResponsables: arrayOf(relationOrganismeSchema),
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     last_transmission_date: date({ description: "Date de la dernière transmission de données" }),

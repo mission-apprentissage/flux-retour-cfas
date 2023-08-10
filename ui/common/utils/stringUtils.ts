@@ -30,6 +30,15 @@ export const formatSiretSplitted = (siret) => {
   return validateSiret(siret) ? `${siret.substr(0, 9)} ${siret.substr(9, siret.length)}` : "SIRET INVALIDE";
 };
 
+const civilityToAbbreviation = {
+  Madame: "Mme",
+  Monsieur: "M.",
+};
+
+export function formatCivility(civility: "Madame" | "Monsieur"): string {
+  return civilityToAbbreviation[civility] ?? "";
+}
+
 export const capitalize = (str) => {
   const firstLetter = str.charAt(0);
   return `${firstLetter.toUpperCase()}${str.substr(1)}`;
@@ -55,15 +64,4 @@ export function prettyFormatNumber(number: number): string {
     return `${shortValue % 1 !== 0 ? shortValue.toFixed(1) : shortValue}${suffixes[suffixNum]}`;
   }
   return `${number % 1 !== 0 ? number.toFixed(1) : number}`;
-}
-
-/**
- * Escape a CSV field by replacing all " by "".
- */
-export function escapeCSVField(value: string): string {
-  if (typeof value === "string") {
-    return value ? `"${value?.replace(/"/g, '""')}"` : "";
-  } else {
-    return value ? `${value}` : "";
-  }
 }

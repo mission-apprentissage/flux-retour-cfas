@@ -1,20 +1,23 @@
-import { Box, Text, Tooltip } from "@chakra-ui/react";
+import { Box, HStack, Input, ListItem, Text, Tooltip, UnorderedList } from "@chakra-ui/react";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
-import { isBefore, subMonths } from "date-fns";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 
+import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
-import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
+import { formatDate } from "@/common/utils/dateUtils";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { normalize } from "@/common/utils/stringUtils";
+import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
 import NatureOrganismeTag from "@/modules/indicateurs/NatureOrganismeTag";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { convertPaginationInfosToQuery } from "@/modules/models/pagination";
-import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import { ArrowDropRightLine } from "@/theme/components/icons";
+
+import InfoTransmissionDonnees from "./InfoTransmissionDonnees";
 
 type OrganismeNormalized = Organisme & {
   normalizedName: string;
@@ -25,7 +28,7 @@ type OrganismeNormalized = Organisme & {
 const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>[] = [
   {
     header: () => "Nom de l’organisme",
-    accessorKey: "nom",
+    accessorKey: "normalizedName",
     cell: ({ row }) => (
       <>
         <Link
@@ -33,9 +36,9 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
           display="block"
           fontSize="1rem"
           width="var(--chakra-sizes-lg)"
-          title={row.original.nom}
+          title={row.original.enseigne ?? row.original.raison_sociale}
         >
-          {row.original.nom ?? "Organisme inconnu"}
+          {row.original.enseigne ?? row.original.raison_sociale ?? "Organisme inconnu"}
         </Link>
         <Text fontSize="xs" pt={2} color="#777777" whiteSpace="nowrap">
           UAI&nbsp;:{" "}
@@ -67,20 +70,45 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
   },
   {
     accessorKey: "last_transmission_date",
-    header: () => "Transmission au tdb",
-    cell: ({ getValue }) => {
-      const lastTransmissionDate = getValue();
-      if (!lastTransmissionDate) return <Text color="tomato">Ne transmet pas</Text>;
-      if (isMoreThanOrEqualOneMonthAgo(lastTransmissionDate)) {
-        return (
-          <Text color="orange">
-            Ne transmet plus <br />
-            depuis le {formatDateNumericDayMonthYear(lastTransmissionDate)}
-          </Text>
-        );
-      }
-      return <Text color="green">{formatDateNumericDayMonthYear(lastTransmissionDate)}</Text>;
-    },
+    header: () => (
+      <>
+        Transmission au tableau
+        <Tooltip
+          background="bluefrance"
+          color="white"
+          label={
+            <Box padding="1w">
+              <b>État de la donnée</b>
+              <Text as="p">5 états concernant la donnée sont identifiés&nbsp;:</Text>
+              <UnorderedList>
+                <ListItem>l’OFA transmet des données depuis moins d’1 semaine (vert)</ListItem>
+                <ListItem>l’OFA transmet des données depuis moins de 3 mois (orange)</ListItem>
+                <ListItem>l’OFA transmet des données considérées obsolètes (depuis plus de 3 mois - rouge)</ListItem>
+                <ListItem>l’OFA ne transmet aucune donnée</ListItem>
+                <ListItem>Non-disponible&nbsp;: Les droits d’accès à cette information sont restreints.</ListItem>
+              </UnorderedList>
+            </Box>
+          }
+          aria-label="État de la donnée."
+        >
+          <Box
+            as="i"
+            className="ri-information-line"
+            fontSize="epsilon"
+            color="grey.500"
+            marginLeft="1v"
+            verticalAlign="middle"
+          />
+        </Tooltip>
+      </>
+    ),
+    sortUndefined: 1,
+    cell: ({ row }) => (
+      <InfoTransmissionDonnees
+        lastTransmissionDate={row.original.last_transmission_date}
+        permissionInfoTransmissionEffectifs={row.original.permissions?.infoTransmissionEffectifs}
+      />
+    ),
   },
   {
     accessorKey: "ferme",
@@ -189,7 +217,7 @@ interface OrganismesTableProps {
   modeNonFiable?: boolean;
 }
 function OrganismesTable(props: OrganismesTableProps) {
-  const defaultSort: SortingState = [{ desc: false, id: "nom" }];
+  const defaultSort: SortingState = [{ desc: false, id: "normalizedName" }];
   const router = useRouter();
   const [searchValue, setSearchValue] = useState<string>(String(router.query.search ?? ""));
   const [sort, setSort] = useState<SortingState>(defaultSort);
@@ -213,8 +241,8 @@ function OrganismesTable(props: OrganismesTableProps) {
   // Update router on search value or sort change.
   useEffect(() => {
     if (!router.isReady) return;
-    const query = { search: searchValue ?? undefined, ...convertPaginationInfosToQuery({ sort }) };
-    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
+    const query = { ...router.query, search: searchValue ?? undefined, ...convertPaginationInfosToQuery({ sort }) };
+    router.replace({ query }, undefined, { shallow: true });
   }, [searchValue, sort, router.isReady]);
 
   // Simple search: filter organismes by name that contains the search value.
@@ -233,26 +261,31 @@ function OrganismesTable(props: OrganismesTableProps) {
 
   return (
     <>
-      <Input
-        {...{
-          name: "search_organisme",
-          fieldType: "text",
-          mask: "C",
-          maskBlocks: [
-            {
-              name: "C",
-              mask: "Pattern",
-              pattern: "^.*$",
-            },
-          ],
-          placeholder: "Rechercher un organisme par nom, UAI, SIRET ou ville (indiquez au moins deux caractères)",
-          value: searchValue,
-          onSubmit: (value: string) => setSearchValue(value.trim()),
-        }}
-      />
+      <HStack mb="4">
+        <Input
+          type="text"
+          name="search_organisme"
+          placeholder="Rechercher un organisme par nom, UAI, SIRET ou ville (indiquez au moins deux caractères)"
+          value={searchValue}
+          onChange={(event) => setSearchValue(event.target.value)}
+          flex="1"
+          mr="2"
+        />
+
+        <DownloadLinkButton
+          action={() => {
+            exportDataAsXlsx(
+              `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
+              filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
+              organismesExportColumns
+            );
+          }}
+        >
+          Télécharger la liste
+        </DownloadLinkButton>
+      </HStack>
 
       <NewTable
-        mt={4}
         data={filteredOrganismes || []}
         loading={false}
         sortingState={sort}
@@ -271,10 +304,4 @@ export default OrganismesTable;
 
 function isSortingState(value: any): value is SortingState {
   return Array.isArray(value) && value.every((item) => typeof item === "object" && "id" in item && "desc" in item);
-}
-
-function isMoreThanOrEqualOneMonthAgo(date: Date | string) {
-  const oneMonthAgo = subMonths(new Date(), 1);
-  const dateAsDate = typeof date === "string" ? new Date(date) : date;
-  return isBefore(dateAsDate, oneMonthAgo) || dateAsDate.getTime() === oneMonthAgo.getTime();
 }

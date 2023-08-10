@@ -92,7 +92,9 @@ const ResetPasswordPage = () => {
               Le lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre adresse
               mail :
               <br />
-              <a href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr">tableau-de-bord@apprentissage.beta.gouv.fr</a>
+              <a href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr" target="_blank" rel="noopener noreferrer">
+                tableau-de-bord@apprentissage.beta.gouv.fr
+              </a>
             </span>
           ),
         });

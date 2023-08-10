@@ -36,12 +36,12 @@ export const natureOrganismeDeFormationTooltip = {
           Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur ;
         </ListItem>
         <ListItem>
-          Est signataire de la convention de formation ; Demande et reçoit les financements de l{"'"}OPCO ;
+          Est signataire de la convention de formation ; Demande et reçoit les financements de l’OPCO ;
         </ListItem>
-        <ListItem>Est responsable auprès de l{"'"}administration du respect de ses missions et obligations ;</ListItem>
+        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations ;</ListItem>
         <ListItem>
           Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
-          sein de l{"'"}UFA.
+          sein de l’UFA.
         </ListItem>
       </UnorderedList>
     </>
@@ -51,8 +51,8 @@ export const natureOrganismeDeFormationTooltip = {
       <Text>Organismes formateurs</Text>
       <UnorderedList mt={4}>
         <ListItem>
-          Dispense des actions de formation par apprentissage déclaré auprès des services de l{"'"}Etat (n° de
-          déclaration d{"'"}activité (NDA))
+          Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+          d’activité (NDA))
         </ListItem>
       </UnorderedList>
     </>
@@ -62,14 +62,15 @@ export const natureOrganismeDeFormationTooltip = {
       <Text>Organismes responsables et formateurs</Text>
       <UnorderedList mt={4}>
         <ListItem>
-          Dispense des actions de formation par apprentissage déclaré auprès des services de l{"'"}Etat (n° de
-          déclaration d{"'"}activité (NDA)) - Est signataire de la convention de formation ;
+          Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+          d’activité (NDA)) ;
         </ListItem>
-        <ListItem>Demande et reçoit les financements de l{"'"}OPCO ;</ListItem>
-        <ListItem>Est responsable auprès de l{"'"}administration du respect de ses missions et obligations ;</ListItem>
+        <ListItem>Est signataire de la convention de formation ;</ListItem>
+        <ListItem>Demande et reçoit les financements de l’OPCO ;</ListItem>
+        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations ;</ListItem>
         <ListItem>
           Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
-          sein de l{"'"}UFA.
+          sein de l’UFA.
         </ListItem>
       </UnorderedList>
     </>
@@ -80,7 +81,7 @@ export default function OrganismeInfo({ organisme, isMine }: { organisme: Organi
   const { data: indicateurs, isLoading: indicateursLoading } = useQuery<IndicateursEffectifs>(
     ["organismes", organisme?._id, "indicateurs"],
     () =>
-      _get(`/api/v1/organismes/${organisme._id}/indicateurs`, {
+      _get(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs`, {
         params: {
           date: new Date(),
         },

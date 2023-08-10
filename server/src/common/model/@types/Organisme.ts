@@ -193,6 +193,7 @@ export interface Organisme {
       | "972"
       | "973"
       | "974"
+      | "975"
       | "976"
       | "977"
       | "978"
@@ -253,6 +254,7 @@ export interface Organisme {
       | "32"
       | "33"
       | "43"
+      | "44"
       | "70"
       | "77"
       | "78";
@@ -625,6 +627,7 @@ export interface Organisme {
           | "972"
           | "973"
           | "974"
+          | "975"
           | "976"
           | "977"
           | "978"
@@ -685,6 +688,7 @@ export interface Organisme {
           | "32"
           | "33"
           | "43"
+          | "44"
           | "70"
           | "77"
           | "78";
@@ -905,6 +909,36 @@ export interface Organisme {
      * Durée théorique de la formation en mois pour cet organisme
      */
     duree_formation_theorique?: number;
+  }[];
+  organismesFormateurs?: {
+    siret?: string;
+    uai?: string | null;
+    referentiel?: boolean;
+    label?: string;
+    sources?: string[];
+    _id?: ObjectId | null;
+    enseigne?: string;
+    raison_sociale?: string;
+    commune?: string;
+    region?: string;
+    departement?: string;
+    academie?: string;
+    reseaux?: string[];
+  }[];
+  organismesResponsables?: {
+    siret?: string;
+    uai?: string | null;
+    referentiel?: boolean;
+    label?: string;
+    sources?: string[];
+    _id?: ObjectId | null;
+    enseigne?: string;
+    raison_sociale?: string;
+    commune?: string;
+    region?: string;
+    departement?: string;
+    academie?: string;
+    reseaux?: string[];
   }[];
   /**
    * Les domaines métiers rattachés à l'établissement

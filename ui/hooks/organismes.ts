@@ -10,7 +10,7 @@ export function useOrganisme(organismeId: string | undefined | null) {
     isLoading,
     error,
     refetch,
-  } = useQuery<any, any>(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
+  } = useQuery<Organisme, any>(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
     enabled: !!organismeId,
   });
 
@@ -42,12 +42,14 @@ export function useOrganisme(organismeId: string | undefined | null) {
 }
 
 // récupère l'organisme lié à l'organisation pour un OF
-export function useOrganisationOrganisme() {
+export function useOrganisationOrganisme(enabled?: boolean) {
   const {
     data: organisme,
     isLoading,
     error,
-  } = useQuery<any, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {});
+  } = useQuery<Organisme, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {
+    enabled: enabled ?? true,
+  });
 
   return {
     organisme,

@@ -9,7 +9,7 @@ import { AuthContext } from "@/common/internal/AuthContext";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { PlausibleGoalsEvents } from "@/common/plausible-goals";
 import Link from "@/components/Links/Link";
-import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
+import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 import { Close, MenuFill, ParentGroupIcon } from "@/theme/components/icons";
@@ -34,33 +34,6 @@ function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): stri
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";
-
-    default:
-      throw new Error(`Type '${type}' inconnu`);
-  }
-}
-
-function canManageEffectifsOrganisme(type: OrganisationType): boolean {
-  switch (type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
-      return true;
-
-    case "TETE_DE_RESEAU":
-      return false;
-
-    case "DREETS":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-    case "DDETS":
-    case "ACADEMIE":
-      return false;
-
-    case "OPERATEUR_PUBLIC_NATIONAL":
-      return false;
-    case "ADMINISTRATEUR":
-      return true;
 
     default:
       throw new Error(`Type '${type}' inconnu`);
@@ -148,18 +121,18 @@ function NavBarTransverse(): ReactElement {
 }
 
 function NavBarOrganismeFormation(): ReactElement {
-  const { organisationType } = useAuth();
   const { organisme } = useOrganisationOrganisme();
-  const { organismes } = useOrganisationOrganismes();
   return (
     <>
       <NavItem to="/" exactMatch>
         Mon tableau de bord
       </NavItem>
-      {/* on s'assure qu'un organisme a accès à au moins un autre organisme */}
-      {organisationType !== "ORGANISME_FORMATION_FORMATEUR" && organismes && organismes.length > 0 && (
+      {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
+      {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
         <NavItem to="/organismes">Mes organismes</NavItem>
       )}
+      {/* <NavItem to="/indicateurs" isDisabled={!(organisme?.first_transmission_date || organisme?.mode_de_transmission)}> */}
+      <NavItem to="/indicateurs">Mes indicateurs</NavItem>
       <NavItem to="/effectifs">Mes effectifs</NavItem>
       {organisme && (
         <NavItem
@@ -177,7 +150,6 @@ function NavBarOrganismeFormation(): ReactElement {
 }
 
 function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactElement {
-  const { organisationType } = useAuth();
   const { organisme } = useEffectifsOrganisme(organismeId);
 
   return (
@@ -189,22 +161,34 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
         <NavItem to={`/organismes/${organismeId}`} exactMatch colorActive="dsfr_lightprimary.bluefrance_850">
           Son tableau de bord
         </NavItem>
-        {canManageEffectifsOrganisme(organisationType) && (
+
+        {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
+          <NavItem to={`/organismes/${organismeId}/organismes`} colorActive="dsfr_lightprimary.bluefrance_850">
+            Ses organismes
+          </NavItem>
+        )}
+        {organisme?.permissions?.indicateursEffectifs && (
+          <>
+            {/* on s'assure qu'un organisme est responsable d'au moins un organisme formateur */}
+            <NavItem to={`/organismes/${organismeId}/indicateurs`} colorActive="dsfr_lightprimary.bluefrance_850">
+              Ses indicateurs
+            </NavItem>
+          </>
+        )}
+        {organisme?.permissions?.manageEffectifs && (
           <>
             <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
               Ses effectifs
             </NavItem>
-            {organisme && (
-              <NavItem
-                to={`/organismes/${organismeId}/enquete-sifa`}
-                isDisabled={!organisme.first_transmission_date}
-                disabledReason={
-                  !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
-                }
-              >
-                Son enquête SIFA
-              </NavItem>
-            )}
+            <NavItem
+              to={`/organismes/${organismeId}/enquete-sifa`}
+              isDisabled={!organisme.first_transmission_date}
+              disabledReason={
+                !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
+              }
+            >
+              Son enquête SIFA
+            </NavItem>
           </>
         )}
       </Flex>

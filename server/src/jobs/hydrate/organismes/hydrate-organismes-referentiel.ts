@@ -40,7 +40,7 @@ const hydrateOrganismesReferentiel = async () => {
   await organismesReferentielDb().deleteMany({});
 
   // On récupère l'intégralité des organismes depuis le référentiel
-  let { organismes } = await fetchOrganismes();
+  const organismes = await fetchOrganismes();
   logger.info(`Insertion de ${organismes.length} organismes provenant du référentiel...`);
   await PromisePool.for(organismes).process(insertOrganismeReferentiel);
 };

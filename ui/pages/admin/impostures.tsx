@@ -58,7 +58,7 @@ function ImposturesPage() {
             isExternal
             borderBottom="1px"
           >
-            catalogue
+            référentiel
             <ExternalLinkLine w={".7em"} h={".7em"} ml={1} />
           </Link>
           .

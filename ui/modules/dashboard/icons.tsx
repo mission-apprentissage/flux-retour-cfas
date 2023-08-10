@@ -28,7 +28,7 @@ export function RupturantsIcon(props?: SystemProps) {
   return (
     <Icon viewBox="0 0 24 24" w="24px" h="24px" {...props}>
       <path
-        fill="#CE0500"
+        fill="#FF732C"
         d="M12 14v8H4a8 8 0 0 1 8-8Zm0-13c3.315 0 6 2.685 6 6s-2.685 6-6 6-6-2.685-6-6 2.685-6 6-6ZM17 14.8c1.923 0 3.481 1.612 3.481 3.6v2.7h.435v.9h-7.832v-.9h.435v-2.7c0-1.988 1.558-3.6 3.481-3.6Zm0 .9c-1.442 0-2.611 1.209-2.611 2.7h.87c0-.994.78-1.8 1.741-1.8v-.9Zm-3.385-1.436.923.954-.615.637L13 14.9l.615-.636Zm6.77 0L21 14.9l-.922.954-.616-.636.923-.954ZM17.435 13v1.35h-.87V13h.87Z"
       />
     </Icon>
@@ -50,10 +50,10 @@ export function AbandonsIcon(props?: SystemProps) {
   return (
     <Icon viewBox="0 0 26 20" w="24px" h="24px" {...props}>
       <path
-        fill="#FF732C"
+        fill="#CE0500"
         d="M15 1a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v3H1a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-7h-7V4H7V2h8V1ZM2 14h16v4H2v-4Zm7-4h2v2H9v-2Z"
       />
-      <path fill="#FF732C" d="M25.608 8V0h-8v2h4.585L16 8.194l1.4 1.427 6.208-6.208V8h2Z" />
+      <path fill="#CE0500" d="M25.608 8V0h-8v2h4.585L16 8.194l1.4 1.427 6.208-6.208V8h2Z" />
     </Icon>
   );
 }

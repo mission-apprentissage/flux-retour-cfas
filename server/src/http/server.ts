@@ -19,13 +19,13 @@ import "express-async-errors";
 
 import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
-import { getOrganismeIndicateurs } from "@/common/actions/effectifs/effectifs.actions";
 import {
   effectifsFiltersSchema,
   fullEffectifsFiltersSchema,
   legacyEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
+import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
   indicateursNationalFiltersSchema,
@@ -35,6 +35,8 @@ import {
   getIndicateursEffectifsParDepartement,
   getIndicateursEffectifsParOrganisme,
   getIndicateursOrganismesParDepartement,
+  getOrganismeIndicateursEffectifs,
+  getOrganismeIndicateursOrganismes,
   typesEffectifNominatif,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
@@ -57,11 +59,14 @@ import {
   configureOrganismeERP,
   findOrganismesBySIRET,
   findOrganismesByUAI,
-  findUserOrganismes,
+  listOrganisationOrganismes,
   generateApiKeyForOrg,
   getOrganismeByAPIKey,
   getOrganismeById,
   getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
+  getOrganismeDetails,
+  listContactsOrganisme,
+  listOrganismesFormateurs,
   searchOrganismes,
   verifyOrganismeAPIKeyToUser,
 } from "@/common/actions/organismes/organismes.actions";
@@ -92,9 +97,8 @@ import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
-import { authOrgMiddleware } from "./middlewares/authOrgMiddleware";
 import errorMiddleware from "./middlewares/errorMiddleware";
-import { requireAdministrator, returnResult } from "./middlewares/helpers";
+import { requireAdministrator, requireOrganismePermission, returnResult } from "./middlewares/helpers";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
@@ -384,22 +388,60 @@ function setupRoutes(app: Application) {
       .Router()
       .get(
         "",
-        authOrgMiddleware("reader"),
         returnResult(async (req, res) => {
-          return await getOrganismeById(res.locals.organismeId); // double récupération avec les permissions mais pas très grave
+          return await getOrganismeDetails(req.user, res.locals.organismeId);
         })
       )
       .get(
-        "/indicateurs",
-        authOrgMiddleware("reader"),
+        "/indicateurs/effectifs",
+        requireOrganismePermission("indicateursEffectifs"),
         returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
-          return await getOrganismeIndicateurs(req.user, res.locals.organismeId, filters);
+          const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
+          return await getOrganismeIndicateursEffectifs(req.user, res.locals.organismeId, filters);
+        })
+      )
+      .get(
+        "/indicateurs/effectifs/par-organisme",
+        requireOrganismePermission("indicateursEffectifs"),
+        returnResult(async (req, res) => {
+          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+          return await getIndicateursEffectifsParOrganisme(req.user, filters, res.locals.organismeId);
+        })
+      )
+      .get(
+        "/indicateurs/effectifs/:type",
+        returnResult(async (req, res) => {
+          const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
+          const permissions = await hasOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
+          if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
+            throw Boom.forbidden("Permissions invalides");
+          }
+          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+          return await getEffectifsNominatifs(req.user, filters, type, res.locals.organismeId);
+        })
+      )
+      .get(
+        "/indicateurs/organismes",
+        returnResult(async (req, res) => {
+          return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
+        })
+      )
+      .get(
+        "/contacts",
+        requireOrganismePermission("viewContacts"),
+        returnResult(async (req, res) => {
+          return await listContactsOrganisme(res.locals.organismeId);
+        })
+      )
+      .get(
+        "/organismes",
+        returnResult(async (req, res) => {
+          return await listOrganismesFormateurs(req.user, res.locals.organismeId);
         })
       )
       .get(
         "/effectifs",
-        authOrgMiddleware("manager"),
+        requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           return await getOrganismeEffectifs(
             res.locals.organismeId,
@@ -410,7 +452,7 @@ function setupRoutes(app: Application) {
       )
       .get(
         "/sifa-export",
-        authOrgMiddleware("manager"),
+        requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           const organismeId = res.locals.organismeId;
           const sifaCsv = await generateSifa(organismeId as any as ObjectId);
@@ -420,7 +462,7 @@ function setupRoutes(app: Application) {
       )
       .put(
         "/configure-erp",
-        authOrgMiddleware("manager"),
+        requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
@@ -428,7 +470,7 @@ function setupRoutes(app: Application) {
       )
       .post(
         "/verify-user",
-        authOrgMiddleware("manager"),
+        requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           // POST /api/v1/organismes/:id/verify-user { siret=XXXXX, uai=YYYYY, erp=ZZZZ , api_key=TTTTT }
           const verif = await validateFullZodObjectSchema(req.body, SReqPostVerifyUser);
@@ -437,7 +479,7 @@ function setupRoutes(app: Application) {
       )
       .use(
         "/upload",
-        authOrgMiddleware("manager"),
+        requireOrganismePermission("manageEffectifs"),
         express
           .Router()
           .get("/", validateRequestMiddleware({ body: uploadedDocumentSchema() }), async (req, res) => {
@@ -475,7 +517,7 @@ function setupRoutes(app: Application) {
           // Manage uploaded documents (delete, set mapping modele)
           .use(
             "/doc/:document_id",
-            authOrgMiddleware("manager"),
+            requireOrganismePermission("manageEffectifs"),
             validateRequestMiddleware({ params: objectIdSchema("document_id") }),
             ((req: Request<{ document_id: ObjectId }>, res: Response, next: NextFunction) => {
               // TODO investiguer pourquoi req.params.document_id est de type string ici
@@ -502,7 +544,7 @@ function setupRoutes(app: Application) {
 
       .use(
         "/api-key",
-        authOrgMiddleware("manager"),
+        requireOrganismePermission("manageEffectifs"),
         express
           .Router()
           .get(
@@ -549,7 +591,7 @@ function setupRoutes(app: Application) {
       })
     )
     .get(
-      "/api/v1/indicateurs/organismes",
+      "/api/v1/indicateurs/organismes/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, organismesFiltersSchema);
         return await getIndicateursOrganismesParDepartement(req.user, filters);
@@ -611,7 +653,7 @@ function setupRoutes(app: Application) {
       .get(
         "/organismes",
         returnResult(async (req) => {
-          return await findUserOrganismes(req.user);
+          return await listOrganisationOrganismes(req.user);
         })
       )
       .get(
