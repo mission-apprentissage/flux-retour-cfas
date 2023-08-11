@@ -109,11 +109,26 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
       enabled: !!organisme?._id,
     }
   );
+
   const formationsFormateur = formations?.formationsFormateur ?? [];
   const formationsResponsable = formations?.formationsResponsable ?? [];
   const formationsResponsableFormateur = formations?.formationsResponsableFormateur ?? [];
   const totalFormations =
     formationsFormateur.length + formationsResponsable.length + formationsResponsableFormateur.length;
+
+  const { data: indicateursParFormation } = useQuery<any[]>(
+    ["organismes", organisme?._id, "indicateurs/effectifs/par-formation"],
+    async () =>
+      _get<any[]>(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs/par-formation`, {
+        params: {
+          date: new Date(),
+        },
+      }),
+    {
+      enabled: !!organisme?._id && organisme?.permissions?.indicateursEffectifs,
+    }
+  );
+  console.log("indicateursParFormation", indicateursParFormation);
 
   const indicateursOrganismesPieData = useMemo<any[]>(() => {
     if (!indicateursOrganismes) {
@@ -704,7 +719,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   {modePublique ? "cet" : "votre"} organisme est responsable
                 </Heading>
                 <FormationsTableEffectifs formations={formationsResponsable} />
-                <FormationsTable formations={formationsResponsable} />
+                {/* <FormationsTable formations={formationsResponsable} /> */}
               </>
             )}
             {/* {formationsFormateur?.length > 0 && (

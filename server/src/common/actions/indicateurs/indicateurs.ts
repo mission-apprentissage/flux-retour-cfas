@@ -1,3 +1,7 @@
+import { ArrayElement } from "mongodb";
+
+import { Organisme } from "@/common/model/@types";
+
 export interface IndicateursEffectifs {
   apprenants: number;
   apprentis: number;
@@ -15,6 +19,9 @@ export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & {
   siret: string;
   uai: string;
 };
+
+export type IndicateursEffectifsAvecFormation = IndicateursEffectifs &
+  ArrayElement<Organisme["formationsResponsableFormateur"]>;
 
 export interface IndicateursOrganismes {
   tauxCouverture: number;

@@ -21,9 +21,12 @@ import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
+import { getOrganismeById } from "../organismes/organismes.actions";
+
 import {
   IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
+  IndicateursEffectifsAvecFormation,
   IndicateursEffectifsAvecOrganisme,
   IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
@@ -442,6 +445,228 @@ export async function getIndicateursEffectifsParOrganisme(
       },
     ])
     .toArray()) as IndicateursEffectifsAvecOrganisme[];
+  return indicateurs;
+}
+export async function getOrganismeIndicateursEffectifsParFormation(
+  ctx: AuthContext,
+  filters: FullEffectifsFilters,
+  organismeId: ObjectId // TODO fonction restreinte à un organisme pour l'instant, à voir si elle sera réutilisée autrement (dreets etc)
+): Promise<IndicateursEffectifsAvecFormation[]> {
+  const organisme = await getOrganismeById(organismeId);
+  const organismeCFDs = [
+    ...(organisme.formationsFormateur ?? []),
+    ...(organisme.formationsResponsable ?? []),
+    ...(organisme.formationsResponsableFormateur ?? []),
+  ].map((f) => f.cfd);
+  console.log("cfds", organismeCFDs);
+
+  const indicateurs = (await effectifsDb()
+    .aggregate([
+      {
+        $match: {
+          $and: buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
+          "_computed.organisme.fiable": true,
+          "formation.cfd": {
+            $in: organismeCFDs,
+          },
+        },
+      },
+      {
+        $project: {
+          "formation.cfd": 1,
+          "apprenant.historique_statut": {
+            $sortArray: {
+              input: {
+                $filter: {
+                  input: "$apprenant.historique_statut",
+                  as: "statut",
+                  cond: {
+                    $lte: ["$$statut.date_statut", filters.date],
+                  },
+                },
+              },
+              sortBy: { date_statut: 1 },
+            },
+          },
+        },
+      },
+      {
+        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+      },
+      {
+        $addFields: {
+          statut_apprenant_at_date: {
+            $last: "$apprenant.historique_statut",
+          },
+        },
+      },
+      {
+        $facet: {
+          apprentis: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti,
+              },
+            },
+            {
+              $group: {
+                _id: "$formation.cfd",
+                apprentis: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+          abandons: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
+              },
+            },
+            {
+              $group: {
+                _id: "$formation.cfd",
+                abandons: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+          inscritsSansContrat: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
+                "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
+              },
+            },
+            {
+              $group: {
+                _id: "$formation.cfd",
+                inscritsSansContrat: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+          rupturants: [
+            { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
+            // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
+            {
+              $addFields: {
+                previousStatutAtDate: {
+                  $arrayElemAt: ["$apprenant.historique_statut", -2],
+                },
+              },
+            },
+            { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
+            {
+              $group: {
+                _id: "$formation.cfd",
+                rupturants: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          items: {
+            $concatArrays: ["$apprentis", "$abandons", "$inscritsSansContrat", "$rupturants"],
+          },
+        },
+      },
+      {
+        $unwind: "$items",
+      },
+      {
+        $group: {
+          _id: "$items._id",
+          merge: {
+            $mergeObjects: "$items",
+          },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              {
+                apprenants: 0,
+                apprentis: 0,
+                inscritsSansContrat: 0,
+                abandons: 0,
+                rupturants: 0,
+              },
+              "$merge",
+            ],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "formationsCatalogue",
+          localField: "_id",
+          foreignField: "cfd",
+          as: "formationCatalogue",
+          pipeline: [
+            {
+              $project: {
+                formation_id: "$_id",
+                cle_ministere_educatif: 1,
+                cfd: 1,
+                rncp: "$rncp_code",
+                intitule_long: 1,
+                lieu_formation_adresse: {
+                  $ifNull: ["$lieu_formation_adresse_computed", "lieu_formation_adresse", ""],
+                },
+                annee_formation: {
+                  $toInt: {
+                    $cond: [{ $eq: ["$annee", "X"] }, "-1", "$annee"],
+                  },
+                },
+                niveau: 5,
+                // niveau: getNiveauFormationFromLibelle(formationCatalogue.niveau),
+                duree_formation_theorique: {
+                  $toInt: "$duree",
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$formationCatalogue",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          // TODO vérifier si plusieurs résultats
+          _id: 0,
+          formation_id: "$formationCatalogue.formation_id",
+          cle_ministere_educatif: "$formationCatalogue.cle_ministere_educatif",
+          cfd: "$formationCatalogue.cfd",
+          rncp: "$formationCatalogue.rncp",
+          intitule_long: "$formationCatalogue.intitule_long",
+          lieu_formation_adresse: "$formationCatalogue.lieu_formation_adresse",
+          annee_formation: "$formationCatalogue.annee_formation",
+          niveau: "$formationCatalogue.niveau",
+          duree_formation_theorique: "$formationCatalogue.duree_formation_theorique",
+
+          apprenants: {
+            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
+          },
+          apprentis: 1,
+          inscritsSansContrat: 1,
+          abandons: 1,
+          rupturants: 1,
+        },
+      },
+    ])
+    .toArray()) as IndicateursEffectifsAvecFormation[];
   return indicateurs;
 }
 
