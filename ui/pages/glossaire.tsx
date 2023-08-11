@@ -90,7 +90,7 @@ export default function Glossaire() {
               <Td verticalAlign="top">Lieu de formation</Td>
               <Td>
                 Les lieux de formations sont caractérisés par une adresse postale et des coordonnées de géolocalisation
-                et toujours rattaché à un organisme de formation. La donnée «&nbsp;lieu de formation&nbsp;» provient des
+                et toujours rattachés à un organisme de formation. La donnée «&nbsp;lieu de formation&nbsp;» provient des
                 Carif-Oref. Si cette donnée est inconnue ou incorrecte, voir la marche à suivre.
               </Td>
             </Tr>
