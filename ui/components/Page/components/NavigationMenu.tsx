@@ -154,7 +154,7 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
 
   return (
     <Container maxW="xl">
-      <Flex as="nav" align="center" wrap="wrap" w="100%">
+      <Flex as="nav" align="center" wrap="wrap" w="100%" fontSize="zeta">
         <Box p={4} bg={"transparent"}>
           <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
         </Box>
