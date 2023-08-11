@@ -1,9 +1,9 @@
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId } from "mongodb";
 
 import { createFormation, getFormationWithCfd } from "@/common/actions/formations.actions";
 import { getCatalogFormationsForOrganisme } from "@/common/apis/apiCatalogueMna";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
-import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
+import { Organisme } from "@/common/model/@types";
 import { formationsCatalogueDb } from "@/common/model/collections";
 
 import { findOrganismeByUai, getOrganismeById } from "./organismes.actions";
@@ -194,35 +194,15 @@ export async function searchOrganismesFormations(searchTerm: string): Promise<an
   return formations;
 }
 
-export async function listOrganismeFormations(organismeId: ObjectId): Promise<WithId<FormationsCatalogue>[]> {
+export async function listOrganismeFormations(organismeId: ObjectId): Promise<{
+  formationsFormateur: Organisme["formationsFormateur"];
+  formationsResponsable: Organisme["formationsResponsable"];
+  formationsResponsableFormateur: Organisme["formationsResponsableFormateur"];
+}> {
   const organisme = await getOrganismeById(organismeId);
-
-  // on récupère toutes les formations sur lesquelles l'organisme est responsable ou formateur
-  const formationIds =
-    organisme.relatedFormations?.map((formation) => formation.formation_id).filter((id): id is ObjectId => !!id) ?? [];
-
-  const formations = await formationsCatalogueDb()
-    .find(
-      {
-        _id: {
-          $in: formationIds,
-        },
-      },
-      {
-        projection: {
-          cle_ministere_educatif: 1,
-          cfd: 1,
-          rncp_code: 1,
-          intitule_long: 1,
-          lieu_formation_adresse: {
-            $ifNull: ["$lieu_formation_adresse_computed", "$lieu_formation_adresse"],
-          },
-          duree: 1,
-          niveau: 1,
-        },
-      }
-    )
-    .toArray();
-
-  return formations;
+  return {
+    formationsFormateur: organisme.formationsFormateur,
+    formationsResponsable: organisme.formationsResponsable,
+    formationsResponsableFormateur: organisme.formationsResponsableFormateur,
+  };
 }

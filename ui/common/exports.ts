@@ -187,8 +187,8 @@ export const formationsExportColumns = [
     width: 60,
   },
   {
-    label: "duree",
-    key: "duree",
+    label: "duree_formation_theorique",
+    key: "duree_formation_theorique",
     width: 10,
   },
   {
@@ -203,7 +203,7 @@ export const formationsExportColumns = [
   },
   {
     label: "rncp",
-    key: "rncp_code",
+    key: "rncp",
     width: 15,
   },
   {

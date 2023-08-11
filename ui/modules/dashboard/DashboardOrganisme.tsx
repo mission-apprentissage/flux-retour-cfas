@@ -22,12 +22,12 @@ import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
-import { Formation } from "@/common/internal/Formation";
+import { FormationsOrganismes } from "@/common/internal/Formation";
 import { Organisme } from "@/common/internal/Organisme";
 import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import { formatCivility, formatSiretSplitted, normalize } from "@/common/utils/stringUtils";
+import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -39,7 +39,7 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation, getOrganisationTypeFromNature } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
-import FormationsTable, { FormationNormalized } from "../organismes/FormationsTable";
+import FormationsTable from "../organismes/FormationsTable";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
@@ -93,19 +93,26 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
   // TODO afficher toutes les formations par niveau par défaut
   // éventuellement avec les effectifs en plus selon les permissions
-  const { data: formations } = useQuery<FormationNormalized[]>(
+  const { data: formations } = useQuery<FormationsOrganismes>(
     ["organismes", organisme?._id, "formations"],
     async () => {
-      const formations = await _get<Formation[]>(`/api/v1/organismes/${organisme._id}/formations`);
-      return formations.map((formation) => ({
-        ...formation,
-        normalizedName: normalize(formation.intitule_long),
-      }));
+      const { formationsFormateur, formationsResponsable, formationsResponsableFormateur } =
+        await _get<FormationsOrganismes>(`/api/v1/organismes/${organisme._id}/formations`);
+      return {
+        formationsFormateur,
+        formationsResponsable,
+        formationsResponsableFormateur,
+      };
     },
     {
       enabled: !!organisme?._id,
     }
   );
+  const formationsFormateur = formations?.formationsFormateur ?? [];
+  const formationsResponsable = formations?.formationsResponsable ?? [];
+  const formationsResponsableFormateur = formations?.formationsResponsableFormateur ?? [];
+  const totalFormations =
+    formationsFormateur.length + formationsResponsable.length + formationsResponsableFormateur.length;
 
   const indicateursOrganismesPieData = useMemo<any[]>(() => {
     if (!indicateursOrganismes) {
@@ -675,22 +682,46 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               </>
             )}
 
-            {formations && (
+            <Divider size="md" my={8} />
+
+            <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+              {/* Répartition des effectifs par niveau et formations */}
+              Aperçu des formations associées à cet organisme
+            </Heading>
+            <Text color="#3A3A3A" mb={4}>
+              <Text as="span" fontWeight="bold">
+                {totalFormations} formation
+                {totalFormations > 1 ? "s" : ""}
+              </Text>{" "}
+              (source : Catalogue de l’apprentissage)
+            </Text>
+
+            {formationsResponsable?.length > 0 && (
               <>
-                <Divider size="md" my={8} />
-
-                <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-                  Aperçu des formations associées à cet organisme
+                <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
+                  {formationsResponsable.length} formation{formationsResponsable.length > 1 ? "s" : ""} dont{" "}
+                  {modePublique ? "cet" : "votre"} organisme est responsable
                 </Heading>
-                {/* <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-                  Répartition des effectifs par niveau et formations
-                </Heading> */}
-
-                <Text color="#3A3A3A" mb={4}>
-                  {formations?.length} formation{formations && formations?.length > 1 ? "s" : ""} (source : Catalogue de
-                  l’apprentissage)
-                </Text>
-                <FormationsTable formations={formations} />
+                <FormationsTable formations={formationsResponsable} />
+              </>
+            )}
+            {formationsFormateur?.length > 0 && (
+              <>
+                <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
+                  {formationsFormateur.length} formation{formationsFormateur.length > 1 ? "s" : ""} dont{" "}
+                  {modePublique ? "cet" : "votre"} organisme est formateur
+                </Heading>
+                <FormationsTable formations={formationsFormateur} />
+              </>
+            )}
+            {formationsResponsableFormateur?.length > 0 && (
+              <>
+                <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
+                  {formationsResponsableFormateur.length} formation
+                  {formationsResponsableFormateur.length > 1 ? "s" : ""} dont {modePublique ? "cet" : "votre"} organisme
+                  est responsable et formateur
+                </Heading>
+                <FormationsTable formations={formationsResponsableFormateur} />
               </>
             )}
           </>

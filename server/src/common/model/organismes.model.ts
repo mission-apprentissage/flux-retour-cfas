@@ -77,10 +77,12 @@ const formationsBaseSchema = object(
       pattern: RNCP_REGEX_PATTERN,
       maxLength: 9,
     }),
+    intitule_long: string({ description: "Intitulé de la formation" }),
+    lieu_formation_adresse: string({ description: "Adresse du lieu de la formation" }),
     annee_formation: integer({
       description: "Année millésime de la formation pour cet organisme",
     }),
-    niveau: stringOrNull({ description: "Niveau de formation récupéré via Tables de Correspondances" }),
+    niveau: string({ description: "Niveau de formation récupéré via Tables de Correspondances" }),
     duree_formation_theorique: integer({
       description: "Durée théorique de la formation en mois pour cet organisme",
     }),

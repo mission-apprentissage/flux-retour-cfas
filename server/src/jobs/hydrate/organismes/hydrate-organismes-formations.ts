@@ -88,16 +88,22 @@ export const hydrateOrganismesFormations = async () => {
 };
 
 /**
- * Retourne les formations en faisant la correspondance avec l'uai + siret d'un organisme
- * Par priorité :
- * - (siret et uai) gestionnaire ou formateur
- * - (siret) gestionnaire ou formateur
- * - (uai) gestionnaire ou formateur
+ * Retourne les formations pour lesquelles l'organisme est responsable, formateur ou les deux.
+ * Fait la correspondance avec l'uai + siret d'un organisme.
+ * Recherche dans les formations du catalogue selon l'UAI/SIRET par priorité :
+ * - siret et uai
+ * - siret
+ * - uai
  */
-async function getFormationsByUAIAndSIRET(
+async function getFormationsParRelationByUAIAndSIRET(
   siret: string,
   uai: string | null
-): Promise<{ formations: WithId<FormationsCatalogue>[]; query: FormationsFindQueryType }> {
+): Promise<{
+  formationsFormateur: WithId<FormationsCatalogue>[];
+  formationsResponsable: WithId<FormationsCatalogue>[];
+  formationsResponsableFormateur: WithId<FormationsCatalogue>[];
+  query: FormationsFindQueryType;
+}> {
   {
     const formations = await formationsCatalogueDb()
       .find({
@@ -114,7 +120,34 @@ async function getFormationsByUAIAndSIRET(
       })
       .toArray();
     if (formations.length > 0) {
-      return { formations, query: "uai/siret" };
+      return {
+        formationsFormateur: formations.filter(
+          (formation) =>
+            formation.etablissement_formateur_siret === siret &&
+            // rome-ignore lint/suspicious/noDoubleEquals:
+            formation.etablissement_formateur_uai == uai &&
+            // rome-ignore lint/suspicious/noDoubleEquals:
+            (formation.etablissement_gestionnaire_siret !== siret || formation.etablissement_gestionnaire_uai != uai)
+        ),
+        formationsResponsable: formations.filter(
+          (formation) =>
+            formation.etablissement_gestionnaire_siret === siret &&
+            // rome-ignore lint/suspicious/noDoubleEquals:
+            formation.etablissement_gestionnaire_uai == uai &&
+            // rome-ignore lint/suspicious/noDoubleEquals:
+            (formation.etablissement_formateur_siret !== siret || formation.etablissement_formateur_uai != uai)
+        ),
+        formationsResponsableFormateur: formations.filter(
+          (formation) =>
+            formation.etablissement_formateur_siret === siret &&
+            // rome-ignore lint/suspicious/noDoubleEquals:
+            formation.etablissement_formateur_uai == uai &&
+            formation.etablissement_gestionnaire_siret === siret &&
+            // rome-ignore lint/suspicious/noDoubleEquals:
+            formation.etablissement_gestionnaire_uai == uai
+        ),
+        query: "uai/siret",
+      };
     }
   }
   {
@@ -131,7 +164,21 @@ async function getFormationsByUAIAndSIRET(
       })
       .toArray();
     if (formations.length > 0) {
-      return { formations, query: "siret" };
+      return {
+        formationsFormateur: formations.filter(
+          (formation) =>
+            formation.etablissement_formateur_siret === siret && formation.etablissement_gestionnaire_siret !== siret
+        ),
+        formationsResponsable: formations.filter(
+          (formation) =>
+            formation.etablissement_gestionnaire_siret === siret && formation.etablissement_formateur_siret !== siret
+        ),
+        formationsResponsableFormateur: formations.filter(
+          (formation) =>
+            formation.etablissement_formateur_siret === siret && formation.etablissement_gestionnaire_siret === siret
+        ),
+        query: "siret",
+      };
     }
   }
   {
@@ -149,60 +196,32 @@ async function getFormationsByUAIAndSIRET(
         })
         .toArray();
       if (formations.length > 0) {
-        return { formations, query: "uai" };
+        return {
+          formationsFormateur: formations.filter(
+            (formation) =>
+              // rome-ignore lint/suspicious/noDoubleEquals:
+              formation.etablissement_formateur_uai == uai && formation.etablissement_gestionnaire_uai != uai
+          ),
+          formationsResponsable: formations.filter(
+            (formation) =>
+              // rome-ignore lint/suspicious/noDoubleEquals:
+              formation.etablissement_gestionnaire_uai == uai && formation.etablissement_formateur_uai != uai
+          ),
+          formationsResponsableFormateur: formations.filter(
+            (formation) =>
+              // rome-ignore lint/suspicious/noDoubleEquals:
+              formation.etablissement_formateur_uai == uai && formation.etablissement_gestionnaire_uai == uai
+          ),
+          query: "uai",
+        };
       }
     }
   }
-  return { formations: [], query: "none" };
-}
-
-/**
- * Retourne les formations pour lesquelles l'organisme est responsable, formateur ou les deux.
- * Fait la correspondance avec l'uai + siret d'un organisme.
- * Par priorité :
- * - siret et uai
- * - siret
- * - uai
- */
-async function getFormationsParRelationByUAIAndSIRET(
-  siret: string,
-  uai: string | null
-): Promise<{
-  formationsFormateur: WithId<FormationsCatalogue>[];
-  formationsResponsable: WithId<FormationsCatalogue>[];
-  formationsResponsableFormateur: WithId<FormationsCatalogue>[];
-  query: FormationsFindQueryType;
-}> {
-  const { formations, query } = await getFormationsByUAIAndSIRET(siret, uai);
-
-  // note : l'UAI est comparé avec == ou != pour faire correspondre null et undefined
   return {
-    formationsFormateur: formations.filter(
-      (formation) =>
-        formation.etablissement_formateur_siret === siret &&
-        // rome-ignore lint/suspicious/noDoubleEquals:
-        formation.etablissement_formateur_uai == uai &&
-        // rome-ignore lint/suspicious/noDoubleEquals:
-        (formation.etablissement_gestionnaire_siret !== siret || formation.etablissement_gestionnaire_uai != uai)
-    ),
-    formationsResponsable: formations.filter(
-      (formation) =>
-        formation.etablissement_gestionnaire_siret === siret &&
-        // rome-ignore lint/suspicious/noDoubleEquals:
-        formation.etablissement_gestionnaire_uai == uai &&
-        // rome-ignore lint/suspicious/noDoubleEquals:
-        (formation.etablissement_formateur_siret !== siret || formation.etablissement_formateur_uai != uai)
-    ),
-    formationsResponsableFormateur: formations.filter(
-      (formation) =>
-        formation.etablissement_formateur_siret === siret &&
-        // rome-ignore lint/suspicious/noDoubleEquals:
-        formation.etablissement_formateur_uai == uai &&
-        formation.etablissement_gestionnaire_siret === siret &&
-        // rome-ignore lint/suspicious/noDoubleEquals:
-        formation.etablissement_gestionnaire_uai == uai
-    ),
-    query,
+    formationsFormateur: [],
+    formationsResponsable: [],
+    formationsResponsableFormateur: [],
+    query: "none",
   };
 }
 
@@ -217,6 +236,9 @@ function formatBaseFormation(
     cle_ministere_educatif: formationCatalogue.cle_ministere_educatif,
     cfd: formationCatalogue.cfd,
     ...(formationCatalogue.rncp_code ? { rncp: formationCatalogue.rncp_code } : {}),
+    intitule_long: formationCatalogue.intitule_long,
+    lieu_formation_adresse:
+      formationCatalogue.lieu_formation_adresse_computed ?? formationCatalogue.lieu_formation_adresse ?? "",
     annee_formation: parseInt(formationCatalogue.annee, 10) || -1, // parfois annee === "X"
     niveau: getNiveauFormationFromLibelle(formationCatalogue.niveau),
     duree_formation_theorique: parseInt(formationCatalogue.duree, 10),

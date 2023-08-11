@@ -1,25 +1,16 @@
-import { Box, HStack, Input, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Text, Tooltip } from "@chakra-ui/react";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { formationsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { Formation } from "@/common/internal/Formation";
-import { formatDate } from "@/common/utils/dateUtils";
-import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import { normalize } from "@/common/utils/stringUtils";
-import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
+import { FormationBase } from "@/common/internal/Formation";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { ArrowDropRightLine } from "@/theme/components/icons";
 
-export type FormationNormalized = Formation & {
-  normalizedName: string;
-};
-
-const formationsTableColumnsDefs: AccessorKeyColumnDef<Formation, any>[] = [
+const formationsTableColumnsDefs: AccessorKeyColumnDef<FormationBase, any>[] = [
   {
-    header: () => "Intitulé et lieu de la formation",
-    accessorKey: "normalizedName",
+    header: () => "Niveau et intitulé",
+    accessorKey: "intitule_long",
     cell: ({ row }) => (
       <>
         <Text>{row.original.intitule_long}</Text>
@@ -67,7 +58,7 @@ const formationsTableColumnsDefs: AccessorKeyColumnDef<Formation, any>[] = [
     ),
   },
   {
-    accessorKey: "rncp_code",
+    accessorKey: "rncp",
     header: () => (
       <>
         Code RNCP
@@ -99,7 +90,7 @@ const formationsTableColumnsDefs: AccessorKeyColumnDef<Formation, any>[] = [
     ),
   },
   {
-    accessorKey: "duree",
+    accessorKey: "duree_formation_theorique",
     header: () => <>Durée (an)</>,
   },
   {
@@ -119,55 +110,17 @@ const formationsTableColumnsDefs: AccessorKeyColumnDef<Formation, any>[] = [
 ];
 
 interface FormationsTableProps {
-  formations: FormationNormalized[];
+  formations: FormationBase[];
 }
 function FormationsTable(props: FormationsTableProps) {
-  const defaultSort: SortingState = [{ desc: false, id: "normalizedName" }];
-  const [searchValue, setSearchValue] = useState<string>("");
+  // TODO tri par niveau d'abord
+  const defaultSort: SortingState = [{ desc: false, id: "intitule_long" }];
   const [sort, setSort] = useState<SortingState>(defaultSort);
-
-  const filteredFormations = useMemo(() => {
-    if (searchValue.length < 2) {
-      return props.formations;
-    }
-
-    const normalizedSearchValue = normalize(searchValue);
-    return props.formations.filter(
-      (formation) =>
-        formation.normalizedName.includes(normalizedSearchValue) ||
-        formation.cfd?.startsWith(normalizedSearchValue) ||
-        formation.rncp_code?.startsWith(normalizedSearchValue)
-    );
-  }, [props.formations, searchValue]);
 
   return (
     <>
-      <HStack mb="4">
-        <Input
-          type="text"
-          name="search_formation"
-          placeholder="Rechercher une formation par intitulé, CFD ou RNCP (indiquez au moins deux caractères)"
-          value={searchValue}
-          onChange={(event) => setSearchValue(event.target.value)}
-          flex="1"
-          mr="2"
-        />
-
-        <DownloadLinkButton
-          action={() => {
-            exportDataAsXlsx(
-              `tdb-formations-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
-              filteredFormations,
-              formationsExportColumns
-            );
-          }}
-        >
-          Télécharger la liste
-        </DownloadLinkButton>
-      </HStack>
-
       <NewTable
-        data={filteredFormations || []}
+        data={props.formations || []}
         loading={false}
         sortingState={sort}
         onSortingChange={(state) => setSort(state)}

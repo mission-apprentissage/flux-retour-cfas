@@ -929,13 +929,21 @@ export interface Organisme {
      */
     rncp?: string;
     /**
+     * Intitulé de la formation
+     */
+    intitule_long?: string;
+    /**
+     * Adresse du lieu de la formation
+     */
+    lieu_formation_adresse?: string;
+    /**
      * Année millésime de la formation pour cet organisme
      */
     annee_formation?: number;
     /**
      * Niveau de formation récupéré via Tables de Correspondances
      */
-    niveau?: string | null;
+    niveau?: string;
     /**
      * Durée théorique de la formation en mois pour cet organisme
      */
@@ -967,13 +975,21 @@ export interface Organisme {
      */
     rncp?: string;
     /**
+     * Intitulé de la formation
+     */
+    intitule_long?: string;
+    /**
+     * Adresse du lieu de la formation
+     */
+    lieu_formation_adresse?: string;
+    /**
      * Année millésime de la formation pour cet organisme
      */
     annee_formation?: number;
     /**
      * Niveau de formation récupéré via Tables de Correspondances
      */
-    niveau?: string | null;
+    niveau?: string;
     /**
      * Durée théorique de la formation en mois pour cet organisme
      */
@@ -1005,13 +1021,21 @@ export interface Organisme {
      */
     rncp?: string;
     /**
+     * Intitulé de la formation
+     */
+    intitule_long?: string;
+    /**
+     * Adresse du lieu de la formation
+     */
+    lieu_formation_adresse?: string;
+    /**
      * Année millésime de la formation pour cet organisme
      */
     annee_formation?: number;
     /**
      * Niveau de formation récupéré via Tables de Correspondances
      */
-    niveau?: string | null;
+    niveau?: string;
     /**
      * Durée théorique de la formation en mois pour cet organisme
      */
