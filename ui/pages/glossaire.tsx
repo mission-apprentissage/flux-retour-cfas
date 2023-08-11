@@ -259,7 +259,7 @@ export default function Glossaire() {
               <Td verticalAlign="top">SIREN</Td>
               <Td>
                 La donnée «&nbsp;SIREN&nbsp;» provient de l’INSEE. Si cette information est erronée, merci de leur
-                signaler
+                signaler.
               </Td>
             </Tr>
             <Tr>
