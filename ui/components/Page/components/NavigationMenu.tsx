@@ -246,6 +246,9 @@ const MenuQuestions = () => {
           >
             Page d’aide
           </MenuItem>
+          <MenuItem as="a" href="/glossaire">
+            Glossaire
+          </MenuItem>
           <MenuItem
             as="a"
             href={`mailto:${CONTACT_ADDRESS}`}
