@@ -11,7 +11,7 @@ const logger = parentLogger.child({
 });
 
 interface OrganismeInfos {
-  _id: ObjectId;
+  _id?: ObjectId;
   enseigne?: string;
   raison_sociale?: string;
   commune?: string;
@@ -125,8 +125,12 @@ export const hydrateOrganismesRelations = async () => {
         { _id: organisme._id },
         {
           $set: {
-            organismesFormateurs: organismesFormateurs.map((organisme) => addOrganismesInfos(organisme)),
-            organismesResponsables: organismesResponsables.map((organisme) => addOrganismesInfos(organisme)),
+            organismesFormateurs: organismesFormateurs
+              .map((organisme) => addOrganismesInfos(organisme))
+              .filter((organisme) => organisme._id !== undefined),
+            organismesResponsables: organismesResponsables
+              .map((organisme) => addOrganismesInfos(organisme))
+              .filter((organisme) => organisme._id !== undefined),
             updated_at: new Date(),
           },
         }
