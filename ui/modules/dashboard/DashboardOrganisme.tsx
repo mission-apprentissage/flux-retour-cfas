@@ -40,6 +40,7 @@ import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation, getOrganisationTypeFromNature } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
 import FormationsTable from "../organismes/FormationsTable";
+import FormationsTableEffectifs from "../organismes/FormationsTableEffectifs";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
@@ -702,10 +703,11 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   {formationsResponsable.length} formation{formationsResponsable.length > 1 ? "s" : ""} dont{" "}
                   {modePublique ? "cet" : "votre"} organisme est responsable
                 </Heading>
+                <FormationsTableEffectifs formations={formationsResponsable} />
                 <FormationsTable formations={formationsResponsable} />
               </>
             )}
-            {formationsFormateur?.length > 0 && (
+            {/* {formationsFormateur?.length > 0 && (
               <>
                 <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
                   {formationsFormateur.length} formation{formationsFormateur.length > 1 ? "s" : ""} dont{" "}
@@ -723,7 +725,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 </Heading>
                 <FormationsTable formations={formationsResponsableFormateur} />
               </>
-            )}
+            )} */}
           </>
         ) : (
           <Ribbons variant="warning" mt="0.5rem">
