@@ -82,7 +82,7 @@ export default function Glossaire() {
                     permet, par l’usage de ce code, d’identifier la formation concernée et les effectifs par typologie
                     de formations et par secteur.
                   </Text>
-                  <Text as="p">Format&nbsp;: 8 chiffres 1 lettre</Text>
+                  <Text as="p">Format&nbsp;: 8 caractères, comprenant des chiffres et des lettres</Text>
                 </Flex>
               </Td>
             </Tr>
@@ -90,8 +90,8 @@ export default function Glossaire() {
               <Td verticalAlign="top">Lieu de formation</Td>
               <Td>
                 Les lieux de formations sont caractérisés par une adresse postale et des coordonnées de géolocalisation
-                et toujours rattachés à un organisme de formation. La donnée «&nbsp;lieu de formation&nbsp;» provient des
-                Carif-Oref. Si cette donnée est inconnue ou incorrecte, voir la marche à suivre.
+                et toujours rattachés à un organisme de formation. La donnée «&nbsp;lieu de formation&nbsp;» provient
+                des Carif-Oref. Si cette donnée est inconnue ou incorrecte, voir la marche à suivre.
               </Td>
             </Tr>
             <Tr>
