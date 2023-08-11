@@ -669,6 +669,8 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
         erps: permissionsOrganisme.infoTransmissionEffectifs,
         first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
         last_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
+        mode_de_transmission: permissionsOrganisme.infoTransmissionEffectifs,
+        setup_step_courante: permissionsOrganisme.infoTransmissionEffectifs,
       }),
     }
   );
