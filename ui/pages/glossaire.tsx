@@ -252,7 +252,7 @@ export default function Glossaire() {
                 régulièrement, tenant compte des évolutions du marché du travail. Il présente l’ensemble des métiers
                 regroupés par fiches, organisées par 14 grands domaines professionnels. Ces fiches proposent une
                 description détaillée des métiers&nbsp;: définition, accès à l’emploi, compétences (savoir-faire,
-                savoir-être professionnels et savoirs), contextes de travail, mobilité professionnelle).
+                savoir-être professionnels et savoirs), contextes de travail, et mobilité professionnelle.
               </Td>
             </Tr>
             <Tr>
