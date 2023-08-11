@@ -5,11 +5,12 @@ import { useState } from "react";
 import { _get } from "@/common/httpClient";
 import { FormationBase } from "@/common/internal/Formation";
 import NewTable from "@/modules/indicateurs/NewTable";
-import { ArrowDropRightLine } from "@/theme/components/icons";
+
+import { niveauFormationByNiveau } from "../indicateurs/filters/FiltreFormationNiveau";
 
 const formationsTableColumnsDefs: AccessorKeyColumnDef<FormationBase, any>[] = [
   {
-    header: () => "Niveau et intitulé",
+    header: () => "Intitulé et lieu de la formation",
     accessorKey: "intitule_long",
     cell: ({ row }) => (
       <>
@@ -96,14 +97,9 @@ const formationsTableColumnsDefs: AccessorKeyColumnDef<FormationBase, any>[] = [
   {
     accessorKey: "niveau",
     header: () => <>Niveau</>,
-  },
-  {
-    accessorKey: "more",
-    enableSorting: false,
-    header: () => "Voir",
-    cell: () => (
+    cell: ({ row }) => (
       <>
-        <ArrowDropRightLine />
+        <Text>{niveauFormationByNiveau[row.original.niveau]}</Text>
       </>
     ),
   },

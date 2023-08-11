@@ -27,6 +27,11 @@ const niveaux: NiveauFormation[] = [
   },
 ];
 
+export const niveauFormationByNiveau = niveaux.reduce((acc, n) => {
+  acc[n.key] = n.label;
+  return acc;
+}, {});
+
 interface FiltreFormationNiveauProps {
   value: string[];
   onChange: (value: string[]) => void;
