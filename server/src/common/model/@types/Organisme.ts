@@ -944,7 +944,7 @@ export interface Organisme {
       /**
        * Code UAI du lieu de formation (optionnel)
        */
-      uai?: string;
+      uai?: string | null;
       /**
        * Siret du lieu de formation (optionnel)
        */
@@ -982,7 +982,7 @@ export interface Organisme {
       /**
        * Code UAI du lieu de formation (optionnel)
        */
-      uai?: string;
+      uai?: string | null;
       /**
        * Siret du lieu de formation (optionnel)
        */

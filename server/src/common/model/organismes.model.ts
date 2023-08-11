@@ -48,7 +48,7 @@ const relationOrganismeSchema = object(
 
 const formationOrganismeSchema = object(
   {
-    uai: string({
+    uai: stringOrNull({
       description: "Code UAI du lieu de formation (optionnel)",
       pattern: UAI_REGEX_PATTERN,
       maxLength: 8,

@@ -216,7 +216,7 @@ function formatBaseFormation(
     formation_id: formationCatalogue._id,
     cle_ministere_educatif: formationCatalogue.cle_ministere_educatif,
     cfd: formationCatalogue.cfd,
-    rncp: formationCatalogue.rncp_code,
+    ...(formationCatalogue.rncp_code ? { rncp: formationCatalogue.rncp_code } : {}),
     annee_formation: parseInt(formationCatalogue.annee, 10) || -1, // parfois annee === "X"
     niveau: getNiveauFormationFromLibelle(formationCatalogue.niveau),
     duree_formation_theorique: parseInt(formationCatalogue.duree, 10),
