@@ -11,12 +11,15 @@ call_daily_jobs_with_logs(){
   # Remplissage des organismes issus du référentiel
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes-referentiel" || true
 
+  # Remplissage des formations depuis le catalogue
+  docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:formations-catalogue" || true
+
   # Remplissage des organismes depuis le référentiel
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes" || true
 
   # Mise à jour des relations
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes-relations" || true
-  
+
   # Remplissage des réseaux
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux" || true
 
@@ -26,7 +29,7 @@ call_daily_jobs_with_logs(){
   # Mise à jour des organismes via APIs externes
   docker exec flux_retour_cfas_server bash -c "yarn cli update:organismes-with-apis" || true
 
-  # Mise à jour des niveaux des formations des effectifs 
+  # Mise à jour des niveaux des formations des effectifs
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:effectifs-formation-niveaux" || true
 
   # Purge des collections events et queues
@@ -39,6 +42,6 @@ call_daily_jobs_with_logs(){
   # Fiabilisation des effectifs : suppression des inscrits sans contrats depuis 90 jours & transformation des rupturants en abandon > 180 jours
   docker exec flux_retour_cfas_server bash -c "yarn cli fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours" || true
   docker exec flux_retour_cfas_server bash -c "yarn cli fiabilisation:effectifs:transform-rupturants-en-abandons-depuis" || true
-} 
+}
 
 call_daily_jobs_with_logs >> ${LOG_FILEPATH}
