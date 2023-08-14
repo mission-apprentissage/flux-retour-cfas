@@ -1,7 +1,5 @@
 import { addHours, isBefore } from "date-fns";
-import { ObjectId } from "mongodb";
 
-import { User } from "@/common/model/@types";
 import { usersDb } from "@/common/model/collections";
 import { generateRandomAlphanumericPhrase } from "@/common/utils/miscUtils";
 import { compare, isTooWeak, hash } from "@/common/utils/passwordUtils";
@@ -11,20 +9,15 @@ const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
 
 /**
  * Vérification de la validité du token
- * @param {*} user
- * @returns
  */
-const isUserLegacyPasswordUpdatedTokenValid = (user) => {
+const isUserLegacyPasswordUpdatedTokenValid = (user: any) => {
   return Boolean(user.password_update_token_expiry) && isBefore(new Date(), user.password_update_token_expiry);
 };
 
 /**
  * Authentification de l'utilisateur
- * @param {*} username
- * @param {*} password
- * @returns
  */
-export const authenticateLegacy = async (username, password) => {
+export const authenticateLegacy = async (username: string, password: string) => {
   const user = await usersDb().findOne({ username });
   if (!user?.password) {
     return null;
@@ -48,34 +41,15 @@ export const authenticateLegacy = async (username, password) => {
 
 /**
  * Récupération d'un utilisateur depuis son username
- * @param {*} username
- * @returns
  */
-export const getUserLegacy = async (username) => {
+export const getUserLegacy = async (username: string) => {
   return await usersDb().findOne({ username });
 };
 
 /**
- * Récupération d'un utilisateur depuis son id
- * @param {*} id
- * @returns
- */
-export const getUserLegacyById = async (id) => {
-  const _id = new ObjectId(id);
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
-  const user = await usersDb().findOne({ _id });
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
-  return user;
-};
-
-/**
  * Création d'un utilisateur depuis props
- * @param {*} userProps
- * @returns
  */
-export const createUserLegacy = async (userProps) => {
+export const createUserLegacy = async (userProps: any) => {
   const username = userProps.username;
   const password = userProps.password || generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
   const passwordHash = hash(password);
@@ -105,10 +79,8 @@ export const createUserLegacy = async (userProps) => {
 
 /**
  * Génération d'un token d'update de mot de passe
- * @param {*} username
- * @returns
  */
-export const generatePasswordUpdateTokenLegacy = async (username) => {
+export const generatePasswordUpdateTokenLegacy = async (username: string) => {
   const user = await usersDb().findOne({ username });
 
   if (!user) {
@@ -135,11 +107,8 @@ export const generatePasswordUpdateTokenLegacy = async (username) => {
 
 /**
  * Mise à jour du mot de passe
- * @param {*} updateToken
- * @param {*} password
- * @returns
  */
-export const updatePasswordLegacy = async (updateToken, password) => {
+export const updatePasswordLegacy = async (updateToken: any, password: any) => {
   if (!validatePassword(password)) throw new Error("Password must be valid (at least 16 characters)");
   // find user with password_update_token and ensures it exists
   const user = await usersDb().findOne({
@@ -168,31 +137,4 @@ export const updatePasswordLegacy = async (updateToken, password) => {
 
   // TODO return nothing (single responsibility)
   return user.username;
-};
-
-/**
- * Suppression d'un utilisateur
- * @param {*} username
- */
-export const removeUserLegacy = async (username) => {
-  const user = await usersDb().findOne({ username });
-  if (!user) {
-    throw new Error(`Unable to find user ${username}`);
-  }
-
-  await usersDb().deleteOne({ username });
-};
-
-/**
- * Mise à jour d'un utilisateur
- * @param {*} id
- * @param {*} param1
- */
-export const updateUserLegacy = async (_id: ObjectId, data: Partial<User>) => {
-  const user = await usersDb().findOne({ _id });
-
-  if (!user) {
-    throw new Error("Unable to find user");
-  }
-  await usersDb().updateOne({ _id }, { $set: data });
 };

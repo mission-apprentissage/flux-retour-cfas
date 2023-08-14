@@ -1,16 +1,12 @@
 import { strict as assert } from "assert";
 
 import { subMinutes, differenceInCalendarDays, differenceInSeconds } from "date-fns";
-import { ObjectId } from "mongodb";
 
 import {
   authenticateLegacy,
   createUserLegacy,
   generatePasswordUpdateTokenLegacy,
-  getUserLegacyById,
-  removeUserLegacy,
   updatePasswordLegacy,
-  updateUserLegacy,
 } from "@/common/actions/legacy/users.legacy.actions";
 import { usersDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
@@ -50,20 +46,6 @@ describe("Components Users Test", () => {
       });
       const found = await usersDb().findOne({ _id: createdId });
       assert.equal(found?.permissions?.includes(apiRoles.administrator), true);
-    });
-  });
-
-  describe("removeUser", () => {
-    it("Permet de supprimer un utilisateur via son username", async () => {
-      await createUserLegacy({
-        username: "userToDelete",
-        password: "password",
-        permissions: [apiRoles.administrator],
-      });
-      await removeUserLegacy("userToDelete");
-
-      const found = await usersDb().findOne({ username: "userToDelete" });
-      assert.equal(found, null);
     });
   });
 
@@ -223,157 +205,6 @@ describe("Components Users Test", () => {
           return true;
         }
       );
-    });
-  });
-
-  describe("updateUser", () => {
-    it("renvoie une erreur quand l'id passé pour la maj d'un utilisateur n'est pas valide", async () => {
-      const usernameTest = "userTest";
-
-      // create user
-      await createUserLegacy({ username: usernameTest });
-
-      // find user
-      const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found?.username === usernameTest, true);
-      assert(found);
-
-      // update user with bad id
-      const objectId = new ObjectId();
-      await assert.rejects(updateUserLegacy(objectId, { username: "UPDATED" }), { message: "Unable to find user" });
-    });
-
-    it("Permets la MAJ d'un utilisateur pour son username", async () => {
-      const usernameTest = "userTest";
-
-      // create user
-      await createUserLegacy({ username: usernameTest });
-
-      // find user
-      const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found?.username === usernameTest, true);
-      assert(found);
-
-      // update user
-      const updatedUserName = "UPDATED";
-      await updateUserLegacy(found?._id, { username: updatedUserName });
-
-      // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
-      assert.equal(foundAfterUpdate?.username === updatedUserName, true);
-    });
-
-    it("Permets la MAJ d'un utilisateur pour son email", async () => {
-      const usernameTest = "userTest";
-
-      // create user
-      await createUserLegacy({ username: usernameTest, email: "test@test.fr" });
-
-      // find user
-      const found = await usersDb().findOne({ username: usernameTest });
-      assert(found);
-      assert.equal(found?.email === "test@test.fr", true);
-
-      // update user
-      const updateValue = "UPDATED@test.fr";
-      await updateUserLegacy(found?._id, { email: updateValue });
-
-      // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
-      assert.equal(foundAfterUpdate?.email === updateValue, true);
-    });
-
-    it("Permets la MAJ d'un utilisateur pour son réseau", async () => {
-      const usernameTest = "userTest";
-
-      // create user
-      await createUserLegacy({ username: usernameTest, network: "TEST_RESEAU" });
-
-      // find user
-      const found = await usersDb().findOne({ username: usernameTest });
-      assert(found);
-      assert.equal(found?.network === "TEST_RESEAU", true);
-
-      // update user
-      const updateValue = "UPDATED_NETWORK";
-      await updateUserLegacy(found?._id, { network: updateValue });
-
-      // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
-      assert.equal(foundAfterUpdate?.network === updateValue, true);
-    });
-
-    it("Permets la MAJ d'un utilisateur pour sa région", async () => {
-      const usernameTest = "userTest";
-
-      // create user
-      await createUserLegacy({ username: usernameTest, region: "TEST_REGION" });
-
-      // find user
-      const found = await usersDb().findOne({ username: usernameTest });
-      assert(found);
-      assert.equal(found?.region === "TEST_REGION", true);
-
-      // update user
-      const updateValue = "UPDATED_REGION";
-      await updateUserLegacy(found?._id, { region: updateValue });
-
-      // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
-      assert.equal(foundAfterUpdate?.region === updateValue, true);
-    });
-
-    it("Permets la MAJ d'un utilisateur pour son organisme", async () => {
-      const usernameTest = "userTest";
-
-      // create user
-      await createUserLegacy({ username: usernameTest, organisme: "TEST_ORGANISME" });
-
-      // find user
-      const found = await usersDb().findOne({ username: usernameTest });
-      assert(found);
-      assert.equal(found?.organisme === "TEST_ORGANISME", true);
-
-      // update user
-      const updateValue = "UPDATED_ORGANISME";
-      await updateUserLegacy(found?._id, { organisme: updateValue });
-
-      // Check update
-      const foundAfterUpdate = await usersDb().findOne({ _id: found?._id });
-      assert.equal(foundAfterUpdate?.organisme === updateValue, true);
-    });
-  });
-
-  describe("getDetailedUserById", () => {
-    it("renvoie une erreur quand l'id passé pour le getDetailedUserById n'est pas valide", async () => {
-      const usernameTest = "userTest";
-
-      // create user
-      await createUserLegacy({ username: usernameTest });
-
-      // find user
-      const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found?.username === usernameTest, true);
-      assert(found);
-
-      // get user with bad id
-      const objectId = "^pkazd^pkazd";
-      await assert.rejects(getUserLegacyById(objectId), { message: "Unable to find user" });
-    });
-
-    it("renvoie le bon utilisateur quand l'id passé pour le getDetailedUserById est valide", async () => {
-      const usernameTest = "userTest";
-
-      // create user
-      await createUserLegacy({ username: usernameTest });
-
-      // find user
-      const found = await usersDb().findOne({ username: usernameTest });
-      assert.equal(found?.username === usernameTest, true);
-
-      // get user with id
-      const gettedUser = await getUserLegacyById(found?._id);
-      assert.equal(gettedUser.username === found?.username, true);
     });
   });
 });
