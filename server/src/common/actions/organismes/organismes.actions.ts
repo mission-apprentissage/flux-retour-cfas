@@ -176,7 +176,7 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
   const metiers = await getMetiersFromLba(organisme.siret);
 
   // Construction de l'arbre des formations de l'organisme
-  const relatedFormations = (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [];
+  const relatedFormations = (await getFormationsTreeForOrganisme(organisme.uai))?.formations || [];
 
   // Eventuellement on pourrait récupérer des informations via API Entreprise
   // const organismeInfosFromSiret = await getOrganismeInfosFromSiret(organisme.siret);

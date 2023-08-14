@@ -10,7 +10,7 @@ import { findOrganismeByUai } from "./organismes.actions";
 /**
  * Méthode de récupération de l'arbre des formations issues du catalogue liées à un organisme
  */
-export const getFormationsTreeForOrganisme = async (uai: string) => {
+export const getFormationsTreeForOrganisme = async (uai: string | undefined) => {
   if (!uai)
     return {
       formations: [],
