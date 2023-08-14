@@ -14,10 +14,6 @@ import { stripEmptyFields } from "@/common/utils/miscUtils";
  * Méthode de construction d'un nouveau tableau d'historique de statut
  * a partir d'un nouveau couple statut / date_metier
  * Va append au tableau un nouvel élément si nécessaire
- * @param {*} historique_statut_apprenant_existant
- * @param {*} updated_statut_apprenant
- * @param {*} updated_date_metier_mise_a_jour_statut
- * @returns
  */
 export const buildNewHistoriqueStatutApprenant = (
   historique_statut_apprenant_existant: Effectif["apprenant"]["historique_statut"],
@@ -104,9 +100,6 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
  * organisme_id : identifiant de l'organisme de formation en apprentissage
  * formation.cfd : Code formation diplôme de la formation suivie par le jeune
  * annee_scolaire : Année scolaire dans laquelle se trouve le jeune pour cette formation dans cet établissement
- * @param effectif
- * @param queryKeys
- * @returns
  */
 export const checkIfEffectifExists = async (
   effectif: Effectif,

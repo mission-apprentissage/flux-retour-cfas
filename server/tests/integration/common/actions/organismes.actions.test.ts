@@ -3,7 +3,6 @@ import { strict as assert } from "assert";
 import { subDays } from "date-fns";
 import { ObjectId } from "mongodb";
 
-import { mapFiabilizedOrganismeUaiSiretCouple } from "@/common/actions/engine/engine.organismes.utils";
 import {
   createOrganisme,
   findOrganismeById,
@@ -12,10 +11,8 @@ import {
   updateOrganisme,
   updateOrganismeFromApis,
 } from "@/common/actions/organismes/organismes.actions";
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { Organisme } from "@/common/model/@types";
-import { fiabilisationUaiSiretDb } from "@/common/model/collections";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 
 const sampleOrganismeWithoutUai: Organisme = {
@@ -249,89 +246,6 @@ describe("Test des actions Organismes", () => {
       const updatedOrganisme = await updateOrganismeFromApis(createdOrganisme);
 
       expect(updatedOrganisme?.ferme).toBe(false);
-    });
-  });
-
-  describe("mapFiabilizedOrganismeUaiSiretCouple", () => {
-    it("return same uai-siret couple when not present in fiabilisation file or collection", async () => {
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
-        uai,
-        siret,
-      });
-      assert.equal(cleanUai, uai);
-      assert.equal(cleanSiret, siret);
-    });
-
-    it("return cleaned uai-siret couple when uai is the same in fiabilisation collection", async () => {
-      const sampleUai = "0755805C";
-      const sampleSiret = "77568013501139";
-      const sampleUaiFiable = "0755805C";
-      const sampleSiretFiable = "77568013501089";
-
-      // Create entry A_FIABILISER in fiabilisation collection
-      await fiabilisationUaiSiretDb().insertOne({
-        uai: sampleUai,
-        siret: sampleSiret,
-        uai_fiable: sampleUaiFiable,
-        siret_fiable: sampleSiretFiable,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-      });
-
-      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
-        uai: sampleUai,
-        siret: sampleSiret,
-      });
-      assert.equal(cleanUai, sampleUaiFiable);
-      assert.equal(cleanSiret, sampleSiretFiable);
-    });
-
-    it("return cleaned uai-siret couple when siret is the same in fiabilisation collection", async () => {
-      const sampleUai = "0755805C";
-      const sampleSiret = "77568013501139";
-      const sampleUaiFiable = "0802004U";
-      const sampleSiretFiable = "77568013501139";
-
-      // Create entry A_FIABILISER in fiabilisation collection
-      await fiabilisationUaiSiretDb().insertOne({
-        uai: sampleUai,
-        siret: sampleSiret,
-        uai_fiable: sampleUaiFiable,
-        siret_fiable: sampleSiretFiable,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-      });
-
-      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
-        uai: sampleUai,
-        siret: sampleSiret,
-      });
-      assert.equal(cleanUai, sampleUaiFiable);
-      assert.equal(cleanSiret, sampleSiretFiable);
-    });
-
-    it("return cleaned uai-siret couple when siret is null in fiabilisation collection", async () => {
-      const sampleUai = "0755805C";
-      const sampleSiret = null;
-      const sampleUaiFiable = "0755805C";
-      const sampleSiretFiable = "77568013501139";
-
-      // Create entry A_FIABILISER in fiabilisation collection
-      await fiabilisationUaiSiretDb().insertOne({
-        uai: sampleUai,
-        siret: sampleSiret,
-        uai_fiable: sampleUaiFiable,
-        siret_fiable: sampleSiretFiable,
-        type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
-      });
-
-      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
-        uai: sampleUai,
-        siret: sampleSiret,
-      });
-      assert.equal(cleanUai, sampleUaiFiable);
-      assert.equal(cleanSiret, sampleSiretFiable);
     });
   });
 
