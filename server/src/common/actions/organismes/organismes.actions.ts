@@ -18,11 +18,10 @@ import { organismesDb, effectifsDb, organisationsDb } from "@/common/model/colle
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
-import { buildAdresseFromApiEntreprise } from "@/common/utils/adresseUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { cleanProjection } from "@/common/utils/mongoUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
-import { buildAdresseFromUai, getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
+import { getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
@@ -36,8 +35,6 @@ const SEARCH_RESULTS_LIMIT = 50;
 /**
  * Méthode de création d'un organisme
  * Checks uai format & existence
- * @param {*} organismeProps
- * @returns
  */
 export const createOrganisme = async (data: Organisme) => {
   if ((await organismesDb().countDocuments({ uai: data.uai, siret: data.siret })) > 0) {
@@ -57,10 +54,8 @@ export const createOrganisme = async (data: Organisme) => {
 
 /**
  * Fonction de récupération des métiers depuis l'API LBA
- * @param {string} siret
- * @returns
  */
-const getMetiersFromLba = async (siret) => {
+const getMetiersFromLba = async (siret: string) => {
   let metiers: any[] = [];
 
   try {
@@ -74,8 +69,6 @@ const getMetiersFromLba = async (siret) => {
 
 /**
  * Fonction de récupération d'informations depuis SIRET via API Entreprise via siret
- * @param {*} siret
- * @returns Object
  */
 export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial<Organisme>> => {
   let organismeInfos: Partial<Organisme> = {};
@@ -114,45 +107,18 @@ export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial
 };
 
 /**
- * Création d'un objet organisme
- */
-export const structureOrganisme = async <T extends Partial<Organisme>>({ uai, siret, nom }: T) => {
-  let adresseForOrganisme = {};
-  if (uai) {
-    adresseForOrganisme = buildAdresseFromUai(uai);
-  } else if (siret) {
-    adresseForOrganisme = await buildAdresseFromApiEntreprise(siret);
-  }
-
-  return {
-    ...defaultValuesOrganisme(),
-    nom,
-    uai,
-    siret,
-    last_transmission_date: new Date(),
-    ...adresseForOrganisme,
-  };
-};
-
-/**
  * Méthode de récupération d'organismes depuis un siret
  * Previously getFromSiret
- * @param {string} siret
- * @param {*} projection
- * @returns
  */
-export const findOrganismesBySiret = async (siret, projection = {}) => {
+export const findOrganismesBySiret = async (siret: string, projection = {}) => {
   return await organismesDb().find({ siret }, { projection }).toArray();
 };
 
 /**
  * Méthode de récupération d'un organisme depuis un uai
  * Previously getFromUai
- * @param {string} uai
- * @param {*} projection
- * @returns
  */
-export const findOrganismeByUai = async (uai, projection = {}) => {
+export const findOrganismeByUai = async (uai: string, projection = {}) => {
   if (!uai) {
     throw Error("missing parameter `uai`");
   }
@@ -160,21 +126,7 @@ export const findOrganismeByUai = async (uai, projection = {}) => {
 };
 
 /**
- * Méthode de récupération d'un organisme depuis un siret
- * @param {string} siret
- * @param {*} projection
- * @returns
- */
-export const findOrganismeBySiret = async (siret: string, projection = {}) => {
-  return organismesDb().findOne({ siret }, { projection });
-};
-
-/**
  * Méthode de récupération d'un organisme depuis un UAI et un SIRET
- * @param {string} uai
- * @param {string} siret
- * @param {*} projection
- * @returns
  */
 export const findOrganismeByUaiAndSiret = async (uai?: string, siret?: string, projection = {}) => {
   if (!uai && !siret) {
@@ -185,31 +137,13 @@ export const findOrganismeByUaiAndSiret = async (uai?: string, siret?: string, p
 
 /**
  * Méthode de récupération d'un organisme depuis un id
- * @param {string|ObjectId} id
- * @param {*} projection
- * @returns
  */
-export const findOrganismeById = async (id, projection = {}) => {
+export const findOrganismeById = async (id: string | ObjectId, projection = {}) => {
   return organismesDb().findOne({ _id: new ObjectId(id) }, { projection });
 };
 
 /**
- * Méthode de récupération d'organismes versatile par query
- * @param {*} query
- * @param {*} projection
- * @returns
- */
-export const findOrganismesByQuery = async (query, projection = {}) => {
-  return await organismesDb().find(query, { projection }).toArray();
-};
-
-/**
  * Méthode de mise à jour d'un organisme depuis son id
- *
- * @param {string|ObjectId} id
- * @param {Object} data
- * @param {Object} options
- * @returns
  */
 export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) => {
   const organisme = await organismesDb().findOne({ _id });
@@ -234,8 +168,6 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) =
 
 /**
  * Fonction de MAJ d'un organisme en appelant les API externes
- * @param organisme
- * @returns
  */
 export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
   let updatedData: Partial<Organisme> = {};
@@ -265,8 +197,6 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
 
 /**
  * Méthode de maj des dates de transmission d'un organisme
- * @param {*} organisme
- * @returns
  * @deprecated Utiliser updateOrganismeLastTransmissionDate
  */
 export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) => {
@@ -289,7 +219,6 @@ export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>
 
 /**
  * Met à jour la date de dernière transmission d'un organisme.
- * @param organismeId
  */
 export async function updateOrganismeLastTransmissionDate(organismeId: ObjectId) {
   const modifyResult = await organismesDb().findOneAndUpdate(
@@ -308,10 +237,8 @@ export async function updateOrganismeLastTransmissionDate(organismeId: ObjectId)
 
 /**
  * Returns sous-établissements by siret for an uai
- * @param {string} uai
- * @returns {Promise<Array<any>>}
  */
-export const getSousEtablissementsForUai = async (uai) => {
+export const getSousEtablissementsForUai = async (uai: string): Promise<Array<any>> => {
   return await organismesDb()
     .aggregate([
       { $match: { uai, siret: { $ne: null } } },
@@ -387,9 +314,8 @@ export const searchOrganismes = async (ctx: AuthContext, searchCriteria: Organis
 
 /**
  * Supprime l'organisme identifié par son id et supprime tous ses effectifs
- * @param {*} id
  */
-export const deleteOrganismeAndEffectifs = async (id) => {
+export const deleteOrganismeAndEffectifs = async (id: ObjectId) => {
   const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
@@ -406,8 +332,6 @@ export const deleteOrganismeAndEffectifs = async (id) => {
 
 /**
  * Méthode de récupération de la liste des organismes en base
- * @param {*} query
- * @returns
  */
 export const getAllOrganismes = async (
   query = {},
@@ -435,10 +359,8 @@ export const getAllOrganismes = async (
 
 /**
  * Méthode de récupération d'un organisme et de ses détails depuis son id
- * @param {*} _id
- * @returns
  */
-export const getDetailedOrganismeById = async (_id) => {
+export const getDetailedOrganismeById = async (_id: any) => {
   const organisme = await organismesDb()
     .aggregate([
       { $match: { _id: new ObjectId(_id) } },
@@ -592,8 +514,6 @@ export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
 
 /**
  * Méthode de récupération des stats sur la table organisme
- * @param {*} _id
- * @returns
  */
 export const getStatOrganismes = async () => {
   const stats = await organismesDb()
