@@ -71,48 +71,42 @@ function NewTable<T>(props: NewTableProps<T>) {
     <>
       <Table variant={props?.variant || "primary"}>
         <Thead>
-          {/* {table.getHeaderGroups().map((headerGroup) => (
+          {table.getHeaderGroups().map((headerGroup) => (
             <Tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => { */}
-          {table.getHeaderGroups().map((headerGroup, index) => (
-            <Tr key={`headerGroup_${index}`}>
-              {headerGroup.headers.map((header, index) => {
-                return (
-                  <Th
-                    // key={header.id}
-                    key={`header${index}`}
-                    colSpan={header.colSpan}
-                    cursor={header.column.getCanSort() ? "pointer" : "default"}
-                    userSelect={header.column.getCanSort() ? "none" : "initial"}
-                    onClick={header.column.getToggleSortingHandler()}
-                    _hover={
-                      header.column.getCanSort() && !header.column.getIsSorted()
-                        ? {
-                            backgroundColor: "grey.100",
-                            "::after": {
-                              color: "grey.500",
-                              content: '"▼"',
-                              marginLeft: "-14px", // Negative margin to pull icon to the left, based on following Box
-                            },
-                          }
-                        : undefined
-                    }
-                  >
-                    {header.isPlaceholder ? null : (
-                      <>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
+              {headerGroup.headers.map((header) => (
+                <Th
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  cursor={header.column.getCanSort() ? "pointer" : "default"}
+                  userSelect={header.column.getCanSort() ? "none" : "initial"}
+                  onClick={header.column.getToggleSortingHandler()}
+                  _hover={
+                    header.column.getCanSort() && !header.column.getIsSorted()
+                      ? {
+                          backgroundColor: "grey.100",
+                          "::after": {
+                            color: "grey.500",
+                            content: '"▼"',
+                            marginLeft: "-14px", // Negative margin to pull icon to the left, based on following Box
+                          },
+                        }
+                      : undefined
+                  }
+                >
+                  {header.isPlaceholder ? null : (
+                    <>
+                      {flexRender(header.column.columnDef.header, header.getContext())}
 
-                        <Box as="span" display="inline-block" w="14px">
-                          {{
-                            asc: "▲",
-                            desc: "▼",
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </Box>
-                      </>
-                    )}
-                  </Th>
-                );
-              })}
+                      <Box as="span" display="inline-block" w="14px">
+                        {{
+                          asc: "▲",
+                          desc: "▼",
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </Box>
+                    </>
+                  )}
+                </Th>
+              ))}
             </Tr>
           ))}
         </Thead>
@@ -126,40 +120,27 @@ function NewTable<T>(props: NewTableProps<T>) {
               </Td>
             </Tr>
           ) : (
-            table.getRowModel().rows.map((row, index) => {
-              // return (
-              //   <Tr key={row.id}>
-              //     {row.getVisibleCells().map((cell) => {
-              //       return <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>;
-              //     })}
-              //   </Tr>
-              // );
-              return (
-                <Fragment key={`fragment_${index}`}>
-                  <Tr key={`row_${index}`}>
-                    {row.getVisibleCells().map((cell, index) => {
-                      return (
-                        <Td key={`cellContent_${index}`}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </Td>
-                      );
-                    })}
+            table.getRowModel().rows.map((row) => (
+              <Fragment key={`fragment_${row.id}`}>
+                <Tr key={`row_${row.id}`}>
+                  {row.getVisibleCells().map((cell) => (
+                    <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>
+                  ))}
+                </Tr>
+
+                {props.isRowExpanded && (
+                  <Tr key={`rowExpanded_${row.id}`}>
+                    <Td colSpan={row.getVisibleCells().length}>{props?.renderSubComponent?.(row)}</Td>
                   </Tr>
+                )}
 
-                  {props.isRowExpanded && (
-                    <Tr key={`rowExpanded_${index}`}>
-                      <Td colSpan={row.getVisibleCells().length}>{props?.renderSubComponent?.(row)}</Td>
-                    </Tr>
-                  )}
-
-                  {props.renderDivider && (
-                    <Tr key={`rowDivider_${index}`}>
-                      <Td colSpan={row.getVisibleCells().length}>{props?.renderDivider?.()}</Td>
-                    </Tr>
-                  )}
-                </Fragment>
-              );
-            })
+                {props.renderDivider && (
+                  <Tr key={`rowDivider_${row.id}`}>
+                    <Td colSpan={row.getVisibleCells().length}>{props?.renderDivider?.()}</Td>
+                  </Tr>
+                )}
+              </Fragment>
+            ))
           )}
         </Tbody>
       </Table>
