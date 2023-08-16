@@ -8,6 +8,7 @@ import { niveauFormationByNiveau } from "../indicateurs/filters/FiltreFormationN
 
 const formationsTableColumnsDefs: any[] = [
   {
+    accessKey: "intitule_long",
     header: () => "Intitulé et lieu de la formation",
     cell: ({ row }) => (
       <>
@@ -19,6 +20,7 @@ const formationsTableColumnsDefs: any[] = [
     ),
   },
   {
+    accessKey: "cfd",
     header: () => (
       <>
         Code Diplôme
@@ -55,6 +57,7 @@ const formationsTableColumnsDefs: any[] = [
     ),
   },
   {
+    accessKey: "rncp",
     header: () => (
       <>
         Code RNCP
@@ -86,6 +89,7 @@ const formationsTableColumnsDefs: any[] = [
     ),
   },
   {
+    accessKey: "duree",
     header: () => <>Durée (an)</>,
   },
 ];
@@ -134,7 +138,7 @@ function FormationsTableEffectifs(props: FormationsTableEffectifsProps) {
           <Tr>
             {formationsTableColumnsDefs.map((columnDef) => (
               <Th
-                key={columnDef.header()}
+                key={columnDef.accessKey}
                 textTransform="initial"
                 textColor="grey.800"
                 fontSize="zeta"
