@@ -1,3 +1,4 @@
+import { uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
 
 import {
@@ -19,6 +20,7 @@ import {
   findOrganismeFormateursIds,
 } from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
+import { Organisme } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
@@ -459,7 +461,11 @@ export async function getOrganismeIndicateursEffectifsParFormation(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
   organismeId: ObjectId // TODO fonction restreinte à un organisme pour l'instant, à voir si elle sera réutilisée autrement (dreets etc)
-): Promise<IndicateursEffectifsAvecFormation[]> {
+): Promise<{
+  formationsFormateur: Exclude<IndicateursEffectifsAvecFormation, "cle_ministere_educatif">[];
+  formationsResponsable: Exclude<IndicateursEffectifsAvecFormation, "cle_ministere_educatif">[];
+  formationsResponsableFormateur: Exclude<IndicateursEffectifsAvecFormation, "cle_ministere_educatif">[];
+}> {
   const organisme = await getOrganismeById(organismeId);
   const organismeCFDs = [
     ...(organisme.formationsFormateur ?? []),
@@ -617,67 +623,9 @@ export async function getOrganismeIndicateursEffectifsParFormation(
         },
       },
       {
-        $lookup: {
-          from: "formationsCatalogue",
-          localField: "_id",
-          foreignField: "cfd",
-          as: "formationCatalogue",
-          pipeline: [
-            {
-              $project: {
-                formation_id: "$_id",
-                cle_ministere_educatif: 1,
-                cfd: 1,
-                rncp: "$rncp_code",
-                intitule_long: 1,
-                lieu_formation_adresse: {
-                  $ifNull: ["$lieu_formation_adresse_computed", "lieu_formation_adresse", ""],
-                },
-                annee_formation: {
-                  $toInt: {
-                    $cond: [{ $eq: ["$annee", "X"] }, "-1", "$annee"],
-                  },
-                },
-                niveau: {
-                  $toInt: {
-                    $substr: ["$niveau", 0, 1],
-                  },
-                },
-                duree_formation_theorique: {
-                  $toInt: "$duree",
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $set: {
-          formationCatalogue: {
-            $first: "$formationCatalogue",
-          },
-        },
-      },
-      {
-        $unwind: {
-          path: "$formationCatalogue",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $project: {
-          // TODO vérifier si plusieurs résultats
           _id: 0,
-          formation_id: "$formationCatalogue.formation_id",
-          cle_ministere_educatif: "$formationCatalogue.cle_ministere_educatif",
-          cfd: "$formationCatalogue.cfd",
-          rncp: "$formationCatalogue.rncp",
-          intitule_long: "$formationCatalogue.intitule_long",
-          lieu_formation_adresse: "$formationCatalogue.lieu_formation_adresse",
-          annee_formation: "$formationCatalogue.annee_formation",
-          niveau: "$formationCatalogue.niveau",
-          duree_formation_theorique: "$formationCatalogue.duree_formation_theorique",
-
+          cfd: "$_id",
           apprenants: {
             $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
           },
@@ -688,8 +636,31 @@ export async function getOrganismeIndicateursEffectifsParFormation(
         },
       },
     ])
-    .toArray()) as IndicateursEffectifsAvecFormation[];
-  return indicateurs;
+    .toArray()) as (IndicateursEffectifs & { cfd: string })[];
+
+  const indicateursByCFD = indicateurs.reduce((acc, indicateur) => {
+    acc[indicateur.cfd] = indicateur;
+    return acc;
+  }, {});
+
+  function completeFormationsWithIndicateurs(formations: Organisme["formationsResponsableFormateur"]) {
+    return uniqBy(formations, "cfd").map((formation) => ({
+      ...formation,
+      ...(indicateursByCFD[formation.cfd as string] ?? {
+        apprenants: 0,
+        apprentis: 0,
+        inscritsSansContrat: 0,
+        abandons: 0,
+        rupturants: 0,
+      }),
+    }));
+  }
+
+  return {
+    formationsFormateur: completeFormationsWithIndicateurs(organisme.formationsFormateur ?? []),
+    formationsResponsable: completeFormationsWithIndicateurs(organisme.formationsResponsable ?? []),
+    formationsResponsableFormateur: completeFormationsWithIndicateurs(organisme.formationsResponsableFormateur ?? []),
+  };
 }
 
 export const typesEffectifNominatif = [
