@@ -22,7 +22,7 @@ import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
-import { FormationsOrganismes } from "@/common/internal/Formation";
+import { FormationBase, FormationsOrganismes } from "@/common/internal/Formation";
 import { Organisme } from "@/common/internal/Organisme";
 import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
@@ -38,7 +38,7 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation, getOrganisationTypeFromNature } from "../auth/inscription/common";
-import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
+import { IndicateursEffectifs, IndicateursEffectifsAvecFormation, IndicateursOrganismes } from "../models/indicateurs";
 import FormationsTable from "../organismes/FormationsTable";
 import FormationsTableEffectifs from "../organismes/FormationsTableEffectifs";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
@@ -96,15 +96,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   // éventuellement avec les effectifs en plus selon les permissions
   const { data: formations } = useQuery<FormationsOrganismes>(
     ["organismes", organisme?._id, "formations"],
-    async () => {
-      const { formationsFormateur, formationsResponsable, formationsResponsableFormateur } =
-        await _get<FormationsOrganismes>(`/api/v1/organismes/${organisme._id}/formations`);
-      return {
-        formationsFormateur,
-        formationsResponsable,
-        formationsResponsableFormateur,
-      };
-    },
+    async () => _get<FormationsOrganismes>(`/api/v1/organismes/${organisme._id}/formations`),
     {
       enabled: !!organisme?._id,
     }
@@ -116,7 +108,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const totalFormations =
     formationsFormateur.length + formationsResponsable.length + formationsResponsableFormateur.length;
 
-  const { data: indicateursParFormation } = useQuery<any[]>(
+  const { data: indicateursParFormation } = useQuery<IndicateursEffectifsAvecFormation[]>(
     ["organismes", organisme?._id, "indicateurs/effectifs/par-formation"],
     async () =>
       _get<any[]>(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs/par-formation`, {
@@ -129,6 +121,44 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
     }
   );
   console.log("indicateursParFormation", indicateursParFormation);
+
+  const formationsAvecIndicateursEffectifs = useMemo<{
+    formationsFormateur: IndicateursEffectifsAvecFormation[];
+    formationsResponsable: IndicateursEffectifsAvecFormation[];
+    formationsResponsableFormateur: IndicateursEffectifsAvecFormation[];
+  } | null>(() => {
+    if (!formations || !indicateursParFormation) {
+      return null;
+    }
+
+    const mergeWithIndicateurs = (f: FormationBase) => {
+      const formationAvecIndicateurs = indicateursParFormation.find((ff) => ff.cfd === f.cfd);
+      return formationAvecIndicateurs
+        ? formationAvecIndicateurs
+        : {
+            formation_id: f.formation_id,
+            cle_ministere_educatif: f.cle_ministere_educatif,
+            cfd: f.cfd,
+            rncp: f.rncp,
+            intitule_long: f.intitule_long,
+            lieu_formation_adresse: f.lieu_formation_adresse,
+            annee_formation: f.annee_formation,
+            niveau: f.niveau,
+            duree_formation_theorique: f.duree_formation_theorique,
+            apprenants: 0,
+            apprentis: 0,
+            inscritsSansContrat: 0,
+            abandons: 0,
+            rupturants: 0,
+          };
+    };
+    return {
+      formationsFormateur: formations.formationsFormateur.map(mergeWithIndicateurs),
+      formationsResponsable: formations.formationsResponsable.map(mergeWithIndicateurs),
+      formationsResponsableFormateur: formations.formationsResponsableFormateur.map(mergeWithIndicateurs),
+    } as any;
+  }, [formations, indicateursParFormation]);
+  console.log("formationsAvecIndicateursEffectifs", formationsAvecIndicateursEffectifs);
 
   const indicateursOrganismesPieData = useMemo<any[]>(() => {
     if (!indicateursOrganismes) {
@@ -718,17 +748,19 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   {formationsResponsable.length} formation{formationsResponsable.length > 1 ? "s" : ""} dont{" "}
                   {modePublique ? "cet" : "votre"} organisme est responsable
                 </Heading>
-                <FormationsTableEffectifs formations={formationsResponsable} />
-                {/* <FormationsTable formations={formationsResponsable} /> */}
+                <FormationsTable formations={formationsResponsable} />
+                <FormationsTableEffectifs formations={indicateursParFormation ?? []} />
               </>
             )}
-            {/* {formationsFormateur?.length > 0 && (
+            {formationsFormateur?.length > 0 && (
               <>
                 <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
                   {formationsFormateur.length} formation{formationsFormateur.length > 1 ? "s" : ""} dont{" "}
                   {modePublique ? "cet" : "votre"} organisme est formateur
                 </Heading>
                 <FormationsTable formations={formationsFormateur} />
+                {/* <FormationsTableEffectifs formations={indicateursParFormation ?? []} /> */}
+                <FormationsTableEffectifs formations={formationsAvecIndicateursEffectifs?.formationsFormateur ?? []} />
               </>
             )}
             {formationsResponsableFormateur?.length > 0 && (
@@ -739,8 +771,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   est responsable et formateur
                 </Heading>
                 <FormationsTable formations={formationsResponsableFormateur} />
+                <FormationsTableEffectifs formations={indicateursParFormation ?? []} />
               </>
-            )} */}
+            )}
           </>
         ) : (
           <Ribbons variant="warning" mt="0.5rem">

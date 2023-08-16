@@ -16,6 +16,7 @@ import {
   getOrganismeIndicateursEffectifsRestriction,
   getIndicateursEffectifsRestriction,
   getIndicateursOrganismesRestriction,
+  findOrganismeFormateursIds,
 } from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
@@ -447,6 +448,13 @@ export async function getIndicateursEffectifsParOrganisme(
     .toArray()) as IndicateursEffectifsAvecOrganisme[];
   return indicateurs;
 }
+
+/**
+ * Récupère les indicateurs effectifs d'un organisme.
+ * Etapes :
+ * 1. Trouver les formations (groupées par CFD) où l'organisme est gestionnaire ou formateur
+ * 2. Récupérer les effectifs rattachés à l'organisme ou ses formateurs, et filtrer par CFD
+ */
 export async function getOrganismeIndicateursEffectifsParFormation(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
@@ -459,6 +467,7 @@ export async function getOrganismeIndicateursEffectifsParFormation(
     ...(organisme.formationsResponsableFormateur ?? []),
   ].map((f) => f.cfd);
   console.log("cfds", organismeCFDs);
+  console.log("org ids", findOrganismeFormateursIds(organisme));
 
   const indicateurs = (await effectifsDb()
     .aggregate([
@@ -468,6 +477,9 @@ export async function getOrganismeIndicateursEffectifsParFormation(
           "_computed.organisme.fiable": true,
           "formation.cfd": {
             $in: organismeCFDs,
+          },
+          organisme_id: {
+            $in: [organismeId, findOrganismeFormateursIds(organisme)],
           },
         },
       },
@@ -626,14 +638,24 @@ export async function getOrganismeIndicateursEffectifsParFormation(
                     $cond: [{ $eq: ["$annee", "X"] }, "-1", "$annee"],
                   },
                 },
-                niveau: 5,
-                // niveau: getNiveauFormationFromLibelle(formationCatalogue.niveau),
+                niveau: {
+                  $toInt: {
+                    $substr: ["$niveau", 0, 1],
+                  },
+                },
                 duree_formation_theorique: {
                   $toInt: "$duree",
                 },
               },
             },
           ],
+        },
+      },
+      {
+        $set: {
+          formationCatalogue: {
+            $first: "$formationCatalogue",
+          },
         },
       },
       {

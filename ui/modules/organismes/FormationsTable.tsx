@@ -1,25 +1,25 @@
-import { Box, Text, Tooltip } from "@chakra-ui/react";
-import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
-import { useState } from "react";
+import { ChevronDownIcon } from "@chakra-ui/icons";
+import { Box, Table, Tbody, Td, Text, Th, Thead, Tooltip, Tr } from "@chakra-ui/react";
+import { Fragment, useMemo, useState } from "react";
 
 import { _get } from "@/common/httpClient";
 import { FormationBase } from "@/common/internal/Formation";
-import NewTable from "@/modules/indicateurs/NewTable";
 
 import { niveauFormationByNiveau } from "../indicateurs/filters/FiltreFormationNiveau";
 
-const formationsTableColumnsDefs: AccessorKeyColumnDef<FormationBase, any>[] = [
+interface CustomColumnDef {
+  accessorKey: string;
+  header: () => string | JSX.Element;
+  style?: any;
+}
+
+const formationsTableColumnsDefs: CustomColumnDef[] = [
   {
-    header: () => "Intitulé et lieu de la formation",
     accessorKey: "intitule_long",
-    cell: ({ row }) => (
-      <>
-        <Text>{row.original.intitule_long}</Text>
-        <Text mt={2} color="#3A3A3A">
-          {row.original.lieu_formation_adresse}
-        </Text>
-      </>
-    ),
+    header: () => "Intitulé et lieu de la formation",
+    style: {
+      width: "100%",
+    },
   },
   {
     accessorKey: "cfd",
@@ -43,8 +43,7 @@ const formationsTableColumnsDefs: AccessorKeyColumnDef<FormationBase, any>[] = [
               </Text>
             </Box>
           }
-          aria-label="Code Formation Diplôme. Codification qui concerne l’ensemble des diplômes technologiques et professionnels des
-                        ministères certificateurs."
+          aria-label="Code Formation Diplôme. Codification qui concerne l’ensemble des diplômes technologiques et professionnels des ministères certificateurs."
         >
           <Box
             as="i"
@@ -76,7 +75,7 @@ const formationsTableColumnsDefs: AccessorKeyColumnDef<FormationBase, any>[] = [
               </Text>
             </Box>
           }
-          aria-label=" Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la disposition de tous une information constamment à jour sur les diplômes et les titres à finalité professionnelle ainsi que sur les certificats de qualification."
+          aria-label="Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la disposition de tous une information constamment à jour sur les diplômes et les titres à finalité professionnelle ainsi que sur les certificats de qualification."
         >
           <Box
             as="i"
@@ -91,37 +90,100 @@ const formationsTableColumnsDefs: AccessorKeyColumnDef<FormationBase, any>[] = [
     ),
   },
   {
-    accessorKey: "duree_formation_theorique",
+    accessorKey: "duree",
     header: () => <>Durée (an)</>,
   },
-  {
-    accessorKey: "niveau",
-    header: () => <>Niveau</>,
-    cell: ({ row }) => (
-      <>
-        <Text>{niveauFormationByNiveau[row.original.niveau]}</Text>
-      </>
-    ),
-  },
 ];
+
+interface NiveauAvecFormations {
+  niveau: string;
+  label: string;
+  formations: FormationBase[];
+}
 
 interface FormationsTableProps {
   formations: FormationBase[];
 }
 function FormationsTable(props: FormationsTableProps) {
-  // TODO tri par niveau d'abord
-  const defaultSort: SortingState = [{ desc: false, id: "intitule_long" }];
-  const [sort, setSort] = useState<SortingState>(defaultSort);
+  const [expandedNiveaux, setExpandedNiveaux] = useState<{ [niveau: string]: boolean }>({});
+
+  function toggleExpand(niveau: string) {
+    expandedNiveaux[niveau] = !expandedNiveaux[niveau];
+    setExpandedNiveaux({ ...expandedNiveaux });
+  }
+
+  const niveauxAvecFormations = useMemo(() => {
+    return Object.values(
+      props.formations.reduce<{ [key: string]: NiveauAvecFormations }>((acc, formation) => {
+        let formationsNiveau = acc[formation.niveau];
+        if (!formationsNiveau) {
+          formationsNiveau = acc[formation.niveau] = {
+            niveau: formation.niveau,
+            label: niveauFormationByNiveau[formation.niveau],
+            formations: [],
+          };
+        }
+        formationsNiveau.formations.push(formation);
+        return acc;
+      }, {})
+    ).sort((a, b) => (a.niveau < b.niveau ? -1 : 1));
+  }, [props.formations]);
 
   return (
     <>
-      <NewTable
-        data={props.formations || []}
-        loading={false}
-        sortingState={sort}
-        onSortingChange={(state) => setSort(state)}
-        columns={formationsTableColumnsDefs}
-      />
+      <Table className="stripped-bgcolor-even" variant="primary">
+        <Thead position="sticky" top="0" zIndex="1" background="#ffffff">
+          <Tr>
+            {formationsTableColumnsDefs.map((columnDef) => (
+              <Th key={columnDef.accessorKey} {...columnDef?.style}>
+                {columnDef.header()}
+              </Th>
+            ))}
+          </Tr>
+        </Thead>
+        <Tbody fontSize="zeta">
+          {niveauxAvecFormations.map((niveauAvecFormations) => (
+            <Fragment key={niveauAvecFormations.niveau}>
+              <Tr key={niveauAvecFormations.niveau}>
+                <Td
+                  background="#F5F5FE"
+                  color="bluefrance"
+                  fontWeight="bold"
+                  fontSize="zeta"
+                  colSpan={100}
+                  cursor="pointer"
+                  title="Cliquer pour afficher/masquer le détail"
+                  lineHeight="3em"
+                  borderBottom=".5px solid bluefrance"
+                  onClick={() => toggleExpand(niveauAvecFormations.niveau)}
+                >
+                  <ChevronDownIcon
+                    boxSize="6"
+                    transform={expandedNiveaux[niveauAvecFormations.niveau] ? "rotate(-180deg)" : ""}
+                    transition=".3s"
+                  />
+                  {niveauAvecFormations.label}
+                </Td>
+              </Tr>
+
+              {expandedNiveaux[niveauAvecFormations.niveau] &&
+                niveauAvecFormations.formations.map((formation) => (
+                  <Tr key={formation.cle_ministere_educatif}>
+                    <Td>
+                      <Text>{formation.intitule_long}</Text>
+                      <Text mt={2} color="#3A3A3A" fontSize="omega">
+                        {formation.lieu_formation_adresse} - {formation.cle_ministere_educatif}
+                      </Text>
+                    </Td>
+                    <Td>{formation.cfd}</Td>
+                    <Td>{formation.rncp ?? "inconnu"}</Td>
+                    <Td>{formation.duree_formation_theorique}</Td>
+                  </Tr>
+                ))}
+            </Fragment>
+          ))}
+        </Tbody>
+      </Table>
     </>
   );
 }
