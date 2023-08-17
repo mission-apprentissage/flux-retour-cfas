@@ -67,7 +67,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
     ["organismes", organisme?._id, "contacts"],
     () => _get(`/api/v1/organismes/${organisme._id}/contacts`),
     {
-      enabled: !!organisme?._id && modePublique,
+      enabled: !!organisme?._id && modePublique && organisme?.permissions?.viewContacts,
     }
   );
 
@@ -91,78 +91,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
       enabled: !!organisme?._id,
     }
   );
-
-  // TODO afficher toutes les formations par niveau par défaut
-  // éventuellement avec les effectifs en plus selon les permissions
-  const { data: formations } = useQuery<FormationsOrganismes>(
-    ["organismes", organisme?._id, "formations"],
-    async () => _get(`/api/v1/organismes/${organisme._id}/formations`),
-    {
-      enabled: !!organisme?._id,
-    }
-  );
-
-  const formationsFormateur = formations?.formationsFormateur ?? [];
-  const formationsResponsable = formations?.formationsResponsable ?? [];
-  const formationsResponsableFormateur = formations?.formationsResponsableFormateur ?? [];
-  const totalFormations =
-    formationsFormateur.length + formationsResponsable.length + formationsResponsableFormateur.length;
-
-  const { data: indicateursParFormation } = useQuery<{
-    formationsFormateur: IndicateursEffectifsAvecFormation[];
-    formationsResponsable: IndicateursEffectifsAvecFormation[];
-    formationsResponsableFormateur: IndicateursEffectifsAvecFormation[];
-  }>(
-    ["organismes", organisme?._id, "indicateurs/effectifs/par-formation"],
-    async () =>
-      _get(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs/par-formation`, {
-        params: {
-          date: new Date(),
-        },
-      }),
-    {
-      enabled: !!organisme?._id && organisme?.permissions?.indicateursEffectifs,
-    }
-  );
-  console.log("indicateursParFormation", indicateursParFormation);
-
-  // const formationsAvecIndicateursEffectifs = useMemo<{
-  //   formationsFormateur: IndicateursEffectifsAvecFormation[];
-  //   formationsResponsable: IndicateursEffectifsAvecFormation[];
-  //   formationsResponsableFormateur: IndicateursEffectifsAvecFormation[];
-  // } | null>(() => {
-  //   if (!formations || !indicateursParFormation) {
-  //     return null;
-  //   }
-
-  //   const mergeWithIndicateurs = (f: FormationBase) => {
-  //     const formationAvecIndicateurs = indicateursParFormation.find((ff) => ff.cfd === f.cfd);
-  //     return formationAvecIndicateurs
-  //       ? formationAvecIndicateurs
-  //       : {
-  //           formation_id: f.formation_id,
-  //           cle_ministere_educatif: f.cle_ministere_educatif,
-  //           cfd: f.cfd,
-  //           rncp: f.rncp,
-  //           intitule_long: f.intitule_long,
-  //           lieu_formation_adresse: f.lieu_formation_adresse,
-  //           annee_formation: f.annee_formation,
-  //           niveau: f.niveau,
-  //           duree_formation_theorique: f.duree_formation_theorique,
-  //           apprenants: 0,
-  //           apprentis: 0,
-  //           inscritsSansContrat: 0,
-  //           abandons: 0,
-  //           rupturants: 0,
-  //         };
-  //   };
-  //   return {
-  //     formationsFormateur: formations.formationsFormateur.map(mergeWithIndicateurs),
-  //     formationsResponsable: formations.formationsResponsable.map(mergeWithIndicateurs),
-  //     formationsResponsableFormateur: formations.formationsResponsableFormateur.map(mergeWithIndicateurs),
-  //   } as any;
-  // }, [formations, indicateursParFormation]);
-  // console.log("formationsAvecIndicateursEffectifs", formationsAvecIndicateursEffectifs);
 
   const indicateursOrganismesPieData = useMemo<any[]>(() => {
     if (!indicateursOrganismes) {
@@ -734,48 +662,12 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
 
             <Divider size="md" my={8} />
 
-            <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-              {/* Répartition des effectifs par niveau et formations */}
-              Aperçu des formations associées à cet organisme
-            </Heading>
-            <Text color="#3A3A3A" mb={4}>
-              <Text as="span" fontWeight="bold">
-                {totalFormations} formation
-                {totalFormations > 1 ? "s" : ""}
-              </Text>{" "}
-              (source : Catalogue de l’apprentissage)
-            </Text>
-
-            {formationsResponsable?.length > 0 && (
-              <>
-                <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
-                  {formationsResponsable.length} formation{formationsResponsable.length > 1 ? "s" : ""} dont{" "}
-                  {modePublique ? "cet" : "votre"} organisme est responsable
-                </Heading>
-                <FormationsTable formations={formationsResponsable} />
-                <FormationsTableEffectifs formations={indicateursParFormation?.formationsResponsable ?? []} />
-              </>
-            )}
-            {formationsFormateur?.length > 0 && (
-              <>
-                <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
-                  {formationsFormateur.length} formation{formationsFormateur.length > 1 ? "s" : ""} dont{" "}
-                  {modePublique ? "cet" : "votre"} organisme est formateur
-                </Heading>
-                <FormationsTable formations={formationsFormateur} />
-                <FormationsTableEffectifs formations={indicateursParFormation?.formationsFormateur ?? []} />
-              </>
-            )}
-            {formationsResponsableFormateur?.length > 0 && (
-              <>
-                <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
-                  {formationsResponsableFormateur.length} formation
-                  {formationsResponsableFormateur.length > 1 ? "s" : ""} dont {modePublique ? "cet" : "votre"} organisme
-                  est responsable et formateur
-                </Heading>
-                <FormationsTable formations={formationsResponsableFormateur} />
-                <FormationsTableEffectifs formations={indicateursParFormation?.formationsResponsableFormateur ?? []} />
-              </>
+            {organisme?.permissions?.indicateursEffectifs !== undefined && (
+              <FormationsBlock
+                organismeId={organisme?._id}
+                permissionIndicateursEffectifs={organisme?.permissions?.indicateursEffectifs}
+                modePublique={modePublique}
+              />
             )}
           </>
         ) : (
@@ -887,4 +779,104 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
       return false;
   }
   return false; // cas autre
+}
+
+interface FormationsBlockProps {
+  organismeId?: string;
+  permissionIndicateursEffectifs: boolean;
+  modePublique: boolean;
+}
+function FormationsBlock({ organismeId, permissionIndicateursEffectifs, modePublique }: FormationsBlockProps) {
+  const { data: formations } = useQuery<FormationsOrganismes>(
+    ["organismes", organismeId, "formations"],
+    async () => _get(`/api/v1/organismes/${organismeId}/formations`),
+    {
+      enabled: !!organismeId && !permissionIndicateursEffectifs,
+    }
+  );
+
+  const { data: formationsAvecIndicateurs } = useQuery<{
+    formationsFormateur: IndicateursEffectifsAvecFormation[];
+    formationsResponsable: IndicateursEffectifsAvecFormation[];
+    formationsResponsableFormateur: IndicateursEffectifsAvecFormation[];
+  }>(
+    ["organismes", organismeId, "indicateurs/effectifs/par-formation"],
+    async () =>
+      _get(`/api/v1/organismes/${organismeId}/indicateurs/effectifs/par-formation`, {
+        params: {
+          date: new Date(),
+        },
+      }),
+    {
+      enabled: !!organismeId && permissionIndicateursEffectifs,
+    }
+  );
+
+  const totalFormationsFormateur =
+    formations?.formationsFormateur?.length ?? formationsAvecIndicateurs?.formationsFormateur?.length ?? 0;
+  const totalFormationsResponsable =
+    formations?.formationsResponsable?.length ?? formationsAvecIndicateurs?.formationsResponsable?.length ?? 0;
+  const totalFormationsResponsableFormateur =
+    formations?.formationsResponsableFormateur?.length ??
+    formationsAvecIndicateurs?.formationsResponsableFormateur?.length ??
+    0;
+  const totalFormations = totalFormationsFormateur + totalFormationsResponsable + totalFormationsResponsableFormateur;
+
+  return (
+    <>
+      <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+        {permissionIndicateursEffectifs
+          ? "Répartition des effectifs par niveau et formations"
+          : `Aperçu des formations associées à ${modePublique ? "cet" : "votre"} organisme`}
+      </Heading>
+      <Text color="#3A3A3A" mb={4}>
+        <Text as="span" fontWeight="bold">
+          {totalFormations} formation
+          {totalFormations > 1 ? "s" : ""}
+        </Text>{" "}
+        (source : Catalogue de l’apprentissage)
+      </Text>
+
+      {totalFormationsResponsable > 0 && (
+        <>
+          <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
+            {totalFormationsResponsable} formation{totalFormationsResponsable > 1 ? "s" : ""} dont{" "}
+            {modePublique ? "cet" : "votre"} organisme est responsable
+          </Heading>
+          {permissionIndicateursEffectifs ? (
+            <FormationsTableEffectifs formations={formationsAvecIndicateurs?.formationsResponsable ?? []} />
+          ) : (
+            <FormationsTable formations={formations?.formationsResponsable ?? []} />
+          )}
+        </>
+      )}
+      {totalFormationsFormateur > 0 && (
+        <>
+          <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
+            {totalFormationsFormateur} formation{totalFormationsFormateur > 1 ? "s" : ""} dont{" "}
+            {modePublique ? "cet" : "votre"} organisme est formateur
+          </Heading>
+          {permissionIndicateursEffectifs ? (
+            <FormationsTableEffectifs formations={formationsAvecIndicateurs?.formationsFormateur ?? []} />
+          ) : (
+            <FormationsTable formations={formations?.formationsFormateur ?? []} />
+          )}
+        </>
+      )}
+      {totalFormationsResponsableFormateur > 0 && (
+        <>
+          <Heading as="h2" color="#3A3A3A" fontSize="gamma" fontWeight="700" my={6}>
+            {totalFormationsResponsableFormateur} formation
+            {totalFormationsResponsableFormateur > 1 ? "s" : ""} dont {modePublique ? "cet" : "votre"} organisme est
+            responsable et formateur
+          </Heading>
+          {permissionIndicateursEffectifs ? (
+            <FormationsTableEffectifs formations={formationsAvecIndicateurs?.formationsResponsableFormateur ?? []} />
+          ) : (
+            <FormationsTable formations={formations?.formationsResponsableFormateur ?? []} />
+          )}
+        </>
+      )}
+    </>
+  );
 }
