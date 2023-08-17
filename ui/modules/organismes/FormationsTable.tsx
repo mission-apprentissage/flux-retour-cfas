@@ -172,10 +172,10 @@ function FormationsTable(props: FormationsTableProps) {
                     <Td>
                       <Text>{formation.intitule_long}</Text>
                       <Text mt={2} color="#3A3A3A" fontSize="omega">
-                        {formation.lieu_formation_adresse} - {formation.cle_ministere_educatif}
+                        {formation.lieu_formation_adresse}
                       </Text>
                     </Td>
-                    <Td>{formation.cfd}</Td>
+                    <Td title={formation.cle_ministere_educatif}>{formation.cfd}</Td>
                     <Td>{formation.rncp ?? "inconnu"}</Td>
                     <Td>{formation.duree_formation_theorique}</Td>
                   </Tr>
