@@ -537,7 +537,7 @@ function setupRoutes(app: Application) {
   );
 
   /********************************
-   * Indicateurs aggrégés         *
+   * Indicateurs agrégés         *
    ********************************/
   authRouter
     .get(

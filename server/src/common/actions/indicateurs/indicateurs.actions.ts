@@ -12,17 +12,16 @@ import {
 } from "@/common/actions/helpers/filters";
 import {
   findOrganismesFormateursIdsOfOrganisme,
-  getEffectifsAnonymesRestriction,
   getEffectifsNominatifsRestriction,
-  getOrganismeIndicateursEffectifsRestriction,
-  getIndicateursEffectifsRestriction,
-  getIndicateursOrganismesRestriction,
-  findOrganismeFormateursIds,
+  buildOrganismeRestriction,
+  findOrganismesAccessiblesByOrganisationOF,
+  buildAggregatedRestriction,
 } from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 
 import { getOrganismeById } from "../organismes/organismes.actions";
 
@@ -35,6 +34,39 @@ import {
   IndicateursOrganismesAvecDepartement,
 } from "./indicateurs";
 
+export async function getIndicateursEffectifsParDepartementRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      // TODO, pas utilisé, mais il faudrait utiliser les liens cfd
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+      return {
+        organisme_id: {
+          $in: linkedOrganismesIds,
+        },
+      };
+    }
+
+    case "TETE_DE_RESEAU":
+      return {
+        "_computed.organisme.reseaux": organisation.reseau,
+      };
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return {};
+  }
+}
+
 export async function getIndicateursEffectifsParDepartement(
   ctx: AuthContext,
   filters: EffectifsFilters
@@ -44,7 +76,7 @@ export async function getIndicateursEffectifsParDepartement(
       {
         $match: {
           $and: [
-            await getIndicateursEffectifsRestriction(ctx),
+            await getIndicateursEffectifsParDepartementRestriction(ctx),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true,
@@ -201,55 +233,6 @@ export async function getIndicateursEffectifsParDepartement(
   return indicateurs;
 }
 
-export async function getIndicateursOrganismesParDepartement(
-  ctx: AuthContext,
-  filters: OrganismesFilters
-): Promise<IndicateursOrganismesAvecDepartement[]> {
-  const indicateurs = (await organismesDb()
-    .aggregate([
-      {
-        $match: {
-          $and: [
-            await getIndicateursOrganismesRestriction(ctx),
-            ...buildMongoFilters(filters, organismesFiltersConfigurations),
-          ],
-          fiabilisation_statut: "FIABLE",
-          ferme: false,
-        },
-      },
-      {
-        $project: {
-          departement: "$adresse.departement",
-          transmet: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 1, 0] },
-          ne_transmet_pas: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 0, 1] },
-        },
-      },
-      {
-        $group: {
-          _id: { departement: "$departement" },
-          total_transmet: { $sum: "$transmet" },
-          total_ne_transmet_pas: { $sum: "$ne_transmet_pas" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          departement: "$_id.departement",
-          tauxCouverture: {
-            $multiply: [100, { $divide: ["$total_transmet", { $add: ["$total_transmet", "$total_ne_transmet_pas"] }] }],
-          },
-          totalOrganismes: {
-            $add: ["$total_transmet", "$total_ne_transmet_pas"],
-          },
-          organismesTransmetteurs: "$total_transmet",
-          organismesNonTransmetteurs: "$total_ne_transmet_pas",
-        },
-      },
-    ])
-    .toArray()) as IndicateursOrganismesAvecDepartement[];
-  return indicateurs;
-}
-
 export async function getIndicateursEffectifsParOrganisme(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
@@ -258,14 +241,9 @@ export async function getIndicateursEffectifsParOrganisme(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: {
-          $and: [
-            await getOrganismeRestriction(organismeId),
-            await getEffectifsAnonymesRestriction(ctx),
-            ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
-          ],
-          "_computed.organisme.fiable": true,
-        },
+        $match: await (organismeId
+          ? buildOrganismeRestriction(ctx, organismeId, filters)
+          : buildAggregatedRestriction(ctx, filters)),
       },
       {
         $project: {
@@ -456,38 +434,22 @@ export async function getIndicateursEffectifsParOrganisme(
  * Etapes :
  * 1. Trouver les formations (groupées par CFD) où l'organisme est gestionnaire ou formateur
  * 2. Récupérer les effectifs rattachés à l'organisme ou ses formateurs, et filtrer par CFD
+ *
+ * Selon les droits, les CFD sont filtrés : si double réseau dont AGRI ou si CFD formateur uniquement
  */
 export async function getOrganismeIndicateursEffectifsParFormation(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
-  organismeId: ObjectId // TODO fonction restreinte à un organisme pour l'instant, à voir si elle sera réutilisée autrement (dreets etc)
+  organismeId: ObjectId
 ): Promise<{
   formationsFormateur: Exclude<IndicateursEffectifsAvecFormation, "cle_ministere_educatif">[];
   formationsResponsable: Exclude<IndicateursEffectifsAvecFormation, "cle_ministere_educatif">[];
   formationsResponsableFormateur: Exclude<IndicateursEffectifsAvecFormation, "cle_ministere_educatif">[];
 }> {
-  const organisme = await getOrganismeById(organismeId);
-  const organismeCFDs = [
-    ...(organisme.formationsFormateur ?? []),
-    ...(organisme.formationsResponsable ?? []),
-    ...(organisme.formationsResponsableFormateur ?? []),
-  ].map((f) => f.cfd);
-  console.log("cfds", organismeCFDs);
-  console.log("org ids", findOrganismeFormateursIds(organisme));
-
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: {
-          $and: buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
-          "_computed.organisme.fiable": true,
-          "formation.cfd": {
-            $in: organismeCFDs,
-          },
-          organisme_id: {
-            $in: [organismeId, findOrganismeFormateursIds(organisme)],
-          },
-        },
+        $match: await buildOrganismeRestriction(ctx, organismeId, filters),
       },
       {
         $project: {
@@ -656,6 +618,7 @@ export async function getOrganismeIndicateursEffectifsParFormation(
     }));
   }
 
+  const organisme = await getOrganismeById(organismeId);
   return {
     formationsFormateur: completeFormationsWithIndicateurs(organisme.formationsFormateur ?? []),
     formationsResponsable: completeFormationsWithIndicateurs(organisme.formationsResponsable ?? []),
@@ -837,14 +800,7 @@ export async function getOrganismeIndicateursEffectifs(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: {
-          $and: [
-            await getOrganismeRestriction(organismeId),
-            await getOrganismeIndicateursEffectifsRestriction(ctx),
-            ...buildMongoFilters(filters, effectifsFiltersConfigurations),
-          ],
-          "_computed.organisme.fiable": true,
-        },
+        $match: await buildOrganismeRestriction(ctx, organismeId, filters),
       },
       {
         $project: {
@@ -1035,4 +991,84 @@ async function getOrganismeRestriction(organismeId?: ObjectId) {
   return organismeId
     ? { organisme_id: { $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId))] } }
     : {};
+}
+
+export async function getIndicateursOrganismesParDepartementRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION_FORMATEUR":
+    case "ORGANISME_FORMATION_RESPONSABLE":
+    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+      return {
+        _id: {
+          $in: linkedOrganismesIds,
+        },
+      };
+    }
+    case "TETE_DE_RESEAU":
+      return {
+        reseaux: organisation.reseau,
+      };
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "ADMINISTRATEUR":
+      return {};
+  }
+}
+
+export async function getIndicateursOrganismesParDepartement(
+  ctx: AuthContext,
+  filters: OrganismesFilters
+): Promise<IndicateursOrganismesAvecDepartement[]> {
+  const indicateurs = (await organismesDb()
+    .aggregate([
+      {
+        $match: {
+          $and: [
+            await getIndicateursOrganismesParDepartementRestriction(ctx),
+            ...buildMongoFilters(filters, organismesFiltersConfigurations),
+          ],
+          fiabilisation_statut: "FIABLE",
+          ferme: false,
+        },
+      },
+      {
+        $project: {
+          departement: "$adresse.departement",
+          transmet: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 1, 0] },
+          ne_transmet_pas: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 0, 1] },
+        },
+      },
+      {
+        $group: {
+          _id: { departement: "$departement" },
+          total_transmet: { $sum: "$transmet" },
+          total_ne_transmet_pas: { $sum: "$ne_transmet_pas" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          departement: "$_id.departement",
+          tauxCouverture: {
+            $multiply: [100, { $divide: ["$total_transmet", { $add: ["$total_transmet", "$total_ne_transmet_pas"] }] }],
+          },
+          totalOrganismes: {
+            $add: ["$total_transmet", "$total_ne_transmet_pas"],
+          },
+          organismesTransmetteurs: "$total_transmet",
+          organismesNonTransmetteurs: "$total_ne_transmet_pas",
+        },
+      },
+    ])
+    .toArray()) as IndicateursOrganismesAvecDepartement[];
+  return indicateurs;
 }

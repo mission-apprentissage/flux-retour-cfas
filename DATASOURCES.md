@@ -14,7 +14,7 @@ Le Référentiel des organismes de formation en apprentissage contient 96% d’o
 ### Organismes
 
 Nous utilisons la listes des organismes du référentiel pour fiabiliser les organismes transmettant des données au TDB.
-Pour cela nous utilisons l'API du référentiel qui nous renvoie le contenu de la collection organismes (construite via l'aggrégation de différentes sources, cf. https://referentiel.apprentissage.onisep.fr/construction)
+Pour cela nous utilisons l'API du référentiel qui nous renvoie le contenu de la collection organismes (construite via l'agrégation de différentes sources, cf. https://referentiel.apprentissage.onisep.fr/construction)
 
 ### UAIs de la base ACCE
 

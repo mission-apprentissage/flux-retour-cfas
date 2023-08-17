@@ -7,15 +7,13 @@ import {
   LegacyEffectifsFilters,
   organismeLookup,
 } from "@/common/actions/helpers/filters";
-import {
-  getIndicateursEffectifsRestriction,
-  requireOrganismeIndicateursAccess,
-} from "@/common/actions/helpers/permissions";
+import { requireOrganismeIndicateursAccess } from "@/common/actions/helpers/permissions";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { mergeObjectsBy } from "@/common/utils/mergeObjectsBy";
 
 import { IndicateursEffectifs } from "../indicateurs/indicateurs";
+import { getIndicateursEffectifsParDepartementRestriction } from "../indicateurs/indicateurs.actions";
 
 import {
   abandonsIndicator,
@@ -59,7 +57,8 @@ export async function checkIndicateursFiltersPermissions(
     await requireOrganismeIndicateursAccess(ctx, organisme._id);
   } else {
     // amend filters with a restriction
-    (filters as EffectifsFiltersWithRestriction).restrictionMongo = await getIndicateursEffectifsRestriction(ctx);
+    (filters as EffectifsFiltersWithRestriction).restrictionMongo =
+      await getIndicateursEffectifsParDepartementRestriction(ctx);
   }
 
   return filters;
