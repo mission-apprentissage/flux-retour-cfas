@@ -46,24 +46,21 @@ const relationOrganismeSchema = object(
   { additionalProperties: true }
 );
 
-const formationOrganismeSchema = object(
-  {
-    uai: stringOrNull({
-      description: "Code UAI du lieu de formation (optionnel)",
-      pattern: UAI_REGEX_PATTERN,
-      maxLength: 8,
-      minLength: 8,
-    }),
-    siret: string({
-      description: "Siret du lieu de formation (optionnel)",
-      pattern: SIRET_REGEX_PATTERN,
-      maxLength: 14,
-      minLength: 14,
-    }),
-    organisme_id: objectId(),
-  },
-  { additionalProperties: true }
-);
+const formationOrganismeSchema = object({
+  uai: stringOrNull({
+    description: "Code UAI du lieu de formation (optionnel)",
+    pattern: UAI_REGEX_PATTERN,
+    maxLength: 8,
+    minLength: 8,
+  }),
+  siret: string({
+    description: "Siret du lieu de formation (optionnel)",
+    pattern: SIRET_REGEX_PATTERN,
+    maxLength: 14,
+    minLength: 14,
+  }),
+  organisme_id: objectId(),
+});
 
 const formationsBaseSchema = object(
   {
@@ -87,7 +84,7 @@ const formationsBaseSchema = object(
       description: "Durée théorique de la formation en mois pour cet organisme",
     }),
   },
-  { additionalProperties: true }
+  { required: ["formation_id", "cle_ministere_educatif", "cfd", "intitule_long"] }
 );
 
 const formationsFormateurSchema = object(
@@ -95,14 +92,14 @@ const formationsFormateurSchema = object(
     ...formationsBaseSchema.properties,
     organisme_responsable: formationOrganismeSchema,
   },
-  { additionalProperties: true }
+  { required: formationsBaseSchema.required }
 );
 const formationsResponsableSchema = object(
   {
     ...formationsBaseSchema.properties,
     organisme_formateur: formationOrganismeSchema,
   },
-  { additionalProperties: true }
+  { required: formationsBaseSchema.required }
 );
 const formationsResponsableFormateurSchema = formationsBaseSchema;
 

@@ -915,15 +915,15 @@ export interface Organisme {
     duree_formation_theorique?: number;
   }[];
   formationsFormateur?: {
-    formation_id?: ObjectId;
+    formation_id: ObjectId;
     /**
      * Clé unique de la formation
      */
-    cle_ministere_educatif?: string;
+    cle_ministere_educatif: string;
     /**
      * Code CFD de la formation
      */
-    cfd?: string;
+    cfd: string;
     /**
      * Code RNCP de la formation à laquelle l'apprenant est inscrit
      */
@@ -931,7 +931,7 @@ export interface Organisme {
     /**
      * Intitulé de la formation
      */
-    intitule_long?: string;
+    intitule_long: string;
     /**
      * Adresse du lieu de la formation
      */
@@ -961,15 +961,15 @@ export interface Organisme {
     };
   }[];
   formationsResponsable?: {
-    formation_id?: ObjectId;
+    formation_id: ObjectId;
     /**
      * Clé unique de la formation
      */
-    cle_ministere_educatif?: string;
+    cle_ministere_educatif: string;
     /**
      * Code CFD de la formation
      */
-    cfd?: string;
+    cfd: string;
     /**
      * Code RNCP de la formation à laquelle l'apprenant est inscrit
      */
@@ -977,7 +977,7 @@ export interface Organisme {
     /**
      * Intitulé de la formation
      */
-    intitule_long?: string;
+    intitule_long: string;
     /**
      * Adresse du lieu de la formation
      */
@@ -1007,15 +1007,15 @@ export interface Organisme {
     };
   }[];
   formationsResponsableFormateur?: {
-    formation_id?: ObjectId;
+    formation_id: ObjectId;
     /**
      * Clé unique de la formation
      */
-    cle_ministere_educatif?: string;
+    cle_ministere_educatif: string;
     /**
      * Code CFD de la formation
      */
-    cfd?: string;
+    cfd: string;
     /**
      * Code RNCP de la formation à laquelle l'apprenant est inscrit
      */
@@ -1023,7 +1023,7 @@ export interface Organisme {
     /**
      * Intitulé de la formation
      */
-    intitule_long?: string;
+    intitule_long: string;
     /**
      * Adresse du lieu de la formation
      */

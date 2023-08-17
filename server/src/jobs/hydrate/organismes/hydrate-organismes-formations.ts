@@ -21,8 +21,7 @@ type FormationsFindQueryType = "uai/siret" | "siret" | "uai" | "none";
  * avec les formations du catalogue stockées dans la collection formationsCatalogue.
  */
 export const hydrateOrganismesFormations = async () => {
-  logger.info("récupération des formations depuis le catalogue");
-
+  logger.info("hydrate organisme formations");
   const organismes = await organismesDb()
     .find({}, { projection: { _id: 1, uai: 1, siret: 1 } })
     .toArray();
@@ -53,33 +52,44 @@ export const hydrateOrganismesFormations = async () => {
       { _id: organisme._id },
       {
         $set: {
-          formationsFormateur: formationsFormateur.map((formation) =>
-            stripEmptyFields<ArrayElement<Organisme["formationsFormateur"]>>({
-              ...formatBaseFormation(formation),
-              organisme_responsable: {
-                siret: formation.etablissement_gestionnaire_siret,
-                uai: formation.etablissement_gestionnaire_uai,
-                organisme_id: organismeIdBySIRETAndUAI.get(
-                  getOrganismeKey(formation.etablissement_gestionnaire_siret, formation.etablissement_gestionnaire_uai)
-                ),
-              },
-            })
-          ),
-          formationsResponsable: formationsResponsable.map((formation) =>
-            stripEmptyFields<ArrayElement<Organisme["formationsResponsable"]>>({
-              ...formatBaseFormation(formation),
-              organisme_formateur: {
-                siret: formation.etablissement_formateur_siret,
-                uai: formation.etablissement_formateur_uai,
-                organisme_id: organismeIdBySIRETAndUAI.get(
-                  getOrganismeKey(formation.etablissement_formateur_siret, formation.etablissement_formateur_uai)
-                ),
-              },
-            })
-          ),
-          formationsResponsableFormateur: formationsResponsableFormateur.map((formation) =>
-            stripEmptyFields<ArrayElement<Organisme["formationsResponsableFormateur"]>>(formatBaseFormation(formation))
-          ),
+          formationsFormateur: formationsFormateur
+            .map((formation) =>
+              stripEmptyFields<ArrayElement<Organisme["formationsFormateur"]>>({
+                ...formatBaseFormation(formation),
+                organisme_responsable: {
+                  siret: formation.etablissement_gestionnaire_siret,
+                  uai: formation.etablissement_gestionnaire_uai,
+                  organisme_id: organismeIdBySIRETAndUAI.get(
+                    getOrganismeKey(
+                      formation.etablissement_gestionnaire_siret,
+                      formation.etablissement_gestionnaire_uai
+                    )
+                  ),
+                },
+              })
+            )
+            .sort((a, b) => (a.intitule_long < b.intitule_long ? -1 : 1)),
+          formationsResponsable: formationsResponsable
+            .map((formation) =>
+              stripEmptyFields<ArrayElement<Organisme["formationsResponsable"]>>({
+                ...formatBaseFormation(formation),
+                organisme_formateur: {
+                  siret: formation.etablissement_formateur_siret,
+                  uai: formation.etablissement_formateur_uai,
+                  organisme_id: organismeIdBySIRETAndUAI.get(
+                    getOrganismeKey(formation.etablissement_formateur_siret, formation.etablissement_formateur_uai)
+                  ),
+                },
+              })
+            )
+            .sort((a, b) => (a.intitule_long < b.intitule_long ? -1 : 1)),
+          formationsResponsableFormateur: formationsResponsableFormateur
+            .map((formation) =>
+              stripEmptyFields<ArrayElement<Organisme["formationsResponsableFormateur"]>>(
+                formatBaseFormation(formation)
+              )
+            )
+            .sort((a, b) => (a.intitule_long < b.intitule_long ? -1 : 1)),
           updated_at: new Date(),
         },
       }
