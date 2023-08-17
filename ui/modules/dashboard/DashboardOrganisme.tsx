@@ -659,21 +659,20 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 </Flex>
               </>
             )}
-
-            <Divider size="md" my={8} />
-
-            {organisme?.permissions?.indicateursEffectifs !== undefined && (
-              <FormationsBlock
-                organismeId={organisme?._id}
-                permissionIndicateursEffectifs={organisme?.permissions?.indicateursEffectifs}
-                modePublique={modePublique}
-              />
-            )}
           </>
         ) : (
           <Ribbons variant="warning" mt="0.5rem">
             <Text color="grey.800">{getForbiddenErrorText(auth)}</Text>
           </Ribbons>
+        )}
+        <Divider size="md" my={8} />
+
+        {organisme?.permissions?.indicateursEffectifs !== undefined && (
+          <FormationsBlock
+            organismeId={organisme?._id}
+            permissionIndicateursEffectifs={organisme?.permissions?.indicateursEffectifs}
+            modePublique={modePublique}
+          />
         )}
       </Container>
     </Box>
