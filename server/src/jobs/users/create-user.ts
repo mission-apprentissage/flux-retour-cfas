@@ -12,19 +12,6 @@ export const createUserAccount = async ({ email }) => {
   logger.info(`Création de l'utilisateur ${email}`);
 
   throw new Error("non implémenté");
-  // await createUser(
-  //   { email, password: generateRandomAlphanumericPhrase(80) },
-  //   {
-  //     nom,
-  //     prenom,
-  //     is_admin,
-  //     is_cross_organismes,
-  //     account_status: "PENDING_PASSWORD_SETUP",
-  //   }
-  // );
-  // logger.info(`User ${email} successfully created`);
-
-  // return { email };
 };
 
 /**
