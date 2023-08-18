@@ -101,7 +101,7 @@ export const primitivesV1 = {
     date_de_naissance: extensions.iso8601Date().openapi({
       type: "string",
       description: "Date de naissance de l'apprenant, au format ISO-8601",
-      examples: ["2000-10-28T00:00:00.000Z"],
+      example: "2000-10-28T00:00:00.000Z",
     }),
     statut: z
       .preprocess(
