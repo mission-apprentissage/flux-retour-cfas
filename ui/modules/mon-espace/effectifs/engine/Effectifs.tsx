@@ -118,7 +118,7 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
               router.push(`${router.asPath}/televersement`);
             }}
           >
-            <Text as="span">+ Ajouter</Text>
+            <Text as="span">+ Ajouter via fichier Excel</Text>
           </Button>
 
           {organisme.mode_de_transmission !== "API" && (
