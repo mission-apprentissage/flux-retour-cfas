@@ -5,6 +5,7 @@ import logger from "@/common/logger";
 import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
 import { formatError } from "@/common/utils/errorUtils";
+import stripNullProperties from "@/common/utils/stripNullProperties";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
 import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
 
@@ -19,10 +20,9 @@ export default () => {
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
   router.post("/", async ({ user, body, originalUrl }, res) => {
-    const bodyItems = await Joi.array()
-      .max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)
-      .validateAsync(body, { abortEarly: false });
-
+    const bodyItems = (
+      await Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).validateAsync(body, { abortEarly: false })
+    ).map((e) => stripNullProperties(e));
     const isV3 = originalUrl.includes("/v3");
     const validationSchema = isV3 ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2();
 

@@ -115,7 +115,7 @@ export const createRandomDossierApprenantApiInput = (
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
     annee_formation: formation.annee,
-    periode_formation: isStudentPresent ? formation.periode.join("-") : null,
+    periode_formation: isStudentPresent ? formation.periode.join("-") : undefined,
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
     tel_apprenant: faker.helpers.arrayElement([faker.phone.number(), undefined]),
