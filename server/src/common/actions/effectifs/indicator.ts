@@ -98,13 +98,8 @@ export class Indicator {
   constructor(config) {
     this.config = config;
   }
-  /**
-   *
-   * @param {*} searchDate
-   * @param {*} options
-   * @returns {any[]}
-   */
-  getAtDateAggregationPipeline(searchDate, options: any = {}) {
+
+  getAtDateAggregationPipeline(searchDate: any, options: any = {}): any[] {
     return [
       ...this.config.preStages,
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
@@ -119,7 +114,7 @@ export class Indicator {
    * @param {*} options Options de regroupement / projection optionnelles
    * @returns
    */
-  async getCountAtDate(searchDate, filterStages: any = [], options: any = {}) {
+  async getCountAtDate(searchDate: any, filterStages: any = [], options: any = {}) {
     const result = await effectifsDb()
       .aggregate([
         ...filterStages,
@@ -153,12 +148,8 @@ export class Indicator {
    * 1. On filtre dans l'historique sur les éléments ayant une date <= date recherchée
    * 2. On construit dans l'historique des statuts un champ diff_date_search = différence entre la date du statut de l'historique et la date recherchée
    * 3. On crée un champ statut_apprenant_at_date = statut dans l'historique avec le plus petit diff_date_search
-   *
-   * @param {*} searchDate
-   * @param {*} projection
-   * @returns
    */
-  getEffectifsWithStatutAtDateAggregationPipeline(searchDate, projection = {}) {
+  getEffectifsWithStatutAtDateAggregationPipeline(searchDate: any, projection = {}) {
     return [
       // Filtrage sur les élements avec date antérieure à la date recherchée
       {
@@ -205,10 +196,6 @@ export class Indicator {
 
   /**
    * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
-   * @param {*} searchDate
-   * @param {*} filterStages
-   * @param {*} indicateur
-   * @returns
    */
   async getFullExportFormattedListAtDate(searchDate: any, filterStages: any[] = [], indicateur: any) {
     const exportList = await this.getListAtDate(searchDate, [...filterStages, { $lookup: organismeLookup }], {
