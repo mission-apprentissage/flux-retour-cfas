@@ -8,7 +8,6 @@ import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation, OrganisationType } from "@/common/model/organisations.model";
-import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 import { FullEffectifsFilters, buildMongoFilters, fullEffectifsFiltersConfigurations } from "./filters";
 
@@ -410,6 +409,25 @@ async function getIndicateursEffectifsRestrictionNew(ctx: AuthContext): Promise<
       }
 
       return {
+        $or: [
+          // effectifs de l'OF liés aux formations dont l'OF est formateur ou responsable/formateur
+          {
+            organisme_id: userOrganisme._id,
+            "formation.cfd": {
+              $in: uniq(
+                [
+                  ...(userOrganisme.formationsFormateur ?? []),
+                  ...(userOrganisme.formationsResponsableFormateur ?? []),
+                ].map((f) => f.cfd)
+              ),
+            },
+          },
+          // effectifs des formateurs liés aux formation dont l'OF est responsable
+          ...(userOrganisme.formationsResponsable ?? []).map((formationResponsable) => ({
+            organisme_id: formationResponsable.organisme_formateur?.organisme_id,
+            "formation.cfd": formationResponsable.cfd,
+          })),
+        ],
         // $or: [
         //   {
         //     organisme_id: userOrganisme._id,
@@ -435,18 +453,18 @@ async function getIndicateursEffectifsRestrictionNew(ctx: AuthContext): Promise<
 
         //   }
         // ]
-        organisme_id: {
-          $in: [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)],
-        },
-        "formation.cfd": {
-          $in: uniq(
-            [
-              ...(userOrganisme.formationsFormateur ?? []),
-              ...(userOrganisme.formationsResponsable ?? []),
-              ...(userOrganisme.formationsResponsableFormateur ?? []),
-            ].map((f) => f.cfd)
-          ),
-        },
+        // organisme_id: {
+        //   $in: [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)],
+        // },
+        // "formation.cfd": {
+        //   $in: uniq(
+        //     [
+        //       ...(userOrganisme.formationsFormateur ?? []),
+        //       ...(userOrganisme.formationsResponsable ?? []),
+        //       ...(userOrganisme.formationsResponsableFormateur ?? []),
+        //     ].map((f) => f.cfd)
+        //   ),
+        // },
       };
     }
 
@@ -506,9 +524,25 @@ async function getOrganismeIndicateursEffectifsRestrictionNew(
       if (userOrganisme._id.equals(organisme._id)) {
         // OF cible
         return {
-          organisme_id: {
-            $in: [userOrganisme._id, ...userOrganismesFormateursIds],
-          },
+          $or: [
+            // effectifs de l'OF liés aux formations dont l'OF est formateur ou responsable/formateur
+            {
+              organisme_id: userOrganisme._id,
+              "formation.cfd": {
+                $in: uniq(
+                  [
+                    ...(userOrganisme.formationsFormateur ?? []),
+                    ...(userOrganisme.formationsResponsableFormateur ?? []),
+                  ].map((f) => f.cfd)
+                ),
+              },
+            },
+            // effectifs des formateurs liés aux formation dont l'OF est responsable
+            ...(userOrganisme.formationsResponsable ?? []).map((formationResponsable) => ({
+              organisme_id: formationResponsable.organisme_formateur?.organisme_id,
+              "formation.cfd": formationResponsable.cfd,
+            })),
+          ],
         };
       } else if (userOrganismesFormateursIds.some((id) => id.equals(organisme._id))) {
         // OF responsable
