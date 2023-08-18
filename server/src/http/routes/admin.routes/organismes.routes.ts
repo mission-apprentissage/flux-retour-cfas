@@ -66,7 +66,7 @@ export default () => {
     }),
     async ({ params }, res) => {
       const { id } = params;
-      const organisme = await findOrganismeById(id);
+      const organisme = await findOrganismeById(id as string);
       if (!organisme) {
         throw Boom.notFound(`Organisme with id ${id} not found`);
       }

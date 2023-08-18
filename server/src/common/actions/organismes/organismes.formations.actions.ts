@@ -3,16 +3,14 @@ import { ObjectId } from "mongodb";
 import { createFormation, getFormationWithCfd } from "@/common/actions/formations.actions";
 import { getCatalogFormationsForOrganisme } from "@/common/apis/apiCatalogueMna";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
-import { formationsCatalogueDb, organismesDb } from "@/common/model/collections";
+import { formationsCatalogueDb } from "@/common/model/collections";
 
 import { findOrganismeByUai } from "./organismes.actions";
 
 /**
  * Méthode de récupération de l'arbre des formations issues du catalogue liées à un organisme
- * @param {string} uai
- * @returns
  */
-export const getFormationsTreeForOrganisme = async (uai) => {
+export const getFormationsTreeForOrganisme = async (uai: string | undefined) => {
   if (!uai)
     return {
       formations: [],
@@ -76,10 +74,8 @@ export const getFormationsTreeForOrganisme = async (uai) => {
 
 /**
  * Méthode de construction de la liste des organismes avec leur nature, rattachés à une formation du catalogue
- * @param {*} formationCatalog
- * @returns
  */
-const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => {
+const buildOrganismesListFromFormationFromCatalog = async (formationCatalog: any) => {
   let organismesLinkedToFormation: any[] = [];
 
   // Récupération du responsable (gestionnaire)
@@ -135,12 +131,8 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
 /**
  * Vérifie la nature, si on détecte un UAI formateur = responsable alors on est dans le cas d'un responsable_formateur
  * sinon on renvoi la nature default
- * @param {*} defaultNature
- * @param {*} formationCatalog
- * @param {*} organismesLinkedToFormation
- * @returns
  */
-const getOrganismeNature = (defaultNature, formationCatalog, organismesLinkedToFormation) => {
+const getOrganismeNature = (defaultNature: any, formationCatalog: any, organismesLinkedToFormation: any) => {
   // Vérification si OF a la fois identifié gestionnaire (responsable) & formateur
   const isResponsableEtFormateur =
     formationCatalog.etablissement_gestionnaire_uai === formationCatalog.etablissement_formateur_uai;
@@ -153,26 +145,6 @@ const getOrganismeNature = (defaultNature, formationCatalog, organismesLinkedToF
   return isResponsableEtFormateur && isNotAlreadyInOrganismesLinkedToFormation
     ? NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
     : defaultNature;
-};
-
-/**
- * Méthode de recherche d'une formation dans un organisme depuis un cfd
- * @param {string|ObjectId} organisme_id
- * @param {string} cfd
- * @returns
- */
-export const findOrganismeFormationByCfd = async (organisme_id: string, cfd: string) => {
-  const organisme = await organismesDb().findOne({ _id: new ObjectId(organisme_id) });
-  if (!organisme) {
-    throw new Error("organisme not found");
-  }
-  const formationFound = await getFormationWithCfd(cfd, { _id: 1 });
-
-  return formationFound
-    ? organisme.relatedFormations?.find(
-        (formation) => formation.formation_id?.toString() === formationFound._id.toString()
-      )
-    : null;
 };
 
 export async function searchOrganismesFormations(searchTerm: string): Promise<any[]> {
