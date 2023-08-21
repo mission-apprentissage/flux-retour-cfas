@@ -17,6 +17,9 @@ export interface Organisme {
     | "ADEN"
     | "CMA"
     | "AGRI"
+    | "AGRI_CNEAP"
+    | "AGRI_UNREP"
+    | "AGRI_UNMFREO"
     | "ANASUP"
     | "CCI"
     | "CFA_EC"
@@ -953,7 +956,7 @@ export interface Organisme {
    */
   last_transmission_date?: Date;
   /**
-   * Est dans le referentiel ONISEP des organismes
+   * Présence dans le referentiel ONISEP des organismes
    */
   est_dans_le_referentiel?: "absent" | "present" | "present_uai_multiples_dans_tdb";
   /**
