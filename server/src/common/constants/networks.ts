@@ -18,6 +18,18 @@ export const TETE_DE_RESEAUX = [
     key: "AGRI",
   },
   {
+    nom: "AGRI_CNEAP",
+    key: "AGRI_CNEAP",
+  },
+  {
+    nom: "AGRI_UNREP",
+    key: "AGRI_UNREP",
+  },
+  {
+    nom: "AGRI_UNMFREO",
+    key: "AGRI_UNMFREO",
+  },
+  {
     nom: "ANASUP",
     key: "ANASUP",
   },
