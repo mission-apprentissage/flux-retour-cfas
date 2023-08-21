@@ -416,15 +416,28 @@ async function getIndicateursEffectifsRestrictionNew(ctx: AuthContext): Promise<
             "formation.cfd": {
               $in: uniq(
                 [
-                  ...(userOrganisme.formationsFormateur ?? []),
+                  // ...(userOrganisme.formationsFormateur ?? []),
                   ...(userOrganisme.formationsResponsableFormateur ?? []),
                 ].map((f) => f.cfd)
               ),
             },
           },
+          // effectifs des responsables liés aux formations dont l'OF est formateur
+          ...(userOrganisme.formationsFormateur ?? []).map((formationFormateur) => ({
+            // pas assez d'effectifs bien rangés
+            // organisme_id: formationFormateur.organisme_formateur?.organisme_id,
+            organisme_id: {
+              $in: [userOrganisme._id, formationFormateur.organisme_responsable?.organisme_id],
+            },
+            "formation.cfd": formationFormateur.cfd,
+          })),
           // effectifs des formateurs liés aux formation dont l'OF est responsable
           ...(userOrganisme.formationsResponsable ?? []).map((formationResponsable) => ({
-            organisme_id: formationResponsable.organisme_formateur?.organisme_id,
+            // pas assez d'effectifs bien rangés
+            // organisme_id: formationResponsable.organisme_formateur?.organisme_id,
+            organisme_id: {
+              $in: [userOrganisme._id, formationResponsable.organisme_formateur?.organisme_id],
+            },
             "formation.cfd": formationResponsable.cfd,
           })),
         ],
@@ -531,15 +544,28 @@ async function getOrganismeIndicateursEffectifsRestrictionNew(
               "formation.cfd": {
                 $in: uniq(
                   [
-                    ...(userOrganisme.formationsFormateur ?? []),
+                    // ...(userOrganisme.formationsFormateur ?? []),
                     ...(userOrganisme.formationsResponsableFormateur ?? []),
                   ].map((f) => f.cfd)
                 ),
               },
             },
+            // effectifs des responsables liés aux formations dont l'OF est formateur
+            ...(userOrganisme.formationsFormateur ?? []).map((formationFormateur) => ({
+              // pas assez d'effectifs bien rangés
+              // organisme_id: formationFormateur.organisme_formateur?.organisme_id,
+              organisme_id: {
+                $in: [userOrganisme._id, formationFormateur.organisme_responsable?.organisme_id],
+              },
+              "formation.cfd": formationFormateur.cfd,
+            })),
             // effectifs des formateurs liés aux formation dont l'OF est responsable
             ...(userOrganisme.formationsResponsable ?? []).map((formationResponsable) => ({
-              organisme_id: formationResponsable.organisme_formateur?.organisme_id,
+              // pas assez d'effectifs bien rangés
+              // organisme_id: formationResponsable.organisme_formateur?.organisme_id,
+              organisme_id: {
+                $in: [userOrganisme._id, formationResponsable.organisme_formateur?.organisme_id],
+              },
               "formation.cfd": formationResponsable.cfd,
             })),
           ],

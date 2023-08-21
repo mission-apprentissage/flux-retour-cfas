@@ -18,6 +18,7 @@ import {
   buildAggregatedRestriction,
 } from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
+import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -238,6 +239,7 @@ export async function getIndicateursEffectifsParOrganisme(
   filters: FullEffectifsFilters,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
+  logger.info({ f: await buildAggregatedRestriction(ctx, filters) }, "debug");
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
