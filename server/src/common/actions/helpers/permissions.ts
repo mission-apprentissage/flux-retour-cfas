@@ -44,6 +44,7 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
       return {
         "adresse.region": organisation.code_region,
       };
@@ -57,6 +58,7 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
       };
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return {};
   }
@@ -85,9 +87,11 @@ export async function getIndicateursOrganismesRestriction(ctx: AuthContext): Pro
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return {};
   }
@@ -120,9 +124,11 @@ export async function getIndicateursEffectifsRestriction(ctx: AuthContext): Prom
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return {};
   }
@@ -155,6 +161,7 @@ export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
       return {
         "_computed.organisme.region": organisation.code_region,
       };
@@ -168,6 +175,7 @@ export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise
       };
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return {};
   }
@@ -197,6 +205,7 @@ export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthConte
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
       return {
         "_computed.organisme.region": organisation.code_region,
       };
@@ -210,6 +219,7 @@ export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthConte
       };
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return {};
   }
@@ -250,8 +260,10 @@ export async function getEffectifsNominatifsRestriction(ctx: AuthContext): Promi
       };
 
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
       return {
         _id: new ObjectId("000000000000"), // permet de tout rejeter
       };
@@ -309,6 +321,7 @@ export async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeI
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
       return organisme.adresse?.region === organisation.code_region;
     case "DDETS":
       return organisme.adresse?.departement === organisation.code_departement;
@@ -316,6 +329,7 @@ export async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeI
       return organisme.adresse?.academie === organisation.code_academie;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return true;
   }
@@ -343,6 +357,7 @@ async function canAccessOrganismesFormateurs(ctx: AuthContext, organismeId: Obje
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
       return organisme.adresse?.region === organisation.code_region;
     case "DDETS":
       return organisme.adresse?.departement === organisation.code_departement;
@@ -350,6 +365,7 @@ async function canAccessOrganismesFormateurs(ctx: AuthContext, organismeId: Obje
       return organisme.adresse?.academie === organisation.code_academie;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return true;
   }

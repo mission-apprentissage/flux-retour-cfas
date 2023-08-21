@@ -23,9 +23,11 @@ export const organisationTypes = [
   "DREETS",
   "DRAAF",
   "CONSEIL_REGIONAL",
+  "CARIF_OREF_REGIONAL",
   "DDETS",
   "ACADEMIE",
   "OPERATEUR_PUBLIC_NATIONAL",
+  "CARIF_OREF_NATIONAL",
   "ADMINISTRATEUR",
 ];
 
@@ -36,6 +38,7 @@ export type NewOrganisation =
   | OrganisationOperateurPublicDepartement
   | OrganisationOperateurPublicAcademie
   | OrganisationOperateurPublicNational
+  | OrganisationCarifOrefNational
   | OrganisationAdministrateur;
 
 export type Organisation = NewOrganisation & { created_at: Date };
@@ -62,8 +65,12 @@ export interface OrganisationOperateurPublicNational {
   nom: (typeof ORGANISATIONS_NATIONALES)[number]["key"];
 }
 
+export interface OrganisationCarifOrefNational {
+  type: "CARIF_OREF_NATIONAL";
+}
+
 export interface OrganisationOperateurPublicRegion {
-  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL";
+  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "CARIF_OREF_REGIONAL";
   code_region: string;
 }
 
@@ -104,6 +111,8 @@ export function getOrganisationLabel(organisation: NewOrganisation): string {
       return `${organisation.type} ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "CONSEIL_REGIONAL":
       return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+    case "CARIF_OREF_REGIONAL":
+      return `CARIF OREF ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "DDETS":
       return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement}`;
     case "ACADEMIE":
@@ -111,6 +120,8 @@ export function getOrganisationLabel(organisation: NewOrganisation): string {
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;
+    case "CARIF_OREF_NATIONAL":
+      return "CARIF OREF national";
     case "ADMINISTRATEUR":
       return "Administrateur";
   }
@@ -121,9 +132,11 @@ function isPublicOrganisation(organisation: NewOrganisation): boolean {
     "DREETS",
     "DRAAF",
     "CONSEIL_REGIONAL",
+    "CARIF_OREF_REGIONAL",
     "DDETS",
     "ACADEMIE",
     "OPERATEUR_PUBLIC_NATIONAL",
+    "CARIF_OREF_NATIONAL",
     "ADMINISTRATEUR",
   ].includes(organisation.type);
 }
@@ -134,7 +147,16 @@ export function getWarningOnEmail(email: string, organisation: Organisation & { 
     return;
   }
   if (
-    ["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DDETS", "ACADEMIE"].includes(organisation.type) &&
+    [
+      "DREETS",
+      "DRAAF",
+      "CONSEIL_REGIONAL",
+      "CARIF_OREF_REGIONAL",
+      "DDETS",
+      "ACADEMIE",
+      "OPERATEUR_PUBLIC_NATIONAL",
+      "CARIF_OREF_NATIONAL",
+    ].includes(organisation.type) &&
     !email.endsWith(".gouv.fr")
   ) {
     warning = "Cet email n'appartient pas à un compte public finissant par .gouv.fr.";
@@ -172,7 +194,7 @@ const schema = object(
     // si tête de réseau
     reseau: string({ enum: TETE_DE_RESEAUX.map((r) => r.key), description: "Nom du réseau" }),
 
-    // si DREETS, DRAAF, CONSEIL_REGIONAL
+    // si DREETS, DRAAF, CONSEIL_REGIONAL, CARIF_OREF_REGIONAL
     code_region: string({
       enum: REGIONS.map(({ code }) => code),
       description: "Code région",

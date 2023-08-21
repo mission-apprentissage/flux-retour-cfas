@@ -358,7 +358,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Création d’une API RCO pour les rupturants et sans contrat",
     explication:
-      "API pour identifier les apprentis sans contrats et rupturants, afin de nourrir la cartographie effectuée par le réseau des Carif-Oref",
+      "API pour identifier les apprentis sans contrats et rupturants, afin de nourrir la cartographie effectuée par le réseau des CARIF OREF",
     correctif: "Non",
     date: "2021/11/11",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CalculDesIndices,

@@ -832,9 +832,11 @@ async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return true;
   }

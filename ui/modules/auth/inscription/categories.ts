@@ -12,6 +12,10 @@ export const categoriesCompteInscription = [
     value: "tete_de_reseau",
   },
   {
+    text: "Un membre du Réseau des CARIF OREF",
+    value: "carif_oref",
+  },
+  {
     text: "Autre organisation",
     value: "autre",
   },

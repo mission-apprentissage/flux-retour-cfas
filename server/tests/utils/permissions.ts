@@ -207,6 +207,20 @@ const profilsOrganisation = [
     },
   },
   {
+    label: "CARIF OREF régional même région",
+    organisation: {
+      type: "CARIF_OREF_REGIONAL",
+      code_region: "53",
+    },
+  },
+  {
+    label: "CARIF OREF régional autre région",
+    organisation: {
+      type: "CARIF_OREF_REGIONAL",
+      code_region: "76",
+    },
+  },
+  {
     label: "DDETS même département",
     organisation: {
       type: "DDETS",
@@ -239,6 +253,12 @@ const profilsOrganisation = [
     organisation: {
       type: "OPERATEUR_PUBLIC_NATIONAL",
       nom: "Ministère de la Justice",
+    },
+  },
+  {
+    label: "CARIF OREF national",
+    organisation: {
+      type: "CARIF_OREF_NATIONAL",
     },
   },
   {

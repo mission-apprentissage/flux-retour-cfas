@@ -12,9 +12,11 @@ export interface Organisation {
     | "DREETS"
     | "DRAAF"
     | "CONSEIL_REGIONAL"
+    | "CARIF_OREF_REGIONAL"
     | "DDETS"
     | "ACADEMIE"
     | "OPERATEUR_PUBLIC_NATIONAL"
+    | "CARIF_OREF_NATIONAL"
     | "ADMINISTRATEUR";
   /**
    * N° SIRET
