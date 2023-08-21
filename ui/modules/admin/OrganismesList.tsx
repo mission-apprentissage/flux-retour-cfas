@@ -95,7 +95,7 @@ const OrganismesList = ({ data, pagination, sorting, searchValue, highlight }: a
                 ? { as: Link, href: { query: { ...router.query, est_dans_le_referentiel: getValue() } } }
                 : {})}
             >
-              {getValue() ? "OUI" : "NON"}
+              {getValue() || ""}
             </Text>
           ),
         },

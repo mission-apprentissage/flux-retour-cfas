@@ -3,6 +3,7 @@ import path from "path";
 import { PromisePool } from "@supercharge/promise-pool";
 
 import { findOrganismesBySiret } from "@/common/actions/organismes/organismes.actions";
+import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -110,7 +111,7 @@ const hydrateReseauFile = async (filename: string) => {
 
     // Recherche des organismes présents dans le référentiel et ayant ce siret
     const organismesForSiret = await findOrganismesBySiret(organismeFromFile.siret, {
-      est_dans_le_referentiel: true,
+      est_dans_le_referentiel: { $ne: STATUT_PRESENCE_REFERENTIEL.ABSENT },
     });
 
     const found = organismesForSiret?.length !== 0;

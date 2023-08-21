@@ -7,6 +7,7 @@ import {
   updateOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
 import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 
@@ -56,7 +57,12 @@ const resetOrganismesReferentielPresence = async () => {
   logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
   await organismesDb().updateMany(
     { siret: { $exists: true } },
-    { $set: { est_dans_le_referentiel: false, fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU } }
+    {
+      $set: {
+        est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT,
+        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
+      },
+    }
   );
 };
 
@@ -73,6 +79,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
 
   // Recherche de l'organisme via le couple UAI - SIRET
   const organismeInTdb = await findOrganismeByUaiAndSiret(uai, siret);
+  const uaiMultiplesInTdb = (await organismesDb().countDocuments({ siret })) > 1;
 
   // Ajout de l'organisme sans appels API si non existant dans le tdb
   if (!organismeInTdb) {
@@ -87,7 +94,9 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
         adresse: adresseFormatted,
         ferme: isFerme,
         qualiopi: qualiopi || false,
-        est_dans_le_referentiel: true,
+        est_dans_le_referentiel: uaiMultiplesInTdb
+          ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
+          : STATUT_PRESENCE_REFERENTIEL.PRESENT,
       });
       nbOrganismeCreated++;
     } catch (error) {
@@ -110,7 +119,9 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       adresse: adresseFormatted,
       ferme: isFerme,
       qualiopi: qualiopi || false,
-      est_dans_le_referentiel: true,
+      est_dans_le_referentiel: uaiMultiplesInTdb
+        ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
+        : STATUT_PRESENCE_REFERENTIEL.PRESENT,
     };
     try {
       await updateOrganisme(organismeInTdb._id, updatedOrganisme);

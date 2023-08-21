@@ -1,6 +1,7 @@
 import { ObjectId, WithId } from "mongodb";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
+import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { NewOrganisation } from "@/common/model/organisations.model";
@@ -49,7 +50,7 @@ export const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organis
   organismesResponsables: [],
   created_at: new Date("2023-04-12T18:00:00.000Z"),
   updated_at: new Date("2023-04-12T18:00:00.000Z"),
-  est_dans_le_referentiel: true,
+  est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
   last_transmission_date: new Date("2023-04-15T18:00:00.000Z"),
 };
 

@@ -11,6 +11,7 @@ import {
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
 } from "@/common/constants/fiabilisation";
+import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import {
@@ -84,7 +85,7 @@ export const updateOrganismesFiabilisationUaiSiret = async () => {
  */
 const updateOrganismesReferentielFiables = async () => {
   const { modifiedCount } = await organismesDb().updateMany(
-    { uai: { $exists: true }, est_dans_le_referentiel: true, ferme: false },
+    { uai: { $exists: true }, est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT, ferme: false },
     { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE } }
   );
   nbOrganismesReferentielFiables += modifiedCount;

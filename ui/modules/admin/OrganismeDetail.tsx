@@ -164,7 +164,12 @@ const OrganismeDetail = ({ data }) => {
         },
         est_dans_le_referentiel: {
           header: () => "Est dans le Référentiel?",
-          cell: ({ value }) => (value ? <Text color="green">OUI</Text> : <Text color="tomato">NON</Text>),
+          cell: ({ value }) =>
+            value === "present" || value === "present_uai_multiples_dans_tdb" ? (
+              <Text color="green">{value}</Text>
+            ) : (
+              <Text color="tomato">{value}</Text>
+            ),
         },
         last_transmission_date: {
           header: () => "Dernière transmission au tdb",

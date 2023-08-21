@@ -5,3 +5,9 @@ export const NATURE_ORGANISME_DE_FORMATION = {
   LIEU: "lieu_formation",
   INCONNUE: "inconnue",
 } as const;
+
+export const STATUT_PRESENCE_REFERENTIEL = {
+  ABSENT: "absent",
+  PRESENT: "present",
+  PRESENT_UAI_MULTIPLES_TDB: "present_uai_multiples_dans_tdb",
+} as const;
