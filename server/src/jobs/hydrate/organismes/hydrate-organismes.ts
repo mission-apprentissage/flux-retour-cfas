@@ -6,7 +6,6 @@ import {
   findOrganismeByUaiAndSiret,
   updateOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
-import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
@@ -26,9 +25,6 @@ let nbOrganismeNotUpdated = 0;
  * En cas d'erreurs on log via un createJobEvent()
  */
 export const hydrateOrganismesFromReferentiel = async () => {
-  // On remet à 0 l'information de présence dans le référentiel
-  await resetOrganismesReferentielPresence();
-
   // On récupère l'intégralité des organismes depuis le référentiel
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
   logger.info(`Traitement de ${organismesFromReferentiel.length} organismes provenant du référentiel...`);
@@ -48,22 +44,6 @@ export const hydrateOrganismesFromReferentiel = async () => {
     nbOrganismesMaj: nbOrganismeUpdated,
     nbOrganismesNonMajErreur: nbOrganismeNotUpdated,
   };
-};
-
-/**
- * Reset du flag est_dans_le_referentiel pour tous les organismes ayant au moins un siret
- */
-const resetOrganismesReferentielPresence = async () => {
-  logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
-  await organismesDb().updateMany(
-    { siret: { $exists: true } },
-    {
-      $set: {
-        est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT,
-        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
-      },
-    }
-  );
 };
 
 /**
