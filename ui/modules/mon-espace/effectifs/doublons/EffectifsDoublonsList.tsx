@@ -28,7 +28,7 @@ const EffectifsDoublonsList = ({ data }) => {
       isRowExpanded={true}
       renderSubComponent={RenderSubComponent}
       paginationState={defaultPaginationState}
-      renderDivider={() => <Divider marginTop="2px" orientation="horizontal" verticalAlign="middle" opacity="1" />}
+      renderDivider={() => <Divider orientation="horizontal" verticalAlign="middle" opacity="1" />}
       columns={[
         {
           header: () => "Année scolaire",
@@ -72,7 +72,9 @@ const EffectifsDoublonsList = ({ data }) => {
           cell: ({ row }) => (
             <HStack>
               <Alert mt={2} />
-              <Text fontSize="1rem" pt={2} whiteSpace="nowrap">{`${row?.original?.duplicates.length} duplicats`}</Text>
+              <Text fontSize="1rem" pt={2} whiteSpace="nowrap">
+                {row?.original?.duplicates.length}
+              </Text>
             </HStack>
           ),
         },
@@ -83,7 +85,7 @@ const EffectifsDoublonsList = ({ data }) => {
 
 const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
   return (
-    <Stack spacing={6} mt={4} mb={4} ml={10}>
+    <Stack spacing={1} mt={-2} ml={10}>
       {row?.original?.duplicates
         // Tri par date de création pour proposition de suppression du moins récent
         ?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
@@ -93,9 +95,6 @@ const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
               <ArrowRightLine />
               <Text>
                 <b>{`${transformNomPrenomToPascalCase(row)}`}</b>
-              </Text>
-              <Text>
-                <i>{`(${item.id})`}</i>
               </Text>
               <Text>
                 <i>{`créé le ${prettyPrintDate(item.created_at)}`}</i>

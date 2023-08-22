@@ -77,7 +77,7 @@ const EffectifDoublonDetailModal = ({
               <Text>
                 {`Détail de l'apprenant ${toPascalCase(effectifDetail?.apprenant?.prenom)} ${toPascalCase(
                   effectifDetail?.apprenant?.nom
-                )} (${effectifId})`}
+                )}`}
               </Text>
             )}
           </ModalHeader>
@@ -88,7 +88,7 @@ const EffectifDoublonDetailModal = ({
                 <Text>Dossier mis à jour le {prettyPrintDate(effectifDetail?.updated_at)}</Text>
                 {/* Infos Apprenant */}
                 <TableContainer>
-                  <Table size="sm">
+                  <Table size="sm" variant="detailsHalfColumns">
                     <Thead>
                       <Tr>
                         <Th colSpan={2}>Apprenant</Th>
@@ -165,7 +165,7 @@ const EffectifDoublonDetailModal = ({
 
                 {/* Adresse */}
                 <TableContainer>
-                  <Table size="sm">
+                  <Table size="sm" variant="detailsHalfColumns">
                     <Thead>
                       <Tr>
                         <Th colSpan={2}>Adresse</Th>
@@ -226,7 +226,7 @@ const EffectifDoublonDetailModal = ({
 
                 {/* Formation */}
                 <TableContainer>
-                  <Table size="sm">
+                  <Table size="sm" variant="detailsHalfColumns">
                     <Thead>
                       <Tr>
                         <Th colSpan={2}>Formation</Th>
@@ -280,7 +280,7 @@ const EffectifDoublonDetailModal = ({
                 {/* Contrats */}
                 {effectifDetail?.contrats?.map((contrat, index) => (
                   <TableContainer key={`tableContrats_${index}`}>
-                    <Table size="sm">
+                    <Table size="sm" variant="detailsHalfColumns">
                       <Thead>
                         <Tr>
                           <Th colSpan={2}>Contrats</Th>
@@ -326,7 +326,7 @@ const EffectifDoublonDetailModal = ({
 
                 {/* Historique */}
                 <TableContainer>
-                  <Table size="sm">
+                  <Table size="sm" variant="detailsHalfColumns">
                     <Thead>
                       <Tr>
                         <Th colSpan={2}>Historique de l&apos;apprenant</Th>
@@ -362,7 +362,7 @@ const EffectifDoublonDetailModal = ({
                 type="submit"
               >
                 <Box as="i" className="ri-delete-bin-7-line" mr={2} />
-                <Text as="span">Supprimer l&apos;apprenant ?</Text>
+                <Text as="span">Supprimer l&apos;apprenant</Text>
               </Button>
               <Button
                 variant="secondary"
