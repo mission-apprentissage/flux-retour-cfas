@@ -1,17 +1,8 @@
 import { PromisePool } from "@supercharge/promise-pool";
 
-import {
-  STATUT_FIABILISATION_COUPLES_UAI_SIRET,
-  STATUT_FIABILISATION_ORGANISME,
-} from "@/common/constants/fiabilisation";
-import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
 import logger from "@/common/logger";
-import {
-  effectifsDb,
-  fiabilisationUaiSiretDb,
-  organismesDb,
-  organismesReferentielDb,
-} from "@/common/model/collections";
+import { effectifsDb, fiabilisationUaiSiretDb, organismesReferentielDb } from "@/common/model/collections";
 import { getPercentage } from "@/common/utils/miscUtils";
 
 import { addFiabilisationsManuelles } from "./build.manual";
@@ -36,11 +27,7 @@ const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"]
 export const buildFiabilisationUaiSiret = async () => {
   await fiabilisationUaiSiretDb().deleteMany({});
 
-  // On remet à 0 l'information de présence dans le référentiel
-  await resetOrganismesReferentielPresence();
-
   logger.info("> Execution du script de fiabilisation sur tous les couples UAI-SIRET...");
-
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
 
   // on récupère tous les couples UAI/SIRET depuis les effectifs en faisant un lookup effectifs - organismes
@@ -183,20 +170,4 @@ export const buildFiabilisationCoupleForTdbCouple = async (
 
   // Règle n°9 on vérifie les couples non fiabilisables, si l'UAI est validée cotée référentiel
   if (await checkCoupleNonFiabilisable(coupleUaiSiretTdbToCheck)) return;
-};
-
-/**
- * Reset du flag est_dans_le_referentiel pour tous les organismes ayant au moins un siret
- */
-const resetOrganismesReferentielPresence = async () => {
-  logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
-  await organismesDb().updateMany(
-    {},
-    {
-      $set: {
-        est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT,
-        fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
-      },
-    }
-  );
 };

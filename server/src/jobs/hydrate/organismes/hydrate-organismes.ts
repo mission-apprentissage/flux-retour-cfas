@@ -25,6 +25,9 @@ let nbOrganismeNotUpdated = 0;
  * En cas d'erreurs on log via un createJobEvent()
  */
 export const hydrateOrganismesFromReferentiel = async () => {
+  // On reset tous les organismes comme non présents dans le référentiel
+  await resetOrganismesReferentielPresence();
+
   // On récupère l'intégralité des organismes depuis le référentiel
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
   logger.info(`Traitement de ${organismesFromReferentiel.length} organismes provenant du référentiel...`);
@@ -137,4 +140,12 @@ const mapAdresseReferentielToAdresseTdb = (adresseReferentiel) => {
     academie: academie?.code.replace(/^0+/, ""), // Mapping pour coller à notre constante ACADEMIES
     complete: label,
   };
+};
+
+/**
+ * Reset du flag est_dans_le_referentiel pour tous les organismes
+ */
+export const resetOrganismesReferentielPresence = async () => {
+  logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
+  await organismesDb().updateMany({}, { $set: { est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT } });
 };
