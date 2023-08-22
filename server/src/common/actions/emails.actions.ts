@@ -10,7 +10,6 @@ function addEmail(userEmail: string, token: string, templateName: string, payloa
   return usersMigrationDb().findOneAndUpdate(
     { email: userEmail },
     {
-      // @ts-ignore
       $push: {
         emails: {
           token,

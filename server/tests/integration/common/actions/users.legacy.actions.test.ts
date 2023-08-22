@@ -81,12 +81,12 @@ describe("Components Users Test", () => {
 
       assert.equal(userInDb?.password_update_token, token);
       // password token should expire in 48h ~ 2880 minutes, ±1 seconds tolerance
-      // @ts-ignore
+      // @ts-expect-error
       const diffSeconds = differenceInSeconds(userInDb?.password_update_token_expiry, new Date());
       const _48hoursInSeconds = 48 * 60 * 60;
       assert.equal(_48hoursInSeconds - diffSeconds <= 1, true);
       assert.equal(_48hoursInSeconds - diffSeconds >= 0, true);
-      // @ts-ignore
+      // @ts-expect-error
       assert.equal(differenceInCalendarDays(userInDb?.password_update_token_expiry, new Date()), 2);
     });
 

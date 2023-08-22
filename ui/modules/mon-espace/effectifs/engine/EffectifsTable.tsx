@@ -82,7 +82,6 @@ const EffectifsTable = ({
         mt={4}
         data={organismesEffectifs}
         searchValue={searchValue}
-        /* @ts-ignore */
         onCountItemsChange={(count) => {
           setCount(count);
           onCountItemsChange(count);
@@ -526,9 +525,7 @@ const EffectifsTable = ({
               }
             : {}),
         }}
-        /* @ts-ignore */
         getRowCanExpand={() => true}
-        /* @ts-ignore */
         renderSubComponent={({ row }) => {
           return (
             <EffectifDetails row={row} modeSifa={modeSifa} canEdit={canEdit} effectifsSnapshot={effectifsSnapshot} />

@@ -6,6 +6,6 @@ export const asyncForEach = async (array, callback) => {
 
 export function timeout(promise, millis) {
   const timeout = new Promise((resolve, reject) => setTimeout(() => reject(`Timed out after ${millis} ms.`), millis));
-  // @ts-ignore
+  // @ts-expect-error
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timeout));
 }

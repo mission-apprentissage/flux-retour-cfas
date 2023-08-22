@@ -195,7 +195,6 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
                   setSearchValue(value.trim());
                 },
               }}
-              /* @ts-ignore */
               w="35%"
             />
           </VStack>
