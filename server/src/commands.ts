@@ -13,6 +13,7 @@ import { recreateIndexes } from "./jobs/db/recreateIndexes";
 import { removeInscritsSansContratsDepuis, transformRupturantsToAbandonsDepuis } from "./jobs/fiabilisation/effectifs";
 import { getStats } from "./jobs/fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/build";
+import { resetOrganismesFiabilisationStatut } from "./jobs/fiabilisation/uai-siret/build.utils";
 import { updateOrganismesFiabilisationUaiSiret } from "./jobs/fiabilisation/uai-siret/update";
 import { hydrateEffectifsComputed } from "./jobs/hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsFormationsNiveaux } from "./jobs/hydrate/effectifs/hydrate-effectifs-formations-niveaux";
@@ -551,6 +552,9 @@ program
   .description("Lancement des scripts de fiabilisation des couples UAI SIRET")
   .action(
     runJob(async () => {
+      // On reset le statut de fiabilisation de tous les organismes
+      await resetOrganismesFiabilisationStatut();
+
       // On lance séquentiellement 2 fois de suite la construction (build) de la collection fiabilisation suivi de la MAJ des données liées (apply)
       // Nécessaire pour le bon fonctionnement de l'algo
       await buildFiabilisationUaiSiret();

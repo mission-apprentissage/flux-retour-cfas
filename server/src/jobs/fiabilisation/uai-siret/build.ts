@@ -28,7 +28,6 @@ export const buildFiabilisationUaiSiret = async () => {
   await fiabilisationUaiSiretDb().deleteMany({});
 
   logger.info("> Execution du script de fiabilisation sur tous les couples UAI-SIRET...");
-
   const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
 
   // on récupère tous les couples UAI/SIRET depuis les effectifs en faisant un lookup effectifs - organismes
