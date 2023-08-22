@@ -191,7 +191,7 @@ export const buildFiabilisationCoupleForTdbCouple = async (
 const resetOrganismesReferentielPresence = async () => {
   logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
   await organismesDb().updateMany(
-    { siret: { $exists: true } },
+    {},
     {
       $set: {
         est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT,
