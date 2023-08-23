@@ -2,7 +2,6 @@ import path from "path";
 
 import { PromisePool } from "@supercharge/promise-pool";
 
-import { findOrganismesBySiret } from "@/common/actions/organismes/organismes.actions";
 import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
@@ -109,49 +108,53 @@ const hydrateReseauFile = async (filename: string) => {
   await PromisePool.for(reseauFile).process(async (reseauFileLine) => {
     const organismeFromFile = mapFileOrganisme(reseauFileLine);
 
-    // Recherche des organismes présents dans le référentiel et ayant ce siret
-    const organismesForSiret = await findOrganismesBySiret(organismeFromFile.siret, {
-      est_dans_le_referentiel: { $ne: STATUT_PRESENCE_REFERENTIEL.ABSENT },
-    });
+    try {
+      // Recherche des organismes présents dans le référentiel et ayant ce siret
+      const organismesForSiret = await organismesDb()
+        .find({ siret: organismeFromFile.siret, est_dans_le_referentiel: { $ne: STATUT_PRESENCE_REFERENTIEL.ABSENT } })
+        .toArray();
 
-    const found = organismesForSiret?.length !== 0;
+      const found = organismesForSiret?.length !== 0;
 
-    if (found) {
-      organismesFound.push({ uai: organismeFromFile.uai, siret: organismeFromFile.siret });
-      logger.debug(`${organismesForSiret.length} organismes trouvés pour le SIRET ${organismeFromFile.siret}`);
+      if (found) {
+        organismesFound.push({ uai: organismeFromFile.uai, siret: organismeFromFile.siret });
+        logger.debug(`${organismesForSiret.length} organismes trouvés pour le SIRET ${organismeFromFile.siret}`);
 
-      await PromisePool.for(organismesForSiret).process(async (currentOrganismeFound) => {
-        const reseauxFromDb = currentOrganismeFound.reseaux || [];
-        const reseauxFromFile = organismeFromFile.reseaux || [];
+        await PromisePool.for(organismesForSiret).process(async (currentOrganismeFound) => {
+          const reseauxFromDb = currentOrganismeFound.reseaux || [];
+          const reseauxFromFile = organismeFromFile.reseaux || [];
 
-        if (!arraysContainSameValues(reseauxFromDb, reseauxFromFile)) {
-          logger.debug(`Mise à jour de l'organisme ${organismeFromFile.siret} avec : ${reseauxFromFile.join(", ")}`);
-          try {
-            const reseauxToUpdate = [...reseauxFromDb, ...reseauxFromFile];
-            await organismesDb().updateOne(
-              { _id: currentOrganismeFound._id },
-              {
-                // Fusion des réseaux dans le cas d'un organisme multi réseaux
-                // https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/#value-to-add-is-an-array
-                $addToSet: { reseaux: { $each: reseauxToUpdate } },
-              }
-            );
+          if (!arraysContainSameValues(reseauxFromDb, reseauxFromFile)) {
+            logger.debug(`Mise à jour de l'organisme ${organismeFromFile.siret} avec : ${reseauxFromFile.join(", ")}`);
+            try {
+              const reseauxToUpdate = [...reseauxFromDb, ...reseauxFromFile];
+              await organismesDb().updateOne(
+                { _id: currentOrganismeFound._id },
+                {
+                  // Fusion des réseaux dans le cas d'un organisme multi réseaux
+                  // https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/#value-to-add-is-an-array
+                  $addToSet: { reseaux: { $each: reseauxToUpdate } },
+                }
+              );
 
-            organismeUpdatedCount++;
-          } catch (err) {
-            logger.error(
-              `Erreur pour le fichier ${filename} lors de la mise à jour de l'organisme SIRET : ${
-                organismeFromFile.siret
-              } - UAI : ${organismeFromFile.uai} pour les réseaux : ${JSON.stringify(reseauxFromFile)}`
-            );
-            organismeUpdateErrorCount++;
-            logger.error(err);
+              organismeUpdatedCount++;
+            } catch (err) {
+              logger.error(
+                `Erreur pour le fichier ${filename} lors de la mise à jour de l'organisme SIRET : ${
+                  organismeFromFile.siret
+                } - UAI : ${organismeFromFile.uai} pour les réseaux : ${JSON.stringify(reseauxFromFile)}`
+              );
+              organismeUpdateErrorCount++;
+              logger.error(err);
+            }
           }
-        }
-      });
-    } else {
-      organismesNotFound.push({ uai: organismeFromFile.uai, siret: organismeFromFile.siret });
-      logger.debug(`Aucun organisme trouvé pour le SIRET ${organismeFromFile.siret}`);
+        });
+      } else {
+        organismesNotFound.push({ uai: organismeFromFile.uai, siret: organismeFromFile.siret });
+        logger.debug(`Aucun organisme trouvé pour le SIRET ${organismeFromFile.siret}`);
+      }
+    } catch (err) {
+      logger.error(err);
     }
   });
 
