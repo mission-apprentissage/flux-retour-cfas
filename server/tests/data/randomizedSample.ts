@@ -13,7 +13,6 @@ import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierAp
 import sampleEtablissements from "./sampleEtablissements";
 import { sampleLibelles } from "./sampleLibelles";
 
-const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
 const getRandomFormationCfd = () => new RandExp(CFD_REGEX).gen().toUpperCase();
 const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
@@ -93,7 +92,6 @@ export const createSampleEffectif = ({
 export const createRandomDossierApprenantApiInput = (
   params: Partial<DossierApprenantSchemaV1V2ZodType> = {}
 ): DossierApprenantSchemaV1V2ZodType => {
-  const isStudentPresent = isPresent();
   const annee_scolaire = getRandomAnneeScolaire();
   const { uai, siret } = getRandomEtablissement();
   const formation = getRandomFormation(annee_scolaire);
@@ -115,7 +113,7 @@ export const createRandomDossierApprenantApiInput = (
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
     annee_formation: formation.annee,
-    periode_formation: isStudentPresent ? formation.periode.join("-") : undefined,
+    periode_formation: formation.periode.join("-"),
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
     tel_apprenant: faker.helpers.arrayElement([faker.phone.number(), undefined]),
