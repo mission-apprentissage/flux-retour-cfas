@@ -173,13 +173,13 @@ describe("Test des actions Organismes", () => {
 
   describe("updateOrganisme", () => {
     it("throws when given data is null", async () => {
-      // @ts-ignore
+      // @ts-expect-error
       await assert.rejects(() => updateOrganisme("id", null));
     });
 
     it("throws when given id is null", async () => {
       const randomOrganisme = createRandomOrganisme();
-      // @ts-ignore
+      // @ts-expect-error
       await assert.rejects(() => updateOrganisme(null, randomOrganisme));
     });
 

@@ -23,7 +23,6 @@ describe("Users Indexes", () => {
     const dbIndexes = await getDbCollectionIndexes(usersModelDescriptor.collectionName);
 
     assert.deepStrictEqual(
-      // @ts-ignore
       dbIndexes.sort((a, b) => (a.name > b.name ? 1 : -1)),
       [
         { v: 2, key: { _id: 1 }, name: "_id_" },

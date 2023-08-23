@@ -29,10 +29,9 @@ const Effectif = React.memo(function EffectifMemo({
 
   return (
     <>
-      {/* @ts-ignore */}
+      {/* @ts-expect-error */}
       <CerfaControllerContext.Provider value={cerfaController}>
         <Box my={12} px={5}>
-          {/* @ts-ignore */}
           <CerfaForm modeSifa={modeSifa} />
         </Box>
       </CerfaControllerContext.Provider>

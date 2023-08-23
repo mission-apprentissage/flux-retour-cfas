@@ -177,10 +177,6 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
       {organismesEffectifs.length > 0 && (
         <>
           <VStack alignItems="flex-start">
-            <Text fontWeight="bold">
-              Vous avez {organismesEffectifs.length} effectifs au total. Pour plus de facilité, vous pouvez effectuer
-              une recherche, ou filtrer par année.
-            </Text>
             <Input
               {...{
                 name: "search_effectifs",
@@ -193,13 +189,12 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
                     pattern: "^.*$",
                   },
                 ],
-                placeholder: "Recherche",
+                placeholder: "Rechercher un apprenant...",
                 value: searchValue,
                 onSubmit: (value) => {
                   setSearchValue(value.trim());
                 },
               }}
-              /* @ts-ignore */
               w="35%"
             />
           </VStack>

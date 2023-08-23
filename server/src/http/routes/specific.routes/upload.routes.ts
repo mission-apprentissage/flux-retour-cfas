@@ -474,17 +474,12 @@ export default {
           for (const validation_error of effectifToSave.validation_errors) {
             const { fieldName } = validation_error;
             if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
-              // @ts-ignore
               validation_error.willNotBeModified = true;
             } else if (fieldName === "contrats[0].date_debut" || fieldName === "contrats[0].date_fin") {
-              // @ts-ignore
               validation_error.willNotBeModified = true;
-              // @ts-ignore
               validation_error.isRequired = true;
             } else if ((fieldName as any)?.includes("apprenant.historique_statut")) {
-              // @ts-ignore
               validation_error.willNotBeModified = true;
-              // @ts-ignore
               validation_error.isRequired = true;
             }
           }
