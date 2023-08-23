@@ -3,6 +3,8 @@ import omitDeep from "omit-deep";
 
 import logger from "@/common/logger";
 
+import { zodToMongoSchema } from "./utils/mongoSchemaBuilder";
+
 let mongodbClient: MongoClient;
 
 const ensureInitialization = () => {
@@ -25,6 +27,8 @@ export const connectToMongodb = async (uri) => {
 
   return client;
 };
+
+export const getMongodbClient = () => mongodbClient;
 
 export const closeMongodbConnection = () => {
   ensureInitialization();
@@ -77,10 +81,17 @@ const createCollectionIfDoesNotExist = async (collectionName) => {
 export const configureDbSchemaValidation = async (modelDescriptors) => {
   const db = getDatabase();
   await Promise.all(
-    modelDescriptors.map(async ({ collectionName, schema }) => {
+    modelDescriptors.map(async ({ collectionName, schema, zod }) => {
       await createCollectionIfDoesNotExist(collectionName);
 
-      if (!schema) {
+      if (!schema && !zod) {
+        return;
+      }
+      let convertedSchema = schema;
+      if (zod) {
+        convertedSchema = zodToMongoSchema(zod);
+      }
+      if (!convertedSchema) {
         return;
       }
 
@@ -89,7 +100,7 @@ export const configureDbSchemaValidation = async (modelDescriptors) => {
         validationLevel: "strict",
         validationAction: "error",
         validator: {
-          $jsonSchema: { title: collectionName, ...omitDeep(schema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
+          $jsonSchema: { title: collectionName, ...omitDeep(convertedSchema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
         },
       });
     })
