@@ -8,6 +8,7 @@ import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
 import { NewOrganisation } from "@/modules/auth/inscription/common";
 import SearchBySIRETForm from "@/modules/auth/inscription/components/SearchBySIRETForm";
+import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCarifOref";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
 import { ExternalLinkLine } from "@/theme/components/icons";
@@ -44,6 +45,10 @@ function ImposturesPage() {
             Opérateur public
           </Heading>
           <InscriptionOperateurPublic setOrganisation={setOrganisation} />
+          <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
+            CARIF OREF
+          </Heading>
+          <InscriptionCarifOref setOrganisation={setOrganisation} />
           <Heading as="h2" color="#465F9D" fontSize="gamma" fontWeight="700" mt={10} mb={3}>
             Tête de réseau
           </Heading>

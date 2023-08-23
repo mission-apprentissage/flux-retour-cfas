@@ -27,11 +27,13 @@ function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): stri
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
       return "Mon territoire";
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";
 
@@ -208,9 +210,11 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       // fourre-tout, mais on pourra avoir des différences plus tard
       return <NavBarTransverse />;

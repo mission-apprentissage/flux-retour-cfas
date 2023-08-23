@@ -84,6 +84,16 @@ export async function buildOrganismePermissions(
         manageEffectifs: false,
       };
     }
+    case "CARIF_OREF_REGIONAL": {
+      const sameRegion = organisme.adresse?.region === organisation.code_region;
+      return {
+        viewContacts: true,
+        infoTransmissionEffectifs: true,
+        indicateursEffectifs: sameRegion,
+        effectifsNominatifs: false,
+        manageEffectifs: false,
+      };
+    }
     case "DDETS": {
       const sameDepartement = organisme.adresse?.departement === organisation.code_departement;
       return {
@@ -106,6 +116,14 @@ export async function buildOrganismePermissions(
     }
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+      return {
+        viewContacts: true,
+        infoTransmissionEffectifs: true,
+        indicateursEffectifs: true,
+        effectifsNominatifs: false,
+        manageEffectifs: false,
+      };
+    case "CARIF_OREF_NATIONAL":
       return {
         viewContacts: true,
         infoTransmissionEffectifs: true,

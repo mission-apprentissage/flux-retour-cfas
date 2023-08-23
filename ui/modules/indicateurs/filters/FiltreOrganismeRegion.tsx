@@ -15,7 +15,12 @@ interface FiltreOrganismeRegionProps {
 }
 
 function isOrganisationOperateurPublicRegion(organisation): organisation is OrganisationOperateurPublicRegion {
-  return organisation.type === "DREETS" || organisation.type === "DRAAF" || organisation.type === "CONSEIL_REGIONAL";
+  return (
+    organisation.type === "DREETS" ||
+    organisation.type === "DRAAF" ||
+    organisation.type === "CONSEIL_REGIONAL" ||
+    organisation.type === "CARIF_OREF_REGIONAL"
+  );
 }
 
 const FiltreOrganismeRegion = (props: FiltreOrganismeRegionProps) => {

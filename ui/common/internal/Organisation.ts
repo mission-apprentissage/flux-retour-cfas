@@ -10,9 +10,11 @@ export const organisationTypes = [
   "DREETS",
   "DRAAF",
   "CONSEIL_REGIONAL",
+  "CARIF_OREF_REGIONAL",
   "DDETS",
   "ACADEMIE",
   "OPERATEUR_PUBLIC_NATIONAL",
+  "CARIF_OREF_NATIONAL",
   "ADMINISTRATEUR",
   "AUTRE", // UI uniquement
 ] as const;
@@ -24,6 +26,7 @@ export type Organisation = { _id: string } & (
   | OrganisationOperateurPublicDepartement
   | OrganisationOperateurPublicAcademie
   | OrganisationOperateurPublicNational
+  | OrganisationCarifOrefNational
   | OrganisationAdministrateur
   | OrganisationAutre
 );
@@ -55,8 +58,12 @@ export interface OrganisationOperateurPublicNational extends AbstractOrganisatio
   nom: string;
 }
 
+export interface OrganisationCarifOrefNational extends AbstractOrganisation {
+  type: "CARIF_OREF_NATIONAL";
+}
+
 export interface OrganisationOperateurPublicRegion extends AbstractOrganisation {
-  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL";
+  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "CARIF_OREF_REGIONAL";
   code_region: string;
 }
 
@@ -102,6 +109,8 @@ export function getOrganisationLabel(organisation: Organisation): string {
       return `${organisation.type} ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "CONSEIL_REGIONAL":
       return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+    case "CARIF_OREF_REGIONAL":
+      return `CARIF OREF ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "DDETS":
       return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement}`;
     case "ACADEMIE":
@@ -109,6 +118,8 @@ export function getOrganisationLabel(organisation: Organisation): string {
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;
+    case "CARIF_OREF_NATIONAL":
+      return "CARIF OREF";
     case "ADMINISTRATEUR":
       return "Administrateur";
   }

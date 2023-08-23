@@ -456,6 +456,7 @@ function getPermissionsEffectifsNominatifs(
     case "DRAAF":
       return ["inscritSansContrat", "rupturant", "abandon"];
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
       return false;
     case "DDETS":
       return ["inscritSansContrat", "rupturant", "abandon"];
@@ -463,6 +464,7 @@ function getPermissionsEffectifsNominatifs(
       return false;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
       return false;
 
     case "ADMINISTRATEUR":

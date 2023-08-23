@@ -63,11 +63,14 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": 1,
         "Conseil Régional même région": 1,
         "Conseil Régional autre région": 1,
+        "CARIF OREF régional même région": 1,
+        "CARIF OREF régional autre région": 1,
         "DDETS même département": 1,
         "DDETS autre département": 1,
         "Académie même académie": 1,
         "Académie autre académie": 1,
         "Opérateur public national": 1,
+        "CARIF OREF national": 1,
         Administrateur: 1,
       };
       testPermissions(accesOrganisme, async (organisation, nbApprentis) => {
@@ -115,11 +118,14 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": 4,
         "Conseil Régional même région": 4,
         "Conseil Régional autre région": 4,
+        "CARIF OREF régional même région": 4,
+        "CARIF OREF régional autre région": 4,
         "DDETS même département": 4,
         "DDETS autre département": 4,
         "Académie même académie": 4,
         "Académie autre académie": 4,
         "Opérateur public national": 4,
+        "CARIF OREF national": 4,
         Administrateur: 4,
       };
       testPermissions(accesOrganisme, async (organisation, nbOrganismes) => {
@@ -185,11 +191,14 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": 0,
         "Conseil Régional même région": 1,
         "Conseil Régional autre région": 0,
+        "CARIF OREF régional même région": 1,
+        "CARIF OREF régional autre région": 0,
         "DDETS même département": 1,
         "DDETS autre département": 0,
         "Académie même académie": 1,
         "Académie autre académie": 0,
         "Opérateur public national": 1,
+        "CARIF OREF national": 1,
         Administrateur: 1,
       };
       testPermissions(accesOrganisme, async (organisation, nbApprentis) => {
@@ -261,11 +270,14 @@ describe("Route indicateurs", () => {
         "DRAAF autre région": false,
         "Conseil Régional même région": false,
         "Conseil Régional autre région": false,
+        "CARIF OREF régional même région": false,
+        "CARIF OREF régional autre région": false,
         "DDETS même département": true,
         "DDETS autre département": false,
         "Académie même académie": false,
         "Académie autre académie": false,
         "Opérateur public national": false,
+        "CARIF OREF national": false,
         Administrateur: true,
       };
       testPermissions(accesOrganisme, async (organisation, hasAccess) => {

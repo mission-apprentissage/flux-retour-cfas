@@ -7,6 +7,7 @@ import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
 import { NewOrganisation, SetterOrganisation } from "@/modules/auth/inscription/common";
+import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCarifOref";
 import { InscriptionOF } from "@/modules/auth/inscription/InscriptionOF";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
 import { InscriptionTeteDeReseau } from "@/modules/auth/inscription/InscriptionTeteDeReseau";
@@ -48,6 +49,9 @@ const RegisterConfigurationOrganisationPage = () => {
         )}
         {typeOrganisation === "tete_de_reseau" && (
           <InscriptionTeteDeReseau setOrganisation={setOrganisation as SetterOrganisation} />
+        )}
+        {typeOrganisation === "carif_oref" && (
+          <InscriptionCarifOref setOrganisation={setOrganisation as SetterOrganisation} />
         )}
       </Box>
       <HStack gap="24px" mt={5}>

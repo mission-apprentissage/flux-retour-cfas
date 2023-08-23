@@ -254,7 +254,7 @@ function OrganismesNonFiablesPanelContent({ organismes }: { organismes: Organism
             Un organisme est considéré comme non-fiable dès lors qu’il remplit au moins l’une de ces conditions.
           </Text>
           <Text fontWeight="bold">
-            Veuillez contacter les organismes non-fiables pour encourager une action auprès de leur Carif-Oref ou de
+            Veuillez contacter les organismes non-fiables pour encourager une action auprès de leur CARIF OREF ou de
             l’INSEE.
           </Text>
         </Box>
@@ -279,11 +279,13 @@ function getHeaderTitleFromOrganisationType(type: OrganisationType) {
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
       return "Les organismes de mon territoire";
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "Tous les organismes";
 
@@ -305,11 +307,13 @@ function getTextContextFromOrganisationType(type: OrganisationType) {
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
     case "DDETS":
     case "ACADEMIE":
       return "de votre territoire";
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
     case "ADMINISTRATEUR":
       return "de l'ensemble du territoire";
 

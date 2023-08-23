@@ -709,6 +709,7 @@ export function getForbiddenErrorText(ctx: AuthContext): string {
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
       return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre région.";
     case "DDETS":
       return "Vous n’avez pas accès aux données de cet organisme car il n’est pas dans votre département.";
@@ -744,6 +745,7 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
       return (
         organisme.organismesFormateurs.some((organisme) => !organisme.region?.includes(organisation.code_region)) &&
         "région"
@@ -761,6 +763,7 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
       );
 
     case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
       return false;
     case "ADMINISTRATEUR":
       return false;
