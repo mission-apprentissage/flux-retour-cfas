@@ -25,6 +25,10 @@ const niveaux: NiveauFormation[] = [
     key: "7",
     label: "Niveau 7 (Master…)",
   },
+  {
+    key: "8",
+    label: "Niveau 8 (Doctorat)",
+  },
 ];
 
 interface FiltreFormationNiveauProps {
