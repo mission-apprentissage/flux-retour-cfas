@@ -20,15 +20,14 @@ services:
     image: metabase/metabase:v0.46.6.4
     mem_limit: 2g
     container_name: flux_retour_cfas_metabase
-    volumes:
-      - /opt/flux-retour-cfas/data/metabase:/metabase-data
-      - /opt/flux-retour-cfas/backups/metabase:/data/backups
     environment:
       JAVA_TIMEZONE: Europe/Paris
       MB_SITE_LOCALE: fr
       MB_SITE_URL: http://0.0.0.0/metabase
       MB_PASSWORD_COMPLEXITY: strong
       MB_START_OF_WEEK: monday
+      MB_DB_TYPE: postgres
+      MB_ENCRYPTION_SECRET_KEY: {{vault[env_type].FLUX_RETOUR_CFAS_METABASE_ENCRYPTION_SECRET_KEY}}
       MB_EMAIL_SMTP_HOST: {{vault[env_type].FLUX_RETOUR_CFAS_SMTP_HOST}}
       MB_EMAIL_SMTP_PORT: {{vault[env_type].FLUX_RETOUR_CFAS_SMTP_PORT}}
       MB_EMAIL_SMTP_USERNAME: {{vault[env_type].FLUX_RETOUR_CFAS_SMTP_AUTH_USER}}
