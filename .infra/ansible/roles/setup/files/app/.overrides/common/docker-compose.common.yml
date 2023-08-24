@@ -37,9 +37,15 @@ services:
       - mongodb
     environment:
       JAVA_TIMEZONE: Europe/Paris
-      MB_DB_FILE: /metabase-data/metabase.db
       MB_SITE_LOCALE: fr
       MB_SITE_URL: http://0.0.0.0/metabase
+      MB_PASSWORD_COMPLEXITY: strong
+      MB_START_OF_WEEK: monday
+      MB_EMAIL_SMTP_HOST: {{vault[env_type].FLUX_RETOUR_CFAS_SMTP_HOST}}
+      MB_EMAIL_SMTP_PORT: {{vault[env_type].FLUX_RETOUR_CFAS_SMTP_PORT}}
+      MB_EMAIL_SMTP_USERNAME: {{vault[env_type].FLUX_RETOUR_CFAS_SMTP_AUTH_USER}}
+      MB_EMAIL_SMTP_PASSWORD: {{vault[env_type].FLUX_RETOUR_CFAS_SMTP_AUTH_PASS}}
+      MB_EMAIL_SMTP_SECURITY: tls
     restart: always
     networks:
       - flux_retour_cfas_network
