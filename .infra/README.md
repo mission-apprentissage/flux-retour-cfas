@@ -1,24 +1,43 @@
 # Déploiement & Infrastructure de Partage Simplifié
 
-- [Prérequis](#prérequis)
-  - [SSH](#ssh)
-  - [GPG](#gpg)
-  - [Organisation des dossiers](#organisation-des-dossiers)
-- [Etape 1 : Configuration initiale](#configuration-initiale)
-- [Etape 2 : Lancement du playbook Ansible](#lancement-du-playbook-ansible)
-- [Etape 3 : Configuration OVH](#configuration-ovh)
-- [Utilitaires](#utilitaires)
-  - [Mise à jour et déploiement de l'application](#mise-à-jour-et-déploiement)
-  - [Requêtage de la base MongoDb](#Requetes-sur-la-base-mongodb)
-  - [Sauvegarde & restauration](#sauvegarde-&-restauration)
-    - [Sauvegarde & restauration de la base Mongodb](#sauvegarde-&-restauration-de-la-base-mongodb)
-    - [Sauvegarde complète cryptée](#sauvegarde-complète-cryptée)
-    - [Sauvegarde complète non cryptée](#sauvegarde-complète-non-cryptée)
-    - [Restauration de dump complet crypté](#restauration-de-dump-complet-crypté)
-    - [Sauvegarde & Restauration de Metabase](#sauvegarde-&-restauration-de-metabase)
-  - [Suppression d'un utilisateur de la VM](#supprimer-un-utilisateur-de-la-vm)
-  - [Fermeture du service](#fermeture-du-service)
-  - [Mode maintenance](#mode-maintenance)
+- [Déploiement \& Infrastructure de Partage Simplifié](#déploiement--infrastructure-de-partage-simplifié)
+  - [Prérequis](#prérequis)
+    - [SSH](#ssh)
+    - [GPG](#gpg)
+    - [Organisation des dossiers](#organisation-des-dossiers)
+  - [Configuration initiale](#configuration-initiale)
+    - [1. Paramétrage de l'email Devops pour génération du certificat SSL](#1-paramétrage-de-lemail-devops-pour-génération-du-certificat-ssl)
+    - [2. Ajout de votre Clé SSH](#2-ajout-de-votre-clé-ssh)
+    - [3. Création des environnements (VPS) sous OVHCloud](#3-création-des-environnements-vps-sous-ovhcloud)
+      - [3.1 Création des VPS](#31-création-des-vps)
+      - [3.2 Ajout au known\_hosts \& Connexion en SSH](#32-ajout-au-known_hosts--connexion-en-ssh)
+      - [3.4 Changement du nom de la VM -- Optionnel](#34-changement-du-nom-de-la-vm----optionnel)
+    - [4. Mapping DNS \& IP](#4-mapping-dns--ip)
+    - [5. Configuration des environnements Ansible (IP \& branches git)](#5-configuration-des-environnements-ansible-ip--branches-git)
+    - [6. Création d'un channel Slack dédié pour l'alerting](#6-création-dun-channel-slack-dédié-pour-lalerting)
+    - [7. Vault Ansible](#7-vault-ansible)
+      - [Création du vault](#création-du-vault)
+      - [Edition du vault](#edition-du-vault)
+      - [Variables du vault](#variables-du-vault)
+    - [8. Habilitations](#8-habilitations)
+      - [Ajout d'un utilisateur](#ajout-dun-utilisateur)
+      - [Suppression d'un utilisateur](#suppression-dun-utilisateur)
+  - [Lancement du playbook Ansible](#lancement-du-playbook-ansible)
+    - [1. Vérification des environnements](#1-vérification-des-environnements)
+    - [2. Execution du playbook Ansible](#2-execution-du-playbook-ansible)
+    - [3. Changement du mot de passe utilisateur](#3-changement-du-mot-de-passe-utilisateur)
+    - [4. Nettoyage des ressources](#4-nettoyage-des-ressources)
+    - [Accès à l'application](#accès-à-lapplication)
+    - [(_Optionnel_) - Tester les playbook Ansible](#optionnel---tester-les-playbook-ansible)
+  - [Configuration OVH](#configuration-ovh)
+    - [1. Ping API OVH](#1-ping-api-ovh)
+    - [2. Création du firewall](#2-création-du-firewall)
+  - [Utilitaires](#utilitaires)
+    - [Mise à jour et déploiement](#mise-à-jour-et-déploiement)
+    - [Requetes sur la base MongoDb](#requetes-sur-la-base-mongodb)
+    - [Supprimer un utilisateur de la vm](#supprimer-un-utilisateur-de-la-vm)
+    - [Fermeture du service](#fermeture-du-service)
+    - [Mode maintenance](#mode-maintenance)
 
 ## Prérequis
 
@@ -421,34 +440,7 @@ Pour vérifier que l'API d'OVH est joignable il faut executer :
 bash ping-ovh-api.sh
 ```
 
-### 2. Ajouter un disque de sauvegarde externe
-
-Il est possible d'ajouter un disque externe permettant de sauvegarder l'ensemble des données de l'application. Pour se
-faire, il faut la commande suivante
-
-```sh
-bash scripts/ovh/create-backup-partition.sh <nom de l'environnement>
-```
-
-Lors de l'exécution de ce script, vous serez redirigé vers une page web vous demandant de vous authentifier afin de
-générer un jeton d'api. Vous devez donc avoir un compte OVH ayant le droit de gérer les instances de la Mission
-apprentissage. Une fois authentifié, le script utilisera automatiquement ce jeton.
-
-Quand le script est terminé, vous pouvez aller sur l'interface
-OVH [https://www.ovh.com/manager/dedicated/#/nasha/zpool-128310/partitions](https://www.ovh.com/manager/dedicated/#/nasha/zpool-128310/partitions)
-afin de vérifier que la partition est bien créée.
-
-- Dans le fichier `ansible/env.ini`, vous devez ensuite ajouter la nom de la partition pour l'environnement :
-
-```
-backup_partition_name=<nom de la partition>
-```
-
-- Relancer le `setup-vm.sh` afin d'appliquer les modifications sur le serveur.
-
-Il est aussi possible de créer le disque de sauvegarde depuis l'interface d'OVH
-
-### 3. Création du firewall
+### 2. Création du firewall
 
 Pour créer et configurer le firewall par défaut OVH sur un environnement il faut executer :
 
@@ -488,55 +480,6 @@ Une fois le script executé on passe en mode mongoShell et il est possible d'éc
 ```mongoShell
 db.collection.find({});
 ```
-
-### Sauvegarde & restauration
-
-#### Sauvegarde & restauration de la base MongoDb
-
-Il est possible de sauvegarder et restaurer la base de données MongoDb directement depuis la VM en utilisant les scripts présents dans
-
-- `/ansible/roles/setup/files/app/tools/mongodb/backup/` pour la sauvegarde
-- `/ansible/roles/setup/files/app/tools/mongodb/restore/` pour la restauration des données
-
-#### Sauvegarde complète cryptée
-
-Il est possible de créer un dump de sauvegarde crypté à la date du jour via :
-
-```
-bash backup-mongodb.sh
-```
-
-Les backups sont automatiquement sauvegardés en local dans le dossier `/opt/app/backups/mongodb` et dans le NAS qui est monté sur le dossier `/mnt/backups/mongodb`.
-Une fonction de purge automatique des sauvegardes de plus de 7 jours **en local** est executée.
-Le cryptage du dump est executé via age, et la clé de cryptage est propre à la VM.
-
-#### Sauvegarde complète non cryptée
-
-Il est possible de créer un dump de sauvegarde complète à la date du jour via :
-
-```
-bash /legacy/backup-legacy-mongodb-move-to-folder.sh <cheminDump>
-```
-
-Ce script va créer un dump contenant l'intégralité de la base et déplacer le dump vers le chemin précisé (ex : /home/moi)
-**Une fois la sauvegarde faite il est possible de récupérer le dump via SCP par exemple pour l'exploiter en local ou autre...**
-
-#### Restauration de dump complet crypté
-
-Il est possible de restaurer un dump de sauvegarde crypté via :
-
-```
-bash restore-mongodb.sh <nomDuDump>
-```
-
-Ce script va décrypter le dump dont le nom a été fourni et restaurer l'intégralité des données.
-
-#### Sauvegarde & restauration de Metabase
-
-Il est possible de sauvegarder / restaurer le contenu du volume METABASE via :
-
-- `/ansible/roles/setup/files/app/tools/metabase/backup-metabase.sh` pour la sauvegarde
-- `/ansible/roles/setup/files/app/tools/metabase/restore-metabase.sh` pour la restauration
 
 ### Supprimer un utilisateur de la vm
 
