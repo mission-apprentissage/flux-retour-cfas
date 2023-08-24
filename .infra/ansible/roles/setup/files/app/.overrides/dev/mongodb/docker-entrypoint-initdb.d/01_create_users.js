@@ -29,15 +29,6 @@ db.getSiblingDB("{{ vault.DB_SIBLING_NAME }}").createUser({
 });
 
 db.getSiblingDB("{{ vault.DB_SIBLING_NAME }}").createUser({
-  user: "{{ vault[env_type].FLUX_RETOUR_CFAS_MONGODB_BACKUP_USER }}",
-  pwd: "{{ vault[env_type].FLUX_RETOUR_CFAS_MONGODB_BACKUP_PASSWORD }}",
-  roles: [
-    { role: "backup", db: "{{ vault.DB_ADMIN_NAME }}" },
-    { role: "restore", db: "{{ vault.DB_ADMIN_NAME }}" },
-  ],
-});
-
-db.getSiblingDB("{{ vault.DB_SIBLING_NAME }}").createUser({
   user: "{{ vault[env_type].FLUX_RETOUR_CFAS_MONGODB_METABASE_USER }}",
   pwd: "{{ vault[env_type].FLUX_RETOUR_CFAS_MONGODB_METABASE_PASSWORD }}",
   roles: [{ role: "read", db: "{{ vault.DB_ADMIN_NAME }}" }],

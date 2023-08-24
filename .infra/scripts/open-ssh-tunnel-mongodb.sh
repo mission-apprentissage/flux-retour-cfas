@@ -10,7 +10,6 @@ function open_ssh_tunnel() {
   local env_ip
   env_ip="$(cat "${ANSIBLE_DIR}/env.ini" | grep "\[${env_name}\]" -A 1 | tail -1)"
 
-  echo "mongodb://{{ vault[env_type].FLUX_RETOUR_CFAS_MONGODB_USER }}:{{ vault[env_type].FLUX_RETOUR_CFAS_MONGODB_USER_PASSWORD }}@127.0.0.1:${local_port}/{{ vault.DB_NAME }}?authSource=admin&retryWrites=true&w=majority"
   ssh -L "${local_port}:127.0.0.1:27017" "${remote_user}@${env_ip}"
 }
 
