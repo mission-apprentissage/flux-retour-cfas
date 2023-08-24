@@ -16,16 +16,6 @@ services:
     environment:
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
 
-  mongodb:
-    command: mongod --auth
-    volumes:
-      - /opt/flux-retour-cfas/data/mongodb/db:/data/db
-      - /opt/flux-retour-cfas/data/mongodb/configdb:/data/configdb
-      - /opt/flux-retour-cfas/data/mongodb/backups:/data/backups-legacy
-      - /opt/flux-retour-cfas/.overrides/mongodb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-    # ports:
-    #   - "127.0.0.1:27017:27017"
-
   metabase:
     image: metabase/metabase:v0.46.6.4
     mem_limit: 2g
@@ -33,8 +23,6 @@ services:
     volumes:
       - /opt/flux-retour-cfas/data/metabase:/metabase-data
       - /opt/flux-retour-cfas/backups/metabase:/data/backups
-    depends_on:
-      - mongodb
     environment:
       JAVA_TIMEZONE: Europe/Paris
       MB_SITE_LOCALE: fr

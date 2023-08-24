@@ -71,6 +71,12 @@ services:
       - smtp
 
   mongodb:
+    image: mongo:6.0.2-focal
+    container_name: flux_retour_cfas_mongodb
+    mem_limit: 2g
+    restart: unless-stopped
+    networks:
+      - flux_retour_cfas_network
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
