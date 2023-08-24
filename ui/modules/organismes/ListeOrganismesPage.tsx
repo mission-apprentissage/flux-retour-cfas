@@ -72,7 +72,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
       organisme.normalizedUai = normalize(organisme.uai ?? "");
       organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
 
-      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme) {
+      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
         organismesFiables.push(organisme);
       } else {
         organismesNonFiables.push(organisme);
