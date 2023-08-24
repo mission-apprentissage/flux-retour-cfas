@@ -249,6 +249,10 @@ function OrganismesNonFiablesPanelContent({ organismes }: { organismes: Organism
               L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE, est{" "}
               <strong>fermé</strong>.
             </ListItem>
+            <ListItem>
+              La nature de l’organisme (déduite des relations entre organismes - base des Carif-Oref) est{" "}
+              <strong>inconnue</strong>.
+            </ListItem>
           </UnorderedList>
           <Text>
             Un organisme est considéré comme non-fiable dès lors qu’il remplit au moins l’une de ces conditions.
