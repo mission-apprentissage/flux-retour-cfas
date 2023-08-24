@@ -1,31 +1,27 @@
-- name: Create backup directory
-  ansible.builtin.file:
-    path: /mnt/backups
-    state: directory
-    mode: 700
-
+# Remove legacy backup CRON
 - block:
     - name: Installation nfs-client package
       apt:
         name: nfs-client
+      state: absent
 
     - name: Mount backup NFS partition
-      when: backup_cron|bool == true
       ansible.posix.mount:
-        src: "{{nas_ip}}:{{nas_name}}/{{backup_partition_name}}"
+        src: "10.201.16.96:zpool-129542/fluxretourcfas"
         path: /mnt/backups
         opts: _netdev,mountproto=tcp
         state: mounted
         fstype: nfs
         boot: yes
+      state: absent
 
     - name: Add mongodb backup cron
-      when: backup_cron|bool == true
       cron:
         name: "backup mongodb each day at 04h00"
         minute: "0"
         hour: "4"
         job: "bash /opt/flux-retour-cfas/tools/backup-mongodb.sh >> /var/log/backup-mongodb.log 2>&1"
+      state: absent
 
     - name: Add metabase backup cron"
       become: true
@@ -34,11 +30,6 @@
         minute: "20"
         hour: "0"
         job: "bash /opt/flux-retour-cfas/tools/backup-metabase.sh >> /var/log/backup-metabase.log 2>&1"
+      state: absent
 
-  when: backup_partition_name is defined
-
-- name: Ensure mounted directory has the same permission
-  ansible.builtin.file:
-    path: /mnt/backups
-    state: directory
-    mode: 700
+  when: env_type == "production"
