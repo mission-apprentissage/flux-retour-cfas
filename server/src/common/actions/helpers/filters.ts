@@ -185,6 +185,7 @@ export const fullEffectifsFiltersSchema = {
     .optional(),
   formation_niveaux: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   formation_cfds: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  formation_secteursProfessionnels: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
 };
 
 export type FullEffectifsFilters = z.infer<z.ZodObject<typeof fullEffectifsFiltersSchema>>;
@@ -243,6 +244,10 @@ export const fullEffectifsFiltersConfigurations: {
   },
   formation_cfds: {
     matchKey: "formation.cfd",
+    transformValue: (value) => ({ $in: value }),
+  },
+  formation_secteursProfessionnels: {
+    matchKey: "formation.cfd", // FIXME déterminer sur quoi on filtre
     transformValue: (value) => ({ $in: value }),
   },
 };
