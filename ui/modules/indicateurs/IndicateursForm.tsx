@@ -39,6 +39,7 @@ import {
 
 import IndicateursFilter from "./FilterAccordion";
 import FiltreFormationCFD from "./filters/FiltreFormationCFD";
+import FiltreFormationSecteurProfessionnel from "./filters/FiltreFormationSecteurProfessionnel";
 import FiltreOrganismeAcademie from "./filters/FiltreOrganismeAcademie";
 import FiltreOrganismeBassinEmploi from "./filters/FiltreOrganismeBassinEmploi";
 import FiltreOrganismeDepartement from "./filters/FiltreOrganismeDepartement";
@@ -226,12 +227,16 @@ function IndicateursForm(props: IndicateursFormProps) {
               />
             )}
         </SimpleGrid>
-        {/* <Text fontWeight="700" textTransform="uppercase">
+        <Text fontWeight="700" textTransform="uppercase">
           Domaine d’activité
         </Text>
-        <IndicateursFilter label="Secteur professionnel">
-          <Box>Liste des filtres</Box>
-        </IndicateursFilter> */}
+
+        <FiltreFormationSecteurProfessionnel
+          value={effectifsFilters.formation_secteursProfessionnels}
+          onChange={(secteursProfessionnels) =>
+            updateState({ formation_secteursProfessionnels: secteursProfessionnels })
+          }
+        />
 
         <SimpleGrid gap={3}>
           <Text fontWeight="700" textTransform="uppercase">
