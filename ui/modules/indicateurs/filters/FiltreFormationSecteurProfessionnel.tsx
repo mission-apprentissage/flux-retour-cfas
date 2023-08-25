@@ -1,30 +1,17 @@
-import {
-  Box,
-  Checkbox,
-  Heading,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Skeleton,
-  Stack,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tooltip,
-  Tr,
-} from "@chakra-ui/react";
+import { Box, Checkbox, Heading, HStack, Input, InputGroup, InputLeftElement, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import TreeView, { flattenTree } from "react-accessible-treeview";
 
-import { _post } from "@/common/httpClient";
+import { _get, _post } from "@/common/httpClient";
+import { normalize } from "@/common/utils/stringUtils";
 import InputLegend from "@/components/InputLegend/InputLegend";
+import { ArrowTriangleDownIcon } from "@/modules/dashboard/icons";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 import { FilterButton } from "../FilterButton";
+
+import { FamilleMetier } from "./secteur-professionnel/arborescence-rome";
 
 interface FiltreFormationSecteurProfessionnelProps {
   value: string[];
@@ -37,25 +24,26 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: formations, isFetching: isLoading } = useQuery<any[]>(
-    ["formations", searchTerm],
-    () =>
-      _post("/api/v1/formations/search", {
-        searchTerm,
-      }),
+  const { data: famillesMetier, isFetching: isLoading } = useQuery<FamilleMetier[]>(
+    ["arborescence-rome-14-06-2021.json"],
+    () => _get("/arborescence-rome-14-06-2021.json"),
     {
-      enabled: searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH,
+      cacheTime: 99999999, // never expire, change the URL if that must expire
     }
   );
+  const treeData = useMemo(
+    () => (famillesMetier ? flattenTree(normalizeTreeInPlace({ name: "", children: famillesMetier })) : []),
+    [famillesMetier]
+  );
 
-  function updateSelection(cfd: string) {
-    const index = props.value.indexOf(cfd);
-    if (index !== -1) {
-      props.onChange(props.value.filter((item) => item !== cfd));
-    } else {
-      props.onChange([...props.value, cfd]);
+  const filteredTreeData = useMemo(() => {
+    // TODO ne garder que les noeuds qui correspondent et tous leurs ancètres.
+    if (searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH) {
+      return treeData;
     }
-  }
+    // const search = normalize(searchTerm);
+    return treeData;
+  }, [treeData, searchTerm]);
 
   return (
     <div>
@@ -86,125 +74,80 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
             />
           </InputGroup>
 
-          {searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH && (
-            <Box paddingLeft="1w" paddingTop="3v">
+          <Box ml="1w" mt="3v" mb={4} minH={6}>
+            {searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH && (
               <InputLegend>
                 Merci de renseigner au minimum {MINIMUM_CHARS_TO_PERFORM_SEARCH} caractères pour lancer la recherche
               </InputLegend>
-            </Box>
-          )}
-          {!isLoading && searchTerm.length > 0 && formations?.length === 0 && (
+            )}
+          </Box>
+          {/* {!isLoading && searchTerm.length > 0 && formations?.length === 0 && (
             <Text color="grey.800" fontWeight="700" marginTop="4w" paddingLeft="1w">
               Il n’y a aucun résultat pour votre recherche
             </Text>
-          )}
-          {isLoading && (
-            <Stack spacing="2w" paddingLeft="1w" marginTop="4w">
-              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-              <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-            </Stack>
-          )}
-          {formations && formations.length > 0 && (
-            <TableContainer marginTop="4w" textAlign="left">
-              <Table variant="primary">
-                <Thead>
-                  <Tr>
-                    <Th>Libellé de la formation</Th>
-                    <Th>
-                      CFD
-                      <Tooltip
-                        background="bluefrance"
-                        color="white"
-                        label={
-                          <Box padding="1w">
-                            <b>Code Formation Diplôme (CFD)</b>
-                            <Text as="p">
-                              Codification qui concerne l’ensemble des diplômes technologiques et professionnels des
-                              ministères certificateurs.
-                            </Text>
-                            <Text as="p">
-                              Y sont ajoutés, en tant que de besoin et à la demande des centres de formation par
-                              l’apprentissage, les autres diplômes et titres inscrits au répertoire national des
-                              certifications professionnelles (RNCP), dès lors qu’ils sont préparés par la voie de
-                              l’apprentissage.
-                            </Text>
-                          </Box>
-                        }
-                        aria-label="Code Formation Diplôme. Codification qui concerne l’ensemble des diplômes technologiques et professionnels des
-                        ministères certificateurs."
-                      >
-                        <Box
-                          as="i"
-                          className="ri-information-line"
-                          fontSize="epsilon"
-                          color="grey.500"
-                          marginLeft="1v"
-                          verticalAlign="middle"
-                        />
-                      </Tooltip>
-                    </Th>
-                    <Th>
-                      RNCP
-                      <Tooltip
-                        background="bluefrance"
-                        color="white"
-                        label={
-                          <Box padding="1w">
-                            <b>Répertoire national des certifications professionnelles (RNCP)</b>
-                            <Text as="p">
-                              Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la
-                              disposition de tous une information constamment à jour sur les diplômes et les titres à
-                              finalité professionnelle ainsi que sur les certificats de qualification. La mise à jour du
-                              RNCP est confiée à France compétences.
-                            </Text>
-                          </Box>
-                        }
-                        aria-label=" Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la disposition de tous une information constamment à jour sur les diplômes et les titres à finalité professionnelle ainsi que sur les certificats de qualification."
-                      >
-                        <Box
-                          as="i"
-                          className="ri-information-line"
-                          fontSize="epsilon"
-                          color="grey.500"
-                          marginLeft="1v"
-                          verticalAlign="middle"
-                        />
-                      </Tooltip>
-                    </Th>
-                    <Th>Date de validité du CFD</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {formations?.map((formation) => {
-                    return (
-                      <Tr onClick={() => updateSelection(formation.cfd)} cursor="pointer" key={formation.cfd}>
-                        <Td maxWidth="550px" whiteSpace={"pre-line"}>
-                          <Checkbox
-                            isChecked={props.value.includes(formation.cfd)}
-                            fontSize="caption"
-                            pointerEvents="none"
-                          >
-                            {formation.intitule_long || "N/A"}
-                          </Checkbox>
-                        </Td>
-                        <Td>{formation.cfd}</Td>
-                        <Td>{formation.rncp || "N/A"}</Td>
-                        {formation.cfd_start_date && formation.cfd_end_date ? (
-                          <Td>{`Du ${new Date(formation.cfd_start_date).toLocaleDateString()} au ${new Date(
-                            formation.cfd_end_date
-                          ).toLocaleDateString()}`}</Td>
-                        ) : (
-                          <Td fontStyle="italic">N/A</Td>
-                        )}
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </TableContainer>
+          )} */}
+          {isLoading && <Spinner />}
+          <style>
+            {`
+              .tree-secteur-professionnel .tree,
+              .tree-secteur-professionnel .tree-node,
+              .tree-secteur-professionnel .tree-node-group {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+              }
+            `}
+          </style>
+          {famillesMetier && (
+            <Box className="tree-secteur-professionnel" mt={4} userSelect="none">
+              <TreeView
+                data={filteredTreeData}
+                className="tree-secteur-professionnel"
+                aria-label="Checkbox tree"
+                multiSelect
+                propagateSelect
+                propagateSelectUpwards
+                togglableSelect
+                selectedIds={props.value}
+                onNodeSelect={({ treeState }) => {
+                  props.onChange(treeState ? Array.from(treeState?.selectedIds as Set<string>) : []);
+                }}
+                nodeRenderer={({
+                  element,
+                  isBranch,
+                  isExpanded,
+                  isSelected,
+                  isHalfSelected,
+                  getNodeProps,
+                  level,
+                  handleSelect,
+                  handleExpand,
+                }) => (
+                  <HStack {...getNodeProps({ onClick: handleExpand })} h={8} style={{ marginLeft: 40 * (level - 1) }}>
+                    {isBranch && (
+                      <ArrowTriangleDownIcon
+                        transitionDuration=".3s"
+                        transform={isExpanded ? "rotate(0deg)" : "rotate(-90deg)"}
+                      />
+                    )}
+                    <Checkbox
+                      isChecked={isSelected}
+                      fontSize="caption"
+                      pointerEvents="none"
+                      isIndeterminate={isHalfSelected}
+                      onClick={(e) => {
+                        console.log("handle click");
+                        handleSelect(e);
+                        e.stopPropagation();
+                      }}
+                      color="#3a3a3a"
+                    >
+                      {element.name}
+                    </Checkbox>
+                  </HStack>
+                )}
+              />
+            </Box>
           )}
         </SimpleOverlayMenu>
       )}
@@ -213,3 +156,21 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
 };
 
 export default FiltreFormationSecteurProfessionnel;
+
+interface Node {
+  name: string;
+  children?: Node[];
+
+  // computed
+  metadata?: {
+    normalizedName?: string;
+  };
+}
+
+function normalizeTreeInPlace(node: Node) {
+  node.metadata = {
+    normalizedName: normalize(node.name),
+  };
+  node.children?.forEach((node) => normalizeTreeInPlace(node));
+  return node;
+}
