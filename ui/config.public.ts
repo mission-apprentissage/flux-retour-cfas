@@ -1,82 +1,47 @@
 export interface PublicConfig {
-  sentry: {
-    dsn: string;
-  };
+  baseUrl: string;
   host: string;
-  apiEndpoint: string;
-  env: "local" | "preview" | "recette" | "production";
+  env: "local" | "dev" | "recette" | "production";
 }
 
 function getProductionPublicConfig(): PublicConfig {
-  const host = "bal.apprentissage.beta.gouv.fr";
+  const host = "cfas.apprentissage.beta.gouv.fr";
 
   return {
-    sentry: {
-      dsn: "https://9517661db1de4c869b89a1a1a8678480@sentry.apprentissage.beta.gouv.fr/3",
-    },
-    host,
     env: "production",
-    apiEndpoint: `https://${host}`,
-    // apiEndpoint: `https://${host}/api`,
+    host,
+    baseUrl: `https://${host}`,
   };
 }
 
 function getRecettePublicConfig(): PublicConfig {
-  const host = "bal-recette.apprentissage.beta.gouv.fr";
+  const host = "cfas-recette.apprentissage.beta.gouv.fr";
 
   return {
-    sentry: {
-      dsn: "https://9517661db1de4c869b89a1a1a8678480@sentry.apprentissage.beta.gouv.fr/3",
-    },
-    host,
     env: "recette",
-    apiEndpoint: `https://${host}`,
-    // apiEndpoint: `https://${host}/api`,
+    host,
+    baseUrl: `https://${host}`,
   };
 }
 
-function getPreviewPublicConfig(): PublicConfig {
-  const version = getVersion();
-  const matches = version.match(/^0\.0\.0-(\d+)$/);
-
-  if (!matches) {
-    throw new Error(`getPreviewPublicConfig: invalid preview version ${version}`);
-  }
-
-  const host = `${matches[1]}.bal-preview.apprentissage.beta.gouv.fr`;
+function getDevPublicConfig(): PublicConfig {
+  const host = "cfas-dev.apprentissage.beta.gouv.fr";
 
   return {
-    sentry: {
-      dsn: "https://9517661db1de4c869b89a1a1a8678480@sentry.apprentissage.beta.gouv.fr/3",
-    },
+    env: "dev",
     host,
-    env: "preview",
-    apiEndpoint: `https://${host}`,
-    // apiEndpoint: `https://${host}/api`,
+    baseUrl: `https://${host}`,
   };
 }
 
 function getLocalPublicConfig(): PublicConfig {
   const host = "localhost";
+
   return {
-    sentry: {
-      dsn: "https://9517661db1de4c869b89a1a1a8678480@sentry.apprentissage.beta.gouv.fr/3",
-    },
-    host,
     env: "local",
-    apiEndpoint: `http://${host}:${process.env.NEXT_PUBLIC_API_PORT ?? 5000}`,
-    // apiEndpoint: `http://${host}:${process.env.NEXT_PUBLIC_API_PORT ?? 5000}/api`,
+    host,
+    baseUrl: `http://${host}`,
   };
-}
-
-function getVersion(): string {
-  const version = process.env.NEXT_PUBLIC_VERSION;
-
-  if (!version) {
-    throw new Error("missing NEXT_PUBLIC_VERSION env-vars");
-  }
-
-  return version;
 }
 
 function getEnv(): PublicConfig["env"] {
@@ -84,7 +49,7 @@ function getEnv(): PublicConfig["env"] {
   switch (env) {
     case "production":
     case "recette":
-    case "preview":
+    case "dev":
     case "local":
       return env;
     default:
@@ -98,8 +63,8 @@ function getPublicConfig(): PublicConfig {
       return getProductionPublicConfig();
     case "recette":
       return getRecettePublicConfig();
-    case "preview":
-      return getPreviewPublicConfig();
+    case "dev":
+      return getDevPublicConfig();
     case "local":
       return getLocalPublicConfig();
   }
