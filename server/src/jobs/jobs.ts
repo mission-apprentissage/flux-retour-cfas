@@ -226,7 +226,7 @@ export async function runJob(
           return processEffectifQueueById(job.payload as any);
         case "process:effectifs-queue":
           return processEffectifsQueue(job.payload as any);
-        case "processor:start":
+        case "queue_processor:start":
           return startEffectifQueueProcessor();
         case "db:find-invalid-documents":
           return findInvalidDocuments(job.payload as any);

@@ -234,12 +234,12 @@ program
   });
 
 program
-  .command("processor:start")
+  .command("queue_processor:start")
   .description("Démarre le démon qui traite les effectifs en attente")
   .action(async () => {
     const exitCode = await addJob(
       {
-        name: "processor:start",
+        name: "queue_processor:start",
         sync: true,
       },
       { runningLogs: true }
