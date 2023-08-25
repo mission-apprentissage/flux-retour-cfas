@@ -196,11 +196,14 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
 };
 
 /**
- * Méthode de maj des dates de transmission d'un organisme
- * @deprecated Utiliser updateOrganismeLastTransmissionDate
+ * Met à jour les dates de transmission d'un organisme.
+ * - first_transmission_date : si pas déjà présent
+ * - last_transmission_date : dans tous les cas
  */
-export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>) => {
-  const updated = await organismesDb().findOneAndUpdate(
+export const updateOrganismeTransmissionDates = async (
+  organisme: Pick<WithId<Organisme>, "_id" | "first_transmission_date">
+) => {
+  const modifyResult = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
       $set: {
@@ -208,32 +211,12 @@ export const setOrganismeTransmissionDates = async (organisme: WithId<Organisme>
         last_transmission_date: new Date(),
         updated_at: new Date(),
       },
-    },
-    { returnDocument: "after" }
-  );
-  if (!updated.value) {
-    throw new Error(`Could not set organisme transmission dates on organisme ${organisme._id.toString()}`);
-  }
-  return updated.value as WithId<Organisme>;
-};
-
-/**
- * Met à jour la date de dernière transmission d'un organisme.
- */
-export async function updateOrganismeLastTransmissionDate(organismeId: ObjectId) {
-  const modifyResult = await organismesDb().findOneAndUpdate(
-    { _id: organismeId },
-    {
-      $set: {
-        last_transmission_date: new Date(),
-        updated_at: new Date(),
-      },
     }
   );
-  if (!modifyResult.ok) {
-    throw new Error(`Could not set organisme last transmission date on organisme ${organismeId.toString()}`);
+  if (!modifyResult.value) {
+    throw new Error(`Could not set organisme transmission dates on organisme ${organisme._id.toString()}`);
   }
-}
+};
 
 /**
  * Returns sous-établissements by siret for an uai
