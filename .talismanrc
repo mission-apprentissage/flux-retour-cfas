@@ -1,6 +1,24 @@
 fileignoreconfig:
+- filename: .infra/.env_server
+  checksum: a0e68332e47c15db5758914f940eb9f1d88be4742828063b89bbe5f8dd883b73
+- filename: .infra/env.ini
+  checksum: 2aed7cac12a6abc38324da9a7a6bef1de373c7e7f1f71421c4b2495eddd223e5
+- filename: .infra/files/configs/metabase/setup-metabase.sh
+  checksum: 765adeddaec79a391cfee48424fa51be96452a60dc5d2c62c858f442d7c4dd81
+- filename: .infra/vault/vault.yml
+  checksum: 59bb37d6751b9ec0a05c5cbc708782817ddc15e593aca889526fe1abde168f6b
+- filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
+  checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
+- filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml
+  checksum: 7d7420305e052a5a13c2476ef88e3d21bfeb8ac1ec55b8a5d29ce713353c4458
+- filename: .infra_previous/ansible/roles/setup/files/app/.overrides/recette/docker-compose.env.yml
+  checksum: 24ebe0dea49a7706a0351fe679dbab556d80b12aa8511642ca3637e2e6925fc9
 - filename: .yarn/**
   checksum: any
+- filename: server/.env.test
+  checksum: 7dfcad7a7492c7db923fb04aba04111e0381d6df655010992d6cf30da3e148f2
+- filename: server/src/config.ts
+  checksum: c3a89696970fc89cb83227237e56d164f442c14f12da518b8061bda37cc4e443
 scopeconfig:
 - scope: node
 version: "1.0"
