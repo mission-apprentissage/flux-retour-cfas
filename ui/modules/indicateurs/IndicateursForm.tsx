@@ -485,8 +485,7 @@ function getMessageBandeauMesIndicateurs(organisationType: OrganisationType): JS
       return (
         <>
           Retrouvez ici les indicateurs et les organismes dont les formations en apprentissage sont{" "}
-          <Text as="strong">sous votre gestion</Text>
-          uniquement.
+          <Text as="strong">sous votre gestion</Text> uniquement.
         </>
       );
 
