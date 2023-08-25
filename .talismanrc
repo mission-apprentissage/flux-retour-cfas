@@ -1,0 +1,6 @@
+fileignoreconfig:
+- filename: .yarn/**
+  checksum: any
+scopeconfig:
+- scope: node
+version: "1.0"

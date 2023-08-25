@@ -1,0 +1,24 @@
+---
+- hosts: preview
+  become: true
+  gather_facts: false
+  vars_files:
+    - "../vault/vault.yml"
+  tasks:
+    - name: creation du fichier docker compose preview system
+      ansible.builtin.template:
+        src: "{{inventory_dir}}/docker-compose.preview-system.yml"
+        dest: "/opt/app/docker-compose.preview-system.yml"
+
+    - name: lancement preview system
+      shell:
+        chdir: /opt/app
+        cmd: docker compose -f docker-compose.preview-system.yml up -d --wait
+
+    - include_tasks: ./tasks/preview_pr.yml
+      vars:
+        build: true
+        repo_name: bal
+        docker_images:
+          - mna_bal_ui
+          - mna_bal_server

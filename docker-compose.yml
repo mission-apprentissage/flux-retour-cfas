@@ -1,123 +1,51 @@
-version: "2.4"
+version: "3.8"
+
 services:
-  reverse_proxy:
-    image: flux_retour_cfas_reverse_proxy
-    container_name: flux_retour_cfas_reverse_proxy
-    build:
-      context: reverse_proxy
-    mem_limit: 256m
-    restart: unless-stopped
-    ports:
-      - 80:80
-      - 443:443
-    networks:
-      - flux_retour_cfas_network
-    depends_on:
-      - server
-      - ui
-    environment:
-      - PARANOIA=1
-      - ANOMALY_INBOUND=5
-      - ANOMALY_OUTBOUND=4
-      - REPORTING_LEVEL=4
-      - DNS_SERVER=127.0.0.11
-      - PROXY=1
-      - SERVERNAME=localhost
-      - ACCESSLOG=/data/access.log
-      - ERRORLOG=/data/error.log
-      - LOGLEVEL=warn
-      - NGINX_ALWAYS_TLS_REDIRECT=false
-      - ALLOWED_METHODS=GET HEAD POST OPTIONS PUT DELETE
-
-  ui:
-    image: flux_retour_cfas_ui
-    container_name: flux_retour_cfas_ui
-    build:
-      context: ui
-    mem_limit: 256m
-    restart: unless-stopped
-    networks:
-      - flux_retour_cfas_network
-    depends_on:
-      - server
-    environment:
-      - SERVER_URI=http://server:5000
-      - NEXT_PUBLIC_SENTRY_DSN=https://362c29c6acbe4a599640109d87e77beb@o4504570758561792.ingest.sentry.io/4504570760265728
-
-  server:
-    image: flux_retour_cfas_server
-    container_name: flux_retour_cfas_server
-    build:
-      context: server
-    mem_limit: 3g
-    restart: unless-stopped
-    networks:
-      - flux_retour_cfas_network
-    depends_on:
-      - mongodb
-      - clamav
-    environment:
-      - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
-      - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
-      - FLUX_RETOUR_CFAS_SENTRY_DSN=https://2c67929155a24fe2bdc16f61a67dab8e@o4504570758561792.ingest.sentry.io/4504570802798592
-
-  queue_processor:
-    image: flux_retour_cfas_server
-    container_name: flux_retour_cfas_queue_processor
-    build:
-      context: server
-    command: ["yarn", "cli", "queue_processor:start"]
-    mem_limit: 2g
-    restart: unless-stopped
-    networks:
-      - flux_retour_cfas_network
-    depends_on:
-      - mongodb
-      - clamav
-    environment:
-      - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
-      - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
-      - FLUX_RETOUR_CFAS_SENTRY_DSN=https://2c67929155a24fe2bdc16f61a67dab8e@o4504570758561792.ingest.sentry.io/4504570802798592
-
-  jobs_processor:
-    image: flux_retour_cfas_server
-    container_name: flux_retour_cfas_jobs_processor
-    build:
-      context: server
-    command: ["yarn", "cli", "job_processor:start"]
-    mem_limit: 1g
-    restart: unless-stopped
-    networks:
-      - flux_retour_cfas_network
-    depends_on:
-      - mongodb
-      - clamav
-    environment:
-      - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
-      - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
-      - FLUX_RETOUR_CFAS_SENTRY_DSN=https://2c67929155a24fe2bdc16f61a67dab8e@o4504570758561792.ingest.sentry.io/4504570802798592
-
   mongodb:
     image: mongo:6.0.2-focal
-    container_name: flux_retour_cfas_mongodb
-    mem_limit: 2g
     restart: unless-stopped
-    networks:
-      - flux_retour_cfas_network
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - tdb_mongodb_data:/data
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", '''db.runCommand("ping").ok''', "--quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   clamav:
-    image: clamav/clamav:0.105.1
-    container_name: flux_retour_cfas_clamav
-    mem_limit: 3g
+    image: clamav/clamav:latest
     restart: unless-stopped
-    networks:
-      - flux_retour_cfas_network
     healthcheck:
       test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
       interval: 60s
       retries: 3
-      start_period: 120s
+      start_period: 6m
+    ports:
+      - 3310:3310
+    volumes:
+      - tdb_clamav_data:/var/lib/clamav
 
-networks:
-  flux_retour_cfas_network:
-    name: flux_retour_cfas_network
+  smtp:
+    image: axllent/mailpit:v1.5.5
+    restart: unless-stopped
+    ports:
+      - 1025:1025
+      - 8025:8025
+    environment:
+      - MP_DATA_FILE=/data/mailpit.db
+    volumes:
+      - tdb_smtp_data:/data
+
+volumes:
+  tdb_mongodb_data:
+    driver: local
+    name: tdb_mongodb_data
+  tdb_smtp_data:
+    driver: local
+    name: tdb_smtp_data
+  tdb_clamav_data:
+    driver: local
+    name: tdb_clamav_data

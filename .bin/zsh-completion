@@ -1,0 +1,32 @@
+#compdef -d mna-tdb
+
+_mna-tdb_completion() {
+  local curcontext="$curcontext" state line
+  typeset -A opt_args
+  local -a commands=(
+   "help:'Show help message'"
+   "bin\:setup:'Installs mna-tdb binary with zsh completion on system'"
+   "init\:env:'Update local env files using values from vault file'"
+   "release\:app:'Build & Push Docker image releases'"
+   "release\:interactive:'Interactivelly Build & Push Docker image releases'"
+   "deploy:'Deploy application to <env>'"
+   "preview\:build:'Build preview from open pull-requests'"
+   "preview\:cleanup:'Remove preview from close pull-requests'"
+   "vault\:edit:'Edit vault file'"
+   "vault\:password:'Get vault password'"
+  )
+
+  # Set completion behavior based on the current word
+  _arguments -C '1: :->command'
+
+  case $state in
+    (command)
+      # Provide completion for commands
+      _describe 'command' commands
+      ;;
+  esac
+  
+  # _describe 'command' commands
+}
+
+_mna-tdb_completion "$@"

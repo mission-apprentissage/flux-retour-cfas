@@ -11,18 +11,42 @@
     "rome": "^11.0.0"
   },
   "scripts": {
-    "docker:start": "docker-compose up -d --build --force-recreate",
-    "docker:stop": "docker-compose stop",
-    "docker:down": "docker-compose down",
-    "docker:clean": "docker-compose kill && docker system prune --force --volumes",
+    "setup": ".bin/mna-tdb init:env",
+    "dev": "yarn services:start; yarn foreach:parallel run dev",
+    "cli": "yarn workspace server cli",
+    "seed": "yarn cli seed",
+    "deploy": "./.bin/mna-tdb deploy",
+    "build": "yarn foreach:seq run build",
+    "migrations:status": "yarn cli migrations:status",
+    "migrations:up": "yarn cli migrations:up",
+    "migration:create": "yarn migrations:create",
+    "server:dev": "yarn workspace server dev",
+    "services:start": "docker compose up --remove-orphans -d",
+    "services:stop": "docker compose down",
+    "services:clean": "yarn services:stop; docker system prune --volumes",
     "lint": "yarn --cwd server lint && yarn --cwd ui lint",
-    "lint:staged": "lint-staged",
-    "prettier:fix": "prettier --write ./ui ./server",
-    "prettier:check": "prettier --check ./ui ./server",
-    "npm:release": "semantic-release",
-    "npm:release:local": "CI=true LOCAL_RELEASE=true semantic-release",
-    "postinstall": "husky install"
+    "release": "semantic-release",
+    "release:interactive": "./.bin/mna-tdb release:interactive",
+    "prepare": "husky install",
+    "talisman:add-exception": "yarn node-talisman --githook pre-commit -i",
+    "e2e": "cypress open",
+    "e2e:headless": "cypress run",
+    "e2e:convert": "node cypress/convertRecords.mjs",
+    "test": "vitest",
+    "test:ci": "yarn test --run --coverage",
+    "test:watch": "vitest --watch",
+    "typecheck": "yarn foreach:parallel run typecheck",
+    "typecheck:ci": "yarn foreach:ci run typecheck",
+    "vault:edit": ".bin/mna-tdb vault:edit",
+    "foreach:seq": "yarn workspaces foreach -Av --exclude mna-tdb",
+    "foreach:parallel": "yarn foreach:seq -pi",
+    "foreach:ci": "yarn foreach:seq -p"
   },
+  "workspaces": [
+    "ui",
+    "server",
+    "shared"
+  ],
   "devDependencies": {
     "@commitlint/cli": "16.2.4",
     "@commitlint/config-conventional": "16.2.4",
@@ -31,6 +55,7 @@
     "@semantic-release/git": "10.0.1",
     "husky": "^8.0.0",
     "lint-staged": "^13.1.0",
+    "node-talisman": "^1.29.10",
     "prettier": "2.8.7",
     "semantic-release": "19.0.2",
     "semantic-release-slack-bot": "3.5.2",
@@ -45,5 +70,10 @@
     "*.{js,jsx,ts,tsx}": [
       "npx rome check"
     ]
-  }
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": "please-use-yarn"
+  },
+  "packageManager": "yarn@3.6.1"
 }

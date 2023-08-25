@@ -137,3 +137,8 @@ yarn-error.log
 
 **/.vault-password.gpg
 **/habilitations.yml
+
+scripts/ovh/ovh-nodejs-client/.yarn/
+# /app/tools is managed by infra
+files/tools
+files/system

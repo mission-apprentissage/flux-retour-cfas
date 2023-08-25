@@ -30,15 +30,15 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-# Sentry
-.sentryclirc
+.env*.local
+.env
 
-# Sentry
-next.config.original.js
+# vercel
+.vercel
 
-# generated file
+# typescript
+*.tsbuildinfo
 next-env.d.ts
+
+# Sentry Auth Token
+.sentryclirc
