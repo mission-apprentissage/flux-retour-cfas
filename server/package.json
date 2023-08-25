@@ -16,10 +16,7 @@
     "test:ci": "yarn test --ci --coverage --w 2",
     "lint": "eslint --cache . --ext .ts",
     "build": "tsc --build",
-    "typecheck": "tsc --noEmit",
-    "migration:create": "migrate-mongo create",
-    "migration:up": "migrate-mongo up",
-    "migration:down": "migrate-mongo down"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "4.5.1",
@@ -71,7 +68,7 @@
     "lodash.pick": "4.4.0",
     "lodash.sortby": "4.7.0",
     "luxon": "2.3.0",
-    "migrate-mongo": "9.0.0",
+    "migrate-mongo": "10.0.0",
     "mjml": "4.11.0",
     "mongodb": "5.7.0",
     "multiparty": "4.2.3",

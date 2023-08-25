@@ -5970,10 +5970,10 @@ micromatch@^4.0.4:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
-migrate-mongo@9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/migrate-mongo/-/migrate-mongo-9.0.0.tgz#e66077e5f7156c65a7556e63561a6dbd3e3c8574"
-  integrity sha512-Hs+5kmNdYtKo5574pvIxRAgHUkWtoXE0pIC5QPMCY1m7kwUVViuCtvOZQo0rd9rirtbI9+WDpYtI5ceG32Prgw==
+migrate-mongo@10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/migrate-mongo/-/migrate-mongo-10.0.0.tgz#c29c7e80dcbdb548e172c7395ccc439cdece1bc6"
+  integrity sha512-QA/bBKNMq/FmuK3fDbgwfNoW2riiU1wLDWGXv/tGhUItPLGqcciPPmu29SrnYAzRKMOVaGEXxzmrBs1zp5cQ7Q==
   dependencies:
     cli-table3 "^0.6.1"
     commander "^9.1.0"
@@ -5981,7 +5981,6 @@ migrate-mongo@9.0.0:
     fn-args "^5.0.0"
     fs-extra "^10.0.1"
     lodash "^4.17.21"
-    mongodb "^4.4.1"
     p-each-series "^2.2.0"
 
 mime-db@1.52.0:
@@ -6481,7 +6480,7 @@ mongodb@^3.5.9:
   optionalDependencies:
     saslprep "^1.0.0"
 
-mongodb@^4.16.0, mongodb@^4.4.1:
+mongodb@^4.16.0:
   version "4.16.0"
   resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-4.16.0.tgz#8b0043de7b577c6a7e0ce44a2ca7315b9c0a7927"
   integrity sha512-0EB113Fsucaq1wsY0dOhi1fmZOwFtLOtteQkiqOXGklvWMnSH3g2QS53f0KTP+/6qOkuoXE2JksubSZNmxeI+g==
