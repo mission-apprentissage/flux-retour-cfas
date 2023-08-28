@@ -133,12 +133,10 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
                     <Checkbox
                       isChecked={isSelected}
                       fontSize="caption"
-                      pointerEvents="none"
                       isIndeterminate={isHalfSelected}
-                      onClick={(e) => {
-                        console.log("handle click");
+                      onClickCapture={(e) => {
                         handleSelect(e);
-                        e.stopPropagation();
+                        e.preventDefault();
                       }}
                       color="#3a3a3a"
                     >
