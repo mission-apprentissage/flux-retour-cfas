@@ -1,3 +1,7 @@
 th {
   text-align: left;
 }
+.table-padding-lg td,
+.table-padding-lg th {
+  padding: 1.5rem !important;
+}
