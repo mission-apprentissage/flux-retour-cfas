@@ -4,7 +4,7 @@ set -euo pipefail
 
 echo "Push les images docker de TDB sur le registry github (https://ghcr.io/mission-apprentissage/)"
 
-readonly VERSION=$(${ROOT_DIR}/.bin/scripts/get-version.sh)
+readonly VERSION=$("${ROOT_DIR}/.bin/scripts/get-version.sh")
 
 get_channel() {
   local version="$1"
@@ -14,7 +14,7 @@ get_channel() {
     channel="latest"
   fi
 
-  echo $channel
+  echo $channel | cut -d '.' -f 1
 }
 
 generate_next_patch_version() {
@@ -27,7 +27,7 @@ generate_next_patch_version() {
   fi;
 
   local version="$VERSION"
-  
+
   # Extract major version
   local major="${version%%.*}"
   version="${version#*.}"
