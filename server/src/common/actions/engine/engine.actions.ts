@@ -1,10 +1,10 @@
 import { isEqual } from "date-fns";
 import { cloneDeep, get } from "lodash-es";
+import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "shared";
 import { PartialDeep } from "type-fest";
 
 import { findEffectifByQuery } from "@/common/actions/effectifs.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
-import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "@/common/constants/territoires";
 import logger from "@/common/logger";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";

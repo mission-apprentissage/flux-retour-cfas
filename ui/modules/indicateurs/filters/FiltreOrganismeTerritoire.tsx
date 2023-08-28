@@ -11,7 +11,6 @@ import {
   Tabs,
 } from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
-
 import {
   ACADEMIES_BY_CODE,
   ACADEMIES_SORTED,
@@ -21,7 +20,8 @@ import {
   DEPARTEMENTS_SORTED,
   REGIONS_BY_CODE,
   REGIONS_SORTED,
-} from "@/common/constants/territoires";
+} from "shared";
+
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 export interface FiltreOrganismeTerritoireConfig {

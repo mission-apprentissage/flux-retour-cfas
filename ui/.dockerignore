@@ -1,7 +1,0 @@
-.dockerignore
-npm-debug.log
-README.md
-.next/
-.git
-.env
-

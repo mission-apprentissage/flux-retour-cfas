@@ -1,6 +1,5 @@
 import { find } from "lodash-es";
-
-import { DEPARTEMENTS } from "@/common/constants/territoires";
+import { DEPARTEMENTS } from "shared";
 
 import { isValidUAI } from "./validationUtils";
 

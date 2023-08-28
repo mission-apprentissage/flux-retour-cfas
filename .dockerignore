@@ -20,7 +20,9 @@
 
 .git/
 .infra
+**/.local
 **/dist
 **/coverage
 **/node_modules
 */tests
+**/logs

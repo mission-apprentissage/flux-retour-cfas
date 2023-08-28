@@ -10,10 +10,6 @@
     "node": ">=20",
     "npm": "please-use-yarn"
   },
-  "dependencies": {
-    "global": "4.4.0",
-    "rome": "^11.0.0"
-  },
   "scripts": {
     "setup": ".bin/mna-tdb init:env",
     "dev": "yarn services:start; yarn foreach:parallel run dev",
@@ -28,7 +24,9 @@
     "services:start": "docker compose up --remove-orphans -d",
     "services:stop": "docker compose down",
     "services:clean": "yarn services:stop; docker system prune --volumes",
-    "lint": "yarn --cwd server lint && yarn --cwd ui lint",
+    "lint": "eslint --ignore-path .gitignore --cache .",
+    "prettier:fix": "prettier --write .",
+    "prettier:check": "prettier --check .",
     "release": "semantic-release",
     "release:interactive": "./.bin/mna-tdb release:interactive",
     "prepare": "husky install",
@@ -52,18 +50,29 @@
     "shared"
   ],
   "devDependencies": {
-    "@commitlint/cli": "16.2.4",
-    "@commitlint/config-conventional": "16.2.4",
-    "@semantic-release/changelog": "6.0.1",
-    "@semantic-release/exec": "6.0.3",
-    "@semantic-release/git": "10.0.1",
-    "husky": "^8.0.0",
-    "lint-staged": "^13.1.0",
+    "@commitlint/cli": "^17.7.1",
+    "@commitlint/config-conventional": "^17.7.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/parser": "^6.4.1",
+    "eslint": "^8.48.0",
+    "eslint-config-next": "^13.4.19",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-import-resolver-typescript": "^3.6.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-mocha": "^10.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "eslint-plugin-unused-imports": "^3.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
     "node-talisman": "^1.29.10",
-    "prettier": "2.8.7",
-    "semantic-release": "19.0.2",
-    "semantic-release-slack-bot": "3.5.2",
-    "typescript": "5.0.4"
+    "prettier": "^3.0.2",
+    "semantic-release": "^21.1.1",
+    "semantic-release-slack-bot": "^4.0.2",
+    "typescript": "^5.2.2"
   },
   "prettier": {
     "printWidth": 120,
@@ -72,7 +81,11 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "npx rome check"
+      "eslint --ignore-path .gitignore --cache --fix",
+      "prettier --write"
+    ],
+    "*": [
+      "prettier --write"
     ]
   },
   "packageManager": "yarn@3.6.1"

@@ -1,7 +1,7 @@
 import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
 import { useState } from "react";
+import { REGIONS_BY_CODE, REGIONS_SORTED } from "shared";
 
-import { REGIONS_BY_CODE, REGIONS_SORTED } from "@/common/constants/territoires";
 import { OrganisationOperateurPublicRegion } from "@/common/internal/Organisation";
 import useAuth from "@/hooks/useAuth";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";

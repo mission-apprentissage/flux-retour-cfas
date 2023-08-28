@@ -130,6 +130,8 @@ build/
 packaged.yaml
 /public/stack.json
 .DS_Store
+*.pem
+tsconfig.tsbuildinfo
 
 # Css
 src/**/*.css

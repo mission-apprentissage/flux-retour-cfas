@@ -17,11 +17,11 @@ import { useDropzone } from "react-dropzone";
 import { useRecoilValue } from "recoil";
 
 import { _delete, _postFile } from "@/common/httpClient";
+import { publicConfig } from "@/config.public";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import useServerEvents from "@/hooks/useServerEvents";
 import { useDocuments } from "@/modules/mon-espace/effectifs/engine/TransmissionFichier/hooks/useDocuments";
 import { Bin, DownloadLine, File } from "@/theme/components/icons";
-import { publicConfig } from "@/config.public";
 
 const endpoint = `${publicConfig.baseUrl}/api`;
 const MAX_FILE_SIZE = 10_485_760; // 10MB

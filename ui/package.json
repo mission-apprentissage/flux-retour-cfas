@@ -13,7 +13,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build --no-lint",
-    "lint": "next lint",
     "test": "jest --watch",
     "test:ci": "jest --ci",
     "test:coverage": "jest --coverage",
@@ -62,6 +61,7 @@
     "react-phone-input-2": "2.15.1",
     "recoil": "0.7.7",
     "remixicon": "2.5.0",
+    "shared": "workspace:*",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz",
     "yup": "0.32.11",
     "yup-password": "0.2.2",
@@ -85,29 +85,15 @@
     "@testing-library/user-event": "14.4.3",
     "@types/jsonwebtoken": "9.0.2",
     "@types/react": "18.0.35",
-    "@typescript-eslint/eslint-plugin": "5.59.0",
-    "@typescript-eslint/parser": "5.59.0",
     "babel-loader": "9.1.2",
     "cross-env": "7.0.3",
-    "eslint": "8.38.0",
-    "eslint-config-next": "13.2.3",
-    "eslint-config-prettier": "8.8.0",
-    "eslint-import-resolver-typescript": "3.5.5",
-    "eslint-plugin-import": "2.27.5",
-    "eslint-plugin-prettier": "4.2.1",
     "jest": "28.0.3",
     "jest-environment-jsdom": "28.0.2",
-    "prettier": "2.8.7",
     "storybook": "^7.0.5",
     "storybook-addon-mock": "4.0.0",
     "storybook-addon-next": "1.8.0",
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
     "typescript": "5.0.4"
-  },
-  "prettier": {
-    "printWidth": 120,
-    "bracketSpacing": true,
-    "trailingComma": "es5"
   }
 }

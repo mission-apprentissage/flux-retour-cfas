@@ -1,5 +1,6 @@
-import { publicConfig } from "@/config.public";
 import { useEffect, useState } from "react";
+
+import { publicConfig } from "@/config.public";
 
 export default function useServerEvents() {
   const [data, setData] = useState<any>(null);
