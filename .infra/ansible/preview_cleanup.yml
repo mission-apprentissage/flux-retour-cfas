@@ -17,7 +17,7 @@
         loop_var: pr_number
       vars:
         build: false
-        repo_name: bal
+        repo_name: flux-retour-cfas
         docker_images:
-          - mna_bal_ui
-          - mna_bal_server
+          - mna_tdb_ui
+          - mna_tdb_server

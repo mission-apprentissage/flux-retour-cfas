@@ -79,7 +79,7 @@
     - name: "Shutdown processor"
       shell:
         chdir: /opt/app
-        cmd: "sudo docker service scale bal_processor=0"
+        cmd: "sudo docker service scale tdb_queue_processorr=0 tdb_jobs_processor=0"
       when:
         - stack_status.stdout != ""
         - '"migrations-status=synced" not in migration_status_output.stdout_lines'
@@ -95,7 +95,7 @@
     - name: "Shutdown server"
       shell:
         chdir: /opt/app
-        cmd: "sudo docker service scale bal_server=0"
+        cmd: "sudo docker service scale tdb_server=0"
       when:
         - stack_status.stdout != ""
         - '"migrations-status=synced" not in migration_status_output.stdout_lines'
@@ -113,7 +113,7 @@
     - name: Lancement de l'application {{env_type}}
       shell:
         chdir: /opt/app
-        cmd: 'sudo docker stack deploy $(for file in $(ls docker-compose.*.yml); do echo -n "-c $file "; done) bal'
+        cmd: 'sudo docker stack deploy $(for file in $(ls docker-compose.*.yml); do echo -n "-c $file "; done) tdb'
       register: docker_deploy_output
 
     - debug:
@@ -122,7 +122,7 @@
     - name: Attente du deploiement
       shell:
         chdir: /opt/app
-        cmd: "sudo docker run --rm -v /var/run/docker.sock:/var/run/docker.sock sudobmitch/docker-stack-wait bal"
+        cmd: "sudo docker run --rm -v /var/run/docker.sock:/var/run/docker.sock sudobmitch/docker-stack-wait tdb"
       async: 1800
       poll: 10
 

@@ -90,7 +90,7 @@
 
     - name: "[{{ pr_number }}] Preview URL"
       debug:
-        msg: "{{ vault[env_type].MNA_BAL_PUBLIC_URL }}"
+        msg: "{{ vault[env_type].MNA_TDB_PUBLIC_URL }}"
 
 - name: "[{{ pr_number }}] Uninstalling preview"
   when: pr_state != 'open'
@@ -115,7 +115,7 @@
 
     - name: "[{{ pr_number }}] Remove database"
       shell:
-        cmd: docker run --rm -i --network mna_network mongo:6.0.2-focal mongosh "{{ vault[env_type].MNA_BAL_MONGODB_URI }}" --eval "db.dropDatabase()"
+        cmd: docker run --rm -i --network mna_network mongo:6.0.2-focal mongosh "{{ vault[env_type].MNA_TDB_MONGODB_URI }}" --eval "db.dropDatabase()"
 
     - name: "[{{ pr_number }}] Removing preview directory"
       shell:
