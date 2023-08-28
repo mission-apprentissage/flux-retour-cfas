@@ -4,7 +4,6 @@ import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "shared";
 
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
 
-
 import { InscriptionOrganistionChildProps } from "./common";
 
 const typesOrganisation = [

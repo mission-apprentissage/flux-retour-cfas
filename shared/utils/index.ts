@@ -1,1 +1,1 @@
-export * from './sortAlphabetically'
+export * from "./sortAlphabetically";

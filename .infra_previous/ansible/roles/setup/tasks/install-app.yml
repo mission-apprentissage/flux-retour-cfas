@@ -47,4 +47,3 @@
     minute: "0"
     hour: "1"
     job: "bash /opt/flux-retour-cfas/tools/rotate-nginx-log-files.sh >> /var/log/cron.log 2>&1"
-

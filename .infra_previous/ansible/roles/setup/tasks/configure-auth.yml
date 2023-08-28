@@ -11,7 +11,7 @@
 
 - name: Install pam packages
   apt:
-    name: [ 'libpam-cracklib' ]
+    name: ["libpam-cracklib"]
 
 - name: Ensure group "mna" exists
   group:
@@ -27,13 +27,11 @@
 - name: Set umask=077 for root user
   lineinfile:
     path: /root/.bashrc
-    regexp: '^umask$'
-    line: 'umask 0077'
+    regexp: "^umask$"
+    line: "umask 0077"
 
 - name: Set default umask
   lineinfile:
     path: /etc/pam.d/common-session
-    regexp: '^session optional			pam_umask.so$'
-    line: 'session optional pam_umask.so umask=0027'
-
-
+    regexp: "^session optional			pam_umask.so$"
+    line: "session optional pam_umask.so umask=0027"

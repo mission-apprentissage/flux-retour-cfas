@@ -1,6 +1,6 @@
 - name: Install fail2ban packages
   apt:
-    name: [ 'fail2ban' ]
+    name: ["fail2ban"]
 
 - name: Copy fail2ban actions
   copy:

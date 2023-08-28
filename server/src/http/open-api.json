@@ -53,10 +53,7 @@
     "/login": {
       "post": {
         "summary": "Authentification de l'ERP",
-        "tags": [
-          "v1",
-          "v2"
-        ],
+        "tags": ["v1", "v2"],
         "requestBody": {
           "required": true,
           "content": {
@@ -75,10 +72,7 @@
                     "example": "monMOtDePAsseSecur1sE"
                   }
                 },
-                "required": [
-                  "username",
-                  "password"
-                ]
+                "required": ["username", "password"]
               }
             }
           }
@@ -110,9 +104,7 @@
     "/status-apprenants": {
       "post": {
         "deprecated": true,
-        "tags": [
-          "v1"
-        ],
+        "tags": ["v1"],
         "summary": "Import des dossiers apprenants",
         "description": "Permet la création ou la mise à jour de plusieurs dossiers apprenants",
         "security": [
@@ -145,9 +137,7 @@
                       "type": "string",
                       "format": "YYYY-MM-DD",
                       "description": "Date de naissance de l'apprenant, au format ISO-8601",
-                      "examples": [
-                        "2000-10-28T00:00:00.000Z"
-                      ]
+                      "examples": ["2000-10-28T00:00:00.000Z"]
                     },
                     "uai_etablissement": {
                       "type": "string",
@@ -168,19 +158,12 @@
                     "annee_scolaire": {
                       "type": "string",
                       "description": "Période scolaire",
-                      "examples": [
-                        "2022-2023",
-                        "2023-2023"
-                      ]
+                      "examples": ["2022-2023", "2023-2023"]
                     },
                     "statut_apprenant": {
                       "type": "integer",
                       "description": "Valeurs possibles: 0,2,3",
-                      "enum": [
-                        0,
-                        2,
-                        3
-                      ]
+                      "enum": [0, 2, 3]
                     },
                     "date_metier_mise_a_jour_statut": {
                       "type": "string",
@@ -199,27 +182,19 @@
                       "anyOf": [
                         {
                           "type": "string",
-                          "enum": [
-                            "v1"
-                          ]
+                          "enum": ["v1"]
                         },
                         {
                           "type": "string",
-                          "enum": [
-                            "v2"
-                          ]
+                          "enum": ["v2"]
                         },
                         {
                           "type": "string",
-                          "enum": [
-                            "v3"
-                          ]
+                          "enum": ["v3"]
                         },
                         {
                           "type": "string",
-                          "enum": [
-                            ""
-                          ]
+                          "enum": [""]
                         },
                         {
                           "type": "null"
@@ -277,23 +252,13 @@
                     "annee_formation": {
                       "type": "integer",
                       "description": "Année de la formation",
-                      "enum": [
-                        0,
-                        1,
-                        2,
-                        3,
-                        4,
-                        5
-                      ]
+                      "enum": [0, 1, 2, 3, 4, 5]
                     },
                     "formation_rncp": {
                       "type": "string",
                       "pattern": "^(RNCP)?[0-9]{2,5}$",
                       "description": "Code RNCP de la formation",
-                      "examples": [
-                        "RNCP35316",
-                        "35316"
-                      ]
+                      "examples": ["RNCP35316", "35316"]
                     },
                     "contrat_date_debut": {
                       "type": "string",
@@ -343,9 +308,7 @@
                     "message": {
                       "type": "string",
                       "description": "Queued",
-                      "enum": [
-                        "Queued"
-                      ]
+                      "enum": ["Queued"]
                     },
                     "data": {
                       "type": "array",
@@ -368,9 +331,7 @@
                             "type": "string",
                             "format": "YYYY-MM-DD",
                             "description": "Date de naissance de l'apprenant, au format ISO-8601",
-                            "examples": [
-                              "2000-10-28T00:00:00.000Z"
-                            ]
+                            "examples": ["2000-10-28T00:00:00.000Z"]
                           },
                           "uai_etablissement": {
                             "type": "string",
@@ -391,19 +352,12 @@
                           "annee_scolaire": {
                             "type": "string",
                             "description": "Période scolaire",
-                            "examples": [
-                              "2022-2023",
-                              "2023-2023"
-                            ]
+                            "examples": ["2022-2023", "2023-2023"]
                           },
                           "statut_apprenant": {
                             "type": "integer",
                             "description": "Valeurs possibles: 0,2,3",
-                            "enum": [
-                              0,
-                              2,
-                              3
-                            ]
+                            "enum": [0, 2, 3]
                           },
                           "date_metier_mise_a_jour_statut": {
                             "type": "string",
@@ -422,27 +376,19 @@
                             "anyOf": [
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v1"
-                                ]
+                                "enum": ["v1"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v2"
-                                ]
+                                "enum": ["v2"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v3"
-                                ]
+                                "enum": ["v3"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  ""
-                                ]
+                                "enum": [""]
                               },
                               {
                                 "type": "null"
@@ -500,23 +446,13 @@
                           "annee_formation": {
                             "type": "integer",
                             "description": "Année de la formation",
-                            "enum": [
-                              0,
-                              1,
-                              2,
-                              3,
-                              4,
-                              5
-                            ]
+                            "enum": [0, 1, 2, 3, 4, 5]
                           },
                           "formation_rncp": {
                             "type": "string",
                             "pattern": "^(RNCP)?[0-9]{2,5}$",
                             "description": "Code RNCP de la formation",
-                            "examples": [
-                              "RNCP35316",
-                              "35316"
-                            ]
+                            "examples": ["RNCP35316", "35316"]
                           },
                           "contrat_date_debut": {
                             "type": "string",
@@ -552,10 +488,7 @@
                                   "example": "contrat_date_rupture"
                                 }
                               },
-                              "required": [
-                                "msg",
-                                "path"
-                              ]
+                              "required": ["msg", "path"]
                             },
                             "description": "Erreurs de validation de cet effectif"
                           }
@@ -576,10 +509,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "message",
-                    "data"
-                  ]
+                  "required": ["message", "data"]
                 }
               }
             }
@@ -595,9 +525,7 @@
     },
     "/dossiers-apprenants": {
       "post": {
-        "tags": [
-          "v2"
-        ],
+        "tags": ["v2"],
         "summary": "Import des dossiers apprenants",
         "description": "Permet la création ou la mise à jour de plusieurs dossiers apprenants",
         "security": [
@@ -630,9 +558,7 @@
                       "type": "string",
                       "format": "YYYY-MM-DD",
                       "description": "Date de naissance de l'apprenant, au format ISO-8601",
-                      "examples": [
-                        "2000-10-28T00:00:00.000Z"
-                      ]
+                      "examples": ["2000-10-28T00:00:00.000Z"]
                     },
                     "uai_etablissement": {
                       "type": "string",
@@ -653,19 +579,12 @@
                     "annee_scolaire": {
                       "type": "string",
                       "description": "Période scolaire",
-                      "examples": [
-                        "2022-2023",
-                        "2023-2023"
-                      ]
+                      "examples": ["2022-2023", "2023-2023"]
                     },
                     "statut_apprenant": {
                       "type": "integer",
                       "description": "Valeurs possibles: 0,2,3",
-                      "enum": [
-                        0,
-                        2,
-                        3
-                      ]
+                      "enum": [0, 2, 3]
                     },
                     "date_metier_mise_a_jour_statut": {
                       "type": "string",
@@ -684,27 +603,19 @@
                       "anyOf": [
                         {
                           "type": "string",
-                          "enum": [
-                            "v1"
-                          ]
+                          "enum": ["v1"]
                         },
                         {
                           "type": "string",
-                          "enum": [
-                            "v2"
-                          ]
+                          "enum": ["v2"]
                         },
                         {
                           "type": "string",
-                          "enum": [
-                            "v3"
-                          ]
+                          "enum": ["v3"]
                         },
                         {
                           "type": "string",
-                          "enum": [
-                            ""
-                          ]
+                          "enum": [""]
                         },
                         {
                           "type": "null"
@@ -762,23 +673,13 @@
                     "annee_formation": {
                       "type": "integer",
                       "description": "Année de la formation",
-                      "enum": [
-                        0,
-                        1,
-                        2,
-                        3,
-                        4,
-                        5
-                      ]
+                      "enum": [0, 1, 2, 3, 4, 5]
                     },
                     "formation_rncp": {
                       "type": "string",
                       "pattern": "^(RNCP)?[0-9]{2,5}$",
                       "description": "Code RNCP de la formation",
-                      "examples": [
-                        "RNCP35316",
-                        "35316"
-                      ]
+                      "examples": ["RNCP35316", "35316"]
                     },
                     "contrat_date_debut": {
                       "type": "string",
@@ -828,9 +729,7 @@
                     "message": {
                       "type": "string",
                       "description": "Queued",
-                      "enum": [
-                        "Queued"
-                      ]
+                      "enum": ["Queued"]
                     },
                     "data": {
                       "type": "array",
@@ -853,9 +752,7 @@
                             "type": "string",
                             "format": "YYYY-MM-DD",
                             "description": "Date de naissance de l'apprenant, au format ISO-8601",
-                            "examples": [
-                              "2000-10-28T00:00:00.000Z"
-                            ]
+                            "examples": ["2000-10-28T00:00:00.000Z"]
                           },
                           "uai_etablissement": {
                             "type": "string",
@@ -876,19 +773,12 @@
                           "annee_scolaire": {
                             "type": "string",
                             "description": "Période scolaire",
-                            "examples": [
-                              "2022-2023",
-                              "2023-2023"
-                            ]
+                            "examples": ["2022-2023", "2023-2023"]
                           },
                           "statut_apprenant": {
                             "type": "integer",
                             "description": "Valeurs possibles: 0,2,3",
-                            "enum": [
-                              0,
-                              2,
-                              3
-                            ]
+                            "enum": [0, 2, 3]
                           },
                           "date_metier_mise_a_jour_statut": {
                             "type": "string",
@@ -907,27 +797,19 @@
                             "anyOf": [
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v1"
-                                ]
+                                "enum": ["v1"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v2"
-                                ]
+                                "enum": ["v2"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v3"
-                                ]
+                                "enum": ["v3"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  ""
-                                ]
+                                "enum": [""]
                               },
                               {
                                 "type": "null"
@@ -985,23 +867,13 @@
                           "annee_formation": {
                             "type": "integer",
                             "description": "Année de la formation",
-                            "enum": [
-                              0,
-                              1,
-                              2,
-                              3,
-                              4,
-                              5
-                            ]
+                            "enum": [0, 1, 2, 3, 4, 5]
                           },
                           "formation_rncp": {
                             "type": "string",
                             "pattern": "^(RNCP)?[0-9]{2,5}$",
                             "description": "Code RNCP de la formation",
-                            "examples": [
-                              "RNCP35316",
-                              "35316"
-                            ]
+                            "examples": ["RNCP35316", "35316"]
                           },
                           "contrat_date_debut": {
                             "type": "string",
@@ -1037,10 +909,7 @@
                                   "example": "contrat_date_rupture"
                                 }
                               },
-                              "required": [
-                                "msg",
-                                "path"
-                              ]
+                              "required": ["msg", "path"]
                             },
                             "description": "Erreurs de validation de cet effectif"
                           }
@@ -1061,10 +930,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "message",
-                    "data"
-                  ]
+                  "required": ["message", "data"]
                 }
               }
             }
@@ -1087,9 +953,7 @@
             "apiKeyAuth": []
           }
         ],
-        "tags": [
-          "v3"
-        ],
+        "tags": ["v3"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1115,26 +979,17 @@
                       "type": "string",
                       "format": "YYYY-MM-DD",
                       "description": "Date de naissance de l'apprenant, au format ISO-8601",
-                      "examples": [
-                        "2000-10-28T00:00:00.000Z"
-                      ]
+                      "examples": ["2000-10-28T00:00:00.000Z"]
                     },
                     "annee_scolaire": {
                       "type": "string",
                       "description": "Période scolaire",
-                      "examples": [
-                        "2022-2023",
-                        "2023-2023"
-                      ]
+                      "examples": ["2022-2023", "2023-2023"]
                     },
                     "statut_apprenant": {
                       "type": "integer",
                       "description": "Valeurs possibles: 0,2,3",
-                      "enum": [
-                        0,
-                        2,
-                        3
-                      ]
+                      "enum": [0, 2, 3]
                     },
                     "date_metier_mise_a_jour_statut": {
                       "type": "string",
@@ -1171,23 +1026,13 @@
                     "annee_formation": {
                       "type": "integer",
                       "description": "Année de la formation",
-                      "enum": [
-                        0,
-                        1,
-                        2,
-                        3,
-                        4,
-                        5
-                      ]
+                      "enum": [0, 1, 2, 3, 4, 5]
                     },
                     "formation_rncp": {
                       "type": "string",
                       "pattern": "^(RNCP)?[0-9]{2,5}$",
                       "description": "Code RNCP de la formation",
-                      "examples": [
-                        "RNCP35316",
-                        "35316"
-                      ]
+                      "examples": ["RNCP35316", "35316"]
                     },
                     "contrat_date_debut": {
                       "type": "string",
@@ -1223,10 +1068,7 @@
                     "sexe_apprenant": {
                       "type": "string",
                       "description": "Sexe de l'apprenant",
-                      "enum": [
-                        "M",
-                        "F"
-                      ],
+                      "enum": ["M", "F"],
                       "example": "M"
                     },
                     "rqth_apprenant": {
@@ -1519,9 +1361,7 @@
                     "message": {
                       "type": "string",
                       "description": "Queued",
-                      "enum": [
-                        "Queued"
-                      ]
+                      "enum": ["Queued"]
                     },
                     "data": {
                       "type": "array",
@@ -1544,9 +1384,7 @@
                             "type": "string",
                             "format": "YYYY-MM-DD",
                             "description": "Date de naissance de l'apprenant, au format ISO-8601",
-                            "examples": [
-                              "2000-10-28T00:00:00.000Z"
-                            ]
+                            "examples": ["2000-10-28T00:00:00.000Z"]
                           },
                           "uai_etablissement": {
                             "type": "string",
@@ -1567,19 +1405,12 @@
                           "annee_scolaire": {
                             "type": "string",
                             "description": "Période scolaire",
-                            "examples": [
-                              "2022-2023",
-                              "2023-2023"
-                            ]
+                            "examples": ["2022-2023", "2023-2023"]
                           },
                           "statut_apprenant": {
                             "type": "integer",
                             "description": "Valeurs possibles: 0,2,3",
-                            "enum": [
-                              0,
-                              2,
-                              3
-                            ]
+                            "enum": [0, 2, 3]
                           },
                           "date_metier_mise_a_jour_statut": {
                             "type": "string",
@@ -1598,27 +1429,19 @@
                             "anyOf": [
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v1"
-                                ]
+                                "enum": ["v1"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v2"
-                                ]
+                                "enum": ["v2"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  "v3"
-                                ]
+                                "enum": ["v3"]
                               },
                               {
                                 "type": "string",
-                                "enum": [
-                                  ""
-                                ]
+                                "enum": [""]
                               },
                               {
                                 "type": "null"
@@ -1676,23 +1499,13 @@
                           "annee_formation": {
                             "type": "integer",
                             "description": "Année de la formation",
-                            "enum": [
-                              0,
-                              1,
-                              2,
-                              3,
-                              4,
-                              5
-                            ]
+                            "enum": [0, 1, 2, 3, 4, 5]
                           },
                           "formation_rncp": {
                             "type": "string",
                             "pattern": "^(RNCP)?[0-9]{2,5}$",
                             "description": "Code RNCP de la formation",
-                            "examples": [
-                              "RNCP35316",
-                              "35316"
-                            ]
+                            "examples": ["RNCP35316", "35316"]
                           },
                           "contrat_date_debut": {
                             "type": "string",
@@ -1728,10 +1541,7 @@
                                   "example": "contrat_date_rupture"
                                 }
                               },
-                              "required": [
-                                "msg",
-                                "path"
-                              ]
+                              "required": ["msg", "path"]
                             },
                             "description": "Erreurs de validation de cet effectif"
                           }
@@ -1752,10 +1562,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "message",
-                    "data"
-                  ]
+                  "required": ["message", "data"]
                 }
               }
             }

@@ -1,4 +1,3 @@
-
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { STATUT_CREATION_ORGANISME, STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";

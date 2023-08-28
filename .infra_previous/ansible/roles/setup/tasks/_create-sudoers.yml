@@ -21,7 +21,7 @@
   authorized_key:
     user: "{{ habilitation.username }}"
     state: present
-    key: '{{key}}'
+    key: "{{key}}"
   loop: "{{ habilitation.authorized_keys }}"
   loop_control:
     loop_var: key

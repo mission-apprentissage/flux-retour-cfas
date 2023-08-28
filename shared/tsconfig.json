@@ -21,6 +21,6 @@
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": false,
-    "baseUrl": "./",
+    "baseUrl": "./"
   }
 }

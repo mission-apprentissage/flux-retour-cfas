@@ -2,7 +2,6 @@ import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared
 
 import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 
-
 // types en doublon avec le serveur
 export const organisationTypes = [
   "ORGANISME_FORMATION_FORMATEUR",

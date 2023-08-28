@@ -101,12 +101,15 @@ export const REGIONS = [
 
 type IRegions = typeof REGIONS;
 type IRegion = IRegions[number];
-type IRegionCode = IRegion['code'];
+type IRegionCode = IRegion["code"];
 
-export const REGIONS_BY_CODE = REGIONS.reduce((acc, region) => {
-  acc[region.code] = region;
-  return acc;
-}, {} as Record<IRegionCode, IRegion>);
+export const REGIONS_BY_CODE = REGIONS.reduce(
+  (acc, region) => {
+    acc[region.code] = region;
+    return acc;
+  },
+  {} as Record<IRegionCode, IRegion>
+);
 
 export const DEPARTEMENTS = [
   {
@@ -1538,12 +1541,15 @@ export const DEPARTEMENTS = [
 
 type IDepartements = typeof DEPARTEMENTS;
 type IDepartement = IDepartements[number];
-type IDepartmentCode = IDepartement['code']
+type IDepartmentCode = IDepartement["code"];
 
-export const DEPARTEMENTS_BY_CODE = DEPARTEMENTS.reduce((acc, departement) => {
-  acc[departement.code] = departement;
-  return acc;
-}, {} as Record<IDepartmentCode, IDepartement>);
+export const DEPARTEMENTS_BY_CODE = DEPARTEMENTS.reduce(
+  (acc, departement) => {
+    acc[departement.code] = departement;
+    return acc;
+  },
+  {} as Record<IDepartmentCode, IDepartement>
+);
 
 export const ACADEMIES = [
   { nom: "Paris", code: "1" },
@@ -1583,12 +1589,15 @@ export const ACADEMIES = [
 
 type IAcademies = typeof ACADEMIES;
 type IAcademie = IAcademies[number];
-type IAcademieCode = IAcademie['code'];
+type IAcademieCode = IAcademie["code"];
 
-export const ACADEMIES_BY_CODE = ACADEMIES.reduce((acc, academie) => {
-  acc[academie.code] = academie;
-  return acc;
-}, {} as Record<IAcademieCode, IAcademie>);
+export const ACADEMIES_BY_CODE = ACADEMIES.reduce(
+  (acc, academie) => {
+    acc[academie.code] = academie;
+    return acc;
+  },
+  {} as Record<IAcademieCode, IAcademie>
+);
 
 export const TERRITOIRE_TYPE = {
   REGION: "region",
@@ -2829,12 +2838,15 @@ export const BASSINS_EMPLOI = [
 
 type IBassinsEmplois = typeof BASSINS_EMPLOI;
 type IBassinsEmploi = IBassinsEmplois[number];
-type IBassinsEmploiCode = IBassinsEmploi['code'];
+type IBassinsEmploiCode = IBassinsEmploi["code"];
 
-export const BASSIN_EMPLOI_BY_CODE = BASSINS_EMPLOI.reduce((acc, bassinEmploi) => {
-  acc[bassinEmploi.code] = bassinEmploi;
-  return acc;
-}, {} as Record<IBassinsEmploiCode, IBassinsEmploi>);
+export const BASSIN_EMPLOI_BY_CODE = BASSINS_EMPLOI.reduce(
+  (acc, bassinEmploi) => {
+    acc[bassinEmploi.code] = bassinEmploi;
+    return acc;
+  },
+  {} as Record<IBassinsEmploiCode, IBassinsEmploi>
+);
 
 export const REGIONS_SORTED = sortAlphabeticallyBy("nom", REGIONS).map((region) => {
   return { ...region, type: TERRITOIRE_TYPE.REGION };

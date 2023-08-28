@@ -17,4 +17,3 @@ On ajoute 2 moyens de détections dans le dossier `filter.d` dans les fichiers :
 
 - `nginx-conn-limit.conf`
 - `nginx-req-limit.conf`
-

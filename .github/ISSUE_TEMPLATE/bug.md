@@ -1,14 +1,13 @@
 ---
 name: Bug
 about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 **Utilisateur**
- _non connecté/Réseau CMA/DREETS Normandie/..._
+_non connecté/Réseau CMA/DREETS Normandie/..._
 
 **OS**
 _Windows 10/Windows 7/..._
@@ -27,6 +26,6 @@ _1. Se connecter au tableau de bord en tant qu'utilisateur réseau_
 _2. Cliquer sur le filtre CFA_
 _3. La liste de résultats ne s'affiche pas_
 
-* **Screenshot/enregistrement écran** *
+- **Screenshot/enregistrement écran** \*
 
 ** Informations supplémentaires **

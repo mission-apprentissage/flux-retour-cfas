@@ -160,13 +160,7 @@ const Effectif = () => {
                   },
                   metiers: {
                     header: () => "Métiers",
-                    cell: ({ value }) => (
-                      <Text>
-                        {value?.map((metier) => (
-                          <p key={metier}>{metier}</p>
-                        ))}
-                      </Text>
-                    ),
+                    cell: ({ value }) => <Text>{value?.map((metier) => <p key={metier}>{metier}</p>)}</Text>,
                   },
                   duree: {
                     header: () => "Durée",

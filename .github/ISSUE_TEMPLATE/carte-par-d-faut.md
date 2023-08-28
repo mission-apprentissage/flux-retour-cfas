@@ -1,10 +1,9 @@
 ---
 name: Carte par défaut
 about: Template par défaut d'une carte
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 **Objectif**

@@ -1,1 +1,1 @@
-export * from './territoires'
+export * from "./territoires";

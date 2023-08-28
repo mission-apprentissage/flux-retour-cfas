@@ -1,10 +1,9 @@
 ---
 name: Feedback utilisateurice
 about: Template par défaut d'une carte
-title: ''
+title: ""
 labels: feedback
-assignees: ''
-
+assignees: ""
 ---
 
 **Feedback**
@@ -13,4 +12,4 @@ _Décrire ici le feedback utilisateur_
 **Occurences**
 | Profil | Verbatim | Nb de fois |
 | -------- | -------- | -------- |
-Ex: DREETS | "verbatim" | 1 
+Ex: DREETS | "verbatim" | 1
