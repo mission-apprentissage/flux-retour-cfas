@@ -72,7 +72,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
       organisme.normalizedUai = normalize(organisme.uai ?? "");
       organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
 
-      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme) {
+      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
         organismesFiables.push(organisme);
       } else if (organisme.ferme && !organisme.last_transmission_date) {
         // Organismes fermés et ne transmettant pas (on ne les affiche pas)
@@ -251,6 +251,10 @@ function OrganismesNonFiablesPanelContent({ organismes }: { organismes: Organism
             <ListItem>
               L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE, est{" "}
               <strong>fermé</strong>.
+            </ListItem>
+            <ListItem>
+              La nature de l’organisme (déduite des relations entre organismes - base des Carif-Oref) est{" "}
+              <strong>inconnue</strong>.
             </ListItem>
           </UnorderedList>
           <Text>
