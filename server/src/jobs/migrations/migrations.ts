@@ -67,7 +67,7 @@ export async function create({ description }: { description: string }) {
   config.set({
     ...myConfig,
     migrationsDir: "src/db/migrations",
-    migrationFileExtension: ".js",
+    migrationFileExtension: ".ts",
   });
   const fileName = await mcreate(description);
   const file = `src/db/migrations/${fileName}`;

@@ -1,4 +1,6 @@
-export const up = async (/** @type {import('mongodb').Db} */ db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   // cette migration introduit la collection organisations et affecte une organisation à chaque utilisateur
   // try catch au cas où la collection soit créée par le serveur d'abord...
   try {
@@ -62,7 +64,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
       })
       .toArray();
 
-    const usersWithoutOrganisation = [];
+    const usersWithoutOrganisation: any[] = [];
     const organisations = {};
     for (const user of users) {
       const organisme = await findFirstOrganismeFiable(user.siret, user.uai);
@@ -95,7 +97,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
       inconnue: "FORMATEUR",
     };
     await Promise.all(
-      Object.values(organisations).map(async (organisation) => {
+      Object.values(organisations).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne(
           stripUndefinedFields({
             type: `ORGANISME_FORMATION_${natureOFToOrganisationType[organisation.nature] || "FORMATEUR"}`,
@@ -141,7 +143,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     }, {});
 
     await Promise.all(
-      Object.values(organisations).map(async (organisation) => {
+      Object.values(organisations).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne({
           type: "TETE_DE_RESEAU",
           reseau: organisation.reseau,
@@ -186,7 +188,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     }, {});
 
     await Promise.all(
-      Object.values(organisationsReseau).map(async (organisation) => {
+      Object.values(organisationsReseau).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne({
           type: "DREETS",
           code_region: organisation.code_region,
@@ -231,7 +233,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     }, {});
 
     await Promise.all(
-      Object.values(organisationsReseau).map(async (organisation) => {
+      Object.values(organisationsReseau).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne({
           type: "DEETS",
           code_region: organisation.code_region,
@@ -276,7 +278,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     }, {});
 
     await Promise.all(
-      Object.values(organisationsReseau).map(async (organisation) => {
+      Object.values(organisationsReseau).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne({
           type: "DRAAF",
           code_region: organisation.code_region,
@@ -321,7 +323,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     }, {});
 
     await Promise.all(
-      Object.values(organisationsReseau).map(async (organisation) => {
+      Object.values(organisationsReseau).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne({
           type: "CONSEIL_REGIONAL",
           code_region: organisation.code_region,
@@ -366,7 +368,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     }, {});
 
     await Promise.all(
-      Object.values(organisationsReseau).map(async (organisation) => {
+      Object.values(organisationsReseau).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne({
           type: "DDETS",
           code_departement: organisation.code_departement,
@@ -411,7 +413,7 @@ export const up = async (/** @type {import('mongodb').Db} */ db) => {
     }, {});
 
     await Promise.all(
-      Object.values(organisationsReseau).map(async (organisation) => {
+      Object.values(organisationsReseau).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne({
           type: "ACADEMIE",
           code_academie: organisation.code_academie,

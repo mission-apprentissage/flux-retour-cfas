@@ -1,4 +1,6 @@
-export const up = async (/** @type {import('mongodb').Db} */ db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   // cette migration supprime les données liées à l'ancien système de permissions
   await db.collection("usersMigration").updateMany(
     {},

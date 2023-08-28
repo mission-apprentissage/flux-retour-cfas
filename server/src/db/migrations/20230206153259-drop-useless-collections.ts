@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   // Suppression des collections inutilisées (si elles existent)
   const collectionsInDb = (await db.listCollections().toArray()).map(({ name }) => name);
 

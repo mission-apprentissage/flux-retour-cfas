@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   // Simplification des statuts des comptes utilisateur
   const oldStatusToNewStatus = {
     NOT_CONFIRMED: "PENDING_EMAIL_VALIDATION",

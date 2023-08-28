@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   const effectifsIdWithoutOrganisme = (
     await db
       .collection("effectifs")

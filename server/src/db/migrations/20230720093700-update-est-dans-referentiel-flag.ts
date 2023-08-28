@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   // cette migration MAJ le champ est_dans_le_referentiel avec le nouveau format
   await db
     .collection("organismes")

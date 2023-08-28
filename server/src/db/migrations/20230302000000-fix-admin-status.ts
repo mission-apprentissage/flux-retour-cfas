@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   // Passe tous les admins bloqués dans un statut invalide en CONFIRMED.
   // En principe, les permissions admin sont déjà créées et actives (pending=false)
   // suite à la migration 20230209000000-fix-admin-permissions (pas de delta sur les environnements)

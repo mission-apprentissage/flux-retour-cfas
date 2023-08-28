@@ -1,4 +1,6 @@
-export const up = async (/** @type {import('mongodb').Db} */ db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   // cette migration corrige les utilisateurs et permissions invalides
   // qui possède un main_organisme différent de celui retrouvé via le siret
   const users = await db

@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   // also define is_cross_organismes to true when is_admin is true
   await db.collection("usersMigration").updateMany(
     {
@@ -44,7 +46,7 @@ export const up = async (db) => {
       usersWithoutPermissions.map((user) => ({
         created_at: new Date(),
         updated_at: new Date(),
-        role: adminRole._id,
+        role: adminRole?._id,
         organisme_id: null,
         userEmail: user.email,
         pending: false,

@@ -5,15 +5,16 @@ set -euo pipefail
 function Help() {
    # Display Help
    echo "Commands"
-   echo "  bin:setup                                               Installs mna-tdb binary with zsh completion on system"
-   echo "  init:env                                                Update local env files using values from vault file"
-   echo "  release:interactive                                                                Build & Push Docker image releases"
-   echo "  release:app                                                                Build & Push Docker image releases"
-   echo "  deploy <env> --user <your_username>                                           Deploy application to <env>"
-   echo "  preview:build                                                                Build preview"
-   echo "  preview:cleanup --user <your_username>                                        Remove preview from close pull-requests"
-   echo "  vault:edit                                                                    Edit vault file"
-   echo "  vault:password                                                                Show vault password"
+   echo "  help                                       Show help message"
+   echo "  bin:setup                                  Installs mna-tdb binary with zsh completion on system"
+   echo "  init:env                                   Update local env files using values from vault file"
+   echo "  release:interactive                        Build & Push Docker image releases"
+   echo "  release:app                                Build & Push Docker image releases"
+   echo "  deploy <env> --user <your_username>        Deploy application to <env>"
+   echo "  preview:build                              Build preview"
+   echo "  preview:cleanup --user <your_username>     Remove preview from close pull-requests"
+   echo "  vault:edit                                 Edit vault file"
+   echo "  vault:password                             Show vault password"
    echo 
    echo
 }

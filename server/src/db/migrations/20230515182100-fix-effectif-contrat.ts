@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   const collectionName = "effectifs_old";
 
   const collectionsInDb = await db.listCollections().toArray();
@@ -14,6 +16,7 @@ export const up = async (db) => {
   ).map((item) => item._id);
 
   for (const effectif of effectifsWithContrat) {
+    // @ts-ignore
     await db.collection("effectifs").updateOne({ _id: effectif._id }, { $set: { contrats: effectif.contrats } });
   }
 };

@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   await db.collection("users").updateMany({}, { $unset: { orign_register: "" } }, { bypassDocumentValidation: true });
 
   await db

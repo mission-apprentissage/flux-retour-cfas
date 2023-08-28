@@ -1,4 +1,6 @@
-export const up = async (db) => {
+import { Db, MongoClient } from "mongodb";
+
+export const up = async (db: Db, _client: MongoClient) => {
   const cleanOrganisme = await db.collection("organismes").findOne({ uai: "0180865T", siret: "18180001200021" });
   const toRemoveOrganisme = await db.collection("organismes").findOne({ uai: "0180865T", siret: "53825807000019" });
 
