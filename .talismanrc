@@ -1,12 +1,14 @@
 fileignoreconfig:
 - filename: .infra/.env_server
   checksum: a0e68332e47c15db5758914f940eb9f1d88be4742828063b89bbe5f8dd883b73
+- filename: .infra/docker-compose.production.yml
+  checksum: d43ea62acddf9ad604ea391b19619b3f707f6c767ba3ba418aa7191250dbe34d
 - filename: .infra/env.ini
   checksum: 2aed7cac12a6abc38324da9a7a6bef1de373c7e7f1f71421c4b2495eddd223e5
 - filename: .infra/files/configs/metabase/setup-metabase.sh
   checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
 - filename: .infra/vault/vault.yml
-  checksum: 4f583b77619bd438b535c9dce3f8095a6fb82cdbf653c6122614f5306adcf234
+  checksum: 8c843ce0ca7b784c47fd746cf3e2b274d344559fbdc33d6943810ae5d34fe54b
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
   checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml
