@@ -1,4 +1,16 @@
-import { Box, Button, Checkbox, Heading, HStack, Input, InputGroup, InputLeftElement, Spinner } from "@chakra-ui/react";
+import { SmallCloseIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Heading,
+  HStack,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
+  Spinner,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import TreeView, { flattenTree } from "react-accessible-treeview";
@@ -11,7 +23,12 @@ import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 import { FilterButton } from "../FilterButton";
 
-import { FamilleMetier } from "./secteur-professionnel/arborescence-rome";
+import {
+  FamilleMetier,
+  filterRomeNodesByTerm,
+  normalizeRomeNodeInPlace,
+  RomeNode,
+} from "./secteur-professionnel/arborescence-rome";
 
 interface FiltreFormationSecteurProfessionnelProps {
   value: string[];
@@ -24,26 +41,35 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: famillesMetier, isFetching: isLoading } = useQuery<FamilleMetier[]>(
+  const { data: famillesMetiers, isFetching: isLoading } = useQuery<RomeNode[]>(
     ["arborescence-rome-14-06-2021.json"],
-    () => _get("/arborescence-rome-14-06-2021.json"),
+    async () => {
+      const famillersMetiers = await _get<FamilleMetier[]>("/arborescence-rome-14-06-2021.json");
+      return famillersMetiers.map((familleMetiers) => normalizeRomeNodeInPlace(familleMetiers));
+    },
     {
       cacheTime: 99999999, // never expire, change the URL if that must expire
     }
   );
-  const treeData = useMemo(
-    () => (famillesMetier ? flattenTree(normalizeTreeInPlace({ name: "", children: famillesMetier })) : []),
-    [famillesMetier]
-  );
 
-  const filteredTreeData = useMemo(() => {
-    // TODO ne garder que les noeuds qui correspondent et tous leurs ancètres.
-    if (searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH) {
-      return treeData;
+  const filteredFamillesMetiers = useMemo(() => {
+    if (!famillesMetiers) {
+      return [];
     }
-    // const search = normalize(searchTerm);
-    return treeData;
-  }, [treeData, searchTerm]);
+    if (searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH) {
+      return famillesMetiers;
+    }
+    const normalizedSearchTerm = normalize(searchTerm);
+
+    return filterRomeNodesByTerm(famillesMetiers, normalizedSearchTerm);
+  }, [famillesMetiers, searchTerm]);
+
+  const treeData = useMemo(() => {
+    return flattenTree({
+      name: "",
+      children: filteredFamillesMetiers,
+    });
+  }, [filteredFamillesMetiers]);
 
   return (
     <div>
@@ -72,6 +98,11 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
               fontSize="epsilon"
               _placeholder={{ fontSize: "epsilon" }}
             />
+            <InputRightElement>
+              <Button variant="unstyled" size="sm" onClick={() => setSearchTerm("")}>
+                <SmallCloseIcon boxSize={4} />
+              </Button>
+            </InputRightElement>
           </InputGroup>
 
           <Box ml="1w" mt="3v" mb={4} minH={6}>
@@ -102,10 +133,10 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
               }
             `}
           </style>
-          {famillesMetier && (
+          {famillesMetiers && (
             <Box className="tree-secteur-professionnel" mt={4} userSelect="none">
               <TreeView
-                data={filteredTreeData}
+                data={treeData}
                 className="tree-secteur-professionnel"
                 aria-label="Checkbox tree"
                 multiSelect
@@ -140,7 +171,8 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
                       isIndeterminate={isHalfSelected}
                       onClickCapture={(e) => {
                         handleSelect(e);
-                        e.preventDefault();
+                        e.preventDefault(); // prevents triggering another tick
+                        e.stopPropagation(); // prevents toggling the node
                       }}
                       color="#3a3a3a"
                     >
@@ -158,21 +190,3 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
 };
 
 export default FiltreFormationSecteurProfessionnel;
-
-interface Node {
-  name: string;
-  children?: Node[];
-
-  // computed
-  metadata?: {
-    normalizedName?: string;
-  };
-}
-
-function normalizeTreeInPlace(node: Node) {
-  node.metadata = {
-    normalizedName: normalize(node.name),
-  };
-  node.children?.forEach((node) => normalizeTreeInPlace(node));
-  return node;
-}
