@@ -11,9 +11,6 @@
     "cli": "node dist/index.js",
     "init:dev": "yarn cli init:dev",
     "dev": "tsup-node --watch",
-    "test": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:ci": "yarn test --ci --coverage --w 2",
-    "lint": "eslint --cache . --ext .ts",
     "build": "tsup-node --env.NODE_ENV production",
     "build:dev": "tsup-node",
     "typecheck": "tsc --noEmit"

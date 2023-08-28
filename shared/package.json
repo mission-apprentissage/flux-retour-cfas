@@ -6,6 +6,7 @@
   "author": "mna",
   "license": "MIT",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=20",
     "npm": "please-use-yarn"

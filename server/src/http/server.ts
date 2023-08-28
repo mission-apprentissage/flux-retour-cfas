@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
@@ -79,6 +78,7 @@ import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
+import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
@@ -102,6 +102,7 @@ import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAu
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
+import { openApiFilePath } from "./open-api-path";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
@@ -115,7 +116,7 @@ import organismesRouter from "./routes/specific.routes/organismes.routes";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
 import auth from "./routes/user.routes/auth.routes";
 
-const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
+const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
 /**
  * Create the express app

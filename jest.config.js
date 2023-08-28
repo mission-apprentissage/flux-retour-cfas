@@ -1,0 +1,89 @@
+const nextJest = require("next/jest");
+const { defaultsESM } = require("ts-jest/presets/index.js");
+
+const createJestConfig = nextJest({
+  // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
+  dir: "./ui",
+});
+
+const config = async () => {
+  const nextConfig = await createJestConfig({
+    // Add more setup options before each test is run
+    // setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+    // if using TypeScript with a baseUrl set to the root directory then you need the below for alias' to work
+    testPathIgnorePatterns: [
+      "<rootDir>/ui/.next/",
+      "<rootDir>/ui/node_modules/",
+      "<rootDir>/ui/storybook/",
+      "<rootDir>/ui/.history/",
+    ],
+    moduleNameMapper: {
+      "^@/(.*)$": "<rootDir>/ui/$1",
+    },
+  })();
+
+  return {
+    coverageProvider: "v8",
+    coverageThreshold: {
+      global: {
+        branches: 77,
+        functions: 50,
+        lines: 70,
+        statements: -5000,
+      },
+    },
+    projects: [
+      {
+        ...defaultsESM,
+        displayName: "server",
+        globalSetup: "<rootDir>/server/tests/jest/globalSetup.ts",
+        globalTeardown: "<rootDir>/server/tests/jest/globalTeardown.ts",
+        modulePathIgnorePatterns: ["\\dist"],
+        moduleFileExtensions: ["js", "jsx", "ts", "tsx", "json", "node"],
+        moduleNameMapper: {
+          "^@/(.*)$": "<rootDir>/server/src/$1",
+          "^@tests/(.*)$": "<rootDir>/server/tests/$1",
+        },
+        preset: "ts-jest",
+        setupFiles: ["<rootDir>/server/tests/jest/setupFiles.ts"],
+        setupFilesAfterEnv: ["<rootDir>/server/tests/jest/setupFileAfterEnv.ts"],
+        testEnvironment: "node",
+        testMatch: ["<rootDir>/server/**/?(*.)+(spec|test).[tj]s?(x)"],
+        transform: {
+          "^.+\\.tsx?$": [
+            "ts-jest",
+            {
+              tsconfig: "<rootDir>/server/tsconfig.json",
+              useESM: true,
+            },
+          ],
+        },
+      },
+      {
+        ...defaultsESM,
+        displayName: "shared",
+        modulePathIgnorePatterns: ["\\dist"],
+        preset: "ts-jest",
+        testEnvironment: "node",
+        testMatch: ["<rootDir>/shared/**/?(*.)+(spec|test).[tj]s?(x)"],
+        transform: {
+          "^.+\\.tsx?$": [
+            "ts-jest",
+            {
+              tsconfig: "<rootDir>/shared/tsconfig.json",
+              useESM: true,
+            },
+          ],
+        },
+      },
+      {
+        ...nextConfig,
+        displayName: "ui",
+        testEnvironment: "jest-environment-jsdom",
+        testMatch: ["<rootDir>/ui/**/?(*.)+(spec|test).[tj]s?(x)"],
+      },
+    ],
+  };
+};
+
+module.exports = config;

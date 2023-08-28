@@ -1,10 +1,15 @@
 import { readdirSync, readFileSync } from "fs";
+import path from "path";
 
 import nock from "nock";
 
 import { API_ENDPOINT } from "@/common/apis/ApiEntreprise";
+import { __dirname } from "@/common/utils/esmUtils";
 
-const jsonEtablissementDataDir = `${process.cwd()}/tests/data/entreprise.api.gouv.fr/etablissements`;
+const jsonEtablissementDataDir = path.join(
+  __dirname(import.meta.url),
+  `../../data/entreprise.api.gouv.fr/etablissements`
+);
 const realEtablissementDataBySiret = readdirSync(jsonEtablissementDataDir).reduce((acc, jsonFilename) => {
   acc[jsonFilename.replace(".json", "")] = JSON.parse(
     readFileSync(`${jsonEtablissementDataDir}/${jsonFilename}`).toString()
