@@ -63,7 +63,7 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
           <InputGroup>
             <InputLeftElement pointerEvents="none" fontSize="gamma" className="ri-search-line" as="i" marginTop="3px" />
             <Input
-              placeholder="Rechercher un secteur professionnel (ex : immobilier, commerce, santé...))"
+              placeholder="Rechercher un secteur professionnel (ex : immobilier, commerce, santé...)"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               variant="outline"
