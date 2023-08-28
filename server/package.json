@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "3.29.0",
+  "version": "0.0.0",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "author": "MNA",
