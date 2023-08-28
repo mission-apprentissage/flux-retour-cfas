@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const nextJest = require("next/jest");
-const { defaultsESM } = require("ts-jest/presets/index.js");
+const preset = require("ts-jest/presets");
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
@@ -34,7 +35,7 @@ const config = async () => {
     },
     projects: [
       {
-        ...defaultsESM,
+        ...preset.defaultsESM,
         displayName: "server",
         globalSetup: "<rootDir>/server/tests/jest/globalSetup.ts",
         globalTeardown: "<rootDir>/server/tests/jest/globalTeardown.ts",
@@ -60,7 +61,7 @@ const config = async () => {
         },
       },
       {
-        ...defaultsESM,
+        ...preset.defaultsESM,
         displayName: "shared",
         modulePathIgnorePatterns: ["\\dist"],
         preset: "ts-jest",
