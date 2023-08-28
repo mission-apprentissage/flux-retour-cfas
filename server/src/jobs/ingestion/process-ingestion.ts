@@ -12,7 +12,7 @@ import {
 } from "@/common/actions/engine/engine.actions";
 import {
   findOrganismeByUaiAndSiret,
-  updateOrganismeLastTransmissionDate,
+  updateOrganismeTransmissionDates,
 } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { Effectif, FiabilisationUaiSiret, Organisme } from "@/common/model/@types";
@@ -129,7 +129,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       // création ou mise à jour de l'effectif
       const [{ effectifId, itemProcessingInfos }] = await Promise.all([
         createOrUpdateEffectif(effectif),
-        updateOrganismeLastTransmissionDate(organisme._id),
+        updateOrganismeTransmissionDates(organisme),
       ]);
 
       // ajout des informations sur le traitement au logger

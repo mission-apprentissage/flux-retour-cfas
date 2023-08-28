@@ -7,7 +7,7 @@ import {
   createOrganisme,
   findOrganismeById,
   getOrganismeInfosFromSiret,
-  setOrganismeTransmissionDates,
+  updateOrganismeTransmissionDates,
   updateOrganisme,
   updateOrganismeFromApis,
 } from "@/common/actions/organismes/organismes.actions";
@@ -249,7 +249,7 @@ describe("Test des actions Organismes", () => {
     });
   });
 
-  describe("setOrganismeTransmissionDates", () => {
+  describe("updateOrganismeTransmissionDates", () => {
     it("mets à jour les dates first_transmission_date et last_transmission_date pour un organisme sans first_transmission_date", async () => {
       const { _id } = await createOrganisme(sampleOrganismeWithUAI);
 
@@ -259,7 +259,7 @@ describe("Test des actions Organismes", () => {
       assert.deepStrictEqual(created.first_transmission_date, undefined);
 
       // MAJ de l'organisme et vérification de l'ajout de first_transmission_date
-      await setOrganismeTransmissionDates(created);
+      await updateOrganismeTransmissionDates(created);
       const updated = await findOrganismeById(_id);
       assert.notDeepStrictEqual(updated?.first_transmission_date, undefined);
       assert.notDeepStrictEqual(updated?.last_transmission_date, undefined);
@@ -276,7 +276,7 @@ describe("Test des actions Organismes", () => {
       assert.deepStrictEqual(created.first_transmission_date, first_transmission_date);
 
       // MAJ de l'organisme et vérification de l'ajout de last_transmission_date
-      await setOrganismeTransmissionDates(created);
+      await updateOrganismeTransmissionDates(created);
       const updated = await findOrganismeById(_id);
       assert.deepStrictEqual(updated?.first_transmission_date, first_transmission_date);
       assert.notDeepStrictEqual(updated?.last_transmission_date, undefined);
