@@ -46,11 +46,6 @@ const tabs = [
     route: "/organismes/non-fiables",
     index: 1,
   },
-  {
-    key: "fermes-nayant-jamais-transmis",
-    route: "/organismes/fermes-nayant-jamais-transmis",
-    index: 2,
-  },
 ] as const;
 
 interface ListeOrganismesPageProps {
@@ -67,38 +62,35 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     props.activeTab === "non-fiables" ? " non fiables" : ""
   }`;
 
-  const { organismesFiables, organismesNonFiables, organismesFermesNayantJamaisTransmis, nbOrganimesFermes } =
-    useMemo(() => {
-      const organismesFiables: OrganismeNormalized[] = [];
-      const organismesNonFiables: OrganismeNormalized[] = [];
-      const organismesFermesNayantJamaisTransmis: OrganismeNormalized[] = [];
-      let nbOrganimesFermes = 0;
-      (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
-        // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
-        organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
-        organisme.normalizedUai = normalize(organisme.uai ?? "");
-        organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
+  const { organismesFiables, organismesNonFiables, nbOrganismesFermes } = useMemo(() => {
+    const organismesFiables: OrganismeNormalized[] = [];
+    const organismesNonFiables: OrganismeNormalized[] = [];
+    let nbOrganismesFermes = 0;
+    (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
+      // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
+      organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
+      organisme.normalizedUai = normalize(organisme.uai ?? "");
+      organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
 
-        if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme) {
-          organismesFiables.push(organisme);
-        } else if (organisme.ferme && !organisme.first_transmission_date) {
-          organismesFermesNayantJamaisTransmis.push(organisme);
-          nbOrganimesFermes++;
-        } else {
-          organismesNonFiables.push(organisme);
-          if (organisme.ferme) {
-            nbOrganimesFermes++;
-          }
+      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme) {
+        organismesFiables.push(organisme);
+      } else if (organisme.ferme && !organisme.last_transmission_date) {
+        // Organismes fermés et ne transmettant pas (on ne les affiche pas)
+        nbOrganismesFermes++;
+      } else {
+        organismesNonFiables.push(organisme);
+        if (organisme.ferme) {
+          nbOrganismesFermes++;
         }
-      });
+      }
+    });
 
-      return {
-        organismesFiables,
-        organismesNonFiables,
-        organismesFermesNayantJamaisTransmis,
-        nbOrganimesFermes,
-      };
-    }, [props.organismes]);
+    return {
+      organismesFiables,
+      organismesNonFiables,
+      nbOrganismesFermes,
+    };
+  }, [props.organismes]);
 
   return (
     <SimplePage title={title}>
@@ -117,13 +109,13 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           {organismesNonFiables.length !== 0 && (
             <ListItem>
               les <strong>{organismesNonFiables.length}</strong> établissements <strong>non-fiabilisés</strong>
-              {nbOrganimesFermes > 0 && (
+              {nbOrganismesFermes > 0 && (
                 <>
                   {" "}
-                  dont <strong>{nbOrganimesFermes}</strong> établissement{nbOrganimesFermes > 1 ? "s" : ""}{" "}
+                  dont <strong>{nbOrganismesFermes}</strong> établissement{nbOrganismesFermes > 1 ? "s" : ""}{" "}
                   <strong>
                     fermé
-                    {nbOrganimesFermes > 1 ? "s" : ""}
+                    {nbOrganismesFermes > 1 ? "s" : ""}
                   </strong>
                   .
                 </>
@@ -175,9 +167,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             <TabList>
               <Tab fontWeight="bold">Organismes fiables ({organismesFiables.length})</Tab>
               <Tab fontWeight="bold">Organismes à fiabiliser ({organismesNonFiables.length})</Tab>
-              <Tab fontWeight="bold">
-                Organismes fermés n&apos;ayant jamais transmis ({organismesFermesNayantJamaisTransmis.length})
-              </Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
@@ -185,9 +174,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               </TabPanel>
               <TabPanel>
                 <OrganismesNonFiablesPanelContent organismes={organismesNonFiables} />
-              </TabPanel>
-              <TabPanel>
-                <OrganismesFermesNayantJamaisTransmisPanelContent organismes={organismesFermesNayantJamaisTransmis} />
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -274,19 +260,6 @@ function OrganismesNonFiablesPanelContent({ organismes }: { organismes: Organism
             Veuillez contacter les organismes non-fiables pour encourager une action auprès de leur CARIF OREF ou de
             l’INSEE.
           </Text>
-        </Box>
-      </Ribbons>
-      <OrganismesTable organismes={organismes} modeNonFiable />
-    </>
-  );
-}
-
-function OrganismesFermesNayantJamaisTransmisPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
-  return (
-    <>
-      <Ribbons variant="warning" my={8}>
-        <Box color="grey.800">
-          <Text>TODO : Description des organismes fermés n&apos;ayant jamais transmis</Text>
         </Box>
       </Ribbons>
       <OrganismesTable organismes={organismes} modeNonFiable />
