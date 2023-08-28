@@ -1,4 +1,4 @@
-import { Box, Checkbox, Heading, HStack, Input, InputGroup, InputLeftElement, Spinner } from "@chakra-ui/react";
+import { Box, Button, Checkbox, Heading, HStack, Input, InputGroup, InputLeftElement, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import TreeView, { flattenTree } from "react-accessible-treeview";
@@ -81,6 +81,10 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
               </InputLegend>
             )}
           </Box>
+
+          <Button variant="link" onClick={() => props.onChange([])}>
+            Réinitialiser la sélection
+          </Button>
           {/* {!isLoading && searchTerm.length > 0 && formations?.length === 0 && (
             <Text color="grey.800" fontWeight="700" marginTop="4w" paddingLeft="1w">
               Il n’y a aucun résultat pour votre recherche
