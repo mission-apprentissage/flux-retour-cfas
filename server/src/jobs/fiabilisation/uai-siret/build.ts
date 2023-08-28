@@ -24,7 +24,7 @@ import {
 } from "./build.rules";
 
 // Filtres année scolaire pour récupération des couples UAI-SIRET
-const filters = { annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023", "2023-2024"] } };
+const filters = { annee_scolaire: { $in: ["2023-2023", "2023-2024"] } };
 
 /**
  * Fonction de construction de la collection des couples de fiabilisation UAI SIRET
