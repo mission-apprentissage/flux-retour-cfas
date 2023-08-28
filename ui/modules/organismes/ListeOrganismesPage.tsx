@@ -62,10 +62,10 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     props.activeTab === "non-fiables" ? " non fiables" : ""
   }`;
 
-  const { organismesFiables, organismesNonFiables, nbOrganimesFermes } = useMemo(() => {
+  const { organismesFiables, organismesNonFiables, nbOrganismesFermes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesNonFiables: OrganismeNormalized[] = [];
-    let nbOrganimesFermes = 0;
+    let nbOrganismesFermes = 0;
     (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
       organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
@@ -74,10 +74,13 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
 
       if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme) {
         organismesFiables.push(organisme);
+      } else if (organisme.ferme && !organisme.last_transmission_date) {
+        // Organismes fermés et ne transmettant pas (on ne les affiche pas)
+        nbOrganismesFermes++;
       } else {
         organismesNonFiables.push(organisme);
         if (organisme.ferme) {
-          nbOrganimesFermes++;
+          nbOrganismesFermes++;
         }
       }
     });
@@ -85,7 +88,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     return {
       organismesFiables,
       organismesNonFiables,
-      nbOrganimesFermes,
+      nbOrganismesFermes,
     };
   }, [props.organismes]);
 
@@ -106,13 +109,13 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           {organismesNonFiables.length !== 0 && (
             <ListItem>
               les <strong>{organismesNonFiables.length}</strong> établissements <strong>non-fiabilisés</strong>
-              {nbOrganimesFermes > 0 && (
+              {nbOrganismesFermes > 0 && (
                 <>
                   {" "}
-                  dont <strong>{nbOrganimesFermes}</strong> établissement{nbOrganimesFermes > 1 ? "s" : ""}{" "}
+                  dont <strong>{nbOrganismesFermes}</strong> établissement{nbOrganismesFermes > 1 ? "s" : ""}{" "}
                   <strong>
                     fermé
-                    {nbOrganimesFermes > 1 ? "s" : ""}
+                    {nbOrganismesFermes > 1 ? "s" : ""}
                   </strong>
                   .
                 </>
