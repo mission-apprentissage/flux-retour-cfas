@@ -168,8 +168,30 @@ export const buildFiabilisationCoupleForTdbCouple = async (
  * @returns
  */
 export const getAllUniqueCouplesUaiSiretToFiabilise = async () => {
-  // on récupère tous les couples UAI/SIRET depuis les effectifs en faisant un lookup effectifs - organismes
-  const allCouplesUaiSiretTdb = await effectifsDb()
+  const [allCouplesUaiSiretTdb, allCouplesUaiSiretTdbInQueue] = await Promise.all([
+    getAllCouplesUaiSiretTdb(),
+    getAllCouplesUaiSiretTdbInQueue(),
+  ]);
+
+  logger.info(" >>", allCouplesUaiSiretTdb.length, "couples UAI/SIRET trouvés en db");
+  logger.info(" >>", allCouplesUaiSiretTdbInQueue.length, "couples UAI/SIRET trouvés dans la file d'attente");
+
+  // On récupère la liste dédoublonnée des couples depuis les 2 sous ensembles tdb + queue
+  const couplesUaiSiret = [...allCouplesUaiSiretTdb, ...allCouplesUaiSiretTdbInQueue];
+  const uniqueCouplesUaiSiretToCheck = couplesUaiSiret.filter(
+    (obj, index) => couplesUaiSiret.findIndex((item) => item.uai === obj.uai && item.siret === obj.siret) === index
+  );
+
+  logger.info(">", uniqueCouplesUaiSiretToCheck.length, "couples UAI/SIRET uniques à traiter");
+  return uniqueCouplesUaiSiretToCheck;
+};
+
+/**
+ * Fonction de récupération de tous les couples UAI/SIRET depuis les effectifs en faisant un lookup effectifs - organismes
+ * @returns
+ */
+const getAllCouplesUaiSiretTdb = async () => {
+  return await effectifsDb()
     .aggregate([
       { $match: filters },
       {
@@ -186,24 +208,19 @@ export const getAllUniqueCouplesUaiSiretToFiabilise = async () => {
       { $project: { _id: 0, uai: "$_id.uai", siret: "$_id.siret" } },
     ])
     .toArray();
-  logger.info(" >>", allCouplesUaiSiretTdb.length, "couples UAI/SIRET trouvés en db");
+};
 
-  // on récupère tous les couples UAI/SIRET depuis la file d'attente effectifsQueue sans erreurs de validation
-  const allCouplesUaiSiretTdbInQueue = await effectifsQueueDb()
+/**
+ * Fonction de récupération de tous les couples UAI/SIRET depuis la file d'attente effectifsQueue sans erreurs de validation
+ * @returns
+ */
+const getAllCouplesUaiSiretTdbInQueue = async () => {
+  //
+  return await effectifsQueueDb()
     .aggregate([
       { $match: { validation_errors: [], ...filters } },
       { $group: { _id: { uai: "$uai_etablissement", siret: "$siret_etablissement" } } },
       { $project: { _id: 0, uai: "$_id.uai", siret: "$_id.siret" } },
     ])
     .toArray();
-  logger.info(" >>", allCouplesUaiSiretTdbInQueue.length, "couples UAI/SIRET trouvés dans la file d'attente");
-
-  // On récupère la liste dédoublonnée des couples depuis les 2 sous ensembles tdb + queue
-  const couplesUaiSiret = [...allCouplesUaiSiretTdb, ...allCouplesUaiSiretTdbInQueue];
-  const uniqueCouplesUaiSiretToCheck = couplesUaiSiret.filter(
-    (obj, index) => couplesUaiSiret.findIndex((item) => item.uai === obj.uai && item.siret === obj.siret) === index
-  );
-
-  logger.info(">", uniqueCouplesUaiSiretToCheck.length, "couples UAI/SIRET uniques à traiter");
-  return uniqueCouplesUaiSiretToCheck;
 };
