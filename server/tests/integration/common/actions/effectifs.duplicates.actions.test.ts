@@ -24,7 +24,11 @@ const sampleOrganisme: Organisme = {
 const insertDuplicateEffectifs = async (sampleEffectif, nbDuplicates = 2) => {
   const insertedIdList: ObjectId[] = [];
   for (let index = 0; index < nbDuplicates; index++) {
-    const { insertedId } = await effectifsDb().insertOne({ ...sampleEffectif, id_erp_apprenant: `ID_ERP_${index}` });
+    const { insertedId } = await effectifsDb().insertOne({
+      ...sampleEffectif,
+      id_erp_apprenant: `ID_ERP_${index}`,
+      annee_scolaire: "2023-2024",
+    });
     insertedIdList.push(insertedId);
   }
 
@@ -42,7 +46,7 @@ describe("Test des actions Effectifs Duplicates", () => {
 
     it("Permet de vérifier la récupération de doublons d'effectifs", async () => {
       // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({ organisme: sampleOrganisme });
+      const sampleEffectif = createSampleEffectif({ organisme: sampleOrganisme, annee_scolaire: "2023-2024" });
       await insertDuplicateEffectifs(sampleEffectif);
 
       const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
@@ -61,7 +65,10 @@ describe("Test des actions Effectifs Duplicates", () => {
 
     it("Permet de vérifier la non récupération de doublons d'effectifs", async () => {
       // Ajout d'effectif
-      await insertDuplicateEffectifs(createSampleEffectif({ organisme: sampleOrganisme }), 1);
+      await insertDuplicateEffectifs(
+        createSampleEffectif({ organisme: sampleOrganisme, annee_scolaire: "2023-2024" }),
+        1
+      );
       const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
 
       // Vérification de la récupération des doublons
@@ -70,7 +77,11 @@ describe("Test des actions Effectifs Duplicates", () => {
 
     it("Permet de vérifier la récupération de doublons d'effectifs avec un prénom multi-casse", async () => {
       // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({ organisme: sampleOrganisme, apprenant: { prenom: "SYlvAiN" } });
+      const sampleEffectif = createSampleEffectif({
+        organisme: sampleOrganisme,
+        apprenant: { prenom: "SYlvAiN" },
+        annee_scolaire: "2023-2024",
+      });
       await insertDuplicateEffectifs(sampleEffectif, 5);
 
       const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
@@ -89,7 +100,11 @@ describe("Test des actions Effectifs Duplicates", () => {
 
     it("Permet de vérifier la récupération de doublons d'effectifs avec un nom multi-casse", async () => {
       // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({ organisme: sampleOrganisme, apprenant: { nom: "mBaPpe" } });
+      const sampleEffectif = createSampleEffectif({
+        organisme: sampleOrganisme,
+        apprenant: { nom: "mBaPpe" },
+        annee_scolaire: "2023-2024",
+      });
       await insertDuplicateEffectifs(sampleEffectif);
 
       const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
@@ -111,6 +126,7 @@ describe("Test des actions Effectifs Duplicates", () => {
       const sampleEffectif = createSampleEffectif({
         organisme: sampleOrganisme,
         apprenant: { prenom: "JeAn- éDouArd" },
+        annee_scolaire: "2023-2024",
       });
       await insertDuplicateEffectifs(sampleEffectif, 5);
 
@@ -130,7 +146,11 @@ describe("Test des actions Effectifs Duplicates", () => {
 
     it("Permet de vérifier la récupération de doublons d'effectifs avec un nom avec caractères spéciaux, accents et espace", async () => {
       // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({ organisme: sampleOrganisme, apprenant: { nom: "M' BaPpé" } });
+      const sampleEffectif = createSampleEffectif({
+        organisme: sampleOrganisme,
+        apprenant: { nom: "M' BaPpé" },
+        annee_scolaire: "2023-2024",
+      });
       await insertDuplicateEffectifs(sampleEffectif, 5);
 
       const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
