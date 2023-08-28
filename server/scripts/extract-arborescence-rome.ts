@@ -91,8 +91,15 @@ async function main() {
       };
     });
 
+  famillesMetiers.forEach((familleMetier) => addIdsToNames(familleMetier));
+
   writeFileSync("arborescence-rome.json", Buffer.from(JSON.stringify(famillesMetiers), "utf8"));
   console.log("Fichier créé : arborescence-rome.json");
+}
+
+function addIdsToNames(node: any) {
+  node.name = `${node.id} – ${node.name}`;
+  node.children?.forEach((node) => addIdsToNames(node));
 }
 
 main();
