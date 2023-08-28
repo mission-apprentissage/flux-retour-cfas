@@ -51,7 +51,7 @@ const EffectifsDoublonsPage = ({ isMine }) => {
         {/* Zone a traiter */}
         <Stack spacing={6}>
           <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mb={4}>
-            {`Vérifier les ${duplicates.length} duplicats d'effectifs`}
+            {`Vérifier les ${duplicates.length} duplicats d'effectifs pour l'année scolaire en cours`}
           </Text>
 
           <EffectifsDoublonsList data={duplicates || []} />

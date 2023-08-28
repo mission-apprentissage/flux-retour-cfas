@@ -2,6 +2,8 @@ import { ObjectId } from "mongodb";
 
 import { effectifsDb } from "@/common/model/collections";
 
+import { getAnneesScolaireListFromDate } from "../utils/anneeScolaireUtils";
+
 /**
  * Construction du pipeline d'aggregation du clean des noms / prenom pour identification des doublons
  * @returns
@@ -43,7 +45,7 @@ const getSanitizedNomPrenomPipeline = (
 export const getDuplicatesEffectifsForOrganismeId = async (organisme_id: ObjectId) => {
   return await effectifsDb()
     .aggregate([
-      { $match: { organisme_id } },
+      { $match: { organisme_id, annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } } },
       ...getSanitizedNomPrenomPipeline(),
       {
         $group: {
