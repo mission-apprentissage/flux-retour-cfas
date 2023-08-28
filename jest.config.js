@@ -21,6 +21,15 @@ const config = async () => {
     moduleNameMapper: {
       "^@/(.*)$": "<rootDir>/ui/$1",
     },
+    collectCoverageFrom: [
+      "server/src/**/*.{js,jsx,ts,tsx}",
+      "shared/**/*.{js,jsx,ts,tsx}",
+      "ui/**/*.{js,jsx,ts,tsx}",
+      "!**/node_modules/**",
+      "!**/.next/**",
+      "!**/dist/**",
+      "!**/vendor/**",
+    ],
   })();
 
   return {
