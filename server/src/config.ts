@@ -4,6 +4,7 @@ const config = {
   email: env.get("MNA_TDB_EMAIL").default("tableau-de-bord@apprentissage.beta.gouv.fr").asString(),
   email_from: env.get("MNA_TDB_EMAIL_FROM").default("Tableau de bord de l'apprentissage").asString(),
   appName: env.get("MNA_TDB_NAME").default("Flux Retour Cfas").asString(),
+  version: env.get("PUBLIC_VERSION").default("0.0.0-local").asString(),
   port: env.get("MNA_TDB_SERVER_PORT").default(5000).asPortNumber(),
   env: env.get("MNA_TDB_ENV").required().asString(),
   publicUrl: env.get("MNA_TDB_PUBLIC_URL").required().asString(),

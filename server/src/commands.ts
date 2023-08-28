@@ -10,6 +10,15 @@ import config from "./config";
 import createServer from "./http/server";
 import { addJob, processor } from "./jobs/jobs_actions";
 
+program
+  .configureHelp({
+    sortSubcommands: true,
+  })
+  .hook("postAction", async () => {
+    await closeMongodbConnection();
+    await closeSentry();
+  });
+
 async function startProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
   await addJob(
@@ -50,15 +59,6 @@ function createProcessExitSignal() {
 
   return abortController.signal;
 }
-
-program
-  .configureHelp({
-    sortSubcommands: true,
-  })
-  .hook("postAction", async () => {
-    await closeMongodbConnection();
-    await closeSentry();
-  });
 
 program
   .command("start")

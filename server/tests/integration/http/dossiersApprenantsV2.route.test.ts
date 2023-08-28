@@ -48,7 +48,7 @@ describe("Dossiers Apprenants Route", () => {
     randomOrganisme = createRandomOrganisme({ uai, siret });
 
     try {
-      const { _id } = await createOrganisme(randomOrganisme);
+      await createOrganisme(randomOrganisme);
     } catch (err: any) {
       console.error("Error with the following randomOrganisme", randomOrganisme);
       throw new Error(err);

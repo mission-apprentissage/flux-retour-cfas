@@ -58,18 +58,24 @@ module.exports = {
     // le temps de la migration complète vers typescript
     "prefer-const": 0,
     "no-var": 0,
+    "node/no-unsupported-features/es-syntax": [
+      "error",
+      {
+        ignores: ["modules", "dynamicImport"],
+      },
+    ],
   },
   env: {
     es2021: true,
     node: true,
   },
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 2022,
     sourceType: "module",
   },
   overrides: [
     {
-      files: "tests/**/*.ts",
+      files: ["tests/**/*.ts", "tsup.config.ts", "src/dev.ts"],
       rules: {
         // autorise l'import des devDependencies
         "node/no-unpublished-import": "off",

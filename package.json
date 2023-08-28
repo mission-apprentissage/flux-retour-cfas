@@ -1,11 +1,15 @@
 {
-  "name": "mna-flux-retour-cfas",
+  "name": "mna-tdb",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "version": "3.29.0",
   "author": "MNA",
   "license": "MIT",
   "private": true,
+  "engines": {
+    "node": ">=20",
+    "npm": "please-use-yarn"
+  },
   "dependencies": {
     "global": "4.4.0",
     "rome": "^11.0.0"
@@ -70,10 +74,6 @@
     "*.{js,jsx,ts,tsx}": [
       "npx rome check"
     ]
-  },
-  "engines": {
-    "node": ">=20",
-    "npm": "please-use-yarn"
   },
   "packageManager": "yarn@3.6.1"
 }

@@ -1,12 +1,12 @@
-export { Effectif } from "./Effectif";
-export { FiabilisationUaiSiret } from "./FiabilisationUaiSiret";
-export { Formation } from "./Formation";
-export { JobEvent } from "./JobEvent";
-export { JwtSession } from "./JwtSession";
-export { MaintenanceMessage } from "./MaintenanceMessage";
+export type { Effectif } from "./Effectif";
+export type { FiabilisationUaiSiret } from "./FiabilisationUaiSiret";
+export type { Formation } from "./Formation";
+export type { JobEvent } from "./JobEvent";
+export type { JwtSession } from "./JwtSession";
+export type { MaintenanceMessage } from "./MaintenanceMessage";
 // FIXME ajouter le type de l'organisation
-export { Organisme } from "./Organisme";
-export { OrganismesReferentiel } from "./OrganismesReferentiel";
-export { Upload } from "./Upload";
-export { User } from "./User";
-export { UsersMigration } from "./UsersMigration";
+export type { Organisme } from "./Organisme";
+export type { OrganismesReferentiel } from "./OrganismesReferentiel";
+export type { Upload } from "./Upload";
+export type { User } from "./User";
+export type { UsersMigration } from "./UsersMigration";

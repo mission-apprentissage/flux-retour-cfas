@@ -9,7 +9,7 @@ import * as Sentry from "@sentry/nextjs";
 import { publicConfig } from "./config.public";
 
 Sentry.init({
-  dsn: publicConfig.sentry.dsn,
+  dsn: publicConfig.sentry_dsn,
   tracesSampleRate: publicConfig.env === "production" ? 0.1 : 1.0,
   tracePropagationTargets: [/\.apprentissage\.beta\.gouv\.fr$/],
   environment: publicConfig.env,

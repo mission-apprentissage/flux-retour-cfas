@@ -7,15 +7,14 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "cli": "tsx src/main.ts",
-    "init:dev": "tsx src/main.ts init:dev",
-    "start": "tsx src/main.ts start",
-    "dev": "tsx watch --inspect=0.0.0.0:9229 src/main.ts start",
-    "start:dev": "tsx watch --inspect=0.0.0.0:9229 src/main.ts start",
+    "cli:dev": "tsx src/dev.ts",
+    "cli": "node dist/index.js",
+    "init:dev": "yarn cli:dev init:dev",
+    "dev": "tsup-node --watch",
     "test": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest",
     "test:ci": "yarn test --ci --coverage --w 2",
     "lint": "eslint --cache . --ext .ts",
-    "build": "tsc --build",
+    "build": "tsup-node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -46,7 +45,6 @@
     "cron-parser": "4.9.0",
     "date-fns": "2.28.0",
     "deepmerge": "4.2.2",
-    "dotenv": "16.0.1",
     "ejs": "3.1.7",
     "env-var": "7.1.1",
     "express": "4.18.1",
@@ -90,7 +88,6 @@
     "swagger-jsdoc": "6.2.8",
     "swagger-ui-express": "4.6.2",
     "tcp-port-used": "1.0.2",
-    "ts-node": "10.9.1",
     "tsx": "3.12.6",
     "type-fest": "^3.10.0",
     "uuid": "8.3.2",
@@ -121,6 +118,7 @@
     "axiosist": "0.10.0",
     "bson-schema-to-typescript": "0.0.26",
     "cross-env": "7.0.3",
+    "dotenv": "16.0.1",
     "eslint": "8.38.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-import-resolver-typescript": "3.5.5",
@@ -133,6 +131,7 @@
     "nock": "13.2.4",
     "prettier": "2.8.7",
     "ts-jest": "^29.1.0",
+    "tsup": "^7.2.0",
     "typescript": "^5.0.4"
   }
 }
