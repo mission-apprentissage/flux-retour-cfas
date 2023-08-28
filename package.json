@@ -25,8 +25,8 @@
     "services:stop": "docker compose down",
     "services:clean": "yarn services:stop; docker system prune --volumes",
     "lint": "eslint --ignore-path .gitignore --cache .",
-    "prettier:fix": "prettier --write .",
-    "prettier:check": "prettier --check .",
+    "prettier:fix": "prettier --write  -u .",
+    "prettier:check": "prettier --check -u .",
     "release": "semantic-release",
     "release:interactive": "./.bin/mna-tdb release:interactive",
     "prepare": "husky install",
@@ -82,10 +82,10 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --ignore-path .gitignore --cache --fix",
-      "prettier --write"
+      "prettier --write -u"
     ],
     "*": [
-      "prettier --write"
+      "prettier --write -u"
     ]
   },
   "packageManager": "yarn@3.6.1"
