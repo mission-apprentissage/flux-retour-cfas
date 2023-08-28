@@ -232,9 +232,9 @@ Pour résoudre les conflits git sur le vault, il est possible de configurer git 
 Pour l'installer il faut exécuter les commandes suivantes
 
 ```bash
-git config --local merge.merge-vault.driver ".infra/scripts/vault/merge-vault.sh %O %A %B"
+git config --local merge.merge-vault.driver ".bin/scripts/merge-vault.sh %O %A %B"
 git config --local merge.merge-vault.name "ansible-vault merge driver"
-git config --local diff.diff-vault.textconv "ansible-vault decrypt --vault-password-file='.infra/scripts/vault/get-vault-password-client.sh' --output -"
+git config --local diff.diff-vault.textconv "ansible-vault decrypt --vault-password-file='.bin/scripts/get-vault-password-client.sh' --output -"
 git config --local diff.diff-vault.cachetextconv "false"
 ```
 
