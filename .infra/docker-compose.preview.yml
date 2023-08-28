@@ -45,10 +45,19 @@ services:
       - LETSENCRYPT_HOST={{pr_number}}.tdb-preview.apprentissage.beta.gouv.fr
       - LETSENCRYPT_EMAIL=misson.apprentissage.devops@gmail.com
 
-  processor:
+  queue_processor:
     <<: *default
     image: "ghcr.io/mission-apprentissage/mna_tdb_server:0.0.0-{{pr_number}}"
-    container_name: tdb_{{pr_number}}_processor
+    container_name: tdb_{{pr_number}}_queue_processor
+    command: ["yarn", "cli", "queue_processor:start"]
+    env_file: .env_server
+    volumes:
+      - server:/data
+
+  jobs_processor:
+    <<: *default
+    image: "ghcr.io/mission-apprentissage/mna_tdb_server:0.0.0-{{pr_number}}"
+    container_name: tdb_{{pr_number}}_jobs_processor
     command: ["yarn", "cli", "processor"]
     env_file: .env_server
     volumes:
