@@ -23,7 +23,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_FG_TOKEN }}
           persist-credentials: true
 
       - uses: actions/setup-node@v3
@@ -61,7 +60,7 @@ jobs:
       - name: bump and release
         run: yarn release
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_FG_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           GITHUB_REF_NAME: ${{ env.GITHUB_REF_NAME }}
 
@@ -79,7 +78,7 @@ jobs:
     secrets:
       DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
       SSH_KNOWN_HOSTS: ${{ vars.SSH_KNOWN_HOSTS }}
-      DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+      DEPLOY_USERNAME: deploy
       DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       VAULT_PWD: ${{ secrets.VAULT_PWD }}
