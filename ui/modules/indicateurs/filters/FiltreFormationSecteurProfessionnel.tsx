@@ -64,11 +64,25 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
     return filterRomeNodesByTerm(famillesMetiers, normalizedSearchTerm);
   }, [famillesMetiers, searchTerm]);
 
-  const treeData = useMemo(() => {
-    return flattenTree({
+  const { filteredTreeData } = useMemo(() => {
+    const treeData = flattenTree({
       name: "",
       children: filteredFamillesMetiers,
     });
+    // expandedIds contient la liste des id de tous les noeuds dès lors qu'il y a une recherche,
+    // afin de déplier automatiquement les noeuds qui correspondent
+    // désactivé côté composant <TreeView/> car cela ne fonctionne pas quand on change le filtre pour un sous-ensemble
+    // cad on passe de "hot" = "hote" et une erreur comme quoi certains noeuds ne sont plus trouvés
+    // sans doute une issue à lever côté react-accessible-treeview
+    return {
+      filteredTreeData: treeData,
+      expandedIds:
+        searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH
+          ? // hack: reverse pour faire en sorte que l'id root soit en dernier sinon la lib sélectionne
+            // le dernier élément et on perd le focus de la recherche
+            treeData.map((node) => node.id).reverse()
+          : [],
+    };
   }, [filteredFamillesMetiers]);
 
   return (
@@ -142,10 +156,12 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
           {famillesMetiers && (
             <Box className="tree-secteur-professionnel" mt={4} userSelect="none">
               <TreeView
-                data={treeData}
+                data={filteredTreeData}
                 className="tree-secteur-professionnel"
-                aria-label="Checkbox tree"
+                aria-label="Secteurs professionnels"
                 multiSelect
+                // A réactiver une fois le bug corrigé, voir plus haut
+                // expandedIds={expandedIds}
                 propagateSelect
                 propagateSelectUpwards
                 togglableSelect
