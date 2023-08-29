@@ -8,7 +8,7 @@ export default function parseExcelBoolean(input) {
     if (input.trim().toLowerCase() === "oui") return true;
     if (input.trim().toLowerCase() === "non") return false;
     if (input.trim().toLowerCase() === "vrai") return true;
-    if (input.trim().toLowerCase() === "faux") return true;
+    if (input.trim().toLowerCase() === "faux") return false;
   }
   return null;
 }
