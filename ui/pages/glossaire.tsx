@@ -22,9 +22,9 @@ export default function Glossaire() {
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Clarification des termes techniques et données
         </Heading>
-        <Table mt="10" fontSize="zeta" variant="primary" className="table-padding-lg">
+        <Table mt="10" variant="glossaire">
           <Thead>
-            <Tr color="red.500">
+            <Tr>
               <Th w="56">Termes</Th>
               <Th>Définitions et périmètre</Th>
             </Tr>
