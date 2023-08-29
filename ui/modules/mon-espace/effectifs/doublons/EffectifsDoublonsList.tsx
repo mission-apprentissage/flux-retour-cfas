@@ -67,7 +67,7 @@ const EffectifsDoublonsList = ({ data }) => {
           ),
         },
         {
-          header: () => "Nombre de duplicats",
+          header: () => "Nombre d'occurences",
           accessorKey: "_id",
           cell: ({ row }) => (
             <HStack>
