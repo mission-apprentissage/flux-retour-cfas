@@ -70,7 +70,7 @@ services:
       resources:
         limits:
           memory: 1g
-    command: ["yarn", "cli", "processor"]
+    command: ["yarn", "cli", "job_processor:start"]
     env_file: .env_server
     volumes:
       - /opt/app/data/server:/data
