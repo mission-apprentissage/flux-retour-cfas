@@ -20,7 +20,9 @@ import { useDropzone } from "react-dropzone";
 import XLSX from "xlsx";
 
 import { _post } from "@/common/httpClient";
+import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
+import { cyrb53Hash, normalize } from "@/common/utils/stringUtils";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useToaster from "@/hooks/useToaster";
@@ -44,7 +46,24 @@ const dateFields = [
   "contrat_date_rupture_2",
 ];
 
+const booleanFields = ["rqth_apprenant", "obtention_diplome_formation", "formation_presentielle"];
+
 type Status = "validation_success" | "validation_failure" | "import_success" | "import_failure";
+
+// Enrich data with source and id_erp_apprenant
+function toEffectifsQueue(data: any[], organismeId: string) {
+  return data.map((e) => ({
+    ...e,
+    source: String(organismeId),
+    // Generate a unique id for each row, based on the apprenant's name and birthdate.
+    // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693294663898159?thread_ts=1693292246.217809&cid=C02FR2L1VB8
+    id_erp_apprenant: cyrb53Hash(
+      normalize(e.prenom_apprenant || "").trim() +
+        normalize(e.nom_apprenant || "").trim() +
+        (e.date_de_naissance_apprenant || "").trim()
+    ),
+  }));
+}
 
 export default function Televersement({ organismeId, isMine }: { organismeId: string; isMine: boolean }) {
   const { toastError } = useToaster();
@@ -90,6 +109,8 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           return headers.reduce((acc: any, header: string, index: number) => {
             if (dateFields.includes(header)) {
               acc[header] = parseExcelDate(row[index]); // Excel date can be weird, we have to accept multiple formats.
+            } else if (booleanFields.includes(header)) {
+              acc[header] = parseExcelBoolean(row[index]);
             } else {
               acc[header] = row[index];
             }
@@ -100,7 +121,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         // Send data to API for validation.
         const res = await _post(
           `/api/v1/organismes/${organismeId}/upload/validate`,
-          jsonData.map((e) => ({ ...e, source: String(organismeId), id_erp_apprenant: String(e.id_erp_apprenant) }))
+          toEffectifsQueue(jsonData, organismeId)
         );
 
         // The response is an array of errors (zod)
@@ -164,7 +185,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
     setIsSubmitting(true);
     const res = await _post(
       `/api/v1/organismes/${organismeId}/upload/import/v3`,
-      (data || []).map((e) => ({ ...e, source: String(organismeId), id_erp_apprenant: String(e.id_erp_apprenant) }))
+      toEffectifsQueue(data || [], organismeId)
     );
     setStatus(res.error ? "import_failure" : "import_success");
     setIsSubmitting(false);
