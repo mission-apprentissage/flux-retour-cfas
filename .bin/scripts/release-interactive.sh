@@ -10,11 +10,14 @@ get_channel() {
   local version="$1"
   channel=$(echo "$version" | cut -d '-' -f 2)
 
-  if [ -z "$channel" ]; then
+  if [ "$channel" == "$version" ]; then
     channel="latest"
+    echo $channel
+  else
+    channel=$(echo $channel | cut -d '.' -f 1 )
   fi
 
-  echo $channel | cut -d '.' -f 1
+  echo $channel
 }
 
 generate_next_patch_version() {

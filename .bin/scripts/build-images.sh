@@ -11,6 +11,9 @@ get_channel() {
 
   if [ "$channel" == "$version" ]; then
     channel="latest"
+    echo $channel
+  else
+    channel=$(echo $channel | cut -d '.' -f 1 )
   fi
 
   echo $channel
