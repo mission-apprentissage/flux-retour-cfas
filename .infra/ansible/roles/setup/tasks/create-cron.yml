@@ -13,6 +13,7 @@
     minute: "30"
     hour: "2"
     job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-daily-jobs.sh"
+    state: absent
 
 - name: Add CRON to run fiabilité analyses on data received in last 24hours everyday at 11:15AM
   become: true
@@ -21,6 +22,7 @@
     minute: "15"
     hour: "11"
     job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-analyse-fiabilite-donnees-recues-job.sh"
+    state: absent
 
 - name: Add CRON to archive dossiersApprenants every 1rst day of the month at 12:45AM
   become: true
@@ -30,3 +32,4 @@
     hour: "12"
     day: "1"
     job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-archive-job.sh"
+    state: absent

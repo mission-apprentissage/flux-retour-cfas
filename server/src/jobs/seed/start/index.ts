@@ -5,7 +5,7 @@ import { usersMigrationDb } from "@/common/model/collections";
 import { buildAdresseFromUai } from "@/common/utils/uaiUtils";
 
 // TODO devrait désactiver l'envoi d'email globalement en mode CLI
-export const seedAdmin = async (email = "admin@test.fr") => {
+export const seedAdmin = async ({ email } = { email: "admin@test.fr" }) => {
   // Create user Admin
   await register({
     user: {
