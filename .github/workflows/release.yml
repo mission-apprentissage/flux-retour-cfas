@@ -60,7 +60,7 @@ jobs:
       - name: bump and release
         run: yarn release
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_FG_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           GITHUB_REF_NAME: ${{ env.GITHUB_REF_NAME }}
 
