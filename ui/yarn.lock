@@ -10605,10 +10605,10 @@ raw-body@2.5.1:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-react-accessible-treeview@2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/react-accessible-treeview/-/react-accessible-treeview-2.7.0.tgz#c20c98598de8ef7a3d98267949934513b5f015e9"
-  integrity sha512-HUrATF8CLE1sIxTw8oDHeH4WTmuabdPnCfiP51ktwQGuBcsudlDJlGSCgemQX7ORqmGug7ctYlvCKwPtRKLe5g==
+react-accessible-treeview@2.8.0:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/react-accessible-treeview/-/react-accessible-treeview-2.8.0.tgz#2ae780b133719e5c6cdf372b1ffd9608b4366dad"
+  integrity sha512-ZGdXwUNa7gn99gkHknOE5ysqspwTDCzjDzclmN61uzRkVovetW8fBTFQAgddZKprL9lrQBISTof9fahx1FAxmA==
 
 react-clientside-effect@^1.2.6:
   version "1.2.6"
