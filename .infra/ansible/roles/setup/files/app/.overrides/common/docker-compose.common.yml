@@ -16,6 +16,12 @@ services:
     environment:
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
 
+  ui:
+    environment:
+      - METABASE_SITE_URL={{vault.METABASE_SITE_URL}}
+      - METABASE_SECRET_KEY={{vault.METABASE_SECRET_KEY}}
+      - METABASE_ONGLET_DATAVIZ_DASHBOARD_ID={{vault.METABASE_ONGLET_DATAVIZ_DASHBOARD_ID}}
+
   mongodb:
     command: mongod --auth
     volumes:
