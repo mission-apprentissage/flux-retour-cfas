@@ -1,5 +1,4 @@
 import { readFileSync } from "fs";
-import { join } from "path";
 
 import { default as parentLogger } from "@/common/logger";
 import { bassinsEmploiDb } from "@/common/model/collections";

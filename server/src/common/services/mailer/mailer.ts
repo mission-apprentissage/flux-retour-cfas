@@ -1,5 +1,3 @@
-import path from "path";
-
 import { omit } from "lodash-es";
 import nodemailer from "nodemailer";
 import { htmlToText } from "nodemailer-html-to-text";

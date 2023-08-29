@@ -1,5 +1,3 @@
-import path from "path";
-
 import { PromisePool } from "@supercharge/promise-pool";
 
 import parentLogger from "@/common/logger";
