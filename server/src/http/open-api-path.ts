@@ -1,5 +1,4 @@
-import path from "path";
-
 import { __dirname } from "@/common/utils/esmUtils";
+import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 
-export const openApiFilePath = path.join(process.cwd(), "./static/open-api.json");
+export const openApiFilePath = getStaticFilePath("./open-api.json");

@@ -18,8 +18,8 @@ export default defineConfig((options) => {
 
   return {
     entry,
-    watch: isDev ? ["./src", "../shared/src"] : false,
-    onSuccess: isDev ? "yarn cli start --withProcessor" : "",
+    watch: isDev && options.watch ? ["./src", "../shared/src"] : false,
+    onSuccess: isDev && options.watch ? "yarn cli start --withProcessor" : "",
     // In watch mode doesn't exit cleanly as it causes EADDRINUSE error
     killSignal: "SIGKILL",
     target: "es2022",
@@ -31,5 +31,8 @@ export default defineConfig((options) => {
     sourcemap: true,
     noExternal: ["shared"],
     clean: true,
+    env: {
+      IS_BUILT: "true",
+    },
   };
 });

@@ -7,6 +7,7 @@ import { htmlToText } from "nodemailer-html-to-text";
 import { sendStoredEmail } from "@/common/actions/emails.actions";
 import { getPublicUrl, generateHtml } from "@/common/utils/emailsUtils";
 import { __dirname } from "@/common/utils/esmUtils";
+import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 import config from "@/config";
 
 function createTransporter(smtp) {
@@ -47,7 +48,7 @@ export async function sendEmail<T extends TemplateName>(
   // identifiant email car stocké en BDD et possibilité de le consulter via navigateur
   await sendStoredEmail(recipient, template, payload, {
     subject: templatesTitleFuncs[template](payload),
-    templateFile: path.join(process.cwd(), `./static/emails/${template}.mjml.ejs`),
+    templateFile: getStaticFilePath(`./emails/${template}.mjml.ejs`),
     data: payload,
   });
 }
@@ -55,7 +56,7 @@ export async function sendEmail<T extends TemplateName>(
 export function getEmailInfos<T extends TemplateName>(template: T, payload: TemplatePayloads[T]) {
   return {
     subject: templatesTitleFuncs[template](payload),
-    templateFile: path.join(process.cwd(), `./static/emails/${template}.mjml.ejs`),
+    templateFile: getStaticFilePath(`./emails/${template}.mjml.ejs`),
     data: payload,
   };
 }
