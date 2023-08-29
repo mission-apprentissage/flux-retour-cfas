@@ -4,9 +4,10 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 interface SimpleOverlayMenuProps extends SystemProps {
   onClose: () => void;
   children: ReactNode;
+  limitedHeight?: boolean;
 }
 
-function SimpleOverlayMenu({ onClose, children, ...props }: SimpleOverlayMenuProps) {
+function SimpleOverlayMenu({ onClose, children, limitedHeight = true, ...props }: SimpleOverlayMenuProps) {
   const menuRef = useRef<any>();
   const [menuMaxHeight, setMenuMaxHeight] = useState("100%");
 
@@ -14,9 +15,10 @@ function SimpleOverlayMenu({ onClose, children, ...props }: SimpleOverlayMenuPro
     setTimeout(() => {
       const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
       // compute max-height for menu considering viewport, current y axis position and the 16px marginTop
-      const menuHeight = menuRef?.current
-        ? `${Math.max(viewportHeight - menuRef.current.getBoundingClientRect().y - 16, 200)}px`
-        : "100%";
+      const menuHeight =
+        menuRef?.current && limitedHeight
+          ? `${Math.max(viewportHeight - menuRef.current.getBoundingClientRect().y - 16, 200)}px`
+          : "100%";
       setMenuMaxHeight(menuHeight);
     }, 0);
   }, []);

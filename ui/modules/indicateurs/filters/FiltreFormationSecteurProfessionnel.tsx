@@ -81,7 +81,13 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
       />
 
       {isOpen && (
-        <SimpleOverlayMenu onClose={() => setIsOpen(false)} px="8w" py="3w" width="var(--chakra-sizes-xl)">
+        <SimpleOverlayMenu
+          onClose={() => setIsOpen(false)}
+          limitedHeight={false}
+          px="8w"
+          py="3w"
+          width="var(--chakra-sizes-xl)"
+        >
           <Heading as="h3" variant="h3" marginBottom="3w" marginTop="2w">
             Sélectionner un domaine ou sous-domaine d’activité
           </Heading>
