@@ -1,14 +1,15 @@
 name: CI
 
-workflow_call:
-  secrets:
-    CODECOV_TOKEN:
-      description: Code coverrage token
-      required: true
-  outputs:
-    status:
-      description: Whether deployment succeeded or not
-      value: ${{ jobs.deploy.outputs.status }}
+on:
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        description: Code coverrage token
+        required: true
+    outputs:
+      status:
+        description: Whether deployment succeeded or not
+        value: ${{ jobs.deploy.outputs.status }}
 
 jobs:
   tests:
