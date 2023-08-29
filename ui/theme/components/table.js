@@ -59,5 +59,40 @@ export const Table = {
         },
       },
     },
+    glossaire: {
+      th: {
+        fontFamily: "heading",
+        fontWeight: "bold",
+        fontSize: "zeta",
+        color: "grey.800",
+        textTransform: "none",
+        whiteSpace: "nowrap",
+        paddingY: "6",
+        paddingX: "6",
+        letterSpacing: "normal",
+      },
+      thead: {
+        tr: {
+          borderBottom: "3px solid",
+          borderBottomColor: "bluefrance",
+        },
+      },
+      tbody: {
+        tr: {
+          fontSize: "zeta",
+          color: "grey.800",
+          "&:nth-of-type(even)": {
+            backgroundColor: "grey.100",
+          },
+          _hover: {
+            backgroundColor: "grey.200",
+          },
+        },
+        td: {
+          paddingY: "6",
+          paddingX: "6",
+        },
+      },
+    },
   },
 };

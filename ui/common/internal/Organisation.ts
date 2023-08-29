@@ -16,7 +16,6 @@ export const organisationTypes = [
   "OPERATEUR_PUBLIC_NATIONAL",
   "CARIF_OREF_NATIONAL",
   "ADMINISTRATEUR",
-  "AUTRE", // UI uniquement
 ] as const;
 
 export type Organisation = { _id: string } & (
@@ -28,7 +27,6 @@ export type Organisation = { _id: string } & (
   | OrganisationOperateurPublicNational
   | OrganisationCarifOrefNational
   | OrganisationAdministrateur
-  | OrganisationAutre
 );
 
 export type OrganisationType = (typeof organisationTypes)[number];
@@ -81,11 +79,6 @@ export interface OrganisationAdministrateur extends AbstractOrganisation {
   type: "ADMINISTRATEUR";
 }
 
-export interface OrganisationAutre extends AbstractOrganisation {
-  type: "AUTRE";
-  nom: string;
-}
-
 const OFTypeLabelByType = {
   ORGANISME_FORMATION_FORMATEUR: "OF",
   ORGANISME_FORMATION_RESPONSABLE: "OFR",
@@ -123,5 +116,4 @@ export function getOrganisationLabel(organisation: Organisation): string {
     case "ADMINISTRATEUR":
       return "Administrateur";
   }
-  return ""; // cas autre
 }

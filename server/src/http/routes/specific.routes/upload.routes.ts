@@ -18,7 +18,7 @@ import {
 } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists } from "@/common/actions/engine/engine.actions";
 import { getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
-import { findOrganismeById, setOrganismeTransmissionDates } from "@/common/actions/organismes/organismes.actions";
+import { findOrganismeById, updateOrganismeTransmissionDates } from "@/common/actions/organismes/organismes.actions";
 import {
   addDocument,
   getDocument,
@@ -630,7 +630,7 @@ export default {
     }
 
     if (uploads.last_snapshot_effectifs.length > 0) {
-      await setOrganismeTransmissionDates(organisme);
+      await updateOrganismeTransmissionDates(organisme);
     }
 
     return {};

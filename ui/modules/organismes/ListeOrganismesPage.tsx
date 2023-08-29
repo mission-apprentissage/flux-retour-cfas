@@ -62,22 +62,25 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     props.activeTab === "non-fiables" ? " non fiables" : ""
   }`;
 
-  const { organismesFiables, organismesNonFiables, nbOrganimesFermes } = useMemo(() => {
+  const { organismesFiables, organismesNonFiables, nbOrganismesFermes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesNonFiables: OrganismeNormalized[] = [];
-    let nbOrganimesFermes = 0;
+    let nbOrganismesFermes = 0;
     (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
       organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
       organisme.normalizedUai = normalize(organisme.uai ?? "");
       organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
 
-      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme) {
+      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
         organismesFiables.push(organisme);
+      } else if (organisme.ferme && !organisme.last_transmission_date) {
+        // Organismes fermés et ne transmettant pas (on ne les affiche pas)
+        nbOrganismesFermes++;
       } else {
         organismesNonFiables.push(organisme);
         if (organisme.ferme) {
-          nbOrganimesFermes++;
+          nbOrganismesFermes++;
         }
       }
     });
@@ -85,7 +88,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     return {
       organismesFiables,
       organismesNonFiables,
-      nbOrganimesFermes,
+      nbOrganismesFermes,
     };
   }, [props.organismes]);
 
@@ -106,13 +109,13 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           {organismesNonFiables.length !== 0 && (
             <ListItem>
               les <strong>{organismesNonFiables.length}</strong> établissements <strong>non-fiabilisés</strong>
-              {nbOrganimesFermes > 0 && (
+              {nbOrganismesFermes > 0 && (
                 <>
                   {" "}
-                  dont <strong>{nbOrganimesFermes}</strong> établissement{nbOrganimesFermes > 1 ? "s" : ""}{" "}
+                  dont <strong>{nbOrganismesFermes}</strong> établissement{nbOrganismesFermes > 1 ? "s" : ""}{" "}
                   <strong>
                     fermé
-                    {nbOrganimesFermes > 1 ? "s" : ""}
+                    {nbOrganismesFermes > 1 ? "s" : ""}
                   </strong>
                   .
                 </>
@@ -248,6 +251,10 @@ function OrganismesNonFiablesPanelContent({ organismes }: { organismes: Organism
             <ListItem>
               L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE, est{" "}
               <strong>fermé</strong>.
+            </ListItem>
+            <ListItem>
+              La nature de l’organisme (déduite des relations entre organismes - base des Carif-Oref) est{" "}
+              <strong>inconnue</strong>.
             </ListItem>
           </UnorderedList>
           <Text>
