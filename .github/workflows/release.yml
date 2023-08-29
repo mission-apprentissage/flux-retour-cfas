@@ -13,9 +13,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   release:
-    permissions:
-      contents: read
-      packages: write
+    permissions: write-all
     outputs:
       VERSION: ${{ steps.get-version.outputs.VERSION }}
     needs: ["tests"]
