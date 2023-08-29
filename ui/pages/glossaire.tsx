@@ -22,10 +22,10 @@ export default function Glossaire() {
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Clarification des termes techniques et données
         </Heading>
-        <Table mt="10" fontSize="zeta" variant="primary">
+        <Table mt="10" variant="glossaire">
           <Thead>
             <Tr>
-              <Th w="40">Termes</Th>
+              <Th w="56">Termes</Th>
               <Th>Définitions et périmètre</Th>
             </Tr>
           </Thead>
@@ -35,22 +35,22 @@ export default function Glossaire() {
               <Td>
                 <Flex gap="2" flexDirection="column" alignItems="left">
                   <Text as="p">
-                    Elle est censée refléter le niveau auquel est inscrit l’apprenti par rapport à la durée théorique du
-                    cursus de formation. Par exemple, pour une formation de plusieurs années, numéro de l’année en cours
-                    &nbsp;: 1 = 1ère année de formation, 2 = 2ème année de formation, etc.
+                    Le niveau de progression de l’apprenti dans son programme de formation est indiqué par un numéro en
+                    fonction de la durée théorique du cursus. Par exemple, pour une formation sur plusieurs années, le
+                    numéro correspond à l’année en cours (1 pour la première année, 2 pour la deuxième, etc.).
                   </Text>
                   <Text as="p">
-                    Dans le cas des CAP avec une durée théorique égale à 24 mois mais avec une durée réelle de 12 mois,
-                    les apprentis sont déclarés en 2 et non en 1.
+                    Pour les formations déviant de leur durée théorique, comme un CAP prévu sur 24 mois mais durant en
+                    réalité 12 mois, l’apprenti est classé en année 2 au lieu de 1.
                   </Text>
                   <Text as="p">
-                    Dans le cas des Bac Pro avec des cursus en durée réelle en 24 mois où les apprentis font
-                    1ère–terminale, ils sont donc renseignés en 2 et en 3 l’année suivante.
+                    Pour les Bac Pro sur 24 mois, où les apprentis couvrent l’équivalent de la première à la terminale,
+                    ils sont classés en année 2, puis en 3 l’année suivante.
                   </Text>
                   <Text as="p">
-                    De manière générale, si les apprentis passent l’examen cette année sans redoubler, ils sont
-                    renseignés en&nbsp;: 2 pour un CAP ou un BTS et en 3 pour un Bac Pro. Ce principe est appliqué pour
-                    l’ensemble des diplômes quelle que soit leur durée théorique.
+                    Généralement, si les apprentis passent l’examen cette année sans redoubler, ils sont classés en
+                    année 2 pour CAP et BTS, et en 3 pour Bac Pro. Cette règle s’applique à tous les diplômes, quelle
+                    que soit leur durée théorique.
                   </Text>
                 </Flex>
               </Td>
@@ -78,7 +78,7 @@ export default function Glossaire() {
                     Codification qui concerne l’ensemble des diplômes technologiques et professionnels des ministères
                     certificateurs.Y sont ajoutés, en tant que de besoin et à la demande des centres de formation par
                     l’apprentissage, les autres diplômes et titres inscrits au répertoire national des certifications
-                    professionnelles (RNCP), dès lorsqu’ils sont préparés par la voie de l’apprentissage. L’affichage
+                    professionnelles (RNCP), dès lors qu’ils sont préparés par la voie de l’apprentissage. L’affichage
                     permet, par l’usage de ce code, d’identifier la formation concernée et les effectifs par typologie
                     de formations et par secteur.
                   </Text>
@@ -91,7 +91,15 @@ export default function Glossaire() {
               <Td>
                 Les lieux de formations sont caractérisés par une adresse postale et des coordonnées de géolocalisation
                 et toujours rattachés à un organisme de formation. La donnée «&nbsp;lieu de formation&nbsp;» provient
-                des Carif-Oref. Si cette donnée est inconnue ou incorrecte, voir la marche à suivre.
+                des Carif-Oref. Si cette donnée est inconnue ou incorrecte,{" "}
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://referentiel.apprentissage.onisep.fr/corrections?item=lieu"
+                >
+                  voir la marche à suivre
+                </a>
+                .
               </Td>
             </Tr>
             <Tr>
@@ -105,13 +113,13 @@ export default function Glossaire() {
                   <Text as="b">Les organisme «&nbsp;responsables&nbsp;»&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
-                      Ne dispensent pas de formation mais délègue à des organismes responsable et formateur ou
-                      uniquement formateur ;
+                      Ne dispensent pas de formation mais délèguent à des organismes responsable et formateur ou
+                      uniquement formateur&nbsp;;
                     </ListItem>
-                    <ListItem>Sont signataires de la convention de formation ;</ListItem>
-                    <ListItem>Demandent et reçoit les financements de l’OPCO ;</ListItem>
+                    <ListItem>Sont signataires de la convention de formation&nbsp;:</ListItem>
+                    <ListItem>Demandent et reçoivent les financements de l’OPCO&nbsp;:</ListItem>
                     <ListItem>
-                      Sont responsables auprès de l’administration du respect de ses missions et obligations ;
+                      Sont responsables auprès de l’administration du respect de ses missions et obligations&nbsp;:
                     </ListItem>
                     <ListItem>
                       Sont titulaires de la certification qualité en tant que CFA et est garant du respect des critères
@@ -121,17 +129,17 @@ export default function Glossaire() {
                   <Text as="b">Les organisme «&nbsp;responsables et formateurs&nbsp;»&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
-                      Dispensent des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de
-                      déclaration d’activité (NDA)) ;
+                      Dispensent des formations par apprentissage déclaré auprès des services de l’Etat (n° de
+                      déclaration d’activité (NDA))&nbsp;:
                     </ListItem>
-                    <ListItem>Sont signataires de la convention de formation ;</ListItem>
-                    <ListItem>Demandent et reçoit les financements de l’OPCO ;</ListItem>
+                    <ListItem>Sont signataires de la convention de formation&nbsp;:</ListItem>
+                    <ListItem>Demandent et reçoit les financements de l’OPCO&nbsp;:</ListItem>
                     <ListItem>
-                      Sont responsables auprès de l’administration du respect de ses missions et obligations ;
+                      Sont responsables envers l’administration quant au respect de leurs missions et obligations&nbsp;:
                     </ListItem>
                     <ListItem>
-                      Sont titulaires de la certification qualité en tant que CFA et est garant du respect des critères
-                      qualité au sein de l’UFA.
+                      Détiennent la certification qualité en tant que CFA et veillent à respecter les critères qualité
+                      au sein de l’UFA.
                     </ListItem>
                   </UnorderedList>
                   <Text as="b">Les organisme «&nbsp;formateurs&nbsp;»&nbsp;:</Text>
@@ -167,12 +175,20 @@ export default function Glossaire() {
               <Td verticalAlign="top">Organisme de formation (OFA)</Td>
               <Td>
                 <Flex gap="2" flexDirection="column" alignItems="left">
-                  <Text as="p">Nombre d’organismes reconnus par le Tableau de bord comme&nbsp;:</Text>
+                  <Text as="p">Organismes de formation approuvés par le Tableau de bord, incluant ceux&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
-                      trouvés dans le Catalogue des formations en apprentissage (base des Carif-Oref) ;
+                      Répertoriés dans le Catalogue des formations en apprentissage (base Onisep -{" "}
+                      <a target="_blank" rel="noopener noreferrer" href="https://referentiel.apprentissage.onisep.fr">
+                        https://referentiel.apprentissage.onisep.fr
+                      </a>
+                      )&nbsp;
                     </ListItem>
-                    <ListItem>identifiés par un SIRET (ouvert) et un UAI valable ;</ListItem>
+                    <ListItem>
+                      avec les détails suivants : UAI, SIREN, SIRET, Catégorie (Responsable ; Responsable et formateur ;
+                      Formateur), Numéro de déclaration d’activité (NDA), Certification Qualiopi, Nom commercial,
+                      Dénomination sociale, Appartenance à un réseau, Adresse, Région, Académie.
+                    </ListItem>
                   </UnorderedList>
                   <Text as="p">
                     Ce nombre inclut&nbsp;: les OFA «&nbsp;historiques&nbsp;», les OFA académiques et d’entreprise, les
@@ -195,13 +211,13 @@ export default function Glossaire() {
                   </Text>
                   <UnorderedList>
                     <ListItem>
-                      Si les organismes associés à une offre de formation ont le même SIRET, on en déduit la nature
-                      «&nbsp;responsable et formateur&nbsp;» et on se génère pas de relation.{" "}
+                      Si les organismes liés à une offre de formation partagent le même SIRET, cela indique une relation
+                      de type «&nbsp;responsable et formateur&nbsp;» et aucune nouvelle relation n’est créée.
                     </ListItem>
                     <ListItem>
-                      Si les organismes associés à une offre de formation n’ont pas le même SIRET, on en déduit la
-                      nature «&nbsp;responsable&nbsp;»pour l’un et formateur&nbsp;» pour l’autre, et on génère une
-                      relation entre eux.
+                      Si les organismes associés à une offre de formation ont des SIRET différents, cela implique une
+                      relation de type «&nbsp;responsable&nbsp;» pour l’un et «&nbsp;formateur&nbsp;» pour l’autre, ce
+                      qui engendre la création d’une relation entre eux.
                     </ListItem>
                   </UnorderedList>
                 </Flex>
@@ -212,11 +228,10 @@ export default function Glossaire() {
               <Td>
                 Un réseau dans le contexte de l’apprentissage peut regrouper différents partenaires institutionnels,
                 organismes de formation, centres de formation d’apprentis (CFA), entreprises, chambres consulaires,
-                branches professionnelles et acteurs régionaux. Ces entités peuvent se rassembler au sein d’associations
-                ou de groupements consulaires afin de coordonner leurs actions et missions, en ayant des objectifs
-                communs dans le domaine de la formation en apprentissage. L’objectif principal de ces réseaux est de
-                favoriser la collaboration et la mise en commun des ressources pour promouvoir et soutenir
-                l’apprentissage.
+                branches professionnelles et acteurs régionaux. Ces entités peuvent s’associer au sein d’associations ou
+                de groupements consulaires pour coordonner leurs actions et missions, avec des objectifs partagés dans
+                le domaine de la formation en apprentissage. L’objectif principal de ces réseaux est de favoriser la
+                collaboration et la mise en commun des ressources pour promouvoir et soutenir l’apprentissage.
               </Td>
             </Tr>
             <Tr>
@@ -224,11 +239,12 @@ export default function Glossaire() {
               <Td>
                 <Flex gap="2" flexDirection="column" alignItems="left">
                   <Text>
-                    Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la disposition de
-                    tous une information constamment à jour sur les diplômes et les titres à finalité professionnelle
-                    ainsi que sur les certificats de qualification. La mise à jour du RNCP est confiée à France
-                    compétences. L’affichage permet, par l’usage de ce code, d’identifier la formation concernée et
-                    pouvoir identifier les effectifs par typologie de formations et par secteur.
+                    Le Répertoire national des certifications professionnelles (RNCP) a pour rôle de fournir une
+                    information constamment mise à jour sur les diplômes, les titres à finalité professionnelle ainsi
+                    que sur les certificats de qualification, accessible à tous. France compétences est en charge de
+                    maintenir à jour le RNCP. Grâce à un code spécifique, les formations concernées peuvent être
+                    identifiées, ce qui facilite la classification des effectifs selon le type de formation et le
+                    secteur.
                   </Text>
                   <Text>
                     Pour plus d’information sur la certification et son éligibilité à l’apprentissage, consulter le site
@@ -256,33 +272,35 @@ export default function Glossaire() {
               </Td>
             </Tr>
             <Tr>
-              <Td verticalAlign="top">SIREN</Td>
+              <Td verticalAlign="top">SIRET</Td>
               <Td>
-                La donnée «&nbsp;SIREN&nbsp;» provient de l’INSEE. Si cette information est erronée, merci de leur
-                signaler.
+                Système d’identification du répertoire des établissements. Code numérique unique et officiel. Chaque
+                établissement au sein d’une entreprise est doté d’un SIRET, attribué par l’INSEE (Institut National de
+                la Statistique et des Études Économiques). Pour plus d’informations, vous pouvez contacter l’INSEE via
+                leur site web officiel&nbsp;:{" "}
+                <a target="_blank" rel="noopener noreferrer" href="https://www.insee.fr/">
+                  https://www.insee.fr/
+                </a>
               </Td>
             </Tr>
             <Tr>
               <Td verticalAlign="top">UAI</Td>
               <Td>
-                Unité Administrative Immatriculée&nbsp;: Ce code est composé de 7 chiffres suivis d’une lettre, les
-                trois premiers chiffres indiquant le département. La donnée «&nbsp;UAI&nbsp;» affichée provient de la
-                base de données RAMSESE et notamment exploité par la DEC avant d’être validée au niveau de chaque
-                territoire.
+                Le code UAI (Unité Administrative Immatriculée) composé de 7 chiffres et 1 lettre, est un code attribué
+                en France aux établissements d’enseignement (écoles, collèges, lycées, universités, etc.). Il est
+                utilisé pour les identifier dans différentes bases de données et systèmes administratifs. Le code UAI
+                est attribué par le Ministère de l’Éducation nationale en France.
               </Td>
             </Tr>
             <Tr>
               <Td verticalAlign="top">Zone d’emploi</Td>
               <Td>
-                Espace géographique regroupant généralement plusieurs cantons et présentant une cohésion en matière
-                d’infrastructures, de marché du travail et de mouvements économiques. Un bassin d’emploi est constitué
-                généralement autour d’un pôle attractif et peut correspondre soit à une agglomération, soit à une
-                micro-région industrielle développée à partir d’une activité spécifique ou d’une grande entreprise
-                industrielle, soit à un territoire où se regroupent des activités diverses. Un bassin d’emploi est
-                déterminé, selon l’INSEE, à partir du facteur déplacement domicile-travail dans un espace restreint
-                permettant aux personnes actives de résider et travailler dans un établissement du bassin, et aux
-                employeurs de recruter la main d’œuvre sur place. C’est l’aire de déplacements domicile-travail autour
-                d’un pôle d’emplois de plus de 5.000 emplois.
+                Unité géographique définie par l’INSEE pour analyser les dynamiques du marché du travail et les
+                interactions économiques au sein d’une région. Elle regroupe un ensemble de communes qui présentent des
+                liens significatifs en termes de déplacements domicile-travail et d’échanges d’activités économiques.
+                Ces zones d’emploi sont utilisées pour étudier les flux de main-d’œuvre, les caractéristiques de
+                l’emploi et d’autres indicateurs socio-économiques, ce qui permet de mieux comprendre les dynamiques
+                économiques régionales et locales.
               </Td>
             </Tr>
           </Tbody>
