@@ -78,7 +78,7 @@ jobs:
         run: echo ${{ secrets.VAULT_PWD }} > .infra/.vault_pwd.txt
 
       - name: Run playbook
-        run: .bin/mna-bal deploy ${{ inputs.environment }} --extra-vars "app_version=${{ inputs.app_version }}"
+        run: .bin/mna-tdb deploy ${{ inputs.environment }} --extra-vars "app_version=${{ inputs.app_version }}"
         env:
           ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
           ANSIBLE_REMOTE_USER: ${{ secrets.DEPLOY_USERNAME }}
