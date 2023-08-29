@@ -218,7 +218,7 @@ const getAllCouplesUaiSiretTdbInQueue = async () => {
   //
   return await effectifsQueueDb()
     .aggregate([
-      { $match: { validation_errors: [], ...filters } },
+      { $match: { ...filters } },
       { $group: { _id: { uai: "$uai_etablissement", siret: "$siret_etablissement" } } },
       { $project: { _id: 0, uai: "$_id.uai", siret: "$_id.siret" } },
     ])
