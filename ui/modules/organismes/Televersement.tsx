@@ -22,7 +22,7 @@ import XLSX from "xlsx";
 import { _post } from "@/common/httpClient";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
-import { cyrb53Hash } from "@/common/utils/stringUtils";
+import { cyrb53Hash, normalize } from "@/common/utils/stringUtils";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useToaster from "@/hooks/useToaster";
@@ -58,7 +58,9 @@ function toEffectifsQueue(data: any[], organismeId: string) {
     // Generate a unique id for each row, based on the apprenant's name and birthdate.
     // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693294663898159?thread_ts=1693292246.217809&cid=C02FR2L1VB8
     id_erp_apprenant: cyrb53Hash(
-      (e.prenom_apprenant || "").trim() + (e.nom_apprenant || "").trim() + (e.date_de_naissance_apprenant || "").trim()
+      normalize(e.prenom_apprenant || "").trim() +
+        normalize(e.nom_apprenant || "").trim() +
+        (e.date_de_naissance_apprenant || "").trim()
     ),
   }));
 }
