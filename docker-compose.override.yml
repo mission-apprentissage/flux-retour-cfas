@@ -70,6 +70,27 @@ services:
     depends_on:
       - smtp
 
+  jobs_processor:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules/@esbuild/ # exclus du mount et (re)-installer dans le Dockerfile pour avoir le bon driver
+      - /app/node_modules/esbuild/ # exclus du mount et (re)-installer dans le Dockerfile pour avoir le bon driver
+      - ./server:/app:z # Allows source folders to be watched
+    environment:
+      - FLUX_RETOUR_CFAS_ENV=dev
+      - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
+      - FLUX_RETOUR_CFAS_LOG_DESTINATIONS=stdout,mongodb
+      - FLUX_RETOUR_CFAS_SMTP_HOST=smtp
+      - FLUX_RETOUR_CFAS_SMTP_PORT=1025
+      - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=secret
+      - FLUX_RETOUR_CFAS_AUTH_API_TOKEN_JWT_SECRET=secret
+      - FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET=secret
+      - FLUX_RETOUR_CFAS_SENTRY_DSN=
+    depends_on:
+      - smtp
+
   mongodb:
     image: mongo:6.0.2-focal
     container_name: flux_retour_cfas_mongodb

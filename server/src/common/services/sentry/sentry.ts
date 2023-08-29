@@ -1,0 +1,27 @@
+import { CaptureConsole, ExtraErrorData } from "@sentry/integrations";
+import * as Sentry from "@sentry/node";
+
+import config from "../../../config";
+
+function getOptions() {
+  return {
+    tracesSampleRate: config.env === "production" ? 0.1 : 1.0,
+    tracePropagationTargets: [/\.apprentissage\.beta\.gouv\.fr$/],
+    environment: config.env,
+    enabled: config.env !== "local",
+    integrations: [
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.Mongo({ useMongoose: false }),
+      new CaptureConsole({ levels: ["error"] }),
+      new ExtraErrorData({ depth: 8 }),
+    ],
+  };
+}
+
+export function initSentryProcessor(): void {
+  Sentry.init(getOptions());
+}
+
+export async function closeSentry(): Promise<void> {
+  await Sentry.close(2_000);
+}

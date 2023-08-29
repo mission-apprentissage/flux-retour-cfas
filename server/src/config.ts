@@ -4,6 +4,7 @@ const config = {
   email: env.get("FLUX_RETOUR_CFAS_EMAIL").default("tableau-de-bord@apprentissage.beta.gouv.fr").asString(),
   email_from: env.get("FLUX_RETOUR_CFAS_EMAIL_FROM").default("Tableau de bord de l'apprentissage").asString(),
   appName: env.get("FLUX_RETOUR_CFAS_NAME").default("Flux Retour Cfas").asString(),
+  port: env.get("FLUX_RETOUR_CFAS_SERVER_PORT").default(5000).asPortNumber(),
   env: env.get("FLUX_RETOUR_CFAS_ENV").required().asString(),
   publicUrl: env.get("FLUX_RETOUR_CFAS_PUBLIC_URL").required().asString(),
   bodyParserLimit: env.get("FLUX_RETOUR_CFAS_BODY_PARSER_LIMIT").default("10mb").asString(),
