@@ -1,5 +1,5 @@
 module.exports = {
-  branches: ["master"],
+  branches: ["master", { name: "next", channel: "next", prerelease: "rc" }],
   repositoryUrl: "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   plugins: [
     "@semantic-release/commit-analyzer",
