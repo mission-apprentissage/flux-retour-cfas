@@ -84,7 +84,7 @@ services:
     container_name: flux_retour_cfas_jobs_processor
     build:
       context: server
-    command: ["yarn", "cli", "processor"]
+    command: ["yarn", "cli", "job_processor:start"]
     mem_limit: 1g
     restart: unless-stopped
     networks:
