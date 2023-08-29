@@ -23,21 +23,21 @@ const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
  * Tri des fichiers réseaux à traiter pour appliquer les réseaux multiples sans erreurs
  */
 const INPUT_FILES = [
-  "assets/referentiel-reseau-mfr.csv", // MFR
-  "assets/referentiel-reseau-cr-normandie.csv", // CR Normandie
-  "assets/referentiel-reseau-aftral.csv", // AFTRAL
-  "assets/referentiel-reseau-cci.csv", // CCI
-  "assets/referentiel-reseau-cma.csv", // CMA
-  "assets/referentiel-reseau-aden.csv", // ADEN
-  "assets/referentiel-reseau-agri.csv", // AGRI
-  // "assets/referentiel-reseau-anasup.csv", // TODO Fichier non fourni pour l'instant
-  // "assets/referentiel-reseau-dgesip.csv", // TODO Fichier non fourni pour l'instant
-  "assets/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
-  "assets/referentiel-reseau-uimm.csv", // UIMM
-  "assets/referentiel-reseau-greta.csv", // GRETA
-  "assets/referentiel-reseau-en.csv", // EDUC. NAT
-  // "assets/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
-  "assets/referentiel-reseau-cfa-ec.csv", // CFA EC
+  "static/reseaux/referentiel-reseau-mfr.csv", // MFR
+  "static/reseaux/referentiel-reseau-cr-normandie.csv", // CR Normandie
+  "static/reseaux/referentiel-reseau-aftral.csv", // AFTRAL
+  "static/reseaux/referentiel-reseau-cci.csv", // CCI
+  "static/reseaux/referentiel-reseau-cma.csv", // CMA
+  "static/reseaux/referentiel-reseau-aden.csv", // ADEN
+  "static/reseaux/referentiel-reseau-agri.csv", // AGRI
+  // "static/reseaux/referentiel-reseau-anasup.csv", // TODO Fichier non fourni pour l'instant
+  // "static/reseaux/referentiel-reseau-dgesip.csv", // TODO Fichier non fourni pour l'instant
+  "static/reseaux/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
+  "static/reseaux/referentiel-reseau-uimm.csv", // UIMM
+  "static/reseaux/referentiel-reseau-greta.csv", // GRETA
+  "static/reseaux/referentiel-reseau-en.csv", // EDUC. NAT
+  // "static/reseaux/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
+  "static/reseaux/referentiel-reseau-cfa-ec.csv", // CFA EC
 ];
 
 /**
@@ -93,7 +93,7 @@ const hydrateReseauFile = async (filename: string) => {
   logger.info(`Import des données réseaux de ${filename}`);
 
   // Lecture du fichier de référence + conversion JSON
-  const filePath = path.join(__dirname(import.meta.url), filename);
+  const filePath = path.join(process.cwd(), filename);
   const reseauFile = readJsonFromCsvFile(filePath, ";");
 
   // init des compteurs

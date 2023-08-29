@@ -47,7 +47,7 @@ export async function sendEmail<T extends TemplateName>(
   // identifiant email car stocké en BDD et possibilité de le consulter via navigateur
   await sendStoredEmail(recipient, template, payload, {
     subject: templatesTitleFuncs[template](payload),
-    templateFile: path.join(__dirname(import.meta.url), `emails/${template}.mjml.ejs`),
+    templateFile: path.join(process.cwd(), `./static/emails/${template}.mjml.ejs`),
     data: payload,
   });
 }
@@ -55,7 +55,7 @@ export async function sendEmail<T extends TemplateName>(
 export function getEmailInfos<T extends TemplateName>(template: T, payload: TemplatePayloads[T]) {
   return {
     subject: templatesTitleFuncs[template](payload),
-    templateFile: path.join(__dirname(import.meta.url), `emails/${template}.mjml.ejs`),
+    templateFile: path.join(process.cwd(), `./static/emails/${template}.mjml.ejs`),
     data: payload,
   };
 }

@@ -8,7 +8,7 @@ import { __dirname } from "@/common/utils/esmUtils";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
 
 const logger = parentLogger.child({ module: "job:hydrate:organismes-soltea" });
-const SOLTEA_CSV_FILE_PATH = "assets/SOLTEA_extrac_etab_bene.csv";
+const SOLTEA_CSV_FILE_PATH = "static/organismes/SOLTEA_extrac_etab_bene.csv";
 
 /**
  * Ce job peuple la collection organismesSoltea avec le contenu du fichier CSV
@@ -18,7 +18,7 @@ export const hydrateOrganismesSoltea = async () => {
   await organismesSolteaDb().deleteMany({});
 
   // Lecture du fichier CSV
-  const filePath = path.join(__dirname(import.meta.url), SOLTEA_CSV_FILE_PATH);
+  const filePath = path.join(process.cwd(), SOLTEA_CSV_FILE_PATH);
   const solteaFile = readJsonFromCsvFile(filePath, ";");
 
   logger.info(solteaFile.length, "lignes dans le fichier");

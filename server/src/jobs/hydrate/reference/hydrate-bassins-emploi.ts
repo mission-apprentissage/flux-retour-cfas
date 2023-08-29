@@ -25,7 +25,7 @@ const logger = parentLogger.child({
 export const hydrateBassinsEmploi = async () => {
   logger.info("hydrating");
   const associationsZECommunes = JSON.parse(
-    readFileSync(join(__dirname(import.meta.url), "./bassins_emploi_communes.json")).toString()
+    readFileSync(join(process.cwd(), "static/organismes/bassins_emploi_communes.json")).toString()
   );
   await bassinsEmploiDb().deleteMany({});
   await bassinsEmploiDb().insertMany(associationsZECommunes);
