@@ -29,4 +29,5 @@ ansible-vault view --vault-password-file="$ROOT_DIR/.bin/scripts/get-vault-passw
 docker compose -f "$ROOT_DIR/docker-compose.yml" up mongodb -d
 mkdir -p "$ROOT_DIR/.infra/files/mongodb"
 docker compose -f "$ROOT_DIR/docker-compose.yml" exec -it mongodb mongodump --uri "$SOURCE_DB" --gzip --archive > "$SEED_GZ" 
+rm -f "$SEED_GPG"
 gpg  -c --cipher-algo twofish --batch --passphrase-file "$PASSPHRASE" -o "$SEED_GPG" "$SEED_GZ"
