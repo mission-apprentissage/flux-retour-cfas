@@ -5,6 +5,31 @@
   vars_files:
     - "../vault/vault.yml"
   tasks:
+    - name: Création de l'arborescence /opt/app à partir de .infra/files
+      file:
+        path: "/opt/app/{{ item.path }}"
+        state: directory
+        mode: "{{ item.mode }}"
+      with_filetree: "{{inventory_dir}}/files"
+      when:
+        - item.state == 'directory'
+        # /app/tools is managed by infra
+        - item.path | regex_search('^tools/?') == none
+        - item.path | regex_search('^system/?') == none
+
+    - name: Copie des fichiers de l'arborescence /opt/app à partir de .infra/files
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "/opt/app/{{ item.path }}"
+        mode: "{{ item.mode }}"
+      with_filetree: "{{inventory_dir}}/files"
+      when:
+        - item.state == 'file'
+        - item.path | basename != '.gitkeep'
+        # /app/tools is managed by infra
+        - item.path | regex_search('^tools/?') == none
+        - item.path | regex_search('^system/?') == none
+
     - name: creation du fichier docker compose preview system
       ansible.builtin.template:
         src: "{{inventory_dir}}/docker-compose.preview-system.yml"
