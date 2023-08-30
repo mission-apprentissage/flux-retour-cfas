@@ -84,7 +84,7 @@ import { createUserToken } from "@/common/utils/jwtUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
+import { dossierApprenantSchemaV3WithMoreRequiredFields } from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFormationSearchSchema";
@@ -482,7 +482,7 @@ function setupRoutes(app: Application) {
           .post(
             "/validate",
             returnResult(async (req) => {
-              const data = await z.array(dossierApprenantSchemaV3()).safeParseAsync(req.body);
+              const data = await z.array(dossierApprenantSchemaV3WithMoreRequiredFields()).safeParseAsync(req.body);
               return data;
             })
           )
