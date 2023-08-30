@@ -247,7 +247,7 @@ export const fullEffectifsFiltersConfigurations: {
     transformValue: (value) => ({ $in: value }),
   },
   formation_secteursProfessionnels: {
-    matchKey: "formation.cfd", // FIXME déterminer sur quoi on filtre
+    matchKey: "_computed.formation.codes_rome",
     transformValue: (value) => ({ $in: value }),
   },
 };
