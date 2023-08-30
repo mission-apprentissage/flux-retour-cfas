@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
-import { join } from "path";
 
 import { default as parentLogger } from "@/common/logger";
 import { bassinsEmploiDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
+import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 
 const logger = parentLogger.child({
   module: "job:hydrate:bassins-emploi",
@@ -25,7 +25,7 @@ const logger = parentLogger.child({
 export const hydrateBassinsEmploi = async () => {
   logger.info("hydrating");
   const associationsZECommunes = JSON.parse(
-    readFileSync(join(__dirname(import.meta.url), "./bassins_emploi_communes.json")).toString()
+    readFileSync(getStaticFilePath("organismes/bassins_emploi_communes.json")).toString()
   );
   await bassinsEmploiDb().deleteMany({});
   await bassinsEmploiDb().insertMany(associationsZECommunes);

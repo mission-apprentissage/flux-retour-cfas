@@ -1,5 +1,3 @@
-import path from "path";
-
 import { PromisePool } from "@supercharge/promise-pool";
 
 import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
@@ -7,6 +5,7 @@ import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
+import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 import { arraysContainSameValues } from "@/common/utils/miscUtils";
 
 const INPUT_FILE_COLUMN_NAMES = {
@@ -23,21 +22,21 @@ const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
  * Tri des fichiers réseaux à traiter pour appliquer les réseaux multiples sans erreurs
  */
 const INPUT_FILES = [
-  "assets/referentiel-reseau-mfr.csv", // MFR
-  "assets/referentiel-reseau-cr-normandie.csv", // CR Normandie
-  "assets/referentiel-reseau-aftral.csv", // AFTRAL
-  "assets/referentiel-reseau-cci.csv", // CCI
-  "assets/referentiel-reseau-cma.csv", // CMA
-  "assets/referentiel-reseau-aden.csv", // ADEN
-  "assets/referentiel-reseau-agri.csv", // AGRI
-  // "assets/referentiel-reseau-anasup.csv", // TODO Fichier non fourni pour l'instant
-  // "assets/referentiel-reseau-dgesip.csv", // TODO Fichier non fourni pour l'instant
-  "assets/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
-  "assets/referentiel-reseau-uimm.csv", // UIMM
-  "assets/referentiel-reseau-greta.csv", // GRETA
-  "assets/referentiel-reseau-en.csv", // EDUC. NAT
-  // "assets/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
-  "assets/referentiel-reseau-cfa-ec.csv", // CFA EC
+  "reseaux/referentiel-reseau-mfr.csv", // MFR
+  "reseaux/referentiel-reseau-cr-normandie.csv", // CR Normandie
+  "reseaux/referentiel-reseau-aftral.csv", // AFTRAL
+  "reseaux/referentiel-reseau-cci.csv", // CCI
+  "reseaux/referentiel-reseau-cma.csv", // CMA
+  "reseaux/referentiel-reseau-aden.csv", // ADEN
+  "reseaux/referentiel-reseau-agri.csv", // AGRI
+  // "reseaux/referentiel-reseau-anasup.csv", // TODO Fichier non fourni pour l'instant
+  // "reseaux/referentiel-reseau-dgesip.csv", // TODO Fichier non fourni pour l'instant
+  "reseaux/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
+  "reseaux/referentiel-reseau-uimm.csv", // UIMM
+  "reseaux/referentiel-reseau-greta.csv", // GRETA
+  "reseaux/referentiel-reseau-en.csv", // EDUC. NAT
+  // "reseaux/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
+  "reseaux/referentiel-reseau-cfa-ec.csv", // CFA EC
 ];
 
 /**
@@ -93,7 +92,7 @@ const hydrateReseauFile = async (filename: string) => {
   logger.info(`Import des données réseaux de ${filename}`);
 
   // Lecture du fichier de référence + conversion JSON
-  const filePath = path.join(__dirname(import.meta.url), filename);
+  const filePath = getStaticFilePath(filename);
   const reseauFile = readJsonFromCsvFile(filePath, ";");
 
   // init des compteurs

@@ -30,7 +30,7 @@
         "org.opencontainers.image.licenses": "MIT"
       },
       "cache-from": ["type=gha,scope=${DEPS_ID}"],
-      "cache-to": ["type=gha,mode=min,scope=${DEPS_ID}"]
+      "cache-to": ["type=gha,mode=max,scope=${DEPS_ID}"]
     },
     "server": {
       "inherits": ["common"],
