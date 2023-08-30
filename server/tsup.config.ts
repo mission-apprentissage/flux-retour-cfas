@@ -32,7 +32,14 @@ export default defineConfig((options) => {
     noExternal: ["shared"],
     clean: true,
     env: {
-      IS_BUILT: "true",
+      ...options.env,
+    },
+    esbuildOptions(options) {
+      options.define = {
+        ...options.define,
+        "process.env.IS_BUILT": '"true"',
+        "process.env.NODE_ENV": isDev ? '"developpement"' : '"production"',
+      };
     },
   };
 });
