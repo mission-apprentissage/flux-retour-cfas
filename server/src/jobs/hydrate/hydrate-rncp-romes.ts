@@ -1,6 +1,11 @@
-import { readFileSync } from "node:fs";
+import { unlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { PromisePool } from "@supercharge/promise-pool";
+import AdmZip from "adm-zip";
+import axios from "axios";
+import { XMLParser } from "fast-xml-parser";
 
 import parentLogger from "@/common/logger";
 import { Rncp } from "@/common/model/@types/Rncp";
@@ -10,17 +15,72 @@ const logger = parentLogger.child({
   module: "job:hydrate:rncp-romes",
 });
 
-/**
- * Ce job récupère un export du RNCP pour le mettre dans la collection rncp.
- * Contient pour l'instant uniquement les associations RNCP -> codes ROME.
- */
+/*
+  Ce job récupère un export du RNCP pour le mettre dans la collection rncp.
+  Contient pour l'instant uniquement les associations RNCP -> codes ROME.
+  L'origine des données est "export fiches rncp v3" téléchargées depuis la page https://www.data.gouv.fr/fr/datasets/repertoire-national-des-certifications-professionnelles-et-repertoire-specifique/
+
+  Étapes :
+  - récupération du fichier zip export-fiches-rncp-v3 du jour : "https://static.data.gouv.fr/resources/repertoire-national-des-certifications-professionnelles-et-repertoire-specifique/20230830-020022/export-fiches-rncp-v3-0-2023-08-30.zip"
+  - décompression zip
+  - parsing du xml
+  - récupération de la correspondance RNC -> codes ROME uniquement
+  - écriture dans la collection rncp
+*/
 export async function hydrateRNCPRomes() {
-  // temporaire, puis on mettra la récupération du fichier directement
-  const listeRNCP = JSON.parse(readFileSync("rncp-romes.json", "utf8")) as Rncp[];
+  let res = await axios.get(
+    `https://www.data.gouv.fr/api/2/datasets/5eebbc067a14b6fecc9c9976/resources/?page=1&type=update&page_size=10&q=`
+  );
+  if (res.status !== 200) {
+    throw new Error(`Invalid response status. Expected 200 but received ${res.status}`);
+  }
+  const resourceRncpV3 = res.data.data.find((resource) => resource.title.includes("export-fiches-rncp-v3"));
+  if (!resourceRncpV3) {
+    throw new Error(`Ressource non trouvée dans la liste`);
+  }
+  logger.info(`téléchargement de : ${resourceRncpV3.url}`);
 
-  logger.info({ count: listeRNCP.length }, "import des rncp avec romes");
+  res = await axios.get(resourceRncpV3.url, {
+    responseType: "arraybuffer",
+  });
+  if (res.status !== 200) {
+    throw new Error(`Invalid response status. Expected 200 but received ${res.status}`);
+  }
 
-  await PromisePool.for(listeRNCP)
+  const tempZipFilePath = join(tmpdir(), "fiches-rncp.zip");
+  await writeFile(tempZipFilePath, res.data);
+
+  const zip = new AdmZip(tempZipFilePath);
+  const zipEntries = zip.getEntries();
+
+  // l'archive contient seulement un fichier : export_fiches_RNCP_V3_0_2023-08-30.xml
+  const entry = zipEntries.find((entry) => entry.name.includes(".xml"));
+  if (!entry) {
+    throw new Error("Fichier non trouvé. Le format a dû changer");
+  }
+  const zipData = entry.getData();
+  unlink(tempZipFilePath);
+
+  const parser = new XMLParser({
+    isArray(tagName, jPath) {
+      // force un tableau plutôt qu'un objet si jamais un seul élément
+      return jPath === "FICHES.FICHE.CODES_ROME.ROME";
+    },
+  });
+  logger.info("parsing du xml");
+  const parsedContent = parser.parse(zipData);
+
+  const rncpWithRomes: Rncp[] = parsedContent.FICHES.FICHE.map((fiche) => {
+    return {
+      rncp: fiche.NUMERO_FICHE,
+      // certains RNCP n'ont pas de ROME => undefined
+      romes: fiche.CODES_ROME?.ROME?.map((rome) => rome.CODE) ?? [],
+    };
+  });
+
+  logger.info({ count: rncpWithRomes.length }, "import des rncp avec romes");
+
+  await PromisePool.for(rncpWithRomes)
     .withConcurrency(50)
     .process(async (rncp) => {
       await rncpDb().updateOne(
