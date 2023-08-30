@@ -1,5 +1,6 @@
 import { register } from "@/common/actions/account.actions";
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
+import { getUserByEmail } from "@/common/actions/users.actions";
 import logger from "@/common/logger";
 import { usersMigrationDb } from "@/common/model/collections";
 import { buildAdresseFromUai } from "@/common/utils/uaiUtils";
@@ -7,21 +8,23 @@ import { buildAdresseFromUai } from "@/common/utils/uaiUtils";
 // TODO devrait désactiver l'envoi d'email globalement en mode CLI
 export const seedAdmin = async ({ email } = { email: "admin@test.fr" }) => {
   // Create user Admin
-  await register({
-    user: {
-      email,
-      password: "Secret!Password1",
-      civility: "Monsieur",
-      nom: "Admin",
-      prenom: "test",
-      fonction: "",
-      telephone: "",
-      has_accept_cgu_version: "",
-    },
-    organisation: {
-      type: "ADMINISTRATEUR",
-    },
-  });
+  if (!(await getUserByEmail(email))) {
+    await register({
+      user: {
+        email,
+        password: "Secret!Password1",
+        civility: "Monsieur",
+        nom: "Admin",
+        prenom: "test",
+        fonction: "",
+        telephone: "",
+        has_accept_cgu_version: "",
+      },
+      organisation: {
+        type: "ADMINISTRATEUR",
+      },
+    });
+  }
 
   await usersMigrationDb().updateOne(
     {
@@ -69,7 +72,7 @@ export const seedSampleOrganismes = async () => {
     logger.info("organisme A created");
   }
 
-  const organismeB = await findOrganismeByUaiAndSiret("0611309S", "44492238900010");
+  const organismeB = await findOrganismeByUaiAndSiret("0611309S", "44492238900044");
   if (!organismeB) {
     await createOrganisme({
       uai: "0611309S",
@@ -126,23 +129,25 @@ export const seedSampleOrganismes = async () => {
 
 export const seedSampleUsers = async () => {
   // Create user ofr
-  await register({
-    user: {
-      email: "ofr@test.fr",
-      password: "Secret!Password1",
-      civility: "Monsieur",
-      nom: "ofr",
-      prenom: "test",
-      fonction: "",
-      telephone: "",
-      has_accept_cgu_version: "",
-    },
-    organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-      uai: "0010856A",
-      siret: "77931004400028",
-    },
-  });
+  if (!(await getUserByEmail("ofr@test.fr"))) {
+    await register({
+      user: {
+        email: "ofr@test.fr",
+        password: "Secret!Password1",
+        civility: "Monsieur",
+        nom: "ofr",
+        prenom: "test",
+        fonction: "",
+        telephone: "",
+        has_accept_cgu_version: "",
+      },
+      organisation: {
+        type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+        uai: "0010856A",
+        siret: "77931004400028",
+      },
+    });
+  }
 
   await usersMigrationDb().updateOne(
     {

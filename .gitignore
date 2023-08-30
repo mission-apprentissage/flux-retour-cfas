@@ -162,3 +162,6 @@ node_modules.tar.gz
 vault-tmp-*.*
 
 ui/next-env.d.ts
+
+SEED_PASSPHRASE.txt
+seed.gz

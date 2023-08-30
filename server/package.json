@@ -7,7 +7,6 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "cli:dev": "yarn build:dev --onSuccess=\"yarn cli \\\"$@\\\"\"",
     "cli": "node dist/index.js",
     "init:dev": "yarn cli init:dev",
     "dev": "tsup-node --watch",

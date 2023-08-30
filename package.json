@@ -14,7 +14,7 @@
     "setup": ".bin/mna-tdb init:env",
     "dev": "yarn services:start; yarn foreach:parallel run dev",
     "cli": "yarn workspace server cli",
-    "seed": "yarn cli seed",
+    "seed": "./.bin/mna-tdb seed:apply",
     "deploy": "./.bin/mna-tdb deploy",
     "build": "yarn foreach:seq run build",
     "migrations:status": "yarn cli migrations:status",

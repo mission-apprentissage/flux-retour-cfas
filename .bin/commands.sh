@@ -15,6 +15,8 @@ function Help() {
    echo "  preview:cleanup --user <your_username>     Remove preview from close pull-requests"
    echo "  vault:edit                                 Edit vault file"
    echo "  vault:password                             Show vault password"
+   echo "  seed:update                                Update seed using a database"
+   echo "  seed:apply                             Apply seed to a database"
    echo 
    echo
 }
@@ -58,4 +60,12 @@ function vault:edit() {
 
 function vault:password() {
   "${SCRIPT_DIR}/get-vault-password-client.sh" "$@"
+}
+
+function seed:udpate() {
+  "${SCRIPT_DIR}/seed-update.sh" "$@"
+}
+
+function seed:apply() {
+  "${SCRIPT_DIR}/seed-apply.sh" "$@"
 }

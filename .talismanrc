@@ -1,4 +1,8 @@
 fileignoreconfig:
+- filename: .bin/scripts/seed-apply.sh
+  checksum: b1fce8dacb86d357945b8495f07151ddb153521093c1b647c4a23450cfa57e1f
+- filename: .bin/scripts/seed-update.sh
+  checksum: 5d6c4905865f66008d6ffd23eff04577bb8d1260022106b0be24062591bf0883
 - filename: .github/workflows/preview.yml
   checksum: 28b92a37dd1d00c11331bb5ef2a45c483466da06a0e808fd669a3fcb5daba393
 - filename: .github/workflows/preview_cleanup.yml
@@ -11,8 +15,10 @@ fileignoreconfig:
   checksum: 9e083ff7dd8df279cbb122e362b68cb4be44d0816ec6c36d30b0bb04d80225ad
 - filename: .infra/files/configs/metabase/setup-metabase.sh
   checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
+- filename: .infra/files/configs/mongodb/seed.gpg
+  checksum: 11060058a8c92413a1c60077452cc9c40ed062e13039089a1b89beb130da319e
 - filename: .infra/vault/vault.yml
-  checksum: d4ab3436887b6483c4a10e179a7c64b9961b9ee6d5478ea88d942434fb4dcf69
+  checksum: 26e5ec50044ed02928db6d2e393a39736c5b5e6fb9c9ea611d18b036bd4f1f41
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
   checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml
@@ -27,6 +33,8 @@ fileignoreconfig:
   checksum: 7dfcad7a7492c7db923fb04aba04111e0381d6df655010992d6cf30da3e148f2
 - filename: server/src/config.ts
   checksum: c3a89696970fc89cb83227237e56d164f442c14f12da518b8061bda37cc4e443
+- filename: server/src/jobs/seed/start/index.ts
+  checksum: bd018d4dab141be955d6e546f817b0aa58edc733e9e562272765d8211d2f3015
 - filename: ui/modules/organismes/Televersement.tsx
   checksum: f0aef09f007b89516bfdcee828cb44e09f0089b2f96725a146d72b557d802878
 scopeconfig:

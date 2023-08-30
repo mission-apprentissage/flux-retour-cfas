@@ -65,7 +65,7 @@ function getLocalPublicConfig(): PublicConfig {
     sentry_dsn: SENTRY_DSN,
     env: "local",
     host,
-    baseUrl: `http://${host}`,
+    baseUrl: `http://${host}:${process.env.NEXT_PUBLIC_API_PORT}`,
   };
 }
 

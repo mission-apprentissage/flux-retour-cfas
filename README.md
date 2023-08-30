@@ -7,6 +7,8 @@
 - NodeJs 16
 - Yarn
 - Docker & Docker-compose
+- brew install yq
+- brew install git-lfs
 
 ## Présentation
 

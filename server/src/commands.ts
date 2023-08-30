@@ -386,16 +386,6 @@ program
  * Job d'initialisation de données de test
  */
 program
-  .command("seed")
-  .description("Seed data")
-  .action(async () => {
-    // TODO
-  });
-
-/**
- * Job d'initialisation de données de test
- */
-program
   .command("seed:sample")
   .description("Seed sample data")
   .action(async () => {
