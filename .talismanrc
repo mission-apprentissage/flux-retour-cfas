@@ -1,4 +1,8 @@
 fileignoreconfig:
+- filename: .github/workflows/preview.yml
+  checksum: 28b92a37dd1d00c11331bb5ef2a45c483466da06a0e808fd669a3fcb5daba393
+- filename: .github/workflows/preview_cleanup.yml
+  checksum: 4d3fd0f6442350018326e2e1fcad931a068adb8f14566fd1e6df4987ac14d6cd
 - filename: .infra/.env_server
   checksum: 5d8cb6e8c0b2c531ae5ea63a6bf8cc42fc89b29652b1114715d401704add7dae
 - filename: .infra/docker-compose.production.yml
