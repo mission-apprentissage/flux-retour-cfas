@@ -98,6 +98,49 @@ services:
       - LETSENCRYPT_HOST=smtp.{{dns_name}}
       - LETSENCRYPT_EMAIL=misson.apprentissage.devops@gmail.com
 
+  nodeexporter:
+    <<: *default
+    image: prom/node-exporter:v1.5.0
+    hostname: { { host_name } }
+    user: root
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+      - "--collector.textfile.directory=/var/cron-exporter"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /opt/app/system/cron:/var/cron-exporter:rw
+    environment:
+      - VIRTUAL_HOST={{dns_name}}
+      - VIRTUAL_PATH=/_monitoring/nodeexporter
+      - VIRTUAL_PORT=9100
+      - LETSENCRYPT_HOST={{dns_name}}
+      - LETSENCRYPT_EMAIL=misson.apprentissage.devops@gmail.com
+
+  cadvisor:
+    <<: *default
+    image: gcr.io/cadvisor/cadvisor:v0.46.0
+    hostname: { { host_name } }
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    environment:
+      - VIRTUAL_HOST={{dns_name}}
+      - VIRTUAL_PATH=/_monitoring/cadvisor
+      - VIRTUAL_PORT=8080
+      - LETSENCRYPT_HOST={{dns_name}}
+      - LETSENCRYPT_EMAIL=misson.apprentissage.devops@gmail.com
+
   autoheal:
     <<: *default
     image: willfarrell/autoheal:latest
