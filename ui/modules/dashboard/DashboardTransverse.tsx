@@ -256,6 +256,27 @@ const DashboardTransverse = () => {
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Répartition des effectifs au national
+              <Tooltip
+                background="bluefrance"
+                color="white"
+                label={
+                  <Box padding="1w">
+                    Répartition du nombre d’apprenants et de sorties d’apprentissage à l’instant T, par départements.
+                    Ces chiffres correspondent aux données à la date du jour, et peuvent varier d’un jour à l’autre
+                    selon les données transmises par les organismes de formation en apprentissage.
+                  </Box>
+                }
+                aria-label="Informations sur la répartition des effectifs au national"
+              >
+                <Box
+                  as="i"
+                  className="ri-information-line"
+                  fontSize="epsilon"
+                  color="grey.500"
+                  marginLeft="1w"
+                  verticalAlign="middle"
+                />
+              </Tooltip>
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
 
