@@ -101,7 +101,7 @@ services:
   nodeexporter:
     <<: *default
     image: prom/node-exporter:v1.5.0
-    hostname: { { host_name } }
+    hostname: "{{host_name}}"
     user: root
     command:
       - "--path.procfs=/host/proc"
@@ -124,7 +124,7 @@ services:
   cadvisor:
     <<: *default
     image: gcr.io/cadvisor/cadvisor:v0.46.0
-    hostname: { { host_name } }
+    hostname: "{{host_name}}"
     privileged: true
     devices:
       - /dev/kmsg
