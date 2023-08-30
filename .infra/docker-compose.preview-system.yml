@@ -116,6 +116,7 @@ services:
       - /opt/app/system/cron:/var/cron-exporter:rw
     environment:
       - VIRTUAL_HOST={{dns_name}}
+      - VIRTUAL_DEST=/metrics
       - VIRTUAL_PATH=/_monitoring/nodeexporter
       - VIRTUAL_PORT=9100
       - LETSENCRYPT_HOST={{dns_name}}
@@ -136,6 +137,7 @@ services:
       - /dev/disk/:/dev/disk:ro
     environment:
       - VIRTUAL_HOST={{dns_name}}
+      - VIRTUAL_DEST=/metrics
       - VIRTUAL_PATH=/_monitoring/cadvisor
       - VIRTUAL_PORT=8080
       - LETSENCRYPT_HOST={{dns_name}}
