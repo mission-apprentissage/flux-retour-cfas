@@ -85,8 +85,8 @@
 
     - name: "[{{ pr_number }}] Seed database"
       shell:
-        chdir: "/opt/app/scripts/seed.sh"
-        cmd: "docker compose run --rm server yarn cli seed"
+        chdir: "/opt/app"
+        cmd: "/opt/app/scripts/seed.sh preview_{{ pr_number | default('00') }}"
 
     - name: "[{{ pr_number }}] Preview URL"
       debug:

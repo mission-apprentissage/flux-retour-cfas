@@ -18,7 +18,7 @@ fileignoreconfig:
 - filename: .infra/files/configs/mongodb/seed.gpg
   checksum: bd386ba9f6c996fe1a4b27fd9c1727eaa1af5f135138bf7d0920041c7570f49c
 - filename: .infra/files/scripts/seed.sh
-  checksum: f2343776e2e8747f04c74ec2176499cfa355a528b725780b001539730f3c5473
+  checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
   checksum: 26e5ec50044ed02928db6d2e393a39736c5b5e6fb9c9ea611d18b036bd4f1f41
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml

@@ -5,11 +5,6 @@
   vars_files:
     - "../vault/vault.yml"
   tasks:
-    - name: Installation de git-lfs
-      ansible.builtin.apt:
-        name: git-lfs
-        state: present
-
     - name: Création de l'arborescence /opt/app à partir de .infra/files
       file:
         path: "/opt/app/{{ item.path }}"
