@@ -12,7 +12,7 @@ fileignoreconfig:
 - filename: .infra/files/configs/metabase/setup-metabase.sh
   checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
 - filename: .infra/vault/vault.yml
-  checksum: f42c398be60d8476b268672f60dd32370f432b8738bf902f0785a7a36d239a1d
+  checksum: d4ab3436887b6483c4a10e179a7c64b9961b9ee6d5478ea88d942434fb4dcf69
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
   checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml
