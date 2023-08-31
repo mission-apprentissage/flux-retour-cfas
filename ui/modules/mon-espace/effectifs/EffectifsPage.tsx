@@ -77,7 +77,9 @@ const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
 
   let MainComponent;
   if (organisme.last_transmission_date) {
-    MainComponent = <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
+    MainComponent = (
+      <Effectifs nbDuplicates={duplicates?.length || 0} isMine={isMine} organismesEffectifs={organismesEffectifs} />
+    );
   } else if (organisme.mode_de_transmission === "API" && !organisme.erps?.length) {
     MainComponent = <ChoixERP isMine={isMine} organisme={organisme} />;
   } else {

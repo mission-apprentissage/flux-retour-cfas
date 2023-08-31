@@ -153,7 +153,8 @@ const Effectifs = ({ organismesEffectifs, nbDuplicates, isMine }) => {
         <Ribbons variant="alert" mb={6}>
           <Box ml={3}>
             <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6} mb={4}>
-              Nous avons détécté {nbDuplicates} duplicats pour l{"'"}année scolaire en cours.
+              Nous avons détécté {nbDuplicates} duplicat{nbDuplicates > 1 ? "s" : ""} pour l{"'"}année scolaire en
+              cours.
             </Text>
 
             <Button
