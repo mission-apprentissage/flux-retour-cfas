@@ -1,10 +1,11 @@
 import fs from "fs";
 
+import { ExtraErrorData } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
-import * as Tracing from "@sentry/tracing";
 import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import express, { Application } from "express";
 import listEndpoints from "express-list-endpoints";
 import Joi from "joi";
@@ -127,24 +128,31 @@ export default async function createServer(): Promise<Application> {
   // Configure Sentry
   Sentry.init({
     dsn: config.sentry.dsn || "",
-    enabled: !!config.sentry.dsn,
+    enabled: config.env !== "local",
     environment: config.env,
     integrations: [
       // enable HTTP calls tracing
       new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.Mongo({ useMongoose: false }),
       // enable Express.js middleware tracing
-      new Tracing.Integrations.Express({ app }),
+      new Sentry.Integrations.Express({ app }),
+      new ExtraErrorData({ depth: 8 }),
     ],
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
     tracesSampleRate: config.env !== "production" ? 1.0 : 0.2,
+    tracePropagationTargets: [/\.apprentissage\.beta\.gouv\.fr$/],
   });
   // RequestHandler creates a separate execution context using domains, so that every
   // transaction/span/breadcrumb is attached to its own Hub instance
   app.use(Sentry.Handlers.requestHandler());
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
+
+  if (config.env === "local") {
+    app.use(cors({ credentials: true, origin: config.publicUrl }));
+  }
 
   app.use(bodyParser.json({ limit: config.bodyParserLimit }));
   app.use(logMiddleware);
