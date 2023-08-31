@@ -10,6 +10,7 @@ import {
   InputLeftElement,
   InputRightElement,
   Spinner,
+  Text,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -136,11 +137,11 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
           <Button variant="link" onClick={() => props.onChange([])}>
             Réinitialiser la sélection
           </Button>
-          {/* {!isLoading && searchTerm.length > 0 && formations?.length === 0 && (
+          {!isLoading && searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH && filteredTreeData?.length === 1 && (
             <Text color="grey.800" fontWeight="700" marginTop="4w" paddingLeft="1w">
               Il n’y a aucun résultat pour votre recherche
             </Text>
-          )} */}
+          )}
           {isLoading && <Spinner />}
           <style>
             {`
