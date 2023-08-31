@@ -5,7 +5,6 @@ set -euo pipefail
 function Help() {
    # Display Help
    echo "Commands"
-   echo "  help                                       Show help message"
    echo "  bin:setup                                  Installs mna-tdb binary with zsh completion on system"
    echo "  init:env                                   Update local env files using values from vault file"
    echo "  release:interactive                        Build & Push Docker image releases"
@@ -16,7 +15,7 @@ function Help() {
    echo "  vault:edit                                 Edit vault file"
    echo "  vault:password                             Show vault password"
    echo "  seed:update                                Update seed using a database"
-   echo "  seed:apply                             Apply seed to a database"
+   echo "  seed:apply                                 Apply seed to a database"
    echo 
    echo
 }

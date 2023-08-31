@@ -4,7 +4,6 @@ _mna-tdb_completion() {
   local curcontext="$curcontext" state line
   typeset -A opt_args
   local -a commands=(
-   "help:'Show help message'"
    "bin\:setup:'Installs mna-tdb binary with zsh completion on system'"
    "init\:env:'Update local env files using values from vault file'"
    "release\:app:'Build & Push Docker image releases'"
@@ -14,6 +13,8 @@ _mna-tdb_completion() {
    "preview\:cleanup:'Remove preview from close pull-requests'"
    "vault\:edit:'Edit vault file'"
    "vault\:password:'Get vault password'"
+   "seed\:update:'Update seed using a database'"
+   "seed\:apply:'Apply seed to a database'"
   )
 
   # Set completion behavior based on the current word
