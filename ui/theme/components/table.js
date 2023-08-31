@@ -94,5 +94,35 @@ export const Table = {
         },
       },
     },
+    detailsHalfColumns: {
+      th: {
+        fontFamily: "heading",
+        fontWeight: "bold",
+        fontSize: "zeta",
+        color: "grey.800",
+        textTransform: "none",
+        whiteSpace: "nowrap",
+        paddingY: "2",
+        paddingX: "3",
+        letterSpacing: "normal",
+      },
+      tbody: {
+        tr: {
+          fontSize: "zeta",
+          color: "grey.800",
+          "&:nth-of-type(even)": {
+            backgroundColor: "grey.100",
+          },
+          _hover: {
+            backgroundColor: "grey.200",
+          },
+        },
+        td: {
+          width: "50%",
+          paddingY: "2",
+          paddingX: "3",
+        },
+      },
+    },
   },
 };

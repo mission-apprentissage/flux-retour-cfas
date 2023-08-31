@@ -55,6 +55,13 @@ type EffectifsPageProps = {
 
 const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
+  const { data: duplicates } = useQuery<any, any>(
+    [`duplicates-effectifs`, organisme?._id],
+    () => _get(`/api/v1/organismes/${organisme?._id}/duplicates`),
+    {
+      enabled: !!organisme?._id,
+    }
+  );
 
   if (!organisme) {
     return null;
@@ -70,7 +77,9 @@ const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
 
   let MainComponent;
   if (organisme.last_transmission_date) {
-    MainComponent = <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} />;
+    MainComponent = (
+      <Effectifs nbDuplicates={duplicates?.length || 0} isMine={isMine} organismesEffectifs={organismesEffectifs} />
+    );
   } else if (organisme.mode_de_transmission === "API" && !organisme.erps?.length) {
     MainComponent = <ChoixERP isMine={isMine} organisme={organisme} />;
   } else {

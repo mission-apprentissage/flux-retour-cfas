@@ -150,6 +150,17 @@ export default () => {
     return res.json(buildEffectifResult(effectif));
   });
 
+  router.get("/detail/:id", async ({ params }, res) => {
+    let { id } = await Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validateAsync(params, { abortEarly: false });
+
+    const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
+    return res.json(effectif);
+  });
+
   router.get("/:id/snapshot", async ({ params, query }, res) => {
     const { id, organisme_id } = await Joi.object({
       id: Joi.string().required(),
@@ -255,6 +266,18 @@ export default () => {
     });
 
     return res.json(buildEffectifResult(effectifUpdated));
+  });
+
+  router.delete("/:id", async ({ params }, res) => {
+    let { id } = await Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validateAsync(params, { abortEarly: false });
+
+    await effectifsDb().deleteOne({ _id: new ObjectId(id) });
+
+    return res.json({ status: "OK" });
   });
 
   router.post("/recherche-siret", async ({ body }, res) => {
