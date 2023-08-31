@@ -33,16 +33,15 @@ export const buildFiabilisationUaiSiret = async () => {
   await fiabilisationUaiSiretDb().deleteMany({});
 
   logger.info("> Execution du script de fiabilisation sur tous les couples UAI-SIRET...");
-  const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
-  const uniqueCouplesUaiSiretToCheck = await getAllUniqueCouplesUaiSiretToFiabilise();
+  const [organismesFromReferentiel, allCouplesUaiSiretTdb, uniqueCouplesUaiSiretToCheck] = await Promise.all([
+    organismesReferentielDb().find().toArray(),
+    getAllCouplesUaiSiretTdb(),
+    getAllUniqueCouplesUaiSiretToFiabilise(),
+  ]);
 
   // Traitement // sur tous les couples identifiés
   await PromisePool.for(uniqueCouplesUaiSiretToCheck).process(async (coupleUaiSiretTdb) => {
-    await buildFiabilisationCoupleForTdbCouple(
-      coupleUaiSiretTdb,
-      uniqueCouplesUaiSiretToCheck,
-      organismesFromReferentiel
-    );
+    await buildFiabilisationCoupleForTdbCouple(coupleUaiSiretTdb, allCouplesUaiSiretTdb, organismesFromReferentiel);
   });
 
   // Ajout de fiabilisation manuelles
