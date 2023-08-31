@@ -99,6 +99,11 @@ const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
               <Text>
                 <i>{`créé le ${prettyPrintDate(item.created_at)}`}</i>
               </Text>
+              <Text>
+                <i>
+                  ERP source : <b>{item.source}</b>
+                </i>
+              </Text>
 
               <EffectifDoublonDetailModalContainer index={index} effectifId={item.id} />
 

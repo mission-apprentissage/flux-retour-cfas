@@ -86,6 +86,9 @@ const EffectifDoublonDetailModal = ({
               <Stack spacing={6}>
                 <Text>Dossier créé le {prettyPrintDate(effectifDetail?.created_at)}</Text>
                 <Text>Dossier mis à jour le {prettyPrintDate(effectifDetail?.updated_at)}</Text>
+                <Text>
+                  ERP Source : <b>{effectifDetail.source}</b>
+                </Text>
                 {/* Infos Apprenant */}
                 <TableContainer>
                   <Table size="sm" variant="detailsHalfColumns">
