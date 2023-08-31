@@ -12,6 +12,7 @@ export interface EffectifsFiltersQuery {
   formation_annees?: string;
   formation_niveaux?: string;
   formation_cfds?: string;
+  formation_secteursProfessionnels?: string;
 }
 
 export interface EffectifsFilters {
@@ -26,6 +27,7 @@ export interface EffectifsFilters {
   formation_annees: number[];
   formation_niveaux: string[];
   formation_cfds: string[];
+  formation_secteursProfessionnels: string[];
 }
 
 export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): EffectifsFilters {
@@ -41,6 +43,7 @@ export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): Ef
     formation_annees: query.formation_annees?.split(",").map((i) => parseInt(i, 10)) ?? [],
     formation_niveaux: query.formation_niveaux?.split(",") ?? [],
     formation_cfds: query.formation_cfds?.split(",") ?? [],
+    formation_secteursProfessionnels: query.formation_secteursProfessionnels?.split(",") ?? [],
   };
 }
 
@@ -59,5 +62,6 @@ export function convertEffectifsFiltersToQuery(
     formation_annees: effectifsFilters.formation_annees?.join(","),
     formation_niveaux: effectifsFilters.formation_niveaux?.join(","),
     formation_cfds: effectifsFilters.formation_cfds?.join(","),
+    formation_secteursProfessionnels: effectifsFilters.formation_secteursProfessionnels?.join(","),
   });
 }

@@ -1858,5 +1858,8 @@ export interface Effectif {
        */
       fiable?: boolean;
     };
+    formation?: {
+      codes_rome?: string[];
+    };
   };
 }

@@ -79,6 +79,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.uai": 1 }, {}],
   [{ "_computed.organisme.siret": 1 }, {}],
   [{ "_computed.organisme.fiable": 1 }, {}],
+  [{ "_computed.formation.codes_rome": 1 }, {}],
 ];
 
 export const schema = object(
@@ -143,6 +144,9 @@ export const schema = object(
           }),
           siret: string({ pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
           fiable: boolean({ description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false` }),
+        }),
+        formation: object({
+          codes_rome: arrayOf(string()),
         }),
       },
       {

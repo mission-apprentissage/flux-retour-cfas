@@ -16,6 +16,14 @@ export async function hydrateEffectifsComputed() {
             },
           },
           {
+            $lookup: {
+              from: "rncp",
+              localField: "formation.rncp",
+              foreignField: "rncp",
+              as: "_rncp",
+            },
+          },
+          {
             $addFields: {
               _computed: {
                 organisme: {
@@ -28,12 +36,16 @@ export async function hydrateEffectifsComputed() {
                   bassinEmploi: { $first: "$_organisme.adresse.bassinEmploi" },
                   fiable: { $cond: [{ $eq: [{ $first: "$_organisme.fiabilisation_statut" }, "FIABLE"] }, true, false] },
                 },
+                formation: {
+                  codes_rome: { $ifNull: [{ $first: "$_rncp.romes" }, []] },
+                },
               },
             },
           },
           {
             $project: {
               _organisme: 0,
+              _rncp: 0,
             },
           },
           {

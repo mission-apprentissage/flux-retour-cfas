@@ -17,6 +17,7 @@ import { BassinsEmploi } from "./@types/BassinsEmploi";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { OrganismeSoltea } from "./@types/OrganismeSoltea";
+import { Rncp } from "./@types/Rncp";
 import { UaisAcceReferentiel } from "./@types/UaisAcceReferentiel.js";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
@@ -33,6 +34,7 @@ import organisationsModelDescriptor, { Organisation } from "./organisations.mode
 import OrganismesModelDescriptor from "./organismes.model";
 import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
 import organismesSolteaModelDescriptor from "./organismesSoltea.model";
+import rncpModelDescriptor from "./rncp.model";
 import uaisAcceReferentielModelDescriptor from "./uaisAcceReferentiel.model";
 import uploadsModelDescriptor from "./uploads.model/uploads.model";
 import usersModelDescriptor from "./users.model";
@@ -56,6 +58,7 @@ export const modelDescriptors = [
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
   bassinsEmploiDescriptor,
+  rncpModelDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<Formation>(formationsModelDescriptor.collectionName);
@@ -83,3 +86,4 @@ export const fiabilisationUaiSiretDb = () =>
 export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmploiDescriptor.collectionName);
 export const organismesSolteaDb = () =>
   getDbCollection<OrganismeSoltea>(organismesSolteaModelDescriptor.collectionName);
+export const rncpDb = () => getDbCollection<Rncp>(rncpModelDescriptor.collectionName);
