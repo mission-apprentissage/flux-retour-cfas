@@ -283,5 +283,6 @@ yarn test --update
 - [Vault](./docs/Vault.md)
 - [Déploiement](./docs/deploy.md)
 - [Développement](./docs/developpement/developpement.md)
+- [Debugging](./docs/developpement/debug.md)
 - [Infrastructure](./docs/infrastructure.md)
 - [Sécurité](./docs/securite.md)
