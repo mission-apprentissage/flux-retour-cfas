@@ -138,7 +138,7 @@ Lance la stack local de développement (server, ui, services)
 
 Cette commande démarre les containers définis dans le fichier `docker-compose.yml`.
 
-#### CLI mna-TDB
+#### CLI mna-tdb
 
 ```bash
   yarn cli <command>
