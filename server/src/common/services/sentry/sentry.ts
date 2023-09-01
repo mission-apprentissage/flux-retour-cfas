@@ -20,7 +20,10 @@ export function getSentryOptions() {
 }
 
 export function initSentryProcessor(): void {
-  Sentry.init(getSentryOptions());
+  Sentry.init({
+    ...getSentryOptions(),
+    tracesSampleRate: 1.0,
+  });
 }
 
 export async function closeSentry(): Promise<void> {
