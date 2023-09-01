@@ -10,18 +10,13 @@ import { createJob, updateJob } from "../common/actions/job.actions";
 
 import { runJob } from "./jobs";
 
-export async function addJob(
-  {
-    name,
-    type = "simple",
-    payload = {},
-    scheduled_for = new Date(),
-    sync = false,
-  }: Pick<IJob, "name"> & Partial<Pick<IJob, "type" | "payload" | "scheduled_for" | "sync">>,
-  options: { runningLogs: boolean } = {
-    runningLogs: true,
-  }
-): Promise<number> {
+export async function addJob({
+  name,
+  type = "simple",
+  payload = {},
+  scheduled_for = new Date(),
+  sync = false,
+}: Pick<IJob, "name"> & Partial<Pick<IJob, "type" | "payload" | "scheduled_for" | "sync">>): Promise<number> {
   const job = await createJob({
     name,
     type,
@@ -31,7 +26,7 @@ export async function addJob(
   });
 
   if (sync && job) {
-    return runJob(job, options);
+    return runJob(job);
   }
 
   return 0;
@@ -63,14 +58,8 @@ export async function processor(signal: AbortSignal): Promise<void> {
   return processor(signal);
 }
 
-const runner = async (
-  job: IJob,
-  jobFunc: () => Promise<unknown>,
-  options: { runningLogs: boolean } = {
-    runningLogs: true,
-  }
-): Promise<number> => {
-  if (options.runningLogs) logger.info(`Job: ${job.name} Started`);
+const runner = async (job: IJob, jobFunc: () => Promise<unknown>): Promise<number> => {
+  logger.info(`Job: ${job.name} Started`);
   const startDate = new Date();
   await updateJob(job._id, {
     status: "running",
@@ -84,33 +73,29 @@ const runner = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     captureException(err);
-    if (options.runningLogs) logger.error({ err, writeErrors: err.writeErrors, error: err }, "job error");
-    error = err?.toString();
+    logger.error({ err, writeErrors: err.writeErrors, error: err }, "job error");
+    error = err?.stack;
   }
 
   const endDate = new Date();
-  const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
+  const ts = endDate.getTime() - startDate.getTime();
+  const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate })) || `${ts}ms`;
   await updateJob(job._id, {
     status: error ? "errored" : "finished",
     output: { duration, result, error },
     ended_at: endDate,
   });
-  if (options.runningLogs) logger.info(`Job: ${job.name} Ended`);
+
+  logger.info(`Job: ${job.name} Ended`);
 
   if (error) {
-    if (options.runningLogs) logger.error(error.constructor.name === "EnvVarError" ? error.message : error);
+    logger.error(error.constructor.name === "EnvVarError" ? error.message : error);
   }
 
   return error ? 1 : 0;
 };
 
-export function executeJob(
-  job: IJob,
-  jobFunc: () => Promise<unknown>,
-  options: { runningLogs: boolean } = {
-    runningLogs: true,
-  }
-) {
+export function executeJob(job: IJob, jobFunc: () => Promise<unknown>) {
   return runWithAsyncContext(async () => {
     const hub = getCurrentHub();
     const transaction = hub.startTransaction({
@@ -124,9 +109,9 @@ export function executeJob(
     });
     const start = Date.now();
     try {
-      return await runner(job, jobFunc, options);
+      return await runner(job, jobFunc);
     } finally {
-      transaction.setMeasurement("job.execute", Date.now() - start, "millisecond");
+      // transaction.setMeasurement("job.execute", Date.now() - start, "millisecond");
       transaction.finish();
     }
   });

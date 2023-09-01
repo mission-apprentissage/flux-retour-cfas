@@ -116,6 +116,7 @@ import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
 import auth from "./routes/user.routes/auth.routes";
+import { initSentryExpress } from "@/common/services/sentry/sentry";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 
@@ -126,21 +127,7 @@ export default async function createServer(): Promise<Application> {
   const app = express();
 
   // Configure Sentry
-  Sentry.init({
-    dsn: config.sentry.dsn || "",
-    enabled: !!config.sentry.dsn,
-    environment: config.env,
-    integrations: [
-      // enable HTTP calls tracing
-      new Sentry.Integrations.Http({ tracing: true }),
-      // enable Express.js middleware tracing
-      new Tracing.Integrations.Express({ app }),
-    ],
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: config.env !== "production" ? 1.0 : 0.2,
-  });
+  initSentryExpress(app);
   // RequestHandler creates a separate execution context using domains, so that every
   // transaction/span/breadcrumb is attached to its own Hub instance
   app.use(Sentry.Handlers.requestHandler());

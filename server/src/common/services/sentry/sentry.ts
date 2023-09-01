@@ -3,8 +3,9 @@ import * as Sentry from "@sentry/node";
 
 import config from "../../../config";
 
-function getOptions() {
+export function getSentryOptions() {
   return {
+    dsn: config.sentry.dsn,
     tracesSampleRate: config.env === "production" ? 0.1 : 1.0,
     tracePropagationTargets: [/\.apprentissage\.beta\.gouv\.fr$/],
     environment: config.env,
@@ -19,9 +20,17 @@ function getOptions() {
 }
 
 export function initSentryProcessor(): void {
-  Sentry.init(getOptions());
+  Sentry.init(getSentryOptions());
 }
 
 export async function closeSentry(): Promise<void> {
   await Sentry.close(2_000);
+}
+
+export function initSentryExpress(app): void {
+  const defaultOptions = getSentryOptions();
+  Sentry.init({
+    ...defaultOptions,
+    integrations: [...defaultOptions.integrations, new Sentry.Integrations.Express({ app })],
+  });
 }

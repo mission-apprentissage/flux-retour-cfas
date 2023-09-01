@@ -12,13 +12,10 @@ import { addJob, processor } from "./jobs/jobs_actions";
 
 async function startProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
-  await addJob(
-    {
-      name: "crons:init",
-      sync: true,
-    },
-    { runningLogs: true }
-  );
+  await addJob({
+    name: "crons:init",
+    sync: true,
+  });
 
   await processor(signal);
   logger.info(`Processor shut down`);
@@ -124,13 +121,10 @@ program
   .description("Validate Documents")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "db:validate",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "db:validate",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -141,13 +135,10 @@ program
   .command("migrations:up")
   .description("Run migrations up")
   .action(async () => {
-    const exitCode = await addJob(
-      {
-        name: "migrations:up",
-        sync: true,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "migrations:up",
+      sync: true,
+    });
     if (exitCode) {
       program.error("Command failed", { exitCode });
     }
@@ -157,13 +148,10 @@ program
   .command("migrations:status")
   .description("Check migrations status")
   .action(async () => {
-    const exitCode = await addJob(
-      {
-        name: "migrations:status",
-        sync: true,
-      },
-      { runningLogs: false }
-    );
+    const exitCode = await addJob({
+      name: "migrations:status",
+      sync: true,
+    });
     if (exitCode) {
       program.error("Command failed", { exitCode });
     }
@@ -237,13 +225,10 @@ program
   .command("queue_processor:start")
   .description("Démarre le démon qui traite les effectifs en attente")
   .action(async () => {
-    const exitCode = await addJob(
-      {
-        name: "queue_processor:start",
-        sync: true,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "queue_processor:start",
+      sync: true,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -303,13 +288,10 @@ program
   .description("Supprime les dossiers en doublons des effectifs, en ne gardant que le plus récent")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "process:effectifs-queue:remove-duplicates",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "process:effectifs-queue:remove-duplicates",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -348,13 +330,10 @@ program
   .description("[TEMPORAIRE] Suppression des organismes sans siret & sans effectifs")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "tmp:patches:remove-organismes-sansSiret-sansEffectifs",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "tmp:patches:remove-organismes-sansSiret-sansEffectifs",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -369,13 +348,10 @@ program
   .description("[TEMPORAIRE] Mise à jour des date de dernières transmissions d'un organisme à partir de ses effectifs")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "tmp:patches:update-lastTransmissionDate-organismes",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "tmp:patches:update-lastTransmissionDate-organismes",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -389,13 +365,10 @@ program
   .command("seed:sample")
   .description("Seed sample data")
   .action(async () => {
-    const exitCode = await addJob(
-      {
-        name: "seed:sample",
-        sync: true,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "seed:sample",
+      sync: true,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -434,13 +407,10 @@ program
   .description("Seed plausible goals")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "seed:plausible:goals",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "seed:plausible:goals",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -452,13 +422,10 @@ program
   .description("Seed assets clear")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "seed:assets:clear",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "seed:assets:clear",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -492,13 +459,10 @@ program
   .description("Clear users")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "clear:users",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "clear:users",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -510,13 +474,10 @@ program
   .description("Remplissage de la collection bassinsEmploi")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:bassins-emploi",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:bassins-emploi",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -528,13 +489,10 @@ program
   .description("Remplissage du champ organismes.adresse.bassinEmploi")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:organismes-bassins-emploi",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:organismes-bassins-emploi",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -546,13 +504,10 @@ program
   .description("Remplissage du champ effectifs._computed avec les attributs des organismes")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:effectifs-computed",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:effectifs-computed",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -564,13 +519,10 @@ program
   .description("Remplissage du champ niveau des formations des effectifs")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:effectifs-formation-niveaux",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:effectifs-formation-niveaux",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -585,13 +537,10 @@ program
   .description("Remplissage des organismes du référentiel")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:organismes-referentiel",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:organismes-referentiel",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -606,13 +555,10 @@ program
   .description("Remplissage des formations du catalogue")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:formations-catalogue",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:formations-catalogue",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -624,13 +570,10 @@ program
   .description("Remplissage du RNCP")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:rncp-romes",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:rncp-romes",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -642,13 +585,10 @@ program
   .description("Remplissage des formations des organismes")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:organismes-formations",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:organismes-formations",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -660,13 +600,10 @@ program
   .description("Remplissage des relations organismes formateurs liés aux organismes")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:organismes-relations",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:organismes-relations",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -678,13 +615,10 @@ program
   .description("Remplissage des organismes du fichier SOLTEA")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:organismes-soltea",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:organismes-soltea",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -696,13 +630,10 @@ program
   .description("Création/maj du fichier open-api.json")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "dev:generate-open-api",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "dev:generate-open-api",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -718,13 +649,10 @@ program
   .description("Remplissage des organismes du tableau de bord en utilisant le référentiel")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:organismes",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:organismes",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -740,13 +668,10 @@ program
   .description("Mise à jour des organismes avec le nombre d'effectifs")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:organismes-effectifs-count",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:organismes-effectifs-count",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -764,13 +689,10 @@ program
   .description("Mise à jour des organismes via API externes")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "update:organismes-with-apis",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "update:organismes-with-apis",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -785,13 +707,10 @@ program
   .description("Remplissage des réseaux pour les organismes et dossiersApprenants")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:reseaux",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "hydrate:reseaux",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -802,13 +721,10 @@ program
   .command("init:dev")
   .description("Initialisation du projet en local")
   .action(async () => {
-    const exitCode = await addJob(
-      {
-        name: "init:dev",
-        sync: true,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "init:dev",
+      sync: true,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -988,13 +904,10 @@ program
   .description("Lancement des scripts de fiabilisation des couples UAI SIRET")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "fiabilisation:uai-siret:run",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "fiabilisation:uai-siret:run",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -1061,13 +974,10 @@ program
   .description("Affichage de stats sur le service")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "fiabilisation:stats",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "fiabilisation:stats",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -1082,13 +992,10 @@ program
   .description("Generation des types TS à partir des schemas de la base de données")
   .option("-s, --sync", "Run job synchronously")
   .action(async ({ sync }) => {
-    const exitCode = await addJob(
-      {
-        name: "dev:generate-ts-types",
-        sync,
-      },
-      { runningLogs: true }
-    );
+    const exitCode = await addJob({
+      name: "dev:generate-ts-types",
+      sync,
+    });
 
     if (exitCode) {
       program.error("Command failed", { exitCode });
