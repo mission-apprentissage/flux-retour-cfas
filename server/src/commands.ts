@@ -11,6 +11,7 @@ import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { addJob, processor } from "./jobs/jobs_actions";
+import { updateUserPassword } from "./jobs/users/update-user-password";
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
@@ -507,14 +508,18 @@ program
   .action(createJobAction("generate-legacy:password-update-token"));
 
 /**
- * Job de de MAJ de mot de passe pour un utilisateur legacy (ancien modèle) via son token
+ * MAJ de mot de passe pour un utilisateur legacy (ancien modèle) via son token
+ *
+ * Ne pas transfromer en Job pour ne pas save en clair le password dans la collection de job
  */
 program
   .command("update:user-legacy:password")
   .description("Modification du mot de passe d'un utilisateur legacy via son token de MAJ ")
   .requiredOption("--token <string>", "token d'update de password")
   .requiredOption("--password <string>", "nouveau mot de passe")
-  .action(createJobAction("update:user-legacy:password"));
+  .action(async (options) => {
+    await updateUserPassword(options);
+  });
 
 /**
  * TEMPORAIRE

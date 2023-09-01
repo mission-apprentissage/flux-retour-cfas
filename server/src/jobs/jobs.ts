@@ -183,8 +183,6 @@ export async function runJob(job: IJob): Promise<number> {
         return generatePasswordUpdateTokenForUser((job.payload as any)?.email);
       case "generate-legacy:password-update-token":
         return generatePasswordUpdateTokenForUserLegacy((job.payload as any)?.username);
-      case "update:user-legacy:password":
-        return updateUserPassword(job.payload as any);
       case "tmp:users:update-apiSeeders":
         return updateUsersApiSeeders((job.payload as any)?.mode);
       case "fiabilisation:uai-siret:run": {
