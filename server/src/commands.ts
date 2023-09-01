@@ -16,7 +16,7 @@ async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
   await addJob({
     name: "crons:init",
-    sync: true,
+    queued: true,
   });
 
   await processor(signal);
@@ -127,11 +127,11 @@ program
 program
   .command("db:validate")
   .description("Validate Documents")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "db:validate",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -145,7 +145,6 @@ program
   .action(async () => {
     const exitCode = await addJob({
       name: "migrations:up",
-      sync: true,
     });
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -158,7 +157,6 @@ program
   .action(async () => {
     const exitCode = await addJob({
       name: "migrations:status",
-      sync: true,
     });
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -173,7 +171,6 @@ program
     const exitCode = await addJob({
       name: "migrations:create",
       payload: { description },
-      sync: true,
     });
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -184,12 +181,12 @@ program
   .command("indexes:create")
   .description("Creation des indexes mongo")
   .option("-d, --drop", "Supprime les indexes existants avant de les recréer")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ drop, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ drop, queued }) => {
     const exitCode = await addJob({
       name: "indexes:create",
       payload: drop,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -200,12 +197,12 @@ program
   .command("indexes:recreate")
   .description("Drop and recreate indexes")
   .option("-d, --drop", "Drop indexes before recreating them")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ drop, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ drop, queued }) => {
     const exitCode = await addJob({
       name: "indexes:recreate",
       payload: { drop },
-      sync,
+      queued,
     });
     if (exitCode) {
       program.error("Command failed", { exitCode });
@@ -216,12 +213,12 @@ program
   .command("db:find-invalid-documents")
   .description("Recherche des documents invalides")
   .requiredOption("-c, --collection", "the collection to search for invalid documents")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ collection, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ collection, queued }) => {
     const exitCode = await addJob({
       name: "db:find-invalid-documents",
       payload: collection,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -277,8 +274,8 @@ program
     "Prend les éléments à partir d'une certaine date (created_at)",
     (value) => new Date(value)
   )
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ force, limit, since, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ force, limit, since, queued }) => {
     const exitCode = await addJob({
       name: "process:effectifs-queue",
       payload: {
@@ -286,7 +283,7 @@ program
         limit,
         since,
       },
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -298,12 +295,12 @@ program
   .command("process:effectifs-queue:single")
   .description("Traite un effectifQueue")
   .requiredOption("--id <effectifQueueId>", "ID de l'effectifQueue à traiter", (value) => new ObjectId(value))
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ id, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ id, queued }) => {
     const exitCode = await addJob({
       name: "process:effectifs-queue:single",
       payload: id,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -314,11 +311,11 @@ program
 program
   .command("process:effectifs-queue:remove-duplicates")
   .description("Supprime les dossiers en doublons des effectifs, en ne gardant que le plus récent")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "process:effectifs-queue:remove-duplicates",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -334,15 +331,15 @@ program
   .description("[TEMPORAIRE] Suppression d'un organisme avec ses effectifs")
   .requiredOption("--uai <string>", "Uai de l'organisme")
   .requiredOption("--siret <string>", "Siret de l'organisme")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ uai, siret, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ uai, siret, queued }) => {
     const exitCode = await addJob({
       name: "tmp:patches:remove-organisme-effectifs",
       payload: {
         uai,
         siret,
       },
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -356,11 +353,11 @@ program
 program
   .command("tmp:patches:remove-organismes-sansSiret-sansEffectifs")
   .description("[TEMPORAIRE] Suppression des organismes sans siret & sans effectifs")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "tmp:patches:remove-organismes-sansSiret-sansEffectifs",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -374,11 +371,11 @@ program
 program
   .command("tmp:patches:update-lastTransmissionDate-organismes")
   .description("[TEMPORAIRE] Mise à jour des date de dernières transmissions d'un organisme à partir de ses effectifs")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "tmp:patches:update-lastTransmissionDate-organismes",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -395,7 +392,6 @@ program
   .action(async () => {
     const exitCode = await addJob({
       name: "seed:sample",
-      sync: true,
     });
 
     if (exitCode) {
@@ -411,14 +407,14 @@ program
   .command("seed:admin")
   .description("Seed user admin")
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ email, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ email, queued }) => {
     const exitCode = await addJob({
       name: "seed:admin",
       payload: {
         email: email?.toLowerCase(),
       },
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -433,11 +429,11 @@ program
 program
   .command("seed:plausible:goals")
   .description("Seed plausible goals")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "seed:plausible:goals",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -448,11 +444,11 @@ program
 program
   .command("seed:assets:clear")
   .description("Seed assets clear")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "seed:assets:clear",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -467,14 +463,14 @@ program
   .command("clear")
   .description("Clear projet")
   .option("-a, --all", "Tout supprimer")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ all, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ all, queued }) => {
     const exitCode = await addJob({
       name: "clear",
       payload: {
         clearAll: all,
       },
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -485,11 +481,11 @@ program
 program
   .command("clear:users")
   .description("Clear users")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "clear:users",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -500,11 +496,11 @@ program
 program
   .command("hydrate:bassins-emploi")
   .description("Remplissage de la collection bassinsEmploi")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:bassins-emploi",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -515,11 +511,11 @@ program
 program
   .command("hydrate:organismes-bassins-emploi")
   .description("Remplissage du champ organismes.adresse.bassinEmploi")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:organismes-bassins-emploi",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -530,11 +526,11 @@ program
 program
   .command("hydrate:effectifs-computed")
   .description("Remplissage du champ effectifs._computed avec les attributs des organismes")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:effectifs-computed",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -545,11 +541,11 @@ program
 program
   .command("hydrate:effectifs-formation-niveaux")
   .description("Remplissage du champ niveau des formations des effectifs")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:effectifs-formation-niveaux",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -563,11 +559,11 @@ program
 program
   .command("hydrate:organismes-referentiel")
   .description("Remplissage des organismes du référentiel")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:organismes-referentiel",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -581,26 +577,11 @@ program
 program
   .command("hydrate:formations-catalogue")
   .description("Remplissage des formations du catalogue")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:formations-catalogue",
-      sync,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
-
-program
-  .command("hydrate:rncp-romes")
-  .description("Remplissage du RNCP")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
-    const exitCode = await addJob({
-      name: "hydrate:rncp-romes",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -611,11 +592,11 @@ program
 program
   .command("hydrate:organismes-formations")
   .description("Remplissage des formations des organismes")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:organismes-formations",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -626,11 +607,11 @@ program
 program
   .command("hydrate:organismes-relations")
   .description("Remplissage des relations organismes formateurs liés aux organismes")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:organismes-relations",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -641,11 +622,11 @@ program
 program
   .command("hydrate:organismes-soltea")
   .description("Remplissage des organismes du fichier SOLTEA")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:organismes-soltea",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -656,11 +637,11 @@ program
 program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "dev:generate-open-api",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -675,11 +656,11 @@ program
 program
   .command("hydrate:organismes")
   .description("Remplissage des organismes du tableau de bord en utilisant le référentiel")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:organismes",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -694,11 +675,11 @@ program
 program
   .command("hydrate:organismes-effectifs-count")
   .description("Mise à jour des organismes avec le nombre d'effectifs")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:organismes-effectifs-count",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -715,11 +696,11 @@ program
 program
   .command("update:organismes-with-apis")
   .description("Mise à jour des organismes via API externes")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "update:organismes-with-apis",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -733,11 +714,11 @@ program
 program
   .command("hydrate:reseaux")
   .description("Remplissage des réseaux pour les organismes et dossiersApprenants")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "hydrate:reseaux",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -751,7 +732,6 @@ program
   .action(async () => {
     const exitCode = await addJob({
       name: "init:dev",
-      sync: true,
     });
 
     if (exitCode) {
@@ -766,12 +746,12 @@ program
   .command("purge:events")
   .description("Purge des logs inutiles")
   .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ nbDaysToKeep, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ nbDaysToKeep, queued }) => {
     const exitCode = await addJob({
       name: "purge:events",
       payload: nbDaysToKeep,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -786,12 +766,12 @@ program
   .command("purge:queues")
   .description("Purge des queues")
   .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ nbDaysToKeep, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ nbDaysToKeep, queued }) => {
     const exitCode = await addJob({
       name: "purge:queues",
       payload: nbDaysToKeep,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -825,12 +805,12 @@ program
   .command("create:erp-user-legacy")
   .description("Création d'un utilisateur ERP legacy")
   .requiredOption("--username <string>", "Nom de l'utilisateur")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ username, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ username, queued }) => {
     const exitCode = await addJob({
       name: "create:erp-user-legacy",
       payload: username,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -845,12 +825,12 @@ program
   .command("generate:password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur")
   .requiredOption("--email <string>", "Email de l'utilisateur")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ email, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ email, queued }) => {
     const exitCode = await addJob({
       name: "generate:password-update-token",
       payload: email,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -865,12 +845,12 @@ program
   .command("generate-legacy:password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur legacy")
   .requiredOption("--username <string>", "username de l'utilisateur")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ username, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ username, queued }) => {
     const exitCode = await addJob({
       name: "generate-legacy:password-update-token",
       payload: username,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -886,15 +866,15 @@ program
   .description("Modification du mot de passe d'un utilisateur legacy via son token de MAJ ")
   .requiredOption("--token <string>", "token d'update de password")
   .requiredOption("--password <string>", "nouveau mot de passe")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ token, password, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ token, password, queued }) => {
     const exitCode = await addJob({
       name: "update:user-legacy:password",
       payload: {
         token,
         password,
       },
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -911,12 +891,12 @@ program
   .command("tmp:users:update-apiSeeders")
   .description("[TEMPORAIRE] Modification des utilisateurs fournisseurs de données")
   .addOption(new Option("--mode <mode>", "Mode de mise à jour").choices(["active", "inactive"]).makeOptionMandatory())
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ mode, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ mode, queued }) => {
     const exitCode = await addJob({
       name: "tmp:users:update-apiSeeders",
       payload: mode,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -930,11 +910,11 @@ program
 program
   .command("fiabilisation:uai-siret:run")
   .description("Lancement des scripts de fiabilisation des couples UAI SIRET")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "fiabilisation:uai-siret:run",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -949,12 +929,12 @@ program
   .command("fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours")
   .description("Suppression des inscrits sans contrats dans ce statut depuis un nombre de jours donné")
   .option("--nbJours <number>", "Nombre de jours dans le statut", (n) => parseInt(n, 10), 90)
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ nbJours, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ nbJours, queued }) => {
     const exitCode = await addJob({
       name: "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours",
       payload: nbJours,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -969,12 +949,12 @@ program
   .command("fiabilisation:effectifs:transform-rupturants-en-abandons-depuis")
   .description("Transformation des rupturants en abandon dans ce statut depuis un nombre de jours donné")
   .option("--nbJours <number>", "Nombre de jours dans le statut", (n) => parseInt(n, 10), 180)
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ nbJours, sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ nbJours, queued }) => {
     const exitCode = await addJob({
       name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis",
       payload: nbJours,
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -1000,11 +980,11 @@ program
 program
   .command("fiabilisation:stats")
   .description("Affichage de stats sur le service")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "fiabilisation:stats",
-      sync,
+      queued,
     });
 
     if (exitCode) {
@@ -1018,11 +998,11 @@ program
 program
   .command("dev:generate-ts-types")
   .description("Generation des types TS à partir des schemas de la base de données")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob({
       name: "dev:generate-ts-types",
-      sync,
+      queued,
     });
 
     if (exitCode) {

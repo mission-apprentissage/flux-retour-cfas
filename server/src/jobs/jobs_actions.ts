@@ -15,17 +15,18 @@ export async function addJob({
   type = "simple",
   payload = {},
   scheduled_for = new Date(),
-  sync = false,
-}: Pick<IJob, "name"> & Partial<Pick<IJob, "type" | "payload" | "scheduled_for" | "sync">>): Promise<number> {
+  queued = false,
+}: Pick<IJob, "name"> &
+  Partial<Pick<IJob, "type" | "payload" | "scheduled_for">> & { queued?: boolean }): Promise<number> {
   const job = await createJob({
     name,
     type,
     payload,
     scheduled_for,
-    sync,
+    sync: !queued,
   });
 
-  if (sync && job) {
+  if (!queued && job) {
     return runJob(job);
   }
 
