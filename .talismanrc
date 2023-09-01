@@ -31,6 +31,8 @@ fileignoreconfig:
   checksum: any
 - filename: DEV.md
   checksum: 9ea1d3d5e7b14290a680bf3c433c5c77b8a106e13fa2d662e6e0df0c86e7469d
+- filename: README.md
+  checksum: b7e69d60da12cf1c9d127547e747002450730881270ee170755098f22e15a9c4
 - filename: server/.env.test
   checksum: 7dfcad7a7492c7db923fb04aba04111e0381d6df655010992d6cf30da3e148f2
 - filename: server/src/commands.ts
