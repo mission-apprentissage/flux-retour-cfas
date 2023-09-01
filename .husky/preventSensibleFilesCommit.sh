@@ -7,7 +7,7 @@ exception="(package.json|custom-environment-variables.json|example.json"
 exception="$exception|manifest.json|settings.json|zapatosconfig.json|package-lock.json|coverage-final.json|extensions.json|terminals.json"
 exception="$exception|DECA_Extraction MIA-Fake.csv"
 exception="$exception|docker-bake.json|eslintrc.json|app.json|tsconfig.json|.mocharc.json"
-exception="$exception|launch.json"
+exception="$exception|launch.json|arborescence-rome-14-06-2021.json"
 exception="$exception|modele-import.xlsx"
 exception="$exception)$|cypress/(.*).json"
 

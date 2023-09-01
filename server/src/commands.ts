@@ -564,6 +564,24 @@ program
   });
 
 program
+  .command("hydrate:rncp-romes")
+  .description("Remplissage du RNCP")
+  .option("-s, --sync", "Run job synchronously")
+  .action(async ({ sync }) => {
+    const exitCode = await addJob(
+      {
+        name: "hydrate:rncp-romes",
+        sync,
+      },
+      { runningLogs: true }
+    );
+
+    if (exitCode) {
+      program.error("Command failed", { exitCode });
+    }
+  });
+
+program
   .command("hydrate:organismes-formations")
   .description("Remplissage des formations des organismes")
   .option("-q, --queued", "Run job asynchronously", false)

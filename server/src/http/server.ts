@@ -19,6 +19,7 @@ import "express-async-errors";
 
 import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
 import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
+import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
   effectifsFiltersSchema,
   fullEffectifsFiltersSchema,
@@ -453,6 +454,13 @@ function setupRoutes(app: Application) {
             req.query.annee_scolaire as string | undefined,
             req.query.sifa === "true"
           );
+        })
+      )
+      .get(
+        "/duplicates",
+        requireOrganismePermission("manageEffectifs"),
+        returnResult(async (req, res) => {
+          return await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
         })
       )
       .get(

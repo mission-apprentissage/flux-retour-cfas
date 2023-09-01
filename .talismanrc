@@ -10,7 +10,7 @@ fileignoreconfig:
 - filename: .infra/.env_server
   checksum: 3dc90eab8771c5e9af5dcde034b26e28be4d5b6b4821c1e455fa7c2bb22ae17c
 - filename: .infra/docker-compose.production.yml
-  checksum: d43ea62acddf9ad604ea391b19619b3f707f6c767ba3ba418aa7191250dbe34d
+  checksum: 318c72a3804b19a9acdd325995ff91f456c48b4af56a0ed093f0377f40436d6f
 - filename: .infra/env.ini
   checksum: 25ccd152d7eaf3a4042c2d4371e6c31f3992ec6d9d1b651ba2685cec317f8796
 - filename: .infra/files/configs/metabase/setup-metabase.sh
@@ -39,6 +39,8 @@ fileignoreconfig:
   checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
 - filename: server/src/config.ts
   checksum: c3a89696970fc89cb83227237e56d164f442c14f12da518b8061bda37cc4e443
+- filename: server/src/jobs/hydrate/hydrate-rncp-romes.ts
+  checksum: 71c60b9fc5f4d0308146235adde75e4df34ebac59539cef321403b5966b061ad
 - filename: server/src/jobs/seed/start/index.ts
   checksum: bd018d4dab141be955d6e546f817b0aa58edc733e9e562272765d8211d2f3015
 - filename: ui/modules/organismes/Televersement.tsx

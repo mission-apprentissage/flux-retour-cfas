@@ -79,7 +79,7 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
   );
 };
 
-const Effectifs = ({ organismesEffectifs, isMine }) => {
+const Effectifs = ({ organismesEffectifs, nbDuplicates, isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue<any>(organismeAtom);
   const ajoutModal = useDisclosure();
@@ -148,6 +148,27 @@ const Effectifs = ({ organismesEffectifs, isMine }) => {
           permettre par la suite une meilleure prise en charge de tout type de fichier.
         </Text>
       </Ribbons>
+
+      {nbDuplicates > 0 && (
+        <Ribbons variant="alert" mb={6}>
+          <Box ml={3}>
+            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6} mb={4}>
+              Nous avons détécté {nbDuplicates} duplicat{nbDuplicates > 1 ? "s" : ""} pour l{"'"}année scolaire en
+              cours.
+            </Text>
+
+            <Button
+              size="md"
+              variant="secondary"
+              onClick={() => {
+                router.push(`${router.asPath}/doublons`);
+              }}
+            >
+              <Text as="span">Vérifier</Text>
+            </Button>
+          </Box>
+        </Ribbons>
+      )}
 
       {organisme.mode_de_transmission === "MANUEL" && organismesEffectifs.length === 0 && (
         <Ribbons variant="info" mt={5}>
