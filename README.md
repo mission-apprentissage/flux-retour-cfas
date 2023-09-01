@@ -281,6 +281,7 @@ yarn test --update
 
 - [Datasouces](./docs/DATASOURCES.md)
 - [Vault](./docs/Vault.md)
+- [Déploiement](./docs/deploy.md)
 - [Développement](./docs/developpement/developpement.md)
 - [Infrastructure](./docs/infrastructure.md)
 - [Sécurité](./docs/securite.md)
