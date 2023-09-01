@@ -10,6 +10,7 @@ exception="$exception|open-api.json"
 exception="$exception|server/src/jobs/hydrate/reference/bassins_emploi_communes.json"
 exception="$exception|eslintrc.json|app.json|jsconfig.json|tsconfig.json|rome.json"
 exception="$exception)$|^server/tests)"
+exception="$exception|ui/public/arborescence-rome-14-06-2021.json"
 exception="$exception|ui/public/modele-import.xlsx"
 
 if grep -q vault ".infra/ansible/roles/setup/vars/main/vault.yml"; then

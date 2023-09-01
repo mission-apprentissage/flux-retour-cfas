@@ -92,6 +92,14 @@ export function ChevronRightIcon(props?: SystemProps) {
   return <ChevronLeftIcon transform="rotate(180deg)" {...props} />;
 }
 
+export function ArrowTriangleDownIcon(props?: SystemProps) {
+  return (
+    <Icon viewBox="0 0 24 24" w="24px" h="24px" {...props}>
+      <path fill="#000091" d="m12 16-6-6h12l-6 6Z" />
+    </Icon>
+  );
+}
+
 export function TeamIcon(props?: SystemProps) {
   return (
     <Icon viewBox="0 0 25 25" w="25px" h="25px" {...props}>

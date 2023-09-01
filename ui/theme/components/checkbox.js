@@ -15,6 +15,17 @@ const Checkbox = {
           border: "1px",
         },
       },
+      _indeterminate: {
+        background: "bluefrance",
+        color: "white",
+        borderColor: "#161616",
+        border: "1px",
+        _hover: {
+          background: "bluefrance",
+          borderColor: "#161616",
+          border: "1px",
+        },
+      },
     },
   },
 };
