@@ -1,5 +1,8 @@
 ## VAULT
 
+Il est vivement recommander de stocker toutes les variables d'environnement sensibles (ex: token) dans un vault Ansible.
+Le fichier `.infra/vault/vault.yaml` contient déjà les données jugées sensibles.
+
 Le vault ansible `./infra/vault/vault.yml` contient les variables d'environnement du server et de l'ui. Le vault est séparé par environnements:
 
 - `production` : environnement de production
@@ -14,6 +17,33 @@ Le vault ansible `./infra/vault/vault.yml` contient les variables d'environnemen
 ```bash
   yarn vault:edit
 ```
+
+### Variables du vault
+
+Toutes les variables du vault sont préfixées par `vault`
+
+```yaml
+vault:
+  APP_VERSION: "1.0.0"
+  APP_ENV: "recette"
+```
+
+Pour y faire référence dans un fichier il suffit d'utiliser la syntaxe `{{ vault.APP_VERSION }}`
+
+Pour créer une variable spécifique à un environnement, le plus simple est d'ajouter une section dans le vault :
+
+```yaml
+vault:
+  APP_VERSION: "1.0.0"
+  production:
+    APP_ENV: "production"
+  recette:
+    APP_ENV: "recette"
+```
+
+Pour référencer cette variable dans un fichier, il faut utiliser la syntaxe `{{ vault[env_type].APP_ENV }}`
+La variable `env_type` qui est définie dans le fichier `env.ini` sera automatiquement valorisée en fonction de
+l'environnement cible.
 
 ## Vault git diff & merge
 

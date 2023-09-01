@@ -2,28 +2,28 @@
 
 # TDB - Tableau de bord de l'apprentissage
 
-- [TDB - Tableau de bord de l'apprentissage](#tdb---tableau-de-bord-de-l-apprentissage)
+- [TDB - Tableau de bord de l'apprentissage](#tdb---tableau-de-bord-de-lapprentissage)
   - [Fiche Produit](#fiche-produit)
   - [Installation](#installation)
-    - [Pré-requis](#pr--requis)
-    - [Clé GPG](#cl--gpg)
-  - [Développement](#d-veloppement)
-    - **[GETTING STARTED](#gettting-started)**
-    - [Détails des commandes globales](#d-tails-des-commandes-globales)
+    - [Pré-requis](#pré-requis)
+    - [Clé GPG](#clé-gpg)
+  - [Développement](#développement)
+    - [Gettting started](#gettting-started)
+    - [Détails des commandes globales](#détails-des-commandes-globales)
       - [Installation .env](#installation-env)
-      - [Lancement de la stack compléte](#lancement-de-la-stack-compl-te)
-      - [CLI mna-TDB](#cli-mna-tdb)
-      - [Lancement de l'application](#lancement-de-l-application)
+      - [Lancement de la stack compléte](#lancement-de-la-stack-compléte)
+      - [CLI mna-tdb](#cli-mna-tdb)
+      - [Lancement de l'application](#lancement-de-lapplication)
       - [Gestion des services docker](#gestion-des-services-docker)
       - [Hydratation du projet en local](#hydratation-du-projet-en-local)
-      - [Deploiement depuis l'environnement local](#deploiement-depuis-l-environnement-local)
+      - [Deploiement depuis l'environnement local](#deploiement-depuis-lenvironnement-local)
       - [Gestion des migrations](#gestion-des-migrations)
       - [Talisman](#talisman)
       - [Vault](#vault)
       - [Linter](#linter)
-      - [Release depuis l'environnement local](#release-depuis-l-environnement-local)
-    - [Variables d'environnement local](#variables-d-environnement-local)
-    - [Exécution des tests](#ex-cution-des-tests)
+      - [Release depuis l'environnement local](#release-depuis-lenvironnement-local)
+    - [Variables d'environnement local](#variables-denvironnement-local)
+    - [Exécution des tests](#exécution-des-tests)
       - [Snapshots](#snapshots)
   - [Aller plus loin](#aller-plus-loin)
 
@@ -44,6 +44,14 @@ Avant d'installer le projet, assurez-vous d'avoir les éléments suivants :
 - brew install yq https://github.com/mikefarah/yq
 - brew install git-lfs https://git-lfs.com/
 - brew install 1password-cli https://developer.1password.com/docs/cli/get-started/
+- Ansible 2.7+: `brew install ansible`
+- sshpass
+  ```bash
+  brew tap esolitos/ipa
+  brew install esolitos/ipa/sshpass
+  ```
+- pwgen: `brew install pwgen`
+- bash 5+: `brew install bash`
 
 ### Clé GPG
 
@@ -209,12 +217,14 @@ Deploie l'application sur l'environnement cible
   yarn deploy <environnement> <OPTIONAL:--user USERNAME>
 ```
 
+> TODO: Optional only if 1password is configured
+
 #### Gestion des migrations
 
 Cli pour créer une migration
 
 ```bash
-  yarn migration:create
+  yarn migration:create -d <name>
 ```
 
 #### Talisman
