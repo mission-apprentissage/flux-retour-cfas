@@ -19,7 +19,7 @@
 
 ## Fiche Produit
 
-Consultez la [Fiche Produit](???) pour plus d'informations sur le projet.
+Consultez la [Fiche Produit](https://beta.gouv.fr/startups/tdb-apprentissage.html) pour plus d'informations sur le projet.
 
 ## Installation
 
@@ -80,7 +80,7 @@ Voici les étapes pour créer votre clé GPG :
 
 ## Développement
 
-### Installation des dépendances
+### Gettting started
 
 Avant de lancer l'application, assurez-vous d'installer toutes les dépendances nécessaires en exécutant la commande suivante :
 
@@ -93,35 +93,155 @@ Cette commande mettra à jour les dépendances du projet.
 
 Le script vous demandera plusieurs fois la phrase secrète de votre clé GPG pour décrypter les variables d'environnement du vault.
 
-### Developpement CLI mna-TDB
+```bash
+yarn dev
+yarn seed
+```
 
-Les principales opérations sont regroupée dans un CLI `.bin/mna-tdb`, il est possible de liste l'ensemble des commandes disponible via `.bin/mna-tdb help`.
+Vous pouvez maintenant accéder à l'application via l'URL [http://localhost:3000](http://localhost:3000)
 
-Il est également possible d'installer gloTDBlement l'exécutable via la commande `.bin/mna-tdb bin:setup` upuis `compinit -C` ne fois installé il est possible d'utiliser la CLI via `mna-tdb help` directement (n'oubliez pas d'ouvrir une nouvelle session de votre terminal).
+Vous pouvez maintenant accéder à l'API via l'URL [http://localhost:5001](http://localhost:5000)
 
-### Variables d'environnement local
+Vous pouvez maintenant accéder au SMTP via l'URL [http://localhost:1025](http://localhost:1025)
 
-Les variables d'environnement local du server sont stocké dans le vault (peut contenir des secrets). Si vous souhaitez overwwrite certaines variables ou changer le port de l'api par exemple, il est possible de créer un fichier `server/.env.local` et `ui/.env.local`
+### Détails des commandes globales
 
-### Lancement de l'application
+Les principales opérations sont regroupées dans le `package.json`.
+
+#### Installation .env
+
+```bash
+  yarn setup
+```
+
+installation ou mise à jour de vos fichiers d'environnement de développement depuis le vault.yml (`server/.env` et `ui/.env`)
+
+#### Lancement de la stack compléte
 
 Pour démarrer l'application en mode local, exécutez la commande suivante :
 
 ```bash
-yarn dev
+  yarn dev
 ```
+
+Lance la stack local de développement (server, ui, services)
 
 Cette commande démarre les containers définis dans le fichier `docker-compose.yml`.
 
-Une fois l'application démarrée, vous pourrez y accéder via l'URL [http://localhost](http://localhost)
-
-### Hydratation du projet en local
-
-Pour créer des jeux de test facilement il suffit de lancer les commandes suivante :
+#### CLI mna-TDB
 
 ```bash
-yarn seed
+  yarn cli <command>
 ```
+
+commande pour lancer les commandes du cli mna-tdb
+
+#### Lancement de l'application
+
+```bash
+  yarn server:dev
+```
+
+Lance le server en dev indépendamment de la stack
+
+```bash
+  yarn ui:dev
+```
+
+Lance l'ui en dev indépendamment de la stack
+
+#### Gestion des services docker
+
+Lance les services docker en local
+
+```bash
+  yarn services:start
+```
+
+---
+
+Stopper les services docker en local
+
+```bash
+  yarn services:stop
+```
+
+---
+
+Supprimer les services docker en local
+
+```bash
+  yarn services:clean
+```
+
+#### Hydratation du projet en local
+
+```bash
+  yarn seed <OPTIONAL:DB_URL>
+```
+
+Pour créer des jeux de test facilement il suffit de lancer les commandes suivante.
+Applique la base de données seed sur la base de données cible (par défaut la base de données locale)
+
+---
+
+Mise à jour de la base de données seed depuis votre local
+
+```bash
+  yarn seed:update
+```
+
+#### Deploiement depuis l'environnement local
+
+Deploie l'application sur l'environnement cible
+
+```bash
+  yarn deploy <environnement> <OPTIONAL:--user USERNAME>
+```
+
+#### Gestion des migrations
+
+Cli pour créer une migration
+
+```bash
+  yarn migration:create
+```
+
+#### Talisman
+
+Ajouter une exception à talisman
+
+```bash
+  yarn talisman:add-exception
+```
+
+#### Vault
+
+Édition du vault ansible
+
+```bash
+  yarn vault:edit
+```
+
+#### Linter
+
+Lint global du projet
+
+```bash
+  yarn lint
+```
+
+#### Release depuis l'environnement local
+
+Création d'une release
+
+```bash
+  yarn release:interactive
+```
+
+### Variables d'environnement local
+
+Les variables d'environnement local du server sont stocké dans le vault (peut contenir des secrets). Si vous souhaitez overwwrite certaines variables ou changer le port de l'api par exemple, il est possible de créer un fichier `server/.env.local` et `ui/.env.local`
 
 ### Exécution des tests
 

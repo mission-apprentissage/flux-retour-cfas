@@ -2,8 +2,14 @@
 
 set -euo pipefail
 
-readonly TARGET_DB=${1:?"Merci de préciser l'url de connection à la base de donnée cible"}
-shift
+if [ -z "${1:-}" ]; then
+    readonly TARGET_DB="mongodb://localhost:27017"
+else
+    readonly TARGET_DB="$1"
+    shift
+fi
+
+echo "base de donnée cible: $TARGET_DB"
 
 readonly SEED_GPG="$ROOT_DIR/.infra/files/configs/mongodb/seed.gpg"
 readonly SEED_GZ="$ROOT_DIR/.infra/files/configs/mongodb/seed.gz"
