@@ -50,6 +50,15 @@ const Link = {
       py: 2,
       _hover: { textDecoration: "none", bg: "#00000020" },
     },
+    blueBg: {
+      display: "inline-block",
+      bg: "bluefrance",
+      color: "white",
+      whiteSpace: "nowrap",
+      px: 6,
+      py: 2,
+      _hover: { textDecoration: "none", bg: "#1212ff" },
+    },
   },
 };
 

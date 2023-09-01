@@ -124,3 +124,18 @@ export function FileDownloadIcon(props?: SystemProps) {
     </Icon>
   );
 }
+
+export function VerbatimFrQuoteIcon(props?: SystemProps) {
+  return (
+    <Icon viewBox="0 0 32 32" w="32px" h="32px" {...props}>
+      <path
+        fill="#3558A2"
+        d="M13.333 4h5.334a10.667 10.667 0 1 1 0 21.333V30c-6.667-2.667-16-6.667-16-15.333A10.667 10.667 0 0 1 13.333 4ZM16 22.667h2.667a8 8 0 0 0 0-16h-5.334a8 8 0 0 0-8 8c0 4.813 3.283 7.954 10.667 11.306v-3.306Z"
+      />
+      <path
+        fill="#3558A2"
+        d="m15.6 19.333-2.864-4.666L15.6 10h-3.09L9.6 14.667l2.91 4.666h3.09Zm6 0-2.864-4.666L21.6 10h-3.09l-2.91 4.667 2.91 4.666h3.09Z"
+      />
+    </Icon>
+  );
+}

@@ -1,13 +1,5 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Flex,
-  Link,
-} from "@chakra-ui/react";
+import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Flex, Link } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
@@ -41,16 +33,25 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
       <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => (!isUnfold ? unfoldAll() : foldAll())}>
         {!isUnfold ? "Tout déplier" : "Tout replier"}
       </Link>
-      <Accordion marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
+      <Accordion variant="withBorder" marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
         {AccordionItemsDetailList.map((item, index) => (
           <AccordionItem key={index} onClick={() => updateIndex(index)}>
-            <AccordionButton>
-              <Box fontSize={["14px", "delta", "delta"]} flex="1" textAlign="left" color={TextColor}>
-                {item.title}
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel paddingBottom={4}>{item.content}</AccordionPanel>
+            {({ isExpanded }) => (
+              <>
+                <AccordionButton>
+                  <Box fontSize={["14px", "delta", "delta"]} flex="1" textAlign="left" color={TextColor}>
+                    {item.title}
+                  </Box>
+
+                  {isExpanded ? (
+                    <MinusIcon fontSize="12px" color="#000091" />
+                  ) : (
+                    <AddIcon fontSize="12px" color="#000091" />
+                  )}
+                </AccordionButton>
+                <AccordionPanel paddingBottom={4}>{item.content}</AccordionPanel>
+              </>
+            )}
           </AccordionItem>
         ))}
       </Accordion>
