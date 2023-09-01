@@ -574,6 +574,12 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
         last_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
         mode_de_transmission: permissionsOrganisme.infoTransmissionEffectifs,
         setup_step_courante: permissionsOrganisme.infoTransmissionEffectifs,
+
+        // configuration API
+        api_key: permissionsOrganisme.manageEffectifs,
+        api_configuration_date: permissionsOrganisme.manageEffectifs,
+        api_siret: permissionsOrganisme.manageEffectifs,
+        api_uai: permissionsOrganisme.manageEffectifs,
       }),
     }
   );
