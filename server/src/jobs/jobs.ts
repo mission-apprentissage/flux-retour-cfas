@@ -61,36 +61,36 @@ export const CRONS: Record<string, CronDef> = {
     cron_string: "30 2 * * *",
     handler: async () => {
       // # Remplissage des organismes issus du référentiel
-      await addJob({ name: "hydrate:organismes-referentiel" });
+      await addJob({ name: "hydrate:organismes-referentiel", queued: true });
 
       // # Remplissage des organismes depuis le référentiel
-      await addJob({ name: "hydrate:organismes" });
+      await addJob({ name: "hydrate:organismes", queued: true });
 
       // # Mise à jour des relations
-      await addJob({ name: "hydrate:organismes-relations" });
+      await addJob({ name: "hydrate:organismes-relations", queued: true });
 
       // # Remplissage des réseaux
-      await addJob({ name: "hydrate:reseaux" });
+      await addJob({ name: "hydrate:reseaux", queued: true });
 
       // # Lancement des scripts de fiabilisation des couples UAI - SIRET
-      await addJob({ name: "fiabilisation:uai-siret:run" });
+      await addJob({ name: "fiabilisation:uai-siret:run", queued: true });
 
       // # Mise à jour des organismes via APIs externes
-      await addJob({ name: "update:organismes-with-apis" });
+      await addJob({ name: "update:organismes-with-apis", queued: true });
 
       // # Mise à jour des niveaux des formations des effectifs
-      await addJob({ name: "effectifs-formation-niveaux" });
+      await addJob({ name: "effectifs-formation-niveaux", queued: true });
 
       // # Purge des collections events et queues
-      await addJob({ name: "purge:events" });
-      await addJob({ name: "purge:queues" });
+      await addJob({ name: "purge:events", queued: true });
+      await addJob({ name: "purge:queues", queued: true });
 
       // # Mise a jour du nb d'effectifs
-      await addJob({ name: "hydrate:organismes-effectifs-count" });
+      await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
 
       // # Fiabilisation des effectifs : suppression des inscrits sans contrats depuis 90 jours & transformation des rupturants en abandon > 180 jours
-      await addJob({ name: "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours" });
-      await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis" });
+      await addJob({ name: "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours", queued: true });
+      await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
 
       return 0;
     },
@@ -238,7 +238,7 @@ export async function runJob(
         case "migrations:up": {
           await upMigration();
           // Validate all documents after the migration
-          await addJob({ name: "db:validate" });
+          await addJob({ name: "db:validate", queued: true });
           return;
         }
         case "migrations:status": {

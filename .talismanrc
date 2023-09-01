@@ -33,6 +33,8 @@ fileignoreconfig:
   checksum: 9ea1d3d5e7b14290a680bf3c433c5c77b8a106e13fa2d662e6e0df0c86e7469d
 - filename: server/.env.test
   checksum: 7dfcad7a7492c7db923fb04aba04111e0381d6df655010992d6cf30da3e148f2
+- filename: server/src/commands.ts
+  checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
 - filename: server/src/config.ts
   checksum: c3a89696970fc89cb83227237e56d164f442c14f12da518b8061bda37cc4e443
 - filename: server/src/jobs/seed/start/index.ts

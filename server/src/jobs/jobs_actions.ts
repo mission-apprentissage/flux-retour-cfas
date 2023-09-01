@@ -16,8 +16,8 @@ export async function addJob(
     type = "simple",
     payload = {},
     scheduled_for = new Date(),
-    sync = false,
-  }: Pick<IJob, "name"> & Partial<Pick<IJob, "type" | "payload" | "scheduled_for" | "sync">>,
+    queued = false,
+  }: Pick<IJob, "name"> & Partial<Pick<IJob, "type" | "payload" | "scheduled_for">> & { queued?: boolean },
   options: { runningLogs: boolean } = {
     runningLogs: true,
   }
@@ -27,10 +27,10 @@ export async function addJob(
     type,
     payload,
     scheduled_for,
-    sync,
+    sync: !queued,
   });
 
-  if (sync && job) {
+  if (!queued && job) {
     return runJob(job, options);
   }
 
