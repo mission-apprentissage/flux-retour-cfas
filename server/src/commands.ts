@@ -9,8 +9,9 @@ import { closeSentry, initSentryProcessor } from "./common/services/sentry/sentr
 import config from "./config";
 import createServer from "./http/server";
 import { addJob, processor } from "./jobs/jobs_actions";
+import { sleep } from "./common/utils/asyncUtils";
 
-async function startProcessor(signal: AbortSignal) {
+async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
   await addJob({
     name: "crons:init",
@@ -96,7 +97,7 @@ program
       ];
 
       if (withProcessor) {
-        tasks.push(startProcessor(signal));
+        tasks.push(startJobProcessor(signal));
       }
 
       await Promise.all(tasks);
@@ -113,7 +114,13 @@ program
   .action(async () => {
     initSentryProcessor();
     const signal = createProcessExitSignal();
-    await startProcessor(signal);
+    if (config.disable_processors) {
+      // The processor will exit, and be restarted by docker every day
+      await sleep(24 * 3_600_000, signal);
+      return;
+    }
+
+    await startJobProcessor(signal);
   });
 
 program
