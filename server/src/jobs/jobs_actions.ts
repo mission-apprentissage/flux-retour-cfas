@@ -111,7 +111,7 @@ export function executeJob(job: IJob, jobFunc: () => Promise<unknown>) {
     try {
       return await runner(job, jobFunc);
     } finally {
-      // transaction.setMeasurement("job.execute", Date.now() - start, "millisecond");
+      transaction.setMeasurement("job.execute", Date.now() - start, "millisecond");
       transaction.finish();
     }
   });

@@ -52,11 +52,14 @@ type EffectifQueueProcessorOptions = {
 /**
  * Fonction de process de la file d'attente des effectifs en boucle
  */
-export const startEffectifQueueProcessor = async () => {
+export const startEffectifQueueProcessor = async (signal: AbortSignal) => {
   logger.warn("starting EffectifQueue processor");
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const processingResult = await processEffectifsQueue();
+    if (signal.aborted) {
+      return;
+    }
     if (processingResult.totalProcessed === 0) {
       await sleep(5_000);
     }

@@ -1,4 +1,4 @@
-import { captureException } from "@sentry/node";
+import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/node";
 import { Option, program } from "commander";
 import HttpTerminator from "lil-http-terminator";
 import { ObjectId } from "mongodb";
@@ -10,6 +10,7 @@ import config from "./config";
 import createServer from "./http/server";
 import { addJob, processor } from "./jobs/jobs_actions";
 import { sleep } from "./common/utils/asyncUtils";
+import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
@@ -232,13 +233,33 @@ program
   .command("queue_processor:start")
   .description("Démarre le démon qui traite les effectifs en attente")
   .action(async () => {
-    const exitCode = await addJob({
-      name: "queue_processor:start",
-      sync: true,
-    });
+    initSentryProcessor();
+    const signal = createProcessExitSignal();
 
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
+    if (config.disable_processors) {
+      // The processor will exit, and be restarted by docker every day
+      await sleep(24 * 3_600_000, signal);
+      return;
+    }
+
+    try {
+      await runWithAsyncContext(async () => {
+        const hub = getCurrentHub();
+        const transaction = hub.startTransaction({
+          name: `Queue processor`,
+          op: "processor.queue",
+        });
+        hub.configureScope((scope) => {
+          scope.setSpan(transaction);
+        });
+        try {
+          return await startEffectifQueueProcessor(signal);
+        } finally {
+          transaction.finish();
+        }
+      });
+    } catch (err) {
+      captureException(err);
     }
   });
 

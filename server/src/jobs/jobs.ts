@@ -49,6 +49,7 @@ import {
 } from "./users/generate-password-update-token";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders";
 import { updateUserPassword } from "./users/update-user-password";
+import logger from "@/common/logger";
 
 interface CronDef {
   name: string;
@@ -222,8 +223,6 @@ export async function runJob(job: IJob): Promise<number> {
         return processEffectifQueueById(job.payload as any);
       case "process:effectifs-queue":
         return processEffectifsQueue(job.payload as any);
-      case "queue_processor:start":
-        return startEffectifQueueProcessor();
       case "db:find-invalid-documents":
         return findInvalidDocuments(job.payload as any);
       case "indexes:create":
@@ -252,8 +251,10 @@ export async function runJob(job: IJob): Promise<number> {
       case "crons:scheduler":
         return cronsScheduler();
 
-      default:
+      default: {
+        logger.warn(`Jobs not found ${job.name}`);
         return Promise.resolve();
+      }
     }
   });
 }
