@@ -1,7 +1,7 @@
 name: Release version
 on:
   push:
-    branches: [master, next]
+    branches: [master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -70,10 +70,10 @@ jobs:
 
   deploy:
     needs: ["release"]
-    name: Deploy ${{ needs.release.outputs.VERSION }} on sandbox
+    name: Deploy ${{ needs.release.outputs.VERSION }} on recette
     uses: "./.github/workflows/_deploy.yml"
     with:
-      environment: sandbox
+      environment: recette
       app_version: ${{ needs.release.outputs.VERSION }}
     secrets:
       DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
