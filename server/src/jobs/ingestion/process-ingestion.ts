@@ -23,9 +23,9 @@ import {
   fiabilisationUaiSiretDb,
   formationsCatalogueDb,
 } from "@/common/model/collections";
+import { sleep } from "@/common/utils/asyncUtils";
 import { formatError } from "@/common/utils/errorUtils";
 import { AddPrefix, addPrefixToProperties } from "@/common/utils/miscUtils";
-import { sleep } from "@/common/utils/timeUtils";
 import dossierApprenantSchemaV1V2, {
   DossierApprenantSchemaV1V2ZodType,
 } from "@/common/validation/dossierApprenantSchemaV1V2";
@@ -57,11 +57,11 @@ export const startEffectifQueueProcessor = async (signal: AbortSignal) => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const processingResult = await processEffectifsQueue();
+    if (processingResult.totalProcessed === 0) {
+      await sleep(5_000, signal);
+    }
     if (signal.aborted) {
       return;
-    }
-    if (processingResult.totalProcessed === 0) {
-      await sleep(5_000);
     }
   }
 };

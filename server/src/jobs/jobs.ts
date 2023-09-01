@@ -1,3 +1,4 @@
+import logger from "@/common/logger";
 import { IJob } from "@/common/model/job.model";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
 
@@ -29,11 +30,7 @@ import { updateMultipleOrganismesWithApis } from "./hydrate/organismes/update-or
 import { hydrateBassinsEmploi } from "./hydrate/reference/hydrate-bassins-emploi";
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
-import {
-  processEffectifQueueById,
-  processEffectifsQueue,
-  startEffectifQueueProcessor,
-} from "./ingestion/process-ingestion";
+import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { addJob, executeJob } from "./jobs_actions";
 import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs";
@@ -49,7 +46,6 @@ import {
 } from "./users/generate-password-update-token";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders";
 import { updateUserPassword } from "./users/update-user-password";
-import logger from "@/common/logger";
 
 interface CronDef {
   name: string;

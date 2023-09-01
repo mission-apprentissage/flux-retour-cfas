@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 
 import * as Sentry from "@sentry/node";
-import * as Tracing from "@sentry/tracing";
 import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
@@ -80,6 +79,7 @@ import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
+import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { packageJson } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
@@ -116,7 +116,6 @@ import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
 import auth from "./routes/user.routes/auth.routes";
-import { initSentryExpress } from "@/common/services/sentry/sentry";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
 

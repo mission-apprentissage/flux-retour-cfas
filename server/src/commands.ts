@@ -6,11 +6,11 @@ import { ObjectId } from "mongodb";
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
 import { closeSentry, initSentryProcessor } from "./common/services/sentry/sentry";
+import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
-import { addJob, processor } from "./jobs/jobs_actions";
-import { sleep } from "./common/utils/asyncUtils";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
+import { addJob, processor } from "./jobs/jobs_actions";
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
