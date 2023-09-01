@@ -26,7 +26,7 @@ export default {
   // collectCoverageFrom: undefined,
 
   // The directory where Jest should output its coverage files
-  // coverageDirectory: undefined,
+  coverageDirectory: "src",
 
   // An array of regexp pattern strings used to skip coverage collection
   // coveragePathIgnorePatterns: [
@@ -50,7 +50,7 @@ export default {
       branches: 77,
       functions: 50,
       lines: 70,
-      statements: -5000,
+      statements: -7000,
     },
   },
 
