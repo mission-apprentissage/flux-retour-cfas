@@ -23,20 +23,20 @@ Pour cela nous utilisons l'API du référentiel qui nous renvoie le contenu de l
 
 ## Catalogue
 
-TODO
+https://catalogue-apprentissage.intercariforef.org/
 
 ## Tables de correspondances
 
-TODO
+https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
 
 ## API Entreprise
 
-TODO
+https://entreprise.api.gouv.fr
 
 ## API CFADock
 
-TODO
+https://www.cfadock.fr/Home/ApiDescription
 
 ## LaBonneAlternance
 
-TODO
+https://labonnealternance.apprentissage.beta.gouv.fr/

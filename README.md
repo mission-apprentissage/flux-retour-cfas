@@ -269,6 +269,8 @@ yarn test --update
 
 ## Aller plus loin
 
-- [Développement](./docs/developping.md)
-- [Infrastructure](./docs/developping.md)
+- [Datasouces](./docs/DATASOURCES.md)
+- [Vault](./docs/Vault.md)
+- [Développement](./docs/developpement/developpement.md)
+- [Infrastructure](./docs/infrastructure.md)
 - [Sécurité](./docs/securite.md)
