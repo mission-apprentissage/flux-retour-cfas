@@ -566,12 +566,12 @@ program
 program
   .command("hydrate:rncp-romes")
   .description("Remplissage du RNCP")
-  .option("-s, --sync", "Run job synchronously")
-  .action(async ({ sync }) => {
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(async ({ queued }) => {
     const exitCode = await addJob(
       {
         name: "hydrate:rncp-romes",
-        sync,
+        queued,
       },
       { runningLogs: true }
     );
