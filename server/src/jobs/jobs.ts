@@ -134,7 +134,7 @@ export async function runJob(job: IJob): Promise<number> {
       case "seed:sample":
         return seedSample();
       case "seed:admin":
-        return seedAdmin(job.payload as any);
+        return seedAdmin((job.payload as any)?.email?.toLowerCase());
       case "seed:plausible:goals":
         return seedPlausibleGoals();
       case "seed:assets:clear":
@@ -174,19 +174,19 @@ export async function runJob(job: IJob): Promise<number> {
       case "hydrate:reseaux":
         return hydrateReseaux();
       case "purge:events":
-        return purgeEvents(job.payload as any);
+        return purgeEvents((job.payload as any)?.nbDaysToKeep);
       case "purge:queues":
-        return purgeQueues(job.payload as any);
+        return purgeQueues((job.payload as any)?.nbDaysToKeep);
       case "create:erp-user-legacy":
-        return createErpUserLegacy(job.payload as any);
+        return createErpUserLegacy((job.payload as any)?.username);
       case "generate:password-update-token":
-        return generatePasswordUpdateTokenForUser(job.payload as any);
+        return generatePasswordUpdateTokenForUser((job.payload as any)?.email);
       case "generate-legacy:password-update-token":
-        return generatePasswordUpdateTokenForUserLegacy(job.payload as any);
+        return generatePasswordUpdateTokenForUserLegacy((job.payload as any)?.username);
       case "update:user-legacy:password":
         return updateUserPassword(job.payload as any);
       case "tmp:users:update-apiSeeders":
-        return updateUsersApiSeeders(job.payload as any);
+        return updateUsersApiSeeders((job.payload as any)?.mode);
       case "fiabilisation:uai-siret:run": {
         // On reset le statut de fiabilisation de tous les organismes
         await resetOrganismesFiabilisationStatut();
@@ -200,9 +200,9 @@ export async function runJob(job: IJob): Promise<number> {
         return { buildResults, updateResults };
       }
       case "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours":
-        return removeInscritsSansContratsDepuis(job.payload as any);
+        return removeInscritsSansContratsDepuis((job.payload as any)?.nbJours);
       case "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis":
-        return transformRupturantsToAbandonsDepuis(job.payload as any);
+        return transformRupturantsToAbandonsDepuis((job.payload as any)?.nbJours);
       case "fiabilisation:stats":
         return getStats();
       case "dev:generate-ts-types":
@@ -216,14 +216,14 @@ export async function runJob(job: IJob): Promise<number> {
       case "process:effectifs-queue:remove-duplicates":
         return removeDuplicatesEffectifsQueue();
       case "process:effectifs-queue:single":
-        return processEffectifQueueById(job.payload as any);
+        return processEffectifQueueById((job.payload as any)?.id);
       case "process:effectifs-queue":
         return processEffectifsQueue(job.payload as any);
       case "db:find-invalid-documents":
-        return findInvalidDocuments(job.payload as any);
+        return findInvalidDocuments((job.payload as any)?.collection);
       case "indexes:create":
       case "indexes:recreate":
-        return recreateIndexes(job.payload as any);
+        return recreateIndexes((job.payload as any)?.drop);
       case "db:validate":
         return validateModels();
       case "migrations:up": {
@@ -248,8 +248,7 @@ export async function runJob(job: IJob): Promise<number> {
         return cronsScheduler();
 
       default: {
-        logger.warn(`Jobs not found ${job.name}`);
-        return Promise.resolve();
+        logger.warn(`Job not found ${job.name}`);
       }
     }
   });
