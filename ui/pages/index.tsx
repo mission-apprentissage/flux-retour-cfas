@@ -123,56 +123,60 @@ function PublicLandingPage() {
         </Heading>
 
         <Stack direction={["column", "column", "column", "row"]} gap="4" mt="8" mx={[0, 16, 32, 0]}>
-          <VStack flex="1" backgroundColor="galt" px="4" py="8">
-            <Center>
-              <VStack>
-                <Image src="/images/landing-cards/school.svg" alt="" />
-                <CardLabel>ORGANISME DE FORMATION (OFA)</CardLabel>
-                <Text fontSize="delta" fontWeight="bold">
-                  Simplifiez vos démarches
-                </Text>
-              </VStack>
-            </Center>
-            <List styleType="none" pt="8" spacing="2">
-              <ListItem>
-                <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="2" />
-                  Gagnez du temps pour vos démarches administratives
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="2" />
-                  Transmettez vos effectifs de manière sécurisée
-                </Flex>
-              </ListItem>
-            </List>
-          </VStack>
-          <VStack flex="1" backgroundColor="galt" p="8">
-            <Center>
-              <VStack>
-                <Image src="/images/landing-cards/network.svg" alt="" />
-                <CardLabel>RÉSEAU D’OFA</CardLabel>
-                <Text fontSize="delta" fontWeight="bold">
-                  Facilitez votre animation
-                </Text>
-              </VStack>
-            </Center>
-            <List styleType="none" pt="8" spacing="2">
-              <ListItem>
-                <Flex align="center" fontSize="omega">
-                  <TeamIcon boxSize="16px" mr="2" />
-                  Suivez l’activité de votre réseau en temps réel
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="2" />
-                  Centralisez les informations utiles à l’animation de celui-ci
-                </Flex>
-              </ListItem>
-            </List>
-          </VStack>
+          <Link variant="ghost" href="/organismes-formation" flex="1" backgroundColor="galt" p="8">
+            <VStack>
+              <Center>
+                <VStack>
+                  <Image src="/images/landing-cards/school.svg" alt="" />
+                  <CardLabel>ORGANISME DE FORMATION (OFA)</CardLabel>
+                  <Text fontSize="delta" fontWeight="bold">
+                    Simplifiez vos démarches
+                  </Text>
+                </VStack>
+              </Center>
+              <List styleType="none" pt="8" spacing="2">
+                <ListItem>
+                  <Flex align="center" fontSize="omega">
+                    <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="2" />
+                    Gagnez du temps pour vos démarches administratives
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex align="center" fontSize="omega">
+                    <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="2" />
+                    Transmettez vos effectifs de manière sécurisée
+                  </Flex>
+                </ListItem>
+              </List>
+            </VStack>
+          </Link>
+          <Link variant="ghost" href="/organismes-formation" flex="1" backgroundColor="galt" p="8">
+            <VStack>
+              <Center>
+                <VStack>
+                  <Image src="/images/landing-cards/network.svg" alt="" />
+                  <CardLabel>RÉSEAU D’OFA</CardLabel>
+                  <Text fontSize="delta" fontWeight="bold">
+                    Facilitez votre animation
+                  </Text>
+                </VStack>
+              </Center>
+              <List styleType="none" pt="8" spacing="2">
+                <ListItem>
+                  <Flex align="center" fontSize="omega">
+                    <TeamIcon boxSize="16px" mr="2" />
+                    Suivez l’activité de votre réseau en temps réel
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex align="center" fontSize="omega">
+                    <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="2" />
+                    Centralisez les informations utiles à l’animation de celui-ci
+                  </Flex>
+                </ListItem>
+              </List>
+            </VStack>
+          </Link>
           <Link variant="ghost" href="/operateurs-publics" flex="1" backgroundColor="galt" p="8">
             <VStack>
               <Center>
