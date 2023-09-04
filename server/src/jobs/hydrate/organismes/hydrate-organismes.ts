@@ -6,6 +6,7 @@ import {
   findOrganismeByUaiAndSiret,
   updateOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
+import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
@@ -77,6 +78,8 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
         adresse: adresseFormatted,
         ferme: isFerme,
         qualiopi: qualiopi || false,
+        fiabilisation_statut:
+          !isFerme && uai ? STATUT_FIABILISATION_ORGANISME.FIABLE : STATUT_FIABILISATION_ORGANISME.INCONNU,
         est_dans_le_referentiel: uaiMultiplesInTdb
           ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
           : STATUT_PRESENCE_REFERENTIEL.PRESENT,
@@ -102,6 +105,8 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       adresse: adresseFormatted,
       ferme: isFerme,
       qualiopi: qualiopi || false,
+      fiabilisation_statut:
+        !isFerme && uai ? STATUT_FIABILISATION_ORGANISME.FIABLE : STATUT_FIABILISATION_ORGANISME.INCONNU,
       est_dans_le_referentiel: uaiMultiplesInTdb
         ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
         : STATUT_PRESENCE_REFERENTIEL.PRESENT,
