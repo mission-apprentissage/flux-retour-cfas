@@ -96,6 +96,10 @@ Voici les étapes pour créer votre clé GPG :
 
 - `.infra/vault/.vault-password.gpg`
 
+6. Installer 1password cli et connecter votre compte
+
+- brew install 1password-cli https://developer.1password.com/docs/cli/get-started/
+
 ## Développement
 
 ### Gettting started
