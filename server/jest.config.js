@@ -23,7 +23,7 @@ export default {
   // collectCoverage: false,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  // collectCoverageFrom: undefined,
+  collectCoverageFrom: ["src/**/*.{js,ts}"],
 
   // The directory where Jest should output its coverage files
   // coverageDirectory: undefined,
@@ -47,10 +47,10 @@ export default {
   // An object that configures minimum threshold enforcement for coverage results
   coverageThreshold: {
     global: {
-      branches: 77,
-      functions: 50,
-      lines: 70,
-      statements: -5000,
+      branches: 73,
+      functions: 40,
+      lines: 52,
+      statements: -14000,
     },
   },
 
@@ -129,7 +129,7 @@ export default {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  setupFiles: ["<rootDir>/tests/jest/setupFiles.ts"],
+  setupFiles: ["<rootDir>/tests/jest/setupFiles.ts", "jest-date-mock"],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: ["<rootDir>/tests/jest/setupFileAfterEnv.ts"],

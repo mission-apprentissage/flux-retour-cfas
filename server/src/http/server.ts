@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 
 import * as Sentry from "@sentry/node";
-import * as Tracing from "@sentry/tracing";
 import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
@@ -80,6 +79,7 @@ import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
+import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { packageJson } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
@@ -126,21 +126,7 @@ export default async function createServer(): Promise<Application> {
   const app = express();
 
   // Configure Sentry
-  Sentry.init({
-    dsn: config.sentry.dsn || "",
-    enabled: !!config.sentry.dsn,
-    environment: config.env,
-    integrations: [
-      // enable HTTP calls tracing
-      new Sentry.Integrations.Http({ tracing: true }),
-      // enable Express.js middleware tracing
-      new Tracing.Integrations.Express({ app }),
-    ],
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: config.env !== "production" ? 1.0 : 0.2,
-  });
+  initSentryExpress(app);
   // RequestHandler creates a separate execution context using domains, so that every
   // transaction/span/breadcrumb is attached to its own Hub instance
   app.use(Sentry.Handlers.requestHandler());
