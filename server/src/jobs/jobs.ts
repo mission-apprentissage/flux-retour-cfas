@@ -45,7 +45,6 @@ import {
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders";
-import { updateUserPassword } from "./users/update-user-password";
 
 interface CronDef {
   name: string;

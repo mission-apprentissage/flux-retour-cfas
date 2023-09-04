@@ -1,4 +1,4 @@
-import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/node";
+import { captureException } from "@sentry/node";
 import { Option, program } from "commander";
 import HttpTerminator from "lil-http-terminator";
 import { ObjectId } from "mongodb";
