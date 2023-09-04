@@ -9,6 +9,10 @@ describe("parseExcelDate", () => {
     expect(parseExcelDate("foo")).toBeNull();
   });
 
+  it("returns null for undefined input", () => {
+    expect(parseExcelDate(undefined)).toBeNull();
+  });
+
   it("returns date form number", () => {
     expect(parseExcelDate(54321)).toBe("2048-09-20");
   });
