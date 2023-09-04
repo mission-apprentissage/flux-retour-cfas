@@ -5,6 +5,10 @@ describe("parseExcelDate", () => {
     expect(parseExcelDate(null)).toBeNull();
   });
 
+  it("returns null for undefined input", () => {
+    expect(parseExcelDate(undefined)).toBeNull();
+  });
+
   it("returns null for non-date string input", () => {
     expect(parseExcelDate("foo")).toBeNull();
   });
