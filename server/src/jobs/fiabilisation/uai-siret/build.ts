@@ -228,11 +228,8 @@ const getAllCouplesUaiSiretTdbInReferentiel = async () => {
           pipeline: [
             {
               $match: {
-                $expr: {
-                  $or: [
-                    { $eq: ["$est_dans_le_referentiel", STATUT_PRESENCE_REFERENTIEL.PRESENT] },
-                    { $eq: ["$est_dans_le_referentiel", STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB] },
-                  ],
+                est_dans_le_referentiel: {
+                  $in: [STATUT_PRESENCE_REFERENTIEL.PRESENT, STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB],
                 },
               },
             },
