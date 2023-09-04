@@ -1,8 +1,8 @@
 import Boom from "boom";
 import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
+import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE } from "shared";
 
-import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE } from "@/common/constants/territoires";
 import logger from "@/common/logger";
 import { UsersMigration } from "@/common/model/@types/UsersMigration";
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";

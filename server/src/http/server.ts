@@ -1,10 +1,10 @@
 import fs from "fs";
-import path from "path";
 
 import * as Sentry from "@sentry/node";
 import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import express, { Application } from "express";
 import listEndpoints from "express-list-endpoints";
 import Joi from "joi";
@@ -80,7 +80,7 @@ import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
-import { packageJson } from "@/common/utils/esmUtils";
+import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
@@ -104,6 +104,7 @@ import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAu
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication";
 import validateRequestMiddleware from "./middlewares/validateRequestMiddleware";
+import { openApiFilePath } from "./open-api-path";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
@@ -117,7 +118,7 @@ import organismesRouter from "./routes/specific.routes/organismes.routes";
 import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
 import auth from "./routes/user.routes/auth.routes";
 
-const openapiSpecs = JSON.parse(fs.readFileSync(path.join(process.cwd(), "./src/http/open-api.json"), "utf8"));
+const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
 /**
  * Create the express app
@@ -132,6 +133,10 @@ export default async function createServer(): Promise<Application> {
   app.use(Sentry.Handlers.requestHandler());
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
+
+  if (config.env === "local") {
+    app.use(cors({ credentials: true, origin: config.publicUrl }));
+  }
 
   app.use(bodyParser.json({ limit: config.bodyParserLimit }));
   app.use(logMiddleware);
@@ -158,7 +163,7 @@ function setupRoutes(app: Application) {
       returnResult(async () => {
         return {
           name: "TDB Apprentissage API",
-          version: packageJson.version,
+          version: config.version,
           env: config.env,
         };
       })
@@ -176,7 +181,7 @@ function setupRoutes(app: Application) {
 
         return {
           name: "TDB Apprentissage API",
-          version: packageJson.version,
+          version: config.version,
           env: config.env,
           healthcheck: {
             mongodb: mongodbHealthy,

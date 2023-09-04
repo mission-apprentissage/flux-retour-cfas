@@ -6,6 +6,10 @@ import config from "@/config";
 const createStreams = () => {
   const { type, level } = config.log;
 
+  if (process.env.NODE_ENV === "test") {
+    return [];
+  }
+
   const jsonStream = () => {
     return {
       name: "json",

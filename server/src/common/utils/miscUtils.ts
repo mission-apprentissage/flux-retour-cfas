@@ -68,7 +68,7 @@ export function stripEmptyFields<T extends object>(object: T): T {
 export function addPrefixToProperties<
   Prefix extends string,
   Obj extends Record<string, any>,
-  PrefixedObj = AddPrefix<Prefix, Obj>
+  PrefixedObj = AddPrefix<Prefix, Obj>,
 >(prefix: Prefix, obj: Obj): PrefixedObj {
   const newObj = {} as PrefixedObj;
 

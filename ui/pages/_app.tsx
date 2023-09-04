@@ -14,6 +14,7 @@ import { RecoilRoot } from "recoil";
 import { queryClient } from "@/common/queryClient";
 import AlertMessage from "@/components/AlertMessage/AlertMessage";
 import UserWrapper from "@/components/UserWrapper/UserWrapper";
+import { publicConfig } from "@/config.public";
 import Fonts from "@/theme/Fonts";
 import theme from "@/theme/index";
 
@@ -21,7 +22,7 @@ setDefaultOptions({ locale: fr });
 
 function MyApp({ Component, pageProps }) {
   return (
-    <PlausibleProvider domain={process.env.NEXT_PUBLIC_BASE_HOST as string} trackLocalhost={false}>
+    <PlausibleProvider domain={publicConfig.host} trackLocalhost={false}>
       <RecoilRoot>
         <ChakraProvider theme={theme} resetCSS>
           <Fonts />

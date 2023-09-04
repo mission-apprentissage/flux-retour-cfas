@@ -2,7 +2,13 @@ import * as https from "https";
 
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
+import { publicConfig } from "@/config.public";
+
 import { emitter } from "./emitter";
+
+if (publicConfig.env === "local") {
+  axios.defaults.withCredentials = true;
+}
 
 class AuthError extends Error {
   json: any;
@@ -68,7 +74,7 @@ const getHttpsAgent = () => {
 };
 
 export const _get = async <T = any>(path: string, options?: AxiosRequestConfig<any>): Promise<T> => {
-  const response = await axios.get(path, {
+  const response = await axios.get(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
@@ -78,7 +84,7 @@ export const _get = async <T = any>(path: string, options?: AxiosRequestConfig<a
 };
 
 export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) => {
-  const response = await axios.get(path, {
+  const response = await axios.get(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
@@ -93,7 +99,7 @@ export const _post = async <RequestBody = any, ResponseBody = any>(
   body?: RequestBody,
   options?: AxiosRequestConfig<any>
 ): Promise<ResponseBody> => {
-  const response = await axios.post(path, body, {
+  const response = await axios.post(`${publicConfig.baseUrl}${path}`, body, {
     headers: getHeaders(),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
@@ -103,7 +109,7 @@ export const _post = async <RequestBody = any, ResponseBody = any>(
 };
 
 export const _postFile = async (path: string, data, options?: AxiosRequestConfig<any>) => {
-  const response = await axios.post(path, data, {
+  const response = await axios.post(`${publicConfig.baseUrl}${path}`, data, {
     headers: getHeaders(null),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
@@ -113,7 +119,7 @@ export const _postFile = async (path: string, data, options?: AxiosRequestConfig
 };
 
 export const _put = async (path: string, body = {}, options?: AxiosRequestConfig<any>) => {
-  const response = await axios.put(path, body, {
+  const response = await axios.put(`${publicConfig.baseUrl}${path}`, body, {
     headers: getHeaders(),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
@@ -123,7 +129,7 @@ export const _put = async (path: string, body = {}, options?: AxiosRequestConfig
 };
 
 export const _delete = async (path: string, options?: AxiosRequestConfig<any>) => {
-  const response = await axios.delete(path, {
+  const response = await axios.delete(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),

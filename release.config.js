@@ -1,41 +1,16 @@
-const { execSync } = require("child_process");
-const { createHash } = require("crypto");
-
-const mainConfig = {
-  branches: ["master"],
+module.exports = {
+  branches: ["master", { name: "next", channel: "next", prerelease: "rc" }],
   repositoryUrl: "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   plugins: [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     [
-      "@semantic-release/changelog",
-      {
-        changelogFile: "CHANGELOG.md",
-      },
-    ],
-    "@semantic-release/npm",
-    [
       "@semantic-release/exec",
       {
-        prepareCmd: "./scripts/prepare-release.sh ${nextRelease.version}",
-      },
-    ],
-    [
-      "@semantic-release/git",
-      {
-        assets: ["ui/package.json", "server/package.json", "CHANGELOG.md", "package.json"],
-        message:
-          // eslint-disable-next-line no-template-curly-in-string
-          "chore(release): bump ${nextRelease.version}",
+        prepareCmd: `.bin/mna-tdb release:app \${nextRelease.version} push`,
       },
     ],
     "@semantic-release/github",
-    [
-      "@semantic-release/exec",
-      {
-        publishCmd: "git checkout -- package.json",
-      },
-    ],
     [
       "semantic-release-slack-bot",
       {
@@ -46,21 +21,3 @@ const mainConfig = {
     ],
   ],
 };
-
-const branch = execSync("git branch --show-current").toString().trimEnd("\n");
-const channel = createHash("md5").update(branch).digest("hex");
-
-const localConfig = {
-  branches: [
-    "master",
-    {
-      name: branch,
-      channel,
-      prerelease: channel,
-    },
-  ],
-  repositoryUrl: "https://github.com/mission-apprentissage/flux-retour-cfas.git",
-  plugins: ["@semantic-release/commit-analyzer"],
-};
-
-module.exports = process.env.LOCAL_RELEASE ? localConfig : mainConfig;

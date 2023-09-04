@@ -1,0 +1,63 @@
+fileignoreconfig:
+- filename: .bin/scripts/seed-apply.sh
+  checksum: b1fce8dacb86d357945b8495f07151ddb153521093c1b647c4a23450cfa57e1f
+- filename: .bin/scripts/seed-update.sh
+  checksum: 5d6c4905865f66008d6ffd23eff04577bb8d1260022106b0be24062591bf0883
+- filename: .github/workflows/preview.yml
+  checksum: 28b92a37dd1d00c11331bb5ef2a45c483466da06a0e808fd669a3fcb5daba393
+- filename: .github/workflows/preview_cleanup.yml
+  checksum: 4d3fd0f6442350018326e2e1fcad931a068adb8f14566fd1e6df4987ac14d6cd
+- filename: .infra/.env_server
+  checksum: 3dc90eab8771c5e9af5dcde034b26e28be4d5b6b4821c1e455fa7c2bb22ae17c
+- filename: .infra/docker-compose.production.yml
+  checksum: 318c72a3804b19a9acdd325995ff91f456c48b4af56a0ed093f0377f40436d6f
+- filename: .infra/env.ini
+  checksum: 5c8821deaf01a88d0c5e4091a1cd420ac04e13bdbefc3245cc6366eb804bee49
+- filename: .infra/files/configs/metabase/setup-metabase.sh
+  checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
+- filename: .infra/files/configs/mongodb/seed.gpg
+  checksum: bd386ba9f6c996fe1a4b27fd9c1727eaa1af5f135138bf7d0920041c7570f49c
+- filename: .infra/files/scripts/seed.sh
+  checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
+- filename: .infra/vault/vault.yml
+  checksum: 4270a5fb6d86a75adf05be1677f37a9e6013a45b3fe2fd2555a59a24f452364f
+- filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
+  checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
+- filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml
+  checksum: 7d7420305e052a5a13c2476ef88e3d21bfeb8ac1ec55b8a5d29ce713353c4458
+- filename: .infra_previous/ansible/roles/setup/files/app/.overrides/recette/docker-compose.env.yml
+  checksum: 24ebe0dea49a7706a0351fe679dbab556d80b12aa8511642ca3637e2e6925fc9
+- filename: .yarn/**
+  checksum: any
+- filename: DEV.md
+  checksum: 9ea1d3d5e7b14290a680bf3c433c5c77b8a106e13fa2d662e6e0df0c86e7469d
+- filename: README.md
+  checksum: b7e69d60da12cf1c9d127547e747002450730881270ee170755098f22e15a9c4
+- filename: server/.env.test
+  checksum: 292028fd86217934cd5618b59f22e6164473d05fb7038b71af6148c5d1630502
+- filename: server/src/commands.ts
+  checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
+- filename: server/src/config.ts
+  checksum: c3a89696970fc89cb83227237e56d164f442c14f12da518b8061bda37cc4e443
+- filename: server/src/jobs/hydrate/hydrate-rncp-romes.ts
+  checksum: 71c60b9fc5f4d0308146235adde75e4df34ebac59539cef321403b5966b061ad
+- filename: server/src/jobs/seed/start/index.ts
+  checksum: bd018d4dab141be955d6e546f817b0aa58edc733e9e562272765d8211d2f3015
+- filename: ui/modules/organismes/Televersement.tsx
+  checksum: f0aef09f007b89516bfdcee828cb44e09f0089b2f96725a146d72b557d802878
+scopeconfig:
+- scope: node
+custom_patterns:
+- (?s)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}
+allowed_patterns:
+- key
+- Key
+- secret
+- SECRET
+- password
+- Password
+- pass
+- apiKey
+- ApiKey
+- api_key
+version: "1.0"

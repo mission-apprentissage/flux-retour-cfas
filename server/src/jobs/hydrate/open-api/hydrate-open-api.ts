@@ -1,10 +1,10 @@
 import fs from "fs";
-import path from "path";
+
+import { openApiFilePath } from "@/http/open-api-path";
 
 import schema from "./schema";
 
 export const hydrateOpenApi = async () => {
-  const filePath = path.resolve(process.cwd(), "src/http/open-api.json");
-  console.info(`Save file to ${filePath}`);
-  fs.writeFileSync(filePath, JSON.stringify(schema, null, 2));
+  console.info(`Save file to ${openApiFilePath}`);
+  fs.writeFileSync(openApiFilePath, JSON.stringify(schema, null, 2));
 };

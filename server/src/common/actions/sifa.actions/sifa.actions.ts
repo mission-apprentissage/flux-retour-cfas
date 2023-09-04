@@ -123,9 +123,8 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2",
       ADRESSE: effectif.apprenant.adresse
         ? effectif.apprenant.adresse?.complete ??
-          `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${
-            effectif.apprenant.adresse?.voie
-          }`
+          `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${effectif
+            .apprenant.adresse?.voie}`
         : undefined,
       SIT_N_1: effectif.apprenant.derniere_situation,
       ETAB_N_1: effectif.apprenant.dernier_organisme_uai

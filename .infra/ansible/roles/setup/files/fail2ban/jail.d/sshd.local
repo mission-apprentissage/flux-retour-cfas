@@ -1,8 +1,0 @@
-[sshd]
-enabled = true
-port = ssh
-filter = sshd[mode=aggressive]
-logpath = /var/log/auth.log
-maxretry = 10
-bantime = 2592000
-banaction = iptables-multiport

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 
@@ -28,8 +29,15 @@ export default () => {
       try {
         const foundUser = await findUserOrCfa(jwt_payload.sub);
         if (!foundUser) {
+          Sentry.setUser(null);
           return done(null, false);
         }
+        Sentry.setUser({
+          id: foundUser._id.toString(),
+          username: foundUser.username,
+          email: foundUser.email ?? "",
+          segment: "jwt",
+        });
         return done(null, foundUser);
       } catch (err) {
         return done(err, false);

@@ -25,7 +25,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
           dossier: await snapshot.getPromise(dossierAtom), // TODO
           fields: await snapshot.getPromise(cerfaAtom),
           values: await snapshot.getPromise(valuesSelector),
-        } as any),
+        }) as any,
     []
   );
 

@@ -1,7 +1,6 @@
 import { Box, Text, Radio, RadioGroup, Stack, FormControl, FormLabel, Select } from "@chakra-ui/react";
 import React, { useState } from "react";
-
-import { REGIONS_SORTED } from "@/common/constants/territoires";
+import { REGIONS_SORTED } from "shared";
 
 import { InscriptionOrganistionChildProps } from "./common";
 

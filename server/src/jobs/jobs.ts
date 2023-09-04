@@ -38,7 +38,7 @@ import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTr
 import { clearSeedAssets } from "./seed/clearAssets";
 import { seedPlausibleGoals } from "./seed/plausible/goals";
 import { seedAdmin, seedSample, seedSampleOrganismes, seedSampleUsers } from "./seed/start";
-import { generateTypes } from "./seed/types/generate-types";
+// import { generateTypes } from "./seed/types/generate-types";
 import { createErpUserLegacy } from "./users/create-user";
 import {
   generatePasswordUpdateTokenForUser,
@@ -202,8 +202,8 @@ export async function runJob(job: IJob): Promise<number> {
         return transformRupturantsToAbandonsDepuis((job.payload as any)?.nbJours);
       case "fiabilisation:stats":
         return getStats();
-      case "dev:generate-ts-types":
-        return generateTypes();
+      // case "dev:generate-ts-types":
+      //   return generateTypes();
       case "tmp:patches:update-lastTransmissionDate-organismes":
         return updateLastTransmissionDateForOrganismes();
       case "tmp:patches:remove-organismes-sansSiret-sansEffectifs":
@@ -226,7 +226,7 @@ export async function runJob(job: IJob): Promise<number> {
       case "migrations:up": {
         await upMigration();
         // Validate all documents after the migration
-        await addJob({ name: "db:validate" });
+        await addJob({ name: "db:validate", queued: true });
         return;
       }
       case "migrations:status": {

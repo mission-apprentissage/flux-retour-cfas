@@ -15,18 +15,19 @@ const contentSecurityPolicy = `
       frame-src 'self' https://plausible.io https://cfas.apprentissage.beta.gouv.fr https://cfas-recette.apprentissage.beta.gouv.fr;
       img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://www.notion.so https://mission-apprentissage.notion.site data:;
       object-src 'none';
-      script-src 'self' https://plausible.io ${
-        process.env.NEXT_PUBLIC_ENV === "dev" ? "'unsafe-eval' 'unsafe-inline'" : ""
-      };
+      script-src 'self' https://plausible.io ${process.env.NEXT_PUBLIC_ENV === "local" ? "'unsafe-eval'" : ""};
       script-src-attr 'none';
       style-src 'self' https: *.plausible.io 'unsafe-inline';
-      connect-src 'self' https://plausible.io;
+      connect-src 'self' https://plausible.io  https://sentry.apprentissage.beta.gouv.fr ${
+        process.env.NEXT_PUBLIC_ENV === "local" ? "http://localhost:5001/" : ""
+      };
       upgrade-insecure-requests;
 `;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  transpilePackages: ["shared"],
+  poweredByHeader: false,
   swcMinify: true,
   output: "standalone",
   experimental: {
@@ -35,6 +36,10 @@ const nextConfig = {
   },
   eslint: {
     dirs: ["."],
+  },
+  sentry: {
+    hideSourceMaps: false,
+    widenClientFileUpload: true,
   },
   webpack: (config) => {
     config.plugins.push(new CaseSensitivePathsPlugin());

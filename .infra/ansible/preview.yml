@@ -1,0 +1,21 @@
+---
+- hosts: preview
+  become: true
+  gather_facts: false
+  vars_files:
+    - "../vault/vault.yml"
+  tasks:
+    - include_tasks: ./tasks/files_copy.yml
+
+    - name: lancement preview system
+      shell:
+        chdir: /opt/app
+        cmd: docker compose -f docker-compose.preview-system.yml up -d --wait
+
+    - include_tasks: ./tasks/preview_pr.yml
+      vars:
+        build: true
+        repo_name: flux-retour-cfas
+        docker_images:
+          - mna_tdb_ui
+          - mna_tdb_server

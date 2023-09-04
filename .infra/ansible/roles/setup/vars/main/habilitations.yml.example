@@ -1,8 +1,0 @@
-habilitations:
-  - username: xxx
-    name: xxxx XXXX
-    gpg_key: XXXXX
-    authorized_keys:
-     - "https://github.com/xxxxx.keys"
-
-gpg_keys : "{{ habilitations  | map(attribute='gpg_key', default='') | select() | join(',')}}"

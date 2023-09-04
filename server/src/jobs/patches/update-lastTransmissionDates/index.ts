@@ -1,4 +1,4 @@
-import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool";
+import { PromisePool } from "@supercharge/promise-pool";
 
 import logger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";

@@ -1,73 +1,74 @@
 import env from "env-var";
 
 const config = {
-  email: env.get("FLUX_RETOUR_CFAS_EMAIL").default("tableau-de-bord@apprentissage.beta.gouv.fr").asString(),
-  email_from: env.get("FLUX_RETOUR_CFAS_EMAIL_FROM").default("Tableau de bord de l'apprentissage").asString(),
-  appName: env.get("FLUX_RETOUR_CFAS_NAME").default("Flux Retour Cfas").asString(),
-  port: env.get("FLUX_RETOUR_CFAS_SERVER_PORT").default(5000).asPortNumber(),
-  env: env.get("FLUX_RETOUR_CFAS_ENV").required().asString(),
-  publicUrl: env.get("FLUX_RETOUR_CFAS_PUBLIC_URL").required().asString(),
-  bodyParserLimit: env.get("FLUX_RETOUR_CFAS_BODY_PARSER_LIMIT").default("10mb").asString(),
+  email: env.get("MNA_TDB_EMAIL").default("tableau-de-bord@apprentissage.beta.gouv.fr").asString(),
+  email_from: env.get("MNA_TDB_EMAIL_FROM").default("Tableau de bord de l'apprentissage").asString(),
+  appName: env.get("MNA_TDB_NAME").default("Flux Retour Cfas").asString(),
+  version: env.get("PUBLIC_VERSION").default("0.0.0-local").asString(),
+  port: env.get("MNA_TDB_SERVER_PORT").default(5000).asPortNumber(),
+  env: env.get("MNA_TDB_ENV").required().asString(),
+  publicUrl: env.get("MNA_TDB_PUBLIC_URL").required().asString(),
+  bodyParserLimit: env.get("MNA_TDB_BODY_PARSER_LIMIT").default("10mb").asString(),
   mongodb: {
-    uri: env.get("FLUX_RETOUR_CFAS_MONGODB_URI").required().asString(),
+    uri: env.get("MNA_TDB_MONGODB_URI").required().asString(),
   },
   auth: {
     passwordHashRounds: 10000,
     user: {
-      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET").required().asString(),
+      jwtSecret: env.get("MNA_TDB_AUTH_USER_JWT_SECRET").required().asString(),
       expiresIn: "7d",
     },
     activation: {
-      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET").asString(),
+      jwtSecret: env.get("MNA_TDB_AUTH_ACTIVATION_JWT_SECRET").asString(),
       expiresIn: "96h",
     },
     resetPasswordToken: {
-      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET").asString(),
+      jwtSecret: env.get("MNA_TDB_AUTH_PASSWORD_JWT_SECRET").asString(),
       expiresIn: "1h",
     },
   },
   log: {
-    type: env.get("FLUX_RETOUR_CFAS_LOG_TYPE").default("console").asString(),
-    level: env.get("FLUX_RETOUR_CFAS_LOG_LEVEL").default("info").asString(),
+    type: env.get("MNA_TDB_LOG_TYPE").default("console").asString(),
+    level: env.get("MNA_TDB_LOG_LEVEL").default("info").asString(),
   },
   users: {
     defaultAdmin: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS").default([]).asArray(),
+      name: env.get("MNA_TDB_USERS_DEFAULT_ADMIN_NAME").required().asString(),
+      password: env.get("MNA_TDB_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),
+      permissions: env.get("MNA_TDB_USERS_DEFAULT_ADMIN_PERMISSIONS").default([]).asArray(),
     },
   },
   smtp: {
-    host: env.get("FLUX_RETOUR_CFAS_SMTP_HOST").asString(),
-    port: env.get("FLUX_RETOUR_CFAS_SMTP_PORT").asString(),
+    host: env.get("MNA_TDB_SMTP_HOST").asString(),
+    port: env.get("MNA_TDB_SMTP_PORT").asString(),
     auth: {
-      user: env.get("FLUX_RETOUR_CFAS_SMTP_AUTH_USER").asString(),
-      pass: env.get("FLUX_RETOUR_CFAS_SMTP_AUTH_PASS").asString(),
+      user: env.get("MNA_TDB_SMTP_AUTH_USER").asString(),
+      pass: env.get("MNA_TDB_SMTP_AUTH_PASS").asString(),
     },
   },
   clamav: {
-    uri: env.get("FLUX_RETOUR_CFAS_CLAMAV_URI").default("127.0.0.1:3310").asString(),
+    uri: env.get("MNA_TDB_CLAMAV_URI").default("127.0.0.1:3310").asString(),
   },
   ovhStorage: {
-    username: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_USERNAME").required().asString(),
-    password: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_PASSWORD").required().asString(),
+    username: env.get("MNA_TDB_OVH_STORAGE_USERNAME").required().asString(),
+    password: env.get("MNA_TDB_OVH_STORAGE_PASSWORD").required().asString(),
     authURL: "https://auth.cloud.ovh.net/v3/auth",
-    tenantId: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_TENANT_ID").required().asString(),
+    tenantId: env.get("MNA_TDB_OVH_STORAGE_TENANT_ID").required().asString(),
     region: "GRA",
-    containerName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").required().asString(),
-    encryptionKey: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_ENCRYPTION_KEY").required().asString(),
+    containerName: env.get("MNA_TDB_OVH_STORAGE_CONTAINER_NAME").required().asString(),
+    encryptionKey: env.get("MNA_TDB_OVH_STORAGE_ENCRYPTION_KEY").required().asString(),
   },
   ovh: {
     storage: {
-      encryptionKey: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_ENCRYPTION_KEY").asString(),
-      uri: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_URI").asString(),
-      storageName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").asString(),
+      encryptionKey: env.get("MNA_TDB_OVH_STORAGE_ENCRYPTION_KEY").asString(),
+      uri: env.get("MNA_TDB_OVH_STORAGE_URI").asString(),
+      storageName: env.get("MNA_TDB_OVH_STORAGE_CONTAINER_NAME").asString(),
     },
   },
   sentry: {
-    dsn: env.get("FLUX_RETOUR_CFAS_SENTRY_DSN").asString(),
+    dsn: env.get("MNA_TDB_SENTRY_DSN").asString(),
   },
-  organismesConsultationApiKey: env.get("FLUX_RETOUR_CFAS_ORGANISMES_CONSULTATION_API_KEY").asString(),
+  organismesConsultationApiKey: env.get("MNA_TDB_ORGANISMES_CONSULTATION_API_KEY").asString(),
 
   // API métiers externes
   tablesCorrespondances: {
@@ -84,7 +85,7 @@ const config = {
   },
   apiEntreprise: {
     endpoint: "https://entreprise.api.gouv.fr/v3",
-    key: env.get("FLUX_RETOUR_CFAS_API_ENTREPRISE_KEY").asString(),
+    key: env.get("MNA_TDB_API_ENTREPRISE_KEY").asString(),
     defaultRecipient: "13002526500013", // Siret DINUM
     object: "Consolidation des données",
     context: "MNA",

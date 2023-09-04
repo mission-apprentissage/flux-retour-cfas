@@ -12,11 +12,7 @@ export const authArgTypes = {
   auth__account_status: {
     name: "Account status",
     control: "select",
-    options: [
-      "PENDING_EMAIL_VALIDATION",
-      "PENDING_ADMIN_VALIDATION",
-      "CONFIRMED",
-    ],
+    options: ["PENDING_EMAIL_VALIDATION", "PENDING_ADMIN_VALIDATION", "CONFIRMED"],
   },
   auth__organisation: {
     name: "Organisation",

@@ -1,7 +1,7 @@
 import nock from "nock";
+import { DEPARTEMENTS } from "shared";
 
 import { API_ENDPOINT } from "@/common/apis/apiTablesCorrespondances";
-import { DEPARTEMENTS } from "@/common/constants/territoires";
 import { dataForGetCfdInfo, dataForGetSiretInfo } from "@tests/data/apiTablesDeCorrespondances";
 
 export const nockGetCfdInfo = (callback?: any) => {

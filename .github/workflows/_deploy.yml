@@ -1,37 +1,54 @@
-name: Deployment subworkflow
+name: Deployment
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: The environment to deploy to
+        type: choice
+        required: true
+        options:
+          - production
+          - recette
+      app_version:
+        description: app version
+        type: string
+        required: true
+        default: latest
   workflow_call:
     inputs:
       environment:
         description: The environment to deploy to
         type: string
-        required: true
-      server_ip:
-        description: The targeted server
+        default: latest
+        required: false
+      app_version:
+        description: app version
         type: string
-        required: true
-      user:
-        description: The server user to connect
-        type: string
-        required: true
+        required: false
+        default: latest
     secrets:
-      SSH_PRIVATE_KEY:
+      DEPLOY_SSH_PRIVATE_KEY:
         description: SSH private key
         required: true
       SSH_KNOWN_HOSTS:
         description: SSH known hosts list
         required: true
-      SLACK_WEBHOOK_URL:
+      DEPLOY_USERNAME:
+        description: SSH USER TO DEPLOY
+        required: true
+      DEPLOY_PASS:
+        description: SSH PWD TO DEPLOY
+        required: true
+      SLACK_WEBHOOK:
         description: Slack webhook URL
         required: true
-    outputs:
-      status:
-        description: Whether deployment succeeded or not
-        value: ${{ jobs.deploy.outputs.status }}
-concurrency: ${{ inputs.environment }}_deployment
+      VAULT_PWD:
+        description: Vault Password
+        required: true
+
 jobs:
   deploy:
-    name: Deploy on ${{ inputs.environment }}
+    name: Deploy ${{ inputs.app_version }} on ${{ inputs.environment }}
     runs-on: ubuntu-latest
     steps:
       - name: Notify new deployment on Slack
@@ -39,49 +56,50 @@ jobs:
         if: always()
         with:
           status: ${{ job.status }}
-          notification_title: "Déploiement en ${{ inputs.environment }} initié..."
+          notification_title: "Déploiement ${{ inputs.app_version }} en ${{ inputs.environment }} initié..."
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Checkout project
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          persist-credentials: false
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
           name: github_actions
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          known_hosts: ${{ vars.SSH_KNOWN_HOSTS }}
           config: |
-            Host ${{inputs.server_ip}}
-              HostName ${{inputs.server_ip}}
-              User ${{inputs.user}}
+            Host *
               IdentityFile ~/.ssh/github_actions
 
+      - name: Create vault pwd file
+        run: echo ${{ secrets.VAULT_PWD }} > .infra/.vault_pwd.txt
+
       - name: Run playbook
-        run: |
-          bash .infra/scripts/deploy-app.sh ${{ inputs.environment }}
+        run: .bin/mna-tdb deploy ${{ inputs.environment }} --extra-vars "app_version=${{ inputs.app_version }}"
+        env:
+          ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
+          ANSIBLE_REMOTE_USER: ${{ secrets.DEPLOY_USERNAME }}
+          ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
 
       - name: Notify failure on Slack
         uses: ravsamhq/notify-slack-action@v2
         if: always()
         with:
           status: ${{ job.status }}
-          notification_title: "Le déploiement en ${{ inputs.environment }} a échoué"
+          notification_title: "Le déploiement ${{ inputs.app_version }} en ${{ inputs.environment }} a échoué"
           notify_when: "failure"
           mention_groups: "!channel"
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Notify success on Slack
         uses: ravsamhq/notify-slack-action@v2
         if: always()
         with:
           status: ${{ job.status }}
-          notification_title: "Déploiement en ${{ inputs.environment }} terminé avec succès"
+          notification_title: "Déploiement ${{ inputs.app_version }} en ${{ inputs.environment }} terminé avec succès"
           notify_when: "success"
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

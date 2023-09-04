@@ -1,37 +1,52 @@
 name: CI
-on: [push]
+
+on:
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        description: Code coverrage token
+        required: true
+
 jobs:
   tests:
     name: "Tests"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout project
+        uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
-      - name: "Installation des dépendances"
-        run: make install
+      - uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            .yarn/install-state.gz
+            .yarn/cache
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: yarn-
 
-      - name: "Lint"
-        run: make lint
+      - name: Install dependencies
+        run: yarn install
 
-      - name: "Tests"
-        run: make test
+      - name: Make sure to use same dependencies version across all packages
+        run: yarn dedupe --check
 
-      - name: "Build"
-        run: make build
+      - name: lint
+        run: yarn lint
 
-  # This workflow is temporary disabled since we don't want to have a downtime each time we deploy.
+      - name: typecheck
+        run: yarn typecheck:ci
 
-  # deploy-recette:
-  #   if: github.ref == 'refs/heads/master'
-  #   name: "Déploiement en recette"
-  #   needs: tests
-  #   uses: "./.github/workflows/_deploy.yml"
-  #   with:
-  #     environment: recette
-  #     server_ip: 146.59.226.69
-  #     user: antoine
-  #   secrets:
-  #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  #     SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-  #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      - name: test
+        run: yarn test:ci
+
+      - name: prettier
+        run: yarn prettier:check
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

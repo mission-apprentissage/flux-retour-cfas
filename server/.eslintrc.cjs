@@ -1,78 +1,31 @@
 // eslint-disable-next-line no-undef
 module.exports = {
-  root: true,
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended",
-    "plugin:import/recommended",
-    "plugin:import/warnings",
-    "plugin:import/typescript",
-
-    // spécifique server
-    "plugin:node/recommended-module",
-  ],
-  plugins: ["import", "@typescript-eslint"],
+  extends: ["plugin:node/recommended-module"],
   rules: {
-    "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/ban-ts-comment": 0,
-    "@typescript-eslint/no-empty-function": 0,
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        caughtErrorsIgnorePattern: "^_",
-        ignoreRestSiblings: true,
-      },
-    ],
-    "no-unused-vars": 0, // duplicated with @typescript-eslint/no-unused-vars
-    "node/no-missing-import": 0, // duplicated with import/no-unresolved
-
-    // imports
-    "import/extensions": ["error"],
-    "import/order": [
-      "error",
-      {
-        "newlines-between": "always",
-        alphabetize: {
-          order: "asc",
-          caseInsensitive: true,
-        },
-        groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object"],
-        pathGroups: [
-          {
-            pattern: "@/**",
-            group: "internal",
-          },
-        ],
-      },
-    ],
-    "import/newline-after-import": "error",
-    "import/no-extraneous-dependencies": [
-      "error",
-      { devDependencies: ["tests/**/*.ts", "src/jobs/seed/types/generate-types.ts"] },
-    ],
-    "import/no-mutable-exports": "error",
-    "import/default": "off",
-    "import/no-named-as-default-member": "off",
-
     // désactivé temporairement pour éviter trop de changements
     // le temps de la migration complète vers typescript
     "prefer-const": 0,
     "no-var": 0,
+    // Dynamic import is actually supported in Node 20
+    "node/no-unsupported-features/es-syntax": [
+      "error",
+      {
+        ignores: ["modules", "dynamicImport"],
+      },
+    ],
+    // doesn't support path alias
+    "node/no-missing-import": 0,
   },
   env: {
-    es2021: true,
+    es2022: true,
     node: true,
   },
   parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: "module",
+    project: "server/tsconfig.json",
   },
   overrides: [
     {
-      files: "tests/**/*.ts",
+      files: ["tests/**/*.ts", "./tsup.config.ts", "src/dev.ts", "jest.config.js"],
       rules: {
         // autorise l'import des devDependencies
         "node/no-unpublished-import": "off",
@@ -81,12 +34,10 @@ module.exports = {
     },
   ],
   settings: {
-    "import/extensions": [".js", ".ts"],
     "import/resolver": {
-      node: {
-        extensions: [".js", ".ts"],
+      typescript: {
+        project: "server/tsconfig.json",
       },
-      typescript: {}, // this loads <rootdir>/tsconfig.json to eslint
     },
   },
 };
