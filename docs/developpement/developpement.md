@@ -97,7 +97,7 @@ Commandes:
 
 Le server SMTP de test [Mailpit](https://github.com/axllent/mailpit) est utilisé localement pour prendre en charge l'envoi d'emails localement.
 
-Vous pouvez accéder à l'interface utilisateur à l'addresse suivante [http://localhost:1025](http://localhost:1025).
+Vous pouvez accéder à l'interface utilisateur à l'addresse suivante [http://localhost:8025](http://localhost:8025).
 
 ### Debugger sous VSCode
 
