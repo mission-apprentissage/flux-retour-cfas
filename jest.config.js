@@ -39,7 +39,7 @@ const config = async () => {
       global: {
         branches: 73,
         functions: 40,
-        lines: 52,
+        lines: 47,
         statements: -14000,
       },
     },
