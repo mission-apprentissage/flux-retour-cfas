@@ -12,7 +12,7 @@ fileignoreconfig:
 - filename: .infra/docker-compose.production.yml
   checksum: 318c72a3804b19a9acdd325995ff91f456c48b4af56a0ed093f0377f40436d6f
 - filename: .infra/env.ini
-  checksum: ba92d6024cd37414b0e56ae8f6c526a4832c3186ca2b450913487a678bbd3352
+  checksum: 5c8821deaf01a88d0c5e4091a1cd420ac04e13bdbefc3245cc6366eb804bee49
 - filename: .infra/files/configs/metabase/setup-metabase.sh
   checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
 - filename: .infra/files/configs/mongodb/seed.gpg

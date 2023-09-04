@@ -9,7 +9,6 @@ on:
         options:
           - production
           - recette
-          - sandbox
       app_version:
         description: app version
         type: string
