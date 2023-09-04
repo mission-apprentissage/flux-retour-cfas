@@ -83,6 +83,7 @@ import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
+import stripNullProperties from "@/common/utils/stripNullProperties";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
@@ -481,7 +482,9 @@ function setupRoutes(app: Application) {
           .post(
             "/validate",
             returnResult(async (req) => {
-              const data = await z.array(dossierApprenantSchemaV3WithMoreRequiredFields()).safeParseAsync(req.body);
+              const data = await z
+                .array(dossierApprenantSchemaV3WithMoreRequiredFields())
+                .safeParseAsync((req.body || []).map((e) => stripNullProperties(e)));
               return data;
             })
           )
