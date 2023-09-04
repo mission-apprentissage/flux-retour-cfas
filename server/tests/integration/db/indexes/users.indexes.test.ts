@@ -3,8 +3,10 @@ import { strict as assert } from "assert";
 import { createIndexes, dropIndexes } from "@/common/model/indexes/index";
 import usersModelDescriptor from "@/common/model/users.model";
 import { getDbCollectionIndexes } from "@/common/mongodb";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("Users Indexes", () => {
+  useMongo();
   it("Vérifie l'existence des indexes", async () => {
     // Crée une entrée en base
     // await createUser(

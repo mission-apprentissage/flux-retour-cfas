@@ -2,8 +2,10 @@ import { strict as assert } from "assert";
 
 import { effectifsDb } from "@/common/model/collections";
 import { formatError } from "@/common/utils/errorUtils";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("ErrorUtils", () => {
+  useMongo();
   it("display details for Document failed validation on one document", async () => {
     try {
       await effectifsDb().insertOne({ name: "test" } as any);

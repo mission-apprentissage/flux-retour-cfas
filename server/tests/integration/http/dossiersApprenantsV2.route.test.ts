@@ -7,6 +7,7 @@ import { createOrganisme } from "@/common/actions/organismes/organismes.actions"
 import { effectifsQueueDb, usersDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp } from "@tests/utils/testUtils";
 
 const user = {
@@ -34,6 +35,7 @@ const getJwtForUser = async (httpClient) => {
 let httpClient: AxiosInstance;
 
 describe("Dossiers Apprenants Route", () => {
+  useMongo();
   beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;

@@ -9,9 +9,11 @@ import { formationsCatalogueDb } from "@/common/model/collections";
 import { WithStringId } from "@/common/model/types";
 import config from "@/config";
 import { hydrateFormationsCatalogue } from "@/jobs/hydrate/hydrate-formations-catalogue";
+import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
 
 describe("Job hydrateFormationsCatalogue", () => {
+  useMongo();
   const formationsCatalogue: WithStringId<FormationsCatalogue>[] = [
     {
       _id: id(1),

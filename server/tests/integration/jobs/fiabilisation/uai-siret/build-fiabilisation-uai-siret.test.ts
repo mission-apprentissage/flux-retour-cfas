@@ -21,12 +21,14 @@ import {
   checkUaiAucunLieuReferentiel,
   checkUaiLieuReferentiel,
 } from "@/jobs/fiabilisation/uai-siret/build.rules";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("Job Build Fiabilisation UAI SIRET", () => {
   const UAI_REFERENTIEL = "7722672E";
   const SIRET_REFERENTIEL = "99370584100099";
   let organismeReferentiel;
 
+  useMongo();
   beforeEach(async () => {
     // Création d'un organisme dans le référentiel avec un couple
     const { value } = await organismesReferentielDb().findOneAndUpdate(

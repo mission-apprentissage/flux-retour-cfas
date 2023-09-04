@@ -4,6 +4,7 @@ import { Effectif } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { historySequenceApprentiToAbandon, historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
 import {
   PermissionsTestConfig,
   commonEffectifsAttributes,
@@ -18,6 +19,7 @@ let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
 
 describe("Route indicateurs", () => {
+  useMongo();
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
