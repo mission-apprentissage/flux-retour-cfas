@@ -33,6 +33,7 @@ import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-qu
 import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/process-ingestion";
 import { addJob, executeJob } from "./jobs_actions";
 import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants";
+import { removeOrganismesAbsentsReferentielSansTransmission } from "./patches/remove-organismes-absentReferentiel-sansTransmission";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates";
 import { clearSeedAssets } from "./seed/clearAssets";
@@ -210,6 +211,8 @@ export async function runJob(job: IJob): Promise<number> {
         return removeOrganismesSansSiretSansEffectifs();
       case "tmp:patches:remove-organisme-effectifs":
         return removeOrganismeAndEffectifs(job.payload as any);
+      case "tmp:patches:remove-organismes-absentsReferentiel-sansTransmission":
+        return removeOrganismesAbsentsReferentielSansTransmission();
       case "process:effectifs-queue:remove-duplicates":
         return removeDuplicatesEffectifsQueue();
       case "process:effectifs-queue:single":
