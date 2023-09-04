@@ -1,6 +1,7 @@
 import { PromisePool } from "@supercharge/promise-pool";
 
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
+import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import {
   effectifsDb,
@@ -33,14 +34,18 @@ export const buildFiabilisationUaiSiret = async () => {
   await fiabilisationUaiSiretDb().deleteMany({});
 
   logger.info("> Execution du script de fiabilisation sur tous les couples UAI-SIRET...");
-  const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
-  const uniqueCouplesUaiSiretToCheck = await getAllUniqueCouplesUaiSiretToFiabilise();
+  const [organismesFromReferentiel, allCouplesUaiSiretTdbInReferentiel, uniqueCouplesUaiSiretToCheck] =
+    await Promise.all([
+      organismesReferentielDb().find().toArray(),
+      getAllCouplesUaiSiretTdbInReferentiel(),
+      getAllUniqueCouplesUaiSiretToFiabilise(),
+    ]);
 
   // Traitement // sur tous les couples identifiés
   await PromisePool.for(uniqueCouplesUaiSiretToCheck).process(async (coupleUaiSiretTdb) => {
     await buildFiabilisationCoupleForTdbCouple(
       coupleUaiSiretTdb,
-      uniqueCouplesUaiSiretToCheck,
+      allCouplesUaiSiretTdbInReferentiel,
       organismesFromReferentiel
     );
   });
@@ -200,6 +205,35 @@ const getAllCouplesUaiSiretTdb = async () => {
           localField: "organisme_id",
           foreignField: "_id",
           as: "organismes_info",
+        },
+      },
+      { $unwind: "$organismes_info" },
+      { $project: { organisme_uai: "$organismes_info.uai", organisme_siret: "$organismes_info.siret" } },
+      { $group: { _id: { uai: "$organisme_uai", siret: "$organisme_siret" } } },
+      { $project: { _id: 0, uai: "$_id.uai", siret: "$_id.siret" } },
+    ])
+    .toArray();
+};
+
+const getAllCouplesUaiSiretTdbInReferentiel = async () => {
+  return await effectifsDb()
+    .aggregate([
+      { $match: filters },
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "organisme_id",
+          foreignField: "_id",
+          as: "organismes_info",
+          pipeline: [
+            {
+              $match: {
+                est_dans_le_referentiel: {
+                  $in: [STATUT_PRESENCE_REFERENTIEL.PRESENT, STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB],
+                },
+              },
+            },
+          ],
         },
       },
       { $unwind: "$organismes_info" },

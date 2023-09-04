@@ -37,6 +37,7 @@ export interface Organisation {
     | "AGRI_UNREP"
     | "AGRI_UNMFREO"
     | "ANASUP"
+    | "AMUE"
     | "CCI"
     | "CFA_EC"
     | "COMP_DU_DEVOIR"

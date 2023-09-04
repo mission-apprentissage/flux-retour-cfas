@@ -36,6 +36,10 @@ export const TETE_DE_RESEAUX = [
     key: "ANASUP",
   },
   {
+    nom: "AMUE",
+    key: "AMUE",
+  },
+  {
     nom: "CCI",
     key: "CCI",
   },

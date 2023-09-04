@@ -37,6 +37,7 @@ const INPUT_FILES = [
   "reseaux/referentiel-reseau-en.csv", // EDUC. NAT
   // "reseaux/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
   "reseaux/referentiel-reseau-cfa-ec.csv", // CFA EC
+  "reseaux/referentiel-reseau-amue.csv", // AMUE
 ];
 
 /**
