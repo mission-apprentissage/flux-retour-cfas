@@ -40,7 +40,7 @@
     src: "{{ item }}"
     dest: "/opt/app/.env_server"
   with_fileglob:
-    - "../.env_server"
+    - "{{inventory_dir}}/.env_server"
   when: env_type != 'preview'
 
 - name: copy du fichier docker compose
@@ -48,7 +48,7 @@
     src: "{{ item }}"
     dest: "/opt/app/docker-compose.production.yml"
   with_fileglob:
-    - "../docker-compose.production.yml"
+    - "{{inventory_dir}}/docker-compose.production.yml"
   when: env_type != 'preview'
 
 - name: copy du fichier recette docker compose
@@ -56,7 +56,7 @@
     src: "{{ item }}"
     dest: "/opt/app/docker-compose.recette.yml"
   with_fileglob:
-    - "../docker-compose.recette.yml"
+    - "{{inventory_dir}}/docker-compose.recette.yml"
   when: env_type == 'recette' or env_type == 'sandbox'
 
 - name: creation du fichier docker compose preview system

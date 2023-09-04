@@ -10,12 +10,6 @@ import { executeJob } from "@/jobs/jobs_actions";
 const { testkit, sentryTransport } = sentryTestkit();
 
 beforeAll(async () => {
-  console.log({
-    ...getSentryOptions(),
-    tracesSampleRate: 1,
-    enabled: true,
-    transport: sentryTransport,
-  });
   Sentry.init({
     ...getSentryOptions(),
     tracesSampleRate: 1,
