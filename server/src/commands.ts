@@ -6,20 +6,14 @@ import { ObjectId } from "mongodb";
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
 import { closeSentry, initSentryProcessor } from "./common/services/sentry/sentry";
+import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
+import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { addJob, processor } from "./jobs/jobs_actions";
+import { updateUserPassword } from "./jobs/users/update-user-password";
 
-program
-  .configureHelp({
-    sortSubcommands: true,
-  })
-  .hook("postAction", async () => {
-    await closeMongodbConnection();
-    await closeSentry();
-  });
-
-async function startProcessor(signal: AbortSignal) {
+async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
   await addJob({
     name: "crons:init",
@@ -56,6 +50,24 @@ function createProcessExitSignal() {
 
   return abortController.signal;
 }
+
+program
+  .configureHelp({
+    sortSubcommands: true,
+  })
+  .hook("preAction", (_, actionCommand) => {
+    const command = actionCommand.name();
+    // on définit le module du logger en global pour distinguer les logs des jobs
+    if (command !== "start") {
+      logger.fields.module = `cli:${command}`;
+      // Pas besoin d'init Sentry dans le cas du server car il est start automatiquement
+      initSentryProcessor();
+    }
+  })
+  .hook("postAction", async () => {
+    await closeMongodbConnection();
+    await closeSentry();
+  });
 
 program
   .command("start")
@@ -96,7 +108,7 @@ program
       ];
 
       if (withProcessor) {
-        tasks.push(startProcessor(signal));
+        tasks.push(startJobProcessor(signal));
       }
 
       await Promise.all(tasks);
@@ -108,131 +120,99 @@ program
   });
 
 program
-  .command("job_processor:start")
-  .description("Run job processor")
+  .command("queue_processor:start")
+  .description("Démarre le démon qui traite les effectifs en attente")
   .action(async () => {
     initSentryProcessor();
     const signal = createProcessExitSignal();
-    await startProcessor(signal);
+
+    if (config.disable_processors) {
+      // The processor will exit, and be restarted by docker every day
+      await sleep(24 * 3_600_000, signal);
+      return;
+    }
+
+    try {
+      return await startEffectifQueueProcessor(signal);
+    } catch (err) {
+      captureException(err);
+      logger.error(err);
+    }
   });
+
+program
+  .command("job_processor:start")
+  .description("Run job processor")
+  .action(async () => {
+    const signal = createProcessExitSignal();
+    if (config.disable_processors) {
+      // The processor will exit, and be restarted by docker every day
+      await sleep(24 * 3_600_000, signal);
+      return;
+    }
+
+    await startJobProcessor(signal);
+  });
+
+function createJobAction(name) {
+  return async (options) => {
+    try {
+      const { queued = false, ...payload } = options;
+      const exitCode = await addJob({
+        name,
+        queued,
+        payload,
+      });
+
+      if (exitCode) {
+        program.error("Command failed", { exitCode });
+      }
+    } catch (err) {
+      logger.error(err);
+      program.error("Command failed", { exitCode: 2 });
+    }
+  };
+}
 
 program
   .command("db:validate")
   .description("Validate Documents")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "db:validate",
-      queued,
-    });
+  .action(createJobAction("db:validate"));
 
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
-
-program
-  .command("migrations:up")
-  .description("Run migrations up")
-  .action(async () => {
-    const exitCode = await addJob({
-      name: "migrations:up",
-    });
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+program.command("migrations:up").description("Run migrations up").action(createJobAction("migrations:up"));
 
 program
   .command("migrations:status")
   .description("Check migrations status")
-  .action(async () => {
-    const exitCode = await addJob(
-      {
-        name: "migrations:status",
-      },
-      { runningLogs: false }
-    );
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("migrations:status"));
 
 program
   .command("migrations:create")
   .description("Run migrations create")
   .requiredOption("-d, --description <string>", "description")
-  .action(async ({ description }) => {
-    const exitCode = await addJob({
-      name: "migrations:create",
-      payload: { description },
-    });
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("migrations:create"));
 
 program
   .command("indexes:create")
   .description("Creation des indexes mongo")
   .option("-d, --drop", "Supprime les indexes existants avant de les recréer")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ drop, queued }) => {
-    const exitCode = await addJob({
-      name: "indexes:create",
-      payload: drop,
-      queued,
-    });
+  .action(createJobAction("indexes:create"));
 
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
 program
   .command("indexes:recreate")
   .description("Drop and recreate indexes")
   .option("-d, --drop", "Drop indexes before recreating them")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ drop, queued }) => {
-    const exitCode = await addJob({
-      name: "indexes:recreate",
-      payload: { drop },
-      queued,
-    });
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("indexes:recreate"));
 
 program
   .command("db:find-invalid-documents")
   .description("Recherche des documents invalides")
   .requiredOption("-c, --collection", "the collection to search for invalid documents")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ collection, queued }) => {
-    const exitCode = await addJob({
-      name: "db:find-invalid-documents",
-      payload: collection,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
-
-program
-  .command("queue_processor:start")
-  .description("Démarre le démon qui traite les effectifs en attente")
-  .action(async () => {
-    const exitCode = await addJob({
-      name: "queue_processor:start",
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("db:find-invalid-documents"));
 
 program
   .command("process:effectifs-queue")
@@ -249,54 +229,20 @@ program
     (value) => new Date(value)
   )
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ force, limit, since, queued }) => {
-    const exitCode = await addJob({
-      name: "process:effectifs-queue",
-      payload: {
-        force,
-        limit,
-        since,
-      },
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("process:effectifs-queue"));
 
 program
   .command("process:effectifs-queue:single")
   .description("Traite un effectifQueue")
   .requiredOption("--id <effectifQueueId>", "ID de l'effectifQueue à traiter", (value) => new ObjectId(value))
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ id, queued }) => {
-    const exitCode = await addJob({
-      name: "process:effectifs-queue:single",
-      payload: id,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("process:effectifs-queue:single"));
 
 program
   .command("process:effectifs-queue:remove-duplicates")
   .description("Supprime les dossiers en doublons des effectifs, en ne gardant que le plus récent")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "process:effectifs-queue:remove-duplicates",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
-
+  .action(createJobAction("process:effectifs-queue:remove-duplicates"));
 /**
  * Job (temporaire) de suppression d'un organisme et de ses effectifs
  */
@@ -306,20 +252,7 @@ program
   .requiredOption("--uai <string>", "Uai de l'organisme")
   .requiredOption("--siret <string>", "Siret de l'organisme")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ uai, siret, queued }) => {
-    const exitCode = await addJob({
-      name: "tmp:patches:remove-organisme-effectifs",
-      payload: {
-        uai,
-        siret,
-      },
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("tmp:patches:remove-organisme-effectifs"));
 
 /**
  * Job (temporaire) de suppression des organismes sans siret & sans effectifs
@@ -328,16 +261,7 @@ program
   .command("tmp:patches:remove-organismes-sansSiret-sansEffectifs")
   .description("[TEMPORAIRE] Suppression des organismes sans siret & sans effectifs")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "tmp:patches:remove-organismes-sansSiret-sansEffectifs",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("tmp:patches:remove-organismes-sansSiret-sansEffectifs"));
 
 /**
  * Job (temporaire) de MAJ des date de dernières transmission des effectifs
@@ -346,32 +270,12 @@ program
   .command("tmp:patches:update-lastTransmissionDate-organismes")
   .description("[TEMPORAIRE] Mise à jour des date de dernières transmissions d'un organisme à partir de ses effectifs")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "tmp:patches:update-lastTransmissionDate-organismes",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("tmp:patches:update-lastTransmissionDate-organismes"));
 
 /**
  * Job d'initialisation de données de test
  */
-program
-  .command("seed:sample")
-  .description("Seed sample data")
-  .action(async () => {
-    const exitCode = await addJob({
-      name: "seed:sample",
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+program.command("seed:sample").description("Seed sample data").action(createJobAction("seed:sample"));
 
 /**
  * Job d'initialisation d'un user admin
@@ -382,19 +286,7 @@ program
   .description("Seed user admin")
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ email, queued }) => {
-    const exitCode = await addJob({
-      name: "seed:admin",
-      payload: {
-        email: email?.toLowerCase(),
-      },
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("seed:admin"));
 
 /**
  * Job de seed des goals dans plausible,
@@ -404,31 +296,13 @@ program
   .command("seed:plausible:goals")
   .description("Seed plausible goals")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "seed:plausible:goals",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("seed:plausible:goals"));
 
 program
   .command("seed:assets:clear")
   .description("Seed assets clear")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "seed:assets:clear",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("seed:assets:clear"));
 
 /**
  * Job de nettoyage de db
@@ -436,96 +310,39 @@ program
 program
   .command("clear")
   .description("Clear projet")
-  .option("-a, --all", "Tout supprimer")
+  .option("-a, --clearAll", "Tout supprimer")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ all, queued }) => {
-    const exitCode = await addJob({
-      name: "clear",
-      payload: {
-        clearAll: all,
-      },
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("clear"));
 
 program
   .command("clear:users")
   .description("Clear users")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "clear:users",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("clear:users"));
 
 program
   .command("hydrate:bassins-emploi")
   .description("Remplissage de la collection bassinsEmploi")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:bassins-emploi",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:bassins-emploi"));
 
 program
   .command("hydrate:organismes-bassins-emploi")
   .description("Remplissage du champ organismes.adresse.bassinEmploi")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:organismes-bassins-emploi",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:organismes-bassins-emploi"));
 
 program
   .command("hydrate:effectifs-computed")
   .description("Remplissage du champ effectifs._computed avec les attributs des organismes")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:effectifs-computed",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:effectifs-computed"));
 
 program
   .command("hydrate:effectifs-formation-niveaux")
   .description("Remplissage du champ niveau des formations des effectifs")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:effectifs-formation-niveaux",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:effectifs-formation-niveaux"));
 
 /**
  * Job de remplissage des organismes du référentiel
@@ -534,16 +351,7 @@ program
   .command("hydrate:organismes-referentiel")
   .description("Remplissage des organismes du référentiel")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:organismes-referentiel",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:organismes-referentiel"));
 
 /**
  * Job de remplissage des formations du catalogue
@@ -552,94 +360,40 @@ program
   .command("hydrate:formations-catalogue")
   .description("Remplissage des formations du catalogue")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:formations-catalogue",
-      queued,
-    });
+  .action(createJobAction("hydrate:formations-catalogue"));
 
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
-
+/**
+ * Job de remplissage des formations du catalogue
+ */
 program
-  .command("hydrate:rncp-romes")
+  .command("hydrate:rncp-rome")
   .description("Remplissage du RNCP")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob(
-      {
-        name: "hydrate:rncp-romes",
-        queued,
-      },
-      { runningLogs: true }
-    );
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:rncp-romes"));
 
 program
   .command("hydrate:organismes-formations")
   .description("Remplissage des formations des organismes")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:organismes-formations",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:organismes-formations"));
 
 program
   .command("hydrate:organismes-relations")
   .description("Remplissage des relations organismes formateurs liés aux organismes")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:organismes-relations",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:organismes-relations"));
 
 program
   .command("hydrate:organismes-soltea")
   .description("Remplissage des organismes du fichier SOLTEA")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:organismes-soltea",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:organismes-soltea"));
 
 program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "dev:generate-open-api",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("dev:generate-open-api"));
 
 /**
  * Job de remplissage des organismes en allant ajouter / maj aux organismes existants (issus de la transmission)
@@ -649,16 +403,7 @@ program
   .command("hydrate:organismes")
   .description("Remplissage des organismes du tableau de bord en utilisant le référentiel")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:organismes",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:organismes"));
 
 /**
  * Job de remplissage des organismes en allant ajouter / maj aux organismes existants (issus de la transmission)
@@ -668,16 +413,7 @@ program
   .command("hydrate:organismes-effectifs-count")
   .description("Mise à jour des organismes avec le nombre d'effectifs")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:organismes-effectifs-count",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("hydrate:organismes-effectifs-count"));
 
 /**
  * Job de mise à jour des organismes en allant appeler des API externes pour remplir
@@ -689,16 +425,7 @@ program
   .command("update:organismes-with-apis")
   .description("Mise à jour des organismes via API externes")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "update:organismes-with-apis",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("update:organismes-with-apis"));
 
 /**
  * Job de remplissage & maj des d'organismes / dossiersApprenants pour les réseaux avec le nouveau format
@@ -707,29 +434,9 @@ program
   .command("hydrate:reseaux")
   .description("Remplissage des réseaux pour les organismes et dossiersApprenants")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "hydrate:reseaux",
-      queued,
-    });
+  .action(createJobAction("hydrate:reseaux"));
 
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
-
-program
-  .command("init:dev")
-  .description("Initialisation du projet en local")
-  .action(async () => {
-    const exitCode = await addJob({
-      name: "init:dev",
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**
  * Job de purge des events
@@ -739,17 +446,7 @@ program
   .description("Purge des logs inutiles")
   .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ nbDaysToKeep, queued }) => {
-    const exitCode = await addJob({
-      name: "purge:events",
-      payload: nbDaysToKeep,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("purge:events"));
 
 /**
  * Job de purge des queues
@@ -759,17 +456,7 @@ program
   .description("Purge des queues")
   .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ nbDaysToKeep, queued }) => {
-    const exitCode = await addJob({
-      name: "purge:queues",
-      payload: nbDaysToKeep,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("purge:queues"));
 
 /**
  * Job de création d'un utilisateur
@@ -798,17 +485,7 @@ program
   .description("Création d'un utilisateur ERP legacy")
   .requiredOption("--username <string>", "Nom de l'utilisateur")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ username, queued }) => {
-    const exitCode = await addJob({
-      name: "create:erp-user-legacy",
-      payload: username,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("create:erp-user-legacy"));
 
 /**
  * Job de génération d'un token de MAJ de mot de passe pour un utilisateur
@@ -818,17 +495,7 @@ program
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur")
   .requiredOption("--email <string>", "Email de l'utilisateur")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ email, queued }) => {
-    const exitCode = await addJob({
-      name: "generate:password-update-token",
-      payload: email,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("generate:password-update-token"));
 
 /**
  * Job de génération d'un token de MAJ de mot de passe pour un utilisateur legacy (ancien modèle)
@@ -838,40 +505,20 @@ program
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur legacy")
   .requiredOption("--username <string>", "username de l'utilisateur")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ username, queued }) => {
-    const exitCode = await addJob({
-      name: "generate-legacy:password-update-token",
-      payload: username,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("generate-legacy:password-update-token"));
 
 /**
- * Job de de MAJ de mot de passe pour un utilisateur legacy (ancien modèle) via son token
+ * MAJ de mot de passe pour un utilisateur legacy (ancien modèle) via son token
+ *
+ * Ne pas transfromer en Job pour ne pas save en clair le password dans la collection de job
  */
 program
   .command("update:user-legacy:password")
   .description("Modification du mot de passe d'un utilisateur legacy via son token de MAJ ")
   .requiredOption("--token <string>", "token d'update de password")
   .requiredOption("--password <string>", "nouveau mot de passe")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ token, password, queued }) => {
-    const exitCode = await addJob({
-      name: "update:user-legacy:password",
-      payload: {
-        token,
-        password,
-      },
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
+  .action(async (options) => {
+    await updateUserPassword(options);
   });
 
 /**
@@ -884,17 +531,7 @@ program
   .description("[TEMPORAIRE] Modification des utilisateurs fournisseurs de données")
   .addOption(new Option("--mode <mode>", "Mode de mise à jour").choices(["active", "inactive"]).makeOptionMandatory())
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ mode, queued }) => {
-    const exitCode = await addJob({
-      name: "tmp:users:update-apiSeeders",
-      payload: mode,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("tmp:users:update-apiSeeders"));
 
 /**
  * Job de lancement des scripts de fiabilisation des couples UAI SIRET
@@ -903,16 +540,7 @@ program
   .command("fiabilisation:uai-siret:run")
   .description("Lancement des scripts de fiabilisation des couples UAI SIRET")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "fiabilisation:uai-siret:run",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("fiabilisation:uai-siret:run"));
 
 /**
  * Job de suppression des inscrits sans contrats dans ce statut depuis un nb de jours donné
@@ -922,17 +550,7 @@ program
   .description("Suppression des inscrits sans contrats dans ce statut depuis un nombre de jours donné")
   .option("--nbJours <number>", "Nombre de jours dans le statut", (n) => parseInt(n, 10), 90)
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ nbJours, queued }) => {
-    const exitCode = await addJob({
-      name: "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours",
-      payload: nbJours,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours"));
 
 /**
  * Job de transformation des rupturants en abandon dans ce statut depuis un nombre de jours donné
@@ -942,17 +560,7 @@ program
   .description("Transformation des rupturants en abandon dans ce statut depuis un nombre de jours donné")
   .option("--nbJours <number>", "Nombre de jours dans le statut", (n) => parseInt(n, 10), 180)
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ nbJours, queued }) => {
-    const exitCode = await addJob({
-      name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis",
-      payload: nbJours,
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("fiabilisation:effectifs:transform-rupturants-en-abandons-depuis"));
 
 /**
  * Job d'analyse de la fiabilité des dossiersApprenants reçus
@@ -973,16 +581,7 @@ program
   .command("fiabilisation:stats")
   .description("Affichage de stats sur le service")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "fiabilisation:stats",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
+  .action(createJobAction("fiabilisation:stats"));
 
 /**
  * Job d'affichage des stats fiabilisation
@@ -991,24 +590,7 @@ program
   .command("dev:generate-ts-types")
   .description("Generation des types TS à partir des schemas de la base de données")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(async ({ queued }) => {
-    const exitCode = await addJob({
-      name: "dev:generate-ts-types",
-      queued,
-    });
-
-    if (exitCode) {
-      program.error("Command failed", { exitCode });
-    }
-  });
-
-program.hook("preAction", (_, actionCommand) => {
-  const command = actionCommand.name();
-  // on définit le module du logger en global pour distinguer les logs des jobs
-  if (command !== "start") {
-    logger.fields.module = `job:${command}`;
-  }
-});
+  .action(createJobAction("dev:generate-ts-types"));
 
 export async function startCLI() {
   await program.parseAsync(process.argv);

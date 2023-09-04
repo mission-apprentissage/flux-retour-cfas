@@ -34,7 +34,7 @@ fileignoreconfig:
 - filename: README.md
   checksum: b7e69d60da12cf1c9d127547e747002450730881270ee170755098f22e15a9c4
 - filename: server/.env.test
-  checksum: 7dfcad7a7492c7db923fb04aba04111e0381d6df655010992d6cf30da3e148f2
+  checksum: 292028fd86217934cd5618b59f22e6164473d05fb7038b71af6148c5d1630502
 - filename: server/src/commands.ts
   checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
 - filename: server/src/config.ts

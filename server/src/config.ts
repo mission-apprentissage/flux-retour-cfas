@@ -90,6 +90,7 @@ const config = {
     object: "Consolidation des données",
     context: "MNA",
   },
+  disable_processors: env.get("FLUX_RETOUR_CFAS_DISABLE_PROCESSORS").default("false").asBool(),
 };
 
 export default config;

@@ -33,13 +33,14 @@ const config = async () => {
   })();
 
   return {
+    collectCoverageFrom: ["<rootDir>/server/src/**/*.{js,ts}"],
     coverageProvider: "v8",
     coverageThreshold: {
       global: {
-        branches: 77,
-        functions: 50,
-        lines: 70,
-        statements: -5000,
+        branches: 73,
+        functions: 40,
+        lines: 52,
+        statements: -14000,
       },
     },
     projects: [
@@ -48,7 +49,7 @@ const config = async () => {
         displayName: "server",
         globalSetup: "<rootDir>/server/tests/jest/globalSetup.ts",
         globalTeardown: "<rootDir>/server/tests/jest/globalTeardown.ts",
-        modulePathIgnorePatterns: ["\\dist"],
+        modulePathIgnorePatterns: ["<rootDir>/server/dist/", "<rootDir>/ui/.next/"],
         moduleFileExtensions: ["js", "jsx", "ts", "tsx", "json", "node"],
         moduleNameMapper: {
           "^@/(.*)$": "<rootDir>/server/src/$1",
@@ -72,7 +73,7 @@ const config = async () => {
       {
         ...preset.defaultsESM,
         displayName: "shared",
-        modulePathIgnorePatterns: ["\\dist"],
+        modulePathIgnorePatterns: ["<rootDir>/server/dist/", "<rootDir>/ui/.next/"],
         preset: "ts-jest",
         testEnvironment: "node",
         testMatch: ["<rootDir>/shared/**/?(*.)+(spec|test).[tj]s?(x)"],
@@ -89,6 +90,7 @@ const config = async () => {
       {
         ...nextConfig,
         displayName: "ui",
+        modulePathIgnorePatterns: ["<rootDir>/server/dist/", "<rootDir>/ui/.next/"],
         testEnvironment: "jest-environment-jsdom",
         testMatch: ["<rootDir>/ui/**/?(*.)+(spec|test).[tj]s?(x)"],
       },

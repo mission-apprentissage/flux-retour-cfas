@@ -1,6 +1,5 @@
 import fs from "fs";
 
-import { ExtraErrorData } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import bodyParser from "body-parser";
 import Boom from "boom";
@@ -80,6 +79,7 @@ import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
+import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
@@ -127,24 +127,7 @@ export default async function createServer(): Promise<Application> {
   const app = express();
 
   // Configure Sentry
-  Sentry.init({
-    dsn: config.sentry.dsn || "",
-    enabled: config.env !== "local",
-    environment: config.env,
-    integrations: [
-      // enable HTTP calls tracing
-      new Sentry.Integrations.Http({ tracing: true }),
-      new Sentry.Integrations.Mongo({ useMongoose: false }),
-      // enable Express.js middleware tracing
-      new Sentry.Integrations.Express({ app }),
-      new ExtraErrorData({ depth: 8 }),
-    ],
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: config.env !== "production" ? 1.0 : 0.2,
-    tracePropagationTargets: [/\.apprentissage\.beta\.gouv\.fr$/],
-  });
+  initSentryExpress(app);
   // RequestHandler creates a separate execution context using domains, so that every
   // transaction/span/breadcrumb is attached to its own Hub instance
   app.use(Sentry.Handlers.requestHandler());
