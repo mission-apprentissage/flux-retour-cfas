@@ -91,6 +91,7 @@ services:
           memory: 256m
       replicas: 2
     environment:
+      SERVER_URI: "http://server:5000"
       METABASE_SITE_URL: "{{vault.METABASE_SITE_URL}}"
       METABASE_ONGLET_DATAVIZ_DASHBOARD_ID: "{{vault.METABASE_ONGLET_DATAVIZ_DASHBOARD_ID}}"
       METABASE_SECRET_KEY: "{{vault.METABASE_SECRET_KEY}}"
