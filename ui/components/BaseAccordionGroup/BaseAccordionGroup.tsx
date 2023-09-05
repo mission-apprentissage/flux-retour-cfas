@@ -55,7 +55,9 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, textColor = "#3A3
                     <AddIcon fontSize="12px" color="#000091" />
                   )}
                 </AccordionButton>
-                <AccordionPanel paddingBottom={4}>{item.content}</AccordionPanel>
+                <AccordionPanel paddingBottom={4} fontSize="16px">
+                  {item.content}
+                </AccordionPanel>
               </>
             )}
           </AccordionItem>
