@@ -219,7 +219,15 @@ const OperateursPublicsPage = () => {
 
                     <Text>
                       Aidez-nous à améliorer le tableau de bord et ses données en nous faisant part des erreurs que vous
-                      constatez. Contactez-nous par courriel&nbsp;: {CONTACT_ADDRESS}
+                      constatez. Contactez-nous par courriel&nbsp;:{" "}
+                      <Link
+                        href={`mailto:${CONTACT_ADDRESS}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whiteSpace="nowrap"
+                      >
+                        {CONTACT_ADDRESS}
+                      </Link>
                     </Text>
                   </>
                 ),
@@ -240,7 +248,16 @@ const OperateursPublicsPage = () => {
                     transmettent pas et les contacter pour les encourager.
                     <br />
                     L’équipe du tableau de bord vous accompagne dans ces démarches&nbsp;: pour cela, veuillez nous
-                    écrire à {CONTACT_ADDRESS}.
+                    écrire à{" "}
+                    <Link
+                      href={`mailto:${CONTACT_ADDRESS}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whiteSpace="nowrap"
+                    >
+                      {CONTACT_ADDRESS}
+                    </Link>
+                    .
                   </Text>
                 ),
               },
