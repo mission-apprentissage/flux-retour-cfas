@@ -38,7 +38,7 @@ export const contratSchema = object(
     cause_rupture: string({ description: "Cause de rupture du contrat" }),
   },
   {
-    required: ["date_debut", "date_fin"], // TODO siret // Removed required date_rupture car on contrat peut ne pas avoir de rupture
+    required: ["date_debut"], // TODO siret // Removed required date_rupture car on contrat peut ne pas avoir de rupture
     additionalProperties: true,
   }
 );
