@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 
 import { UsersMigration } from "@/common/model/@types";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { useMongo } from "@tests/jest/setupMongo";
 import {
   RequestAsOrganisationFunc,
   expectForbiddenError,
@@ -17,6 +18,7 @@ let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
 
 describe("Routes users", () => {
+  useMongo();
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;

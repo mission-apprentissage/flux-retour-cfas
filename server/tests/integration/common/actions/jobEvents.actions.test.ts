@@ -4,8 +4,10 @@ import { addMinutes } from "date-fns";
 
 import { createJobEvent, isJobInAction } from "@/common/actions/jobEvents.actions";
 import { jobEventStatuts } from "@/common/constants/jobs";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("Test des actions JobEvents", () => {
+  useMongo();
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
     const testJobName = "TEST-JOB";
 

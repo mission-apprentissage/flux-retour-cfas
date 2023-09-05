@@ -3,8 +3,10 @@ import { strict as assert } from "assert";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("Job Update Fiabilisation UAI SIRET", () => {
+  useMongo();
   describe("getEffectifsDuplicatesFromOrganismes", () => {
     let organisme1Id;
     let organisme2Id;

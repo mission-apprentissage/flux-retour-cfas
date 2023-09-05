@@ -9,6 +9,7 @@ import {
   historySequenceInscrit,
 } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
 import { commonEffectifsAttributes, commonOrganismeAttributes } from "@tests/utils/permissions";
 import { generate, id, initTestApp } from "@tests/utils/testUtils";
 
@@ -16,6 +17,7 @@ let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 
 describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effectifs et organismes au national ", () => {
+  useMongo();
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;

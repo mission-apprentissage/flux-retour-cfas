@@ -5,11 +5,13 @@ import jwt from "jsonwebtoken";
 
 import { createUserLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import config from "@/config";
+import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp } from "@tests/utils/testUtils";
 
 let httpClient: AxiosInstance;
 
 describe("POST /login - Login [LEGACY]", () => {
+  useMongo();
   beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;

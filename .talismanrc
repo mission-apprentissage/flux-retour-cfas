@@ -43,6 +43,8 @@ fileignoreconfig:
   checksum: 71c60b9fc5f4d0308146235adde75e4df34ebac59539cef321403b5966b061ad
 - filename: server/src/jobs/seed/start/index.ts
   checksum: bd018d4dab141be955d6e546f817b0aa58edc733e9e562272765d8211d2f3015
+- filename: server/tests/integration/http/password.route.test.ts
+  checksum: 5dac6833c2dc7f76b3c8b74c3e102968cfcb69bd1073046bcd434f44717f1384
 - filename: ui/modules/organismes/Televersement.tsx
   checksum: f0aef09f007b89516bfdcee828cb44e09f0089b2f96725a146d72b557d802878
 scopeconfig:
