@@ -16,7 +16,7 @@ function Help() {
    echo "  vault:password                             Show vault password"
    echo "  seed:update                                Update seed using a database"
    echo "  seed:apply                                 Apply seed to a database"
-   echo 
+   echo
    echo
 }
 
@@ -61,7 +61,7 @@ function vault:password() {
   "${SCRIPT_DIR}/get-vault-password-client.sh" "$@"
 }
 
-function seed:udpate() {
+function seed:update() {
   "${SCRIPT_DIR}/seed-update.sh" "$@"
 }
 
