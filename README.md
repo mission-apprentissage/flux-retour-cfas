@@ -122,7 +122,7 @@ yarn seed
 
 Vous pouvez maintenant accéder à l'application via l'URL [http://localhost:3000](http://localhost:3000)
 
-Vous pouvez maintenant accéder à l'API via l'URL [http://localhost:5001](http://localhost:5000)
+Vous pouvez maintenant accéder à l'API via l'URL [http://localhost:5001](http://localhost:5001)
 
 Vous pouvez maintenant accéder au SMTP via l'URL [http://localhost:8025](http://localhost:8025)
 
