@@ -333,6 +333,8 @@ function Carousel({ images, ...props }: CarouselProps) {
               alt="Capture d'écran du tableau de bord"
               userSelect="none"
               objectFit="contain"
+              onClick={() => setActivePageIndex((index + 1) % images.length)}
+              cursor="pointer"
             />
           ))}
         </Flex>
