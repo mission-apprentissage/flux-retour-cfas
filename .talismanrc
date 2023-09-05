@@ -13,14 +13,17 @@ fileignoreconfig:
   checksum: 318c72a3804b19a9acdd325995ff91f456c48b4af56a0ed093f0377f40436d6f
 - filename: .infra/env.ini
   checksum: 5c8821deaf01a88d0c5e4091a1cd420ac04e13bdbefc3245cc6366eb804bee49
+  ignore_detectors: [filename]
 - filename: .infra/files/configs/metabase/setup-metabase.sh
   checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
 - filename: .infra/files/configs/mongodb/seed.gpg
   checksum: bd386ba9f6c996fe1a4b27fd9c1727eaa1af5f135138bf7d0920041c7570f49c
+  ignore_detectors: [filesize]
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
   checksum: 4270a5fb6d86a75adf05be1677f37a9e6013a45b3fe2fd2555a59a24f452364f
+  ignore_detectors: [filesize]
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
   checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml
@@ -35,6 +38,7 @@ fileignoreconfig:
   checksum: b7e69d60da12cf1c9d127547e747002450730881270ee170755098f22e15a9c4
 - filename: server/.env.test
   checksum: 292028fd86217934cd5618b59f22e6164473d05fb7038b71af6148c5d1630502
+  ignore_detectors: [filename]
 - filename: server/src/commands.ts
   checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
 - filename: server/src/config.ts
