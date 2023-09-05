@@ -103,7 +103,7 @@ const OperateursPublicsPage = () => {
         </Heading>
         <Text fontSize="xl" mt={5}>
           Le tableau de bord restitue les <strong>indicateurs liés aux étapes-clés</strong> du parcours d’un apprenant,
-          de l’expression des voeux jusqu’à sa sortie d’apprentissage.
+          de l’expression des vœux jusqu’à sa sortie d’apprentissage.
         </Text>
         <Image
           src="/images/landing-operateurs-publics-parcours.svg"
