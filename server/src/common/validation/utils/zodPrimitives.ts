@@ -286,6 +286,10 @@ export const primitivesV3 = {
           return value;
         })
         .describe("NIR de l'apprenant")
+        .openapi({
+          example: "1234567890123",
+          type: "string",
+        })
     ),
     adresse: z.string().trim().describe("Adresse de l'apprenant"),
     code_postal: z.preprocess(
