@@ -484,7 +484,9 @@ function setupRoutes(app: Application) {
             returnResult(async (req) => {
               const data = await z
                 .array(dossierApprenantSchemaV3WithMoreRequiredFields())
-                .safeParseAsync((req.body || []).map((e) => stripNullProperties(e)));
+                .safeParseAsync(
+                  Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
+                );
               return data;
             })
           )
