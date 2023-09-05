@@ -444,7 +444,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   display="block"
                   ml="auto"
                   onClick={() => {
-                    router.push(`/effectifs/televersement`);
+                    router.push(`/effectifs`);
                   }}
                 >
                   Transmettre mes effectifs
