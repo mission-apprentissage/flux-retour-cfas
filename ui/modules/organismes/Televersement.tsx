@@ -105,18 +105,23 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         setHeaders(headers);
 
         // Initialize data with headers as keys
-        const jsonData = rawJsonData.slice(1).map((row: any[]) => {
-          return headers.reduce((acc: any, header: string, index: number) => {
-            if (dateFields.includes(header)) {
-              acc[header] = parseExcelDate(row[index]); // Excel date can be weird, we have to accept multiple formats.
-            } else if (booleanFields.includes(header)) {
-              acc[header] = parseExcelBoolean(row[index]);
-            } else {
-              acc[header] = row[index];
-            }
-            return acc;
-          }, {});
-        });
+        const jsonData = rawJsonData
+          .slice(1)
+          .filter((row) => {
+            return row.some((cell) => cell !== "" && cell !== undefined);
+          })
+          .map((row: any[]) => {
+            return headers.reduce((acc: any, header: string, index: number) => {
+              if (dateFields.includes(header)) {
+                acc[header] = parseExcelDate(row[index]); // Excel date can be weird, we have to accept multiple formats.
+              } else if (booleanFields.includes(header)) {
+                acc[header] = parseExcelBoolean(row[index]);
+              } else {
+                acc[header] = row[index];
+              }
+              return acc;
+            }, {});
+          });
 
         // Send data to API for validation.
         const res = await _post(

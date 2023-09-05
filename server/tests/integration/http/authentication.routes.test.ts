@@ -6,6 +6,7 @@ import { ObjectId, WithId } from "mongodb";
 import { UsersMigration } from "@/common/model/@types/UsersMigration";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { setTime } from "@/common/utils/timeUtils";
+import { useMongo } from "@tests/jest/setupMongo";
 import { id, initTestApp, testPasswordHash } from "@tests/utils/testUtils";
 
 const date = "2022-10-10T00:00:00.000Z";
@@ -33,6 +34,7 @@ let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 
 describe("Authentification", () => {
+  useMongo();
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;

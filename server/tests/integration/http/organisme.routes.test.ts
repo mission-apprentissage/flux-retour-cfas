@@ -15,6 +15,7 @@ import {
   historySequenceInscrit,
 } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
 import {
   PermissionsTestConfig,
   commonEffectifsAttributes,
@@ -187,6 +188,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
 };
 
 describe("Routes /organismes/:id", () => {
+  useMongo();
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;

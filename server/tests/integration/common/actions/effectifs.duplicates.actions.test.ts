@@ -6,6 +6,7 @@ import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
 
 const TEST_SIREN = "190404921";
@@ -38,6 +39,7 @@ const insertDuplicateEffectifs = async (sampleEffectif, nbDuplicates = 2) => {
 const sanitizeString = (string) => string.replace(/\s/g, "").toLowerCase();
 
 describe("Test des actions Effectifs Duplicates", () => {
+  useMongo();
   describe("getDuplicatesEffectifsForOrganismeId", () => {
     beforeEach(async () => {
       // Création d'un organisme de test

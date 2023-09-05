@@ -10,8 +10,10 @@ import {
 } from "@/common/actions/legacy/users.legacy.actions";
 import { usersDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("Components Users Test", () => {
+  useMongo();
   describe("createUserLegacy", () => {
     it("Permet de créer un utilisateur avec mot de passe", async () => {
       const createdId = await createUserLegacy({ username: "user", password: "password" });

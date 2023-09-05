@@ -5,8 +5,10 @@ import { jobEventStatuts } from "@/common/constants/jobs";
 import { jobEventsDb } from "@/common/model/collections";
 import jobEventsModelDescriptor from "@/common/model/jobEvents.model";
 import { clearAllCollections, clearCollection } from "@/common/mongodb";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("Mongodb Tests", () => {
+  useMongo();
   describe("clearAllCollections", () => {
     it("Vérifie la suppression de toutes les collections", async () => {
       // Create sample data

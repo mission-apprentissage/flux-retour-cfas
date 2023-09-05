@@ -4,8 +4,10 @@ import { formationsDb } from "@/common/model/collections";
 import formationsModelDescriptor from "@/common/model/formations.model";
 import { createIndexes, dropIndexes } from "@/common/model/indexes/index";
 import { getDbCollectionIndexes } from "@/common/mongodb";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("Formations Indexes", () => {
+  useMongo();
   it("Vérifie l'existence des indexes", async () => {
     // Crée une entrée en base
     await formationsDb().insertOne({ cfd: "0123456G" });

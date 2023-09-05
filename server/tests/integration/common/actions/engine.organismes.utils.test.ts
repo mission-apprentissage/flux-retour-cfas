@@ -1,7 +1,9 @@
 import { isOrganismeFiableForCouple } from "@/common/actions/engine/engine.organismes.utils";
 import { organismesReferentielDb } from "@/common/model/collections";
+import { useMongo } from "@tests/jest/setupMongo";
 
 describe("Tests des actions  engine utilitaires organismes", () => {
+  useMongo();
   describe("isOrganismeFiableForCouple", () => {
     const UAI_REFERENTIEL = "7722672E";
     const SIRET_REFERENTIEL = "99370584100099";

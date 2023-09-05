@@ -12,9 +12,14 @@ import {
 } from "@/common/actions/formations.actions";
 import { formationsDb } from "@/common/model/collections";
 import { dataForGetCfdInfo } from "@tests/data/apiTablesDeCorrespondances";
+import { useMongo } from "@tests/jest/setupMongo";
+import { useNock } from "@tests/jest/setupNock";
 import { nockGetCfdInfo } from "@tests/utils/nockApis/nock-tablesCorrespondances";
 
 describe("Tests des actions Formations", () => {
+  useNock();
+  useMongo();
+
   describe("existsFormation", () => {
     it("returns false when formation with formations collection is empty", async () => {
       const shouldBeFalse = await existsFormation("blabla");

@@ -55,7 +55,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            # :rocket: Prévisualisation
-            ## https://${{ github.event.pull_request.number }}.tdb-preview.apprentissage.beta.gouv.fr/
+            ### :rocket: Prévisualisation
+            https://${{ github.event.pull_request.number }}.tdb-preview.apprentissage.beta.gouv.fr/
           comment_tag: execution
           mode: recreate
