@@ -110,7 +110,7 @@ export default function Glossaire() {
                     Trois natures d’organismes peuvent être observées via le Catalogue des formations en
                     apprentissage&nbsp;:
                   </Text>
-                  <Text as="b">Les organisme «&nbsp;responsables&nbsp;»&nbsp;:</Text>
+                  <Text as="b">Les organismes «&nbsp;responsables&nbsp;»&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
                       Ne dispensent pas de formation mais délèguent à des organismes responsable et formateur ou
@@ -126,7 +126,7 @@ export default function Glossaire() {
                       qualité au sein de l’UFA.
                     </ListItem>
                   </UnorderedList>
-                  <Text as="b">Les organisme «&nbsp;responsables et formateurs&nbsp;»&nbsp;:</Text>
+                  <Text as="b">Les organismes «&nbsp;responsables et formateurs&nbsp;»&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
                       Dispensent des formations par apprentissage déclaré auprès des services de l’Etat (n° de
@@ -142,7 +142,7 @@ export default function Glossaire() {
                       au sein de l’UFA.
                     </ListItem>
                   </UnorderedList>
-                  <Text as="b">Les organisme «&nbsp;formateurs&nbsp;»&nbsp;:</Text>
+                  <Text as="b">Les organismes «&nbsp;formateurs&nbsp;»&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
                       Dispensent des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de
