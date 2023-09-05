@@ -194,10 +194,10 @@ const OperateursPublicsPage = () => {
                 ),
               },
               {
-                title: "J’ai constaté une anomalie sur mon espace : comment la partager au tableau de bord ?",
+                title: <>J’ai constaté une anomalie sur mon espace&nbsp;: comment la partager au tableau de bord ?</>,
                 content: (
                   <>
-                    <Text>Certains écarts peuvent être notamment dus :</Text>
+                    <Text>Certains écarts peuvent être notamment dus&nbsp;:</Text>
 
                     <UnorderedList>
                       <ListItem>À une erreur de saisie à la source ;</ListItem>
@@ -219,14 +219,18 @@ const OperateursPublicsPage = () => {
 
                     <Text>
                       Aidez-nous à améliorer le tableau de bord et ses données en nous faisant part des erreurs que vous
-                      constatez. Contactez-nous par courriel : {CONTACT_ADDRESS}
+                      constatez. Contactez-nous par courriel&nbsp;: {CONTACT_ADDRESS}
                     </Text>
                   </>
                 ),
               },
               {
-                title:
-                  "Je constate un taux de transmission faible des organismes de mon territoire : comment puis-je l’améliorer ?",
+                title: (
+                  <>
+                    Je constate un taux de transmission faible des organismes de mon territoire&nbsp;: comment puis-je
+                    l’améliorer ?
+                  </>
+                ),
                 content: (
                   <Text>
                     Le tableau de bord de l’apprentissage est une plateforme en construction qui s’appuie sur ses
@@ -235,8 +239,8 @@ const OperateursPublicsPage = () => {
                     Chaque opérateur public peut, sur son espace, visualiser les organismes de son territoire qui ne
                     transmettent pas et les contacter pour les encourager.
                     <br />
-                    L’équipe du tableau de bord vous accompagne dans ces démarches : pour cela, veuillez nous écrire à{" "}
-                    {CONTACT_ADDRESS}.
+                    L’équipe du tableau de bord vous accompagne dans ces démarches&nbsp;: pour cela, veuillez nous
+                    écrire à {CONTACT_ADDRESS}.
                   </Text>
                 ),
               },
