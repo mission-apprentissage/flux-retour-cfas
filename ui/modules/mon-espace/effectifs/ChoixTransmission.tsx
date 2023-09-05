@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import React from "react";
 
 import { configureOrganismeERP } from "@/common/api/tableauDeBord";
-import Ribbons from "@/components/Ribbons/Ribbons";
 import { ArrowDropRightLine } from "@/theme/components/icons";
 
 type ChoixTransmissionProps = {
@@ -16,12 +15,6 @@ const ChoixTransmission = ({ organismeId, isMine = false }: ChoixTransmissionPro
 
   return (
     <>
-      <Box my={9} color="bluesoft.500" fontWeight="700">
-        <Ribbons variant="warning" mt={5}>
-          <Box pl={3}>Vous n’avez pas encore transmis de données</Box>
-        </Ribbons>
-      </Box>
-
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         <HStack>
           <Text fontWeight="700">Comment aimeriez-vous importer vos effectifs ?</Text>
