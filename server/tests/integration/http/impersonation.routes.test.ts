@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axiosist";
 
+import { useMongo } from "@tests/jest/setupMongo";
 import { PermissionsTestConfig, testPermissions } from "@tests/utils/permissions";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from "@tests/utils/testUtils";
 
@@ -7,6 +8,7 @@ let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
 
+useMongo();
 beforeEach(async () => {
   app = await initTestApp();
   httpClient = app.httpClient;

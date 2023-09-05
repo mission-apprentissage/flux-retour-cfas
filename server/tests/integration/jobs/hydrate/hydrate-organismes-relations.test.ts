@@ -4,9 +4,11 @@ import { Organisme, OrganismesReferentiel } from "@/common/model/@types";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 import { hydrateOrganismesFromReferentiel } from "@/jobs/hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesRelations } from "@/jobs/hydrate/organismes/hydrate-organismes-relations";
+import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
 
 describe("Job hydrate:organismes-relations", () => {
+  useMongo();
   it("Met à jour les relations des organismes selon le référentiel", async () => {
     /*
     OFA 1 formateur pour OFA 2 et 3

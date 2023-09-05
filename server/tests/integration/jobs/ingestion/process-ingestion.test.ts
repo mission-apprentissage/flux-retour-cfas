@@ -6,6 +6,8 @@ import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
+import { useNock } from "@tests/jest/setupNock";
 
 const UAI = "0802004U";
 const SIRET = "77937827200016";
@@ -20,6 +22,9 @@ const sortByPath = (array: { path?: string[] }[] | undefined) =>
   array?.sort((a, b) => ((a?.path?.[0] || "") < (b?.path?.[0] || "") ? -1 : 1));
 
 describe("Processus d'ingestion", () => {
+  useNock();
+  useMongo();
+
   beforeEach(async () => {
     await organismesReferentielDb().insertMany([
       {

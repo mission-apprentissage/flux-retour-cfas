@@ -6,6 +6,7 @@ import sentryTestkit from "sentry-testkit";
 import { createJob, findJob } from "@/common/actions/job.actions";
 import { getSentryOptions } from "@/common/services/sentry/sentry";
 import { executeJob } from "@/jobs/jobs_actions";
+import { useMongo } from "@tests/jest/setupMongo";
 
 const { testkit, sentryTransport } = sentryTestkit();
 
@@ -35,6 +36,7 @@ afterAll(() => {
 });
 
 describe("executeJob", () => {
+  useMongo();
   describe("when job is success", () => {
     it("should return exit code", async () => {
       const job = await createJob({

@@ -3,11 +3,13 @@ import { strict as assert } from "assert";
 import { AxiosInstance } from "axiosist";
 
 import config from "@/config";
+import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp } from "@tests/utils/testUtils";
 
 let httpClient: AxiosInstance;
 
 describe("Routes Organismes for API referentiel", () => {
+  useMongo();
   beforeEach(async () => {
     const app = await initTestApp();
     httpClient = app.httpClient;

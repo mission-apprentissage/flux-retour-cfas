@@ -14,6 +14,8 @@ import {
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { Organisme } from "@/common/model/@types";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
+import { useNock } from "@tests/jest/setupNock";
 
 const sampleOrganismeWithoutUai: Organisme = {
   siret: "41461021200014",
@@ -86,6 +88,9 @@ const fieldsAddedByApiCalls = {
 
 describe("Test des actions Organismes", () => {
   // Construction de l'adresse nockée via API Entreprise pour un fichier de sample
+
+  useNock();
+  useMongo();
 
   describe("createOrganisme", () => {
     it("throws when given organisme is null", async () => {
