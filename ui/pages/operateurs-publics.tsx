@@ -119,9 +119,9 @@ const OperateursPublicsPage = () => {
           Ils utilisent le tableau de bord...
         </Heading>
         <SimpleGrid columns={{ sm: 1, md: 2 }} mt={8} mb={12} rowGap={4}>
-          <Box borderLeft="1px solid #DDDDDD" pl={6}>
+          <Box borderLeft="1px solid #DDDDDD" px={6}>
             <VerbatimFrQuoteIcon />
-            <Text fontWeight="bold" fontSize="xl" mt={4}>
+            <Text fontWeight="bold" fontStyle="italic" fontSize="xl" mt={4}>
               «&nbsp;Grâce à la mensualisation des données sur le tableau de bord, j’ai pu objectiver et vérifier la
               situation des CFA de ma région sur plusieurs mois.&nbsp;»
             </Text>
@@ -129,9 +129,9 @@ const OperateursPublicsPage = () => {
               Conseil Régional de Normandie
             </Text>
           </Box>
-          <Box borderLeft="1px solid #DDDDDD" pl={6}>
+          <Box borderLeft="1px solid #DDDDDD" px={6}>
             <VerbatimFrQuoteIcon />
-            <Text fontWeight="bold" fontSize="xl" mt={4}>
+            <Text fontWeight="bold" fontStyle="italic" fontSize="xl" mt={4}>
               «&nbsp;Le tableau de bord offre la possibilité aux services déconcentrés de l’Etat de se saisir pleinement
               du rôle d’animation et de relai qui est attendu d’eux au niveau local.&nbsp;»
             </Text>
