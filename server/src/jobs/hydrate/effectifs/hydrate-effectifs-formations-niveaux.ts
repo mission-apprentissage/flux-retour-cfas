@@ -5,7 +5,7 @@ import { effectifsDb, formationsCatalogueDb } from "@/common/model/collections";
 export async function hydrateEffectifsFormationsNiveaux() {
   logger.info("Hydrating effectifs.formation.niveaux ...");
 
-  // Récupération de la liste des CFD pour lesquels le niveau est vide
+  // Récupération de la liste des CFD pour lesquels le niveau est vide ou n'existe pas
   const effectifsCfdWithoutNiveau: string[] = (
     await effectifsDb()
       .aggregate([

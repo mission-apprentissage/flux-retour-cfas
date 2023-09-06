@@ -8,7 +8,7 @@ import {
   AlertDialogFooter,
   Text,
 } from "@chakra-ui/react";
-import { useRouter } from "next/router";
+import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 
 import { _delete } from "@/common/httpClient";
@@ -27,14 +27,14 @@ const EffectifDoublonDeleteAlertDialog = ({
   effectifId: string;
   apprenantNomPrenom: string;
 }) => {
-  const router = useRouter();
+  const queryClient = useQueryClient();
 
   return (
     <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size={"4xl"}>
       <AlertDialogOverlay>
         <AlertDialogContent>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Suppression du duplicat d&apos;apprenant <b>{apprenantNomPrenom}</b> (<i>{effectifId}</i>)
+            Suppression du duplicat d&apos;apprenant <b>{apprenantNomPrenom}</b>
           </AlertDialogHeader>
 
           <AlertDialogBody>
@@ -56,9 +56,10 @@ const EffectifDoublonDeleteAlertDialog = ({
             </Button>
             <Button
               colorScheme="red"
-              onClick={() => {
-                _delete(`/api/v1/effectif/${effectifId}`);
-                router.reload();
+              onClick={async () => {
+                await _delete(`/api/v1/effectif/${effectifId}`);
+                queryClient.invalidateQueries(["duplicates-effectifs"]);
+                onClose();
               }}
               ml={3}
             >
