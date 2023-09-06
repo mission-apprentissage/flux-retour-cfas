@@ -34,7 +34,7 @@ const EffectifDoublonDeleteAlertDialog = ({
       <AlertDialogOverlay>
         <AlertDialogContent>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Suppression du duplicat d&apos;apprenant <b>{apprenantNomPrenom}</b> (<i>{effectifId}</i>)
+            Suppression du duplicat d&apos;apprenant <b>{apprenantNomPrenom}</b>
           </AlertDialogHeader>
 
           <AlertDialogBody>

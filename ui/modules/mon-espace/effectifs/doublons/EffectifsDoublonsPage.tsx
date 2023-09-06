@@ -55,12 +55,6 @@ const EffectifsDoublonsPage = ({ isMine }) => {
           </Text>
 
           <EffectifsDoublonsList data={duplicates || []} />
-
-          <Flex flexDir="row-reverse">
-            <Button mr={6} size="md" variant="primary">
-              <Text as="span">Valider</Text>
-            </Button>
-          </Flex>
         </Stack>
 
         <Divider mt={6} mb={4} />

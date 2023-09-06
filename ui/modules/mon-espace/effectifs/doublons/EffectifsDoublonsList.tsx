@@ -38,6 +38,7 @@ const EffectifsDoublonsList = ({ data }) => {
               {row.original?._id?.annee_scolaire}
             </Text>
           ),
+          enableSorting: false,
         },
         {
           header: () => "Nom de l'apprenant",
@@ -47,6 +48,7 @@ const EffectifsDoublonsList = ({ data }) => {
               {transformNomPrenomToPascalCase(row)}
             </Text>
           ),
+          enableSorting: false,
         },
         {
           header: () => "Né.e le",
@@ -56,6 +58,7 @@ const EffectifsDoublonsList = ({ data }) => {
               {`Né.e le ${formatDateDayMonthYear(row.original?._id?.date_de_naissance_apprenant)}`}
             </Text>
           ),
+          enableSorting: false,
         },
         {
           header: () => "Code formation diplôme",
@@ -65,6 +68,7 @@ const EffectifsDoublonsList = ({ data }) => {
               {`CFD : ${row.original?._id?.formation_cfd}`}
             </Text>
           ),
+          enableSorting: false,
         },
         {
           header: () => "Nombre d'occurences",
@@ -77,6 +81,7 @@ const EffectifsDoublonsList = ({ data }) => {
               </Text>
             </HStack>
           ),
+          enableSorting: false,
         },
       ]}
     />
