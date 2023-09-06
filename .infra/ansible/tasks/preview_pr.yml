@@ -27,6 +27,11 @@
         content: "{{ lookup('ansible.builtin.template', '../.env_server') }}"
         dest: "/opt/app/projects/{{ pr_number }}/.env_server"
 
+    - name: "[{{ pr_number }}] copy ui env file"
+      ansible.builtin.copy:
+        content: "{{ lookup('ansible.builtin.template', '../.env_ui') }}"
+        dest: "/opt/app/projects/{{ pr_number }}/.env_ui"
+
     - name: "[{{ pr_number }}] creation du fichier docker compose"
       ansible.builtin.template:
         src: "{{inventory_dir}}/docker-compose.preview.yml"

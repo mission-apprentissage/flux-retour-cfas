@@ -7,7 +7,7 @@
 !/shared
 
 !/ui
-!/ui/.env
+/ui/.env
 /ui/.next
 
 !/package.json
