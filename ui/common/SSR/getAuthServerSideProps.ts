@@ -1,5 +1,7 @@
 import { GetServerSidePropsContext } from "next";
 
+import { publicConfig } from "@/config.public";
+
 const isInitialServerSideProps = (context: GetServerSidePropsContext) =>
   context.req?.url?.indexOf("/_next/data/") === -1;
 
@@ -9,7 +11,7 @@ export const getAuthServerSideProps = async (context, onlyOnServerSideRendering 
     return {};
   }
   try {
-    const res = await fetch(`${process.env.SERVER_URI}/api/v1/session`, {
+    const res = await fetch(`${publicConfig.baseUrl}/api/v1/session`, {
       headers: {
         cookie: context.req.headers.cookie,
       },

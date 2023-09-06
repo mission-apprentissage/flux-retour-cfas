@@ -8,7 +8,7 @@ exception="$exception|manifest.json|settings.json|zapatosconfig.json|package-loc
 exception="$exception|DECA_Extraction MIA-Fake.csv|referentiel-reseau-amue.csv"
 exception="$exception|docker-bake.json|eslintrc.json|app.json|tsconfig.json|.mocharc.json"
 exception="$exception|launch.json|arborescence-rome-14-06-2021.json"
-exception="$exception|modele-import.xlsx"
+exception="$exception|modele-import.xlsx|.env"
 exception="$exception)$|cypress/(.*).json"
 
 files=$(git diff --cached --name-only | grep -v -E "$exception" | grep -E "$sensible_files_pattern")
