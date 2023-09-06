@@ -34,12 +34,12 @@
 
     - name: "Check if repository exists"
       stat:
-        path: "/opt/app/repository"
+        path: "/opt/app/projects/{{ pr_number }}/repository"
       register: check_stat
 
     - name: "Pruning repository references"
       shell:
-        chdir: "/opt/app/repository"
+        chdir: "/opt/app/projects/{{ pr_number }}/repository"
         cmd: git remote prune origin
       when: check_stat.stat.exists
 
@@ -49,7 +49,7 @@
         version: "{{ pr_commit_id }}"
         force: yes
         accept_newhostkey: yes
-        dest: /opt/app/repository
+        dest: "/opt/app/projects/{{ pr_number }}/repository"
 
     - name: "[{{ pr_number }}] Root only pour tous les répertoires applicatifs"
       file:
@@ -59,12 +59,12 @@
         group: root
         mode: 770
       with_items:
-        - "/opt/app/repository"
+        - "/opt/app/projects/{{ pr_number }}/repository"
 
     - name: "[{{ pr_number }}] Build local images 0.0.0-{{ pr_number }}"
       shell:
         cmd: ".bin/mna-tdb preview:build 0.0.0-{{ pr_number }} load preview"
-        chdir: /opt/app/repository
+        chdir: "/opt/app/projects/{{ pr_number }}/repository"
       async: 900 # max 15 minutes
       poll: 15 # check every 15s
 
