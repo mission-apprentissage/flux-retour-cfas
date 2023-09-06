@@ -273,6 +273,15 @@ program
   .action(createJobAction("tmp:patches:update-lastTransmissionDate-organismes"));
 
 /**
+ * Job (temporaire) de suppression des organismes absents du référentiel n'ayant jamais transmis
+ */
+program
+  .command("tmp:patches:remove-organismes-absentsReferentiel-sansTransmission")
+  .description("[TEMPORAIRE] Suppression des organismes absents du référentiel n'ayant jamais transmis")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:remove-organismes-absentsReferentiel-sansTransmission"));
+
+/**
  * Job d'initialisation de données de test
  */
 program.command("seed:sample").description("Seed sample data").action(createJobAction("seed:sample"));
