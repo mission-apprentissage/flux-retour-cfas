@@ -32,6 +32,14 @@
         "script": "build:dev",
         "path": "server"
       }
+    },
+    {
+      "name": "Cli: Debug without build",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run cli ${input:command}",
+      "cwd": "${workspaceFolder}/server",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**", "**/$KNOWN_TOOLS$/**"]
     }
   ],
   "inputs": [
