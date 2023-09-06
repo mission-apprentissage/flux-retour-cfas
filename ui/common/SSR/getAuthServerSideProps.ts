@@ -11,7 +11,7 @@ export const getAuthServerSideProps = async (context, onlyOnServerSideRendering 
     return {};
   }
   try {
-    const res = await fetch(`${publicConfig.host}/api/v1/session`, {
+    const res = await fetch(`${publicConfig.baseUrl}/api/v1/session`, {
       headers: {
         cookie: context.req.headers.cookie,
       },
