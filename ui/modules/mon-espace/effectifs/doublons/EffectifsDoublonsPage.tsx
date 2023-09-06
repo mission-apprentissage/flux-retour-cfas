@@ -1,4 +1,4 @@
-import { Box, Center, Flex, HStack, Heading, Spinner, Text, Stack, Divider, Button } from "@chakra-ui/react";
+import { Box, Center, Flex, HStack, Heading, Spinner, Text, Stack, Divider } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useRecoilValue } from "recoil";
@@ -55,12 +55,6 @@ const EffectifsDoublonsPage = ({ isMine }) => {
           </Text>
 
           <EffectifsDoublonsList data={duplicates || []} />
-
-          <Flex flexDir="row-reverse">
-            <Button mr={6} size="md" variant="primary">
-              <Text as="span">Valider</Text>
-            </Button>
-          </Flex>
         </Stack>
 
         <Divider mt={6} mb={4} />

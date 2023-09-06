@@ -34,7 +34,7 @@ const EffectifDoublonDeleteAlertDialog = ({
       <AlertDialogOverlay>
         <AlertDialogContent>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Suppression du duplicat d&apos;apprenant <b>{apprenantNomPrenom}</b> (<i>{effectifId}</i>)
+            Suppression du duplicat d&apos;apprenant <b>{apprenantNomPrenom}</b>
           </AlertDialogHeader>
 
           <AlertDialogBody>
@@ -58,6 +58,7 @@ const EffectifDoublonDeleteAlertDialog = ({
               colorScheme="red"
               onClick={() => {
                 _delete(`/api/v1/effectif/${effectifId}`);
+                router.push(window.location.href); // Try to fix reload in prod
                 router.reload();
               }}
               ml={3}
