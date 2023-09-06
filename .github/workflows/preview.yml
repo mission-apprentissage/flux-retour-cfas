@@ -3,9 +3,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, closed]
 
-concurrency:
-  group: ${{ github.workflow }}
-
 jobs:
   tests:
     if: github.event.pull_request.state == 'open'
@@ -15,6 +12,9 @@ jobs:
 
   deploy:
     if: github.event.pull_request.draft == false
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     name: Deploy Preview ${{ github.event.pull_request.number }}
     runs-on: ubuntu-latest
     steps:
