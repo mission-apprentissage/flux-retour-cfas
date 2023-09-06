@@ -4,6 +4,9 @@ const Link = {
     _focusVisible: { boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" },
   },
   variants: {
+    ghost: {
+      _hover: { bg: "#eceae3", textDecoration: "none" },
+    },
     card: {
       p: 8,
       bg: "#F9F8F6",
