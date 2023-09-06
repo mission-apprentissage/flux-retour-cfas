@@ -65,6 +65,11 @@
       async: 1800
       poll: 10
 
+    - name: Trigger de la création des indexes
+      shell:
+        chdir: /opt/app
+        cmd: "sudo /opt/app/scripts/trigger-indexes-creation.sh"
+
     - name: Lancement de l'application {{env_type}}
       shell:
         chdir: /opt/app
