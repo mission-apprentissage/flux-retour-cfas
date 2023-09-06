@@ -58,6 +58,7 @@ const EffectifDoublonDeleteAlertDialog = ({
               colorScheme="red"
               onClick={() => {
                 _delete(`/api/v1/effectif/${effectifId}`);
+                router.push(window.location.href); // Try to fix reload in prod
                 router.reload();
               }}
               ml={3}
