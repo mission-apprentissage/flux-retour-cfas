@@ -46,7 +46,7 @@ const config = async () => {
         preset: "@shelf/jest-mongodb",
         setupFiles: ["<rootDir>/server/tests/jest/setupFiles.ts"],
         setupFilesAfterEnv: ["<rootDir>/server/tests/jest/setupFileAfterEnv.ts"],
-        testMatch: ["<rootDir>/server/**/?(*.)+(spec|test).[tj]s?(x)"],
+        testMatch: ["<rootDir>/server/**/*(*.)@(spec|test).[tj]s?(x)"],
         transform: {
           "^.+\\.tsx?$": [
             "ts-jest",
@@ -63,7 +63,7 @@ const config = async () => {
         modulePathIgnorePatterns: ["<rootDir>/server/dist/", "<rootDir>/ui/.next/"],
         preset: "ts-jest",
         testEnvironment: "node",
-        testMatch: ["<rootDir>/shared/**/?(*.)+(spec|test).[tj]s?(x)"],
+        testMatch: ["<rootDir>/shared/**/*(*.)@(spec|test).[tj]s?(x)"],
         transform: {
           "^.+\\.tsx?$": [
             "ts-jest",
