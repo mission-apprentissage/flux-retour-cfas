@@ -1,4 +1,4 @@
-import { Box, Center, Flex, HStack, Heading, Spinner, Text, Stack, Divider, Button } from "@chakra-ui/react";
+import { Box, Center, Flex, HStack, Heading, Spinner, Text, Stack, Divider } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useRecoilValue } from "recoil";
