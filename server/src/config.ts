@@ -28,7 +28,7 @@ const config = {
     },
   },
   log: {
-    type: env.get("MNA_TDB_LOG_TYPE").default("console").asString(),
+    type: env.get("MNA_TDB_LOG_TYPE").default("json").asString(),
     level: env.get("MNA_TDB_LOG_LEVEL").default("info").asString(),
   },
   users: {
