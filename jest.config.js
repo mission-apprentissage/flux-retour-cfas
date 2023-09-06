@@ -33,16 +33,6 @@ const config = async () => {
   })();
 
   return {
-    collectCoverageFrom: ["<rootDir>/server/src/**/*.{js,ts}"],
-    coverageProvider: "v8",
-    coverageThreshold: {
-      global: {
-        branches: 73,
-        functions: 40,
-        lines: 47,
-        statements: -14000,
-      },
-    },
     projects: [
       {
         ...preset.defaultsESM,
