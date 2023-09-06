@@ -37,18 +37,15 @@ const config = async () => {
       {
         ...preset.defaultsESM,
         displayName: "server",
-        globalSetup: "<rootDir>/server/tests/jest/globalSetup.ts",
-        globalTeardown: "<rootDir>/server/tests/jest/globalTeardown.ts",
         modulePathIgnorePatterns: ["<rootDir>/server/dist/", "<rootDir>/ui/.next/"],
         moduleFileExtensions: ["js", "jsx", "ts", "tsx", "json", "node"],
         moduleNameMapper: {
           "^@/(.*)$": "<rootDir>/server/src/$1",
           "^@tests/(.*)$": "<rootDir>/server/tests/$1",
         },
-        preset: "ts-jest",
+        preset: "@shelf/jest-mongodb",
         setupFiles: ["<rootDir>/server/tests/jest/setupFiles.ts"],
         setupFilesAfterEnv: ["<rootDir>/server/tests/jest/setupFileAfterEnv.ts"],
-        testEnvironment: "node",
         testMatch: ["<rootDir>/server/**/?(*.)+(spec|test).[tj]s?(x)"],
         transform: {
           "^.+\\.tsx?$": [
