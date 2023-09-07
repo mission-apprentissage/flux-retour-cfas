@@ -399,6 +399,12 @@ program
   .action(createJobAction("hydrate:organismes-soltea"));
 
 program
+  .command("hydrate:organismes-prepa-apprentissage")
+  .description("Remplissage des organismes du fichier Prepa Apprentissage")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:organismes-prepa-apprentissage"));
+
+program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)
