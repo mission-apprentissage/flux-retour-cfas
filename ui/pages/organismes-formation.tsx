@@ -438,7 +438,7 @@ interface LienUtileProps {
 
 function LienUtile(props: LienUtileProps) {
   return (
-    <HStack color="#3A3A3A" borderBottom="2px solid #ECEAE3" p={4}>
+    <HStack color="#3A3A3A" borderBottom="2px solid #ECEAE3" p={4} alignItems="baseline">
       <Box fontSize="lg" fontWeight="bold">
         {props.title}
       </Box>
