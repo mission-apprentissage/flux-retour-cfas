@@ -5,7 +5,7 @@ import withAuth from "@/components/withAuth";
 import { useOrganisationOrganismes } from "@/hooks/organismes";
 import ListeOrganismesPage from "@/modules/organismes/ListeOrganismesPage";
 
-function MesOrganismesNonFiables() {
+function MesOrganismesACompleter() {
   const { organismes } = useOrganisationOrganismes();
 
   if (!organismes) {
@@ -20,7 +20,7 @@ function MesOrganismesNonFiables() {
     );
   }
 
-  return <ListeOrganismesPage organismes={organismes} activeTab="non-fiables" modePublique={false} />;
+  return <ListeOrganismesPage organismes={organismes} activeTab="a-completer" modePublique={false} />;
 }
 
-export default withAuth(MesOrganismesNonFiables);
+export default withAuth(MesOrganismesACompleter);

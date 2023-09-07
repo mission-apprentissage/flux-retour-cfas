@@ -42,8 +42,8 @@ const tabs = [
     index: 0,
   },
   {
-    key: "non-fiables",
-    route: "/organismes/non-fiables",
+    key: "a-completer",
+    route: "/organismes/a-completer",
     index: 1,
   },
 ] as const;
@@ -59,12 +59,12 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
   const { auth, organisationType } = useAuth();
 
   const title = `${props.modePublique ? "Ses" : "Mes"} organismes${
-    props.activeTab === "non-fiables" ? " non fiables" : ""
+    props.activeTab === "a-completer" ? " non fiables" : ""
   }`;
 
-  const { organismesFiables, organismesNonFiables, nbOrganismesFermes } = useMemo(() => {
+  const { organismesFiables, organismesACompleter, nbOrganismesFermes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
-    const organismesNonFiables: OrganismeNormalized[] = [];
+    const organismesACompleter: OrganismeNormalized[] = [];
     let nbOrganismesFermes = 0;
     (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
@@ -78,7 +78,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         // Organismes fermés et ne transmettant pas (on ne les affiche pas)
         nbOrganismesFermes++;
       } else {
-        organismesNonFiables.push(organisme);
+        organismesACompleter.push(organisme);
         if (organisme.ferme) {
           nbOrganismesFermes++;
         }
@@ -87,7 +87,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
 
     return {
       organismesFiables,
-      organismesNonFiables,
+      organismesACompleter,
       nbOrganismesFermes,
     };
   }, [props.organismes]);
@@ -106,9 +106,9 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             {props.modePublique ? "rattachés à cet organisme" : getTextContextFromOrganisationType(organisationType)} et
             la nature de chacun (inclus les prépa-apprentissage, CFA académiques, d’entreprise, etc.)
           </ListItem>
-          {organismesNonFiables.length !== 0 && (
+          {organismesACompleter.length !== 0 && (
             <ListItem>
-              les <strong>{organismesNonFiables.length}</strong> établissements <strong>non-fiabilisés</strong>
+              les <strong>{organismesACompleter.length}</strong> établissements <strong>non-fiabilisés</strong>
               {nbOrganismesFermes > 0 && (
                 <>
                   {" "}
@@ -141,7 +141,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         </HStack>
 
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
-        {organismesNonFiables.length === 0 ? (
+        {organismesACompleter.length === 0 ? (
           <OrganismesFiablesPanelContent organismes={organismesFiables} />
         ) : (
           <Tabs
@@ -166,14 +166,19 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           >
             <TabList>
               <Tab fontWeight="bold">Organismes fiables ({organismesFiables.length})</Tab>
-              <Tab fontWeight="bold">Organismes à fiabiliser ({organismesNonFiables.length})</Tab>
+              <Tab fontWeight="bold">
+                <HStack>
+                  <i className="ri-alarm-warning-fill"></i>
+                  <Text>OFA : corrections attendues ({organismesACompleter.length})</Text>
+                </HStack>
+              </Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
                 <OrganismesFiablesPanelContent organismes={organismesFiables} />
               </TabPanel>
               <TabPanel>
-                <OrganismesNonFiablesPanelContent organismes={organismesNonFiables} />
+                <OrganismesACompleterPanelContent organismes={organismesACompleter} />
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -214,18 +219,18 @@ function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNo
   );
 }
 
-function OrganismesNonFiablesPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
+function OrganismesACompleterPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
   return (
     <>
       <Ribbons variant="warning" my={8}>
         <Box color="grey.800">
           <Text>
-            Un organisme (OFA) est considéré comme non-fiable lorsqu’il présente l’une des caractéristiques
-            suivantes&nbsp;:
+            Les organismes (OFA) ci-dessous présentent une ou plusieurs anomalies suivantes à <strong>corriger</strong>{" "}
+            ou <strong>compléter</strong> :
           </Text>
           <UnorderedList styleType="'- '">
             <ListItem>
-              Son couple UAI-SIRET n’est pas <strong>validé</strong> dans le{" "}
+              Un couple UAI-SIRET qui n’est pas <strong>validé</strong> dans le{" "}
               <Link
                 href="https://referentiel.apprentissage.onisep.fr/"
                 isExternal={true}
@@ -237,7 +242,7 @@ function OrganismesNonFiablesPanelContent({ organismes }: { organismes: Organism
               .
             </ListItem>
             <ListItem>
-              Son code UAI est répertorié comme <strong>inconnu</strong> ou non <strong>validé</strong> dans le{" "}
+              Un code UAI est répertorié comme <strong>inconnu</strong> ou non <strong>validé</strong> dans le{" "}
               <Link
                 href="https://referentiel.apprentissage.onisep.fr/"
                 isExternal={true}
@@ -257,12 +262,9 @@ function OrganismesNonFiablesPanelContent({ organismes }: { organismes: Organism
               <strong>inconnue</strong>.
             </ListItem>
           </UnorderedList>
-          <Text>
-            Un organisme est considéré comme non-fiable dès lors qu’il remplit au moins l’une de ces conditions.
-          </Text>
+
           <Text fontWeight="bold">
-            Veuillez contacter les organismes non-fiables pour encourager une action auprès de leur CARIF OREF ou de
-            l’INSEE.
+            Aidez-nous à fiabiliser ces organismes en menant des actions correctives selon les manquements constatés.
           </Text>
         </Box>
       </Ribbons>
