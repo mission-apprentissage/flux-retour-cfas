@@ -173,37 +173,39 @@ function PublicLandingPage() {
               </ListItem>
             </List>
           </VStack>
-          <VStack flex="1" backgroundColor="galt" p="8">
-            <Center>
-              <VStack>
-                <Image src="/images/landing-cards/city-hall.svg" alt="" />
-                <CardLabel>OPÉRATEURS PUBLICS</CardLabel>
-                <Text fontSize="delta" fontWeight="bold">
-                  Pilotez efficacement
-                </Text>
-              </VStack>
-            </Center>
-            <List styleType="none" pt="8" spacing="2">
-              <ListItem>
-                <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/bar-chart.svg" boxSize="16px" alt="" mr="2" />
-                  Visualisez des données ciblées sur votre territoire
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex align="center" fontSize="omega">
-                  <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="2" />
-                  <Text>
-                    Mobilisez rapidement le{" "}
-                    <Text as="abbr" title="SPIE : Service public de l’insertion et de l’emploi" cursor="help">
-                      SPIE
-                    </Text>{" "}
-                    en cas de difficultés des apprentis
+          <Link variant="ghost" href="/operateurs-publics" flex="1" backgroundColor="galt" p="8">
+            <VStack>
+              <Center>
+                <VStack>
+                  <Image src="/images/landing-cards/city-hall.svg" alt="" />
+                  <CardLabel>OPÉRATEURS PUBLICS</CardLabel>
+                  <Text fontSize="delta" fontWeight="bold">
+                    Pilotez efficacement
                   </Text>
-                </Flex>
-              </ListItem>
-            </List>
-          </VStack>
+                </VStack>
+              </Center>
+              <List styleType="none" pt="8" spacing="2">
+                <ListItem>
+                  <Flex align="center" fontSize="omega">
+                    <Image src="/images/landing-cards/bar-chart.svg" boxSize="16px" alt="" mr="2" />
+                    Visualisez des données ciblées sur votre territoire
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex align="center" fontSize="omega">
+                    <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="2" />
+                    <Text>
+                      Mobilisez rapidement le{" "}
+                      <Text as="abbr" title="SPIE : Service public de l’insertion et de l’emploi" cursor="help">
+                        SPIE
+                      </Text>{" "}
+                      en cas de difficultés des apprentis
+                    </Text>
+                  </Flex>
+                </ListItem>
+              </List>
+            </VStack>
+          </Link>
         </Stack>
 
         <SectionApercuChiffresCles />

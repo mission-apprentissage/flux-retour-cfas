@@ -4,6 +4,9 @@ const Link = {
     _focusVisible: { boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" },
   },
   variants: {
+    ghost: {
+      _hover: { bg: "#eceae3", textDecoration: "none" },
+    },
     card: {
       p: 8,
       bg: "#F9F8F6",
@@ -49,6 +52,15 @@ const Link = {
       px: 6,
       py: 2,
       _hover: { textDecoration: "none", bg: "#00000020" },
+    },
+    blueBg: {
+      display: "inline-block",
+      bg: "bluefrance",
+      color: "white",
+      whiteSpace: "nowrap",
+      px: 6,
+      py: 2,
+      _hover: { textDecoration: "none", bg: "#1212ff" },
     },
   },
 };

@@ -1,17 +1,15 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Flex,
-  Link,
-} from "@chakra-ui/react";
-import PropTypes from "prop-types";
+import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Flex, Link } from "@chakra-ui/react";
 import { useState } from "react";
 
-export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" }) => {
+interface BaseAccordionGroupProps {
+  AccordionItemsDetailList: {
+    title: string | JSX.Element;
+    content: JSX.Element;
+  }[];
+  textColor?: string;
+}
+export const BaseAccordionGroup = ({ AccordionItemsDetailList, textColor = "#3A3A3A" }: BaseAccordionGroupProps) => {
   const [indexArray, setIndexArray] = useState<number[]>([]);
   const [isUnfold, setIsUnfold] = useState(false);
   const indexItemArray = AccordionItemsDetailList.map((item) => AccordionItemsDetailList.indexOf(item));
@@ -41,29 +39,30 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
       <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => (!isUnfold ? unfoldAll() : foldAll())}>
         {!isUnfold ? "Tout déplier" : "Tout replier"}
       </Link>
-      <Accordion marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
+      <Accordion variant="withBorder" marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
         {AccordionItemsDetailList.map((item, index) => (
           <AccordionItem key={index} onClick={() => updateIndex(index)}>
-            <AccordionButton>
-              <Box fontSize={["14px", "delta", "delta"]} flex="1" textAlign="left" color={TextColor}>
-                {item.title}
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel paddingBottom={4}>{item.content}</AccordionPanel>
+            {({ isExpanded }) => (
+              <>
+                <AccordionButton>
+                  <Box fontSize={["14px", "delta", "delta"]} flex="1" textAlign="left" color={textColor}>
+                    {item.title}
+                  </Box>
+
+                  {isExpanded ? (
+                    <MinusIcon fontSize="12px" color="#000091" />
+                  ) : (
+                    <AddIcon fontSize="12px" color="#000091" />
+                  )}
+                </AccordionButton>
+                <AccordionPanel paddingBottom={4} fontSize="16px">
+                  {item.content}
+                </AccordionPanel>
+              </>
+            )}
           </AccordionItem>
         ))}
       </Accordion>
     </Flex>
   );
-};
-
-BaseAccordionGroup.propTypes = {
-  AccordionItemsDetailList: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      content: PropTypes.node.isRequired,
-    }).isRequired
-  ).isRequired,
-  TextColor: PropTypes.string,
 };

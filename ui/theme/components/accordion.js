@@ -1,7 +1,4 @@
 const baseStyle = {
-  container: {
-    mb: 2,
-  },
   button: {
     height: 14,
     _focus: { boxShadow: "none", outlineColor: "none" },
