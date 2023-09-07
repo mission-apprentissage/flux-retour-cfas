@@ -1,4 +1,4 @@
-import { ArrowForwardIcon, CheckCircleIcon, DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, CheckCircleIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import {
   Box,
   Container,
@@ -20,7 +20,7 @@ import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
-import { LockFill } from "@/theme/components/icons";
+import { DownloadLine, LockFill } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -448,7 +448,7 @@ function LienUtile(props: LienUtileProps) {
       <Link color="bluefrance" borderBottom="1px" _hover={{ textDecoration: "none" }} href={props.href} isExternal>
         {props.isDownloadLink ? (
           <>
-            <DownloadIcon mr={2} /> Télécharger
+            <DownloadLine mr={2} /> Télécharger
           </>
         ) : (
           <>
