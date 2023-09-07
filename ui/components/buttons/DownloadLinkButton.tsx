@@ -1,9 +1,9 @@
-import { DownloadIcon } from "@chakra-ui/icons";
 import { Button, ButtonProps } from "@chakra-ui/react";
 import { useState } from "react";
 
 import { sleep } from "@/common/utils/misc";
 import useToaster from "@/hooks/useToaster";
+import { DownloadLine } from "@/theme/components/icons";
 
 type Props = {
   action: (() => Promise<any>) | (() => any);
@@ -38,7 +38,7 @@ function DownloadLinkButton({ children, action, ...props }: Props) {
       }}
       isLoading={isLoading}
       onClick={onClick}
-      rightIcon={<DownloadIcon />}
+      rightIcon={<DownloadLine />}
       {...props}
     >
       {children}

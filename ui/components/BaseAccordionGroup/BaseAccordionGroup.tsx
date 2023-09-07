@@ -41,10 +41,10 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, textColor = "#3A3
       </Link>
       <Accordion variant="withBorder" marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
         {AccordionItemsDetailList.map((item, index) => (
-          <AccordionItem key={index} onClick={() => updateIndex(index)}>
+          <AccordionItem key={index}>
             {({ isExpanded }) => (
               <>
-                <AccordionButton>
+                <AccordionButton onClick={() => updateIndex(index)}>
                   <Box fontSize={["14px", "delta", "delta"]} flex="1" textAlign="left" color={textColor}>
                     {item.title}
                   </Box>

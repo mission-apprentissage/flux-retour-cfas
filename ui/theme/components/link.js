@@ -2,6 +2,8 @@ const Link = {
   baseStyle: {
     _focus: { boxShadow: "none", outlineColor: "none" },
     _focusVisible: { boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" },
+    display: "inline-flex",
+    alignItems: "baseline",
   },
   variants: {
     ghost: {

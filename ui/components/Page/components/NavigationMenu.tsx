@@ -101,9 +101,8 @@ const NavBarPublic = () => {
       <NavItem to="/" exactMatch>
         Accueil
       </NavItem>
-      {/* A réactiver une fois les nouvelles pages développées */}
       <NavItem to="/operateurs-publics">Opérateurs publics</NavItem>
-      {/* <NavItem to="/organisme-formation">Organismes de formation</NavItem> */}
+      <NavItem to="/organismes-formation">Organismes de formation</NavItem>
     </>
   );
 };

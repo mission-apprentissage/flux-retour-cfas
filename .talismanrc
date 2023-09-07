@@ -61,6 +61,8 @@ fileignoreconfig:
   checksum: 5dac6833c2dc7f76b3c8b74c3e102968cfcb69bd1073046bcd434f44717f1384
 - filename: ui/modules/organismes/Televersement.tsx
   checksum: f0aef09f007b89516bfdcee828cb44e09f0089b2f96725a146d72b557d802878
+- filename: ui/pages/organismes-formation.tsx
+  checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
 scopeconfig:
 - scope: node
 custom_patterns:
