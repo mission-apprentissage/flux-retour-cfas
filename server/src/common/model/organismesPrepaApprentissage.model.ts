@@ -1,6 +1,12 @@
+import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
 import { object, objectId, stringOrNull } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "organismesPrepaApprentissage";
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ siret: 1 }, {}],
+  [{ uai: 1 }, {}],
+];
 
 const schema = object(
   {
@@ -19,4 +25,4 @@ const schema = object(
   { additionalProperties: true }
 );
 
-export default { schema, collectionName };
+export default { schema, indexes, collectionName };
