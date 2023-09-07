@@ -23,6 +23,7 @@ import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-ef
 import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesBassinEmploi } from "./hydrate/organismes/hydrate-organismes-bassinEmploi";
 import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations";
+import { hydrateOrganismesPrepaApprentissage } from "./hydrate/organismes/hydrate-organismes-prepa-apprentissage";
 import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { hydrateOrganismesSoltea } from "./hydrate/organismes/hydrate-organismes-soltea";
@@ -163,6 +164,8 @@ export async function runJob(job: IJob): Promise<number> {
         return hydrateOrganismesRelations();
       case "hydrate:organismes-soltea":
         return hydrateOrganismesSoltea();
+      case "hydrate:organismes-prepa-apprentissage":
+        return hydrateOrganismesPrepaApprentissage();
       case "dev:generate-open-api":
         return hydrateOpenApi();
       case "hydrate:organismes":
