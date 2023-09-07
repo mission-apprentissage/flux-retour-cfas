@@ -35,6 +35,7 @@ import { processEffectifQueueById, processEffectifsQueue } from "./ingestion/pro
 import { addJob, executeJob } from "./jobs_actions";
 import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectifs-dossiersApprenants";
 import { removeOrganismesAbsentsReferentielSansTransmission } from "./patches/remove-organismes-absentReferentiel-sansTransmission";
+import { removeOrganismeSansEnseigneNiRaisonSocialeNeTransmettantPlus } from "./patches/remove-organismes-sansEnseigneNiRaisonSocialeNeTransmettantPlus";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates";
 import { clearSeedAssets } from "./seed/clearAssets";
@@ -216,6 +217,8 @@ export async function runJob(job: IJob): Promise<number> {
         return removeOrganismeAndEffectifs(job.payload as any);
       case "tmp:patches:remove-organismes-absentsReferentiel-sansTransmission":
         return removeOrganismesAbsentsReferentielSansTransmission();
+      case "tmp:patches:remove-organismes-sansEnseigneNiRaisonSociale-neTransmettantPlus":
+        return removeOrganismeSansEnseigneNiRaisonSocialeNeTransmettantPlus();
       case "process:effectifs-queue:remove-duplicates":
         return removeDuplicatesEffectifsQueue();
       case "process:effectifs-queue:single":
