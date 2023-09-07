@@ -8,7 +8,7 @@ import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
 import ListeOrganismesPage from "@/modules/organismes/ListeOrganismesPage";
 
-function SesOrganismesNonFiables() {
+function SesOrganismesACompleter() {
   const router = useRouter();
   const organismeId = router.query.organismeId as string;
   const { data: organismes } = useQuery<Organisme[]>(
@@ -31,7 +31,7 @@ function SesOrganismesNonFiables() {
     );
   }
 
-  return <ListeOrganismesPage organismes={organismes} activeTab="non-fiables" modePublique={true} />;
+  return <ListeOrganismesPage organismes={organismes} activeTab="a-completer" modePublique={true} />;
 }
 
-export default withAuth(SesOrganismesNonFiables);
+export default withAuth(SesOrganismesACompleter);
