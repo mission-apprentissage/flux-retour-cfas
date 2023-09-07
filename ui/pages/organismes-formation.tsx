@@ -98,7 +98,7 @@ const OrganismesFormationPage = () => {
         <HStack mt={10} justifyContent="end" mb={16}>
           <LockFill color="bluefrance" boxSize="4" />
           <Text>
-            Pour visualiser l’intégralité des données consultables,{" "}
+            Pour démarrer la transmission,{" "}
             <Link
               href="/auth/connexion"
               plausibleGoal="clic_homepage_connexion_carto"
@@ -164,14 +164,17 @@ const OrganismesFormationPage = () => {
                   votre fournisseur d’ERP.
                   <br />
                   <br />
-                  Situation 2 : vous utilisez un autre logiciel de gestion (ERP) qui n’est pas encore branché,
-                  transmettez ce lien{" "}
+                  Situation 2 : vous utilisez un autre logiciel de gestion (ERP) qui n’est pas encore branché, consultez
+                  la{" "}
                   <Link
                     href="https://www.notion.so/b1d9662adb374507b9d26089f4421290?pvs=21"
                     target="_blank"
                     rel="noopener noreferrer"
+                    color="action-high-blue-france"
+                    borderBottom="1px"
+                    _hover={{ textDecoration: "none" }}
                   >
-                    doc API ERP
+                    documentation API ERP
                   </Link>{" "}
                   afin de lui demander de se brancher au tableau de bord. En attendant que votre demande soit prise en
                   compte, vous pouvez transmettre vos effectifs sans logiciel supplémentaire grâce à une fonctionnalité
@@ -189,6 +192,9 @@ const OrganismesFormationPage = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     whiteSpace="nowrap"
+                    color="action-high-blue-france"
+                    borderBottom="1px"
+                    _hover={{ textDecoration: "none" }}
                   >
                     {CONTACT_ADDRESS}
                   </Link>
@@ -207,7 +213,7 @@ const OrganismesFormationPage = () => {
                   <UnorderedList>
                     <ListItem>la base légale du traitement précise cette transmission ;</ListItem>
                     <ListItem>
-                      la politique de confidentialité précise cette transmission et recense les destinataires
+                      la politique de confidentialité précise cette transmission et recense les destinataires ;
                     </ListItem>
                     <ListItem>
                       la mention d’information envoyée par courriel aux apprenants et apprenantes précise cette
@@ -248,39 +254,39 @@ const OrganismesFormationPage = () => {
                   <Text mt="1em">L’organisme responsable&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
-                      Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement
+                      ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement
                       formateur ;
                     </ListItem>
-                    <ListItem>Est signataire de la convention de formation ;</ListItem>
-                    <ListItem>Demande et reçoit les financements de l’OPCO ;</ListItem>
+                    <ListItem>est signataire de la convention de formation ;</ListItem>
+                    <ListItem>demande et reçoit les financements de l’OPCO ;</ListItem>
                     <ListItem>
-                      Est responsable auprès de l’administration du respect de ses missions et obligations ;
+                      est responsable auprès de l’administration du respect de ses missions et obligations ;
                     </ListItem>
                     <ListItem>
-                      Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères
+                      est titulaire de la certification qualité en tant que CFA et est garant du respect des critères
                       qualité au sein de l’UFA.
                     </ListItem>
                   </UnorderedList>
                   <Text mt="1em">L’organisme responsable-formateur&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
-                      Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de
+                      dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de
                       déclaration d’activité (NDA) ;
                     </ListItem>
-                    <ListItem>Est signataire de la convention de formation ;</ListItem>
-                    <ListItem>Demande et reçoit les financements de l’OPCO ;</ListItem>
+                    <ListItem>est signataire de la convention de formation ;</ListItem>
+                    <ListItem>demande et reçoit les financements de l’OPCO ;</ListItem>
                     <ListItem>
-                      Est responsable auprès de l’administration du respect de ses missions et obligations ;
+                      est responsable auprès de l’administration du respect de ses missions et obligations ;
                     </ListItem>
                     <ListItem>
-                      Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères
+                      est titulaire de la certification qualité en tant que CFA et est garant du respect des critères
                       qualité au sein de l’UFA.
                     </ListItem>
                   </UnorderedList>
                   <Text mt="1em">L’organisme formateur&nbsp;:</Text>
                   <UnorderedList>
                     <ListItem>
-                      Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de
+                      dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de
                       déclaration d’activité (NDA).
                     </ListItem>
                   </UnorderedList>
@@ -309,17 +315,17 @@ const OrganismesFormationPage = () => {
                 <>
                   <Text>Certains écarts peuvent être dus&nbsp;:</Text>
                   <UnorderedList>
-                    <ListItem>À une erreur de saisie à la source ;</ListItem>
-                    <ListItem>À une absence de mise à jour du statut de l’apprenant à la source ;</ListItem>
-                    <ListItem>Au délai de mise à jour de la donnée ;</ListItem>
+                    <ListItem>à une erreur de saisie à la source ;</ListItem>
+                    <ListItem>à une absence de mise à jour du statut de l’apprenant à la source ;</ListItem>
+                    <ListItem>au délai de mise à jour de la donnée ;</ListItem>
                     <ListItem>
-                      À des pratiques de saisie observées chez certains utilisateurs (par exemple, concernant les
+                      à des pratiques de saisie observées chez certains utilisateurs (par exemple, concernant les
                       abandons, il se peut simplement que l’apprenant ait arrêté l’apprentissage faute de contrat pour
                       poursuive sa formation en voie scolaire ; concernant les jeunes sans contrat, certains ne sont pas
                       comptabilisés car certains organismes n’inscrivent les élèves que lorsqu’ils ont un contrat) ;
                     </ListItem>
                     <ListItem>
-                      À la transmission des effectifs par un organisme formateur avec l’UAI de l’organisme responsable
+                      à la transmission des effectifs par un organisme formateur avec l’UAI de l’organisme responsable
                       ou responsable-formateur (lequel peut constater un écart entre la totalité des effectifs de ses
                       formateurs et ce qu’il voit car les données sont transmises par tout ou partie des formateurs).
                     </ListItem>
@@ -333,6 +339,9 @@ const OrganismesFormationPage = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       whiteSpace="nowrap"
+                      color="action-high-blue-france"
+                      borderBottom="1px"
+                      _hover={{ textDecoration: "none" }}
                     >
                       {CONTACT_ADDRESS}
                     </Link>
@@ -358,7 +367,7 @@ const OrganismesFormationPage = () => {
         </Link>
       </Container>
 
-      <Box bg="#F9F8F6">
+      <Box bg="#F9F8F6" mb={-8}>
         <Container maxW="xl" py="14">
           <Heading as="h3" fontSize="32px" color="blue_cumulus_main">
             Liens utiles

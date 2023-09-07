@@ -200,18 +200,18 @@ const OperateursPublicsPage = () => {
                     <Text>Certains écarts peuvent être notamment dus&nbsp;:</Text>
 
                     <UnorderedList>
-                      <ListItem>À une erreur de saisie à la source ;</ListItem>
-                      <ListItem>À une absence de mise à jour du statut de l’apprenant à la source ;</ListItem>
-                      <ListItem>Au délai de mise à jour de la donnée ;</ListItem>
+                      <ListItem>à une erreur de saisie à la source ;</ListItem>
+                      <ListItem>à une absence de mise à jour du statut de l’apprenant à la source ;</ListItem>
+                      <ListItem>au délai de mise à jour de la donnée ;</ListItem>
                       <ListItem>
-                        À des pratiques de saisie observées chez certains utilisateurs (par exemple, concernant les
+                        à des pratiques de saisie observées chez certains utilisateurs (par exemple, concernant les
                         abandons, il se peut simplement que l’apprenant ait arrêté l’apprentissage faute de contrat pour
                         poursuive sa formation en voie scolaire ; concernant les jeunes sans contrat, certains ne sont
                         pas comptabilisés car certains organismes n’inscrivent les élèves que lorsqu’ils ont un contrat)
                         ;
                       </ListItem>
                       <ListItem>
-                        À la transmission des effectifs par un organisme formateur avec l’UAI de l’organisme responsable
+                        à la transmission des effectifs par un organisme formateur avec l’UAI de l’organisme responsable
                         ou responsable-formateur (lequel peut constater un écart entre la totalité des effectifs de ses
                         formateurs et ce qu’il voit car les données sont transmises par tout ou partie des formateurs).
                       </ListItem>
@@ -225,6 +225,9 @@ const OperateursPublicsPage = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         whiteSpace="nowrap"
+                        color="action-high-blue-france"
+                        borderBottom="1px"
+                        _hover={{ textDecoration: "none" }}
                       >
                         {CONTACT_ADDRESS}
                       </Link>
@@ -254,6 +257,9 @@ const OperateursPublicsPage = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       whiteSpace="nowrap"
+                      color="action-high-blue-france"
+                      borderBottom="1px"
+                      _hover={{ textDecoration: "none" }}
                     >
                       {CONTACT_ADDRESS}
                     </Link>
