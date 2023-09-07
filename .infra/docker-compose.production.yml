@@ -34,7 +34,7 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: docker.tdb.{{env_type}}.server
+        tag: docker.json.tdb.{{env_type}}.server
         fluentd-async: "true"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5000/api/healthcheck"]
@@ -59,7 +59,7 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: docker.tdb.{{env_type}}.queue_processor
+        tag: docker.json.tdb.{{env_type}}.queue_processor
         fluentd-async: "true"
 
   jobs_processor:
@@ -78,7 +78,7 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: docker.tdb.{{env_type}}.jobs_processor
+        tag: docker.json.tdb.{{env_type}}.jobs_processor
         fluentd-async: "true"
 
   ui:
@@ -95,7 +95,7 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: docker.tdb.{{env_type}}.ui
+        tag: docker.json.tdb.{{env_type}}.ui
         fluentd-async: "true"
 
   metabase:
@@ -130,7 +130,7 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: docker.tdb.{{env_type}}.metabase
+        tag: docker.json.tdb.{{env_type}}.metabase
         fluentd-async: "true"
 
   clamav:
@@ -150,7 +150,7 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: docker.tdb.{{env_type}}.clamav
+        tag: docker.json.tdb.{{env_type}}.clamav
         fluentd-async: "true"
     volumes:
       - /opt/app/data/clamav:/var/lib/clamav
