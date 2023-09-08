@@ -74,8 +74,15 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
 
       if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
         organismesFiables.push(organisme);
-      } else if (organisme.ferme && !organisme.last_transmission_date) {
-        // Organismes fermés et ne transmettant pas (on ne les affiche pas)
+      } else if (
+        // Organismes à masquer :
+        // organismes fermés et ne transmettant pas
+        // organismes inconnus (sans raison sociale ni enseigne) et absents du référentiel ou fermé
+        (organisme.ferme && !organisme.last_transmission_date) ||
+        (!organisme.enseigne &&
+          !organisme.raison_sociale &&
+          (organisme.est_dans_le_referentiel === "absent" || organisme.ferme))
+      ) {
         nbOrganismesFermes++;
       } else {
         organismesACompleter.push(organisme);
