@@ -400,6 +400,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
             <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
               Aperçu de {modePublique ? "ses" : "vos"} effectifs
               {hasOrganismesFormateurs && " et établissements"}
+              <Text fontSize="gamma" as="span" ml="2">
+                (année scolaire 2023-2024)
+              </Text>
             </Heading>
 
             {indicateursEffectifsPartielsMessage && (
