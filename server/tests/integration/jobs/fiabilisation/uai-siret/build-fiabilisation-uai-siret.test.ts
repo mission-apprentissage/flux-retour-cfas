@@ -5,19 +5,13 @@ import {
   STATUT_FIABILISATION_ORGANISME,
 } from "@/common/constants/fiabilisation";
 import { OrganismesReferentiel } from "@/common/model/@types";
-import {
-  organismesReferentielDb,
-  fiabilisationUaiSiretDb,
-  organismesDb,
-  uaisAccesReferentielDb,
-} from "@/common/model/collections";
+import { organismesReferentielDb, fiabilisationUaiSiretDb, organismesDb } from "@/common/model/collections";
 import { buildFiabilisationCoupleForTdbCouple } from "@/jobs/fiabilisation/uai-siret/build";
 import {
   checkCoupleFiable,
   checkCoupleNonFiabilisable,
   checkMatchReferentielSiretUaiDifferent,
   checkMatchReferentielUaiUniqueSiretDifferent,
-  checkOrganismeInexistant,
   checkUaiAucunLieuReferentiel,
   checkUaiLieuReferentiel,
 } from "@/jobs/fiabilisation/uai-siret/build.rules";
@@ -395,51 +389,6 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       assert.deepEqual(nbCoupleFiabilisation, 0);
       assert.deepEqual(nbOrganismePbCollecte, 0);
-    });
-  });
-
-  describe("checkOrganismeInexistant", () => {
-    it("Vérifie un retour FALSE pour un couple du TDB pour lequel l'UAI est dans ACCE (via Référentiel) dans le référentiel mais pas le SIRET", async () => {
-      const UAI_TDB = "9933672E";
-      const coupleTdb = { uai: UAI_TDB, siret: "12340584100000" };
-
-      // Ajout de l'UAI à la base ACCE du Référentel
-      await uaisAccesReferentielDb().insertOne({ uai: UAI_TDB });
-
-      const isOrganismeInexistant = await checkOrganismeInexistant(coupleTdb);
-      const nbCoupleFiabilisation = await fiabilisationUaiSiretDb().countDocuments({});
-
-      assert.deepEqual(nbCoupleFiabilisation, 0);
-      assert.deepEqual(isOrganismeInexistant, false);
-    });
-
-    it("Vérifie un retour FALSE pour un couple du TDB pour lequel le SIRET est dans le référentiel mais l'UAI n'est pas dans ACCE (via Référentiel)", async () => {
-      const UAI_TDB = "9933672E";
-      const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };
-
-      const isOrganismeInexistant = await checkOrganismeInexistant(coupleTdb);
-      const nbCoupleFiabilisation = await fiabilisationUaiSiretDb().countDocuments({});
-
-      assert.deepEqual(nbCoupleFiabilisation, 0);
-      assert.deepEqual(isOrganismeInexistant, false);
-    });
-
-    it("Vérifie l'ajout d'une entrée de fiabilisation NON_FIABILISABLE_INEXISTANT et un retour TRUE pour un couple du TDB pour lequel l'UAI n'est pas dans ACCE (Référentiel) et le SIRET n'est pas dans le Référentiel", async () => {
-      const UAI_TEST = "9933672E";
-      const SIRET_TEST = "12340584100000";
-      const coupleTdb = { uai: UAI_TEST, siret: SIRET_TEST };
-      const isOrganismeInexistant = await checkOrganismeInexistant(coupleTdb);
-      assert.deepEqual(isOrganismeInexistant, true);
-
-      // Vérification de la création du couple en tant que NON_FIABILISABLE_INEXISTANT
-      const fiabilisationUaiSiret = await fiabilisationUaiSiretDb()
-        .find({
-          uai: UAI_TEST,
-          siret: SIRET_TEST,
-        })
-        .toArray();
-      expect(fiabilisationUaiSiret).toHaveLength(1);
-      expect(fiabilisationUaiSiret[0].type).toBe(STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_INEXISTANT);
     });
   });
 

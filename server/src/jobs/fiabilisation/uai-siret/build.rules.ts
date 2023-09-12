@@ -5,12 +5,7 @@ import {
 } from "@/common/constants/fiabilisation";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { OrganismesReferentiel } from "@/common/model/@types";
-import {
-  fiabilisationUaiSiretDb,
-  organismesDb,
-  organismesReferentielDb,
-  uaisAccesReferentielDb,
-} from "@/common/model/collections";
+import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "@/common/model/collections";
 
 /**
  * Règle de vérification des couples fiables
@@ -336,34 +331,6 @@ export const checkSiretMultiplesRelationsAndLieux = async (
         }
       }
     }
-  }
-
-  return false;
-};
-
-/**
- * Règle de vérification de l'existence d'un organisme
- * Si le siret n'est pas dans le référentiel et que l'UAI n'est pas dans la base ACCE alors on le considère inexistant
- * @param param0
- */
-export const checkOrganismeInexistant = async ({ uai, siret }) => {
-  const isSiretInReferentiel = (await organismesReferentielDb().countDocuments({ siret })) > 0;
-  const isUaiInAcce = (await uaisAccesReferentielDb().countDocuments({ uai })) > 0;
-
-  if (!isSiretInReferentiel && !isUaiInAcce) {
-    await fiabilisationUaiSiretDb().updateOne(
-      { uai, siret },
-      { $set: { type: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_INEXISTANT } },
-      { upsert: true }
-    );
-
-    // MAJ du statut de l'organisme lié
-    await organismesDb().updateOne(
-      { uai, siret },
-      { $set: { fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_INEXISTANT } }
-    );
-
-    return true;
   }
 
   return false;
