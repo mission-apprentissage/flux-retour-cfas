@@ -1,6 +1,6 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
-import { arrayOf, object, objectId, string } from "./json-schema/jsonSchemaTypes";
+import { arrayOf, boolean, number, object, objectId, string } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "rncp";
 
@@ -10,9 +10,14 @@ const schema = object(
   {
     _id: objectId(),
     rncp: string(),
+    nouveaux_rncp: arrayOf(string()),
+    intitule: string(),
+    niveau: number(),
+    etat_fiche: string(),
+    actif: boolean(),
     romes: arrayOf(string()),
   },
-  { required: ["rncp", "romes"], additionalProperties: false }
+  { required: ["rncp", "intitule", "etat_fiche", "actif", "romes"], additionalProperties: false }
 );
 
 export default { schema, indexes, collectionName };

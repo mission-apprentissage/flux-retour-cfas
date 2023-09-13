@@ -390,10 +390,10 @@ program
  * Job de remplissage des formations du catalogue
  */
 program
-  .command("hydrate:rncp-rome")
+  .command("hydrate:rncp")
   .description("Remplissage du RNCP")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("hydrate:rncp-romes"));
+  .action(createJobAction("hydrate:rncp"));
 
 program
   .command("hydrate:organismes-formations")
