@@ -43,7 +43,7 @@ const ChoixTransmission = ({ organismeId, isMine = false }: ChoixTransmissionPro
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  if (!isMine) {
+                  if (isMine) {
                     router.push("/mon-compte/erp");
                   } else {
                     await configureOrganismeERP(organismeId, { mode_de_transmission: "API" });
