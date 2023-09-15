@@ -304,13 +304,7 @@ function IndicateursForm(props: IndicateursFormProps) {
       </Box>
 
       <Box flex="1">
-        {!props.organismeId && (
-          <Ribbons>
-            <Text color="grey.800" mx={3}>
-              {getMessageBandeauMesIndicateurs(organisationType)}
-            </Text>
-          </Ribbons>
-        )}
+        {!props.organismeId && <MessageBandeauIndicateurs organisationType={organisationType} />}
 
         <IndicateursGrid
           indicateursEffectifs={indicateursEffectifsTotaux}
@@ -476,57 +470,68 @@ function getPermissionsEffectifsNominatifs(
   return false;
 }
 
-function getMessageBandeauMesIndicateurs(organisationType: OrganisationType): JSX.Element {
+function MessageBandeauIndicateurs({ organisationType }: { organisationType: OrganisationType }) {
+  let text: string | null | JSX.Element = null;
+
   switch (organisationType) {
     case "ORGANISME_FORMATION_FORMATEUR":
-      return <></>;
+      break;
     case "ORGANISME_FORMATION_RESPONSABLE":
     case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
-      return (
+      text = (
         <>
           Retrouvez ici les indicateurs et les organismes dont les formations en apprentissage sont{" "}
           <Text as="strong">sous votre gestion</Text> uniquement.
         </>
       );
-
+      break;
     case "TETE_DE_RESEAU":
-      return (
+      text = (
         <>
           Retrouvez ici les indicateurs et les organismes de formation <Text as="strong">de votre réseau</Text>{" "}
           uniquement.
         </>
       );
-
+      break;
     case "DREETS":
     case "DRAAF":
     case "DDETS":
-      return (
+      text = (
         <>
           Retrouvez ici les indicateurs et les organismes de formation <Text as="strong">de votre territoire</Text>{" "}
           uniquement. Vous avez la possibilité de télécharger les listes <Text as="strong">nominatives</Text> pour les
           jeunes en formation sans contrat, rupturants et sorties d’apprentissage.
         </>
       );
+      break;
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
     case "ACADEMIE":
-      return (
+      text = (
         <>
           Retrouvez ici les indicateurs et les organismes de formation <Text as="strong">de votre territoire</Text>{" "}
           uniquement.
         </>
       );
-
+      break;
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
-      return <></>;
-
+      break;
     case "ADMINISTRATEUR":
-      return (
+      text = (
         <>
           Vous avez la possibilité de télécharger les listes <Text as="strong">nominatives</Text> pour chaque statut.
         </>
       );
   }
-  return <></>;
+
+  if (text === null) return <></>;
+
+  return (
+    <Ribbons>
+      <Text color="grey.800" mx={3}>
+        {text}
+      </Text>
+    </Ribbons>
+  );
 }
