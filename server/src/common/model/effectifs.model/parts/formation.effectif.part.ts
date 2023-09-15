@@ -45,7 +45,6 @@ export const formationEffectifSchema = object(
     date_entree: date({ description: "Date d'entrée en formation" }),
   },
   {
-    required: ["cfd"],
     additionalProperties: true,
   }
 );

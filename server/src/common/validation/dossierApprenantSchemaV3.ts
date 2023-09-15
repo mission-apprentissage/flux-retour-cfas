@@ -84,7 +84,7 @@ export const dossierApprenantSchemaV3Base = () =>
     etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai,
     etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret,
 
-    formation_cfd: primitivesV1.formation.code_cfd,
+    formation_cfd: primitivesV1.formation.code_cfd.optional(),
   });
 
 const dossierApprenantSchemaV3 = () => {
