@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
 
 import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
-import { findFormationById, getFormationWithCfd } from "@/common/actions/formations.actions";
+import { findFormationById, getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
 import { findOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
@@ -100,8 +100,8 @@ export const generateSifa = async (organisme_id: ObjectId) => {
   for (const effectif of effectifs) {
     const formationBcn =
       (await findFormationById(effectif.formation.formation_id)) ||
-      (effectif.formation.cfd ?? (await getFormationWithCfd(effectif.formation.cfd!))) ||
-      (await getFormationWithRNCP(effectif.formation.rncp));
+      (effectif.formation.cfd ? await getFormationWithCfd(effectif.formation.cfd) : null) ||
+      (effectif.formation.rncp ? await getFormationWithRNCP(effectif.formation.rncp) : null);
     const formationOrganisme = organisme.relatedFormations?.find(
       (f) => f.formation_id?.toString() === effectif.formation.formation_id?.toString()
     );
