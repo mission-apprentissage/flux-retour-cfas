@@ -2,6 +2,7 @@ import { Box, Button, Center, Flex, Heading, HStack, Text } from "@chakra-ui/rea
 import { useRouter } from "next/router";
 import React from "react";
 
+import { configureOrganismeERP } from "@/common/api/tableauDeBord";
 import { ArrowDropRightLine } from "@/theme/components/icons";
 
 type ChoixTransmissionProps = {
@@ -42,7 +43,12 @@ const ChoixTransmission = ({ organismeId, isMine = false }: ChoixTransmissionPro
             <Center h="10%">
               <Button
                 onClick={async () => {
-                  router.push("/mon-compte/erp");
+                  if (!isMine) {
+                    router.push("/mon-compte/erp");
+                  } else {
+                    await configureOrganismeERP(organismeId, { mode_de_transmission: "API" });
+                    router.reload();
+                  }
                 }}
                 size={"md"}
                 variant={"secondary"}
