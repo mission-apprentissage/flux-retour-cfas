@@ -1,7 +1,7 @@
 import { PromisePool } from "@supercharge/promise-pool";
 
+import { findOrganismeByUaiAndSiret, updateOrganisme } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import { organismesPrepaApprentissageDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
 import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
@@ -10,12 +10,9 @@ const logger = parentLogger.child({ module: "job:hydrate:organismes-prepa-appren
 const PREPA_APPRENTISSAGE_CSV_FILE_PATH = "organismes/organismes-prepa-apprentissage.csv";
 
 /**
- * Ce job peuple la collection organismesPrepaApprentissage avec le contenu du fichier CSV
+ * Ce job remplit le champ prepa_apprentissage des organismes avec le contenu du fichier CSV prepa_apprentissage
  */
 export const hydrateOrganismesPrepaApprentissage = async () => {
-  logger.info("Clear de la collection organismesPrepaApprentissage...");
-  await organismesPrepaApprentissageDb().deleteMany({});
-
   // Lecture du fichier CSV
   const filePath = getStaticFilePath(PREPA_APPRENTISSAGE_CSV_FILE_PATH);
   const prepaApprentissageFile = readJsonFromCsvFile(filePath, ";");
@@ -26,33 +23,17 @@ export const hydrateOrganismesPrepaApprentissage = async () => {
   }
 
   // Traitement // sur toutes les lignes du fichier
-  await PromisePool.for(prepaApprentissageFile).process(
-    async ({
-      uai,
-      siret,
-      raison_sociale,
-      enseigne,
-      nature,
-      departement,
-      commune,
-      code_postal,
-      adresse,
-      prepa_apprentissage,
-    }: any) => {
-      await organismesPrepaApprentissageDb().insertOne({
-        uai,
-        siret,
-        raison_sociale,
-        enseigne,
-        nature,
-        departement,
-        commune,
-        code_postal,
-        adresse,
-        prepa_apprentissage,
+  await PromisePool.for(prepaApprentissageFile).process(async ({ uai, siret, prepa_apprentissage }: any) => {
+    const foundInOrganismes = await findOrganismeByUaiAndSiret(uai, siret);
+
+    // Match sur un couple trouvé dans les organismes et champ X dans le csv
+    if (foundInOrganismes && prepa_apprentissage === "X") {
+      await updateOrganisme(foundInOrganismes._id, {
+        ...foundInOrganismes,
+        prepa_apprentissage: true,
       });
     }
-  );
+  });
 
-  logger.info("Collection organismesPrepaApprentissage initialisée avec succès !");
+  logger.info("Champ prepa_apprentissage initialisé avec succès !");
 };
