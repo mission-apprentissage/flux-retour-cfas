@@ -78,4 +78,5 @@ allowed_patterns:
 - apiKey
 - ApiKey
 - api_key
+- tableau-de-bord@apprentissage\.beta\.gouv.fr
 version: "1.0"
