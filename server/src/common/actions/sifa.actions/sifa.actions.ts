@@ -99,7 +99,9 @@ export const generateSifa = async (organisme_id: ObjectId) => {
   const items: any[] = [];
   for (const effectif of effectifs) {
     const formationBcn =
-      (await findFormationById(effectif.formation.formation_id)) || (await getFormationWithCfd(effectif.formation.cfd));
+      (await findFormationById(effectif.formation.formation_id)) ||
+      (effectif.formation.cfd ?? (await getFormationWithCfd(effectif.formation.cfd!))) ||
+      (await getFormationWithRNCP(effectif.formation.rncp));
     const formationOrganisme = organisme.relatedFormations?.find(
       (f) => f.formation_id?.toString() === effectif.formation.formation_id?.toString()
     );
