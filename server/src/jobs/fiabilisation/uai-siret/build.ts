@@ -17,7 +17,6 @@ import {
   checkCoupleNonFiabilisable,
   checkMatchReferentielSiretUaiDifferent,
   checkMatchReferentielUaiUniqueSiretDifferent,
-  checkOrganismeInexistant,
   checkSiretMultiplesRelationsAndLieux,
   checkUaiAucunLieuReferentiel,
   checkUaiLieuReferentiel,
@@ -154,7 +153,7 @@ export const buildFiabilisationCoupleForTdbCouple = async (
     return;
 
   // Règle n°6 on vérifie les organismes inexistants
-  if (await checkOrganismeInexistant(coupleUaiSiretTdbToCheck)) return;
+  // Cette règle n'existe plus parce qu'on ne regarde plus dans la base ACCE
 
   // Règle n°7 on vérifie les UAI non trouvées dans les lieux du référentiel
   if (await checkUaiAucunLieuReferentiel(coupleUaiSiretTdbToCheck)) return;
