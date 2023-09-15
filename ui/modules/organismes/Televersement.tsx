@@ -221,7 +221,27 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           href="/modele-import.xlsx"
         >
           <FileDownloadIcon mr="2" />
-          Télécharger le modèle
+          Télécharger le modèle Excel
+        </Button>
+
+        <Button
+          as="a"
+          variant={"link"}
+          fontSize="md"
+          mt="2"
+          borderBottom="1px"
+          borderRadius="0"
+          mb="8"
+          ml="8"
+          lineHeight="6"
+          p="0"
+          _active={{
+            color: "bluefrance",
+          }}
+          href="/dictionnaire-des-donnees.pdf"
+        >
+          <FileDownloadIcon mr="2" />
+          Dictionnaire des données
         </Button>
 
         {status === "validation_failure" && (
