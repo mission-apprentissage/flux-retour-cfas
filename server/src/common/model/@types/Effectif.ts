@@ -1080,7 +1080,7 @@ export interface Effectif {
     /**
      * Code CFD de la formation
      */
-    cfd: string;
+    cfd?: string;
     /**
      * Code RNCP de la formation à laquelle l'apprenant est inscrit
      */
@@ -1610,7 +1610,7 @@ export interface Effectif {
     /**
      * Date de fin du contrat
      */
-    date_fin: Date;
+    date_fin?: Date;
     /**
      * Date de rupture du contrat
      */
