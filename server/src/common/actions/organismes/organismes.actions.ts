@@ -610,8 +610,7 @@ export async function findOrganismesBySIRET(siret: string): Promise<Organisme[]>
     .toArray();
   if (organismes.length === 0) {
     logger.warn({ module: "inscription", siret }, "aucun organisme trouvé en base");
-    // si pas d'organisme en base (et donc le référentiel), on cherche depuis API entreprise
-    return [await fetchFromAPIEntreprise(siret)];
+    throw Boom.badRequest("Aucun organisme trouvé");
   }
   return organismes;
 }
@@ -642,7 +641,6 @@ export async function getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(
 }
 
 export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<Organisme> {
-  // FIXME projection à définir
   const organisme = await organismesDb().findOne({
     uai: uai as any,
     siret: siret,

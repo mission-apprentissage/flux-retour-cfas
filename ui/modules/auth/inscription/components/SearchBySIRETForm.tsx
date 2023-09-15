@@ -18,6 +18,7 @@ import { Field, Form, Formik } from "formik";
 import { useState } from "react";
 import * as Yup from "yup";
 
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { siretRegex } from "@/common/domain/siret";
 import { _post } from "@/common/httpClient";
 import { sleep } from "@/common/utils/misc";
@@ -78,9 +79,21 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
                   {meta.error === "Aucun organisme trouvé" ? (
                     <div>
                       {/* la div supprime le flex parent */}
-                      Ce SIRET n’a pas été identifié. Veuillez vérifier à nouveau ou consulter l’
-                      <Link href={"https://annuaire-entreprises.data.gouv.fr/"} textDecoration={"underline"} isExternal>
-                        annuaire des entreprises
+                      Ce SIRET n’a pas été trouvé dans le{" "}
+                      <Link href="https://referentiel.apprentissage.onisep.fr/" textDecoration="underline" isExternal>
+                        référentiel de l’apprentissage
+                      </Link>
+                      .
+                      <br />
+                      Si vous pensez que c’est une erreur, veuillez nous contacter à{" "}
+                      <Link
+                        href={`mailto:${CONTACT_ADDRESS}`}
+                        target="_blank"
+                        textDecoration="underline"
+                        isExternal
+                        whiteSpace="nowrap"
+                      >
+                        {CONTACT_ADDRESS}
                       </Link>
                       .
                     </div>

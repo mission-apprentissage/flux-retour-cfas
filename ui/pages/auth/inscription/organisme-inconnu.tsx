@@ -17,18 +17,9 @@ export default function InscriptionOrganismeInconnu() {
           color="bluefrance"
           whiteSpace="nowrap"
         >
-          Référentiel{" "}
+          référentiel de l’apprentissage
         </Link>
-        de l’apprentissage ou{" "}
-        <Link
-          href={"https://annuaire-entreprises.data.gouv.fr/"}
-          fontWeight={700}
-          color="bluefrance"
-          whiteSpace="nowrap"
-        >
-          l’Annuaire{" "}
-        </Link>
-        des entreprises. Vous pouvez aussi consulter la{" "}
+        . Vous pouvez aussi consulter la{" "}
         <Link
           href={"https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"}
           fontWeight={700}
