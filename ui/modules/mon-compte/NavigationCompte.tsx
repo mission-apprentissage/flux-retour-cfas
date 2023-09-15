@@ -13,7 +13,7 @@ const NavigationCompte = () => {
       name: "Mes informations",
       href: "/mon-compte",
     },
-    ...(["recette", "dev"].includes(process.env.NEXT_PUBLIC_ENV as string)
+    ...(["recette", "local"].includes(process.env.NEXT_PUBLIC_ENV as string)
       ? [
           {
             name: "Paramétrage ERP",
