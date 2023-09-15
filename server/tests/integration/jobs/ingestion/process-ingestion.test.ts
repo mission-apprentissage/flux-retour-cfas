@@ -433,6 +433,32 @@ describe("Processus d'ingestion", () => {
         created_at: new Date(),
         source: "REPLACE_ME",
       };
+
+      const minimalSampleData: EffectifsQueue = {
+        nom_apprenant: "Doe",
+        prenom_apprenant: "John",
+        date_de_naissance_apprenant: "2000-10-28T00:00:00.000Z",
+        annee_scolaire: "2021-2022",
+        statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
+        date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
+        id_erp_apprenant: "123456789",
+        api_version: "v3",
+        annee_formation: 1,
+        formation_rncp: "RNCP123",
+        date_inscription_formation: "2021-09-01T00:00:00.000Z",
+        date_entree_formation: "2021-09-01T00:00:00.000Z",
+        date_fin_formation: "2022-06-30T00:00:00.000Z",
+        duree_theorique_formation: 2,
+        etablissement_responsable_uai: UAI_RESPONSABLE,
+        etablissement_responsable_siret: SIRET_RESPONSABLE,
+        etablissement_formateur_uai: UAI,
+        etablissement_formateur_siret: SIRET,
+        etablissement_lieu_de_formation_uai: UAI,
+        etablissement_lieu_de_formation_siret: SIRET,
+        created_at: new Date(),
+        source: "REPLACE_ME",
+      };
+
       it("Vérifie l'ingestion valide d'un nouveau dossier valide v3 pour un organisme fiable", async () => {
         const organismeForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
         if (!organismeForInput) throw new Error("Organisme non trouvé");
@@ -533,6 +559,90 @@ describe("Processus d'ingestion", () => {
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
             duree_theorique: 2,
             formation_presentielle: true,
+            date_fin: new Date("2022-06-30T00:00:00.000Z"),
+            date_entree: new Date("2021-09-01T00:00:00.000Z"),
+          },
+          is_lock: expect.any(Object),
+          validation_errors: [],
+          _computed: {
+            organisme: {
+              region: "84",
+              departement: "01",
+              academie: "10",
+              uai: "0802004U",
+              siret: "77937827200016",
+              reseaux: [],
+              fiable: false,
+            },
+          },
+          updated_at: expect.any(Date),
+          created_at: expect.any(Date),
+          annee_scolaire: "2021-2022",
+          source: organismeForInput._id.toString(),
+          id_erp_apprenant: "123456789",
+          organisme_id: new ObjectId(organismeForInput._id),
+          organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
+          organisme_formateur_id: new ObjectId(organismeForInput._id),
+        });
+      });
+
+      it("Vérifie l'ingestion valide d'un nouveau dossier valide v3 pour un organisme fiable avec seulement les champs obligatoires", async () => {
+        const organismeForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
+        if (!organismeForInput) throw new Error("Organisme non trouvé");
+
+        const sampleData: EffectifsQueue = {
+          ...minimalSampleData,
+          source: organismeForInput._id.toString(),
+        };
+
+        const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
+        if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
+
+        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const result = await processEffectifsQueue();
+        const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
+
+        expect(updatedInput?.error).toBeUndefined();
+        expect(updatedInput?.validation_errors).toBeUndefined();
+        expect(updatedInput?.processed_at).toBeInstanceOf(Date);
+
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
+
+        expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
+
+        expect(result).toStrictEqual({
+          totalProcessed: 1,
+          totalValidItems: 1,
+          totalInvalidItems: 0,
+        });
+
+        // Check nb effectifsQueue
+        expect(await effectifsQueueDb().countDocuments({})).toBe(1);
+
+        const insertedDossier = await effectifsDb().findOne({});
+
+        expect(insertedDossier).toStrictEqual({
+          _id: effectifForInput?._id,
+          apprenant: {
+            adresse: {},
+            historique_statut: [
+              {
+                valeur_statut: 2,
+                date_statut: new Date("2022-12-28T04:05:47.647Z"),
+                date_reception: expect.any(Date),
+              },
+            ],
+            nom: "DOE",
+            prenom: "John",
+            date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
+          },
+          contrats: [],
+          formation: {
+            periode: [],
+            rncp: "RNCP123",
+            annee: 1,
+            date_inscription: new Date("2021-09-01T00:00:00.000Z"),
+            duree_theorique: 2,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
