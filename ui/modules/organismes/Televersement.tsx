@@ -390,8 +390,11 @@ function InfoBetaPanel() {
       <Text color="grey.800" mt={4} textStyle="sm">
         Ce service est en cours de refonte, nous travaillons actuellement à le rendre pleinement fonctionnel.
         <br />
-        Si vous constatez un dysfonctionnement lors de son utilisation, cela signifie que votre fichier ne peut pas être
-        pris en charge pour le moment.
+        Si vous constatez un dysfonctionnement lors de son utilisation, contactez-nous&nbsp;:{" "}
+        <a target="_blank" rel="noopener noreferrer" href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr">
+          tableau-de-bord@apprentissage.beta.gouv.fr
+        </a>
+        .
         <br />
         Nous vous prions de bien vouloir nous excuser pour l’éventuel désagrément rencontré et vous remercions de votre
         patience.
