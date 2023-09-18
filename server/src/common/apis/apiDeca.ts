@@ -1,5 +1,4 @@
 import axiosRetry from "axios-retry";
-import { format } from "date-fns";
 
 import logger from "@/common/logger";
 import { ApiError, apiRateLimiter } from "@/common/utils/apiUtils";
@@ -28,7 +27,7 @@ const executeWithRateLimiting = apiRateLimiter("apiDeca", {
  * @param page
  * @returns
  */
-export const getContratsDeca = async (dateDebut: Date, dateFin: Date, page: number): Promise<ApiDeca> => {
+export const getContratsDeca = async (dateDebut: string, dateFin: string, page: number): Promise<ApiDeca> => {
   return executeWithRateLimiting(async (client: any) => {
     axiosRetry(client, { retries: 3 });
 
@@ -36,8 +35,8 @@ export const getContratsDeca = async (dateDebut: Date, dateFin: Date, page: numb
       let response = await client.post(
         `contrats/extractTBA`,
         {
-          dateDebut: format(dateDebut, "yyyy-MM-dd"),
-          dateFin: format(dateFin, "yyyy-MM-dd"),
+          dateDebut,
+          dateFin,
           page,
         },
         {
@@ -49,8 +48,8 @@ export const getContratsDeca = async (dateDebut: Date, dateFin: Date, page: numb
       );
 
       logger.debug(
-        `[API Deca] Récupération contrats du ${dateDebut.toLocaleDateString()} au ${dateFin.toLocaleDateString()} - page ${page} sur ${response
-          ?.data?.metadonnees?.totalPages} ${response.cached ? "(depuis le cache)" : ""}`
+        `[API Deca] Récupération contrats du ${dateDebut} au ${dateFin} - page ${page} sur ${response?.data?.metadonnees
+          ?.totalPages} ${response.cached ? "(depuis le cache)" : ""}`
       );
       if (!response?.data) {
         throw new ApiError("Api Deca", "No data received");
@@ -62,7 +61,7 @@ export const getContratsDeca = async (dateDebut: Date, dateFin: Date, page: numb
   });
 };
 
-export const getAllContrats = async (dateDebut: Date, dateFin: Date): Promise<Contrat[]> => {
+export const getAllContrats = async (dateDebut: string, dateFin: string): Promise<Contrat[]> => {
   const allContrats: Contrat[] = [];
 
   // Fetch de la première page

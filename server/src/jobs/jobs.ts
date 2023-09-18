@@ -14,6 +14,7 @@ import { getStats } from "./fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
 import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
+import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
@@ -167,6 +168,8 @@ export async function runJob(job: IJob): Promise<number> {
         return hydrateOrganismesSoltea();
       case "hydrate:organismes-prepa-apprentissage":
         return hydrateOrganismesPrepaApprentissage();
+      case "hydrate:contratsDeca":
+        return hydrateDeca(job.payload as any);
       case "dev:generate-open-api":
         return hydrateOpenApi();
       case "hydrate:organismes":
