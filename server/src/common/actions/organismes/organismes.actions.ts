@@ -562,6 +562,7 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
           $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
         },
         qualiopi: 1,
+        prepa_apprentissage: 1,
         enseigne: 1,
         raison_sociale: 1,
         reseaux: 1,
@@ -841,6 +842,7 @@ export function getOrganismeProjection(
       $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
     },
     qualiopi: 1,
+    prepa_apprentissage: 1,
     enseigne: 1,
     raison_sociale: 1,
     reseaux: 1,
