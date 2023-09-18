@@ -16,10 +16,12 @@ import { updateUserPassword } from "./jobs/users/update-user-password";
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
-  await addJob({
-    name: "crons:init",
-    queued: true,
-  });
+  if (config.env !== "local") {
+    await addJob({
+      name: "crons:init",
+      queued: true,
+    });
+  }
 
   await processor(signal);
   logger.info(`Processor shut down`);
