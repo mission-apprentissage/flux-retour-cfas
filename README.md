@@ -291,6 +291,15 @@ Pour mettre à jour les snapshots, utilisez la commande suivante dans `/shared`
 yarn test --update
 ```
 
+### Exécution d'un job en mode stand-alone
+
+Il est possible d'executer un job / script en mode stand alone indépendamment de la file d'attente (queue) des jobs.
+Pour cela il faut lancer la commande suivante sur le serveur :
+
+```bash
+docker compose run --rm --no-deps server yarn cli <nom_du_job>
+```
+
 ## Aller plus loin
 
 - [Datasouces](./docs/DATASOURCES.md)
