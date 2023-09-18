@@ -46,9 +46,13 @@ export const hydrateDeca = async ({ drop, full } = { drop: false, full: false })
       logger.info(
         `Insertion des ${decaContratsForPeriod.length} contrats dans la collection contratsDeca du ${dateDebut} au ${dateFin} `
       );
-      await PromisePool.for(decaContratsForPeriod).process(async (currentContrat) => {
-        await contratsDecaDb().insertOne({ ...currentContrat, created_at: new Date() });
-      });
+      await PromisePool.for(decaContratsForPeriod)
+        .handleError(async (err) => {
+          throw new Error(`Erreur lors de la récupération des données Deca : ${JSON.stringify(err)}`);
+        })
+        .process(async (currentContrat) => {
+          await contratsDecaDb().insertOne({ ...currentContrat, created_at: new Date() });
+        });
     } catch (err: any) {
       throw new Error(`Erreur lors de la récupération des données Deca : ${JSON.stringify(err)}`);
     }
