@@ -288,6 +288,37 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       />
                     </Tooltip>
                   </Badge>
+                  <Text>Prepa Apprentissage&nbsp;:</Text>
+                  <Badge
+                    fontSize="epsilon"
+                    textColor="grey.800"
+                    paddingX="1w"
+                    paddingY="2px"
+                    backgroundColor="#ECEAE3"
+                    textTransform="none"
+                  >
+                    {organisme.prepa_apprentissage ? "Oui" : "Non"}
+                    <Tooltip
+                      background="bluefrance"
+                      color="white"
+                      label={
+                        <Box padding="2w">
+                          La prépa-apprentissage, proposé (ou non) par un organisme de formation, est un parcours
+                          d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
+                          bénéficiaire à définir son projet d’apprentissage.
+                        </Box>
+                      }
+                    >
+                      <Box
+                        as="i"
+                        className="ri-information-line"
+                        fontSize="epsilon"
+                        color="grey.500"
+                        marginLeft="1w"
+                        verticalAlign="middle"
+                      />
+                    </Tooltip>
+                  </Badge>
                 </HStack>
               )}
             </Wrap>
