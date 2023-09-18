@@ -33,6 +33,7 @@ import {
   getIndicateursEffectifsParOrganisme,
   getIndicateursOrganismesParDepartement,
   getOrganismeIndicateursEffectifs,
+  getOrganismeIndicateursEffectifsParFormation,
   getOrganismeIndicateursOrganismes,
   typesEffectifNominatif,
 } from "@/common/actions/indicateurs/indicateurs.actions";
@@ -400,6 +401,14 @@ function setupRoutes(app: Application) {
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           return await getIndicateursEffectifsParOrganisme(req.user, filters, res.locals.organismeId);
+        })
+      )
+      .get(
+        "/indicateurs/effectifs/par-formation",
+        requireOrganismePermission("indicateursEffectifs"),
+        returnResult(async (req, res) => {
+          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+          return await getOrganismeIndicateursEffectifsParFormation(req.user, filters, res.locals.organismeId);
         })
       )
       .get(

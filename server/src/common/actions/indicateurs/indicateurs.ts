@@ -1,3 +1,5 @@
+import { Rncp } from "@/common/model/@types/Rncp";
+
 export interface IndicateursEffectifs {
   apprenants: number;
   apprentis: number;
@@ -14,6 +16,11 @@ export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & {
   nature: string;
   siret: string;
   uai: string;
+};
+
+export type IndicateursEffectifsAvecFormation = IndicateursEffectifs & {
+  rncp_code: string | null;
+  rncp: Rncp | null;
 };
 
 export interface IndicateursOrganismes {

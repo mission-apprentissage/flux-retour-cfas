@@ -24,6 +24,7 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import {
   IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
+  IndicateursEffectifsAvecFormation,
   IndicateursEffectifsAvecOrganisme,
   IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
@@ -442,6 +443,189 @@ export async function getIndicateursEffectifsParOrganisme(
       },
     ])
     .toArray()) as IndicateursEffectifsAvecOrganisme[];
+  return indicateurs;
+}
+
+export async function getOrganismeIndicateursEffectifsParFormation(
+  ctx: AuthContext,
+  filters: FullEffectifsFilters,
+  organismeId: ObjectId
+): Promise<IndicateursEffectifsAvecFormation[]> {
+  const indicateurs = (await effectifsDb()
+    .aggregate([
+      {
+        $match: {
+          $and: [
+            await getOrganismeRestriction(organismeId),
+            await getOrganismeIndicateursEffectifsRestriction(ctx),
+            ...buildMongoFilters(filters, effectifsFiltersConfigurations),
+          ],
+          "_computed.organisme.fiable": true,
+        },
+      },
+      {
+        $project: {
+          "formation.rncp": 1,
+          "apprenant.historique_statut": {
+            $sortArray: {
+              input: {
+                $filter: {
+                  input: "$apprenant.historique_statut",
+                  as: "statut",
+                  cond: {
+                    $lte: ["$$statut.date_statut", filters.date],
+                  },
+                },
+              },
+              sortBy: { date_statut: 1 },
+            },
+          },
+        },
+      },
+      {
+        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+      },
+      {
+        $addFields: {
+          statut_apprenant_at_date: {
+            $last: "$apprenant.historique_statut",
+          },
+        },
+      },
+      {
+        $facet: {
+          apprentis: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti,
+              },
+            },
+            {
+              $group: {
+                _id: "$formation.rncp",
+                apprentis: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+          abandons: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
+              },
+            },
+            {
+              $group: {
+                _id: "$formation.rncp",
+                abandons: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+          inscritsSansContrat: [
+            {
+              $match: {
+                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
+                "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
+              },
+            },
+            {
+              $group: {
+                _id: "$formation.rncp",
+                inscritsSansContrat: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+          rupturants: [
+            { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
+            // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
+            {
+              $addFields: {
+                previousStatutAtDate: {
+                  $arrayElemAt: ["$apprenant.historique_statut", -2],
+                },
+              },
+            },
+            { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
+            {
+              $group: {
+                _id: "$formation.rncp",
+                rupturants: {
+                  $sum: 1,
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          items: {
+            $concatArrays: ["$apprentis", "$abandons", "$inscritsSansContrat", "$rupturants"],
+          },
+        },
+      },
+      {
+        $unwind: "$items",
+      },
+      {
+        $group: {
+          _id: "$items._id",
+          merge: {
+            $mergeObjects: "$items",
+          },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              {
+                apprenants: 0,
+                apprentis: 0,
+                inscritsSansContrat: 0,
+                abandons: 0,
+                rupturants: 0,
+              },
+              "$merge",
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          rncp_code: "$_id",
+          apprenants: {
+            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
+          },
+          apprentis: 1,
+          inscritsSansContrat: 1,
+          abandons: 1,
+          rupturants: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: "rncp",
+          localField: "rncp_code",
+          foreignField: "rncp",
+          as: "rncp",
+        },
+      },
+      {
+        $unwind: {
+          path: "$rncp",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ])
+    .toArray()) as IndicateursEffectifsAvecFormation[];
+
   return indicateurs;
 }
 
