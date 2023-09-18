@@ -164,6 +164,7 @@ const schema = object(
     }),
     ferme: boolean({ description: "Le siret est fermé" }),
     qualiopi: boolean({ description: "a la certification Qualiopi" }),
+    prepa_apprentissage: boolean({ description: "fait de la prépa apprentissage" }),
 
     // TODO [tech] TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),

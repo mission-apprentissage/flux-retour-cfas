@@ -969,6 +969,10 @@ export interface Organisme {
    */
   qualiopi?: boolean;
   /**
+   * fait de la prépa apprentissage
+   */
+  prepa_apprentissage?: boolean;
+  /**
    * Le token permettant l'accès au CFA à sa propre page
    */
   access_token?: string;

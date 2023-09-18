@@ -16,7 +16,6 @@ import {
 import { BassinsEmploi } from "./@types/BassinsEmploi";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
-import { OrganismePrepaApprentissage } from "./@types/OrganismePrepaApprentissage";
 import { OrganismeSoltea } from "./@types/OrganismeSoltea";
 import { Rncp } from "./@types/Rncp";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
@@ -32,7 +31,6 @@ import JwtSessionsModelDescriptor from "./jwtSessions.model";
 import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model";
 import organisationsModelDescriptor, { Organisation } from "./organisations.model";
 import OrganismesModelDescriptor from "./organismes.model";
-import OrganismesPrepaApprentissageModelDescriptor from "./organismesPrepaApprentissage.model";
 import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
 import OrganismesSolteaModelDescriptor from "./organismesSoltea.model";
 import rncpModelDescriptor from "./rncp.model";
@@ -54,7 +52,6 @@ export const modelDescriptors = [
   OrganismesModelDescriptor,
   OrganismesReferentielModelDescriptor,
   OrganismesSolteaModelDescriptor,
-  OrganismesPrepaApprentissageModelDescriptor,
   effectifsModelDescriptor,
   effectifsQueueModelDescriptor,
   uploadsModelDescriptor,
@@ -86,6 +83,4 @@ export const fiabilisationUaiSiretDb = () =>
 export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmploiDescriptor.collectionName);
 export const organismesSolteaDb = () =>
   getDbCollection<OrganismeSoltea>(OrganismesSolteaModelDescriptor.collectionName);
-export const organismesPrepaApprentissageDb = () =>
-  getDbCollection<OrganismePrepaApprentissage>(OrganismesPrepaApprentissageModelDescriptor.collectionName);
 export const rncpDb = () => getDbCollection<Rncp>(rncpModelDescriptor.collectionName);
