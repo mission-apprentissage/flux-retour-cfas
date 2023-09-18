@@ -17,7 +17,7 @@ describe("Job hydrateContratsDeca", () => {
       const dateToTest = addDays(new Date(), -10);
 
       // Ajout des 2 contrats de test en base
-      Promise.all(
+      await Promise.all(
         dataDeca.contrats.map((currentContrat) =>
           contratsDecaDb().insertOne({ ...(currentContrat as Contrat), created_at: dateToTest })
         )
@@ -31,7 +31,7 @@ describe("Job hydrateContratsDeca", () => {
       import.meta.jest.useFakeTimers({ doNotFake: ["nextTick", "setImmediate"] }).setSystemTime(new Date("2023-06-01"));
 
       // Ajout des 2 contrats de test en base
-      Promise.all(
+      await Promise.all(
         dataDeca.contrats.map((currentContrat) =>
           contratsDecaDb().insertOne({ ...(currentContrat as Contrat), created_at: new Date() })
         )
