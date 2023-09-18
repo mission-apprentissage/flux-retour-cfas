@@ -11,6 +11,7 @@ import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { addJob, processor } from "./jobs/jobs_actions";
+import { generateTypes } from "./jobs/seed/types/generate-types";
 import { updateUserPassword } from "./jobs/users/update-user-password";
 
 async function startJobProcessor(signal: AbortSignal) {
@@ -614,7 +615,7 @@ program
   .command("dev:generate-ts-types")
   .description("Generation des types TS à partir des schemas de la base de données")
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("dev:generate-ts-types"));
+  .action(generateTypes);
 
 export async function startCLI() {
   await program.parseAsync(process.argv);
