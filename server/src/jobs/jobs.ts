@@ -96,18 +96,19 @@ export const CRONS: Record<string, CronDef> = {
       return 0;
     },
   },
-  // "Run analyses fiabilité données reçues job each day at 11h15": {
-  //   name: "Run analyses fiabilité données reçues job each day at 11h15",
-  //   cron_string: "15 11 * * *",
-  //   handler: async () => {
-  //     /**
-  //      * Job d'analyse de la fiabilité des dossiersApprenants reçus
-  //      */
-  //     // TODO - Voir si on le réactive ?
-  //     //analyseFiabiliteDossierApprenantsRecus();
-  //     return 0;
-  //   },
-  // },
+
+  "Run hydrate contrats DECA job each day at 19h45": {
+    name: "Run hydrate contrats DECA job each day at 19h45",
+    cron_string: "45 19 * * *",
+    handler: async () => {
+      // # Remplissage des contrats DECA
+      await addJob({ name: "hydrate:contratsDeca", queued: true });
+
+      return 0;
+    },
+  },
+
+  // TODO : Checker si coté métier l'archivage est toujours prévu ?
   // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
   //   name: "Run archive dossiers apprenants & effectifs job each first day of month at 12h45",
   //   cron_string: "45 12 1 * *",
