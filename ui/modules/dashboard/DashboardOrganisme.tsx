@@ -303,7 +303,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       color="white"
                       label={
                         <Box padding="2w">
-                          La prépa-apprentissage, proposé (ou non) par un organisme de formation, est un parcours
+                          La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
                           d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
                           bénéficiaire à définir son projet d’apprentissage.
                         </Box>
