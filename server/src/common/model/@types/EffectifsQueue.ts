@@ -2,6 +2,7 @@ export interface EffectifsQueue {
   nom_apprenant?: any; // Nom de l'apprenant
   prenom_apprenant?: any; // Prénom de l'apprenant
   date_de_naissance_apprenant?: any; // Date de naissance de l'apprenant
+  code_postal_de_naissance_apprenant?: any; // Code postal de naissance de l'apprenant
   uai_etablissement?: any; // Code UAI de l'établissement
   nom_etablissement?: any; // Nom de l'organisme de formation
   id_formation?: any; // Code CFD de la formation

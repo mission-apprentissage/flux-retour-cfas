@@ -95,6 +95,7 @@ export const schema = object(
     nir_apprenant: any({ description: "Identification nationale securité social" }),
     adresse_apprenant: any({ description: "Adresse de l'apprenant" }),
     code_postal_apprenant: any({ description: "Code postal de l'apprenant" }),
+    code_postal_de_naissance_apprenant: any({ description: apprenantProps.code_postal_de_naissance.description }),
     sexe_apprenant: any({ description: apprenantProps.sexe.description }),
     rqth_apprenant: any({ description: "Reconnaissance de la Qualité de Travailleur Handicapé de l'apprenant" }),
     date_rqth_apprenant: any({ description: "Date de reconnaissance du RQTH de l'apprenant" }),

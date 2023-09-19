@@ -166,6 +166,7 @@ export const mapEffectifQueueToEffectif = (
       nom: dossierApprenant.nom_apprenant,
       prenom: dossierApprenant.prenom_apprenant,
       date_de_naissance: dossierApprenant.date_de_naissance_apprenant,
+      code_postal_de_naissance: dossierApprenant.code_postal_de_naissance_apprenant,
       courriel: dossierApprenant.email_contact,
       telephone: dossierApprenant.tel_apprenant,
       adresse: stripEmptyFields({

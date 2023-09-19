@@ -39,6 +39,7 @@ export const dossierApprenantSchemaV3Base = () =>
     nir_apprenant: primitivesV3.apprenant.nir.optional(),
     adresse_apprenant: primitivesV3.apprenant.adresse.optional(),
     code_postal_apprenant: primitivesV3.apprenant.code_postal.optional(),
+    code_postal_de_naissance_apprenant: primitivesV3.apprenant.code_postal.optional(),
     sexe_apprenant: primitivesV3.apprenant.sexe.optional(),
     rqth_apprenant: primitivesV3.apprenant.rqth.optional(),
     date_rqth_apprenant: primitivesV3.apprenant.date_rqth.optional(),
