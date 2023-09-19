@@ -47,6 +47,23 @@ jobs:
           ANSIBLE_REMOTE_USER: deploy
           ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
 
+      - name: Encrypt Error log on failure
+        run: .bin/mna-tdb deploy:log:encrypt
+        if: failure()
+        env:
+          ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
+
+      - name: Upload failure artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: error-logs
+          path: /tmp/deploy_error.log.gpg
+
+      - name: Preview Summary when failed
+        if: failure()
+        run: echo 'You can get error logs using `.bin/mna-tdb deploy:log:decrypt ${{ github.run_id }}`' >> $GITHUB_STEP_SUMMARY
+
       - name: Preview Summary
         run: echo 'https://${{ github.event.pull_request.number }}.tdb-preview.apprentissage.beta.gouv.fr/ 🚀' >> $GITHUB_STEP_SUMMARY
 

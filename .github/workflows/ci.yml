@@ -6,7 +6,6 @@ on:
       CODECOV_TOKEN:
         description: Code coverrage token
         required: true
-
 jobs:
   tests:
     name: "Tests"
