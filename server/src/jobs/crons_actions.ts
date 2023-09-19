@@ -17,26 +17,45 @@ function parseCronString(cronString: string, options: { currentDate: string } | 
 
 export async function cronsInit() {
   logger.info(`Crons - initialise crons in DB`);
-  await getDbCollection("jobs").deleteMany({ type: "cron" });
+
+  const crons = Object.values(CRONS);
+  let schedulerRequired = false;
+
   await getDbCollection("jobs").deleteMany({
+    name: { $nin: crons.map((c) => c.name) },
+    type: "cron",
+  });
+  await getDbCollection("jobs").deleteMany({
+    name: { $nin: crons.map((c) => c.name) },
     status: "pending",
     type: "cron_task",
   });
 
-  if (!Object.keys(CRONS).length) {
-    return;
-  }
-
-  for (const cron of Object.values(CRONS)) {
-    await createJob({
+  for (const cron of crons) {
+    const cronJob = await findJob({
       name: cron.name,
       type: "cron",
-      cron_string: cron.cron_string,
-      scheduled_for: new Date(),
     });
+
+    if (!cronJob) {
+      await createJob({
+        name: cron.name,
+        type: "cron",
+        cron_string: cron.cron_string,
+        scheduled_for: new Date(),
+      });
+      schedulerRequired = true;
+    } else if (cronJob.cron_string !== cron.cron_string) {
+      await updateJob(cronJob._id, {
+        cron_string: cron.cron_string,
+      });
+      schedulerRequired = true;
+    }
   }
 
-  await addJob({ name: "crons:scheduler", queued: true });
+  if (schedulerRequired) {
+    await addJob({ name: "crons:scheduler", queued: true });
+  }
 }
 
 export async function cronsScheduler(): Promise<void> {
