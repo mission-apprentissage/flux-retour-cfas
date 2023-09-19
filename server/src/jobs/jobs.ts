@@ -14,6 +14,7 @@ import { getStats } from "./fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
 import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
+import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
@@ -95,18 +96,19 @@ export const CRONS: Record<string, CronDef> = {
       return 0;
     },
   },
-  // "Run analyses fiabilité données reçues job each day at 11h15": {
-  //   name: "Run analyses fiabilité données reçues job each day at 11h15",
-  //   cron_string: "15 11 * * *",
-  //   handler: async () => {
-  //     /**
-  //      * Job d'analyse de la fiabilité des dossiersApprenants reçus
-  //      */
-  //     // TODO - Voir si on le réactive ?
-  //     //analyseFiabiliteDossierApprenantsRecus();
-  //     return 0;
-  //   },
-  // },
+
+  "Run hydrate contrats DECA job each day at 19h45": {
+    name: "Run hydrate contrats DECA job each day at 19h45",
+    cron_string: "45 19 * * *",
+    handler: async () => {
+      // # Remplissage des contrats DECA
+      await addJob({ name: "hydrate:contratsDeca", queued: true });
+
+      return 0;
+    },
+  },
+
+  // TODO : Checker si coté métier l'archivage est toujours prévu ?
   // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
   //   name: "Run archive dossiers apprenants & effectifs job each first day of month at 12h45",
   //   cron_string: "45 12 1 * *",
@@ -167,6 +169,8 @@ export async function runJob(job: IJob): Promise<number> {
         return hydrateOrganismesSoltea();
       case "hydrate:organismes-prepa-apprentissage":
         return hydrateOrganismesPrepaApprentissage();
+      case "hydrate:contratsDeca":
+        return hydrateDeca(job.payload as any);
       case "dev:generate-open-api":
         return hydrateOpenApi();
       case "hydrate:organismes":

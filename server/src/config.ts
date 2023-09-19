@@ -90,6 +90,11 @@ const config = {
     object: "Consolidation des données",
     context: "MNA",
   },
+  decaApi: {
+    endpoint: env.get("MNA_TDB_API_DECA_URL").asString(),
+    login: env.get("MNA_TDB_API_DECA_LOGIN").asString(),
+    password: env.get("MNA_TDB_API_DECA_PASSWORD").asString(),
+  },
   disable_processors: env.get("FLUX_RETOUR_CFAS_DISABLE_PROCESSORS").default("false").asBool(),
 };
 

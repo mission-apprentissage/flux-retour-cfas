@@ -14,11 +14,13 @@ import {
   UsersMigration,
 } from "./@types";
 import { BassinsEmploi } from "./@types/BassinsEmploi";
+import { ContratDeca } from "./@types/ContratDeca";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { OrganismeSoltea } from "./@types/OrganismeSoltea";
 import { Rncp } from "./@types/Rncp";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
+import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
@@ -57,6 +59,7 @@ export const modelDescriptors = [
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
   bassinsEmploiDescriptor,
+  contratsDecaModelDescriptor,
   rncpModelDescriptor,
 ];
 
@@ -84,3 +87,4 @@ export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmplo
 export const organismesSolteaDb = () =>
   getDbCollection<OrganismeSoltea>(OrganismesSolteaModelDescriptor.collectionName);
 export const rncpDb = () => getDbCollection<Rncp>(rncpModelDescriptor.collectionName);
+export const contratsDecaDb = () => getDbCollection<ContratDeca>(contratsDecaModelDescriptor.collectionName);
