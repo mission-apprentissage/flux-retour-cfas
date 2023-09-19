@@ -6,9 +6,6 @@ on:
       CODECOV_TOKEN:
         description: Code coverrage token
         required: true
-      VAULT_PWD:
-        required: true
-
 jobs:
   tests:
     name: "Tests"
@@ -52,31 +49,3 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-  failJob:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout project
-        uses: actions/checkout@v4
-
-      - name: Generate fake error logs
-        run: echo "Failure logs" > /tmp/deploy_error.log
-
-      - name: Fail job
-        run: exit 2
-
-      - name: Create vault pwd file
-        if: failure()
-        run: echo ${{ secrets.VAULT_PWD }} > .infra/.vault_pwd.txt
-
-      - name: Encrypt Error log on failure
-        run: .bin/mna-tdb deploy:log:encrypt
-        if: failure()
-        env:
-          ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
-
-      - name: Upload failure artifacts on failure
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: error-logs
-          path: /tmp/deploy_error.log.gpg
