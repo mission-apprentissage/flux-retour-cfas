@@ -9,6 +9,8 @@ fileignoreconfig:
   checksum: c688cb656af49c2f824ae7a0c9664bf7bdecdcf29d93ec4a99976fb08dcd9285
   ignore_detectors:
   - filename
+- filename: .github/workflows/ci.yml
+  checksum: 9e279ec421f82277240a958eec081cdb098a7e602bfd41e023013362ad365cfb
 - filename: .github/workflows/preview.yml
   checksum: 28b92a37dd1d00c11331bb5ef2a45c483466da06a0e808fd669a3fcb5daba393
 - filename: .github/workflows/preview_cleanup.yml

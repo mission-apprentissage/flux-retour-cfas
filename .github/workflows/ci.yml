@@ -62,9 +62,15 @@ jobs:
       - name: Fail job
         run: exit 2
 
+      - name: Create vault pwd file
+        if: failure()
+        run: echo ${{ secrets.VAULT_PWD }} > .infra/.vault_pwd.txt
+
       - name: Encrypt Error log on failure
         run: .bin/mna-tdb deploy:log:encrypt
         if: failure()
+        env:
+          ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
 
       - name: Upload failure artifacts on failure
         if: failure()
