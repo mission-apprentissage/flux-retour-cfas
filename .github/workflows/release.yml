@@ -8,6 +8,7 @@ jobs:
     uses: "./.github/workflows/ci.yml"
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      VAULT_PWD: ${{ secrets.VAULT_PWD }}
 
   release:
     permissions: write-all
