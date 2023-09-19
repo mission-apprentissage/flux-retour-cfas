@@ -135,7 +135,9 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
         : undefined,
       DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd),
-      DUR_FORM_THEO: formationOrganisme?.duree_formation_theorique
+      DUR_FORM_THEO: effectif.formation.duree_theorique
+        ? effectif.formation.duree_theorique * 12
+        : formationOrganisme?.duree_formation_theorique
         ? formationOrganisme?.duree_formation_theorique * 12
         : undefined,
       DUR_FORM_REELLE: effectif.formation.duree_formation_relle,
@@ -147,6 +149,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       NAT_STR_JUR: "NC", // Unknown for now
     };
 
+    // Note for later: maybe we should not remove incomplete effectifs, to allow the user to fix them manually.
     if (Object.values(requiredFields).some((val) => val === undefined)) {
       continue;
     }
