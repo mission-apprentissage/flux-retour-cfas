@@ -4,15 +4,12 @@ import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 
 import { OrganismeNormalized } from "../ListeOrganismesPage";
-import OrganismesFilterAndSearchPanel from "../OrganismesFilterAndSearchPanel";
 import OrganismesTable from "../OrganismesTable";
 
 function OrganismesACompleterPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
   return (
     <Stack spacing="4w">
-      <OrganismesFilterAndSearchPanel showFilterNature showFilterTransmission showFilterLocalisation showFilterEtat />
-
-      <Ribbons variant="warning" my={8}>
+      <Ribbons variant="warning" mt={4}>
         <Box color="grey.800">
           <Text>
             Les organismes (OFA) ci-dessous présentent une ou plusieurs anomalies suivantes à <strong>corriger</strong>{" "}
@@ -58,7 +55,15 @@ function OrganismesACompleterPanelContent({ organismes }: { organismes: Organism
           </Text>
         </Box>
       </Ribbons>
-      <OrganismesTable organismes={organismes} modeNonFiable />
+
+      <OrganismesTable
+        organismes={organismes}
+        modeNonFiable
+        showFilterNature
+        showFilterTransmission
+        showFilterLocalisation
+        showFilterEtat
+      />
     </Stack>
   );
 }

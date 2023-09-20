@@ -4,20 +4,12 @@ import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 
 import { OrganismeNormalized } from "../ListeOrganismesPage";
-import OrganismesFilterAndSearchPanel from "../OrganismesFilterAndSearchPanel";
 import OrganismesTable from "../OrganismesTable";
 
 function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
   return (
     <Stack spacing="4w">
-      <OrganismesFilterAndSearchPanel
-        showFilterNature
-        showFilterTransmission
-        showFilterQualiopi
-        showFilterPrepaApprentissage
-        showFilterLocalisation
-      />
-      <Ribbons variant="info" my={8}>
+      <Ribbons variant="info" mt={4}>
         <Box color="grey.800">
           <Text>Est considéré comme fiable un organisme (OFA)&nbsp;:</Text>
           <UnorderedList styleType="'- '">
@@ -40,7 +32,15 @@ function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNo
           </UnorderedList>
         </Box>
       </Ribbons>
-      <OrganismesTable organismes={organismes} />
+
+      <OrganismesTable
+        organismes={organismes}
+        showFilterNature
+        showFilterTransmission
+        showFilterQualiopi
+        showFilterPrepaApprentissage
+        showFilterLocalisation
+      />
     </Stack>
   );
 }
