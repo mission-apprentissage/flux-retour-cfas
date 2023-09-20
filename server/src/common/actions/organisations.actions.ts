@@ -225,7 +225,13 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId
       uai: organisationOF.uai as string,
     },
     {
-      projection: getOrganismeProjection(true),
+      projection: getOrganismeProjection({
+        viewContacts: true,
+        infoTransmissionEffectifs: true,
+        indicateursEffectifs: true,
+        effectifsNominatifs: true,
+        manageEffectifs: true,
+      }),
     }
   );
   if (!organisme) {
