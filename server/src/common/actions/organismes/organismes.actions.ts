@@ -25,7 +25,11 @@ import { getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
-import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
+import {
+  OrganismeWithPermissions,
+  PermissionsOrganisme,
+  buildOrganismePermissions,
+} from "../helpers/permissions-organisme";
 import { InfoSiret } from "../infoSiret.actions-struct";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
@@ -553,35 +557,7 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
   const organisme = await organismesDb().findOne(
     { _id: organismeId },
     {
-      projection: cleanProjection<Organisme>({
-        _id: 1,
-        siret: 1,
-        uai: 1,
-        ferme: 1,
-        nature: {
-          $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
-        },
-        qualiopi: 1,
-        prepa_apprentissage: 1,
-        enseigne: 1,
-        raison_sociale: 1,
-        reseaux: 1,
-        adresse: 1,
-        organismesResponsables: 1,
-        organismesFormateurs: 1,
-        fiabilisation_statut: 1,
-        erps: permissionsOrganisme.infoTransmissionEffectifs,
-        first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
-        last_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
-        mode_de_transmission: permissionsOrganisme.infoTransmissionEffectifs,
-        setup_step_courante: permissionsOrganisme.infoTransmissionEffectifs,
-
-        // configuration API
-        api_key: permissionsOrganisme.manageEffectifs,
-        api_configuration_date: permissionsOrganisme.manageEffectifs,
-        api_siret: permissionsOrganisme.manageEffectifs,
-        api_uai: permissionsOrganisme.manageEffectifs,
-      }),
+      projection: getOrganismeProjection(permissionsOrganisme),
     }
   );
   if (!organisme) {
@@ -771,7 +747,7 @@ export async function listOrganisationOrganismes(ctx: AuthContext): Promise<With
         ],
       },
       {
-        projection: getOrganismeProjection(true),
+        projection: getOrganismeListProjection(true),
       }
     )
     .toArray()) as WithId<OrganismeWithPermissions>[];
@@ -791,7 +767,7 @@ export async function listOrganismesFormateurs(
         },
       },
       {
-        projection: getOrganismeProjection(await getInfoTransmissionEffectifsCondition(ctx)),
+        projection: getOrganismeListProjection(await getInfoTransmissionEffectifsCondition(ctx)),
       }
     )
     .toArray()) as WithId<OrganismeWithPermissions>[];
@@ -830,7 +806,47 @@ async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
   }
 }
 
+/**
+ * Retourne la projection d'un organisme selon les permissions.
+ */
 export function getOrganismeProjection(
+  permissionsOrganisme: PermissionsOrganisme
+): Partial<WithId<OrganismeWithPermissions>> {
+  return cleanProjection<Organisme>({
+    _id: 1,
+    siret: 1,
+    uai: 1,
+    ferme: 1,
+    nature: {
+      $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
+    },
+    qualiopi: 1,
+    prepa_apprentissage: 1,
+    enseigne: 1,
+    raison_sociale: 1,
+    reseaux: 1,
+    adresse: 1,
+    organismesResponsables: 1,
+    organismesFormateurs: 1,
+    fiabilisation_statut: 1,
+    erps: permissionsOrganisme.infoTransmissionEffectifs,
+    first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
+    last_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
+    mode_de_transmission: permissionsOrganisme.infoTransmissionEffectifs,
+    setup_step_courante: permissionsOrganisme.infoTransmissionEffectifs,
+
+    // configuration API
+    api_key: permissionsOrganisme.manageEffectifs,
+    api_configuration_date: permissionsOrganisme.manageEffectifs,
+    api_siret: permissionsOrganisme.manageEffectifs,
+    api_uai: permissionsOrganisme.manageEffectifs,
+  });
+}
+
+/**
+ * Retourne la projection d'un organisme utilisé dans une liste selon les permissions.
+ */
+export function getOrganismeListProjection(
   infoTransmissionEffectifsCondition: any
 ): Partial<WithId<OrganismeWithPermissions>> {
   return cleanProjection<WithId<OrganismeWithPermissions>>({

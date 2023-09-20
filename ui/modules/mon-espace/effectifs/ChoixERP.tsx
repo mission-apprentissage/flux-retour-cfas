@@ -20,11 +20,20 @@ const ChoixERP = ({ organisme, isMine }) => {
       erp: Yup.string().required("Requis"),
     }),
     onSubmit: async (submittedValues) => {
-      router.push(
-        isMine
-          ? `/effectifs/aide-configuration-erp?erp=${submittedValues.erp}`
-          : `/organismes/${organisme._id}/effectifs/aide-configuration-erp?erp=${submittedValues.erp}`
-      );
+      if (submittedValues.erp === "SCFORM") {
+        await configureOrganismeERP(organisme._id, {
+          erps: ["SCFORM"],
+          setup_step_courante: "COMPLETE",
+          mode_de_transmission: "API",
+        });
+        router.push("/mon-compte/erp");
+      } else {
+        router.push(
+          isMine
+            ? `/effectifs/aide-configuration-erp?erp=${submittedValues.erp}`
+            : `/organismes/${organisme._id}/effectifs/aide-configuration-erp?erp=${submittedValues.erp}`
+        );
+      }
     },
   });
   return (

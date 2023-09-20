@@ -80,10 +80,14 @@ const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
     MainComponent = (
       <Effectifs nbDuplicates={duplicates?.length || 0} isMine={isMine} organismesEffectifs={organismesEffectifs} />
     );
-  } else if (organisme.mode_de_transmission === "API" && !organisme.erps?.length) {
+  } else if (!organisme.mode_de_transmission) {
+    MainComponent = <ChoixTransmission organismeId={organisme._id} isMine={isMine} />;
+  } else if (!organisme.erps?.length) {
     MainComponent = <ChoixERP isMine={isMine} organisme={organisme} />;
   } else {
-    MainComponent = <ChoixTransmission organismeId={organisme._id} isMine={isMine} />;
+    MainComponent = (
+      <Effectifs nbDuplicates={duplicates?.length || 0} isMine={isMine} organismesEffectifs={organismesEffectifs} />
+    );
   }
 
   return (
