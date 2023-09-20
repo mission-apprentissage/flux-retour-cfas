@@ -1,7 +1,4 @@
-import { AddIcon, ArrowDownIcon, MinusIcon } from "@chakra-ui/icons";
 import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Badge, Box, Stack, Text } from "@chakra-ui/react";
-
-import { ArrowDownLine } from "@/theme/components/icons";
 
 interface Props {
   label: string;
@@ -19,6 +16,7 @@ function OrganismesFilterSelect(props: Props) {
               <AccordionButton>
                 <Stack direction="row" flex="1" alignItems="center">
                   <Text
+                    fontSize="omega"
                     fontWeight={hasFilters ? "bold" : "normal"}
                     color={hasFilters ? "bluefrance" : "var(--chakra-colors-gray-800)"}
                   >

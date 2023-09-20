@@ -4,12 +4,16 @@ export interface OrganismesFiltersQuery {
   qualiopi: string;
   prepa_apprentissage: string;
   transmission: string;
+  nature: string;
+  etat: string;
 }
 
 export interface OrganismesFilters {
   qualiopi: boolean[];
   transmission: boolean[];
   prepa_apprentissage: boolean[];
+  nature: string[];
+  etat: string[];
 }
 
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
@@ -20,6 +24,8 @@ export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): 
       false,
     ],
     transmission: query.transmission?.split(",").map((item) => (item === "true" ? true : false)) ?? [true, false],
+    nature: query.nature?.split(",") ?? ["responsable", "formateur", "responsable_formateur"],
+    etat: query.etat?.split(",") ?? ["ouvert", "ferme"],
   };
 }
 
@@ -30,5 +36,7 @@ export function convertOrganismesFiltersToQuery(
     qualiopi: organismesFilters.qualiopi?.join(","),
     prepa_apprentissage: organismesFilters.prepa_apprentissage?.join(","),
     transmission: organismesFilters.transmission?.join(","),
+    nature: organismesFilters.nature?.join(","),
+    etat: organismesFilters.etat?.join(","),
   });
 }
