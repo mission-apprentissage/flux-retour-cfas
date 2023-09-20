@@ -18,6 +18,7 @@ import { organismesDb, effectifsDb, organisationsDb } from "@/common/model/colle
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
+import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { cleanProjection } from "@/common/utils/mongoUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
@@ -460,12 +461,13 @@ export const getDetailedOrganismeById = async (_id: any) => {
  * Met à jour le nombre d'effectifs d'un organisme
  */
 export const updateEffectifsCount = async (organisme_id: ObjectId) => {
-  const total = await effectifsDb().countDocuments({ organisme_id });
-  const currentYear = new Date().getFullYear();
-  const totalCurrentYear = await effectifsDb().countDocuments({
-    organisme_id,
-    annee_scolaire: { $in: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`] },
-  });
+  const [total, totalCurrentYear] = await Promise.all([
+    effectifsDb().countDocuments({ organisme_id }),
+    effectifsDb().countDocuments({
+      organisme_id,
+      annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+    }),
+  ]);
   return organismesDb().findOneAndUpdate(
     { _id: organisme_id },
     {
