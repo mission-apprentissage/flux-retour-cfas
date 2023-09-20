@@ -5,6 +5,7 @@ import {
   HStack,
   Heading,
   ListItem,
+  Stack,
   Tab,
   TabList,
   TabPanel,
@@ -26,6 +27,14 @@ import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useAuth from "@/hooks/useAuth";
 
+import FiltreYesNo from "./filters/FiltreYesNo";
+import {
+  OrganismesFilters,
+  OrganismesFiltersQuery,
+  parseOrganismesFiltersFromQuery,
+  convertOrganismesFiltersToQuery,
+} from "./models/organismes-filters";
+import OrganismesFilterSelect from "./OrganismesFilterSelect";
 import OrganismesTable from "./OrganismesTable";
 
 type OrganismeNormalized = Organisme & {
@@ -196,8 +205,66 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
 }
 
 function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
+  const router = useRouter();
+
+  const { organismesFilters } = useMemo(() => {
+    return {
+      organismesFilters: parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery),
+    };
+  }, [JSON.stringify(router.query)]);
+
+  const updateState = (newParams: Partial<{ [key in keyof OrganismesFilters]: any }>) => {
+    void router.push(
+      {
+        pathname: router.pathname,
+        query: { ...convertOrganismesFiltersToQuery({ ...organismesFilters, ...newParams }) },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  {
+    /* TODO appliquer filtre sur la liste */
+  }
+  const organismesFiltered = organismesFilters ? organismes : organismes;
+
   return (
-    <>
+    <Stack spacing="4w">
+      <HStack>
+        {/* FILTRE NATURE */}
+
+        {/* FILTRE TRANSMISSION */}
+        <OrganismesFilterSelect label="Transmission au tableau de bord" badge={organismesFilters.transmission?.length}>
+          <FiltreYesNo
+            fieldName="transmission"
+            value={organismesFilters.transmission}
+            onChange={(transmission) => updateState({ transmission })}
+          />
+        </OrganismesFilterSelect>
+
+        {/* FILTRE QUALIOPI */}
+        <OrganismesFilterSelect label="Certification qualiopi" badge={organismesFilters.qualiopi?.length}>
+          <FiltreYesNo
+            fieldName="qualiopi"
+            value={organismesFilters.qualiopi}
+            onChange={(qualiopi) => updateState({ qualiopi })}
+          />
+        </OrganismesFilterSelect>
+
+        {/* FILTRE PREPA APPRENTISSAGE */}
+        <OrganismesFilterSelect label="Prépa apprentissage" badge={organismesFilters.prepa_apprentissage?.length}>
+          <FiltreYesNo
+            fieldName="prepa_apprentissage"
+            value={organismesFilters.prepa_apprentissage}
+            onChange={(prepa_apprentissage) => updateState({ prepa_apprentissage })}
+          />
+        </OrganismesFilterSelect>
+
+        {/* FILTRE LOCALISATION */}
+
+        {/* REINITIALISER */}
+      </HStack>
       <Ribbons variant="info" my={8}>
         <Box color="grey.800">
           <Text>Est considéré comme fiable un organisme (OFA)&nbsp;:</Text>
@@ -221,14 +288,21 @@ function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNo
           </UnorderedList>
         </Box>
       </Ribbons>
-      <OrganismesTable organismes={organismes} />
-    </>
+      <OrganismesTable organismes={organismesFiltered} />
+    </Stack>
   );
 }
 
 function OrganismesACompleterPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
   return (
-    <>
+    <Stack spacing="4w">
+      <HStack>
+        {/* FILTRE NATURE */}
+        {/* FILTRE TRANSMISSION */}
+        {/* FILTRE LOCALISATION */}
+        {/* FILTRE ETAT */}
+        {/* REINITIALISER */}
+      </HStack>
       <Ribbons variant="warning" my={8}>
         <Box color="grey.800">
           <Text>
@@ -276,7 +350,7 @@ function OrganismesACompleterPanelContent({ organismes }: { organismes: Organism
         </Box>
       </Ribbons>
       <OrganismesTable organismes={organismes} modeNonFiable />
-    </>
+    </Stack>
   );
 }
 
