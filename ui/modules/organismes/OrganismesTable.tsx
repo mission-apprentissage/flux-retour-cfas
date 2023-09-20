@@ -1,4 +1,17 @@
-import { Box, HStack, Input, ListItem, Text, Tooltip, UnorderedList } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  Button,
+  Divider,
+  HStack,
+  Input,
+  InputGroup,
+  InputRightElement,
+  ListItem,
+  Text,
+  Tooltip,
+  UnorderedList,
+} from "@chakra-ui/react";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
@@ -19,6 +32,7 @@ import { convertPaginationInfosToQuery } from "@/modules/models/pagination";
 import { ArrowDropRightLine } from "@/theme/components/icons";
 
 import InfoTransmissionDonnees from "./InfoTransmissionDonnees";
+import OrganismesFilterPanel, { OrganismeFiltersListVisibilityProps } from "./OrganismesFilterPanel";
 
 type OrganismeNormalized = Organisme & {
   normalizedName: string;
@@ -213,10 +227,11 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
   },
 ];
 
-interface OrganismesTableProps {
+interface OrganismesTableProps extends OrganismeFiltersListVisibilityProps {
   organismes: OrganismeNormalized[];
   modeNonFiable?: boolean;
 }
+
 function OrganismesTable(props: OrganismesTableProps) {
   const defaultSort: SortingState = [{ desc: false, id: "normalizedName" }];
   const router = useRouter();
@@ -263,20 +278,32 @@ function OrganismesTable(props: OrganismesTableProps) {
 
   return (
     <>
-      <HStack mb="4">
-        <Input
-          type="text"
-          name="search_organisme"
-          placeholder="Rechercher un organisme par nom, UAI, SIRET ou ville (indiquez au moins deux caractères)"
-          value={searchValue}
-          onChange={(event) => setSearchValue(event.target.value)}
-          flex="1"
-          mr="2"
-        />
+      <Box border="1px solid" borderColor="openbluefrance" p={4}>
+        <HStack mb="4">
+          <InputGroup>
+            <Input
+              type="text"
+              name="search_organisme"
+              placeholder="Rechercher un organisme par nom, UAI, SIRET ou ville (indiquez au moins deux caractères)"
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              flex="1"
+              mr="2"
+            />
+            <InputRightElement>
+              <Button backgroundColor="bluefrance" _hover={{ textDecoration: "none" }}>
+                <SearchIcon textColor="white" />
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+        </HStack>
+        <Divider mb="4" />
+        <HStack>
+          <OrganismesFilterPanel {...props} />
 
         <DownloadLinkButton
           action={() => {
-            trackPlausibleEvent(
+              trackPlausibleEvent(
               props.modeNonFiable ? "telechargement_liste_of_a_fiabiliser" : "telechargement_liste_of_fiables"
             );
             exportDataAsXlsx(
@@ -289,6 +316,7 @@ function OrganismesTable(props: OrganismesTableProps) {
           Télécharger la liste
         </DownloadLinkButton>
       </HStack>
+            
 
       <NewTable
         data={filteredOrganismes || []}
