@@ -5,7 +5,6 @@ import {
   HStack,
   Heading,
   ListItem,
-  Stack,
   Tab,
   TabList,
   TabPanel,
@@ -24,20 +23,12 @@ import { Organisme } from "@/common/internal/Organisme";
 import { normalize } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
-import Ribbons from "@/components/Ribbons/Ribbons";
 import useAuth from "@/hooks/useAuth";
 
-import FiltreYesNo from "./filters/FiltreYesNo";
-import {
-  OrganismesFilters,
-  OrganismesFiltersQuery,
-  parseOrganismesFiltersFromQuery,
-  convertOrganismesFiltersToQuery,
-} from "./models/organismes-filters";
-import OrganismesFilterSelect from "./OrganismesFilterSelect";
-import OrganismesTable from "./OrganismesTable";
+import OrganismesACompleterPanelContent from "./tabs/OrganismesACompleterPanelContent";
+import OrganismesFiablesPanelContent from "./tabs/OrganismesFiablesPanelContent";
 
-type OrganismeNormalized = Organisme & {
+export type OrganismeNormalized = Organisme & {
   normalizedName: string;
   normalizedUai: string;
   normalizedCommune: string;
@@ -201,156 +192,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         )}
       </Container>
     </SimplePage>
-  );
-}
-
-function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
-  const router = useRouter();
-
-  const { organismesFilters } = useMemo(() => {
-    return {
-      organismesFilters: parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery),
-    };
-  }, [JSON.stringify(router.query)]);
-
-  const updateState = (newParams: Partial<{ [key in keyof OrganismesFilters]: any }>) => {
-    void router.push(
-      {
-        pathname: router.pathname,
-        query: { ...convertOrganismesFiltersToQuery({ ...organismesFilters, ...newParams }) },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
-  {
-    /* TODO appliquer filtre sur la liste */
-  }
-  const organismesFiltered = organismesFilters ? organismes : organismes;
-
-  return (
-    <Stack spacing="4w">
-      <HStack>
-        {/* FILTRE NATURE */}
-
-        {/* FILTRE TRANSMISSION */}
-        <OrganismesFilterSelect label="Transmission au tableau de bord" badge={organismesFilters.transmission?.length}>
-          <FiltreYesNo
-            fieldName="transmission"
-            value={organismesFilters.transmission}
-            onChange={(transmission) => updateState({ transmission })}
-          />
-        </OrganismesFilterSelect>
-
-        {/* FILTRE QUALIOPI */}
-        <OrganismesFilterSelect label="Certification qualiopi" badge={organismesFilters.qualiopi?.length}>
-          <FiltreYesNo
-            fieldName="qualiopi"
-            value={organismesFilters.qualiopi}
-            onChange={(qualiopi) => updateState({ qualiopi })}
-          />
-        </OrganismesFilterSelect>
-
-        {/* FILTRE PREPA APPRENTISSAGE */}
-        <OrganismesFilterSelect label="Prépa apprentissage" badge={organismesFilters.prepa_apprentissage?.length}>
-          <FiltreYesNo
-            fieldName="prepa_apprentissage"
-            value={organismesFilters.prepa_apprentissage}
-            onChange={(prepa_apprentissage) => updateState({ prepa_apprentissage })}
-          />
-        </OrganismesFilterSelect>
-
-        {/* FILTRE LOCALISATION */}
-
-        {/* REINITIALISER */}
-      </HStack>
-      <Ribbons variant="info" my={8}>
-        <Box color="grey.800">
-          <Text>Est considéré comme fiable un organisme (OFA)&nbsp;:</Text>
-          <UnorderedList styleType="'- '">
-            <ListItem>
-              qui correspond à un couple UAI-SIRET <strong>validé</strong> dans le{" "}
-              <Link
-                href="https://referentiel.apprentissage.onisep.fr/"
-                isExternal={true}
-                borderBottom="1px"
-                _hover={{ textDecoration: "none" }}
-              >
-                Référentiel de l’apprentissage
-              </Link>
-              .
-            </ListItem>
-            <ListItem>
-              dont l’état administratif du SIRET de l’établissement, tel qu’il est renseigné sur l’INSEE, est{" "}
-              <strong>ouvert</strong>.
-            </ListItem>
-          </UnorderedList>
-        </Box>
-      </Ribbons>
-      <OrganismesTable organismes={organismesFiltered} />
-    </Stack>
-  );
-}
-
-function OrganismesACompleterPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
-  return (
-    <Stack spacing="4w">
-      <HStack>
-        {/* FILTRE NATURE */}
-        {/* FILTRE TRANSMISSION */}
-        {/* FILTRE LOCALISATION */}
-        {/* FILTRE ETAT */}
-        {/* REINITIALISER */}
-      </HStack>
-      <Ribbons variant="warning" my={8}>
-        <Box color="grey.800">
-          <Text>
-            Les organismes (OFA) ci-dessous présentent une ou plusieurs anomalies suivantes à <strong>corriger</strong>{" "}
-            ou <strong>compléter</strong> :
-          </Text>
-          <UnorderedList styleType="'- '">
-            <ListItem>
-              Un couple UAI-SIRET qui n’est pas <strong>validé</strong> dans le{" "}
-              <Link
-                href="https://referentiel.apprentissage.onisep.fr/"
-                isExternal={true}
-                borderBottom="1px"
-                _hover={{ textDecoration: "none" }}
-              >
-                Référentiel de l’apprentissage
-              </Link>
-              .
-            </ListItem>
-            <ListItem>
-              Un code UAI est répertorié comme <strong>inconnu</strong> ou non <strong>validé</strong> dans le{" "}
-              <Link
-                href="https://referentiel.apprentissage.onisep.fr/"
-                isExternal={true}
-                borderBottom="1px"
-                _hover={{ textDecoration: "none" }}
-              >
-                Référentiel de l’apprentissage
-              </Link>
-              .
-            </ListItem>
-            <ListItem>
-              L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE, est{" "}
-              <strong>fermé</strong>.
-            </ListItem>
-            <ListItem>
-              La nature de l’organisme (déduite des relations entre organismes - base des Carif-Oref) est{" "}
-              <strong>inconnue</strong>.
-            </ListItem>
-          </UnorderedList>
-
-          <Text fontWeight="bold">
-            Aidez-nous à fiabiliser ces organismes en menant des actions correctives selon les manquements constatés.
-          </Text>
-        </Box>
-      </Ribbons>
-      <OrganismesTable organismes={organismes} modeNonFiable />
-    </Stack>
   );
 }
 
