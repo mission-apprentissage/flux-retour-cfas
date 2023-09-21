@@ -261,9 +261,12 @@ export const fullOrganismesListFiltersSchema = {
   ferme: z
     .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
     .optional(),
-  // ferme: z
-  //   .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.string()))
-  //   .optional(),
+  qualiopi: z
+    .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
+    .optional(),
+  prepa_apprentissage: z
+    .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
+    .optional(),
 };
 
 export type FullOrganismesListFilters = z.infer<z.ZodObject<typeof fullOrganismesListFiltersSchema>>;
@@ -277,6 +280,14 @@ export const fullOrganismesListFiltersConfigurations: {
   },
   ferme: {
     matchKey: "ferme",
+    transformValue: (value) => ({ $in: value }),
+  },
+  qualiopi: {
+    matchKey: "qualiopi",
+    transformValue: (value) => ({ $in: value }),
+  },
+  prepa_apprentissage: {
+    matchKey: "prepa_apprentissage",
     transformValue: (value) => ({ $in: value }),
   },
 };
