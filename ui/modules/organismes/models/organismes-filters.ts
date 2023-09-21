@@ -5,7 +5,7 @@ export interface OrganismesFiltersQuery {
   prepa_apprentissage: string;
   transmission: string;
   nature: string;
-  etat: string;
+  ferme: string;
 }
 
 export interface OrganismesFilters {
@@ -13,7 +13,7 @@ export interface OrganismesFilters {
   transmission: boolean[];
   prepa_apprentissage: boolean[];
   nature: string[];
-  etat: string[];
+  ferme: boolean[];
 }
 
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
@@ -25,7 +25,7 @@ export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): 
     ],
     transmission: query.transmission?.split(",").map((item) => (item === "true" ? true : false)) ?? [true, false],
     nature: query.nature?.split(",") ?? ["responsable", "formateur", "responsable_formateur"],
-    etat: query.etat?.split(",") ?? ["ouvert", "ferme"],
+    ferme: query.ferme?.split(",").map((item) => (item === "true" ? true : false)) ?? [true, false],
   };
 }
 
@@ -33,10 +33,10 @@ export function convertOrganismesFiltersToQuery(
   organismesFilters: Partial<OrganismesFilters>
 ): Partial<OrganismesFiltersQuery> {
   return stripEmptyFields({
-    qualiopi: organismesFilters.qualiopi?.join(","),
-    prepa_apprentissage: organismesFilters.prepa_apprentissage?.join(","),
-    transmission: organismesFilters.transmission?.join(","),
+    // qualiopi: organismesFilters.qualiopi?.join(","),
+    // prepa_apprentissage: organismesFilters.prepa_apprentissage?.join(","),
+    // transmission: organismesFilters.transmission?.join(","),
     nature: organismesFilters.nature?.join(","),
-    etat: organismesFilters.etat?.join(","),
+    ferme: organismesFilters.ferme?.join(","),
   });
 }

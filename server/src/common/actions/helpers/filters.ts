@@ -251,6 +251,37 @@ export const fullEffectifsFiltersConfigurations: {
     transformValue: (value) => ({ $in: value }),
   },
 };
+// #region Filtres Organismes List
+
+/**
+ * Utilisé pour la recherche dans la liste des organismes
+ */
+export const fullOrganismesListFiltersSchema = {
+  nature: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  ferme: z
+    .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
+    .optional(),
+  // ferme: z
+  //   .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.string()))
+  //   .optional(),
+};
+
+export type FullOrganismesListFilters = z.infer<z.ZodObject<typeof fullOrganismesListFiltersSchema>>;
+
+export const fullOrganismesListFiltersConfigurations: {
+  [key in keyof Required<FullOrganismesListFilters>]: FilterConfiguration;
+} = {
+  nature: {
+    matchKey: "nature",
+    transformValue: (value) => ({ $in: value }),
+  },
+  ferme: {
+    matchKey: "ferme",
+    transformValue: (value) => ({ $in: value }),
+  },
+};
+
+// #endregion
 
 export function buildMongoFilters<
   Filters extends { [s: string]: any },

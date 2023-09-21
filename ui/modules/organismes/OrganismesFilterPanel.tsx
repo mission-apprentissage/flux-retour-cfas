@@ -44,9 +44,6 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     );
   };
 
-  // TODO REMOVE
-  console.log("query >> ", JSON.stringify(organismesFilters));
-
   const resetFilters = () => {
     void router.push(
       {
@@ -116,8 +113,8 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
 
         {/* FILTRE ETAT */}
         {props?.showFilterEtat && (
-          <OrganismesFilterSelect label="Etat" badge={organismesFilters.etat?.length}>
-            <FiltreOrganismesEtat value={organismesFilters.etat} onChange={(etat) => updateState({ etat })} />
+          <OrganismesFilterSelect label="Etat" badge={organismesFilters.ferme?.length}>
+            <FiltreOrganismesEtat value={organismesFilters.ferme} onChange={(ferme) => updateState({ ferme })} />
           </OrganismesFilterSelect>
         )}
 

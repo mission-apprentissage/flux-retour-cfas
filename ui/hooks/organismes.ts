@@ -1,7 +1,14 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+import { useMemo } from "react";
 
 import { _get, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
+import {
+  OrganismesFiltersQuery,
+  convertOrganismesFiltersToQuery,
+  parseOrganismesFiltersFromQuery,
+} from "@/modules/organismes/models/organismes-filters";
 
 // récupère un organisme
 export function useOrganisme(organismeId: string | undefined | null) {
@@ -60,11 +67,23 @@ export function useOrganisationOrganisme(enabled?: boolean) {
 
 // récupère les organismes accessibles (OF, opérateur public, etc)
 export function useOrganisationOrganismes() {
+  const router = useRouter();
+
+  const { organismesFilters } = useMemo(() => {
+    return { organismesFilters: parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery) };
+  }, [JSON.stringify(router.query)]);
+
   const {
     data: organismes,
     isLoading,
     error,
-  } = useQuery<Organisme[], any>(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {});
+  } = useQuery<Organisme[], any>(
+    ["organisation/organismes", JSON.stringify(organismesFilters)],
+    () => _get("/api/v1/organisation/organismes", { params: convertOrganismesFiltersToQuery(organismesFilters) }),
+    { enabled: router.isReady }
+  );
+
+  console.log("params :>> ", convertOrganismesFiltersToQuery(organismesFilters));
 
   return {
     organismes,

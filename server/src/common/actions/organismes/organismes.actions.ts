@@ -2,7 +2,13 @@ import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
 import { v4 as uuidv4 } from "uuid";
 
-import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
+import {
+  FullOrganismesListFilters,
+  LegacyEffectifsFilters,
+  buildMongoFilters,
+  buildMongoPipelineFilterStages,
+  fullOrganismesListFiltersConfigurations,
+} from "@/common/actions/helpers/filters";
 import {
   findOrganismesAccessiblesByOrganisationOF,
   findOrganismesFormateursIdsOfOrganisme,
@@ -707,7 +713,7 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
   return organisation ? await listContactsOrganisation(organisation._id) : [];
 }
 
-export async function listOrganisationOrganismes(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>[]> {
+export async function listOrganisationOrganismes(ctx: AuthContext, filters: FullOrganismesListFilters): Promise<WithId<OrganismeWithPermissions>[]> {
   const restrictionOwnOrganisme =
     ctx.organisation.type === "ORGANISME_FORMATION"
       ? {
@@ -723,6 +729,7 @@ export async function listOrganisationOrganismes(ctx: AuthContext): Promise<With
           await getOrganismeRestriction(ctx),
           // cas particulier pour l'OF qui ne doit pas lister son propre organisme
           restrictionOwnOrganisme,
+          ...buildMongoFilters(filters, fullOrganismesListFiltersConfigurations),
         ],
       },
       {

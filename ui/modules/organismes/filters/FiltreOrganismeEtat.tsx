@@ -1,18 +1,21 @@
 import { CheckboxGroup, Stack, Checkbox } from "@chakra-ui/react";
 
 interface FiltreOrganismesEtatProps {
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: boolean[];
+  onChange: (value: boolean[]) => void;
 }
 
 function FiltreOrganismesEtat(props: FiltreOrganismesEtatProps) {
   return (
-    <CheckboxGroup value={props.value} onChange={(value) => props.onChange(value.map((v: string) => v))}>
+    <CheckboxGroup
+      value={props.value?.map((item) => item.toString())}
+      onChange={(value) => props.onChange(value.map((v: string) => (v === "true" ? true : false)))}
+    >
       <Stack>
-        <Checkbox value="ouvert" key="ouvert" fontSize="caption">
+        <Checkbox value="false" key="ouvert" fontSize="caption">
           Ouvert
         </Checkbox>
-        <Checkbox value="ferme" key="ferme" fontSize="caption">
+        <Checkbox value="true" key="ferme" fontSize="caption">
           Fermé
         </Checkbox>
       </Stack>
