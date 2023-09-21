@@ -6,7 +6,6 @@ import Boom from "boom";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application } from "express";
-import listEndpoints from "express-list-endpoints";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
@@ -714,10 +713,4 @@ function setupRoutes(app: Application) {
   );
 
   app.use(authRouter);
-
-  if (process.env.NODE_ENV !== "test") {
-    listEndpoints(app).map(({ path, methods }: { path: string; methods: string[] }) =>
-      console.info(`${methods.join(", ").padStart(20)} ${path}`)
-    );
-  }
 }
