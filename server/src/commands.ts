@@ -1,5 +1,6 @@
 import { captureException } from "@sentry/node";
 import { Option, program } from "commander";
+import listEndpoints from "express-list-endpoints";
 import HttpTerminator from "lil-http-terminator";
 import { ObjectId } from "mongodb";
 
@@ -626,6 +627,16 @@ program
   .description("Generation des types TS à partir des schemas de la base de données")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(generateTypes);
+
+program
+  .command("dev:list-http-endpoints")
+  .description("Liste les routes du serveur HTTP")
+  .action(async () => {
+    const server = await createServer();
+    listEndpoints(server).map(({ path, methods }: { path: string; methods: string[] }) =>
+      console.info(`${methods.join(", ").padStart(20)} ${path}`)
+    );
+  });
 
 export async function startCLI() {
   await program.parseAsync(process.argv);
