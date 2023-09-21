@@ -707,6 +707,9 @@ export async function verifyOrganismeAPIKeyToUser(
         api_siret: verif.siret,
         api_configuration_date: new Date(),
       },
+      $addToSet: {
+        erps: verif.erp,
+      },
     }
   );
 
