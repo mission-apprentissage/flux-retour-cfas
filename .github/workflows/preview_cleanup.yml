@@ -34,7 +34,7 @@ jobs:
           sudo pipx inject ansible-core jmespath
 
       - name: Run playbook
-        run: .bin/mna-bal preview:cleanup
+        run: .bin/mna-tdb preview:cleanup
         env:
           ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
           ANSIBLE_REMOTE_USER: deploy
