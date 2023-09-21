@@ -943,7 +943,7 @@ export interface Organisme {
    */
   qualiopi?: boolean;
   /**
-   * fait de la prépa apprentissage
+   * fait de la prépa-apprentissage
    */
   prepa_apprentissage?: boolean;
   /**

@@ -98,7 +98,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
 
         {/* FILTRE PREPA APPRENTISSAGE */}
         {props?.showFilterPrepaApprentissage && (
-          <OrganismesFilterSelect label="Prépa apprentissage" badge={organismesFilters.prepa_apprentissage?.length}>
+          <OrganismesFilterSelect label="Prépa-apprentissage" badge={organismesFilters.prepa_apprentissage?.length}>
             <FiltreYesNo
               fieldName="prepa_apprentissage"
               value={organismesFilters.prepa_apprentissage}
