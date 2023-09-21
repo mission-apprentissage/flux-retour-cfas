@@ -286,7 +286,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       />
                     </Tooltip>
                   </Badge>
-                  <Text>Prepa Apprentissage&nbsp;:</Text>
+                  <Text>Prépa-apprentissage&nbsp;:</Text>
                   <Badge
                     fontSize="epsilon"
                     textColor="grey.800"
