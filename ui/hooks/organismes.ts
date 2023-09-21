@@ -83,8 +83,6 @@ export function useOrganisationOrganismes() {
     { enabled: router.isReady }
   );
 
-  console.log("params :>> ", convertOrganismesFiltersToQuery(organismesFilters));
-
   return {
     organismes,
     isLoading,
