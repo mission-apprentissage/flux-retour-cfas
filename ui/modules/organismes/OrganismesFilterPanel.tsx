@@ -62,6 +62,13 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
         FILTRER PAR
       </Text>
       <HStack>
+        {/* FILTRE LOCALISATION */}
+        {props?.showFilterLocalisation && (
+          <OrganismesFilterSelect label="Localisation" badge={50}>
+            EN COURS
+          </OrganismesFilterSelect>
+        )}
+
         {/* FILTRE NATURE */}
         {props?.showFilterNature && (
           <OrganismesFilterSelect label="Nature" badge={organismesFilters.nature?.length}>
@@ -102,13 +109,6 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
               value={organismesFilters.prepa_apprentissage}
               onChange={(prepa_apprentissage) => updateState({ prepa_apprentissage })}
             />
-          </OrganismesFilterSelect>
-        )}
-
-        {/* FILTRE LOCALISATION */}
-        {props?.showFilterLocalisation && (
-          <OrganismesFilterSelect label="Localisation" badge={50}>
-            EN COURS
           </OrganismesFilterSelect>
         )}
 
