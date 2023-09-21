@@ -63,12 +63,12 @@ import {
   generateApiKeyForOrg,
   getOrganismeByAPIKey,
   getOrganismeById,
-  getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise,
   getOrganismeDetails,
   listContactsOrganisme,
   listOrganismesFormateurs,
   searchOrganismes,
   verifyOrganismeAPIKeyToUser,
+  getOrganismeByUAIAndSIRET,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { createSession } from "@/common/actions/sessions.actions";
@@ -215,7 +215,7 @@ function setupRoutes(app: Application) {
           uai: z.string().nullable(),
           siret: z.string(),
         });
-        return await getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(uai, siret);
+        return await getOrganismeByUAIAndSIRET(uai, siret);
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working

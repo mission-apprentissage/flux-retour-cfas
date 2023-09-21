@@ -608,17 +608,6 @@ export async function findOrganismesByUAI(uai: string): Promise<Organisme[]> {
   return organismes;
 }
 
-export async function getOrganismeByUAIAndSIRETOrFallbackAPIEntreprise(
-  uai: string | null,
-  siret: string
-): Promise<Organisme> {
-  try {
-    return await getOrganismeByUAIAndSIRET(uai, siret);
-  } catch (err) {
-    return fetchFromAPIEntreprise(siret);
-  }
-}
-
 export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<Organisme> {
   const organisme = await organismesDb().findOne({
     uai: uai as any,
@@ -628,27 +617,6 @@ export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: strin
     throw Boom.badRequest("Aucun organisme trouvé");
   }
   return organisme;
-}
-
-/**
- * Renvoie les données principales d'un établissement de l'API Entreprise
- * Sert pour afficher sur l'UI à l'inscription
- */
-async function fetchFromAPIEntreprise(siret: string): Promise<any> {
-  const result: InfoSiret = await findDataFromSiret(siret);
-  if (result.messages.api_entreprise_status !== "OK") {
-    logger.warn({ module: "inscription", siret }, "aucun organisme trouvé sur api entreprise");
-    throw Boom.badRequest("Aucun organisme trouvé");
-  }
-  return {
-    uai: null,
-    siret: result.result.siret,
-    ferme: result.result.ferme,
-    raison_sociale: result.result.raison_sociale,
-    adresse: {
-      complete: result.result.adresse,
-    },
-  };
 }
 
 async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
