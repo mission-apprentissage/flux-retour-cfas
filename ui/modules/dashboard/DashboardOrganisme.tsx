@@ -41,6 +41,7 @@ import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateu
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
+import { FileDownloadIcon } from "./icons";
 import IndicateursGrid from "./IndicateursGrid";
 import { natureOrganismeDeFormationLabel, natureOrganismeDeFormationTooltip } from "./OrganismeInfo";
 
@@ -639,9 +640,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       meilleur moment.
                     </Text>
 
-                    {/* FIXME: En attente du lien */}
-                    {/* <Link
-                      href="/protection-des-donnees"
+                    <Link
+                      href="/dictionnaire-des-donnees.pdf"
+                      isExternal
                       borderBottom="1px"
                       color="action-high-blue-france"
                       _hover={{ textDecoration: "none" }}
@@ -649,9 +650,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       alignItems="center"
                       mt="3"
                     >
-                      <ArrowForwardIcon mr="2" />
-                      Consultez la liste des données collectées (TODO lien à mettre)
-                    </Link> */}
+                      <FileDownloadIcon mr="2" />
+                      Consultez la liste des données collectées
+                    </Link>
                   </Box>
                 </Flex>
 
