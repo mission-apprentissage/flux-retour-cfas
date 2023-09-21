@@ -8,7 +8,7 @@ import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
+import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
@@ -322,7 +322,7 @@ function IndicateursForm(props: IndicateursFormProps) {
             Répartition des effectifs par organismes
           </Heading>
 
-          <DownloadLinkButton
+          <DownloadButton
             isDisabled={indicateursEffectifs?.length === 0}
             action={async () => {
               const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
@@ -336,7 +336,7 @@ function IndicateursForm(props: IndicateursFormProps) {
             }}
           >
             Télécharger la liste
-          </DownloadLinkButton>
+          </DownloadButton>
         </HStack>
 
         <NewTable

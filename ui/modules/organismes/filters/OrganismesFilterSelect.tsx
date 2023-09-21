@@ -16,7 +16,7 @@ function OrganismesFilterSelect(props: Props) {
               <AccordionButton>
                 <Stack direction="row" flex="1" alignItems="center">
                   <Text
-                    fontSize="legal"
+                    fontSize="zeta"
                     fontWeight={hasFilters ? "bold" : "normal"}
                     color={hasFilters ? "bluefrance" : "var(--chakra-colors-gray-800)"}
                   >
