@@ -216,16 +216,12 @@ function IndicateursForm(props: IndicateursFormProps) {
             value={effectifsFilters.organisme_academies}
             onChange={(academies) => updateState({ organisme_academies: academies })}
           />
-          {organisationType !== "ORGANISME_FORMATION_FORMATEUR" &&
-            organisationType !== "ORGANISME_FORMATION_RESPONSABLE" &&
-            organisationType !== "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR" && (
-              <FiltreOrganismeBassinEmploi
-                value={effectifsFilters.organisme_bassinsEmploi}
-                onChange={(organisme_bassinsEmploi) =>
-                  updateState({ organisme_bassinsEmploi: organisme_bassinsEmploi })
-                }
-              />
-            )}
+          {organisationType !== "ORGANISME_FORMATION" && (
+            <FiltreOrganismeBassinEmploi
+              value={effectifsFilters.organisme_bassinsEmploi}
+              onChange={(organisme_bassinsEmploi) => updateState({ organisme_bassinsEmploi: organisme_bassinsEmploi })}
+            />
+          )}
         </SimpleGrid>
         <Text fontWeight="700" textTransform="uppercase">
           Domaine d’activité
@@ -442,9 +438,7 @@ function getPermissionsEffectifsNominatifs(
   organisationType: OrganisationType
 ): boolean | Array<(typeof typesEffectifNominatif)[number]> {
   switch (organisationType) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+    case "ORGANISME_FORMATION":
       // return true;
       return false; // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
 
@@ -467,17 +461,13 @@ function getPermissionsEffectifsNominatifs(
     case "ADMINISTRATEUR":
       return true;
   }
-  return false;
 }
 
 function MessageBandeauIndicateurs({ organisationType }: { organisationType: OrganisationType }) {
   let text: string | null | JSX.Element = null;
 
   switch (organisationType) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-      break;
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+    case "ORGANISME_FORMATION":
       text = (
         <>
           Retrouvez ici les indicateurs et les organismes dont les formations en apprentissage sont{" "}

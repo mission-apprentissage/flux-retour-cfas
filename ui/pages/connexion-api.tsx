@@ -212,13 +212,7 @@ const ConnexionAPIPage = () => {
       </Head>
 
       <Center w="100%" pt={[4, 8]} mb={5}>
-        <ConnexionAPIContent
-          authorizedOrganisationTypes={[
-            "ORGANISME_FORMATION_FORMATEUR",
-            "ORGANISME_FORMATION_RESPONSABLE",
-            "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-          ]}
-        />
+        <ConnexionAPIContent authorizedOrganisationTypes={["ORGANISME_FORMATION"]} />
       </Center>
     </Page>
   );

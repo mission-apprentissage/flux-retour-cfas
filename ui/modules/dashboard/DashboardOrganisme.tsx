@@ -36,7 +36,7 @@ import useAuth from "@/hooks/useAuth";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import { ExternalLinks } from "../admin/OrganismeDetail";
-import { NewOrganisation, getOrganisationTypeFromNature } from "../auth/inscription/common";
+import { NewOrganisation } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
@@ -54,10 +54,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const { auth, organisationType } = useAuth();
 
   const { organisme: ownOrganisme } = useOrganisationOrganisme(
-    modePublique &&
-      (organisationType === "ORGANISME_FORMATION_FORMATEUR" ||
-        organisationType === "ORGANISME_FORMATION_RESPONSABLE" ||
-        organisationType === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR")
+    modePublique && organisationType === "ORGANISME_FORMATION"
   );
   const isOFviewingItsPublicPage = modePublique && organisme?._id === ownOrganisme?._id;
 
@@ -190,7 +187,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 ml={4}
                 onClick={async () => {
                   await _post<NewOrganisation>("/api/v1/admin/impersonate", {
-                    type: getOrganisationTypeFromNature(organisme.nature as any),
+                    type: "ORGANISME_FORMATION",
                     siret: organisme.siret,
                     uai: organisme.uai ?? (null as any), // peut être absent si non présent dans le référentiel
                   });
@@ -733,9 +730,7 @@ export default withAuth(DashboardOrganisme);
 export function getForbiddenErrorText(ctx: AuthContext): string {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+    case "ORGANISME_FORMATION":
       return "Vous n’avez pas accès aux données de cet organisme.";
 
     case "TETE_DE_RESEAU":
@@ -765,9 +760,7 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
 
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       return false;
     }
 
@@ -803,5 +796,4 @@ function getIndicateursEffectifsPartielsMessage(ctx: AuthContext, organisme: Org
     case "ADMINISTRATEUR":
       return false;
   }
-  return false; // cas autre
 }

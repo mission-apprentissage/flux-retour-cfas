@@ -16,11 +16,7 @@ export const registrationSchema = {
   }),
   organisation: z.discriminatedUnion("type", [
     z.object({
-      type: z.enum([
-        "ORGANISME_FORMATION_FORMATEUR",
-        "ORGANISME_FORMATION_RESPONSABLE",
-        "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-      ]),
+      type: z.literal("ORGANISME_FORMATION"),
       uai: z.string().nullable(),
       siret: z.string(),
     }),

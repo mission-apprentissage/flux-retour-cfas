@@ -142,7 +142,7 @@ export const seedSampleUsers = async () => {
         has_accept_cgu_version: "",
       },
       organisation: {
-        type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+        type: "ORGANISME_FORMATION",
         uai: "0010856A",
         siret: "77931004400028",
       },

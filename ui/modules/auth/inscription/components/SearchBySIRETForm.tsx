@@ -23,7 +23,7 @@ import { siretRegex } from "@/common/domain/siret";
 import { _post } from "@/common/httpClient";
 import { sleep } from "@/common/utils/misc";
 import Link from "@/components/Links/Link";
-import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
+import { InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
 
 import OrganismeDetails from "./OrganismeDetails";
 
@@ -132,7 +132,7 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
                     isDisabled={organismes[0].ferme || organisation}
                     onClick={() =>
                       setOrganisation({
-                        type: getOrganisationTypeFromNature(organismes[0].nature),
+                        type: "ORGANISME_FORMATION",
                         siret: organismes[0].siret,
                         uai: organismes[0].uai || null, // peut être absent si non présent dans le référentiel
                       })
@@ -170,7 +170,7 @@ export default function SearchBySIRETForm({ organisation, setOrganisation }: Ins
                             isDisabled={organisme.ferme}
                             onClick={() =>
                               setOrganisation({
-                                type: getOrganisationTypeFromNature(organisme.nature),
+                                type: "ORGANISME_FORMATION",
                                 siret: organisme.siret,
                                 uai: organisme.uai || null, // peut être absent si non présent dans le référentiel
                               })

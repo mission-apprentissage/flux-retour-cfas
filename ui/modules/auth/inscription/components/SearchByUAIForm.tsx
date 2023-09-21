@@ -23,7 +23,7 @@ import { UAI_REGEX } from "@/common/domain/uai";
 import { _post } from "@/common/httpClient";
 import { sleep } from "@/common/utils/misc";
 import Link from "@/components/Links/Link";
-import { getOrganisationTypeFromNature, InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
+import { InscriptionOrganistionChildProps } from "@/modules/auth/inscription/common";
 
 import OrganismeDetails from "./OrganismeDetails";
 
@@ -133,7 +133,7 @@ export default function SearchByUAIForm({ organisation, setOrganisation }: Inscr
                     isDisabled={organismes[0].ferme || organisation}
                     onClick={() =>
                       setOrganisation({
-                        type: getOrganisationTypeFromNature(organismes[0].nature),
+                        type: "ORGANISME_FORMATION",
                         siret: organismes[0].siret,
                         uai: organismes[0].uai,
                       })
@@ -171,7 +171,7 @@ export default function SearchByUAIForm({ organisation, setOrganisation }: Inscr
                             isDisabled={organisme.ferme}
                             onClick={() =>
                               setOrganisation({
-                                type: getOrganisationTypeFromNature(organisme.nature),
+                                type: "ORGANISME_FORMATION",
                                 siret: organisme.siret,
                                 uai: organisme.uai,
                               })

@@ -9,9 +9,7 @@ import { date, object, objectId, string, stringOrNull } from "./json-schema/json
 
 // types en doublon avec l'UI
 export const organisationTypes = [
-  "ORGANISME_FORMATION_FORMATEUR",
-  "ORGANISME_FORMATION_RESPONSABLE",
-  "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+  "ORGANISME_FORMATION",
   "TETE_DE_RESEAU",
   "DREETS",
   "DRAAF",
@@ -38,12 +36,8 @@ export type Organisation = NewOrganisation & { created_at: Date };
 
 export type OrganisationType = (typeof organisationTypes)[number];
 
-// OFRF, OFR, OFF
 export interface OrganisationOrganismeFormation {
-  type:
-    | "ORGANISME_FORMATION_FORMATEUR"
-    | "ORGANISME_FORMATION_RESPONSABLE"
-    | "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR";
+  type: "ORGANISME_FORMATION";
   siret: string;
   uai: string | null;
 }
@@ -81,19 +75,10 @@ export interface OrganisationAdministrateur {
   type: "ADMINISTRATEUR";
 }
 
-const OFTypeLabelByType = {
-  ORGANISME_FORMATION_FORMATEUR: "OF",
-  ORGANISME_FORMATION_RESPONSABLE: "OFR",
-  ORGANISME_FORMATION_RESPONSABLE_FORMATEUR: "OFRF",
-};
 export function getOrganisationLabel(organisation: NewOrganisation): string {
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      return `${OFTypeLabelByType[organisation.type]} UAI : ${organisation.uai || "Inconnu"} - SIRET : ${
-        organisation.siret
-      }`;
+    case "ORGANISME_FORMATION": {
+      return `OFA UAI : ${organisation.uai || "Inconnu"} - SIRET : ${organisation.siret}`;
     }
 
     case "TETE_DE_RESEAU":

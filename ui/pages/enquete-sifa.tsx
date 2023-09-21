@@ -29,8 +29,4 @@ const PageEnqueteSIFADeMonOrganisme = () => {
   );
 };
 
-export default withAuth(PageEnqueteSIFADeMonOrganisme, [
-  "ORGANISME_FORMATION_FORMATEUR",
-  "ORGANISME_FORMATION_RESPONSABLE",
-  "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
-]);
+export default withAuth(PageEnqueteSIFADeMonOrganisme, ["ORGANISME_FORMATION"]);

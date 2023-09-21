@@ -29,11 +29,7 @@ export async function register(registration: RegistrationSchema): Promise<{
 
   // on s'assure que l'organisme existe pour un OF
   const type = registration.organisation.type;
-  if (
-    type === "ORGANISME_FORMATION_FORMATEUR" ||
-    type === "ORGANISME_FORMATION_RESPONSABLE" ||
-    type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR"
-  ) {
+  if (type === "ORGANISME_FORMATION") {
     const { uai, siret } = registration.organisation;
     try {
       await getOrganismeByUAIAndSIRET(uai, siret);

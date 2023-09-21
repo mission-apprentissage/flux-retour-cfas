@@ -121,7 +121,7 @@ const profilsOrganisation = [
   {
     label: "OF cible",
     organisation: {
-      type: "ORGANISME_FORMATION_FORMATEUR",
+      type: "ORGANISME_FORMATION",
       uai: "0000000A",
       siret: "00000000000018",
     },
@@ -129,7 +129,7 @@ const profilsOrganisation = [
   {
     label: "OF non lié",
     organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+      type: "ORGANISME_FORMATION",
       uai: "1111111B",
       siret: "11111111100006",
     },
@@ -137,7 +137,7 @@ const profilsOrganisation = [
   {
     label: "OF formateur",
     organisation: {
-      type: "ORGANISME_FORMATION_FORMATEUR",
+      type: "ORGANISME_FORMATION",
       uai: "0000000B",
       siret: "00000000000026",
     },
@@ -145,7 +145,7 @@ const profilsOrganisation = [
   {
     label: "OF responsable",
     organisation: {
-      type: "ORGANISME_FORMATION_RESPONSABLE",
+      type: "ORGANISME_FORMATION",
       uai: "0000000C",
       siret: "00000000000034",
     },
