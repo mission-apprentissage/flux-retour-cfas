@@ -294,19 +294,18 @@ function OrganismesTable(props: OrganismesTableProps) {
               </Button>
             </InputRightElement>
           </InputGroup>
-          <Box mr="10">
-            <DownloadButton
-              action={() => {
-                exportDataAsXlsx(
-                  `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
-                  filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
-                  organismesExportColumns
-                );
-              }}
-            >
-              Télécharger la liste
-            </DownloadButton>
-          </Box>
+          <DownloadButton
+            w="25%"
+            action={() => {
+              exportDataAsXlsx(
+                `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
+                filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
+                organismesExportColumns
+              );
+            }}
+          >
+            Télécharger la liste
+          </DownloadButton>
         </HStack>
         <Divider mb="4" />
         <HStack>
