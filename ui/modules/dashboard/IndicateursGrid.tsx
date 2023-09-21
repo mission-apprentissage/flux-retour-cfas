@@ -6,7 +6,6 @@ import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
-import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs } from "@/modules/models/indicateurs";
@@ -152,13 +151,13 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("apprenant")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadLinkButton
+              <DownloadButton
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.apprenants === 0}
                 action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
               >
                 Télécharger la liste
-              </DownloadLinkButton>
+              </DownloadButton>
             )}
         </Card>
       </GridItem>
@@ -180,13 +179,13 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("apprenti")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadLinkButton
+              <DownloadButton
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.apprentis === 0}
                 action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
               >
                 Télécharger la liste
-              </DownloadLinkButton>
+              </DownloadButton>
             )}
         </Card>
       </GridItem>
@@ -209,13 +208,13 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("rupturant")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadLinkButton
+              <DownloadButton
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.rupturants === 0}
                 action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
               >
                 Télécharger la liste
-              </DownloadLinkButton>
+              </DownloadButton>
             )}
         </Card>
       </GridItem>
@@ -237,13 +236,13 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("inscritSansContrat")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadLinkButton
+              <DownloadButton
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.inscritsSansContrat === 0}
                 action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
               >
                 Télécharger la liste
-              </DownloadLinkButton>
+              </DownloadButton>
             )}
         </Card>
       </GridItem>
@@ -268,13 +267,13 @@ function IndicateursGrid({
             ? permissionEffectifsNominatifs.includes("abandon")
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
-              <DownloadLinkButton
+              <DownloadButton
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.abandons === 0}
                 action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}
               >
                 Télécharger la liste
-              </DownloadLinkButton>
+              </DownloadButton>
             )}
         </Card>
       </GridItem>

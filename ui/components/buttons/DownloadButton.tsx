@@ -10,7 +10,7 @@ type Props = {
   children: React.ReactNode;
 } & ButtonProps;
 
-function DownloadLinkButton({ children, action, ...props }: Props) {
+function DownloadButton({ children, action, ...props }: Props) {
   const { toastError } = useToaster();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,17 +28,17 @@ function DownloadLinkButton({ children, action, ...props }: Props) {
 
   return (
     <Button
-      variant={"link"}
+      variant="secondary"
       mt="2"
       borderBottom={isLoading ? "0" : "1px"}
       borderRadius="0"
-      p="0"
+      p="4"
       _active={{
         color: "bluefrance",
       }}
       isLoading={isLoading}
       onClick={onClick}
-      rightIcon={<DownloadLine />}
+      leftIcon={<DownloadLine />}
       {...props}
     >
       {children}
@@ -46,4 +46,4 @@ function DownloadLinkButton({ children, action, ...props }: Props) {
   );
 }
 
-export default DownloadLinkButton;
+export default DownloadButton;

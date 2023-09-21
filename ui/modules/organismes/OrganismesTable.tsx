@@ -22,7 +22,7 @@ import { Organisme } from "@/common/internal/Organisme";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { normalize } from "@/common/utils/stringUtils";
-import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
+import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
 import { usePlausibleTracking } from "@/hooks/plausible";
@@ -279,7 +279,7 @@ function OrganismesTable(props: OrganismesTableProps) {
   return (
     <>
       <Box border="1px solid" borderColor="openbluefrance" p={4}>
-        <HStack mb="4">
+        <HStack mb="4" spacing="8">
           <InputGroup>
             <Input
               type="text"
@@ -296,27 +296,41 @@ function OrganismesTable(props: OrganismesTableProps) {
               </Button>
             </InputRightElement>
           </InputGroup>
+          <Box mr="10">
+            <DownloadButton
+              action={() => {
+                exportDataAsXlsx(
+                  `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
+                  filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
+                  organismesExportColumns
+                );
+              }}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          </Box>
         </HStack>
         <Divider mb="4" />
         <HStack>
           <OrganismesFilterPanel {...props} />
 
-        <DownloadLinkButton
-          action={() => {
-              trackPlausibleEvent(
+          <DownloadLinkButton
+            action={() => {
+                trackPlausibleEvent(
               props.modeNonFiable ? "telechargement_liste_of_a_fiabiliser" : "telechargement_liste_of_fiables"
             );
-            exportDataAsXlsx(
-              `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
-              filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
-              organismesExportColumns
-            );
-          }}
-        >
-          Télécharger la liste
-        </DownloadLinkButton>
-      </HStack>
-            
+              exportDataAsXlsx(
+                `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
+                filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
+                organismesExportColumns
+              );
+            }}
+          >
+            Télécharger la liste
+          </DownloadLinkButton>
+        </HStack>
+      </Box>
+              
 
       <NewTable
         data={filteredOrganismes || []}
