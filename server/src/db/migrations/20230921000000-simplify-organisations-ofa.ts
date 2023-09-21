@@ -15,6 +15,9 @@ export const up = async (db: Db) => {
       $set: {
         type: "ORGANISME_FORMATION",
       },
+    },
+    {
+      bypassDocumentValidation: true,
     }
   );
 };
