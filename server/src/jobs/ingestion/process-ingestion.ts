@@ -313,6 +313,19 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
         if (formation && effectif.formation) {
           effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
           effectif.formation.niveau_libelle = formation.niveau;
+
+          // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
+          // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
+          if (effectif.formation.date_fin && effectif.formation.date_entree) {
+            effectif.formation.duree_formation_relle = Math.round(
+              (effectif.formation.date_fin.getTime() - effectif.formation.date_entree.getTime()) /
+                1000 /
+                60 /
+                60 /
+                24 /
+                30
+            );
+          }
         }
 
         return {
