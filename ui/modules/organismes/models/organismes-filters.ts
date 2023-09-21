@@ -35,7 +35,7 @@ export function convertOrganismesFiltersToQuery(
   return stripEmptyFields({
     qualiopi: organismesFilters.qualiopi?.join(","),
     prepa_apprentissage: organismesFilters.prepa_apprentissage?.join(","),
-    // transmission: organismesFilters.transmission?.join(","),
+    transmission: organismesFilters.transmission?.join(","),
     nature: organismesFilters.nature?.join(","),
     ferme: organismesFilters.ferme?.join(","),
   });
