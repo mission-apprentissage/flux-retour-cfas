@@ -6,6 +6,7 @@ import Link from "@/components/Links/Link";
 
 import FiltreOrganismesEtat from "./filters/FiltreOrganismeEtat";
 import FiltreOrganismesNature from "./filters/FiltreOrganismeNature";
+import FiltreOrganismeTransmission from "./filters/FiltreOrganismeTransmission";
 import FiltreYesNo from "./filters/FiltreYesNo";
 import OrganismesFilterSelect from "./filters/OrganismesFilterSelect";
 import {
@@ -74,7 +75,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
             label="Transmission au tableau de bord"
             badge={organismesFilters.transmission?.length}
           >
-            <FiltreYesNo
+            <FiltreOrganismeTransmission
               fieldName="transmission"
               value={organismesFilters.transmission}
               onChange={(transmission) => updateState({ transmission })}

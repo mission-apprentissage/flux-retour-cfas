@@ -93,6 +93,7 @@ export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRest
 }
 
 export interface FilterConfiguration {
+  matchOperator?: (value: any) => string | undefined;
   matchKey: string;
 
   // optional transformer
@@ -267,6 +268,9 @@ export const fullOrganismesListFiltersSchema = {
   prepa_apprentissage: z
     .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
     .optional(),
+  transmission: z
+    .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
+    .optional(),
 };
 
 export type FullOrganismesListFilters = z.infer<z.ZodObject<typeof fullOrganismesListFiltersSchema>>;
@@ -290,6 +294,16 @@ export const fullOrganismesListFiltersConfigurations: {
     matchKey: "prepa_apprentissage",
     transformValue: (value) => ({ $in: value }),
   },
+  transmission: {
+    matchOperator: (value: string) => (value.length === 2 ? "$or" : undefined),
+    matchKey: "last_transmission_date",
+    transformValue: (value) => {
+      if (value.length === 1 && value[0] === true) return { $exists: true };
+      if (value.length === 1 && value[0] === false) return { $exists: false };
+      if (value.length === 2)
+        return [{ last_transmission_date: { $exists: true } }, { last_transmission_date: { $exists: false } }];
+    },
+  },
 };
 
 // #endregion
@@ -306,7 +320,8 @@ export function buildMongoFilters<
     return [
       ...matchFilters,
       {
-        [filterConfiguration.matchKey]: filterConfiguration.transformValue?.(filterValue) ?? filterValue,
+        [filterConfiguration.matchOperator?.(filterValue) ?? filterConfiguration.matchKey]:
+          filterConfiguration.transformValue?.(filterValue) ?? filterValue,
       },
     ];
   }, [] as any[]);
