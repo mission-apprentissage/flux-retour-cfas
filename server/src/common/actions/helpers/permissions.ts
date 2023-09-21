@@ -6,7 +6,7 @@ import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { OrganisationOrganismeFormation, OrganisationType } from "@/common/model/organisations.model";
+import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 
 export async function requireOrganismeIndicateursAccess(ctx: AuthContext, organismeId: ObjectId): Promise<void> {
   if (!(await canAccessOrganismeIndicateurs(ctx, organismeId))) {
@@ -15,7 +15,7 @@ export async function requireOrganismeIndicateursAccess(ctx: AuthContext, organi
 }
 
 export function requireOrganisationOF(ctx: AuthContext): OrganisationOrganismeFormation {
-  if (!isOrganisationOF(ctx.organisation.type)) {
+  if (ctx.organisation.type !== "ORGANISME_FORMATION") {
     throw Boom.forbidden("Permissions invalides");
   }
   return (ctx as AuthContext<OrganisationOrganismeFormation>).organisation;
@@ -24,9 +24,7 @@ export function requireOrganisationOF(ctx: AuthContext): OrganisationOrganismeFo
 export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
@@ -67,9 +65,7 @@ export async function getOrganismeRestriction(ctx: AuthContext): Promise<any> {
 export async function getIndicateursOrganismesRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
@@ -103,9 +99,7 @@ export async function getIndicateursOrganismesRestriction(ctx: AuthContext): Pro
 export async function getIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
@@ -140,9 +134,7 @@ export async function getIndicateursEffectifsRestriction(ctx: AuthContext): Prom
 export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
@@ -184,9 +176,7 @@ export async function getEffectifsAnonymesRestriction(ctx: AuthContext): Promise
 export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
@@ -231,9 +221,7 @@ export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthConte
 export async function getEffectifsNominatifsRestriction(ctx: AuthContext): Promise<any> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
@@ -306,9 +294,7 @@ export async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeI
   const organisme = await getOrganismeById(organismeId);
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
@@ -345,9 +331,7 @@ async function canAccessOrganismesFormateurs(ctx: AuthContext, organismeId: Obje
   const organisme = await getOrganismeById(organismeId);
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       return organisme._id.equals(organismeId);
     }
 
@@ -371,20 +355,10 @@ async function canAccessOrganismesFormateurs(ctx: AuthContext, organismeId: Obje
   }
 }
 
-export function isOrganisationOF(type: OrganisationType): boolean {
-  return (
-    type === "ORGANISME_FORMATION_FORMATEUR" ||
-    type === "ORGANISME_FORMATION_RESPONSABLE" ||
-    type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR"
-  );
-}
-
 export async function canManageOrganismeEffectifs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );

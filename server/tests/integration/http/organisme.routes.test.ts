@@ -339,7 +339,7 @@ describe("Routes /organismes/:id", () => {
       await Promise.all([
         organisationsDb().insertOne({
           _id: new ObjectId(id(1)),
-          type: "ORGANISME_FORMATION_FORMATEUR",
+          type: "ORGANISME_FORMATION",
           uai: userOrganisme.uai as string,
           siret: userOrganisme.siret,
           created_at: getCurrentTime(),
@@ -444,7 +444,7 @@ describe("Routes /organismes/:id", () => {
                     {
                       _id: expect.any(String),
                       created_at: expect.any(String),
-                      email: "OF UAI : 0000000A - SIRET : 00000000000018@tdb.local",
+                      email: "OFA UAI : 0000000A - SIRET : 00000000000018@tdb.local",
                       fonction: "Responsable administratif",
                       nom: "Dupont",
                       prenom: "Jean",

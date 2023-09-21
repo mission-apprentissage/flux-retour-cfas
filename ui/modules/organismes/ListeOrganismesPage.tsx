@@ -284,9 +284,7 @@ export default ListeOrganismesPage;
 
 function getHeaderTitleFromOrganisationType(type: OrganisationType) {
   switch (type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+    case "ORGANISME_FORMATION":
       return "Mes organismes formateurs";
 
     case "TETE_DE_RESEAU":
@@ -312,9 +310,7 @@ function getHeaderTitleFromOrganisationType(type: OrganisationType) {
 
 function getTextContextFromOrganisationType(type: OrganisationType) {
   switch (type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+    case "ORGANISME_FORMATION":
       return "rattachés à votre organisme";
 
     case "TETE_DE_RESEAU":

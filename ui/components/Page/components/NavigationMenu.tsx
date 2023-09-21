@@ -16,9 +16,7 @@ import { Close, MenuFill, ParentGroupIcon } from "@/theme/components/icons";
 
 function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): string {
   switch (type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR":
+    case "ORGANISME_FORMATION":
       return "Mes organismes";
 
     case "TETE_DE_RESEAU":
@@ -199,9 +197,7 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
 
 function getNavBarComponent(auth?: AuthContext): ReactElement {
   switch (auth?.organisation?.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       return <NavBarOrganismeFormation />;
     }
 

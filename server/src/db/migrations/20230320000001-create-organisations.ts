@@ -90,17 +90,11 @@ export const up = async (db: Db, _client: MongoClient) => {
       console.info(`Aucun organisme fiable trouvé pour ${user.email} (SIRET/UAI=${user.siret}/${user.uai})`);
     });
 
-    const natureOFToOrganisationType = {
-      responsable_formateur: "RESPONSABLE_FORMATEUR",
-      responsable: "RESPONSABLE",
-      formateur: "FORMATEUR",
-      inconnue: "FORMATEUR",
-    };
     await Promise.all(
       Object.values(organisations).map(async (organisation: any) => {
         const { insertedId } = await db.collection("organisations").insertOne(
           stripUndefinedFields({
-            type: `ORGANISME_FORMATION_${natureOFToOrganisationType[organisation.nature] || "FORMATEUR"}`,
+            type: "ORGANISME_FORMATION",
             siret: organisation.siret,
             uai: organisation.uai,
           })

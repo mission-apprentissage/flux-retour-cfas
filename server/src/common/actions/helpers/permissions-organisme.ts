@@ -27,9 +27,7 @@ export async function buildOrganismePermissions(
   const organisme = await getOrganismeById(organismeId);
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const userOrganisme = await organismesDb().findOne({
         siret: organisation.siret,
         uai: organisation.uai as string,

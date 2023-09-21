@@ -48,9 +48,7 @@ function DashboardOwnOrganisme() {
 
 function getDashboardComponent(organisationType: OrganisationType) {
   switch (organisationType) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       return <DashboardOwnOrganisme />;
     }
 

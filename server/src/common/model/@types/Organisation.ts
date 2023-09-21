@@ -5,9 +5,7 @@ export interface Organisation {
    * Type d'organisation (exemple DREETS, ACADEMIE, etc)
    */
   type:
-    | "ORGANISME_FORMATION_FORMATEUR"
-    | "ORGANISME_FORMATION_RESPONSABLE"
-    | "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR"
+    | "ORGANISME_FORMATION"
     | "TETE_DE_RESEAU"
     | "DREETS"
     | "DRAAF"

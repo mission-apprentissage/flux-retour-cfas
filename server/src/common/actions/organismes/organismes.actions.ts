@@ -7,7 +7,6 @@ import {
   findOrganismesAccessiblesByOrganisationOF,
   findOrganismesFormateursIdsOfOrganisme,
   getOrganismeRestriction,
-  isOrganisationOF,
 } from "@/common/actions/helpers/permissions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { getOrganisationOrganisme, listContactsOrganisation } from "@/common/actions/organisations.actions";
@@ -622,9 +621,7 @@ export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: strin
 async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );
@@ -703,13 +700,14 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
 }
 
 export async function listOrganisationOrganismes(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>[]> {
-  const restrictionOwnOrganisme = isOrganisationOF(ctx.organisation.type)
-    ? {
-        _id: {
-          $ne: (await getOrganisationOrganisme(ctx))._id,
-        },
-      }
-    : {};
+  const restrictionOwnOrganisme =
+    ctx.organisation.type === "ORGANISME_FORMATION"
+      ? {
+          _id: {
+            $ne: (await getOrganisationOrganisme(ctx))._id,
+          },
+        }
+      : {};
   const organismes = (await organismesDb()
     .find(
       {
@@ -751,9 +749,7 @@ export async function listOrganismesFormateurs(
 async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
   const organisation = ctx.organisation;
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+    case "ORGANISME_FORMATION": {
       const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
         ctx as AuthContext<OrganisationOrganismeFormation>
       );

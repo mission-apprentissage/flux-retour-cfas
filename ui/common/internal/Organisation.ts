@@ -4,9 +4,7 @@ import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 
 // types en doublon avec le serveur
 export const organisationTypes = [
-  "ORGANISME_FORMATION_FORMATEUR",
-  "ORGANISME_FORMATION_RESPONSABLE",
-  "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR",
+  "ORGANISME_FORMATION",
   "TETE_DE_RESEAU",
   "DREETS",
   "DRAAF",
@@ -37,12 +35,8 @@ interface AbstractOrganisation {
   created_at: Date;
 }
 
-// OFRF, OFR, OFF
 export interface OrganisationOrganismeFormation extends AbstractOrganisation {
-  type:
-    | "ORGANISME_FORMATION_FORMATEUR"
-    | "ORGANISME_FORMATION_RESPONSABLE"
-    | "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR";
+  type: "ORGANISME_FORMATION";
   siret: string;
   uai: string;
 }
@@ -80,19 +74,10 @@ export interface OrganisationAdministrateur extends AbstractOrganisation {
   type: "ADMINISTRATEUR";
 }
 
-const OFTypeLabelByType = {
-  ORGANISME_FORMATION_FORMATEUR: "OF",
-  ORGANISME_FORMATION_RESPONSABLE: "OFR",
-  ORGANISME_FORMATION_RESPONSABLE_FORMATEUR: "OFRF",
-};
 export function getOrganisationLabel(organisation: Organisation): string {
   switch (organisation.type) {
-    case "ORGANISME_FORMATION_FORMATEUR":
-    case "ORGANISME_FORMATION_RESPONSABLE":
-    case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
-      return `${OFTypeLabelByType[organisation.type]} UAI : ${organisation.uai || "Inconnu"} - SIRET : ${
-        organisation.siret
-      }`;
+    case "ORGANISME_FORMATION": {
+      return `OFA UAI : ${organisation.uai || "Inconnu"} - SIRET : ${organisation.siret}`;
     }
 
     case "TETE_DE_RESEAU":

@@ -41,10 +41,7 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
   const { toastError } = useToaster();
-  const isOrganismeFormation =
-    organisation.type === "ORGANISME_FORMATION_FORMATEUR" ||
-    organisation.type === "ORGANISME_FORMATION_RESPONSABLE" ||
-    organisation.type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR";
+  const isOrganismeFormation = organisation.type === "ORGANISME_FORMATION";
 
   const [organisationFormationLabel, setOrganisationFormationLabel] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -81,9 +78,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
       <Box color="grey.800">
         {(() => {
           switch (organisation.type) {
-            case "ORGANISME_FORMATION_FORMATEUR":
-            case "ORGANISME_FORMATION_RESPONSABLE":
-            case "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR": {
+            case "ORGANISME_FORMATION": {
               return (
                 <>
                   <Text fontSize="20px" fontWeight="bold">
@@ -224,10 +219,7 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
   const passwordMinLength = organisation.type === "ADMINISTRATEUR" ? 20 : 12;
   const [showPasswordCharacters, setShowPasswordCharacters] = React.useState(false);
 
-  const isOrganismeFormation =
-    organisation.type === "ORGANISME_FORMATION_FORMATEUR" ||
-    organisation.type === "ORGANISME_FORMATION_RESPONSABLE" ||
-    organisation.type === "ORGANISME_FORMATION_RESPONSABLE_FORMATEUR";
+  const isOrganismeFormation = organisation.type === "ORGANISME_FORMATION";
   return (
     <Formik
       initialValues={{
