@@ -9,13 +9,13 @@ function FiltreOrganismesNature(props: FiltreOrganismesNatureProps) {
   return (
     <CheckboxGroup value={props.value} onChange={(value) => props.onChange(value.map((v: string) => v))}>
       <Stack>
-        <Checkbox value="responsable" key="responsable" fontSize="caption">
+        <Checkbox value="responsable" key="responsable" fontSize="mini" size="sm">
           Responsable
         </Checkbox>
-        <Checkbox value="formateur" key="formateur" fontSize="caption">
+        <Checkbox value="formateur" key="formateur" fontSize="mini" size="sm">
           Formateur
         </Checkbox>
-        <Checkbox value="responsable_formateur" key="responsable_formateur" fontSize="caption">
+        <Checkbox value="responsable_formateur" key="responsable_formateur" fontSize="mini" size="sm">
           Responsable formateur
         </Checkbox>
       </Stack>

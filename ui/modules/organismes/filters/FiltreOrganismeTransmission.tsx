@@ -13,10 +13,10 @@ function FiltreOrganismeTransmission(props: FiltreOrganismeTransmissionProps) {
       onChange={(value) => props.onChange(value.map((v: string) => (v === "true" ? true : false)))}
     >
       <Stack>
-        <Checkbox value="true" key={`${props.fieldName}_true`} fontSize="caption">
+        <Checkbox value="true" key={`${props.fieldName}_true`} fontSize="mini" size="sm">
           Transmets ou a déja transmis
         </Checkbox>
-        <Checkbox value="false" key={`${props.fieldName}_false`} fontSize="caption">
+        <Checkbox value="false" key={`${props.fieldName}_false`} fontSize="mini" size="sm">
           Ne transmets pas
         </Checkbox>
       </Stack>

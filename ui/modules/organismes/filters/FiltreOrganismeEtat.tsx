@@ -12,10 +12,10 @@ function FiltreOrganismesEtat(props: FiltreOrganismesEtatProps) {
       onChange={(value) => props.onChange(value.map((v: string) => (v === "true" ? true : false)))}
     >
       <Stack>
-        <Checkbox value="false" key="ouvert" fontSize="caption">
+        <Checkbox value="false" key="ouvert" fontSize="mini" size="sm">
           Ouvert
         </Checkbox>
-        <Checkbox value="true" key="ferme" fontSize="caption">
+        <Checkbox value="true" key="ferme" fontSize="mini" size="sm">
           Fermé
         </Checkbox>
       </Stack>
