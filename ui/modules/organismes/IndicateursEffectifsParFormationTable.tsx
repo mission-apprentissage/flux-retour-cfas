@@ -1,5 +1,24 @@
-import { ChevronDownIcon } from "@chakra-ui/icons";
-import { Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import { ArrowForwardIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import {
+  Badge,
+  HStack,
+  Link,
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  VStack,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import { Fragment, useMemo, useState } from "react";
 
 import { _get } from "@/common/httpClient";
@@ -78,6 +97,19 @@ interface IndicateursEffectifsParFormationTableProps {
   formations: IndicateursEffectifsAvecFormation[];
 }
 function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFormationTableProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedCodeRNCP, setSelectedCodeRNCP] = useState<string | null>(null);
+
+  const { data: ficheRNCP } = useQuery(["/api/v1/rncp", selectedCodeRNCP], async () => {
+    if (selectedCodeRNCP) {
+      const ficheRNCP = await _get(`/api/v1/rncp/${selectedCodeRNCP}`);
+      onOpen();
+      return ficheRNCP;
+    } else {
+      return {};
+    }
+  });
+  console.log("ficheRNCP", ficheRNCP);
   const [expandedNiveaux, setExpandedNiveaux] = useState<{ [niveau: string]: boolean }>({});
 
   function toggleExpand(niveau: string) {
@@ -143,7 +175,15 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
                 niveauAvecFormations.formations.map((formation) => (
                   <Tr key={formation.rncp_code}>
                     <Td>
-                      <Text>{formation.rncp?.intitule ?? "Fiche non trouvée"}</Text>
+                      <Link
+                        display="block"
+                        fontSize="1rem"
+                        width="var(--chakra-sizes-lg)"
+                        title={formation.rncp?.intitule ?? "Fiche non trouvée"}
+                        onClick={() => setSelectedCodeRNCP(formation.rncp_code)}
+                      >
+                        {formation.rncp?.intitule ?? "Fiche non trouvée"}
+                      </Link>
                       <Text mt={2} color="#3A3A3A" fontSize="omega">
                         RNCP&nbsp;:{" "}
                         {formation.rncp_code ? (
@@ -165,8 +205,77 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
           ))}
         </Tbody>
       </Table>
+
+      {ficheRNCP && (
+        <Modal isOpen={isOpen} onClose={onClose} size="3xl">
+          <ModalOverlay />
+          <ModalContent borderRadius="0" p="2w" pb="4w">
+            <ModalHeader display="flex" alignItems="center" fontSize="24px" pl="0">
+              <ArrowForwardIcon boxSize={"8"} mr="2" />
+              {ficheRNCP.intitule}
+            </ModalHeader>
+            <ModalCloseButton size="lg" />
+            <VStack borderWidth="1px" borderColor="bluefrance" p={6} alignItems="start" gap={2}>
+              <HStack w="100%">
+                <Text>Code RNCP&nbsp;:</Text>
+                <TextBadge>{ficheRNCP.rncp}</TextBadge>
+
+                <Link
+                  variant="whiteBg"
+                  href={`https://www.francecompetences.fr/recherche/rncp/${ficheRNCP.rncp?.substring(4)}`}
+                  isExternal
+                  borderBottom="1px"
+                  ml="auto !important"
+                >
+                  Consulter la fiche
+                </Link>
+              </HStack>
+              <HStack>
+                <Text>État&nbsp;:</Text>
+                <TextBadge>{ficheRNCP.etat_fiche}</TextBadge>
+              </HStack>
+              <HStack>
+                <Text>Actif&nbsp;:</Text>
+                <TextBadge>{ficheRNCP.actif ? "oui" : "non"}</TextBadge>
+              </HStack>
+              <HStack>
+                <Text>Niveau de formation&nbsp;:</Text>
+                <Badge
+                  fontSize="epsilon"
+                  textColor="grey.800"
+                  paddingX="1w"
+                  paddingY="2px"
+                  backgroundColor="#ECEAE3"
+                  textTransform="none"
+                >
+                  {niveauFormationByNiveau[ficheRNCP.niveau] ?? "Inconnu"}
+                </Badge>
+              </HStack>
+              <HStack>
+                <Text>Codes ROME&nbsp;:</Text>
+                <TextBadge>{ficheRNCP.romes?.join(", ")}</TextBadge>
+              </HStack>
+            </VStack>
+          </ModalContent>
+        </Modal>
+      )}
     </>
   );
 }
 
 export default IndicateursEffectifsParFormationTable;
+
+function TextBadge({ children }: { children: string | JSX.Element }) {
+  return (
+    <Badge
+      fontSize="epsilon"
+      textColor="grey.800"
+      paddingX="1w"
+      paddingY="2px"
+      backgroundColor="#ECEAE3"
+      textTransform="none"
+    >
+      {children}
+    </Badge>
+  );
+}

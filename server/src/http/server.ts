@@ -71,6 +71,7 @@ import {
   getInvalidUaisFromDossierApprenant,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
+import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
@@ -579,6 +580,13 @@ function setupRoutes(app: Application) {
         return await searchOrganismesFormations(searchTerm);
       })
     );
+
+  authRouter.get(
+    "/api/v1/rncp/:code_rncp",
+    returnResult(async (req) => {
+      return await getFicheRNCP(req.params.code_rncp);
+    })
+  );
 
   // LEGACY écrans indicateurs
   authRouter
