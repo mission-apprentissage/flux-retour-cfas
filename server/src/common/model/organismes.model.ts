@@ -204,6 +204,8 @@ export function defaultValuesOrganisme() {
     relatedFormations: [],
     fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.INCONNU,
     ferme: false,
+    qualiopi: false,
+    prepa_apprentissage: false,
     created_at: new Date(),
     updated_at: new Date(),
   };
