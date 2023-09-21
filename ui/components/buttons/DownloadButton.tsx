@@ -30,6 +30,7 @@ function DownloadButton({ children, action, ...props }: Props) {
     <Button
       variant="secondary"
       mt="2"
+      margin="8"
       borderBottom={isLoading ? "0" : "1px"}
       borderRadius="0"
       p="4"
