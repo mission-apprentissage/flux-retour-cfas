@@ -33,8 +33,8 @@ export function convertOrganismesFiltersToQuery(
   organismesFilters: Partial<OrganismesFilters>
 ): Partial<OrganismesFiltersQuery> {
   return stripEmptyFields({
-    // qualiopi: organismesFilters.qualiopi?.join(","),
-    // prepa_apprentissage: organismesFilters.prepa_apprentissage?.join(","),
+    qualiopi: organismesFilters.qualiopi?.join(","),
+    prepa_apprentissage: organismesFilters.prepa_apprentissage?.join(","),
     // transmission: organismesFilters.transmission?.join(","),
     nature: organismesFilters.nature?.join(","),
     ferme: organismesFilters.ferme?.join(","),
