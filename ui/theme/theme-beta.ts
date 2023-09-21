@@ -218,6 +218,7 @@ const fontSizes = {
   omega: "0.75rem",
   caption: "0.6875rem",
   legal: "0.625rem",
+  mini: "0.525rem",
 };
 
 const textStyles = {

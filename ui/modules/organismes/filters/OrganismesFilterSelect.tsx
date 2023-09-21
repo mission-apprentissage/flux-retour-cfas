@@ -29,7 +29,7 @@ function OrganismesFilterSelect(props: Props) {
                   )}
                 </Stack>
                 <Box
-                  fontSize="epsilon"
+                  fontSize="zeta"
                   as="i"
                   className={isExpanded ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
                   marginLeft="1v"
