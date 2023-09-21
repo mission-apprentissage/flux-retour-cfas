@@ -21,7 +21,7 @@ export default {
   },
   19040492100017: {
     uai: "0040533H",
-    siret: "1904049210001",
+    siret: "19040492100017",
     nom: "LYCEE POLYVALENT TEST",
     nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
     adresse: {
