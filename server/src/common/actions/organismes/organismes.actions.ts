@@ -644,6 +644,14 @@ export async function configureOrganismeERP(
   if (!(await canConfigureOrganismeERP(ctx, organismeId))) {
     throw Boom.forbidden("Permissions invalides");
   }
+  if (conf.mode_de_transmission === null) {
+    await organismesDb().updateOne(
+      { _id: new ObjectId(organismeId) },
+      {
+        $unset: { mode_de_transmission: "" },
+      }
+    );
+  }
   await organismesDb().updateOne({ _id: new ObjectId(organismeId) }, { $set: stripEmptyFields(conf) as any });
 }
 

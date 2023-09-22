@@ -82,7 +82,7 @@ const EffectifsPage = ({ isMine, organisme }: EffectifsPageProps) => {
     );
   } else if (!organisme.mode_de_transmission) {
     MainComponent = <ChoixTransmission organismeId={organisme._id} isMine={isMine} />;
-  } else if (!organisme.erps?.length) {
+  } else if (organisme.mode_de_transmission === "API" && !organisme.erps?.length) {
     MainComponent = <ChoixERP isMine={isMine} organisme={organisme} />;
   } else {
     MainComponent = (
