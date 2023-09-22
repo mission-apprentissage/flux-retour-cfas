@@ -1,4 +1,30 @@
 export const formationSchema = {
+  "formation.cfd": {
+    label: "Code Formation Diplôme (CFD)",
+    mask: "C",
+    maskBlocks: [
+      {
+        name: "C",
+        mask: "Pattern",
+        pattern: "^.+$",
+      },
+    ],
+  },
+  "formation.rncp": {
+    required: true,
+    showInfo: true,
+    label: "Code RNCP de la formation",
+    requiredMessage: "Le Code RNCP est obligatoire",
+    mask: "C",
+    maskBlocks: [
+      {
+        name: "C",
+        mask: "Pattern",
+        pattern: "^.+$",
+      },
+    ],
+  },
+
   "formation.duree_formation_relle": {
     fieldType: "numberStepper",
     required: true,
@@ -35,8 +61,21 @@ export const formationSchema = {
     precision: 0,
   },
   "formation.annee": {
-    fieldType: "number",
+    fieldType: "numberStepper",
+    required: true,
     label: "Année de la formation concernée",
+    requiredMessage: "L'année de formation est obligatoire",
+    validateMessage: " n'est pas valide (1,2,3,4,5)",
+    mask: "C",
+    maskBlocks: [
+      {
+        name: "C",
+        mask: "Pattern",
+        pattern: "^\\d*$",
+      },
+    ],
+    min: 1,
+    precision: 0,
   },
   "formation.date_inscription": {
     fieldType: "date",
