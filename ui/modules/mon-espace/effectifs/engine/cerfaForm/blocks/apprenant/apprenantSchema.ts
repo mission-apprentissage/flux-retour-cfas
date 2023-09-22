@@ -96,7 +96,7 @@ export const apprenantSchema = {
       },
     ],
   },
-  "apprenant.handicap": {
+  "apprenant.rqth": {
     fieldType: "radio",
     label: "Déclare bénéficier de la reconnaissance travailleur handicapé :",
     options: [
@@ -109,6 +109,10 @@ export const apprenantSchema = {
         value: false,
       },
     ],
+  },
+  "apprenant.date_rqth": {
+    fieldType: "date",
+    label: "Date de reconnaissance travailleur handicapé :",
   },
   "apprenant.inscription_sportif_haut_niveau": {
     fieldType: "radio",

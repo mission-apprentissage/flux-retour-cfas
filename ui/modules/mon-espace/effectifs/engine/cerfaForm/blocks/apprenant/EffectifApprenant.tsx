@@ -20,7 +20,8 @@ export const EffectifApprenant = memo(({ apprenant }: { apprenant: any }) => {
           <InputController name="apprenant.date_de_naissance" />
           <InputController name="apprenant.code_postal_de_naissance" />
           <InputController name="apprenant.nationalite" />
-          <InputController name="apprenant.handicap" />
+          <InputController name="apprenant.rqth" />
+          <InputController name="apprenant.date_rqth" />
           <InputController name="apprenant.inscription_sportif_haut_niveau" />
           <InputController name="apprenant.courriel" />
           <InputController name="apprenant.telephone" />

@@ -22,8 +22,8 @@ export const formationEffectifSchema = object(
     niveau_libelle: formationsProps.niveau_libelle,
     annee: integer({ description: "Numéro de l'année dans la formation (promo)" }),
     // FIN champs collectés
-    date_debut_formation: date({ description: "Date de début de la formation" }),
-    date_fin_formation: date({ description: "Date de fin de la formation" }),
+    date_debut_formation: date({ description: "Date de début de la formation" }), // Obsolete, useless à virer
+    date_fin_formation: date({ description: "Date de fin de la formation" }), // Obsolete, useless à virer
     date_obtention_diplome: date({ description: "Date d'obtention du diplôme" }),
     duree_formation_relle: integer({ description: "Durée réelle de la formation en mois" }),
     periode: arrayOf(integer(), { description: "Période de la formation, en année (peut être sur plusieurs années)" }),
@@ -41,7 +41,7 @@ export const formationEffectifSchema = object(
     formation_presentielle: boolean({ description: "Formation en présentiel" }),
     duree_theorique: integer({ description: "Durée théorique de la formation en mois" }),
     date_fin: date({ description: "Date de fin de la formation" }),
-    date_debut: date({ description: "Date de début de la formation" }),
+    date_debut: date({ description: "Date de début de la formation" }), // Obsolete, useless à virer
     date_entree: date({ description: "Date d'entrée en formation" }),
   },
   {
