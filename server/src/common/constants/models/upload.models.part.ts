@@ -16,7 +16,6 @@ export const preDefinedModels = [
       code_postal_de_naissance: "code_postal_de_naissance",
       nationalite: "nationalite",
       regime_scolaire: "regime_scolaire",
-      handicap: "handicap",
       inscription_sportif_haut_niveau: "inscription_sportif_haut_niveau",
       courriel: "courriel",
       telephone: "telephone",
