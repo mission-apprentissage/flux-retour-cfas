@@ -39,7 +39,6 @@ export const apprenantSchema = object(
       enum: ["I", "D", "E", "IE"],
     }),
     rqth: boolean({
-      // note: anciennement "handicap", mais aucun record en base
       description: "Apprenant en situation d'handicape (RQTH)",
     }),
     date_rqth: date({

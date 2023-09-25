@@ -61,7 +61,6 @@ const mappingModel = {
   code_postal_de_naissance: "apprenant.code_postal_de_naissance",
   nationalite: "apprenant.nationalite",
   regime_scolaire: "apprenant.regime_scolaire",
-  handicap: "apprenant.handicap",
   inscription_sportif_haut_niveau: "apprenant.inscription_sportif_haut_niveau",
   courriel: "apprenant.courriel",
   telephone: "apprenant.telephone",

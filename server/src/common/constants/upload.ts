@@ -54,10 +54,6 @@ export const OPTIONAL_KEYS = {
     label: "Régime scolaire de l'apprenant(e)",
     value: "regime_scolaire",
   },
-  handicap: {
-    label: "Situation de handicap",
-    value: "handicap",
-  },
   inscription_sportif_haut_niveau: {
     label: "Sportif de haut niveau",
     value: "inscription_sportif_haut_niveau",
