@@ -556,7 +556,7 @@ describe("Processus d'ingestion", () => {
             referent_handicap: {
               nom: "Doe",
               prenom: "John",
-              email: "a3@example.org",
+              email: "a3@example-example.org",
             },
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
             duree_theorique: 2,
