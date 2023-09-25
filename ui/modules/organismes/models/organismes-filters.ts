@@ -6,6 +6,7 @@ export interface OrganismesFiltersQuery {
   transmission: string;
   nature: string;
   ferme: string;
+  localisation: string;
 }
 
 export interface OrganismesFilters {
@@ -14,6 +15,7 @@ export interface OrganismesFilters {
   prepa_apprentissage: boolean[];
   nature: string[];
   ferme: boolean[];
+  localisation: string[];
 }
 
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
@@ -26,6 +28,7 @@ export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): 
     transmission: query.transmission?.split(",").map((item) => (item === "true" ? true : false)) ?? [true, false],
     nature: query.nature?.split(",") ?? ["responsable", "formateur", "responsable_formateur"],
     ferme: query.ferme?.split(",").map((item) => (item === "true" ? true : false)) ?? [true, false],
+    localisation: [],
   };
 }
 
@@ -38,5 +41,6 @@ export function convertOrganismesFiltersToQuery(
     transmission: organismesFilters.transmission?.join(","),
     nature: organismesFilters.nature?.join(","),
     ferme: organismesFilters.ferme?.join(","),
+    localisation: organismesFilters.localisation?.join(","),
   });
 }

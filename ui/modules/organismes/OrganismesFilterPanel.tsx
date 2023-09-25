@@ -5,10 +5,10 @@ import { useMemo } from "react";
 import Link from "@/components/Links/Link";
 
 import FiltreOrganismesEtat from "./filters/FiltreOrganismeEtat";
+import FiltreOrganismeLocalisation from "./filters/FiltreOrganismeLocalisation";
 import FiltreOrganismesNature from "./filters/FiltreOrganismeNature";
 import FiltreOrganismeTransmission from "./filters/FiltreOrganismeTransmission";
 import FiltreYesNo from "./filters/FiltreYesNo";
-import OrganismesFilterSelect from "./filters/OrganismesFilterSelect";
 import {
   OrganismesFilters,
   OrganismesFiltersQuery,
@@ -64,59 +64,49 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
       <HStack>
         {/* FILTRE LOCALISATION */}
         {props?.showFilterLocalisation && (
-          <OrganismesFilterSelect label="Localisation" badge={50}>
-            EN COURS
-          </OrganismesFilterSelect>
+          <FiltreOrganismeLocalisation
+            value={organismesFilters.localisation}
+            onChange={(localisation) => updateState({ localisation })}
+          />
         )}
 
         {/* FILTRE NATURE */}
         {props?.showFilterNature && (
-          <OrganismesFilterSelect label="Nature" badge={organismesFilters.nature?.length}>
-            <FiltreOrganismesNature value={organismesFilters.nature} onChange={(nature) => updateState({ nature })} />
-          </OrganismesFilterSelect>
+          <FiltreOrganismesNature value={organismesFilters.nature} onChange={(nature) => updateState({ nature })} />
         )}
 
         {/* FILTRE TRANSMISSION */}
         {props?.showFilterTransmission && (
-          <OrganismesFilterSelect
-            label="Transmission au tableau de bord"
-            badge={organismesFilters.transmission?.length}
-          >
-            <FiltreOrganismeTransmission
-              fieldName="transmission"
-              value={organismesFilters.transmission}
-              onChange={(transmission) => updateState({ transmission })}
-            />
-          </OrganismesFilterSelect>
+          <FiltreOrganismeTransmission
+            fieldName="transmission"
+            value={organismesFilters.transmission}
+            onChange={(transmission) => updateState({ transmission })}
+          />
         )}
 
         {/* FILTRE QUALIOPI */}
         {props?.showFilterQualiopi && (
-          <OrganismesFilterSelect label="Certification qualiopi" badge={organismesFilters.qualiopi?.length}>
-            <FiltreYesNo
-              fieldName="qualiopi"
-              value={organismesFilters.qualiopi}
-              onChange={(qualiopi) => updateState({ qualiopi })}
-            />
-          </OrganismesFilterSelect>
+          <FiltreYesNo
+            fieldName="qualiopi"
+            filterLabel="Certification qualiopi"
+            value={organismesFilters.qualiopi}
+            onChange={(qualiopi) => updateState({ qualiopi })}
+          />
         )}
 
         {/* FILTRE PREPA APPRENTISSAGE */}
         {props?.showFilterPrepaApprentissage && (
-          <OrganismesFilterSelect label="Prépa-apprentissage" badge={organismesFilters.prepa_apprentissage?.length}>
-            <FiltreYesNo
-              fieldName="prepa_apprentissage"
-              value={organismesFilters.prepa_apprentissage}
-              onChange={(prepa_apprentissage) => updateState({ prepa_apprentissage })}
-            />
-          </OrganismesFilterSelect>
+          <FiltreYesNo
+            fieldName="prepa_apprentissage"
+            filterLabel="Prépa-apprentissage"
+            value={organismesFilters.prepa_apprentissage}
+            onChange={(prepa_apprentissage) => updateState({ prepa_apprentissage })}
+          />
         )}
 
         {/* FILTRE ETAT */}
         {props?.showFilterEtat && (
-          <OrganismesFilterSelect label="Etat" badge={organismesFilters.ferme?.length}>
-            <FiltreOrganismesEtat value={organismesFilters.ferme} onChange={(ferme) => updateState({ ferme })} />
-          </OrganismesFilterSelect>
+          <FiltreOrganismesEtat value={organismesFilters.ferme} onChange={(ferme) => updateState({ ferme })} />
         )}
 
         {/* REINITIALISER */}
