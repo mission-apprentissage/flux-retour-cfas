@@ -97,7 +97,6 @@ export const generateSifa = async (organisme_id: ObjectId) => {
   >[];
 
   const items: any[] = [];
-
   for (const effectif of effectifs) {
     const formationBcn =
       (await findFormationById(effectif.formation.formation_id)) ||
@@ -152,11 +151,6 @@ export const generateSifa = async (organisme_id: ObjectId) => {
 
     // Note for later: maybe we should not remove incomplete effectifs, to allow the user to fix them manually.
     if (Object.values(requiredFields).some((val) => val === undefined)) {
-      console.log("Incomplete effectif, skipping", effectif);
-      console.log(
-        "Missing fields",
-        Object.entries(requiredFields).filter(([, val]) => val === undefined)
-      );
       continue;
     }
 
