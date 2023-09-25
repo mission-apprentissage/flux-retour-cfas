@@ -47,7 +47,7 @@ const extensions = {
     ),
   siret: () =>
     z.preprocess(
-      (v: any) => (v ? String(v) : v),
+      (v: any) => (v ? String(v).replace(/\s+/g, "") : v),
       z.string().trim().regex(SIRET_REGEX, "SIRET invalide") // e.g 01234567890123
     ),
   uai: () => z.string().trim().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
