@@ -9,7 +9,7 @@ import stripNullProperties from "@/common/utils/stripNullProperties";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
 import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
 
-const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
+const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 500;
 
 export default () => {
   const router = express.Router();
