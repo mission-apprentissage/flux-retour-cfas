@@ -20,14 +20,11 @@ export interface OrganismesFilters {
 
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
   return {
-    qualiopi: query.qualiopi?.split(",").map((item) => (item === "true" ? true : false)) ?? [true, false],
-    prepa_apprentissage: query.prepa_apprentissage?.split(",").map((item) => (item === "true" ? true : false)) ?? [
-      true,
-      false,
-    ],
-    transmission: query.transmission?.split(",").map((item) => (item === "true" ? true : false)) ?? [true, false],
-    nature: query.nature?.split(",") ?? ["responsable", "formateur", "responsable_formateur"],
-    ferme: query.ferme?.split(",").map((item) => (item === "true" ? true : false)) ?? [true, false],
+    qualiopi: query.qualiopi?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
+    prepa_apprentissage: query.prepa_apprentissage?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
+    transmission: query.transmission?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
+    nature: query.nature?.split(",") ?? [],
+    ferme: query.ferme?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
     localisation: [],
   };
 }
