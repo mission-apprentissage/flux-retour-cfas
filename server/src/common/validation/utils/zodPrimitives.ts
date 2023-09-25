@@ -13,6 +13,7 @@ import {
   YEAR_RANGE_REGEX,
   INE_REGEX,
   NIR_LOOSE_REGEX,
+  ZOD_3_22_2_EMAIL_REGEX_PATTERN,
 } from "@/common/constants/validations";
 
 import { telephoneConverter } from "./frenchTelephoneNumber";
@@ -133,9 +134,14 @@ export const primitivesV1 = {
         .regex(INE_REGEX, "INE invalide")
         .describe("Identifiant National Élève de l'apprenant")
     ),
-    email: z.string().trim().email("Email non valide").describe("Email de l'apprenant").openapi({
-      example: "gaston.lenotre@domain.tld",
-    }),
+    email: z
+      .string()
+      .trim()
+      .regex(ZOD_3_22_2_EMAIL_REGEX_PATTERN, "Email non valide")
+      .describe("Email de l'apprenant")
+      .openapi({
+        example: "gaston.lenotre@domain.tld",
+      }),
     telephone: extensions.phone().describe("Téléphone de l'apprenant"),
     code_commune_insee: extensions.codeCommuneInsee().describe("Code Insee de la commune de résidence de l'apprenant"),
   },
@@ -310,7 +316,7 @@ export const primitivesV3 = {
     email: z
       .string()
       .trim()
-      .email("Email non valide")
+      .regex(ZOD_3_22_2_EMAIL_REGEX_PATTERN, "Email non valide")
       .describe("Email du responsable de l'apprenant")
       .openapi({ example: "escoffier@domain.tld" }),
   },
@@ -362,7 +368,7 @@ export const primitivesV3 = {
       prenom: z.string().openapi({
         description: "Prénom du référent handicap de la formation",
       }),
-      email: z.string().email().openapi({
+      email: z.string().regex(ZOD_3_22_2_EMAIL_REGEX_PATTERN, "Email non valide").openapi({
         description: "Email du référent handicap de la formation",
       }),
     },

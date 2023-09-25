@@ -24434,7 +24434,7 @@ request-debug@latest:
     typescript: ^5.0.4
     uuid: 8.3.2
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
-    zod: 3.22.2
+    zod: 3.21.4
     zod-express-middleware: 1.4.0
     zod-to-json-schema: 3.21.4
   languageName: unknown
@@ -27618,7 +27618,7 @@ request-debug@latest:
   languageName: node
   linkType: hard
 
-"zod@npm:3.22.2, zod@npm:^3.22.1":
+"zod@npm:^3.22.1":
   version: 3.22.2
   resolution: "zod@npm:3.22.2"
   checksum: 231e2180c8eabb56e88680d80baff5cf6cbe6d64df3c44c50ebe52f73081ecd0229b1c7215b9552537f537a36d9e36afac2737ddd86dc14e3519bdbc777e82b9
