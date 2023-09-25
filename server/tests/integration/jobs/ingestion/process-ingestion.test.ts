@@ -411,7 +411,7 @@ describe("Processus d'ingestion", () => {
         cause_exclusion_formation: "absences répétées et injustifiées",
         nom_referent_handicap_formation: "Doe",
         prenom_referent_handicap_formation: "John",
-        email_referent_handicap_formation: "a3@example.org",
+        email_referent_handicap_formation: "a3@example-example.org",
         cause_rupture_contrat: "abandon",
         contrat_date_debut_2: "2021-09-01T00:00:00.000Z",
         contrat_date_fin_2: "2022-06-30T00:00:00.000Z",
@@ -556,7 +556,7 @@ describe("Processus d'ingestion", () => {
             referent_handicap: {
               nom: "Doe",
               prenom: "John",
-              email: "a3@example.org",
+              email: "a3@example-example.org",
             },
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
             duree_theorique: 2,
