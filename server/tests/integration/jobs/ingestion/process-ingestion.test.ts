@@ -417,7 +417,7 @@ describe("Processus d'ingestion", () => {
         contrat_date_fin_2: "2022-06-30T00:00:00.000Z",
         contrat_date_rupture_2: "2022-06-30T00:00:00.000Z",
         cause_rupture_contrat_2: "abandon",
-        siret_employeur: "12345678901234",
+        siret_employeur: "123 456 7890 1234",
         siret_employeur_2: "12345678901234",
         formation_presentielle: true,
         date_inscription_formation: "2021-09-01T00:00:00.000Z",
