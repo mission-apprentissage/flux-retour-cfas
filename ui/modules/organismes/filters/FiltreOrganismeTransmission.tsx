@@ -1,4 +1,9 @@
 import { CheckboxGroup, Stack, Checkbox } from "@chakra-ui/react";
+import { useState } from "react";
+
+import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
+
+import { OrganismesFilterButton } from "./OrganismesFilterButton";
 
 interface FiltreOrganismeTransmissionProps {
   fieldName: string;
@@ -7,20 +12,35 @@ interface FiltreOrganismeTransmissionProps {
 }
 
 function FiltreOrganismeTransmission(props: FiltreOrganismeTransmissionProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const transmissions = props.value;
+
   return (
-    <CheckboxGroup
-      value={props.value?.map((item) => item.toString())}
-      onChange={(value) => props.onChange(value.map((v: string) => (v === "true" ? true : false)))}
-    >
-      <Stack>
-        <Checkbox value="true" key={`${props.fieldName}_true`} fontSize="mini" size="sm">
-          Transmets ou a déja transmis
-        </Checkbox>
-        <Checkbox value="false" key={`${props.fieldName}_false`} fontSize="mini" size="sm">
-          Ne transmets pas
-        </Checkbox>
-      </Stack>
-    </CheckboxGroup>
+    <div>
+      <OrganismesFilterButton
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        buttonLabel="Transmission au tableau de bord"
+        badge={transmissions?.length}
+      />
+      {isOpen && (
+        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)" p="3w">
+          <CheckboxGroup
+            value={props.value?.map((item) => item.toString())}
+            onChange={(value) => props.onChange(value.map((v: string) => (v === "true" ? true : false)))}
+          >
+            <Stack>
+              <Checkbox value="true" key={`${props.fieldName}_true`} fontSize="mini" size="sm">
+                Transmets ou a déja transmis
+              </Checkbox>
+              <Checkbox value="false" key={`${props.fieldName}_false`} fontSize="mini" size="sm">
+                Ne transmets pas
+              </Checkbox>
+            </Stack>
+          </CheckboxGroup>
+        </SimpleOverlayMenu>
+      )}
+    </div>
   );
 }
 
