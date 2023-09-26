@@ -198,8 +198,6 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       COM_ETAB: wrapNumString(dernierContratActif?.adresse?.code_postal),
     };
 
-    // date_debut_formation
-    // date_fin_formation
     // date_obtention_diplome
     // duree_formation_relle
 

@@ -128,9 +128,9 @@ export const schema = object(
     formation_presentielle: any({ description: "Formation 100% à distance ou non" }),
 
     // REQUIRED FIELDS
-    date_inscription_formation: any({ description: formationProps.date_debut_formation.description }),
-    date_entree_formation: any({ description: formationProps.date_debut_formation.description }),
-    date_fin_formation: any({ description: formationProps.date_fin_formation.description }),
+    date_inscription_formation: any({ description: formationProps.date_inscription.description }),
+    date_entree_formation: any({ description: formationProps.date_entree.description }),
+    date_fin_formation: any({ description: formationProps.date_fin.description }),
     duree_theorique_formation: any({ description: "Durée théorique de la formation" }),
 
     etablissement_responsable_uai: any({ description: "UAI de l'établissement responsable" }),

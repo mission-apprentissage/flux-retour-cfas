@@ -204,13 +204,14 @@ export default () => {
       merge(effectifDb, stripEmptyFields(restData));
 
     // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
-    if (dataToUpdate.formation.date_debut_formation)
-      dataToUpdate.formation.date_debut_formation = new Date(dataToUpdate.formation.date_debut_formation);
-    if (dataToUpdate.formation.date_fin_formation)
-      dataToUpdate.formation.date_fin_formation = new Date(dataToUpdate.formation.date_fin_formation);
+    if (dataToUpdate.formation.date_entree)
+      dataToUpdate.formation.date_entree = new Date(dataToUpdate.formation.date_entree);
+    if (dataToUpdate.formation.date_fin) dataToUpdate.formation.date_fin = new Date(dataToUpdate.formation.date_fin);
+    if (dataToUpdate.formation.date_inscription)
+      dataToUpdate.formation.date_inscription = new Date(dataToUpdate.formation.date_inscription);
     if (dataToUpdate.formation.date_obtention_diplome)
       dataToUpdate.formation.date_obtention_diplome = new Date(dataToUpdate.formation.date_obtention_diplome);
-
+    if (dataToUpdate.apprenant.date_rqth) dataToUpdate.apprenant.date_rqth = new Date(dataToUpdate.apprenant.date_rqth);
     if (dataToUpdate.apprenant.date_de_naissance)
       dataToUpdate.apprenant.date_de_naissance = new Date(dataToUpdate.apprenant.date_de_naissance);
 

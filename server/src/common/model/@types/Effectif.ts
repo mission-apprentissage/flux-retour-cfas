@@ -1102,14 +1102,6 @@ export interface Effectif {
      */
     annee?: number;
     /**
-     * Date de début de la formation
-     */
-    date_debut_formation?: Date;
-    /**
-     * Date de fin de la formation
-     */
-    date_fin_formation?: Date;
-    /**
      * Date d'obtention du diplôme
      */
     date_obtention_diplome?: Date;
@@ -1163,10 +1155,6 @@ export interface Effectif {
      * Date de fin de la formation
      */
     date_fin?: Date;
-    /**
-     * Date de début de la formation
-     */
-    date_debut?: Date;
     /**
      * Date d'entrée en formation
      */
