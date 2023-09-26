@@ -1,7 +1,4 @@
-import { organismeLookup } from "@/common/actions/helpers/filters";
 import { effectifsDb } from "@/common/model/collections";
-
-import { exportedMongoFieldsProjection } from "./export";
 
 /**
   Indicator s'occupe de construire un pipeline d'aggrégation pour obtenir un indicateur
@@ -192,20 +189,5 @@ export class Indicator {
         },
       },
     ];
-  }
-
-  /**
-   * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
-   */
-  async getFullExportFormattedListAtDate(searchDate: any, filterStages: any[] = [], indicateur: any) {
-    const exportList = await this.getListAtDate(searchDate, [...filterStages, { $lookup: organismeLookup }], {
-      projection: exportedMongoFieldsProjection,
-    });
-    return exportList.map((item) => ({
-      ...this.config.formatRow(item),
-      indicateur,
-      date_debut_formation: item.formation.periode ? item.formation.periode[0] : null,
-      date_fin_formation: item.formation.periode ? item.formation.periode[1] : null,
-    }));
   }
 }
