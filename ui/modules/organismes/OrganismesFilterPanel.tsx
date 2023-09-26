@@ -3,10 +3,12 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 import Link from "@/components/Links/Link";
+import useAuth from "@/hooks/useAuth";
 
+import FiltreOrganismeDepartements from "./filters/FiltreOrganismeDepartements";
 import FiltreOrganismesEtat from "./filters/FiltreOrganismeEtat";
-import FiltreOrganismeLocalisation from "./filters/FiltreOrganismeLocalisation";
 import FiltreOrganismesNature from "./filters/FiltreOrganismeNature";
+import FiltreOrganismeRegions from "./filters/FiltreOrganismeRegions";
 import FiltreOrganismeTransmission from "./filters/FiltreOrganismeTransmission";
 import FiltreYesNo from "./filters/FiltreYesNo";
 import {
@@ -27,6 +29,7 @@ export interface OrganismeFiltersListVisibilityProps {
 
 const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
   const router = useRouter();
+  const { auth } = useAuth();
 
   const { organismesFilters } = useMemo(() => {
     return {
@@ -56,18 +59,44 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     );
   };
 
+  console.log("orga :>> ", auth.organisation);
+
+  const allowedShowFilterDepartement = [
+    "TETE_DE_RESEAU",
+    "DREETS",
+    "DRAAF",
+    "CONSEIL_REGIONAL",
+    "CARIF_OREF_REGIONAL",
+    "ACADEMIE",
+    "OPERATEUR_PUBLIC_NATIONAL",
+    "CARIF_OREF_NATIONAL",
+    "ADMINISTRATEUR",
+  ].includes(auth?.organisation?.type);
+
+  const allowedShowFilterRegions = [
+    "TETE_DE_RESEAU",
+    "OPERATEUR_PUBLIC_NATIONAL",
+    "CARIF_OREF_NATIONAL",
+    "ADMINISTRATEUR",
+  ].includes(auth?.organisation?.type);
+
   return (
     <Stack spacing="0.5">
       <Text fontSize="zeta" fontWeight="extrabold">
         FILTRER PAR
       </Text>
       <HStack>
-        {/* FILTRE LOCALISATION */}
-        {props?.showFilterLocalisation && (
-          <FiltreOrganismeLocalisation
-            value={organismesFilters.localisation}
-            onChange={(localisation) => updateState({ localisation })}
+        {/* FILTRE DEPARTEMENT */}
+        {props?.showFilterLocalisation && allowedShowFilterDepartement && (
+          <FiltreOrganismeDepartements
+            value={organismesFilters.departements}
+            onChange={(departements) => updateState({ departements })}
           />
+        )}
+
+        {/* FILTRE REGION */}
+        {props?.showFilterLocalisation && allowedShowFilterRegions && (
+          <FiltreOrganismeRegions value={organismesFilters.regions} onChange={(regions) => updateState({ regions })} />
         )}
 
         {/* FILTRE NATURE */}
