@@ -52,6 +52,7 @@ Avant d'installer le projet, assurez-vous d'avoir les éléments suivants :
   ```
 - pwgen: `brew install pwgen`
 - bash 5+: `brew install bash`
+- brew install gh
 
 ### Clé GPG
 
