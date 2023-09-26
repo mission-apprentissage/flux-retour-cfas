@@ -14,6 +14,8 @@ import {
   Tbody,
   Flex,
   Heading,
+  UnorderedList,
+  ListItem,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -49,6 +51,29 @@ const dateFields = [
 
 const booleanFields = ["rqth_apprenant", "obtention_diplome_formation", "formation_presentielle"];
 
+const mandatoryFields = [
+  "nom_apprenant",
+  "prenom_apprenant",
+  "date_de_naissance_apprenant",
+  "annee_scolaire",
+  "statut_apprenant",
+  "date_metier_mise_a_jour_statut",
+  "date_inscription_formation",
+  "date_entree_formation",
+  "date_fin_formation",
+  "etablissement_responsable_uai",
+  "etablissement_responsable_siret",
+  "etablissement_formateur_uai",
+  "etablissement_formateur_siret",
+  "etablissement_lieu_de_formation_uai",
+  "etablissement_lieu_de_formation_siret",
+  "email_contact",
+  "adresse_apprenant",
+  "code_postal_apprenant",
+  "sexe_apprenant",
+  "annee_formation",
+];
+
 type Status = "validation_success" | "validation_failure" | "import_success" | "import_failure";
 
 // Enrich data with source and id_erp_apprenant
@@ -79,6 +104,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   const [headers, setHeaders] = useState<string[] | null>(null);
   const [data, setData] = useState<any[] | null>(null);
   const [errorsCount, setErrorsCount] = useState(0);
+  const [missingHeaders, setMissingHeaders] = useState<string[]>([]);
   const [status, setStatus] = useState<Status | null>(null);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
@@ -151,6 +177,8 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           });
           return acc;
         }, {});
+
+        setMissingHeaders(mandatoryFields.filter((header) => !headers.includes(header)));
 
         const rows = jsonData.map((row: any, index: number) => {
           const errors = errorsByRow[index] || [];
@@ -262,6 +290,19 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                 Vous pouvez voir le détail ligne à ligne ci-dessous. Vous devez modifier votre fichier et
                 l&apos;importer à nouveau.
               </Text>
+              {missingHeaders.length > 0 && (
+                <Text fontSize="sm" color="grey.800">
+                  Les colonnes suivantes sont obligatoires et n’ont pas été trouvées, veuillez vérifier leur présence
+                  dans le fichier&nbsp;:{" "}
+                  <UnorderedList mt="4">
+                    {missingHeaders.map((header) => (
+                      <ListItem key={header} color="red.500">
+                        {header}
+                      </ListItem>
+                    ))}
+                  </UnorderedList>
+                </Text>
+              )}
             </Box>
           </Ribbons>
         )}
