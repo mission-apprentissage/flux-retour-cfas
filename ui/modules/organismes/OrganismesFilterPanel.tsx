@@ -5,6 +5,12 @@ import { useMemo } from "react";
 import Link from "@/components/Links/Link";
 import useAuth from "@/hooks/useAuth";
 
+import {
+  PaginationInfosQuery,
+  parsePaginationInfosFromQuery,
+  convertPaginationInfosToQuery,
+} from "../models/pagination";
+
 import FiltreOrganismeDepartements from "./filters/FiltreOrganismeDepartements";
 import FiltreOrganismesEtat from "./filters/FiltreOrganismeEtat";
 import FiltreOrganismesNature from "./filters/FiltreOrganismeNature";
@@ -31,9 +37,12 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
   const router = useRouter();
   const { auth } = useAuth();
 
-  const { organismesFilters } = useMemo(() => {
+  const { organismesFilters, sort } = useMemo(() => {
+    const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
     return {
       organismesFilters: parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery),
+      pagination: pagination,
+      sort: sort ?? [{ desc: false, id: "nom" }],
     };
   }, [JSON.stringify(router.query)]);
 
@@ -41,7 +50,10 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     void router.push(
       {
         pathname: router.pathname,
-        query: { ...convertOrganismesFiltersToQuery({ ...organismesFilters, ...newParams }) },
+        query: {
+          ...convertOrganismesFiltersToQuery({ ...organismesFilters, ...newParams }),
+          ...convertPaginationInfosToQuery({ sort, ...newParams }),
+        },
       },
       undefined,
       { shallow: true }
@@ -58,8 +70,6 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
       { shallow: true }
     );
   };
-
-  console.log("orga :>> ", auth.organisation);
 
   const allowedShowFilterDepartement = [
     "TETE_DE_RESEAU",
