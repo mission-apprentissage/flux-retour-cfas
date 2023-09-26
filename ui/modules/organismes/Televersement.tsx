@@ -20,6 +20,7 @@ import { useDropzone } from "react-dropzone";
 import XLSX from "xlsx";
 
 import { _post } from "@/common/httpClient";
+import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
 import { cyrb53Hash, normalize } from "@/common/utils/stringUtils";
@@ -63,6 +64,13 @@ function toEffectifsQueue(data: any[], organismeId: string) {
         (e.date_de_naissance_apprenant || "").trim()
     ),
   }));
+}
+
+function fromIsoLikeDateStringToFrenchDate(date: string) {
+  if (!date || String(date) !== date) return date;
+  if (date.match(/^(\d{4})-(\d{2})-(\d{2})$/)) {
+    return formatDateNumericDayMonthYear(date);
+  }
 }
 
 export default function Televersement({ organismeId, isMine }: { organismeId: string; isMine: boolean }) {
@@ -307,13 +315,20 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                         if (error) {
                           return (
                             <Td key={key}>
-                              <Text color="grey.500">{row[key] || "Donnée manquante"}</Text>
+                              <Text color="grey.500">
+                                {(dateFields.includes(key) ? fromIsoLikeDateStringToFrenchDate(row[key]) : row[key]) ||
+                                  "Donnée manquante"}
+                              </Text>
                               <Text color="red.500">{error.message.replace("String", "Texte")}</Text>
                             </Td>
                           );
                         }
                       }
-                      return <Td key={key}>{row[key]}</Td>;
+                      return (
+                        <Td key={key}>
+                          {dateFields.includes(key) ? fromIsoLikeDateStringToFrenchDate(row[key]) : row[key]}
+                        </Td>
+                      );
                     })}
                   </Tr>
                 ))}
