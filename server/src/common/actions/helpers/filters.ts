@@ -271,6 +271,8 @@ export const fullOrganismesListFiltersSchema = {
   transmission: z
     .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
     .optional(),
+  regions: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
+  departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
 };
 
 export type FullOrganismesListFilters = z.infer<z.ZodObject<typeof fullOrganismesListFiltersSchema>>;
@@ -303,6 +305,14 @@ export const fullOrganismesListFiltersConfigurations: {
       if (value.length === 2)
         return [{ last_transmission_date: { $exists: true } }, { last_transmission_date: { $exists: false } }];
     },
+  },
+  departements: {
+    matchKey: "adresse.departement",
+    transformValue: (value) => ({ $in: value }),
+  },
+  regions: {
+    matchKey: "adresse.region",
+    transformValue: (value) => ({ $in: value }),
   },
 };
 

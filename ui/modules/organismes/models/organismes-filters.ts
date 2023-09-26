@@ -6,7 +6,8 @@ export interface OrganismesFiltersQuery {
   transmission: string;
   nature: string;
   ferme: string;
-  localisation: string;
+  regions?: string;
+  departements?: string;
 }
 
 export interface OrganismesFilters {
@@ -15,7 +16,8 @@ export interface OrganismesFilters {
   prepa_apprentissage: boolean[];
   nature: string[];
   ferme: boolean[];
-  localisation: string[];
+  regions: string[];
+  departements: string[];
 }
 
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
@@ -25,7 +27,8 @@ export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): 
     transmission: query.transmission?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
     nature: query.nature?.split(",") ?? [],
     ferme: query.ferme?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
-    localisation: [],
+    regions: query.regions?.split(",") ?? [],
+    departements: query.departements?.split(",") ?? [],
   };
 }
 
@@ -38,6 +41,7 @@ export function convertOrganismesFiltersToQuery(
     transmission: organismesFilters.transmission?.join(","),
     nature: organismesFilters.nature?.join(","),
     ferme: organismesFilters.ferme?.join(","),
-    localisation: organismesFilters.localisation?.join(","),
+    regions: organismesFilters.regions?.join(","),
+    departements: organismesFilters.departements?.join(","),
   });
 }

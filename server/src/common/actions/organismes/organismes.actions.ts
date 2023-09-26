@@ -713,7 +713,10 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
   return organisation ? await listContactsOrganisation(organisation._id) : [];
 }
 
-export async function listOrganisationOrganismes(ctx: AuthContext, filters: FullOrganismesListFilters): Promise<WithId<OrganismeWithPermissions>[]> {
+export async function listOrganisationOrganismes(
+  ctx: AuthContext,
+  filters: FullOrganismesListFilters
+): Promise<WithId<OrganismeWithPermissions>[]> {
   const restrictionOwnOrganisme =
     ctx.organisation.type === "ORGANISME_FORMATION"
       ? {
