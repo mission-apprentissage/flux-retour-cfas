@@ -9,7 +9,7 @@ export function getSentryOptions() {
     tracesSampleRate: config.env === "production" ? 0.1 : 1.0,
     tracePropagationTargets: [/\.apprentissage\.beta\.gouv\.fr$/],
     environment: config.env,
-    enabled: config.env !== "local",
+    enabled: false, // TODO: remettre `config.env !== "local",` quand l'intégration sera fonctionnelle
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Mongo({ useMongoose: false }),
