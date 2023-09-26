@@ -1,16 +1,4 @@
-import {
-  Box,
-  Flex,
-  Text,
-  HStack,
-  Button,
-  useDisclosure,
-  Heading,
-  Spinner,
-  VStack,
-  Circle,
-  Switch,
-} from "@chakra-ui/react";
+import { Box, Flex, Text, HStack, Button, useDisclosure, Heading, VStack, Circle, Switch } from "@chakra-ui/react";
 import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import React, { useState, useMemo } from "react";
@@ -19,27 +7,11 @@ import { useRecoilValue } from "recoil";
 import { _getBlob } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { organismeAtom } from "@/hooks/organismeAtoms";
-import useDownloadClick from "@/hooks/useDownloadClick";
-import { DownloadLine } from "@/theme/components/icons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
 import AjoutApprenantModal from "./AjoutApprenantModal";
 import EffectifsTable from "./EffectifsTable";
 import { Input } from "./formEngine/components/Input/Input";
-
-const DownloadButton = ({ title, fileName, getFile }) => {
-  const { onClick, isLoading } = useDownloadClick(getFile, fileName);
-
-  return (
-    <Button size="md" onClick={onClick} variant="secondary">
-      {isLoading && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
-      {!isLoading && <DownloadLine />}
-      <Text as="span" ml={2}>
-        {title}
-      </Text>
-    </Button>
-  );
-};
 
 const BadgeButton = ({ onClick, active = false, children, ...props }) => {
   return (
@@ -83,7 +55,6 @@ const Effectifs = ({ organismesEffectifs, nbDuplicates, isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue<any>(organismeAtom);
   const ajoutModal = useDisclosure();
-  const exportFilename = `tdb-données-${organisme?.nom || ""}-${new Date().toLocaleDateString()}.csv`;
   const [searchValue, setSearchValue] = useState("");
 
   const organismesEffectifsGroupedBySco = useMemo(
@@ -103,14 +74,6 @@ const Effectifs = ({ organismesEffectifs, nbDuplicates, isMine }) => {
           {isMine ? "Mes effectifs" : "Ses effectifs"}
         </Heading>
         <HStack spacing={4}>
-          {organismesEffectifs.length > 0 && (
-            <DownloadButton
-              fileName={exportFilename}
-              getFile={() => _getBlob(`/api/v1/indicateurs-export?organisme_id=${organisme._id}&date=${Date.now()}`)}
-              title="Télécharger rapport"
-            />
-          )}
-
           <Button
             size="md"
             variant="secondary"

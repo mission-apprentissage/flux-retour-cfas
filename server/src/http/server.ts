@@ -16,12 +16,10 @@ import { z } from "zod";
 import "express-async-errors";
 
 import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
-import { exportAnonymizedEffectifsAsCSV } from "@/common/actions/effectifs/effectifs-export.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
   effectifsFiltersSchema,
   fullEffectifsFiltersSchema,
-  legacyEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
@@ -576,14 +574,7 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/v1/effectif", effectif())
-    .get("/api/v1/server-events", serverEventsHandler)
-    // à supprimer au profit de la route /api/v1/organismes/:id/indicateurs JSON (+ CSV côté UI) une fois les écrans OF revus et le bouton
-    // export anonymisé potentiellement supprimé
-    .get("/api/v1/indicateurs-export", async (req, res) => {
-      const filters = await validateFullZodObjectSchema(req.query, legacyEffectifsFiltersSchema);
-      const csv = await exportAnonymizedEffectifsAsCSV(req.user, filters);
-      res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
-    });
+    .get("/api/v1/server-events", serverEventsHandler);
 
   /*
    * referentiel
