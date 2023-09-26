@@ -807,7 +807,7 @@ describe("Processus d'ingestion", () => {
 
         expect(sortByPath(updatedInput?.validation_errors)).toStrictEqual([
           {
-            message: "Format invalide",
+            message: "Format invalide (format attendu : 2023-2024)",
             path: ["annee_scolaire"],
           },
           {
@@ -978,7 +978,7 @@ describe("Processus d'ingestion", () => {
 
         expect(sortByPath(updatedInput?.validation_errors)).toStrictEqual([
           {
-            message: "Format invalide",
+            message: "Format invalide (format attendu : 2023-2024)",
             path: ["annee_scolaire"],
           },
         ]);

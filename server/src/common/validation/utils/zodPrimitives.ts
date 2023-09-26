@@ -48,6 +48,7 @@ const extensions = {
     ),
   siret: () =>
     z.preprocess(
+      // On accepte les tirets, les espaces et les points dans le SIRET (et on les retire silencieusement)
       (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
       z.string().trim().regex(SIRET_REGEX, "SIRET invalide") // e.g 01234567890123
     ),
@@ -231,11 +232,12 @@ export const primitivesV1 = {
         example: `${currentYear - 2}-${currentYear + 1}` as any,
       }),
     annee_scolaire: z.preprocess(
-      (v: any) => (v ? String(v) : v),
+      // On accepte les "/" dans l'année scolaire (et on les retire silencieusement)
+      (v: any) => (v ? String(v).replace(/\//g, "-") : v),
       z
         .string()
         .trim()
-        .regex(YEAR_RANGE_REGEX, "Format invalide")
+        .regex(YEAR_RANGE_REGEX, "Format invalide (format attendu : 2023-2024)")
         .describe("Période scolaire")
         .openapi({
           type: "string",
