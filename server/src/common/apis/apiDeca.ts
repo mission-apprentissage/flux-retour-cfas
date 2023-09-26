@@ -66,11 +66,21 @@ export const getAllContrats = async (dateDebut: string, dateFin: string): Promis
 
   // Fetch de la première page
   const apiResponse: ApiDeca = await getContratsDeca(dateDebut, dateFin, 1);
+  logger.info(
+    `> API DECA - Fetch => [dateDebut : ${dateDebut} - dateFin : ${dateFin} - page : 1] => Métadonnées Réponse : ${JSON.stringify(
+      apiResponse?.metadonnees
+    )}`
+  );
   allContrats.push(...apiResponse.contrats);
 
   // Fetch sur toutes les pages restantes
   for (let pageIndex = 2; pageIndex <= apiResponse.metadonnees.totalPages; pageIndex++) {
     const apiResponse: ApiDeca = await getContratsDeca(dateDebut, dateFin, pageIndex);
+    logger.info(
+      `> API DECA - Fetch => [dateDebut : ${dateDebut} - dateFin : ${dateFin} - page : ${pageIndex}] => Métadonnées Réponse : ${JSON.stringify(
+        apiResponse?.metadonnees
+      )}`
+    );
     allContrats.push(...apiResponse.contrats);
   }
 
