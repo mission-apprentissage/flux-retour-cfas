@@ -25,7 +25,6 @@ services:
     environment:
       - MP_DATA_FILE=/data/mailpit.db
       - MP_UI_AUTH_FILE=/auth
-      - MP_WEBROOT=/smtp/
     logging:
       driver: "fluentd"
       options:
