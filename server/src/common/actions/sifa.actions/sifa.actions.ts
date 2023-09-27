@@ -1,6 +1,7 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
+import { getAnneesScolaireListFromDate } from "shared";
 
 import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
 import { findFormationById, getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
@@ -81,17 +82,16 @@ export const isEligibleSIFA = ({ historique_statut }) => {
 };
 
 export const generateSifa = async (organisme_id: ObjectId) => {
-  const currentYear = new Date().getFullYear();
-  const previousYear = currentYear - 1;
-  const anneScolaire = `${previousYear}-${currentYear}`;
-
   const organisme = await findOrganismeById(organisme_id);
   if (!organisme) {
     throw new Error("organisme not found");
   }
 
   const effectifs = (
-    await findEffectifsByQuery({ organisme_id: new ObjectId(organisme_id), annee_scolaire: anneScolaire })
+    await findEffectifsByQuery({
+      organisme_id: new ObjectId(organisme_id),
+      annee_scolaire: getAnneesScolaireListFromDate(new Date()),
+    })
   ).filter((effectif) => isEligibleSIFA({ historique_statut: effectif.apprenant.historique_statut })) as Required<
     WithId<Effectif>
   >[];
