@@ -13,6 +13,7 @@ import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
 import { useOrganisme } from "@/hooks/organismes";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
 import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
@@ -53,6 +54,7 @@ interface IndicateursFormProps {
 function IndicateursForm(props: IndicateursFormProps) {
   const { auth, organisationType } = useAuth();
   const router = useRouter();
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
   const { organisme } = useOrganisme(props.organismeId); // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -325,6 +327,7 @@ function IndicateursForm(props: IndicateursFormProps) {
           <DownloadLinkButton
             isDisabled={indicateursEffectifs?.length === 0}
             action={async () => {
+              trackPlausibleEvent("telechargement_liste_repartition_effectifs");
               const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(
                 ({ organisme_id, apprenants, ...effectif }) => effectif // eslint-disable-line @typescript-eslint/no-unused-vars
               );
