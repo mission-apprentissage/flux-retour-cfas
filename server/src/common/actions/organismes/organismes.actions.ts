@@ -1,5 +1,6 @@
 import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
+import { getAnneesScolaireListFromDate } from "shared";
 import { v4 as uuidv4 } from "uuid";
 
 import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
@@ -17,7 +18,6 @@ import { organismesDb, effectifsDb, organisationsDb } from "@/common/model/colle
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
-import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { cleanProjection } from "@/common/utils/mongoUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";

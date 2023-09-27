@@ -1,9 +1,9 @@
 import { subYears } from "date-fns";
 import { ObjectId } from "mongodb";
+import { getAnneesScolaireListFromDate } from "shared";
 import { z } from "zod";
 
 import { SIRET_REGEX } from "@/common/constants/validations";
-import { getAnneesScolaireListFromDate } from "@/common/utils/anneeScolaireUtils";
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { isValidUAI } from "@/common/utils/validationUtils";
 

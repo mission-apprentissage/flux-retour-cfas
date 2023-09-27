@@ -1,8 +1,7 @@
 import { ObjectId } from "mongodb";
+import { getAnneesScolaireListFromDate } from "shared";
 
 import { effectifsDb } from "@/common/model/collections";
-
-import { getAnneesScolaireListFromDate } from "../utils/anneeScolaireUtils";
 
 /**
  * Construction du pipeline d'aggregation du clean des noms / prenom pour identification des doublons
