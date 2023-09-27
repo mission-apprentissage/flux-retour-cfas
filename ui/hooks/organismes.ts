@@ -69,22 +69,25 @@ export function useOrganisationOrganisme(enabled?: boolean) {
 export function useOrganisationOrganismes() {
   const router = useRouter();
 
-  const { organismesFilters } = useMemo(() => {
-    return { organismesFilters: parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery) };
-  }, [JSON.stringify(router.query)]);
-
   const {
     data: organismes,
     isLoading,
     error,
-  } = useQuery<Organisme[], any>(
-    ["organisation/organismes", JSON.stringify(organismesFilters)],
-    () => _get("/api/v1/organisation/organismes"),
-    { enabled: router.isReady }
-  );
+  } = useQuery<Organisme[], any>(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {
+    enabled: router.isReady,
+  });
+
+  const organismesFiltres = useMemo(() => {
+    return organismes
+      ? filterOrganismesArrayFromOrganismesFilters(
+          organismes,
+          parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery)
+        )
+      : undefined;
+  }, [organismes, router.query]);
 
   return {
-    organismes: filterOrganismesArrayFromOrganismesFilters(organismes, organismesFilters),
+    organismes: organismesFiltres,
     isLoading,
     error,
   };
