@@ -429,11 +429,7 @@ function setupRoutes(app: Application) {
         "/effectifs",
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
-          return await getOrganismeEffectifs(
-            res.locals.organismeId,
-            req.query.annee_scolaire as string | undefined,
-            req.query.sifa === "true"
-          );
+          return await getOrganismeEffectifs(res.locals.organismeId, req.query.sifa === "true");
         })
       )
       .get(

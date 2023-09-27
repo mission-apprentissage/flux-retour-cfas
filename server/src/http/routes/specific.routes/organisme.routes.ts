@@ -1,21 +1,28 @@
 import Boom from "boom";
 import { compact, get } from "lodash-es";
 import { ObjectId } from "mongodb";
+import { getAnneesScolaireListFromDate } from "shared";
 
-import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
 import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions";
 import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
-import { Effectif } from "@/common/model/@types/Effectif";
+import { effectifsDb } from "@/common/model/collections";
 
-export async function getOrganismeEffectifs(organismeId: ObjectId, anneeScolaire: string | undefined, sifa = false) {
-  const filter: Partial<Effectif> = { organisme_id: organismeId };
-  if (anneeScolaire) {
-    filter.annee_scolaire = anneeScolaire;
-  }
+export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false) {
+  console.log(getAnneesScolaireListFromDate(new Date()));
+  const effectifs = await effectifsDb()
+    .find({
+      organisme_id: organismeId,
+      ...(sifa
+        ? {
+            annee_scolaire: {
+              $in: getAnneesScolaireListFromDate(new Date()),
+            },
+          }
+        : {}),
+    })
+    .toArray();
 
-  const effectifsDb = await findEffectifsByQuery(filter);
-
-  const effectifs: any[] = [];
+  const effectifsSifa: any[] = [];
 
   const requiredFieldsSifa = [
     "apprenant.nom",
@@ -35,7 +42,7 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, anneeScolaire
     "apprenant.adresse.commune",
   ];
 
-  for (const effectifDb of effectifsDb) {
+  for (const effectifDb of effectifs) {
     const { _id, id_erp_apprenant, source, annee_scolaire, validation_errors, apprenant, formation } = effectifDb;
 
     let historique_statut = apprenant.historique_statut;
@@ -66,11 +73,11 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, anneeScolaire
     };
 
     if (!sifa || isEligibleSIFA({ historique_statut })) {
-      effectifs.push(effectif);
+      effectifsSifa.push(effectif);
     }
   }
 
-  return effectifs;
+  return effectifsSifa;
 }
 
 export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {
