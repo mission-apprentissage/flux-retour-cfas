@@ -1,7 +1,6 @@
 import { usePlausible } from "next-plausible";
 import { PlausibleGoalType } from "shared";
 
-import { _get, _post, _put } from "@/common/httpClient";
 import { getOrganisationLabel } from "@/common/internal/Organisation";
 
 import useAuth from "./useAuth";
