@@ -1,9 +1,8 @@
-import { HStack, Stack, Text } from "@chakra-ui/react";
+import { Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 import { OrganisationType } from "@/common/internal/Organisation";
-import Link from "@/components/Links/Link";
 import useAuth from "@/hooks/useAuth";
 
 import {
@@ -162,8 +161,8 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
         )}
 
         {/* REINITIALISER */}
-        <Link
-          href=""
+        <Button
+          variant="secondary"
           onClick={resetFilters}
           color="action-high-blue-france"
           borderBottom="1px"
@@ -171,7 +170,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
           _hover={{ textDecoration: "none" }}
         >
           réinitialiser
-        </Link>
+        </Button>
       </HStack>
     </Stack>
   );

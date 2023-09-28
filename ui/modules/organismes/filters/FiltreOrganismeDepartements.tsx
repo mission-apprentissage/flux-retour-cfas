@@ -42,7 +42,7 @@ function FiltreOrganismeDepartements(props: FiltreOrganismeDepartementsProps) {
         badge={departements?.length}
       />
       {isOpen && (
-        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)" p="3w">
+        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup
             defaultValue={departements}
             size="sm"

@@ -18,7 +18,7 @@ function FiltreOrganismesNature(props: FiltreOrganismesNatureProps) {
     <div>
       <OrganismesFilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Nature" badge={natures?.length} />
       {isOpen && (
-        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)" p="3w">
+        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup value={props.value} onChange={(value) => props.onChange(value.map((v: string) => v))}>
             <Stack>
               <Checkbox value="responsable" key="responsable" fontSize="mini" size="sm">
