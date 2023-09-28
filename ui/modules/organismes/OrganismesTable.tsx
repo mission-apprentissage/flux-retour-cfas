@@ -313,6 +313,10 @@ function OrganismesTable(props: OrganismesTableProps) {
         </HStack>
       </Box>
 
+      <Text>
+        <strong>{filteredOrganismes.length} organismes</strong>
+      </Text>
+
       <NewTable
         data={filteredOrganismes || []}
         loading={false}
