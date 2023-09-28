@@ -12,6 +12,7 @@ import { normalize } from "@/common/utils/stringUtils";
 import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
 import Link from "@/components/Links/Link";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import NatureOrganismeTag from "@/modules/indicateurs/NatureOrganismeTag";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { convertPaginationInfosToQuery } from "@/modules/models/pagination";
@@ -219,6 +220,7 @@ interface OrganismesTableProps {
 function OrganismesTable(props: OrganismesTableProps) {
   const defaultSort: SortingState = [{ desc: false, id: "normalizedName" }];
   const router = useRouter();
+  const { trackPlausibleEvent } = usePlausibleTracking();
   const [searchValue, setSearchValue] = useState<string>(String(router.query.search ?? ""));
   const [sort, setSort] = useState<SortingState>(defaultSort);
 
@@ -274,6 +276,9 @@ function OrganismesTable(props: OrganismesTableProps) {
 
         <DownloadLinkButton
           action={() => {
+            trackPlausibleEvent(
+              props.modeNonFiable ? "telechargement_liste_of_a_fiabiliser" : "telechargement_liste_of_fiables"
+            );
             exportDataAsXlsx(
               `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
               filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),

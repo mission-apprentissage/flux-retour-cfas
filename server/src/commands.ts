@@ -12,6 +12,7 @@ import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { addJob, processor } from "./jobs/jobs_actions";
+import { seedPlausibleGoals } from "./jobs/seed/plausible/goals";
 import { generateTypes } from "./jobs/seed/types/generate-types";
 import { updateUserPassword } from "./jobs/users/update-user-password";
 
@@ -317,8 +318,9 @@ program
 program
   .command("seed:plausible:goals")
   .description("Seed plausible goals")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("seed:plausible:goals"));
+  .action(async () => {
+    await seedPlausibleGoals();
+  });
 
 program
   .command("seed:assets:clear")

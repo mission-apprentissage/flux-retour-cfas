@@ -1,11 +1,13 @@
 import { Box, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import { ReactNode } from "react";
+import { PlausibleGoalType } from "shared";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs } from "@/modules/models/indicateurs";
 
@@ -55,15 +57,16 @@ function Card({ label, count, tooltipLabel, icon, big = false, children }: CardP
   );
 }
 
-export const typesEffectifNominatif = [
-  "apprenant",
-  "apprenti",
-  "inscritSansContrat",
-  "rupturant",
-  "abandon",
-  "inconnu",
-] as const;
+export const typesEffectifNominatif = ["apprenant", "apprenti", "inscritSansContrat", "rupturant", "abandon"] as const;
 export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
+
+const typeToGoalPlausible: { [key in TypeEffectifNominatif]: PlausibleGoalType } = {
+  inscritSansContrat: "telechargement_liste_sans_contrats",
+  rupturant: "telechargement_liste_rupturants",
+  abandon: "telechargement_liste_abandons",
+  apprenti: "telechargement_liste_apprentis",
+  apprenant: "telechargement_liste_apprenants",
+};
 
 interface IndicateursGridProps {
   indicateursEffectifs: IndicateursEffectifs;
@@ -79,6 +82,8 @@ function IndicateursGrid({
   effectifsFilters,
   organismeId,
 }: IndicateursGridProps) {
+  const { trackPlausibleEvent } = usePlausibleTracking();
+
   if (loading) {
     return (
       <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
@@ -105,6 +110,7 @@ function IndicateursGrid({
     type: (typeof typesEffectifNominatif)[number],
     effectifsFilters: EffectifsFilters
   ) {
+    trackPlausibleEvent(typeToGoalPlausible[type]);
     const effectifs = await _get(
       `/api/v1${organismeId ? `/organismes/${organismeId}` : ""}/indicateurs/effectifs/${type}`,
       {

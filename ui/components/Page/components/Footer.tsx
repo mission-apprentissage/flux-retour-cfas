@@ -1,6 +1,4 @@
 import { Box, Container, Flex, Grid, GridItem, Image, List, ListItem, Text } from "@chakra-ui/react";
-import { usePlausible } from "next-plausible";
-import React from "react";
 
 import Link from "@/components/Links/Link";
 import { ExternalLinkLine } from "@/theme/components/icons";
@@ -8,8 +6,6 @@ import { ExternalLinkLine } from "@/theme/components/icons";
 const APP_VERSION = process.env.NEXT_PUBLIC_VERSION;
 
 const Footer = () => {
-  const plausible = usePlausible();
-
   return (
     <Box borderTop="1px solid" borderColor="bluefrance" color="#1E1E1E" fontSize="zeta" w="full">
       <Container maxW="xl" pt={["0", "0", "0", "2.5rem"]} pb={["4w", "4w", "2w", "2w"]}>
@@ -103,7 +99,7 @@ const Footer = () => {
                 <Link href={"/cgu"}>Conditions générales d&apos;utilisation</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="/stats" onClick={() => plausible("clic_statistiques")}>
+                <Link href="/stats" plausibleGoal="clic_statistiques">
                   Statistiques
                 </Link>
               </ListItem>
