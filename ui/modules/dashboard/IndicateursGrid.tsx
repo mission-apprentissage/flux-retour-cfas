@@ -6,6 +6,7 @@ import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
+import DownloadButton from "@/components/buttons/DownloadButton";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs } from "@/modules/models/indicateurs";

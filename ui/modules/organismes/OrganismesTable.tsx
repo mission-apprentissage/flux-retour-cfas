@@ -299,6 +299,9 @@ function OrganismesTable(props: OrganismesTableProps) {
           <DownloadButton
             w="25%"
             action={() => {
+              trackPlausibleEvent(
+                props.modeNonFiable ? "telechargement_liste_of_a_fiabiliser" : "telechargement_liste_of_fiables"
+              );
               exportDataAsXlsx(
                 `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
                 filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
@@ -312,24 +315,8 @@ function OrganismesTable(props: OrganismesTableProps) {
         <Divider mb="4" />
         <HStack>
           <OrganismesFilterPanel {...props} />
-
-          <DownloadLinkButton
-            action={() => {
-                trackPlausibleEvent(
-              props.modeNonFiable ? "telechargement_liste_of_a_fiabiliser" : "telechargement_liste_of_fiables"
-            );
-              exportDataAsXlsx(
-                `tdb-organismes-${formatDate(new Date(), "dd-MM-yy")}.xlsx`,
-                filteredOrganismes.map((organisme) => convertOrganismeToExport(organisme)),
-                organismesExportColumns
-              );
-            }}
-          >
-            Télécharger la liste
-          </DownloadLinkButton>
         </HStack>
       </Box>
-              
 
       <Text>
         <strong>{filteredOrganismes.length} organismes</strong>
