@@ -1,3 +1,6 @@
+// to make the file a module and avoid the TypeScript error
+export {};
+
 declare module "next-plausible" {
   /**
    * @deprecated Ne pas utiliser directement, mais plutôt usePlausibleTracking()
