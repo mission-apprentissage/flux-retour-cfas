@@ -152,6 +152,7 @@ function IndicateursGrid({
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
               <DownloadButton
+                asLink
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.apprenants === 0}
                 action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
@@ -180,6 +181,7 @@ function IndicateursGrid({
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
               <DownloadButton
+                asLink
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.apprentis === 0}
                 action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
@@ -209,6 +211,7 @@ function IndicateursGrid({
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
               <DownloadButton
+                asLink
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.rupturants === 0}
                 action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
@@ -237,6 +240,7 @@ function IndicateursGrid({
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
               <DownloadButton
+                asLink
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.inscritsSansContrat === 0}
                 action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
@@ -268,6 +272,7 @@ function IndicateursGrid({
             : permissionEffectifsNominatifs) &&
             effectifsFilters && (
               <DownloadButton
+                asLink
                 fontSize="sm"
                 isDisabled={indicateursEffectifs.abandons === 0}
                 action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}

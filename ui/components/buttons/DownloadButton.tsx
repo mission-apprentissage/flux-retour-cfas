@@ -8,6 +8,7 @@ import { DownloadLine } from "@/theme/components/icons";
 type Props = {
   action: (() => Promise<any>) | (() => any);
   children: React.ReactNode;
+  asLink?: boolean;
 } & ButtonProps;
 
 function DownloadButton({ children, action, ...props }: Props) {
@@ -28,12 +29,12 @@ function DownloadButton({ children, action, ...props }: Props) {
 
   return (
     <Button
-      variant="secondary"
+      variant={props.asLink ? "link" : "secondary"}
       mt="2"
-      margin="8"
+      margin={props.asLink ? "0" : "8"}
       borderBottom={isLoading ? "0" : "1px"}
       borderRadius="0"
-      p="4"
+      p={props.asLink ? "0" : "4"}
       _active={{
         color: "bluefrance",
       }}
