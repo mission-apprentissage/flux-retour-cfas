@@ -162,14 +162,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
         )}
 
         {/* REINITIALISER */}
-        <Button
-          variant="secondary"
-          onClick={resetFilters}
-          color="action-high-blue-france"
-          borderBottom="1px"
-          fontSize="omega"
-          _hover={{ textDecoration: "none" }}
-        >
+        <Button variant="link" onClick={resetFilters} fontSize="omega">
           réinitialiser
         </Button>
       </HStack>

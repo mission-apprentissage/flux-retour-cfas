@@ -20,7 +20,7 @@ function FiltreOrganismeTransmission(props: FiltreOrganismeTransmissionProps) {
       <OrganismesFilterButton
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        buttonLabel="Transmission au tableau de bord"
+        buttonLabel="Transmission"
         badge={transmissions?.length}
       />
       {isOpen && (
