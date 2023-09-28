@@ -2,11 +2,14 @@ import { Box, ListItem, Stack, Text, UnorderedList } from "@chakra-ui/react";
 
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { useOrganismesFiltered } from "@/hooks/organismes";
 
 import { OrganismeNormalized } from "../ListeOrganismesPage";
 import OrganismesTable from "../OrganismesTable";
 
 function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
+  const { organismesFiltered } = useOrganismesFiltered(organismes);
+
   return (
     <Stack spacing="4w">
       <Ribbons variant="info" mt={4}>
@@ -34,7 +37,7 @@ function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNo
       </Ribbons>
 
       <OrganismesTable
-        organismes={organismes}
+        organismes={organismesFiltered}
         showFilterNature
         showFilterTransmission
         showFilterQualiopi
