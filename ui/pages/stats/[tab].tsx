@@ -1,20 +1,19 @@
 import { Box, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { usePlausible } from "next-plausible";
-import React from "react";
 
 import Page from "@/components/Page/Page";
+import { usePlausibleTracking } from "@/hooks/plausible";
 
 // note: les noms de tab doivent correspondre aux noms des goals dans plausible (avec prefixe "clic_stats_")
-const tabs = ["visites", "profils-utilisateur", "acquisition", "qualite", "couverture"];
+const tabs = ["visites", "profils-utilisateur", "acquisition", "qualite", "couverture"] as const;
 
 const StatistiquesPage = () => {
   const title = "Statistiques";
   const router = useRouter();
-  const plausible = usePlausible();
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
-  const defaultIndex = router.query.tab ? tabs.indexOf(router.query.tab as string) : 0;
+  const defaultIndex = router.query.tab ? (tabs as unknown as string[]).indexOf(router.query.tab as string) : 0;
 
   return (
     <Page>
@@ -37,7 +36,7 @@ const StatistiquesPage = () => {
               defaultIndex={defaultIndex}
               lazyBehavior="keepMounted"
               onChange={(index) => {
-                plausible(`clic_stats_${tabs[index]}`);
+                trackPlausibleEvent(`clic_stats_${tabs[index]}`);
                 router.push(`/stats/${tabs[index]}`, undefined, { scroll: false, shallow: true });
               }}
             >

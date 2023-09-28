@@ -2,12 +2,12 @@ import { Center, Heading, Spinner, Box, Flex, Text, HStack, Button, VStack, Swit
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
-import { usePlausible } from "next-plausible";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { organismeAtom } from "@/hooks/organismeAtoms";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import useDownloadClick from "@/hooks/useDownloadClick";
 import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import EffectifsTable from "@/modules/mon-espace/effectifs/engine/EffectifsTable";
@@ -50,13 +50,13 @@ function useOrganismesEffectifs(organismeId, anneeScolaire) {
 
 const DownloadButton = ({ title, fileName, getFile }) => {
   const { onClick, isLoading } = useDownloadClick(getFile, fileName);
-  const plausible = usePlausible();
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   return (
     <Button
       size="md"
       onClick={(_e) => {
-        plausible("telechargement_sifa");
+        trackPlausibleEvent("telechargement_sifa");
         return onClick();
       }}
       variant="secondary"

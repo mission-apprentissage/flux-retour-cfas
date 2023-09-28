@@ -37,6 +37,9 @@ export const plausibleGoals = [
   // - Page organismes
   "telechargement_liste_of_a_fiabiliser",
   "telechargement_liste_of_fiables",
+
+  // Anciens goals
+  "telechargement_sifa",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
