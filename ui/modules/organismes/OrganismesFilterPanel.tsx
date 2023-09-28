@@ -2,6 +2,7 @@ import { HStack, Stack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
+import { OrganisationType } from "@/common/internal/Organisation";
 import Link from "@/components/Links/Link";
 import useAuth from "@/hooks/useAuth";
 
@@ -71,24 +72,36 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     );
   };
 
-  const allowedShowFilterDepartement = [
-    "TETE_DE_RESEAU",
-    "DREETS",
-    "DRAAF",
-    "CONSEIL_REGIONAL",
-    "CARIF_OREF_REGIONAL",
-    "ACADEMIE",
-    "OPERATEUR_PUBLIC_NATIONAL",
-    "CARIF_OREF_NATIONAL",
-    "ADMINISTRATEUR",
-  ].includes(auth?.organisation?.type);
+  const isAllowedToShowFilterDepartement = (type: OrganisationType) => {
+    switch (type) {
+      case "TETE_DE_RESEAU":
+      case "DREETS":
+      case "DRAAF":
+      case "CONSEIL_REGIONAL":
+      case "CARIF_OREF_REGIONAL":
+      case "ACADEMIE":
+      case "OPERATEUR_PUBLIC_NATIONAL":
+      case "CARIF_OREF_NATIONAL":
+      case "ADMINISTRATEUR":
+        return true;
 
-  const allowedShowFilterRegions = [
-    "TETE_DE_RESEAU",
-    "OPERATEUR_PUBLIC_NATIONAL",
-    "CARIF_OREF_NATIONAL",
-    "ADMINISTRATEUR",
-  ].includes(auth?.organisation?.type);
+      default:
+        return false;
+    }
+  };
+
+  const isAllowedToShowFilterRegions = (type: OrganisationType) => {
+    switch (type) {
+      case "TETE_DE_RESEAU":
+      case "OPERATEUR_PUBLIC_NATIONAL":
+      case "CARIF_OREF_NATIONAL":
+      case "ADMINISTRATEUR":
+        return true;
+
+      default:
+        return false;
+    }
+  };
 
   return (
     <Stack spacing="0.5">
@@ -97,7 +110,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
       </Text>
       <HStack>
         {/* FILTRE DEPARTEMENT */}
-        {props?.showFilterLocalisation && allowedShowFilterDepartement && (
+        {props?.showFilterLocalisation && isAllowedToShowFilterDepartement(auth?.organisation?.type) && (
           <FiltreOrganismeDepartements
             value={organismesFilters.departements}
             onChange={(departements) => updateState({ departements })}
@@ -105,7 +118,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
         )}
 
         {/* FILTRE REGION */}
-        {props?.showFilterLocalisation && allowedShowFilterRegions && (
+        {props?.showFilterLocalisation && isAllowedToShowFilterRegions(auth?.organisation?.type) && (
           <FiltreOrganismeRegions value={organismesFilters.regions} onChange={(regions) => updateState({ regions })} />
         )}
 
