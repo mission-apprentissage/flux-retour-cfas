@@ -19,7 +19,7 @@ function FiltreOrganismeRegions(props: FiltreOrganismeRegionsProps) {
     <div>
       <OrganismesFilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Région" badge={regions?.length} />
       {isOpen && (
-        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)" p="3w">
+        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup
             defaultValue={regions}
             size="sm"

@@ -26,7 +26,7 @@ function FiltreYesNo(props: FiltreYesNoProps) {
         badge={selectionItems?.length}
       />
       {isOpen && (
-        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)" p="3w">
+        <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup
             value={props.value?.map((item) => item.toString())}
             onChange={(value) => props.onChange(value.map((v: string) => (v === "true" ? true : false)))}
