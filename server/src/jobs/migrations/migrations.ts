@@ -39,13 +39,11 @@ const myConfig = {
 };
 
 export async function up() {
-  // @ts-ignore
   config.set(myConfig);
 
   await status();
 
   const client = getMongodbClient();
-  // @ts-ignore
   await mup(client.db(), client);
 }
 
@@ -63,7 +61,6 @@ export async function status(): Promise<number> {
 }
 
 export async function create({ description }: { description: string }) {
-  // @ts-ignore
   config.set({
     ...myConfig,
     migrationsDir: "src/db/migrations",
@@ -74,9 +71,10 @@ export async function create({ description }: { description: string }) {
   const content = await readFile(file, {
     encoding: "utf-8",
   });
-  const newContent =
-    'import { Db, MongoClient } from "mongodb";\n\n' +
-    content.replaceAll("async (db, client)", "async (_db: Db, _client: MongoClient)");
+  // ajoute le typage TS et supprime la migration down inutile
+  const newContent = `import { Db } from "mongodb";
+
+${content.replaceAll("async (db, client)", "async (db: Db)").replace(/\nexport const down =[\s\S]+/, "")}`;
 
   await writeFile(file, newContent, { encoding: "utf-8" });
   console.log("Created:", fileName);
