@@ -601,8 +601,7 @@ function setupRoutes(app: Application) {
       .get(
         "/organismes",
         returnResult(async (req) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullOrganismesListFiltersSchema);
-          return await listOrganisationOrganismes(req.user, filters);
+          return await listOrganisationOrganismes(req.user);
         })
       )
       .get(

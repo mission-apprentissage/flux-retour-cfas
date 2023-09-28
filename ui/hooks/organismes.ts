@@ -6,7 +6,7 @@ import { _get, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import {
   OrganismesFiltersQuery,
-  convertOrganismesFiltersToQuery,
+  filterOrganismesArrayFromOrganismesFilters,
   parseOrganismesFiltersFromQuery,
 } from "@/modules/organismes/models/organismes-filters";
 
@@ -79,12 +79,12 @@ export function useOrganisationOrganismes() {
     error,
   } = useQuery<Organisme[], any>(
     ["organisation/organismes", JSON.stringify(organismesFilters)],
-    () => _get("/api/v1/organisation/organismes", { params: convertOrganismesFiltersToQuery(organismesFilters) }),
+    () => _get("/api/v1/organisation/organismes"),
     { enabled: router.isReady }
   );
 
   return {
-    organismes,
+    organismes: filterOrganismesArrayFromOrganismesFilters(organismes, organismesFilters),
     isLoading,
     error,
   };

@@ -252,75 +252,10 @@ export const fullEffectifsFiltersConfigurations: {
     transformValue: (value) => ({ $in: value }),
   },
 };
-// #region Filtres Organismes List
-
-/**
- * Utilisé pour la recherche dans la liste des organismes
- */
-export const fullOrganismesListFiltersSchema = {
-  nature: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-  ferme: z
-    .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
-    .optional(),
-  qualiopi: z
-    .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
-    .optional(),
-  prepa_apprentissage: z
-    .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
-    .optional(),
-  transmission: z
-    .preprocess((str: any) => str.split(",").map((i: string) => (i === "true" ? true : false)), z.array(z.boolean()))
-    .optional(),
-  regions: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-  departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-};
-
-export type FullOrganismesListFilters = z.infer<z.ZodObject<typeof fullOrganismesListFiltersSchema>>;
-
-export const fullOrganismesListFiltersConfigurations: {
-  [key in keyof Required<FullOrganismesListFilters>]: FilterConfiguration;
-} = {
-  nature: {
-    matchKey: "nature",
-    transformValue: (value) => ({ $in: value }),
-  },
-  ferme: {
-    matchKey: "ferme",
-    transformValue: (value) => ({ $in: value }),
-  },
-  qualiopi: {
-    matchKey: "qualiopi",
-    transformValue: (value) => ({ $in: value }),
-  },
-  prepa_apprentissage: {
-    matchKey: "prepa_apprentissage",
-    transformValue: (value) => ({ $in: value }),
-  },
-  transmission: {
-    matchOperator: (value: string) => (value.length === 2 ? "$or" : undefined),
-    matchKey: "last_transmission_date",
-    transformValue: (value) => {
-      if (value.length === 1 && value[0] === true) return { $exists: true };
-      if (value.length === 1 && value[0] === false) return { $exists: false };
-      if (value.length === 2)
-        return [{ last_transmission_date: { $exists: true } }, { last_transmission_date: { $exists: false } }];
-    },
-  },
-  departements: {
-    matchKey: "adresse.departement",
-    transformValue: (value) => ({ $in: value }),
-  },
-  regions: {
-    matchKey: "adresse.region",
-    transformValue: (value) => ({ $in: value }),
-  },
-};
-
-// #endregion
 
 export function buildMongoFilters<
   Filters extends { [s: string]: any },
-  FiltersConfiguration = { [key in keyof Required<OrganismesFilters>]: FilterConfiguration },
+  FiltersConfiguration = { [key in keyof Required<OrganismesFilters>]: FilterConfiguration }
 >(filters: Filters, filtersConfiguration: FiltersConfiguration): any[] {
   return Object.entries(filters).reduce((matchFilters, [filterName, filterValue]) => {
     const filterConfiguration = filtersConfiguration[filterName];
@@ -330,8 +265,7 @@ export function buildMongoFilters<
     return [
       ...matchFilters,
       {
-        [filterConfiguration.matchOperator?.(filterValue) ?? filterConfiguration.matchKey]:
-          filterConfiguration.transformValue?.(filterValue) ?? filterValue,
+        [filterConfiguration.matchKey]: filterConfiguration.transformValue?.(filterValue) ?? filterValue,
       },
     ];
   }, [] as any[]);
