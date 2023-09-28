@@ -1,6 +1,6 @@
-import { Db, MongoClient } from "mongodb";
+import { Db } from "mongodb";
 
-export const up = async (_db: Db, _client: MongoClient) => {
+export const up = async (db: Db) => {
   // Dédoublonnage du champ ERPS des organismes
-  await _db.collection("organismes").updateMany({}, [{ $set: { erps: { $setIntersection: ["$erps", "$erps"] } } }]);
+  await db.collection("organismes").updateMany({}, [{ $set: { erps: { $setIntersection: ["$erps", "$erps"] } } }]);
 };
