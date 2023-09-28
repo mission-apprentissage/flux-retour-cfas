@@ -40,7 +40,6 @@ import { removeOrganismeSansEnseigneNiRaisonSocialeNeTransmettantPlus } from "./
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates";
 import { clearSeedAssets } from "./seed/clearAssets";
-import { seedPlausibleGoals } from "./seed/plausible/goals";
 import { seedAdmin, seedSample, seedSampleOrganismes, seedSampleUsers } from "./seed/start";
 // import { generateTypes } from "./seed/types/generate-types";
 import { createErpUserLegacy } from "./users/create-user";
@@ -139,8 +138,6 @@ export async function runJob(job: IJob): Promise<number> {
         return seedSample();
       case "seed:admin":
         return seedAdmin((job.payload as any)?.email?.toLowerCase());
-      case "seed:plausible:goals":
-        return seedPlausibleGoals();
       case "seed:assets:clear":
         return clearSeedAssets();
       case "clear":
