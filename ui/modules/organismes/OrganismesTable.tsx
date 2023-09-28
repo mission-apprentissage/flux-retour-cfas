@@ -331,6 +331,10 @@ function OrganismesTable(props: OrganismesTableProps) {
       </Box>
               
 
+      <Text>
+        <strong>{filteredOrganismes.length} organismes</strong>
+      </Text>
+
       <NewTable
         data={filteredOrganismes || []}
         loading={false}
