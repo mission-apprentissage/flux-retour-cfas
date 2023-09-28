@@ -52,7 +52,7 @@ const extensions = {
       (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
       z.string().trim().regex(SIRET_REGEX, "SIRET invalide") // e.g 01234567890123
     ),
-  uai: () => z.string().trim().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
+  uai: () => z.string().trim().toUpperCase().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
   code_naf: () =>
     z.preprocess(
       (v: any) => (v ? String(v.replace(".", "")) : v), // parfois, le code naf contient un point
