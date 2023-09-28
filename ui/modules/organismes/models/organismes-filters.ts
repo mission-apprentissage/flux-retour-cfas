@@ -48,12 +48,10 @@ export function convertOrganismesFiltersToQuery(
 }
 
 export function filterOrganismesArrayFromOrganismesFilters(
-  organismesList: Organisme[] | undefined,
+  organismesList: Organisme[],
   organismesFilters: Partial<OrganismesFilters>
-): Organisme[] | undefined {
+): Organisme[] {
   let filteredOrganismes = organismesList;
-
-  if (!organismesList) return undefined;
 
   if (organismesFilters.qualiopi?.length && organismesFilters.qualiopi?.length > 0) {
     filteredOrganismes = filteredOrganismes?.filter((item) => {
