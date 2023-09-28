@@ -297,6 +297,7 @@ function OrganismesTable(props: OrganismesTableProps) {
             </InputRightElement>
           </InputGroup>
           <DownloadButton
+            variant="secondary"
             w="25%"
             action={() => {
               trackPlausibleEvent(

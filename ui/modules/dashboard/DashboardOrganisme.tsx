@@ -526,6 +526,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       </HStack>
 
                       <DownloadButton
+                        variant="secondary"
                         action={async () => {
                           const organismes = await _get<Organisme[]>(`/api/v1/organismes/${organisme._id}/organismes`);
                           exportDataAsXlsx(
