@@ -60,7 +60,7 @@ function OrganismesACompleterPanelContent({ organismes }: { organismes: Organism
       </Ribbons>
 
       <OrganismesTable
-        organismes={organismesFiltered}
+        organismes={organismesFiltered || []}
         modeNonFiable
         showFilterNature
         showFilterTransmission

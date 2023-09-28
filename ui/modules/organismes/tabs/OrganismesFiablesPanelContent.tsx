@@ -37,7 +37,7 @@ function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNo
       </Ribbons>
 
       <OrganismesTable
-        organismes={organismesFiltered}
+        organismes={organismesFiltered || []}
         showFilterNature
         showFilterTransmission
         showFilterQualiopi

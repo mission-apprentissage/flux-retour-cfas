@@ -1,5 +1,6 @@
-import { Organisme } from "@/common/internal/Organisme";
 import { stripEmptyFields } from "@/common/utils/misc";
+
+import { OrganismeNormalized } from "../ListeOrganismesPage";
 
 export interface OrganismesFiltersQuery {
   qualiopi: string;
@@ -48,9 +49,9 @@ export function convertOrganismesFiltersToQuery(
 }
 
 export function filterOrganismesArrayFromOrganismesFilters(
-  organismesList: Organisme[],
+  organismesList: OrganismeNormalized[],
   organismesFilters: Partial<OrganismesFilters>
-): Organisme[] {
+): OrganismeNormalized[] {
   let filteredOrganismes = organismesList;
 
   if (organismesFilters.qualiopi?.length && organismesFilters.qualiopi?.length > 0) {
