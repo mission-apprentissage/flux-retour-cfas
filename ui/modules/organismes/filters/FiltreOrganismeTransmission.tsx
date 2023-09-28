@@ -31,10 +31,10 @@ function FiltreOrganismeTransmission(props: FiltreOrganismeTransmissionProps) {
           >
             <Stack>
               <Checkbox value="true" key={`${props.fieldName}_true`} fontSize="mini" size="sm">
-                Transmets ou a déja transmis
+                Transmet ou a déja transmis
               </Checkbox>
               <Checkbox value="false" key={`${props.fieldName}_false`} fontSize="mini" size="sm">
-                Ne transmets pas
+                Ne transmet pas
               </Checkbox>
             </Stack>
           </CheckboxGroup>
