@@ -1,18 +1,18 @@
 import { Link as ChakraLink, LinkProps as ChakraLinkProps, SystemProps } from "@chakra-ui/react";
 import NavLink from "next/link";
-import { usePlausible } from "next-plausible";
 import { ReactNode } from "react";
+import { PlausibleGoalType } from "shared";
 
-import { plausibleGoals } from "@/common/plausible-goals";
+import { usePlausibleTracking } from "@/hooks/plausible";
 
 interface LinkProps extends ChakraLinkProps, SystemProps {
   href: string;
   children: ReactNode;
   shallow?: boolean;
-  plausibleGoal?: (typeof plausibleGoals)[number];
+  plausibleGoal?: PlausibleGoalType;
 }
 const Link = ({ children, href, shallow, plausibleGoal, ...rest }: LinkProps) => {
-  const plausible = usePlausible();
+  const { trackPlausibleEvent } = usePlausibleTracking();
   return (
     <ChakraLink
       {...rest}
@@ -20,7 +20,7 @@ const Link = ({ children, href, shallow, plausibleGoal, ...rest }: LinkProps) =>
       href={href}
       shallow={shallow ?? false}
       onClick={() => {
-        plausibleGoal && plausible(plausibleGoal);
+        plausibleGoal && trackPlausibleEvent(plausibleGoal);
       }}
     >
       {children}

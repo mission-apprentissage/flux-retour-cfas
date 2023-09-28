@@ -1,15 +1,14 @@
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { usePlausible } from "next-plausible";
 import { ReactElement, useState } from "react";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { OrganisationType } from "@/common/internal/Organisation";
-import { PlausibleGoalsEvents } from "@/common/plausible-goals";
 import Link from "@/components/Links/Link";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 import { Close, MenuFill, ParentGroupIcon } from "@/theme/components/icons";
@@ -218,7 +217,7 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
 }
 
 const MenuQuestions = () => {
-  const plausible = usePlausible<PlausibleGoalsEvents>();
+  const { trackPlausibleEvent } = usePlausibleTracking();
   return (
     <>
       <Menu>
@@ -229,7 +228,7 @@ const MenuQuestions = () => {
           borderColor="transparent"
           bg="transparent"
           _hover={{ textDecoration: "none", color: "grey.800", bg: "grey.200" }}
-          onClick={() => plausible("clic_homepage_questions")}
+          onClick={() => trackPlausibleEvent("clic_homepage_questions")}
         >
           <Text display="block">
             Question ? <ChevronDownIcon />
@@ -241,7 +240,7 @@ const MenuQuestions = () => {
             href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => plausible("clic_homepage_page_aide")}
+            onClick={() => trackPlausibleEvent("clic_homepage_page_aide")}
           >
             Page d’aide
           </MenuItem>
@@ -253,7 +252,7 @@ const MenuQuestions = () => {
             href={`mailto:${CONTACT_ADDRESS}`}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => plausible("clic_homepage_envoi_message")}
+            onClick={() => trackPlausibleEvent("clic_homepage_envoi_message")}
           >
             Nous envoyer un message
           </MenuItem>

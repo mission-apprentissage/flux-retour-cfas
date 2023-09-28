@@ -1,5 +1,6 @@
 import { Box, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import { ReactNode } from "react";
+import { PlausibleGoalType } from "shared";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -59,7 +60,7 @@ function Card({ label, count, tooltipLabel, icon, big = false, children }: CardP
 export const typesEffectifNominatif = ["apprenant", "apprenti", "inscritSansContrat", "rupturant", "abandon"] as const;
 export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
 
-const typeToGoalPlausible: { [key in TypeEffectifNominatif]: string } = {
+const typeToGoalPlausible: { [key in TypeEffectifNominatif]: PlausibleGoalType } = {
   inscritSansContrat: "telechargement_liste_sans_contrats",
   rupturant: "telechargement_liste_rupturants",
   abandon: "telechargement_liste_abandons",
