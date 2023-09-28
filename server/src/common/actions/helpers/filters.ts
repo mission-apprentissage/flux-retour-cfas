@@ -93,7 +93,6 @@ export function buildMongoPipelineFilterStages(filters: EffectifsFiltersWithRest
 }
 
 export interface FilterConfiguration {
-  matchOperator?: (value: any) => string | undefined;
   matchKey: string;
 
   // optional transformer
