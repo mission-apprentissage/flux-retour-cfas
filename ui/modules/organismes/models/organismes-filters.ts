@@ -55,16 +55,22 @@ export function filterOrganismesArrayFromOrganismesFilters(
 
   if (!organismesList) return undefined;
 
-  if (organismesFilters.qualiopi?.length && organismesFilters.qualiopi?.length > 0)
-    filteredOrganismes = filteredOrganismes?.filter((item) => organismesFilters.qualiopi?.includes(item.qualiopi));
+  if (organismesFilters.qualiopi?.length && organismesFilters.qualiopi?.length > 0) {
+    filteredOrganismes = filteredOrganismes?.filter((item) => {
+      if (item.qualiopi !== undefined) return organismesFilters.qualiopi?.includes(item.qualiopi);
+    });
+  }
 
   if (organismesFilters.prepa_apprentissage?.length && organismesFilters.prepa_apprentissage?.length > 0)
-    filteredOrganismes = filteredOrganismes?.filter(
-      (item) => organismesFilters.prepa_apprentissage?.includes(item.prepa_apprentissage)
-    );
+    filteredOrganismes = filteredOrganismes?.filter((item) => {
+      if (item.prepa_apprentissage !== undefined)
+        return organismesFilters.prepa_apprentissage?.includes(item.prepa_apprentissage);
+    });
 
   if (organismesFilters.ferme?.length && organismesFilters.ferme?.length > 0)
-    filteredOrganismes = filteredOrganismes?.filter((item) => organismesFilters.ferme?.includes(item.ferme));
+    filteredOrganismes = filteredOrganismes?.filter((item) => {
+      if (item.ferme !== undefined) return organismesFilters.ferme?.includes(item.ferme);
+    });
 
   if (organismesFilters.nature?.length && organismesFilters.nature?.length > 0)
     filteredOrganismes = filteredOrganismes?.filter((item) => organismesFilters.nature?.includes(item.nature));
