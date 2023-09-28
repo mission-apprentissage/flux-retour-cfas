@@ -1,4 +1,5 @@
 import { Organisme } from "./internal/Organisme";
+import { formatDateNumericDayMonthYear } from "./utils/dateUtils";
 import { ExportColumn } from "./utils/exportUtils";
 
 export const indicateursParOrganismeExportColumns = [
@@ -163,6 +164,11 @@ export const organismesExportColumns = [
     key: "adresse",
     width: 120,
   },
+  {
+    label: "dernière transmission",
+    key: "last_transmission_date",
+    width: 120,
+  },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
 export function convertOrganismeToExport(
@@ -177,5 +183,8 @@ export function convertOrganismeToExport(
     departement: organisme.adresse?.departement ?? "",
     commune: organisme.adresse?.commune ?? "",
     adresse: organisme.adresse?.complete ?? "",
+    last_transmission_date: organisme.last_transmission_date
+      ? formatDateNumericDayMonthYear(organisme.last_transmission_date)
+      : "",
   };
 }
