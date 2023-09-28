@@ -25,6 +25,11 @@ import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import useAuth from "@/hooks/useAuth";
 
+import {
+  OrganismesFiltersQuery,
+  filterOrganismesArrayFromOrganismesFilters,
+  parseOrganismesFiltersFromQuery,
+} from "./models/organismes-filters";
 import OrganismesACompleterPanelContent from "./tabs/OrganismesACompleterPanelContent";
 import OrganismesFiablesPanelContent from "./tabs/OrganismesFiablesPanelContent";
 
@@ -62,11 +67,20 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     props.activeTab === "a-completer" ? " non fiables" : ""
   }`;
 
+  const organismesFiltres = useMemo(() => {
+    return props.organismes
+      ? filterOrganismesArrayFromOrganismesFilters(
+          props.organismes,
+          parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery)
+        )
+      : undefined;
+  }, [props.organismes, router.query]);
+
   const { organismesFiables, organismesACompleter, nbOrganismesFermes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesACompleter: OrganismeNormalized[] = [];
     let nbOrganismesFermes = 0;
-    (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
+    (organismesFiltres || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
       organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
       organisme.normalizedUai = normalize(organisme.uai ?? "");
@@ -97,7 +111,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
       organismesACompleter,
       nbOrganismesFermes,
     };
-  }, [props.organismes]);
+  }, [organismesFiltres]);
 
   return (
     <SimplePage title={title}>

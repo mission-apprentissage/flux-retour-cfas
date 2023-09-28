@@ -1,14 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
 
 import { _get, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
-import {
-  OrganismesFiltersQuery,
-  filterOrganismesArrayFromOrganismesFilters,
-  parseOrganismesFiltersFromQuery,
-} from "@/modules/organismes/models/organismes-filters";
 
 // récupère un organisme
 export function useOrganisme(organismeId: string | undefined | null) {
@@ -77,17 +71,8 @@ export function useOrganisationOrganismes() {
     enabled: router.isReady,
   });
 
-  const organismesFiltres = useMemo(() => {
-    return organismes
-      ? filterOrganismesArrayFromOrganismesFilters(
-          organismes,
-          parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery)
-        )
-      : undefined;
-  }, [organismes, router.query]);
-
   return {
-    organismes: organismesFiltres,
+    organismes,
     isLoading,
     error,
   };

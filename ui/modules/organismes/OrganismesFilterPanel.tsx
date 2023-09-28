@@ -51,6 +51,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
       {
         pathname: router.pathname,
         query: {
+          ...(router.query.organismeId ? { organismeId: router.query.organismeId } : {}),
           ...convertOrganismesFiltersToQuery({ ...organismesFilters, ...newParams }),
           ...convertPaginationInfosToQuery({ sort, ...newParams }),
         },
@@ -64,7 +65,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     void router.push(
       {
         pathname: router.pathname,
-        query: {},
+        query: { ...(router.query.organismeId ? { organismeId: router.query.organismeId } : {}) },
       },
       undefined,
       { shallow: true }
