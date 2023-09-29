@@ -22538,7 +22538,7 @@ md5@latest:
   languageName: node
   linkType: hard
 
-"prop-types@npm:15.8.1, prop-types@npm:^15.0.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.0.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -26361,7 +26361,6 @@ request-debug@latest:
     luxon: 3.3.0
     next: 13.2.3
     next-plausible: 3.7.2
-    prop-types: 15.8.1
     react: 18.2.0
     react-accessible-treeview: 2.8.0
     react-copy-to-clipboard: 5.1.0

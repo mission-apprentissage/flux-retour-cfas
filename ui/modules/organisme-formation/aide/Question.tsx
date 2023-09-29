@@ -1,8 +1,7 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-const Question = ({ question, answer }) => {
+const Question = ({ question, answer }: { question: string; answer: any }) => {
   const [showAnswer, setShowAnswer] = useState(false);
 
   return (
@@ -29,8 +28,4 @@ const Question = ({ question, answer }) => {
   );
 };
 
-Question.propTypes = {
-  question: PropTypes.string.isRequired,
-  answer: PropTypes.object.isRequired,
-};
 export default Question;

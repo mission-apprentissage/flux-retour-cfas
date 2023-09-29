@@ -1,8 +1,15 @@
 import { Skeleton, Td, Tr } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
-const RowsSkeleton = ({ nbRows = 5, nbColumns = 5, height = "1rem" }) => {
+const RowsSkeleton = ({
+  nbRows = 5,
+  nbColumns = 5,
+  height = "1rem",
+}: {
+  nbRows?: number;
+  nbColumns?: number;
+  height?: string;
+}) => {
   const rows = Array.from({ length: nbRows }, (_, i) => i);
   const columns = Array.from({ length: nbColumns }, (_, j) => j);
 
@@ -23,11 +30,6 @@ const RowsSkeleton = ({ nbRows = 5, nbColumns = 5, height = "1rem" }) => {
       })}
     </>
   );
-};
-
-RowsSkeleton.propTypes = {
-  nbRows: PropTypes.number,
-  nbColumns: PropTypes.number,
 };
 
 export default RowsSkeleton;

@@ -1,10 +1,19 @@
 import { Box, Table as ChakraTable, Text, Th, Thead, Tr } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
 import TableSkeleton from "@/components/skeletons/TableSkeleton";
 
-const Table = ({ headers, loading, error, children }) => {
+const Table = ({
+  headers,
+  loading,
+  error,
+  children,
+}: {
+  headers: string[];
+  loading?: boolean;
+  error?: any;
+  children: React.ReactNode;
+}) => {
   if (loading) {
     return <TableSkeleton headers={headers} />;
   }
@@ -46,13 +55,6 @@ const Table = ({ headers, loading, error, children }) => {
       {children}
     </ChakraTable>
   );
-};
-
-Table.propTypes = {
-  headers: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  children: PropTypes.node,
-  loading: PropTypes.bool,
-  error: PropTypes.object,
 };
 
 export default Table;

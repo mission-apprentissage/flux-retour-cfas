@@ -1,8 +1,15 @@
 import { Box, Button, Circle } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import { useState } from "react";
 
-const JournalDesEvolutionsTagFilter = ({ children, onShowFilteredData, onHideFilteredData }) => {
+const JournalDesEvolutionsTagFilter = ({
+  children,
+  onShowFilteredData,
+  onHideFilteredData,
+}: {
+  children: React.ReactNode;
+  onShowFilteredData: () => void;
+  onHideFilteredData: () => void;
+}) => {
   const [filterEnabled, setFilterEnabled] = useState(false);
 
   const onSetFilterChange = async () => {
@@ -31,12 +38,6 @@ const JournalDesEvolutionsTagFilter = ({ children, onShowFilteredData, onHideFil
       </Button>
     </Box>
   );
-};
-
-JournalDesEvolutionsTagFilter.propTypes = {
-  children: PropTypes.node.isRequired,
-  onShowFilteredData: PropTypes.func.isRequired,
-  onHideFilteredData: PropTypes.func.isRequired,
 };
 
 export default JournalDesEvolutionsTagFilter;

@@ -1,10 +1,9 @@
 import { Table, Tbody, Th, Thead, Tr } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
 import RowsSkeleton from "./RowsSkeleton";
 
-const TableSkeleton = ({ headers, nbRows = 5 }) => {
+const TableSkeleton = ({ headers, nbRows = 5 }: { headers: string[]; nbRows?: number }) => {
   return (
     <Table marginTop="2w">
       <Thead>
@@ -34,11 +33,6 @@ const TableSkeleton = ({ headers, nbRows = 5 }) => {
       </Tbody>
     </Table>
   );
-};
-
-TableSkeleton.propTypes = {
-  headers: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  nbRows: PropTypes.number,
 };
 
 export default TableSkeleton;

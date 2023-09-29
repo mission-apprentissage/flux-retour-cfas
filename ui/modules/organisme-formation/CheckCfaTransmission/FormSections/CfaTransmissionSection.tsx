@@ -1,5 +1,4 @@
 import { Box, Button, HStack, Input, Text } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import { useState } from "react";
 
 import { validateSiret } from "@/common/domain/siret";
@@ -7,7 +6,13 @@ import { validateUai } from "@/common/domain/uai";
 import { _post } from "@/common/httpClient";
 import { queryClient } from "@/common/queryClient";
 
-const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => {
+const CfaTransmissionSection = ({
+  setOrganismeFound,
+  setOrganismeNotFound,
+}: {
+  setOrganismeFound: () => void;
+  setOrganismeNotFound: () => void;
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isInputValid, setIsInputValid] = useState<boolean>();
 
@@ -57,8 +62,4 @@ const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => 
   );
 };
 
-CfaTransmissionSection.propTypes = {
-  setOrganismeFound: PropTypes.func.isRequired,
-  setOrganismeNotFound: PropTypes.func.isRequired,
-};
 export default CfaTransmissionSection;

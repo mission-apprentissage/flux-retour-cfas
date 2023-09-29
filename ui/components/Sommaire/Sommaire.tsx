@@ -1,7 +1,7 @@
 import { Box, Text } from "@chakra-ui/react";
-import PropTypes from "prop-types";
+import { ReactNode } from "react";
 
-const Sommaire = ({ isWrapped, children, ...otherProps }: { isWrapped?: boolean; children: any }) => (
+const Sommaire = ({ isWrapped, children, ...otherProps }: { isWrapped?: boolean; children: ReactNode }) => (
   <Box
     position={isWrapped ? "static" : ["static", "static", "static", "sticky"]}
     top={isWrapped ? "0" : ["0", "0", "0", "10"]}
@@ -19,9 +19,5 @@ const Sommaire = ({ isWrapped, children, ...otherProps }: { isWrapped?: boolean;
     {children}
   </Box>
 );
-
-Sommaire.propTypes = {
-  children: PropTypes.node.isRequired,
-};
 
 export default Sommaire;
