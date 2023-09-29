@@ -32,6 +32,8 @@ import useToaster from "@/hooks/useToaster";
 import { FileDownloadIcon } from "@/modules/dashboard/icons";
 import { DownloadLine } from "@/theme/components/icons";
 
+const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
+
 const dateFields = [
   "date_de_naissance_apprenant",
   "date_metier_mise_a_jour_statut",
@@ -133,6 +135,14 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         }
         const worksheet = workbook.Sheets[worksheetName];
         const rawJsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 });
+
+        if (rawJsonData.length - 1 > POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH) {
+          toastError(
+            `Le nombre de lignes dans le fichier est trop important (maximum ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes)`
+          );
+          setIsSubmitting(false);
+          return;
+        }
 
         // Remove "*" from headers (it is used in model) and trim
         const headers: string[] = rawJsonData[0].map((e) => e.toLocaleLowerCase().replace(/\*/g, "").trim());
