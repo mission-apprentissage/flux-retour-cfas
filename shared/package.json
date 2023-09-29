@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0",
     "json-schema-to-ts": "^2.9.2",
     "lodash-es": "^4.17.21",
     "luhn": "^2.4.1",

@@ -49,7 +49,7 @@ describe("getSIFADate()", () => {
     { date: "2022-08-01", expected: "2022" },
   ].forEach(({ date, expected }) => {
     it(`returns Date(${expected}-12-31) for ${date}`, () => {
-      expect(getSIFADate(new Date(`${date}T00:00:00Z`))).toStrictEqual(new Date(`${expected}-12-31T22:59:59.999Z`));
+      expect(getSIFADate(new Date(`${date}T00:00:00Z`))).toStrictEqual(new Date(`${expected}-12-31T23:59:59.999Z`));
     });
   });
 });
