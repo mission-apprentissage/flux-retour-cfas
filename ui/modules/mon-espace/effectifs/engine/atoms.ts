@@ -27,11 +27,6 @@ export const dossierAtom = atom({
   default: null,
 });
 
-export const uploadsAtom = atom({
-  key: "uploadsAtom",
-  default: null,
-});
-
 export const effectifIdAtom = atom({
   key: "effectifIdAtom",
   default: null,
