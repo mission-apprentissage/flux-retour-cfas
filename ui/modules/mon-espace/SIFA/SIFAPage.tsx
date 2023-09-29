@@ -1,4 +1,4 @@
-import { Center, Heading, Spinner, Box, Flex, Text, HStack, Button, VStack, Switch } from "@chakra-ui/react";
+import { Center, Heading, Spinner, Box, Flex, Text, HStack, Button, VStack, Switch, Container } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
@@ -69,7 +69,11 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
   );
 };
 
-const SIFAPage = ({ isMine }) => {
+interface SIFAPageProps {
+  modePublique: boolean;
+}
+
+const SIFAPage = (props: SIFAPageProps) => {
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning } = useToaster();
@@ -93,10 +97,10 @@ const SIFAPage = ({ isMine }) => {
   }
 
   return (
-    <Flex flexDir="column" width="100%" my={10}>
+    <Container maxW="xl" p="8">
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
-        <Heading textStyle="h2" color="grey.800" mt={5} mb={8}>
-          {isMine ? "Mon Enquête SIFA" : "Son Enquête SIFA"}
+        <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+          {props.modePublique ? "Son" : "Mon"} Enquête SIFA
         </Heading>
         <HStack spacing={4}>
           <DownloadButton
@@ -206,7 +210,7 @@ const SIFAPage = ({ isMine }) => {
           );
         })}
       </Box>
-    </Flex>
+    </Container>
   );
 };
 
