@@ -1,7 +1,12 @@
 import Boom from "boom";
 import { compact, get } from "lodash-es";
 import { ObjectId } from "mongodb";
-import { getAnneesScolaireListFromDate, getSIFADate } from "shared";
+import {
+  getAnneesScolaireListFromDate,
+  getSIFADate,
+  requiredApprenantAdresseFieldsSifa,
+  requiredFieldsSifa,
+} from "shared";
 
 import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions";
 import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
@@ -20,24 +25,6 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
         : {}),
     })
     .toArray();
-
-  const requiredFieldsSifa = [
-    "apprenant.nom",
-    "apprenant.prenom",
-    "apprenant.date_de_naissance",
-    "apprenant.code_postal_de_naissance",
-    "apprenant.sexe",
-    "apprenant.derniere_situation",
-    "apprenant.dernier_organisme_uai",
-    "apprenant.organisme_gestionnaire",
-    "formation.duree_formation_relle",
-  ];
-
-  const requiredApprenantAdresseFieldsSifa = [
-    "apprenant.adresse.voie",
-    "apprenant.adresse.code_postal",
-    "apprenant.adresse.commune",
-  ];
 
   return effectifs
     .filter((effectif) => !sifa || isEligibleSIFA(effectif.apprenant.historique_statut))

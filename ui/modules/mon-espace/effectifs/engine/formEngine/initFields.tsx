@@ -1,43 +1,20 @@
 import get from "lodash.get";
 import { DateTime } from "luxon";
+import { requiredApprenantAdresseFieldsSifa, requiredFieldsSifa } from "shared";
 
 import { findDefinition } from "./utils";
 import { isEmptyValue } from "./utils/isEmptyValue";
 
-let requiredFieldsSifa = [
-  "apprenant.nom",
-  "apprenant.prenom",
-  "apprenant.date_de_naissance",
-  "apprenant.code_postal_de_naissance",
-  "apprenant.sexe",
-  "apprenant.derniere_situation",
-  "apprenant.dernier_organisme_uai",
-  "apprenant.organisme_gestionnaire",
-
-  "formation.duree_formation_relle",
-
-  // "contrats[0].siret",
-  // "contrats[0].type_employeur",
-  // "contrats[0].date_debut",
-  // "contrats[0].date_rupture",
-  // "contrats[0].naf",
-  // "contrats[0].nombre_de_salaries",
-  // "contrats[0].adresse.code_postal",
-];
-
-const requiredApprenantAdresseFieldsSifa = [
-  "apprenant.adresse.voie",
-  "apprenant.adresse.code_postal",
-  "apprenant.adresse.commune",
-];
-
 export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
-  const createField = createFieldFactory({ modeSifa, schema });
+  const createField = createFieldFactory({
+    modeSifa,
+    schema,
+    requiredFieldsSifa: cerfa.apprenant.adresse.complete.value
+      ? requiredFieldsSifa
+      : [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa],
+  });
   const fields = {};
   const isAPITransmission = organisme.mode_de_transmission === "API";
-
-  if (!cerfa.apprenant.adresse.complete.value)
-    requiredFieldsSifa = [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa];
 
   Object.keys(schema.fields).forEach((name) => {
     const data = get(cerfa, name);
@@ -287,7 +264,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
 };
 
 const createFieldFactory =
-  ({ schema, modeSifa }) =>
+  ({ schema, modeSifa, requiredFieldsSifa }) =>
   ({ name, data, forceFieldDefinition = null }) => {
     const fieldSchema = findDefinition({ name: forceFieldDefinition || name, schema });
     if (!fieldSchema) throw new Error(`Field ${name} is not defined.`);
