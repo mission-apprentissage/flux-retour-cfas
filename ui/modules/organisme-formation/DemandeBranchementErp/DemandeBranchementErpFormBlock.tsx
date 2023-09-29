@@ -1,6 +1,5 @@
 import { Box, Flex, HStack, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { ERP_STATE } from "@/common/constants/erps";
@@ -8,7 +7,7 @@ import { ERP_STATE } from "@/common/constants/erps";
 import DemandeBranchementErpForm from "./DemandeBranchementErpForm";
 import useSubmitDemandeBranchementErp, { SUBMIT_STATE } from "./useSubmitDemandeBranchementErp";
 
-const Message = ({ iconClassName, title, message }) => {
+const Message = ({ iconClassName, title, message }: { iconClassName: string; title: string; message: string }) => {
   return (
     <>
       <Flex fontWeight="700" fontSize="beta" color="grey.800" alignItems="center">
@@ -24,12 +23,6 @@ const Message = ({ iconClassName, title, message }) => {
       </HStack>
     </>
   );
-};
-
-Message.propTypes = {
-  iconClassName: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  message: PropTypes.string.isRequired,
 };
 
 const DemandeBranchementErpFormBlock = () => {

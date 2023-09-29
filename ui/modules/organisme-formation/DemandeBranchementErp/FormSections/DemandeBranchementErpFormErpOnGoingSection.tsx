@@ -1,10 +1,9 @@
 import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Stack, Text } from "@chakra-ui/react";
 import { Field } from "formik";
-import PropTypes from "prop-types";
 
 import { PRODUCT_NAME } from "@/common/constants/product";
 
-const DemandeBranchementErpFormErpOnGoingSection = ({ isSubmitting }) => {
+const DemandeBranchementErpFormErpOnGoingSection = ({ isSubmitting }: { isSubmitting: boolean }) => {
   return (
     <>
       <Stack marginTop="3w" marginBottom="3w" direction="row">
@@ -57,7 +56,4 @@ const DemandeBranchementErpFormErpOnGoingSection = ({ isSubmitting }) => {
   );
 };
 
-DemandeBranchementErpFormErpOnGoingSection.propTypes = {
-  isSubmitting: PropTypes.bool.isRequired,
-};
 export default DemandeBranchementErpFormErpOnGoingSection;

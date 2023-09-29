@@ -1,7 +1,6 @@
 import { Flex, Link, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import PropTypes from "prop-types";
-import React from "react";
+import React, { ReactNode } from "react";
 
 const OrganismeFormationPagesMenu = (props) => {
   return (
@@ -11,7 +10,7 @@ const OrganismeFormationPagesMenu = (props) => {
   );
 };
 
-const NavItem = ({ children, to = "/", ...rest }) => {
+const NavItem = ({ children, to = "/", ...rest }: { children: ReactNode; to: string }) => {
   const router = useRouter();
   const isActive = router.pathname === to;
 
@@ -32,11 +31,6 @@ const NavItem = ({ children, to = "/", ...rest }) => {
   );
 };
 
-NavItem.propTypes = {
-  children: PropTypes.string.isRequired,
-  to: PropTypes.string.isRequired,
-};
-
 const NavLinks = () => {
   return (
     <Flex flexDirection="column">
@@ -51,16 +45,12 @@ const NavLinks = () => {
   );
 };
 
-const NavBarContainer = ({ children }) => {
+const NavBarContainer = ({ children }: { children: ReactNode }) => {
   return (
     <Flex as="nav" flexWrap="wrap">
       {children}
     </Flex>
   );
-};
-
-NavBarContainer.propTypes = {
-  children: PropTypes.node,
 };
 
 export default OrganismeFormationPagesMenu;

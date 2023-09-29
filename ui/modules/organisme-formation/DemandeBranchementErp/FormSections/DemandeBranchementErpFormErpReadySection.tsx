@@ -1,10 +1,9 @@
 import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
-import PropTypes from "prop-types";
 
 import { PRODUCT_NAME } from "@/common/constants/product";
 
-const DemandeBranchementErpFormErpReadySection = ({ helpFilePath }) => {
+const DemandeBranchementErpFormErpReadySection = ({ helpFilePath }: { helpFilePath: string }) => {
   return (
     <>
       <Stack marginTop="3w" marginBottom="3w" direction="row">
@@ -28,7 +27,4 @@ const DemandeBranchementErpFormErpReadySection = ({ helpFilePath }) => {
   );
 };
 
-DemandeBranchementErpFormErpReadySection.propTypes = {
-  helpFilePath: PropTypes.string.isRequired,
-};
 export default DemandeBranchementErpFormErpReadySection;

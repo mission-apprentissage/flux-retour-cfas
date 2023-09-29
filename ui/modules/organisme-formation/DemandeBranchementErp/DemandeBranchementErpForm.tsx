@@ -1,6 +1,5 @@
 import { FormControl, FormErrorMessage, FormLabel, Select, Stack } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
-import PropTypes from "prop-types";
 import React from "react";
 import * as Yup from "yup";
 
@@ -27,7 +26,7 @@ const formInitialValues = {
 
 const ErpSelectionList: any = [{ name: "Sélectionnez une option", state: null }].concat(ERPS_FORM_CASES as any);
 
-const DemandeBranchementErpForm = ({ onSubmit }) => {
+const DemandeBranchementErpForm = ({ onSubmit }: { onSubmit: (values: any) => void }) => {
   return (
     <Formik
       initialValues={formInitialValues}
@@ -89,10 +88,6 @@ const DemandeBranchementErpForm = ({ onSubmit }) => {
       )}
     </Formik>
   );
-};
-
-DemandeBranchementErpForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
 };
 
 export default DemandeBranchementErpForm;
