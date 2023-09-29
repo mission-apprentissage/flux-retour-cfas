@@ -12465,7 +12465,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^2.24.0, date-fns@npm:^2.28.0":
+"date-fns@npm:^2.24.0, date-fns@npm:^2.28.0, date-fns@npm:^2.30.0":
   version: 2.30.0
   resolution: "date-fns@npm:2.30.0"
   dependencies:
@@ -24498,6 +24498,7 @@ request-debug@latest:
   resolution: "shared@workspace:shared"
   dependencies:
     bson: ^5.4.0
+    date-fns: ^2.30.0
     json-schema-to-ts: ^2.9.2
     lodash-es: ^4.17.21
     luhn: ^2.4.1

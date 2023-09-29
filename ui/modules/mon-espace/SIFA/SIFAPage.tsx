@@ -4,7 +4,7 @@ import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { getAnneesScolaireListFromDate } from "shared";
+import { getAnneeScolaireFromDate, getSIFADate } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { organismeAtom } from "@/hooks/organismeAtoms";
@@ -15,8 +15,6 @@ import EffectifsTable from "@/modules/mon-espace/effectifs/engine/EffectifsTable
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import { DownloadLine } from "@/theme/components/icons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
-
-const currentAnneeScolaireYear = getAnneesScolaireListFromDate(new Date())[1].substring(0, 4);
 
 function useOrganismesEffectifs(organismeId: string) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -115,7 +113,7 @@ const SIFAPage = ({ isMine }) => {
       </Center>
     );
   }
-  // historique_statut.date_statut <= "31/12/202"
+
   return (
     <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
@@ -146,8 +144,9 @@ const SIFAPage = ({ isMine }) => {
       <VStack alignItems="flex-start">
         <Text fontWeight="bold">
           Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre{" "}
-          {currentAnneeScolaireYear}, sur l&apos;année scolaire {getAnneesScolaireListFromDate(new Date()).join(", ")}.
-          Pour plus de facilité, vous pouvez effectuer une recherche, ou filtrer par année.
+          {getSIFADate(new Date()).getFullYear()}, sur l&apos;année scolaire{" "}
+          {getAnneeScolaireFromDate(getSIFADate(new Date()))}. Pour plus de facilité, vous pouvez effectuer une
+          recherche, ou filtrer par année.
         </Text>
         <Input
           name="search_effectifs"

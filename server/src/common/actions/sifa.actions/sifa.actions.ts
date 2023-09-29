@@ -1,7 +1,7 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
-import { getAnneesScolaireListFromDate } from "shared";
+import { getAnneesScolaireListFromDate, getSIFADate } from "shared";
 
 import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
 import { findFormationById, getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
@@ -44,14 +44,9 @@ const wrapNumString = (str) => {
   return `="${str}"`;
 };
 
-/**
- *
- * @param param0
- * @returns
- */
 export const isEligibleSIFA = ({ historique_statut }) => {
-  const previousYear = new Date().getFullYear() - 1;
-  const endOfyear = DateTime.fromFormat(`31/12/${previousYear}`, "dd/MM/yyyy").setLocale("fr-FR"); // FIXME, date à revoir / configurer ?
+  const sifaDate = getSIFADate(new Date());
+  const endOfyear = DateTime.fromFormat(`31/12/${sifaDate.getFullYear()}`, "dd/MM/yyyy").setLocale("fr-FR"); // FIXME, date à revoir / configurer ?
 
   const historiqueSorted = historique_statut
     .filter(({ date_statut }) => {

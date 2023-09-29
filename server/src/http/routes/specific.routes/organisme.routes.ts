@@ -1,21 +1,20 @@
 import Boom from "boom";
 import { compact, get } from "lodash-es";
 import { ObjectId } from "mongodb";
-import { getAnneesScolaireListFromDate } from "shared";
+import { getAnneesScolaireListFromDate, getSIFADate } from "shared";
 
 import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions";
 import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
 import { effectifsDb } from "@/common/model/collections";
 
 export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false) {
-  console.log(getAnneesScolaireListFromDate(new Date()));
   const effectifs = await effectifsDb()
     .find({
       organisme_id: organismeId,
       ...(sifa
         ? {
             annee_scolaire: {
-              $in: getAnneesScolaireListFromDate(new Date()),
+              $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
             },
           }
         : {}),
