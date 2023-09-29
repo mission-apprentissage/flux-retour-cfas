@@ -21,8 +21,6 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
     })
     .toArray();
 
-  const effectifsSifa: any[] = [];
-
   const requiredFieldsSifa = [
     "apprenant.nom",
     "apprenant.prenom",
@@ -41,42 +39,33 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
     "apprenant.adresse.commune",
   ];
 
-  for (const effectifDb of effectifs) {
-    const { _id, id_erp_apprenant, source, annee_scolaire, validation_errors, apprenant, formation } = effectifDb;
-
-    let historique_statut = apprenant.historique_statut;
-    const effectif = {
-      id: _id.toString(),
-      id_erp_apprenant,
+  return effectifs
+    .filter((effectif) => !sifa || isEligibleSIFA(effectif.apprenant.historique_statut))
+    .map((effectif) => ({
+      id: effectif._id.toString(),
+      id_erp_apprenant: effectif.id_erp_apprenant,
       organisme_id: organismeId,
-      annee_scolaire,
-      source,
-      validation_errors,
-      formation,
-      nom: apprenant.nom,
-      prenom: apprenant.prenom,
-      historique_statut,
+      annee_scolaire: effectif.annee_scolaire,
+      source: effectif.source,
+      validation_errors: effectif.validation_errors,
+      formation: effectif.formation,
+      nom: effectif.apprenant.nom,
+      prenom: effectif.apprenant.prenom,
+      historique_statut: effectif.apprenant.historique_statut,
       ...(sifa
         ? {
             requiredSifa: compact(
               [
-                ...(!apprenant.adresse?.complete
+                ...(!effectif.apprenant.adresse?.complete
                   ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
                   : requiredFieldsSifa),
               ].map((fieldName) =>
-                !get(effectifDb, fieldName) || get(effectifDb, fieldName) === "" ? fieldName : undefined
+                !get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined
               )
             ),
           }
         : {}),
-    };
-
-    if (!sifa || isEligibleSIFA(historique_statut)) {
-      effectifsSifa.push(effectif);
-    }
-  }
-
-  return effectifsSifa;
+    }));
 }
 
 export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {
