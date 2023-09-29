@@ -13,8 +13,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build --no-lint",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -66,13 +64,6 @@
   },
   "devDependencies": {
     "@babel/core": "7.21.4",
-    "@storybook/addon-essentials": "^7.0.5",
-    "@storybook/addon-interactions": "^7.0.5",
-    "@storybook/addon-links": "^7.0.5",
-    "@storybook/blocks": "^7.0.5",
-    "@storybook/nextjs": "^7.0.5",
-    "@storybook/react": "^7.0.5",
-    "@storybook/testing-library": "0.1.0",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
@@ -81,9 +72,6 @@
     "@types/react": "18.0.35",
     "babel-loader": "9.1.2",
     "cross-env": "7.0.3",
-    "storybook": "^7.0.5",
-    "storybook-addon-mock": "4.0.0",
-    "storybook-addon-next": "1.8.0",
     "typescript": "5.0.4"
   }
 }
