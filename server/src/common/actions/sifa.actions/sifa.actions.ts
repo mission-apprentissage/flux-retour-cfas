@@ -3,12 +3,12 @@ import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, getSIFADate } from "shared";
 
-import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
 import { findFormationById, getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
 import { findOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { Effectif } from "@/common/model/@types/Effectif";
+import { effectifsDb } from "@/common/model/collections";
 
 import { SIFA_FIELDS } from "./sifaCsvFields";
 
@@ -79,10 +79,14 @@ export const generateSifa = async (organisme_id: ObjectId) => {
   }
 
   const effectifs = (
-    await findEffectifsByQuery({
-      organisme_id: new ObjectId(organisme_id),
-      annee_scolaire: getAnneesScolaireListFromDate(getSIFADate(new Date())),
-    })
+    await effectifsDb()
+      .find({
+        organisme_id: new ObjectId(organisme_id),
+        annee_scolaire: {
+          $in: getAnneesScolaireListFromDate(getSIFADate(new Date())),
+        },
+      })
+      .toArray()
   ).filter((effectif) => isEligibleSIFA(effectif.apprenant.historique_statut)) as Required<WithId<Effectif>>[];
 
   const items: any[] = [];
