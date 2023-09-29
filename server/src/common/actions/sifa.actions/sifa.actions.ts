@@ -1,13 +1,14 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
+import { getAnneesScolaireListFromDate, getSIFADate } from "shared";
 
-import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
 import { findFormationById, getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
 import { findOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { Effectif } from "@/common/model/@types/Effectif";
+import { effectifsDb } from "@/common/model/collections";
 
 import { SIFA_FIELDS } from "./sifaCsvFields";
 
@@ -43,25 +44,16 @@ const wrapNumString = (str) => {
   return `="${str}"`;
 };
 
-/**
- *
- * @param param0
- * @returns
- */
-export const isEligibleSIFA = ({ historique_statut }) => {
-  const previousYear = new Date().getFullYear() - 1;
-  const endOfyear = DateTime.fromFormat(`31/12/${previousYear}`, "dd/MM/yyyy").setLocale("fr-FR"); // FIXME, date à revoir / configurer ?
+export const isEligibleSIFA = (historique_statut: Effectif["apprenant"]["historique_statut"]) => {
+  const endOfyear = getSIFADate(new Date());
 
   const historiqueSorted = historique_statut
-    .filter(({ date_statut }) => {
-      const dateStatut = DateTime.fromJSDate(new Date(date_statut)).setZone("Europe/Paris").setLocale("fr-FR");
-      return dateStatut <= endOfyear;
-    })
+    .filter(({ date_statut }) => date_statut <= endOfyear)
     .sort((a, b) => {
       return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
     });
 
-  const current = [...historiqueSorted].pop();
+  const current = historiqueSorted[0];
   if (current?.valeur_statut === CODES_STATUT_APPRENANT.apprenti) {
     // Décision 18/01/2023 - Les CFAs connectés en API ne renseigne pas tjrs la date d'inscription de l'apprenant
     // let aEteInscrit = false;
@@ -81,20 +73,21 @@ export const isEligibleSIFA = ({ historique_statut }) => {
 };
 
 export const generateSifa = async (organisme_id: ObjectId) => {
-  const currentYear = new Date().getFullYear();
-  const previousYear = currentYear - 1;
-  const anneScolaire = `${previousYear}-${currentYear}`;
-
   const organisme = await findOrganismeById(organisme_id);
   if (!organisme) {
     throw new Error("organisme not found");
   }
 
   const effectifs = (
-    await findEffectifsByQuery({ organisme_id: new ObjectId(organisme_id), annee_scolaire: anneScolaire })
-  ).filter((effectif) => isEligibleSIFA({ historique_statut: effectif.apprenant.historique_statut })) as Required<
-    WithId<Effectif>
-  >[];
+    await effectifsDb()
+      .find({
+        organisme_id: new ObjectId(organisme_id),
+        annee_scolaire: {
+          $in: getAnneesScolaireListFromDate(getSIFADate(new Date())),
+        },
+      })
+      .toArray()
+  ).filter((effectif) => isEligibleSIFA(effectif.apprenant.historique_statut)) as Required<WithId<Effectif>>[];
 
   const items: any[] = [];
   for (const effectif of effectifs) {

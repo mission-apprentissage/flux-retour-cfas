@@ -4,6 +4,7 @@ import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
+import { getAnneeScolaireFromDate, getSIFADate } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { organismeAtom } from "@/hooks/organismeAtoms";
@@ -15,14 +16,10 @@ import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/componen
 import { DownloadLine } from "@/theme/components/icons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
-const currentYear = new Date().getFullYear();
-const previousYear = currentYear - 1;
-const currentAnneeScolaire = `${previousYear}-${currentYear}`;
-
-function useOrganismesEffectifs(organismeId, anneeScolaire) {
+function useOrganismesEffectifs(organismeId: string) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const queryClient = useQueryClient();
-  const prevOrganismeId = useRef(null);
+  const prevOrganismeId = useRef<string | null>(null);
 
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
@@ -33,10 +30,7 @@ function useOrganismesEffectifs(organismeId, anneeScolaire) {
   }, [queryClient, organismeId]);
 
   const { data, isLoading, isFetching } = useQuery<any, any>(["organismesEffectifs", organismeId], async () => {
-    const organismesEffectifs = await _get(
-      `/api/v1/organismes/${organismeId}/effectifs?sifa=true&annee_scolaire=${anneeScolaire}`
-    );
-    // eslint-disable-next-line no-undef
+    const organismesEffectifs = await _get(`/api/v1/organismes/${organismeId}/effectifs?sifa=true`);
     const newEffectifsState = new Map();
     for (const { id, validation_errors, requiredSifa } of organismesEffectifs as any) {
       newEffectifsState.set(id, { validation_errors, requiredSifa });
@@ -99,7 +93,7 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
 const SIFAPage = ({ isMine }) => {
   const router = useRouter();
   const organisme = useRecoilValue<any>(organismeAtom);
-  const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id, currentAnneeScolaire);
+  const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
   const exportSifaFilename = `tdb-données-sifa-${
     organisme.enseigne ?? organisme.raison_sociale
   }-${new Date().toLocaleDateString()}.csv`;
@@ -119,7 +113,7 @@ const SIFAPage = ({ isMine }) => {
       </Center>
     );
   }
-  // historique_statut.date_statut <= "31/12/202"
+
   return (
     <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
@@ -149,9 +143,10 @@ const SIFAPage = ({ isMine }) => {
 
       <VStack alignItems="flex-start">
         <Text fontWeight="bold">
-          Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre {previousYear}, sur
-          l&apos;année scolaire {currentAnneeScolaire}. Pour plus de facilité, vous pouvez effectuer une recherche, ou
-          filtrer par année.
+          Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre{" "}
+          {getSIFADate(new Date()).getUTCFullYear()}, sur l&apos;année scolaire{" "}
+          {getAnneeScolaireFromDate(getSIFADate(new Date()))}. Pour plus de facilité, vous pouvez effectuer une
+          recherche, ou filtrer par année.
         </Text>
         <Input
           name="search_effectifs"

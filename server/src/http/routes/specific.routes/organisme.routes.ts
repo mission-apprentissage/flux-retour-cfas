@@ -1,76 +1,58 @@
 import Boom from "boom";
 import { compact, get } from "lodash-es";
 import { ObjectId } from "mongodb";
+import {
+  getAnneesScolaireListFromDate,
+  getSIFADate,
+  requiredApprenantAdresseFieldsSifa,
+  requiredFieldsSifa,
+} from "shared";
 
-import { findEffectifsByQuery } from "@/common/actions/effectifs.actions";
 import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions";
 import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
-import { Effectif } from "@/common/model/@types/Effectif";
+import { effectifsDb } from "@/common/model/collections";
 
-export async function getOrganismeEffectifs(organismeId: ObjectId, anneeScolaire: string | undefined, sifa = false) {
-  const filter: Partial<Effectif> = { organisme_id: organismeId };
-  if (anneeScolaire) {
-    filter.annee_scolaire = anneeScolaire;
-  }
-
-  const effectifsDb = await findEffectifsByQuery(filter);
-
-  const effectifs: any[] = [];
-
-  const requiredFieldsSifa = [
-    "apprenant.nom",
-    "apprenant.prenom",
-    "apprenant.date_de_naissance",
-    "apprenant.code_postal_de_naissance",
-    "apprenant.sexe",
-    "apprenant.derniere_situation",
-    "apprenant.dernier_organisme_uai",
-    "apprenant.organisme_gestionnaire",
-    "formation.duree_formation_relle",
-  ];
-
-  const requiredApprenantAdresseFieldsSifa = [
-    "apprenant.adresse.voie",
-    "apprenant.adresse.code_postal",
-    "apprenant.adresse.commune",
-  ];
-
-  for (const effectifDb of effectifsDb) {
-    const { _id, id_erp_apprenant, source, annee_scolaire, validation_errors, apprenant, formation } = effectifDb;
-
-    let historique_statut = apprenant.historique_statut;
-    const effectif = {
-      id: _id.toString(),
-      id_erp_apprenant,
+export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false) {
+  const effectifs = await effectifsDb()
+    .find({
       organisme_id: organismeId,
-      annee_scolaire,
-      source,
-      validation_errors,
-      formation,
-      nom: apprenant.nom,
-      prenom: apprenant.prenom,
-      historique_statut,
+      ...(sifa
+        ? {
+            annee_scolaire: {
+              $in: getAnneesScolaireListFromDate(sifa ? getSIFADate(new Date()) : new Date()),
+            },
+          }
+        : {}),
+    })
+    .toArray();
+
+  return effectifs
+    .filter((effectif) => !sifa || isEligibleSIFA(effectif.apprenant.historique_statut))
+    .map((effectif) => ({
+      id: effectif._id.toString(),
+      id_erp_apprenant: effectif.id_erp_apprenant,
+      organisme_id: organismeId,
+      annee_scolaire: effectif.annee_scolaire,
+      source: effectif.source,
+      validation_errors: effectif.validation_errors,
+      formation: effectif.formation,
+      nom: effectif.apprenant.nom,
+      prenom: effectif.apprenant.prenom,
+      historique_statut: effectif.apprenant.historique_statut,
       ...(sifa
         ? {
             requiredSifa: compact(
               [
-                ...(!apprenant.adresse?.complete
+                ...(!effectif.apprenant.adresse?.complete
                   ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
                   : requiredFieldsSifa),
               ].map((fieldName) =>
-                !get(effectifDb, fieldName) || get(effectifDb, fieldName) === "" ? fieldName : undefined
+                !get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined
               )
             ),
           }
         : {}),
-    };
-
-    if (!sifa || isEligibleSIFA({ historique_statut })) {
-      effectifs.push(effectif);
-    }
-  }
-
-  return effectifs;
+    }));
 }
 
 export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {

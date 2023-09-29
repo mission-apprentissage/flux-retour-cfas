@@ -75,16 +75,6 @@ export const findEffectifs = async (organisme_id, projection = {}) => {
 };
 
 /**
- * Méthode de récupération des effectifs par query
- * @param {*} query
- * @param {*} projection
- * @returns
- */
-export const findEffectifsByQuery = async (query, projection = {}) => {
-  return effectifsDb().find(query, { projection }).toArray();
-};
-
-/**
  * Méthode de récupération d'un effectif versatile par query
  * @param {*} query
  * @param {*} projection
