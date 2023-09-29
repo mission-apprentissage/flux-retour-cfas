@@ -9,7 +9,7 @@ const AUGUST_MONTH_INDEX = 7;
  * (utilisé pour le filtrage des effectifs)
  */
 export function getAnneesScolaireListFromDate(date: Date): string[] {
-  const year = date.getFullYear();
+  const year = date.getUTCFullYear();
   return [
     // année calendaire
     `${year}-${year}`,
@@ -23,7 +23,7 @@ export function getAnneesScolaireListFromDate(date: Date): string[] {
  * Renvoie l'année scolaire (août à août) pour une date donnée.
  */
 export function getAnneeScolaireFromDate(date: Date): string {
-  const year = date.getFullYear();
+  const year = date.getUTCFullYear();
   return date.getMonth() < AUGUST_MONTH_INDEX ? `${year - 1}-${year}` : `${year}-${year + 1}`;
 }
 

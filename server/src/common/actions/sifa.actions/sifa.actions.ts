@@ -44,20 +44,16 @@ const wrapNumString = (str) => {
   return `="${str}"`;
 };
 
-export const isEligibleSIFA = ({ historique_statut }) => {
-  const sifaDate = getSIFADate(new Date());
-  const endOfyear = DateTime.fromFormat(`31/12/${sifaDate.getFullYear()}`, "dd/MM/yyyy").setLocale("fr-FR"); // FIXME, date à revoir / configurer ?
+export const isEligibleSIFA = (historique_statut: Effectif["apprenant"]["historique_statut"]) => {
+  const endOfyear = getSIFADate(new Date());
 
   const historiqueSorted = historique_statut
-    .filter(({ date_statut }) => {
-      const dateStatut = DateTime.fromJSDate(new Date(date_statut)).setZone("Europe/Paris").setLocale("fr-FR");
-      return dateStatut <= endOfyear;
-    })
+    .filter(({ date_statut }) => date_statut <= endOfyear)
     .sort((a, b) => {
       return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
     });
 
-  const current = [...historiqueSorted].pop();
+  const current = historiqueSorted[0];
   if (current?.valeur_statut === CODES_STATUT_APPRENANT.apprenti) {
     // Décision 18/01/2023 - Les CFAs connectés en API ne renseigne pas tjrs la date d'inscription de l'apprenant
     // let aEteInscrit = false;
@@ -87,9 +83,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       organisme_id: new ObjectId(organisme_id),
       annee_scolaire: getAnneesScolaireListFromDate(getSIFADate(new Date())),
     })
-  ).filter((effectif) => isEligibleSIFA({ historique_statut: effectif.apprenant.historique_statut })) as Required<
-    WithId<Effectif>
-  >[];
+  ).filter((effectif) => isEligibleSIFA(effectif.apprenant.historique_statut)) as Required<WithId<Effectif>>[];
 
   const items: any[] = [];
   for (const effectif of effectifs) {

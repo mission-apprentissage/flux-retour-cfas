@@ -71,7 +71,7 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
         : {}),
     };
 
-    if (!sifa || isEligibleSIFA({ historique_statut })) {
+    if (!sifa || isEligibleSIFA(historique_statut)) {
       effectifsSifa.push(effectif);
     }
   }

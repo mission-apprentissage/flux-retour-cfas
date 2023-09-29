@@ -144,7 +144,7 @@ const SIFAPage = ({ isMine }) => {
       <VStack alignItems="flex-start">
         <Text fontWeight="bold">
           Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre{" "}
-          {getSIFADate(new Date()).getFullYear()}, sur l&apos;année scolaire{" "}
+          {getSIFADate(new Date()).getUTCFullYear()}, sur l&apos;année scolaire{" "}
           {getAnneeScolaireFromDate(getSIFADate(new Date()))}. Pour plus de facilité, vous pouvez effectuer une
           recherche, ou filtrer par année.
         </Text>
