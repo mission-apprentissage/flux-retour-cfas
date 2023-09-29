@@ -67,7 +67,7 @@ module.exports = {
           "**/__mocks__/**",
           "**/test.{js,jsx,ts,tsx}",
           "**/test-*.{js,jsx,ts,tsx}",
-          "**/*{.,_}{test,spec,stories,bench,fixture}.{js,jsx,ts,tsx}",
+          "**/*{.,_}{test,spec,bench,fixture}.{js,jsx,ts,tsx}",
           "**/jest.config.js",
           "**/dev.ts",
           "**/tsup.config.ts",
