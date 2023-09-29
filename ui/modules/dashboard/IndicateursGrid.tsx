@@ -156,6 +156,7 @@ function IndicateursGrid({
                 variant="link"
                 fontSize="sm"
                 p="0"
+                mt="2"
                 isDisabled={indicateursEffectifs.apprenants === 0}
                 action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
               >
@@ -186,6 +187,7 @@ function IndicateursGrid({
                 variant="link"
                 fontSize="sm"
                 p="0"
+                mt="2"
                 isDisabled={indicateursEffectifs.apprentis === 0}
                 action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
               >
@@ -217,6 +219,7 @@ function IndicateursGrid({
                 variant="link"
                 fontSize="sm"
                 p="0"
+                mt="2"
                 isDisabled={indicateursEffectifs.rupturants === 0}
                 action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
               >
@@ -247,6 +250,7 @@ function IndicateursGrid({
                 variant="link"
                 fontSize="sm"
                 p="0"
+                mt="2"
                 isDisabled={indicateursEffectifs.inscritsSansContrat === 0}
                 action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
               >
@@ -280,6 +284,7 @@ function IndicateursGrid({
                 variant="link"
                 fontSize="sm"
                 p="0"
+                mt="2"
                 isDisabled={indicateursEffectifs.abandons === 0}
                 action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}
               >

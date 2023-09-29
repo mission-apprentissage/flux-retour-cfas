@@ -7,13 +7,14 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import { getAnneeScolaireFromDate, getSIFADate } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
+import { downloadObject } from "@/common/utils/browser";
+import DownloadButton from "@/components/buttons/DownloadButton";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { usePlausibleTracking } from "@/hooks/plausible";
-import useDownloadClick from "@/hooks/useDownloadClick";
+import useToaster from "@/hooks/useToaster";
 import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import EffectifsTable from "@/modules/mon-espace/effectifs/engine/EffectifsTable";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
-import { DownloadLine } from "@/theme/components/icons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
 function useOrganismesEffectifs(organismeId: string) {
@@ -41,28 +42,6 @@ function useOrganismesEffectifs(organismeId: string) {
 
   return { isLoading: isFetching || isLoading, organismesEffectifs: data || [] };
 }
-
-const DownloadButton = ({ title, fileName, getFile }) => {
-  const { onClick, isLoading } = useDownloadClick(getFile, fileName);
-  const { trackPlausibleEvent } = usePlausibleTracking();
-
-  return (
-    <Button
-      size="md"
-      onClick={(_e) => {
-        trackPlausibleEvent("telechargement_sifa");
-        return onClick();
-      }}
-      variant="secondary"
-    >
-      {isLoading && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
-      {!isLoading && <DownloadLine />}
-      <Text as="span" ml={2}>
-        {title}
-      </Text>
-    </Button>
-  );
-};
 
 const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, ...props }) => {
   const [count, setCount] = useState(effectifs.length);
@@ -92,11 +71,10 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
 
 const SIFAPage = ({ isMine }) => {
   const router = useRouter();
+  const { trackPlausibleEvent } = usePlausibleTracking();
+  const { toastWarning } = useToaster();
   const organisme = useRecoilValue<any>(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
-  const exportSifaFilename = `tdb-données-sifa-${
-    organisme.enseigne ?? organisme.raison_sociale
-  }-${new Date().toLocaleDateString()}.csv`;
 
   const [searchValue, setSearchValue] = useState("");
 
@@ -122,10 +100,26 @@ const SIFAPage = ({ isMine }) => {
         </Heading>
         <HStack spacing={4}>
           <DownloadButton
-            fileName={exportSifaFilename}
-            getFile={() => _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`)}
-            title="Télécharger SIFA"
-          />
+            variant="secondary"
+            action={async () => {
+              trackPlausibleEvent("telechargement_sifa");
+              downloadObject(
+                await _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`),
+                `tdb-données-sifa-${
+                  organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"
+                }-${new Date().toLocaleDateString()}.csv`,
+                "text/plain"
+              );
+              const nbEffectifsInvalides = organismesEffectifs.filter(
+                (effectif) => effectif.requiredSifa.length > 0
+              ).length;
+              toastWarning(
+                `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${nbEffectifsInvalides} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`
+              );
+            }}
+          >
+            Télécharger SIFA
+          </DownloadButton>
           <Button
             size="md"
             fontSize={{ base: "sm", md: "md" }}
