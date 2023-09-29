@@ -85,7 +85,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
   const effectifs = (
     await findEffectifsByQuery({
       organisme_id: new ObjectId(organisme_id),
-      annee_scolaire: getAnneesScolaireListFromDate(new Date()),
+      annee_scolaire: getAnneesScolaireListFromDate(getSIFADate(new Date())),
     })
   ).filter((effectif) => isEligibleSIFA({ historique_statut: effectif.apprenant.historique_statut })) as Required<
     WithId<Effectif>
