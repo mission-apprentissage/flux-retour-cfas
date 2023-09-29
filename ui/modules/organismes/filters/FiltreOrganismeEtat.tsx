@@ -16,7 +16,7 @@ function FiltreOrganismesEtat(props: FiltreOrganismesEtatProps) {
 
   return (
     <div>
-      <OrganismesFilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Etat" badge={etats?.length} />
+      <OrganismesFilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="État" badge={etats?.length} />
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup
