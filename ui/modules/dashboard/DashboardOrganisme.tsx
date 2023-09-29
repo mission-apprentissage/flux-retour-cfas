@@ -27,7 +27,7 @@ import { User } from "@/common/internal/User";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
-import DownloadLinkButton from "@/components/buttons/DownloadLinkButton";
+import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
@@ -286,7 +286,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       />
                     </Tooltip>
                   </Badge>
-                  <Text>Prepa Apprentissage&nbsp;:</Text>
+                  <Text>Prépa-apprentissage&nbsp;:</Text>
                   <Badge
                     fontSize="epsilon"
                     textColor="grey.800"
@@ -525,7 +525,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                         </Text>
                       </HStack>
 
-                      <DownloadLinkButton
+                      <DownloadButton
+                        variant="secondary"
                         action={async () => {
                           const organismes = await _get<Organisme[]>(`/api/v1/organismes/${organisme._id}/organismes`);
                           exportDataAsXlsx(
@@ -538,7 +539,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                         }}
                       >
                         Télécharger la liste des organismes qui ne transmettent pas
-                      </DownloadLinkButton>
+                      </DownloadButton>
                     </VStack>
 
                     <Box flex="1" minH="250px">

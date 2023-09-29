@@ -23,12 +23,12 @@ import { Organisme } from "@/common/internal/Organisme";
 import { normalize } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
-import Ribbons from "@/components/Ribbons/Ribbons";
 import useAuth from "@/hooks/useAuth";
 
-import OrganismesTable from "./OrganismesTable";
+import OrganismesACompleterPanelContent from "./tabs/OrganismesACompleterPanelContent";
+import OrganismesFiablesPanelContent from "./tabs/OrganismesFiablesPanelContent";
 
-type OrganismeNormalized = Organisme & {
+export type OrganismeNormalized = Organisme & {
   normalizedName: string;
   normalizedUai: string;
   normalizedCommune: string;
@@ -192,91 +192,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         )}
       </Container>
     </SimplePage>
-  );
-}
-
-function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
-  return (
-    <>
-      <Ribbons variant="info" my={8}>
-        <Box color="grey.800">
-          <Text>Est considéré comme fiable un organisme (OFA)&nbsp;:</Text>
-          <UnorderedList styleType="'- '">
-            <ListItem>
-              qui correspond à un couple UAI-SIRET <strong>validé</strong> dans le{" "}
-              <Link
-                href="https://referentiel.apprentissage.onisep.fr/"
-                isExternal={true}
-                borderBottom="1px"
-                _hover={{ textDecoration: "none" }}
-              >
-                Référentiel de l’apprentissage
-              </Link>
-              .
-            </ListItem>
-            <ListItem>
-              dont l’état administratif du SIRET de l’établissement, tel qu’il est renseigné sur l’INSEE, est{" "}
-              <strong>ouvert</strong>.
-            </ListItem>
-          </UnorderedList>
-        </Box>
-      </Ribbons>
-      <OrganismesTable organismes={organismes} />
-    </>
-  );
-}
-
-function OrganismesACompleterPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
-  return (
-    <>
-      <Ribbons variant="warning" my={8}>
-        <Box color="grey.800">
-          <Text>
-            Les organismes (OFA) ci-dessous présentent une ou plusieurs anomalies suivantes à <strong>corriger</strong>{" "}
-            ou <strong>compléter</strong> :
-          </Text>
-          <UnorderedList styleType="'- '">
-            <ListItem>
-              Un couple UAI-SIRET qui n’est pas <strong>validé</strong> dans le{" "}
-              <Link
-                href="https://referentiel.apprentissage.onisep.fr/"
-                isExternal={true}
-                borderBottom="1px"
-                _hover={{ textDecoration: "none" }}
-              >
-                Référentiel de l’apprentissage
-              </Link>
-              .
-            </ListItem>
-            <ListItem>
-              Un code UAI est répertorié comme <strong>inconnu</strong> ou non <strong>validé</strong> dans le{" "}
-              <Link
-                href="https://referentiel.apprentissage.onisep.fr/"
-                isExternal={true}
-                borderBottom="1px"
-                _hover={{ textDecoration: "none" }}
-              >
-                Référentiel de l’apprentissage
-              </Link>
-              .
-            </ListItem>
-            <ListItem>
-              L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE, est{" "}
-              <strong>fermé</strong>.
-            </ListItem>
-            <ListItem>
-              La nature de l’organisme (déduite des relations entre organismes - base des Carif-Oref) est{" "}
-              <strong>inconnue</strong>.
-            </ListItem>
-          </UnorderedList>
-
-          <Text fontWeight="bold">
-            Aidez-nous à fiabiliser ces organismes en menant des actions correctives selon les manquements constatés.
-          </Text>
-        </Box>
-      </Ribbons>
-      <OrganismesTable organismes={organismes} modeNonFiable />
-    </>
   );
 }
 
