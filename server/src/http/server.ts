@@ -113,7 +113,6 @@ import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants
 import effectif from "./routes/specific.routes/effectif.routes";
 import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
-import { serverEventsHandler } from "./routes/specific.routes/server-events.routes";
 import auth from "./routes/user.routes/auth.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
@@ -573,8 +572,7 @@ function setupRoutes(app: Application) {
         return await searchOrganismes(req.user, req.body as any);
       })
     )
-    .use("/api/v1/effectif", effectif())
-    .get("/api/v1/server-events", serverEventsHandler);
+    .use("/api/v1/effectif", effectif());
 
   /*
    * referentiel

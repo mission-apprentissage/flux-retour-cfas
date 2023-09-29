@@ -15,7 +15,6 @@ import { AuthContext } from "../common/internal/AuthContext";
 import theme from "../theme/index";
 import Fonts from "../theme/Fonts";
 import { organismeAtom } from "../hooks/organismeAtoms";
-import { uploadsAtom } from "../modules/mon-espace/effectifs/engine/atoms";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +47,6 @@ const preview: Preview = {
 
       function initializeRecoilState({ set }) {
         set(organismeAtom, parameters.mockRecoil?.organisme);
-        set(uploadsAtom, parameters.mockRecoil?.uploads);
       }
 
       return (

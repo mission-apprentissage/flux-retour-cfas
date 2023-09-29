@@ -18621,7 +18621,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.uniq@npm:4.5.0, lodash.uniq@npm:^4.5.0":
+"lodash.uniq@npm:^4.5.0":
   version: 4.5.0
   resolution: "lodash.uniq@npm:4.5.0"
   checksum: a4779b57a8d0f3c441af13d9afe7ecff22dd1b8ce1129849f71d9bbc8e8ee4e46dfb4b7c28f7ad3d67481edd6e51126e4e2a6ee276e25906d10f7140187c392d
@@ -26357,7 +26357,6 @@ request-debug@latest:
     lodash.groupby: 4.6.0
     lodash.range: 3.2.0
     lodash.setwith: 4.3.2
-    lodash.uniq: 4.5.0
     luxon: 3.3.0
     next: 13.2.3
     next-plausible: 3.7.2
