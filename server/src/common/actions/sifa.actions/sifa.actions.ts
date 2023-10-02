@@ -4,7 +4,7 @@ import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, getSIFADate } from "shared";
 
 import { findFormationById, getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
-import { findOrganismeById } from "@/common/actions/organismes/organismes.actions";
+import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { Effectif } from "@/common/model/@types/Effectif";
@@ -73,10 +73,7 @@ export const isEligibleSIFA = (historique_statut: Effectif["apprenant"]["histori
 };
 
 export const generateSifa = async (organisme_id: ObjectId) => {
-  const organisme = await findOrganismeById(organisme_id);
-  if (!organisme) {
-    throw new Error("organisme not found");
-  }
+  const organisme = await getOrganismeById(organisme_id);
 
   const effectifs = (
     await effectifsDb()
@@ -118,8 +115,9 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2",
       ADRESSE: effectif.apprenant.adresse
         ? effectif.apprenant.adresse?.complete ??
-          `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${effectif
-            .apprenant.adresse?.voie}`
+          `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${
+            effectif.apprenant.adresse?.voie ?? ""
+          }`
         : undefined,
       SIT_N_1: effectif.apprenant.derniere_situation,
       ETAB_N_1: effectif.apprenant.dernier_organisme_uai
@@ -141,11 +139,6 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       UAI_EPLE: "NC", // Unknown for now
       NAT_STR_JUR: "NC", // Unknown for now
     };
-
-    // Note for later: maybe we should not remove incomplete effectifs, to allow the user to fix them manually.
-    if (Object.values(requiredFields).some((val) => val === undefined)) {
-      continue;
-    }
 
     const apprenantFields = {
       INE: wrapNumString(effectif.apprenant.ine) ?? "ine",

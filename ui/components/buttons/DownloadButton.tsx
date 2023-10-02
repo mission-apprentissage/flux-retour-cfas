@@ -8,10 +8,9 @@ import { DownloadLine } from "@/theme/components/icons";
 type Props = {
   action: (() => Promise<any>) | (() => any);
   children: React.ReactNode;
-  variant: string;
 } & ButtonProps;
 
-function DownloadButton({ children, action, variant, ...props }: Props) {
+function DownloadButton({ children, action, ...props }: Props) {
   const { toastError } = useToaster();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,9 +28,8 @@ function DownloadButton({ children, action, variant, ...props }: Props) {
 
   return (
     <Button
-      variant={variant}
-      mt="2"
-      borderBottom={isLoading ? "0" : "1px"}
+      variant={props.variant ?? "secondary"}
+      borderBottom={isLoading && props.variant === "link" ? "0" : "1px"}
       borderRadius="0"
       _active={{
         color: "bluefrance",

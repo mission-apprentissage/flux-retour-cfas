@@ -19,5 +19,13 @@ export default function useToaster() {
       ...options,
     });
 
-  return { toastError, toastSuccess };
+  const toastWarning = (title: UseToastOptions["title"], options?: UseToastOptions) =>
+    toast({
+      title,
+      status: "warning",
+      isClosable: true,
+      ...options,
+    });
+
+  return { toastError, toastSuccess, toastWarning };
 }
