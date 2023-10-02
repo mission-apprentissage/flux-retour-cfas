@@ -1,7 +1,6 @@
-import { Center, Heading, Spinner, Box, Flex, Text, HStack, Button, VStack, Switch, Container } from "@chakra-ui/react";
+import { Center, Heading, Spinner, Box, Flex, Text, HStack, VStack, Switch, Container } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
-import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { getAnneeScolaireFromDate, getSIFADate } from "shared";
@@ -74,7 +73,6 @@ interface SIFAPageProps {
 }
 
 const SIFAPage = (props: SIFAPageProps) => {
-  const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning } = useToaster();
   const organisme = useRecoilValue<any>(organismeAtom);
@@ -126,20 +124,8 @@ const SIFAPage = (props: SIFAPageProps) => {
               );
             }}
           >
-            Télécharger SIFA
+            Télécharger le fichier SIFA
           </DownloadButton>
-          <Button
-            size="md"
-            fontSize={{ base: "sm", md: "md" }}
-            p={{ base: 2, md: 4 }}
-            h={{ base: 8, md: 10 }}
-            onClick={() => {
-              router.push(`${router.asPath.replace("/enquete-sifa", "/effectifs/televersement")}`);
-            }}
-            variant="secondary"
-          >
-            <Text as="span">+ Ajouter</Text>
-          </Button>
         </HStack>
       </Flex>
 
