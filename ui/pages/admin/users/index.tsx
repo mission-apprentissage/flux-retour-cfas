@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Heading,
   HStack,
   Input,
@@ -9,46 +8,170 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Spinner,
   Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import Head from "next/head";
+import NavLink from "next/link";
 import { useRouter } from "next/router";
+import { useMemo, useState } from "react";
 
+import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _get } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import UserForm from "@/modules/admin/UserForm";
-import UsersList from "@/modules/admin/UsersList";
+import NewTable from "@/modules/indicateurs/NewTable";
+import { ArrowRightLine } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
-const DEFAULT_LIMIT = 100;
+
+const NO_LIMIT = 10_000;
+
+type UserNormalized = {
+  _id: string;
+  normalizedNom: string;
+  normalizedPrenom: string;
+  normalizedEmail: string;
+  normalizedOrganismeNom: string;
+  organisationType: string;
+  organismeId: string;
+  organismeNom: string;
+  nom: string;
+  prenom: string;
+  account_status: string;
+  created_at: string;
+};
+
+const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
+  {
+    header: () => "Nom",
+    accessorKey: "normalizedNom",
+    cell: ({ row }) => <Text fontSize="md">{row.original?.nom}</Text>,
+  },
+  {
+    header: () => "Prénom",
+    accessorKey: "normalizedPrenom",
+    cell: ({ row }) => <Text fontSize="md">{row.original?.prenom}</Text>,
+  },
+  {
+    header: () => "Type de compte",
+    accessorKey: "organisationType",
+    cell: ({ row }) => {
+      if (row.original?.organisationType.startsWith("OFA ")) {
+        return (
+          <>
+            <Text fontSize="md">Organisme de formation</Text>
+            <Text fontSize="xs" color="#777">
+              {row.original?.organisationType}
+            </Text>
+          </>
+        );
+      }
+      return (
+        <Text fontSize="md" lineHeight="38px">
+          {row.original?.organisationType || "Inconnu"}
+        </Text>
+      );
+    },
+  },
+  {
+    header: () => "Etablissement",
+    accessorKey: "normalizedOrganismeNom",
+    cell: ({ row }) => {
+      return (
+        <Text
+          {...(row.original?.organismeId
+            ? { as: NavLink, href: `/admin/organismes/${row.original?.organismeId}` }
+            : {})}
+          flexGrow={1}
+        >
+          <Text isTruncated maxWidth={400}>
+            {row.original?.organismeNom}
+          </Text>
+        </Text>
+      );
+    },
+  },
+  {
+    header: () => "Statut du compte",
+    accessorKey: "account_status",
+    cell: ({ row }) => (
+      <>
+        <Text fontSize="md">{USER_STATUS_LABELS[row.original?.account_status] ?? row.original?.account_status}</Text>
+        <Text fontSize="xs" color="#777">
+          Créé le {formatDateNumericDayMonthYear(row.original?.created_at)}
+        </Text>
+      </>
+    ),
+  },
+  {
+    header: () => "",
+    accessorKey: "_id",
+    cell: ({ row }) => (
+      <NavLink href={`/admin/users/${row.original?._id}`}>
+        <ArrowRightLine w="1w" />
+      </NavLink>
+    ),
+  },
+];
 
 const Users = () => {
   const title = "Gestion des utilisateurs";
   const router = useRouter();
-  const { page: _page, limit: _limit, q: searchValue, ...filter } = router.query;
-  const page = parseInt(router.query.page as string, 10) || 1;
-  const limit = parseInt(router.query.limit as string, 10) || DEFAULT_LIMIT;
+  const [search, setSearch] = useState<string>("");
 
   const {
-    data: users,
+    data,
     refetch: refetchUsers,
     isLoading,
-    error,
-  } = useQuery<any, any>(["admin/users", page, limit, filter, searchValue], () =>
-    _get("/api/v1/admin/users/", { params: { page, q: searchValue, filter } })
+  } = useQuery<any, any>(["admin/users"], () =>
+    _get("/api/v1/admin/users/", {
+      params: {
+        page: 1,
+        limit: NO_LIMIT,
+      },
+    })
   );
-  // prefetch next page
-  useQuery(
-    ["users", page + 1, limit, filter, searchValue],
-    () => _get("/api/v1/admin/users/", { params: { page: page + 1, limit, q: searchValue, filter } }),
-    { enabled: !!(users?.pagination && page + 1 < users?.pagination?.lastPage) }
-  );
+
+  const users = useMemo(() => {
+    if (!data) return [];
+    return data.data.map((user) => {
+      const organismeId = user?.organisation?.organisme?._id;
+      const organismeNom = user?.organisation?.organisme?.nom || "";
+      return {
+        ...user,
+        organismeId,
+        organismeNom,
+        organisationType: user?.organisation?.label || "",
+        normalizedOrganismeNom: organismeNom.toLowerCase(),
+        normalizedNom: user.nom.toLowerCase(),
+        normalizedPrenom: user.prenom.toLowerCase(),
+        normalizedEmail: user.email.toLowerCase(),
+      };
+    });
+  }, [data]);
+
+  const filteredUsers = useMemo(() => {
+    if (!search) return users;
+    return users?.filter((user) => {
+      const searchLower = search.toLowerCase();
+      return (
+        user.normalizedNom.includes(searchLower) ||
+        user.normalizedPrenom.includes(searchLower) ||
+        user.normalizedEmail.includes(searchLower) ||
+        user.normalizedOrganismeNom.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [search, users]);
+
+  const defaultSort: SortingState = [{ desc: false, id: "normalizedNom" }];
+  const [sort, setSort] = useState<SortingState>(defaultSort);
 
   const closeModal = () => router.push("/admin/users", undefined, { shallow: true });
 
@@ -94,43 +217,29 @@ const Users = () => {
             </Button>
           )} */}
         </HStack>
-        {isLoading && !(users as any)?.data ? (
-          <Spinner alignSelf="center" />
-        ) : error ? (
-          <Box>Une erreur est survenue : {(error as any).message}</Box>
-        ) : (
-          <Stack spacing={2} width="100%">
-            <form
-              method="get"
-              onSubmit={(e: any) => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const { q } = Object.fromEntries(formData);
-                router.push(
-                  {
-                    pathname: "/admin/users",
-                    query: (q ? { q } : {}) as any,
-                  },
-                  undefined,
-                  { shallow: true }
-                );
-              }}
-            >
-              <HStack gap={0} width={500}>
-                <Input type="search" name="q" defaultValue={searchValue} />
-                <Button type="submit" title="Rechercher" m={0} marginInlineStart={0}>
-                  <i className="ri-search" />
-                  Rechercher
-                </Button>
-              </HStack>
-            </form>
-            <Text>
-              {Intl.NumberFormat().format(users?.pagination?.total || 0)}{" "}
-              {users?.pagination?.total > 1 ? "comptes utilisateurs" : "compte utilisateur"}
-            </Text>
-            <UsersList data={users?.data || []} pagination={users?.pagination} searchValue={searchValue} />
-          </Stack>
-        )}
+        <Stack spacing={2} width="100%">
+          <HStack gap={0}>
+            <Input
+              placeholder="Rechercher un utilisateur par nom, prénom, email, siret, établissement, etc."
+              type="search"
+              name="q"
+              defaultValue={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </HStack>
+          <Text py="6" color="#777">
+            {Intl.NumberFormat().format(filteredUsers.length || 0)}{" "}
+            {filteredUsers.length > 1 ? "comptes utilisateurs" : "compte utilisateur"}
+            {filteredUsers.length < users.length ? ` (${users.length} au total)` : ""}
+          </Text>
+          <NewTable
+            data={filteredUsers || []}
+            loading={isLoading}
+            sortingState={sort}
+            onSortingChange={(state) => setSort(state)}
+            columns={UsersColumns}
+          />
+        </Stack>
       </VStack>
     </Page>
   );
