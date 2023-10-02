@@ -47,6 +47,7 @@ type UserNormalized = {
   created_at: string;
   email: string;
   fonction: string;
+  last_connection: string;
 };
 
 const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
@@ -66,32 +67,11 @@ const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
     ),
   },
   {
-    header: () => "Type de compte",
-    accessorKey: "organisationType",
-    cell: ({ row }) => {
-      if (row.original?.organisationType.startsWith("OFA ")) {
-        return (
-          <>
-            <Text fontSize="md">Organisme de formation</Text>
-            <Text fontSize="xs" color="#777">
-              {row.original?.organisationType}
-            </Text>
-          </>
-        );
-      }
-      return (
-        <Text fontSize="md" lineHeight="38px">
-          {row.original?.organisationType || "Inconnu"}
-        </Text>
-      );
-    },
-  },
-  {
     header: () => "Etablissement",
     accessorKey: "normalizedOrganismeNom",
     cell: ({ row }) => {
       return (
-        <Text
+        <Box
           {...(row.original?.organismeId
             ? { as: NavLink, href: `/admin/organismes/${row.original?.organismeId}` }
             : {})}
@@ -100,19 +80,33 @@ const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
           <Text isTruncated maxWidth={400}>
             {row.original?.organismeNom}
           </Text>
-        </Text>
+          {row.original?.organismeNom !== row.original?.organisationType && row.original?.organisationType ? (
+            <Text fontSize="xs" color="#777">
+              {row.original?.organisationType}
+            </Text>
+          ) : null}
+        </Box>
       );
     },
+  },
+  {
+    header: () => "Date de création",
+    accessorKey: "created_at",
+    cell: ({ row }) => (
+      <>
+        <Text fontSize="sm">Créé le {formatDateNumericDayMonthYear(row.original?.created_at)}</Text>
+        <Text fontSize="xs" color="#777">
+          Dernière connexion le {formatDateNumericDayMonthYear(row.original?.last_connection)}
+        </Text>
+      </>
+    ),
   },
   {
     header: () => "Statut du compte",
     accessorKey: "account_status",
     cell: ({ row }) => (
       <>
-        <Text fontSize="md">{USER_STATUS_LABELS[row.original?.account_status] ?? row.original?.account_status}</Text>
-        <Text fontSize="xs" color="#777">
-          Créé le {formatDateNumericDayMonthYear(row.original?.created_at)}
-        </Text>
+        <Text fontSize="sm">{USER_STATUS_LABELS[row.original?.account_status] ?? row.original?.account_status}</Text>
       </>
     ),
   },
@@ -136,8 +130,8 @@ const Users = () => {
     data,
     refetch: refetchUsers,
     isLoading,
-  } = useQuery<any, any>(["admin/users"], () =>
-    _get("/api/v1/admin/users/", {
+  } = useQuery(["admin/users"], () =>
+    _get<{ data: any[] }>("/api/v1/admin/users/", {
       params: {
         page: 1,
         limit: NO_LIMIT,
@@ -149,7 +143,7 @@ const Users = () => {
     if (!data) return [];
     return data.data.map((user) => {
       const organismeId = user?.organisation?.organisme?._id;
-      const organismeNom = user?.organisation?.organisme?.nom || "";
+      const organismeNom = user?.organisation?.organisme?.nom || user?.organisation?.label || "";
       return {
         ...user,
         organismeId,
@@ -174,7 +168,7 @@ const Users = () => {
     });
   }, [search, users]);
 
-  const defaultSort: SortingState = [{ desc: false, id: "normalizedNom" }];
+  const defaultSort: SortingState = [{ desc: false, id: "normalizedNomPrenom" }];
   const [sort, setSort] = useState<SortingState>(defaultSort);
 
   const closeModal = () => router.push("/admin/users", undefined, { shallow: true });
