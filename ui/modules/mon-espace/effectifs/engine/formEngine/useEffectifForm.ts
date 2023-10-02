@@ -4,17 +4,23 @@ import { useRecoilCallback, useSetRecoilState } from "recoil";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { dossierAtom, effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 
-import { cerfaAtom, cerfaSetter, cerfaStatusGetter, fieldSelector, valuesSelector } from "./atoms";
-import { indexedDependencies, indexedDependencesRevalidationRules, indexedRules } from "./cerfaSchema";
+import {
+  effectifFormAtom,
+  effectifFormSetter,
+  EffectifFormStatusStatusGetter,
+  fieldSelector,
+  valuesSelector,
+} from "./atoms";
+import { indexedDependencies, indexedDependencesRevalidationRules, indexedRules } from "./effectifFormSchema";
 import { findDefinition } from "./utils";
 import { findLogicErrors } from "./utils/findLogicErrors";
 import { getValues } from "./utils/getValues";
 import { isEmptyValue } from "./utils/isEmptyValue";
 import { validField } from "./utils/validField";
 
-export const useCerfa = ({ schema }: { schema: any }) => {
-  const setCerfa = useSetRecoilState<any>(cerfaAtom);
-  const patchFields = useSetRecoilState<any>(cerfaSetter);
+export const useEffectifForm = ({ schema }: { schema: any }) => {
+  const setEffectifForm = useSetRecoilState<any>(effectifFormAtom);
+  const patchFields = useSetRecoilState<any>(effectifFormSetter);
 
   const getData = useRecoilCallback(
     ({ snapshot }) =>
@@ -23,7 +29,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
           organisme: await snapshot.getPromise(organismeAtom),
           effectifId: await snapshot.getPromise(effectifIdAtom),
           dossier: await snapshot.getPromise(dossierAtom), // TODO
-          fields: await snapshot.getPromise(cerfaAtom),
+          fields: await snapshot.getPromise(effectifFormAtom),
           values: await snapshot.getPromise(valuesSelector),
         }) as any,
     []
@@ -32,7 +38,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
   const getFields: any = useRecoilCallback(
     ({ snapshot }) =>
       async () =>
-        await snapshot.getPromise(cerfaAtom),
+        await snapshot.getPromise(effectifFormAtom),
     []
   );
 
@@ -41,7 +47,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
   const getValue = useRecoilCallback(
     ({ snapshot }) =>
       async (name: string) =>
-        ((await snapshot.getPromise(cerfaAtom)) as any)[name].value,
+        ((await snapshot.getPromise(effectifFormAtom)) as any)[name].value,
     []
   );
 
@@ -60,7 +66,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
   const getStatus = useRecoilCallback(
     ({ snapshot }) =>
       async () =>
-        snapshot.getPromise(cerfaStatusGetter),
+        snapshot.getPromise(EffectifFormStatusStatusGetter),
     []
   );
 
@@ -219,7 +225,7 @@ export const useCerfa = ({ schema }: { schema: any }) => {
             return [key, field];
           })
         );
-        setCerfa(formattedFields);
+        setEffectifForm(formattedFields);
       },
       dispatch: (name, data) => (observers[name] ?? []).forEach((handler) => handler(data)),
       on(eventName, handler) {
@@ -231,6 +237,6 @@ export const useCerfa = ({ schema }: { schema: any }) => {
         observers[eventName] = observers[eventName].filter((item) => item !== handler);
       },
     };
-  }, [getData, getFields, getStatus, getValue, patchFields, registerField, setCerfa]);
+  }, [getData, getFields, getStatus, getValue, patchFields, registerField, setEffectifForm]);
   return { controller };
 };

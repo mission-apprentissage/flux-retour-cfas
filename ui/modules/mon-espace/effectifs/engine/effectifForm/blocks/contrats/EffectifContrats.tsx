@@ -3,13 +3,13 @@ import React, { memo } from "react";
 import { useRecoilValue } from "recoil";
 
 import { fieldSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
-import { useCerfaController } from "@/modules/mon-espace/effectifs/engine/formEngine/CerfaControllerContext";
 import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
+import { useEffectifFormController } from "@/modules/mon-espace/effectifs/engine/formEngine/EffectifFormControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
 export const ApprenantContrats = memo(({ contrats }: { contrats: any[] }) => {
   const nouveaContratField = useRecoilValue<any>(fieldSelector("apprenant.nouveau_contrat"));
-  const cerfaController = useCerfaController();
+  const effectifFormController = useEffectifFormController();
   return (
     <>
       {contrats?.map((contrat, i) => {
@@ -47,7 +47,7 @@ export const ApprenantContrats = memo(({ contrats }: { contrats: any[] }) => {
                   <Button
                     size="lg"
                     onClick={async () => {
-                      cerfaController.setField("apprenant.nouveau_contrat", "trigger", {
+                      effectifFormController.setField("apprenant.nouveau_contrat", "trigger", {
                         triggerSave: false,
                       });
                     }}

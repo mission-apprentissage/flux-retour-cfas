@@ -109,7 +109,7 @@ export const employerSiretLogic = [
     deps: ["apprenant.nouveau_contrat"],
     process: async ({ values, organisme, effectifId }) => {
       try {
-        await apiService.saveCerfa({
+        await apiService.saveEffectifForm({
           organisme_id: organisme._id,
           effectifId,
           data: {

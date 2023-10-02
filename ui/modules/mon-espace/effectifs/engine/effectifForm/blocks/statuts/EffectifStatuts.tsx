@@ -3,13 +3,13 @@ import React, { memo } from "react";
 import { useRecoilValue } from "recoil";
 
 import { fieldSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
-import { useCerfaController } from "@/modules/mon-espace/effectifs/engine/formEngine/CerfaControllerContext";
 import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
+import { useEffectifFormController } from "@/modules/mon-espace/effectifs/engine/formEngine/EffectifFormControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
 const EffectifStatuts = memo(({ values }: { values: any }) => {
   const nouveaStatutField = useRecoilValue<any>(fieldSelector("apprenant.nouveau_statut"));
-  const cerfaController = useCerfaController();
+  const effectifFormController = useEffectifFormController();
   return (
     <>
       {values?.apprenant?.historique_statut?.map((statut, i) => {
@@ -23,7 +23,7 @@ const EffectifStatuts = memo(({ values }: { values: any }) => {
                   <Button
                     size="md"
                     onClick={async () => {
-                      cerfaController.setField("apprenant.nouveau_statut", "trigger", {
+                      effectifFormController.setField("apprenant.nouveau_statut", "trigger", {
                         triggerSave: false,
                       });
                     }}

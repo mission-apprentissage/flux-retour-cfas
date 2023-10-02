@@ -38,7 +38,7 @@ export const NumberInput = (props: any) => {
       <ChakraNumberInput
         precision={precision}
         w="100%"
-        variant="cerfa"
+        variant="effectifForm"
         isInvalid={!!error}
         name={name.replaceAll(".", "_")}
         {...{

@@ -4,17 +4,15 @@ import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms"
 
 import { getValues } from "./utils/getValues";
 
-// import { getFormStatus } from "@/modules/mon-espace/effectifs/engine/cerfaForm/completion";
-
-export const cerfaAtom = atom({
-  key: "cerfaAtom",
+export const effectifFormAtom = atom({
+  key: "effectifFormAtom",
   default: undefined,
 });
 
-export const cerfaStatusGetter = selector({
+export const EffectifFormStatusStatusGetter = selector({
   key: "errorsGetter",
   get: ({ get }) => {
-    const fields = get(cerfaAtom);
+    const fields = get(effectifFormAtom);
     const values = get(valuesSelector);
     // const dossier = get(dossierAtom);
     if (!(fields && values)) return;
@@ -110,12 +108,12 @@ export const effectifStateSelector = selectorFamily({
     },
 });
 
-export const cerfaSetter = selector({
-  key: "cerfaSetter",
+export const effectifFormSetter = selector({
+  key: "effectifFormSetter",
   get: () => ({}),
   set: ({ set }, payload) => {
-    set(cerfaAtom, (cerfa: any) => {
-      let newState = { ...cerfa };
+    set(effectifFormAtom, (effectifForm: any) => {
+      let newState = { ...effectifForm };
       Object.entries(payload).forEach(([name, patch]) => {
         if (patch === undefined) {
           delete newState[name];
@@ -136,16 +134,19 @@ export const valueSelector = selectorFamily({
   get:
     (name: string) =>
     ({ get }) =>
-      (get(cerfaAtom)?.[name] as any)?.value,
+      (get(effectifFormAtom)?.[name] as any)?.value,
 });
 
-export const valuesSelector = selector({ key: "valuesSelector", get: ({ get }) => getValues(get(cerfaAtom) as any) });
+export const valuesSelector = selector({
+  key: "valuesSelector",
+  get: ({ get }) => getValues(get(effectifFormAtom) as any),
+});
 
 export const fieldSelector = selectorFamily({
   key: "fieldSelector",
   get:
     (name: string) =>
     ({ get }) => {
-      return get(cerfaAtom)?.[name];
+      return get(effectifFormAtom)?.[name];
     },
 });

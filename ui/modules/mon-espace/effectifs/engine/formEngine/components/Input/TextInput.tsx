@@ -42,7 +42,7 @@ export const TextInput = (props) => {
     <InputWrapper {...props}>
       {mask ? (
         <MaskedInput
-          variant="cerfa"
+          variant="effectifForm"
           isInvalid={!!error}
           name={name.replaceAll(".", "_")}
           type={fieldType}
@@ -61,7 +61,7 @@ export const TextInput = (props) => {
         />
       ) : (
         <ChackraInput
-          variant="cerfa"
+          variant="effectifForm"
           isInvalid={!!error}
           name={name.replaceAll(".", "_")}
           type={fieldType}

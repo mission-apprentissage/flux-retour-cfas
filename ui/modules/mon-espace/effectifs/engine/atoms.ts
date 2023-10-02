@@ -1,22 +1,22 @@
 import { atom, selector } from "recoil";
 
-import { cerfaStatusGetter } from "./formEngine/atoms";
+import { EffectifFormStatusStatusGetter } from "./formEngine/atoms";
 // import { documentsCompletionStatusGetter } from "./TransmissionFichier/documentsAtoms";
 
 export const dossierCompletionStatus = selector({
   key: "dossierCompletionStatus",
   get: ({ get }) => {
-    const cerfaCompletionStatus: any = get(cerfaStatusGetter);
+    const effectifFormCompletionStatus: any = get(EffectifFormStatusStatusGetter);
     // const documentsCompletionStatus = get(documentsCompletionStatusGetter);
     return {
-      cerfa: {
-        completion: cerfaCompletionStatus?.completion,
-        complete: cerfaCompletionStatus?.completion === 100,
+      effectifForm: {
+        completion: effectifFormCompletionStatus?.completion,
+        complete: effectifFormCompletionStatus?.completion === 100,
       },
       // documents: documentsCompletionStatus,
       dossier: {
-        // complete: cerfaCompletionStatus?.completion + documentsCompletionStatus?.completion === 200,
-        // completion: (cerfaCompletionStatus?.completion + documentsCompletionStatus?.completion) / 2,
+        // complete: effectifFormCompletionStatus?.completion + documentsCompletionStatus?.completion === 200,
+        // completion: (effectifFormCompletionStatus?.completion + documentsCompletionStatus?.completion) / 2,
       },
     };
   },

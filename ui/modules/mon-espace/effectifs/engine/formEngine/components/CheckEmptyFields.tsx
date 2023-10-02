@@ -3,21 +3,21 @@ import React, { useState } from "react";
 import { useRecoilValue } from "recoil";
 
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { cerfaStatusGetter } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
-import { useCerfaController } from "@/modules/mon-espace/effectifs/engine/formEngine/CerfaControllerContext";
+import { EffectifFormStatusStatusGetter } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
+import { useEffectifFormController } from "@/modules/mon-espace/effectifs/engine/formEngine/EffectifFormControllerContext";
 import { ArrowRightLine, ErrorIcon } from "@/theme/components/icons";
 
 // eslint-disable-next-line react/display-name
 const CheckEmptyFields = React.memo(({ schema, blocName }: { schema: any; blocName: string }) => {
-  const controller = useCerfaController();
+  const controller = useEffectifFormController();
   const [isOpen, setIsOpen] = useState(false);
 
-  const cerfaStatus = useRecoilValue<any>(cerfaStatusGetter);
+  const effectifFormStatus = useRecoilValue<any>(EffectifFormStatusStatusGetter);
 
-  const invalidFields = cerfaStatus[blocName].fieldErrors;
-  const success = cerfaStatus[blocName].complete;
+  const invalidFields = effectifFormStatus[blocName].fieldErrors;
+  const success = effectifFormStatus[blocName].complete;
   const checkFields = () => controller.triggerValidation(Object.keys(schema), true);
-  const nbErrors = Object.keys(cerfaStatus.global.errors).length + invalidFields.length;
+  const nbErrors = Object.keys(effectifFormStatus.global.errors).length + invalidFields.length;
 
   return (
     <Box mt={10}>
@@ -63,7 +63,7 @@ const CheckEmptyFields = React.memo(({ schema, blocName }: { schema: any; blocNa
                     </ListItem>
                   );
                 })}
-                {Object.entries(cerfaStatus.global.errors).map(([target, error]: [any, any]) => (
+                {Object.entries(effectifFormStatus.global.errors).map(([target, error]: [any, any]) => (
                   <ListItem key={target}>
                     <ListIcon as={ArrowRightLine} color="flaterror" />
                     <Link

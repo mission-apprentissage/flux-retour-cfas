@@ -56,7 +56,7 @@ export const useAutoSave = ({ controller }) => {
         const organisme = await getOrganisme();
         if (!organisme) throw new Error("Organisme not found");
         try {
-          await apiService.saveCerfa({
+          await apiService.saveEffectifForm({
             organisme_id: organisme._id,
             data,
             effectifId,

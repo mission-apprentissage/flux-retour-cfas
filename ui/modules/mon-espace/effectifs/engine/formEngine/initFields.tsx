@@ -5,11 +5,11 @@ import { requiredApprenantAdresseFieldsSifa, requiredFieldsSifa } from "shared";
 import { findDefinition } from "./utils";
 import { isEmptyValue } from "./utils/isEmptyValue";
 
-export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
+export const initFields = ({ effectifForm, schema, modeSifa, canEdit, organisme }) => {
   const createField = createFieldFactory({
     modeSifa,
     schema,
-    requiredFieldsSifa: cerfa.apprenant.adresse.complete.value
+    requiredFieldsSifa: effectifForm.apprenant.adresse.complete.value
       ? requiredFieldsSifa
       : [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa],
   });
@@ -17,15 +17,15 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
   const isAPITransmission = organisme.mode_de_transmission === "API";
 
   Object.keys(schema.fields).forEach((name) => {
-    const data = get(cerfa, name);
+    const data = get(effectifForm, name);
     if (!data) return;
     fields[name] = { ...createField({ name, data }), ...(!canEdit ? { locked: true } : {}) };
   });
 
   let historique_statut: any[] = [];
   let showAddStatut = true;
-  if ((modeSifa && !!cerfa.apprenant.historique_statut.value.length) || !canEdit || isAPITransmission) {
-    historique_statut = cerfa.apprenant.historique_statut.value;
+  if ((modeSifa && !!effectifForm.apprenant.historique_statut.value.length) || !canEdit || isAPITransmission) {
+    historique_statut = effectifForm.apprenant.historique_statut.value;
     showAddStatut = false;
   } else {
     fields["apprenant.nouveau_statut"] = createField({
@@ -39,7 +39,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
         date_reception: "",
         valeur_statut: "",
       },
-      ...cerfa.apprenant.historique_statut.value,
+      ...effectifForm.apprenant.historique_statut.value,
     ];
   }
 
@@ -72,8 +72,8 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
 
   let contrats: any[] = [];
   let showAddContrat = true;
-  if ((modeSifa && !!cerfa.contrats.value.length) || !canEdit || isAPITransmission) {
-    contrats = cerfa.contrats.value;
+  if ((modeSifa && !!effectifForm.contrats.value.length) || !canEdit || isAPITransmission) {
+    contrats = effectifForm.contrats.value;
     showAddContrat = false;
   } else {
     fields["apprenant.nouveau_contrat"] = createField({
@@ -101,7 +101,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
           region: "",
         },
       },
-      ...cerfa.contrats.value,
+      ...effectifForm.contrats.value,
     ];
   }
   contrats.forEach((contrat, i) => {
@@ -221,8 +221,8 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     };
   });
 
-  if (cerfa.validation_errors.length) {
-    for (const validation_error of cerfa.validation_errors) {
+  if (effectifForm.validation_errors.length) {
+    for (const validation_error of effectifForm.validation_errors) {
       if (fields[validation_error.fieldName]) {
         fields[validation_error.fieldName] = {
           ...fields[validation_error.fieldName],
