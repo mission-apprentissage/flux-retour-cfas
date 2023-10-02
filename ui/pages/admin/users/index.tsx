@@ -35,8 +35,7 @@ const NO_LIMIT = 10_000;
 
 type UserNormalized = {
   _id: string;
-  normalizedNom: string;
-  normalizedPrenom: string;
+  normalizedNomPrenom: string;
   normalizedEmail: string;
   normalizedOrganismeNom: string;
   organisationType: string;
@@ -46,18 +45,25 @@ type UserNormalized = {
   prenom: string;
   account_status: string;
   created_at: string;
+  email: string;
+  fonction: string;
 };
 
 const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
   {
-    header: () => "Nom",
-    accessorKey: "normalizedNom",
-    cell: ({ row }) => <Text fontSize="md">{row.original?.nom}</Text>,
-  },
-  {
-    header: () => "Prénom",
-    accessorKey: "normalizedPrenom",
-    cell: ({ row }) => <Text fontSize="md">{row.original?.prenom}</Text>,
+    header: () => "Nom et prénom",
+    accessorKey: "normalizedNomPrenom",
+    cell: ({ row }) => (
+      <>
+        <Text fontSize="md">
+          {row.original?.nom} {row.original?.prenom}
+        </Text>
+        <Text fontSize="xs" color="#777">
+          {row.original?.email}
+          {row.original?.fonction ? ` - ${row.original?.fonction}` : ""}
+        </Text>
+      </>
+    ),
   },
   {
     header: () => "Type de compte",
@@ -150,8 +156,7 @@ const Users = () => {
         organismeNom,
         organisationType: user?.organisation?.label || "",
         normalizedOrganismeNom: organismeNom.toLowerCase(),
-        normalizedNom: user.nom.toLowerCase(),
-        normalizedPrenom: user.prenom.toLowerCase(),
+        normalizedNomPrenom: user.nom.toLowerCase() + " " + user.prenom.toLowerCase(),
         normalizedEmail: user.email.toLowerCase(),
       };
     });
@@ -162,8 +167,7 @@ const Users = () => {
     return users?.filter((user) => {
       const searchLower = search.toLowerCase();
       return (
-        user.normalizedNom.includes(searchLower) ||
-        user.normalizedPrenom.includes(searchLower) ||
+        user.normalizedNomPrenom.includes(searchLower) ||
         user.normalizedEmail.includes(searchLower) ||
         user.normalizedOrganismeNom.toLowerCase().includes(searchLower)
       );
