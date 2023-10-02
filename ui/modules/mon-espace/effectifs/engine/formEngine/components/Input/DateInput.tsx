@@ -17,7 +17,7 @@ export const DateInput = (props) => {
   return (
     <InputWrapper {...props}>
       <DateInputIn
-        variant="cerfa"
+        variant="effectifForm"
         isInvalid={!!error}
         name={name}
         locked={locked}

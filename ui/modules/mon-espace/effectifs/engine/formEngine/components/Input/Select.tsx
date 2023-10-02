@@ -34,7 +34,7 @@ export const Select = (props) => {
         data-testid={`select-${name}`}
         placeholder={placeholder ?? "Sélectionner une option"}
         value={selectedLabel ?? ""}
-        variant="cerfa"
+        variant="effectifForm"
       >
         {options[0].options ? (
           <>

@@ -5,7 +5,7 @@ export const apprenantNouveauStatutLogic = [
     deps: ["apprenant.nouveau_statut"],
     process: async ({ values, organisme, effectifId }) => {
       try {
-        await apiService.saveCerfa({
+        await apiService.saveEffectifForm({
           organisme_id: organisme._id,
           effectifId,
           data: {

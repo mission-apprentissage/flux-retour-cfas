@@ -36,7 +36,7 @@ const commonFieldStyle = {
 const Select = {
   parts: ["field"],
   variants: {
-    cerfa: {
+    effectifForm: {
       field: {
         ...commonFieldStyle,
         _disabled: {

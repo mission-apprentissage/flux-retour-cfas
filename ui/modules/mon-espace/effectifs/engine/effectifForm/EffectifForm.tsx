@@ -41,7 +41,7 @@ const useOpenAccordionToLocation = () => {
 };
 
 // eslint-disable-next-line react/display-name, @typescript-eslint/no-unused-vars
-export const CerfaForm = memo(({ modeSifa = false }: { modeSifa: boolean }) => {
+export const EffectifForm = memo(({ modeSifa = false }: { modeSifa: boolean }) => {
   const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
 
   const effectifId = useRecoilValue<any>(effectifIdAtom);

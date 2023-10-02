@@ -1,12 +1,12 @@
 import { Box, Skeleton } from "@chakra-ui/react";
 import React from "react";
 
-import { CerfaForm } from "./cerfaForm/CerfaForm";
-import { CerfaControllerContext } from "./formEngine/CerfaControllerContext";
-import { cerfaSchema } from "./formEngine/cerfaSchema";
+import { EffectifForm } from "./effectifForm/EffectifForm";
+import { EffectifFormControllerContext } from "./formEngine/EffectifFormControllerContext";
+import { effectifFormSchema } from "./formEngine/effectifFormSchema";
 import { useAutoSave } from "./formEngine/hooks/useAutoSave";
-import { useInitCerfa } from "./formEngine/hooks/useInitCerfa";
-import { useCerfa } from "./formEngine/useCerfa";
+import { useInitEffectifForm } from "./formEngine/hooks/useInitEffectifForm";
+import { useEffectifForm } from "./formEngine/useEffectifForm";
 
 interface EffectifProps {
   modeSifa: boolean;
@@ -19,9 +19,14 @@ const Effectif = React.memo(function EffectifMemo({
   canEdit = false,
   effectifsSnapshot = false,
 }: EffectifProps) {
-  const { controller: cerfaController } = useCerfa({ schema: cerfaSchema });
-  const { isLoading } = useInitCerfa({ controller: cerfaController, modeSifa, canEdit, effectifsSnapshot });
-  useAutoSave({ controller: cerfaController });
+  const { controller: effectifFormController } = useEffectifForm({ schema: effectifFormSchema });
+  const { isLoading } = useInitEffectifForm({
+    controller: effectifFormController,
+    modeSifa,
+    canEdit,
+    effectifsSnapshot,
+  });
+  useAutoSave({ controller: effectifFormController });
 
   if (isLoading) {
     return <Skeleton height="50px" startColor="grey.300" endColor="galt" my={5} />;
@@ -30,11 +35,11 @@ const Effectif = React.memo(function EffectifMemo({
   return (
     <>
       {/* @ts-expect-error */}
-      <CerfaControllerContext.Provider value={cerfaController}>
+      <EffectifFormControllerContext.Provider value={effectifFormController}>
         <Box my={12} px={5}>
-          <CerfaForm modeSifa={modeSifa} />
+          <EffectifForm modeSifa={modeSifa} />
         </Box>
-      </CerfaControllerContext.Provider>
+      </EffectifFormControllerContext.Provider>
     </>
   );
 });

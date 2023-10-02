@@ -4,7 +4,7 @@
 // import { apprentiSchema } from "./blocks/apprenti/apprentiSchema";
 // import { employerSchema } from "./blocks/employer/employerSchema";
 
-import { cerfaSchema } from "@/modules/mon-espace/effectifs/engine/formEngine/cerfaSchema";
+import { effectifFormSchema } from "@/modules/mon-espace/effectifs/engine/formEngine/effectifFormSchema";
 import { getValues } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/getValues";
 import { isEmptyValue } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/isEmptyValue";
 
@@ -20,7 +20,7 @@ export const getFormStatus = ({ fields, values }) => {
   // const employeurStatus = getBlocCompletion(Object.keys(employerSchema), fields, "employeur", formErrors);
   const apprenantStatus = getBlocCompletion(Object.keys(apprenantSchema), fields, "apprenant", formErrors);
 
-  const cerfaTabCompletion = apprenantStatus.completion;
+  const effectifFormTabCompletion = apprenantStatus.completion;
 
   return {
     // contrat: contratStatus,
@@ -29,8 +29,8 @@ export const getFormStatus = ({ fields, values }) => {
     // apprenti: apprentiStatus,
     // employeur: employeurStatus,
     apprenant: apprenantStatus,
-    complete: cerfaTabCompletion === 100,
-    completion: cerfaTabCompletion,
+    complete: effectifFormTabCompletion === 100,
+    completion: effectifFormTabCompletion,
     global: {
       errors: formErrors.reduce((acc, er) => ({ ...acc, [er.target]: er }), {}),
     },
@@ -89,7 +89,7 @@ const getRequiredFieldNames = (fieldNames, fields) => {
 
 const getBlocErrors = ({ fields, values }: { fields?: any; values?: any }) => {
   const blockErrors: any[] = [];
-  cerfaSchema.logics.forEach((logic: any) => {
+  effectifFormSchema.logics.forEach((logic: any) => {
     if (!logic.target) return;
     const { error }: any = logic.process({ values }) ?? {};
     if (error) {
