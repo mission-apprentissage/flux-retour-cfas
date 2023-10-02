@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { ERPS_FORM_CASES } from "shared";
 
-import { ERPS_FORM_CASES } from "@/common/constants/erps";
 import { _post } from "@/common/httpClient";
 
 export const SUBMIT_STATE = {

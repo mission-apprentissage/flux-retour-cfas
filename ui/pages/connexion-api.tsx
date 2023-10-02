@@ -34,7 +34,7 @@ const ConnexionAPI = () => {
 
   useEffect(() => {
     if (!router.query.api_key && !currentOrganisme?.api_key) {
-      router.push(`/mon-compte/erp?erp=${router.query.erp}`);
+      router.push("/parametres"); // FIXME REVIEW pas sûr du workflow ici
     }
   }, [currentOrganisme]);
 
@@ -57,7 +57,7 @@ const ConnexionAPIVerifyUser = ({ organisme }) => {
         await _post("/api/v1/auth/logout");
         router.push("/");
       } else if (data?.message === "success") {
-        window.location.href = "/mon-compte/erp";
+        window.location.href = `/parametres?erpV3=${router.query.erp}`;
       }
     }
     run();

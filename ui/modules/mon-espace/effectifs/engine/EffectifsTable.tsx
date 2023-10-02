@@ -3,8 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import React, { useEffect, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
+import { ERPS } from "shared";
 
-import { ERPS } from "@/common/constants/erps";
 import Table from "@/components/Table/Table";
 import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "@/theme/components/icons";
 

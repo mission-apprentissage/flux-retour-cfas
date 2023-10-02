@@ -1,8 +1,7 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Button, Heading, Stack, Text } from "@chakra-ui/react";
 import React from "react";
-
-import { ERPS_BY_ID } from "@/common/constants/erps";
+import { ERPS_BY_ID } from "shared";
 
 const ErpTutorial = ({ erp, ...rest }) => {
   return (

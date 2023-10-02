@@ -91,6 +91,9 @@ const schema = object(
         description: "ERPs rattachés au CFA, s'ils existent",
       }
     ),
+    erp_unsupported: string({
+      description: "ERP renseigné par l'utilisateur à la configuration quand il n'est pas supporté",
+    }),
     effectifs_count: integer({ description: "Compteur sur le nombre d'effectifs de l'organisme" }),
     effectifs_current_year_count: integer({
       description: "Compteur sur le nombre d'effectifs de l'organisme sur l'année courante",
@@ -181,9 +184,11 @@ const schema = object(
       description: "Mode de transmission des effectifs",
       enum: ["API", "MANUEL"],
     }),
-    setup_step_courante: string({
-      description: "Etape d'installation courante",
-      enum: ["STEP1", "STEP2", "STEP3", "COMPLETE"],
+    mode_de_transmission_configuration_date: date({
+      description: "Date à laquelle le mode de transmission a été configuré",
+    }),
+    mode_de_transmission_configuration_author_fullname: string({
+      description: "Auteur de la configuration (prénom nom)",
     }),
     creation_statut: string({
       description: "Flag pour identifier que c'est un organisme créé à partir d'un lieu",

@@ -1,7 +1,7 @@
 import { Image, VStack, Heading, Text, HStack } from "@chakra-ui/react";
 import React from "react";
+import { ERPS } from "shared";
 
-import { ERPS } from "@/common/constants/erps";
 import { Organisme } from "@/common/internal/Organisme";
 import { prettyPrintDate } from "@/common/utils/dateUtils";
 import Section from "@/components/Section/Section";

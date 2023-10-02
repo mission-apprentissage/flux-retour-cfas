@@ -15,13 +15,13 @@ const Link = ({ children, href, shallow, plausibleGoal, ...rest }: LinkProps) =>
   const { trackPlausibleEvent } = usePlausibleTracking();
   return (
     <ChakraLink
-      {...rest}
       as={NavLink}
       href={href}
       shallow={shallow ?? false}
       onClick={() => {
         plausibleGoal && trackPlausibleEvent(plausibleGoal);
       }}
+      {...rest}
     >
       {children}
     </ChakraLink>

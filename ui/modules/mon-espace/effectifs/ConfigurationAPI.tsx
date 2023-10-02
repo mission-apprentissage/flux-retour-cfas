@@ -2,9 +2,9 @@ import { Box, Button, Flex, RadioGroup, Radio, Text, VStack, Stack, HStack } fro
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import React from "react";
+import { ERPS } from "shared";
 
 import { configureOrganismeERP } from "@/common/api/tableauDeBord";
-import { ERPS } from "@/common/constants/erps";
 import { DownloadLine } from "@/theme/components/icons/index";
 
 type ConfigurationAPIProps = {

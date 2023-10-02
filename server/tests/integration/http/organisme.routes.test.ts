@@ -627,7 +627,6 @@ describe("Routes /organismes/:id", () => {
     it("Erreur si non authentifié", async () => {
       const response = await httpClient.put(`/api/v1/organismes/${id(1)}/configure-erp`, {
         mode_de_transmission: "MANUEL",
-        setup_step_courante: "COMPLETE",
       });
 
       expectUnauthorizedError(response);
@@ -665,7 +664,6 @@ describe("Routes /organismes/:id", () => {
             `/api/v1/organismes/${id(1)}/configure-erp`,
             {
               mode_de_transmission: "MANUEL",
-              setup_step_courante: "COMPLETE",
             }
           );
 

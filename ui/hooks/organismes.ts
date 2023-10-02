@@ -54,6 +54,7 @@ export function useOrganisationOrganisme(enabled?: boolean) {
   const {
     data: organisme,
     isLoading,
+    refetch,
     error,
   } = useQuery<Organisme, any>(["organisation/organisme"], () => _get("/api/v1/organisation/organisme"), {
     enabled: enabled ?? true,
@@ -62,6 +63,7 @@ export function useOrganisationOrganisme(enabled?: boolean) {
   return {
     organisme,
     isLoading,
+    refetch,
     error,
   };
 }

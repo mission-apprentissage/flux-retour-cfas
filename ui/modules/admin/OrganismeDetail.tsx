@@ -147,9 +147,6 @@ const OrganismeDetail = ({ data }) => {
         mode_de_transmission: {
           header: () => "Mode de transmission",
         },
-        setup_step_courante: {
-          header: () => "Setup step courante",
-        },
         fiabilisation_statut: {
           header: () => "Fiabilisation",
           cell: ({ value }) => (

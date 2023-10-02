@@ -41,6 +41,10 @@ export interface Organisme {
    */
   erps?: string[];
   /**
+   * ERP renseigné par l'utilisateur à la configuration quand il n'est pas supporté
+   */
+  erp_unsupported?: string;
+  /**
    * Compteur sur le nombre d'effectifs de l'organisme
    */
   effectifs_count?: number;
@@ -1009,9 +1013,13 @@ export interface Organisme {
    */
   mode_de_transmission?: "API" | "MANUEL";
   /**
-   * Etape d'installation courante
+   * Date à laquelle le mode de transmission a été configuré
    */
-  setup_step_courante?: "STEP1" | "STEP2" | "STEP3" | "COMPLETE";
+  mode_de_transmission_configuration_date?: Date;
+  /**
+   * Auteur de la configuration (prénom nom)
+   */
+  mode_de_transmission_configuration_author_fullname?: string;
   /**
    * Flag pour identifier que c'est un organisme créé à partir d'un lieu
    */

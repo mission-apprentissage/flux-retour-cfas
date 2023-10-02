@@ -450,15 +450,16 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 <Text color="grey.800">
                   {modePublique ? (
                     "Cet établissement ne transmet pas encore ses effectifs au tableau de bord."
-                  ) : (
+                  ) : !organisme.mode_de_transmission ? (
                     <>
-                      Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs. Veuillez
-                      cliquer dans l’onglet{" "}
-                      <Link href="/effectifs" borderBottom="1px" _hover={{ textDecoration: "none" }}>
-                        Mes effectifs
+                      Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs. Veuillez{" "}
+                      <Link href="/parametres" borderBottom="1px" _hover={{ textDecoration: "none" }}>
+                        paramétrer
                       </Link>{" "}
-                      pour démarrer l’interfaçage ERP ou transmettre manuellement vos effectifs.
+                      votre moyen de transmission.
                     </>
+                  ) : (
+                    <>Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs.</>
                   )}
                 </Text>
               </Ribbons>
@@ -469,31 +470,28 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
             )}
 
             {aucunEffectifTransmis ? (
-              !modePublique && (
-                <Button
-                  size="md"
-                  variant="secondary"
-                  display="block"
-                  ml="auto"
-                  onClick={() => {
-                    router.push(`/effectifs`);
-                  }}
-                >
-                  Transmettre mes effectifs
-                </Button>
-              )
+              !modePublique &&
+              (!organisme.mode_de_transmission ? (
+                <Link href="/parametres" variant="whiteBg" display="block" ml="auto" width="fit-content">
+                  Paramétrer un moyen de transmission
+                </Link>
+              ) : (
+                organisme.mode_de_transmission === "MANUEL" && (
+                  <Link href="/effectifs/televersement" variant="whiteBg" display="block" ml="auto" width="fit-content">
+                    Ajouter via fichier Excel
+                  </Link>
+                )
+              ))
             ) : (
-              <Button
-                size="md"
-                variant="secondary"
+              <Link
+                href={`${modePublique ? `/organismes/${organisme._id}` : ""}/indicateurs`}
+                variant="whiteBg"
                 display="block"
                 ml="auto"
-                onClick={() => {
-                  router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/indicateurs`);
-                }}
+                width="fit-content"
               >
                 Voir les indicateurs
-              </Button>
+              </Link>
             )}
 
             {organisme.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (

@@ -1,8 +1,7 @@
 import { Box, Flex, HStack, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
 import React from "react";
-
-import { ERP_STATE } from "@/common/constants/erps";
+import { ERP_STATE } from "shared";
 
 import DemandeBranchementErpForm from "./DemandeBranchementErpForm";
 import useSubmitDemandeBranchementErp, { SUBMIT_STATE } from "./useSubmitDemandeBranchementErp";

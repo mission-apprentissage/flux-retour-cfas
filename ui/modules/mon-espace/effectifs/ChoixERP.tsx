@@ -2,10 +2,10 @@ import { Box, Button, RadioGroup, Radio, Text, VStack, HStack } from "@chakra-ui
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import React from "react";
+import { ERPS } from "shared";
 import * as Yup from "yup";
 
 import { configureOrganismeERP } from "@/common/api/tableauDeBord";
-import { ERPS } from "@/common/constants/erps";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { InfoCircle } from "@/theme/components/icons/index";
 

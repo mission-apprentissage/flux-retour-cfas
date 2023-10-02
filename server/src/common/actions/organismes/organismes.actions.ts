@@ -650,15 +650,46 @@ export async function configureOrganismeERP(
   if (!(await canConfigureOrganismeERP(ctx, organismeId))) {
     throw Boom.forbidden("Permissions invalides");
   }
-  if (conf.mode_de_transmission === null) {
-    await organismesDb().updateOne(
-      { _id: new ObjectId(organismeId) },
-      {
-        $unset: { mode_de_transmission: "" },
-      }
-    );
+  await organismesDb().updateOne(
+    { _id: new ObjectId(organismeId) },
+    {
+      $set: {
+        mode_de_transmission: conf.mode_de_transmission,
+        erps: conf.erps ?? [],
+        ...(conf.erp_unsupported ? { erp_unsupported: conf.erp_unsupported } : {}),
+        mode_de_transmission_configuration_date: new Date(),
+        mode_de_transmission_configuration_author_fullname: `${ctx.prenom} ${ctx.nom}`,
+      },
+      $unset: conf.erp_unsupported
+        ? {}
+        : {
+            erp_unsupported: 1,
+          },
+    }
+  );
+}
+
+export async function resetConfigurationERP(ctx: AuthContext, organismeId: ObjectId): Promise<void> {
+  if (!(await canConfigureOrganismeERP(ctx, organismeId))) {
+    throw Boom.forbidden("Permissions invalides");
   }
-  await organismesDb().updateOne({ _id: new ObjectId(organismeId) }, { $set: stripEmptyFields(conf) as any });
+  await organismesDb().updateOne(
+    { _id: new ObjectId(organismeId) },
+    {
+      $unset: {
+        mode_de_transmission: 1,
+        mode_de_transmission_configuration_date: 1,
+        erp_unsupported: 1,
+        api_configuration_date: 1,
+        api_siret: 1,
+        api_uai: 1,
+        // pas besoin de réinitialiser api_key
+      },
+      $set: {
+        erps: [],
+      },
+    }
+  );
 }
 
 export async function verifyOrganismeAPIKeyToUser(
@@ -813,10 +844,12 @@ export function getOrganismeProjection(
     organismesFormateurs: 1,
     fiabilisation_statut: 1,
     erps: permissionsOrganisme.infoTransmissionEffectifs,
+    erp_unsupported: permissionsOrganisme.infoTransmissionEffectifs,
     first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
     last_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,
     mode_de_transmission: permissionsOrganisme.infoTransmissionEffectifs,
-    setup_step_courante: permissionsOrganisme.infoTransmissionEffectifs,
+    mode_de_transmission_configuration_date: permissionsOrganisme.infoTransmissionEffectifs,
+    mode_de_transmission_configuration_author_fullname: permissionsOrganisme.infoTransmissionEffectifs,
 
     // configuration API
     api_key: permissionsOrganisme.manageEffectifs,
@@ -851,6 +884,9 @@ export function getOrganismeListProjection(
     fiabilisation_statut: 1,
     erps: {
       $cond: [infoTransmissionEffectifsCondition, "$erps", undefined],
+    },
+    erp_unsupported: {
+      $cond: [infoTransmissionEffectifsCondition, "$erp_unsupported", undefined],
     },
     first_transmission_date: {
       $cond: [infoTransmissionEffectifsCondition, "$first_transmission_date", undefined],

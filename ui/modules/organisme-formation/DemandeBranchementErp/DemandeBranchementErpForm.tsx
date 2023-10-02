@@ -1,9 +1,9 @@
 import { FormControl, FormErrorMessage, FormLabel, Select, Stack } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import React from "react";
+import { ERP_STATE, ERPS_FORM_CASES } from "shared";
 import * as Yup from "yup";
 
-import { ERP_STATE, ERPS_FORM_CASES } from "@/common/constants/erps";
 import { UAI_REGEX } from "@/common/domain/uai";
 
 import {
