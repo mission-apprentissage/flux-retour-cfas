@@ -30,6 +30,9 @@ function FiltreOrganismesNature(props: FiltreOrganismesNatureProps) {
               <Checkbox value="responsable_formateur" key="responsable_formateur" fontSize="mini" size="sm">
                 Responsable formateur
               </Checkbox>
+              <Checkbox value="inconnue" key="inconnue" fontSize="mini" size="sm">
+                Inconnue
+              </Checkbox>
             </Stack>
           </CheckboxGroup>
         </SimpleOverlayMenu>
