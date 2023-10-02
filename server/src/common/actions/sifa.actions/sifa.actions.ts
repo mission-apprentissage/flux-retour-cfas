@@ -87,6 +87,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
   ).filter((effectif) => isEligibleSIFA(effectif.apprenant.historique_statut)) as Required<WithId<Effectif>>[];
 
   const items: any[] = [];
+  const organismesUaiCache: Record<string, string> = {};
   for (const effectif of effectifs) {
     const formationBcn =
       (await findFormationById(effectif.formation.formation_id)) ||
@@ -98,8 +99,49 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     const cpInfo = await getCodePostalInfo(effectif.apprenant.code_postal_de_naissance);
     const cpNaissanceInfo = cpInfo?.result;
 
+    let numeroUai = organisme.uai;
+    let sitForm = "";
+    let uaiEple = "NC";
+
+    // Vu avec Nadine le 21 septembre 2023 dans Slack, si on a les 3 (c'est à dire en API v3) on les renseigne dans les champs suivants :
+    // NUMERO_UAI = uai_organisme_responsable
+    // SIT_FORM = uai_organisme_formateur
+    // UAI_EPLE = uai_organisme_lieu_de_formation
+    if (effectif.organisme_formateur_id && effectif.organisme_responsable_id && effectif.organisme_id) {
+      //  organisme_responsable_id
+      if (organismesUaiCache[effectif.organisme_responsable_id.toString()]) {
+        sitForm = organismesUaiCache[effectif.organisme_responsable_id.toString()];
+      } else {
+        const organismeResponsable = await getOrganismeById(effectif.organisme_responsable_id);
+        if (organismeResponsable?.uai) {
+          organismesUaiCache[effectif.organisme_responsable_id.toString()] = organismeResponsable.uai;
+          sitForm = organismeResponsable.uai;
+        }
+      }
+      // organisme_formateur_id
+      if (organismesUaiCache[effectif.organisme_formateur_id.toString()]) {
+        numeroUai = organismesUaiCache[effectif.organisme_formateur_id.toString()];
+      } else {
+        const organismeFormateur = await getOrganismeById(effectif.organisme_formateur_id);
+        if (organismeFormateur?.uai) {
+          organismesUaiCache[effectif.organisme_formateur_id.toString()] = organismeFormateur.uai;
+          numeroUai = organismeFormateur.uai;
+        }
+      }
+      // organisme_id
+      if (organismesUaiCache[effectif.organisme_id.toString()]) {
+        uaiEple = organismesUaiCache[effectif.organisme_id.toString()];
+      } else {
+        const organismeEple = await getOrganismeById(effectif.organisme_id);
+        if (organismeEple?.uai) {
+          organismesUaiCache[effectif.organisme_id.toString()] = organismeEple.uai;
+          uaiEple = organismeEple.uai;
+        }
+      }
+    }
+
     const requiredFields = {
-      NUMERO_UAI: organisme.uai,
+      NUMERO_UAI: numeroUai,
       NOM: formatStringForSIFA(effectif.apprenant.nom),
       PRENOM1: formatStringForSIFA(effectif.apprenant.prenom),
       DATE_NAIS: effectif.apprenant.date_de_naissance
@@ -133,10 +175,10 @@ export const generateSifa = async (organisme_id: ObjectId) => {
         : undefined,
       DUR_FORM_REELLE: effectif.formation.duree_formation_relle,
       AN_FORM: effectif.formation.annee,
-      SIT_FORM: "", //RESPONSABLE / FORMATEUR / RESPONSABLE_FORMATEUR / LIEU
+      SIT_FORM: sitForm,
       STATUT: "APP", // STATUT courant
       OG: effectif.apprenant.organisme_gestionnaire,
-      UAI_EPLE: "NC", // Unknown for now
+      UAI_EPLE: uaiEple,
       NAT_STR_JUR: "NC", // Unknown for now
     };
 
