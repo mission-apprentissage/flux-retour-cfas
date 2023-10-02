@@ -103,6 +103,7 @@ describe("Processus d'ingestion", () => {
         const effectifForInput = await effectifsDb().findOne({});
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
+        expect(organismeForInput?.erps).toStrictEqual([sampleData.source]);
         expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
 
         expect(result).toStrictEqual({
@@ -154,6 +155,7 @@ describe("Processus d'ingestion", () => {
         const effectifForInput = await effectifsDb().findOne({});
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
+        expect(organismeForInput?.erps).toStrictEqual([sampleData.source]);
         expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
 
         expect(result).toStrictEqual({
@@ -299,6 +301,7 @@ describe("Processus d'ingestion", () => {
         const effectifForInput = await effectifsDb().findOne({});
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
+        expect(organismeForInput?.erps).toStrictEqual([commonSampleData.source]);
         expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
 
         expect(result).toStrictEqual({
@@ -346,6 +349,7 @@ describe("Processus d'ingestion", () => {
         const effectifForInput = await effectifsDb().findOne({ "formation.cfd": "77733777" });
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
+        expect(organismeForInput?.erps).toStrictEqual([commonSampleData.source]);
         expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
 
         expect(result).toStrictEqual({
@@ -480,6 +484,9 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
+        const organismeForInputUpdated = await findOrganismeByUaiAndSiret(UAI, SIRET);
+        expect(organismeForInputUpdated?.erps).toStrictEqual([sampleData.source]);
+
         const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
@@ -612,6 +619,9 @@ describe("Processus d'ingestion", () => {
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
 
+        const organismeUpdatedForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
+        expect(organismeUpdatedForInput?.erps).toStrictEqual([sampleData.source]);
+
         expect(result).toStrictEqual({
           totalProcessed: 1,
           totalValidItems: 1,
@@ -705,6 +715,9 @@ describe("Processus d'ingestion", () => {
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
         expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
+
+        const organismeUpdatedForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
+        expect(organismeUpdatedForInput?.erps).toStrictEqual([organismeForInput._id.toString()]);
 
         expect(result).toStrictEqual({
           totalProcessed: 1,

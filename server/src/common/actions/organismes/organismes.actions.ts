@@ -200,12 +200,15 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
 };
 
 /**
- * Met à jour les dates de transmission d'un organisme.
+ * Met à jour les informations de transmission d'un organisme
+ * Dates de transmission :
  * - first_transmission_date : si pas déjà présent
  * - last_transmission_date : dans tous les cas
+ * Ajout de la source à la liste des ERPs
  */
-export const updateOrganismeTransmissionDates = async (
-  organisme: Pick<WithId<Organisme>, "_id" | "first_transmission_date">
+export const updateOrganismeTransmission = async (
+  organisme: Pick<WithId<Organisme>, "_id" | "first_transmission_date">,
+  source: string
 ) => {
   const modifyResult = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -215,8 +218,10 @@ export const updateOrganismeTransmissionDates = async (
         last_transmission_date: new Date(),
         updated_at: new Date(),
       },
+      $addToSet: { erps: source },
     }
   );
+
   if (!modifyResult.value) {
     throw new Error(`Could not set organisme transmission dates on organisme ${organisme._id.toString()}`);
   }
