@@ -208,7 +208,7 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
  */
 export const updateOrganismeTransmission = async (
   organisme: Pick<WithId<Organisme>, "_id" | "first_transmission_date">,
-  source: string
+  source?: string
 ) => {
   const modifyResult = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -218,7 +218,7 @@ export const updateOrganismeTransmission = async (
         last_transmission_date: new Date(),
         updated_at: new Date(),
       },
-      $addToSet: { erps: source },
+      ...(source ? { $addToSet: { erps: source } } : {}),
     }
   );
 
