@@ -864,3 +864,39 @@ export function getOrganismeListProjection(
     },
   });
 }
+
+export async function getInvalidUaisFromDossierApprenant(data: any[]) {
+  if (!data) return [];
+  const uais = new Set<string>();
+  for (const dossier of data) {
+    uais.add(dossier.etablissement_formateur_uai);
+    uais.add(dossier.etablissement_lieu_de_formation_uai);
+    uais.add(dossier.etablissement_responsable_uai);
+  }
+  const invalidsUais: string[] = [];
+  for (const uai of uais) {
+    const organisme = await organismesDb().findOne({ uai: uai });
+    if (!organisme) {
+      invalidsUais.push(uai);
+    }
+  }
+  return invalidsUais;
+}
+
+export async function getInvalidSiretsFromDossierApprenant(data: any[]) {
+  if (!data) return [];
+  const sirets = new Set<string>();
+  for (const dossier of data) {
+    sirets.add(dossier.etablissement_formateur_siret);
+    sirets.add(dossier.etablissement_lieu_de_formation_siret);
+    sirets.add(dossier.etablissement_responsable_siret);
+  }
+  const invalidsSirets: string[] = [];
+  for (const siret of sirets) {
+    const organisme = await organismesDb().findOne({ siret: siret });
+    if (!organisme) {
+      invalidsSirets.push(siret);
+    }
+  }
+  return invalidsSirets;
+}
