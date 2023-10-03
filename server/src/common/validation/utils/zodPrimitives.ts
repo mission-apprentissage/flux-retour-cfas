@@ -304,10 +304,18 @@ export const primitivesV3 = {
       (v: any) => (v ? String(v) : v),
       z.string().trim().describe("Code postal de l'apprenant")
     ),
-    sexe: z.string().trim().describe("Sexe de l'apprenant").openapi({
-      enum: SEXE_APPRENANT_ENUM,
-      example: "M",
-    }),
+    sexe: z.preprocess(
+      (v: any) => (v ? String(v).trim().replace("H", "M").replace("1", "M").replace("2", "F") : v),
+      z
+        .string()
+        .trim()
+        .regex(/^[MF]$/, "M, H ou F attendu")
+        .describe("Sexe de l'apprenant")
+        .openapi({
+          enum: SEXE_APPRENANT_ENUM,
+          example: "M",
+        })
+    ),
     rqth: z.boolean().describe("Reconnaissance de la Qualité de Travailleur Handicapé").openapi({ example: true }),
     date_rqth: extensions
       .iso8601Date()
