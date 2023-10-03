@@ -875,7 +875,7 @@ export async function getInvalidUaisFromDossierApprenant(data: any[]) {
   }
   const invalidsUais: string[] = [];
   for (const uai of uais) {
-    const organisme = await organismesDb().findOne({ uai: uai });
+    const organisme = await organismesDb().findOne({ uai: { $eq: uai } });
     if (!organisme) {
       invalidsUais.push(uai);
     }
@@ -893,7 +893,7 @@ export async function getInvalidSiretsFromDossierApprenant(data: any[]) {
   }
   const invalidsSirets: string[] = [];
   for (const siret of sirets) {
-    const organisme = await organismesDb().findOne({ siret: siret });
+    const organisme = await organismesDb().findOne({ siret: { $eq: siret } });
     if (!organisme) {
       invalidsSirets.push(siret);
     }
