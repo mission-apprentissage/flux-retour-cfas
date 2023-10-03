@@ -26,6 +26,10 @@ export interface Effectif {
    */
   source: string;
   /**
+   * Identifiant de l'organisme id source transmettant
+   */
+  source_organisme_id: string;
+  /**
    * Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")
    */
   annee_scolaire: string;

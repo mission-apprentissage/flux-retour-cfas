@@ -68,6 +68,7 @@ export interface EffectifsQueue {
   etablissement_lieu_de_formation_siret?: any; // SIRET de l'établissement de formation
   formation_cfd?: any; // Code CFD de la formation
   source: string; // Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)
+  source_organisme_id: string; // Identifiant de l'organisme id source transmettant
   effectif_id?: any; // Id de l'effectif associé, objectId
   organisme_id?: any; // Id de l'organisme associé, objectId
   updated_at?: Date; // Date de mise à jour en base de données

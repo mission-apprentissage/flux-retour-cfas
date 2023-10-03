@@ -18,6 +18,8 @@ export interface AuthContext<IOrganisation = Organisation> {
 
   // field used for ERPs
   source?: string;
+  // source organisme id for V3 API
+  source_organisme_id?: string;
   // legacy field used for ERPs
   username: string;
 

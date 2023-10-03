@@ -321,7 +321,13 @@ function setupRoutes(app: Application) {
         throw new Error("Unauthorized");
       }
 
-      (req.user as any) = { source: organisme._id.toString() };
+      let erpSource: string = "";
+      if (organisme.erps?.length) {
+        if (organisme.erps?.length === 1) erpSource = organisme.erps[0];
+        if (organisme.erps?.length > 1) erpSource = "MULTI_ERP";
+      }
+
+      (req.user as any) = { source: erpSource, source_organisme_id: organisme._id.toString() };
       next();
     },
     dossierApprenantRouter()
