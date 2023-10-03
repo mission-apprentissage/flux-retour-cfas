@@ -13,7 +13,7 @@ import {
 import { getNiveauFormationFromLibelle } from "@/common/actions/formations.actions";
 import {
   findOrganismeByUaiAndSiret,
-  updateOrganismeTransmissionDates,
+  updateOrganismeTransmission,
 } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { Effectif, FiabilisationUaiSiret, Organisme } from "@/common/model/@types";
@@ -133,7 +133,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       // création ou mise à jour de l'effectif
       const [{ effectifId, itemProcessingInfos }] = await Promise.all([
         createOrUpdateEffectif(effectif),
-        updateOrganismeTransmissionDates(organisme),
+        updateOrganismeTransmission(organisme, effectif.source),
       ]);
 
       // ajout des informations sur le traitement au logger
