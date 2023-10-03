@@ -70,6 +70,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
   ],
   [{ source: 1 }, { name: "source" }],
+  [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ created_at: 1 }, { name: "created_at" }],
   [{ "_computed.organisme.region": 1 }, {}],
   [{ "_computed.organisme.departement": 1 }, {}],
@@ -91,6 +92,7 @@ export const schema = object(
 
     id_erp_apprenant: string({ description: "Identifiant de l'apprenant dans l'erp" }),
     source: string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),
+    source_organisme_id: string({ description: "Identifiant de l'organisme id source transmettant" }),
     annee_scolaire: string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
       pattern: YEAR_RANGE_PATTERN,
