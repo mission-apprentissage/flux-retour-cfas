@@ -173,6 +173,7 @@ describe("Dossiers Apprenants Route", () => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+
       // Check Api Response
       expect(response.status).toBe(200);
       assert.equal(response.data.status, "OK");
