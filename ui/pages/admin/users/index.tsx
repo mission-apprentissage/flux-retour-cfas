@@ -96,7 +96,11 @@ const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
       <>
         <Text fontSize="sm">Créé le {formatDateNumericDayMonthYear(row.original?.created_at)}</Text>
         <Text fontSize="xs" color="#777">
-          Dernière connexion le {formatDateNumericDayMonthYear(row.original?.last_connection)}
+          {row.original?.last_connection ? (
+            <>Dernière connexion le {formatDateNumericDayMonthYear(row.original?.last_connection)}</>
+          ) : (
+            <>Jamais connecté</>
+          )}
         </Text>
       </>
     ),
