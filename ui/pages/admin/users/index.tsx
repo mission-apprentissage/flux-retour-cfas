@@ -168,7 +168,7 @@ const Users = () => {
     });
   }, [search, users]);
 
-  const defaultSort: SortingState = [{ desc: false, id: "normalizedNomPrenom" }];
+  const defaultSort: SortingState = [{ desc: true, id: "created_at" }];
   const [sort, setSort] = useState<SortingState>(defaultSort);
 
   const closeModal = () => router.push("/admin/users", undefined, { shallow: true });
