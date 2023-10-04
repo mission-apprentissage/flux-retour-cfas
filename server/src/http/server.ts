@@ -499,7 +499,8 @@ function setupRoutes(app: Application) {
             // v3 is required in URL to consider the request as a v3 import
             "/import/v3",
             async (req, res, next) => {
-              req.user.source = String(res.locals.organismeId);
+              req.user.source = "televersement";
+              req.user.source_organisme_id = String(res.locals.organismeId);
               next();
             },
             dossierApprenantRouter()

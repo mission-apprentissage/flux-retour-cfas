@@ -15,7 +15,7 @@ const AjoutApprenantModal = (modal) => {
       await _post("/api/v1/effectif", {
         organisme_id: organisme._id,
         annee_scolaire: "2020-2021",
-        source: "TDB_MANUEL",
+        source: "televersement",
         apprenant: { nom: "Hanry", prenom: "Pablo" },
         formation: { cfd: "26033206" },
       });

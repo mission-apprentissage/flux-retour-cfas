@@ -82,7 +82,8 @@ type Status = "validation_success" | "validation_failure" | "import_success" | "
 function toEffectifsQueue(data: any[], organismeId: string) {
   return data.map((e) => ({
     ...e,
-    source: String(organismeId),
+    source: "televersement", // TODO : a supprimer ?
+    source_organisme_id: String(organismeId), // TODO : a supprimer ?
     // Generate a unique id for each row, based on the apprenant's name and birthdate.
     // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693294663898159?thread_ts=1693292246.217809&cid=C02FR2L1VB8
     id_erp_apprenant: cyrb53Hash(
