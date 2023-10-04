@@ -321,7 +321,7 @@ function setupRoutes(app: Application) {
         throw new Error("Unauthorized");
       }
 
-      let erpSource: string = "";
+      let erpSource: string = "INCONNU";
       if (organisme.erps?.length) {
         if (organisme.erps?.length === 1) erpSource = organisme.erps[0];
         if (organisme.erps?.length > 1) erpSource = "MULTI_ERP";
