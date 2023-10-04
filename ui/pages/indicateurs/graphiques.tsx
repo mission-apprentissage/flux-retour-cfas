@@ -30,6 +30,7 @@ export const getServerSideProps: GetServerSideProps<{
   const payload = {
     resource: { dashboard: METABASE_ONGLET_DATAVIZ_DASHBOARD_ID },
     params: {
+      reseau: (auth.organisation as any).reseau ?? [],
       region: (auth.organisation as any).code_region ?? [],
       departement: (auth.organisation as any).code_departement ?? [],
       academie: (auth.organisation as any).code_academie ?? [],

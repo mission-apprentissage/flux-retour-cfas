@@ -3,9 +3,9 @@ import { OrganisationType } from "@/common/internal/Organisation";
 export function canViewOngletIndicateursVueGraphique(organisationType: OrganisationType): boolean {
   switch (organisationType) {
     case "ORGANISME_FORMATION":
-    case "TETE_DE_RESEAU":
       return false;
 
+    case "TETE_DE_RESEAU":
     case "DREETS":
     case "DRAAF":
     case "DDETS":
