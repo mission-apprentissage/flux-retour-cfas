@@ -48,7 +48,7 @@ export const TETE_DE_RESEAUX = [
     key: "CFA_EC",
   },
   {
-    nom: "COMPAGNONS DU DEVOIR",
+    nom: "COMPAGNONS DU TOUR DE FRANCE",
     key: "COMP_DU_DEVOIR",
   },
   {
