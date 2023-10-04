@@ -13,14 +13,6 @@ const NavigationCompte = () => {
       name: "Mes informations",
       href: "/mon-compte",
     },
-    ...(["recette", "local"].includes(process.env.NEXT_PUBLIC_ENV as string)
-      ? [
-          {
-            name: "Paramétrage ERP",
-            href: "/mon-compte/erp",
-          },
-        ]
-      : []),
   ];
 
   return (
