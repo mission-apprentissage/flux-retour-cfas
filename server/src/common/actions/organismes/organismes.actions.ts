@@ -13,6 +13,7 @@ import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { getOrganisationOrganisme, listContactsOrganisation } from "@/common/actions/organisations.actions";
 import { getMetiersBySiret } from "@/common/apis/apiLba";
 import logger from "@/common/logger";
+import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb, effectifsDb, organisationsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -863,4 +864,38 @@ export function getOrganismeListProjection(
       },
     },
   });
+}
+
+export async function getInvalidUaisFromDossierApprenant(data: Partial<EffectifsQueue>[]): Promise<string[]> {
+  const uais = new Set<string>();
+  for (const dossier of data) {
+    if (dossier.etablissement_formateur_uai) uais.add(dossier.etablissement_formateur_uai);
+    if (dossier.etablissement_lieu_de_formation_uai) uais.add(dossier.etablissement_lieu_de_formation_uai);
+    if (dossier.etablissement_responsable_uai) uais.add(dossier.etablissement_responsable_uai);
+  }
+  const invalidsUais: string[] = [];
+  for (const uai of uais) {
+    const organisme = await organismesDb().findOne({ uai: { $eq: uai } });
+    if (!organisme) {
+      invalidsUais.push(uai);
+    }
+  }
+  return invalidsUais;
+}
+
+export async function getInvalidSiretsFromDossierApprenant(data: Partial<EffectifsQueue>[]): Promise<string[]> {
+  const sirets = new Set<string>();
+  for (const dossier of data) {
+    if (dossier.etablissement_formateur_siret) sirets.add(dossier.etablissement_formateur_siret);
+    if (dossier.etablissement_lieu_de_formation_siret) sirets.add(dossier.etablissement_lieu_de_formation_siret);
+    if (dossier.etablissement_responsable_siret) sirets.add(dossier.etablissement_responsable_siret);
+  }
+  const invalidsSirets: string[] = [];
+  for (const siret of sirets) {
+    const organisme = await organismesDb().findOne({ siret: { $eq: siret } });
+    if (!organisme) {
+      invalidsSirets.push(siret);
+    }
+  }
+  return invalidsSirets;
 }

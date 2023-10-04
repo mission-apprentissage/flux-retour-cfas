@@ -113,6 +113,39 @@ export const dossierApprenantSchemaV3WithMoreRequiredFields = () => {
   );
 };
 
+export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
+  invalidsUais: string[],
+  invalidsSirets: string[]
+) {
+  const validateUAI = (uai: string) => !invalidsUais.includes(uai);
+  const validateSiret = (siret: string) => !invalidsSirets.includes(siret);
+  const messageUai = "UAI non valide";
+  const messageSiret = "Siret non valide";
+
+  return dossierApprenantSchemaV3WithMoreRequiredFields().merge(
+    z.object({
+      etablissement_responsable_uai: primitivesV1.etablissement_responsable.uai.refine(validateUAI, {
+        message: messageUai,
+      }),
+      etablissement_responsable_siret: primitivesV1.etablissement_responsable.siret.refine(validateSiret, {
+        message: messageSiret,
+      }),
+      etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai.refine(validateUAI, {
+        message: messageUai,
+      }),
+      etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret.refine(validateSiret, {
+        message: messageSiret,
+      }),
+      etablissement_lieu_de_formation_uai: primitivesV1.etablissement_lieu_de_formation.uai.refine(validateUAI, {
+        message: messageUai,
+      }),
+      etablissement_lieu_de_formation_siret: primitivesV1.etablissement_lieu_de_formation.siret.refine(validateSiret, {
+        message: messageSiret,
+      }),
+    })
+  );
+}
+
 export type DossierApprenantSchemaV3ZodType = z.input<ReturnType<typeof dossierApprenantSchemaV3>>;
 
 export default dossierApprenantSchemaV3;

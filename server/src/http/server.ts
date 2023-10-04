@@ -66,6 +66,8 @@ import {
   searchOrganismes,
   verifyOrganismeAPIKeyToUser,
   getOrganismeByUAIAndSIRET,
+  getInvalidSiretsFromDossierApprenant,
+  getInvalidUaisFromDossierApprenant,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { createSession } from "@/common/actions/sessions.actions";
@@ -84,7 +86,7 @@ import stripNullProperties from "@/common/utils/stripNullProperties";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-import { dossierApprenantSchemaV3WithMoreRequiredFields } from "@/common/validation/dossierApprenantSchemaV3";
+import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFormationSearchSchema";
@@ -475,7 +477,12 @@ function setupRoutes(app: Application) {
             "/validate",
             returnResult(async (req) => {
               const data = await z
-                .array(dossierApprenantSchemaV3WithMoreRequiredFields())
+                .array(
+                  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
+                    await getInvalidUaisFromDossierApprenant(Array.isArray(req.body) ? req.body : []),
+                    await getInvalidSiretsFromDossierApprenant(Array.isArray(req.body) ? req.body : [])
+                  )
+                )
                 .safeParseAsync(
                   Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
                 );
