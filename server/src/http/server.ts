@@ -478,9 +478,9 @@ function setupRoutes(app: Application) {
             returnResult(async (req) => {
               const data = await z
                 .array(
-                  await dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
-                    await getInvalidUaisFromDossierApprenant(req.body),
-                    await getInvalidSiretsFromDossierApprenant(req.body)
+                  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
+                    await getInvalidUaisFromDossierApprenant(Array.isArray(req.body) ? req.body : []),
+                    await getInvalidSiretsFromDossierApprenant(Array.isArray(req.body) ? req.body : [])
                   )
                 )
                 .safeParseAsync(

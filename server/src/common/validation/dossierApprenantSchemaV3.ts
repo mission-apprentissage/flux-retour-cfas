@@ -113,7 +113,7 @@ export const dossierApprenantSchemaV3WithMoreRequiredFields = () => {
   );
 };
 
-export async function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
+export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
   invalidsUais: string[],
   invalidsSirets: string[]
 ) {
