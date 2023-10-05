@@ -122,7 +122,13 @@ const Footer = () => {
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="/journal-des-evolutions">Journal des évolutions</Link>
+                <Link
+                  href="https://mission-apprentissage.notion.site/Journal-des-volutions-6de190f453e6455eb0804a911646d1df"
+                  isExternal
+                >
+                  Journal des évolutions
+                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
+                </Link>
               </ListItem>
               <ListItem _after={{ content: "''", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="https://github.com/mission-apprentissage/flux-retour-cfas" isExternal>
