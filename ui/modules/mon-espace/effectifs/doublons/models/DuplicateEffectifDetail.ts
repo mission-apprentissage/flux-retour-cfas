@@ -6,10 +6,10 @@ export interface DuplicateEffectifDetail {
   id_erp_apprenant: string;
   annee_scolaire: string;
   apprenant?: {
-    nom?: string;
-    prenom?: string;
+    nom: string;
+    prenom: string;
     ine?: string;
-    date_de_naissance?: string;
+    date_de_naissance?: Date;
     courriel?: string;
     telephone?: string;
     adresse?: {
@@ -20,7 +20,7 @@ export interface DuplicateEffectifDetail {
       academie?: string;
       region?: string;
     };
-    historique_statut?: [
+    historique_statut: [
       {
         valeur_statut?: string;
         date_statut?: string;
@@ -32,14 +32,14 @@ export interface DuplicateEffectifDetail {
     libelle_long?: string;
     cfd?: string;
     rncp?: string;
-    periode?: string;
+    periode: string[];
     annee?: string;
   };
   contrats?: [
     {
-      date_debut?: string;
-      date_fin?: string;
-      date_rupture?: string;
+      date_debut: Date;
+      date_fin?: Date;
+      date_rupture?: Date;
       cause_rupture?: string;
     },
   ];

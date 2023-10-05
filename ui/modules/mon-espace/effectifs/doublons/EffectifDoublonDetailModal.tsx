@@ -121,7 +121,10 @@ const EffectifDoublonDetailModal = ({
                           <i>Date de naissance</i>
                         </Td>
                         <Td>
-                          <b>{formatDateDayMonthYear(duplicateDetail?.apprenant?.date_de_naissance)}</b>
+                          <b>
+                            {duplicateDetail?.apprenant?.date_de_naissance &&
+                              formatDateDayMonthYear(duplicateDetail?.apprenant?.date_de_naissance)}
+                          </b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -297,7 +300,7 @@ const EffectifDoublonDetailModal = ({
                             <i>Date de fin de contrat</i>
                           </Td>
                           <Td>
-                            <b>{formatDateDayMonthYear(contrat?.date_fin)}</b>
+                            <b>{contrat?.date_fin && formatDateDayMonthYear(contrat?.date_fin)}</b>
                           </Td>
                         </Tr>
                         <Tr>
