@@ -50,6 +50,10 @@ export const TETE_DE_RESEAUX = [
     key: "COMP_DU_DEVOIR",
   },
   {
+    nom: "COMPAGNONS DU TOUR DE FRANCE",
+    key: "COMP_DU_TOUR_DE_FRANCE",
+  },
+  {
     nom: "GRETA",
     key: "GRETA",
   },
