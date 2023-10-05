@@ -92,7 +92,7 @@ describe("Processus d'ingestion", () => {
           created_at: new Date(),
         };
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
@@ -144,7 +144,7 @@ describe("Processus d'ingestion", () => {
           created_at: new Date(),
         };
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
         const result = await processEffectifsQueue();
 
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
@@ -476,7 +476,7 @@ describe("Processus d'ingestion", () => {
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
 
-        const { insertedId } = await effectifsQueueDb().insertOne(commonSampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...commonSampleData });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
@@ -603,7 +603,7 @@ describe("Processus d'ingestion", () => {
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
 
-        const { insertedId } = await effectifsQueueDb().insertOne(minimalSampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...minimalSampleData });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
@@ -689,7 +689,6 @@ describe("Processus d'ingestion", () => {
           id_erp_apprenant: "987654321",
           statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
           date_metier_mise_a_jour_statut: "2023-07-12T04:05:47.647Z",
-          _id: new ObjectId(), // FIXME : Pour éviter l'exception "duplicate _id" à fixer
         });
         await processEffectifsQueue();
 
@@ -699,7 +698,6 @@ describe("Processus d'ingestion", () => {
           id_erp_apprenant: "987654321",
           statut_apprenant: CODES_STATUT_APPRENANT.apprenti, // MAJ du statut
           date_metier_mise_a_jour_statut: "2023-07-13T04:05:47.647Z", // MAJ de la date
-          _id: new ObjectId(), // FIXME : Pour éviter l'exception "duplicate _id" à fixer
         });
 
         const result = await processEffectifsQueue();
@@ -863,7 +861,7 @@ describe("Processus d'ingestion", () => {
           created_at: new Date(),
         };
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
 
         const result = await processEffectifsQueue();
 
@@ -974,7 +972,7 @@ describe("Processus d'ingestion", () => {
           created_at: new Date(),
         };
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
 
         const result = await processEffectifsQueue();
 
