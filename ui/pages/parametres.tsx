@@ -1,4 +1,4 @@
-import { ArrowForwardIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, InfoIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -205,6 +205,14 @@ const ParametresPage = () => {
                     Choisir cette méthode
                   </Button>
                 </VStack>
+              </HStack>
+              <HStack alignItems="start" color="mgalt" mt={8}>
+                <InfoIcon />
+                <Text>
+                  Un outil de gestion / ERP (Enterprise Ressource Planning ou PGI pour Progiciel de Gestion Intégré) est
+                  une solution logicielle permettant d’unifier le système d’information d’une entreprise autour d’une
+                  base de données unique.
+                </Text>
               </HStack>
             </>
           ))}
