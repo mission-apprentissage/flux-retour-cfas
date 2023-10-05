@@ -1,7 +1,6 @@
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
 import React from "react";
-
-import { TETE_DE_RESEAUX_SORTED } from "@/common/constants/networks";
+import { TETE_DE_RESEAUX_SORTED } from "shared";
 
 import { InscriptionOrganistionChildProps } from "./common";
 

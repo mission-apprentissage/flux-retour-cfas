@@ -17,8 +17,8 @@ import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { TETE_DE_RESEAUX_BY_ID } from "shared";
 
-import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";

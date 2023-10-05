@@ -1,7 +1,15 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-import { REGIONS, DEPARTEMENTS, ACADEMIES, ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared";
+import {
+  REGIONS,
+  DEPARTEMENTS,
+  ACADEMIES,
+  ACADEMIES_BY_CODE,
+  DEPARTEMENTS_BY_CODE,
+  REGIONS_BY_CODE,
+  TETE_DE_RESEAUX,
+  TETE_DE_RESEAUX_BY_ID,
+} from "shared";
 
-import { TETE_DE_RESEAUX, TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 

@@ -9,9 +9,9 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
+import { TETE_DE_RESEAUX } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
-
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
@@ -73,7 +73,6 @@ import { searchOrganismesFormations } from "@/common/actions/organismes/organism
 import { createSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
-import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";

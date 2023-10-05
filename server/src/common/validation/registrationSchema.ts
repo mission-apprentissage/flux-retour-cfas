@@ -1,6 +1,6 @@
+import { TETE_DE_RESEAUX, TeteDeReseauKey } from "shared";
 import { z } from "zod";
 
-import { TETE_DE_RESEAUX, TeteDeReseauKey } from "@/common/constants/networks";
 import { ORGANISATIONS_NATIONALES, OrganisationsNationalesKey } from "@/common/constants/organisations";
 
 export const registrationSchema = {

@@ -11,8 +11,8 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import { TETE_DE_RESEAUX_BY_ID } from "shared";
 
-import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import Ribbons from "@/components/Ribbons/Ribbons";

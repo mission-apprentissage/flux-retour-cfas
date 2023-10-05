@@ -1,8 +1,7 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-import { ACADEMIES, DEPARTEMENTS, REGIONS } from "shared";
+import { ACADEMIES, DEPARTEMENTS, REGIONS, TETE_DE_RESEAUX } from "shared";
 import { PartialDeep } from "type-fest";
 
-import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN, YEAR_RANGE_PATTERN } from "@/common/constants/validations";
 import { any, arrayOf, boolean, date, object, objectId, string } from "@/common/model/json-schema/jsonSchemaTypes";
 
