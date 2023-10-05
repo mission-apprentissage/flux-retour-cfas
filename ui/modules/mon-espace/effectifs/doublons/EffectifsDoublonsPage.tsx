@@ -4,16 +4,16 @@ import React from "react";
 import { useRecoilValue } from "recoil";
 
 import { _get } from "@/common/httpClient";
-import { DuplicateEffectif } from "@/common/types/duplicatesEffectifs";
 import Link from "@/components/Links/Link";
 import { organismeAtom } from "@/hooks/organismeAtoms";
+import { DuplicateEffectifGroup } from "@/modules/mon-espace/effectifs/doublons/models/DuplicateEffectifGroup";
 
 import EffectifsDoublonsList from "./EffectifsDoublonsList";
 
 const EffectifsDoublonsPage = ({ isMine }) => {
   const organisme = useRecoilValue<any>(organismeAtom);
 
-  const { data: duplicates, isLoading } = useQuery<any, DuplicateEffectif[]>(
+  const { data: duplicates, isLoading } = useQuery<any, DuplicateEffectifGroup[]>(
     [`duplicates-effectifs`, organisme?._id],
     () => _get(`/api/v1/organismes/${organisme?._id}/duplicates`)
   );

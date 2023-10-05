@@ -14,17 +14,19 @@ import React from "react";
 import { _delete } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
 
+import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
+
 const EffectifDoublonDeleteAlertDialog = ({
   isOpen,
   onClose = () => {},
   cancelRef,
-  effectifId,
+  duplicateDetail,
   apprenantNomPrenom,
 }: {
   isOpen: boolean;
   onClose?: () => void;
   cancelRef;
-  effectifId: string;
+  duplicateDetail: DuplicateEffectifDetail;
   apprenantNomPrenom: string;
 }) => {
   const queryClient = useQueryClient();
@@ -57,7 +59,7 @@ const EffectifDoublonDeleteAlertDialog = ({
             <Button
               colorScheme="red"
               onClick={async () => {
-                await _delete(`/api/v1/effectif/${effectifId}`);
+                await _delete(`/api/v1/effectif/${duplicateDetail?._id}`);
                 queryClient.invalidateQueries(["duplicates-effectifs"]);
                 onClose();
               }}
