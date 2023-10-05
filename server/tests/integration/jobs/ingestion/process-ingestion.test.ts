@@ -88,10 +88,11 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: "apiUser",
+          source_organisme_id: "9999999",
           created_at: new Date(),
         };
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
@@ -139,10 +140,11 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: "apiUser",
+          source_organisme_id: "9999999",
           created_at: new Date(),
         };
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
         const result = await processEffectifsQueue();
 
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
@@ -270,6 +272,7 @@ describe("Processus d'ingestion", () => {
         tel_apprenant: "+33 534648662",
         code_commune_insee_apprenant: "05109",
         source: "apiUser",
+        source_organisme_id: "9999999",
         created_at: new Date(),
       };
 
@@ -436,7 +439,8 @@ describe("Processus d'ingestion", () => {
         etablissement_lieu_de_formation_siret: SIRET,
         formation_cfd: "1234ABCD",
         created_at: new Date(),
-        source: "REPLACE_ME",
+        source: "SOURCE_TEST",
+        source_organisme_id: "9999999",
       };
 
       const minimalSampleData: EffectifsQueue = {
@@ -461,22 +465,18 @@ describe("Processus d'ingestion", () => {
         etablissement_lieu_de_formation_uai: UAI,
         etablissement_lieu_de_formation_siret: SIRET,
         created_at: new Date(),
-        source: "REPLACE_ME",
+        source: "SOURCE_TEST",
+        source_organisme_id: "9999999",
       };
 
       it("Vérifie l'ingestion valide d'un nouveau dossier valide v3 pour un organisme fiable", async () => {
         const organismeForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
         if (!organismeForInput) throw new Error("Organisme non trouvé");
 
-        const sampleData: EffectifsQueue = {
-          ...commonSampleData,
-          source: organismeForInput._id.toString(),
-        };
-
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...commonSampleData });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
@@ -485,7 +485,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
         const organismeForInputUpdated = await findOrganismeByUaiAndSiret(UAI, SIRET);
-        expect(organismeForInputUpdated?.erps).toStrictEqual([sampleData.source]);
+        expect(organismeForInputUpdated?.erps).toStrictEqual([commonSampleData.source]);
 
         const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
 
@@ -587,7 +587,8 @@ describe("Processus d'ingestion", () => {
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
-          source: organismeForInput._id.toString(),
+          source: "SOURCE_TEST",
+          source_organisme_id: "9999999",
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
@@ -599,15 +600,10 @@ describe("Processus d'ingestion", () => {
         const organismeForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
         if (!organismeForInput) throw new Error("Organisme non trouvé");
 
-        const sampleData: EffectifsQueue = {
-          ...minimalSampleData,
-          source: organismeForInput._id.toString(),
-        };
-
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...minimalSampleData });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
@@ -620,7 +616,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
 
         const organismeUpdatedForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
-        expect(organismeUpdatedForInput?.erps).toStrictEqual([sampleData.source]);
+        expect(organismeUpdatedForInput?.erps).toStrictEqual([minimalSampleData.source]);
 
         expect(result).toStrictEqual({
           totalProcessed: 1,
@@ -674,7 +670,8 @@ describe("Processus d'ingestion", () => {
           updated_at: expect.any(Date),
           created_at: expect.any(Date),
           annee_scolaire: "2021-2022",
-          source: organismeForInput._id.toString(),
+          source: "SOURCE_TEST",
+          source_organisme_id: "9999999",
           id_erp_apprenant: "123456789",
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
@@ -690,7 +687,6 @@ describe("Processus d'ingestion", () => {
         await effectifsQueueDb().insertOne({
           ...commonSampleData,
           id_erp_apprenant: "987654321",
-          source: organismeForInput._id.toString(),
           statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
           date_metier_mise_a_jour_statut: "2023-07-12T04:05:47.647Z",
         });
@@ -700,10 +696,10 @@ describe("Processus d'ingestion", () => {
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...commonSampleData,
           id_erp_apprenant: "987654321",
-          source: organismeForInput._id.toString(),
           statut_apprenant: CODES_STATUT_APPRENANT.apprenti, // MAJ du statut
           date_metier_mise_a_jour_statut: "2023-07-13T04:05:47.647Z", // MAJ de la date
         });
+
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
@@ -717,7 +713,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
 
         const organismeUpdatedForInput = await findOrganismeByUaiAndSiret(UAI, SIRET);
-        expect(organismeUpdatedForInput?.erps).toStrictEqual([organismeForInput._id.toString()]);
+        expect(organismeUpdatedForInput?.erps).toStrictEqual([commonSampleData.source]);
 
         expect(result).toStrictEqual({
           totalProcessed: 1,
@@ -758,6 +754,7 @@ describe("Processus d'ingestion", () => {
             ...createRandomDossierApprenantApiInput({ [requiredField]: undefined }),
             uai_etablissement: UAI,
             siret_etablissement: SIRET,
+            source_organisme_id: "9999999",
             created_at: new Date(),
           });
 
@@ -800,7 +797,7 @@ describe("Processus d'ingestion", () => {
             siret_etablissement: SIRET,
             id_formation: "invalideIdFormation",
           }),
-
+          source_organisme_id: "9999999",
           created_at: new Date(),
         });
 
@@ -860,10 +857,11 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: "apiUser",
+          source_organisme_id: "9999999",
           created_at: new Date(),
         };
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
 
         const result = await processEffectifsQueue();
 
@@ -907,7 +905,7 @@ describe("Processus d'ingestion", () => {
             contrat_date_fin: "abc",
             contrat_date_rupture: "13/11/2020",
           }),
-
+          source_organisme_id: "9999999",
           created_at: new Date(),
         });
         const result = await processEffectifsQueue();
@@ -970,10 +968,11 @@ describe("Processus d'ingestion", () => {
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
           source: "apiUser",
+          source_organisme_id: "9999999",
           created_at: new Date(),
         };
 
-        const { insertedId } = await effectifsQueueDb().insertOne(sampleData);
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
 
         const result = await processEffectifsQueue();
 
@@ -1022,6 +1021,7 @@ describe("Processus d'ingestion", () => {
         tel_apprenant: "+33 534648662",
         code_commune_insee_apprenant: "05109",
         source: "apiUser",
+        source_organisme_id: "9999999",
         created_at: new Date(),
       };
 

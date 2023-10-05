@@ -159,6 +159,7 @@ export const mapEffectifQueueToEffectif = (
   return stripEmptyFields<PartialDeep<Effectif>>({
     annee_scolaire: dossierApprenant.annee_scolaire,
     source: dossierApprenant.source,
+    source_organisme_id: dossierApprenant.source_organisme_id,
     id_erp_apprenant: dossierApprenant.id_erp_apprenant,
     apprenant: {
       historique_statut: [newHistoriqueStatut],

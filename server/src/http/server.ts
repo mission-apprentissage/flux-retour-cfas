@@ -321,7 +321,13 @@ function setupRoutes(app: Application) {
         throw new Error("Unauthorized");
       }
 
-      (req.user as any) = { source: organisme._id.toString() };
+      let erpSource: string = "INCONNU";
+      if (organisme.erps?.length) {
+        if (organisme.erps?.length === 1) erpSource = organisme.erps[0];
+        if (organisme.erps?.length > 1) erpSource = "MULTI_ERP";
+      }
+
+      (req.user as any) = { source: erpSource, source_organisme_id: organisme._id.toString() };
       next();
     },
     dossierApprenantRouter()
@@ -493,7 +499,8 @@ function setupRoutes(app: Application) {
             // v3 is required in URL to consider the request as a v3 import
             "/import/v3",
             async (req, res, next) => {
-              req.user.source = String(res.locals.organismeId);
+              req.user.source = "televersement";
+              req.user.source_organisme_id = String(res.locals.organismeId);
               next();
             },
             dossierApprenantRouter()

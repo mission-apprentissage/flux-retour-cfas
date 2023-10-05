@@ -79,10 +79,9 @@ const mandatoryFields = [
 type Status = "validation_success" | "validation_failure" | "import_success" | "import_failure";
 
 // Enrich data with source and id_erp_apprenant
-function toEffectifsQueue(data: any[], organismeId: string) {
+function toEffectifsQueue(data: any[]) {
   return data.map((e) => ({
     ...e,
-    source: String(organismeId),
     // Generate a unique id for each row, based on the apprenant's name and birthdate.
     // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693294663898159?thread_ts=1693292246.217809&cid=C02FR2L1VB8
     id_erp_apprenant: cyrb53Hash(
@@ -168,10 +167,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           });
 
         // Send data to API for validation.
-        const res = await _post(
-          `/api/v1/organismes/${organismeId}/upload/validate`,
-          toEffectifsQueue(jsonData, organismeId)
-        );
+        const res = await _post(`/api/v1/organismes/${organismeId}/upload/validate`, toEffectifsQueue(jsonData));
 
         // The response is an array of errors (zod)
         // Iterate over the array and add the error to the corresponding row
@@ -234,10 +230,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   // Send data to API (via effectifQueue).
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    const res = await _post(
-      `/api/v1/organismes/${organismeId}/upload/import/v3`,
-      toEffectifsQueue(data || [], organismeId)
-    );
+    const res = await _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, toEffectifsQueue(data || []));
     setStatus(res.error ? "import_failure" : "import_success");
     setIsSubmitting(false);
   };

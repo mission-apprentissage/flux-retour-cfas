@@ -18,6 +18,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ created_at: 1 }, { name: "created_at" }],
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
   [{ source: 1 }, { name: "source" }],
+  [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
   [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
   [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
@@ -32,6 +33,7 @@ const apprenantProps = apprenantSchema.properties;
 // internal fields (shared with api V3)
 export const internalFields = {
   source: string({ description: effectifsProps.source.description }),
+  source_organisme_id: string({ description: effectifsProps.source_organisme_id.description }),
   effectif_id: objectId({ description: "Id de l'effectif associé" }),
   organisme_id: objectId({ description: "Id de l'organisme associé" }),
   updated_at: date({ description: "Date de mise à jour en base de données" }),

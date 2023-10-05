@@ -81,6 +81,7 @@ export const createSampleEffectif = ({
       updated_at: new Date(),
       id_erp_apprenant: faker.datatype.uuid(),
       source: faker.random.word(),
+      source_organisme_id: faker.datatype.uuid(),
       annee_scolaire,
       organisme_id: organisme?._id,
       _computed: organisme ? addEffectifComputedFields(organisme as Organisme) : {},
