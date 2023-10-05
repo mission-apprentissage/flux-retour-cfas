@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axiosist";
 
+import { IndicateursEffectifsAvecOrganisme } from "@/common/actions/indicateurs/indicateurs";
 import { Effectif } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { historySequenceApprentiToAbandon, historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
@@ -225,7 +226,7 @@ describe("Route indicateurs", () => {
                   inscritsSansContrat: 0,
                   rupturants: 0,
                   abandons: 0,
-                },
+                } satisfies IndicateursEffectifsAvecOrganisme,
               ]
             : []
         );

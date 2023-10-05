@@ -615,6 +615,13 @@ export async function getOrganismeIndicateursEffectifsParFormation(
           localField: "rncp_code",
           foreignField: "rncp",
           as: "rncp",
+          pipeline: [
+            {
+              $project: {
+                _id: 0,
+              },
+            },
+          ],
         },
       },
       {
