@@ -109,7 +109,6 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
       return {};
     }
   });
-  console.log("ficheRNCP", ficheRNCP);
   const [expandedNiveaux, setExpandedNiveaux] = useState<{ [niveau: string]: boolean }>({});
 
   function toggleExpand(niveau: string) {
@@ -207,7 +206,14 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
       </Table>
 
       {ficheRNCP && (
-        <Modal isOpen={isOpen} onClose={onClose} size="3xl">
+        <Modal
+          isOpen={isOpen}
+          onClose={() => {
+            onClose();
+            setSelectedCodeRNCP(null);
+          }}
+          size="3xl"
+        >
           <ModalOverlay />
           <ModalContent borderRadius="0" p="2w" pb="4w">
             <ModalHeader display="flex" alignItems="center" fontSize="24px" pl="0">
@@ -224,7 +230,6 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
                   variant="whiteBg"
                   href={`https://www.francecompetences.fr/recherche/rncp/${ficheRNCP.rncp?.substring(4)}`}
                   isExternal
-                  borderBottom="1px"
                   ml="auto !important"
                 >
                   Consulter la fiche
