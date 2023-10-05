@@ -16,7 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import { ERPS_BY_ID } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -27,6 +26,7 @@ import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
 import EffectifsTable from "../mon-espace/effectifs/engine/EffectifsTable";
 import { Input } from "../mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import BandeauTransmission from "../organismes/BandeauTransmission";
 
 interface EffectifsPageProps {
   organisme: Organisme;
@@ -64,22 +64,9 @@ function EffectifsPage(props: EffectifsPageProps) {
           </Link>
         </HStack>
 
-        {organismesEffectifs &&
-          organismesEffectifs.length === 0 &&
-          props.organisme.erps &&
-          props.organisme.erps.length > 0 && (
-            <Ribbons variant="success">
-              <Box ml={3}>
-                <Text fontSize="bold">
-                  {ERPS_BY_ID[props.organisme.erps[0]]?.name} est votre moyen de transmission.
-                </Text>
-                <Text>
-                  L’importation de vos effectifs est en cours. Le tableau de bord recevra vos effectifs entre 24-48
-                  heures. Revenez plus tard pour consulter le tableau de vos effectifs.
-                </Text>
-              </Box>
-            </Ribbons>
-          )}
+        {organismesEffectifs && organismesEffectifs.length === 0 && (
+          <BandeauTransmission organisme={props.organisme} modePublique={props.modePublique} />
+        )}
 
         {duplicates && duplicates?.length > 0 && (
           <Ribbons variant="alert" mb={6}>

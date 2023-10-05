@@ -38,6 +38,7 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
+import BandeauTransmission from "../organismes/BandeauTransmission";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
@@ -446,23 +447,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
             )}
 
             {aucunEffectifTransmis && (
-              <Ribbons variant="warning" mt="0.5rem">
-                <Text color="grey.800">
-                  {modePublique ? (
-                    "Cet établissement ne transmet pas encore ses effectifs au tableau de bord."
-                  ) : !organisme.mode_de_transmission ? (
-                    <>
-                      Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs. Veuillez{" "}
-                      <Link href="/parametres" borderBottom="1px" _hover={{ textDecoration: "none" }}>
-                        paramétrer
-                      </Link>{" "}
-                      votre moyen de transmission.
-                    </>
-                  ) : (
-                    <>Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs.</>
-                  )}
-                </Text>
-              </Ribbons>
+              <BandeauTransmission organisme={organisme} modePublique={modePublique} modeIndicateurs />
             )}
 
             {indicateursEffectifs && (

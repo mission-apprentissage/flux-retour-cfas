@@ -143,9 +143,6 @@ const ParametresPage = () => {
 
                 <Image src="/images/parametres-choix-transmission.svg" alt="" userSelect="none" />
               </HStack>
-              <Text fontSize="gamma" fontWeight="bold">
-                Vous avez besoin de modifier ou rajouter un moyen de transmission ?
-              </Text>
 
               <Button
                 variant="primary"
@@ -161,13 +158,6 @@ const ParametresPage = () => {
             </>
           ) : (
             <>
-              <Ribbons maxW="588px">
-                <Text color="grey.800">
-                  Si vous utilisez deux outils de gestion, vous aurez la possibilité de combiner deux moyens
-                  d’importation. Cependant, vous devez paramétrer un premier (le principal).
-                </Text>
-              </Ribbons>
-
               <HStack gap={7} mt={6}>
                 <VStack
                   p={6}
