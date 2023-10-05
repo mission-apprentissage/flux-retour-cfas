@@ -78,7 +78,7 @@ import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
-import { jobEventsDb, organisationsDb } from "@/common/model/collections";
+import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -455,6 +455,25 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           return await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
+        })
+      )
+      .delete(
+        "/duplicate/:effectifId",
+        requireOrganismePermission("manageEffectifs"),
+        async (req, res, next) => {
+          res.locals.duplicateId = new ObjectId((req.params as any).effectifId);
+          console.log("res.locals.duplicateId :>> ", res.locals.duplicateId);
+
+          const isEffectifLinkedToOrganisme = (
+            await effectifsDb().findOne({ _id: res.locals.duplicateId })
+          )?.organisme_id.equals(res.locals.organismeId);
+          console.log("isEffectifLinkedToOrganisme:>> ", isEffectifLinkedToOrganisme);
+
+          if (!isEffectifLinkedToOrganisme) return res.status(401).json({ error: "Accès non autorisé" });
+          next();
+        },
+        returnResult(async (req, res) => {
+          await effectifsDb().deleteOne({ _id: new ObjectId(res.locals.duplicateId) });
         })
       )
       .get(

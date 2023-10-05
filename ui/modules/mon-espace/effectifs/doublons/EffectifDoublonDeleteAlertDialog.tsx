@@ -10,9 +10,11 @@ import {
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
+import { useRecoilValue } from "recoil";
 
 import { _delete } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { organismeAtom } from "@/hooks/organismeAtoms";
 
 import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
 
@@ -30,6 +32,7 @@ const EffectifDoublonDeleteAlertDialog = ({
   apprenantNomPrenom: string;
 }) => {
   const queryClient = useQueryClient();
+  const organisme = useRecoilValue<any>(organismeAtom);
 
   return (
     <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size={"4xl"}>
@@ -59,7 +62,7 @@ const EffectifDoublonDeleteAlertDialog = ({
             <Button
               colorScheme="red"
               onClick={async () => {
-                await _delete(`/api/v1/effectif/${duplicateDetail?._id}`);
+                await _delete(`/api/v1/organismes/${organisme?._id}/duplicate/${duplicateDetail?.id}`);
                 queryClient.invalidateQueries(["duplicates-effectifs"]);
                 onClose();
               }}
