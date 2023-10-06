@@ -1,3 +1,4 @@
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 import { Heading, Container, Text, FormControl, FormLabel, Input, Box, Button, VStack } from "@chakra-ui/react";
 import { Form, Formik, useFormik } from "formik";
 import { useEffect } from "react";
@@ -89,6 +90,7 @@ function TestERP() {
                   }}
                 >
                   Connecter au tableau de bord
+                  <ExternalLinkIcon ml={2} />
                 </Button>
 
                 <Text fontSize="delta" fontWeight="bold">
@@ -117,6 +119,7 @@ function TestERP() {
                   }}
                 >
                   Valider votre connexion au tableau de bord
+                  <ExternalLinkIcon ml={2} />
                 </Button>
               </VStack>
             </Form>
