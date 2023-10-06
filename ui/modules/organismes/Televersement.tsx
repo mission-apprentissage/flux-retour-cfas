@@ -49,6 +49,12 @@ const dateFields = [
   "contrat_date_debut_2",
   "contrat_date_fin_2",
   "contrat_date_rupture_2",
+  "contrat_date_debut_3",
+  "contrat_date_fin_3",
+  "contrat_date_rupture_3",
+  "contrat_date_debut_4",
+  "contrat_date_fin_4",
+  "contrat_date_rupture_4",
 ];
 
 const booleanFields = ["rqth_apprenant", "obtention_diplome_formation", "formation_presentielle"];
