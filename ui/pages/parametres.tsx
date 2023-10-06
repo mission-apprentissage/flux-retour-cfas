@@ -238,16 +238,29 @@ const ParametresPage = () => {
               </Select>
             </FormControl>
 
-            <Button
-              variant="primary"
-              px={6}
-              isDisabled={!selectedERPId}
-              onClick={() => {
-                setStepConfigurationERP(selectedERPId === "other" ? "unsupported_erp" : erp.apiV3 ? "v3" : "v2");
-              }}
-            >
-              Confirmer
-            </Button>
+            <HStack gap={3}>
+              <Button
+                variant="secondary"
+                px={6}
+                onClick={() => {
+                  setStepConfigurationERP("none");
+                  setSelectedERPId("");
+                }}
+              >
+                Revenir en arrière
+              </Button>
+
+              <Button
+                variant="primary"
+                px={6}
+                isDisabled={!selectedERPId}
+                onClick={() => {
+                  setStepConfigurationERP(selectedERPId === "other" ? "unsupported_erp" : erp.apiV3 ? "v3" : "v2");
+                }}
+              >
+                Confirmer
+              </Button>
+            </HStack>
           </>
         )}
 
@@ -262,28 +275,45 @@ const ParametresPage = () => {
               <Input name="erp_name" placeholder="Nom de l’ERP..." />
             </FormControl>
 
-            <AppButton
-              variant="primary"
-              px={6}
-              isDisabled={unsupportedERPName.length === 0}
-              action={async () => {
-                await _put(`/api/v1/organismes/${organisme._id}/configure-erp`, {
-                  mode_de_transmission: "MANUEL",
-                  erp_unsupported: unsupportedERPName,
-                });
-                await refetchOrganisme();
-                setStepConfigurationERP("none");
-                setSelectedERPId("");
-                setUnsupportedERPName("");
-              }}
-            >
-              Valider
-            </AppButton>
+            <HStack gap={3}>
+              <Button
+                variant="secondary"
+                px={6}
+                onClick={() => {
+                  setStepConfigurationERP("choix_erp");
+                  setSelectedERPId("");
+                }}
+              >
+                Revenir en arrière
+              </Button>
+
+              <AppButton
+                variant="primary"
+                px={6}
+                isDisabled={unsupportedERPName.length === 0}
+                action={async () => {
+                  await _put(`/api/v1/organismes/${organisme._id}/configure-erp`, {
+                    mode_de_transmission: "MANUEL",
+                    erp_unsupported: unsupportedERPName,
+                  });
+                  await refetchOrganisme();
+                  setStepConfigurationERP("none");
+                  setSelectedERPId("");
+                  setUnsupportedERPName("");
+                }}
+              >
+                Valider
+              </AppButton>
+            </HStack>
           </VStack>
         )}
         {stepConfigurationERP === "v2" && (
           <ConfigurationERPV2
             erpId={selectedERPId}
+            onBack={() => {
+              setStepConfigurationERP("choix_erp");
+              setSelectedERPId("");
+            }}
             onSubmit={async () => {
               await _put(`/api/v1/organismes/${organisme._id}/configure-erp`, {
                 mode_de_transmission: "API",
@@ -309,6 +339,10 @@ const ParametresPage = () => {
               setStepConfigurationERP("none");
               setSelectedERPId("");
             }}
+            onBack={() => {
+              setStepConfigurationERP("choix_erp");
+              setSelectedERPId("");
+            }}
             onSubmit={async () => {
               await _put(`/api/v1/organismes/${organisme._id}/configure-erp`, {
                 mode_de_transmission: "API",
@@ -329,6 +363,7 @@ export default withAuth(ParametresPage);
 
 interface ConfigurationERPV2Props {
   erpId: string;
+  onBack: () => any;
   onSubmit: () => any;
 }
 function ConfigurationERPV2(props: ConfigurationERPV2Props) {
@@ -378,9 +413,15 @@ function ConfigurationERPV2(props: ConfigurationERPV2Props) {
         J’ai bien paramétré mon ERP avec le tableau de bord.
       </Checkbox>
 
-      <Button variant="primary" px={6} isDisabled={!configurationFinished} onClick={props.onSubmit}>
-        Finaliser la configuration
-      </Button>
+      <HStack gap={3}>
+        <Button variant="secondary" px={6} onClick={props.onBack}>
+          Revenir en arrière
+        </Button>
+
+        <Button variant="primary" px={6} isDisabled={!configurationFinished} onClick={props.onSubmit}>
+          Finaliser la configuration
+        </Button>
+      </HStack>
     </VStack>
   );
 }
@@ -390,6 +431,7 @@ interface ConfigurationERPV3Props {
   organisme: Organisme;
   onGenerateKey: () => any;
   onConfigurationMismatch: () => any;
+  onBack: () => any;
   onSubmit: () => any;
 }
 function ConfigurationERPV3(props: ConfigurationERPV3Props) {
@@ -521,20 +563,33 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
           {props.organisme.api_key ? (
             <>
               <Input type="text" name="apiKey" value={props.organisme.api_key} required readOnly w="380px" />
-              <CopyToClipboard
-                text={props.organisme.api_key}
-                onCopy={() => {
-                  setCopied(true);
-                  toastSuccess("Copié !");
-                }}
-              >
-                <Button variant="primary">Copier la clé</Button>
-              </CopyToClipboard>
+
+              <HStack gap={3}>
+                <Button variant="secondary" px={6} onClick={props.onBack}>
+                  Revenir en arrière
+                </Button>
+
+                <CopyToClipboard
+                  text={props.organisme.api_key}
+                  onCopy={() => {
+                    setCopied(true);
+                    toastSuccess("Copié !");
+                  }}
+                >
+                  <Button variant="primary">Copier la clé</Button>
+                </CopyToClipboard>
+              </HStack>
             </>
           ) : (
-            <AppButton variant="primary" action={props.onGenerateKey}>
-              Générer la clé d’échange
-            </AppButton>
+            <HStack gap={3}>
+              <Button variant="secondary" px={6} onClick={props.onBack}>
+                Revenir en arrière
+              </Button>
+
+              <AppButton variant="primary" action={props.onGenerateKey}>
+                Générer la clé d’échange
+              </AppButton>
+            </HStack>
           )}
         </>
       )}
