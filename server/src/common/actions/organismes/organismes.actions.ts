@@ -679,6 +679,7 @@ export async function resetConfigurationERP(ctx: AuthContext, organismeId: Objec
       $unset: {
         mode_de_transmission: 1,
         mode_de_transmission_configuration_date: 1,
+        mode_de_transmission_configuration_author_fullname: 1,
         erp_unsupported: 1,
         api_configuration_date: 1,
         api_siret: 1,
