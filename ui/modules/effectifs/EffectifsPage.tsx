@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
+import { useSetRecoilState } from "recoil";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -24,6 +25,7 @@ import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
+import { effectifsStateAtom } from "../mon-espace/effectifs/engine/atoms";
 import EffectifsTable from "../mon-espace/effectifs/engine/EffectifsTable";
 import { Input } from "../mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import BandeauTransmission from "../organismes/BandeauTransmission";
@@ -34,13 +36,25 @@ interface EffectifsPageProps {
 }
 function EffectifsPage(props: EffectifsPageProps) {
   const router = useRouter();
+  const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
 
   const [searchValue, setSearchValue] = useState("");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
   const [anneScolaire, setAnneScolaire] = useState("all");
 
-  const { data: organismesEffectifs, isLoading } = useQuery(["organismes", props.organisme._id, "effectifs"], () =>
-    _get<any[]>(`/api/v1/organismes/${props.organisme._id}/effectifs`)
+  const { data: organismesEffectifs, isLoading } = useQuery(
+    ["organismes", props.organisme._id, "effectifs"],
+    async () => {
+      const organismesEffectifs = await _get<any[]>(`/api/v1/organismes/${props.organisme._id}/effectifs`);
+      // met à jour l'état de validation de chaque effectif (nécessaire pour le formulaire)
+      setCurrentEffectifsState(
+        organismesEffectifs.reduce((acc, { id, validation_errors }) => {
+          acc.set(id, { validation_errors, requiredSifa: [] });
+          return acc;
+        }, new Map())
+      );
+      return organismesEffectifs;
+    }
   );
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
