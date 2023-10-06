@@ -24,8 +24,6 @@ export const ERPS = sortAlphabeticallyBy("name", [
   {
     id: "scform",
     name: "SC Form",
-    // helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/scform.pdf",
-    // helpFileSize: "734 ko",
     apiV3: true,
   },
   {
@@ -37,6 +35,11 @@ export const ERPS = sortAlphabeticallyBy("name", [
     name: "FCA Manager",
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/fcamanager.pdf",
     helpFileSize: "288 ko",
+  },
+  {
+    id: "auriga",
+    name: "Auriga",
+    apiV3: true,
   },
 ] satisfies ERP[]);
 
