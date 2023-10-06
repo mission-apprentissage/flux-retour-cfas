@@ -14,6 +14,7 @@ import {
   INE_REGEX,
   NIR_LOOSE_REGEX,
   ZOD_3_22_2_EMAIL_REGEX_PATTERN,
+  CODE_POSTAL_REGEX,
 } from "@/common/constants/validations";
 
 import { telephoneConverter } from "./frenchTelephoneNumber";
@@ -302,8 +303,12 @@ export const primitivesV3 = {
     ),
     adresse: z.string().trim().describe("Adresse de l'apprenant"),
     code_postal: z.preprocess(
-      (v: any) => (v ? String(v) : v),
-      z.string().trim().describe("Code postal de l'apprenant")
+      (v: any) => (v ? String(v).trim().padStart(5, "0") : v),
+      z
+        .string()
+        .trim()
+        .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement")
+        .describe("Code postal de l'apprenant")
     ),
     sexe: z.preprocess(
       (v: any) => (v ? String(v).trim().replace("H", "M").replace("1", "M").replace("2", "F") : v),
