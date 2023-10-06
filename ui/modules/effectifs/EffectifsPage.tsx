@@ -55,7 +55,7 @@ function EffectifsPage(props: EffectifsPageProps) {
       <Container maxW="xl" p="8">
         <HStack justifyContent="space-between" mb={8}>
           <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
-            {props.modePublique ? "Ses" : "Mes"} effectifs
+            {title}
           </Heading>
 
           <Link variant="whiteBg" href={`${router.asPath}/televersement`}>
