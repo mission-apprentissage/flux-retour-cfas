@@ -34,7 +34,7 @@ const ConnexionAPI = () => {
 
   useEffect(() => {
     if (!router.query.api_key && !currentOrganisme?.api_key) {
-      router.push("/parametres"); // FIXME REVIEW pas sûr du workflow ici
+      router.push(`/parametres?erpV3=${router.query.erp}`);
     }
   }, [currentOrganisme]);
 
