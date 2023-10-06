@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import { z } from "zod";
 
 import { _post } from "@/common/httpClient";
@@ -13,7 +14,6 @@ import Page from "@/components/Page/Page";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { useOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
-import useLocalStorage from "@/hooks/userLocalStorage";
 import { useEffectifsOrganismeOrganisation } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -99,7 +99,7 @@ const ConnexionAPIVerifyUser = ({ organisme }) => {
 const ConnexionAPIUserNotConnected = () => {
   const { auth } = useAuth();
   const router = useRouter();
-  const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl");
+  const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl", "");
 
   useEffect(() => {
     if (originConnexionUrl !== window.location.href) {
