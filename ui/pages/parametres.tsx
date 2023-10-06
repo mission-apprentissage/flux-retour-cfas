@@ -399,6 +399,27 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
   const erp = ERPS_BY_ID[props.erpId];
   const verified = !!props.organisme.api_siret && !!props.organisme.api_uai;
 
+  if (!erp) {
+    return (
+      <>
+        <Ribbons variant="alert" fontSize="gamma" fontWeight="bold">
+          <Box color="grey.800">
+            L’ERP {props.erpId} n’est pas pris en charge. Veuillez{" "}
+            <Link
+              variant="link"
+              color="inherit"
+              href={`mailto:${CONTACT_ADDRESS}?subject=ERP non pris en charge "${props.erpId}" détecté lors du paramétrage`}
+              isExternal
+            >
+              contacter le support
+            </Link>
+            .
+          </Box>
+        </Ribbons>
+      </>
+    );
+  }
+
   return (
     <VStack alignItems="start" gap={8} w="fit-content">
       <Ribbons variant="success" fontSize="gamma" fontWeight="bold">
