@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "4.5.1",
+    "@asteasolutions/zod-to-openapi": "6.1.0",
     "@sentry/integrations": "7.64.0",
     "@sentry/node": "7.64.0",
     "@sentry/tracing": "7.64.0",
@@ -96,7 +96,7 @@
     "type-fest": "^3.10.0",
     "uuid": "8.3.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
-    "zod": "3.21.4",
+    "zod": "3.22.4",
     "zod-express-middleware": "1.4.0",
     "zod-to-json-schema": "3.21.4"
   },

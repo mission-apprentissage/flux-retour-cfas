@@ -1,4 +1,4 @@
-import { OpenAPIRegistry, OpenAPIGenerator, RouteConfig } from "@asteasolutions/zod-to-openapi";
+import { OpenAPIRegistry, OpenApiGeneratorV3, RouteConfig } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 
 import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2";
@@ -160,9 +160,10 @@ registry.registerPath({
   },
 });
 
-const generator = new OpenAPIGenerator(registry.definitions, "3.0.0");
+const generator = new OpenApiGeneratorV3(registry.definitions);
 
 export default generator.generateDocument({
+  openapi: "3.0.0",
   info: {
     version: "1.0.0",
     title: "API mission apprentissage",

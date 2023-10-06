@@ -13,7 +13,6 @@ import {
   YEAR_RANGE_REGEX,
   INE_REGEX,
   NIR_LOOSE_REGEX,
-  ZOD_3_22_2_EMAIL_REGEX_PATTERN,
   CODE_POSTAL_REGEX,
 } from "@/common/constants/validations";
 
@@ -38,15 +37,13 @@ const iso8601Regex = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/;
 
 const extensions = {
   phone: () =>
-    z.preprocess(
-      (v: any) => telephoneConverter(v),
-      z
-        .string()
-        .regex(/.*[0-9].*/, "Format invalide") // check it contains at least one digit
-        .openapi({
-          example: "0628000000",
-        })
-    ),
+    z
+      .string()
+      .regex(/.*[0-9].*/, "Format invalide") // check it contains at least one digit
+      .transform((v: string) => telephoneConverter(v))
+      .openapi({
+        example: "0628000000",
+      }),
   siret: () =>
     z.preprocess(
       // On accepte les tirets, les espaces et les points dans le SIRET (et on les retire silencieusement)
@@ -137,14 +134,9 @@ export const primitivesV1 = {
         .regex(INE_REGEX, "INE invalide")
         .describe("Identifiant National Élève de l'apprenant")
     ),
-    email: z
-      .string()
-      .trim()
-      .regex(ZOD_3_22_2_EMAIL_REGEX_PATTERN, "Email non valide")
-      .describe("Email de l'apprenant")
-      .openapi({
-        example: "gaston.lenotre@domain.tld",
-      }),
+    email: z.string().trim().email("Email non valide").describe("Email de l'apprenant").openapi({
+      example: "gaston.lenotre@domain.tld",
+    }),
     telephone: extensions.phone().describe("Téléphone de l'apprenant"),
     code_commune_insee: extensions.codeCommuneInsee().describe("Code Insee de la commune de résidence de l'apprenant"),
   },
@@ -332,7 +324,7 @@ export const primitivesV3 = {
     email: z
       .string()
       .trim()
-      .regex(ZOD_3_22_2_EMAIL_REGEX_PATTERN, "Email non valide")
+      .email("Email non valide")
       .describe("Email du responsable de l'apprenant")
       .openapi({ example: "escoffier@domain.tld" }),
   },
@@ -384,7 +376,7 @@ export const primitivesV3 = {
       prenom: z.string().openapi({
         description: "Prénom du référent handicap de la formation",
       }),
-      email: z.string().regex(ZOD_3_22_2_EMAIL_REGEX_PATTERN, "Email non valide").openapi({
+      email: z.string().email("Email non valide").openapi({
         description: "Email du référent handicap de la formation",
       }),
     },
