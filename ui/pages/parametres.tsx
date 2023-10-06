@@ -463,7 +463,7 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
             <Link
               variant="whiteBg"
               px={6}
-              href={`mailto:${CONTACT_ADDRESS}?subject=Mauvais configuration paramétrage ERP - API`}
+              href={`mailto:${CONTACT_ADDRESS}?subject=Mauvaise configuration paramétrage ERP - API`}
               onClick={props.onConfigurationMismatch}
             >
               Je ne confirme pas

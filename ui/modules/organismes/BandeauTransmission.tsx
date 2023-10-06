@@ -50,7 +50,7 @@ function BandeauTransmission({
           ) : (
             <>
               Votre outil de gestion est {erpName}. Le tableau de bord ne reçoit pas vos effectifs. Veuillez vérifier à
-              nouveau le paramétrage de votre ERP le{" "}
+              nouveau le paramétrage de votre ERP fait le{" "}
               {formatDateDayMonthYear(organisme.mode_de_transmission_configuration_date as string)}. En cas de
               difficultés,{" "}
               <Link
