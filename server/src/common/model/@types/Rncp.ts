@@ -2,5 +2,10 @@
 
 export interface Rncp {
   rncp: string;
+  nouveaux_rncp?: string[];
+  intitule: string;
+  niveau?: number;
+  etat_fiche: string;
+  actif: boolean;
   romes: string[];
 }

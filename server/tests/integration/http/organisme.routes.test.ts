@@ -4,8 +4,10 @@ import { AxiosInstance } from "axiosist";
 import { ObjectId, WithId } from "mongodb";
 
 import { PermissionsOrganisme } from "@/common/actions/helpers/permissions-organisme";
+import { IndicateursEffectifsAvecFormation } from "@/common/actions/indicateurs/indicateurs";
 import { Organisme } from "@/common/model/@types";
-import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { Rncp } from "@/common/model/@types/Rncp";
+import { effectifsDb, organisationsDb, organismesDb, rncpDb, usersMigrationDb } from "@/common/model/collections";
 import { MapObjectIdToString } from "@/common/utils/mongoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import {
@@ -13,6 +15,7 @@ import {
   historySequenceApprentiToAbandon,
   historySequenceApprentiToInscrit,
   historySequenceInscrit,
+  historySequenceInscritToApprenti,
 } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -623,7 +626,101 @@ describe("Routes /organismes/:id", () => {
     });
   });
 
-  describe("PUT /organismes/:id/configure-erp - configuration de l'ERP d'un organisme", () => {
+  describe("GET /organismes/:id/indicateurs/effectifs/par-formation - indicateurs effectifs d'un organisme par formation", () => {
+    const date = "2022-10-10T00:00:00.000Z";
+    const anneeScolaire = "2022-2023";
+
+    const ficheRNCP: Rncp = {
+      rncp: "RNCP34956",
+      actif: true,
+      etat_fiche: "Publiée",
+      intitule: "Arts de la cuisine",
+      niveau: 4,
+      romes: ["G1602"],
+    };
+
+    beforeEach(async () => {
+      await Promise.all([
+        effectifsDb().insertOne(
+          createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceInscritToApprenti,
+            },
+            formation: {
+              rncp: ficheRNCP.rncp,
+            },
+          })
+        ),
+        rncpDb().insertOne({ ...ficheRNCP }), // la copie par destructuring évite à insertOne d'ajouter _id à l'objet
+      ]);
+    });
+
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+      const response = await httpClient.get(
+        `/api/v1/organismes/${id(1)}/indicateurs/effectifs/par-formation?date=${date}`
+      );
+
+      expectUnauthorizedError(response);
+    });
+
+    describe("Permissions", () => {
+      testPermissions(
+        {
+          "OF cible": true,
+          "OF responsable": true,
+          "OF formateur": false,
+          "OF non lié": false,
+          "Tête de réseau même réseau": true,
+          "Tête de réseau autre réseau": false,
+          "DREETS même région": true,
+          "DREETS autre région": false,
+          "DRAAF même région": true,
+          "DRAAF autre région": false,
+          "Conseil Régional même région": true,
+          "Conseil Régional autre région": false,
+          "CARIF OREF régional même région": true,
+          "CARIF OREF régional autre région": false,
+          "DDETS même département": true,
+          "DDETS autre département": false,
+          "Académie même académie": true,
+          "Académie autre académie": false,
+          "Opérateur public national": true,
+          "CARIF OREF national": true,
+          Administrateur: true,
+        },
+        async (organisation, allowed) => {
+          const response = await requestAsOrganisation(
+            organisation,
+            "get",
+            `/api/v1/organismes/${id(1)}/indicateurs/effectifs/par-formation?date=${date}`
+          );
+
+          if (allowed) {
+            expect(response.status).toStrictEqual(200);
+            expect(response.data).toStrictEqual([
+              {
+                rncp_code: ficheRNCP.rncp,
+                rncp: ficheRNCP,
+                apprenants: 1,
+                apprentis: 1,
+                inscritsSansContrat: 0,
+                rupturants: 0,
+                abandons: 0,
+              } satisfies IndicateursEffectifsAvecFormation,
+            ]);
+          } else {
+            expectForbiddenError(response);
+          }
+        }
+      );
+    });
+
+    // TODO vérifier chaque filtre
+  });
+
+  describe("PUT /organismes/:id/configure-erp - configuration du mode de transmission d'un organisme", () => {
     it("Erreur si non authentifié", async () => {
       const response = await httpClient.put(`/api/v1/organismes/${id(1)}/configure-erp`, {
         mode_de_transmission: "MANUEL",

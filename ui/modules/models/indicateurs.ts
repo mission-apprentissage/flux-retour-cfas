@@ -16,6 +16,11 @@ export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & {
   uai: string;
 };
 
+export type IndicateursEffectifsAvecFormation = IndicateursEffectifs & {
+  rncp_code: string | null;
+  rncp: Record<any, any> | null;
+}; // FIXME importer le modèle complet
+
 export interface IndicateursOrganismes {
   tauxCouverture: number;
   totalOrganismes: number;

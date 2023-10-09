@@ -10,9 +10,10 @@ import { XMLParser } from "fast-xml-parser";
 import parentLogger from "@/common/logger";
 import { Rncp } from "@/common/model/@types/Rncp";
 import { rncpDb } from "@/common/model/collections";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 const logger = parentLogger.child({
-  module: "job:hydrate:rncp-romes",
+  module: "job:hydrate:rncp",
 });
 
 /*
@@ -24,10 +25,10 @@ const logger = parentLogger.child({
   - récupération du fichier zip export-fiches-rncp-v3 du jour : "https://static.data.gouv.fr/resources/repertoire-national-des-certifications-professionnelles-et-repertoire-specifique/20230830-020022/export-fiches-rncp-v3-0-2023-08-30.zip"
   - décompression zip
   - parsing du xml
-  - récupération de la correspondance RNC -> codes ROME uniquement
+  - récupération de la correspondance RNCP -> codes ROME + autres attributs
   - écriture dans la collection rncp
 */
-export async function hydrateRNCPRomes() {
+export async function hydrateRNCP() {
   let res = await axios.get(
     `https://www.data.gouv.fr/api/2/datasets/5eebbc067a14b6fecc9c9976/resources/?page=1&type=update&page_size=10&q=`
   );
@@ -64,33 +65,41 @@ export async function hydrateRNCPRomes() {
   const parser = new XMLParser({
     isArray(tagName, jPath) {
       // force un tableau plutôt qu'un objet si jamais un seul élément
-      return jPath === "FICHES.FICHE.CODES_ROME.ROME";
+      return ["FICHES.FICHE.CODES_ROME.ROME", "FICHES.FICHE.NOUVELLE_CERTIFICATION"].includes(jPath);
     },
   });
   logger.info("parsing du xml");
   const parsedContent = parser.parse(zipData);
 
-  const rncpWithRomes: Rncp[] = parsedContent.FICHES.FICHE.map((fiche) => {
+  const fichesRNCP: Rncp[] = parsedContent.FICHES.FICHE.map((fiche) => {
     return {
       rncp: fiche.NUMERO_FICHE,
+      nouveaux_rncp: fiche.NOUVELLE_CERTIFICATION,
+      niveau: fiche.NOMENCLATURE_EUROPE.NIVEAU
+        ? parseInt((fiche.NOMENCLATURE_EUROPE.NIVEAU as string).substring(3))
+        : undefined,
+      intitule: fiche.INTITULE,
+      etat_fiche: fiche.ETAT_FICHE,
+      actif: fiche.ACTIF === "Oui",
       // certains RNCP n'ont pas de ROME => undefined
       romes: fiche.CODES_ROME?.ROME?.map((rome) => rome.CODE) ?? [],
-    };
+    } as Rncp;
   });
 
-  logger.info({ count: rncpWithRomes.length }, "import des rncp avec romes");
+  logger.info({ count: fichesRNCP.length }, "import des fiches rncp");
 
-  await PromisePool.for(rncpWithRomes)
+  await PromisePool.for(fichesRNCP)
     .withConcurrency(50)
-    .process(async (rncp) => {
+    .handleError(async (error) => {
+      throw error;
+    })
+    .process(async ({ rncp, ...fiche }) => {
       await rncpDb().updateOne(
         {
-          rncp: rncp.rncp,
+          rncp,
         },
         {
-          $set: {
-            romes: rncp.romes,
-          },
+          $set: stripEmptyFields(fiche),
         },
         {
           upsert: true,
