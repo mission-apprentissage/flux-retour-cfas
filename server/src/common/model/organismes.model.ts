@@ -1,7 +1,7 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import { TETE_DE_RESEAUX } from "shared";
 
 import { STATUT_CREATION_ORGANISME, STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
-import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
 import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";

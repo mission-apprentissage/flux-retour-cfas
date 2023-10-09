@@ -1832,6 +1832,7 @@ export interface Effectif {
         | "CCI"
         | "CFA_EC"
         | "COMP_DU_DEVOIR"
+        | "COMP_DU_TOUR_DE_FRANCE"
         | "GRETA"
         | "UIMM"
         | "BTP_CFA"

@@ -1,6 +1,5 @@
 import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
-
-import { TETE_DE_RESEAUX_SORTED } from "@/common/constants/networks";
+import { TETE_DE_RESEAUX_SORTED } from "shared";
 
 interface FiltreOrganismeReseauProps {
   value: string[];
