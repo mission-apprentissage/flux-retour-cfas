@@ -111,6 +111,13 @@ const ParametresPage = () => {
                       <Text fontSize="gamma" fontWeight="bold">
                         Votre moyen de transmission est {organisme.erp_unsupported}.
                       </Text>
+                      {organisme.mode_de_transmission_configuration_date && (
+                        <Text>
+                          (configuré le{" "}
+                          {formatDateNumericDayMonthYear(organisme.mode_de_transmission_configuration_date)} par{" "}
+                          {organisme.mode_de_transmission_configuration_author_fullname})
+                        </Text>
+                      )}
                       <Text mt={4}>
                         Actuellement, cet ERP n’est pas encore interfaçé avec le tableau de bord. Nous vous tiendrons
                         informé dès que ce sera le cas.
@@ -129,6 +136,13 @@ const ParametresPage = () => {
                       <Text fontSize="gamma" fontWeight="bold">
                         Votre établissement n’utilise pas d’ERP.
                       </Text>
+                      {organisme.mode_de_transmission_configuration_date && (
+                        <Text>
+                          (configuré le{" "}
+                          {formatDateNumericDayMonthYear(organisme.mode_de_transmission_configuration_date)} par{" "}
+                          {organisme.mode_de_transmission_configuration_author_fullname})
+                        </Text>
+                      )}
                       <Text mt={4}>Cliquez ci-dessous pour transmettre manuellement vos effectifs.</Text>
                       <Link
                         variant="whiteBg"
