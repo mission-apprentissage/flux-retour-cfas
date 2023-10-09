@@ -104,7 +104,7 @@ function TestERP() {
                     name="api_key"
                     value={values.api_key}
                     onChange={handleChange}
-                    placeholder="Exemple : ymag"
+                    placeholder="Exemple : 00000000-0000-0000-0000-00000000000"
                   />
                 </FormControl>
 
