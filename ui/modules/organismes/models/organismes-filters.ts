@@ -10,6 +10,7 @@ export interface OrganismesFiltersQuery {
   ferme: string;
   regions?: string;
   departements?: string;
+  etatUAI: string;
 }
 
 export interface OrganismesFilters {
@@ -20,6 +21,7 @@ export interface OrganismesFilters {
   ferme: boolean[];
   regions: string[];
   departements: string[];
+  etatUAI: boolean[];
 }
 
 export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): OrganismesFilters {
@@ -31,6 +33,7 @@ export function parseOrganismesFiltersFromQuery(query: OrganismesFiltersQuery): 
     ferme: query.ferme?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
     regions: query.regions?.split(",") ?? [],
     departements: query.departements?.split(",") ?? [],
+    etatUAI: query.etatUAI?.split(",").map((item) => (item === "true" ? true : false)) ?? [],
   };
 }
 
@@ -45,6 +48,7 @@ export function convertOrganismesFiltersToQuery(
     ferme: organismesFilters.ferme?.join(","),
     regions: organismesFilters.regions?.join(","),
     departements: organismesFilters.departements?.join(","),
+    etatUAI: organismesFilters.etatUAI?.join(","),
   });
 }
 
@@ -91,6 +95,13 @@ export function filterOrganismesArrayFromOrganismesFilters(
       if (organismesFilters.transmission?.[0] === true) return item.last_transmission_date;
       if (organismesFilters.transmission?.[0] === false) return !item.last_transmission_date;
     });
+
+  if (organismesFilters.etatUAI?.length && organismesFilters.etatUAI?.length > 0) {
+    filteredOrganismes = filteredOrganismes?.filter((item) => {
+      if (organismesFilters.etatUAI?.[0] === true) return item.uai;
+      if (organismesFilters.etatUAI?.[0] === false) return !item.uai;
+    });
+  }
 
   return filteredOrganismes;
 }

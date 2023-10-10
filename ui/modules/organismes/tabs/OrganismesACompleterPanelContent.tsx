@@ -66,6 +66,7 @@ function OrganismesACompleterPanelContent({ organismes }: { organismes: Organism
         showFilterTransmission
         showFilterLocalisation
         showFilterEtat
+        showFilterUai
       />
     </Stack>
   );
