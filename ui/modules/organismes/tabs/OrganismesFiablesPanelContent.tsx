@@ -43,7 +43,6 @@ function OrganismesFiablesPanelContent({ organismes }: { organismes: OrganismeNo
         showFilterQualiopi
         showFilterPrepaApprentissage
         showFilterLocalisation
-        showFilterUai
       />
     </Stack>
   );
