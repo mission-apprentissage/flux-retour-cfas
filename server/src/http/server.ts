@@ -9,9 +9,9 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
+import { TETE_DE_RESEAUX } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
-
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
@@ -33,6 +33,7 @@ import {
   getIndicateursEffectifsParOrganisme,
   getIndicateursOrganismesParDepartement,
   getOrganismeIndicateursEffectifs,
+  getOrganismeIndicateursEffectifsParFormation,
   getOrganismeIndicateursOrganismes,
   typesEffectifNominatif,
 } from "@/common/actions/indicateurs/indicateurs.actions";
@@ -71,10 +72,10 @@ import {
   resetConfigurationERP,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
+import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
-import { TETE_DE_RESEAUX } from "@/common/constants/networks";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { jobEventsDb, organisationsDb } from "@/common/model/collections";
@@ -404,6 +405,14 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
+        "/indicateurs/effectifs/par-formation",
+        requireOrganismePermission("indicateursEffectifs"),
+        returnResult(async (req, res) => {
+          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
+          return await getOrganismeIndicateursEffectifsParFormation(req.user, filters, res.locals.organismeId);
+        })
+      )
+      .get(
         "/indicateurs/effectifs/:type",
         returnResult(async (req, res) => {
           const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
@@ -578,6 +587,13 @@ function setupRoutes(app: Application) {
         return await searchOrganismesFormations(searchTerm);
       })
     );
+
+  authRouter.get(
+    "/api/v1/rncp/:code_rncp",
+    returnResult(async (req) => {
+      return await getFicheRNCP(req.params.code_rncp);
+    })
+  );
 
   // LEGACY écrans indicateurs
   authRouter

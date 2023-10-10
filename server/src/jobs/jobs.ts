@@ -18,7 +18,7 @@ import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
-import { hydrateRNCPRomes } from "./hydrate/hydrate-rncp-romes";
+import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
@@ -156,8 +156,8 @@ export async function runJob(job: IJob): Promise<number> {
         return hydrateFromReferentiel();
       case "hydrate:formations-catalogue":
         return hydrateFormationsCatalogue();
-      case "hydrate:rncp-romes":
-        return hydrateRNCPRomes();
+      case "hydrate:rncp":
+        return hydrateRNCP();
       case "hydrate:organismes-formations":
         return hydrateOrganismesFormations();
       case "hydrate:organismes-relations":

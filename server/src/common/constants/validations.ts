@@ -11,11 +11,6 @@ export const YEAR_RANGE_PATTERN = "^[12][0-9]{3}-[12][0-9]{3}$";
 export const NIR_REGEX_PATTERN = "^[0-9]{13}$";
 // Le NIR peut contenir 15 caractères (13 chiffres + 2 chiffres de contrôle)
 export const NIR_LOOSE_REGEX_PATTERN = "^[0-9]{13}([0-9]{2})?$";
-// Source: https://github.com/colinhacks/zod/pull/2274/files#diff-52632a4861fc9d7dc2dacef13cd91d60286dd706c1bb57438b8ee6a579a8796a
-// La version 3.22.2 utilise cette version pour la validation des emails, mais elle a plusieurs bugs et problèmes de performance.
-// En attendant qu'une version corrigée soit publiée, on utilise la regex de cette version sans mettre à jour la librairie.
-export const ZOD_3_22_2_EMAIL_REGEX_PATTERN =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\])|(\[IPv6:(([a-f0-9]{1,4}:){7}|::([a-f0-9]{1,4}:){0,6}|([a-f0-9]{1,4}:){1}:([a-f0-9]{1,4}:){0,5}|([a-f0-9]{1,4}:){2}:([a-f0-9]{1,4}:){0,4}|([a-f0-9]{1,4}:){3}:([a-f0-9]{1,4}:){0,3}|([a-f0-9]{1,4}:){4}:([a-f0-9]{1,4}:){0,2}|([a-f0-9]{1,4}:){5}:([a-f0-9]{1,4}:){0,1})([a-f0-9]{1,4}|(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2})))\])|([A-Za-z0-9]\.?([A-Za-z0-9-]+\.)*([A-Za-z0-9-])*[A-Za-z0-9]))$/;
 
 // Numero INE (Identifiant National Elève)
 // Le numero INE composé de 11 caractères,
@@ -38,7 +33,6 @@ export const UAI_REGEX = new RegExp(UAI_REGEX_PATTERN);
 export const YEAR_RANGE_REGEX = new RegExp(YEAR_RANGE_PATTERN);
 export const NIR_REGEX = new RegExp(NIR_REGEX_PATTERN);
 export const NIR_LOOSE_REGEX = new RegExp(NIR_LOOSE_REGEX_PATTERN);
-export const ZOD_3_22_2_EMAIL_REGEX = new RegExp(ZOD_3_22_2_EMAIL_REGEX_PATTERN);
 
 export const isValidCFD = (cfd) => typeof cfd === "string" && CFD_REGEX.test(cfd);
 export const isValidINE = (ine) => typeof ine === "string" && INE_REGEX.test(ine);

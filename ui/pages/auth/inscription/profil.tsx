@@ -21,11 +21,10 @@ import {
 import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared";
+import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TETE_DE_RESEAUX_BY_ID } from "shared";
 import * as Yup from "yup";
 import YupPassword from "yup-password";
 
-import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { _get, _post } from "@/common/httpClient";
 import { Organisation } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";

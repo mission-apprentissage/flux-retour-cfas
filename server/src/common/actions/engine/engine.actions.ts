@@ -79,7 +79,7 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
     return effectifData;
   }
 
-  effectifDataWithAddress.apprenant.adresse = {
+  effectifDataWithAddress.apprenant.adresse = stripEmptyFields({
     ...effectifDataWithAddress.apprenant.adresse,
     commune: adresseInfo.commune,
     code_insee: adresseInfo.code_commune_insee,
@@ -89,7 +89,7 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
       ? (adresseInfo.num_academie?.toString() as any)
       : undefined,
     region: REGIONS_BY_CODE[adresseInfo.num_region] ? (adresseInfo.num_region as any) : undefined,
-  };
+  });
 
   return effectifDataWithAddress;
 };

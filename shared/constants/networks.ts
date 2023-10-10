@@ -1,7 +1,4 @@
-// données à synchroniser avec /server/src/common/constants/networks.ts
-// en attendant un import partagé
-
-import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
+import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
 
 /**
  * Noms des réseaux de CFAS
@@ -52,6 +49,10 @@ export const TETE_DE_RESEAUX = [
     key: "COMP_DU_DEVOIR",
   },
   {
+    nom: "COMPAGNONS DU TOUR DE FRANCE",
+    key: "COMP_DU_TOUR_DE_FRANCE",
+  },
+  {
     nom: "GRETA",
     key: "GRETA",
   },
@@ -93,11 +94,18 @@ export const TETE_DE_RESEAUX = [
   },
 ] as const;
 
+type ITetesDeReseaux = typeof TETE_DE_RESEAUX;
+type ITeteDeReseau = ITetesDeReseaux[number];
+type ITeteDeReseauKey = ITeteDeReseau["key"];
+
 export type TeteDeReseauKey = (typeof TETE_DE_RESEAUX)[number]["key"];
 
 export const TETE_DE_RESEAUX_SORTED = sortAlphabeticallyBy("nom", TETE_DE_RESEAUX);
 
-export const TETE_DE_RESEAUX_BY_ID = TETE_DE_RESEAUX.reduce((acc, reseau) => {
-  acc[reseau.key] = reseau;
-  return acc;
-}, {});
+export const TETE_DE_RESEAUX_BY_ID = TETE_DE_RESEAUX.reduce(
+  (acc, reseau) => {
+    acc[reseau.key] = reseau;
+    return acc;
+  },
+  {} as Record<ITeteDeReseauKey, ITeteDeReseau>
+);

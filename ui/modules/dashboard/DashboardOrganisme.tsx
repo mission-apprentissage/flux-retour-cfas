@@ -17,8 +17,8 @@ import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { TETE_DE_RESEAUX_BY_ID } from "shared";
 
-import { TETE_DE_RESEAUX_BY_ID } from "@/common/constants/networks";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
@@ -37,8 +37,9 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation } from "../auth/inscription/common";
-import { IndicateursEffectifs, IndicateursOrganismes } from "../models/indicateurs";
+import { IndicateursEffectifs, IndicateursEffectifsAvecFormation, IndicateursOrganismes } from "../models/indicateurs";
 import BandeauTransmission from "../organismes/BandeauTransmission";
+import IndicateursEffectifsParFormationTable from "../organismes/IndicateursEffectifsParFormationTable";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
@@ -85,6 +86,19 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
     () => _get(`/api/v1/organismes/${organisme._id}/indicateurs/organismes`),
     {
       enabled: !!organisme?._id,
+    }
+  );
+
+  const { data: formationsAvecIndicateurs } = useQuery<IndicateursEffectifsAvecFormation[]>(
+    ["organismes", organisme?._id, "indicateurs/effectifs/par-formation"],
+    async () =>
+      _get(`/api/v1/organismes/${organisme._id}/indicateurs/effectifs/par-formation`, {
+        params: {
+          date: new Date(),
+        },
+      }),
+    {
+      enabled: !!organisme?._id && organisme?.permissions?.indicateursEffectifs,
     }
   );
 
@@ -672,6 +686,18 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 </Flex>
               </>
             )}
+
+            {organisme?.permissions?.indicateursEffectifs &&
+              formationsAvecIndicateurs &&
+              formationsAvecIndicateurs.length > 0 && (
+                <>
+                  <Divider size="md" my={8} />
+                  <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+                    Répartition des effectifs par niveau et formations
+                  </Heading>
+                  <IndicateursEffectifsParFormationTable formations={formationsAvecIndicateurs} />
+                </>
+              )}
           </>
         ) : (
           <Ribbons variant="warning" mt="0.5rem">

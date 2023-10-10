@@ -31,13 +31,14 @@ const INPUT_FILES = [
   "reseaux/referentiel-reseau-agri.csv", // AGRI
   // "reseaux/referentiel-reseau-anasup.csv", // TODO Fichier non fourni pour l'instant
   // "reseaux/referentiel-reseau-dgesip.csv", // TODO Fichier non fourni pour l'instant
-  "reseaux/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
+  "reseaux/referentiel-reseau-compagnons-du-tour-de-france.csv", // Compagnons du tour de france
   "reseaux/referentiel-reseau-uimm.csv", // UIMM
   "reseaux/referentiel-reseau-greta.csv", // GRETA
   "reseaux/referentiel-reseau-en.csv", // EDUC. NAT
   // "reseaux/referentiel-reseau-ccca-btp.csv", // TODO Fichier non fourni pour l'instant
   "reseaux/referentiel-reseau-amue.csv", // AMUE
   "reseaux/referentiel-reseau-cfa-ec.csv", // CFA EC
+  "reseaux/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
 ];
 
 /**

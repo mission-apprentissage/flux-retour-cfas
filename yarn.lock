@@ -76,14 +76,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@asteasolutions/zod-to-openapi@npm:4.5.1":
-  version: 4.5.1
-  resolution: "@asteasolutions/zod-to-openapi@npm:4.5.1"
+"@asteasolutions/zod-to-openapi@npm:6.1.0":
+  version: 6.1.0
+  resolution: "@asteasolutions/zod-to-openapi@npm:6.1.0"
   dependencies:
-    openapi3-ts: ^3.1.1
+    openapi3-ts: ^4.1.2
   peerDependencies:
     zod: ^3.20.2
-  checksum: 98e069b89ca380a6291646a64c2672e078bf08834844b6c41b5da6197b70ca6c4edc7c8fafd3cd482c1b1a5960678b5a95799d233e2e1adbab36717ce02e0df4
+  checksum: e435740543b10702f4b98ae6988e8916b49a457e136f400d178bf0773fe8a8e73fe69b22b24ec177ba836a20932bcd7d6bd6e0f556ba7e4d409169a9d97e9012
   languageName: node
   linkType: hard
 
@@ -16475,12 +16475,12 @@ md5@latest:
   languageName: node
   linkType: hard
 
-"openapi3-ts@npm:^3.1.1":
-  version: 3.2.0
-  resolution: "openapi3-ts@npm:3.2.0"
+"openapi3-ts@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "openapi3-ts@npm:4.1.2"
   dependencies:
-    yaml: ^2.2.1
-  checksum: 8796a29a1363bc892ba1acb3ddffd9e6b80e8f83cbfad4cd507262e957317139cac2528ab4b14c1b30bf350ebc9cc4c43ad32a89da4d7c4b85f7e815ffba3ebe
+    yaml: ^2.2.2
+  checksum: 019a66f4195966bf58ee29f913b91e39975616458fdb40a15507a3b3e338eacfc882def0dda1a5001edf962e382ed6f46c8a0d40684adcccb868960267df30d9
   languageName: node
   linkType: hard
 
@@ -18539,7 +18539,7 @@ request-debug@latest:
   version: 0.0.0-use.local
   resolution: "server@workspace:server"
   dependencies:
-    "@asteasolutions/zod-to-openapi": 4.5.1
+    "@asteasolutions/zod-to-openapi": 6.1.0
     "@faker-js/faker": 7.6.0
     "@jest/globals": ^29.6.4
     "@sentry/integrations": 7.64.0
@@ -18638,7 +18638,7 @@ request-debug@latest:
     typescript: ^5.0.4
     uuid: 8.3.2
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
-    zod: 3.21.4
+    zod: 3.22.4
     zod-express-middleware: 1.4.0
     zod-to-json-schema: 3.21.4
   languageName: unknown
@@ -18683,7 +18683,7 @@ request-debug@latest:
     react: 18.2.0
     type-fest: ^4.2.0
     typescript: ^5.1.6
-    zod: ^3.22.1
+    zod: ^3.22.4
     zod-to-json-schema: 3.21.4
   languageName: unknown
   linkType: soft
@@ -20235,7 +20235,7 @@ request-debug@latest:
     xlsx: "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz"
     yup: 0.32.11
     yup-password: 0.2.2
-    zod: 3.21.4
+    zod: 3.22.4
     zod-formik-adapter: 1.2.0
   languageName: unknown
   linkType: soft
@@ -21097,7 +21097,7 @@ request-debug@latest:
   languageName: node
   linkType: hard
 
-"yaml@npm:2.3.1, yaml@npm:^2.1.1, yaml@npm:^2.2.1":
+"yaml@npm:2.3.1":
   version: 2.3.1
   resolution: "yaml@npm:2.3.1"
   checksum: 2c7bc9a7cd4c9f40d3b0b0a98e370781b68b8b7c4515720869aced2b00d92f5da1762b4ffa947f9e795d6cd6b19f410bd4d15fdd38aca7bd96df59bd9486fb54
@@ -21108,6 +21108,13 @@ request-debug@latest:
   version: 1.10.2
   resolution: "yaml@npm:1.10.2"
   checksum: ce4ada136e8a78a0b08dc10b4b900936912d15de59905b2bf415b4d33c63df1d555d23acb2a41b23cf9fb5da41c256441afca3d6509de7247daa062fd2c5ea5f
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^2.1.1, yaml@npm:^2.2.1, yaml@npm:^2.2.2":
+  version: 2.3.2
+  resolution: "yaml@npm:2.3.2"
+  checksum: acd80cc24df12c808c6dec8a0176d404ef9e6f08ad8786f746ecc9d8974968c53c6e8a67fdfabcc5f99f3dc59b6bb0994b95646ff03d18e9b1dcd59eccc02146
   languageName: node
   linkType: hard
 
@@ -21281,10 +21288,10 @@ request-debug@latest:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.22.1":
-  version: 3.22.2
-  resolution: "zod@npm:3.22.2"
-  checksum: 231e2180c8eabb56e88680d80baff5cf6cbe6d64df3c44c50ebe52f73081ecd0229b1c7215b9552537f537a36d9e36afac2737ddd86dc14e3519bdbc777e82b9
+"zod@npm:3.22.4, zod@npm:^3.22.4":
+  version: 3.22.4
+  resolution: "zod@npm:3.22.4"
+  checksum: 80bfd7f8039b24fddeb0718a2ec7c02aa9856e4838d6aa4864335a047b6b37a3273b191ef335bf0b2002e5c514ef261ffcda5a589fb084a48c336ffc4cdbab7f
   languageName: node
   linkType: hard
 
