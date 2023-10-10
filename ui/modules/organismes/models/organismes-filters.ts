@@ -90,18 +90,18 @@ export function filterOrganismesArrayFromOrganismesFilters(
         return organismesFilters.departements?.includes(item.adresse.departement);
     });
 
-  if (organismesFilters.transmission?.length && organismesFilters.transmission?.length === 1)
-    filteredOrganismes = filteredOrganismes?.filter((item) => {
-      if (organismesFilters.transmission?.[0] === true) return item.last_transmission_date;
-      if (organismesFilters.transmission?.[0] === false) return !item.last_transmission_date;
-    });
+  if (organismesFilters.transmission?.length && organismesFilters.transmission?.length > 0)
+    filteredOrganismes = filteredOrganismes?.filter(
+      (item) =>
+        organismesFilters.transmission?.some(
+          (filter) => (!!filter && !!item.last_transmission_date) || (!filter && !item.last_transmission_date)
+        )
+    );
 
-  if (organismesFilters.etatUAI?.length && organismesFilters.etatUAI?.length > 0) {
-    filteredOrganismes = filteredOrganismes?.filter((item) => {
-      if (organismesFilters.etatUAI?.[0] === true) return item.uai;
-      if (organismesFilters.etatUAI?.[0] === false) return !item.uai;
-    });
-  }
+  if (organismesFilters.etatUAI?.length && organismesFilters.etatUAI?.length > 0)
+    filteredOrganismes = filteredOrganismes?.filter(
+      (item) => organismesFilters.etatUAI?.some((filter) => (!!filter && !!item.uai) || (!filter && !item.uai))
+    );
 
   return filteredOrganismes;
 }
