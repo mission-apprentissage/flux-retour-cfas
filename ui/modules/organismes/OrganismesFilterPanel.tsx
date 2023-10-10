@@ -121,11 +121,6 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
         FILTRER PAR
       </Text>
       <HStack>
-        {/* FILTRE UAI */}
-        {props?.showFilterUai && isAllowedToShowFilterUAI(auth?.organisation?.type) && (
-          <FiltreOrganismeUai value={organismesFilters.etatUAI} onChange={(etatUAI) => updateState({ etatUAI })} />
-        )}
-
         {/* FILTRE DEPARTEMENT */}
         {props?.showFilterLocalisation && isAllowedToShowFilterDepartement(auth?.organisation?.type) && (
           <FiltreOrganismeDepartements
@@ -142,6 +137,11 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
         {/* FILTRE NATURE */}
         {props?.showFilterNature && (
           <FiltreOrganismesNature value={organismesFilters.nature} onChange={(nature) => updateState({ nature })} />
+        )}
+
+        {/* FILTRE UAI */}
+        {props?.showFilterUai && isAllowedToShowFilterUAI(auth?.organisation?.type) && (
+          <FiltreOrganismeUai value={organismesFilters.etatUAI} onChange={(etatUAI) => updateState({ etatUAI })} />
         )}
 
         {/* FILTRE TRANSMISSION */}
