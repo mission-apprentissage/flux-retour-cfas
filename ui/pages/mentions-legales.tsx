@@ -1,17 +1,4 @@
-import {
-  Box,
-  Container,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  HStack,
-  Link,
-  ListItem,
-  Text,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, Container, Flex, Heading, HStack, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -79,7 +66,7 @@ const MentionsLegalesPage = () => {
                   </Heading>
 
                   <Text color="grey.400" fontWeight="bold" align="right" float="right">
-                    Mise à jour : 11 octobre 2023
+                    Mise à jour&nbsp;: 6 octobre 2023
                   </Text>
                 </HStack>
                 <Text mt={4}>Mentions légales du site « tableau de bord de l’apprentissage »</Text>
@@ -111,17 +98,17 @@ const MentionsLegalesPage = () => {
                   Hébergement du site
                 </Heading>
                 <Text>
-                  L’hébergement est assuré par OVH SAS, situé à l’adresse suivante :
+                  L’hébergement est assuré par OVH SAS, situé à l’adresse suivante&nbsp;:
                   <br />
                   2 rue Kellermann
                   <br />
                   59100 Roubaix
                   <br />
-                  Standard : 09.72.10.07
+                  Standard&nbsp;: 09.72.10.07
                   <br />
                   <br />
                   La conception et la réalisation du site sont effectuée par La Mission Interministérielle pour
-                  l’apprentissage, située à l’adresse suivante :
+                  l’apprentissage, située à l’adresse suivante&nbsp;:
                   <br />
                   Beta.gouv
                   <br />
@@ -175,7 +162,8 @@ function BoxProtectionDesDonnees() {
           Traitement des données à caractère personnel
         </Heading>
         <Text>
-          Le tableau de bord de l’apprentissage est développé par la Mission interministérielle pour l’apprentissage.
+          LLe ministère du Travail, du Plein emploi et de l’insertion traite vos données dans le cadre du Tableau de
+          bord de l’apprentissage, développé par la Mission interministérielle pour l’apprentissage.
         </Text>
       </Box>
 
@@ -185,15 +173,12 @@ function BoxProtectionDesDonnees() {
         </Heading>
         <Text>
           Nous manipulons des données à caractère personnel pour améliorer la qualité du suivi et du pilotage de
-          l’apprentissage par les différents acteurs. Plus précisément, elles visent à :
+          l’apprentissage par les différents acteurs. Plus précisément, elles visent à&nbsp;:
         </Text>
         <UnorderedList ml="30px !important" mt="1w">
+          <ListItem>Piloter les dispositifs relatifs à la politique de l’apprentissage&nbsp;;</ListItem>
           <ListItem>
-            Permettre aux pouvoirs publics de piloter au mieux la politique de l’apprentissage nationalement et
-            localement ;
-          </ListItem>
-          <ListItem>
-            Aider ceux qui peuvent agir à accompagner les apprentis en situation de rupture ou sans contrat ;
+            Aider ceux qui peuvent agir à accompagner les apprentis en situation de rupture ou sans contrat&nbsp;;
           </ListItem>
           <ListItem>
             Simplifier la délivrance d’informations par les CFA, en utilisant la donnée pour pré-remplir les enquêtes
@@ -206,23 +191,13 @@ function BoxProtectionDesDonnees() {
         <Heading as="h3" fontSize="beta" mb={2}>
           Données à caractère personnel traitées
         </Heading>
-        <Text>
-          Nous traitons les données à caractère personnel et catégories de données à caractère personnel
-          suivantes&nbsp;:
-        </Text>
         <UnorderedList ml="30px !important" mt="1w">
-          <ListItem>
-            Données relatives à l’identification du candidat ou jeune (nom, prénom, date de naissance, INE, adresse
-            e-mail) ;
-          </ListItem>
-          <ListItem>Données relatives au représentant légal du jeune (nom, numéro de téléphone) ;</ListItem>
-          <ListItem>
-            Données relatives aux événements du parcours des apprenants (date de début et de fin du parcours, date de
-            début et de fin de contrat, et rupture, organisme de formation et département) ;
-          </ListItem>
-          <ListItem>Informations relatives au souhait de formation des candidats;</ListItem>
-          <ListItem>Données de contact des organismes de formation (adresse e-mail) ;</ListItem>
-          <ListItem>Données de contact des entreprises (adresse e-mail).</ListItem>
+          <ListItem>Données relatives à l’identification du candidat ou jeune&nbsp;</ListItem>
+          <ListItem>Données relatives au représentant légal du jeune&nbsp;</ListItem>
+          <ListItem>Données relatives aux événements du parcours des apprenants&nbsp;</ListItem>
+          <ListItem>Informations relatives au souhait de formation des candidats&nbsp;</ListItem>
+          <ListItem>Données de contact des représentants des organismes de formation&nbsp;</ListItem>
+          <ListItem>Données de contact des représentants des entreprises.</ListItem>
         </UnorderedList>
       </Box>
 
@@ -231,11 +206,37 @@ function BoxProtectionDesDonnees() {
           Base juridique du traitement de données
         </Heading>
         <Text>
-          Nous sommes autorisés à traiter vos données dans le cadre d’une mission d’intérêt public ou relevant de
-          l’exercice de l’autorité publique dont est investi le responsable de traitement au sens de l’article 6-1 e) du
-          RPGD. Cette mission est notamment précisée dans la lettre de Mission de la Mission nationale pour
-          l’apprentissage du 10 septembre 2019 et décision gouvernementale du 26 novembre 2019.
+          Nous sommes autorisés à traiter vos données dans le cadre d’une mission d’intérêt public dont est investi le
+          responsable de traitement au sens de l’article 6-1 e) du RPGD.
         </Text>
+      </Box>
+
+      <Box>
+        <Heading as="h3" fontSize="beta" mb={2}>
+          Destinataires des données
+        </Heading>
+        <Text>
+          Nous nous engageons à ce que les données à caractère personnel soient traitées par les seules personnes
+          autorisées à savoir&nbsp;:
+        </Text>
+
+        <UnorderedList ml="30px !important" mt="1w">
+          <ListItem>
+            La Délégation générale à l’emploi et à la formation professionnelle et sous-traitants, ainsi que les membres
+            de l’équipe de la Mission interministérielle pour l’apprentissage notamment La bonne alternance&nbsp;;
+          </ListItem>
+          <ListItem>
+            Les agents autorisés des DREETS, DRIEETS, DDETS, DRAAF, dans le cadre de leurs missions de service
+            public&nbsp;;
+          </ListItem>
+          <ListItem>Les organismes de formation (responsable, formateur, responsable-formateur)&nbsp;;</ListItem>
+          <ListItem>Les réseaux des organismes de formation&nbsp;;</ListItem>
+          <ListItem>Les conseils régionaux&nbsp;;</ListItem>
+          <ListItem>Les académies&nbsp;;</ListItem>
+          <ListItem>InterCarif Oref National&nbsp;;</ListItem>
+          <ListItem>Carif Oref Régional.</ListItem>
+        </UnorderedList>
+        <Text>Les données sont hébergées chez OVH.</Text>
       </Box>
 
       <Box>
@@ -243,9 +244,8 @@ function BoxProtectionDesDonnees() {
           Durée de conservation des données
         </Heading>
         <Text>
-          Nous conservons vos données pour une durée de 2 ans à compter de la dernière modification liée aux
-          informations sur un candidat pour réaliser des analyses comparatives d’une année sur l’autre dans le cadre de
-          la finalité de pilotage.
+          Nous conservons vos données pour une durée de 2 ans à compter du dernier contact avec les personnes concernées
+          susvisées.
         </Text>
       </Box>
 
@@ -253,12 +253,11 @@ function BoxProtectionDesDonnees() {
         <Heading as="h3" fontSize="beta" mb={2}>
           Droit des personnes concernées
         </Heading>
-        <Text>Vous disposez des droits suivants concernant vos données à caractère personnel :</Text>
+        <Text>Vous disposez des droits suivants concernant vos données à caractère personnel&nbsp;:</Text>
         <UnorderedList ml="30px !important" mt="1w">
-          <ListItem>Droit d’information et droit d’accès aux données ;</ListItem>
-          <ListItem>Droit de rectification et le cas échéant de suppression des données ;</ListItem>
-          <ListItem>Droit d’opposition au traitement des données ;</ListItem>
-          <ListItem>Droit à la portabilité des données ;</ListItem>
+          <ListItem>Droit d’information et droit d’accès aux données&nbsp;;</ListItem>
+          <ListItem>Droit de rectification&nbsp;;</ListItem>
+          <ListItem>Droit d’opposition au traitement des données&nbsp;;</ListItem>
           <ListItem>Droit à la limitation du traitement.</ListItem>
         </UnorderedList>
         <Text mt={4}>
@@ -285,69 +284,16 @@ function BoxProtectionDesDonnees() {
           preuve de votre identité.
         </Text>
         <Text mt={4}>
-          Pour vous aider dans votre démarche, vous trouverez un modèle de courrier élaboré par la CNIL ici :{" "}
+          Pour vous aider dans votre démarche, vous trouverez un modèle de courrier élaboré par la CNIL ici&nbsp;:{" "}
           <Link href="https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces" color="primary">
             https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces
           </Link>
-        </Text>
-        <Text mt={4}>
-          Le responsable de traitement s’engage à répondre dans un délai raisonnable qui ne saurait dépasser 1 mois à
-          compter de la réception de votre demande.
         </Text>
         <Text mt={4}>
           Si vous estimez, après avoir contacté la DGEFP, que vos droits ne sont pas respectés ou que le traitement
           n’est pas conforme au Règlement Général sur la Protection des Données, vous pouvez adresser une réclamation
           auprès de la Commission Nationale de l’Informatique et des Libertés (CNIL).
         </Text>
-      </Box>
-
-      <Box>
-        <Heading as="h3" fontSize="beta" mb={2}>
-          Destinataires des données
-        </Heading>
-        <Text>
-          Nous nous engageons à ce que les données à caractère personnel soient traitées par les seules personnes
-          autorisées à savoir :
-        </Text>
-        <UnorderedList ml="30px">
-          <ListItem>Les membres de l’équipe de la Mission interministérielle pour l’apprentissage ;</ListItem>
-          <ListItem>Les agents autorisés des DREETS, dans le cadre de leurs missions de service public ;</ListItem>
-          <ListItem>Les organismes de formation.</ListItem>
-        </UnorderedList>
-      </Box>
-
-      <Box>
-        <Heading as="h3" fontSize="beta" mb={2}>
-          Sous-traitants
-        </Heading>
-        <Grid gridTemplateRows={{ base: "repeat(8, auto)", md: "repeat(2, auto)" }} gridAutoFlow="column">
-          <GridItem border="1px" p={2} bg="grey.200">
-            Sous-traitant
-          </GridItem>
-          <GridItem border="1px" p={2}>
-            OVH SAS
-          </GridItem>
-          <GridItem border="1px" p={2} bg="grey.200">
-            Traitement réalisé
-          </GridItem>
-          <GridItem border="1px" p={2}>
-            Hébergement
-          </GridItem>
-          <GridItem border="1px" p={2} bg="grey.200">
-            Pays destinataire
-          </GridItem>
-          <GridItem border="1px" p={2}>
-            France
-          </GridItem>
-          <GridItem border="1px" p={2} bg="grey.200">
-            Garanties
-          </GridItem>
-          <GridItem border="1px" p={2}>
-            <Link color="primary" href="https://www.ovhcloud.com/fr/personal-data-protection">
-              https://www.ovhcloud.com/fr/personal-data-protection
-            </Link>
-          </GridItem>
-        </Grid>
       </Box>
 
       <Box>
@@ -365,7 +311,7 @@ function BoxProtectionDesDonnees() {
           donnée à caractère personnel et ne dépose aucun cookie. Il ne permet ni d’identifier les personnes, ni de
           tracer leur usage d’internet dans ou en dehors du site.
         </Text>
-        <Text mt={4}>Pour plus d’informations sur Plausible : </Text>
+        <Text mt={4}>Pour plus d’informations sur Plausible&nbsp;:</Text>
 
         <UnorderedList ml="30px !important" mt="1w">
           <ListItem>
