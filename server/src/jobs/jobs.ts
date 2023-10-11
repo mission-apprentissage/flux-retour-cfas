@@ -9,6 +9,7 @@ import { cronsInit, cronsScheduler } from "./crons_actions";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
+import { sendReminderEmails } from "./emails/reminder";
 import { removeInscritsSansContratsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { getStats } from "./fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
@@ -92,6 +93,15 @@ export const CRONS: Record<string, CronDef> = {
       await addJob({ name: "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours", queued: true });
       await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
 
+      return 0;
+    },
+  },
+
+  "Send reminder emails at 7h": {
+    name: "Send reminder daily at 7h",
+    cron_string: "0 7 * * *",
+    handler: async () => {
+      await addJob({ name: "send-reminder-emails", queued: true });
       return 0;
     },
   },
@@ -208,8 +218,8 @@ export async function runJob(job: IJob): Promise<number> {
         return transformRupturantsToAbandonsDepuis((job.payload as any)?.nbJours);
       case "fiabilisation:stats":
         return getStats();
-      // case "dev:generate-ts-types":
-      //   return generateTypes();
+      case "send-reminder-emails":
+        return sendReminderEmails();
       case "tmp:patches:update-lastTransmissionDate-organismes":
         return updateLastTransmissionDateForOrganismes();
       case "tmp:patches:remove-organismes-sansSiret-sansEffectifs":

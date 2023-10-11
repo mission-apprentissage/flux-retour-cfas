@@ -66,6 +66,8 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
   notify_access_granted: () => "Votre demande d'accès a été acceptée",
   notify_access_rejected: () => "Votre demande d'accès a été refusée",
   notify_invitation_rejected: () => "Votre invitation à rejoindre le tableau de bord de l'apprentissage n'a pas abouti",
+  reminder_missing_configuration_and_data: () => "Finalisez votre configuration de votre moyen de transmission",
+  reminder_missing_data: () => "Nous n'avons pas reçu vos effectifs",
   reset_password: () => "Réinitialisation du mot de passe",
   validation_user_by_orga_gestionnaire: (payload) =>
     `Demande d'accès à votre organisation ${payload.organisationLabel}`,
@@ -120,6 +122,23 @@ export type TemplatePayloads = {
       date: string;
       email: string;
     };
+  };
+  reminder_missing_configuration_and_data: {
+    recipient: {
+      civility: string;
+      nom: string;
+      prenom: string;
+    };
+  };
+  reminder_missing_data: {
+    recipient: {
+      civility: string;
+      nom: string;
+      prenom: string;
+    };
+    mode_de_transmission: string;
+    erp: string;
+    erp_unsupported: string;
   };
   reset_password: {
     recipient: {

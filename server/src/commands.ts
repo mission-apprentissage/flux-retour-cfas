@@ -621,9 +621,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("fiabilisation:stats"));
 
-/**
- * Job d'affichage des stats fiabilisation
- */
+program
+  .command("send-reminder-emails")
+  .description("Envoi des emails de relance")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("send-reminder-emails"));
+
 program
   .command("dev:generate-ts-types")
   .description("Generation des types TS à partir des schemas de la base de données")
