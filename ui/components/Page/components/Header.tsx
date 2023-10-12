@@ -112,11 +112,7 @@ const Header = () => {
       <Container maxW="xl" py={[0, 2]} px={[0, 4]}>
         <Flex flexDirection={["column", "column", "column", "row"]} alignItems="center" color="grey.800">
           <Link href="/" p={[4, 0]}>
-            <Image
-              src="/images/marianne.svg#svgView(viewBox(12 0 152 78))"
-              alt="Logo République française"
-              userSelect="none"
-            />
+            <Image src="/images/marianne.svg" alt="Logo République française" userSelect="none" />
           </Link>
           <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]} flexGrow={1}>
             <Heading as="h6" variant="h1" fontSize="gamma">
