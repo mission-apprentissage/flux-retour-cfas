@@ -75,14 +75,5 @@ function BandeauTransmission({
   );
 }
 
-{
-  /* <Text fontSize="bold">
-{ERPS_BY_ID[organisme.erps[0]]?.name} est votre moyen de transmission.
-</Text>
-<Text>
-L’importation de vos effectifs est en cours. Le tableau de bord recevra vos effectifs entre 24-48
-heures. Revenez plus tard pour consulter le tableau de vos effectifs.
-</Text> */
-}
 
 export default BandeauTransmission;
