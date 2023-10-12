@@ -384,9 +384,7 @@ const EffectifDoublonDetailModal = ({
         isOpen={isOpenAlertDialog}
         onClose={onCloseAlertDialog}
         duplicateDetail={duplicateDetail}
-        apprenantNomPrenom={`${toPascalCase(duplicateDetail?.apprenant?.prenom)} ${toPascalCase(
-          duplicateDetail?.apprenant?.nom
-        )}`}
+        apprenantNomPrenom={`${duplicateDetail?.apprenant?.prenom} ${duplicateDetail?.apprenant?.nom}`}
       />
     </>
   );
