@@ -462,14 +462,13 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         async (req, res, next) => {
           res.locals.duplicateId = new ObjectId((req.params as any).effectifId);
-          console.log("res.locals.duplicateId :>> ", res.locals.duplicateId);
 
           const isEffectifLinkedToOrganisme = (
             await effectifsDb().findOne({ _id: res.locals.duplicateId })
           )?.organisme_id.equals(res.locals.organismeId);
-          console.log("isEffectifLinkedToOrganisme:>> ", isEffectifLinkedToOrganisme);
 
-          if (!isEffectifLinkedToOrganisme) return res.status(401).json({ error: "Accès non autorisé" });
+          if (!isEffectifLinkedToOrganisme) throw Boom.forbidden("Permissions invalides");
+
           next();
         },
         returnResult(async (req, res) => {
