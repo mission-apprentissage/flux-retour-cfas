@@ -22,6 +22,7 @@ import {
   fullEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
+import { canDeleteEffectifDuplicate } from "@/common/actions/helpers/permissions";
 import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
@@ -368,6 +369,15 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         await updateUserProfile(req.user, { has_accept_cgu_version: req.params.version });
       })
+    )
+    .delete(
+      "/api/v1/effectif-duplicate/:effectifId",
+      returnResult(async (req) => {
+        if (!(await canDeleteEffectifDuplicate(req.user, req.params.effectifId)))
+          throw Boom.forbidden("Permissions invalides");
+
+        await effectifsDb().deleteOne({ _id: new ObjectId(req.params.effectifId) });
+      })
     );
 
   /********************************
@@ -455,24 +465,6 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           return await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
-        })
-      )
-      .delete(
-        "/duplicate/:effectifId",
-        requireOrganismePermission("manageEffectifs"),
-        async (req, res, next) => {
-          res.locals.duplicateId = new ObjectId((req.params as any).effectifId);
-
-          const isEffectifLinkedToOrganisme = (
-            await effectifsDb().findOne({ _id: res.locals.duplicateId })
-          )?.organisme_id.equals(res.locals.organismeId);
-
-          if (!isEffectifLinkedToOrganisme) throw Boom.forbidden("Permissions invalides");
-
-          next();
-        },
-        returnResult(async (req, res) => {
-          await effectifsDb().deleteOne({ _id: new ObjectId(res.locals.duplicateId) });
         })
       )
       .get(

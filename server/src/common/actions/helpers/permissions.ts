@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
-import { organismesDb } from "@/common/model/collections";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 
@@ -289,6 +289,57 @@ export function findOrganismeFormateursIds(organisme: Organisme): ObjectId[] {
     .filter((organisme) => !!organisme._id)
     .map((organisme) => organisme._id as ObjectId);
 }
+
+/**
+ * Fonction qui vérifie si on peut supprimer un effectif (en doublon)
+ * Si c'est un effectif de notre organisme -> OK
+ * Si c'est un effectif d'un de nos organismes formateur -> OK
+ * Si on est administrateur -> OK
+ * Sinon -> KO
+ * @param ctx
+ * @param effectifId
+ * @returns
+ */
+export const canDeleteEffectifDuplicate = async (ctx: AuthContext, effectifId: ObjectId) => {
+  // On récupère l'organisme rattaché à l'effectif
+  const effectifToDelete = await effectifsDb().findOne({ _id: new ObjectId(effectifId) });
+
+  if (!effectifToDelete) {
+    logger.error(effectifId, "effectif non trouvé");
+    throw new Error("effectif non trouvé");
+  }
+
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION": {
+      const ofContext = ctx as AuthContext<OrganisationOrganismeFormation>;
+
+      const organismeIdForEffectif = effectifToDelete.organisme_id;
+
+      // On compare l'organisme de l'effectif à l'organisme du user ou l'un de ses responsables
+      const organisation = ofContext.organisation;
+      const userOrganisme = await organismesDb().findOne({
+        siret: organisation.siret,
+        uai: organisation.uai as string,
+      });
+      if (!userOrganisme) {
+        logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
+        throw new Error("organisme de l'organisation non trouvé");
+      }
+
+      const organismesResponsablesIdsOfOrganisme = findOrganismeFormateursIds(userOrganisme);
+
+      return (
+        organismeIdForEffectif.equals(userOrganisme._id) ||
+        organismesResponsablesIdsOfOrganisme.includes(organismeIdForEffectif)
+      );
+    }
+    case "ADMINISTRATEUR":
+      return true;
+  }
+
+  return false;
+};
 
 export async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
   const organisme = await getOrganismeById(organismeId);
