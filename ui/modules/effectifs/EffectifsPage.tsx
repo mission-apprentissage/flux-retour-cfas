@@ -90,10 +90,7 @@ function EffectifsPage(props: EffectifsPageProps) {
                 scolaire en cours.
               </Text>
 
-              <Link
-                variant="whiteBg"
-                href={`${router.asPath}/doublons`} // FIXME la page n'existe pas pour soi-même !!!
-              >
+              <Link variant="whiteBg" href={`${router.asPath}/doublons`}>
                 Vérifier
               </Link>
             </Box>

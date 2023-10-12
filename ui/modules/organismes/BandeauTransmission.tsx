@@ -24,56 +24,72 @@ function BandeauTransmission({
   modeIndicateurs,
   ...props
 }: BandeauTransmissionProps & SystemProps) {
-  const erpName = organisme.erps?.map((erpId) => ERPS_BY_ID[erpId]?.name).join(", "); // généralement 1 seul ERP
-
   return (
     <Ribbons variant="warning" {...props}>
-      <Text color="grey.800">
-        {modePublique ? (
-          "Cet établissement ne transmet pas encore ses effectifs au tableau de bord."
-        ) : !organisme.mode_de_transmission ? (
-          <>
-            Les {modeIndicateurs ? "indicateurs sont nuls" : "effectifs sont vides"} car votre établissement ne transmet
-            pas encore ses effectifs. Veuillez{" "}
-            <Link href="/parametres" borderBottom="1px" _hover={{ textDecoration: "none" }}>
-              paramétrer
-            </Link>{" "}
-            votre moyen de transmission.
-          </>
-        ) : organisme.mode_de_transmission === "API" ? (
-          differenceInDays(new Date(organisme.mode_de_transmission_configuration_date as string), new Date()) < 7 ? (
-            <>
-              Votre outil de gestion est {erpName}. Les{" "}
-              {modeIndicateurs ? "indicateurs sont nuls" : "effectifs sont vides"} car l’importation de vos effectifs
-              est en cours. Le tableau de bord recevra vos effectifs entre 24 et 48 heures.
-            </>
-          ) : (
-            <>
-              Votre outil de gestion est {erpName}. Le tableau de bord ne reçoit pas vos effectifs. Veuillez vérifier à
-              nouveau le paramétrage de votre ERP fait le{" "}
-              {formatDateDayMonthYear(organisme.mode_de_transmission_configuration_date as string)}. En cas de
-              difficultés,{" "}
-              <Link
-                variant="link"
-                color="inherit"
-                href={`mailto:${CONTACT_ADDRESS}?subject=Aide au paramétrage ERP`}
-                isExternal
-              >
-                contactez-nous
-              </Link>{" "}
-              pour obtenir de l’aide.
-            </>
-          )
-        ) : (
-          <>
-            Les {modeIndicateurs ? "indicateurs sont nuls" : "effectifs sont vides"} car votre établissement ne transmet
-            pas encore ses effectifs.
-          </>
-        )}
-      </Text>
+      <Text color="grey.800">{getContenuBandeauTransmission({ organisme, modePublique, modeIndicateurs })}</Text>
     </Ribbons>
   );
 }
 
-
 export default BandeauTransmission;
+
+function getContenuBandeauTransmission({
+  organisme,
+  modePublique,
+  modeIndicateurs,
+}: BandeauTransmissionProps): JSX.Element {
+  const erpName = organisme.erps?.map((erpId) => ERPS_BY_ID[erpId]?.name).join(", "); // généralement 1 seul ERP
+
+  if (modePublique) {
+    return <>Cet établissement ne transmet pas encore ses effectifs au tableau de bord.</>;
+  }
+
+  if (!organisme.mode_de_transmission) {
+    return (
+      <>
+        Les {modeIndicateurs ? "indicateurs sont nuls" : "effectifs sont vides"} car votre établissement ne transmet pas
+        encore ses effectifs. Veuillez{" "}
+        <Link href="/parametres" borderBottom="1px" _hover={{ textDecoration: "none" }}>
+          paramétrer
+        </Link>{" "}
+        votre moyen de transmission.
+      </>
+    );
+  }
+
+  if (organisme.mode_de_transmission === "API") {
+    if (differenceInDays(new Date(organisme.mode_de_transmission_configuration_date as string), new Date()) < 7) {
+      return (
+        <>
+          Votre outil de gestion est {erpName}. Les {modeIndicateurs ? "indicateurs sont nuls" : "effectifs sont vides"}{" "}
+          car l’importation de vos effectifs est en cours. Le tableau de bord recevra vos effectifs entre 24 et 48
+          heures.
+        </>
+      );
+    }
+
+    return (
+      <>
+        Votre outil de gestion est {erpName}. Le tableau de bord ne reçoit pas vos effectifs. Veuillez vérifier à
+        nouveau le paramétrage de votre ERP fait le{" "}
+        {formatDateDayMonthYear(organisme.mode_de_transmission_configuration_date as string)}. En cas de difficultés,{" "}
+        <Link
+          variant="link"
+          color="inherit"
+          href={`mailto:${CONTACT_ADDRESS}?subject=Aide au paramétrage ERP`}
+          isExternal
+        >
+          contactez-nous
+        </Link>{" "}
+        pour obtenir de l’aide.
+      </>
+    );
+  }
+
+  return (
+    <>
+      Les {modeIndicateurs ? "indicateurs sont nuls" : "effectifs sont vides"} car votre établissement ne transmet pas
+      encore ses effectifs.
+    </>
+  );
+}
