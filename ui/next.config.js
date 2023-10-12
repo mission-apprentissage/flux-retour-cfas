@@ -70,6 +70,11 @@ const nextConfig = {
         destination: "/protection-des-donnees",
         permanent: true,
       },
+      {
+        source: "/protection-des-donnees",
+        destination: "/mentions-legales#protection-des-donnees",
+        permanent: true,
+      },
     ];
   },
 };
