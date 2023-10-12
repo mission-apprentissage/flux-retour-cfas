@@ -79,11 +79,11 @@ const UserMenu = () => {
                   <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
                     Gestion des utilisateurs
                   </MenuItem>
-                  <MenuItem href="/admin/organismes" icon={<Parametre boxSize={4} />}>
-                    Gestion des organismes
-                  </MenuItem>
                   <MenuItem href="/admin/effectifs" icon={<Parametre boxSize={4} />}>
                     Gestion des effectifs
+                  </MenuItem>
+                  <MenuItem href="/admin/organismes" icon={<Parametre boxSize={4} />}>
+                    Fusion d&apos;organismes
                   </MenuItem>
                   <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
                     Message de maintenance
