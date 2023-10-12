@@ -16,6 +16,7 @@ import FiltreOrganismesEtat from "./filters/FiltreOrganismeEtat";
 import FiltreOrganismesNature from "./filters/FiltreOrganismeNature";
 import FiltreOrganismeRegions from "./filters/FiltreOrganismeRegions";
 import FiltreOrganismeTransmission from "./filters/FiltreOrganismeTransmission";
+import FiltreOrganismeUai from "./filters/FiltreOrganismeUai";
 import FiltreYesNo from "./filters/FiltreYesNo";
 import {
   OrganismesFilters,
@@ -25,6 +26,7 @@ import {
 } from "./models/organismes-filters";
 
 export interface OrganismeFiltersListVisibilityProps {
+  showFilterUai?: boolean;
   showFilterNature?: boolean;
   showFilterTransmission?: boolean;
   showFilterQualiopi?: boolean;
@@ -103,6 +105,16 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     }
   };
 
+  const isAllowedToShowFilterUAI = (type: OrganisationType) => {
+    switch (type) {
+      case "ADMINISTRATEUR":
+        return true;
+
+      default:
+        return false;
+    }
+  };
+
   return (
     <Stack spacing="0.5">
       <Text fontSize="zeta" fontWeight="extrabold">
@@ -125,6 +137,11 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
         {/* FILTRE NATURE */}
         {props?.showFilterNature && (
           <FiltreOrganismesNature value={organismesFilters.nature} onChange={(nature) => updateState({ nature })} />
+        )}
+
+        {/* FILTRE UAI */}
+        {props?.showFilterUai && isAllowedToShowFilterUAI(auth?.organisation?.type) && (
+          <FiltreOrganismeUai value={organismesFilters.etatUAI} onChange={(etatUAI) => updateState({ etatUAI })} />
         )}
 
         {/* FILTRE TRANSMISSION */}
