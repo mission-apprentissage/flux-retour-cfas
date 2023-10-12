@@ -17,15 +17,15 @@ import { Field, Form, Formik } from "formik";
 import NavLink from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import { useLocalStorage } from "usehooks-ts";
 import * as Yup from "yup";
 
 import { _post } from "@/common/httpClient";
 import useAuth from "@/hooks/useAuth";
-import useLocalStorage from "@/hooks/userLocalStorage";
 import { AlertRounded, ShowPassword } from "@/theme/components/icons";
 
 const Login = (props) => {
-  const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl");
+  const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl", "");
   const { refreshSession } = useAuth();
   const router = useRouter();
 

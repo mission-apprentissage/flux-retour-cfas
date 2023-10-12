@@ -6,6 +6,11 @@ const Link = {
     alignItems: "baseline",
   },
   variants: {
+    link: {
+      color: "bluefrance",
+      borderBottom: "1px solid",
+      _hover: { textDecoration: "none", bg: "grey.200" },
+    },
     ghost: {
       _hover: { bg: "#eceae3", textDecoration: "none" },
     },

@@ -26,6 +26,7 @@ interface NewTableProps<T> extends SystemProps {
   sortingState?: SortingState;
   paginationState?: PaginationState;
   variant?: string;
+  showPagination?: boolean;
   onSortingChange?: (state: SortingState) => any;
   onPaginationChange?: (state: PaginationState) => any;
   renderSubComponent?: (row: Row<T>) => React.ReactElement;
@@ -93,6 +94,7 @@ function NewTable<T>(props: NewTableProps<T>) {
                           }
                         : undefined
                     }
+                    w={header.getSize()}
                   >
                     {header.isPlaceholder ? null : (
                       <>
@@ -153,68 +155,70 @@ function NewTable<T>(props: NewTableProps<T>) {
         </Tbody>
       </Table>
 
-      <HStack mt={8} spacing={3} justifyContent="space-between">
-        <HStack spacing={3}>
-          <Button variant="unstyled" onClick={() => table.setPageIndex(0)} isDisabled={!table.getCanPreviousPage()}>
-            <FirstPageIcon />
-          </Button>
-          <Button variant="unstyled" onClick={() => table.previousPage()} isDisabled={!table.getCanPreviousPage()}>
-            <ChevronLeftIcon />
-          </Button>
+      {(props.showPagination ?? true) && (
+        <HStack mt={8} spacing={3} justifyContent="space-between">
+          <HStack spacing={3}>
+            <Button variant="unstyled" onClick={() => table.setPageIndex(0)} isDisabled={!table.getCanPreviousPage()}>
+              <FirstPageIcon />
+            </Button>
+            <Button variant="unstyled" onClick={() => table.previousPage()} isDisabled={!table.getCanPreviousPage()}>
+              <ChevronLeftIcon />
+            </Button>
 
-          {table.getState().pagination.pageIndex - 1 > 0 && (
-            <Button variant="unstyled" onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 2)}>
-              {table.getState().pagination.pageIndex - 1}
+            {table.getState().pagination.pageIndex - 1 > 0 && (
+              <Button variant="unstyled" onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 2)}>
+                {table.getState().pagination.pageIndex - 1}
+              </Button>
+            )}
+            {table.getState().pagination.pageIndex > 0 && (
+              <Button variant="unstyled" onClick={() => table.previousPage()}>
+                {table.getState().pagination.pageIndex}
+              </Button>
+            )}
+            <Button bg="bluefrance" color="white" pointerEvents="none" fontSize="zeta">
+              {table.getState().pagination.pageIndex + 1}
             </Button>
-          )}
-          {table.getState().pagination.pageIndex > 0 && (
-            <Button variant="unstyled" onClick={() => table.previousPage()}>
-              {table.getState().pagination.pageIndex}
-            </Button>
-          )}
-          <Button bg="bluefrance" color="white" pointerEvents="none" fontSize="zeta">
-            {table.getState().pagination.pageIndex + 1}
-          </Button>
-          {table.getCanNextPage() && (
-            <Button variant="unstyled" onClick={() => table.nextPage()}>
-              {table.getState().pagination.pageIndex + 2}
-            </Button>
-          )}
-          {table.getState().pagination.pageIndex + 2 < table.getPageCount() && (
-            <Button variant="unstyled" onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 2)}>
-              {table.getState().pagination.pageIndex + 3}
-            </Button>
-          )}
+            {table.getCanNextPage() && (
+              <Button variant="unstyled" onClick={() => table.nextPage()}>
+                {table.getState().pagination.pageIndex + 2}
+              </Button>
+            )}
+            {table.getState().pagination.pageIndex + 2 < table.getPageCount() && (
+              <Button variant="unstyled" onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 2)}>
+                {table.getState().pagination.pageIndex + 3}
+              </Button>
+            )}
 
-          <Button variant="unstyled" onClick={() => table.nextPage()} isDisabled={!table.getCanNextPage()}>
-            <ChevronRightIcon />
-          </Button>
-          <Button
-            variant="unstyled"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            isDisabled={!table.getCanNextPage()}
-          >
-            <LastPageIcon />
-          </Button>
+            <Button variant="unstyled" onClick={() => table.nextPage()} isDisabled={!table.getCanNextPage()}>
+              <ChevronRightIcon />
+            </Button>
+            <Button
+              variant="unstyled"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              isDisabled={!table.getCanNextPage()}
+            >
+              <LastPageIcon />
+            </Button>
+          </HStack>
+
+          <HStack spacing={3} justifyContent="flex-end">
+            <Select
+              variant="filled"
+              fontSize="zeta"
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value));
+              }}
+            >
+              {[5, 10, 20, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Voir par {pageSize}
+                </option>
+              ))}
+            </Select>
+          </HStack>
         </HStack>
-
-        <HStack spacing={3} justifyContent="flex-end">
-          <Select
-            variant="filled"
-            fontSize="zeta"
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-          >
-            {[5, 10, 20, 50].map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                Voir par {pageSize}
-              </option>
-            ))}
-          </Select>
-        </HStack>
-      </HStack>
+      )}
     </>
   );
 }

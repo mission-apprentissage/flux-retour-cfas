@@ -1,4 +1,4 @@
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, SettingsIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ReactElement, useState } from "react";
@@ -100,6 +100,7 @@ const NavBarPublic = () => {
       </NavItem>
       <NavItem to="/operateurs-publics">Opérateurs publics</NavItem>
       <NavItem to="/organismes-formation">Organismes de formation</NavItem>
+      <MenuQuestions />
     </>
   );
 };
@@ -114,6 +115,7 @@ function NavBarTransverse(): ReactElement {
       </NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
       <NavItem to="/indicateurs">Mes indicateurs</NavItem>
+      <MenuQuestions />
     </>
   );
 }
@@ -129,7 +131,6 @@ function NavBarOrganismeFormation(): ReactElement {
       {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
         <NavItem to="/organismes">Mes organismes</NavItem>
       )}
-      {/* <NavItem to="/indicateurs" isDisabled={!(organisme?.first_transmission_date || organisme?.mode_de_transmission)}> */}
       <NavItem to="/indicateurs">Mes indicateurs</NavItem>
       <NavItem to="/effectifs">Mes effectifs</NavItem>
       {organisme && (
@@ -143,6 +144,12 @@ function NavBarOrganismeFormation(): ReactElement {
           Mon enquête SIFA
         </NavItem>
       )}
+      <MenuQuestions />
+
+      <NavItem to="/parametres" ml="auto">
+        <SettingsIcon mr={2} />
+        Paramètres
+      </NavItem>
     </>
   );
 }
@@ -293,7 +300,6 @@ const NavigationMenu = () => {
                 textStyle="sm"
               >
                 {getNavBarComponent(auth)}
-                <MenuQuestions />
               </Flex>
             </Box>
           </Flex>

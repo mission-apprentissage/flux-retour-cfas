@@ -38,6 +38,7 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursEffectifsAvecFormation, IndicateursOrganismes } from "../models/indicateurs";
+import BandeauTransmission from "../organismes/BandeauTransmission";
 import IndicateursEffectifsParFormationTable from "../organismes/IndicateursEffectifsParFormationTable";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
@@ -460,22 +461,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
             )}
 
             {aucunEffectifTransmis && (
-              <Ribbons variant="warning" mt="0.5rem">
-                <Text color="grey.800">
-                  {modePublique ? (
-                    "Cet établissement ne transmet pas encore ses effectifs au tableau de bord."
-                  ) : (
-                    <>
-                      Les indicateurs sont nuls car votre établissement ne transmet pas encore ses effectifs. Veuillez
-                      cliquer dans l’onglet{" "}
-                      <Link href="/effectifs" borderBottom="1px" _hover={{ textDecoration: "none" }}>
-                        Mes effectifs
-                      </Link>{" "}
-                      pour démarrer l’interfaçage ERP ou transmettre manuellement vos effectifs.
-                    </>
-                  )}
-                </Text>
-              </Ribbons>
+              <BandeauTransmission organisme={organisme} modePublique={modePublique} modeIndicateurs />
             )}
 
             {indicateursEffectifs && (
@@ -483,31 +469,28 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
             )}
 
             {aucunEffectifTransmis ? (
-              !modePublique && (
-                <Button
-                  size="md"
-                  variant="secondary"
-                  display="block"
-                  ml="auto"
-                  onClick={() => {
-                    router.push(`/effectifs`);
-                  }}
-                >
-                  Transmettre mes effectifs
-                </Button>
-              )
+              !modePublique &&
+              (!organisme.mode_de_transmission ? (
+                <Link href="/parametres" variant="whiteBg" display="block" ml="auto" width="fit-content">
+                  Paramétrer un moyen de transmission
+                </Link>
+              ) : (
+                organisme.mode_de_transmission === "MANUEL" && (
+                  <Link href="/effectifs/televersement" variant="whiteBg" display="block" ml="auto" width="fit-content">
+                    Ajouter via fichier Excel
+                  </Link>
+                )
+              ))
             ) : (
-              <Button
-                size="md"
-                variant="secondary"
+              <Link
+                href={`${modePublique ? `/organismes/${organisme._id}` : ""}/indicateurs`}
+                variant="whiteBg"
                 display="block"
                 ml="auto"
-                onClick={() => {
-                  router.push(`${modePublique ? `/organismes/${organisme._id}` : ""}/indicateurs`);
-                }}
+                width="fit-content"
               >
                 Voir les indicateurs
-              </Button>
+              </Link>
             )}
 
             {organisme.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (

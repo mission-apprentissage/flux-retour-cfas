@@ -69,6 +69,7 @@ import {
   getOrganismeByUAIAndSIRET,
   getInvalidSiretsFromDossierApprenant,
   getInvalidUaisFromDossierApprenant,
+  resetConfigurationERP,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
@@ -472,6 +473,13 @@ function setupRoutes(app: Application) {
         returnResult(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
+        })
+      )
+      .delete(
+        "/configure-erp",
+        requireOrganismePermission("manageEffectifs"),
+        returnResult(async (req, res) => {
+          await resetConfigurationERP(req.user, res.locals.organismeId);
         })
       )
       .post(

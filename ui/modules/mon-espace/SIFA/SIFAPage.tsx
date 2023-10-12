@@ -88,7 +88,7 @@ const SIFAPage = (props: SIFAPageProps) => {
 
   if (isLoading) {
     return (
-      <Center>
+      <Center h="200px">
         <Spinner />
       </Center>
     );
@@ -100,33 +100,31 @@ const SIFAPage = (props: SIFAPageProps) => {
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
           {props.modePublique ? "Son" : "Mon"} Enquête SIFA
         </Heading>
-        <HStack spacing={4}>
-          <DownloadButton
-            variant="secondary"
-            action={async () => {
-              trackPlausibleEvent("telechargement_sifa");
-              downloadObject(
-                await _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`),
-                `tdb-données-sifa-${
-                  organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"
-                }-${new Date().toLocaleDateString()}.csv`,
-                "text/plain"
-              );
-              const nbEffectifsInvalides = organismesEffectifs.filter(
-                (effectif) => effectif.requiredSifa.length > 0
-              ).length;
-              toastWarning(
-                `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${nbEffectifsInvalides} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
-                {
-                  isClosable: true,
-                  duration: 20000,
-                }
-              );
-            }}
-          >
-            Télécharger le fichier SIFA
-          </DownloadButton>
-        </HStack>
+        <DownloadButton
+          variant="secondary"
+          action={async () => {
+            trackPlausibleEvent("telechargement_sifa");
+            downloadObject(
+              await _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`),
+              `tdb-données-sifa-${
+                organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"
+              }-${new Date().toLocaleDateString()}.csv`,
+              "text/plain"
+            );
+            const nbEffectifsInvalides = organismesEffectifs.filter(
+              (effectif) => effectif.requiredSifa.length > 0
+            ).length;
+            toastWarning(
+              `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${nbEffectifsInvalides} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
+              {
+                isClosable: true,
+                duration: 20000,
+              }
+            );
+          }}
+        >
+          Télécharger le fichier SIFA
+        </DownloadButton>
       </Flex>
 
       <VStack alignItems="flex-start">

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import { z } from "zod";
 
 import { _post } from "@/common/httpClient";
@@ -13,7 +14,6 @@ import Page from "@/components/Page/Page";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { useOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
-import useLocalStorage from "@/hooks/userLocalStorage";
 import { useEffectifsOrganismeOrganisation } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -34,7 +34,7 @@ const ConnexionAPI = () => {
 
   useEffect(() => {
     if (!router.query.api_key && !currentOrganisme?.api_key) {
-      router.push(`/mon-compte/erp?erp=${router.query.erp}`);
+      router.push(`/parametres?erpV3=${router.query.erp}`);
     }
   }, [currentOrganisme]);
 
@@ -57,7 +57,7 @@ const ConnexionAPIVerifyUser = ({ organisme }) => {
         await _post("/api/v1/auth/logout");
         router.push("/");
       } else if (data?.message === "success") {
-        window.location.href = "/mon-compte/erp";
+        window.location.href = `/parametres?erpV3=${router.query.erp}`;
       }
     }
     run();
@@ -99,7 +99,7 @@ const ConnexionAPIVerifyUser = ({ organisme }) => {
 const ConnexionAPIUserNotConnected = () => {
   const { auth } = useAuth();
   const router = useRouter();
-  const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl");
+  const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl", "");
 
   useEffect(() => {
     if (originConnexionUrl !== window.location.href) {
