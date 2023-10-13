@@ -59,7 +59,7 @@ const EffectifDoublonDeleteAlertDialog = ({
             <Button
               colorScheme="red"
               onClick={async () => {
-                await _delete(`/api/v1/effectif-duplicate/${duplicateDetail?.id}`);
+                await _delete(`/api/v1/effectif/${duplicateDetail?.id}`);
                 queryClient.invalidateQueries(["duplicates-effectifs"]);
                 onClose();
               }}

@@ -22,7 +22,7 @@ import {
   fullEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { canDeleteEffectifDuplicate } from "@/common/actions/helpers/permissions";
+import { canDeleteEffectif } from "@/common/actions/helpers/permissions";
 import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
@@ -371,12 +371,11 @@ function setupRoutes(app: Application) {
       })
     )
     .delete(
-      "/api/v1/effectif-duplicate/:effectifId",
+      "/api/v1/effectif/:id",
       returnResult(async (req) => {
-        if (!(await canDeleteEffectifDuplicate(req.user, req.params.effectifId)))
-          throw Boom.forbidden("Permissions invalides");
-
-        await effectifsDb().deleteOne({ _id: new ObjectId(req.params.effectifId) });
+        const effectifId = new ObjectId(req.params.id);
+        if (!(await canDeleteEffectif(req.user, effectifId))) throw Boom.forbidden("Permissions invalides");
+        await effectifsDb().deleteOne({ _id: effectifId });
       })
     );
 

@@ -300,10 +300,9 @@ export function findOrganismeFormateursIds(organisme: Organisme): ObjectId[] {
  * @param effectifId
  * @returns
  */
-export const canDeleteEffectifDuplicate = async (ctx: AuthContext, effectifId: ObjectId) => {
+export const canDeleteEffectif = async (ctx: AuthContext, effectifId: ObjectId) => {
   // On récupère l'organisme rattaché à l'effectif
-  const effectifToDelete = await effectifsDb().findOne({ _id: new ObjectId(effectifId) });
-
+  const effectifToDelete = await effectifsDb().findOne({ _id: effectifId });
   if (!effectifToDelete) {
     logger.error(effectifId, "effectif non trouvé");
     throw new Error("effectif non trouvé");
@@ -312,27 +311,13 @@ export const canDeleteEffectifDuplicate = async (ctx: AuthContext, effectifId: O
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
-      const ofContext = ctx as AuthContext<OrganisationOrganismeFormation>;
-
+      // On compare l'id de l'organisme de l'effectif aux id des organismes liés à l'organisation du user
       const organismeIdForEffectif = effectifToDelete.organisme_id;
-
-      // On compare l'organisme de l'effectif à l'organisme du user ou l'un de ses responsables
-      const organisation = ofContext.organisation;
-      const userOrganisme = await organismesDb().findOne({
-        siret: organisation.siret,
-        uai: organisation.uai as string,
-      });
-      if (!userOrganisme) {
-        logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
-        throw new Error("organisme de l'organisation non trouvé");
-      }
-
-      const organismesResponsablesIdsOfOrganisme = findOrganismeFormateursIds(userOrganisme);
-
-      return (
-        organismeIdForEffectif.equals(userOrganisme._id) ||
-        organismesResponsablesIdsOfOrganisme.includes(organismeIdForEffectif)
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
+        ctx as AuthContext<OrganisationOrganismeFormation>
       );
+
+      return linkedOrganismesIds.some((id) => id.equals(organismeIdForEffectif));
     }
     case "ADMINISTRATEUR":
       return true;
