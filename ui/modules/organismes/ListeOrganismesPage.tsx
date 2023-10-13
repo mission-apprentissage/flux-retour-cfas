@@ -14,15 +14,14 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _get } from "@/common/httpClient";
 import { OrganisationType, getOrganisationLabel } from "@/common/internal/Organisation";
 import { Organisme } from "@/common/internal/Organisme";
-import { normalize } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
+import { useOrganismesNormalizedLists } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 
 import OrganismesACompleterPanelContent from "./tabs/OrganismesACompleterPanelContent";
@@ -68,16 +67,9 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     props.activeTab === "a-completer" ? " non fiables" : ""
   }`;
 
-  const { organismesFiables, organismesACompleter, organismesNonRetenus, nbOrganismesFermes } = useMemo(() => {
-    const organismesFiables: OrganismeNormalized[] = [];
-    const organismesACompleter: OrganismeNormalized[] = [];
-    const organismesNonRetenus: OrganismeNormalized[] = [];
-    let nbOrganismesFermes = 0;
-    (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
-      // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
-      organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
-      organisme.normalizedUai = normalize(organisme.uai ?? "");
-      organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
+  const { organismesFiables, organismesACompleter, nbOrganismesFermes } = useOrganismesNormalizedLists(
+    props.organismes
+  );
 
       if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
         organismesFiables.push(organisme);

@@ -42,6 +42,7 @@ import {
 import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDepartement } from "../models/indicateurs";
 
 import CarteFrance from "./CarteFrance";
+import DashboardAdministrateur from "./DashboardAdministrateur";
 import IndicateursGrid from "./IndicateursGrid";
 
 const DashboardTransverse = () => {
@@ -165,6 +166,7 @@ const DashboardTransverse = () => {
         </Container>
       </Box>
       <Container maxW="xl" p="8">
+        {auth.organisation.type === "ADMINISTRATEUR" && <DashboardAdministrateur />}
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Aperçu des données de l’apprentissage
         </Heading>
