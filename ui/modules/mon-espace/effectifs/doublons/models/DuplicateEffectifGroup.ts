@@ -1,4 +1,6 @@
-export type DuplicateEffectif = {
+import { DuplicateEffectifDetail } from "./DuplicateEffectifDetail";
+
+export type DuplicateEffectifGroup = {
   _id: {
     nom_apprenant: string;
     prenom_apprenant: string;
@@ -6,5 +8,5 @@ export type DuplicateEffectif = {
     annee_scolaire: string;
     formation_cfd: string;
   };
-  duplicates: [{ id: string; created_at: Date; source: string }];
+  duplicates: DuplicateEffectifDetail[];
 };

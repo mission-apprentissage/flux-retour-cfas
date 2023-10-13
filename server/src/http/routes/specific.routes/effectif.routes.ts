@@ -269,18 +269,6 @@ export default () => {
     return res.json(buildEffectifResult(effectifUpdated));
   });
 
-  router.delete("/:id", async ({ params }, res) => {
-    let { id } = await Joi.object({
-      id: Joi.string().required(),
-    })
-      .unknown()
-      .validateAsync(params, { abortEarly: false });
-
-    await effectifsDb().deleteOne({ _id: new ObjectId(id) });
-
-    return res.json({ status: "OK" });
-  });
-
   router.post("/recherche-siret", async ({ body }, res) => {
     // TODO organismeFormation
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

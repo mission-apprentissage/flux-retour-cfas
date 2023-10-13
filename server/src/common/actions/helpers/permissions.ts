@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
-import { organismesDb } from "@/common/model/collections";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 
@@ -289,6 +289,42 @@ export function findOrganismeFormateursIds(organisme: Organisme): ObjectId[] {
     .filter((organisme) => !!organisme._id)
     .map((organisme) => organisme._id as ObjectId);
 }
+
+/**
+ * Fonction qui vérifie si on peut supprimer un effectif (en doublon)
+ * Si c'est un effectif de notre organisme -> OK
+ * Si c'est un effectif d'un de nos organismes formateur -> OK
+ * Si on est administrateur -> OK
+ * Sinon -> KO
+ * @param ctx
+ * @param effectifId
+ * @returns
+ */
+export const canDeleteEffectif = async (ctx: AuthContext, effectifId: ObjectId) => {
+  // On récupère l'organisme rattaché à l'effectif
+  const effectifToDelete = await effectifsDb().findOne({ _id: effectifId });
+  if (!effectifToDelete) {
+    logger.error(effectifId, "effectif non trouvé");
+    throw new Error("effectif non trouvé");
+  }
+
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION": {
+      // On compare l'id de l'organisme de l'effectif aux id des organismes liés à l'organisation du user
+      const organismeIdForEffectif = effectifToDelete.organisme_id;
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
+        ctx as AuthContext<OrganisationOrganismeFormation>
+      );
+
+      return linkedOrganismesIds.some((id) => id.equals(organismeIdForEffectif));
+    }
+    case "ADMINISTRATEUR":
+      return true;
+  }
+
+  return false;
+};
 
 export async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
   const organisme = await getOrganismeById(organismeId);

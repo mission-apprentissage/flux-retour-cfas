@@ -19,8 +19,7 @@ import {
   Td,
   Stack,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
-import React, { Fragment } from "react";
+import React from "react";
 
 import { getStatutApprenantNameFromCode } from "@/common/constants/dossierApprenant";
 import { _get } from "@/common/httpClient";
@@ -29,22 +28,17 @@ import { toPascalCase } from "@/common/utils/stringUtils";
 import { Close } from "@/theme/components/icons";
 
 import EffectifDoublonDeleteAlertDialog from "./EffectifDoublonDeleteAlertDialog";
+import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
 
 const EffectifDoublonDetailModal = ({
   isOpen,
   onClose = () => {},
-  effectifId,
+  duplicateDetail,
 }: {
   isOpen: boolean;
   onClose?: () => void;
-  effectifId: string;
+  duplicateDetail: DuplicateEffectifDetail;
 }) => {
-  const { data: effectifDetail } = useQuery<any, any>(
-    [`effectif`, effectifId],
-    () => _get(`/api/v1/effectif/detail/${effectifId}`),
-    { enabled: isOpen }
-  );
-
   const { isOpen: isOpenAlertDialog, onOpen: onOpenAlertDialog, onClose: onCloseAlertDialog } = useDisclosure();
   const cancelRef = React.useRef();
 
@@ -73,21 +67,21 @@ const EffectifDoublonDetailModal = ({
             </Text>
           </Button>
           <ModalHeader>
-            {effectifDetail && (
+            {duplicateDetail && (
               <Text>
-                {`Détail de l'apprenant ${toPascalCase(effectifDetail?.apprenant?.prenom)} ${toPascalCase(
-                  effectifDetail?.apprenant?.nom
+                {`Détail de l'apprenant ${toPascalCase(duplicateDetail?.apprenant?.prenom)} ${toPascalCase(
+                  duplicateDetail?.apprenant?.nom
                 )}`}
               </Text>
             )}
           </ModalHeader>
           <ModalBody pb={6}>
-            {effectifDetail && (
+            {duplicateDetail && (
               <Stack spacing={6}>
-                <Text>Dossier créé le {prettyPrintDate(effectifDetail?.created_at)}</Text>
-                <Text>Dossier mis à jour le {prettyPrintDate(effectifDetail?.updated_at)}</Text>
+                <Text>Dossier créé le {prettyPrintDate(duplicateDetail?.created_at)}</Text>
+                <Text>Dossier mis à jour le {prettyPrintDate(duplicateDetail?.updated_at)}</Text>
                 <Text>
-                  ERP Source : <b>{effectifDetail.source}</b>
+                  ERP Source : <b>{duplicateDetail.source}</b>
                 </Text>
                 {/* Infos Apprenant */}
                 <TableContainer>
@@ -103,7 +97,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Prénom</i>
                         </Td>
                         <Td>
-                          <b>{toPascalCase(effectifDetail?.apprenant?.prenom)}</b>
+                          <b>{toPascalCase(duplicateDetail?.apprenant?.prenom)}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -111,7 +105,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Nom</i>
                         </Td>
                         <Td>
-                          <b>{toPascalCase(effectifDetail?.apprenant?.nom)}</b>
+                          <b>{toPascalCase(duplicateDetail?.apprenant?.nom)}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -119,7 +113,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Numéro INE</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.ine}</b>
+                          <b>{duplicateDetail?.apprenant?.ine}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -127,7 +121,10 @@ const EffectifDoublonDetailModal = ({
                           <i>Date de naissance</i>
                         </Td>
                         <Td>
-                          <b>{formatDateDayMonthYear(effectifDetail?.apprenant?.date_de_naissance)}</b>
+                          <b>
+                            {duplicateDetail?.apprenant?.date_de_naissance &&
+                              formatDateDayMonthYear(duplicateDetail?.apprenant?.date_de_naissance)}
+                          </b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -135,7 +132,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Courriel</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.courriel}</b>
+                          <b>{duplicateDetail?.apprenant?.courriel}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -143,7 +140,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Téléphone</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.telephone}</b>
+                          <b>{duplicateDetail?.apprenant?.telephone}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -151,7 +148,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Identifiant ERP</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.id_erp_apprenant}</b>
+                          <b>{duplicateDetail?.id_erp_apprenant}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -159,7 +156,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Année scolaire</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.annee_scolaire}</b>
+                          <b>{duplicateDetail?.annee_scolaire}</b>
                         </Td>
                       </Tr>
                     </Tbody>
@@ -180,7 +177,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Code insee</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.adresse?.code_insee}</b>
+                          <b>{duplicateDetail?.apprenant?.adresse?.code_insee}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -188,7 +185,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Code postal</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.adresse?.code_postal}</b>
+                          <b>{duplicateDetail?.apprenant?.adresse?.code_postal}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -196,7 +193,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Commune</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.adresse?.commune}</b>
+                          <b>{duplicateDetail?.apprenant?.adresse?.commune}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -204,7 +201,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Département</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.adresse?.departement}</b>
+                          <b>{duplicateDetail?.apprenant?.adresse?.departement}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -212,7 +209,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Académie</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.adresse?.academie}</b>
+                          <b>{duplicateDetail?.apprenant?.adresse?.academie}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -220,7 +217,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Région</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.apprenant?.adresse?.region}</b>
+                          <b>{duplicateDetail?.apprenant?.adresse?.region}</b>
                         </Td>
                       </Tr>
                     </Tbody>
@@ -241,7 +238,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Libellé de la formation</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.formation?.libelle_long}</b>
+                          <b>{duplicateDetail?.formation?.libelle_long}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -249,7 +246,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Code formation diplôme</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.formation?.cfd}</b>
+                          <b>{duplicateDetail?.formation?.cfd}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -257,7 +254,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Code rncp</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.formation?.rncp}</b>
+                          <b>{duplicateDetail?.formation?.rncp}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -265,7 +262,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Période de formation</i>
                         </Td>
                         <Td>
-                          <b>{`${effectifDetail?.formation?.periode[0]} - ${effectifDetail?.formation?.periode[1]}`}</b>
+                          <b>{`${duplicateDetail?.formation?.periode[0]} - ${duplicateDetail?.formation?.periode[1]}`}</b>
                         </Td>
                       </Tr>
                       <Tr>
@@ -273,7 +270,7 @@ const EffectifDoublonDetailModal = ({
                           <i>Année de la formation</i>
                         </Td>
                         <Td>
-                          <b>{effectifDetail?.formation?.annee}</b>
+                          <b>{duplicateDetail?.formation?.annee}</b>
                         </Td>
                       </Tr>
                     </Tbody>
@@ -281,7 +278,7 @@ const EffectifDoublonDetailModal = ({
                 </TableContainer>
 
                 {/* Contrats */}
-                {effectifDetail?.contrats?.map((contrat, index) => (
+                {duplicateDetail?.contrats?.map((contrat, index) => (
                   <TableContainer key={`tableContrats_${index}`}>
                     <Table size="sm" variant="detailsHalfColumns">
                       <Thead>
@@ -303,7 +300,7 @@ const EffectifDoublonDetailModal = ({
                             <i>Date de fin de contrat</i>
                           </Td>
                           <Td>
-                            <b>{formatDateDayMonthYear(contrat?.date_fin)}</b>
+                            <b>{contrat?.date_fin && formatDateDayMonthYear(contrat?.date_fin)}</b>
                           </Td>
                         </Tr>
                         <Tr>
@@ -336,7 +333,7 @@ const EffectifDoublonDetailModal = ({
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {effectifDetail?.apprenant?.historique_statut.map((currentStatut, index) => (
+                      {duplicateDetail?.apprenant?.historique_statut.map((currentStatut, index) => (
                         <Tr key={`rowHisto_${index}`}>
                           <Td>
                             <i>Statut</i>
@@ -386,10 +383,8 @@ const EffectifDoublonDetailModal = ({
         cancelRef={cancelRef}
         isOpen={isOpenAlertDialog}
         onClose={onCloseAlertDialog}
-        effectifId={effectifId}
-        apprenantNomPrenom={`${toPascalCase(effectifDetail?.apprenant?.prenom)} ${toPascalCase(
-          effectifDetail?.apprenant?.nom
-        )}`}
+        duplicateDetail={duplicateDetail}
+        apprenantNomPrenom={`${duplicateDetail?.apprenant?.prenom} ${duplicateDetail?.apprenant?.nom}`}
       />
     </>
   );

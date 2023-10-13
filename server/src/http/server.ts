@@ -22,6 +22,7 @@ import {
   fullEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
+import { canDeleteEffectif } from "@/common/actions/helpers/permissions";
 import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
@@ -78,7 +79,7 @@ import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
-import { jobEventsDb, organisationsDb } from "@/common/model/collections";
+import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -367,6 +368,14 @@ function setupRoutes(app: Application) {
       "/api/v1/profile/cgu/accept/:version",
       returnResult(async (req) => {
         await updateUserProfile(req.user, { has_accept_cgu_version: req.params.version });
+      })
+    )
+    .delete(
+      "/api/v1/effectif/:id",
+      returnResult(async (req) => {
+        const effectifId = new ObjectId(req.params.id);
+        if (!(await canDeleteEffectif(req.user, effectifId))) throw Boom.forbidden("Permissions invalides");
+        await effectifsDb().deleteOne({ _id: effectifId });
       })
     );
 

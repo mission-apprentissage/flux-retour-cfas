@@ -2,13 +2,14 @@ import { Box, Button, Divider, HStack, Stack, Text, useDisclosure } from "@chakr
 import { Row } from "@tanstack/react-table";
 import React, { Fragment } from "react";
 
-import { DuplicateEffectif } from "@/common/types/duplicatesEffectifs";
 import { formatDateDayMonthYear, prettyPrintDate } from "@/common/utils/dateUtils";
 import { toPascalCase } from "@/common/utils/stringUtils";
 import NewTable from "@/modules/indicateurs/NewTable";
+import { DuplicateEffectifGroup } from "@/modules/mon-espace/effectifs/doublons/models/DuplicateEffectifGroup";
 import { Alert, ArrowRightLine } from "@/theme/components/icons";
 
 import EffectifDoublonDetailModal from "./EffectifDoublonDetailModal";
+import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
 
 const transformNomPrenomToPascalCase = (row) =>
   `${toPascalCase(row.original?._id?.prenom_apprenant)} ${toPascalCase(row.original?._id?.nom_apprenant)}`;
@@ -88,7 +89,7 @@ const EffectifsDoublonsList = ({ data }) => {
   );
 };
 
-const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
+const RenderSubComponent = (row: Row<DuplicateEffectifGroup>) => {
   return (
     <Stack spacing={1} mt={-2} ml={10}>
       {row?.original?.duplicates
@@ -110,7 +111,7 @@ const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
                 </i>
               </Text>
 
-              <EffectifDoublonDetailModalContainer index={index} effectifId={item.id} />
+              <EffectifDoublonDetailModalContainer index={index} duplicateDetail={item} />
 
               {index === 0 && (
                 <HStack color="warning">
@@ -125,9 +126,14 @@ const RenderSubComponent = (row: Row<DuplicateEffectif>) => {
   );
 };
 
-const EffectifDoublonDetailModalContainer = ({ index, effectifId }) => {
+const EffectifDoublonDetailModalContainer = ({
+  index,
+  duplicateDetail,
+}: {
+  index: number;
+  duplicateDetail: DuplicateEffectifDetail;
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-
   return (
     <Fragment key={`detailModal_${index}`}>
       <Button size="xs" variant="secondary" onClick={onOpen}>
@@ -135,7 +141,7 @@ const EffectifDoublonDetailModalContainer = ({ index, effectifId }) => {
         <Text as="span">Voir en détail</Text>
       </Button>
 
-      <EffectifDoublonDetailModal isOpen={isOpen} onClose={onClose} effectifId={effectifId} />
+      <EffectifDoublonDetailModal isOpen={isOpen} onClose={onClose} duplicateDetail={duplicateDetail} />
     </Fragment>
   );
 };
