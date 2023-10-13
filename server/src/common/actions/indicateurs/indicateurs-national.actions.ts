@@ -50,6 +50,9 @@ export async function getIndicateursOrganismesNature(filters: OrganismesFilters)
             {
               fiabilisation_statut: "FIABLE",
               ferme: false,
+              last_transmission_date: {
+                $gte: new Date(new Date().getFullYear(), 7, 1),
+              },
             },
           ],
         },

@@ -451,7 +451,7 @@ function SectionApercuChiffresCles() {
                   {formatNumber(indicateursNational?.indicateursOrganismes?.total)}
                 </Text>
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
-                  organismes de formation en apprentissage
+                  organismes de formation en apprentissage transmettent leurs données
                   <Tooltip
                     background="bluefrance"
                     color="white"
@@ -468,6 +468,7 @@ function SectionApercuChiffresCles() {
                             (base des Carif-Oref)&nbsp;;
                           </ListItem>
                           <ListItem>identifiés par un SIRET (ouvert) et un UAI valable&nbsp;;</ListItem>
+                          <ListItem>ayant envoyé des données depuis le premier août&nbsp;;</ListItem>
                         </UnorderedList>
                         <Text as="p">
                           Ce nombre inclut&nbsp;: les OFA «&nbsp;historiques&nbsp;», les OFA académiques et
