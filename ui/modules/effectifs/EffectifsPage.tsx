@@ -40,7 +40,7 @@ function EffectifsPage(props: EffectifsPageProps) {
 
   const [searchValue, setSearchValue] = useState("");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
-  const [anneeScolaire, setAnneeScolaire] = useState("all");
+  const [filtreAnneeScolaire, setFiltreAnneeScolaire] = useState("all");
 
   const { data: organismesEffectifs, isLoading } = useQuery(
     ["organismes", props.organisme._id, "effectifs"],
@@ -144,15 +144,15 @@ function EffectifsPage(props: EffectifsPageProps) {
               </HStack>
               <HStack w="full" mt={2}>
                 <Text>Par année scolaire</Text>
-                <BadgeButton onClick={() => setAnneeScolaire("all")} active={anneeScolaire === "all"}>
+                <BadgeButton onClick={() => setFiltreAnneeScolaire("all")} active={filtreAnneeScolaire === "all"}>
                   Toutes
                 </BadgeButton>
                 {Object.keys(effectifsByAnneeScolaire).map((anneeScolaire) => {
                   return (
                     <BadgeButton
-                      onClick={() => setAnneeScolaire(anneeScolaire)}
+                      onClick={() => setFiltreAnneeScolaire(anneeScolaire)}
                       key={anneeScolaire}
-                      active={anneeScolaire === anneeScolaire}
+                      active={anneeScolaire === filtreAnneeScolaire}
                     >
                       {anneeScolaire}
                     </BadgeButton>
@@ -165,7 +165,7 @@ function EffectifsPage(props: EffectifsPageProps) {
 
         <Box mt={10} mb={16}>
           {Object.entries<any[]>(effectifsByAnneeScolaire).map(([anneeScolaire, effectifs]) => {
-            if (anneeScolaire !== "all" && anneeScolaire !== anneeScolaire) {
+            if (filtreAnneeScolaire !== "all" && anneeScolaire !== filtreAnneeScolaire) {
               return null;
             }
             const orgaEffectifs = showOnlyErrors
