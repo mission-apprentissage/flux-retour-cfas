@@ -238,7 +238,7 @@ describe("Routes /organismes/:id", () => {
 
       const infoTransmissionEffectifsAttributes = {
         erps: ["YMAG"],
-        last_transmission_date: "2023-04-15T18:00:00.000Z",
+        last_transmission_date: "2023-08-15T18:00:00.000Z",
       };
 
       testPermissions<any>(
