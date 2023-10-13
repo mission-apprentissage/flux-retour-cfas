@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import TreeView, { flattenTree } from "react-accessible-treeview";
 
-import { _get, _post } from "@/common/httpClient";
+import { _get, _getUI, _post } from "@/common/httpClient";
 import { normalize } from "@/common/utils/stringUtils";
 import InputLegend from "@/components/InputLegend/InputLegend";
 import { ArrowTriangleDownIcon } from "@/modules/dashboard/icons";
@@ -45,7 +45,7 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
   const { data: famillesMetiers, isFetching: isLoading } = useQuery<RomeNode[]>(
     ["arborescence-rome-14-06-2021.json"],
     async () => {
-      const famillersMetiers = await _get<FamilleMetier[]>("/arborescence-rome-14-06-2021.json");
+      const famillersMetiers = await _getUI<FamilleMetier[]>("/arborescence-rome-14-06-2021.json");
       return famillersMetiers.map((familleMetiers) => normalizeRomeNodeInPlace(familleMetiers));
     },
     {
