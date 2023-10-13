@@ -31,7 +31,7 @@ const EffectifsDoublonsPage = ({ isMine }) => {
   return (
     <Flex flexDir="column" width="100%">
       <Heading textStyle="h2" color="grey.800">
-        {isMine ? "Mes effectifs" : "Ses effectifs"}
+        {isMine ? "Mes duplicats d'effectifs" : "Ses duplicats d'effectifs"}
       </Heading>
 
       <HStack mb={6}>
