@@ -73,6 +73,20 @@ const getHttpsAgent = () => {
     : undefined;
 };
 
+/**
+ * Récupère un fichier exposé par l'UI.
+ * Nécessaire pour l'environnement local, car les ports sont maintenant exposés.
+ */
+export const _getUI = async <T = any>(path: string, options?: AxiosRequestConfig<any>): Promise<T> => {
+  const response = await axios.get(path, {
+    headers: getHeaders(),
+    validateStatus: () => true,
+    httpsAgent: getHttpsAgent(),
+    ...options,
+  });
+  return handleResponse<T>(path, response);
+};
+
 export const _get = async <T = any>(path: string, options?: AxiosRequestConfig<any>): Promise<T> => {
   const response = await axios.get(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
