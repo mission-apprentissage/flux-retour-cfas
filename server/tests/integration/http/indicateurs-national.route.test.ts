@@ -123,6 +123,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
         responsablesFormateurs: 2,
         responsables: 1,
         formateurs: 1,
+        totalWithoutTransmissionDateCondition: 4,
       },
     });
   });
