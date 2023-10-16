@@ -33,6 +33,7 @@ import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
 import FiltreOrganismeTerritoire from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
+import DashboardAdministrateur from "../admin/DashboardAdministrateur";
 import {
   convertEffectifsFiltersToQuery,
   EffectifsFilters,
@@ -42,7 +43,6 @@ import {
 import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDepartement } from "../models/indicateurs";
 
 import CarteFrance from "./CarteFrance";
-import DashboardAdministrateur from "./DashboardAdministrateur";
 import IndicateursGrid from "./IndicateursGrid";
 
 const DashboardTransverse = () => {
