@@ -69,7 +69,7 @@ export interface UsersMigration {
   /**
    * Date d'envoi de la relance email pour configuration et données manquantes
    */
-  reminder_missing_data_and_configuration_sent_date?: Date;
+  reminder_missing_configuration_and_data_sent_date?: Date;
   emails?: {
     token: string;
     templateName: string;
