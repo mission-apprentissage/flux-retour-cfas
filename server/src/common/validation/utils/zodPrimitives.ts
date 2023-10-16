@@ -37,13 +37,16 @@ const iso8601Regex = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/;
 
 const extensions = {
   phone: () =>
-    z
-      .string()
-      .regex(/.*[0-9].*/, "Format invalide") // check it contains at least one digit
-      .transform((v: string) => telephoneConverter(v))
-      .openapi({
-        example: "0628000000",
-      }),
+    z.preprocess(
+      (v: any) => (v ? String(v) : v),
+      z
+        .string()
+        .regex(/.*[0-9].*/, "Format invalide") // check it contains at least one digit
+        .transform((v: string) => telephoneConverter(v))
+        .openapi({
+          example: "0628000000",
+        })
+    ),
   siret: () =>
     z.preprocess(
       // On accepte les tirets, les espaces et les points dans le SIRET (et on les retire silencieusement)
