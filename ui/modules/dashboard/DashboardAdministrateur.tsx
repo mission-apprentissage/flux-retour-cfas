@@ -9,7 +9,7 @@ import {
 const DashboardAdministrateur = () => {
   const { organismes } = useOrganisationOrganismes();
   const { organismesACompleter } = useOrganismesNormalizedLists(organismes || []);
-  const { organismesDuplicats } = useOrganismesDuplicatsLists(organismes || []);
+  const { organismesDuplicats } = useOrganismesDuplicatsLists();
 
   return (
     <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(2, 1fr)" gap={4} my={8}>
@@ -17,7 +17,7 @@ const DashboardAdministrateur = () => {
         {organismesACompleter.length} organismes <strong>à fiabiliser</strong>
       </GridItem>
       <GridItem border="1px" borderColor="grey.400" borderBottom="4px" borderBottomColor="bluefrance" py="6" px="6">
-        {organismesDuplicats.length} <strong>duplicats d&apos;organismes</strong>
+        {organismesDuplicats?.length || 0} <strong>duplicats d&apos;organismes</strong>
       </GridItem>
     </Grid>
   );

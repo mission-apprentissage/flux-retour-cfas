@@ -72,6 +72,7 @@ import {
   resetConfigurationERP,
   getStatOrganismes,
 } from "@/common/actions/organismes/organismes.actions";
+import { getDuplicatesOrganismes } from "@/common/actions/organismes/organismes.duplicates.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
@@ -758,6 +759,12 @@ function setupRoutes(app: Application) {
             impersonatedOrganisation: organisation,
           });
           responseWithCookie(res, sessionToken);
+        })
+      )
+      .get(
+        "/organismes-duplicates",
+        returnResult(async () => {
+          return await getDuplicatesOrganismes();
         })
       )
   );
