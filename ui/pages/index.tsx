@@ -371,7 +371,7 @@ interface IndicateursNationalFilters {
 
 interface IndicateursOrganismesNature {
   total: number;
-  totalWithoutTransmissionDateCondition: number;
+  totalWithoutTransmissionDate: number;
   responsables: number;
   responsablesFormateurs: number;
   formateurs: number;
@@ -490,10 +490,8 @@ function SectionApercuChiffresCles() {
                 </Text>
                 <Text fontSize="zeta" color="mgalt">
                   transmettent au tableau de bord sur{" "}
-                  <b>
-                    {formatNumber(indicateursNational?.indicateursOrganismes?.totalWithoutTransmissionDateCondition)}
-                  </b>{" "}
-                  OFA fiables.
+                  <b>{formatNumber(indicateursNational?.indicateursOrganismes?.totalWithoutTransmissionDate)}</b> OFA
+                  fiables.
                 </Text>
                 <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
                 <Text fontSize="zeta" color="mgalt">
