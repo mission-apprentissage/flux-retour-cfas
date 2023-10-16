@@ -17,7 +17,9 @@ export const getDuplicatesOrganismes = async () => {
           duplicates: {
             $addToSet: {
               id: "$_id",
+              nom: "$nom",
               uai: "$uai",
+              siret: "$siret",
               created_at: "$created_at",
               updated_at: "$updated_at",
               effectifs_count: "$effectifs_count",

@@ -153,11 +153,11 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
 export function useOrganismesDuplicatsLists() {
   const router = useRouter();
 
-  const { data: organismesDuplicats } = useQuery<Organisme[], any>(
+  const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], any>(
     ["admin/organismes-duplicats"],
     () => _get("/api/v1/admin/organismes-duplicates"),
     { enabled: router.isReady }
   );
 
-  return { organismesDuplicats };
+  return { organismesDuplicats, isLoading };
 }
