@@ -6,7 +6,7 @@ import { getUsersLinkedToOrganismeId } from "@/common/actions/users.actions";
 import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";
-import { organismes } from "@tests/utils/permissions";
+import { organismes, commonOrganismeAttributes } from "@tests/utils/permissions";
 import { id, testPasswordHash } from "@tests/utils/testUtils";
 
 describe("Components Users Test", () => {
@@ -93,6 +93,57 @@ describe("Components Users Test", () => {
           prenom: "Corinne",
           email: "corinne@tdb.local",
           telephone: "0102030406",
+        },
+      ]);
+    });
+
+    it("Vérifie qu'on renvoi la liste des utilisateurs rattachés à une organisation d'un organisme sans uai", async () => {
+      const organismeWithoutUai = {
+        ...commonOrganismeAttributes,
+        _id: new ObjectId(id(8)),
+        siret: "00000000000026",
+        organismesResponsables: [{ _id: new ObjectId(id(1)) }],
+      };
+      await organismesDb().insertOne(organismeWithoutUai);
+
+      // Création d'une organisation lié au couple UAI - SIRET du premier organisme de test + création d'utilisateurs liés
+      await Promise.all([
+        organisationsDb().insertOne({
+          _id: new ObjectId(id(8)),
+          type: "ORGANISME_FORMATION",
+          uai: null,
+          siret: organismeWithoutUai.siret,
+          created_at: getCurrentTime(),
+        }),
+        usersMigrationDb().insertMany([
+          {
+            account_status: "CONFIRMED",
+            invalided_token: false,
+            password_updated_at: new Date(),
+            connection_history: [],
+            emails: [],
+            created_at: new Date(),
+            civility: "Madame",
+            nom: "Boucher",
+            prenom: "Alice",
+            fonction: "Directrice",
+            email: "alice@tdb.local",
+            telephone: "0102030405",
+            password: testPasswordHash,
+            has_accept_cgu_version: "v0.1",
+            organisation_id: new ObjectId(id(8)),
+          },
+        ]),
+      ]);
+
+      const usersLinked = await getUsersLinkedToOrganismeId(organismeWithoutUai._id);
+      expect(usersLinked.map(({ _id, ...user }) => user)).toStrictEqual([
+        {
+          civility: "Madame",
+          nom: "Boucher",
+          prenom: "Alice",
+          email: "alice@tdb.local",
+          telephone: "0102030405",
         },
       ]);
     });

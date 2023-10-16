@@ -415,7 +415,10 @@ export const getUsersLinkedToOrganismeId = async (organismeId: ObjectId) => {
                   {
                     $match: {
                       $expr: {
-                        $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }],
+                        $or: [
+                          { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }] },
+                          { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: [null, "$$uai"] }] },
+                        ],
                       },
                     },
                   },
