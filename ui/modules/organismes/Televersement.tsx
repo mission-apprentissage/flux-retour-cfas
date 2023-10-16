@@ -16,6 +16,7 @@ import {
   Heading,
   UnorderedList,
   ListItem,
+  HStack,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -406,30 +407,74 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         )}
 
         {(status === "validation_failure" || status === null) && (
-          <Box {...getRootProps<any>({ style })} mb={8} minH="200px">
-            {isSubmitting ? (
-              <Box textAlign="center" flex="1" flexDirection="column">
-                <Spinner />
-                <Text mt={2}>Veuillez patienter quelques secondes</Text>
-              </Box>
-            ) : (
-              <>
-                <Input {...(getInputProps() as any)} />
-                {isDragActive ? (
-                  <Text>Glissez et déposez ici ...</Text>
-                ) : (
-                  <>
-                    <DownloadLine boxSize="4" color="bluefrance" mb={4} />
-                    <Text color="mgalt">Glissez le fichier dans cette zone ou cliquez sur le bouton</Text>
-                    <Text color="mgalt">pour ajouter un document Excel (xlsx) depuis votre disque dur</Text>
-                    <Button size="md" variant="secondary" mt={4}>
-                      Ajouter un document
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
-          </Box>
+          <>
+            <Box {...getRootProps<any>({ style })} mb={8} minH="200px">
+              {isSubmitting ? (
+                <Box textAlign="center" flex="1" flexDirection="column">
+                  <Spinner />
+                  <Text mt={2}>Veuillez patienter quelques secondes</Text>
+                </Box>
+              ) : (
+                <>
+                  <Input {...(getInputProps() as any)} />
+                  {isDragActive ? (
+                    <Text>Glissez et déposez ici ...</Text>
+                  ) : (
+                    <>
+                      <DownloadLine boxSize="4" color="bluefrance" mb={4} />
+                      <Text color="mgalt">Glissez le fichier dans cette zone ou cliquez sur le bouton</Text>
+                      <Text color="mgalt">pour ajouter un document Excel (xlsx) depuis votre disque dur</Text>
+                      <Button size="md" variant="secondary" mt={4}>
+                        Ajouter un document
+                      </Button>
+                    </>
+                  )}
+                </>
+              )}
+            </Box>
+            <div>
+              <Text color="#ef5800">Vous pouvez directement remplir le fichier-modèle avec vos effectifs.</Text>
+              <Text color="#ef5800">Veuillez ne pas modifier l’intitulé des colonnes.</Text>
+              <Text mt={6} fontWeight="bold">
+                25 données sont obligatoires&nbsp;:
+              </Text>
+              <HStack mt={2}>
+                <Box>
+                  <UnorderedList>
+                    <ListItem>Nom de l’apprenant</ListItem>
+                    <ListItem>Prénom de l’apprenant</ListItem>
+                    <li>Date de naissance de l’apprenant</li>
+                    <li>Email de l’apprenant</li>
+                    <li>Adresse de résidence de l’apprenant</li>
+                    <li>Code postal de résidence de l’apprenant</li>
+                    <li>Genre de l’apprenant</li>
+                    <li>Date à laquelle le statut de l’apprenant a été saisi</li>
+                    <li>Statut de l’apprenant</li>
+                    <li>N° UAI de l’établissement responsable</li>
+                    <li>SIRET de l’établissement responsable</li>
+                    <li>N° UAI de l’établissement formateur</li>
+                  </UnorderedList>
+                </Box>
+                <Box>
+                  <UnorderedList>
+                    <li>SIRET de l’établissement formateur</li>
+                    <li>N° UAI du lieu de formation</li>
+                    <li>SIRET du lieu de formation</li>
+                    <li>Année de formation concernée</li>
+                    <li>Date d’inscription en formation</li>
+                    <li>Date d’entrée en formation </li>
+                    <li>Date de fin de formation</li>
+                    <li>Durée théorique de la formation</li>
+                    <li>Code Formation Diplôme (CFD)</li>
+                    <li>Diplôme de la formation</li>
+                    <li>Code RNCP de la formation</li>
+                    <li>SIRET de l’employeur </li>
+                    <li>Date de rupture du contrat (si pertinent)</li>
+                  </UnorderedList>
+                </Box>
+              </HStack>
+            </div>
+          </>
         )}
       </Container>
     </SimplePage>
