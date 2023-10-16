@@ -35,78 +35,55 @@ export async function getIndicateursNational(filters: IndicateursNationalFilters
 
 interface IndicateursOrganismesNature {
   total: number;
-  totalWithoutTransmissionDateCondition: number;
+  totalWithoutTransmissionDate: number;
   responsables: number;
   responsablesFormateurs: number;
   formateurs: number;
 }
 
 export async function getIndicateursOrganismesNature(filters: OrganismesFilters): Promise<IndicateursOrganismesNature> {
-  const currentYear = new Date().getFullYear();
-
-  const baseFilters = [
-    ...buildMongoFilters(filters, organismesFiltersConfigurations),
-    {
-      fiabilisation_statut: "FIABLE",
-      ferme: false,
-    },
-  ];
-
-  const dateFilter = {
-    last_transmission_date: {
-      $gte: new Date(currentYear, 7, 1),
-    },
-  };
-
-  const projectStage = {
-    $project: {
-      responsables: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable"] }, 1, 0] },
-      responsablesFormateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable_formateur"] }, 1, 0] },
-      formateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "formateur"] }, 1, 0] },
-    },
-  };
-
-  const groupStage = {
-    $group: {
-      _id: "",
-      responsables: { $sum: "$responsables" },
-      responsablesFormateurs: { $sum: "$responsablesFormateurs" },
-      formateurs: { $sum: "$formateurs" },
-    },
-  };
-
-  const projectResultStage = {
-    $project: {
-      _id: 0,
-      total: {
-        $add: ["$responsables", "$responsablesFormateurs", "$formateurs"],
-      },
-      responsables: 1,
-      responsablesFormateurs: 1,
-      formateurs: 1,
-    },
-  };
-
   const indicateurs = (await organismesDb()
     .aggregate([
       {
-        $facet: {
-          withDateCondition: [
-            { $match: { $and: [...baseFilters, dateFilter] } },
-            projectStage,
-            groupStage,
-            projectResultStage,
+        $match: {
+          $and: [
+            ...buildMongoFilters(filters, organismesFiltersConfigurations),
+            {
+              fiabilisation_statut: "FIABLE",
+              ferme: false,
+            },
           ],
-          withoutDateCondition: [{ $match: { $and: baseFilters } }, projectStage, groupStage, projectResultStage],
         },
       },
       {
         $project: {
-          responsables: { $arrayElemAt: ["$withDateCondition.responsables", 0] },
-          responsablesFormateurs: { $arrayElemAt: ["$withDateCondition.responsablesFormateurs", 0] },
-          formateurs: { $arrayElemAt: ["$withDateCondition.formateurs", 0] },
-          total: { $arrayElemAt: ["$withDateCondition.total", 0] },
-          totalWithoutTransmissionDateCondition: { $arrayElemAt: ["$withoutDateCondition.total", 0] },
+          responsables: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable"] }, 1, 0] },
+          responsablesFormateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable_formateur"] }, 1, 0] },
+          formateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "formateur"] }, 1, 0] },
+          withoutTransmissionDate: {
+            $cond: [{ $gte: ["$last_transmission_date", new Date(new Date().getFullYear(), 7, 1)] }, 1, 0],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "",
+          responsables: { $sum: "$responsables" },
+          responsablesFormateurs: { $sum: "$responsablesFormateurs" },
+          formateurs: { $sum: "$formateurs" },
+          totalWithoutTransmissionDate: { $sum: "$withoutTransmissionDate" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          responsables: 1,
+          responsablesFormateurs: 1,
+          formateurs: 1,
+          totalWithoutTransmissionDate: 1,
+          total: {
+            $add: ["$responsables", "$responsablesFormateurs", "$formateurs"],
+          },
         },
       },
     ])
