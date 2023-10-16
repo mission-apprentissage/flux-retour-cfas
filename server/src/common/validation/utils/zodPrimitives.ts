@@ -37,7 +37,7 @@ const iso8601Regex = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/;
 
 const extensions = {
   phone: () =>
-    z
+    z.coerce
       .string()
       .regex(/.*[0-9].*/, "Format invalide") // check it contains at least one digit
       .transform((v: string) => telephoneConverter(v))
