@@ -1,3 +1,5 @@
+import { ERPS_BY_ID } from "shared";
+
 import parentLogger from "@/common/logger";
 import { usersMigrationDb } from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";
@@ -63,6 +65,8 @@ export async function sendReminderEmails() {
                       mode_de_transmission: 1,
                       last_transmission_date: 1,
                       mode_de_transmission_configuration_date: 1,
+                      erps: 1,
+                      erp_unsupported: 1,
                     },
                   },
                 ],
@@ -89,7 +93,7 @@ export async function sendReminderEmails() {
         "0 configuration, 0 effectif"
       );
       await sendEmail(user.email, "reminder_missing_configuration_and_data", {
-        user: {
+        recipient: {
           civility: user.civility,
           nom: user.nom,
           prenom: user.prenom,
@@ -106,12 +110,14 @@ export async function sendReminderEmails() {
         "1 configuration, 0 effectif"
       );
       await sendEmail(user.email, "reminder_missing_data", {
-        user: {
+        recipient: {
           civility: user.civility,
           nom: user.nom,
           prenom: user.prenom,
         },
         mode_de_transmission: organisme.mode_de_transmission,
+        erp: ERPS_BY_ID[organisme.erps?.[0]]?.name ?? "",
+        erp_unsupported: organisme.erp_unsupported,
       });
     }
     // logger.info({ email: user.email, userId: user._id }, "checking user");

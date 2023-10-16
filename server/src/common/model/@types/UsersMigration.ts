@@ -62,6 +62,14 @@ export interface UsersMigration {
    * Date de dernière mise à jour mot de passe
    */
   password_updated_at?: Date;
+  /**
+   * Date d'envoi de la relance email pour données manquantes
+   */
+  reminder_missing_data_sent_date?: Date;
+  /**
+   * Date d'envoi de la relance email pour configuration et données manquantes
+   */
+  reminder_missing_data_and_configuration_sent_date?: Date;
   emails?: {
     token: string;
     templateName: string;
