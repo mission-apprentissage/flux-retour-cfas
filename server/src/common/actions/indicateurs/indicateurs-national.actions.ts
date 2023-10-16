@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, subMonths } from "date-fns";
 import { z } from "zod";
 
 import { organismesDb } from "@/common/model/collections";
@@ -35,6 +35,7 @@ export async function getIndicateursNational(filters: IndicateursNationalFilters
 
 interface IndicateursOrganismesNature {
   total: number;
+  totalWithoutTransmissionDate: number;
   responsables: number;
   responsablesFormateurs: number;
   formateurs: number;
@@ -50,37 +51,66 @@ export async function getIndicateursOrganismesNature(filters: OrganismesFilters)
             {
               fiabilisation_statut: "FIABLE",
               ferme: false,
-              last_transmission_date: {
-                $gte: new Date(new Date().getFullYear(), 7, 1),
+            },
+          ],
+        },
+      },
+      {
+        $facet: {
+          withoutTransmissionDate: [
+            {
+              $count: "total",
+            },
+          ],
+          withTransmissionDate: [
+            {
+              $match: {
+                last_transmission_date: {
+                  $gte: subMonths(new Date(), 6),
+                },
+              },
+            },
+            {
+              $project: {
+                responsables: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable"] }, 1, 0] },
+                responsablesFormateurs: {
+                  $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable_formateur"] }, 1, 0],
+                },
+                formateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "formateur"] }, 1, 0] },
+              },
+            },
+            {
+              $group: {
+                _id: 0,
+                responsables: { $sum: "$responsables" },
+                responsablesFormateurs: { $sum: "$responsablesFormateurs" },
+                formateurs: { $sum: "$formateurs" },
+              },
+            },
+            {
+              $addFields: {
+                total: {
+                  $add: ["$responsables", "$responsablesFormateurs", "$formateurs"],
+                },
               },
             },
           ],
         },
       },
       {
-        $project: {
-          responsables: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable"] }, 1, 0] },
-          responsablesFormateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "responsable_formateur"] }, 1, 0] },
-          formateurs: { $cond: [{ $eq: [{ $ifNull: ["$nature", ""] }, "formateur"] }, 1, 0] },
-        },
+        $unwind: "$withTransmissionDate",
       },
       {
-        $group: {
-          _id: "",
-          responsables: { $sum: "$responsables" },
-          responsablesFormateurs: { $sum: "$responsablesFormateurs" },
-          formateurs: { $sum: "$formateurs" },
-        },
+        $unwind: "$withoutTransmissionDate",
       },
       {
         $project: {
           _id: 0,
-          total: {
-            $add: ["$responsables", "$responsablesFormateurs", "$formateurs"],
-          },
-          responsables: 1,
-          responsablesFormateurs: 1,
-          formateurs: 1,
+          totalWithoutTransmissionDate: "$withoutTransmissionDate.total",
+          total: "$withTransmissionDate.total",
+          responsables: "$withTransmissionDate.responsables",
+          responsablesFormateurs: "$withTransmissionDate.responsablesFormateurs",
+          formateurs: "$withTransmissionDate.formateurs",
         },
       },
     ])

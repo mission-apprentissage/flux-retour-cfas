@@ -371,6 +371,7 @@ interface IndicateursNationalFilters {
 
 interface IndicateursOrganismesNature {
   total: number;
+  totalWithoutTransmissionDate: number;
   responsables: number;
   responsablesFormateurs: number;
   formateurs: number;
@@ -451,7 +452,7 @@ function SectionApercuChiffresCles() {
                   {formatNumber(indicateursNational?.indicateursOrganismes?.total)}
                 </Text>
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
-                  organismes de formation en apprentissage transmettent leurs données
+                  organismes de formation en apprentissage
                   <Tooltip
                     background="bluefrance"
                     color="white"
@@ -486,6 +487,11 @@ function SectionApercuChiffresCles() {
                       verticalAlign="middle"
                     />
                   </Tooltip>
+                </Text>
+                <Text fontSize="zeta" color="mgalt">
+                  transmettent au tableau de bord sur{" "}
+                  <b>{formatNumber(indicateursNational?.indicateursOrganismes?.totalWithoutTransmissionDate)}</b> OFA
+                  fiables.
                 </Text>
                 <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
                 <Text fontSize="zeta" color="mgalt">

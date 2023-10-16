@@ -120,6 +120,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
       ],
       indicateursOrganismes: {
         total: 4,
+        totalWithoutTransmissionDate: 4,
         responsablesFormateurs: 2,
         responsables: 1,
         formateurs: 1,
