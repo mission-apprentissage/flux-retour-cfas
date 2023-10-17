@@ -41,17 +41,17 @@ describe("Job send-reminder-emails", () => {
 
     advanceTo("2023-10-08T04:00z");
     await sendReminderEmails();
-    // 0 mail envoyé car < 7j
+    // 0 nouveau mail envoyé car < 7j
     expect(sendEmail).toHaveBeenCalledTimes(0);
 
     advanceTo("2023-10-08T05:00z");
     await sendReminderEmails();
-    // 1 mail envoyé car >= 7j et 1ère relance
+    // 1 nouveau mail envoyé car >= 7j et 1ère relance
     expect(sendEmail).toHaveBeenCalledTimes(1);
 
     advanceTo("2023-10-08T06:00z");
     await sendReminderEmails();
-    // 0 mail envoyé car relance déjà envoyée
+    // 0 nouveau mail envoyé car relance déjà envoyée
     expect(sendEmail).toHaveBeenCalledTimes(1);
   });
 
@@ -80,17 +80,17 @@ describe("Job send-reminder-emails", () => {
 
     advanceTo("2023-10-17T08:00z");
     await sendReminderEmails();
-    // 0 mail envoyé car < 7j
+    // 0 nouveau mail envoyé car < 7j
     expect(sendEmail).toHaveBeenCalledTimes(0);
 
     advanceTo("2023-10-17T12:00z");
     await sendReminderEmails();
-    // 1 mail envoyé car >= 7j et 1ère relance
+    // 1 nouveau mail envoyé car >= 7j et 1ère relance
     expect(sendEmail).toHaveBeenCalledTimes(1);
 
     advanceTo("2023-10-17T12:00z");
     await sendReminderEmails();
-    // 0 mail envoyé car relance déjà envoyée
+    // 0 nouveau mail envoyé car relance déjà envoyée
     expect(sendEmail).toHaveBeenCalledTimes(1);
   });
 
@@ -134,12 +134,12 @@ describe("Job send-reminder-emails", () => {
 
     advanceTo("2023-10-07T10:00z");
     await sendReminderEmails();
-    // 0 mail envoyé car < 7j
+    // 0 nouveau mail envoyé car < 7j
     expect(sendEmail).toHaveBeenCalledTimes(0);
 
     advanceTo("2023-10-08T10:00z");
     await sendReminderEmails();
-    // 1 mail envoyé car >= 7j et 1ère relance pour user 1
+    // 1 nouveau mail envoyé car >= 7j et 1ère relance pour user 1
     expect(sendEmail).toHaveBeenCalledTimes(1);
 
     advanceTo("2023-10-09T10:00z");
@@ -152,17 +152,17 @@ describe("Job send-reminder-emails", () => {
 
     advanceTo("2023-10-10T10:00z");
     await sendReminderEmails();
-    // 1 mail envoyé car état de relance réinitialisé pour user 1
+    // 1 nouveau mail envoyé car état de relance réinitialisé pour user 1
     expect(sendEmail).toHaveBeenCalledTimes(2);
 
     advanceTo("2023-10-11T10:00z");
     await sendReminderEmails();
-    // 1 mail envoyé car >= 7j et 1ère relance pour user 2
+    // 1 nouveau mail envoyé car >= 7j et 1ère relance pour user 2
     expect(sendEmail).toHaveBeenCalledTimes(3);
 
     advanceTo("2023-10-12T10:00z");
     await sendReminderEmails();
-    // rien
+    // 0 nouveau mail envoyé car relances déjà envoyées
     expect(sendEmail).toHaveBeenCalledTimes(3);
   });
 });
