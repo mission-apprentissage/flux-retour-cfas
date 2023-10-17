@@ -78,7 +78,10 @@ export async function sendReminderEmails() {
     ])
     .toArray();
 
-  logger.info({ count: users.length }, "checking users");
+  logger.info({ count: users.length }, "fetched OFA users");
+
+  // séquentiel car on n'utilise pas de pool de connexion au serveur SMTP
+  // et l'envoi d'un email prend ~1s
   for (const user of users) {
     const organisme = user.organisation.organisme;
 
