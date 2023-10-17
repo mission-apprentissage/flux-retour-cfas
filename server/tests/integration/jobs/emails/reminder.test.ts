@@ -46,8 +46,8 @@ describe("Job send-reminder-emails", () => {
 
     advanceTo("2023-10-08T05:00z");
     await sendReminderEmails();
-    expect(sendEmail).toHaveBeenCalledTimes(1);
     // 1 mail envoyé car >= 7j et 1ère relance
+    expect(sendEmail).toHaveBeenCalledTimes(1);
 
     advanceTo("2023-10-08T06:00z");
     await sendReminderEmails();
@@ -85,8 +85,8 @@ describe("Job send-reminder-emails", () => {
 
     advanceTo("2023-10-17T12:00z");
     await sendReminderEmails();
-    expect(sendEmail).toHaveBeenCalledTimes(1);
     // 1 mail envoyé car >= 7j et 1ère relance
+    expect(sendEmail).toHaveBeenCalledTimes(1);
 
     advanceTo("2023-10-17T12:00z");
     await sendReminderEmails();
@@ -139,8 +139,8 @@ describe("Job send-reminder-emails", () => {
 
     advanceTo("2023-10-08T10:00z");
     await sendReminderEmails();
-    expect(sendEmail).toHaveBeenCalledTimes(1);
     // 1 mail envoyé car >= 7j et 1ère relance pour user 1
+    expect(sendEmail).toHaveBeenCalledTimes(1);
 
     advanceTo("2023-10-09T10:00z");
     // configuration et suppression ERP
@@ -157,13 +157,13 @@ describe("Job send-reminder-emails", () => {
 
     advanceTo("2023-10-11T10:00z");
     await sendReminderEmails();
-    expect(sendEmail).toHaveBeenCalledTimes(3);
     // 1 mail envoyé car >= 7j et 1ère relance pour user 2
+    expect(sendEmail).toHaveBeenCalledTimes(3);
 
     advanceTo("2023-10-12T10:00z");
     await sendReminderEmails();
-    expect(sendEmail).toHaveBeenCalledTimes(3);
     // rien
+    expect(sendEmail).toHaveBeenCalledTimes(3);
   });
 });
 

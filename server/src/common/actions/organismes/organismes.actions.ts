@@ -971,17 +971,14 @@ export async function getMemberIdsOfOrganisme(organismeId: ObjectId): Promise<Ob
           from: "organisations",
           as: "organisation",
           let: {
-            uai: "$uai",
+            uai: { $ifNull: ["$uai", null] }, // on force par défaut à null plutôt que undefined pour correspondre avec l'organisation
             siret: "$siret",
           },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $or: [
-                    { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }] },
-                    { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: [null, "$$uai"] }] },
-                  ],
+                  $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }],
                 },
               },
             },
