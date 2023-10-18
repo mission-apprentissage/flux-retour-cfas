@@ -51,6 +51,9 @@ export async function getIndicateursOrganismesNature(filters: OrganismesFilters)
             {
               fiabilisation_statut: "FIABLE",
               ferme: false,
+              nature: {
+                $nin: ["inconnue", null],
+              },
             },
           ],
         },
