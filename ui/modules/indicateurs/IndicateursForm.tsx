@@ -84,15 +84,21 @@ function IndicateursForm(props: IndicateursFormProps) {
     }
   );
 
+  const prominentOrganismeId = props.organismeId ?? ownOrganisme?._id;
+  const prominentOrganisme = (indicateursEffectifs ?? []).find((org) => org.organisme_id === prominentOrganismeId);
+  if (prominentOrganisme) {
+    (prominentOrganisme as any).prominent = true;
+  }
+
   const indicateursEffectifsTotaux = useMemo(
     () =>
       (indicateursEffectifs ?? []).reduce(
-        (acc, indicateursDepartement) => {
-          acc.apprenants += indicateursDepartement.apprenants;
-          acc.apprentis += indicateursDepartement.apprentis;
-          acc.inscritsSansContrat += indicateursDepartement.inscritsSansContrat;
-          acc.abandons += indicateursDepartement.abandons;
-          acc.rupturants += indicateursDepartement.rupturants;
+        (acc, indicateursParOrganisme) => {
+          acc.apprenants += indicateursParOrganisme.apprenants;
+          acc.apprentis += indicateursParOrganisme.apprentis;
+          acc.inscritsSansContrat += indicateursParOrganisme.inscritsSansContrat;
+          acc.abandons += indicateursParOrganisme.abandons;
+          acc.rupturants += indicateursParOrganisme.rupturants;
           return acc;
         },
         {

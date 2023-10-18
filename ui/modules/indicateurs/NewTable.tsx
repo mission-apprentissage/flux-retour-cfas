@@ -33,7 +33,7 @@ interface NewTableProps<T> extends SystemProps {
   renderDivider?: () => React.ReactElement;
 }
 
-function NewTable<T>(props: NewTableProps<T>) {
+function NewTable<T>(props: NewTableProps<T & { prominent?: boolean }>) {
   const [pagination, setPagination] = useState<PaginationState>(
     props.paginationState ?? {
       pageIndex: 0,
@@ -127,7 +127,11 @@ function NewTable<T>(props: NewTableProps<T>) {
             table.getRowModel().rows.map((row, index) => {
               return (
                 <Fragment key={`fragment_${index}`}>
-                  <Tr key={`row_${index}`}>
+                  <Tr
+                    key={`row_${index}`}
+                    borderLeftWidth={row.original.prominent ? "4px" : ""}
+                    borderLeftColor="blue_cumulus_main"
+                  >
                     {row.getVisibleCells().map((cell, index) => {
                       return (
                         <Td key={`cellContent_${index}`}>
