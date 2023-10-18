@@ -118,8 +118,8 @@ export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret
   invalidsUais: string[],
   invalidsSirets: string[]
 ) {
-  const validateUAI = (uai: string) => !invalidsUais.includes(uai);
-  const validateSiret = (siret: string) => !invalidsSirets.includes(siret);
+  const validateUAI = (uai: string) => !invalidsUais.includes(String(uai));
+  const validateSiret = (siret: string) => !invalidsSirets.includes(String(siret));
   const messageUai = "UAI non valide";
   const messageSiret = "Siret non valide";
 
