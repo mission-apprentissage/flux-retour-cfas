@@ -36,6 +36,10 @@ export const schema = object(
     connection_history: arrayOf(date(), { description: "Historique des dates de connexion" }),
     invalided_token: boolean({ description: "true si besoin de reset le token" }),
     password_updated_at: date({ description: "Date de dernière mise à jour mot de passe" }),
+    reminder_missing_data_sent_date: date({ description: "Date d'envoi de la relance email pour données manquantes" }),
+    reminder_missing_configuration_and_data_sent_date: date({
+      description: "Date d'envoi de la relance email pour configuration et données manquantes",
+    }),
     emails: arrayOf(
       object(
         {

@@ -66,6 +66,19 @@ export async function initTestApp() {
         headers: { cookie: `${COOKIE_NAME}=${sessionToken}` },
       });
     },
+
+    /**
+     * Permet de faire une requête authentifiée pour un utilisateur existant.
+     */
+    async requestAsUser<T>(userEmail: string, method: Method, url: string, body?: T): Promise<AxiosResponse> {
+      const sessionToken = await createSession(userEmail);
+      return await httpClient.request({
+        method,
+        url,
+        data: body,
+        headers: { cookie: `${COOKIE_NAME}=${sessionToken}` },
+      });
+    },
   };
 }
 

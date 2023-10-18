@@ -15,7 +15,7 @@ import { getMetiersBySiret } from "@/common/apis/apiLba";
 import logger from "@/common/logger";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { Organisme } from "@/common/model/@types/Organisme";
-import { organismesDb, effectifsDb, organisationsDb } from "@/common/model/collections";
+import { organismesDb, effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
@@ -691,6 +691,21 @@ export async function resetConfigurationERP(ctx: AuthContext, organismeId: Objec
       },
     }
   );
+
+  // reset reminder states
+  await usersMigrationDb().updateMany(
+    {
+      _id: {
+        $in: await getMemberIdsOfOrganisme(organismeId),
+      },
+    },
+    {
+      $unset: {
+        reminder_missing_data_sent_date: 1,
+        reminder_missing_configuration_and_data_sent_date: 1,
+      },
+    }
+  );
 }
 
 export async function verifyOrganismeAPIKeyToUser(
@@ -935,4 +950,75 @@ export async function getInvalidSiretsFromDossierApprenant(data: Partial<Effecti
     }
   }
   return invalidsSirets;
+}
+
+export async function getMemberIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
+  const res = await organismesDb()
+    .aggregate<{ _id: ObjectId }>([
+      {
+        $match: {
+          _id: organismeId,
+        },
+      },
+      {
+        $project: {
+          siret: 1,
+          uai: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: "organisations",
+          as: "organisation",
+          let: {
+            uai: { $ifNull: ["$uai", null] }, // on force par défaut à null plutôt que undefined pour correspondre avec l'organisation
+            siret: "$siret",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }],
+                },
+              },
+            },
+          ],
+        },
+      },
+      { $unwind: { path: "$organisation" } },
+      {
+        $lookup: {
+          from: "usersMigration",
+          as: "users",
+          let: {
+            organisation_id: "$organisation._id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$organisation_id", "$$organisation_id"],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: "$users",
+      },
+      {
+        $replaceRoot: {
+          newRoot: "$users",
+        },
+      },
+    ])
+    .toArray();
+
+  return res.map((doc) => doc._id);
 }
