@@ -96,7 +96,7 @@
     "type-fest": "^3.10.0",
     "uuid": "8.3.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
-    "zod": "3.22.4",
+    "zod": "3.21.4",
     "zod-express-middleware": "1.4.0",
     "zod-to-json-schema": "3.21.4"
   },

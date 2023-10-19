@@ -60,7 +60,7 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz",
     "yup": "0.32.11",
     "yup-password": "0.2.2",
-    "zod": "3.22.4",
+    "zod": "3.21.4",
     "zod-formik-adapter": "1.2.0"
   },
   "devDependencies": {
