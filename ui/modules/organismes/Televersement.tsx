@@ -294,7 +294,9 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           <Ribbons variant="error" mb={8}>
             <Box mb="8">
               <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
-                {errorsCount} erreurs ont été détectées dans votre fichier.
+                {errorsCount === 1
+                  ? "Une erreur a été détectée dans votre fichier"
+                  : `${errorsCount} erreurs ont été détectées dans votre fichier.`}
               </Text>
               <Text fontSize="sm" color="grey.800">
                 Vous pouvez voir le détail ligne à ligne ci-dessous. Vous devez modifier votre fichier et
@@ -336,7 +338,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             <Table fontSize="sm">
               <Thead>
                 <Tr>
-                  <Th>#</Th>
+                  <Th>Ligne</Th>
                   <Th>Statut</Th>
                   {headers.map((key) => (
                     <Th key={key}>{key}</Th>
@@ -349,14 +351,16 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                     <Td>{index + 2}</Td>
                     <Td>
                       {row.errors.length === 0 ? (
-                        <Flex color="green.500">
+                        <Flex color="green.500" alignItems="center">
                           <CheckIcon />
                           <Text ml="2">Valide</Text>
                         </Flex>
                       ) : (
-                        <Flex color="red.500">
+                        <Flex color="red.500" alignItems="center">
                           <WarningTwoIcon />
-                          <Text ml="2">{row.errors.length}&nbsp;erreurs</Text>
+                          <Text ml="2">
+                            {row.errors.length}&nbsp;erreur{row.errors.length > 1 ? "s" : ""}
+                          </Text>
                         </Flex>
                       )}
                     </Td>
