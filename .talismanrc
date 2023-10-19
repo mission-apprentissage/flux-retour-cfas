@@ -73,6 +73,8 @@ fileignoreconfig:
   checksum: 71c60b9fc5f4d0308146235adde75e4df34ebac59539cef321403b5966b061ad
 - filename: server/src/jobs/seed/start/index.ts
   checksum: bd018d4dab141be955d6e546f817b0aa58edc733e9e562272765d8211d2f3015
+- filename: server/static/open-api.json
+  checksum: cc6eef59550fe79f35ddf54e74e8b7f72dc85bc3480261a8cea94fa19e16a882
 - filename: server/tests/integration/external/zod.test.ts
   checksum: 6e871e7294e90ce4917b687aa3ea21698792a4582013b5354cc43126c91ad2e2
 - filename: server/tests/integration/http/organisme.routes.test.ts
