@@ -51,6 +51,8 @@ fileignoreconfig:
   checksum: 24ebe0dea49a7706a0351fe679dbab556d80b12aa8511642ca3637e2e6925fc9
 - filename: .yarn/**
   checksum: any
+- filename: .yarn/patches/zod-npm-3.21.4-9f570b215c.patch
+  checksum: d429ff982063e6476ea8d8d91ac1173a1279d1c9bf0488b6e05396affeb8c6cf
 - filename: DEV.md
   checksum: 9ea1d3d5e7b14290a680bf3c433c5c77b8a106e13fa2d662e6e0df0c86e7469d
 - filename: README.md
