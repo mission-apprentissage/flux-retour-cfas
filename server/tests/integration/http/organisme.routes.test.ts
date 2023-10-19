@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
+import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 
 import { PermissionsOrganisme } from "@/common/actions/helpers/permissions-organisme";
@@ -238,7 +239,7 @@ describe("Routes /organismes/:id", () => {
 
       const infoTransmissionEffectifsAttributes = {
         erps: ["YMAG"],
-        last_transmission_date: "2023-08-15T18:00:00.000Z",
+        last_transmission_date: startOfDay(subMonths(new Date(), 1)).toISOString(),
       };
 
       testPermissions<any>(
