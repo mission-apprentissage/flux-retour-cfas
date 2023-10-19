@@ -1,0 +1,89 @@
+import {
+  Button,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
+import React from "react";
+
+import { _delete } from "@/common/httpClient";
+import useToaster from "@/hooks/useToaster";
+import { ArrowRightLine } from "@/theme/components/icons";
+
+import { DuplicateOrganismeDetail } from "./models/DuplicateOrganismeDetail";
+
+const OrganismeDoublonDeleteAlertDialog = ({
+  isOpen,
+  onClose = () => {},
+  cancelRef,
+  duplicatesDetail,
+}: {
+  isOpen: boolean;
+  onClose?: () => void;
+  cancelRef;
+  duplicatesDetail: DuplicateOrganismeDetail[];
+}) => {
+  const queryClient = useQueryClient();
+  const { toastSuccess } = useToaster();
+
+  return (
+    <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size={"4xl"}>
+      <AlertDialogOverlay>
+        <AlertDialogContent>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            <ArrowRightLine mt="-0.5rem" />
+            <Text as="span" ml="1rem" textStyle={"h4"}>
+              Fusionner les organismes
+            </Text>
+          </AlertDialogHeader>
+
+          <AlertDialogBody>
+            <Stack spacing="8">
+              <Text>
+                En choisissant de fusionner les organismes, les informations qui les concernent seront regroupées en un
+                seul organisme.
+              </Text>
+              <Text>
+                Cela concerne les informations suivantes :
+                <br />- effectifs
+                <br />- paramétrage du ou des ERP
+                <br />- comptes utilisateurs
+              </Text>
+              <Text>
+                <strong>Cette action est irreversible.</strong>
+              </Text>
+            </Stack>
+          </AlertDialogBody>
+
+          <AlertDialogFooter>
+            <Button ref={cancelRef} onClick={onClose}>
+              Annuler
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={async () => {
+                // TODO
+                // await _post(`/api/v1/fusionner/TODO`);
+                console.log("duplicatesDetail :>> ", duplicatesDetail);
+                toastSuccess("Les organismes ont bien été fusionnés !");
+                queryClient.invalidateQueries(["admin/organismes-duplicats"]);
+                onClose();
+              }}
+              ml={3}
+            >
+              Fusionner les organismes
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialogOverlay>
+    </AlertDialog>
+  );
+};
+
+export default OrganismeDoublonDeleteAlertDialog;

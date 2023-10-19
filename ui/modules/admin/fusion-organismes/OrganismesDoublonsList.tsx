@@ -1,7 +1,9 @@
-import { Box, Button, HStack, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import { Row } from "@tanstack/react-table";
 import React, { Fragment } from "react";
 
+import Link from "@/components/Links/Link";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { Alert, ArrowRightLine } from "@/theme/components/icons";
 
@@ -17,7 +19,6 @@ const defaultPaginationState = {
 const OrganismesDoublonsList = ({ data }) => {
   return (
     <NewTable
-      mt={4}
       data={data || []}
       loading={false}
       variant="third"
@@ -26,12 +27,24 @@ const OrganismesDoublonsList = ({ data }) => {
       paginationState={defaultPaginationState}
       columns={[
         {
-          header: () => <Text color="gray.500">Nom</Text>,
+          header: () => <></>,
           accessorKey: "duplicates",
           cell: ({ row }) => (
-            <Text fontSize="1rem" pt={2} whiteSpace="nowrap">
-              <strong>{Array.from(new Set(row.original?.duplicates?.map((item) => item.nom))).join(" ou ")}</strong>
-            </Text>
+            <HStack spacing={6}>
+              <Text fontSize="1rem" pt={-2} whiteSpace="nowrap">
+                <strong>{Array.from(new Set(row.original?.duplicates?.map((item) => item.nom))).join(" ou ")}</strong>
+              </Text>
+              <Link
+                href={`https://referentiel.apprentissage.onisep.fr/organismes?text=${row.original?._id.siret}`}
+                isExternal
+                color="bluefrance"
+                fontSize="zeta"
+              >
+                <Text size="8px" textDecoration="underline">
+                  <Box as="i" className="ri-external-link-fill" /> Voir dans le référentiel
+                </Text>
+              </Link>
+            </HStack>
           ),
           enableSorting: false,
         },
@@ -42,8 +55,8 @@ const OrganismesDoublonsList = ({ data }) => {
 
 const RenderSubComponent = (row: Row<DuplicateOrganismeGroup>) => {
   return (
-    <Box border="1px" p="12px" borderColor="gray.300">
-      <Stack spacing={8} mt={1} ml={10}>
+    <Box border="1px" p="12px" mt="-10px   " borderColor="gray.300">
+      <Stack spacing={8} ml={10}>
         {row?.original?.duplicates
           // Tri par date de création pour proposition de suppression du moins récent
           ?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
@@ -63,38 +76,51 @@ const RenderSubComponent = (row: Row<DuplicateOrganismeGroup>) => {
                   <Text color={item.effectifs_count > 0 ? "black" : "gray.500"}>
                     Effectifs : {item.effectifs_count > 0 ? item.effectifs_count : "Non déclaré"}
                   </Text>
-                  <OrganismeDoublonDetailModalContainer index={index} duplicateDetail={item} />
+
                   {!item.uai && (
-                    <HStack color="warning">
-                      <Alert boxSize={4} mt={1} />
-                      <Text fontSize="0.7rem"> Etablissement non fiable</Text>
+                    <HStack color="warning" spacing="1">
+                      <Alert boxSize={4} mb="0.1rem" />
+                      <Text fontSize="0.8rem">Non fiable</Text>
                     </HStack>
                   )}
                 </HStack>
               </Stack>
             </Fragment>
           ))}
+        <Flex mt="4">
+          {row?.original?.duplicates.length === 2 && (
+            <OrganismeDoublonDetailModalContainer duplicatesDetail={row?.original?.duplicates} />
+          )}
+
+          {row?.original?.duplicates.length !== 2 && (
+            <Ribbons variant="alert" mb={6}>
+              <Box ml={3}>
+                <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6} mb={4}>
+                  Attention il y a plus de 2 organismes en duplicat, analyse complémentaire nécessaire.
+                </Text>
+              </Box>
+            </Ribbons>
+          )}
+        </Flex>
       </Stack>
     </Box>
   );
 };
 
 const OrganismeDoublonDetailModalContainer = ({
-  index,
-  duplicateDetail,
+  duplicatesDetail,
 }: {
-  index: number;
-  duplicateDetail: DuplicateOrganismeDetail;
+  duplicatesDetail: DuplicateOrganismeDetail[];
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <Fragment key={`detailModal_${index}`}>
-      <Button size="xs" variant="secondary" onClick={onOpen}>
+    <Fragment>
+      <Button size="md" variant="secondary" onClick={onOpen}>
         <Box as="i" className="ri-eye-line" fontSize="epsilon" mr={2} />
         <Text as="span">Voir les détails</Text>
       </Button>
 
-      <OrganismeDoublonDetailModal isOpen={isOpen} onClose={onClose} duplicateDetail={duplicateDetail} />
+      <OrganismeDoublonDetailModal isOpen={isOpen} onClose={onClose} duplicatesDetail={duplicatesDetail} />
     </Fragment>
   );
 };
