@@ -21,6 +21,9 @@
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": false,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "paths": {
+      "zod": ["node_modules/@totak/zod"] // à supprimer quand https://github.com/colinhacks/zod/pull/2719 sera mergé
+    }
   }
 }

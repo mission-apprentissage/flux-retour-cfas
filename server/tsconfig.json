@@ -18,7 +18,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@tests/*": ["./tests/*"],
-      "shared": ["../shared"]
+      "shared": ["../shared"],
+      "zod": ["node_modules/@totak/zod"] // à supprimer quand https://github.com/colinhacks/zod/pull/2719 sera mergé
     },
     "resolveJsonModule": true,
     /* JavaScript Support */
