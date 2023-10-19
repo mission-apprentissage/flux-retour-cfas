@@ -194,8 +194,7 @@ registry.registerPath({
   },
   responses: {
     "200": {
-      description:
-        "les dossiers apprenants ont été mis en file d'attente, en attente de traitement. Les éventuels erreurs seront remontées par email.",
+      description: "les dossiers apprenants ont été mis en file d'attente.",
       content: {
         "application/json": {
           schema: z.object({
