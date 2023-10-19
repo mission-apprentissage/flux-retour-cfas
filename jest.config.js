@@ -37,6 +37,7 @@ const config = async () => {
         moduleNameMapper: {
           "^@/(.*)$": "<rootDir>/server/src/$1",
           "^@tests/(.*)$": "<rootDir>/server/tests/$1",
+          zod: "<rootDir>/node_modules/@totak/zod",
         },
         preset: "@shelf/jest-mongodb",
         setupFiles: ["<rootDir>/server/tests/jest/setupFiles.ts"],
@@ -68,6 +69,9 @@ const config = async () => {
             },
           ],
         },
+        moduleNameMapper: {
+          zod: "<rootDir>/node_modules/@totak/zod",
+        },
       },
       {
         ...nextConfig,
@@ -75,6 +79,9 @@ const config = async () => {
         modulePathIgnorePatterns: ["<rootDir>/server/dist/", "<rootDir>/ui/.next/"],
         testEnvironment: "jest-environment-jsdom",
         testMatch: ["<rootDir>/ui/**/?(*.)+(spec|test).[tj]s?(x)"],
+        moduleNameMapper: {
+          zod: "<rootDir>/node_modules/@totak/zod",
+        },
       },
     ],
   };
