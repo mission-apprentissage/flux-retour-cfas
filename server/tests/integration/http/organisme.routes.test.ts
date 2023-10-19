@@ -239,7 +239,7 @@ describe("Routes /organismes/:id", () => {
 
       const infoTransmissionEffectifsAttributes = {
         erps: ["YMAG"],
-        last_transmission_date: startOfDay(subMonths(new Date(), 1)),
+        last_transmission_date: startOfDay(subMonths(new Date(), 1)).toISOString(),
       };
 
       testPermissions<any>(
