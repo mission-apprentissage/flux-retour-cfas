@@ -56,25 +56,27 @@ module.exports = {
     "import/no-mutable-exports": "error",
     "import/default": "off",
     "import/no-named-as-default-member": "off",
-    "import/no-extraneous-dependencies": [
-      "error",
-      {
-        devDependencies: [
-          "**/test/**",
-          "**/tests/**",
-          "**/spec/**",
-          "**/__tests__/**",
-          "**/__mocks__/**",
-          "**/test.{js,jsx,ts,tsx}",
-          "**/test-*.{js,jsx,ts,tsx}",
-          "**/*{.,_}{test,spec,bench,fixture}.{js,jsx,ts,tsx}",
-          "**/jest.config.js",
-          "**/dev.ts",
-          "**/tsup.config.ts",
-        ],
-        optionalDependencies: false,
-      },
-    ],
+
+    // désactivé tant qu'on utilise le fork de zod
+    // "import/no-extraneous-dependencies": [
+    //   "error",
+    //   {
+    //     devDependencies: [
+    //       "**/test/**",
+    //       "**/tests/**",
+    //       "**/spec/**",
+    //       "**/__tests__/**",
+    //       "**/__mocks__/**",
+    //       "**/test.{js,jsx,ts,tsx}",
+    //       "**/test-*.{js,jsx,ts,tsx}",
+    //       "**/*{.,_}{test,spec,bench,fixture}.{js,jsx,ts,tsx}",
+    //       "**/jest.config.js",
+    //       "**/dev.ts",
+    //       "**/tsup.config.ts",
+    //     ],
+    //     optionalDependencies: false,
+    //   },
+    // ],
   },
   settings: {
     "import/extensions": [".js", ".ts"],

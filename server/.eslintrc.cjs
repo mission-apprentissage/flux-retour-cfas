@@ -15,6 +15,7 @@ module.exports = {
     ],
     // doesn't support path alias
     "node/no-missing-import": 0,
+    "node/no-extraneous-import": "off",
   },
   env: {
     es2022: true,
@@ -29,7 +30,6 @@ module.exports = {
       rules: {
         // autorise l'import des devDependencies
         "node/no-unpublished-import": "off",
-        "node/no-extraneous-import": "error",
       },
     },
   ],
