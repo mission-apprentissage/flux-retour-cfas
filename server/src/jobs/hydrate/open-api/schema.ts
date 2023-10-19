@@ -24,6 +24,60 @@ const dossierApprenantSchemaWithErrors = dossierApprenantSchema().extend({
     .openapi({ description: "Erreurs de validation de cet effectif" }),
 });
 
+const dossierApprenantSchemaV3WithErrors = dossierApprenantSchemaV3Base().extend({
+  validation_errors: z
+    .array(
+      z.object({
+        message: z.string().openapi({
+          description: "Message d'erreur",
+          example: '"contrat_date_rupture" must be in iso format',
+        }),
+        path: z.array(
+          z.string().openapi({
+            description: "Chemin du ou des champs en erreur",
+            type: "string",
+            example: '["contrat_date_rupture"]',
+          })
+        ),
+      })
+    )
+    .optional()
+    .openapi({ description: "Erreurs de validation de cet effectif" }),
+  updated_at: z.string().openapi({
+    description: "Date de mise à jour de l'effectif",
+    type: "string",
+    format: "YYYY-MM-DDT00:00:00Z",
+  }),
+  created_at: z.string().openapi({
+    description: "Date de création de l'effectif",
+    type: "string",
+    format: "YYYY-MM-DDT00:00:00Z",
+  }),
+  processed_at: z.string().openapi({
+    description: "Date de traitement de l'effectif",
+    type: "string",
+    format: "YYYY-MM-DDT00:00:00Z",
+  }),
+  source: z.string().openapi({
+    description: "Source de l'effectif (nom de l'ERP)",
+    type: "string",
+    example: "my-erp",
+  }),
+  source_organisme_id: z.string().openapi({
+    description: "Identifiant interne de l'organisme qui a envoyé l'effectif",
+    type: "string",
+  }),
+  api_version: z.string().openapi({
+    description: "Version de l'API utilisée",
+    type: "string",
+    example: "v3",
+  }),
+  _id: z.string().openapi({
+    description: "Identifiant unique (interne) de l'effectif",
+    type: "string",
+  }),
+});
+
 const registry = new OpenAPIRegistry();
 
 const httpAuth = registry.registerComponent("securitySchemes", "httpAuth", {
@@ -141,15 +195,20 @@ registry.registerPath({
   responses: {
     "200": {
       description:
-        "les dossiers apprenants ont été mise en queue, en attente de traitement. Les éventuels erreurs seront remontées par email.",
+        "les dossiers apprenants ont été mis en file d'attente, en attente de traitement. Les éventuels erreurs seront remontées par email.",
       content: {
         "application/json": {
           schema: z.object({
+            status: z.string().openapi({
+              description: "OK",
+              enum: ["OK"],
+            }),
+            detail: z.string().optional(),
             message: z.string().openapi({
               description: "Queued",
               enum: ["Queued"],
             }),
-            data: z.array(dossierApprenantSchemaWithErrors),
+            data: z.array(dossierApprenantSchemaV3WithErrors),
           }),
         },
       },
