@@ -30,7 +30,7 @@ describe("Route indicateurs", () => {
     await organismesDb().insertMany(organismes);
   });
 
-  describe("GET /api/v1/indicateurs/effectifs - indicateurs sur les effectifs", () => {
+  describe("GET /api/v1/indicateurs/effectifs/par-departement - indicateurs sur les effectifs par département", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
@@ -47,7 +47,7 @@ describe("Route indicateurs", () => {
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-      const response = await httpClient.get(`/api/v1/indicateurs/effectifs?date=${date}`);
+      const response = await httpClient.get(`/api/v1/indicateurs/effectifs/par-departement?date=${date}`);
 
       expectUnauthorizedError(response);
     });
@@ -77,7 +77,11 @@ describe("Route indicateurs", () => {
         Administrateur: 1,
       };
       testPermissions(accesOrganisme, async (organisation, nbApprentis) => {
-        const response = await requestAsOrganisation(organisation, "get", `/api/v1/indicateurs/effectifs?date=${date}`);
+        const response = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/indicateurs/effectifs/par-departement?date=${date}`
+        );
 
         expect(response.status).toStrictEqual(200);
         expect(response.data).toStrictEqual(

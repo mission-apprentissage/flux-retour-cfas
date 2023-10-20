@@ -3,11 +3,10 @@ import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate } from "shared";
 import { v4 as uuidv4 } from "uuid";
 
-import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "@/common/actions/helpers/filters";
 import {
-  findOrganismesAccessiblesByOrganisationOF,
+  canConfigureOrganismeERP,
   findOrganismesFormateursIdsOfOrganisme,
-  getOrganismeRestriction,
+  getInfoTransmissionEffectifsCondition,
 } from "@/common/actions/helpers/permissions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
@@ -16,15 +15,13 @@ import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb, effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { cleanProjection } from "@/common/utils/mongoUtils";
-import { escapeRegExp } from "@/common/utils/regexUtils";
-import { getDepartementCodeFromUai } from "@/common/utils/uaiUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
+import { getPermissionOrganisation } from "../helpers/permissions-new";
 import {
   OrganismeWithPermissions,
   PermissionsOrganisme,
@@ -33,8 +30,6 @@ import {
 import { InfoSiret } from "../infoSiret.actions-struct";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
-
-const SEARCH_RESULTS_LIMIT = 50;
 
 /**
  * Méthode de création d'un organisme
@@ -220,63 +215,6 @@ export type OrganismesSearch = {
   etablissement_num_region?: string;
   etablissement_num_departement?: string;
   etablissement_reseaux?: string;
-};
-
-/**
- * Retourne la liste des organismes correspondant aux critères de recherche
- * restreint aux organismes accessibles par l'utilisateur
- */
-export const searchOrganismes = async (ctx: AuthContext, searchCriteria: OrganismesSearch) => {
-  const matchStage: any = await getOrganismeRestriction(ctx);
-  if (searchCriteria.searchTerm) {
-    matchStage.$or = [
-      { $text: { $search: searchCriteria.searchTerm } },
-      { uai: new RegExp(escapeRegExp(searchCriteria.searchTerm), "g") },
-      { siret: new RegExp(escapeRegExp(searchCriteria.searchTerm), "g") },
-    ];
-  }
-
-  // if other criteria have been provided, find the list of uai matching those criteria in the DossierApprenant collection
-  if (
-    searchCriteria.etablissement_num_departement ||
-    searchCriteria.etablissement_num_region ||
-    searchCriteria.etablissement_reseaux
-  ) {
-    const start = Date.now();
-    const eligibleUais = (
-      await effectifsDb()
-        .aggregate([
-          ...buildMongoPipelineFilterStages(searchCriteria as unknown as LegacyEffectifsFilters),
-          { $group: { _id: "$_computed.organisme.uai" } },
-        ])
-        .toArray()
-    ).map((row) => row._id);
-    logger.info({ elapsted: Date.now() - start, eligibleUais: eligibleUais.length }, "searchOrganismes_eligibleUais");
-    matchStage.uai = { $in: eligibleUais };
-  }
-
-  const sortStage = searchCriteria.searchTerm
-    ? {
-        score: { $meta: "textScore" },
-        "organisme.nom": 1,
-      }
-    : { "organisme.nom": 1 };
-
-  const start = Date.now();
-  const organismes = await organismesDb()
-    .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
-    .toArray();
-  logger.info({ elapsted: Date.now() - start, organismes: organismes.length }, "searchOrganismes_organismes");
-
-  return organismes.map((organisme) => {
-    return {
-      uai: organisme.uai,
-      siret: organisme.siret,
-      nom: organisme.nom,
-      nature: organisme.nature,
-      departement: organisme.uai ? getDepartementCodeFromUai(organisme.uai) : null,
-    };
-  });
 };
 
 /**
@@ -615,7 +553,7 @@ export async function findOrganismesByUAI(uai: string): Promise<Organisme[]> {
   return organismes;
 }
 
-export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<Organisme> {
+export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<WithId<Organisme>> {
   const organisme = await organismesDb().findOne({
     uai: uai as any,
     siret: siret,
@@ -624,24 +562,6 @@ export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: strin
     throw Boom.badRequest("Aucun organisme trouvé");
   }
   return organisme;
-}
-
-async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: ObjectId): Promise<boolean> {
-  const organisation = ctx.organisation;
-  switch (organisation.type) {
-    case "ORGANISME_FORMATION": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
-        ctx as AuthContext<OrganisationOrganismeFormation>
-      );
-      return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());
-    }
-
-    case "ADMINISTRATEUR":
-      return true;
-
-    default:
-      return false;
-  }
 }
 
 export async function configureOrganismeERP(
@@ -764,7 +684,7 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
 
 export async function listOrganisationOrganismes(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>[]> {
   const organismes = (await organismesDb()
-    .find(await getOrganismeRestriction(ctx), {
+    .find(await getPermissionOrganisation(ctx, "ListeOrganismes"), {
       projection: getOrganismeListProjection(true),
     })
     .toArray()) as WithId<OrganismeWithPermissions>[];
@@ -790,35 +710,6 @@ export async function listOrganismesFormateurs(
     .toArray()) as WithId<OrganismeWithPermissions>[];
 
   return organismes;
-}
-
-async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
-  const organisation = ctx.organisation;
-  switch (organisation.type) {
-    case "ORGANISME_FORMATION": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
-        ctx as AuthContext<OrganisationOrganismeFormation>
-      );
-      return {
-        $in: ["$_id", linkedOrganismesIds],
-      };
-    }
-
-    case "TETE_DE_RESEAU": {
-      return { $eq: ["$reseaux", organisation.reseau] };
-    }
-
-    case "DREETS":
-    case "DRAAF":
-    case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
-    case "DDETS":
-    case "ACADEMIE":
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "CARIF_OREF_NATIONAL":
-    case "ADMINISTRATEUR":
-      return true;
-  }
 }
 
 /**

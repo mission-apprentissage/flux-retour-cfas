@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import { PromisePool } from "@supercharge/promise-pool";
 import { Filter, ObjectId, WithId } from "mongodb";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";

@@ -4,12 +4,8 @@ import { ObjectId, WithId } from "mongodb";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
-import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { Organisme } from "../model/@types";
-
-import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions";
-import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters";
 
 /**
  * Méthode de build d'un effectif
@@ -72,16 +68,6 @@ export const findEffectifs = async (organisme_id, projection = {}) => {
   return await effectifsDb()
     .find({ organisme_id: new ObjectId(organisme_id) }, { projection })
     .toArray();
-};
-
-/**
- * Méthode de récupération d'un effectif versatile par query
- * @param {*} query
- * @param {*} projection
- * @returns
- */
-export const findEffectifByQuery = async (query, projection = {}) => {
-  return await effectifsDb().findOne(query, { projection });
 };
 
 /**
@@ -173,25 +159,6 @@ export const lockEffectif = async (effectif: WithId<Effectif>) => {
   );
 
   return updated.value;
-};
-
-/**
- * Récupération du nb distinct d'organismes transmettant des effectifs (distinct organisme_id dans la collection effectifs)
- */
-export const getNbDistinctOrganismes = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
-  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
-  const filterStages = buildMongoPipelineFilterStages(filtersWithRestriction);
-  const distinctOrganismes = await effectifsDb()
-    .aggregate([
-      ...filterStages,
-      {
-        $group: {
-          _id: "$organisme_id",
-        },
-      },
-    ])
-    .toArray();
-  return distinctOrganismes.length;
 };
 
 export const addEffectifComputedFields = (organisme: Organisme): Effectif["_computed"] => {

@@ -11,15 +11,13 @@ import {
 } from "@/common/actions/helpers/filters";
 import {
   findOrganismesFormateursIdsOfOrganisme,
-  getEffectifsAnonymesRestriction,
-  getEffectifsNominatifsRestriction,
   getOrganismeIndicateursEffectifsRestriction,
-  getIndicateursEffectifsRestriction,
-  getIndicateursOrganismesRestriction,
 } from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+
+import { getPermissionOrganisation } from "../helpers/permissions-new";
 
 import {
   IndicateursEffectifs,
@@ -39,7 +37,7 @@ export async function getIndicateursEffectifsParDepartement(
       {
         $match: {
           $and: [
-            await getIndicateursEffectifsRestriction(ctx),
+            await getPermissionOrganisation(ctx, "IndicateursEffectifsParDepartement"),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -205,7 +203,7 @@ export async function getIndicateursOrganismesParDepartement(
       {
         $match: {
           $and: [
-            await getIndicateursOrganismesRestriction(ctx),
+            await getPermissionOrganisation(ctx, "IndicateursOrganismesParDepartement"),
             ...buildMongoFilters(filters, organismesFiltersConfigurations),
           ],
           fiabilisation_statut: "FIABLE",
@@ -256,7 +254,7 @@ export async function getIndicateursEffectifsParOrganisme(
         $match: {
           $and: [
             await getOrganismeRestriction(organismeId),
-            await getEffectifsAnonymesRestriction(ctx),
+            await getPermissionOrganisation(ctx, "IndicateursEffectifsParOrganisme"),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -658,7 +656,7 @@ export async function getEffectifsNominatifs(
         $match: {
           $and: [
             await getOrganismeRestriction(organismeId),
-            await getEffectifsNominatifsRestriction(ctx),
+            await getPermissionOrganisation(ctx, "TéléchargementListesNominatives"),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables

@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
+import { Organisme } from "@/common/internal/Organisme";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
@@ -317,9 +318,8 @@ function IndicateursForm(props: IndicateursFormProps) {
           loading={indicateursEffectifsLoading}
           permissionEffectifsNominatifs={
             props.organismeId
-              ? organisme?.permissions?.effectifsNominatifs && organisationType !== "ORGANISME_FORMATION" // OFA interdit sur les formateurs
-              : getPermissionsEffectifsNominatifs(organisationType) &&
-                (organisationType !== "ORGANISME_FORMATION" || ownOrganisme?.organismesFormateurs?.length === 0) // OFA autorisé seulement si aucun formateur
+              ? organisme?.permissions?.effectifsNominatifs
+              : getPermissionsEffectifsNominatifs(organisationType, ownOrganisme)
           }
           effectifsFilters={effectifsFilters}
           organismeId={props.organismeId}
@@ -448,11 +448,12 @@ function IndicateursForm(props: IndicateursFormProps) {
 export default IndicateursForm;
 
 function getPermissionsEffectifsNominatifs(
-  organisationType: OrganisationType
+  organisationType: OrganisationType,
+  ownOrganisme?: Organisme
 ): boolean | Array<(typeof typesEffectifNominatif)[number]> {
   switch (organisationType) {
     case "ORGANISME_FORMATION":
-      return true;
+      return organisationType !== "ORGANISME_FORMATION" || ownOrganisme?.organismesFormateurs?.length === 0; // OFA autorisé seulement si aucun formateur
 
     case "TETE_DE_RESEAU":
       return false;

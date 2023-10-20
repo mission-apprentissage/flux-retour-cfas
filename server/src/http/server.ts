@@ -64,7 +64,6 @@ import {
   getOrganismeDetails,
   listContactsOrganisme,
   listOrganismesFormateurs,
-  searchOrganismes,
   verifyOrganismeAPIKeyToUser,
   getOrganismeByUAIAndSIRET,
   getInvalidSiretsFromDossierApprenant,
@@ -97,7 +96,6 @@ import { configurationERPSchema } from "@/common/validation/configurationERPSche
 import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
-import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFormationSearchSchema";
 import { registrationSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
@@ -589,7 +587,7 @@ function setupRoutes(app: Application) {
    ********************************/
   authRouter
     .get(
-      "/api/v1/indicateurs/effectifs",
+      "/api/v1/indicateurs/effectifs/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
         return await getIndicateursEffectifsParDepartement(req.user, filters);
@@ -634,18 +632,7 @@ function setupRoutes(app: Application) {
     })
   );
 
-  // LEGACY écrans indicateurs
-  authRouter
-    // à supprimer une fois les écrans /organisme-formation/* supprimés, (sans doute après la nouvelle page d'accueil + onglets développés)
-    // peut-être attendre les prochains écrans d'aide intégrés au TDB pour être sûr de supprimer ceux existants
-    .post(
-      "/api/v1/organismes/search",
-      validateRequestMiddleware({ body: organismeOrFormationSearchSchema() }),
-      returnResult(async (req) => {
-        return await searchOrganismes(req.user, req.body as any);
-      })
-    )
-    .use("/api/v1/effectif", effectif());
+  authRouter.use("/api/v1/effectif", effectif());
 
   /********************************
    * API organisation   *
