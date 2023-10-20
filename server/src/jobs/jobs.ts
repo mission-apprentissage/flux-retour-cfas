@@ -98,7 +98,7 @@ export const CRONS: Record<string, CronDef> = {
   },
 
   "Send reminder emails at 7h": {
-    name: "Send reminder daily at 7h",
+    name: "Send reminder emails at 7h",
     cron_string: "0 7 * * *",
     handler: async () => {
       await addJob({ name: "send-reminder-emails", queued: true });
