@@ -273,6 +273,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         <Button
           as="a"
           variant={"link"}
+          target="_blank"
           fontSize="md"
           mt="2"
           borderBottom="1px"
@@ -284,10 +285,10 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           _active={{
             color: "bluefrance",
           }}
-          href="/dictionnaire-des-donnees.pdf"
+          href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20"
         >
           <FileDownloadIcon mr="2" />
-          Dictionnaire des données
+          Guide des données
         </Button>
 
         {status === "validation_failure" && (
