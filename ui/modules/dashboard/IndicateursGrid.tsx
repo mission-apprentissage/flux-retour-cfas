@@ -158,6 +158,7 @@ function IndicateursGrid({
                 p="0"
                 mt="2"
                 isDisabled={indicateursEffectifs.apprenants === 0}
+                title={indicateursEffectifs.apprenants === 0 ? "Aucun effectif à télécharger" : ""}
                 action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
               >
                 Télécharger la liste
@@ -189,6 +190,7 @@ function IndicateursGrid({
                 p="0"
                 mt="2"
                 isDisabled={indicateursEffectifs.apprentis === 0}
+                title={indicateursEffectifs.apprentis === 0 ? "Aucun effectif à télécharger" : ""}
                 action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
               >
                 Télécharger la liste
@@ -221,6 +223,7 @@ function IndicateursGrid({
                 p="0"
                 mt="2"
                 isDisabled={indicateursEffectifs.rupturants === 0}
+                title={indicateursEffectifs.rupturants === 0 ? "Aucun effectif à télécharger" : ""}
                 action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
               >
                 Télécharger la liste
@@ -252,6 +255,7 @@ function IndicateursGrid({
                 p="0"
                 mt="2"
                 isDisabled={indicateursEffectifs.inscritsSansContrat === 0}
+                title={indicateursEffectifs.inscritsSansContrat === 0 ? "Aucun effectif à télécharger" : ""}
                 action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
               >
                 Télécharger la liste
@@ -286,6 +290,7 @@ function IndicateursGrid({
                 p="0"
                 mt="2"
                 isDisabled={indicateursEffectifs.abandons === 0}
+                title={indicateursEffectifs.abandons === 0 ? "Aucun effectif à télécharger" : ""}
                 action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}
               >
                 Télécharger la liste
