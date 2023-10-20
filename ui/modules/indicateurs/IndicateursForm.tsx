@@ -12,7 +12,7 @@ import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
-import { useOrganisme } from "@/hooks/organismes";
+import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
@@ -56,8 +56,10 @@ function IndicateursForm(props: IndicateursFormProps) {
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
 
-  // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
-  const { organisme } = useOrganisme(props.organismeId); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const { organisme } = useOrganisme(props.organismeId);
+  const { organisme: ownOrganisme } = useOrganisationOrganisme(
+    organisationType === "ORGANISME_FORMATION" && !!props.organismeId
+  );
 
   const { effectifsFilters, sort } = useMemo(() => {
     const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
@@ -309,9 +311,9 @@ function IndicateursForm(props: IndicateursFormProps) {
           loading={indicateursEffectifsLoading}
           permissionEffectifsNominatifs={
             props.organismeId
-              ? // ? organisme?.permissions?.effectifsNominatifs
-                false // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
-              : getPermissionsEffectifsNominatifs(organisationType)
+              ? organisme?.permissions?.effectifsNominatifs && organisationType !== "ORGANISME_FORMATION" // OFA interdit sur les formateurs
+              : getPermissionsEffectifsNominatifs(organisationType) &&
+                (organisationType !== "ORGANISME_FORMATION" || ownOrganisme?.organismesFormateurs?.length === 0) // OFA autorisé seulement si aucun formateur
           }
           effectifsFilters={effectifsFilters}
           organismeId={props.organismeId}
@@ -443,8 +445,7 @@ function getPermissionsEffectifsNominatifs(
 ): boolean | Array<(typeof typesEffectifNominatif)[number]> {
   switch (organisationType) {
     case "ORGANISME_FORMATION":
-      // return true;
-      return false; // FIXME temporaire, en attendant la PR qui va descendre les permissions des effectifs à aux formations
+      return true;
 
     case "TETE_DE_RESEAU":
       return false;
