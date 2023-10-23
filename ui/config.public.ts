@@ -2,7 +2,8 @@ export interface PublicConfig {
   sentry_dsn: string;
   baseUrl: string;
   host: string;
-  env: "local" | "dev" | "recette" | "production" | "preview";
+  env: "local" | "recette" | "production" | "preview";
+  version: string;
 }
 
 const SENTRY_DSN = "https://362c29c6acbe4a599640109d87e77beb@o4504570758561792.ingest.sentry.io/4504570760265728";
@@ -15,6 +16,7 @@ function getProductionPublicConfig(): PublicConfig {
     env: "production",
     host,
     baseUrl: `https://${host}`,
+    version: getVersion(),
   };
 }
 
@@ -26,17 +28,7 @@ function getRecettePublicConfig(): PublicConfig {
     env: "recette",
     host,
     baseUrl: `https://${host}`,
-  };
-}
-
-function getDevPublicConfig(): PublicConfig {
-  const host = "cfas-dev.apprentissage.beta.gouv.fr";
-
-  return {
-    sentry_dsn: SENTRY_DSN,
-    env: "dev",
-    host,
-    baseUrl: `https://${host}`,
+    version: getVersion(),
   };
 }
 
@@ -55,6 +47,7 @@ function getPreviewPublicConfig(): PublicConfig {
     env: "preview",
     host,
     baseUrl: `https://${host}`,
+    version: getVersion(),
   };
 }
 
@@ -66,6 +59,7 @@ function getLocalPublicConfig(): PublicConfig {
     env: "local",
     host,
     baseUrl: `http://${host}:${process.env.NEXT_PUBLIC_API_PORT}`,
+    version: getVersion(),
   };
 }
 
@@ -84,7 +78,6 @@ function getEnv(): PublicConfig["env"] {
   switch (env) {
     case "production":
     case "recette":
-    case "dev":
     case "preview":
     case "local":
       return env;
@@ -99,8 +92,6 @@ function getPublicConfig(): PublicConfig {
       return getProductionPublicConfig();
     case "recette":
       return getRecettePublicConfig();
-    case "dev":
-      return getDevPublicConfig();
     case "preview":
       return getPreviewPublicConfig();
     case "local":

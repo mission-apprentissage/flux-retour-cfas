@@ -91,7 +91,7 @@ services:
       - /opt/app/configs/mailpit/auth:/auth
     environment:
       - MP_DATA_FILE=/data/mailpit.db
-      - MP_UI_AUTH_FILE=/auth/auth
+      - MP_UI_AUTH_FILE=/auth
       - VIRTUAL_HOST=smtp.{{dns_name}}
       - VIRTUAL_PATH=/
       - VIRTUAL_PORT=8025

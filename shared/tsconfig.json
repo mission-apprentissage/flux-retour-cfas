@@ -1,13 +1,14 @@
 {
-  "include": ["."],
-  "exclude": ["**/node_modules", ".next/*"],
+  "include": ["**/*.ts"],
+  "exclude": ["**/node_modules"],
   "compilerOptions": {
+    "incremental": true,
     "strictPropertyInitialization": false,
     "declarationMap": true,
     "listEmittedFiles": false,
     "listFiles": false,
     "pretty": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "lib": ["ES2023"] /* Emit ECMAScript-standard-compliant class fields. */,
     "module": "ESNext" /* Specify what module code is generated. */,
     "moduleResolution": "node" /* Specify how TypeScript looks up a file from a given module specifier. */,
@@ -20,7 +21,6 @@
     "declaration": true,
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
-    "allowJs": false,
-    "baseUrl": "./"
+    "allowJs": false
   }
 }

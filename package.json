@@ -6,10 +6,16 @@
   "author": "MNA",
   "license": "MIT",
   "private": true,
+  "packageManager": "yarn@3.6.1",
   "engines": {
     "node": ">=20",
     "npm": "please-use-yarn"
   },
+  "workspaces": [
+    "ui",
+    "server",
+    "shared"
+  ],
   "scripts": {
     "setup": ".bin/mna-tdb init:env",
     "dev": "yarn services:start; yarn foreach:parallel run dev",
@@ -26,12 +32,13 @@
     "services:stop": "docker compose down",
     "services:clean": "yarn services:stop; docker system prune --volumes",
     "seed:update": "./.bin/mna-tdb seed:update",
-    "lint": "eslint --ignore-path .gitignore --cache .",
+    "lint": "eslint --ignore-path .gitignore --cache --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "yarn lint --fix",
     "prettier:fix": "prettier --write  -u .",
     "prettier:check": "prettier --check -u .",
     "release": "semantic-release",
     "release:interactive": "./.bin/mna-tdb release:interactive",
-    "prepare": "husky install",
+    "postinstall": "husky install",
     "talisman:add-exception": "yarn node-talisman --githook pre-commit -i",
     "test": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest",
     "test:ci": "yarn test --ci -w 2",
@@ -43,11 +50,6 @@
     "foreach:parallel": "yarn foreach:seq -pi",
     "foreach:ci": "yarn foreach:seq -p"
   },
-  "workspaces": [
-    "ui",
-    "server",
-    "shared"
-  ],
   "devDependencies": {
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
@@ -94,7 +96,6 @@
       "prettier --write -u"
     ]
   },
-  "packageManager": "yarn@3.6.1",
   "resolutions": {
     "zod@3.21.4": "patch:zod@npm%3A3.21.4#./.yarn/patches/zod-npm-3.21.4-9f570b215c.patch"
   }

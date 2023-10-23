@@ -13,6 +13,10 @@ fileignoreconfig:
   checksum: 920950cddadd6683cfeb4b678051e935d9e9bdf62a557a9119b45a2e03cf155f
 - filename: .github/workflows/ci.yml
   checksum: 9e279ec421f82277240a958eec081cdb098a7e602bfd41e023013362ad365cfb
+- filename: .github/workflows/deploy_preview.yml
+  checksum: 461208e3c293062c405f4dacdda6bf3b87153cb43da80698f7c97a4be76375f0
+- filename: .github/workflows/gitguardian.yml
+  checksum: 6570536d75569b3826026d9126cff26fc4de473afbab8adbfc9fab833362fb79
 - filename: .github/workflows/preview.yml
   checksum: dbe369785961ffb27ed90dbdd9842d14cedc621a2d32f430710515457b05fa51
 - filename: .github/workflows/preview_cleanup.yml

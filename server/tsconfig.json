@@ -1,7 +1,5 @@
 {
   "files": ["src/types.d.ts"],
-  "include": ["./**/*.ts", "./**/*.js"],
-  "exclude": ["**/node_modules", "coverage", "dist"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
     /* Projects */
@@ -14,11 +12,10 @@
     /* Modules */
     "module": "ESNext", // TODO: maybe nodenext ?
     "moduleResolution": "node",
-    "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"],
       "@tests/*": ["./tests/*"],
-      "shared": ["../shared"]
+      "shared/*": ["../shared/*"]
     },
     "resolveJsonModule": true,
     /* JavaScript Support */
@@ -28,6 +25,7 @@
     /* Interop Constraints */
     "esModuleInterop": true,
     "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
     /* Type Checking */
     "strict": true,
     "noImplicitAny": false,
@@ -35,5 +33,7 @@
     "skipLibCheck": true,
     /* Output Formatting */
     "pretty": true
-  }
+  },
+  "include": ["./**/*.ts", "./**/*.js"],
+  "exclude": ["**/node_modules", "coverage", "dist"]
 }

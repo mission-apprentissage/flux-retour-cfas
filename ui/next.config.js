@@ -29,11 +29,11 @@ const nextConfig = {
   transpilePackages: ["shared"],
   poweredByHeader: false,
   swcMinify: true,
-  output: "standalone",
   experimental: {
     appDir: false,
     typedRoutes: true,
   },
+  output: "standalone",
   eslint: {
     dirs: ["."],
   },

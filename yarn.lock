@@ -87,6 +87,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@asteasolutions/zod-to-openapi@npm:^6.2.0":
+  version: 6.2.0
+  resolution: "@asteasolutions/zod-to-openapi@npm:6.2.0"
+  dependencies:
+    openapi3-ts: ^4.1.2
+  peerDependencies:
+    zod: ^3.20.2
+  checksum: 27106e47676fe87c8acf29ba8a9a61270d4a26ecd386c3fbe5f65b1517af9a2948544338a0e82de3091c112316ebc3c75adc1e7cf88a0e626b8680c21b8f5f17
+  languageName: node
+  linkType: hard
+
 "@aws-crypto/crc32@npm:3.0.0":
   version: 3.0.0
   resolution: "@aws-crypto/crc32@npm:3.0.0"
@@ -18616,6 +18627,7 @@ request-debug@latest:
   version: 0.0.0-use.local
   resolution: "shared@workspace:shared"
   dependencies:
+    "@asteasolutions/zod-to-openapi": ^6.2.0
     bson: ^5.4.0
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.0
