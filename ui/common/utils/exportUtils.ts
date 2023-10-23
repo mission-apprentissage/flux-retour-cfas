@@ -4,6 +4,7 @@ export interface ExportColumn {
   label: string;
   key: string;
   width: number; // only used in xlsx documents
+  xlsxType?: "string" | "date"; // only used in xlsx documents
 }
 
 export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
@@ -12,6 +13,22 @@ export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
   exportColumns: Columns
 ) {
   const workbook = utils.book_new();
+
+  const columnsWithXlsxType = exportColumns.filter((column) => column.xlsxType);
+
+  for (const row of rows) {
+    for (const column of columnsWithXlsxType) {
+      if (column.xlsxType === "date" && row[column.key]) {
+        row[column.key] = new Date(row[column.key]);
+      } else if (column.xlsxType === "string" && row[column.key]) {
+        row[column.key] = {
+          f: `="${row[column.key]}"`,
+          t: "s",
+        };
+      }
+    }
+  }
+
   const worksheet = utils.json_to_sheet(rows, {
     header: exportColumns.map((column) => column.key),
   });

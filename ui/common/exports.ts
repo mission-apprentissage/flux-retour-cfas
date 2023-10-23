@@ -11,6 +11,7 @@ export const indicateursParOrganismeExportColumns = [
   {
     label: "organisme_siret",
     key: "siret",
+    xlsxType: "string",
     width: 15,
   },
   {
@@ -54,6 +55,7 @@ export const effectifsExportColumns = [
   {
     label: "organisme_siret",
     key: "organisme_siret",
+    xlsxType: "string",
     width: 15,
   },
   {
@@ -79,6 +81,7 @@ export const effectifsExportColumns = [
   {
     label: "apprenant_date_de_naissance",
     key: "apprenant_date_de_naissance",
+    xlsxType: "date",
     width: 20,
   },
   {
@@ -89,6 +92,7 @@ export const effectifsExportColumns = [
   {
     label: "formation_cfd",
     key: "formation_cfd",
+    xlsxType: "string",
     width: 15,
   },
   {
@@ -114,11 +118,13 @@ export const effectifsExportColumns = [
   {
     label: "formation_date_debut_formation",
     key: "formation_date_debut_formation",
+    xlsxType: "date",
     width: 20,
   },
   {
     label: "formation_date_fin_formation",
     key: "formation_date_fin_formation",
+    xlsxType: "date",
     width: 20,
   },
 ] as const satisfies ReadonlyArray<ExportColumn>;
@@ -132,6 +138,7 @@ export const organismesExportColumns = [
   {
     label: "siret",
     key: "siret",
+    xlsxType: "string",
     width: 15,
   },
   {
@@ -152,6 +159,7 @@ export const organismesExportColumns = [
   {
     label: "departement",
     key: "departement",
+    xlsxType: "string",
     width: 10,
   },
   {
@@ -167,6 +175,7 @@ export const organismesExportColumns = [
   {
     label: "dernière transmission",
     key: "last_transmission_date",
+    xlsxType: "date",
     width: 120,
   },
 ] as const satisfies ReadonlyArray<ExportColumn>;
