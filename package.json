@@ -40,7 +40,7 @@
     "release:interactive": "./.bin/mna-tdb release:interactive",
     "postinstall": "husky install",
     "talisman:add-exception": "yarn node-talisman --githook pre-commit -i",
-    "test": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest -w 50%",
+    "test": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest",
     "test:ci": "yarn test --ci -w 1",
     "test:watch": "yarn test --watch",
     "typecheck": "yarn foreach:parallel run typecheck",
