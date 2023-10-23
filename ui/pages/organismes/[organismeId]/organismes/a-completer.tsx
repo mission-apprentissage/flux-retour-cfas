@@ -31,6 +31,11 @@ function SesOrganismesACompleter() {
     );
   }
 
+  const prominentOrganisme = organismes.find((org) => org._id === organismeId);
+  if (prominentOrganisme) {
+    (prominentOrganisme as any).prominent = true;
+  }
+
   return <ListeOrganismesPage organismes={organismes} activeTab="a-completer" modePublique={true} />;
 }
 

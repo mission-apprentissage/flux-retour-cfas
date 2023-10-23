@@ -10,7 +10,7 @@ import {
   getOrganismeRestriction,
 } from "@/common/actions/helpers/permissions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { getOrganisationOrganisme, listContactsOrganisation } from "@/common/actions/organisations.actions";
+import { listContactsOrganisation } from "@/common/actions/organisations.actions";
 import { getMetiersBySiret } from "@/common/apis/apiLba";
 import logger from "@/common/logger";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
@@ -761,27 +761,10 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
 }
 
 export async function listOrganisationOrganismes(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>[]> {
-  const restrictionOwnOrganisme =
-    ctx.organisation.type === "ORGANISME_FORMATION"
-      ? {
-          _id: {
-            $ne: (await getOrganisationOrganisme(ctx))._id,
-          },
-        }
-      : {};
   const organismes = (await organismesDb()
-    .find(
-      {
-        $and: [
-          await getOrganismeRestriction(ctx),
-          // cas particulier pour l'OF qui ne doit pas lister son propre organisme
-          restrictionOwnOrganisme,
-        ],
-      },
-      {
-        projection: getOrganismeListProjection(true),
-      }
-    )
+    .find(await getOrganismeRestriction(ctx), {
+      projection: getOrganismeListProjection(true),
+    })
     .toArray()) as WithId<OrganismeWithPermissions>[];
 
   return organismes;
@@ -795,7 +778,7 @@ export async function listOrganismesFormateurs(
     .find(
       {
         _id: {
-          $in: await findOrganismesFormateursIdsOfOrganisme(organismeId),
+          $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId))],
         },
       },
       {

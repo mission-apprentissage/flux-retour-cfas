@@ -2,10 +2,13 @@ import { Center, Container, Spinner } from "@chakra-ui/react";
 
 import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
-import { useOrganisationOrganismes } from "@/hooks/organismes";
+import { useOrganisationOrganisme, useOrganisationOrganismes } from "@/hooks/organismes";
+import useAuth from "@/hooks/useAuth";
 import ListeOrganismesPage from "@/modules/organismes/ListeOrganismesPage";
 
 function MesOrganismesACompleter() {
+  const { organisationType } = useAuth();
+  const { organisme: ownOrganisme } = useOrganisationOrganisme(organisationType === "ORGANISME_FORMATION");
   const { organismes } = useOrganisationOrganismes();
 
   if (!organismes) {
@@ -18,6 +21,12 @@ function MesOrganismesACompleter() {
         </Container>
       </SimplePage>
     );
+  }
+
+  const prominentOrganismeId = ownOrganisme?._id;
+  const prominentOrganisme = (organismes ?? []).find((org) => org._id === prominentOrganismeId);
+  if (prominentOrganisme) {
+    (prominentOrganisme as any).prominent = true;
   }
 
   return <ListeOrganismesPage organismes={organismes} activeTab="a-completer" modePublique={false} />;

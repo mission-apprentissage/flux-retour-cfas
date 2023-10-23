@@ -103,7 +103,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     <SimplePage title={title}>
       <Container maxW="xl" p="8">
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb="4w">
-          {props.modePublique ? "Ses organismes formateurs" : getHeaderTitleFromOrganisationType(organisationType)}
+          {props.modePublique ? "Ses organismes" : getHeaderTitleFromOrganisationType(organisationType)}
         </Heading>
 
         <Text>Retrouvez ci-dessous&nbsp;:</Text>
@@ -200,7 +200,7 @@ export default ListeOrganismesPage;
 function getHeaderTitleFromOrganisationType(type: OrganisationType) {
   switch (type) {
     case "ORGANISME_FORMATION":
-      return "Mes organismes formateurs";
+      return "Mes organismes";
 
     case "TETE_DE_RESEAU":
       return "Les organismes de mon réseau";
