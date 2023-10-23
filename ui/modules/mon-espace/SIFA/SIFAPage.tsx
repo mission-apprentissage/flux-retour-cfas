@@ -1,19 +1,36 @@
-import { Center, Heading, Spinner, Box, Flex, Text, HStack, VStack, Switch, Container } from "@chakra-ui/react";
+import {
+  Center,
+  Heading,
+  Spinner,
+  Box,
+  Flex,
+  Text,
+  HStack,
+  Switch,
+  Container,
+  FormControl,
+  FormLabel,
+  UnorderedList,
+  ListItem,
+} from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { getAnneeScolaireFromDate, getSIFADate } from "shared";
+import { getSIFADate } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { downloadObject } from "@/common/utils/browser";
 import DownloadButton from "@/components/buttons/DownloadButton";
+import Link from "@/components/Links/Link";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useToaster from "@/hooks/useToaster";
 import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import EffectifsTable from "@/modules/mon-espace/effectifs/engine/EffectifsTable";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import { DownloadLine, ExternalLinkLine } from "@/theme/components/icons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
 function useOrganismesEffectifs(organismeId: string) {
@@ -97,7 +114,7 @@ const SIFAPage = (props: SIFAPageProps) => {
   return (
     <Container maxW="xl" p="8">
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
-        <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
+        <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
           {props.modePublique ? "Son" : "Mon"} Enquête SIFA
         </Heading>
         <DownloadButton
@@ -127,48 +144,87 @@ const SIFAPage = (props: SIFAPageProps) => {
         </DownloadButton>
       </Flex>
 
-      <VStack alignItems="flex-start">
+      <Box mt={10} px={14} py={10} bg="galt">
+        <HStack gap={10}>
+          <Box flex="7">
+            <Text>
+              <UnorderedList>
+                <ListItem>
+                  Pour <strong>faciliter</strong> la remontée d’information avec les données demandées par l’enquête
+                  SIFA, le tableau de bord vous permet de réaliser les contrôles, compléter les éventuelles données
+                  manquantes et générer un fichier compatible à déposer sur la{" "}
+                  <Link variant="link" href="https://dep.adc.education.fr/sifa2/login" isExternal>
+                    plateforme SIFA
+                    <ExternalLinkLine w=".7rem" h=".7rem" ml={1} />
+                  </Link>
+                  .
+                </ListItem>
+                <ListItem>
+                  La remontée SIFA est <strong>annuelle</strong>. La date d’observation est fixée au{" "}
+                  <strong>31 décembre de l’année N</strong> et l’ouverture de l’application permettant la collecte est
+                  prévue début janvier.
+                </ListItem>
+              </UnorderedList>
+            </Text>
+            <Link variant="link" href="/InstructionsSIFA_31122022.pdf" mt={4} isExternal>
+              Fichier d’instruction SIFA (2022)
+              <DownloadLine mb={1} ml={2} fontSize="xs" />
+            </Link>
+            <Text fontSize="xs" color="mgalt">
+              PDF – 473 ko
+            </Text>
+          </Box>
+
+          <Ribbons variant="info" flex="3">
+            <Text color="#3A3A3A" fontSize="gamma" fontWeight="bold">
+              Attention
+            </Text>
+            <Text color="grey.800">
+              Vérifiez que tous vos apprentis soient bien présents dans le fichier. Sinon, complétez-le.
+            </Text>
+          </Ribbons>
+        </HStack>
+      </Box>
+      <Box mt={10}>
         <Text fontWeight="bold">
           Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre{" "}
-          {getSIFADate(new Date()).getUTCFullYear()}, sur l&apos;année scolaire{" "}
-          {getAnneeScolaireFromDate(getSIFADate(new Date()))}. Pour plus de facilité, vous pouvez effectuer une
-          recherche, ou filtrer par année.
+          {getSIFADate(new Date()).getUTCFullYear()}.
         </Text>
-        <Input
-          name="search_effectifs"
-          placeholder="Recherche"
-          fieldType="text"
-          mask="C"
-          maskBlocks={[
-            {
-              name: "C",
-              mask: "Pattern",
-              pattern: "^.*$",
-            },
-          ]}
-          onSubmit={(value) => setSearchValue(value.trim())}
-          value={searchValue}
-          w="35%"
-        />
-      </VStack>
+        <HStack justifyContent="space-between" mt={6}>
+          <Input
+            name="search_effectifs"
+            placeholder="Rechercher un apprenant..."
+            fieldType="text"
+            mask="C"
+            maskBlocks={[
+              {
+                name: "C",
+                mask: "Pattern",
+                pattern: "^.*$",
+              },
+            ]}
+            onSubmit={(value) => setSearchValue(value.trim())}
+            value={searchValue}
+            w="35%"
+            mb={0}
+          />
 
-      <VStack alignItems="flex-start" mt={8}>
-        <HStack w="full">
-          <Box fontWeight="bold" flexGrow={1}>
-            Filtrer:
-          </Box>
-          <HStack>
+          <FormControl w="auto" display="flex" alignItems="center">
             <Switch
+              id="show-only-incomplete-toggle"
               variant="icon"
               isChecked={showOnlyMissingSifa}
               onChange={(e) => {
                 setShowOnlyMissingSifa(e.target.checked);
               }}
+              mr={2}
             />
-            <Text flexGrow={1}>Afficher uniquement les données manquantes pour SIFA</Text>
-          </HStack>
+            <FormLabel htmlFor="show-only-incomplete-toggle" mb="0" mr="0">
+              Afficher uniquement les données manquantes pour SIFA
+            </FormLabel>
+          </FormControl>
         </HStack>
-      </VStack>
+      </Box>
 
       <Box mt={10} mb={16}>
         {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]: [string, any]) => {
