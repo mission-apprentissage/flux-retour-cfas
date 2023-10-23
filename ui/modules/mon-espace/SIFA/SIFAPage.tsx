@@ -219,7 +219,7 @@ const SIFAPage = (props: SIFAPageProps) => {
               }}
               mr={2}
             />
-            <FormLabel htmlFor="show-only-incomplete-toggle" mb="0" mr="0">
+            <FormLabel htmlFor="show-only-incomplete-toggle" mb="0" mr="0" cursor="pointer">
               Afficher uniquement les données manquantes pour SIFA
             </FormLabel>
           </FormControl>
