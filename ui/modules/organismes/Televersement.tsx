@@ -17,6 +17,8 @@ import {
   UnorderedList,
   ListItem,
   HStack,
+  Switch,
+  FormLabel,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -113,6 +115,8 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   const [data, setData] = useState<any[] | null>(null);
   const [errorsCount, setErrorsCount] = useState(0);
   const [missingHeaders, setMissingHeaders] = useState<string[]>([]);
+  const [columsWithErrors, setColumsWithErrors] = useState<string[]>([]);
+  const [showOnlyColumnsWithErrors, setShowOnlyColumnsWithErrors] = useState(false);
   const [status, setStatus] = useState<Status | null>(null);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
@@ -190,6 +194,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           });
           return acc;
         }, {});
+        setColumsWithErrors(Array.from(new Set<string>(errors.map((e: any) => e.path[1]))));
 
         setMissingHeaders(mandatoryFields.filter((header) => !headers.includes(header)));
 
@@ -244,6 +249,11 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
 
   if (status === "import_success") return <ImportSuccess isMine={isMine} organismeId={organismeId} />;
 
+  const filteredHeaders =
+    showOnlyColumnsWithErrors && columsWithErrors.length
+      ? headers?.filter((header) => columsWithErrors.includes(header))
+      : headers;
+
   return (
     <SimplePage title="Import des effectifs">
       <Container maxW="xl" p="8">
@@ -292,32 +302,44 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         </Button>
 
         {status === "validation_failure" && (
-          <Ribbons variant="error" mb={8}>
-            <Box mb="8">
-              <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
-                {errorsCount === 1
-                  ? "Une erreur a été détectée dans votre fichier"
-                  : `${errorsCount} erreurs ont été détectées dans votre fichier.`}
-              </Text>
-              <Text fontSize="sm" color="grey.800">
-                Vous pouvez voir le détail ligne à ligne ci-dessous. Vous devez modifier votre fichier et
-                l&apos;importer à nouveau.
-              </Text>
-              {missingHeaders.length > 0 && (
-                <Text fontSize="sm" color="grey.800">
-                  Les colonnes suivantes sont obligatoires et n’ont pas été trouvées, veuillez vérifier leur présence
-                  dans le fichier&nbsp;:{" "}
-                  <UnorderedList mt="4">
-                    {missingHeaders.map((header) => (
-                      <ListItem key={header} color="red.500">
-                        {header}
-                      </ListItem>
-                    ))}
-                  </UnorderedList>
+          <>
+            <Ribbons variant="error" mb={8}>
+              <Box mb="8">
+                <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
+                  {errorsCount === 1
+                    ? "Une erreur a été détectée dans votre fichier"
+                    : `${errorsCount} erreurs ont été détectées dans votre fichier.`}
                 </Text>
-              )}
-            </Box>
-          </Ribbons>
+                <Text fontSize="sm" color="grey.800">
+                  Vous pouvez voir le détail ligne à ligne ci-dessous. Vous devez modifier votre fichier et
+                  l&apos;importer à nouveau.
+                </Text>
+                {missingHeaders.length > 0 && (
+                  <Text fontSize="sm" color="grey.800">
+                    Les colonnes suivantes sont obligatoires et n’ont pas été trouvées, veuillez vérifier leur présence
+                    dans le fichier&nbsp;:{" "}
+                    <UnorderedList mt="4">
+                      {missingHeaders.map((header) => (
+                        <ListItem key={header} color="red.500">
+                          {header}
+                        </ListItem>
+                      ))}
+                    </UnorderedList>
+                  </Text>
+                )}
+              </Box>
+            </Ribbons>
+            <HStack my={8}>
+              <Switch
+                id="show-only-errors"
+                variant="icon"
+                onChange={(e) => {
+                  setShowOnlyColumnsWithErrors(e.target.checked);
+                }}
+              />
+              <FormLabel htmlFor="show-only-errors">Afficher uniquement les colonnes avec données en erreur</FormLabel>
+            </HStack>
+          </>
         )}
 
         {status === "validation_success" && (
@@ -334,14 +356,14 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           </Ribbons>
         )}
 
-        {data && headers && (
+        {data && filteredHeaders && (
           <Box overflowX="auto" mb="8">
             <Table fontSize="sm">
               <Thead>
                 <Tr>
                   <Th>Ligne</Th>
                   <Th>Statut</Th>
-                  {headers.map((key) => (
+                  {filteredHeaders.map((key) => (
                     <Th key={key}>{key}</Th>
                   ))}
                 </Tr>
@@ -365,7 +387,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                         </Flex>
                       )}
                     </Td>
-                    {headers.map((key) => {
+                    {filteredHeaders.map((key) => {
                       if (row.errors.length > 0) {
                         const error = row.errors.find((e: any) => e.key === key);
                         if (error) {
