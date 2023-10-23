@@ -41,7 +41,7 @@
     "postinstall": "husky install",
     "talisman:add-exception": "yarn node-talisman --githook pre-commit -i",
     "test": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:ci": "yarn test --ci -w 1",
+    "test:ci": "yarn test --ci -w 2",
     "test:watch": "yarn test --watch",
     "typecheck": "yarn foreach:parallel run typecheck",
     "typecheck:ci": "yarn foreach:ci run typecheck",
@@ -49,6 +49,9 @@
     "foreach:seq": "yarn workspaces foreach -Av --exclude mna-tdb",
     "foreach:parallel": "yarn foreach:seq -pi",
     "foreach:ci": "yarn foreach:seq -p"
+  },
+  "dependencies": {
+    "husky": "^8.0.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.7.1",
@@ -69,7 +72,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-unused-imports": "^3.0.0",
-    "husky": "^8.0.3",
     "jest": "^29.6.4",
     "jest-environment-jsdom": "^29.6.4",
     "lint-staged": "^14.0.1",
