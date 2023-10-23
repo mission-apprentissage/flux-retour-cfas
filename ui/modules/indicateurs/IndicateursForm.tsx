@@ -329,6 +329,7 @@ function IndicateursForm(props: IndicateursFormProps) {
           <DownloadButton
             variant="secondary"
             isDisabled={indicateursEffectifs?.length === 0}
+            title={indicateursEffectifs?.length === 0 ? "Aucun organisme à télécharger" : ""}
             action={async () => {
               trackPlausibleEvent("telechargement_liste_repartition_effectifs");
               const effectifsWithoutOrganismeId = (indicateursEffectifs ?? []).map(

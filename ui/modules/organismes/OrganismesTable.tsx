@@ -309,6 +309,8 @@ function OrganismesTable(props: OrganismesTableProps) {
                 organismesExportColumns
               );
             }}
+            isDisabled={filteredOrganismes.length === 0}
+            title={filteredOrganismes.length === 0 ? "Aucun organisme à télécharger" : ""}
           >
             Télécharger la liste
           </DownloadButton>
