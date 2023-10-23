@@ -22,11 +22,11 @@ export const ZJobSimple = z
       .enum(["pending", "will_start", "running", "finished", "blocked", "errored"])
       .describe("Statut courant du job"),
     sync: z.boolean().describe("Si le job est synchrone"),
-    payload: z.record(z.unknown()).optional().describe("La donnée liéé à la tâche"),
-    output: z.record(z.unknown()).optional().describe("Les valeurs de retours du job"),
+    payload: z.record(z.unknown()).nullish().describe("La donnée liéé à la tâche"),
+    output: z.record(z.unknown()).nullish().describe("Les valeurs de retours du job"),
     scheduled_for: z.date().describe("Date de lancement programmée"),
-    started_at: z.date().optional().describe("Date de lancement"),
-    ended_at: z.date().optional().describe("Date de fin d'execution"),
+    started_at: z.date().nullish().describe("Date de lancement"),
+    ended_at: z.date().nullish().describe("Date de fin d'execution"),
     updated_at: z.date().describe("Date de mise à jour en base de données"),
     created_at: z.date().describe("Date d'ajout en base de données"),
   })
