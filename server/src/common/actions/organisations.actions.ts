@@ -171,14 +171,21 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
       },
     }
   );
-  await sendEmail(user.email, "notify_access_granted", {
-    recipient: {
-      civility: user.civility,
-      nom: user.nom,
-      prenom: user.prenom,
-    },
-    organisationLabel: await buildOrganisationLabel(user.organisation_id),
-  });
+
+  const userOrganisation = await getOrganisationById(user.organisation_id);
+
+  await sendEmail(
+    user.email,
+    userOrganisation.type === "ORGANISME_FORMATION" ? "notify_access_granted_ofa" : "notify_access_granted",
+    {
+      recipient: {
+        civility: user.civility,
+        nom: user.nom,
+        prenom: user.prenom,
+      },
+      organisationLabel: await buildOrganisationLabel(user.organisation_id),
+    }
+  );
 }
 
 export async function rejectMembre(ctx: AuthContext, userId: string): Promise<void> {

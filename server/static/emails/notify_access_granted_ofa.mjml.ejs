@@ -1,0 +1,32 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text>
+            Bonjour
+            <strong><%= data.recipient.civility %> <%= data.recipient.prenom %> <%= data.recipient.nom %></strong>,
+          </mj-text>
+          <mj-text>
+            Votre demande d'accès sur le <strong>tableau de bord de l'apprentissage</strong> pour l'organisation <%=
+            data.organisationLabel %> a été acceptée.
+          </mj-text>
+          <mj-text>
+            Vous pouvez désormais transmettre vos effectifs au tableau de bord : rendez-vous dans votre espace, puis
+            paramétrez votre moyen de transmission.
+          </mj-text>
+
+          <mj-button href="<%= utils.getPublicUrl(`/auth/connexion`) %>" background-color="#0e4194" color="white">
+            Accéder à votre espace
+          </mj-button>
+
+          <%- include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>
