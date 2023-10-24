@@ -41,7 +41,7 @@
     "postinstall": "husky install",
     "talisman:add-exception": "yarn node-talisman --githook pre-commit -i",
     "test": "cross-env NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:ci": "yarn test --ci -w 2",
+    "test:ci": "yarn test --ci --runInBand",
     "test:watch": "yarn test --watch",
     "typecheck": "yarn foreach:parallel run typecheck",
     "typecheck:ci": "yarn foreach:ci run typecheck",
