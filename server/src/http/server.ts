@@ -324,13 +324,16 @@ function setupRoutes(app: Application) {
         throw new Error("Unauthorized");
       }
 
-      let erpSource: string = "INCONNU";
+      let erpSource = "INCONNU";
       if (organisme.erps?.length) {
         if (organisme.erps?.length === 1) erpSource = organisme.erps[0];
         if (organisme.erps?.length > 1) erpSource = "MULTI_ERP";
       }
 
-      (req.user as any) = { source: erpSource, source_organisme_id: organisme._id.toString() };
+      (req.user as any) = {
+        source: erpSource,
+        source_organisme_id: organisme._id.toString(),
+      };
       next();
     },
     dossierApprenantRouter()
@@ -341,7 +344,9 @@ function setupRoutes(app: Application) {
    *********************************************************/
   app.use(
     "/api/organismes",
-    requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
+    requireApiKeyAuthenticationMiddleware({
+      apiKeyValue: config.organismesConsultationApiKey,
+    }),
     organismesRouter()
   );
 
@@ -367,7 +372,9 @@ function setupRoutes(app: Application) {
     .put(
       "/api/v1/profile/cgu/accept/:version",
       returnResult(async (req) => {
-        await updateUserProfile(req.user, { has_accept_cgu_version: req.params.version });
+        await updateUserProfile(req.user, {
+          has_accept_cgu_version: req.params.version,
+        });
       })
     )
     .delete(
@@ -738,7 +745,9 @@ function setupRoutes(app: Application) {
           }
 
           // génère une nouvelle session avec l'organisation usurpée
-          const sessionToken = await createSession(req.user.email, { impersonatedOrganisation: organisation });
+          const sessionToken = await createSession(req.user.email, {
+            impersonatedOrganisation: organisation,
+          });
           responseWithCookie(res, sessionToken);
         })
       )
