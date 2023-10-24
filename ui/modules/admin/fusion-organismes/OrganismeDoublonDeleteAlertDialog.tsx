@@ -12,22 +12,22 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 
-import { _delete } from "@/common/httpClient";
+import { _delete, _post } from "@/common/httpClient";
 import useToaster from "@/hooks/useToaster";
 import { ArrowRightLine } from "@/theme/components/icons";
-
-import { DuplicateOrganismeDetail } from "./models/DuplicateOrganismeDetail";
 
 const OrganismeDoublonDeleteAlertDialog = ({
   isOpen,
   onClose = () => {},
   cancelRef,
-  duplicatesDetail,
+  organismeSansUaiId,
+  organismeFiableId,
 }: {
   isOpen: boolean;
   onClose?: () => void;
   cancelRef;
-  duplicatesDetail: DuplicateOrganismeDetail[];
+  organismeSansUaiId: string;
+  organismeFiableId: string;
 }) => {
   const queryClient = useQueryClient();
   const { toastSuccess } = useToaster();
@@ -68,9 +68,7 @@ const OrganismeDoublonDeleteAlertDialog = ({
             <Button
               colorScheme="red"
               onClick={async () => {
-                // TODO
-                // await _post(`/api/v1/fusionner/TODO`);
-                console.log("duplicatesDetail :>> ", duplicatesDetail);
+                await _post(`/api/v1/admin/fusion-organismes`, { organismeFiableId, organismeSansUaiId });
                 toastSuccess("Les organismes ont bien été fusionnés !");
                 queryClient.invalidateQueries(["admin/organismes-duplicats"]);
                 onClose();

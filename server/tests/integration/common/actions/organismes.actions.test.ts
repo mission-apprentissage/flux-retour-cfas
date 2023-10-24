@@ -28,7 +28,7 @@ export const sampleOrganismeWithoutUai: Organisme = {
   },
 };
 
-const sampleOrganismeWithUAI = {
+export const sampleOrganismeWithUAI = {
   uai: "0693400W",
   ...sampleOrganismeWithoutUai,
 };

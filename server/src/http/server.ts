@@ -72,7 +72,10 @@ import {
   resetConfigurationERP,
   getStatOrganismes,
 } from "@/common/actions/organismes/organismes.actions";
-import { getDuplicatesOrganismes } from "@/common/actions/organismes/organismes.duplicates.actions";
+import {
+  getDuplicatesOrganismes,
+  mergeOrganismeSansUaiDansOrganismeFiable,
+} from "@/common/actions/organismes/organismes.duplicates.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
@@ -765,6 +768,17 @@ function setupRoutes(app: Application) {
         "/organismes-duplicates",
         returnResult(async () => {
           return await getDuplicatesOrganismes();
+        })
+      )
+      .post(
+        "/fusion-organismes",
+        returnResult(async (req) => {
+          const { organismeFiableId, organismeSansUaiId } = req.body;
+
+          await mergeOrganismeSansUaiDansOrganismeFiable(
+            new ObjectId(organismeSansUaiId),
+            new ObjectId(organismeFiableId)
+          );
         })
       )
   );

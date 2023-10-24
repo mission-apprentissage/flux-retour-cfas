@@ -101,6 +101,8 @@ fileignoreconfig:
   checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
 - filename: server/tests/integration/common/actions/users.actions.test.ts
   checksum: 77550fcbcd5120292fcf6eeca7a3019bc62d34e4ec3c402b94b6fcd84d0f0c15
+- filename: server/tests/integration/http/admin.routes.test.ts
+  checksum: cf94ce9123fc9dee7fcf63a8b67bf6cbc26eb7594595cd8bd188853569f290b1
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
 scopeconfig:

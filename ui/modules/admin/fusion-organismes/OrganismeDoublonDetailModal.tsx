@@ -38,6 +38,14 @@ const OrganismeDoublonDetailModal = ({
   const { isOpen: isOpenAlertDialog, onOpen: onOpenAlertDialog, onClose: onCloseAlertDialog } = useDisclosure();
   const cancelRef = React.useRef();
 
+  const getOrganismesFiableNonFiableId = () => {
+    return duplicatesDetail[0].uai
+      ? { organismeFiableId: duplicatesDetail[0].id, organismeSansUaiId: duplicatesDetail[1].id }
+      : { organismeFiableId: duplicatesDetail[1].id, organismeSansUaiId: duplicatesDetail[0].id };
+  };
+
+  const { organismeFiableId, organismeSansUaiId } = getOrganismesFiableNonFiableId();
+
   return (
     <>
       <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose} size={"6xl"}>
@@ -153,7 +161,8 @@ const OrganismeDoublonDetailModal = ({
         cancelRef={cancelRef}
         isOpen={isOpenAlertDialog}
         onClose={onCloseAlertDialog}
-        duplicatesDetail={duplicatesDetail}
+        organismeFiableId={organismeFiableId}
+        organismeSansUaiId={organismeSansUaiId}
       />
     </>
   );

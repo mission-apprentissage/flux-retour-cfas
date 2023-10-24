@@ -18,6 +18,7 @@ export const getEffectifsDuplicatesFromOrganismes = async (organismeSource, orga
             annee_scolaire: "$annee_scolaire",
           },
           count: { $sum: 1 },
+          duplicatesInfo: { $addToSet: { id: "$_id", created_at: "$created_at" } },
         },
       },
       { $match: { count: { $gt: 1 } } },
