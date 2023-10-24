@@ -18,6 +18,7 @@ export const useInitEffectifForm = ({ controller, modeSifa, canEdit, effectifsSn
     ["effectif", effectifId],
     async () => {
       if (!effectifId) return null;
+      // FIXME REVIEW snapshot pas/plus utilisé ?
       const effectifForm = await _get(`/api/v1/effectif/${effectifId}${effectifsSnapshot ? "/snapshot" : ""}`, {
         params: { organisme_id: organisme._id },
       });
