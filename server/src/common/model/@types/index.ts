@@ -7,6 +7,5 @@ export type { MaintenanceMessage } from "./MaintenanceMessage";
 // FIXME ajouter le type de l'organisation
 export type { Organisme } from "./Organisme";
 export type { OrganismesReferentiel } from "./OrganismesReferentiel";
-export type { Upload } from "./Upload";
 export type { User } from "./User";
 export type { UsersMigration } from "./UsersMigration";
