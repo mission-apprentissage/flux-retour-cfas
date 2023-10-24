@@ -15,7 +15,7 @@ import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
-import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
+import { activateUser, login, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
   effectifsFiltersSchema,
@@ -74,9 +74,10 @@ import {
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
-import { createSession } from "@/common/actions/sessions.actions";
+import { createSession, removeSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
+import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
@@ -118,7 +119,6 @@ import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants
 import effectif from "./routes/specific.routes/effectif.routes";
 import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
-import auth from "./routes/user.routes/auth.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
@@ -220,8 +220,28 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
-    .use("/api/v1/auth", auth())
     .use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs))
+    .post(
+      "/api/v1/auth/login",
+      returnResult(async (req, res) => {
+        const { email, password } = await validateFullZodObjectSchema(req.body, {
+          email: z.string().email().toLowerCase(),
+          password: z.string(),
+        });
+        const sessionToken = await login(email, password);
+        responseWithCookie(res, sessionToken);
+      })
+    )
+    .post(
+      "/api/v1/auth/logout",
+      returnResult(async (req, res) => {
+        if (!req.cookies[COOKIE_NAME]) {
+          throw Boom.unauthorized("invalid jwt");
+        }
+        await removeSession(req.cookies[COOKIE_NAME]);
+        res.clearCookie(COOKIE_NAME);
+      })
+    )
     .post(
       "/api/v1/auth/register",
       returnResult(async (req) => {
