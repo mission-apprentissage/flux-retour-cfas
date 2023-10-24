@@ -32,20 +32,19 @@ export async function cronsInit() {
 
   logger.info(`Crons - initialise crons in DB`);
 
-  const crons = Object.values(CRONS);
   let schedulerRequired = false;
 
   await getDbCollection("jobs").deleteMany({
-    name: { $nin: crons.map((c) => c.name) },
+    name: { $nin: CRONS.map((c) => c.name) },
     type: "cron",
   });
   await getDbCollection("jobs").deleteMany({
-    name: { $nin: crons.map((c) => c.name) },
+    name: { $nin: CRONS.map((c) => c.name) },
     status: { $in: ["pending", "will_start"] },
     type: "cron_task",
   });
 
-  for (const cron of crons) {
+  for (const cron of CRONS) {
     const cronJob = await findJob({
       name: cron.name,
       type: "cron",
