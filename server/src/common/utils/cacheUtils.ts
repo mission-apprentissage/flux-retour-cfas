@@ -16,10 +16,13 @@ export async function tryCachedExecution<T>(
     cachedResult = cache[cacheKey] = serviceFunc();
 
     // invalidate the cache after some time
-    setTimeout(() => {
+    let timeout = setTimeout(() => {
       logger.debug({ cacheKey, expiration }, "clear cache");
       delete cache[cacheKey];
     }, expiration);
+    cachedResult.finally(() => {
+      clearTimeout(timeout);
+    });
   }
   return await cachedResult;
 }
