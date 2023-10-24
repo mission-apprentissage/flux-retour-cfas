@@ -18,10 +18,11 @@ import { updateUserPassword } from "./jobs/users/update-user-password";
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
-  if (config.env !== "local") {
+  if (config.env !== "local" && config.env !== "preview") {
     await addJob({
       name: "crons:init",
       queued: true,
+      payload: {},
     });
   }
 
@@ -60,6 +61,7 @@ program
   .configureHelp({
     sortSubcommands: true,
   })
+  .showSuggestionAfterError()
   .hook("preAction", (_, actionCommand) => {
     const command = actionCommand.name();
     // on définit le module du logger en global pour distinguer les logs des jobs

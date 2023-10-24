@@ -9,7 +9,7 @@ COPY ui/package.json ui/package.json
 COPY server/package.json server/package.json
 COPY shared/package.json shared/package.json
 
-RUN yarn install --immutable
+RUN --mount=type=cache,target=/app/.yarn/cache yarn install --immutable
 
 FROM builder_root as root
 WORKDIR /app
@@ -27,14 +27,12 @@ COPY ./shared ./shared
 
 RUN yarn --cwd server build
 # Removing dev dependencies
-RUN yarn workspaces focus --all --production
-# Cache is not needed anymore
-RUN rm -rf .yarn/cache
+RUN --mount=type=cache,target=/app/.yarn/cache yarn workspaces focus --all --production
 
 # Production image, copy all the files and run next
 FROM node:20-alpine AS server
 WORKDIR /app
-RUN apk add --update \
+RUN --mount=type=cache,target=/var/cache/apk apk add --update \
   curl \
   && rm -rf /var/cache/apk/*
 
@@ -73,8 +71,7 @@ ARG PUBLIC_ENV
 ENV NEXT_PUBLIC_ENV=$PUBLIC_ENV
 
 RUN yarn --cwd ui build
-# Cache is not needed anymore
-RUN rm -rf .yarn/cache
+# RUN --mount=type=cache,target=/app/ui/.next/cache yarn --cwd ui build
 
 # Production image, copy all the files and run next
 FROM node:20-alpine AS ui
@@ -84,13 +81,19 @@ ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED 1
 
+ARG PUBLIC_VERSION
+ENV NEXT_PUBLIC_VERSION=$PUBLIC_VERSION
+
+ARG PUBLIC_ENV
+ENV NEXT_PUBLIC_ENV=$PUBLIC_ENV
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # You only need to copy next.config.js if you are NOT using the default configuration
-COPY --from=builder_ui /app/ui/next.config.js /app/
-COPY --from=builder_ui /app/ui/public /app/ui/public
-COPY --from=builder_ui /app/ui/package.json /app/ui/package.json
+COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/next.config.js /app/
+COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/public /app/ui/public
+COPY --from=builder_ui --chown=nextjs:nodejs /app/ui/package.json /app/ui/package.json
 
 # Automatically leverage output traces to reduce image size 
 # https://nextjs.org/docs/advanced-features/output-file-tracing

@@ -1,26 +1,27 @@
 import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/node";
+import Boom from "boom";
 import { formatDuration, intervalToDuration } from "date-fns";
 
 import logger from "@/common/logger";
 import { jobsDb } from "@/common/model/collections";
-import { IJob } from "@/common/model/job.model";
+import { IJob, IJobsSimple } from "@/common/model/job.model";
 import { sleep } from "@/common/utils/asyncUtils";
 
-import { createJob, updateJob } from "../common/actions/job.actions";
+import { createJobSimple, updateJob } from "../common/actions/job.actions";
 
 import { runJob } from "./jobs";
 
+type AddJobSimpleParams = Pick<IJobsSimple, "name" | "payload"> &
+  Partial<Pick<IJobsSimple, "scheduled_for">> & { queued?: boolean };
+
 export async function addJob({
   name,
-  type = "simple",
-  payload = {},
+  payload,
   scheduled_for = new Date(),
   queued = false,
-}: Pick<IJob, "name"> &
-  Partial<Pick<IJob, "type" | "payload" | "scheduled_for">> & { queued?: boolean }): Promise<number> {
-  const job = await createJob({
+}: AddJobSimpleParams): Promise<number> {
+  const job = await createJobSimple({
     name,
-    type,
     payload,
     scheduled_for,
     sync: !queued,
@@ -50,6 +51,10 @@ export async function processor(signal: AbortSignal): Promise<void> {
   );
 
   if (nextJob) {
+    if (nextJob.type === "cron") {
+      throw Boom.internal("Unexpected");
+    }
+
     logger.info({ job: nextJob.name }, "job will start");
     await runJob(nextJob);
   } else {
@@ -107,11 +112,11 @@ const runner = async (job: IJob, jobFunc: () => Promise<unknown>): Promise<numbe
 export function executeJob(job: IJob, jobFunc: () => Promise<unknown>) {
   return runWithAsyncContext(async () => {
     const hub = getCurrentHub();
-    const transaction = hub.startTransaction({
+    const transaction = hub?.startTransaction({
       name: `JOB: ${job.name}`,
       op: "processor.job",
     });
-    hub.configureScope((scope) => {
+    hub?.configureScope((scope) => {
       scope.setSpan(transaction);
       scope.setTag("job", job.name);
       scope.setContext("job", job);
@@ -120,8 +125,8 @@ export function executeJob(job: IJob, jobFunc: () => Promise<unknown>) {
     try {
       return await runner(job, jobFunc);
     } finally {
-      transaction.setMeasurement("job.execute", Date.now() - start, "millisecond");
-      transaction.finish();
+      transaction?.setMeasurement("job.execute", Date.now() - start, "millisecond");
+      transaction?.finish();
     }
   });
 }

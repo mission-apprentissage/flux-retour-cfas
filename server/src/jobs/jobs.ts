@@ -1,5 +1,5 @@
 import logger from "@/common/logger";
-import { IJob } from "@/common/model/job.model";
+import { IJobsCronTask, IJobsSimple } from "@/common/model/job.model";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
 
 import { clear, clearUsers } from "./clear/clear-all";
@@ -50,15 +50,8 @@ import {
 } from "./users/generate-password-update-token";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders";
 
-interface CronDef {
-  name: string;
-  cron_string: string;
-  handler: () => Promise<number>;
-}
-
-export const CRONS: Record<string, CronDef> = {
+export const CronsMap = {
   "Run daily jobs each day at 02h30": {
-    name: "Run daily jobs each day at 02h30",
     cron_string: "30 2 * * *",
     handler: async () => {
       // # Remplissage des organismes issus du référentiel
@@ -98,7 +91,6 @@ export const CRONS: Record<string, CronDef> = {
   },
 
   "Send reminder emails at 7h": {
-    name: "Send reminder emails at 7h",
     cron_string: "0 7 * * *",
     handler: async () => {
       await addJob({ name: "send-reminder-emails", queued: true });
@@ -107,7 +99,6 @@ export const CRONS: Record<string, CronDef> = {
   },
 
   "Run hydrate contrats DECA job each day at 19h45": {
-    name: "Run hydrate contrats DECA job each day at 19h45",
     cron_string: "45 19 * * *",
     handler: async () => {
       // # Remplissage des contrats DECA
@@ -119,19 +110,31 @@ export const CRONS: Record<string, CronDef> = {
 
   // TODO : Checker si coté métier l'archivage est toujours prévu ?
   // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
-  //   name: "Run archive dossiers apprenants & effectifs job each first day of month at 12h45",
   //   cron_string: "45 12 1 * *",
   //   handler: async () => {
   //     // run-archive-job.sh yarn cli archive:dossiersApprenantsEffectifs
   //     return 0;
   //   },
   // },
-};
+} satisfies Record<string, Omit<CronDef, "name">>;
 
-export async function runJob(job: IJob): Promise<number> {
+export type CronName = keyof typeof CronsMap;
+
+interface CronDef {
+  name: CronName;
+  cron_string: string;
+  handler: () => Promise<number>;
+}
+
+export const CRONS: CronDef[] = Object.entries(CronsMap).map(([name, cronDef]) => ({
+  ...cronDef,
+  name: name as CronName,
+}));
+
+export async function runJob(job: IJobsCronTask | IJobsSimple): Promise<number> {
   return executeJob(job, async () => {
     if (job.type === "cron_task") {
-      return CRONS[job.name].handler();
+      return CronsMap[job.name].handler();
     }
     switch (job.name) {
       case "init:dev":

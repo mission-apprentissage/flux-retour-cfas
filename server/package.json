@@ -6,12 +6,16 @@
   "author": "MNA",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=20",
+    "npm": "please-use-yarn"
+  },
   "scripts": {
     "cli": "node dist/index.js",
-    "init:dev": "yarn cli init:dev",
-    "dev": "tsup-node --watch",
-    "build": "tsup-node --env.NODE_ENV production",
     "build:dev": "tsup-node",
+    "dev": "tsup-node --env.TSUP_WATCH true",
+    "init:dev": "yarn cli init:dev",
+    "build": "tsup-node --env.NODE_ENV production",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -99,10 +103,6 @@
     "zod": "3.21.4",
     "zod-express-middleware": "1.4.0",
     "zod-to-json-schema": "3.21.4"
-  },
-  "engines": {
-    "node": ">=20",
-    "npm": "please-use-yarn"
   },
   "prettier": {
     "printWidth": 120,

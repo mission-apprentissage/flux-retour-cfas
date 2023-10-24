@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/node";
 import { advanceTo, clear } from "jest-date-mock";
 import sentryTestkit from "sentry-testkit";
 
-import { createJob, findJob } from "@/common/actions/job.actions";
+import { createJobSimple, findJob } from "@/common/actions/job.actions";
 import { getSentryOptions } from "@/common/services/sentry/sentry";
 import { executeJob } from "@/jobs/jobs_actions";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -39,9 +39,8 @@ describe("executeJob", () => {
   useMongo();
   describe("when job is success", () => {
     it("should return exit code", async () => {
-      const job = await createJob({
+      const job = await createJobSimple({
         name: "success:job",
-        type: "simple",
         payload: { name: "Moroine" },
         scheduled_for: timings.scheduled_for,
         sync: true,
@@ -89,9 +88,8 @@ describe("executeJob", () => {
 
   describe("when job fails", () => {
     it("should return exit code", async () => {
-      const job = await createJob({
+      const job = await createJobSimple({
         name: "failure:job",
-        type: "simple",
         payload: { name: "Moroine" },
         scheduled_for: timings.scheduled_for,
         sync: true,

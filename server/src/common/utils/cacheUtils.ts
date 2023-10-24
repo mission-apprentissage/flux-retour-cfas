@@ -19,7 +19,7 @@ export async function tryCachedExecution<T>(
     setTimeout(() => {
       logger.debug({ cacheKey, expiration }, "clear cache");
       delete cache[cacheKey];
-    }, expiration);
+    }, expiration).unref();
   }
   return await cachedResult;
 }

@@ -10,10 +10,10 @@ import { publicConfig } from "./config.public";
 Sentry.init({
   dsn: publicConfig.sentry_dsn,
   tracesSampleRate: publicConfig.env === "production" ? 0.1 : 1.0,
-  tracePropagationTargets: [/\.apprentissage\.beta\.gouv\.fr$/],
+  tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/, publicConfig.baseUrl],
   environment: publicConfig.env,
   enabled: publicConfig.env !== "local",
-  // debug: true,
+  release: publicConfig.version,
   normalizeDepth: 8,
   integrations: [
     new Sentry.Integrations.Http({ tracing: true }),

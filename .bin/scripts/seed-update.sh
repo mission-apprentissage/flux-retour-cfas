@@ -9,6 +9,8 @@ else
     shift
 fi
 
+echo "base de donnée cible: $TARGET_DB"
+
 read -p "La base de donnée contient-elle des données sensible ? [Y/n]: " response
 case $response in
   [nN][oO]|[nN])

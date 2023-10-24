@@ -24,7 +24,7 @@ if [[ $# == "0" ]]; then
 fi;
 
 set +e
-docker buildx create --name mna --driver docker-container --bootstrap --use 2> /dev/null
+docker buildx create --name mna-tdb --driver docker-container --config "$SCRIPT_DIR/buildkitd.toml" 2> /dev/null
 set -e
 
 if [[ ! -z "${CI:-}" ]]; then
@@ -36,4 +36,6 @@ fi
 export CHANNEL=$(get_channel $VERSION)
 
 # "$@" is the list of environements
-docker buildx bake --builder mna --${mode} "$@"
+docker buildx bake --builder mna-tdb --${mode} "$@"
+docker builder prune --builder mna-tdb --keep-storage 20GB --force
+docker buildx stop --builder mna-tdb

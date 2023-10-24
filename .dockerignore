@@ -1,14 +1,18 @@
 *
 
-!/server
-/server/.env
-/server/.env.local
+!/server/src
+!/server/static
+!/server/package.json
+!/server/tsconfig.json
+!/server/tsoa.json
+!/server/tsup.config.ts
 
 !/shared
 
 !/ui
 /ui/.env
 /ui/.next
+/ui/.eslintrc.js
 
 !/package.json
 !/.yarn/cache
