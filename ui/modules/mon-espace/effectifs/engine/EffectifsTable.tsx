@@ -12,7 +12,7 @@ import { effectifIdAtom } from "./atoms";
 import Effectif from "./Effectif";
 import { effectifStateSelector } from "./formEngine/atoms";
 
-const EffectifDetails = ({ row, modeSifa = false, canEdit = false, effectifsSnapshot = false }) => {
+const EffectifDetails = ({ row, modeSifa = false, canEdit = false }) => {
   const queryClient = useQueryClient();
   const prevEffectifId = useRef(null);
   const setEffectifId = useSetRecoilState(effectifIdAtom);
@@ -30,7 +30,7 @@ const EffectifDetails = ({ row, modeSifa = false, canEdit = false, effectifsSnap
 
   return (
     <Box>
-      <Effectif modeSifa={modeSifa} canEdit={canEdit} effectifsSnapshot={effectifsSnapshot} />
+      <Effectif modeSifa={modeSifa} canEdit={canEdit} />
     </Box>
   );
 };
@@ -53,19 +53,17 @@ const ShowErrorInCell = ({ item, fieldName, value }) => {
 interface EffectifsTableProps {
   organismesEffectifs: any[];
   modeSifa?: boolean;
-  effectifsSnapshot?: boolean;
   canEdit?: boolean;
   columns?: string[];
   show?: string;
   searchValue?: string;
-  RenderErrorImport?: (data: any) => any; // eslint-disable-line no-unused-vars
-  onCountItemsChange?: (count: number) => any; // eslint-disable-line no-unused-vars
+  RenderErrorImport?: (data: any) => any;
+  onCountItemsChange?: (count: number) => any;
 }
 
 const EffectifsTable = ({
   organismesEffectifs,
   modeSifa = false,
-  effectifsSnapshot = false,
   canEdit = false,
   columns = ["expander", "annee_scolaire", "statut_courant", "nom", "prenom", "separator", "source", "state"],
   show = "normal",
@@ -527,9 +525,7 @@ const EffectifsTable = ({
         }}
         getRowCanExpand={() => true}
         renderSubComponent={({ row }) => {
-          return (
-            <EffectifDetails row={row} modeSifa={modeSifa} canEdit={canEdit} effectifsSnapshot={effectifsSnapshot} />
-          );
+          return <EffectifDetails row={row} modeSifa={modeSifa} canEdit={canEdit} />;
         }}
       />
     </Box>
