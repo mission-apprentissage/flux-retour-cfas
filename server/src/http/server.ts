@@ -71,6 +71,7 @@ import {
   getInvalidSiretsFromDossierApprenant,
   getInvalidUaisFromDossierApprenant,
   resetConfigurationERP,
+  getStatOrganismes,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
@@ -112,7 +113,6 @@ import { openApiFilePath } from "./open-api-path";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
-import statsAdmin from "./routes/admin.routes/stats.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
@@ -752,7 +752,12 @@ function setupRoutes(app: Application) {
       .use("/users", usersAdmin())
       .use("/organismes", organismesAdmin())
       .use("/effectifs", effectifsAdmin())
-      .use("/stats", statsAdmin())
+      .get(
+        "/stats",
+        returnResult(async () => {
+          return await getStatOrganismes();
+        })
+      )
       .use("/maintenanceMessages", maintenancesAdmin())
       .post(
         "/impersonate",
