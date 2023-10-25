@@ -38,8 +38,6 @@ const getNbAbandonsADate = async () => (await abandonsIndicator.getListAtDate(ne
  * qui sont dans ce statut depuis nbJours
  */
 export const removeInscritsSansContratsDepuis = async (nbJours = 90) => {
-  const filterStages = [{ $match: { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } } }];
-
   const inscritsSansContratsIdsToRemove = (
     await effectifsDb()
       .aggregate([
