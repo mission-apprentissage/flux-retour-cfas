@@ -38,8 +38,9 @@ const config = async () => {
           "^@/(.*)$": "<rootDir>/server/src/$1",
           "^@tests/(.*)$": "<rootDir>/server/tests/$1",
         },
-        preset: "@shelf/jest-mongodb",
+        preset: "ts-jest",
         setupFiles: ["<rootDir>/server/tests/jest/setupFiles.ts"],
+        globalTeardown: "<rootDir>/server/tests/jest/globalTeardown.ts",
         setupFilesAfterEnv: ["<rootDir>/server/tests/jest/setupFileAfterEnv.ts"],
         testMatch: ["<rootDir>/server/**/*(*.)@(spec|test).[tj]s?(x)"],
         transform: {
@@ -48,6 +49,7 @@ const config = async () => {
             {
               tsconfig: "<rootDir>/server/tsconfig.json",
               useESM: true,
+              isolatedModules: true,
             },
           ],
         },
@@ -65,6 +67,7 @@ const config = async () => {
             {
               tsconfig: "<rootDir>/shared/tsconfig.json",
               useESM: true,
+              isolatedModules: true,
             },
           ],
         },

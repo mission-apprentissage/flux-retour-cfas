@@ -5,12 +5,13 @@ import logger from "@/common/logger";
 
 import { zodToMongoSchema } from "./utils/mongoSchemaBuilder";
 
-let mongodbClient: MongoClient;
+let mongodbClient: MongoClient | null = null;
 
-const ensureInitialization = () => {
-  if (!mongodbClient) {
+const ensureInitialization = (client: MongoClient | null): MongoClient => {
+  if (!client) {
     throw new Error("Database connection does not exist. Please call connectToMongodb before.");
   }
+  return client;
 };
 
 /**
@@ -18,6 +19,10 @@ const ensureInitialization = () => {
  * @returns client
  */
 export const connectToMongodb = async (uri) => {
+  if (mongodbClient) {
+    return mongodbClient;
+  }
+
   logger.info("Connecting to MongoDB...");
   const client = new MongoClient(uri);
 
@@ -28,36 +33,41 @@ export const connectToMongodb = async (uri) => {
   return client;
 };
 
-export const getMongodbClient = () => mongodbClient;
+export const getMongodbClient = () => ensureInitialization(mongodbClient);
 
-export const closeMongodbConnection = () => {
-  ensureInitialization();
-  return mongodbClient.close();
+export const closeMongodbConnection = async () => {
+  if (!mongodbClient) {
+    return;
+  }
+  try {
+    await mongodbClient.close();
+  } finally {
+    mongodbClient = null;
+  }
 };
 
 export const getDatabase = () => {
-  ensureInitialization();
-  return mongodbClient.db();
+  return ensureInitialization(mongodbClient).db();
 };
 
 export const getCollectionList = () => {
-  return mongodbClient.db().listCollections().toArray();
+  return ensureInitialization(mongodbClient).db().listCollections().toArray();
 };
 
 export const getDbCollection = <TSchema extends Document>(name) => {
-  ensureInitialization();
-  return mongodbClient.db().collection<TSchema>(name);
+  return ensureInitialization(mongodbClient).db().collection<TSchema>(name);
 };
 
 export const getDbCollectionSchema = async (name) => {
-  ensureInitialization();
-  const collectionInfo: CollectionInfo | null = await mongodbClient.db().listCollections({ name }).next();
+  const collectionInfo: CollectionInfo | null = await ensureInitialization(mongodbClient)
+    .db()
+    .listCollections({ name })
+    .next();
   return collectionInfo?.options?.validator;
 };
 
 export const getDbCollectionIndexes = async (name) => {
-  ensureInitialization();
-  return await mongodbClient.db().collection(name).indexes();
+  return await ensureInitialization(mongodbClient).db().collection(name).indexes();
 };
 
 /**
@@ -123,6 +133,5 @@ export const clearAllCollections = async () => {
  */
 export async function clearCollection(name) {
   logger.warn(`Suppression des données de la collection ${name}...`);
-  ensureInitialization();
   await getDatabase().collection(name).deleteMany({});
 }
