@@ -1,4 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
+import { getAnneesScolaireListFromDate } from "shared";
 
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
 import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
@@ -24,7 +25,7 @@ import {
 } from "./build.rules";
 
 // Filtres année scolaire pour récupération des couples UAI-SIRET
-const filters = { annee_scolaire: { $in: ["2023-2023", "2023-2024"] } };
+const filters = { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } };
 
 /**
  * Fonction de construction de la collection des couples de fiabilisation UAI SIRET
