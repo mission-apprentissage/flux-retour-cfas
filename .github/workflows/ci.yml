@@ -13,7 +13,6 @@ jobs:
     services:
       mongodb:
         image: mongo:6.0.2-focal
-        options: --storageEngine inMemory
         ports:
           - "27017:27017"
     steps:
