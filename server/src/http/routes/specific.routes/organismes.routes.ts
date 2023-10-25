@@ -32,17 +32,7 @@ export default () => {
       const allData = await organismesDb().find(jsonQuery).skip(skip).limit(limit).toArray();
       const count = await organismesDb().countDocuments(jsonQuery);
       const omittedData = allData.map((item) =>
-        pick(item, [
-          "uai",
-          "siret",
-          "nom",
-          "nature",
-          "reseaux",
-          "adresse",
-          "metiers",
-          "est_dans_le_referentiel",
-          "ferme",
-        ])
+        pick(item, ["uai", "siret", "nom", "nature", "reseaux", "adresse", "est_dans_le_referentiel", "ferme"])
       );
 
       return {

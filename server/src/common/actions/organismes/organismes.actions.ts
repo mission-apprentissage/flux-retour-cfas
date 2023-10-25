@@ -11,7 +11,6 @@ import {
 } from "@/common/actions/helpers/permissions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
-import { getMetiersBySiret } from "@/common/apis/apiLba";
 import logger from "@/common/logger";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { Organisme } from "@/common/model/@types/Organisme";
@@ -55,21 +54,6 @@ export const createOrganisme = async (data: Organisme) => {
     _id: insertedId,
     ...dataToInsert,
   };
-};
-
-/**
- * Fonction de récupération des métiers depuis l'API LBA
- */
-const getMetiersFromLba = async (siret: string) => {
-  let metiers: any[] = [];
-
-  try {
-    metiers = await getMetiersBySiret(siret);
-  } catch (error) {
-    logger.error(`getMetiersFromLba > Erreur ${error} `);
-  }
-
-  return metiers ?? [];
 };
 
 /**
@@ -175,25 +159,15 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) =
  * Fonction de MAJ d'un organisme en appelant les API externes
  */
 export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
-  let updatedData: Partial<Organisme> = {};
-
-  // Récupération des métiers depuis l'API LBA
-  const metiers = await getMetiersFromLba(organisme.siret);
-
   // Construction de l'arbre des formations de l'organisme
   const relatedFormations = (await getFormationsTreeForOrganisme(organisme.uai))?.formations || [];
 
   // Eventuellement on pourrait récupérer des informations via API Entreprise
   // const organismeInfosFromSiret = await getOrganismeInfosFromSiret(organisme.siret);
 
-  updatedData = {
-    metiers,
-    relatedFormations,
-  };
-
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
-    { $set: { ...updatedData, updated_at: new Date() } },
+    { $set: { ...relatedFormations, updated_at: new Date() } },
     { returnDocument: "after" }
   );
 
