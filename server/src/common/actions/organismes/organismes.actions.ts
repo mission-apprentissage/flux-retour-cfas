@@ -167,7 +167,7 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
-    { $set: { ...relatedFormations, updated_at: new Date() } },
+    { $set: { relatedFormations, updated_at: new Date() } },
     { returnDocument: "after" }
   );
 
