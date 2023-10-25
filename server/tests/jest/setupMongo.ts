@@ -8,7 +8,7 @@ export const useMongo = () => {
     // connect to mongodb and create indexes before running tests
     await startAndConnectMongodb();
     await createIndexes();
-  }, 10_000);
+  }, 30_000);
   afterAll(async () => {
     await stopMongodb();
   });

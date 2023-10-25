@@ -23,14 +23,17 @@ const sampleOrganisme: Organisme = {
  * @param nbDuplicates
  */
 const insertDuplicateEffectifs = async (sampleEffectif, nbDuplicates = 2) => {
-  const insertedIdList: ObjectId[] = [];
+  const insertedIdList: Promise<ObjectId>[] = [];
   for (let index = 0; index < nbDuplicates; index++) {
-    const { insertedId } = await effectifsDb().insertOne({
-      ...sampleEffectif,
-      id_erp_apprenant: `ID_ERP_${index}`,
-      annee_scolaire: "2023-2024",
-    });
-    insertedIdList.push(insertedId);
+    insertedIdList.push(
+      effectifsDb()
+        .insertOne({
+          ...sampleEffectif,
+          id_erp_apprenant: `ID_ERP_${index}`,
+          annee_scolaire: "2023-2024",
+        })
+        .then(({ insertedId }) => insertedId)
+    );
   }
 
   return insertedIdList;
