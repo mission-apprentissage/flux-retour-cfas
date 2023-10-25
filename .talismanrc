@@ -97,6 +97,8 @@ fileignoreconfig:
   checksum: 79608f856866cdf4e0232e5729f8909535c9cfe77155bd1799257aa74ff4104a
 - filename: ui/pages/organismes-formation.tsx
   checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
+- filename: ui/public/modele-import.xlsx
+  checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
 
 scopeconfig:
 - scope: node
