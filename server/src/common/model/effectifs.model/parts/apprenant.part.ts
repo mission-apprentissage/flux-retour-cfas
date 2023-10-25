@@ -131,7 +131,7 @@ export const apprenantSchema = object(
     }),
     dernier_organisme_uai: string({
       description:
-        "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou departement",
+        "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
       pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789]|[0-9]{7}[a-zA-Z])$",
     }),
     organisme_gestionnaire: integer({

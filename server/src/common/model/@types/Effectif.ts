@@ -577,7 +577,7 @@ export interface Effectif {
       | 9900
       | 9999;
     /**
-     * Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou departement
+     * Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département
      */
     dernier_organisme_uai?: string;
     /**
