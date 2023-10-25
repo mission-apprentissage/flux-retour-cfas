@@ -408,4 +408,28 @@ export const primitivesV3 = {
       .describe("Code Insee de la commune de l'établissement de l'employeur"),
     code_naf: extensions.code_naf().describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
   },
+  derniere_situation: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(5)
+    .describe("Situation de l'apprenant N-1")
+    .openapi({
+      enum: [
+        1003, 1005, 1009, 1013, 1015, 1017, 1018, 1019, 1021, 1023, 2001, 2003, 2005, 2007, 3001, 3101, 3003, 3103,
+        3009, 3109, 3011, 3111, 3031, 3131, 3032, 3132, 3033, 3133, 3117, 3119, 3021, 3121, 3023, 3123, 4001, 4101,
+        4003, 4103, 4005, 4105, 4007, 4107, 4009, 4011, 4111, 4013, 4113, 4015, 4115, 4017, 4117, 4019, 4119, 4021,
+        4121, 5901, 5903, 5905, 5907, 5909, 9900, 9999,
+      ],
+      type: "integer",
+    }),
+  dernier_organisme_uai: z
+    .string()
+    .regex(/^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789]|[0-9]{7}[a-zA-Z])$/, "UAI ou département")
+    .describe(
+      "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département"
+    )
+    .openapi({
+      example: "0123456A",
+    }),
 };
