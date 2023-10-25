@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 
 import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
 import { getUsersLinkedToOrganismeId } from "@/common/actions/users.actions";
-import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { auditLogsDb, effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -293,6 +293,8 @@ describe("Routes administrateur", () => {
       ]);
       expect(await effectifsDb().countDocuments({ organisme_id: createdWithUai._id })).toBe(5);
       expect(await effectifsDb().countDocuments({ organisme_id: createdWithoutUai._id })).toBe(0);
+      expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-init" })).toBe(1);
+      expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" })).toBe(1);
     });
 
     it("Vérifie la fusion de 2 organismes avec effectifs sur le non fiable et le fiable et avec comptes utilisateurs", async () => {
@@ -392,6 +394,8 @@ describe("Routes administrateur", () => {
       ]);
       expect(await effectifsDb().countDocuments({ organisme_id: createdWithUai._id })).toBe(15);
       expect(await effectifsDb().countDocuments({ organisme_id: createdWithoutUai._id })).toBe(0);
+      expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-init" })).toBe(1);
+      expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" })).toBe(1);
     });
 
     it("Vérifie la fusion de 2 organismes avec effectifs en doublons", async () => {
@@ -526,6 +530,9 @@ describe("Routes administrateur", () => {
       effectifsExDoublons
         .map((item) => item.created_at)
         .forEach((created_at) => expect(created_at?.getTime()).toEqual(duplicateRecentDate.getTime()));
+
+      expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-init" })).toBe(1);
+      expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" })).toBe(1);
     });
   });
 });

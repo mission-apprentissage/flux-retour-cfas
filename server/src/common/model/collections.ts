@@ -12,12 +12,14 @@ import {
   User,
   UsersMigration,
 } from "./@types";
+import { AuditLog } from "./@types/AuditLog";
 import { BassinsEmploi } from "./@types/BassinsEmploi";
 import { ContratDeca } from "./@types/ContratDeca";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { OrganismeSoltea } from "./@types/OrganismeSoltea";
 import { Rncp } from "./@types/Rncp";
+import auditLogsModelDescriptor from "./auditLogs.model";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
 import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
@@ -40,6 +42,7 @@ import usersModelDescriptor from "./users.model";
 import usersMigrationModelDescriptor from "./usersMigration.model";
 
 export const modelDescriptors = [
+  auditLogsModelDescriptor,
   usersModelDescriptor,
   formationsModelDescriptor,
   formationsCatalogueModelDescriptor,
@@ -87,3 +90,4 @@ export const organismesSolteaDb = () =>
 export const romeDb = () => getDbCollection<IRome>(romeModelDescriptor.collectionName);
 export const rncpDb = () => getDbCollection<Rncp>(rncpModelDescriptor.collectionName);
 export const contratsDecaDb = () => getDbCollection<ContratDeca>(contratsDecaModelDescriptor.collectionName);
+export const auditLogsDb = () => getDbCollection<AuditLog>(auditLogsModelDescriptor.collectionName);

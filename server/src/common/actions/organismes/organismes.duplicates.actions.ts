@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-import { effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import { auditLogsDb, effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";
 
 import { getUsersLinkedToOrganismeId } from "../users.actions";
@@ -63,6 +63,12 @@ export const mergeOrganismeSansUaiDansOrganismeFiable = async (
   organismeSansUaiId: ObjectId,
   organismeFiableId: ObjectId
 ) => {
+  await auditLogsDb().insertOne({
+    action: "mergeOrganismeSansUaiDansOrganismeFiable-init",
+    date: new Date(),
+    data: { organismeFiableId: organismeFiableId, organismeSansUaiId: organismeSansUaiId },
+  });
+
   const organismeSansUai = await organismesDb().findOne({ _id: organismeSansUaiId });
   const organismeFiable = await organismesDb().findOne({ _id: organismeFiableId });
 
@@ -76,16 +82,28 @@ export const mergeOrganismeSansUaiDansOrganismeFiable = async (
     organismeFiableId,
     organismeSansUaiId
   );
+  let deletedDuplicates = 0;
+  let updatedDuplicates = 0;
+  let updatedEffectifsLinkedToOrganismeSansUai = 0;
 
   const effectifsOrganismeSansUai = await effectifsDb().find({ organisme_id: organismeSansUaiId }).toArray();
 
   // 1. Si aucun doublon on update
   if (duplicatesForFiableAndNonFiable.length === 0) {
     await Promise.all(
-      effectifsOrganismeSansUai.map((effectifToMove) => {
-        effectifsDb().updateOne({ _id: effectifToMove._id }, { $set: { organisme_id: organismeFiableId } });
+      effectifsOrganismeSansUai.map(async (effectifToMove) => {
+        const { modifiedCount } = await effectifsDb().updateOne(
+          { _id: effectifToMove._id },
+          { $set: { organisme_id: organismeFiableId } }
+        );
+        updatedEffectifsLinkedToOrganismeSansUai += modifiedCount;
       })
-    ).catch(function (err) {
+    ).catch(async (err) => {
+      await auditLogsDb().insertOne({
+        action: "mergeOrganismeSansUaiDansOrganismeFiable-end",
+        date: new Date(),
+        data: `Impossible de déplacer l'effectif de l'organisme sans uai vers l'organisme fiable : ${err}`,
+      });
       throw new Error("Impossible de déplacer l'effectif de l'organisme sans uai vers l'organisme fiable : ", err);
     });
   } else {
@@ -101,10 +119,15 @@ export const mergeOrganismeSansUaiDansOrganismeFiable = async (
               .filter((item) => item.id !== effectifIdToKeep)
               .map((item) => item.id);
 
-            await effectifsDb().deleteMany({ _id: { $in: effectifsIdToRemove } });
+            const { deletedCount } = await effectifsDb().deleteMany({ _id: { $in: effectifsIdToRemove } });
+            deletedDuplicates += deletedCount;
 
             // Update du doublon le plus récent
-            await effectifsDb().updateOne({ _id: effectifIdToKeep }, { $set: { organisme_id: organismeFiableId } });
+            const { modifiedCount } = await effectifsDb().updateOne(
+              { _id: effectifIdToKeep },
+              { $set: { organisme_id: organismeFiableId } }
+            );
+            updatedDuplicates += modifiedCount;
           }
         }
       })
@@ -112,14 +135,28 @@ export const mergeOrganismeSansUaiDansOrganismeFiable = async (
   }
 
   // MAJ des organisations liés à l'organisme sans UAI vers l'organisme fiable
-  await organisationsDb().updateMany(
+  const { modifiedCount: organisationsUpdatedCount } = await organisationsDb().updateMany(
     { uai: organismeSansUai?.uai, siret: organismeSansUai?.siret },
     { $set: { uai: organismeFiable.uai, siret: organismeFiable.siret } }
   );
 
   // Suppression des effectifs de l'organisme sans UAI
-  await effectifsDb().deleteMany({ organisme_id: organismeSansUaiId });
+  const { deletedCount: effectifsDeletedCount } = await effectifsDb().deleteMany({ organisme_id: organismeSansUaiId });
 
   // Suppression de l'organisme sans UAI
-  await organismesDb().deleteOne({ _id: organismeSansUaiId });
+  const { deletedCount: organismeDeletedCount } = await organismesDb().deleteOne({ _id: organismeSansUaiId });
+
+  await auditLogsDb().insertOne({
+    action: "mergeOrganismeSansUaiDansOrganismeFiable-end",
+    date: new Date(),
+    data: {
+      updatedEffectifsLinkedToOrganismeSansUai,
+      deletedDuplicates,
+      updatedDuplicates,
+      organisationsUpdatedCount,
+      effectifsDeletedCount,
+      organismeDeletedCount,
+      duplicatesForFiableAndNonFiable,
+    },
+  });
 };
