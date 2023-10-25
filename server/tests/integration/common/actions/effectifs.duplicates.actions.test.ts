@@ -36,7 +36,7 @@ const insertDuplicateEffectifs = async (sampleEffectif, nbDuplicates = 2) => {
     );
   }
 
-  return insertedIdList;
+  return Promise.all(insertedIdList);
 };
 
 const sanitizeString = (string) => string.replace(/\s/g, "").toLowerCase();
