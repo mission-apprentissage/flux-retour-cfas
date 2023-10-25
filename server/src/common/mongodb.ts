@@ -33,7 +33,7 @@ export const connectToMongodb = async (uri) => {
   return client;
 };
 
-export const getMongodbClient = () => mongodbClient;
+export const getMongodbClient = () => ensureInitialization(mongodbClient);
 
 export const closeMongodbConnection = async () => {
   if (!mongodbClient) {
