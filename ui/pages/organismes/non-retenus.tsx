@@ -5,7 +5,7 @@ import withAuth from "@/components/withAuth";
 import { useOrganisationOrganismes } from "@/hooks/organismes";
 import ListeOrganismesPage from "@/modules/organismes/ListeOrganismesPage";
 
-function LesOrganismesFermesSansTransmissionOuInconnus() {
+function OrganismesNonRetenus() {
   const { organismes } = useOrganisationOrganismes();
 
   if (!organismes) {
@@ -20,9 +20,7 @@ function LesOrganismesFermesSansTransmissionOuInconnus() {
     );
   }
 
-  return (
-    <ListeOrganismesPage organismes={organismes} activeTab="fermesSansTransmission-inconnus" modePublique={false} />
-  );
+  return <ListeOrganismesPage organismes={organismes} activeTab="non-retenus" modePublique={false} />;
 }
 
-export default withAuth(LesOrganismesFermesSansTransmissionOuInconnus);
+export default withAuth(OrganismesNonRetenus);

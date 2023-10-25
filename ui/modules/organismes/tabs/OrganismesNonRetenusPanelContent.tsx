@@ -6,7 +6,7 @@ import { useOrganismesFiltered } from "@/hooks/organismes";
 import { OrganismeNormalized } from "../ListeOrganismesPage";
 import OrganismesTable from "../OrganismesTable";
 
-function OrganismesFermesSansTransmissionOuInconnusPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
+function OrganismesNonRetenusPanelContent({ organismes }: { organismes: OrganismeNormalized[] }) {
   const { organismesFiltered } = useOrganismesFiltered(organismes);
 
   return (
@@ -30,4 +30,4 @@ function OrganismesFermesSansTransmissionOuInconnusPanelContent({ organismes }: 
   );
 }
 
-export default OrganismesFermesSansTransmissionOuInconnusPanelContent;
+export default OrganismesNonRetenusPanelContent;

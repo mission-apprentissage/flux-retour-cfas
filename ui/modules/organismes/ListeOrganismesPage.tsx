@@ -26,8 +26,8 @@ import SimplePage from "@/components/Page/SimplePage";
 import useAuth from "@/hooks/useAuth";
 
 import OrganismesACompleterPanelContent from "./tabs/OrganismesACompleterPanelContent";
-import OrganismesFermesSansTransmissionOuInconnusPanelContent from "./tabs/OrganismesFermesSansTransmissionOuInconnusPanelContent";
 import OrganismesFiablesPanelContent from "./tabs/OrganismesFiablesPanelContent";
+import OrganismesNonRetenusPanelContent from "./tabs/OrganismesNonRetenusPanelContent";
 
 export type OrganismeNormalized = Organisme & {
   normalizedName: string;
@@ -48,8 +48,8 @@ const tabs = [
     index: 1,
   },
   {
-    key: "fermesSansTransmission-inconnus",
-    route: "/organismes/fermesSansTransmission-inconnus",
+    key: "non-retenus",
+    route: "/organismes/non-retenus",
     index: 2,
   },
 ] as const;
@@ -68,46 +68,45 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     props.activeTab === "a-completer" ? " non fiables" : ""
   }`;
 
-  const { organismesFiables, organismesACompleter, organismesFermesSansTransmissionOuInconnus, nbOrganismesFermes } =
-    useMemo(() => {
-      const organismesFiables: OrganismeNormalized[] = [];
-      const organismesACompleter: OrganismeNormalized[] = [];
-      const organismesFermesSansTransmissionOuInconnus: OrganismeNormalized[] = [];
-      let nbOrganismesFermes = 0;
-      (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
-        // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
-        organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
-        organisme.normalizedUai = normalize(organisme.uai ?? "");
-        organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
+  const { organismesFiables, organismesACompleter, organismesNonRetenus, nbOrganismesFermes } = useMemo(() => {
+    const organismesFiables: OrganismeNormalized[] = [];
+    const organismesACompleter: OrganismeNormalized[] = [];
+    const organismesNonRetenus: OrganismeNormalized[] = [];
+    let nbOrganismesFermes = 0;
+    (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
+      // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
+      organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
+      organisme.normalizedUai = normalize(organisme.uai ?? "");
+      organisme.normalizedCommune = normalize(organisme.adresse?.commune ?? "");
 
-        if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
-          organismesFiables.push(organisme);
-        } else if (
-          // Organismes à masquer :
-          // organismes fermés et ne transmettant pas
-          // organismes inconnus (sans raison sociale ni enseigne) et absents du référentiel ou fermé
-          (organisme.ferme && !organisme.last_transmission_date) ||
-          (!organisme.enseigne &&
-            !organisme.raison_sociale &&
-            (organisme.est_dans_le_referentiel === "absent" || organisme.ferme))
-        ) {
+      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
+        organismesFiables.push(organisme);
+      } else if (
+        // Organismes à masquer :
+        // organismes fermés et ne transmettant pas
+        // organismes inconnus (sans raison sociale ni enseigne) et absents du référentiel ou fermé
+        (organisme.ferme && !organisme.last_transmission_date) ||
+        (!organisme.enseigne &&
+          !organisme.raison_sociale &&
+          (organisme.est_dans_le_referentiel === "absent" || organisme.ferme))
+      ) {
+        nbOrganismesFermes++;
+        organismesNonRetenus.push(organisme);
+      } else {
+        organismesACompleter.push(organisme);
+        if (organisme.ferme) {
           nbOrganismesFermes++;
-          organismesFermesSansTransmissionOuInconnus.push(organisme);
-        } else {
-          organismesACompleter.push(organisme);
-          if (organisme.ferme) {
-            nbOrganismesFermes++;
-          }
         }
-      });
+      }
+    });
 
-      return {
-        organismesFiables,
-        organismesACompleter,
-        organismesFermesSansTransmissionOuInconnus,
-        nbOrganismesFermes,
-      };
-    }, [props.organismes]);
+    return {
+      organismesFiables,
+      organismesACompleter,
+      organismesNonRetenus,
+      nbOrganismesFermes,
+    };
+  }, [props.organismes]);
 
   return (
     <SimplePage title={title}>
@@ -159,7 +158,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         </HStack>
 
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
-        {organismesACompleter.length === 0 && organismesFermesSansTransmissionOuInconnus.length === 0 ? (
+        {organismesACompleter.length === 0 && organismesNonRetenus.length === 0 ? (
           <OrganismesFiablesPanelContent organismes={organismesFiables} />
         ) : (
           <Tabs
@@ -194,9 +193,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                 <Tab fontWeight="bold">
                   <HStack>
                     <i className="ri-close-circle-fill"></i>
-                    <Text>
-                      OFA : fermés ne transmettant pas ou inconnus ({organismesFermesSansTransmissionOuInconnus.length})
-                    </Text>
+                    <Text>OFA : non retenus ({organismesNonRetenus.length})</Text>
                   </HStack>
                 </Tab>
               )}
@@ -210,9 +207,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               </TabPanel>
               {organisationType === "ADMINISTRATEUR" && (
                 <TabPanel>
-                  <OrganismesFermesSansTransmissionOuInconnusPanelContent
-                    organismes={organismesFermesSansTransmissionOuInconnus}
-                  />
+                  <OrganismesNonRetenusPanelContent organismes={organismesNonRetenus} />
                 </TabPanel>
               )}
             </TabPanels>
