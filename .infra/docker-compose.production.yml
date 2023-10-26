@@ -136,25 +136,3 @@ services:
         fluentd-address: localhost:24224
         tag: docker.json.tdb.{{env_type}}.metabase
         fluentd-async: "true"
-
-  clamav:
-    <<: *default
-    image: clamav/clamav:latest
-    deploy:
-      <<: *deploy-default
-      resources:
-        limits:
-          memory: 2g
-    healthcheck:
-      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
-      interval: 60s
-      retries: 3
-      start_period: 6m
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        tag: docker.json.tdb.{{env_type}}.clamav
-        fluentd-async: "true"
-    volumes:
-      - /opt/app/data/clamav:/var/lib/clamav

@@ -15,19 +15,6 @@ services:
       retries: 12
       start_period: 10s
 
-  clamav:
-    image: clamav/clamav:latest
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
-      interval: 60s
-      retries: 3
-      start_period: 6m
-    ports:
-      - 3310:3310
-    volumes:
-      - tdb_clamav_data:/var/lib/clamav
-
   smtp:
     image: axllent/mailpit:v1.5.5
     restart: unless-stopped
@@ -46,6 +33,3 @@ volumes:
   tdb_smtp_data:
     driver: local
     name: tdb_smtp_data
-  tdb_clamav_data:
-    driver: local
-    name: tdb_clamav_data
