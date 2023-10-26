@@ -79,14 +79,14 @@ jobs:
           sudo pipx inject ansible-core jmespath
 
       - name: Run playbook
-        run: .bin/mna-lba deploy preview "${{ github.event.issue.number }}"
+        run: .bin/mna-tdb deploy preview "${{ github.event.issue.number }}"
         env:
           ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
           ANSIBLE_REMOTE_USER: deploy
           ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
 
       - name: Encrypt Error log on failure
-        run: .bin/mna-lba deploy:log:encrypt
+        run: .bin/mna-tdb deploy:log:encrypt
         if: failure()
         env:
           ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
@@ -100,7 +100,7 @@ jobs:
 
       - name: Preview Summary when failed
         if: failure()
-        run: echo 'You can get error logs using `.bin/mna-lba deploy:log:decrypt ${{ github.run_id }}`' >> $GITHUB_STEP_SUMMARY
+        run: echo 'You can get error logs using `.bin/mna-tdb deploy:log:decrypt ${{ github.run_id }}`' >> $GITHUB_STEP_SUMMARY
 
       - name: Preview Summary
         run: echo 'https://${{ github.event.issue.number }}.tdb-preview.apprentissage.beta.gouv.fr/ 🚀' >> $GITHUB_STEP_SUMMARY
@@ -129,7 +129,7 @@ jobs:
 
             https://${{ github.event.issue.number }}.tdb-preview.apprentissage.beta.gouv.fr/
 
-            You can get error logs using `.bin/mna-lba deploy:log:decrypt ${{ github.run_id }}`
+            You can get error logs using `.bin/mna-tdb deploy:log:decrypt ${{ github.run_id }}`
             You can access runner logs in ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
 
             To re-deploy just add a comment with :rocket:
