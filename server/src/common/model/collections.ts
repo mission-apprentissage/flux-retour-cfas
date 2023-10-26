@@ -9,7 +9,6 @@ import {
   MaintenanceMessage,
   Organisme,
   OrganismesReferentiel,
-  Upload,
   User,
   UsersMigration,
 } from "./@types";
@@ -36,7 +35,6 @@ import OrganismesModelDescriptor from "./organismes.model";
 import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
 import OrganismesSolteaModelDescriptor from "./organismesSoltea.model";
 import rncpModelDescriptor from "./rncp.model";
-import uploadsModelDescriptor from "./uploads.model/uploads.model";
 import usersModelDescriptor from "./users.model";
 import usersMigrationModelDescriptor from "./usersMigration.model";
 
@@ -56,7 +54,6 @@ export const modelDescriptors = [
   OrganismesSolteaModelDescriptor,
   effectifsModelDescriptor,
   effectifsQueueModelDescriptor,
-  uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
   bassinsEmploiDescriptor,
   contratsDecaModelDescriptor,
@@ -80,7 +77,6 @@ export const maintenanceMessageDb = () =>
   getDbCollection<MaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<EffectifsQueue>(effectifsQueueModelDescriptor.collectionName);
-export const uploadsDb = () => getDbCollection<Upload>(uploadsModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
 export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmploiDescriptor.collectionName);

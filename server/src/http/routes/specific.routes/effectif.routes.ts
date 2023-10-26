@@ -6,7 +6,6 @@ import { ObjectId } from "mongodb";
 import { updateEffectif } from "@/common/actions/effectifs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { InfoSiret } from "@/common/actions/infoSiret.actions-struct";
-import { getUploadByOrgId } from "@/common/actions/uploads.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
 import { effectifsDb } from "@/common/model/collections";
@@ -149,40 +148,6 @@ export default () => {
     const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
     return res.json(buildEffectifResult(effectif));
   });
-
-  router.get("/detail/:id", async ({ params }, res) => {
-    let { id } = await Joi.object({
-      id: Joi.string().required(),
-    })
-      .unknown()
-      .validateAsync(params, { abortEarly: false });
-
-    const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
-    return res.json(effectif);
-  });
-
-  router.get("/:id/snapshot", async ({ params, query }, res) => {
-    const { id, organisme_id } = await Joi.object({
-      id: Joi.string().required(),
-      organisme_id: Joi.string().required(),
-    })
-      .unknown()
-      .validateAsync({ ...params, ...query }, { abortEarly: false });
-
-    const uploads = await getUploadByOrgId(new ObjectId(organisme_id));
-
-    const effectif = uploads.last_snapshot_effectifs.find(({ _id }) => _id.toString() === id);
-
-    if (!effectif) {
-      throw new Error(`Unable to find effectif ${params.id}`);
-    }
-
-    return res.json(buildEffectifResult(effectif));
-  });
-
-  // TODO https://github.com/mission-apprentissage/flux-retour-cfas/issues/2387
-  // router.post("/", async ({ body }, res) => {
-  // });
 
   router.put("/:id", async ({ body, params }, res) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -11,20 +11,14 @@ import { useEffectifForm } from "./formEngine/useEffectifForm";
 interface EffectifProps {
   modeSifa: boolean;
   canEdit: boolean;
-  effectifsSnapshot: boolean;
 }
 
-const Effectif = React.memo(function EffectifMemo({
-  modeSifa = false,
-  canEdit = false,
-  effectifsSnapshot = false,
-}: EffectifProps) {
+const Effectif = React.memo(function EffectifMemo({ modeSifa = false, canEdit = false }: EffectifProps) {
   const { controller: effectifFormController } = useEffectifForm({ schema: effectifFormSchema });
   const { isLoading } = useInitEffectifForm({
     controller: effectifFormController,
     modeSifa,
     canEdit,
-    effectifsSnapshot,
   });
   useAutoSave({ controller: effectifFormController });
 

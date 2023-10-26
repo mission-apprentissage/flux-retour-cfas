@@ -15,7 +15,7 @@ import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
-import { activateUser, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
+import { activateUser, login, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
   effectifsFiltersSchema,
@@ -71,12 +71,14 @@ import {
   getInvalidSiretsFromDossierApprenant,
   getInvalidUaisFromDossierApprenant,
   resetConfigurationERP,
+  getStatOrganismes,
 } from "@/common/actions/organismes/organismes.actions";
 import { searchOrganismesFormations } from "@/common/actions/organismes/organismes.formations.actions";
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
-import { createSession } from "@/common/actions/sessions.actions";
+import { createSession, removeSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
+import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
@@ -111,14 +113,12 @@ import { openApiFilePath } from "./open-api-path";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
-import statsAdmin from "./routes/admin.routes/stats.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import effectif from "./routes/specific.routes/effectif.routes";
 import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
-import auth from "./routes/user.routes/auth.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
@@ -220,8 +220,28 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
-    .use("/api/v1/auth", auth())
     .use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs))
+    .post(
+      "/api/v1/auth/login",
+      returnResult(async (req, res) => {
+        const { email, password } = await validateFullZodObjectSchema(req.body, {
+          email: z.string().email().toLowerCase(),
+          password: z.string(),
+        });
+        const sessionToken = await login(email, password);
+        responseWithCookie(res, sessionToken);
+      })
+    )
+    .post(
+      "/api/v1/auth/logout",
+      returnResult(async (req, res) => {
+        if (!req.cookies[COOKIE_NAME]) {
+          throw Boom.unauthorized("invalid jwt");
+        }
+        await removeSession(req.cookies[COOKIE_NAME]);
+        res.clearCookie(COOKIE_NAME);
+      })
+    )
     .post(
       "/api/v1/auth/register",
       returnResult(async (req) => {
@@ -324,13 +344,16 @@ function setupRoutes(app: Application) {
         throw new Error("Unauthorized");
       }
 
-      let erpSource: string = "INCONNU";
+      let erpSource = "INCONNU";
       if (organisme.erps?.length) {
         if (organisme.erps?.length === 1) erpSource = organisme.erps[0];
         if (organisme.erps?.length > 1) erpSource = "MULTI_ERP";
       }
 
-      (req.user as any) = { source: erpSource, source_organisme_id: organisme._id.toString() };
+      (req.user as any) = {
+        source: erpSource,
+        source_organisme_id: organisme._id.toString(),
+      };
       next();
     },
     dossierApprenantRouter()
@@ -341,7 +364,9 @@ function setupRoutes(app: Application) {
    *********************************************************/
   app.use(
     "/api/organismes",
-    requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
+    requireApiKeyAuthenticationMiddleware({
+      apiKeyValue: config.organismesConsultationApiKey,
+    }),
     organismesRouter()
   );
 
@@ -367,7 +392,9 @@ function setupRoutes(app: Application) {
     .put(
       "/api/v1/profile/cgu/accept/:version",
       returnResult(async (req) => {
-        await updateUserProfile(req.user, { has_accept_cgu_version: req.params.version });
+        await updateUserProfile(req.user, {
+          has_accept_cgu_version: req.params.version,
+        });
       })
     )
     .delete(
@@ -725,7 +752,12 @@ function setupRoutes(app: Application) {
       .use("/users", usersAdmin())
       .use("/organismes", organismesAdmin())
       .use("/effectifs", effectifsAdmin())
-      .use("/stats", statsAdmin())
+      .get(
+        "/stats",
+        returnResult(async () => {
+          return await getStatOrganismes();
+        })
+      )
       .use("/maintenanceMessages", maintenancesAdmin())
       .post(
         "/impersonate",
@@ -738,7 +770,9 @@ function setupRoutes(app: Application) {
           }
 
           // génère une nouvelle session avec l'organisation usurpée
-          const sessionToken = await createSession(req.user.email, { impersonatedOrganisation: organisation });
+          const sessionToken = await createSession(req.user.email, {
+            impersonatedOrganisation: organisation,
+          });
           responseWithCookie(res, sessionToken);
         })
       )

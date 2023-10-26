@@ -7,10 +7,7 @@ import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import { effectifFormSchema } from "@/modules/mon-espace/effectifs/engine/formEngine/effectifFormSchema";
 import { initFields } from "@/modules/mon-espace/effectifs/engine/formEngine/initFields";
 
-// eslint-disable-next-line no-undef
-// const sleep = (m) => new Promise((r) => setTimeout(r, m));
-
-export const useInitEffectifForm = ({ controller, modeSifa, canEdit, effectifsSnapshot = false }) => {
+export const useInitEffectifForm = ({ controller, modeSifa, canEdit }) => {
   const effectifId = useRecoilValue<any>(effectifIdAtom);
   const organisme = useRecoilValue<any>(organismeAtom);
 
@@ -18,7 +15,7 @@ export const useInitEffectifForm = ({ controller, modeSifa, canEdit, effectifsSn
     ["effectif", effectifId],
     async () => {
       if (!effectifId) return null;
-      const effectifForm = await _get(`/api/v1/effectif/${effectifId}${effectifsSnapshot ? "/snapshot" : ""}`, {
+      const effectifForm = await _get(`/api/v1/effectif/${effectifId}`, {
         params: { organisme_id: organisme._id },
       });
       // await sleep(300); // TODO SPECIAL UX
