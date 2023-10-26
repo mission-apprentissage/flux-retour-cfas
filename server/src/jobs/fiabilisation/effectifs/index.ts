@@ -1,4 +1,5 @@
 import { addDays } from "date-fns";
+import { getAnneesScolaireListFromDate } from "shared";
 
 import {
   abandonsIndicator,
@@ -9,8 +10,7 @@ import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
 
-const CURRENT_ANNEES_SCOLAIRES = ["2022-2023", "2023-2023"];
-const filterStages = [{ $match: { annee_scolaire: { $in: CURRENT_ANNEES_SCOLAIRES } } }];
+const filterStages = [{ $match: { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } } }];
 
 /**
  * Aggregation pour filtre sur le nb de jours dans ce statut
@@ -38,8 +38,6 @@ const getNbAbandonsADate = async () => (await abandonsIndicator.getListAtDate(ne
  * qui sont dans ce statut depuis nbJours
  */
 export const removeInscritsSansContratsDepuis = async (nbJours = 90) => {
-  const filterStages = [{ $match: { annee_scolaire: { $in: CURRENT_ANNEES_SCOLAIRES } } }];
-
   const inscritsSansContratsIdsToRemove = (
     await effectifsDb()
       .aggregate([
