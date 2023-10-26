@@ -2,7 +2,7 @@ import { ObjectId } from "bson";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z, ZodType } from "zod";
 
-export type CollectionName = "users" | "jobs";
+export type CollectionName = "users" | "jobs" | "rome";
 
 export interface IModelDescriptor {
   zod: ZodType;

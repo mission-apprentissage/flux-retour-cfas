@@ -35,6 +35,7 @@ import OrganismesModelDescriptor from "./organismes.model";
 import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
 import OrganismesSolteaModelDescriptor from "./organismesSoltea.model";
 import rncpModelDescriptor from "./rncp.model";
+import romeModelDescriptor, { IRome } from "./rome.model";
 import usersModelDescriptor from "./users.model";
 import usersMigrationModelDescriptor from "./usersMigration.model";
 
@@ -57,6 +58,7 @@ export const modelDescriptors = [
   fiabilisationUaiSiretModelDescriptor,
   bassinsEmploiDescriptor,
   contratsDecaModelDescriptor,
+  romeModelDescriptor,
   rncpModelDescriptor,
 ];
 
@@ -82,5 +84,6 @@ export const fiabilisationUaiSiretDb = () =>
 export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmploiDescriptor.collectionName);
 export const organismesSolteaDb = () =>
   getDbCollection<OrganismeSoltea>(OrganismesSolteaModelDescriptor.collectionName);
+export const romeDb = () => getDbCollection<IRome>(romeModelDescriptor.collectionName);
 export const rncpDb = () => getDbCollection<Rncp>(rncpModelDescriptor.collectionName);
 export const contratsDecaDb = () => getDbCollection<ContratDeca>(contratsDecaModelDescriptor.collectionName);
