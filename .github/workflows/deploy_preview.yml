@@ -103,7 +103,7 @@ jobs:
         run: echo 'You can get error logs using `.bin/mna-lba deploy:log:decrypt ${{ github.run_id }}`' >> $GITHUB_STEP_SUMMARY
 
       - name: Preview Summary
-        run: echo 'https://${{ github.event.issue.number }}.labonnealternance-preview.apprentissage.beta.gouv.fr/ 🚀' >> $GITHUB_STEP_SUMMARY
+        run: echo 'https://${{ github.event.issue.number }}.tdb-preview.apprentissage.beta.gouv.fr/ 🚀' >> $GITHUB_STEP_SUMMARY
 
       - name: Comment PR Preview
         if: github.event.issue.state != 'closed'
@@ -111,7 +111,7 @@ jobs:
         with:
           message: |
             ### :rocket: Prévisualisation
-            https://${{ github.event.issue.number }}.labonnealternance-preview.apprentissage.beta.gouv.fr/
+            https://${{ github.event.issue.number }}.tdb-preview.apprentissage.beta.gouv.fr/
 
             You can access runner logs in ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
 
@@ -127,7 +127,7 @@ jobs:
           message: |
             ### :ambulance: Prévisualisation failed
 
-            https://${{ github.event.issue.number }}.labonnealternance-preview.apprentissage.beta.gouv.fr/
+            https://${{ github.event.issue.number }}.tdb-preview.apprentissage.beta.gouv.fr/
 
             You can get error logs using `.bin/mna-lba deploy:log:decrypt ${{ github.run_id }}`
             You can access runner logs in ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
@@ -144,7 +144,7 @@ jobs:
           message: |
             ### :ambulance: Prévisualisation cancelled
 
-            https://${{ github.event.issue.number }}.labonnealternance-preview.apprentissage.beta.gouv.fr/
+            https://${{ github.event.issue.number }}.tdb-preview.apprentissage.beta.gouv.fr/
 
             You can access runner logs in ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
 
