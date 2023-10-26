@@ -45,7 +45,6 @@ export const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organis
   raison_sociale: "ADEN Formations (Caen)",
   fiabilisation_statut: "FIABLE",
   ferme: false,
-  metiers: [],
   relatedFormations: [],
   organismesFormateurs: [],
   organismesResponsables: [],

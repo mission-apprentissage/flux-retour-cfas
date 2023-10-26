@@ -35,7 +35,6 @@ const sampleOrganismeWithUAI = {
 
 const sampleOrganismeWithoutUAIOutput: Organisme = {
   ...sampleOrganismeWithoutUai,
-  metiers: [],
   reseaux: [],
   erps: [],
   relatedFormations: [],
@@ -53,24 +52,6 @@ const sampleOrganismeWithUAIOutput: Organisme = {
 const fieldsAddedByApiCalls = {
   enseigne: sampleOrganismeWithUAI.nom,
   raison_sociale: "CENTR FORMATION TECHNICIENS AGRICOLES",
-  metiers: [
-    "Exploitation agricole",
-    "Paysagisme, jardinage, entretien des espaces verts",
-    "Elevage d'animaux de ferme ",
-    "Ingéniérie, agronomie",
-    "Exploitation forestière, sylviculture",
-    "Horticulture : production de fleurs, végétaux, arbustes",
-    "Mécanique engins agricoles et engins de chantier",
-    "Conduite d'engins agricoles",
-    "Production d'alcool (vin, bière, cidre…)",
-    "Architecture",
-    "Ingéniérie en BTP (Bureau d'études, conception technique, BIM, …)",
-    "Elevage de chevaux",
-    "Production de produits fermiers",
-    "Management commercial",
-    "Soins aux animaux",
-    "Elevage de poissons, produits de la mer",
-  ],
   adresse: {
     numero: 25,
     voie: "RUEPIERRE NEVEU",

@@ -44,7 +44,7 @@ fileignoreconfig:
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
-  checksum: 5613e1059b3607f8281619281e1c04d01853d32f169b9877bd69817a08b534cd
+  checksum: 71c4adc90d1b720320b8c713f4ab5fd69335979705fe079b77f79504f7dbab6f
   ignore_detectors:
   - filesize
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
@@ -97,6 +97,7 @@ fileignoreconfig:
   checksum: 79608f856866cdf4e0232e5729f8909535c9cfe77155bd1799257aa74ff4104a
 - filename: ui/pages/organismes-formation.tsx
   checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
+
 scopeconfig:
 - scope: node
 custom_patterns:

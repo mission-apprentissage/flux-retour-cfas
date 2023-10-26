@@ -41,7 +41,6 @@ describe("Routes Organismes for API referentiel", () => {
     //   "nature",
     //   "reseaux",
     //   "adresse",
-    //   "metiers",
     //   "est_dans_le_referentiel",
     //   "ferme",
     // ]);

@@ -923,10 +923,6 @@ export interface Organisme {
     reseaux?: string[];
   }[];
   /**
-   * Les domaines métiers rattachés à l'établissement
-   */
-  metiers?: string[];
-  /**
    * Date de la première transmission de données
    */
   first_transmission_date?: string;

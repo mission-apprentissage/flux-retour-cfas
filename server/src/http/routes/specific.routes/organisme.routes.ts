@@ -65,7 +65,6 @@ export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {
   return {
     libelleLong: organisme.nom,
     reseaux: organisme.reseaux,
-    domainesMetiers: organisme.metiers,
     uai: organisme.uai,
     nature: organisme.nature,
     adresse: organisme.adresse,

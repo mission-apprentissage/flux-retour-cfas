@@ -158,7 +158,6 @@ const schema = object(
     ),
     organismesFormateurs: arrayOf(relationOrganismeSchema),
     organismesResponsables: arrayOf(relationOrganismeSchema),
-    metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     last_transmission_date: date({ description: "Date de la dernière transmission de données" }),
     est_dans_le_referentiel: string({
@@ -203,7 +202,6 @@ const schema = object(
 // Default value
 export function defaultValuesOrganisme() {
   return {
-    metiers: [],
     reseaux: [],
     erps: [],
     relatedFormations: [],

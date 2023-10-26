@@ -77,9 +77,6 @@ const config = {
   mnaCatalogApi: {
     endpoint: "https://catalogue.apprentissage.beta.gouv.fr/api",
   },
-  lbaApi: {
-    endpoint: "https://labonnealternance.apprentissage.beta.gouv.fr/api",
-  },
   mnaReferentielApi: {
     endpoint: "https://referentiel.apprentissage.onisep.fr/api/v1",
   },
