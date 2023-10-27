@@ -388,9 +388,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:formations-catalogue"));
 
-/**
- * Job de remplissage des formations du catalogue
- */
+program
+  .command("hydrate:rome")
+  .description("Remplissage du ROME")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:rome"));
+
 program
   .command("hydrate:rncp")
   .description("Remplissage du RNCP")
