@@ -103,6 +103,11 @@ export const schema = object(
     date_rqth_apprenant: any({ description: "Date de reconnaissance du RQTH de l'apprenant" }),
     responsable_apprenant_mail1: any({ description: "Mail du responsable de l'apprenant" }),
     responsable_apprenant_mail2: any({ description: "Mail du responsable de l'apprenant" }),
+    derniere_situation: any({ description: "Situation de l'apprenant N-1" }),
+    dernier_organisme_uai: any({
+      description:
+        "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
+    }),
     obtention_diplome_formation: any(),
     date_obtention_diplome_formation: any({ description: formationProps.date_obtention_diplome.description }),
     date_exclusion_formation: any(),

@@ -31,6 +31,8 @@ export interface EffectifsQueue {
   date_rqth_apprenant?: any; // Date de reconnaissance du RQTH de l'apprenant
   responsable_apprenant_mail1?: any; // Mail du responsable de l'apprenant
   responsable_apprenant_mail2?: any; // Mail du responsable de l'apprenant
+  derniere_situation?: any; // Situation de l'apprenant N-1
+  dernier_organisme_uai?: any; // Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département
   obtention_diplome_formation?: any;
   date_obtention_diplome_formation?: any; // Date d'obtention du diplôme
   date_exclusion_formation?: any;
