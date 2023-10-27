@@ -411,8 +411,6 @@ export const primitivesV3 = {
   derniere_situation: z.coerce
     .number()
     .int()
-    .min(0)
-    .max(5)
     .describe("Situation de l'apprenant N-1")
     .openapi({
       enum: [
