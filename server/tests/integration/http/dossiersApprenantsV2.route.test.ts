@@ -232,7 +232,7 @@ describe("Dossiers Apprenants Route", () => {
       });
 
       // Check Nb Items added
-      expect(await effectifsQueueDb().countDocuments({})).toBe(1);
+      await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(1);
     });
   });
 });

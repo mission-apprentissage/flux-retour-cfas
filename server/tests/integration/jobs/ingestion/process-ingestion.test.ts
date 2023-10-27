@@ -114,7 +114,7 @@ describe("Processus d'ingestion", () => {
         });
 
         // Check nb effectifsQueue
-        expect(await effectifsQueueDb().countDocuments({})).toBe(1);
+        await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(1);
 
         // TODO : Vérifier le locker
       });
@@ -167,7 +167,7 @@ describe("Processus d'ingestion", () => {
         });
 
         // Check nb effectifsQueue
-        expect(await effectifsDb().countDocuments({})).toBe(1);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(1);
 
         const insertedDossier = await effectifsDb().findOne({});
 
@@ -314,10 +314,10 @@ describe("Processus d'ingestion", () => {
         });
 
         // Check nb effectifsQueue
-        expect(await effectifsQueueDb().countDocuments({})).toBe(2);
+        await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(2);
 
         // Check nb d'effectifs
-        expect(await effectifsDb().countDocuments({})).toBe(1);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(1);
 
         // Check historique
         const effectifInserted = await effectifsDb().findOne({ id_erp_apprenant: commonSampleData.id_erp_apprenant });
@@ -362,10 +362,10 @@ describe("Processus d'ingestion", () => {
         });
 
         // Check nb effectifsQueue
-        expect(await effectifsQueueDb().countDocuments({})).toBe(2);
+        await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(2);
 
         // Check nb d'effectifs
-        expect(await effectifsDb().countDocuments({})).toBe(2);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(2);
 
         // Check historiques des effectifs
         const effectifInserted = await effectifsDb().findOne({ "formation.cfd": commonSampleData.id_formation });
@@ -498,7 +498,7 @@ describe("Processus d'ingestion", () => {
         });
 
         // Check nb effectifsQueue
-        expect(await effectifsQueueDb().countDocuments({})).toBe(1);
+        await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(1);
 
         const insertedDossier = await effectifsDb().findOne({});
 
@@ -625,7 +625,7 @@ describe("Processus d'ingestion", () => {
         });
 
         // Check nb effectifsQueue
-        expect(await effectifsQueueDb().countDocuments({})).toBe(1);
+        await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(1);
 
         const insertedDossier = await effectifsDb().findOne({});
 
@@ -722,10 +722,10 @@ describe("Processus d'ingestion", () => {
         });
 
         // Check nb effectifsQueue
-        expect(await effectifsQueueDb().countDocuments({})).toBe(2);
+        await expect(effectifsQueueDb().countDocuments({})).resolves.toBe(2);
 
         // Check nb d'effectifs
-        expect(await effectifsDb().countDocuments({})).toBe(1);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(1);
 
         // Check historique
         const effectifInserted = await effectifsDb().findOne({ id_erp_apprenant: "987654321" });
@@ -784,7 +784,7 @@ describe("Processus d'ingestion", () => {
           expect(updatedInput?.effectif_id).toBeUndefined();
 
           // check that no data was created
-          expect(await effectifsDb().countDocuments({})).toBe(0);
+          await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
         });
       });
 
@@ -833,7 +833,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.effectif_id).toBeUndefined();
 
         // check that no data was created
-        expect(await effectifsDb().countDocuments({})).toBe(0);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
       });
 
       it("Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format du nom / prenom du jeune pour un organisme fiable", async () => {
@@ -891,7 +891,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.effectif_id).toBeUndefined();
 
         // check that no data was created
-        expect(await effectifsDb().countDocuments({})).toBe(0);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
       });
 
       it("Vérifie qu'on ne crée pas de donnée et renvoie une erreur lorsque les champs date ne sont pas iso", async () => {
@@ -944,7 +944,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.effectif_id).toBeUndefined();
 
         // check that no data was created
-        expect(await effectifsDb().countDocuments({})).toBe(0);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
       });
 
       it("Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format de l'année scolaire pour un organisme fiable", async () => {
@@ -998,7 +998,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.effectif_id).toBeUndefined();
 
         // check that no data was created
-        expect(await effectifsDb().countDocuments({})).toBe(0);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
       });
     });
 
@@ -1060,7 +1060,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.effectif_id).toBeUndefined();
 
         // check effectifs count
-        expect(await effectifsDb().countDocuments({})).toBe(1);
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(1);
 
         // Check Séquence historique
         const effectifInserted = await effectifsDb().findOne({ id_erp_apprenant: commonSampleData.id_erp_apprenant });
