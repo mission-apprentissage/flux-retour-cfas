@@ -62,24 +62,6 @@ services:
     labels:
       - autoheal=true
 
-  clamav:
-    <<: *default
-    image: clamav/clamav:latest
-    container_name: tdb_clamav
-    deploy:
-      resources:
-        limits:
-          memory: 2g
-    volumes:
-      - /opt/app/data/clamav:/var/lib/clamav
-    healthcheck:
-      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
-      interval: 60s
-      retries: 3
-      start_period: 6m
-    labels:
-      - autoheal=true
-
   smtp:
     <<: *default
     image: axllent/mailpit:v1.5.5

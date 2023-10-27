@@ -46,9 +46,6 @@ const config = {
       pass: env.get("MNA_TDB_SMTP_AUTH_PASS").asString(),
     },
   },
-  clamav: {
-    uri: env.get("MNA_TDB_CLAMAV_URI").default("127.0.0.1:3310").asString(),
-  },
   ovhStorage: {
     username: env.get("MNA_TDB_OVH_STORAGE_USERNAME").required().asString(),
     password: env.get("MNA_TDB_OVH_STORAGE_PASSWORD").required().asString(),

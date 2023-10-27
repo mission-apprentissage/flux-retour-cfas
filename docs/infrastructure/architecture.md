@@ -22,7 +22,6 @@ flowchart TB
         P-->S["fa:fa-layer-group Server"]
         P-->U["fa:fa-layer-group UI"]
         P-->M
-        S-->C["Clamav"]
         S-->D["MongoDB"]
         M["Metabase"]-->D["MongoDB"]
         Pro["Processor"]-->D["MongoDB"]
@@ -96,7 +95,7 @@ sequenceDiagram
 ```
 
 - Les modifications des services Proxy, Server, Processor et UI se font sans interruption.
-- **Cependant, les modifications des services MongoDB et Clamav se traduisent par une interruption de service.**
+- **Cependant, la modification du service MongoDB se traduit par une interruption de service.**
 
 ### Avec Migration
 
