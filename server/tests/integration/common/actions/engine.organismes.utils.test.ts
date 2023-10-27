@@ -74,14 +74,14 @@ describe("Tests des actions  engine utilitaires organismes", () => {
 
       testsCases.forEach((test) => {
         it(test.label, async () => {
-          expect(await isOrganismeFiableForCouple(test.uai, test.siret)).toBe(test.expectedFiable);
+          await expect(isOrganismeFiableForCouple(test.uai, test.siret)).resolves.toBe(test.expectedFiable);
         });
       });
     });
 
     describe("Vérification des cas de couples fiables", () => {
       it("Vérifie qu'on couple dont l'UAI et le SIRET matchent dans le référentiel est pas fiable", async () => {
-        expect(await isOrganismeFiableForCouple(UAI_REFERENTIEL, SIRET_REFERENTIEL)).toBe(true);
+        await expect(isOrganismeFiableForCouple(UAI_REFERENTIEL, SIRET_REFERENTIEL)).resolves.toBe(true);
       });
     });
   });

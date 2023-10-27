@@ -77,7 +77,7 @@ describe("Routes diverses", () => {
       testPermissions(accesOrganisme, async (organisation, allowed) => {
         const response = await requestAsOrganisation(organisation, "delete", `/api/v1/effectif/${effectifId}`);
         expect(response.status).toStrictEqual(allowed ? 200 : 403);
-        expect(await effectifsDb().countDocuments()).toStrictEqual(allowed ? 0 : 1);
+        await expect(effectifsDb().countDocuments()).resolves.toStrictEqual(allowed ? 0 : 1);
       });
     });
   });

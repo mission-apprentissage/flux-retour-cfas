@@ -10,7 +10,7 @@ describe("Job hydrateContratsDeca", () => {
   useMongo();
   describe("getLastDecaCreatedDateInDb", () => {
     it("Vérifie la non récupération de la dernière date d'ajout d'une entrée dans la collection contratsDeca si la collection est vide", async () => {
-      expect(await getLastDecaCreatedDateInDb()).toStrictEqual(null);
+      await expect(getLastDecaCreatedDateInDb()).resolves.toStrictEqual(null);
     });
 
     it("Vérifie la récupération de la dernière date d'ajout d'une entrée dans la collection contratsDeca pour une date dans le passé", async () => {
@@ -21,7 +21,7 @@ describe("Job hydrateContratsDeca", () => {
         dataDeca.contrats.map((currentContrat) => ({ ...(currentContrat as Contrat), created_at: dateToTest }))
       );
 
-      expect(await getLastDecaCreatedDateInDb()).toStrictEqual(dateToTest);
+      await expect(getLastDecaCreatedDateInDb()).resolves.toStrictEqual(dateToTest);
     });
 
     it("Vérifie la récupération de la dernière date d'ajout d'une entrée dans la collection contratsDeca pour la date du jour", async () => {
@@ -33,7 +33,7 @@ describe("Job hydrateContratsDeca", () => {
         dataDeca.contrats.map((currentContrat) => ({ ...(currentContrat as Contrat), created_at: new Date() }))
       );
 
-      expect(await getLastDecaCreatedDateInDb()).toStrictEqual(addDays(new Date(), -1));
+      await expect(getLastDecaCreatedDateInDb()).resolves.toStrictEqual(addDays(new Date(), -1));
     });
   });
 
