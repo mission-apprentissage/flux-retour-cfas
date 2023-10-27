@@ -1,7 +1,8 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
+import { Effectif } from "@/common/model/@types";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
@@ -412,6 +413,8 @@ describe("Processus d'ingestion", () => {
         date_rqth_apprenant: "2021-09-01T00:00:00.000Z",
         responsable_apprenant_mail1: "a1@example.org",
         responsable_apprenant_mail2: "a2@example.org",
+        derniere_situation: 4001,
+        dernier_organisme_uai: "1234567X",
         obtention_diplome_formation: true,
         date_obtention_diplome_formation: "2022-06-30T00:00:00.000Z",
         date_exclusion_formation: "2022-06-30T00:00:00.000Z",
@@ -488,6 +491,7 @@ describe("Processus d'ingestion", () => {
         expect(organismeForInputUpdated?.erps).toStrictEqual([commonSampleData.source]);
 
         const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
+        if (!effectifForInput) throw new Error("Effectif non trouvé");
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
 
@@ -503,7 +507,7 @@ describe("Processus d'ingestion", () => {
         const insertedDossier = await effectifsDb().findOne({});
 
         expect(insertedDossier).toStrictEqual({
-          _id: effectifForInput?._id,
+          _id: effectifForInput._id,
           apprenant: {
             historique_statut: [
               {
@@ -534,6 +538,8 @@ describe("Processus d'ingestion", () => {
             nir: "1234567890123",
             responsable_mail1: "a1@example.org",
             responsable_mail2: "a2@example.org",
+            derniere_situation: 4001,
+            dernier_organisme_uai: "1234567X",
           },
           contrats: [
             {
@@ -593,7 +599,7 @@ describe("Processus d'ingestion", () => {
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
           organisme_formateur_id: new ObjectId(organismeForInput._id),
-        });
+        } satisfies WithId<Effectif>);
       });
 
       it("Vérifie l'ingestion valide d'un nouveau dossier valide v3 pour un organisme fiable avec seulement les champs obligatoires", async () => {
@@ -612,6 +618,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
         const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
+        if (!effectifForInput) throw new Error("Effectif non trouvé");
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
 
@@ -676,7 +683,7 @@ describe("Processus d'ingestion", () => {
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
           organisme_formateur_id: new ObjectId(organismeForInput._id),
-        });
+        } satisfies WithId<Effectif>);
       });
 
       it("Vérifie l'ingestion et la mise à jour valide d'un dossier valide v3 déja existant pour un organisme fiable", async () => {
@@ -837,7 +844,7 @@ describe("Processus d'ingestion", () => {
       });
 
       it("Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format du nom / prenom du jeune pour un organisme fiable", async () => {
-        const sampleData = {
+        const sampleData: EffectifsQueue = {
           ine_apprenant: "402957826QH",
           nom_apprenant: 12,
           prenom_apprenant: 18,
@@ -948,7 +955,7 @@ describe("Processus d'ingestion", () => {
       });
 
       it("Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format de l'année scolaire pour un organisme fiable", async () => {
-        const sampleData = {
+        const sampleData: EffectifsQueue = {
           ine_apprenant: "402957826QH",
           nom_apprenant: "SMITH",
           prenom_apprenant: "Jean",
@@ -1003,7 +1010,7 @@ describe("Processus d'ingestion", () => {
     });
 
     describe("Ingestion de mises à jour de données invalides", () => {
-      const commonSampleData = {
+      const commonSampleData: EffectifsQueue = {
         ine_apprenant: "772957826QH",
         nom_apprenant: "MBAPPE",
         prenom_apprenant: "Kylian",
