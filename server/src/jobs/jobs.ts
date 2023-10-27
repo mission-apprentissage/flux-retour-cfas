@@ -19,6 +19,7 @@ import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
+import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateROME } from "./hydrate/hydrate-rome";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
@@ -63,6 +64,9 @@ export const CronsMap = {
 
       // # Mise à jour des relations
       await addJob({ name: "hydrate:organismes-relations", queued: true });
+
+      // # Remplissage des OPCOs
+      await addJob({ name: "hydrate:opcos", queued: true });
 
       // # Remplissage des réseaux
       await addJob({ name: "hydrate:reseaux", queued: true });
@@ -192,6 +196,8 @@ export async function runJob(job: IJobsCronTask | IJobsSimple): Promise<number> 
         return hydrateOrganismesEffectifsCount();
       case "update:organismes-with-apis":
         return updateMultipleOrganismesWithApis();
+      case "hydrate:opcos":
+        return hydrateOrganismesOPCOs();
       case "hydrate:reseaux":
         return hydrateReseaux();
       case "purge:events":

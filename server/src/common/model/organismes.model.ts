@@ -80,6 +80,9 @@ const schema = object(
       maxLength: 14,
       minLength: 14,
     }),
+    opcos: arrayOf(string({}), {
+      description: "OPCOs du CFA, s'ils existent",
+    }),
     reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) }), {
       description: "Réseaux du CFA, s'ils existent",
     }),

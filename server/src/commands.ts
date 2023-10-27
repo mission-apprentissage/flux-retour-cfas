@@ -470,6 +470,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("update:organismes-with-apis"));
 
+program
+  .command("hydrate:opcos")
+  .description("Remplissage des OPCOs pour les organismes")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:opcos"));
+
 /**
  * Job de remplissage & maj des d'organismes / dossiersApprenants pour les réseaux avec le nouveau format
  */
