@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// FIXME modèle à revoir
 const userSchema = () =>
   z.object({
     civility: z.string({ required_error: "Champ obligatoire" }),

@@ -35,7 +35,7 @@ const ResetPasswordPage = () => {
   const [show, setShow] = React.useState(false);
   const onShowPassword = () => setShow(!show);
 
-  // FIXME on pourrait avoir le type d'organisation dans le token pour l'avoir
+  // TODO on pourrait avoir le type d'organisation dans le token pour l'avoir
   // const minLength = auth?.organisation?.type === "ADMINISTRATEUR" ? 20 : 12;
   const minLength = 12;
 

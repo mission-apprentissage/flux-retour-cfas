@@ -75,6 +75,12 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
+    "no-warning-comments": [
+      "error",
+      {
+        terms: ["FIXME"],
+      },
+    ],
   },
   settings: {
     "import/extensions": [".js", ".ts"],

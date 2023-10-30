@@ -6,8 +6,6 @@ import { useMongo } from "@tests/jest/setupMongo";
 import { organismes, testPermissions } from "@tests/utils/permissions";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from "@tests/utils/testUtils";
 
-// FIXME route authentifiée
-
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;

@@ -635,6 +635,5 @@ function SectionApercuChiffresCles() {
 
 export default function Home() {
   const { auth } = useAuth();
-  // FIXME vérifier le chargement
   return auth ? <DashboardPage /> : <PublicLandingPage />;
 }

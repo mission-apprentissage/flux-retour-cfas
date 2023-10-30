@@ -64,7 +64,6 @@ export default () => {
     async ({ body, params }, res) => {
       const { id } = params;
 
-      // FIXME : mise à jour de l'organisation ?
       await updateUser(id, {
         ...body,
         invalided_token: true,

@@ -477,7 +477,6 @@ describe("Routes /organismes/:id", () => {
 
     describe("Permissions", () => {
       beforeEach(async () => {
-        // FIXME revoir les statuts
         await effectifsDb().insertMany([
           // 5 apprentis
           ...generate(5, () =>

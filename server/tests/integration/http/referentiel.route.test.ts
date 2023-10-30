@@ -7,7 +7,7 @@ import { initTestApp } from "@tests/utils/testUtils";
 
 let httpClient: AxiosInstance;
 
-// FIXME route authentifiée
+// TODO route non utilisée, probablement à supprimer sachant qu'on a le dossier shared avec les constantes réseaux
 xdescribe("Referentiel Route", () => {
   beforeEach(async () => {
     const app = await initTestApp();
