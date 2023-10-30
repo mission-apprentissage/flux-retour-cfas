@@ -27,6 +27,7 @@ import useAuth from "@/hooks/useAuth";
 
 import OrganismesACompleterPanelContent from "./tabs/OrganismesACompleterPanelContent";
 import OrganismesFiablesPanelContent from "./tabs/OrganismesFiablesPanelContent";
+import OrganismesNonRetenusPanelContent from "./tabs/OrganismesNonRetenusPanelContent";
 
 export type OrganismeNormalized = Organisme & {
   normalizedName: string;
@@ -46,6 +47,11 @@ const tabs = [
     route: "/organismes/a-completer",
     index: 1,
   },
+  {
+    key: "non-retenus",
+    route: "/organismes/non-retenus",
+    index: 2,
+  },
 ] as const;
 
 interface ListeOrganismesPageProps {
@@ -62,9 +68,10 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     props.activeTab === "a-completer" ? " non fiables" : ""
   }`;
 
-  const { organismesFiables, organismesACompleter, nbOrganismesFermes } = useMemo(() => {
+  const { organismesFiables, organismesACompleter, organismesNonRetenus, nbOrganismesFermes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesACompleter: OrganismeNormalized[] = [];
+    const organismesNonRetenus: OrganismeNormalized[] = [];
     let nbOrganismesFermes = 0;
     (props.organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
@@ -84,6 +91,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           (organisme.est_dans_le_referentiel === "absent" || organisme.ferme))
       ) {
         nbOrganismesFermes++;
+        organismesNonRetenus.push(organisme);
       } else {
         organismesACompleter.push(organisme);
         if (organisme.ferme) {
@@ -95,6 +103,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     return {
       organismesFiables,
       organismesACompleter,
+      organismesNonRetenus,
       nbOrganismesFermes,
     };
   }, [props.organismes]);
@@ -119,7 +128,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               {nbOrganismesFermes > 0 && (
                 <>
                   {" "}
-                  dont <strong>{nbOrganismesFermes}</strong> établissement{nbOrganismesFermes > 1 ? "s" : ""}{" "}
+                  dont <strong>{nbOrganismesFermes}</strong> établissement
+                  {nbOrganismesFermes > 1 ? "s" : ""}{" "}
                   <strong>
                     fermé
                     {nbOrganismesFermes > 1 ? "s" : ""}
@@ -148,7 +158,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
         </HStack>
 
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
-        {organismesACompleter.length === 0 ? (
+        {organismesACompleter.length === 0 && organismesNonRetenus.length === 0 ? (
           <OrganismesFiablesPanelContent organismes={organismesFiables} />
         ) : (
           <Tabs
@@ -179,6 +189,14 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
                   <Text>OFA : corrections attendues ({organismesACompleter.length})</Text>
                 </HStack>
               </Tab>
+              {organisationType === "ADMINISTRATEUR" && (
+                <Tab fontWeight="bold">
+                  <HStack>
+                    <i className="ri-close-circle-fill"></i>
+                    <Text>OFA : non retenus ({organismesNonRetenus.length})</Text>
+                  </HStack>
+                </Tab>
+              )}
             </TabList>
             <TabPanels>
               <TabPanel>
@@ -187,6 +205,11 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               <TabPanel>
                 <OrganismesACompleterPanelContent organismes={organismesACompleter} />
               </TabPanel>
+              {organisationType === "ADMINISTRATEUR" && (
+                <TabPanel>
+                  <OrganismesNonRetenusPanelContent organismes={organismesNonRetenus} />
+                </TabPanel>
+              )}
             </TabPanels>
           </Tabs>
         )}
