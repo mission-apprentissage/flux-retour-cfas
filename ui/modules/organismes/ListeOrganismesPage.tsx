@@ -67,9 +67,8 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
     props.activeTab === "a-completer" ? " non fiables" : ""
   }`;
 
-  const { organismesFiables, organismesACompleter, nbOrganismesFermes } = useOrganismesNormalizedLists(
-    props.organismes
-  );
+  const { organismesFiables, organismesACompleter, organismesNonRetenus, nbOrganismesFermes } =
+    useOrganismesNormalizedLists(props.organismes);
 
       if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
         organismesFiables.push(organisme);

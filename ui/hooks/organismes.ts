@@ -106,9 +106,11 @@ export function useOrganismesFiltered(organismes: OrganismeNormalized[]) {
 }
 
 export function useOrganismesNormalizedLists(organismes: Organisme[]) {
-  const { organismesFiables, organismesACompleter, nbOrganismesFermes } = useMemo(() => {
+  const { organismesFiables, organismesACompleter, organismesNonRetenus, nbOrganismesFermes } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesACompleter: OrganismeNormalized[] = [];
+    const organismesNonRetenus: OrganismeNormalized[] = [];
+
     let nbOrganismesFermes = 0;
     (organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
@@ -128,6 +130,7 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
           (organisme.est_dans_le_referentiel === "absent" || organisme.ferme))
       ) {
         nbOrganismesFermes++;
+        organismesNonRetenus.push(organisme);
       } else {
         organismesACompleter.push(organisme);
         if (organisme.ferme) {
@@ -139,6 +142,7 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
     return {
       organismesFiables,
       organismesACompleter,
+      organismesNonRetenus,
       nbOrganismesFermes,
     };
   }, [organismes]);
@@ -146,6 +150,7 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
   return {
     organismesFiables,
     organismesACompleter,
+    organismesNonRetenus,
     nbOrganismesFermes,
   };
 }
