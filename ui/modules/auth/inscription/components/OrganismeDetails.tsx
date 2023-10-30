@@ -18,7 +18,7 @@ export default function OrganismeDetails({ organisme }) {
         </b>
       </Text>
       <Text>
-        Raison sociale : <b>{organisme.raison_sociale || organisme.nom || organisme.enseigne}</b>
+        Raison sociale : <b>{organisme.enseigne || organisme.raison_sociale}</b>
       </Text>
       <Text>
         Adresse : <b>{organisme.adresse?.complete}</b>
