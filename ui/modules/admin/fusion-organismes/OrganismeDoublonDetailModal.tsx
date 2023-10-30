@@ -9,7 +9,6 @@ import {
   ModalOverlay,
   Stack,
   Table,
-  TableContainer,
   Tbody,
   Td,
   Text,
@@ -79,54 +78,52 @@ const OrganismeDoublonDetailModal = ({
           <ModalBody pb={6}>
             {duplicatesDetail && (
               <Stack spacing={6}>
-                <TableContainer>
-                  <Table size="sm" variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Informations</Th>
-                        <Th>Organisme 1</Th>
-                        <Th>Organisme 2</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      <Tr>
-                        <Td>Raison sociale</Td>
-                        <Td>{duplicatesDetail[0]?.raison_sociale}</Td>
-                        <Td>{duplicatesDetail[1]?.raison_sociale}</Td>
-                      </Tr>
-                      <Tr>
-                        <Td>UAI</Td>
-                        <Td>{duplicatesDetail[0]?.uai}</Td>
-                        <Td>{duplicatesDetail[1]?.uai}</Td>
-                      </Tr>
-                      <Tr>
-                        <Td>SIRET</Td>
-                        <Td>{duplicatesDetail[0]?.siret}</Td>
-                        <Td>{duplicatesDetail[1]?.siret}</Td>
-                      </Tr>
-                      <Tr>
-                        <Td>Nature</Td>
-                        <Td>{duplicatesDetail[0]?.nature}</Td>
-                        <Td>{duplicatesDetail[1]?.nature}</Td>
-                      </Tr>
-                      <Tr>
-                        <Td>Etat</Td>
-                        <Td>{duplicatesDetail[0]?.ferme ? "Fermé" : "Ouvert"}</Td>
-                        <Td>{duplicatesDetail[1]?.ferme ? "Fermé" : "Ouvert"}</Td>
-                      </Tr>
-                      <Tr>
-                        <Td>Transmission au tableau de bord</Td>
-                        <Td>{duplicatesDetail[0]?.last_transmission_date ? "Transmets" : "Ne transmets pas"}</Td>
-                        <Td>{duplicatesDetail[1]?.last_transmission_date ? "Transmets" : "Ne transmets pas"}</Td>
-                      </Tr>
-                      <Tr>
-                        <Td>Fiabilisation</Td>
-                        <Td>{duplicatesDetail[0]?.uai ? "Fiable" : "Non fiable"}</Td>
-                        <Td>{duplicatesDetail[1]?.uai ? "Fiable" : "Non fiable"}</Td>
-                      </Tr>
-                    </Tbody>
-                  </Table>
-                </TableContainer>
+                <Table sx={{ tableLayout: "fixed", width: "100%" }}>
+                  <Thead>
+                    <Tr>
+                      <Th>Informations</Th>
+                      <Th>Organisme 1</Th>
+                      <Th>Organisme 2</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    <Tr>
+                      <Td>Raison sociale</Td>
+                      <Td sx={{ wordWrap: "break-word", width: "150px" }}>{duplicatesDetail[0]?.raison_sociale}</Td>
+                      <Td sx={{ wordWrap: "break-word", width: "150px" }}>{duplicatesDetail[1]?.raison_sociale}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>UAI</Td>
+                      <Td>{duplicatesDetail[0]?.uai}</Td>
+                      <Td>{duplicatesDetail[1]?.uai}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>SIRET</Td>
+                      <Td>{duplicatesDetail[0]?.siret}</Td>
+                      <Td>{duplicatesDetail[1]?.siret}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>Nature</Td>
+                      <Td>{duplicatesDetail[0]?.nature}</Td>
+                      <Td>{duplicatesDetail[1]?.nature}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>Etat</Td>
+                      <Td>{duplicatesDetail[0]?.ferme ? "Fermé" : "Ouvert"}</Td>
+                      <Td>{duplicatesDetail[1]?.ferme ? "Fermé" : "Ouvert"}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>Transmission au tableau de bord</Td>
+                      <Td>{duplicatesDetail[0]?.last_transmission_date ? "Transmets" : "Ne transmets pas"}</Td>
+                      <Td>{duplicatesDetail[1]?.last_transmission_date ? "Transmets" : "Ne transmets pas"}</Td>
+                    </Tr>
+                    <Tr>
+                      <Td>Fiabilisation</Td>
+                      <Td>{duplicatesDetail[0]?.uai ? "Fiable" : "Non fiable"}</Td>
+                      <Td>{duplicatesDetail[1]?.uai ? "Fiable" : "Non fiable"}</Td>
+                    </Tr>
+                  </Tbody>
+                </Table>
               </Stack>
             )}
           </ModalBody>

@@ -75,7 +75,7 @@ const OrganismeDoublonDeleteAlertDialog = ({
               }}
               ml={3}
             >
-              Fusionner les organismes
+              Confirmer
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
