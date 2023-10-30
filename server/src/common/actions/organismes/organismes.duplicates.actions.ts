@@ -8,7 +8,7 @@ import { getUsersLinkedToOrganismeId } from "../users.actions";
 /**
  * Fonction de récupération des organismes à fusionner = duplicats d'organismes
  * Organismes groupés par SIRET dont il existe au moins un organisme avec UAI vide
- * On ajout sur chaque organisme le nombre de comptes utilisateurs liés
+ * On ajoute sur chaque organisme le nombre de comptes utilisateurs liés
  */
 export const getDuplicatesOrganismes = async () => {
   const duplicatesGroup = await organismesDb()
