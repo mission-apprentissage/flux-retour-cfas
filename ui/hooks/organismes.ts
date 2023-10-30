@@ -159,7 +159,7 @@ export function useOrganismesDuplicatsLists() {
   const router = useRouter();
 
   const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], any>(
-    ["admin/organismes-duplicats"],
+    ["admin/organismes-duplicates"],
     () => _get("/api/v1/admin/organismes-duplicates"),
     { enabled: router.isReady }
   );

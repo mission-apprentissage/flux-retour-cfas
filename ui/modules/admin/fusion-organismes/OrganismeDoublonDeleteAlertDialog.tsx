@@ -56,7 +56,7 @@ const OrganismeDoublonDeleteAlertDialog = ({
                 <br />- comptes utilisateurs
               </Text>
               <Text>
-                <strong>Cette action est irreversible.</strong>
+                <strong>Cette action est irréversible.</strong>
               </Text>
             </Stack>
           </AlertDialogBody>
@@ -70,7 +70,7 @@ const OrganismeDoublonDeleteAlertDialog = ({
               onClick={async () => {
                 await _post(`/api/v1/admin/fusion-organismes`, { organismeFiableId, organismeSansUaiId });
                 toastSuccess("Les organismes ont bien été fusionnés !");
-                queryClient.invalidateQueries(["admin/organismes-duplicats"]);
+                queryClient.invalidateQueries(["admin/organismes-duplicates"]);
                 onClose();
               }}
               ml={3}

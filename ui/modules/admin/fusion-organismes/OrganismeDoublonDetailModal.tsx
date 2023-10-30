@@ -19,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 
+import { NATURE_ORGANISME } from "@/common/constants/organismes";
 import { _get } from "@/common/httpClient";
 import { ArrowRightLine, Close } from "@/theme/components/icons";
 
@@ -32,7 +33,7 @@ const OrganismeDoublonDetailModal = ({
 }: {
   isOpen: boolean;
   onClose?: () => void;
-  duplicatesDetail: DuplicateOrganismeDetail[];
+  duplicatesDetail: [DuplicateOrganismeDetail, DuplicateOrganismeDetail];
 }) => {
   const { isOpen: isOpenAlertDialog, onOpen: onOpenAlertDialog, onClose: onCloseAlertDialog } = useDisclosure();
   const cancelRef = React.useRef();
@@ -89,38 +90,38 @@ const OrganismeDoublonDetailModal = ({
                   <Tbody>
                     <Tr>
                       <Td>Raison sociale</Td>
-                      <Td sx={{ wordWrap: "break-word", width: "150px" }}>{duplicatesDetail[0]?.raison_sociale}</Td>
-                      <Td sx={{ wordWrap: "break-word", width: "150px" }}>{duplicatesDetail[1]?.raison_sociale}</Td>
+                      <Td sx={{ wordWrap: "break-word", width: "150px" }}>{duplicatesDetail[0].raison_sociale}</Td>
+                      <Td sx={{ wordWrap: "break-word", width: "150px" }}>{duplicatesDetail[1].raison_sociale}</Td>
                     </Tr>
                     <Tr>
                       <Td>UAI</Td>
-                      <Td>{duplicatesDetail[0]?.uai}</Td>
-                      <Td>{duplicatesDetail[1]?.uai}</Td>
+                      <Td>{duplicatesDetail[0].uai}</Td>
+                      <Td>{duplicatesDetail[1].uai}</Td>
                     </Tr>
                     <Tr>
                       <Td>SIRET</Td>
-                      <Td>{duplicatesDetail[0]?.siret}</Td>
-                      <Td>{duplicatesDetail[1]?.siret}</Td>
+                      <Td>{duplicatesDetail[0].siret}</Td>
+                      <Td>{duplicatesDetail[1].siret}</Td>
                     </Tr>
                     <Tr>
                       <Td>Nature</Td>
-                      <Td>{duplicatesDetail[0]?.nature}</Td>
-                      <Td>{duplicatesDetail[1]?.nature}</Td>
+                      <Td>{NATURE_ORGANISME[duplicatesDetail[0].nature] ?? "⚠ Inconnue"}</Td>
+                      <Td>{NATURE_ORGANISME[duplicatesDetail[1].nature] ?? "⚠ Inconnue"}</Td>
                     </Tr>
                     <Tr>
                       <Td>Etat</Td>
-                      <Td>{duplicatesDetail[0]?.ferme ? "Fermé" : "Ouvert"}</Td>
-                      <Td>{duplicatesDetail[1]?.ferme ? "Fermé" : "Ouvert"}</Td>
+                      <Td>{duplicatesDetail[0].ferme ? "Fermé" : "Ouvert"}</Td>
+                      <Td>{duplicatesDetail[1].ferme ? "Fermé" : "Ouvert"}</Td>
                     </Tr>
                     <Tr>
                       <Td>Transmission au tableau de bord</Td>
-                      <Td>{duplicatesDetail[0]?.last_transmission_date ? "Transmets" : "Ne transmets pas"}</Td>
-                      <Td>{duplicatesDetail[1]?.last_transmission_date ? "Transmets" : "Ne transmets pas"}</Td>
+                      <Td>{duplicatesDetail[0].last_transmission_date ? "Transmet" : "Ne Transmet pas"}</Td>
+                      <Td>{duplicatesDetail[1].last_transmission_date ? "Transmet" : "Ne Transmet pas"}</Td>
                     </Tr>
                     <Tr>
                       <Td>Fiabilisation</Td>
-                      <Td>{duplicatesDetail[0]?.uai ? "Fiable" : "Non fiable"}</Td>
-                      <Td>{duplicatesDetail[1]?.uai ? "Fiable" : "Non fiable"}</Td>
+                      <Td>{duplicatesDetail[0].uai ? "Fiable" : "Non fiable"}</Td>
+                      <Td>{duplicatesDetail[1].uai ? "Fiable" : "Non fiable"}</Td>
                     </Tr>
                   </Tbody>
                 </Table>
