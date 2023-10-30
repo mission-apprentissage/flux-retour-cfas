@@ -5,7 +5,7 @@ import React, { Fragment } from "react";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import NewTable from "@/modules/indicateurs/NewTable";
-import { Alert, ArrowRightLine } from "@/theme/components/icons";
+import { Alert, ArrowRightLine, ExternalLinkLine } from "@/theme/components/icons";
 
 import { DuplicateOrganismeDetail } from "./models/DuplicateOrganismeDetail";
 import { DuplicateOrganismeGroup } from "./models/DuplicateOrganismeGroup";
@@ -41,7 +41,8 @@ const OrganismesDoublonsList = ({ data }) => {
                 fontSize="zeta"
               >
                 <Text size="8px" textDecoration="underline">
-                  <Box as="i" className="ri-external-link-fill" /> Voir dans le référentiel
+                  Voir dans le référentiel
+                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
                 </Text>
               </Link>
             </HStack>
@@ -120,7 +121,11 @@ const OrganismeDoublonDetailModalContainer = ({
         <Text as="span">Voir les détails</Text>
       </Button>
 
-      <OrganismeDoublonDetailModal isOpen={isOpen} onClose={onClose} duplicatesDetail={duplicatesDetail} />
+      <OrganismeDoublonDetailModal
+        isOpen={isOpen}
+        onClose={onClose}
+        duplicatesDetail={[duplicatesDetail[0], duplicatesDetail[1]]}
+      />
     </Fragment>
   );
 };
