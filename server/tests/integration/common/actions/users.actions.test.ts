@@ -1,5 +1,3 @@
-import { strict as assert } from "assert";
-
 import { ObjectId } from "mongodb";
 
 import { getUsersLinkedToOrganismeId } from "@/common/actions/users.actions";
@@ -17,12 +15,8 @@ describe("Components Users Test", () => {
   });
 
   describe("getUsersLinkedToOrganismeId", () => {
-    it("throws when given organisme id is null", async () => {
-      try {
-        await getUsersLinkedToOrganismeId(null as any);
-      } catch (err) {
-        assert.notEqual(err, undefined);
-      }
+    it("Returns empty when given organisme id is null", async () => {
+      await expect(getUsersLinkedToOrganismeId(null as any)).resolves.toEqual([]);
     });
 
     it("Vérifie qu'on renvoi une liste vide si aucun utilisateur n'est lié à l'organisme", async () => {
@@ -79,8 +73,9 @@ describe("Components Users Test", () => {
       ]);
 
       const usersLinked = await getUsersLinkedToOrganismeId(organismes[0]._id);
-      expect(usersLinked.map(({ _id, ...user }) => user)).toStrictEqual([
+      expect(usersLinked.map((user) => user)).toStrictEqual([
         {
+          _id: expect.any(ObjectId),
           civility: "Madame",
           nom: "Boucher",
           prenom: "Alice",
@@ -88,6 +83,7 @@ describe("Components Users Test", () => {
           telephone: "0102030405",
         },
         {
+          _id: expect.any(ObjectId),
           civility: "Madame",
           nom: "Jean",
           prenom: "Corinne",
@@ -104,10 +100,10 @@ describe("Components Users Test", () => {
         siret: "00000000000026",
         organismesResponsables: [{ _id: new ObjectId(id(1)) }],
       };
-      await organismesDb().insertOne(organismeWithoutUai);
 
       // Création d'une organisation lié au couple UAI - SIRET du premier organisme de test + création d'utilisateurs liés
       await Promise.all([
+        organismesDb().insertOne(organismeWithoutUai),
         organisationsDb().insertOne({
           _id: new ObjectId(id(8)),
           type: "ORGANISME_FORMATION",
@@ -137,8 +133,9 @@ describe("Components Users Test", () => {
       ]);
 
       const usersLinked = await getUsersLinkedToOrganismeId(organismeWithoutUai._id);
-      expect(usersLinked.map(({ _id, ...user }) => user)).toStrictEqual([
+      expect(usersLinked.map((item) => item)).toStrictEqual([
         {
+          _id: expect.any(ObjectId),
           civility: "Madame",
           nom: "Boucher",
           prenom: "Alice",
