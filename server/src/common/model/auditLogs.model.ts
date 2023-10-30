@@ -1,15 +1,19 @@
-import { object, string, date, objectId } from "./json-schema/jsonSchemaTypes";
+import { z } from "zod";
 
-const collectionName = "auditLogs";
+import { IModelDescriptor, zObjectId } from "./common";
 
-const schema = object(
-  {
-    _id: objectId(),
-    action: string({ description: "L'action en cours" }),
-    date: date({ description: "La date de l'evenement" }),
-    data: object({}, { additionalProperties: true, description: "La donnée liéé à l'action" }),
-  },
-  { required: ["action", "date"] }
-);
+export const auditLogSchema = z
+  .object({
+    action: z.string().describe("L'action en cours"),
+    date: z.date().describe("La date de l'évènement"),
+    data: z.any().nullish().describe("La donnée liée à l'action"),
+  })
+  .strict();
 
-export default { schema, collectionName, indexes: [] };
+export type IAuditLog = z.output<typeof auditLogSchema>;
+
+export default {
+  collectionName: "auditLogs",
+  indexes: [],
+  zod: auditLogSchema.merge(z.object({ _id: zObjectId })).strict(),
+} as IModelDescriptor;
