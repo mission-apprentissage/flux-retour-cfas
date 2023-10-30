@@ -7,5 +7,12 @@ export const up = async (db: Db) => {
     (sourceValue) => ObjectId.isValid(sourceValue)
   );
 
-  await collection.updateMany({ source: { $in: distinctSourceValuesToRemove } }, { $set: { source: "televersement" } });
+  await Promise.all(
+    distinctSourceValuesToRemove.map(async (sourceToRemove) => {
+      await collection.updateMany(
+        { source: sourceToRemove },
+        { $set: { source: "televersement", source_organisme_id: sourceToRemove } }
+      );
+    })
+  );
 };
