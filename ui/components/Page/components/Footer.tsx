@@ -37,7 +37,7 @@ const Footer = () => {
                   textDecoration={"underline"}
                   isExternal
                 >
-                  Mission interministérielle pour l&apos;apprentissage
+                  Mission interministérielle pour l’apprentissage
                 </Link>{" "}
                 développe plusieurs services destinés à faciliter les entrées en apprentissage.
               </Text>
@@ -93,10 +93,13 @@ const Footer = () => {
                 <Link href={"/accessibilite"}>Accessibilité : Non conforme</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/mentions-legales"}>Mentions légales</Link>
+                <Link href={"/mentions-legales"} isExternal>
+                  Mentions légales
+                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
+                </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/cgu"}>Conditions générales d&apos;utilisation</Link>
+                <Link href={"/cgu"}>Conditions générales d’utilisation</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="/stats" plausibleGoal="clic_statistiques">
@@ -109,11 +112,14 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
                 >
-                  Page d&rsquo;aide
+                  Page d’aide
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/mentions-legales#protection-des-donnees"}>Protection des données</Link>
+                <Link href={"/mention-information"} isExternal>
+                  Mention d’information
+                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
+                </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="https://beta.gouv.fr/startups/tdb-apprentissage.html" isExternal>

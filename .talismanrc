@@ -95,11 +95,12 @@ fileignoreconfig:
   checksum: 736fbc34e70cc8d948a03094fc0f85be607359367aa748eb8d6daaeb75e38382
 - filename: ui/modules/organismes/Televersement.tsx
   checksum: 79608f856866cdf4e0232e5729f8909535c9cfe77155bd1799257aa74ff4104a
+- filename: ui/next.config.js
+  checksum: e68b7b2b7828b9c665c02503b0505821e2b0ea41c91ae440fbce422c781ef07b
 - filename: ui/pages/organismes-formation.tsx
   checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
-
 scopeconfig:
 - scope: node
 custom_patterns:
