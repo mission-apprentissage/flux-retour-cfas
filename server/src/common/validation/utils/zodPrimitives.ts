@@ -226,8 +226,8 @@ export const primitivesV1 = {
         example: `${currentYear - 2}-${currentYear + 1}` as any,
       }),
     annee_scolaire: z.preprocess(
-      // On accepte les "/" dans l'année scolaire (et on les retire silencieusement)
-      (v: any) => (v ? String(v).replace(/\//g, "-") : v),
+      // On accepte les "/" et espaces dans l'année scolaire (et on les retire silencieusement)
+      (v: any) => (v ? String(v).replace(/\//g, "-").replaceAll(" ", "") : v),
       z
         .string()
         .trim()
