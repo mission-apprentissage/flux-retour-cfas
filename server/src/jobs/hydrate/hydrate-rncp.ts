@@ -10,7 +10,11 @@ import { XMLParser } from "fast-xml-parser";
 import parentLogger from "@/common/logger";
 import { Rncp } from "@/common/model/@types/Rncp";
 import { rncpDb } from "@/common/model/collections";
+import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
+import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
+
+import { OPCOS } from "./hydrate-organismes-opcos";
 
 const logger = parentLogger.child({
   module: "job:hydrate:rncp",
@@ -26,6 +30,7 @@ const logger = parentLogger.child({
   - décompression zip
   - parsing du xml
   - récupération de la correspondance RNCP -> codes ROME + autres attributs
+  - récupération des OPCOs pour chaque RNCP depuis les CSV OPCOs
   - écriture dans la collection rncp
 */
 export async function hydrateRNCP() {
@@ -88,6 +93,8 @@ export async function hydrateRNCP() {
 
   logger.info({ count: fichesRNCP.length }, "import des fiches rncp");
 
+  const opcosByRNCP = getOpcosByRNCP();
+
   await PromisePool.for(fichesRNCP)
     .withConcurrency(50)
     .handleError(async (error) => {
@@ -99,11 +106,33 @@ export async function hydrateRNCP() {
           rncp,
         },
         {
-          $set: stripEmptyFields(fiche),
+          $set: stripEmptyFields({
+            ...fiche,
+            opcos: opcosByRNCP[rncp],
+          }),
         },
         {
           upsert: true,
         }
       );
     });
+}
+
+function getOpcosByRNCP(): Record<string, string[]> {
+  return OPCOS.reduce((opcosByRNCP, opco) => {
+    const codes_rncp = (
+      readJsonFromCsvFile(getStaticFilePath(`opcos/${opco}.csv`), ";") as { code_rncp: string }[]
+    ).map((row) => row.code_rncp);
+    logger.info({ opco, count: codes_rncp.length }, "rncp chargés");
+
+    codes_rncp.forEach((rncp) => {
+      let existingItem = opcosByRNCP[rncp];
+      if (!existingItem) {
+        existingItem = opcosByRNCP[rncp] = [];
+      }
+      existingItem.push(opco);
+    });
+
+    return opcosByRNCP;
+  }, {});
 }
