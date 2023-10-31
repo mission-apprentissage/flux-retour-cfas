@@ -123,11 +123,9 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
       } else if (
         // Organismes à masquer :
         // organismes fermés et ne transmettant pas
-        // organismes inconnus (sans raison sociale ni enseigne) et absents du référentiel ou fermé
+        // organismes inconnus (sans raison sociale ni enseigne)
         (organisme.ferme && !organisme.last_transmission_date) ||
-        (!organisme.enseigne &&
-          !organisme.raison_sociale &&
-          (organisme.est_dans_le_referentiel === "absent" || organisme.ferme))
+        (!organisme.enseigne && !organisme.raison_sociale)
       ) {
         nbOrganismesFermes++;
         organismesNonRetenus.push(organisme);

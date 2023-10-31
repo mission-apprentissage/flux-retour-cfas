@@ -70,33 +70,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
   const { organismesFiables, organismesACompleter, organismesNonRetenus, nbOrganismesFermes } =
     useOrganismesNormalizedLists(props.organismes);
 
-      if (organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme && organisme.nature !== "inconnue") {
-        organismesFiables.push(organisme);
-      } else if (
-        // Organismes à masquer :
-        // organismes fermés et ne transmettant pas
-        // organismes inconnus (sans raison sociale ni enseigne)
-        (organisme.ferme && !organisme.last_transmission_date) ||
-        (!organisme.enseigne && !organisme.raison_sociale)
-      ) {
-        nbOrganismesFermes++;
-        organismesNonRetenus.push(organisme);
-      } else {
-        organismesACompleter.push(organisme);
-        if (organisme.ferme) {
-          nbOrganismesFermes++;
-        }
-      }
-    });
-
-    return {
-      organismesFiables,
-      organismesACompleter,
-      organismesNonRetenus,
-      nbOrganismesFermes,
-    };
-  }, [props.organismes]);
-
   return (
     <SimplePage title={title}>
       <Container maxW="xl" p="8">
