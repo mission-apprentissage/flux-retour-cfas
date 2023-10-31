@@ -12,6 +12,10 @@ export interface Organisme {
    */
   siret: string;
   /**
+   * OPCOs du CFA, s'ils existent
+   */
+  opcos?: string[];
+  /**
    * Réseaux du CFA, s'ils existent
    */
   reseaux?: (

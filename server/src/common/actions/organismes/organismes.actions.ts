@@ -839,6 +839,7 @@ export function getOrganismeProjection(
     prepa_apprentissage: 1,
     enseigne: 1,
     raison_sociale: 1,
+    opcos: 1,
     reseaux: 1,
     adresse: 1,
     organismesResponsables: 1,

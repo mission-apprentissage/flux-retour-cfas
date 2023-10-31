@@ -357,6 +357,28 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               </HStack>
             )}
 
+            {organisme.opcos && organisme.opcos?.length > 0 && (
+              <HStack>
+                <Text>
+                  Cet organisme est rattaché {organisme.opcos?.length === 1 ? "à l'OPCO" : "aux OPCOS"}
+                  &nbsp;:
+                </Text>
+                {organisme.opcos.map((opco) => (
+                  <Badge
+                    fontSize="epsilon"
+                    textColor="grey.800"
+                    paddingX="1w"
+                    paddingY="2px"
+                    backgroundColor="#ECEAE3"
+                    textTransform="none"
+                    key={opco}
+                  >
+                    {opco.toUpperCase()}
+                  </Badge>
+                ))}
+              </HStack>
+            )}
+
             <HStack>
               <Text>Raison sociale&nbsp;:</Text>
               <Text fontWeight="bold">{organisme.raison_sociale || "Inconnue"}</Text>
