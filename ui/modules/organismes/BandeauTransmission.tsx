@@ -58,7 +58,7 @@ function getContenuBandeauTransmission({
   }
 
   if (organisme.mode_de_transmission === "API") {
-    if (differenceInDays(new Date(organisme.mode_de_transmission_configuration_date as string), new Date()) < 7) {
+    if (differenceInDays(new Date(), new Date(organisme.mode_de_transmission_configuration_date as string)) < 7) {
       return (
         <>
           Votre outil de gestion est {erpName}. Les {modeIndicateurs ? "indicateurs sont nuls" : "effectifs sont vides"}{" "}
