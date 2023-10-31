@@ -31,7 +31,7 @@ const typesOrganisation = [
     label: "Organisation nationale",
     value: "OPERATEUR_PUBLIC_NATIONAL",
   },
-  // FIXME, pas pris en compte pour l'instant, car il faut pouvoir enregistrer l'utilisateur / envoyer un mail
+  // TODO, pas pris en compte pour l'instant, car il faut pouvoir enregistrer l'utilisateur / envoyer un mail
   // {
   //   label: "Autre opérateur public",
   //   value: "AUTRE",

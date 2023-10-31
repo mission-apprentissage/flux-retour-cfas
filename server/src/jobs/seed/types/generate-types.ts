@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-// FIXME à déplacer en dehors de la codebase car dépendances de dev
+// TODO à déplacer en dehors de la codebase car dépendances de dev
 import { compileBSON, getDatabaseSchemas } from "bson-schema-to-typescript";
 import traverse from "json-schema-traverse";
 import { upperFirst } from "lodash-es";

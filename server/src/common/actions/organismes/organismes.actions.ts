@@ -560,11 +560,25 @@ export async function getOrganismeByAPIKey(api_key: string) {
 }
 
 export async function findOrganismesBySIRET(siret: string): Promise<Organisme[]> {
-  // FIXME projection à définir
   const organismes = await organismesDb()
-    .find({
-      siret: siret,
-    })
+    .find(
+      {
+        siret: siret,
+      },
+      {
+        projection: {
+          siret: 1,
+          uai: 1,
+          enseigne: 1,
+          raison_sociale: 1,
+          ferme: 1,
+          nature: {
+            $ifNull: ["$nature", "inconnue"],
+          },
+          adresse: 1,
+        },
+      }
+    )
     .toArray();
   if (organismes.length === 0) {
     logger.warn({ module: "inscription", siret }, "aucun organisme trouvé en base");
@@ -574,11 +588,25 @@ export async function findOrganismesBySIRET(siret: string): Promise<Organisme[]>
 }
 
 export async function findOrganismesByUAI(uai: string): Promise<Organisme[]> {
-  // FIXME projection à définir
   const organismes = await organismesDb()
-    .find({
-      uai: uai,
-    })
+    .find(
+      {
+        uai: uai,
+      },
+      {
+        projection: {
+          siret: 1,
+          uai: 1,
+          enseigne: 1,
+          raison_sociale: 1,
+          ferme: 1,
+          nature: {
+            $ifNull: ["$nature", "inconnue"],
+          },
+          adresse: 1,
+        },
+      }
+    )
     .toArray();
   if (organismes.length === 0) {
     logger.warn({ module: "inscription", uai }, "aucun organisme trouvé en base");

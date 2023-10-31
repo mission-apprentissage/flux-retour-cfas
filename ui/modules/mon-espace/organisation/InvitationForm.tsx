@@ -33,7 +33,6 @@ const InvitationForm = (props: InvitationFormProps) => {
         toastSuccess("Un email d'invitation a été envoyé au destinataire.");
         props.onInvitation?.();
       } catch (err) {
-        // FIXME le mécanisme toaster devrait être global pour les erreurs non catchées
         console.error(err);
         toastError(err?.json?.data?.message || "Oups, une erreur est survenue, merci de réessayer plus tard");
       }

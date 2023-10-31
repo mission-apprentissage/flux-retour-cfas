@@ -481,14 +481,12 @@ async function findOrganismeWithStats(
   let uai: string;
   let siret: string;
   if (fiabilisationResult?.type === "A_FIABILISER") {
-    // FIXME seulement 4 en prod !!! potentiellement prendre plus de choses
     uai = fiabilisationResult.uai_fiable as string;
     siret = fiabilisationResult.siret_fiable as string;
   } else {
     uai = uai_etablissement;
     siret = siret_etablissement as string;
   }
-  // TODO/FIXME peut-être vérifier dans fiabilisationUaiSiretDb, avec couple uai/siret, sinon uai, sinon siret ???
 
   // 2. On cherche l'organisme avec le couple uai/siret
   const organisme = await findOrganismeByUaiAndSiret(uai, siret, projection);

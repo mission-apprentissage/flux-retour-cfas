@@ -5,7 +5,6 @@ import { AuthContext } from "@/common/internal/AuthContext";
 import { AuthenticationContext } from "@/components/UserWrapper/UserWrapper";
 
 export default function useAuth() {
-  // FIXME loading state ?
   const { auth, setAuth } = useContext(AuthenticationContext);
   const organisationType = auth?.organisation?.type;
 

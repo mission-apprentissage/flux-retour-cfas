@@ -29,7 +29,7 @@ export const authMiddleware = () => {
           if (!user) {
             throw Boom.unauthorized("Vous n'êtes pas connecté");
           }
-          // FIXME à quoi sert ce champ ?
+          // TODO champ probablement à supprimer
           if (user.invalided_token) {
             await updateUser(user._id, { invalided_token: false });
             return done(null, { invalided_token: true });

@@ -206,7 +206,7 @@ export const fullEffectifsFiltersConfigurations: {
       if (/^\d{3,}$/.test(value)) {
         return [{ "_computed.organisme.siret": new RegExp(escapeRegExp(value)) }];
       }
-      return [{ "_computed.organisme.nom": new RegExp(escapeRegExp(value)) }]; // FIXME rapatrier le nom (enseigne/raison_sociale) de l'organisme
+      return [{ "_computed.organisme.nom": new RegExp(escapeRegExp(value)) }]; // TODO probablement ajouter un champ nom (enseigne + raison_sociale) de l'organisme
     },
   },
   organisme_reseaux: {

@@ -59,7 +59,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     { nom: "text", siret: "text", uai: "text" },
     { name: "nom_siret_uai_text", default_language: "french" },
   ],
-  [{ "adresse.departement": 1 }, { name: "departement" }], // FIXME n'a pas l'air d'améliorer les performances
+  [{ "adresse.departement": 1 }, { name: "departement" }],
   [{ "adresse.region": 1 }, { name: "region" }],
   [{ created_at: 1 }, { name: "created_at" }],
 ];

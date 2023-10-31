@@ -36,7 +36,6 @@ const UserMenu = () => {
     window.location.href = "/";
   };
 
-  // FIXME: corriger le chargement de l'auth
   return (
     <>
       {!auth && (

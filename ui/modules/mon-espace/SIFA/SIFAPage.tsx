@@ -41,7 +41,7 @@ function useOrganismesEffectifs(organismeId: string) {
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
       prevOrganismeId.current = organismeId;
-      // FIXME, reset toutes les queries ?!
+      // FIX ME: reset toutes les queries ?! Cet effect est probablement à supprimer car inutile
       // queryClient.resetQueries("organismesEffectifs", { exact: true });
     }
   }, [queryClient, organismeId]);
@@ -241,7 +241,7 @@ const SIFAPage = (props: SIFAPageProps) => {
                   return (
                     <EffectifsTableContainer
                       key={anneSco + cfd}
-                      canEdit={true} // FIXME organisation liée à l'organisme uniquement ?
+                      canEdit={true}
                       effectifs={effectifs}
                       formation={formation}
                       searchValue={searchValue}
