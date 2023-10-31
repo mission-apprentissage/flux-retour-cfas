@@ -18,8 +18,7 @@ export const ERPS = sortAlphabeticallyBy("name", [
   {
     id: "ymag",
     name: "Ypareo",
-    helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/ypareo.pdf",
-    helpFileSize: "1.7 Mo",
+    apiV3: true,
   },
   {
     id: "scform",
