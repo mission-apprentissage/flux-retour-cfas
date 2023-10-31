@@ -9,7 +9,6 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
-import { TETE_DE_RESEAUX } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
@@ -643,21 +642,6 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/v1/effectif", effectif());
-
-  /*
-   * referentiel
-   */
-  authRouter.get(
-    "/api/referentiel/networks",
-    returnResult(() => {
-      // TODO : TMP on ne renvoie que les réseaux fiabilisés pour l'instant - débloquer le reste quand ce sera fiable
-      const RESEAUX_CFAS_INVALID = ["ANASUP", "GRETA_VAUCLUSE", "BTP_CFA"];
-      return TETE_DE_RESEAUX.filter((reseau) => !RESEAUX_CFAS_INVALID.includes(reseau.key)).map((reseau) => ({
-        id: reseau.key,
-        nom: reseau.nom,
-      }));
-    })
-  );
 
   /********************************
    * API organisation   *
