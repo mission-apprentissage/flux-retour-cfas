@@ -39,14 +39,16 @@ export const getDuplicatesOrganismes = async () => {
     ])
     .toArray();
 
-  if (duplicatesGroup.length === 1) {
-    duplicatesGroup[0].duplicates = await Promise.all(
-      duplicatesGroup[0]?.duplicates.map(async (duplicate) => ({
-        ...duplicate,
-        nbUsers: (await getUsersLinkedToOrganismeId(duplicate?.id)).length ?? 0,
-      }))
-    );
-  }
+  await Promise.all(
+    duplicatesGroup.map(async (currentDuplicateGroup) => {
+      currentDuplicateGroup.duplicates = await Promise.all(
+        currentDuplicateGroup.duplicates.map(async (duplicate) => ({
+          ...duplicate,
+          nbUsers: (await getUsersLinkedToOrganismeId(duplicate?.id)).length ?? 0,
+        }))
+      );
+    })
+  );
 
   return duplicatesGroup;
 };
