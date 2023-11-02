@@ -1,4 +1,5 @@
-import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
+import { STATUT_FIABILISATION_ORGANISME } from "shared";
+
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 

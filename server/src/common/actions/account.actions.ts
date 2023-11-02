@@ -1,6 +1,6 @@
 import Boom from "boom";
+import { STATUT_FIABILISATION_ORGANISME } from "shared";
 
-import { STATUT_FIABILISATION_ORGANISME } from "@/common/constants/fiabilisation";
 import logger from "@/common/logger";
 import { invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";

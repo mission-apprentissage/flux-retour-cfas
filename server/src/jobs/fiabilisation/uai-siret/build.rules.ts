@@ -1,8 +1,6 @@
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET, STATUT_FIABILISATION_ORGANISME } from "shared";
+
 import { isOrganismeFiableForCouple } from "@/common/actions/engine/engine.organismes.utils";
-import {
-  STATUT_FIABILISATION_COUPLES_UAI_SIRET,
-  STATUT_FIABILISATION_ORGANISME,
-} from "@/common/constants/fiabilisation";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { OrganismesReferentiel } from "@/common/model/@types";
 import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "@/common/model/collections";
