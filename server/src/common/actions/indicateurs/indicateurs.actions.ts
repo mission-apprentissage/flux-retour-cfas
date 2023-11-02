@@ -42,7 +42,7 @@ export async function getIndicateursEffectifsParDepartement(
             await getIndicateursEffectifsRestriction(ctx),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
-          "_computed.organisme.fiable": true,
+          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
       {
@@ -259,7 +259,7 @@ export async function getIndicateursEffectifsParOrganisme(
             await getEffectifsAnonymesRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
-          "_computed.organisme.fiable": true,
+          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
       {
@@ -460,7 +460,7 @@ export async function getOrganismeIndicateursEffectifsParFormation(
             await getOrganismeIndicateursEffectifsRestriction(ctx),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
-          "_computed.organisme.fiable": true,
+          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
       {
@@ -661,7 +661,7 @@ export async function getEffectifsNominatifs(
             await getEffectifsNominatifsRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
-          "_computed.organisme.fiable": true,
+          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
       {
@@ -816,7 +816,6 @@ export async function getOrganismeIndicateursEffectifs(
             await getOrganismeIndicateursEffectifsRestriction(ctx),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
-          "_computed.organisme.fiable": true,
         },
       },
       {
