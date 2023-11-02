@@ -28,7 +28,7 @@ export interface Effectif {
   /**
    * Identifiant de l'organisme id source transmettant
    */
-  source_organisme_id: string;
+  source_organisme_id?: string;
   /**
    * Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")
    */
@@ -1854,6 +1854,7 @@ export interface Effectif {
     };
     formation?: {
       codes_rome?: string[];
+      opcos?: string[];
     };
   };
 }

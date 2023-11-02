@@ -38,6 +38,7 @@ export async function hydrateEffectifsComputed() {
                 },
                 formation: {
                   codes_rome: { $ifNull: [{ $first: "$_rncp.romes" }, []] },
+                  opcos: { $first: "$_rncp.opcos" },
                 },
               },
             },

@@ -8,4 +8,8 @@ export interface Rncp {
   etat_fiche: string;
   actif: boolean;
   romes: string[];
+  /**
+   * Information récupérée depuis les CSV des OPCOs et non le RNCP
+   */
+  opcos?: string[];
 }

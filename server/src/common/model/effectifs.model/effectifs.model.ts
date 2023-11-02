@@ -80,6 +80,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.siret": 1 }, {}],
   [{ "_computed.organisme.fiable": 1 }, {}],
   [{ "_computed.formation.codes_rome": 1 }, {}],
+  [{ "_computed.formation.opcos": 1 }, {}],
 ];
 
 export const schema = object(
@@ -148,6 +149,7 @@ export const schema = object(
         }),
         formation: object({
           codes_rome: arrayOf(string()),
+          opcos: arrayOf(string()),
         }),
       },
       {
