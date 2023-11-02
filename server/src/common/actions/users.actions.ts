@@ -387,3 +387,59 @@ export async function resendConfirmationEmail(userId: string): Promise<void> {
     activationToken: createActivationToken(user.email),
   });
 }
+
+/**
+ * Fonction de récupération de la liste des utilisateurs liés à un organismeId
+ * @param organismeId
+ * @returns
+ */
+export const getUsersLinkedToOrganismeId = async (organismeId: ObjectId) => {
+  return await usersMigrationDb()
+    .aggregate([
+      {
+        $lookup: {
+          from: "organisations",
+          localField: "organisation_id",
+          foreignField: "_id",
+          as: "organisation",
+          pipeline: [
+            {
+              $lookup: {
+                from: "organismes",
+                as: "organisme",
+                let: {
+                  uai: "$uai",
+                  siret: "$siret",
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $or: [
+                          { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }] },
+                          { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: [null, "$$uai"] }] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
+          ],
+        },
+      },
+      { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } },
+      { $match: { "organisation.organisme._id": organismeId } },
+      {
+        $project: {
+          civility: 1,
+          nom: 1,
+          prenom: 1,
+          email: 1,
+          telephone: 1,
+        },
+      },
+    ])
+    .toArray();
+};

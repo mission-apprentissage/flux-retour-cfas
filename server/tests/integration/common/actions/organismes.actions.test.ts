@@ -17,7 +17,7 @@ import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
 
-const sampleOrganismeWithoutUai: Organisme = {
+export const sampleOrganismeWithoutUai: Organisme = {
   siret: "41461021200014",
   nom: "ETABLISSEMENT TEST",
   nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
@@ -28,7 +28,7 @@ const sampleOrganismeWithoutUai: Organisme = {
   },
 };
 
-const sampleOrganismeWithUAI = {
+export const sampleOrganismeWithUAI = {
   uai: "0693400W",
   ...sampleOrganismeWithoutUai,
 };
