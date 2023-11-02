@@ -108,7 +108,7 @@ export async function hydrateRNCP() {
         {
           $set: stripEmptyFields({
             ...fiche,
-            opcos: opcosByRNCP[rncp],
+            opcos: opcosByRNCP[rncp] ?? [],
           }),
         },
         {
