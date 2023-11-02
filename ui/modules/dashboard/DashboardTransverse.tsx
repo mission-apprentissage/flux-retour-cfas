@@ -33,7 +33,7 @@ import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
 import FiltreOrganismeTerritoire from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
-import DashboardAdministrateur from "../admin/DashboardAdministrateur";
+// import DashboardAdministrateur from "../admin/DashboardAdministrateur";
 import {
   convertEffectifsFiltersToQuery,
   EffectifsFilters,
@@ -166,7 +166,7 @@ const DashboardTransverse = () => {
         </Container>
       </Box>
       <Container maxW="xl" p="8">
-        {auth.organisation.type === "ADMINISTRATEUR" && <DashboardAdministrateur />}
+        {/* {auth.organisation.type === "ADMINISTRATEUR" && <DashboardAdministrateur />} */}
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Aperçu des données de l’apprentissage
         </Heading>
