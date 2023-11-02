@@ -1,7 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { getAnneesScolaireListFromDate } from "shared";
+import { getAnneesScolaireListFromDate, STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "shared";
 
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
 import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import {

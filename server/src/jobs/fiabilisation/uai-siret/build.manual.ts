@@ -1,4 +1,5 @@
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "@/common/constants/fiabilisation";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "shared";
+
 import { fiabilisationUaiSiretDb } from "@/common/model/collections";
 
 /**

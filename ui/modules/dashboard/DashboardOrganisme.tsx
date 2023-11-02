@@ -40,6 +40,7 @@ import { NewOrganisation } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursEffectifsAvecFormation, IndicateursOrganismes } from "../models/indicateurs";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 import IndicateursEffectifsParFormationTable from "../organismes/IndicateursEffectifsParFormationTable";
+import InfoFiabilisationOrganisme from "../organismes/InfoFiabilisationOrganisme";
 import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 
 import ContactsModal from "./ContactsModal";
@@ -180,6 +181,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 lastTransmissionDate={organisme.last_transmission_date}
                 permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
               />
+            )}
+            {organisme.fiabilisation_statut && (
+              <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
             )}
           </HStack>
 

@@ -1,9 +1,7 @@
 import { strict as assert } from "assert";
 
-import {
-  STATUT_FIABILISATION_COUPLES_UAI_SIRET,
-  STATUT_FIABILISATION_ORGANISME,
-} from "@/common/constants/fiabilisation";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET, STATUT_FIABILISATION_ORGANISME } from "shared";
+
 import { OrganismesReferentiel } from "@/common/model/@types";
 import { organismesReferentielDb, fiabilisationUaiSiretDb, organismesDb } from "@/common/model/collections";
 import { buildFiabilisationCoupleForTdbCouple } from "@/jobs/fiabilisation/uai-siret/build";
