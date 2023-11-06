@@ -13,6 +13,7 @@ import {
   ListItem,
   Spinner,
   Stack,
+  Tag,
   Text,
   Tooltip,
   UnorderedList,
@@ -508,6 +509,24 @@ function SectionApercuChiffresCles() {
                 <Text fontSize="zeta">
                   <Text as="b">{formatNumber(indicateursNational?.indicateursOrganismes?.formateurs)}</Text> formateurs
                 </Text>
+                <Tag
+                  mt={4}
+                  borderRadius="full"
+                  fontSize="omega"
+                  boxShadow="inset 0 0 0px 1px #000091"
+                  variant="outline"
+                  color="bluefrance"
+                >
+                  Soit&nbsp;
+                  <Text as="b" fontSize="zeta">
+                    {Math.round(
+                      (indicateursNational?.indicateursOrganismes?.total || 0) /
+                        (indicateursNational?.indicateursOrganismes?.totalWithoutTransmissionDate || 1)
+                    )}
+                    %
+                  </Text>
+                  &nbsp;des établissements
+                </Tag>
               </Box>
             </HStack>
           </Center>
