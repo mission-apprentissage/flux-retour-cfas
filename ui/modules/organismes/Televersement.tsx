@@ -116,12 +116,13 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   const [errorsCount, setErrorsCount] = useState(0);
   const [missingHeaders, setMissingHeaders] = useState<string[]>([]);
   const [columsWithErrors, setColumsWithErrors] = useState<string[]>([]);
-  const [showOnlyColumnsWithErrors, setShowOnlyColumnsWithErrors] = useState(false);
+  const [showOnlyColumnsAndLinesWithErrors, setShowOnlyColumnsAndLinesWithErrors] = useState(false);
   const [status, setStatus] = useState<Status | null>(null);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
     // On drop, read the file and parse it, then return data with validation errors.
     onDrop: (acceptedFiles: File[]) => {
+      setShowOnlyColumnsAndLinesWithErrors(false);
       setIsSubmitting(true);
       const file = acceptedFiles[0];
       if (!file) return;
@@ -250,7 +251,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   if (status === "import_success") return <ImportSuccess isMine={isMine} organismeId={organismeId} />;
 
   const filteredHeaders =
-    showOnlyColumnsWithErrors && columsWithErrors.length
+    showOnlyColumnsAndLinesWithErrors && columsWithErrors.length
       ? headers?.filter((header) => columsWithErrors.includes(header))
       : headers;
 
@@ -334,10 +335,12 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                 id="show-only-errors"
                 variant="icon"
                 onChange={(e) => {
-                  setShowOnlyColumnsWithErrors(e.target.checked);
+                  setShowOnlyColumnsAndLinesWithErrors(e.target.checked);
                 }}
               />
-              <FormLabel htmlFor="show-only-errors">Afficher uniquement les colonnes avec données en erreur</FormLabel>
+              <FormLabel htmlFor="show-only-errors">
+                Afficher uniquement les lignes et colonnes avec données en erreur
+              </FormLabel>
             </HStack>
           </>
         )}
@@ -369,47 +372,51 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                 </Tr>
               </Thead>
               <Tbody>
-                {data.map((row: any, index: number) => (
-                  <Tr key={index}>
-                    <Td>{index + 2}</Td>
-                    <Td>
-                      {row.errors.length === 0 ? (
-                        <Flex color="green.500" alignItems="center">
-                          <CheckIcon />
-                          <Text ml="2">Valide</Text>
-                        </Flex>
-                      ) : (
-                        <Flex color="red.500" alignItems="center">
-                          <WarningTwoIcon />
-                          <Text ml="2">
-                            {row.errors.length}&nbsp;erreur{row.errors.length > 1 ? "s" : ""}
-                          </Text>
-                        </Flex>
-                      )}
-                    </Td>
-                    {filteredHeaders.map((key) => {
-                      if (row.errors.length > 0) {
-                        const error = row.errors.find((e: any) => e.key === key);
-                        if (error) {
-                          return (
-                            <Td key={key}>
-                              <Text color="grey.500">
-                                {(dateFields.includes(key) ? fromIsoLikeDateStringToFrenchDate(row[key]) : row[key]) ||
-                                  "Donnée manquante"}
-                              </Text>
-                              <Text color="red.500">{error.message.replace("String", "Texte")}</Text>
-                            </Td>
-                          );
+                {data.map((row: any, index: number) => {
+                  if (showOnlyColumnsAndLinesWithErrors && row.errors.length === 0) return null;
+                  return (
+                    <Tr key={index}>
+                      <Td>{index + 2}</Td>
+                      <Td>
+                        {row.errors.length === 0 ? (
+                          <Flex color="green.500" alignItems="center">
+                            <CheckIcon />
+                            <Text ml="2">Valide</Text>
+                          </Flex>
+                        ) : (
+                          <Flex color="red.500" alignItems="center">
+                            <WarningTwoIcon />
+                            <Text ml="2">
+                              {row.errors.length}&nbsp;erreur{row.errors.length > 1 ? "s" : ""}
+                            </Text>
+                          </Flex>
+                        )}
+                      </Td>
+                      {filteredHeaders.map((key) => {
+                        if (row.errors.length > 0) {
+                          const error = row.errors.find((e: any) => e.key === key);
+                          if (error) {
+                            return (
+                              <Td key={key}>
+                                <Text color="grey.500">
+                                  {(dateFields.includes(key)
+                                    ? fromIsoLikeDateStringToFrenchDate(row[key])
+                                    : row[key]) || "Donnée manquante"}
+                                </Text>
+                                <Text color="red.500">{error.message.replace("String", "Texte")}</Text>
+                              </Td>
+                            );
+                          }
                         }
-                      }
-                      return (
-                        <Td key={key}>
-                          {dateFields.includes(key) ? fromIsoLikeDateStringToFrenchDate(row[key]) : row[key]}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                ))}
+                        return (
+                          <Td key={key}>
+                            {dateFields.includes(key) ? fromIsoLikeDateStringToFrenchDate(row[key]) : row[key]}
+                          </Td>
+                        );
+                      })}
+                    </Tr>
+                  );
+                })}
               </Tbody>
             </Table>
           </Box>
