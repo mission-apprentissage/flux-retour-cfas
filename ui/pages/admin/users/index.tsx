@@ -72,9 +72,7 @@ const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
     cell: ({ row }) => {
       return (
         <Box
-          {...(row.original?.organismeId
-            ? { as: NavLink, href: `/admin/organismes/${row.original?.organismeId}` }
-            : {})}
+          {...(row.original?.organismeId ? { as: NavLink, href: `/organismes/${row.original?.organismeId}` } : {})}
           flexGrow={1}
         >
           <Text isTruncated maxWidth={400}>
