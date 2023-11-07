@@ -174,15 +174,19 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
                 niveauAvecFormations.formations.map((formation) => (
                   <Tr key={formation.rncp_code}>
                     <Td>
-                      <Link
-                        display="block"
-                        fontSize="1rem"
-                        width="var(--chakra-sizes-lg)"
-                        title={formation.rncp?.intitule ?? "Fiche non trouvée"}
-                        onClick={() => setSelectedCodeRNCP(formation.rncp_code)}
-                      >
-                        {formation.rncp?.intitule ?? "Fiche non trouvée"}
-                      </Link>
+                      {formation.rncp?.intitule ? (
+                        <Link
+                          display="block"
+                          fontSize="1rem"
+                          width="var(--chakra-sizes-lg)"
+                          title={formation.rncp.intitule}
+                          onClick={() => setSelectedCodeRNCP(formation.rncp_code)}
+                        >
+                          {formation.rncp.intitule}
+                        </Link>
+                      ) : (
+                        <Text fontSize="1rem">Fiche non trouvée</Text>
+                      )}
                       <Text mt={2} color="#3A3A3A" fontSize="omega">
                         RNCP&nbsp;:{" "}
                         {formation.rncp_code ? (
