@@ -62,7 +62,8 @@ const headerTooltips = {
   ine_apprenant: (
     <>
       Identifiant National Élève, inscrit dans le «&nbsp;répertoire national des identifiants élèves, étudiants et
-      apprentis&nbsp;» (donnée facultative).
+      apprentis&nbsp;» (donnée facultative). Il est composé de 11 caractères (soit 10 chiffres et 1 lettre soit 9
+      chiffres et 2 lettres).
     </>
   ),
   nir_apprenant: (
