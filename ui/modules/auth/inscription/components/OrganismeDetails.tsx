@@ -1,6 +1,5 @@
 import { Text, VStack } from "@chakra-ui/react";
-
-import { natureOrganismeDeFormationLabel } from "@/modules/dashboard/OrganismeInfo";
+import { natureOrganismeDeFormationLabel } from "shared";
 
 export default function OrganismeDetails({ organisme }) {
   return (
