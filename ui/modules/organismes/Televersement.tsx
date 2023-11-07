@@ -37,6 +37,7 @@ import { FileDownloadIcon } from "@/modules/dashboard/icons";
 import { DownloadLine } from "@/theme/components/icons";
 
 import headerTooltips from "./headerTooltips";
+import InfoTeleversement from "./InfoTeleversement";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
@@ -473,48 +474,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                 </>
               )}
             </Box>
-            <div>
-              <Text color="#ef5800">Vous pouvez directement remplir le fichier-modèle avec vos effectifs.</Text>
-              <Text color="#ef5800">Veuillez ne pas modifier l’intitulé des colonnes.</Text>
-              <Text mt={6} fontWeight="bold">
-                25 données sont obligatoires&nbsp;:
-              </Text>
-              <HStack mt={2}>
-                <Box>
-                  <UnorderedList>
-                    <ListItem>Nom de l’apprenant</ListItem>
-                    <ListItem>Prénom de l’apprenant</ListItem>
-                    <ListItem>Date de naissance de l’apprenant</ListItem>
-                    <ListItem>Email de l’apprenant</ListItem>
-                    <ListItem>Adresse de résidence de l’apprenant</ListItem>
-                    <ListItem>Code postal de résidence de l’apprenant</ListItem>
-                    <ListItem>Genre de l’apprenant</ListItem>
-                    <ListItem>Date à laquelle le statut de l’apprenant a été saisi</ListItem>
-                    <ListItem>Statut de l’apprenant</ListItem>
-                    <ListItem>N° UAI de l’établissement responsable</ListItem>
-                    <ListItem>SIRET de l’établissement responsable</ListItem>
-                    <ListItem>N° UAI de l’établissement formateur</ListItem>
-                  </UnorderedList>
-                </Box>
-                <Box>
-                  <UnorderedList>
-                    <ListItem>SIRET de l’établissement formateur</ListItem>
-                    <ListItem>N° UAI du lieu de formation</ListItem>
-                    <ListItem>SIRET du lieu de formation</ListItem>
-                    <ListItem>Année de formation concernée</ListItem>
-                    <ListItem>Date d’inscription en formation</ListItem>
-                    <ListItem>Date d’entrée en formation </ListItem>
-                    <ListItem>Date de fin de formation</ListItem>
-                    <ListItem>Durée théorique de la formation</ListItem>
-                    <ListItem>Code Formation Diplôme (CFD)</ListItem>
-                    <ListItem>Diplôme de la formation</ListItem>
-                    <ListItem>Code RNCP de la formation</ListItem>
-                    <ListItem>SIRET de l’employeur </ListItem>
-                    <ListItem>Date de rupture du contrat (si pertinent)</ListItem>
-                  </UnorderedList>
-                </Box>
-              </HStack>
-            </div>
+            <InfoTeleversement />
           </>
         )}
       </Container>
