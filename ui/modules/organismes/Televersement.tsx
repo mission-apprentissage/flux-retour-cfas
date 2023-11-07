@@ -19,6 +19,7 @@ import {
   HStack,
   Switch,
   FormLabel,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -34,7 +35,7 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import useToaster from "@/hooks/useToaster";
 import { FileDownloadIcon } from "@/modules/dashboard/icons";
 import { DownloadLine } from "@/theme/components/icons";
-
+import headerTooltips from "./headerTooltips";
 import InfoTeleversement from "./InfoTeleversement";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
@@ -366,10 +367,14 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             <Table fontSize="sm">
               <Thead>
                 <Tr>
-                  <Th>Ligne</Th>
+                  <Th>
+                    <Header header="Ligne" />
+                  </Th>
                   <Th>Statut</Th>
                   {filteredHeaders.map((key) => (
-                    <Th key={key}>{key}</Th>
+                    <Th key={key}>
+                      <Header header={key} />
+                    </Th>
                   ))}
                 </Tr>
               </Thead>
@@ -526,4 +531,25 @@ function InfoBetaPanel() {
       </Text>
     </Ribbons>
   );
+}
+
+function Header({ header }: { header: string }) {
+  if (headerTooltips[header]) {
+    return (
+      <>
+        {header}
+        <Tooltip background="bluefrance" color="white" label={<Box padding="2w">{headerTooltips[header]}</Box>}>
+          <Box
+            as="i"
+            className="ri-information-line"
+            fontSize="epsilon"
+            color="grey.500"
+            marginLeft="1v"
+            verticalAlign="middle"
+          />
+        </Tooltip>
+      </>
+    );
+  }
+  return <>{header}</>;
 }
