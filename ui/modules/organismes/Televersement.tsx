@@ -477,33 +477,33 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                   <UnorderedList>
                     <ListItem>Nom de l’apprenant</ListItem>
                     <ListItem>Prénom de l’apprenant</ListItem>
-                    <li>Date de naissance de l’apprenant</li>
-                    <li>Email de l’apprenant</li>
-                    <li>Adresse de résidence de l’apprenant</li>
-                    <li>Code postal de résidence de l’apprenant</li>
-                    <li>Genre de l’apprenant</li>
-                    <li>Date à laquelle le statut de l’apprenant a été saisi</li>
-                    <li>Statut de l’apprenant</li>
-                    <li>N° UAI de l’établissement responsable</li>
-                    <li>SIRET de l’établissement responsable</li>
-                    <li>N° UAI de l’établissement formateur</li>
+                    <ListItem>Date de naissance de l’apprenant</ListItem>
+                    <ListItem>Email de l’apprenant</ListItem>
+                    <ListItem>Adresse de résidence de l’apprenant</ListItem>
+                    <ListItem>Code postal de résidence de l’apprenant</ListItem>
+                    <ListItem>Genre de l’apprenant</ListItem>
+                    <ListItem>Date à laquelle le statut de l’apprenant a été saisi</ListItem>
+                    <ListItem>Statut de l’apprenant</ListItem>
+                    <ListItem>N° UAI de l’établissement responsable</ListItem>
+                    <ListItem>SIRET de l’établissement responsable</ListItem>
+                    <ListItem>N° UAI de l’établissement formateur</ListItem>
                   </UnorderedList>
                 </Box>
                 <Box>
                   <UnorderedList>
-                    <li>SIRET de l’établissement formateur</li>
-                    <li>N° UAI du lieu de formation</li>
-                    <li>SIRET du lieu de formation</li>
-                    <li>Année de formation concernée</li>
-                    <li>Date d’inscription en formation</li>
-                    <li>Date d’entrée en formation </li>
-                    <li>Date de fin de formation</li>
-                    <li>Durée théorique de la formation</li>
-                    <li>Code Formation Diplôme (CFD)</li>
-                    <li>Diplôme de la formation</li>
-                    <li>Code RNCP de la formation</li>
-                    <li>SIRET de l’employeur </li>
-                    <li>Date de rupture du contrat (si pertinent)</li>
+                    <ListItem>SIRET de l’établissement formateur</ListItem>
+                    <ListItem>N° UAI du lieu de formation</ListItem>
+                    <ListItem>SIRET du lieu de formation</ListItem>
+                    <ListItem>Année de formation concernée</ListItem>
+                    <ListItem>Date d’inscription en formation</ListItem>
+                    <ListItem>Date d’entrée en formation </ListItem>
+                    <ListItem>Date de fin de formation</ListItem>
+                    <ListItem>Durée théorique de la formation</ListItem>
+                    <ListItem>Code Formation Diplôme (CFD)</ListItem>
+                    <ListItem>Diplôme de la formation</ListItem>
+                    <ListItem>Code RNCP de la formation</ListItem>
+                    <ListItem>SIRET de l’employeur </ListItem>
+                    <ListItem>Date de rupture du contrat (si pertinent)</ListItem>
                   </UnorderedList>
                 </Box>
               </HStack>
