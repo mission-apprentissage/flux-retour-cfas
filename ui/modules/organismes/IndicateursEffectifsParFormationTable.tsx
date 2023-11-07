@@ -179,8 +179,8 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
                           display="block"
                           fontSize="1rem"
                           width="var(--chakra-sizes-lg)"
-                          title={formation.rncp?.intitule ?? "Fiche non trouvée"}
-                          onClick={() => formation.rncp?.intitule && setSelectedCodeRNCP(formation.rncp_code)}
+                          title={formation.rncp.intitule}
+                          onClick={() => setSelectedCodeRNCP(formation.rncp_code)}
                         >
                           {formation.rncp?.intitule}
                         </Link>
