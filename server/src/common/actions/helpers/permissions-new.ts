@@ -239,24 +239,24 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
         // tout ça afin d'éviter que les effectifs d'un formateur avec plusieurs responsables ne remontent chez chacun des responsables
         // Cependant, les permissions n'ont pas été en accord, car un responsable peut toujours accéder aux listes nominatives via le 2e onglet.
 
-        // const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
-        // const hasNoFormateurs = !organisme.organismesFormateurs || organisme.organismesFormateurs.length === 0;
-        // return hasNoFormateurs
-        //   ? {
-        //       organisme_id: {
-        //         $in: [organisme._id, ...findOrganismeFormateursIds(organisme)],
-        //       },
-        //     }
-        //   : {
-        //       _id: new ObjectId("000000000000"),
-        //     };
-
         const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
-        return {
-          organisme_id: {
-            $in: [organisme._id, ...findOrganismeFormateursIds(organisme)],
-          },
-        };
+        const hasNoFormateurs = !organisme.organismesFormateurs || organisme.organismesFormateurs.length === 0;
+        return hasNoFormateurs
+          ? {
+              organisme_id: {
+                $in: [organisme._id, ...findOrganismeFormateursIds(organisme)],
+              },
+            }
+          : {
+              _id: new ObjectId("000000000000"),
+            };
+
+        // const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
+        // return {
+        //   organisme_id: {
+        //     $in: [organisme._id, ...findOrganismeFormateursIds(organisme)],
+        //   },
+        // };
       },
       TETE_DE_RESEAU: () => ({
         _id: new ObjectId("000000000000"),

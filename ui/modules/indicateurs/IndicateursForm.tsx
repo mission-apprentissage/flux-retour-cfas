@@ -447,6 +447,7 @@ function IndicateursForm(props: IndicateursFormProps) {
 
 export default IndicateursForm;
 
+// FIXME à intégrer aux permissions partagées
 function getPermissionsEffectifsNominatifs(
   organisationType: OrganisationType,
   ownOrganisme?: Organisme

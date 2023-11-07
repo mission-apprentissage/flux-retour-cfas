@@ -50,7 +50,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     viewContacts: true,
   },
   "OF responsable": {
-    effectifsNominatifs: true,
+    effectifsNominatifs: false,
     indicateursEffectifs: true,
     infoTransmissionEffectifs: true,
     manageEffectifs: true,

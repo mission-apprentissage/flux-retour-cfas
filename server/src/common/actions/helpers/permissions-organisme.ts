@@ -46,8 +46,8 @@ export async function buildOrganismePermissions(
         infoTransmissionEffectifs: isOrganismeOrFormateur,
         indicateursEffectifs: isOrganismeOrFormateur,
         // FIXME à voir si on veut vraiment interdire ça
-        // effectifsNominatifs: organismeId.equals(userOrganisme._id), // OFA interdit sur les formateurs
-        effectifsNominatifs: isOrganismeOrFormateur,
+        effectifsNominatifs: organismeId.equals(userOrganisme._id), // OFA interdit sur les formateurs
+        // effectifsNominatifs: isOrganismeOrFormateur,
         manageEffectifs: isOrganismeOrFormateur,
       };
     }

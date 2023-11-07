@@ -265,10 +265,10 @@ describe("Route indicateurs", () => {
 
     describe("Permissions", () => {
       const accesOrganisme: PermissionsTestConfig<boolean> = {
-        "OF cible": true,
+        "OF cible": false, // car il possède un formateur, mais y accède théoriquement
         "OF non lié": false,
         "OF formateur": false,
-        "OF responsable": true,
+        "OF responsable": false,
         "Tête de réseau même réseau": false,
         "Tête de réseau autre réseau": false,
         "DREETS même région": true,
