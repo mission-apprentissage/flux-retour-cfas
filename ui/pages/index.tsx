@@ -520,7 +520,7 @@ function SectionApercuChiffresCles() {
                   Soit&nbsp;
                   <Text as="b" fontSize="zeta">
                     {Math.round(
-                      (indicateursNational?.indicateursOrganismes?.total || 0) /
+                      (100 * (indicateursNational?.indicateursOrganismes?.total || 0)) /
                         (indicateursNational?.indicateursOrganismes?.totalWithoutTransmissionDate || 1)
                     )}
                     %
