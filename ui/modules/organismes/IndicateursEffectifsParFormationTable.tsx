@@ -182,7 +182,7 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
                           title={formation.rncp.intitule}
                           onClick={() => setSelectedCodeRNCP(formation.rncp_code)}
                         >
-                          {formation.rncp?.intitule}
+                          {formation.rncp.intitule}
                         </Link>
                       ) : (
                         <Text fontSize="1rem">Fiche non trouvée</Text>
