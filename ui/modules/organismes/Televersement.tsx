@@ -592,5 +592,5 @@ function Header({ header }: { header: string }) {
       </>
     );
   }
-  return <>header</>;
+  return <>{header}</>;
 }
