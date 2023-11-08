@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import {
   EffectifsFilters,
@@ -633,16 +634,6 @@ export async function getOrganismeIndicateursEffectifsParFormation(
 
   return indicateurs;
 }
-
-export const typesEffectifNominatif = [
-  "apprenant",
-  "apprenti",
-  "inscritSansContrat",
-  "rupturant",
-  "abandon",
-  "inconnu",
-] as const;
-export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
 
 export async function getEffectifsNominatifs(
   ctx: AuthContext,

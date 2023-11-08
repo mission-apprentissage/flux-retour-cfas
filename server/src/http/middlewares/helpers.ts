@@ -1,8 +1,9 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
+import { PermissionOrganisme } from "shared/constants/permissions";
 
-import { PermissionsOrganisme, hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
+import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 // catch errors and return the result of the request handler
@@ -43,7 +44,7 @@ interface MyLocals {
 }
 
 export function requireOrganismePermission<TParams = any, TQuery = any, TBody = any, TLocals = any>(
-  permission: keyof PermissionsOrganisme
+  permission: PermissionOrganisme
 ): RequestHandler<TParams, any, TBody, TQuery, TLocals & MyLocals> {
   return async (req, res, next) => {
     try {

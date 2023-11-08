@@ -9,6 +9,7 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
+import { typesEffectifNominatif } from "shared/constants/indicateurs";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
@@ -35,7 +36,6 @@ import {
   getOrganismeIndicateursEffectifs,
   getOrganismeIndicateursEffectifsParFormation,
   getOrganismeIndicateursOrganismes,
-  typesEffectifNominatif,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";

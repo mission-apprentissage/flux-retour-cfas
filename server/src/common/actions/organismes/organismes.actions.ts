@@ -1,6 +1,7 @@
 import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate } from "shared";
+import { PermissionsOrganisme } from "shared/constants/permissions";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -22,11 +23,7 @@ import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
 import { getPermissionOrganisation } from "../helpers/permissions-organisation";
-import {
-  OrganismeWithPermissions,
-  PermissionsOrganisme,
-  buildOrganismePermissions,
-} from "../helpers/permissions-organisme";
+import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
 import { InfoSiret } from "../infoSiret.actions-struct";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";

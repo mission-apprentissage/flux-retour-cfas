@@ -3,6 +3,7 @@ import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -24,7 +25,7 @@ import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganisme
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
 
 import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
-import IndicateursGrid, { typesEffectifNominatif } from "../dashboard/IndicateursGrid";
+import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
   EffectifsFilters,
@@ -447,11 +448,10 @@ function IndicateursForm(props: IndicateursFormProps) {
 
 export default IndicateursForm;
 
-// FIXME à intégrer aux permissions partagées
 function getPermissionsEffectifsNominatifs(
   organisationType: OrganisationType,
   ownOrganisme?: Organisme
-): boolean | Array<(typeof typesEffectifNominatif)[number]> {
+): boolean | TypeEffectifNominatif[] {
   switch (organisationType) {
     case "ORGANISME_FORMATION":
       return organisationType !== "ORGANISME_FORMATION" || ownOrganisme?.organismesFormateurs?.length === 0; // OFA autorisé seulement si aucun formateur

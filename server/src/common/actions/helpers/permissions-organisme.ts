@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { PermissionsOrganisme } from "shared/constants/permissions";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
@@ -6,20 +7,11 @@ import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
-import { typesEffectifNominatif } from "../indicateurs/indicateurs.actions";
-
 import { findOrganismeFormateursIds } from "./permissions";
 
 export type OrganismeWithPermissions = Organisme & { permissions: PermissionsOrganisme };
 
-export interface PermissionsOrganisme {
-  viewContacts: boolean;
-  infoTransmissionEffectifs: boolean;
-  indicateursEffectifs: boolean; // pourrait peut-être être false | "partial" (restriction réseau/territoire) | "full"
-  effectifsNominatifs: boolean | Array<(typeof typesEffectifNominatif)[number]>;
-  manageEffectifs: boolean;
-}
-
+// Référence : https://www.notion.so/mission-apprentissage/Permissions-afd9dc14606042e8b76b23aa57f516a8?pvs=4#790eaa3c87b24ceaa33a64cb4bf2513a
 export async function buildOrganismePermissions(
   ctx: AuthContext,
   organismeId: ObjectId

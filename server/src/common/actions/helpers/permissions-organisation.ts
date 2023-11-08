@@ -1,4 +1,7 @@
+// @ts-nocheck TS2589: Type instantiation is excessively deep and possibly infinite.
+
 import { ObjectId } from "bson";
+import { PermissionOrganisation } from "shared/constants/permissions";
 
 import { Effectif, Organisme } from "@/common/model/@types";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -7,14 +10,6 @@ import { Organisation, OrganisationByType } from "@/common/model/organisations.m
 import { getOrganismeByUAIAndSIRET } from "../organismes/organismes.actions";
 
 import { findOrganismesAccessiblesByOrganisationOF } from "./permissions";
-
-// Permissions Profils d'organisation vs Fonctionnalités de l'organisation (= 1er niveau d'onglet)
-type PermissionOrganisation =
-  | "IndicateursEffectifsParDepartement" // /api/v1/indicateurs/effectifs/par-departement
-  | "IndicateursOrganismesParDepartement" // /api/v1/indicateurs/organismes/par-departement
-  | "ListeOrganismes" // /api/v1/organisation/organismes
-  | "IndicateursEffectifsParOrganisme" // /api/v1/indicateurs/effectifs/par-organisme
-  | "TéléchargementListesNominatives"; // /api/v1/indicateurs/effectifs/{type}
 
 // Schema permet de filtrer sur une collection
 type APIConfig<Schema extends object, Filter = ToObjectFilter<Schema & { _id: ObjectId }>> = {
@@ -41,25 +36,13 @@ export type ToObjectFilter<Obj> = {
 } & {}; // eslint-disable-line @typescript-eslint/ban-types -- permet d'obtenir une copie des propriétés pour le debug
 
 type PermissionConfig = {
-  ui: Record<Organisation["type"], boolean | string[]>;
-  api: APIConfig<any>;
+  ui?: Record<Organisation["type"], boolean | string[]>;
+  api: APIConfig<object>;
 };
 
+// Référence : https://www.notion.so/mission-apprentissage/Permissions-afd9dc14606042e8b76b23aa57f516a8?pvs=4#bf039f348f1a4d8e84b065eafc1b6db1
 const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> = {
   IndicateursEffectifsParDepartement: {
-    ui: {
-      ORGANISME_FORMATION: true,
-      TETE_DE_RESEAU: true,
-      DREETS: true,
-      DRAAF: true,
-      CONSEIL_REGIONAL: true,
-      CARIF_OREF_REGIONAL: true,
-      DDETS: true,
-      ACADEMIE: true,
-      OPERATEUR_PUBLIC_NATIONAL: true,
-      CARIF_OREF_NATIONAL: true,
-      ADMINISTRATEUR: true,
-    },
     api: {
       ORGANISME_FORMATION: async (organisation) => ({
         organisme_id: {
@@ -81,19 +64,6 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
     } satisfies APIConfig<Effectif>,
   },
   IndicateursOrganismesParDepartement: {
-    ui: {
-      ORGANISME_FORMATION: true,
-      TETE_DE_RESEAU: true,
-      DREETS: true,
-      DRAAF: true,
-      CONSEIL_REGIONAL: true,
-      CARIF_OREF_REGIONAL: true,
-      DDETS: true,
-      ACADEMIE: true,
-      OPERATEUR_PUBLIC_NATIONAL: true,
-      CARIF_OREF_NATIONAL: true,
-      ADMINISTRATEUR: true,
-    },
     api: {
       ORGANISME_FORMATION: async (organisation) => ({
         _id: {
@@ -115,19 +85,6 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
     } satisfies APIConfig<Organisme>,
   },
   ListeOrganismes: {
-    ui: {
-      ORGANISME_FORMATION: true, // dépend si des OF formateurs
-      TETE_DE_RESEAU: true,
-      DREETS: true,
-      DRAAF: true,
-      CONSEIL_REGIONAL: true,
-      CARIF_OREF_REGIONAL: true,
-      DDETS: true,
-      ACADEMIE: true,
-      OPERATEUR_PUBLIC_NATIONAL: true,
-      CARIF_OREF_NATIONAL: true,
-      ADMINISTRATEUR: true,
-    },
     api: {
       ORGANISME_FORMATION: async (organisation) => {
         return {
@@ -163,19 +120,6 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
     } satisfies APIConfig<Organisme>,
   },
   IndicateursEffectifsParOrganisme: {
-    ui: {
-      ORGANISME_FORMATION: true,
-      TETE_DE_RESEAU: true,
-      DREETS: true,
-      DRAAF: true,
-      CONSEIL_REGIONAL: true,
-      CARIF_OREF_REGIONAL: true,
-      DDETS: true,
-      ACADEMIE: true,
-      OPERATEUR_PUBLIC_NATIONAL: true,
-      CARIF_OREF_NATIONAL: true,
-      ADMINISTRATEUR: true,
-    },
     api: {
       ORGANISME_FORMATION: async (organisation) => ({
         organisme_id: {

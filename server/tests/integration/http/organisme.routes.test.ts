@@ -3,8 +3,8 @@ import { strict as assert } from "assert";
 import { AxiosInstance } from "axiosist";
 import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
+import { PermissionsOrganisme } from "shared/constants/permissions";
 
-import { PermissionsOrganisme } from "@/common/actions/helpers/permissions-organisme";
 import { IndicateursEffectifsAvecFormation } from "@/common/actions/indicateurs/indicateurs";
 import { Organisme } from "@/common/model/@types";
 import { Rncp } from "@/common/model/@types/Rncp";
