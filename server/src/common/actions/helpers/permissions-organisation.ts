@@ -53,8 +53,6 @@ type PermissionConfig = {
   api: APIConfig<any>;
 };
 
-export type Simplify<T> = { [K in keyof T]: T[K] } & {};
-
 const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> = {
   IndicateursEffectifsParDepartement: {
     ui: {
@@ -205,7 +203,6 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
         "_computed.organisme.region": organisation.code_region,
       }),
       CARIF_OREF_REGIONAL: (organisation) => ({
-        // FIXME à valider et corriger sur le tableau des permissions
         "_computed.organisme.region": organisation.code_region,
       }),
       DDETS: (organisation) => ({
@@ -221,7 +218,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
   },
   TéléchargementListesNominatives: {
     ui: {
-      ORGANISME_FORMATION: true, // FIXME seulement si aucun formateur
+      ORGANISME_FORMATION: true, // TODO seulement si aucun formateur
       TETE_DE_RESEAU: false,
       DREETS: ["inscritSansContrat", "rupturant", "abandon"],
       DRAAF: ["inscritSansContrat", "rupturant", "abandon"],

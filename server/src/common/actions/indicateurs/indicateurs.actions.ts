@@ -17,7 +17,7 @@ import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
-import { getPermissionOrganisation } from "../helpers/permissions-new";
+import { getPermissionOrganisation } from "../helpers/permissions-organisation";
 
 import {
   IndicateursEffectifs,

@@ -21,7 +21,7 @@ import { cleanProjection } from "@/common/utils/mongoUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
-import { getPermissionOrganisation } from "../helpers/permissions-new";
+import { getPermissionOrganisation } from "../helpers/permissions-organisation";
 import {
   OrganismeWithPermissions,
   PermissionsOrganisme,
