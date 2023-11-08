@@ -76,7 +76,7 @@ function DashboardPage() {
 function PublicLandingPage() {
   return (
     <SimplePage title="Tableau de bord de l’apprentissage">
-      <Center bg="#F5F5FE" color="plaininfo" h="14" fontWeight="bold" lineHeight="1.2em">
+      <Center bg="#F5F5FE" color="plaininfo" fontWeight="bold" lineHeight="1.2em" p={2}>
         <Image src="/images/landing-cards/info.svg" alt="" userSelect="none" mr="3" />
         Informations actualisées ! Consultez les nouveaux effectifs d&apos;apprenants pour l&apos;année scolaire
         démarrant en août, sur le tableau de bord de l&apos;apprentissage.
@@ -89,7 +89,14 @@ function PublicLandingPage() {
         borderBottomColor="grey.300"
         bg="linear-gradient(86.78deg, #3558A2 0.27%, rgba(53, 88, 162, 0.85) 44.27%, rgba(238, 241, 248, 0.54) 99.66%)"
       >
-        <Container maxW="xl" py="10" display="flex" alignItems={"center"} gap="16">
+        <Container
+          maxW="xl"
+          py="10"
+          display="flex"
+          alignItems="center"
+          gap="16"
+          flexDirection={["column-reverse", "column-reverse", "column-reverse", "row"]}
+        >
           <Box flex="3">
             <Heading as="h1" fontSize="5xl" color="#ffffff" lineHeight="120%">
               Tableau de bord de l’apprentissage
@@ -122,92 +129,113 @@ function PublicLandingPage() {
         </Heading>
 
         <Stack direction={["column", "column", "column", "row"]} gap="4" mt="8" mx={[0, 16, 32, 0]}>
-          <Link variant="ghost" href="/organismes-formation" flex="1" backgroundColor="galt" p="8">
-            <VStack>
-              <Center>
-                <VStack>
-                  <Image src="/images/landing-cards/school.svg" alt="" />
-                  <CardLabel>ORGANISME DE FORMATION (OFA)</CardLabel>
-                  <Text fontSize="delta" fontWeight="bold">
-                    Simplifiez vos démarches
-                  </Text>
-                </VStack>
-              </Center>
-              <List styleType="none" pt="8" spacing="2">
-                <ListItem>
-                  <Flex align="center" fontSize="omega">
-                    <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="2" />
-                    Gagnez du temps pour vos démarches administratives
-                  </Flex>
-                </ListItem>
-                <ListItem>
-                  <Flex align="center" fontSize="omega">
-                    <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="2" />
-                    Transmettez vos effectifs de manière sécurisée
-                  </Flex>
-                </ListItem>
-              </List>
-            </VStack>
+          <Link
+            variant="ghost"
+            href="/organismes-formation"
+            flex="1"
+            backgroundColor="galt"
+            p="8"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+          >
+            <Center>
+              <VStack>
+                <Image src="/images/landing-cards/school.svg" alt="" />
+                <CardLabel>ORGANISME DE FORMATION (OFA)</CardLabel>
+                <Text fontSize="delta" fontWeight="bold">
+                  Simplifiez vos démarches
+                </Text>
+              </VStack>
+            </Center>
+            <List styleType="none" pt="8" spacing="2">
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/timer-flash.svg" boxSize="16px" alt="" mr="2" />
+                  Gagnez du temps pour vos démarches administratives
+                </Flex>
+              </ListItem>
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/shield-user.svg" boxSize="16px" alt="" mr="2" />
+                  Transmettez vos effectifs de manière sécurisée
+                </Flex>
+              </ListItem>
+            </List>
           </Link>
-          <Link variant="ghost" href="/organismes-formation" flex="1" backgroundColor="galt" p="8">
-            <VStack>
-              <Center>
-                <VStack>
-                  <Image src="/images/landing-cards/network.svg" alt="" />
-                  <CardLabel>RÉSEAU D’OFA</CardLabel>
-                  <Text fontSize="delta" fontWeight="bold">
-                    Facilitez votre animation
-                  </Text>
-                </VStack>
-              </Center>
-              <List styleType="none" pt="8" spacing="2">
-                <ListItem>
-                  <Flex align="center" fontSize="omega">
-                    <TeamIcon boxSize="16px" mr="2" />
-                    Suivez l’activité de votre réseau en temps réel
-                  </Flex>
-                </ListItem>
-                <ListItem>
-                  <Flex align="center" fontSize="omega">
-                    <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="2" />
-                    Centralisez les informations utiles à l’animation de celui-ci
-                  </Flex>
-                </ListItem>
-              </List>
-            </VStack>
+          <Link
+            variant="ghost"
+            href="/organismes-formation"
+            flex="1"
+            backgroundColor="galt"
+            p="8"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+          >
+            <Center>
+              <VStack>
+                <Image src="/images/landing-cards/network.svg" alt="" />
+                <CardLabel>RÉSEAU D’OFA</CardLabel>
+                <Text fontSize="delta" fontWeight="bold">
+                  Facilitez votre animation
+                </Text>
+              </VStack>
+            </Center>
+            <List styleType="none" pt="8" spacing="2">
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <TeamIcon boxSize="16px" mr="2" />
+                  Suivez l’activité de votre réseau en temps réel
+                </Flex>
+              </ListItem>
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/file-damaged.svg" boxSize="16px" alt="" mr="2" />
+                  Centralisez les informations utiles à l’animation de celui-ci
+                </Flex>
+              </ListItem>
+            </List>
           </Link>
-          <Link variant="ghost" href="/operateurs-publics" flex="1" backgroundColor="galt" p="8">
-            <VStack>
-              <Center>
-                <VStack>
-                  <Image src="/images/landing-cards/city-hall.svg" alt="" />
-                  <CardLabel>OPÉRATEURS PUBLICS</CardLabel>
-                  <Text fontSize="delta" fontWeight="bold">
-                    Pilotez efficacement
+          <Link
+            variant="ghost"
+            href="/operateurs-publics"
+            flex="1"
+            backgroundColor="galt"
+            p="8"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+          >
+            <Center>
+              <VStack>
+                <Image src="/images/landing-cards/city-hall.svg" alt="" />
+                <CardLabel>OPÉRATEURS PUBLICS</CardLabel>
+                <Text fontSize="delta" fontWeight="bold">
+                  Pilotez efficacement
+                </Text>
+              </VStack>
+            </Center>
+            <List styleType="none" pt="8" spacing="2">
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/bar-chart.svg" boxSize="16px" alt="" mr="2" />
+                  Visualisez des données ciblées sur votre territoire
+                </Flex>
+              </ListItem>
+              <ListItem>
+                <Flex align="center" fontSize="omega">
+                  <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="2" />
+                  <Text>
+                    Mobilisez rapidement le{" "}
+                    <Text as="abbr" title="SPIE : Service public de l’insertion et de l’emploi" cursor="help">
+                      SPIE
+                    </Text>{" "}
+                    en cas de difficultés des apprentis
                   </Text>
-                </VStack>
-              </Center>
-              <List styleType="none" pt="8" spacing="2">
-                <ListItem>
-                  <Flex align="center" fontSize="omega">
-                    <Image src="/images/landing-cards/bar-chart.svg" boxSize="16px" alt="" mr="2" />
-                    Visualisez des données ciblées sur votre territoire
-                  </Flex>
-                </ListItem>
-                <ListItem>
-                  <Flex align="center" fontSize="omega">
-                    <Image src="/images/landing-cards/alarm-warning.svg" boxSize="16px" alt="" mr="2" />
-                    <Text>
-                      Mobilisez rapidement le{" "}
-                      <Text as="abbr" title="SPIE : Service public de l’insertion et de l’emploi" cursor="help">
-                        SPIE
-                      </Text>{" "}
-                      en cas de difficultés des apprentis
-                    </Text>
-                  </Flex>
-                </ListItem>
-              </List>
-            </VStack>
+                </Flex>
+              </ListItem>
+            </List>
           </Link>
         </Stack>
 
@@ -441,10 +469,10 @@ function SectionApercuChiffresCles() {
         <Text as="b">{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</Text>.
       </Text>
 
-      <Grid templateColumns="1fr 2fr" gap={4} my={4}>
+      <Grid templateColumns={["1fr", "1fr", "1fr 2fr"]} gap={4} my={4}>
         <GridItem bg="#F5F5FE">
           <Center h="100%">
-            <HStack gap={3} py="10" px="12">
+            <HStack gap={3} py="10" px={["2", "6", "12"]}>
               <Box alignSelf={"start"} pt="3">
                 <Image src="/images/landing-cards/community.svg" boxSize="10" alt="" userSelect="none" />
               </Box>
@@ -533,9 +561,9 @@ function SectionApercuChiffresCles() {
         </GridItem>
 
         <GridItem bg="#F5F5FE">
-          <HStack>
+          <Stack direction={["column", "row", "row"]}>
             <Center h="100%">
-              <HStack gap={3} py="10" px="12">
+              <HStack gap={3} py="10" px={["2", "6", "12"]}>
                 <Box alignSelf={"start"} pt="3">
                   <TeamIcon fill="bluefrance" />
                 </Box>
@@ -620,7 +648,7 @@ function SectionApercuChiffresCles() {
                 />
               )}
             </Center>
-          </HStack>
+          </Stack>
         </GridItem>
       </Grid>
 
