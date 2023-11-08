@@ -25,9 +25,7 @@ export async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
-        ctx as AuthContext<OrganisationOrganismeFormation>
-      );
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
       return {
         $in: ["$_id", linkedOrganismesIds],
       };
@@ -55,9 +53,7 @@ export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthConte
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
-        ctx as AuthContext<OrganisationOrganismeFormation>
-      );
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
       return {
         organisme_id: {
           $in: linkedOrganismesIds,
@@ -98,9 +94,7 @@ export async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: Ob
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
-        ctx as AuthContext<OrganisationOrganismeFormation>
-      );
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
       return linkedOrganismesIds.map((id) => id.toString()).includes(organismeId.toString());
     }
 
@@ -115,10 +109,9 @@ export async function canConfigureOrganismeERP(ctx: AuthContext, organismeId: Ob
 /**
  * Liste tous les organismes accessibles pour une organisation (dont l'organisme lié à l'organisation)
  */
-async function findOrganismesAccessiblesByOrganisationOF(
-  ctx: AuthContext<OrganisationOrganismeFormation>
+export async function findOrganismesAccessiblesByOrganisationOF(
+  organisation: OrganisationOrganismeFormation
 ): Promise<ObjectId[]> {
-  const organisation = ctx.organisation;
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,
     uai: organisation.uai as string,
@@ -165,10 +158,7 @@ export const canDeleteEffectif = async (ctx: AuthContext, effectifId: ObjectId) 
     case "ORGANISME_FORMATION": {
       // On compare l'id de l'organisme de l'effectif aux id des organismes liés à l'organisation du user
       const organismeIdForEffectif = effectifToDelete.organisme_id;
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
-        ctx as AuthContext<OrganisationOrganismeFormation>
-      );
-
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
       return linkedOrganismesIds.some((id) => id.equals(organismeIdForEffectif));
     }
     case "ADMINISTRATEUR":
@@ -183,9 +173,7 @@ export async function canAccessOrganismeIndicateurs(ctx: AuthContext, organismeI
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
-        ctx as AuthContext<OrganisationOrganismeFormation>
-      );
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
       return linkedOrganismesIds.some((linkedOrganismesId) => linkedOrganismesId.equals(organismeId));
     }
 
@@ -247,9 +235,7 @@ export async function canManageOrganismeEffectifs(ctx: AuthContext, organismeId:
   const organisation = ctx.organisation;
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
-      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(
-        ctx as AuthContext<OrganisationOrganismeFormation>
-      );
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
       return linkedOrganismesIds.some((linkedOrganismesId) => linkedOrganismesId.equals(organismeId));
     }
 

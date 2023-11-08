@@ -1,14 +1,12 @@
 import { ObjectId } from "bson";
 
-import logger from "@/common/logger";
 import { Effectif, Organisme } from "@/common/model/@types";
-import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { Organisation, OrganisationByType, OrganisationOrganismeFormation } from "@/common/model/organisations.model";
+import { Organisation, OrganisationByType } from "@/common/model/organisations.model";
 
 import { getOrganismeByUAIAndSIRET } from "../organismes/organismes.actions";
 
-import { findOrganismeFormateursIds } from "./permissions";
+import { findOrganismesAccessiblesByOrganisationOF } from "./permissions";
 
 // Permissions Profils d'organisation vs Fonctionnalités de l'organisation (= 1er niveau d'onglet)
 type PermissionOrganisation =
@@ -17,12 +15,6 @@ type PermissionOrganisation =
   | "ListeOrganismes" // /api/v1/organisation/organismes
   | "IndicateursEffectifsParOrganisme" // /api/v1/indicateurs/effectifs/par-organisme
   | "TéléchargementListesNominatives"; // /api/v1/indicateurs/effectifs/{type}
-
-// type PermissionOrganisme = ""; // TODO tableau
-
-// IndicateursEffectifsParDepartement
-// UI: si accessible ou pas
-// API: restriction mongo
 
 // Schema permet de filtrer sur une collection
 type APIConfig<Schema extends object, Filter = ToObjectFilter<Schema & { _id: ObjectId }>> = {
@@ -235,25 +227,15 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
         // TODO en principe, on a décidé de masquer le bouton téléchargement des effectifs nominatifs quand un organisme possède plusieurs formateurs
         // tout ça afin d'éviter que les effectifs d'un formateur avec plusieurs responsables ne remontent chez chacun des responsables
         // Cependant, les permissions n'ont pas été en accord, car un responsable peut toujours accéder aux listes nominatives via le 2e onglet.
-
         const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
         const hasNoFormateurs = !organisme.organismesFormateurs || organisme.organismesFormateurs.length === 0;
         return hasNoFormateurs
           ? {
-              organisme_id: {
-                $in: [organisme._id, ...findOrganismeFormateursIds(organisme)],
-              },
+              organisme_id: organisme._id,
             }
           : {
               _id: new ObjectId("000000000000"),
             };
-
-        // const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
-        // return {
-        //   organisme_id: {
-        //     $in: [organisme._id, ...findOrganismeFormateursIds(organisme)],
-        //   },
-        // };
       },
       TETE_DE_RESEAU: () => ({
         _id: new ObjectId("000000000000"),
@@ -290,22 +272,4 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
 export async function getPermissionOrganisation(ctx: AuthContext, permission: PermissionOrganisation) {
   const permissionConfig = permissionsOrganisation[permission].api[ctx.organisation.type];
   return typeof permissionConfig === "function" ? permissionConfig(ctx.organisation as any) : permissionConfig;
-}
-
-/**
- * Liste tous les organismes accessibles pour une organisation (dont l'organisme lié à l'organisation)
- */
-async function findOrganismesAccessiblesByOrganisationOF(
-  organisation: OrganisationOrganismeFormation
-): Promise<ObjectId[]> {
-  const userOrganisme = await organismesDb().findOne({
-    siret: organisation.siret,
-    uai: organisation.uai as string,
-  });
-  if (!userOrganisme) {
-    logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
-    throw new Error("organisme de l'organisation non trouvé");
-  }
-
-  return [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)];
 }
