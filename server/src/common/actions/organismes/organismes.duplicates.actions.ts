@@ -39,7 +39,6 @@ export const getDuplicatesOrganismes = async () => {
     ])
     .toArray();
 
-  // TODO : pas bien à faire en lookup mongo
   await Promise.all(
     duplicatesGroup.map(async (currentDuplicateGroup) => {
       currentDuplicateGroup.duplicates = await Promise.all(
