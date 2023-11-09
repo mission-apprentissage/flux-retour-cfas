@@ -294,7 +294,7 @@ const NavigationMenu = () => {
             >
               <Flex
                 align="center"
-                justify={["center", "space-between", "flex-end", "flex-start"]}
+                justify={["center", "space-between", "flex-start", "flex-start"]}
                 direction={["column", "row", "row", "row"]}
                 pb={[8, 0]}
                 textStyle="sm"
