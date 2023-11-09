@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { auditLogsDb, effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";
 
-import { getUsersLinkedToOrganismeId } from "../users.actions";
+// import { getUsersLinkedToOrganismeId } from "../users.actions";
 
 /**
  * Fonction de récupération des organismes à fusionner = duplicats d'organismes
@@ -38,17 +38,6 @@ export const getDuplicatesOrganismes = async () => {
       { $match: { count: { $gt: 1 }, "duplicates.uai": { $in: [null] } } },
     ])
     .toArray();
-
-  await Promise.all(
-    duplicatesGroup.map(async (currentDuplicateGroup) => {
-      currentDuplicateGroup.duplicates = await Promise.all(
-        currentDuplicateGroup.duplicates.map(async (duplicate) => ({
-          ...duplicate,
-          nbUsers: (await getUsersLinkedToOrganismeId(duplicate?.id)).length ?? 0,
-        }))
-      );
-    })
-  );
 
   return duplicatesGroup;
 };
