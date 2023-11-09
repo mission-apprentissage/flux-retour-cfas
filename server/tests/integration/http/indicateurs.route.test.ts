@@ -350,7 +350,7 @@ describe("Route indicateurs", () => {
         "Académie autre académie": false,
         "Opérateur public national": false,
         "CARIF OREF national": false,
-        Administrateur: effectifResult,
+        Administrateur: emptyResult,
       };
       testPermissions(accesOrganisme, async (organisation, expectedPermission) => {
         const response = await requestAsOrganisation(
