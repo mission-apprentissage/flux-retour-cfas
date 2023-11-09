@@ -71,9 +71,6 @@ const RenderSubComponent = (row: Row<DuplicateOrganismeGroup>) => {
                 <HStack spacing={6}>
                   <Text color={item.uai ? "black" : "gray.500"}>UAI : {item.uai ?? "Inconnu"}</Text>
                   <Text>SIRET : {item.siret}</Text>
-                  <Text color={item.nbUsers > 0 ? "black" : "gray.500"}>
-                    Compte(s) utilisateur(s) : {item.nbUsers > 0 ? item.nbUsers : "Aucun"}
-                  </Text>
                   <Text color={item.effectifs_count > 0 ? "black" : "gray.500"}>
                     Effectifs : {item.effectifs_count > 0 ? item.effectifs_count : "Non déclaré"}
                   </Text>
