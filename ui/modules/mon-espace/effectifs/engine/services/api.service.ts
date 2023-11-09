@@ -1,12 +1,10 @@
 import { _post, _put } from "@/common/httpClient";
 import { InfoSiret } from "@/common/types/infoSiret";
 
-// eslint-disable-next-line no-unused-vars
-const saveEffectifForm = async ({ organisme_id, effectifId, data, inputNames }) => {
+const saveEffectifForm = async ({ effectifId, data, inputNames }) => {
   try {
     return await _put(`/api/v1/effectif/${effectifId}`, {
       ...data,
-      organisme_id,
       inputNames,
     });
   } catch (e) {
