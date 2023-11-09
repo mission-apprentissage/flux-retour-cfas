@@ -53,7 +53,7 @@ const dossierApprenantSchemaV3WithErrors = dossierApprenantSchemaV3Base().extend
     type: "string",
     format: "YYYY-MM-DDT00:00:00Z",
   }),
-  processed_at: z.string().openapi({
+  processed_at: z.string().optional().openapi({
     description: "Date de traitement de l'effectif",
     type: "string",
     format: "YYYY-MM-DDT00:00:00Z",
