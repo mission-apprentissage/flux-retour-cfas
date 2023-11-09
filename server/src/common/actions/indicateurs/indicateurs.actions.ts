@@ -1,3 +1,4 @@
+import Boom from "boom";
 import { ObjectId } from "mongodb";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
@@ -641,13 +642,18 @@ export async function getEffectifsNominatifs(
   type: TypeEffectifNominatif,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
+  const permissionRestriction = await getPermissionOrganisation(ctx, "TéléchargementListesNominatives");
+  if (!permissionRestriction) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
           $and: [
             await getOrganismeRestriction(organismeId),
-            await getPermissionOrganisation(ctx, "TéléchargementListesNominatives"),
+            permissionRestriction,
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables

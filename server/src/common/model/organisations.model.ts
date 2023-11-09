@@ -83,7 +83,7 @@ export interface OrganisationAdministrateur {
   type: "ADMINISTRATEUR";
 }
 
-// nouveaux types structurés pour faciliter les permissions
+// types structurés pour faciliter les permissions
 export type OrganisationByType = {
   ORGANISME_FORMATION: OrganisationOrganismeFormation;
   TETE_DE_RESEAU: OrganisationTeteReseau;

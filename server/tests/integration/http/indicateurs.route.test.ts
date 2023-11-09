@@ -1,7 +1,6 @@
 import { AxiosInstance } from "axiosist";
 
 import { IndicateursEffectifsAvecOrganisme } from "@/common/actions/indicateurs/indicateurs";
-import { Effectif } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { historySequenceApprentiToAbandon, historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
@@ -13,7 +12,13 @@ import {
   testPermissions,
   userOrganisme,
 } from "@tests/utils/permissions";
-import { RequestAsOrganisationFunc, expectUnauthorizedError, id, initTestApp } from "@tests/utils/testUtils";
+import {
+  RequestAsOrganisationFunc,
+  expectForbiddenError,
+  expectUnauthorizedError,
+  id,
+  initTestApp,
+} from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
@@ -244,10 +249,11 @@ describe("Route indicateurs", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
-    let effectif: Effectif;
+    let effectifResult: any[] = [];
+    const emptyResult = [];
 
     beforeEach(async () => {
-      effectif = createSampleEffectif({
+      const effectif = createSampleEffectif({
         ...commonEffectifsAttributes,
         annee_scolaire: anneeScolaire,
         apprenant: {
@@ -255,6 +261,25 @@ describe("Route indicateurs", () => {
         },
       });
       await effectifsDb().insertOne(effectif);
+
+      // petit hack pour muter l'objet :-°
+      effectifResult.splice(0, 1, {
+        apprenant_date_de_naissance: effectif.apprenant.date_de_naissance?.toISOString().substring(0, 10),
+        apprenant_nom: effectif.apprenant.nom,
+        apprenant_prenom: effectif.apprenant.prenom,
+        apprenant_statut: "abandon",
+        formation_annee: effectif.formation?.annee,
+        formation_cfd: effectif.formation?.cfd,
+        formation_date_debut_formation: effectif.formation?.periode?.[0],
+        formation_date_fin_formation: effectif.formation?.periode?.[1],
+        formation_libelle_long: effectif.formation?.libelle_long,
+        formation_niveau: effectif.formation?.niveau,
+        formation_rncp: effectif.formation?.rncp,
+        organisme_nature: userOrganisme.nature,
+        organisme_nom: userOrganisme.raison_sociale,
+        organisme_siret: userOrganisme.siret,
+        organisme_uai: userOrganisme.uai,
+      });
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
@@ -264,60 +289,42 @@ describe("Route indicateurs", () => {
     });
 
     describe("Permissions", () => {
-      const accesOrganisme: PermissionsTestConfig<boolean> = {
+      const accesOrganisme: PermissionsTestConfig<false | any[]> = {
         "OF cible": false, // car il possède un formateur, mais y accède théoriquement
-        "OF non lié": false,
-        "OF formateur": false,
+        "OF non lié": emptyResult,
+        "OF formateur": emptyResult,
         "OF responsable": false,
         "Tête de réseau même réseau": false,
         "Tête de réseau autre réseau": false,
-        "DREETS même région": true,
-        "DREETS autre région": false,
-        "DRAAF même région": true,
-        "DRAAF autre région": false,
+        "DREETS même région": effectifResult,
+        "DREETS autre région": emptyResult,
+        "DRAAF même région": effectifResult,
+        "DRAAF autre région": emptyResult,
         "Conseil Régional même région": false,
         "Conseil Régional autre région": false,
         "CARIF OREF régional même région": false,
         "CARIF OREF régional autre région": false,
-        "DDETS même département": true,
-        "DDETS autre département": false,
+        "DDETS même département": effectifResult,
+        "DDETS autre département": emptyResult,
         "Académie même académie": false,
         "Académie autre académie": false,
         "Opérateur public national": false,
         "CARIF OREF national": false,
-        Administrateur: true,
+        Administrateur: effectifResult,
       };
-      testPermissions(accesOrganisme, async (organisation, hasAccess) => {
+      testPermissions(accesOrganisme, async (organisation, expectedPermission) => {
         const response = await requestAsOrganisation(
           organisation,
           "get",
           `/api/v1/indicateurs/effectifs/abandon?date=${date}`
         );
 
-        expect(response.status).toStrictEqual(200);
-        expect(response.data).toStrictEqual(
-          hasAccess
-            ? [
-                {
-                  apprenant_date_de_naissance: effectif.apprenant.date_de_naissance?.toISOString().substring(0, 10),
-                  apprenant_nom: effectif.apprenant.nom,
-                  apprenant_prenom: effectif.apprenant.prenom,
-                  apprenant_statut: "abandon",
-                  formation_annee: effectif.formation?.annee,
-                  formation_cfd: effectif.formation?.cfd,
-                  formation_date_debut_formation: effectif.formation?.periode?.[0],
-                  formation_date_fin_formation: effectif.formation?.periode?.[1],
-                  formation_libelle_long: effectif.formation?.libelle_long,
-                  formation_niveau: effectif.formation?.niveau,
-                  formation_rncp: effectif.formation?.rncp,
-                  organisme_nature: userOrganisme.nature,
-                  organisme_nom: userOrganisme.raison_sociale,
-                  organisme_siret: userOrganisme.siret,
-                  organisme_uai: userOrganisme.uai,
-                },
-              ]
-            : []
-        );
+        if (expectedPermission) {
+          expect(response.status).toStrictEqual(200);
+          expect(response.data).toStrictEqual(expectedPermission);
+        } else {
+          expectForbiddenError(response);
+        }
       });
     });
 

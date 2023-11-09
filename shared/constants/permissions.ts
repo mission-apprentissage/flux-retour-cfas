@@ -15,6 +15,7 @@ export type PermissionsOrganisme = {
   indicateursEffectifs: boolean; // pourrait peut-être être false | "partial" (restriction réseau/territoire) | "full"
   effectifsNominatifs: boolean | TypeEffectifNominatif[];
   manageEffectifs: boolean;
+  configurerModeTransmission: boolean;
 };
 
 export type PermissionOrganisme = keyof PermissionsOrganisme;

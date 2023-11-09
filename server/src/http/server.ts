@@ -23,6 +23,7 @@ import {
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import { canDeleteEffectif } from "@/common/actions/helpers/permissions";
+import { getPermissionOrganisationConfig } from "@/common/actions/helpers/permissions-organisation";
 import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
@@ -37,6 +38,7 @@ import {
   getOrganismeIndicateursEffectifsParFormation,
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
+import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
@@ -80,7 +82,9 @@ import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
+import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
+import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
@@ -89,7 +93,9 @@ import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
+import { algoUAI } from "@/common/utils/uaiUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
@@ -98,7 +104,7 @@ import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
-import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
+import { extensions, primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
@@ -397,14 +403,6 @@ function setupRoutes(app: Application) {
           has_accept_cgu_version: req.params.version,
         });
       })
-    )
-    .delete(
-      "/api/v1/effectif/:id",
-      returnResult(async (req) => {
-        const effectifId = new ObjectId(req.params.id);
-        if (!(await canDeleteEffectif(req.user, effectifId))) throw Boom.forbidden("Permissions invalides");
-        await effectifsDb().deleteOne({ _id: effectifId });
-      })
     );
 
   /********************************
@@ -452,12 +450,12 @@ function setupRoutes(app: Application) {
       .get(
         "/indicateurs/effectifs/:type",
         returnResult(async (req, res) => {
+          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
           const permissions = await hasOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
           if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
             throw Boom.forbidden("Permissions invalides");
           }
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           return await getEffectifsNominatifs(req.user, filters, type, res.locals.organismeId);
         })
       )
@@ -506,7 +504,7 @@ function setupRoutes(app: Application) {
       )
       .put(
         "/configure-erp",
-        requireOrganismePermission("manageEffectifs"),
+        requireOrganismePermission("configurerModeTransmission"),
         returnResult(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
@@ -514,18 +512,18 @@ function setupRoutes(app: Application) {
       )
       .delete(
         "/configure-erp",
-        requireOrganismePermission("manageEffectifs"),
+        requireOrganismePermission("configurerModeTransmission"),
         returnResult(async (req, res) => {
-          await resetConfigurationERP(req.user, res.locals.organismeId);
+          await resetConfigurationERP(res.locals.organismeId);
         })
       )
       .post(
         "/verify-user",
-        requireOrganismePermission("manageEffectifs"),
+        requireOrganismePermission("configurerModeTransmission"),
         returnResult(async (req, res) => {
           // POST /api/v1/organismes/:id/verify-user { siret=XXXXX, uai=YYYYY, erp=ZZZZ , api_key=TTTTT }
           const verif = await validateFullZodObjectSchema(req.body, SReqPostVerifyUser);
-          await verifyOrganismeAPIKeyToUser(req.user, res.locals.organismeId, verif);
+          await verifyOrganismeAPIKeyToUser(res.locals.organismeId, verif);
         })
       )
       .use(
@@ -605,6 +603,10 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
         const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
+        const permissions = await getPermissionOrganisationConfig(req.user, "TéléchargementListesNominatives");
+        if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
+          throw Boom.forbidden("Permissions invalides");
+        }
         return await getEffectifsNominatifs(req.user, filters, type);
       })
     )
@@ -629,6 +631,50 @@ function setupRoutes(app: Application) {
     "/api/v1/rncp/:code_rncp",
     returnResult(async (req) => {
       return await getFicheRNCP(req.params.code_rncp);
+    })
+  );
+
+  authRouter.post(
+    "/api/v1/effectif/recherche-siret",
+    returnResult(async (req) => {
+      const { siret } = await validateFullZodObjectSchema(req.body, {
+        siret: extensions.siret(),
+      });
+
+      return await findDataFromSiret(siret);
+    })
+  );
+  authRouter.post(
+    "/api/v1/effectif/recherche-uai",
+    returnResult(async (req) => {
+      const { uai } = await validateFullZodObjectSchema(req.body, {
+        uai: extensions.uai(),
+      });
+
+      return stripEmptyFields({
+        uai,
+        error: !algoUAI(uai) ? `L'UAI ${uai} n'est pas valide` : null,
+      });
+    })
+  );
+  authRouter.post(
+    "/api/v1/effectif/recherche-code-postal",
+    returnResult(async (req) => {
+      const { codePostal } = await validateFullZodObjectSchema(req.body, {
+        codePostal: z
+          .string()
+          .trim()
+          .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement"),
+      });
+      return await getCodePostalInfo(codePostal);
+    })
+  );
+  authRouter.delete(
+    "/api/v1/effectif/:id",
+    returnResult(async (req) => {
+      const effectifId = new ObjectId(req.params.id);
+      if (!(await canDeleteEffectif(req.user, effectifId))) throw Boom.forbidden("Permissions invalides");
+      await effectifsDb().deleteOne({ _id: effectifId });
     })
   );
 

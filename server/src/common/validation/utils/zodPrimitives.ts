@@ -35,7 +35,7 @@ const sixMonthAgo = subDays(new Date(), 30 * 6);
 
 const iso8601Regex = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/;
 
-const extensions = {
+export const extensions = {
   phone: () =>
     z.coerce
       .string()

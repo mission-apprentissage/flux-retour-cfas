@@ -30,6 +30,7 @@ export async function buildOrganismePermissions(
       }
 
       const linkedOrganismesIds = [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)];
+      const isOrganismeCible = organismeId.equals(userOrganisme._id);
       const isOrganismeOrFormateur = linkedOrganismesIds.some((linkedOrganismesId) =>
         linkedOrganismesId.equals(organismeId)
       );
@@ -37,8 +38,9 @@ export async function buildOrganismePermissions(
         viewContacts: isOrganismeOrFormateur,
         infoTransmissionEffectifs: isOrganismeOrFormateur,
         indicateursEffectifs: isOrganismeOrFormateur,
-        effectifsNominatifs: organismeId.equals(userOrganisme._id), // OFA interdit sur les formateurs
+        effectifsNominatifs: isOrganismeCible, // OFA interdit sur les formateurs
         manageEffectifs: isOrganismeOrFormateur,
+        configurerModeTransmission: isOrganismeCible,
       };
     }
 
@@ -50,6 +52,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameReseau,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
 
@@ -62,6 +65,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameRegion,
         effectifsNominatifs: sameRegion ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
     case "CONSEIL_REGIONAL": {
@@ -72,6 +76,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameRegion,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
     case "CARIF_OREF_REGIONAL": {
@@ -82,6 +87,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameRegion,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
     case "DDETS": {
@@ -92,6 +98,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameDepartement,
         effectifsNominatifs: sameDepartement ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
     case "ACADEMIE": {
@@ -102,6 +109,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameAcademie,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
 
@@ -112,6 +120,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: true,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     case "CARIF_OREF_NATIONAL":
       return {
@@ -120,6 +129,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: true,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     case "ADMINISTRATEUR":
       return {
@@ -128,6 +138,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: true,
         effectifsNominatifs: true,
         manageEffectifs: true,
+        configurerModeTransmission: true,
       };
   }
 }

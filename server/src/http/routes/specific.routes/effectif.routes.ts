@@ -4,15 +4,10 @@ import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
 import { ObjectId } from "mongodb";
 
 import { updateEffectif } from "@/common/actions/effectifs.actions";
-import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { InfoSiret } from "@/common/actions/infoSiret.actions-struct";
-import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
-import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
 import { effectifsDb } from "@/common/model/collections";
 import { schema } from "@/common/model/effectifs.model/effectifs.model";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
-import { algoUAI } from "@/common/utils/uaiUtils";
-import { legacyRequireManageEffectifsPermissionMiddleware } from "@/http/middlewares/legacyRequireManageEffectifsPermissionMiddleware";
+import { requireOrganismePermission } from "@/http/middlewares/helpers";
 
 const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
@@ -22,7 +17,14 @@ const flattenKeys = (obj: any, path: any = []) =>
 export default () => {
   const router = express.Router();
 
-  router.use(legacyRequireManageEffectifsPermissionMiddleware);
+  router.use([
+    (req, res, next) => {
+      // temporaire en attendant de gérer plus proprement les données (cad retrouver l'organisme en fonction de l'effectif et non en param du body)
+      res.locals.organismeId = new ObjectId((req.query.organisme_id as string) || (req.body.organisme_id as string));
+      next();
+    },
+    requireOrganismePermission("manageEffectifs"),
+  ]);
 
   const buildEffectifResult = (effectif) => {
     const { properties: effectifSchema } = schema;
@@ -232,54 +234,6 @@ export default () => {
     });
 
     return res.json(buildEffectifResult(effectifUpdated));
-  });
-
-  router.post("/recherche-siret", async ({ body }, res) => {
-    // TODO organismeFormation
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { siret, organismeFormation } = await Joi.object({
-      siret: Joi.string().required(),
-      organismeFormation: Joi.boolean(),
-    })
-      .unknown()
-      .validateAsync(body, { abortEarly: false });
-
-    const data: InfoSiret = await findDataFromSiret(siret);
-
-    return res.json(data);
-  });
-
-  router.post("/recherche-uai", async ({ body }, res) => {
-    const { uai: userUai } = await Joi.object({
-      uai: Joi.string(),
-    })
-      .unknown()
-      .validateAsync(body, { abortEarly: false });
-
-    let uai = null;
-    if (userUai) {
-      if (!algoUAI(userUai)) return res.json({ uai, error: `L'UAI ${userUai} n'est pas valide` });
-      uai = userUai;
-    }
-
-    // if (uai) {
-    //   const { organismes: organismesResp } = await fetchOrganismesWithUai(uai);
-    //   if (!organismesResp.length) return res.json({ uai, error: `L'uai ${uai} n'a pas été retrouvé` });
-    // }
-
-    return res.json({ uai });
-  });
-
-  router.post("/recherche-code-postal", async ({ body }, res) => {
-    const { codePostal } = await Joi.object({
-      codePostal: Joi.string().pattern(CODE_POSTAL_REGEX),
-    })
-      .unknown()
-      .validateAsync(body, { abortEarly: false });
-
-    const result = await getCodePostalInfo(codePostal);
-
-    return res.json(result);
   });
 
   return router;

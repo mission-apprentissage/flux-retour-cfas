@@ -14,27 +14,27 @@ const saveEffectifForm = async ({ organisme_id, effectifId, data, inputNames }) 
   }
 };
 
-const fetchSiret = async ({ siret, organisme_id, organismeFormation = false, signal }): Promise<InfoSiret> => {
+const fetchSiret = async ({ siret, signal }): Promise<InfoSiret> => {
   try {
-    return await _post("/api/v1/effectif/recherche-siret", { siret, organisme_id, organismeFormation }, { signal });
+    return await _post("/api/v1/effectif/recherche-siret", { siret }, { signal });
   } catch (e) {
     if (e.name === "AbortError") throw e;
     return { error: e.prettyMessage ?? "Une erreur technique est survenue" };
   }
 };
 
-const fetchUAI = async ({ uai, organisme_id, signal }) => {
+const fetchUAI = async ({ uai, signal }) => {
   try {
-    return await _post("/api/v1/effectif/recherche-uai", { uai, organisme_id }, { signal });
+    return await _post("/api/v1/effectif/recherche-uai", { uai }, { signal });
   } catch (e) {
     if (e.name === "AbortError") throw e;
     return { error: e.prettyMessage ?? "Une erreur technique est survenue" };
   }
 };
 
-const fetchCodePostal = async ({ codePostal, organisme_id, signal }) => {
+const fetchCodePostal = async ({ codePostal, signal }) => {
   try {
-    return await _post("/api/v1/effectif/recherche-code-postal", { codePostal, organisme_id }, { signal });
+    return await _post("/api/v1/effectif/recherche-code-postal", { codePostal }, { signal });
   } catch (e) {
     if (e.name === "AbortError") throw e;
     return { error: e.prettyMessage ?? "Une erreur technique est survenue" };

@@ -18,11 +18,10 @@ const unlockAllCascade = {
 export const employerSiretLogic = [
   {
     deps: ["contrats[0].siret"],
-    process: async ({ values, signal, organisme }: { values?: any; signal?: any; organisme?: any }) => {
+    process: async ({ values, signal }: { values?: any; signal?: any }) => {
       const siret = values.contrats[0].siret;
       const { messages, result, error }: InfoSiret = await apiService.fetchSiret({
         siret,
-        organisme_id: organisme._id,
         signal,
       });
 
@@ -150,7 +149,7 @@ export const employerSiretLogic = [
             "apprenant.nouveau_contrat.adresse.code_postal",
             "apprenant.nouveau_contrat.adresse.commune",
             "apprenant.nouveau_contrat.adresse.departement",
-            "apprenantnouveau_contrat.adresse.region",
+            "apprenant.nouveau_contrat.adresse.region",
           ],
         });
         window.location.reload(); // TODO tmp

@@ -5,7 +5,6 @@ import { PermissionsOrganisme } from "shared/constants/permissions";
 import { v4 as uuidv4 } from "uuid";
 
 import {
-  canConfigureOrganismeERP,
   findOrganismesFormateursIdsOfOrganisme,
   getInfoTransmissionEffectifsCondition,
 } from "@/common/actions/helpers/permissions";
@@ -566,9 +565,6 @@ export async function configureOrganismeERP(
   organismeId: ObjectId,
   conf: ConfigurationERP
 ): Promise<void> {
-  if (!(await canConfigureOrganismeERP(ctx, organismeId))) {
-    throw Boom.forbidden("Permissions invalides");
-  }
   await organismesDb().updateOne(
     { _id: new ObjectId(organismeId) },
     {
@@ -588,10 +584,7 @@ export async function configureOrganismeERP(
   );
 }
 
-export async function resetConfigurationERP(ctx: AuthContext, organismeId: ObjectId): Promise<void> {
-  if (!(await canConfigureOrganismeERP(ctx, organismeId))) {
-    throw Boom.forbidden("Permissions invalides");
-  }
+export async function resetConfigurationERP(organismeId: ObjectId): Promise<void> {
   await organismesDb().updateOne(
     { _id: new ObjectId(organismeId) },
     {
@@ -627,17 +620,10 @@ export async function resetConfigurationERP(ctx: AuthContext, organismeId: Objec
   );
 }
 
-export async function verifyOrganismeAPIKeyToUser(
-  ctx: AuthContext,
-  organismeId: ObjectId,
-  verif: IReqPostVerifyUser
-): Promise<any> {
-  if (!(await canConfigureOrganismeERP(ctx, organismeId))) {
-    throw Boom.forbidden("Permissions invalides");
-  }
+export async function verifyOrganismeAPIKeyToUser(organismeId: ObjectId, verif: IReqPostVerifyUser): Promise<any> {
   const organisme = (await organismesDb().findOne({ _id: organismeId })) as WithId<Organisme>;
   if (!organisme) {
-    throw new Error("Aucun organisme trouvé");
+    throw Boom.notFound("Aucun organisme trouvé");
   }
 
   if (organisme.api_key !== verif.api_key) {

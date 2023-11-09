@@ -13,7 +13,6 @@ import { sendEmail } from "@/common/services/mailer/mailer";
 import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
-import { requireOrganisationOF } from "./helpers/permissions";
 import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
 import { getUserById } from "./users.actions";
@@ -224,12 +223,15 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
 }
 
 export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>> {
-  const organisationOF = requireOrganisationOF(ctx);
+  const { organisation } = ctx;
+  if (organisation.type !== "ORGANISME_FORMATION") {
+    throw Boom.forbidden("Permissions invalides");
+  }
 
   const organisme = await organismesDb().findOne(
     {
-      siret: organisationOF.siret,
-      uai: organisationOF.uai as string,
+      siret: organisation.siret,
+      uai: organisation.uai as string,
     },
     {
       projection: getOrganismeProjection({
@@ -238,13 +240,14 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId
         indicateursEffectifs: true,
         effectifsNominatifs: true,
         manageEffectifs: true,
+        configurerModeTransmission: true,
       }),
     }
   );
   if (!organisme) {
     throw Boom.notFound("organisme de l'organisation non trouvé", {
-      siret: organisationOF.siret,
-      uai: organisationOF.uai,
+      siret: organisation.siret,
+      uai: organisation.uai,
     });
   }
   return {
@@ -255,6 +258,7 @@ export async function getOrganisationOrganisme(ctx: AuthContext): Promise<WithId
       indicateursEffectifs: true,
       effectifsNominatifs: true,
       manageEffectifs: true,
+      configurerModeTransmission: true,
     },
   };
 }
