@@ -448,8 +448,8 @@ export async function getIndicateursEffectifsParOrganisme(
 
 export async function getOrganismeIndicateursEffectifsParFormation(
   ctx: AuthContext,
-  filters: FullEffectifsFilters,
-  organismeId: ObjectId
+  organismeId: ObjectId,
+  filters: FullEffectifsFilters
 ): Promise<IndicateursEffectifsAvecFormation[]> {
   const indicateurs = (await effectifsDb()
     .aggregate([

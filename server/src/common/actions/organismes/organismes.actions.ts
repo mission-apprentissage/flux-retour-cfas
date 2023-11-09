@@ -5,8 +5,8 @@ import { PermissionsOrganisme } from "shared/constants/permissions";
 import { v4 as uuidv4 } from "uuid";
 
 import {
+  findOrganismesAccessiblesByOrganisationOF,
   findOrganismesFormateursIdsOfOrganisme,
-  getInfoTransmissionEffectifsCondition,
 } from "@/common/actions/helpers/permissions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
@@ -695,6 +695,32 @@ export async function listOrganismesFormateurs(
   return organismes;
 }
 
+async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
+      return {
+        $in: ["$_id", linkedOrganismesIds],
+      };
+    }
+
+    case "TETE_DE_RESEAU": {
+      return { $eq: ["$reseaux", organisation.reseau] };
+    }
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
+    case "DDETS":
+    case "ACADEMIE":
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
+    case "ADMINISTRATEUR":
+      return true;
+  }
+}
 /**
  * Retourne la projection d'un organisme selon les permissions.
  */

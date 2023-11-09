@@ -16,13 +16,13 @@ import { z } from "zod";
 import "express-async-errors";
 
 import { activateUser, login, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
+import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
   effectifsFiltersSchema,
   fullEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { canDeleteEffectif } from "@/common/actions/helpers/permissions";
 import { getPermissionOrganisationConfig } from "@/common/actions/helpers/permissions-organisation";
 import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
@@ -109,7 +109,12 @@ import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
 import errorMiddleware from "./middlewares/errorMiddleware";
-import { requireAdministrator, requireOrganismePermission, returnResult } from "./middlewares/helpers";
+import {
+  requireAdministrator,
+  requireEffectifOrganismePermission,
+  requireOrganismePermission,
+  returnResult,
+} from "./middlewares/helpers";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
@@ -123,7 +128,6 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
-import effectif from "./routes/specific.routes/effectif.routes";
 import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 
@@ -444,7 +448,7 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("indicateursEffectifs"),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          return await getOrganismeIndicateursEffectifsParFormation(req.user, filters, res.locals.organismeId);
+          return await getOrganismeIndicateursEffectifsParFormation(req.user, res.locals.organismeId, filters);
         })
       )
       .get(
@@ -634,51 +638,63 @@ function setupRoutes(app: Application) {
     })
   );
 
-  authRouter.post(
-    "/api/v1/effectif/recherche-siret",
-    returnResult(async (req) => {
-      const { siret } = await validateFullZodObjectSchema(req.body, {
-        siret: extensions.siret(),
-      });
+  authRouter
+    .post(
+      "/api/v1/effectif/recherche-siret",
+      returnResult(async (req) => {
+        const { siret } = await validateFullZodObjectSchema(req.body, {
+          siret: extensions.siret(),
+        });
 
-      return await findDataFromSiret(siret);
-    })
-  );
-  authRouter.post(
-    "/api/v1/effectif/recherche-uai",
-    returnResult(async (req) => {
-      const { uai } = await validateFullZodObjectSchema(req.body, {
-        uai: extensions.uai(),
-      });
+        return await findDataFromSiret(siret);
+      })
+    )
+    .post(
+      "/api/v1/effectif/recherche-uai",
+      returnResult(async (req) => {
+        const { uai } = await validateFullZodObjectSchema(req.body, {
+          uai: extensions.uai(),
+        });
 
-      return stripEmptyFields({
-        uai,
-        error: !algoUAI(uai) ? `L'UAI ${uai} n'est pas valide` : null,
-      });
-    })
-  );
-  authRouter.post(
-    "/api/v1/effectif/recherche-code-postal",
-    returnResult(async (req) => {
-      const { codePostal } = await validateFullZodObjectSchema(req.body, {
-        codePostal: z
-          .string()
-          .trim()
-          .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement"),
-      });
-      return await getCodePostalInfo(codePostal);
-    })
-  );
-  authRouter.delete(
-    "/api/v1/effectif/:id",
-    returnResult(async (req) => {
-      const effectifId = new ObjectId(req.params.id);
-      if (!(await canDeleteEffectif(req.user, effectifId))) throw Boom.forbidden("Permissions invalides");
-      await effectifsDb().deleteOne({ _id: effectifId });
-    })
-  );
-
-  authRouter.use("/api/v1/effectif", effectif());
+        return stripEmptyFields({
+          uai,
+          error: !algoUAI(uai) ? `L'UAI ${uai} n'est pas valide` : null,
+        });
+      })
+    )
+    .post(
+      "/api/v1/effectif/recherche-code-postal",
+      returnResult(async (req) => {
+        const { codePostal } = await validateFullZodObjectSchema(req.body, {
+          codePostal: z
+            .string()
+            .trim()
+            .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement"),
+        });
+        return await getCodePostalInfo(codePostal);
+      })
+    )
+    .get(
+      "/api/v1/effectif/:id",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        return await getEffectifForm(new ObjectId(req.params.id));
+      })
+    )
+    .put(
+      "/api/v1/effectif/:id",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        return await updateEffectifFromForm(new ObjectId(req.params.id), req.body);
+      })
+    )
+    .delete(
+      "/api/v1/effectif/:id",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        await effectifsDb().deleteOne({ _id: new ObjectId(req.params.id) });
+      })
+    );
 
   /********************************
    * API organisation   *
