@@ -10,5 +10,5 @@ export interface DuplicateOrganismeDetail {
   created_at: string;
   updated_at: string;
   effectifs_count: number;
-  nbUsers: number;
+  users: string[];
 }

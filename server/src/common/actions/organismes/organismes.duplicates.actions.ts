@@ -3,8 +3,6 @@ import { ObjectId } from "mongodb";
 import { auditLogsDb, effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";
 
-// import { getUsersLinkedToOrganismeId } from "../users.actions";
-
 /**
  * Fonction de récupération des organismes à fusionner = duplicats d'organismes
  * Organismes groupés par SIRET dont il existe au moins un organisme avec UAI vide
@@ -13,6 +11,34 @@ import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-s
 export const getDuplicatesOrganismes = async () => {
   const duplicatesGroup = await organismesDb()
     .aggregate([
+      // Lookup sur les organisations
+      {
+        $lookup: {
+          from: "organisations",
+          as: "organisation",
+          let: {
+            uai: { $ifNull: ["$uai", null] }, // on force par défaut à null plutôt que undefined pour correspondre avec l'organisation
+            siret: "$siret",
+          },
+          pipeline: [{ $match: { $expr: { $and: [{ $eq: ["$siret", "$$siret"] }, { $eq: ["$uai", "$$uai"] }] } } }],
+        },
+      },
+      { $unwind: { path: "$organisation", preserveNullAndEmptyArrays: true } }, // preserveNullAndEmptyArrays pour garder les cas ou la jointure est vide
+
+      // Lookup sur les users depuis les organisations
+      {
+        $lookup: {
+          from: "usersMigration",
+          as: "users",
+          let: { organisation_id: "$organisation._id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$organisation_id", "$$organisation_id"] } } },
+            { $project: { _id: 1 } },
+          ],
+        },
+      },
+
+      // Regroupement par SIRET commun avec au moins un UAI null dans le groupe
       {
         $group: {
           _id: { siret: "$siret" },
@@ -30,7 +56,7 @@ export const getDuplicatesOrganismes = async () => {
               created_at: "$created_at",
               updated_at: "$updated_at",
               effectifs_count: "$effectifs_count",
-              nbUsers: 0,
+              users: "$users",
             },
           },
         },
