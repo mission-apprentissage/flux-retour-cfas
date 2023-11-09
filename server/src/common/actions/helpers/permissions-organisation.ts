@@ -159,7 +159,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       CONSEIL_REGIONAL: false,
       CARIF_OREF_REGIONAL: false,
       DDETS: ["inscritSansContrat", "rupturant", "abandon"],
-      ACADEMIE: false,
+      ACADEMIE: ["inscritSansContrat", "rupturant", "abandon"],
       OPERATEUR_PUBLIC_NATIONAL: false,
       CARIF_OREF_NATIONAL: false,
       ADMINISTRATEUR: true,
@@ -186,7 +186,9 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       DDETS: (organisation) => ({
         "_computed.organisme.departement": organisation.code_departement,
       }),
-      ACADEMIE: false,
+      ACADEMIE: (organisation) => ({
+        "_computed.organisme.academie": organisation.code_academie,
+      }),
       OPERATEUR_PUBLIC_NATIONAL: false,
       CARIF_OREF_NATIONAL: false,
       ADMINISTRATEUR: {},

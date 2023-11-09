@@ -11,15 +11,13 @@ import {
   fullEffectifsFiltersConfigurations,
   organismesFiltersConfigurations,
 } from "@/common/actions/helpers/filters";
-import {
-  findOrganismesFormateursIdsOfOrganisme,
-  getOrganismeIndicateursEffectifsRestriction,
-} from "@/common/actions/helpers/permissions";
+import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { getPermissionOrganisation } from "../helpers/permissions-organisation";
+import { getOrganismeIndicateursEffectifsRestriction } from "../helpers/permissions-organisme";
 
 import {
   IndicateursEffectifs,

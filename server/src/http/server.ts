@@ -611,6 +611,7 @@ function setupRoutes(app: Application) {
         if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
           throw Boom.forbidden("Permissions invalides");
         }
+
         return await getEffectifsNominatifs(req.user, filters, type);
       })
     )

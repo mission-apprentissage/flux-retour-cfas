@@ -288,7 +288,7 @@ describe("Route indicateurs", () => {
       expectUnauthorizedError(response);
     });
 
-    describe("Permissions", () => {
+    describe("Permissions abandon", () => {
       const accesOrganisme: PermissionsTestConfig<false | any[]> = {
         "OF cible": false, // car il possède un formateur, mais y accède théoriquement
         "OF non lié": emptyResult,
@@ -306,6 +306,46 @@ describe("Route indicateurs", () => {
         "CARIF OREF régional autre région": false,
         "DDETS même département": effectifResult,
         "DDETS autre département": emptyResult,
+        "Académie même académie": effectifResult,
+        "Académie autre académie": emptyResult,
+        "Opérateur public national": false,
+        "CARIF OREF national": false,
+        Administrateur: effectifResult,
+      };
+      testPermissions(accesOrganisme, async (organisation, expectedPermission) => {
+        const response = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/indicateurs/effectifs/abandon?date=${date}`
+        );
+
+        if (expectedPermission) {
+          expect(response.status).toStrictEqual(200);
+          expect(response.data).toStrictEqual(expectedPermission);
+        } else {
+          expectForbiddenError(response);
+        }
+      });
+    });
+
+    describe("Permissions apprenti", () => {
+      const accesOrganisme: PermissionsTestConfig<false | any[]> = {
+        "OF cible": false, // car il possède un formateur, mais y accède théoriquement
+        "OF non lié": emptyResult,
+        "OF formateur": emptyResult,
+        "OF responsable": false,
+        "Tête de réseau même réseau": false,
+        "Tête de réseau autre réseau": false,
+        "DREETS même région": false,
+        "DREETS autre région": false,
+        "DRAAF même région": false,
+        "DRAAF autre région": false,
+        "Conseil Régional même région": false,
+        "Conseil Régional autre région": false,
+        "CARIF OREF régional même région": false,
+        "CARIF OREF régional autre région": false,
+        "DDETS même département": false,
+        "DDETS autre département": false,
         "Académie même académie": false,
         "Académie autre académie": false,
         "Opérateur public national": false,
@@ -316,7 +356,7 @@ describe("Route indicateurs", () => {
         const response = await requestAsOrganisation(
           organisation,
           "get",
-          `/api/v1/indicateurs/effectifs/abandon?date=${date}`
+          `/api/v1/indicateurs/effectifs/apprenti?date=${date}`
         );
 
         if (expectedPermission) {

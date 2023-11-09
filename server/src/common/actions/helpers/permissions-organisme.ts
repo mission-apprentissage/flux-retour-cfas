@@ -7,7 +7,7 @@ import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
-import { findOrganismeFormateursIds } from "./permissions";
+import { findOrganismeFormateursIds, findOrganismesAccessiblesByOrganisationOF } from "./permissions";
 
 export type OrganismeWithPermissions = Organisme & { permissions: PermissionsOrganisme };
 
@@ -150,4 +150,45 @@ export async function hasOrganismePermission<Perm extends keyof PermissionsOrgan
 ): Promise<PermissionsOrganisme[Perm]> {
   const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
   return permissionsOrganisme[permission];
+}
+
+// indicateurs.actions : getOrganismeIndicateursEffectifsParFormation, getOrganismeIndicateursEffectifs
+export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
+      return {
+        organisme_id: {
+          $in: linkedOrganismesIds,
+        },
+      };
+    }
+
+    case "TETE_DE_RESEAU":
+      return {
+        "_computed.organisme.reseaux": organisation.reseau,
+      };
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
+      return {
+        "_computed.organisme.region": organisation.code_region,
+      };
+    case "DDETS":
+      return {
+        "_computed.organisme.departement": organisation.code_departement,
+      };
+    case "ACADEMIE":
+      return {
+        "_computed.organisme.academie": organisation.code_academie,
+      };
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
+    case "ADMINISTRATEUR":
+      return {};
+  }
 }
