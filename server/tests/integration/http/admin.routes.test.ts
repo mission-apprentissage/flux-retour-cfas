@@ -172,7 +172,7 @@ describe("Routes administrateur", () => {
             nom: createdWithUai.nom,
             ferme: createdWithUai.ferme,
             nature: createdWithUai.nature,
-            users: [{ _id: new ObjectId(id(123)).toString() }, { _id: new ObjectId(id(124)).toString() }],
+            users: [{ _id: id(123) }, { _id: id(124) }],
             created_at: createdWithUai.created_at.toISOString(),
             updated_at: createdWithUai.updated_at.toISOString(),
           },
