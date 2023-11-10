@@ -42,8 +42,8 @@ export async function getIndicateursEffectifsParDepartement(
             await getIndicateursEffectifsRestriction(ctx),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
-          "computed.organisme.raison_sociale": { $exists: true },
-          "computed.organisme.enseigne": { $exists: true },
+          "_computed.organisme.raison_sociale": { $exists: true },
+          "_computed.organisme.enseigne": { $exists: true },
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -261,8 +261,8 @@ export async function getIndicateursEffectifsParOrganisme(
             await getEffectifsAnonymesRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
-          "computed.organisme.raison_sociale": { $exists: true },
-          "computed.organisme.enseigne": { $exists: true },
+          "_computed.organisme.raison_sociale": { $exists: true },
+          "_computed.organisme.enseigne": { $exists: true },
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -464,8 +464,8 @@ export async function getOrganismeIndicateursEffectifsParFormation(
             await getOrganismeIndicateursEffectifsRestriction(ctx),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
-          "computed.organisme.raison_sociale": { $exists: true },
-          "computed.organisme.enseigne": { $exists: true },
+          "_computed.organisme.raison_sociale": { $exists: true },
+          "_computed.organisme.enseigne": { $exists: true },
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -667,8 +667,8 @@ export async function getEffectifsNominatifs(
             await getEffectifsNominatifsRestriction(ctx),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
-          "computed.organisme.raison_sociale": { $exists: true },
-          "computed.organisme.enseigne": { $exists: true },
+          "_computed.organisme.raison_sociale": { $exists: true },
+          "_computed.organisme.enseigne": { $exists: true },
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
