@@ -185,7 +185,7 @@ export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
 
 export async function updateEffectifFromForm(effectifId: ObjectId, body: any): Promise<any> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)
+  const { inputNames, ...data } = body; // TODO JOI (inputNames used to track user actions)
 
   const effectifDb = await effectifsDb().findOne({ _id: effectifId });
   if (!effectifDb) {
