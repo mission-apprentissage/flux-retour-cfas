@@ -17,6 +17,7 @@ import {
   RadioGroup,
   Spinner,
   Text,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/router";
@@ -302,8 +303,45 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
                 isInvalid={meta.error && meta.touched}
                 isDisabled={fixedEmail !== ""}
               >
-                <FormLabel>Votre courriel</FormLabel>
-                <Input {...field} id={field.name} placeholder="Ex : jeandupont@mail.com" />
+                <FormLabel>
+                  Votre courriel
+                  <Tooltip
+                    background="bluefrance"
+                    color="white"
+                    label={
+                      <Box padding="1w">
+                        <Text as="p">
+                          Pour des raisons de sécurité, merci d&apos;utiliser un email nominatif professionnel lié à
+                          votre organisation.
+                        </Text>
+                        <Text as="p" mt="4">
+                          Exemples : prenom.nom@cfa-dumoulin.fr ou équivalent.
+                        </Text>
+                        <Text as="p" mt="4">
+                          Nous ne pouvons pas valider les emails (@gmail, @hotmail, @orange, etc.), ni les mails
+                          génériques (contact@, apprentissage@...).
+                        </Text>
+                        <Text as="p" mt="4">
+                          Si cela vous est impossible, merci de nous contacter à
+                          tableau-de-bord@apprentissage.beta.gouv.fr.
+                        </Text>
+                      </Box>
+                    }
+                    aria-label="Pour des raisons de sécurité, merci d'utiliser un email nominatif professionnel lié à votre organisation.
+                    Exemples : prenom.nom@cfa-dumoulin.fr ou équivalent. Nous ne pouvons pas valider les emails (@gmail, @hotmail, @orange, etc.), ni les mails génériques (contact@, apprentissage@...).
+                    Si cela vous est impossible, merci de nous contacter à tableau-de-bord@apprentissage.beta.gouv.fr."
+                  >
+                    <Box
+                      as="i"
+                      className="ri-error-warning-line"
+                      fontSize="epsilon"
+                      color="red.500"
+                      marginLeft="1w"
+                      verticalAlign="middle"
+                    />
+                  </Tooltip>
+                </FormLabel>
+                <Input {...field} id={field.name} placeholder="Ex : jeandupont@cfa.fr" />
                 <FormErrorMessage>{meta.error}</FormErrorMessage>
               </FormControl>
             )}

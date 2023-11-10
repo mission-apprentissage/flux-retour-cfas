@@ -105,6 +105,8 @@ fileignoreconfig:
   checksum: cf94ce9123fc9dee7fcf63a8b67bf6cbc26eb7594595cd8bd188853569f290b1
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
+- filename: ui/pages/auth/inscription/profil.tsx
+  checksum: 7873a0ce38104e5b892c011bb99621e115cbc0a30bf3b02f916142213d488df8
 scopeconfig:
 - scope: node
 custom_patterns:
