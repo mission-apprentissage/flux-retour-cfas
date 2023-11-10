@@ -42,6 +42,7 @@ export const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organis
   reseaux: ["CCI"],
   erps: ["YMAG"],
   nature: "responsable_formateur",
+  enseigne: "ADEN Formations (Caen)",
   raison_sociale: "ADEN Formations (Caen)",
   fiabilisation_statut: "FIABLE",
   ferme: false,
@@ -61,6 +62,8 @@ export const organismes: WithId<Organisme>[] = [
     _id: new ObjectId(id(1)),
     uai: "0000000A",
     siret: "00000000000018",
+    enseigne: "ADEN Formations (Caen)",
+    raison_sociale: "ADEN Formations (Caen)",
     organismesFormateurs: [
       {
         _id: new ObjectId(id(2)),
@@ -77,6 +80,8 @@ export const organismes: WithId<Organisme>[] = [
     _id: new ObjectId(id(2)),
     uai: "0000000B",
     siret: "00000000000026",
+    enseigne: "Test OFA 2",
+    raison_sociale: "Test OFA 2",
     organismesResponsables: [
       {
         _id: new ObjectId(id(1)),
@@ -88,6 +93,8 @@ export const organismes: WithId<Organisme>[] = [
     _id: new ObjectId(id(3)),
     uai: "0000000C",
     siret: "00000000000034",
+    enseigne: "Test OFA 3",
+    raison_sociale: "Test OFA 3",
     organismesFormateurs: [
       {
         _id: new ObjectId(id(1)),
@@ -100,6 +107,8 @@ export const organismes: WithId<Organisme>[] = [
     _id: new ObjectId(id(10)),
     uai: "1111111B",
     siret: "11111111100006",
+    enseigne: "Test OFA 10",
+    raison_sociale: "Test OFA 10",
   },
 ];
 

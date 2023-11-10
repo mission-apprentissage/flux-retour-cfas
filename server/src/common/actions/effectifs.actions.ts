@@ -173,6 +173,8 @@ export const addEffectifComputedFields = (organisme: Organisme): Effectif["_comp
       ...(organisme.uai ? { uai: organisme.uai } : {}),
       ...(organisme.siret ? { siret: organisme.siret } : {}),
       ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
+      ...(organisme.enseigne ? { enseigne: organisme.enseigne } : {}),
+      ...(organisme.raison_sociale ? { raison_sociale: organisme.raison_sociale } : {}),
       fiable: organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme,
     },
   };
