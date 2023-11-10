@@ -3,8 +3,8 @@ import { strict as assert } from "assert";
 import { AxiosInstance } from "axiosist";
 import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
+import { PermissionsOrganisme } from "shared/constants/permissions";
 
-import { PermissionsOrganisme } from "@/common/actions/helpers/permissions-organisme";
 import { IndicateursEffectifsAvecFormation } from "@/common/actions/indicateurs/indicateurs";
 import { Organisme } from "@/common/model/@types";
 import { Rncp } from "@/common/model/@types/Rncp";
@@ -48,13 +48,15 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: true,
     viewContacts: true,
+    configurerModeTransmission: true,
   },
   "OF responsable": {
-    effectifsNominatifs: true,
+    effectifsNominatifs: false,
     indicateursEffectifs: true,
     infoTransmissionEffectifs: true,
     manageEffectifs: true,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "OF formateur": {
     effectifsNominatifs: false,
@@ -62,6 +64,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: false,
     manageEffectifs: false,
     viewContacts: false,
+    configurerModeTransmission: false,
   },
   "OF non lié": {
     effectifsNominatifs: false,
@@ -69,6 +72,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: false,
     manageEffectifs: false,
     viewContacts: false,
+    configurerModeTransmission: false,
   },
   "Tête de réseau même réseau": {
     effectifsNominatifs: false,
@@ -76,6 +80,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "Tête de réseau autre réseau": {
     effectifsNominatifs: false,
@@ -83,6 +88,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: false,
     manageEffectifs: false,
     viewContacts: false,
+    configurerModeTransmission: false,
   },
   "DREETS même région": {
     effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
@@ -90,6 +96,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "DREETS autre région": {
     effectifsNominatifs: false,
@@ -97,6 +104,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "DRAAF même région": {
     effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
@@ -104,6 +112,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "DRAAF autre région": {
     effectifsNominatifs: false,
@@ -111,6 +120,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "Conseil Régional même région": {
     effectifsNominatifs: false,
@@ -118,6 +128,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "Conseil Régional autre région": {
     effectifsNominatifs: false,
@@ -125,6 +136,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "CARIF OREF régional même région": {
     effectifsNominatifs: false,
@@ -132,6 +144,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "CARIF OREF régional autre région": {
     effectifsNominatifs: false,
@@ -139,6 +152,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "DDETS même département": {
     effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
@@ -146,6 +160,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "DDETS autre département": {
     effectifsNominatifs: false,
@@ -153,6 +168,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "Académie même académie": {
     effectifsNominatifs: false,
@@ -160,6 +176,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "Académie autre académie": {
     effectifsNominatifs: false,
@@ -167,6 +184,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "Opérateur public national": {
     effectifsNominatifs: false,
@@ -174,6 +192,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   "CARIF OREF national": {
     effectifsNominatifs: false,
@@ -181,6 +200,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
     viewContacts: true,
+    configurerModeTransmission: false,
   },
   Administrateur: {
     effectifsNominatifs: true,
@@ -188,6 +208,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     infoTransmissionEffectifs: true,
     manageEffectifs: true,
     viewContacts: true,
+    configurerModeTransmission: true,
   },
 };
 
@@ -735,7 +756,7 @@ describe("Routes /organismes/:id", () => {
           "OF cible": true,
           "OF non lié": false,
           "OF formateur": false,
-          "OF responsable": true,
+          "OF responsable": false,
           "Tête de réseau même réseau": false,
           "Tête de réseau autre réseau": false,
           "DREETS même région": false,

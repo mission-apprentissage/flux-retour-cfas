@@ -1,4 +1,6 @@
+import Boom from "boom";
 import { ObjectId } from "mongodb";
+import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import {
   EffectifsFilters,
@@ -9,17 +11,13 @@ import {
   fullEffectifsFiltersConfigurations,
   organismesFiltersConfigurations,
 } from "@/common/actions/helpers/filters";
-import {
-  findOrganismesFormateursIdsOfOrganisme,
-  getEffectifsAnonymesRestriction,
-  getEffectifsNominatifsRestriction,
-  getOrganismeIndicateursEffectifsRestriction,
-  getIndicateursEffectifsRestriction,
-  getIndicateursOrganismesRestriction,
-} from "@/common/actions/helpers/permissions";
+import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
 import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+
+import { getPermissionOrganisationQueryFilter } from "../helpers/permissions-organisation";
+import { getOrganismeIndicateursEffectifsRestriction } from "../helpers/permissions-organisme";
 
 import {
   IndicateursEffectifs,
@@ -39,7 +37,7 @@ export async function getIndicateursEffectifsParDepartement(
       {
         $match: {
           $and: [
-            await getIndicateursEffectifsRestriction(ctx),
+            await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParDepartement"),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -205,7 +203,7 @@ export async function getIndicateursOrganismesParDepartement(
       {
         $match: {
           $and: [
-            await getIndicateursOrganismesRestriction(ctx),
+            await getPermissionOrganisationQueryFilter(ctx, "IndicateursOrganismesParDepartement"),
             ...buildMongoFilters(filters, organismesFiltersConfigurations),
           ],
           fiabilisation_statut: "FIABLE",
@@ -256,7 +254,7 @@ export async function getIndicateursEffectifsParOrganisme(
         $match: {
           $and: [
             await getOrganismeRestriction(organismeId),
-            await getEffectifsAnonymesRestriction(ctx),
+            await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParOrganisme"),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -448,8 +446,8 @@ export async function getIndicateursEffectifsParOrganisme(
 
 export async function getOrganismeIndicateursEffectifsParFormation(
   ctx: AuthContext,
-  filters: FullEffectifsFilters,
-  organismeId: ObjectId
+  organismeId: ObjectId,
+  filters: FullEffectifsFilters
 ): Promise<IndicateursEffectifsAvecFormation[]> {
   const indicateurs = (await effectifsDb()
     .aggregate([
@@ -636,29 +634,24 @@ export async function getOrganismeIndicateursEffectifsParFormation(
   return indicateurs;
 }
 
-export const typesEffectifNominatif = [
-  "apprenant",
-  "apprenti",
-  "inscritSansContrat",
-  "rupturant",
-  "abandon",
-  "inconnu",
-] as const;
-export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
-
 export async function getEffectifsNominatifs(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
   type: TypeEffectifNominatif,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
+  const permissionRestriction = await getPermissionOrganisationQueryFilter(ctx, "TéléchargementListesNominatives");
+  if (!permissionRestriction) {
+    throw Boom.forbidden("Permissions invalides");
+  }
+
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
           $and: [
             await getOrganismeRestriction(organismeId),
-            await getEffectifsNominatifsRestriction(ctx),
+            permissionRestriction,
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables

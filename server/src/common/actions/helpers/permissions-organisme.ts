@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { PermissionsOrganisme } from "shared/constants/permissions";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
@@ -6,20 +7,11 @@ import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
-import { typesEffectifNominatif } from "../indicateurs/indicateurs.actions";
-
-import { findOrganismeFormateursIds } from "./permissions";
+import { findOrganismeFormateursIds, findOrganismesAccessiblesByOrganisationOF } from "./permissions";
 
 export type OrganismeWithPermissions = Organisme & { permissions: PermissionsOrganisme };
 
-export interface PermissionsOrganisme {
-  viewContacts: boolean;
-  infoTransmissionEffectifs: boolean;
-  indicateursEffectifs: boolean; // pourrait peut-être être false | "partial" (restriction réseau/territoire) | "full"
-  effectifsNominatifs: boolean | Array<(typeof typesEffectifNominatif)[number]>;
-  manageEffectifs: boolean;
-}
-
+// Référence : https://www.notion.so/mission-apprentissage/Permissions-afd9dc14606042e8b76b23aa57f516a8?pvs=4#790eaa3c87b24ceaa33a64cb4bf2513a
 export async function buildOrganismePermissions(
   ctx: AuthContext,
   organismeId: ObjectId
@@ -38,6 +30,7 @@ export async function buildOrganismePermissions(
       }
 
       const linkedOrganismesIds = [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)];
+      const isOrganismeCible = organismeId.equals(userOrganisme._id);
       const isOrganismeOrFormateur = linkedOrganismesIds.some((linkedOrganismesId) =>
         linkedOrganismesId.equals(organismeId)
       );
@@ -45,8 +38,9 @@ export async function buildOrganismePermissions(
         viewContacts: isOrganismeOrFormateur,
         infoTransmissionEffectifs: isOrganismeOrFormateur,
         indicateursEffectifs: isOrganismeOrFormateur,
-        effectifsNominatifs: isOrganismeOrFormateur,
+        effectifsNominatifs: isOrganismeCible, // OFA interdit sur les formateurs
         manageEffectifs: isOrganismeOrFormateur,
+        configurerModeTransmission: isOrganismeCible,
       };
     }
 
@@ -58,6 +52,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameReseau,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
 
@@ -70,6 +65,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameRegion,
         effectifsNominatifs: sameRegion ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
     case "CONSEIL_REGIONAL": {
@@ -80,6 +76,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameRegion,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
     case "CARIF_OREF_REGIONAL": {
@@ -90,6 +87,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameRegion,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
     case "DDETS": {
@@ -100,6 +98,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameDepartement,
         effectifsNominatifs: sameDepartement ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
     case "ACADEMIE": {
@@ -110,6 +109,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: sameAcademie,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     }
 
@@ -120,6 +120,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: true,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     case "CARIF_OREF_NATIONAL":
       return {
@@ -128,6 +129,7 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: true,
         effectifsNominatifs: false,
         manageEffectifs: false,
+        configurerModeTransmission: false,
       };
     case "ADMINISTRATEUR":
       return {
@@ -136,15 +138,57 @@ export async function buildOrganismePermissions(
         indicateursEffectifs: true,
         effectifsNominatifs: true,
         manageEffectifs: true,
+        configurerModeTransmission: true,
       };
   }
 }
 
-export async function hasOrganismePermission<Perm extends keyof PermissionsOrganisme>(
+export async function getOrganismePermission<Perm extends keyof PermissionsOrganisme>(
   ctx: AuthContext,
   organismeId: ObjectId,
   permission: Perm
 ): Promise<PermissionsOrganisme[Perm]> {
   const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
   return permissionsOrganisme[permission];
+}
+
+// indicateurs.actions : getOrganismeIndicateursEffectifsParFormation, getOrganismeIndicateursEffectifs
+export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
+  const organisation = ctx.organisation;
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION": {
+      const linkedOrganismesIds = await findOrganismesAccessiblesByOrganisationOF(organisation);
+      return {
+        organisme_id: {
+          $in: linkedOrganismesIds,
+        },
+      };
+    }
+
+    case "TETE_DE_RESEAU":
+      return {
+        "_computed.organisme.reseaux": organisation.reseau,
+      };
+
+    case "DREETS":
+    case "DRAAF":
+    case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
+      return {
+        "_computed.organisme.region": organisation.code_region,
+      };
+    case "DDETS":
+      return {
+        "_computed.organisme.departement": organisation.code_departement,
+      };
+    case "ACADEMIE":
+      return {
+        "_computed.organisme.academie": organisation.code_academie,
+      };
+
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
+    case "ADMINISTRATEUR":
+      return {};
+  }
 }

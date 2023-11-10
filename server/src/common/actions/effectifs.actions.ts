@@ -1,15 +1,13 @@
-import { isObject, merge, reduce, set, uniqBy } from "lodash-es";
+import Boom from "boom";
+import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
 
 import { Effectif } from "@/common/model/@types/Effectif";
 import { effectifsDb } from "@/common/model/collections";
-import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
-import { AuthContext } from "@/common/model/internal/AuthContext";
+import { defaultValuesEffectif, schema } from "@/common/model/effectifs.model/effectifs.model";
 
 import { Organisme } from "../model/@types";
-
-import { checkIndicateursFiltersPermissions } from "./effectifs/effectifs.actions";
-import { LegacyEffectifsFilters, buildMongoPipelineFilterStages } from "./helpers/filters";
+import { stripEmptyFields } from "../utils/miscUtils";
 
 /**
  * Méthode de build d'un effectif
@@ -72,16 +70,6 @@ export const findEffectifs = async (organisme_id, projection = {}) => {
   return await effectifsDb()
     .find({ organisme_id: new ObjectId(organisme_id) }, { projection })
     .toArray();
-};
-
-/**
- * Méthode de récupération d'un effectif versatile par query
- * @param {*} query
- * @param {*} projection
- * @returns
- */
-export const findEffectifByQuery = async (query, projection = {}) => {
-  return await effectifsDb().findOne(query, { projection });
 };
 
 /**
@@ -175,25 +163,6 @@ export const lockEffectif = async (effectif: WithId<Effectif>) => {
   return updated.value;
 };
 
-/**
- * Récupération du nb distinct d'organismes transmettant des effectifs (distinct organisme_id dans la collection effectifs)
- */
-export const getNbDistinctOrganismes = async (ctx: AuthContext, filters: LegacyEffectifsFilters) => {
-  const filtersWithRestriction = await checkIndicateursFiltersPermissions(ctx, filters);
-  const filterStages = buildMongoPipelineFilterStages(filtersWithRestriction);
-  const distinctOrganismes = await effectifsDb()
-    .aggregate([
-      ...filterStages,
-      {
-        $group: {
-          _id: "$organisme_id",
-        },
-      },
-    ])
-    .toArray();
-  return distinctOrganismes.length;
-};
-
 export const addEffectifComputedFields = (organisme: Organisme): Effectif["_computed"] => {
   return {
     organisme: {
@@ -208,3 +177,214 @@ export const addEffectifComputedFields = (organisme: Organisme): Effectif["_comp
     },
   };
 };
+
+export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
+  const effectif = await effectifsDb().findOne({ _id: effectifId });
+  return buildEffectifResult(effectif);
+}
+
+export async function updateEffectifFromForm(effectifId: ObjectId, body: any): Promise<any> {
+  const { inputNames, ...data } = body; // TODO JOI (inputNames used to track user actions)
+
+  const effectifDb = await effectifsDb().findOne({ _id: effectifId });
+  if (!effectifDb) {
+    throw Boom.notFound(`Unable to find effectif ${effectifId.toString()}`);
+  }
+
+  const { is_lock, nouveau_statut, nouveau_contrat, ...restData } = data;
+
+  const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
+    merge(effectifDb, stripEmptyFields(restData));
+
+  // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
+  if (dataToUpdate.formation.date_entree) {
+    dataToUpdate.formation.date_entree = new Date(dataToUpdate.formation.date_entree);
+  }
+  if (dataToUpdate.formation.date_fin) {
+    dataToUpdate.formation.date_fin = new Date(dataToUpdate.formation.date_fin);
+  }
+  if (dataToUpdate.formation.date_inscription) {
+    dataToUpdate.formation.date_inscription = new Date(dataToUpdate.formation.date_inscription);
+  }
+  if (dataToUpdate.formation.date_obtention_diplome) {
+    dataToUpdate.formation.date_obtention_diplome = new Date(dataToUpdate.formation.date_obtention_diplome);
+  }
+  if (dataToUpdate.apprenant.date_rqth) {
+    dataToUpdate.apprenant.date_rqth = new Date(dataToUpdate.apprenant.date_rqth);
+  }
+  if (dataToUpdate.apprenant.date_de_naissance) {
+    dataToUpdate.apprenant.date_de_naissance = new Date(dataToUpdate.apprenant.date_de_naissance);
+  }
+
+  dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut.map((s) => {
+    const statut = stripEmptyFields(s);
+    if (statut.date_statut) {
+      statut.date_statut = new Date(statut.date_statut);
+    }
+    if (statut.date_reception) {
+      statut.date_reception = new Date(statut.date_reception);
+    }
+    return statut;
+  });
+  if (nouveau_statut) {
+    dataToUpdate.apprenant.historique_statut.push({
+      valeur_statut: nouveau_statut.valeur_statut,
+      date_statut: nouveau_statut.date_statut,
+      date_reception: new Date(),
+    });
+  }
+
+  dataToUpdate.contrats = dataToUpdate.contrats.map((c) => {
+    const contrat = stripEmptyFields(c);
+    if (contrat.date_debut) {
+      contrat.date_debut = new Date(contrat.date_debut);
+    }
+    if (contrat.date_fin) {
+      contrat.date_fin = new Date(contrat.date_fin);
+    }
+    if (contrat.date_rupture) {
+      contrat.date_rupture = new Date(contrat.date_rupture);
+    }
+    return contrat;
+  });
+  if (nouveau_contrat) {
+    dataToUpdate.contrats.push(nouveau_contrat);
+  }
+
+  let validation_errors: any[] = [];
+  for (const validation_error of dataToUpdate.validation_errors) {
+    if (!inputNames.includes(validation_error.fieldName)) {
+      validation_errors.push(validation_error);
+    }
+  }
+
+  const effectifUpdated = await updateEffectif(effectifDb._id, {
+    ...dataToUpdate,
+    id_erp_apprenant,
+    organisme_id: new ObjectId(organisme_id),
+    annee_scolaire,
+    source,
+    validation_errors,
+  });
+
+  return buildEffectifResult(effectifUpdated);
+}
+
+function buildEffectifResult(effectif) {
+  const { properties: effectifSchema } = schema;
+
+  function customizer(objValue, srcValue) {
+    if (objValue !== undefined) {
+      return {
+        ...objValue,
+        value:
+          srcValue || srcValue === false || srcValue === 0 ? srcValue : typeof objValue.type === "object" ? null : "",
+      };
+    }
+  }
+
+  function customizerLock(objValue, srcValue) {
+    if (objValue !== undefined) {
+      return { ...objValue, locked: srcValue };
+    }
+  }
+  function customizerPath(objValue, srcValue) {
+    if (objValue !== undefined) {
+      return { ...objValue, path: srcValue };
+    }
+  }
+
+  const flatPaths = Object.keys(flattenKeys(effectif.is_lock));
+  let paths = cloneDeep(effectif.is_lock);
+  for (const path of flatPaths) {
+    set(paths, path, path);
+  }
+
+  return {
+    apprenant: {
+      ...mergeWith(
+        mergeWith(
+          mergeWith(cloneDeep(effectifSchema.apprenant.properties), effectif.apprenant, customizer),
+          effectif.is_lock.apprenant,
+          customizerLock
+        ),
+        paths.apprenant,
+        customizerPath
+      ),
+      adresse: {
+        ...mergeWith(
+          mergeWith(
+            mergeWith(
+              cloneDeep(effectifSchema.apprenant.properties.adresse.properties),
+              effectif.apprenant.adresse,
+              customizer
+            ),
+            effectif.is_lock.apprenant.adresse,
+            customizerLock
+          ),
+          paths.apprenant.adresse,
+          customizerPath
+        ),
+      },
+      representant_legal: {
+        ...mergeWith(
+          mergeWith(
+            mergeWith(
+              cloneDeep(effectifSchema.apprenant.properties.representant_legal.properties),
+              effectif.apprenant.representant_legal,
+              customizer
+            ),
+            effectif.is_lock.apprenant.representant_legal,
+            customizerLock
+          ),
+          paths.apprenant.representant_legal,
+          customizerPath
+        ),
+        adresse: {
+          ...mergeWith(
+            mergeWith(
+              mergeWith(
+                cloneDeep(effectifSchema.apprenant.properties.representant_legal.properties.adresse.properties),
+                effectif.apprenant.representant_legal ? effectif.apprenant.representant_legal.adresse : {},
+                customizer
+              ),
+              effectif.is_lock.apprenant.representant_legal?.adresse,
+              customizerLock
+            ),
+            paths.apprenant.representant_legal?.adresse,
+            customizerPath
+          ),
+        },
+      },
+    },
+    formation: {
+      ...mergeWith(
+        mergeWith(
+          mergeWith(cloneDeep(effectifSchema.formation.properties), effectif.formation, customizer),
+          effectif.is_lock.formation,
+          customizerLock
+        ),
+        paths.formation.adresse,
+        customizerPath
+      ),
+    },
+    contrats: {
+      ...effectifSchema.contrats,
+      value: effectif.contrats,
+      locked: effectif.is_lock.contrats || false,
+      path: paths.contrats,
+    },
+    annee_scolaire: effectif.annee_scolaire,
+    id: effectif._id,
+    organisme_id: effectif.organisme_id,
+    id_erp_apprenant: effectif.id_erp_apprenant,
+    source: effectif.source,
+    validation_errors: effectif.validation_errors,
+    updated_at: effectif.updated_at,
+  };
+}
+
+const flattenKeys = (obj: any, path: any = []) =>
+  !isObject(obj)
+    ? { [path.join(".")]: obj }
+    : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});

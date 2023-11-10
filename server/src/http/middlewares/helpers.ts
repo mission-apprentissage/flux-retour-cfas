@@ -1,8 +1,10 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
+import { PermissionOrganisme } from "shared/constants/permissions";
 
-import { PermissionsOrganisme, hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
+import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
+import { effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 // catch errors and return the result of the request handler
@@ -43,11 +45,31 @@ interface MyLocals {
 }
 
 export function requireOrganismePermission<TParams = any, TQuery = any, TBody = any, TLocals = any>(
-  permission: keyof PermissionsOrganisme
+  permission: PermissionOrganisme
 ): RequestHandler<TParams, any, TBody, TQuery, TLocals & MyLocals> {
   return async (req, res, next) => {
     try {
-      if (!(await hasOrganismePermission(req.user, res.locals.organismeId, permission))) {
+      if (!(await getOrganismePermission(req.user, res.locals.organismeId, permission))) {
+        throw Boom.forbidden("Permissions invalides");
+      }
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
+}
+
+export function requireEffectifOrganismePermission<TParams = any, TQuery = any, TBody = any, TLocals = any>(
+  permission: PermissionOrganisme
+): RequestHandler<TParams, any, TBody, TQuery, TLocals & MyLocals> {
+  return async (req, res, next) => {
+    try {
+      // On récupère l'organisme rattaché à l'effectif
+      const effectif = await effectifsDb().findOne({ _id: new ObjectId((req.params as any).id) });
+      if (!effectif) {
+        throw Boom.notFound("effectif non trouvé");
+      }
+      if (!(await getOrganismePermission(req.user, effectif.organisme_id, permission))) {
         throw Boom.forbidden("Permissions invalides");
       }
       next();

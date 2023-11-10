@@ -82,7 +82,7 @@ const DashboardTransverse = () => {
   >(
     ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString() })],
     () =>
-      _get("/api/v1/indicateurs/effectifs", {
+      _get("/api/v1/indicateurs/effectifs/par-departement", {
         params: {
           date: effectifsFilters.date,
         },
@@ -98,7 +98,7 @@ const DashboardTransverse = () => {
   } = useQuery<IndicateursEffectifsAvecDepartement[]>(
     ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(effectifsFilters))],
     () =>
-      _get("/api/v1/indicateurs/effectifs", {
+      _get("/api/v1/indicateurs/effectifs/par-departement", {
         params: convertEffectifsFiltersToQuery(effectifsFilters),
       }),
     {

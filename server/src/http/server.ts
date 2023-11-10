@@ -9,20 +9,22 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
+import { typesEffectifNominatif } from "shared/constants/indicateurs";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
 import { activateUser, login, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
+import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
   effectifsFiltersSchema,
   fullEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { canDeleteEffectif } from "@/common/actions/helpers/permissions";
-import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
+import { getPermissionOrganisationContext } from "@/common/actions/helpers/permissions-organisation";
+import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
   indicateursNationalFiltersSchema,
@@ -35,8 +37,8 @@ import {
   getOrganismeIndicateursEffectifs,
   getOrganismeIndicateursEffectifsParFormation,
   getOrganismeIndicateursOrganismes,
-  typesEffectifNominatif,
 } from "@/common/actions/indicateurs/indicateurs.actions";
+import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { authenticateLegacy } from "@/common/actions/legacy/users.legacy.actions";
 import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
@@ -64,7 +66,6 @@ import {
   getOrganismeDetails,
   listContactsOrganisme,
   listOrganismesFormateurs,
-  searchOrganismes,
   verifyOrganismeAPIKeyToUser,
   getOrganismeByUAIAndSIRET,
   getInvalidSiretsFromDossierApprenant,
@@ -81,7 +82,9 @@ import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import { createSession, removeSession } from "@/common/actions/sessions.actions";
 import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
+import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
+import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types";
 import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
@@ -90,22 +93,28 @@ import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { createUserToken } from "@/common/utils/jwtUtils";
+import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
+import { algoUAI } from "@/common/utils/uaiUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
-import organismeOrFormationSearchSchema from "@/common/validation/organismeOrFormationSearchSchema";
 import { registrationSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
-import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
+import { extensions, primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
 import errorMiddleware from "./middlewares/errorMiddleware";
-import { requireAdministrator, requireOrganismePermission, returnResult } from "./middlewares/helpers";
+import {
+  requireAdministrator,
+  requireEffectifOrganismePermission,
+  requireOrganismePermission,
+  returnResult,
+} from "./middlewares/helpers";
 import legacyUserPermissionsMiddleware from "./middlewares/legacyUserPermissionsMiddleware";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
@@ -119,7 +128,6 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
-import effectif from "./routes/specific.routes/effectif.routes";
 import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 
@@ -399,14 +407,6 @@ function setupRoutes(app: Application) {
           has_accept_cgu_version: req.params.version,
         });
       })
-    )
-    .delete(
-      "/api/v1/effectif/:id",
-      returnResult(async (req) => {
-        const effectifId = new ObjectId(req.params.id);
-        if (!(await canDeleteEffectif(req.user, effectifId))) throw Boom.forbidden("Permissions invalides");
-        await effectifsDb().deleteOne({ _id: effectifId });
-      })
     );
 
   /********************************
@@ -448,18 +448,18 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("indicateursEffectifs"),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          return await getOrganismeIndicateursEffectifsParFormation(req.user, filters, res.locals.organismeId);
+          return await getOrganismeIndicateursEffectifsParFormation(req.user, res.locals.organismeId, filters);
         })
       )
       .get(
         "/indicateurs/effectifs/:type",
         returnResult(async (req, res) => {
+          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-          const permissions = await hasOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
+          const permissions = await getOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
           if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
             throw Boom.forbidden("Permissions invalides");
           }
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           return await getEffectifsNominatifs(req.user, filters, type, res.locals.organismeId);
         })
       )
@@ -508,7 +508,7 @@ function setupRoutes(app: Application) {
       )
       .put(
         "/configure-erp",
-        requireOrganismePermission("manageEffectifs"),
+        requireOrganismePermission("configurerModeTransmission"),
         returnResult(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
@@ -516,18 +516,18 @@ function setupRoutes(app: Application) {
       )
       .delete(
         "/configure-erp",
-        requireOrganismePermission("manageEffectifs"),
+        requireOrganismePermission("configurerModeTransmission"),
         returnResult(async (req, res) => {
-          await resetConfigurationERP(req.user, res.locals.organismeId);
+          await resetConfigurationERP(res.locals.organismeId);
         })
       )
       .post(
         "/verify-user",
-        requireOrganismePermission("manageEffectifs"),
+        requireOrganismePermission("configurerModeTransmission"),
         returnResult(async (req, res) => {
           // POST /api/v1/organismes/:id/verify-user { siret=XXXXX, uai=YYYYY, erp=ZZZZ , api_key=TTTTT }
           const verif = await validateFullZodObjectSchema(req.body, SReqPostVerifyUser);
-          await verifyOrganismeAPIKeyToUser(req.user, res.locals.organismeId, verif);
+          await verifyOrganismeAPIKeyToUser(res.locals.organismeId, verif);
         })
       )
       .use(
@@ -589,7 +589,7 @@ function setupRoutes(app: Application) {
    ********************************/
   authRouter
     .get(
-      "/api/v1/indicateurs/effectifs",
+      "/api/v1/indicateurs/effectifs/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
         return await getIndicateursEffectifsParDepartement(req.user, filters);
@@ -607,6 +607,11 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
         const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
+        const permissions = await getPermissionOrganisationContext(req.user, "TéléchargementListesNominatives");
+        if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
+          throw Boom.forbidden("Permissions invalides");
+        }
+
         return await getEffectifsNominatifs(req.user, filters, type);
       })
     )
@@ -634,18 +639,63 @@ function setupRoutes(app: Application) {
     })
   );
 
-  // LEGACY écrans indicateurs
   authRouter
-    // à supprimer une fois les écrans /organisme-formation/* supprimés, (sans doute après la nouvelle page d'accueil + onglets développés)
-    // peut-être attendre les prochains écrans d'aide intégrés au TDB pour être sûr de supprimer ceux existants
     .post(
-      "/api/v1/organismes/search",
-      validateRequestMiddleware({ body: organismeOrFormationSearchSchema() }),
+      "/api/v1/effectif/recherche-siret",
       returnResult(async (req) => {
-        return await searchOrganismes(req.user, req.body as any);
+        const { siret } = await validateFullZodObjectSchema(req.body, {
+          siret: extensions.siret(),
+        });
+
+        return await findDataFromSiret(siret);
       })
     )
-    .use("/api/v1/effectif", effectif());
+    .post(
+      "/api/v1/effectif/recherche-uai",
+      returnResult(async (req) => {
+        const { uai } = await validateFullZodObjectSchema(req.body, {
+          uai: extensions.uai(),
+        });
+
+        return stripEmptyFields({
+          uai,
+          error: !algoUAI(uai) ? `L'UAI ${uai} n'est pas valide` : null,
+        });
+      })
+    )
+    .post(
+      "/api/v1/effectif/recherche-code-postal",
+      returnResult(async (req) => {
+        const { codePostal } = await validateFullZodObjectSchema(req.body, {
+          codePostal: z
+            .string()
+            .trim()
+            .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement"),
+        });
+        return await getCodePostalInfo(codePostal);
+      })
+    )
+    .get(
+      "/api/v1/effectif/:id",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        return await getEffectifForm(new ObjectId(req.params.id));
+      })
+    )
+    .put(
+      "/api/v1/effectif/:id",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        return await updateEffectifFromForm(new ObjectId(req.params.id), req.body);
+      })
+    )
+    .delete(
+      "/api/v1/effectif/:id",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        await effectifsDb().deleteOne({ _id: new ObjectId(req.params.id) });
+      })
+    );
 
   /********************************
    * API organisation   *

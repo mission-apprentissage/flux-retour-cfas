@@ -3,11 +3,11 @@ import { cloneDeep, get } from "lodash-es";
 import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "shared";
 import { PartialDeep } from "type-fest";
 
-import { findEffectifByQuery } from "@/common/actions/effectifs.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import logger from "@/common/logger";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
+import { effectifsDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 
 /**
@@ -108,7 +108,7 @@ export const checkIfEffectifExists = async (
   // Recherche de l'effectif via sa clé d'unicité
   const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
 
-  return await findEffectifByQuery(query);
+  return await effectifsDb().findOne(query);
 };
 
 /**

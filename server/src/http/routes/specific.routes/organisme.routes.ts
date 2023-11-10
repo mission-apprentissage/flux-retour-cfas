@@ -1,4 +1,3 @@
-import Boom from "boom";
 import { compact, get } from "lodash-es";
 import { ObjectId } from "mongodb";
 import {
@@ -8,7 +7,6 @@ import {
   requiredFieldsSifa,
 } from "shared";
 
-import { findOrganismeByUai, getSousEtablissementsForUai } from "@/common/actions/organismes/organismes.actions";
 import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
 import { effectifsDb } from "@/common/model/collections";
 
@@ -53,21 +51,4 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
           }
         : {}),
     }));
-}
-
-export async function getOrganismeByUAIAvecSousEtablissements(uai: string) {
-  const organisme = await findOrganismeByUai(uai);
-  if (!organisme) {
-    throw Boom.notFound(`No cfa found for UAI ${uai}`);
-  }
-
-  const sousEtablissements = await getSousEtablissementsForUai(uai);
-  return {
-    libelleLong: organisme.nom,
-    reseaux: organisme.reseaux,
-    uai: organisme.uai,
-    nature: organisme.nature,
-    adresse: organisme.adresse,
-    sousEtablissements,
-  };
 }

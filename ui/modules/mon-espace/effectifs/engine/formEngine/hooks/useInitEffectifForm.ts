@@ -15,10 +15,7 @@ export const useInitEffectifForm = ({ controller, modeSifa, canEdit }) => {
     ["effectif", effectifId],
     async () => {
       if (!effectifId) return null;
-      const effectifForm = await _get(`/api/v1/effectif/${effectifId}`, {
-        params: { organisme_id: organisme._id },
-      });
-      // await sleep(300); // TODO SPECIAL UX
+      const effectifForm = await _get(`/api/v1/effectif/${effectifId}`);
       const fields = initFields({ effectifForm, schema: effectifFormSchema, modeSifa, canEdit, organisme });
       controller.setFields(fields);
       return effectifForm;

@@ -67,6 +67,10 @@ fileignoreconfig:
   - filename
 - filename: server/src/commands.ts
   checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
+- filename: server/src/common/actions/helpers/permissions-organisation.ts
+  checksum: badad18721a816276dfa8de8445f4ef85054b68adf719b994607650d1f5d0884
+- filename: server/src/common/actions/helpers/permissions-organisme.ts
+  checksum: 00d5dd83be4ac22a474c450f2d62efa05aa1737edf9cebbe54b77a0f575ecbe3
 - filename: server/src/common/constants/validations.ts
   checksum: 3aa0789da5a8bcc45f7078a165f381254ec5714032a1dc7044bfe88cc06ade55
 - filename: server/src/common/validation/utils/zodPrimitives.ts
@@ -79,8 +83,12 @@ fileignoreconfig:
   checksum: bd018d4dab141be955d6e546f817b0aa58edc733e9e562272765d8211d2f3015
 - filename: server/static/open-api.json
   checksum: cc6eef59550fe79f35ddf54e74e8b7f72dc85bc3480261a8cea94fa19e16a882
+- filename: server/tests/integration/common/actions/users.actions.test.ts
+  checksum: 77550fcbcd5120292fcf6eeca7a3019bc62d34e4ec3c402b94b6fcd84d0f0c15
 - filename: server/tests/integration/external/zod.test.ts
   checksum: 6e871e7294e90ce4917b687aa3ea21698792a4582013b5354cc43126c91ad2e2
+- filename: server/tests/integration/http/admin.routes.test.ts
+  checksum: cf94ce9123fc9dee7fcf63a8b67bf6cbc26eb7594595cd8bd188853569f290b1
 - filename: server/tests/integration/http/organisme.routes.test.ts
   checksum: c2769caf07b18b075ef9164b3711b7af46b1fac6de841ba66e377a31bcacf070
 - filename: server/tests/integration/http/password.route.test.ts
@@ -99,10 +107,6 @@ fileignoreconfig:
   checksum: e68b7b2b7828b9c665c02503b0505821e2b0ea41c91ae440fbce422c781ef07b
 - filename: ui/pages/organismes-formation.tsx
   checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
-- filename: server/tests/integration/common/actions/users.actions.test.ts
-  checksum: 77550fcbcd5120292fcf6eeca7a3019bc62d34e4ec3c402b94b6fcd84d0f0c15
-- filename: server/tests/integration/http/admin.routes.test.ts
-  checksum: cf94ce9123fc9dee7fcf63a8b67bf6cbc26eb7594595cd8bd188853569f290b1
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
 - filename: ui/pages/auth/inscription/profil.tsx

@@ -1,6 +1,7 @@
 import { Box, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import { PlausibleGoalType } from "shared";
+import { TypeEffectifNominatif, typesEffectifNominatif } from "shared/constants/indicateurs";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -57,10 +58,7 @@ function Card({ label, count, tooltipLabel, icon, big = false, children }: CardP
   );
 }
 
-export const typesEffectifNominatif = ["apprenant", "apprenti", "inscritSansContrat", "rupturant", "abandon"] as const;
-export type TypeEffectifNominatif = (typeof typesEffectifNominatif)[number];
-
-const typeToGoalPlausible: { [key in TypeEffectifNominatif]: PlausibleGoalType } = {
+const typeToGoalPlausible: { [key in Exclude<TypeEffectifNominatif, "inconnu">]: PlausibleGoalType } = {
   inscritSansContrat: "telechargement_liste_sans_contrats",
   rupturant: "telechargement_liste_rupturants",
   abandon: "telechargement_liste_abandons",
@@ -71,7 +69,7 @@ const typeToGoalPlausible: { [key in TypeEffectifNominatif]: PlausibleGoalType }
 interface IndicateursGridProps {
   indicateursEffectifs: IndicateursEffectifs;
   loading: boolean;
-  permissionEffectifsNominatifs?: boolean | Array<(typeof typesEffectifNominatif)[number]>;
+  permissionEffectifsNominatifs?: boolean | TypeEffectifNominatif[];
   effectifsFilters?: EffectifsFilters;
   organismeId?: string;
 }

@@ -8,8 +8,10 @@ import {
   Flex,
   HStack,
   Heading,
+  ListItem,
   Text,
   Tooltip,
+  UnorderedList,
   VStack,
   Wrap,
 } from "@chakra-ui/react";
@@ -17,7 +19,7 @@ import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { TETE_DE_RESEAUX_BY_ID } from "shared";
+import { natureOrganismeDeFormationLabel, TETE_DE_RESEAUX_BY_ID } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
@@ -46,7 +48,56 @@ import InfoTransmissionDonnees from "../organismes/InfoTransmissionDonnees";
 import ContactsModal from "./ContactsModal";
 import { FileDownloadIcon } from "./icons";
 import IndicateursGrid from "./IndicateursGrid";
-import { natureOrganismeDeFormationLabel, natureOrganismeDeFormationTooltip } from "./OrganismeInfo";
+
+const natureOrganismeDeFormationTooltip = {
+  responsable: (
+    <>
+      <Text>Organismes responsables</Text>
+      <UnorderedList mt={4}>
+        <ListItem>
+          Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur ;
+        </ListItem>
+        <ListItem>
+          Est signataire de la convention de formation ; Demande et reçoit les financements de l’OPCO ;
+        </ListItem>
+        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations ;</ListItem>
+        <ListItem>
+          Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
+          sein de l’UFA.
+        </ListItem>
+      </UnorderedList>
+    </>
+  ),
+  formateur: (
+    <>
+      <Text>Organismes formateurs</Text>
+      <UnorderedList mt={4}>
+        <ListItem>
+          Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+          d’activité (NDA))
+        </ListItem>
+      </UnorderedList>
+    </>
+  ),
+  responsable_formateur: (
+    <>
+      <Text>Organismes responsables et formateurs</Text>
+      <UnorderedList mt={4}>
+        <ListItem>
+          Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+          d’activité (NDA)) ;
+        </ListItem>
+        <ListItem>Est signataire de la convention de formation ;</ListItem>
+        <ListItem>Demande et reçoit les financements de l’OPCO ;</ListItem>
+        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations ;</ListItem>
+        <ListItem>
+          Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
+          sein de l’UFA.
+        </ListItem>
+      </UnorderedList>
+    </>
+  ),
+};
 
 interface Props {
   organisme: Organisme;

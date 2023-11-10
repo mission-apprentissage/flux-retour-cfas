@@ -3,10 +3,12 @@ import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
+import { Organisme } from "@/common/internal/Organisme";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
@@ -23,7 +25,7 @@ import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganisme
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
 
 import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
-import IndicateursGrid, { typesEffectifNominatif } from "../dashboard/IndicateursGrid";
+import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
   EffectifsFilters,
@@ -317,9 +319,8 @@ function IndicateursForm(props: IndicateursFormProps) {
           loading={indicateursEffectifsLoading}
           permissionEffectifsNominatifs={
             props.organismeId
-              ? organisme?.permissions?.effectifsNominatifs && organisationType !== "ORGANISME_FORMATION" // OFA interdit sur les formateurs
-              : getPermissionsEffectifsNominatifs(organisationType) &&
-                (organisationType !== "ORGANISME_FORMATION" || ownOrganisme?.organismesFormateurs?.length === 0) // OFA autorisé seulement si aucun formateur
+              ? organisme?.permissions?.effectifsNominatifs
+              : getPermissionsEffectifsNominatifs(organisationType, ownOrganisme)
           }
           effectifsFilters={effectifsFilters}
           organismeId={props.organismeId}
@@ -448,11 +449,12 @@ function IndicateursForm(props: IndicateursFormProps) {
 export default IndicateursForm;
 
 function getPermissionsEffectifsNominatifs(
-  organisationType: OrganisationType
-): boolean | Array<(typeof typesEffectifNominatif)[number]> {
+  organisationType: OrganisationType,
+  ownOrganisme?: Organisme
+): boolean | TypeEffectifNominatif[] {
   switch (organisationType) {
     case "ORGANISME_FORMATION":
-      return true;
+      return organisationType !== "ORGANISME_FORMATION" || ownOrganisme?.organismesFormateurs?.length === 0; // OFA autorisé seulement si aucun formateur
 
     case "TETE_DE_RESEAU":
       return false;

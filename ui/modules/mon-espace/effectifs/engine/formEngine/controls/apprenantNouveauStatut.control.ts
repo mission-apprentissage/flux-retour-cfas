@@ -3,10 +3,9 @@ import { apiService } from "@/modules/mon-espace/effectifs/engine/services/api.s
 export const apprenantNouveauStatutLogic = [
   {
     deps: ["apprenant.nouveau_statut"],
-    process: async ({ values, organisme, effectifId }) => {
+    process: async ({ values, effectifId }) => {
       try {
         await apiService.saveEffectifForm({
-          organisme_id: organisme._id,
           effectifId,
           data: {
             nouveau_statut: {

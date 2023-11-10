@@ -83,6 +83,21 @@ export interface OrganisationAdministrateur {
   type: "ADMINISTRATEUR";
 }
 
+// types structurés pour faciliter les permissions
+export type OrganisationByType = {
+  ORGANISME_FORMATION: OrganisationOrganismeFormation;
+  TETE_DE_RESEAU: OrganisationTeteReseau;
+  DREETS: OrganisationOperateurPublicRegion;
+  DRAAF: OrganisationOperateurPublicRegion;
+  CONSEIL_REGIONAL: OrganisationOperateurPublicRegion;
+  CARIF_OREF_REGIONAL: OrganisationOperateurPublicRegion;
+  DDETS: OrganisationOperateurPublicDepartement;
+  ACADEMIE: OrganisationOperateurPublicAcademie;
+  ADMINISTRATEUR: OrganisationAdministrateur;
+  OPERATEUR_PUBLIC_NATIONAL: OrganisationOperateurPublicNational;
+  CARIF_OREF_NATIONAL: OrganisationCarifOrefNational;
+};
+
 export function getOrganisationLabel(organisation: NewOrganisation): string {
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {

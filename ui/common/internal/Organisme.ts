@@ -1,4 +1,4 @@
-import { typesEffectifNominatif } from "@/modules/dashboard/IndicateursGrid";
+import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 // récupéré de l'API et adapté pour ne pas avoir certains champs optionnels
 export interface Organisme {
@@ -993,7 +993,7 @@ export interface Organisme {
     viewContacts: boolean;
     infoTransmissionEffectifs: boolean;
     indicateursEffectifs: boolean; // pourrait peut-être être false | "partial" (restriction réseau/territoire) | "full"
-    effectifsNominatifs: boolean | Array<(typeof typesEffectifNominatif)[number]>;
+    effectifsNominatifs: boolean | TypeEffectifNominatif[];
     manageEffectifs: boolean;
   };
 }

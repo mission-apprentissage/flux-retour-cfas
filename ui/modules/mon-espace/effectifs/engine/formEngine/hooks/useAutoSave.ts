@@ -57,7 +57,6 @@ export const useAutoSave = ({ controller }) => {
         if (!organisme) throw new Error("Organisme not found");
         try {
           await apiService.saveEffectifForm({
-            organisme_id: organisme._id,
             data,
             effectifId,
             inputNames: inputNamesRef.current,
