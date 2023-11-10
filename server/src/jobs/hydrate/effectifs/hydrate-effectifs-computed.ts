@@ -35,6 +35,8 @@ export async function hydrateEffectifsComputed() {
                   siret: { $first: "$_organisme.siret" },
                   bassinEmploi: { $first: "$_organisme.adresse.bassinEmploi" },
                   fiable: { $cond: [{ $eq: [{ $first: "$_organisme.fiabilisation_statut" }, "FIABLE"] }, true, false] },
+                  enseigne: { $first: "$_organisme.enseigne" },
+                  raison_sociale: { $first: "$_organisme.raison_sociale" },
                 },
                 formation: {
                   codes_rome: { $ifNull: [{ $first: "$_rncp.romes" }, []] },
