@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "6.1.0",
-    "@sentry/integrations": "7.64.0",
-    "@sentry/node": "7.64.0",
-    "@sentry/tracing": "7.64.0",
+    "@sentry/integrations": "^7.80.0",
+    "@sentry/node": "^7.80.0",
+    "@sentry/tracing": "^7.80.0",
     "@supercharge/promise-pool": "2.4.0",
     "@types/boom": "7.3.2",
     "JSONStream": "^1.3.5",
