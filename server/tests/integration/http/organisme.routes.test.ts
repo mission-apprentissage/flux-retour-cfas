@@ -221,6 +221,7 @@ describe("Routes /organismes/:id", () => {
         reseaux: ["CCI"],
         nature: "responsable_formateur",
         raison_sociale: "ADEN Formations (Caen)",
+        enseigne: "ADEN Formations (Caen)",
         fiabilisation_statut: "FIABLE",
         ferme: false,
         uai: "0000000A",
