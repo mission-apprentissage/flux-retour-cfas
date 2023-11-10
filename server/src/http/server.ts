@@ -24,7 +24,7 @@ import {
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import { getPermissionOrganisationConfig } from "@/common/actions/helpers/permissions-organisation";
-import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
+import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
   indicateursNationalFiltersSchema,
@@ -456,7 +456,7 @@ function setupRoutes(app: Application) {
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-          const permissions = await hasOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
+          const permissions = await getOrganismePermission(req.user, res.locals.organismeId, "effectifsNominatifs");
           if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
             throw Boom.forbidden("Permissions invalides");
           }

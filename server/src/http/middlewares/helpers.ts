@@ -3,7 +3,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
 import { PermissionOrganisme } from "shared/constants/permissions";
 
-import { hasOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
+import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
@@ -49,7 +49,7 @@ export function requireOrganismePermission<TParams = any, TQuery = any, TBody = 
 ): RequestHandler<TParams, any, TBody, TQuery, TLocals & MyLocals> {
   return async (req, res, next) => {
     try {
-      if (!(await hasOrganismePermission(req.user, res.locals.organismeId, permission))) {
+      if (!(await getOrganismePermission(req.user, res.locals.organismeId, permission))) {
         throw Boom.forbidden("Permissions invalides");
       }
       next();
@@ -69,7 +69,7 @@ export function requireEffectifOrganismePermission<TParams = any, TQuery = any, 
       if (!effectif) {
         throw Boom.notFound("effectif non trouvé");
       }
-      if (!(await hasOrganismePermission(req.user, effectif.organisme_id, permission))) {
+      if (!(await getOrganismePermission(req.user, effectif.organisme_id, permission))) {
         throw Boom.forbidden("Permissions invalides");
       }
       next();

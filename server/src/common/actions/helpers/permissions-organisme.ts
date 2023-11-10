@@ -143,7 +143,7 @@ export async function buildOrganismePermissions(
   }
 }
 
-export async function hasOrganismePermission<Perm extends keyof PermissionsOrganisme>(
+export async function getOrganismePermission<Perm extends keyof PermissionsOrganisme>(
   ctx: AuthContext,
   organismeId: ObjectId,
   permission: Perm
