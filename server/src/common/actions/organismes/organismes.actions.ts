@@ -21,7 +21,7 @@ import { cleanProjection } from "@/common/utils/mongoUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
-import { getPermissionOrganisation } from "../helpers/permissions-organisation";
+import { getPermissionOrganisationQueryFilter } from "../helpers/permissions-organisation";
 import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
 import { InfoSiret } from "../infoSiret.actions-struct";
 
@@ -667,7 +667,7 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
 
 export async function listOrganisationOrganismes(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>[]> {
   const organismes = (await organismesDb()
-    .find(await getPermissionOrganisation(ctx, "ListeOrganismes"), {
+    .find(await getPermissionOrganisationQueryFilter(ctx, "ListeOrganismes"), {
       projection: getOrganismeListProjection(true),
     })
     .toArray()) as WithId<OrganismeWithPermissions>[];

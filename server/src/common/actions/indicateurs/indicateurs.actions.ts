@@ -16,7 +16,7 @@ import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
-import { getPermissionOrganisation } from "../helpers/permissions-organisation";
+import { getPermissionOrganisationQueryFilter } from "../helpers/permissions-organisation";
 import { getOrganismeIndicateursEffectifsRestriction } from "../helpers/permissions-organisme";
 
 import {
@@ -37,7 +37,7 @@ export async function getIndicateursEffectifsParDepartement(
       {
         $match: {
           $and: [
-            await getPermissionOrganisation(ctx, "IndicateursEffectifsParDepartement"),
+            await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParDepartement"),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -203,7 +203,7 @@ export async function getIndicateursOrganismesParDepartement(
       {
         $match: {
           $and: [
-            await getPermissionOrganisation(ctx, "IndicateursOrganismesParDepartement"),
+            await getPermissionOrganisationQueryFilter(ctx, "IndicateursOrganismesParDepartement"),
             ...buildMongoFilters(filters, organismesFiltersConfigurations),
           ],
           fiabilisation_statut: "FIABLE",
@@ -254,7 +254,7 @@ export async function getIndicateursEffectifsParOrganisme(
         $match: {
           $and: [
             await getOrganismeRestriction(organismeId),
-            await getPermissionOrganisation(ctx, "IndicateursEffectifsParOrganisme"),
+            await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParOrganisme"),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -640,7 +640,7 @@ export async function getEffectifsNominatifs(
   type: TypeEffectifNominatif,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
-  const permissionRestriction = await getPermissionOrganisation(ctx, "TéléchargementListesNominatives");
+  const permissionRestriction = await getPermissionOrganisationQueryFilter(ctx, "TéléchargementListesNominatives");
   if (!permissionRestriction) {
     throw Boom.forbidden("Permissions invalides");
   }

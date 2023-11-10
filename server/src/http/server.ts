@@ -23,7 +23,7 @@ import {
   fullEffectifsFiltersSchema,
   organismesFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { getPermissionOrganisationConfig } from "@/common/actions/helpers/permissions-organisation";
+import { getPermissionOrganisationContext } from "@/common/actions/helpers/permissions-organisation";
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
@@ -607,7 +607,7 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
         const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-        const permissions = await getPermissionOrganisationConfig(req.user, "TéléchargementListesNominatives");
+        const permissions = await getPermissionOrganisationContext(req.user, "TéléchargementListesNominatives");
         if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
           throw Boom.forbidden("Permissions invalides");
         }

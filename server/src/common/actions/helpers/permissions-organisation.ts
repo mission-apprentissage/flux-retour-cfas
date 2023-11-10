@@ -7,20 +7,19 @@ import { getOrganismeByUAIAndSIRET } from "../organismes/organismes.actions";
 
 import { findOrganismesAccessiblesByOrganisationOF } from "./permissions";
 
-// Schema permet de filtrer sur une collection
-type APIConfig<Result = false | object> = {
+type QueryFilter<Result = false | object> = {
   [Type in keyof OrganisationByType]: Result | ((organisation: OrganisationByType[Type]) => Result | Promise<Result>);
 };
 
 type PermissionConfig = {
-  config?: Record<Organisation["type"], boolean | string[]>;
-  api: APIConfig;
+  context?: Record<Organisation["type"], boolean | string[]>;
+  queryFilter: QueryFilter;
 };
 
 // Référence : https://www.notion.so/mission-apprentissage/Permissions-afd9dc14606042e8b76b23aa57f516a8?pvs=4#bf039f348f1a4d8e84b065eafc1b6db1
 const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> = {
   IndicateursEffectifsParDepartement: {
-    api: {
+    queryFilter: {
       ORGANISME_FORMATION: async (organisation) => ({
         organisme_id: {
           $in: await findOrganismesAccessiblesByOrganisationOF(organisation),
@@ -41,7 +40,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
     },
   },
   IndicateursOrganismesParDepartement: {
-    api: {
+    queryFilter: {
       ORGANISME_FORMATION: async (organisation) => ({
         _id: {
           $in: await findOrganismesAccessiblesByOrganisationOF(organisation),
@@ -62,7 +61,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
     },
   },
   ListeOrganismes: {
-    api: {
+    queryFilter: {
       ORGANISME_FORMATION: async (organisation) => {
         return {
           _id: {
@@ -97,7 +96,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
     },
   },
   IndicateursEffectifsParOrganisme: {
-    api: {
+    queryFilter: {
       ORGANISME_FORMATION: async (organisation) => ({
         organisme_id: {
           $in: await findOrganismesAccessiblesByOrganisationOF(organisation),
@@ -130,7 +129,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
     },
   },
   TéléchargementListesNominatives: {
-    config: {
+    context: {
       ORGANISME_FORMATION: true, // TODO seulement si aucun formateur
       TETE_DE_RESEAU: false,
       DREETS: ["inscritSansContrat", "rupturant", "abandon"],
@@ -143,7 +142,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       CARIF_OREF_NATIONAL: false,
       ADMINISTRATEUR: true,
     },
-    api: {
+    queryFilter: {
       ORGANISME_FORMATION: async (organisation) => {
         const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
         const hasNoFormateurs = !organisme.organismesFormateurs || organisme.organismesFormateurs.length === 0;
@@ -175,11 +174,11 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
   },
 };
 
-export async function getPermissionOrganisation(ctx: AuthContext, permission: PermissionOrganisation) {
-  const permissionConfig = permissionsOrganisation[permission].api[ctx.organisation.type];
+export async function getPermissionOrganisationQueryFilter(ctx: AuthContext, permission: PermissionOrganisation) {
+  const permissionConfig = permissionsOrganisation[permission].queryFilter[ctx.organisation.type];
   return typeof permissionConfig === "function" ? permissionConfig(ctx.organisation as any) : permissionConfig;
 }
 
-export async function getPermissionOrganisationConfig(ctx: AuthContext, permission: PermissionOrganisation) {
-  return permissionsOrganisation[permission].config?.[ctx.organisation.type];
+export async function getPermissionOrganisationContext(ctx: AuthContext, permission: PermissionOrganisation) {
+  return permissionsOrganisation[permission].context?.[ctx.organisation.type];
 }
