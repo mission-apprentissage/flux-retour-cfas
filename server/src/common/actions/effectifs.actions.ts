@@ -184,7 +184,6 @@ export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
 }
 
 export async function updateEffectifFromForm(effectifId: ObjectId, body: any): Promise<any> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { inputNames, ...data } = body; // TODO JOI (inputNames used to track user actions)
 
   const effectifDb = await effectifsDb().findOne({ _id: effectifId });
@@ -192,27 +191,30 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
     throw Boom.notFound(`Unable to find effectif ${effectifId.toString()}`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { is_lock, nouveau_statut, nouveau_contrat, ...restData } = data;
 
-  // TODO CHECK IS LOCK IF COMING FROM API
-  // organisme
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
     merge(effectifDb, stripEmptyFields(restData));
 
   // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
-  if (dataToUpdate.formation.date_entree)
+  if (dataToUpdate.formation.date_entree) {
     dataToUpdate.formation.date_entree = new Date(dataToUpdate.formation.date_entree);
-  if (dataToUpdate.formation.date_fin) dataToUpdate.formation.date_fin = new Date(dataToUpdate.formation.date_fin);
-  if (dataToUpdate.formation.date_inscription)
+  }
+  if (dataToUpdate.formation.date_fin) {
+    dataToUpdate.formation.date_fin = new Date(dataToUpdate.formation.date_fin);
+  }
+  if (dataToUpdate.formation.date_inscription) {
     dataToUpdate.formation.date_inscription = new Date(dataToUpdate.formation.date_inscription);
-  if (dataToUpdate.formation.date_obtention_diplome)
+  }
+  if (dataToUpdate.formation.date_obtention_diplome) {
     dataToUpdate.formation.date_obtention_diplome = new Date(dataToUpdate.formation.date_obtention_diplome);
-  if (dataToUpdate.apprenant.date_rqth) dataToUpdate.apprenant.date_rqth = new Date(dataToUpdate.apprenant.date_rqth);
-  if (dataToUpdate.apprenant.date_de_naissance)
+  }
+  if (dataToUpdate.apprenant.date_rqth) {
+    dataToUpdate.apprenant.date_rqth = new Date(dataToUpdate.apprenant.date_rqth);
+  }
+  if (dataToUpdate.apprenant.date_de_naissance) {
     dataToUpdate.apprenant.date_de_naissance = new Date(dataToUpdate.apprenant.date_de_naissance);
+  }
 
   dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut.map((s) => {
     const statut = stripEmptyFields(s);
