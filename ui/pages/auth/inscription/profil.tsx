@@ -333,9 +333,9 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation;
                   >
                     <Box
                       as="i"
-                      className="ri-information-line"
+                      className="ri-error-warning-line"
                       fontSize="epsilon"
-                      color="grey.500"
+                      color="red.500"
                       marginLeft="1w"
                       verticalAlign="middle"
                     />
