@@ -519,7 +519,7 @@ function InfoBetaPanel() {
         Service d’import de vos effectifs en version bêta.
       </Text>
       <Text color="grey.800" mt={4} textStyle="sm">
-        Ce service est en cours de refonte, nous travaillons actuellement à le rendre pleinement fonctionnel.
+        Ce service est en phase d’amélioration, nous travaillons actuellement à le rendre pleinement fonctionnel.
         <br />
         Si vous constatez un dysfonctionnement lors de son utilisation, contactez-nous&nbsp;:{" "}
         <a target="_blank" rel="noopener noreferrer" href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr">
