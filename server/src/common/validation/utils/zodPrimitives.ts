@@ -355,7 +355,12 @@ export const primitivesV3 = {
     }),
     duree_theorique: z.preprocess(
       (v: any) => (v ? Number(v) : v),
-      z.number().int().min(1).max(4).describe("Durée théorique de la formation")
+      z
+        .number()
+        .int()
+        .min(1, "Le chiffre doit être supérieur ou égal à 1")
+        .max(4, "Le chiffre doit être inférieur ou égal à 4")
+        .describe("Durée théorique de la formation")
     ),
     date_exclusion: extensions.iso8601Date().openapi({
       description: "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
