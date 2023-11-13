@@ -133,39 +133,17 @@ export async function activateUser(ctx: AuthContext) {
       throw Boom.badRequest("Permissions invalides");
     }
 
-    // si des gestionnaires existent, on les notifie, sinon c'est un admin du TDB qui doit valider
-    if (gestionnaires.length > 0) {
-      await Promise.all(
-        gestionnaires.map(async (gestionnaire) => {
-          await sendEmail(gestionnaire.email, "validation_user_by_orga_gestionnaire", {
-            recipient: {
-              civility: gestionnaire.civility,
-              prenom: gestionnaire.prenom,
-              nom: gestionnaire.nom,
-            },
-            user: {
-              _id: ctx._id.toString(),
-              civility: ctx.civility,
-              nom: ctx.nom,
-              prenom: ctx.prenom,
-              email: ctx.email,
-            },
-            organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
-          });
-        })
-      );
-    } else {
-      await sendEmail("tableau-de-bord@apprentissage.beta.gouv.fr", "validation_user_by_tdb_team", {
-        user: {
-          _id: ctx._id.toString(),
-          civility: ctx.civility,
-          prenom: ctx.prenom,
-          nom: ctx.nom,
-          email: ctx.email,
-        },
-        organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
-      });
-    }
+    // Notification à l'administrateur TDB
+    await sendEmail("tableau-de-bord@apprentissage.beta.gouv.fr", "validation_user_by_tdb_team", {
+      user: {
+        _id: ctx._id.toString(),
+        civility: ctx.civility,
+        prenom: ctx.prenom,
+        nom: ctx.nom,
+        email: ctx.email,
+      },
+      organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
+    });
   }
 
   // renvoi du statut du compte pour rediriger l'utilisateur si son statut change
