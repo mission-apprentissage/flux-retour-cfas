@@ -654,7 +654,7 @@ export async function getEffectifsNominatifs(
             permissionRestriction,
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
-          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
+          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables et à modifier si on veut masquer les effectifs des OF inconnus
         },
       },
       {
