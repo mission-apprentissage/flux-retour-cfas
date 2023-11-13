@@ -40,8 +40,6 @@ export async function getIndicateursEffectifsParDepartement(
             await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParDepartement"),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
-          "_computed.organisme.raison_sociale": { $exists: true },
-          "_computed.organisme.enseigne": { $exists: true },
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -259,8 +257,6 @@ export async function getIndicateursEffectifsParOrganisme(
             await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParOrganisme"),
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
-          "_computed.organisme.raison_sociale": { $exists: true },
-          "_computed.organisme.enseigne": { $exists: true },
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -462,8 +458,6 @@ export async function getOrganismeIndicateursEffectifsParFormation(
             await getOrganismeIndicateursEffectifsRestriction(ctx),
             ...buildMongoFilters(filters, effectifsFiltersConfigurations),
           ],
-          "_computed.organisme.raison_sociale": { $exists: true },
-          "_computed.organisme.enseigne": { $exists: true },
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -660,8 +654,6 @@ export async function getEffectifsNominatifs(
             permissionRestriction,
             ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
-          "_computed.organisme.raison_sociale": { $exists: true },
-          "_computed.organisme.enseigne": { $exists: true },
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
