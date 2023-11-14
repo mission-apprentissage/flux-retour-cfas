@@ -19,6 +19,7 @@ const RegisterConfigurationOrganisationPage = () => {
   const router = useRouter();
   const typeOrganisation = router.query.typeOrganisation as CategorieCompteInscription;
   const [organisation, setOrganisation] = useState<NewOrganisation | null>(null);
+  const [hideBackNextButtons, setHideBackNextButtons] = useState<boolean>(false);
 
   return (
     <InscriptionWrapper>
@@ -51,26 +52,29 @@ const RegisterConfigurationOrganisationPage = () => {
           <InscriptionTeteDeReseau
             organisation={organisation}
             setOrganisation={setOrganisation as SetterOrganisation}
+            setHideBackNextButtons={setHideBackNextButtons}
           />
         )}
         {typeOrganisation === "carif_oref" && (
           <InscriptionCarifOref setOrganisation={setOrganisation as SetterOrganisation} />
         )}
       </Box>
-      <HStack gap="24px" mt={5}>
-        <Button onClick={() => router.push("/auth/inscription")} color="bluefrance" variant="secondary">
-          Revenir
-        </Button>
-        <Button
-          size="md"
-          variant="primary"
-          onClick={() => router.push(`/auth/inscription/profil?organisation=${JSON.stringify(organisation)}`)}
-          px={6}
-          isDisabled={!organisation}
-        >
-          Suivant
-        </Button>
-      </HStack>
+      {!hideBackNextButtons && (
+        <HStack gap="24px" mt={5}>
+          <Button onClick={() => router.push("/auth/inscription")} color="bluefrance" variant="secondary">
+            Revenir
+          </Button>
+          <Button
+            size="md"
+            variant="primary"
+            onClick={() => router.push(`/auth/inscription/profil?organisation=${JSON.stringify(organisation)}`)}
+            px={6}
+            isDisabled={!organisation}
+          >
+            Suivant
+          </Button>
+        </HStack>
+      )}
       {typeOrganisation === "organisme_formation" && (
         <Text mt={6}>
           <Link
