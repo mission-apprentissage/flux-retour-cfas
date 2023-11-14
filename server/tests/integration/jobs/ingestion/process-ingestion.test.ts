@@ -404,7 +404,7 @@ describe("Processus d'ingestion", () => {
         contrat_date_debut: "2021-09-01T00:00:00.000Z",
         contrat_date_fin: "2022-06-30T00:00:00.000Z",
         contrat_date_rupture: "2022-06-30T00:00:00.000Z",
-        nir_apprenant: "1234567890123",
+        nir_apprenant: "123 45678901 23", // les espaces sont supprimés
         adresse_apprenant: "1 rue de la paix",
         code_postal_apprenant: "75000",
         code_postal_de_naissance_apprenant: "44000",
