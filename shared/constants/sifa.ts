@@ -6,7 +6,7 @@ export const requiredFieldsSifa = [
   "apprenant.sexe",
   "apprenant.derniere_situation",
   "apprenant.dernier_organisme_uai",
-  "apprenant.organisme_gestionnaire",
+  "apprenant.type_cfa",
   "formation.duree_formation_relle",
   "formation.duree_theorique",
 ];

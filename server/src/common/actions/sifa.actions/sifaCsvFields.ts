@@ -8,8 +8,8 @@ export const SIFA_FIELDS = [
     value: "NUMERO_UAI",
   },
   {
-    label: "OG",
-    value: "OG",
+    label: "TYPE_CFA",
+    value: "TYPE_CFA",
   },
   {
     label: "SIT_FORM",

@@ -581,9 +581,9 @@ export interface Effectif {
      */
     dernier_organisme_uai?: string;
     /**
-     * Organisme gestionnaire de l’établissement
+     * Type de CFA
      */
-    organisme_gestionnaire?: 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 21 | 23 | 24 | 25;
+    type_cfa?: "01" | "02" | "03" | "04" | "05" | "06" | "07" | "08" | "09" | "10";
     /**
      * Dernier diplôme obtenu
      */
