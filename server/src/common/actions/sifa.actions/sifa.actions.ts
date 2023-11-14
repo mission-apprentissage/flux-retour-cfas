@@ -177,7 +177,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       AN_FORM: effectif.formation.annee,
       SIT_FORM: organismeFormateurUai,
       STATUT: "APP", // STATUT courant
-      OG: effectif.apprenant.organisme_gestionnaire,
+      TYPE_CFA: wrapNumString(effectif.apprenant.type_cfa),
       UAI_EPLE: organismeLieuDeFormationUai,
       NAT_STR_JUR: "NC", // Unknown for now
     };

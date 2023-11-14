@@ -134,8 +134,8 @@ export const apprenantSchema = object(
         "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
       pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789]|[0-9]{7}[a-zA-Z])$",
     }),
-    organisme_gestionnaire: integer({
-      enum: [11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 24, 25],
+    type_cfa: string({
+      enum: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
       description: "Organisme gestionnaire de l’établissement",
     }),
 
