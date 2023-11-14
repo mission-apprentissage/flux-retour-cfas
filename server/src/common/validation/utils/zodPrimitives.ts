@@ -275,7 +275,7 @@ export const primitivesV1 = {
 export const primitivesV3 = {
   apprenant: {
     nir: z.preprocess(
-      (v: any) => (v ? String(v) : v),
+      (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
       z
         .string()
         .trim()
