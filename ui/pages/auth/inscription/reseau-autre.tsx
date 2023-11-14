@@ -1,4 +1,4 @@
-import { Text, Center, Heading, HStack, Box } from "@chakra-ui/react";
+import { Text, Center, Heading, HStack, Box, Image } from "@chakra-ui/react";
 import Head from "next/head";
 import React from "react";
 
@@ -8,24 +8,23 @@ import Page from "@/components/Page/Page";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const BravoPage = () => {
+const ReseauAutre = () => {
   return (
     <Page>
       <Head>
         <title>Inscription</title>
       </Head>
       <Center w="full" flexDirection="column" border="1px solid" borderColor="openbluefrance" p={12}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/supportOutline_III.svg" alt="felicitation" />
+        <Image src="/images/supportOutline_III.svg" alt="felicitation" />
         <Heading as="h2" fontSize="2xl" my={[3, 6]}>
-          La création de votre compte n&apos;a pu aboutir (pour le moment).
+          La création de votre compte n’a pu aboutir (pour le moment).
         </Heading>
         <Text textAlign="center">
-          Le réseau indiqué n&apos;est actuellement pas encore référencé sur le tableau de bord.
+          Le réseau indiqué n’est actuellement pas encore référencé sur le tableau de bord.
           <br />
-          L&apos;équipe du tableau de bord reviendra vers vous pour investiguer et finaliser la création de votre
-          compte. <br />
-          Merci de votre patience et de l&apos;intérêt que vous portez au tableau de bord de l&apos;apprentissage.
+          L’équipe du tableau de bord reviendra vers vous pour investiguer et finaliser la création de votre compte.{" "}
+          <br />
+          Merci de votre patience et de l’intérêt que vous portez au tableau de bord de l’apprentissage.
         </Text>
         <HStack>
           <Link
@@ -44,4 +43,4 @@ const BravoPage = () => {
   );
 };
 
-export default BravoPage;
+export default ReseauAutre;
