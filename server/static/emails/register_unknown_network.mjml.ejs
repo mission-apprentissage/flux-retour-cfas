@@ -1,0 +1,34 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+    <mj-body background-color="#f9fafc">
+      <%- include('./common/header.ejs'); %>
+        <mj-wrapper padding="10px 20px">
+          <mj-section background-color="#ffffff" padding-top="0">
+            <mj-column>
+              <mj-text>
+                Bonjour,
+              </mj-text>
+              <mj-text>
+                Un utilisateur souhaite créer un compte sur le tableau de bord en tant que <strong>Tête de
+                  réseau</strong>
+              </mj-text>
+
+              <mj-text>
+                - Email : <%= data.email %><br />
+                  - Réseau : <%= data.reseau %>
+              </mj-text>
+
+              <mj-text>
+                Le réseau indiqué n'est actuellement ni identifié ni référencé.<br />
+                <strong>La création de son compte nécessite donc une action d'investigation de votre part (et contacter
+                  l'utilisateur).</strong>
+              </mj-text>
+
+              <%- include('./common/signature.ejs'); %>
+            </mj-column>
+          </mj-section>
+        </mj-wrapper>
+        <%- include('./common/footer.ejs'); %>
+    </mj-body>
+</mjml>

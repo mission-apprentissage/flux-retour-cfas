@@ -2,10 +2,10 @@ import Boom from "boom";
 import { STATUT_FIABILISATION_ORGANISME } from "shared";
 
 import logger from "@/common/logger";
-import { invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { auditLogsDb, invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken, createResetPasswordToken } from "@/common/utils/jwtUtils";
-import { RegistrationSchema } from "@/common/validation/registrationSchema";
+import { RegistrationSchema, RegistrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import config from "@/config";
 
 import { AuthContext } from "../model/internal/AuthContext.js";
@@ -162,6 +162,7 @@ export async function activateUser(ctx: AuthContext) {
     validationByGestionnaire: gestionnaires.length > 0,
   };
 }
+
 export async function sendForgotPasswordRequest(email: string) {
   const user = await getUserByEmail(email);
   if (!user) {
@@ -178,5 +179,20 @@ export async function sendForgotPasswordRequest(email: string) {
       email: user.email,
     },
     resetPasswordToken: token,
+  });
+}
+
+export async function registerUnknownNetwork(registrationUnknownNetwork: RegistrationUnknownNetworkSchema) {
+  // On stocke la demande dans les logs d'audits
+  await auditLogsDb().insertOne({
+    action: "register-unknown-network",
+    date: new Date(),
+    data: { email: registrationUnknownNetwork.email, reseau: registrationUnknownNetwork.unknownNetwork },
+  });
+
+  // Notification à l'administrateur TDB
+  await sendEmail("tableau-de-bord@apprentissage.beta.gouv.fr", "register_unknown_network", {
+    email: registrationUnknownNetwork.email,
+    reseau: registrationUnknownNetwork.unknownNetwork,
   });
 }

@@ -73,6 +73,7 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
   validation_user_by_orga_gestionnaire: (payload) =>
     `Demande d'accès à votre organisation ${payload.organisationLabel}`,
   validation_user_by_tdb_team: (payload) => `[ADMIN] Demande d'accès à l'organisation ${payload.organisationLabel}`,
+  register_unknown_network: () => `[ADMIN] Demande d'accès au tableau de bord : nouveau réseau signalé`,
 };
 
 // Pour chaque template, déclarer les champs qui sont utilisés dans le template
@@ -182,6 +183,10 @@ export type TemplatePayloads = {
       email: string;
     };
     organisationLabel: string;
+  };
+  register_unknown_network: {
+    email: string;
+    reseau: string;
   };
 };
 
