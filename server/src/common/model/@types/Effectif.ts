@@ -1851,14 +1851,6 @@ export interface Effectif {
        * organismes.fiabilisation_statut == "FIABLE" && ferme != false
        */
       fiable?: boolean;
-      /**
-       * Enseigne de l'organisme de formation
-       */
-      enseigne?: string;
-      /**
-       * Raison sociale de l'organisme de formation
-       */
-      raison_sociale?: string;
     };
     formation?: {
       codes_rome?: string[];
