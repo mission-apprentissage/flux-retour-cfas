@@ -1,10 +1,12 @@
-import { FormControl, FormLabel, Select } from "@chakra-ui/react";
+import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
 import React from "react";
 import { TETE_DE_RESEAUX_SORTED } from "shared";
 
 import { InscriptionOrganistionChildProps } from "./common";
 
-export const InscriptionTeteDeReseau = ({ setOrganisation }: InscriptionOrganistionChildProps) => {
+export const InscriptionTeteDeReseau = ({ organisation, setOrganisation }: InscriptionOrganistionChildProps) => {
+  const TETE_DE_RESEAUX_SORTED_WITH_OTHER_OPTION = [...TETE_DE_RESEAUX_SORTED, { nom: "Autre Réseau", key: "AUTRE" }];
+
   return (
     <>
       <FormControl isRequired>
@@ -18,13 +20,20 @@ export const InscriptionTeteDeReseau = ({ setOrganisation }: InscriptionOrganist
             })
           }
         >
-          {TETE_DE_RESEAUX_SORTED.map((reseau, index) => (
+          {TETE_DE_RESEAUX_SORTED_WITH_OTHER_OPTION.map((reseau, index) => (
             <option value={reseau.key} key={index}>
               {reseau.nom}
             </option>
           ))}
         </Select>
       </FormControl>
+
+      {organisation?.type === "TETE_DE_RESEAU" && organisation?.reseau === "AUTRE" && (
+        <FormControl mt="4" isRequired>
+          <FormLabel>Indiquez le nom de votre réseau :</FormLabel>
+          <Input name="autre_reseau" placeholder="Nom du réseau..." />
+        </FormControl>
+      )}
     </>
   );
 };

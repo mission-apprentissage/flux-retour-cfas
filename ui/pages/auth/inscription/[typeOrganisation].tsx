@@ -48,7 +48,10 @@ const RegisterConfigurationOrganisationPage = () => {
           <InscriptionOperateurPublic setOrganisation={setOrganisation as SetterOrganisation} />
         )}
         {typeOrganisation === "tete_de_reseau" && (
-          <InscriptionTeteDeReseau setOrganisation={setOrganisation as SetterOrganisation} />
+          <InscriptionTeteDeReseau
+            organisation={organisation}
+            setOrganisation={setOrganisation as SetterOrganisation}
+          />
         )}
         {typeOrganisation === "carif_oref" && (
           <InscriptionCarifOref setOrganisation={setOrganisation as SetterOrganisation} />
