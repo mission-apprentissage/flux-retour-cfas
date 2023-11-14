@@ -5,6 +5,8 @@ import React from "react";
 import { TETE_DE_RESEAUX_SORTED } from "shared";
 import * as Yup from "yup";
 
+import { _post } from "@/common/httpClient";
+
 import { InscriptionOrganistionChildProps } from "./common";
 
 export const InscriptionTeteDeReseau = ({
@@ -17,7 +19,10 @@ export const InscriptionTeteDeReseau = ({
 
   const sendOtherReseauRegisterDemand = async (values, { setStatus }) => {
     try {
-      // TODO Post with values
+      await _post("/api/v1/auth/register-unknown-network", {
+        email: values.email,
+        unknownNetwork: values.nomReseau,
+      });
       router.push("/auth/inscription/reseau-autre");
     } catch (e) {
       console.error(e);

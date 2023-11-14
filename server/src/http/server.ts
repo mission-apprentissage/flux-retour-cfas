@@ -15,7 +15,13 @@ import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
-import { activateUser, login, register, sendForgotPasswordRequest } from "@/common/actions/account.actions";
+import {
+  activateUser,
+  login,
+  register,
+  registerUnknownNetwork,
+  sendForgotPasswordRequest,
+} from "@/common/actions/account.actions";
 import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
@@ -102,7 +108,7 @@ import { configurationERPSchema } from "@/common/validation/configurationERPSche
 import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
-import { registrationSchema } from "@/common/validation/registrationSchema";
+import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import { extensions, primitivesV1 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
@@ -259,6 +265,17 @@ function setupRoutes(app: Application) {
         const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
         registration.user.email = registration.user.email.toLowerCase();
         return await register(registration);
+      })
+    )
+    .post(
+      "/api/v1/auth/register-unknown-network",
+      returnResult(async (req) => {
+        const registrationUnknownNetwork = await validateFullZodObjectSchema(
+          req.body,
+          registrationUnknownNetworkSchema
+        );
+        registrationUnknownNetwork.email = registrationUnknownNetwork.email.toLowerCase();
+        await registerUnknownNetwork(registrationUnknownNetwork);
       })
     )
     .post(

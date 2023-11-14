@@ -39,3 +39,10 @@ export const registrationSchema = {
 };
 
 export type RegistrationSchema = z.infer<z.ZodObject<typeof registrationSchema>>;
+
+export const registrationUnknownNetworkSchema = {
+  email: z.string(),
+  unknownNetwork: z.string(),
+};
+
+export type RegistrationUnknownNetworkSchema = z.infer<z.ZodObject<typeof registrationUnknownNetworkSchema>>;
