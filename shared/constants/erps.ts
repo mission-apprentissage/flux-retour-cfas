@@ -19,6 +19,7 @@ export const ERPS = sortAlphabeticallyBy("name", [
     id: "ymag",
     name: "Ypareo",
     apiV3: true,
+    helpFilePath: "/Ypareo-2023.pdf",
   },
   {
     id: "scform",
