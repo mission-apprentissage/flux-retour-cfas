@@ -35,6 +35,7 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useToaster from "@/hooks/useToaster";
+import { FileDownloadIcon } from "@/modules/dashboard/icons";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { Check, DownloadLine, Checkbox as IconCheckbox } from "@/theme/components/icons";
 
@@ -607,6 +608,45 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
           )}
         </>
       )}
+      {erp.helpFilePath ? (
+        <VStack
+          p={6}
+          borderWidth="1px"
+          borderColor="dgalt"
+          borderBottomWidth="4px"
+          borderBottomColor="bluefrance"
+          alignItems="start"
+          maxWidth={"360px"}
+        >
+          <Heading as="h4" fontSize="gamma">
+            Tutoriel pour {erp.name}
+          </Heading>
+          <Text pb={6}>
+            Une fois votre clé générée et copiée, veuillez la coller dans votre compte ERP. Ci-dessous, voyez comment
+            procéder.
+          </Text>
+          <Button
+            as="a"
+            variant={"link"}
+            target="_blank"
+            fontSize="md"
+            mt="2"
+            borderBottom="1px"
+            borderRadius="0"
+            mb="8"
+            ml="8"
+            lineHeight="6"
+            p="0"
+            _active={{
+              color: "bluefrance",
+            }}
+            href={erp.helpFilePath}
+          >
+            <FileDownloadIcon mr="2" />
+            Lire le tutoriel
+          </Button>
+        </VStack>
+      ) : null}
     </VStack>
   );
 }
