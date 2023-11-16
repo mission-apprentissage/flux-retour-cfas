@@ -14,6 +14,7 @@ import {
   UnorderedList,
   VStack,
   Wrap,
+  Link,
 } from "@chakra-ui/react";
 import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
@@ -30,7 +31,6 @@ import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
-import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
@@ -273,8 +273,49 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
             <Wrap fontSize="epsilon" textColor="grey.800">
               <HStack>
                 <Text>UAI&nbsp;:</Text>
-                <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
-                  {organisme.uai || "UAI INCONNUE"}
+                <Badge
+                  fontSize="epsilon"
+                  textColor="grey.800"
+                  textTransform="none"
+                  paddingX="1w"
+                  paddingY="2px"
+                  backgroundColor="#ECEAE3"
+                >
+                  {organisme.uai || "UAI Inconnue"}
+                  {!organisme.uai && (
+                    <Tooltip
+                      background="bluefrance"
+                      color="white"
+                      label={
+                        <Box padding="2w">
+                          <Text>
+                            <strong>Organismes responsables</strong>
+                          </Text>
+                          <UnorderedList mt={4}>
+                            <ListItem>
+                              Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme ’’Inconnue’’ alors
+                              que votre organisme en possède une, veuillez nous écrire à
+                              tableau-de-bord@apprentissage.beta.gouv.fr en nous la communiquant ainsi que votre fiche
+                              UAI, afin que nous puissions la mettre à jour.
+                            </ListItem>{" "}
+                            <ListItem>
+                              Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des services
+                              du rectorat de l’académie où se situe votre CFA.
+                            </ListItem>
+                          </UnorderedList>
+                        </Box>
+                      }
+                    >
+                      <Box
+                        as="i"
+                        className="ri-information-line"
+                        fontSize="epsilon"
+                        color="grey.500"
+                        marginLeft="1w"
+                        verticalAlign="middle"
+                      />
+                    </Tooltip>
+                  )}
                 </Badge>
               </HStack>
 
@@ -303,6 +344,41 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   backgroundColor="#ECEAE3"
                 >
                   {natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}
+                  {natureOrganismeDeFormationLabel[organisme.nature] === "Inconnue" && (
+                    <Tooltip
+                      background="bluefrance"
+                      color="white"
+                      label={
+                        <Box padding="2w">
+                          <Text>
+                            <strong>Votre Nature est inconnue</strong>
+                          </Text>
+                          <Text mt="2w">
+                            Si votre organisme a pour nature ’’Inconnue’’, cela signifie que l’offre de formation n’est
+                            pas collectée ou mal référencée par le Carif-Oref. Adressez-vous auprès de votre Carif-Oref
+                            régional pour modifier cette donnée. Veuillez noter que la modification de la nature d’un
+                            organisme impacte ses relations avec les autres organismes.
+                          </Text>
+                          <Link
+                            textDecoration={"underline"}
+                            isExternal
+                            href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                          >
+                            En savoir plus sur la démarche.
+                          </Link>
+                        </Box>
+                      }
+                    >
+                      <Box
+                        as="i"
+                        className="ri-information-line"
+                        fontSize="epsilon"
+                        color="grey.500"
+                        marginLeft="1w"
+                        verticalAlign="middle"
+                      />
+                    </Tooltip>
+                  )}
                   {natureOrganismeDeFormationTooltip[organisme.nature] && (
                     <Tooltip
                       background="bluefrance"
