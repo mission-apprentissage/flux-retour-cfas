@@ -12,8 +12,7 @@ export const ERPS = sortAlphabeticallyBy("name", [
   {
     id: "gesti",
     name: "Gesti",
-    helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/gesti.pdf",
-    helpFileSize: "352 ko",
+    apiV3: true,
   },
   {
     id: "ymag",
