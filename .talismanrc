@@ -113,6 +113,8 @@ fileignoreconfig:
   checksum: 7873a0ce38104e5b892c011bb99621e115cbc0a30bf3b02f916142213d488df8
 - filename: ui/modules/auth/inscription/InscriptionTeteDeReseau.tsx
   checksum: 5fa50502b737d7e06efff5cd4128da53f4dc7a196428149e1695977175e92cab
+- filename: ui/modules/dashboard/DashboardOrganisme.tsx
+  checksum: 2740311625e562ca5a15d43eadbed83ae73113716a09b4fbdb2e1f0c79ad42df
 scopeconfig:
 - scope: node
 custom_patterns:

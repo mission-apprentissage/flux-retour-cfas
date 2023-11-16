@@ -691,7 +691,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     </Text>
 
                     <Link
-                      href="/dictionnaire-des-donnees.pdf"
+                      href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20"
                       isExternal
                       borderBottom="1px"
                       color="action-high-blue-france"
