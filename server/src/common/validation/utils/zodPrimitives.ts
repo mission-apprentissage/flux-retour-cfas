@@ -199,7 +199,7 @@ export const primitivesV1 = {
             .trim()
             .toUpperCase()
             .replace(/[\s.-]+/g, "");
-          return sanitized.startsWith("RNCP") ? sanitized : `RNCP${sanitized}`;
+          return sanitized?.startsWith("RNCP") ? sanitized : `RNCP${sanitized}`;
         },
         z.string().toUpperCase().regex(RNCP_REGEX, "Code RNCP invalide")
       )
