@@ -296,11 +296,14 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                               Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme ’’Inconnue’’ alors
                               que votre organisme en possède une, veuillez nous écrire à
                               tableau-de-bord@apprentissage.beta.gouv.fr en nous la communiquant ainsi que votre fiche
-                              UAI, afin que nous puissions la mettre à jour.
+                              UAI, afin que nous puissions la mettre à jour. L’absence de ce numéro bloque
+                              l’enregistrement des contrats d’apprentissage. L’UAI est recommandée pour être reconnu
+                              OFA.
                             </ListItem>{" "}
                             <ListItem>
                               Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des services
-                              du rectorat de l’académie où se situe votre CFA.
+                              du rectorat de l’académie où se situe votre CFA. Plus d’informations dans la page d’Aide
+                              et FAQ.
                             </ListItem>
                           </UnorderedList>
                         </Box>
@@ -356,7 +359,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                           <Text mt="2w">
                             Si votre organisme a pour nature ’’Inconnue’’, cela signifie que l’offre de formation n’est
                             pas collectée ou mal référencée par le Carif-Oref. Adressez-vous auprès de votre Carif-Oref
-                            régional pour modifier cette donnée. Veuillez noter que la modification de la nature d’un
+                            régional pour renseigner cette donnée. Veuillez noter que la modification de la nature d’un
                             organisme impacte ses relations avec les autres organismes.
                           </Text>
                           <Link
