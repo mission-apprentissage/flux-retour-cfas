@@ -10,7 +10,7 @@ const SuggestFeature = () => {
 
   return (
     <Link
-      href={`mailto:${CONTACT_ADDRESS}?subject=Suggestion de fonctionnalité TDB [${getOrganisationLabel(
+      href={`mailto:${CONTACT_ADDRESS}?subject=Suggestion de fonctionnalité ou besoin exprimé sur TDB [${getOrganisationLabel(
         auth.organisation
       )}]`}
       target="_blank"
