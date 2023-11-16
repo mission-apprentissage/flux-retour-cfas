@@ -23,6 +23,8 @@ export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }: any
 
   // if (!field) throw new Error(`Field ${name} is not defined.`);
 
+  console.log(field);
+
   return (
     <InputField
       fieldType={fieldType ?? "text"}
@@ -31,6 +33,7 @@ export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }: any
       value={field.value ?? ""}
       onChange={handle}
       isRequired={field.required}
+      showApplyAllOption={field.showApplyAllOption && field.value}
       mb={mb}
       mt={mt}
       ml={ml}
