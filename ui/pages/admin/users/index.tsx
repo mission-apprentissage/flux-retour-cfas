@@ -20,9 +20,12 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
+import { usersExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
+import DownloadButton from "@/components/buttons/DownloadButton";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import UserForm from "@/modules/admin/UserForm";
@@ -227,11 +230,49 @@ const Users = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </HStack>
-          <Text py="6" color="#777">
-            {Intl.NumberFormat().format(filteredUsers.length || 0)}{" "}
-            {filteredUsers.length > 1 ? "comptes utilisateurs" : "compte utilisateur"}
-            {filteredUsers.length < users.length ? ` (${users.length} au total)` : ""}
-          </Text>
+          <HStack>
+            <DownloadButton
+              mr="4"
+              variant="secondary"
+              action={async () => {
+                exportDataAsXlsx(
+                  `users.xlsx`,
+                  filteredUsers.map((e) => {
+                    return {
+                      account_status: e.account_status,
+                      civility: e.civility,
+                      created_at: e.created_at,
+                      nom: e.nom,
+                      prenom: e.prenom,
+                      email: e.email,
+                      telephone: e.telephone,
+                      fonction: e.fonction,
+                      "organisation.type": e.organisation.type,
+                      "organisation.siret": e.organisation.siret,
+                      "organisation.uai": e.organisation.uai,
+                      "organisation.label": e.organisation.label,
+                      "organisation.organisme.nature": e.organisation.organisme?.nature,
+                      "organisation.organisme.nom": e.organisation.organisme?.nom,
+                      "organisation.organisme.raison_sociale": e.organisation.organisme?.raison_sociale,
+                      "organisation.organisme.reseaux": e.organisation.organisme?.reseaux?.join(", "),
+                      password_updated_at: e.password_updated_at,
+                      has_accept_cgu_version: e.has_accept_cgu_version,
+                      last_connection: e.last_connection,
+                      _id: e._id,
+                    };
+                  }),
+                  usersExportColumns
+                );
+              }}
+            >
+              Télécharger la liste
+            </DownloadButton>
+            <Text py="6" color="#777">
+              {Intl.NumberFormat().format(filteredUsers.length || 0)}{" "}
+              {filteredUsers.length > 1 ? "comptes utilisateurs" : "compte utilisateur"}
+              {filteredUsers.length < users.length ? ` (${users.length} au total)` : ""}
+            </Text>
+          </HStack>
           <NewTable
             data={filteredUsers || []}
             loading={isLoading}
