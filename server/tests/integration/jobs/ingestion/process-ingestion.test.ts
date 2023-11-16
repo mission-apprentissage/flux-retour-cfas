@@ -400,7 +400,7 @@ describe("Processus d'ingestion", () => {
         tel_apprenant: "0123456789",
         libelle_court_formation: "CAP",
         annee_formation: 1,
-        formation_rncp: "RNCP123",
+        formation_rncp: "RNCP 123", // les espaces sont supprimés
         contrat_date_debut: "2021-09-01T00:00:00.000Z",
         contrat_date_fin: "2022-06-30T00:00:00.000Z",
         contrat_date_rupture: "2022-06-30T00:00:00.000Z",

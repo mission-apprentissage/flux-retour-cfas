@@ -193,7 +193,14 @@ export const primitivesV1 = {
     code_rncp: z
       .preprocess(
         // certains organismes n'envoient pas le prefix RNCP
-        (v: any) => (v?.toString().trim().toUpperCase().startsWith("RNCP") ? v : `RNCP${v}`),
+        (v: any) => {
+          const sanitized = v
+            ?.toString()
+            .trim()
+            .toUpperCase()
+            .replace(/[\s.-]+/g, "");
+          return sanitized?.startsWith("RNCP") ? sanitized : `RNCP${sanitized}`;
+        },
         z.string().toUpperCase().regex(RNCP_REGEX, "Code RNCP invalide")
       )
       .openapi({
