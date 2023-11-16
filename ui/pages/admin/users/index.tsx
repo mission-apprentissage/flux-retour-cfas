@@ -178,8 +178,6 @@ const Users = () => {
 
   const closeModal = () => router.push("/admin/users", undefined, { shallow: true });
 
-  console.log(filteredUsers);
-
   return (
     <Page>
       <Head>
