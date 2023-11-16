@@ -180,6 +180,30 @@ export const organismesExportColumns = [
   },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
+export const usersExportColumns = [
+  { label: "account_status", key: "account_status", width: 20 },
+  { label: "civility", key: "civility", width: 20 },
+  { label: "created_at", key: "created_at", width: 20, xlsxType: "date" },
+  { label: "nom", key: "nom", width: 20 },
+  { label: "prenom", key: "prenom", width: 20 },
+  { label: "email", key: "email", width: 20 },
+  { label: "telephone", key: "telephone", width: 20, xlsxType: "string" },
+  { label: "fonction", key: "fonction", width: 20 },
+  { label: "organisation.type", key: "organisation.type", width: 20 },
+  { label: "organisation.siret", key: "organisation.siret", width: 20, xlsxType: "string" },
+  { label: "organisation.uai", key: "organisation.uai", width: 20, xlsxType: "string" },
+  { label: "organisation.label", key: "organisation.label", width: 20 },
+  { label: "organisation.organisme.nature", key: "organisation.organisme.nature", width: 20 },
+  { label: "organisation.organisme.nature", key: "organisation.organisme.nature", width: 20 },
+  { label: "organisation.organisme.nom", key: "organisation.organisme.nom", width: 20 },
+  { label: "organisation.organisme.raison_sociale", key: "organisation.organisme.raison_sociale", width: 20 },
+  { label: "organisation.organisme.reseaux", key: "organisation.organisme.reseaux", width: 20 },
+  { label: "password_updated_at", key: "password_updated_at", width: 20, xlsxType: "date" },
+  { label: "has_accept_cgu_version", key: "has_accept_cgu_version", width: 20 },
+  { label: "last_connection", key: "last_connection", width: 20, xlsxType: "date" },
+  { label: "_id", key: "_id", width: 20 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
 export function convertOrganismeToExport(
   organisme: Organisme
 ): Record<(typeof organismesExportColumns)[number]["key"], string> {
