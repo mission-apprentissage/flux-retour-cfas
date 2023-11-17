@@ -293,7 +293,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                           </Text>
                           <UnorderedList mt={4}>
                             <ListItem>
-                              Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme ’’Inconnue’’ alors
+                              Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme «&nbsp;Inconnue&nbsp;» alors
                               que votre organisme en possède une, veuillez nous écrire à
                               tableau-de-bord@apprentissage.beta.gouv.fr en nous la communiquant ainsi que votre fiche
                               UAI, afin que nous puissions la mettre à jour. L’absence de ce numéro bloque
