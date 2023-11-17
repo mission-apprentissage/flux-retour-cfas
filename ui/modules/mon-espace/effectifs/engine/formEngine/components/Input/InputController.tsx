@@ -23,8 +23,6 @@ export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w, onApp
 
   // if (!field) throw new Error(`Field ${name} is not defined.`);
 
-  console.log(field);
-
   return (
     <InputField
       fieldType={fieldType ?? "text"}

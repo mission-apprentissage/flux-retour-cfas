@@ -448,6 +448,6 @@ export const primitivesV3 = {
     .describe("Type de CFA")
     .openapi({
       enum: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
-      description: "Organisme gestionnaire de l’établissement",
+      description: "Type de CFA",
     }),
 };
