@@ -48,7 +48,7 @@ export const extensions = {
     z.preprocess(
       // On accepte les tirets, les espaces et les points dans le SIRET (et on les retire silencieusement)
       (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
-      z.string().trim().regex(SIRET_REGEX, "SIRET invalide") // e.g 01234567890123
+      z.string().trim().regex(SIRET_REGEX, "Siret invalide. Format attendu : 14 chiffres") // e.g 01234567890123
     ),
   uai: () => z.string().trim().toUpperCase().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
   code_naf: () =>
@@ -251,7 +251,7 @@ export const primitivesV1 = {
         .number()
         .int()
         .min(0)
-        .max(5)
+        .max(5, "Le chiffre doit être inférieur ou égal à 5")
         .describe("Année de la formation")
         // TO_DISCUSS: à quoi correspond l'année 0 ?
         .openapi({
