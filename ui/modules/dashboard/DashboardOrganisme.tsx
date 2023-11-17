@@ -281,7 +281,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   paddingY="2px"
                   backgroundColor="#ECEAE3"
                 >
-                  {organisme.uai || "UAI Inconnue"}
+                  {organisme.uai || "Inconnue"}
                   {!organisme.uai && (
                     <Tooltip
                       background="bluefrance"
@@ -289,7 +289,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       label={
                         <Box padding="2w">
                           <Text>
-                            <strong>Organismes responsables</strong>
+                            <strong>Votre UAI est inconnue</strong>
                           </Text>
                           <UnorderedList mt={4}>
                             <ListItem>
@@ -299,7 +299,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                               UAI, afin que nous puissions la mettre à jour. L’absence de ce numéro bloque
                               l’enregistrement des contrats d’apprentissage. L’UAI est recommandée pour être reconnu
                               OFA.
-                            </ListItem>{" "}
+                            </ListItem>
                             <ListItem>
                               Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des services
                               du rectorat de l’académie où se situe votre CFA. Plus d’informations dans la page d’Aide
