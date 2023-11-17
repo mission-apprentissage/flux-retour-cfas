@@ -357,7 +357,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                             <strong>Votre Nature est inconnue</strong>
                           </Text>
                           <Text mt="2w">
-                            Si votre organisme a pour nature ’’Inconnue’’, cela signifie que l’offre de formation n’est
+                            Si votre organisme a pour nature «&nbsp;Inconnue&nbsp;», cela signifie que l’offre de formation n’est
                             pas collectée ou mal référencée par le Carif-Oref. Adressez-vous auprès de votre Carif-Oref
                             régional pour renseigner cette donnée. Veuillez noter que la modification de la nature d’un
                             organisme impacte ses relations avec les autres organismes.
