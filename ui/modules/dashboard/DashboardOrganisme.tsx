@@ -293,8 +293,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                           </Text>
                           <UnorderedList mt={4}>
                             <ListItem>
-                              Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme «&nbsp;Inconnue&nbsp;» alors
-                              que votre organisme en possède une, veuillez nous écrire à
+                              Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme
+                              «&nbsp;Inconnue&nbsp;» alors que votre organisme en possède une, veuillez nous écrire à
                               tableau-de-bord@apprentissage.beta.gouv.fr en nous la communiquant ainsi que votre fiche
                               UAI, afin que nous puissions la mettre à jour. L’absence de ce numéro bloque
                               l’enregistrement des contrats d’apprentissage. L’UAI est recommandée pour être reconnu
@@ -357,10 +357,10 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                             <strong>Votre Nature est inconnue</strong>
                           </Text>
                           <Text mt="2w">
-                            Si votre organisme a pour nature «&nbsp;Inconnue&nbsp;», cela signifie que l’offre de formation n’est
-                            pas collectée ou mal référencée par le Carif-Oref. Adressez-vous auprès de votre Carif-Oref
-                            régional pour renseigner cette donnée. Veuillez noter que la modification de la nature d’un
-                            organisme impacte ses relations avec les autres organismes.
+                            Si votre organisme a pour nature «&nbsp;Inconnue&nbsp;», cela signifie que l’offre de
+                            formation n’est pas collectée ou mal référencée par le Carif-Oref. Adressez-vous auprès de
+                            votre Carif-Oref régional pour renseigner cette donnée. Veuillez noter que la modification
+                            de la nature d’un organisme impacte ses relations avec les autres organismes.
                           </Text>
                           <Link
                             textDecoration={"underline"}
