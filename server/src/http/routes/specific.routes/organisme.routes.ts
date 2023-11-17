@@ -52,3 +52,23 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
         : {}),
     }));
 }
+
+export async function updateOrganismeEffectifs(
+  organismeId: ObjectId,
+  sifa = false,
+  update: {
+    "apprenant.type_cfa"?: string | undefined;
+  }
+) {
+  const effectifs = await getOrganismeEffectifs(organismeId, sifa);
+  await effectifsDb().updateMany(
+    {
+      _id: {
+        $in: effectifs.map((effectif) => new ObjectId(effectif.id)),
+      },
+    },
+    {
+      ...(update["apprenant.type_cfa"] ? { $set: { "apprenant.type_cfa": update["apprenant.type_cfa"] } } : {}),
+    }
+  );
+}

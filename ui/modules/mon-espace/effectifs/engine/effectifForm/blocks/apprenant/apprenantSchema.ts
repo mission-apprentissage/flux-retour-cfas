@@ -748,6 +748,7 @@ export const apprenantSchema = {
       { value: "09", label: "09 CFA associatif" },
       { value: "10", label: "10 Autre CFA privé" },
     ],
+    showApplyAllOption: true,
   },
   "apprenant.dernier_diplome": {
     fieldType: "select",

@@ -176,19 +176,18 @@ export const InputField = memo(({ mt, mb, ml, mr, w, ...props }: any) => {
         <FormHelperText color={"warning"}>{typeof warning !== "function" ? warning : warning()}</FormHelperText>
       )}
       {error && <FormErrorMessage>{typeof error !== "function" ? error : error()}</FormErrorMessage>}
-      {showApplyAllOption && (
+      {showApplyAllOption && onApplyAll && (
         <Button
-          mt="-2"
-          mb="6"
+          mt="2"
+          mb="4"
           variant="secondary"
           fontSize="zeta"
           size="sm"
           onClick={() => {
-            if (onApplyAll) onApplyAll(props.value);
-            else alert(props.value);
+            onApplyAll(props.value);
           }}
         >
-          Appliquer ce paramètre à tous les effectifs concernés par l’enquête
+          Appliquer ce paramètre à tous les effectifs
         </Button>
       )}
     </FormControl>
