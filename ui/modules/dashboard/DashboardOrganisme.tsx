@@ -570,11 +570,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               </HStack>
             )}
           </VStack>
-
-          <HStack justifyContent="space-between">
-            <Box />
-            <SuggestFeature />
-          </HStack>
         </Container>
       </Box>
 
@@ -838,6 +833,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   <IndicateursEffectifsParFormationTable formations={formationsAvecIndicateurs} />
                 </>
               )}
+
+            <SuggestFeature />
           </>
         ) : (
           <Ribbons variant="warning" mt="0.5rem">

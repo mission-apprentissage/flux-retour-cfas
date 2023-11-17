@@ -164,10 +164,6 @@ const DashboardTransverse = () => {
           <Text color="bluefrance" fontWeight={700} mt="4" textTransform="uppercase">
             {getOrganisationLabel(auth.organisation)}
           </Text>
-          <HStack justifyContent="space-between">
-            <Box />
-            <SuggestFeature />
-          </HStack>
         </Container>
       </Box>
       <Container maxW="xl" p="8">
@@ -371,6 +367,8 @@ const DashboardTransverse = () => {
             )}
           </GridItem>
         </Grid>
+
+        <SuggestFeature />
       </Container>
     </Box>
   );
