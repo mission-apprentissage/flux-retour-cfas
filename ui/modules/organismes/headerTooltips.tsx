@@ -87,20 +87,37 @@ const headerTooltips = {
       (donnée facultative).
     </>
   ),
-  sit_n_1: (
+  derniere_situation: (
     <>
       Situation ou classe fréquentée l’année dernière (N-1). Pour plus d’aide, se référer à la nomenclature de la notice
       d’instruction SIFA disponible sur votre onglet “Mon enquête SIFA” (donnée facultative).
     </>
   ),
-  etab_n_1: (
+  dernier_organisme_uai: (
     <>
       L’établissement fréquenté l’année dernière par l’apprenant. Elle peut être renseignée : soit par le numéro UAI de
       l’établissement fréquenté l’année dernière (N-1); soit par le numéro du département de scolarisation de l’année
       dernière (N-1). (donnée facultative).
     </>
   ),
-  annee_scolaire: <>Il s’agit de l’année scolaire sur laquelle est positionnée l’apprenant (donnée obligatoire).</>,
+  annee_scolaire: (
+    <>
+      Il s’agit de l’année scolaire sur laquelle est positionnée l’apprenant (donnée obligatoire). Il est accepté
+      uniquement les années scolaires ou calendaires sur une année, soit par exemples&nbsp;:
+      <ul>
+        <li>2022-2023</li>
+        <li>2023-2024</li>
+        <li>2022-2022</li>
+        <li>2023-2023</li>
+      </ul>
+      Exemples d’années scolaires non valides&nbsp;:
+      <ul>
+        <li>2022-2024</li>
+        <li>2022-2025</li>
+        <li>2022-2026</li>
+      </ul>
+    </>
+  ),
   annee_formation: (
     <>
       Indiquer au choix 1, 2, 3, 4, 5, 6. Il s’agit de la situation dans la formation : elle est censée refléter le
@@ -189,7 +206,12 @@ const headerTooltips = {
   ),
   contrat_date_debut: <>Date de début du premier contrat (donnée facultative).</>,
   contrat_date_fin: <>Date de fin du premier contrat (donnée facultative).</>,
-  siret_employeur: <>Donnée obligatoire seulement si il y a eu un contrat signé entre un apprenti et un employeur.</>,
+  siret_employeur: (
+    <>
+      Donnée obligatoire seulement si il y a eu un contrat signé entre un apprenti et un employeur. Format
+      attendu&nbsp;: 14 chiffres
+    </>
+  ),
   contrat_date_rupture: (
     <>Date de rupture du premier contrat. Donnée obligatoire seulement si il y a eu rupture du contrat.</>
   ),
