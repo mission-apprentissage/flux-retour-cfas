@@ -26,7 +26,7 @@ const SuggestFeature = () => {
         </Text>
         <Text mt={4}>
           Le Tableau de bord se veut être l’instrument de votre pilotage - vous voulez voir une fonctionnalité sur votre
-          tableau qui n’existe pas encore, écrivez-nous !
+          tableau qui n’existe pas encore, écrivez-nous&nbsp;!
         </Text>
         <Link
           variant="blueBg"
