@@ -8,7 +8,7 @@ import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 
 // le nom doit correspondre à la clé de l'opco et au nom du fichier CSV
 // dans le dossier server/static/opcos
-export const OPCOS = ["2i", "ep"];
+export const OPCOS = ["2i", "ep", "akto", "atlas"];
 
 const jobLogger = parentLogger.child({
   module: "job:hydrate:opcos",
@@ -16,7 +16,7 @@ const jobLogger = parentLogger.child({
 
 /**
  * Remplit le champ organismes.opcos.
- * Pour l'instant, uniquement 2i et ep.
+ * Pour l'instant, uniquement 2i, ep, akto et atlas.
  */
 export const hydrateOrganismesOPCOs = async () => {
   for (const opco of OPCOS) {
