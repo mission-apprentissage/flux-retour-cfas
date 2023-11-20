@@ -22,11 +22,11 @@ const SuggestFeature = () => {
     >
       <Box flex="6">
         <Text fontWeight="bold" color="black" fontSize="gamma">
-          Contribuer à l’évolution du Tableau de Bord
+          Contribuer à l’évolution du Tableau de bord de l’apprentissage
         </Text>
         <Text mt={4}>
-          Aidez-nous à faire évoluer le Tableau de Bord en proposant de nouvelles fonctionnalités, informations à
-          afficher ou en proposant des améliorations sur l’existant.
+          Le Tableau de bord se veut être l’instrument de votre pilotage - vous voulez voir une fonctionnalité sur votre
+          tableau qui n’existe pas encore, écrivez-nous !
         </Text>
         <Link
           variant="blueBg"
