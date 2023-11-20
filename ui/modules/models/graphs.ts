@@ -4,7 +4,13 @@ export interface Bin {
   color: string;
 }
 
-export function calculateBins(data: number[], numberOfBuckets: number, minColor: string, maxColor: string): Bin[] {
+export function calculateBins(
+  data: number[],
+  numberOfBuckets: number,
+  minColor: string,
+  maxColor: string,
+  maxTo100?: boolean
+): Bin[] {
   const sortedData = [...data].sort((a, b) => a - b);
   const dataMin = sortedData[0];
   const dataMax = sortedData[sortedData.length - 1];
@@ -19,9 +25,10 @@ export function calculateBins(data: number[], numberOfBuckets: number, minColor:
 
     return { minValue, maxValue, color };
   });
-  // borne min à zéro, max à 100 pour un meilleur affichage
+  // borne min à zéro pour un meilleur affichage
   bins[0].minValue = 0;
-  bins[bins.length - 1].maxValue = 100;
+  // Si c'est des porcentages, on met la borne max à 100
+  if (maxTo100) bins[bins.length - 1].maxValue = 100;
   return bins;
 }
 

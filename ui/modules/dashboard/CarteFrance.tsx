@@ -30,7 +30,8 @@ function CarteFrance<Data extends object>(props: Props<Data>) {
         props.donneesAvecDepartement.map((v) => v[props.dataKey]),
         5,
         props.minColor,
-        props.maxColor
+        props.maxColor,
+        props.pourcentage
       ),
     [props.donneesAvecDepartement, props.dataKey, props.minColor, props.maxColor]
   );
