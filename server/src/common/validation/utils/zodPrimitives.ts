@@ -456,4 +456,12 @@ export const primitivesV3 = {
     .openapi({
       example: "0123456A",
     }),
+  type_cfa: z
+    .string()
+    .regex(/^(01|02|03|04|05|06|07|08|09|10)$/, "01 à 10")
+    .describe("Type de CFA")
+    .openapi({
+      enum: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
+      description: "Type de CFA",
+    }),
 };

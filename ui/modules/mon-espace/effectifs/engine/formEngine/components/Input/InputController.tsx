@@ -7,7 +7,7 @@ import { useEffectifFormController } from "@/modules/mon-espace/effectifs/engine
 import { InputField } from "./Input";
 
 // eslint-disable-next-line react/display-name
-export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }: any) => {
+export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w, onApplyAll }: any) => {
   const controller = useEffectifFormController();
 
   const handle = useCallback(
@@ -31,6 +31,8 @@ export const InputController = memo(({ name, fieldType, mt, mb, ml, mr, w }: any
       value={field.value ?? ""}
       onChange={handle}
       isRequired={field.required}
+      showApplyAllOption={field.showApplyAllOption && field.value}
+      onApplyAll={onApplyAll}
       mb={mb}
       mt={mt}
       ml={ml}

@@ -77,7 +77,7 @@ export const EffectifForm = memo(({ modeSifa = false }: { modeSifa: boolean }) =
               validationErrors={validationErrorsByBlock.apprenant}
               requiredSifa={requiredSifaByBlock.apprenant}
             >
-              <EffectifApprenant apprenant={values?.apprenant} />
+              <EffectifApprenant apprenant={values?.apprenant} modeSifa={modeSifa} />
             </AccordionItemChild>
           )}
         </AccordionItem>

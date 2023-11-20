@@ -1,4 +1,13 @@
-import { Box, FormControl, FormErrorMessage, FormHelperText, FormLabel, HStack, InputGroup } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
+  HStack,
+  InputGroup,
+} from "@chakra-ui/react";
 import React, { memo, useCallback, useMemo, useState } from "react";
 
 import InfoTooltip from "@/components/InfoTooltip/InfoTooltip";
@@ -127,7 +136,18 @@ export const Input = memo(
 
 // eslint-disable-next-line react/display-name
 export const InputField = memo(({ mt, mb, ml, mr, w, ...props }: any) => {
-  const { name, label, locked, isRequired, error, description, fieldType = "text", warning } = props;
+  const {
+    name,
+    label,
+    locked,
+    isRequired,
+    error,
+    description,
+    fieldType = "text",
+    warning,
+    showApplyAllOption,
+    onApplyAll,
+  } = props;
   const Component = TypesMapping[fieldType] ?? (() => <></>);
 
   return (
@@ -156,6 +176,20 @@ export const InputField = memo(({ mt, mb, ml, mr, w, ...props }: any) => {
         <FormHelperText color={"warning"}>{typeof warning !== "function" ? warning : warning()}</FormHelperText>
       )}
       {error && <FormErrorMessage>{typeof error !== "function" ? error : error()}</FormErrorMessage>}
+      {showApplyAllOption && onApplyAll && (
+        <Button
+          mt="2"
+          mb="4"
+          variant="secondary"
+          fontSize="zeta"
+          size="sm"
+          onClick={() => {
+            onApplyAll(props.value);
+          }}
+        >
+          Appliquer ce paramètre à tous les effectifs
+        </Button>
+      )}
     </FormControl>
   );
 });

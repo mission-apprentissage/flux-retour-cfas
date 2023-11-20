@@ -1,6 +1,10 @@
 import { Box, Flex, FormLabel, HStack, Text } from "@chakra-ui/react";
 import React, { memo } from "react";
+import { useRecoilValue } from "recoil";
 
+import { _put } from "@/common/httpClient";
+import { Organisme } from "@/common/internal/Organisme";
+import { organismeAtom } from "@/hooks/organismeAtoms";
 import { CollapseController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/CollapseController";
 import { InputController } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/InputController";
 
@@ -8,7 +12,11 @@ import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal"
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 
 // eslint-disable-next-line react/display-name
-export const EffectifApprenant = memo(({ apprenant }: { apprenant: any }) => {
+export const EffectifApprenant = memo(({ apprenant, modeSifa }: { apprenant: any; modeSifa: boolean }) => {
+  const organisme = useRecoilValue<Organisme | null | undefined>(organismeAtom);
+
+  if (!organisme) return null;
+
   return (
     <Box>
       <Flex>
@@ -85,7 +93,15 @@ export const EffectifApprenant = memo(({ apprenant }: { apprenant: any }) => {
           <InputController name="apprenant.adresse.code_insee" />
           <InputController name="apprenant.adresse.commune" />
           <InputController name="apprenant.situation_avant_contrat" />
-          <InputController name="apprenant.type_cfa" />
+          <InputController
+            name="apprenant.type_cfa"
+            onApplyAll={async () => {
+              if (confirm("Êtes-vous sûr de vouloir appliquer ce paramètre à tous les effectifs ?"))
+                await _put(`/api/v1/organismes/${organisme._id}/effectifs${modeSifa ? "?sifa=true" : ""}`, {
+                  "apprenant.type_cfa": apprenant.type_cfa,
+                });
+            }}
+          />
           <InputController name="apprenant.dernier_organisme_uai" />
           <InputController name="apprenant.derniere_situation" />
           <InputController name="apprenant.dernier_diplome" />

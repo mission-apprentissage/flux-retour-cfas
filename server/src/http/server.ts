@@ -110,7 +110,7 @@ import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
-import { extensions, primitivesV1 } from "@/common/validation/utils/zodPrimitives";
+import { extensions, primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
@@ -134,7 +134,7 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
-import { getOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
+import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
@@ -504,6 +504,16 @@ function setupRoutes(app: Application) {
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
           return await getOrganismeEffectifs(res.locals.organismeId, req.query.sifa === "true");
+        })
+      )
+      .put(
+        "/effectifs",
+        requireOrganismePermission("manageEffectifs"),
+        returnResult(async (req, res) => {
+          const updated = await validateFullZodObjectSchema(req.body, {
+            "apprenant.type_cfa": primitivesV3.type_cfa.optional(),
+          });
+          await updateOrganismeEffectifs(res.locals.organismeId, req.query.sifa === "true", updated);
         })
       )
       .get(
