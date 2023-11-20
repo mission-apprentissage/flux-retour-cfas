@@ -19,8 +19,9 @@ export function calculateBins(data: number[], numberOfBuckets: number, minColor:
 
     return { minValue, maxValue, color };
   });
-  // borne min à zéro pour un meilleur affichage
+  // borne min à zéro, max à 100 pour un meilleur affichage
   bins[0].minValue = 0;
+  bins[bins.length - 1].maxValue = 100;
   return bins;
 }
 
