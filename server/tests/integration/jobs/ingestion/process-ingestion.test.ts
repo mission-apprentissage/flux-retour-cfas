@@ -798,7 +798,7 @@ describe("Processus d'ingestion", () => {
       it("Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format de l'id_formation / rncp pour un organisme fiable", async () => {
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...createRandomDossierApprenantApiInput({
-            annee_scolaire: "2021,2022",
+            annee_scolaire: "2021-2022",
             uai_etablissement: UAI,
             formation_rncp: "invalideRncp",
             siret_etablissement: SIRET,
@@ -823,10 +823,6 @@ describe("Processus d'ingestion", () => {
         });
 
         expect(sortByPath(updatedInput?.validation_errors)).toStrictEqual([
-          {
-            message: "Format invalide (format attendu : 2023-2024)",
-            path: ["annee_scolaire"],
-          },
           {
             message: "Code RNCP invalide",
             path: ["formation_rncp"],
@@ -954,59 +950,66 @@ describe("Processus d'ingestion", () => {
         await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
       });
 
-      it("Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format de l'année scolaire pour un organisme fiable", async () => {
-        const sampleData: EffectifsQueue = {
-          ine_apprenant: "402957826QH",
-          nom_apprenant: "SMITH",
-          prenom_apprenant: "Jean",
-          date_de_naissance_apprenant: "1999-08-31T16:21:32",
-          email_contact: "Clandre34@hotmail.fr",
-          id_formation: "50033610",
-          libelle_long_formation: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
-          uai_etablissement: UAI,
-          siret_etablissement: SIRET,
-          nom_etablissement: "ETABLISSEMENT EMPOWER",
-          statut_apprenant: 3,
-          date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
-          annee_formation: 0,
-          periode_formation: "2022-2024",
-          annee_scolaire: 2024,
-          id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
-          tel_apprenant: "+33 534648662",
-          code_commune_insee_apprenant: "05109",
-          source: "apiUser",
-          source_organisme_id: "9999999",
-          created_at: new Date(),
-        };
+      it.each([[2024], ["2024"], ["2021,2022"], ["2023-2025"], ["2010-2026"], ["2023-2021"]])(
+        "Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format de l'année scolaire pour un organisme fiable",
+        async (wrongAnneeScolaire) => {
+          const sampleData: EffectifsQueue = {
+            ine_apprenant: "402957826QH",
+            nom_apprenant: "SMITH",
+            prenom_apprenant: "Jean",
+            date_de_naissance_apprenant: "1999-08-31T16:21:32",
+            email_contact: "Clandre34@hotmail.fr",
+            id_formation: "50033610",
+            libelle_long_formation: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
+            uai_etablissement: UAI,
+            siret_etablissement: SIRET,
+            nom_etablissement: "ETABLISSEMENT EMPOWER",
+            statut_apprenant: 3,
+            date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
+            annee_formation: 0,
+            periode_formation: "2022-2024",
+            annee_scolaire: 2024,
+            id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
+            tel_apprenant: "+33 534648662",
+            code_commune_insee_apprenant: "05109",
+            source: "apiUser",
+            source_organisme_id: "9999999",
+            created_at: new Date(),
+          };
 
-        const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
+          const { insertedId } = await effectifsQueueDb().insertOne({
+            ...sampleData,
+            annee_scolaire: wrongAnneeScolaire,
+          });
 
-        const result = await processEffectifsQueue();
+          const result = await processEffectifsQueue();
 
-        expect(result).toStrictEqual({
-          totalProcessed: 1,
-          totalValidItems: 0,
-          totalInvalidItems: 1,
-        });
+          expect(result).toStrictEqual({
+            totalProcessed: 1,
+            totalValidItems: 0,
+            totalInvalidItems: 1,
+          });
 
-        const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
+          const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
-        expect(updatedInput).toMatchObject({
-          processed_at: expect.any(Date),
-        });
+          expect(updatedInput).toMatchObject({
+            processed_at: expect.any(Date),
+          });
 
-        expect(sortByPath(updatedInput?.validation_errors)).toStrictEqual([
-          {
-            message: "Format invalide (format attendu : 2023-2024)",
-            path: ["annee_scolaire"],
-          },
-        ]);
-        expect(updatedInput?.organisme_id).toBeUndefined();
-        expect(updatedInput?.effectif_id).toBeUndefined();
+          expect(sortByPath(updatedInput?.validation_errors)).toStrictEqual([
+            {
+              message:
+                "Format invalide (format attendu : 2023-2024). Les années doivent être consécutives ou identiques (ex : 2023-2024 ou 2023-2023)",
+              path: ["annee_scolaire"],
+            },
+          ]);
+          expect(updatedInput?.organisme_id).toBeUndefined();
+          expect(updatedInput?.effectif_id).toBeUndefined();
 
-        // check that no data was created
-        await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
-      });
+          // check that no data was created
+          await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
+        }
+      );
     });
 
     describe("Ingestion de mises à jour de données invalides", () => {

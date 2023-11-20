@@ -10,7 +10,6 @@ import {
   RNCP_REGEX,
   SIRET_REGEX,
   UAI_REGEX,
-  YEAR_RANGE_REGEX,
   INE_REGEX,
   NIR_LOOSE_REGEX,
   CODE_POSTAL_REGEX,
@@ -238,7 +237,22 @@ export const primitivesV1 = {
       z
         .string()
         .trim()
-        .regex(YEAR_RANGE_REGEX, "Format invalide (format attendu : 2023-2024)")
+        .refine(
+          (value) => {
+            const match = value.match(/^([12][0-9]{3})-([12][0-9]{3})$/);
+            if (match) {
+              const [, year1, year2] = match;
+              const year1Num = parseInt(year1, 10);
+              const year2Num = parseInt(year2, 10);
+              return year1Num === year2Num || year1Num + 1 === year2Num;
+            }
+            return false;
+          },
+          {
+            message:
+              "Format invalide (format attendu : 2023-2024). Les années doivent être consécutives ou identiques (ex : 2023-2024 ou 2023-2023)",
+          }
+        )
         .describe("Période scolaire")
         .openapi({
           type: "string",
