@@ -60,6 +60,7 @@ export async function updateOrganismeEffectifs(
     "apprenant.type_cfa"?: string | undefined;
   }
 ) {
+  if (!update["apprenant.type_cfa"]) return;
   const effectifs = await getOrganismeEffectifs(organismeId, sifa);
   await effectifsDb().updateMany(
     {
