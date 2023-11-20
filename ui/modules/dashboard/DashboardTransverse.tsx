@@ -27,6 +27,7 @@ import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { formatCivility, formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
+import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
@@ -366,6 +367,8 @@ const DashboardTransverse = () => {
             )}
           </GridItem>
         </Grid>
+
+        <SuggestFeature />
       </Container>
     </Box>
   );

@@ -32,6 +32,7 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
@@ -832,6 +833,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                   <IndicateursEffectifsParFormationTable formations={formationsAvecIndicateurs} />
                 </>
               )}
+
+            <SuggestFeature />
           </>
         ) : (
           <Ribbons variant="warning" mt="0.5rem">
