@@ -38,7 +38,7 @@ export const extensions = {
   phone: () =>
     z.coerce
       .string()
-      // On vérifier que ça contient au moins un chiffre (ou que c'est une chaine vide, car on les accepte aussi)
+      // On va vérifier que ça contient au moins un chiffre (ou que c'est une chaine vide, car on les accepte aussi)
       .regex(/^$|.*[0-9].*/, "Format invalide")
       // On passe à null en cas de chaine vide
       .transform((v: string) => (v ? telephoneConverter(v) : null))
