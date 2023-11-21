@@ -1,16 +1,19 @@
+import { SearchIcon } from "@chakra-ui/icons";
 import {
   Box,
+  Button,
+  Divider,
   Heading,
   HStack,
   Input,
+  InputGroup,
+  InputRightElement,
   Modal,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Stack,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
@@ -19,7 +22,7 @@ import NavLink from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
-import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
+import { USER_STATUS_LABELS, USER_STATUS_STYLE } from "@/common/constants/usersConstants";
 import { usersExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
@@ -29,6 +32,7 @@ import DownloadButton from "@/components/buttons/DownloadButton";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import UserForm from "@/modules/admin/UserForm";
+import UsersFiltersPanel from "@/modules/admin/users/UsersFiltersPanel";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { ArrowRightLine } from "@/theme/components/icons";
 
@@ -111,7 +115,9 @@ const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
     accessorKey: "account_status",
     cell: ({ row }) => (
       <>
-        <Text fontSize="sm">{USER_STATUS_LABELS[row.original?.account_status] ?? row.original?.account_status}</Text>
+        <Text color={USER_STATUS_STYLE[row.original?.account_status] ?? "black"} fontSize="sm">
+          {USER_STATUS_LABELS[row.original?.account_status] ?? row.original?.account_status}
+        </Text>
       </>
     ),
   },
@@ -161,6 +167,8 @@ const Users = () => {
     });
   }, [data]);
 
+  console.log("users :>> ", users);
+
   const filteredUsers = useMemo(() => {
     if (!search) return users;
     return users?.filter((user) => {
@@ -208,80 +216,85 @@ const Users = () => {
         </ModalContent>
       </Modal>
 
-      <VStack alignItems="baseline" width="100%">
-        <HStack justifyContent="space-between" alignItems="baseline" width="100%">
-          <Heading as="h1" mb={8} mt={6}>
-            {title}
-          </Heading>
-          {/** désactivé tant que formulaire de création pas complet */}
-          {/* {!isLoading && (
-            <Button as={NavLink} href="?new=1" bg="bluefrance" color="white" _hover={{ bg: "blue.700" }}>
-              Créer un utilisateur
-            </Button>
-          )} */}
-        </HStack>
-        <Stack spacing={2} width="100%">
-          <HStack gap={0}>
+      <Heading as="h1" mb={8} mt={6}>
+        {title}
+      </Heading>
+
+      <Box border="1px solid" borderColor="openbluefrance" p={4}>
+        <HStack mb="4" spacing="8">
+          <InputGroup>
             <Input
               placeholder="Rechercher un utilisateur par nom, prénom, email, siret, établissement, etc."
               type="search"
               name="q"
               defaultValue={search}
               onChange={(e) => setSearch(e.target.value)}
+              flex="1"
+              mr="2"
             />
-          </HStack>
-          <HStack>
-            <DownloadButton
-              mr="4"
-              variant="secondary"
-              action={async () => {
-                exportDataAsXlsx(
-                  `users.xlsx`,
-                  filteredUsers.map((e) => {
-                    return {
-                      account_status: e.account_status,
-                      civility: e.civility,
-                      created_at: e.created_at,
-                      nom: e.nom,
-                      prenom: e.prenom,
-                      email: e.email,
-                      telephone: e.telephone,
-                      fonction: e.fonction,
-                      "organisation.type": e.organisation.type,
-                      "organisation.siret": e.organisation.siret,
-                      "organisation.uai": e.organisation.uai,
-                      "organisation.label": e.organisation.label,
-                      "organisation.organisme.nature": e.organisation.organisme?.nature,
-                      "organisation.organisme.nom": e.organisation.organisme?.nom,
-                      "organisation.organisme.raison_sociale": e.organisation.organisme?.raison_sociale,
-                      "organisation.organisme.reseaux": e.organisation.organisme?.reseaux?.join(", "),
-                      password_updated_at: e.password_updated_at,
-                      has_accept_cgu_version: e.has_accept_cgu_version,
-                      last_connection: e.last_connection,
-                      _id: e._id,
-                    };
-                  }),
-                  usersExportColumns
-                );
-              }}
-            >
-              Télécharger la liste
-            </DownloadButton>
-            <Text py="6" color="#777">
-              {Intl.NumberFormat().format(filteredUsers.length || 0)}{" "}
-              {filteredUsers.length > 1 ? "comptes utilisateurs" : "compte utilisateur"}
-              {filteredUsers.length < users.length ? ` (${users.length} au total)` : ""}
-            </Text>
-          </HStack>
-          <NewTable
-            data={filteredUsers || []}
-            loading={isLoading}
-            sortingState={sort}
-            onSortingChange={(state) => setSort(state)}
-            columns={UsersColumns}
-          />
-        </Stack>
-      </VStack>
+            <InputRightElement>
+              <Button backgroundColor="bluefrance" _hover={{ textDecoration: "none" }}>
+                <SearchIcon textColor="white" />
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+          <DownloadButton
+            mr="4"
+            w="25%"
+            variant="secondary"
+            action={async () => {
+              exportDataAsXlsx(
+                `users.xlsx`,
+                filteredUsers.map((e) => {
+                  return {
+                    account_status: e.account_status,
+                    civility: e.civility,
+                    created_at: e.created_at,
+                    nom: e.nom,
+                    prenom: e.prenom,
+                    email: e.email,
+                    telephone: e.telephone,
+                    fonction: e.fonction,
+                    "organisation.type": e.organisation.type,
+                    "organisation.siret": e.organisation.siret,
+                    "organisation.uai": e.organisation.uai,
+                    "organisation.label": e.organisation.label,
+                    "organisation.organisme.nature": e.organisation.organisme?.nature,
+                    "organisation.organisme.nom": e.organisation.organisme?.nom,
+                    "organisation.organisme.raison_sociale": e.organisation.organisme?.raison_sociale,
+                    "organisation.organisme.reseaux": e.organisation.organisme?.reseaux?.join(", "),
+                    password_updated_at: e.password_updated_at,
+                    has_accept_cgu_version: e.has_accept_cgu_version,
+                    last_connection: e.last_connection,
+                    _id: e._id,
+                  };
+                }),
+                usersExportColumns
+              );
+            }}
+          >
+            Télécharger la liste
+          </DownloadButton>
+        </HStack>
+        <Divider mb="4" />
+        <HStack>
+          <UsersFiltersPanel />
+        </HStack>
+      </Box>
+
+      <Text py="6" color="#777">
+        {Intl.NumberFormat().format(filteredUsers.length || 0)}{" "}
+        {filteredUsers.length > 1 ? "comptes utilisateurs" : "compte utilisateur"}
+        {filteredUsers.length < users.length ? ` (${users.length} au total)` : ""}
+      </Text>
+
+      <NewTable
+        data={filteredUsers || []}
+        loading={isLoading}
+        sortingState={sort}
+        onSortingChange={(state) => setSort(state)}
+        columns={UsersColumns}
+      />
     </Page>
   );
 };
