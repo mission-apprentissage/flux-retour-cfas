@@ -44,7 +44,7 @@ fileignoreconfig:
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
-  checksum: 71c4adc90d1b720320b8c713f4ab5fd69335979705fe079b77f79504f7dbab6f
+  checksum: 2d18465402ee5d7b806d63e3d72195ad65bfbc271e2e156840bbc29210e71b14
   ignore_detectors:
   - filesize
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml

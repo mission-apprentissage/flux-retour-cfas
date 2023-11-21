@@ -11,6 +11,7 @@ import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
 import { sendReminderEmails } from "./emails/reminder";
 import { removeInscritsSansContratsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
+import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
 import { getStats } from "./fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
 import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
@@ -70,6 +71,9 @@ export const CronsMap = {
 
       // # Remplissage des réseaux
       await addJob({ name: "hydrate:reseaux", queued: true });
+
+      // # Remplissage des ofa inconnus
+      await addJob({ name: "hydrate:ofa-inconnus", queued: true });
 
       // # Lancement des scripts de fiabilisation des couples UAI - SIRET
       await addJob({ name: "fiabilisation:uai-siret:run", queued: true });
@@ -200,6 +204,8 @@ export async function runJob(job: IJobsCronTask | IJobsSimple): Promise<number> 
         return hydrateOrganismesOPCOs();
       case "hydrate:reseaux":
         return hydrateReseaux();
+      case "hydrate:ofa-inconnus":
+        return hydrateRaisonSocialeEtEnseigneOFAInconnus();
       case "purge:events":
         return purgeEvents((job.payload as any)?.nbDaysToKeep);
       case "purge:queues":

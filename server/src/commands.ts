@@ -485,6 +485,12 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:reseaux"));
 
+program
+  .command("hydrate:ofa-inconnus")
+  .description("Correction de l'enseigne et raison sociale des OFA inconnus via API Entreprise")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:ofa-inconnus"));
+
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**
