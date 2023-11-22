@@ -15,12 +15,11 @@ import {
   ModalOverlay,
   Text,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import Head from "next/head";
 import NavLink from "next/link";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { USER_STATUS_LABELS, USER_STATUS_STYLE } from "@/common/constants/usersConstants";
 import { usersExportColumns } from "@/common/exports";
@@ -31,31 +30,14 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
+import { useUsers, useUsersFiltered, useUsersSearched } from "@/hooks/users";
 import UserForm from "@/modules/admin/UserForm";
+import { UserNormalized } from "@/modules/admin/users/models/users";
 import UsersFiltersPanel from "@/modules/admin/users/UsersFiltersPanel";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { ArrowRightLine } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
-
-const NO_LIMIT = 10_000;
-
-type UserNormalized = {
-  _id: string;
-  normalizedNomPrenom: string;
-  normalizedEmail: string;
-  normalizedOrganismeNom: string;
-  organisationType: string;
-  organismeId: string;
-  organismeNom: string;
-  nom: string;
-  prenom: string;
-  account_status: string;
-  created_at: string;
-  email: string;
-  fonction: string;
-  last_connection: string;
-};
 
 const UsersColumns: AccessorKeyColumnDef<UserNormalized>[] = [
   {
@@ -137,49 +119,9 @@ const Users = () => {
   const router = useRouter();
   const [search, setSearch] = useState<string>("");
 
-  const {
-    data,
-    refetch: refetchUsers,
-    isLoading,
-  } = useQuery(["admin/users"], () =>
-    _get<{ data: any[] }>("/api/v1/admin/users/", {
-      params: {
-        page: 1,
-        limit: NO_LIMIT,
-      },
-    })
-  );
-
-  const users = useMemo(() => {
-    if (!data) return [];
-    return data.data.map((user) => {
-      const organismeId = user?.organisation?.organisme?._id;
-      const organismeNom = user?.organisation?.organisme?.nom || user?.organisation?.label || "";
-      return {
-        ...user,
-        organismeId,
-        organismeNom,
-        organisationType: user?.organisation?.label || "",
-        normalizedOrganismeNom: organismeNom.toLowerCase(),
-        normalizedNomPrenom: user.nom.toLowerCase() + " " + user.prenom.toLowerCase(),
-        normalizedEmail: user.email.toLowerCase(),
-      };
-    });
-  }, [data]);
-
-  console.log("users :>> ", users);
-
-  const filteredUsers = useMemo(() => {
-    if (!search) return users;
-    return users?.filter((user) => {
-      const searchLower = search.toLowerCase();
-      return (
-        user.normalizedNomPrenom.includes(searchLower) ||
-        user.normalizedEmail.includes(searchLower) ||
-        user.normalizedOrganismeNom.toLowerCase().includes(searchLower)
-      );
-    });
-  }, [search, users]);
+  const { isLoading, allUsers, refetchUsers } = useUsers();
+  const { filteredUsers } = useUsersFiltered(allUsers);
+  const { searchedUsers } = useUsersSearched(filteredUsers, search);
 
   const defaultSort: SortingState = [{ desc: true, id: "created_at" }];
   const [sort, setSort] = useState<SortingState>(defaultSort);
@@ -245,7 +187,7 @@ const Users = () => {
             action={async () => {
               exportDataAsXlsx(
                 `users.xlsx`,
-                filteredUsers.map((e) => {
+                searchedUsers?.map((e) => {
                   return {
                     account_status: e.account_status,
                     civility: e.civility,
@@ -283,13 +225,13 @@ const Users = () => {
       </Box>
 
       <Text py="6" color="#777">
-        {Intl.NumberFormat().format(filteredUsers.length || 0)}{" "}
-        {filteredUsers.length > 1 ? "comptes utilisateurs" : "compte utilisateur"}
-        {filteredUsers.length < users.length ? ` (${users.length} au total)` : ""}
+        {Intl.NumberFormat().format(searchedUsers.length || 0)}{" "}
+        {searchedUsers.length > 1 ? "comptes utilisateurs" : "compte utilisateur"}
+        {searchedUsers.length < allUsers.length ? ` (${allUsers.length} au total)` : ""}
       </Text>
 
       <NewTable
-        data={filteredUsers || []}
+        data={searchedUsers || []}
         loading={isLoading}
         sortingState={sort}
         onSortingChange={(state) => setSort(state)}

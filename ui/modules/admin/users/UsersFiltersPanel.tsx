@@ -1,32 +1,47 @@
 import { Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { useMemo } from "react";
+
+import {
+  PaginationInfosQuery,
+  convertPaginationInfosToQuery,
+  parsePaginationInfosFromQuery,
+} from "@/modules/models/pagination";
+
+import FiltreUserTypes from "./filters/FiltreUsersType";
+import {
+  UsersFilters,
+  UsersFiltersQuery,
+  convertUsersFiltersToQuery,
+  parseUsersFiltersFromQuery,
+} from "./models/users-filters";
 
 const UsersFiltersPanel = () => {
   const router = useRouter();
 
-  //   const { organismesFilters, sort } = useMemo(() => {
-  //     const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
-  //     return {
-  //       organismesFilters: parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery),
-  //       pagination: pagination,
-  //       sort: sort ?? [{ desc: false, id: "nom" }],
-  //     };
-  //   }, [JSON.stringify(router.query)]);
+  const { usersFilters, sort } = useMemo(() => {
+    const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
+    return {
+      usersFilters: parseUsersFiltersFromQuery(router.query as unknown as UsersFiltersQuery),
+      pagination: pagination,
+      sort: sort ?? [{ desc: false, id: "nom" }],
+    };
+  }, [JSON.stringify(router.query)]);
 
-  //   const updateState = (newParams: Partial<{ [key in keyof OrganismesFilters]: any }>) => {
-  //     void router.push(
-  //       {
-  //         pathname: router.pathname,
-  //         query: {
-  //           ...(router.query.organismeId ? { organismeId: router.query.organismeId } : {}),
-  //           ...convertOrganismesFiltersToQuery({ ...organismesFilters, ...newParams }),
-  //           ...convertPaginationInfosToQuery({ sort, ...newParams }),
-  //         },
-  //       },
-  //       undefined,
-  //       { shallow: true }
-  //     );
-  //   };
+  const updateState = (newParams: Partial<{ [key in keyof UsersFilters]: any }>) => {
+    void router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...(router.query.organismeId ? { organismeId: router.query.organismeId } : {}),
+          ...convertUsersFiltersToQuery({ ...usersFilters, ...newParams }),
+          ...convertPaginationInfosToQuery({ sort, ...newParams }),
+        },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const resetFilters = () => {
     void router.push(
@@ -50,6 +65,10 @@ const UsersFiltersPanel = () => {
         {/* FILTRE Région */}
 
         {/* FILTRE Type Utilisateur */}
+        <FiltreUserTypes
+          value={usersFilters.type_utilisateur}
+          onChange={(type_utilisateur) => updateState({ type_utilisateur })}
+        />
 
         {/* FILTRE Réseau */}
 

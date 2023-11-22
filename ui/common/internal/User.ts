@@ -1,33 +1,46 @@
-// récupéré de l'API et adapté pour ne pas avoir certains champs optionnels
+export interface UsersPaginated {
+  pagination: Pagination;
+  data: User[];
+}
 
 export interface User {
   _id: string;
-  /**
-   * Email utilisateur
-   */
+  account_status: string;
+  password_updated_at: Date;
+  created_at: Date;
   email: string;
-  /**
-   * civilité
-   */
-  civility: "Madame" | "Monsieur";
-  /**
-   * Le nom de l'utilisateur
-   */
+  civility: string;
   nom: string;
-  /**
-   * Le prénom de l'utilisateur
-   */
   prenom: string;
-  /**
-   * Le téléphone de l'utilisateur
-   */
-  telephone: string;
-  /**
-   * La fonction de l'utilisateur
-   */
   fonction: string;
-  /**
-   * Date de création du compte
-   */
-  created_at: string;
+  telephone: string;
+  has_accept_cgu_version: string;
+  organisation_id: string;
+  organisation: UserOrganisation;
+  last_connection: string;
+}
+
+export interface UserOrganisation {
+  _id: string;
+  created_at: Date;
+  type: string;
+  uai: string;
+  siret: string;
+  organisme: UserOrganisme;
+  label: string;
+}
+
+export interface UserOrganisme {
+  _id: string;
+  nom: string;
+  reseaux: any[];
+  nature: string;
+  raison_sociale: string;
+}
+
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  lastPage: number;
 }
