@@ -9,6 +9,7 @@ import {
 } from "@/modules/models/pagination";
 
 import FiltreUsersAccountStatut from "./filters/FiltreUsersAccountStatut";
+import FiltreUsersReseaux from "./filters/FiltreUsersReseaux";
 import FiltreUserTypes from "./filters/FiltreUsersType";
 import {
   UsersFilters,
@@ -72,6 +73,7 @@ const UsersFiltersPanel = () => {
         />
 
         {/* FILTRE Réseau */}
+        <FiltreUsersReseaux value={usersFilters.reseaux} onChange={(reseaux) => updateState({ reseaux })} />
 
         {/* FILTRE Statut du compte */}
         <FiltreUsersAccountStatut

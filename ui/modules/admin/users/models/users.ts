@@ -16,6 +16,7 @@ export type UserNormalized = {
   userType: string;
   organismeId: string;
   organismeNom: string;
+  organismeReseaux: string[];
   nom: string;
   prenom: string;
   account_status: string;
@@ -28,10 +29,13 @@ export type UserNormalized = {
 export const toUserNormalized = (user: User): UserNormalized => {
   const organismeId = user?.organisation?.organisme?._id;
   const organismeNom = user?.organisation?.organisme?.nom || user?.organisation?.label || "";
+  const organismeReseaux = user?.organisation?.organisme?.reseaux || [];
+
   return {
     ...user,
     organismeId,
     organismeNom,
+    organismeReseaux,
     created_at: formatDateDayMonthYear(user.created_at),
     organisationType: user?.organisation?.label || "",
     userType: user?.organisation?.type || "",
