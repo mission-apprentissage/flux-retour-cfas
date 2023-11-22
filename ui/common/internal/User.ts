@@ -36,6 +36,10 @@ export interface UserOrganisme {
   reseaux: any[];
   nature: string;
   raison_sociale: string;
+  adresse?: {
+    departement?: string;
+    region?: string;
+  };
 }
 
 export interface Pagination {

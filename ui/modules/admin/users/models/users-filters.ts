@@ -6,12 +6,16 @@ export interface UsersFilters {
   type_utilisateur: string[];
   account_status: string[];
   reseaux: string[];
+  departements: string[];
+  regions: string[];
 }
 
 export interface UsersFiltersQuery {
   type_utilisateur?: string;
   account_status?: string;
   reseaux?: string;
+  departements?: string;
+  regions?: string;
 }
 
 export function parseUsersFiltersFromQuery(query: UsersFiltersQuery): UsersFilters {
@@ -19,6 +23,8 @@ export function parseUsersFiltersFromQuery(query: UsersFiltersQuery): UsersFilte
     type_utilisateur: query.type_utilisateur?.split(",") ?? [],
     account_status: query.account_status?.split(",") ?? [],
     reseaux: query.reseaux?.split(",") ?? [],
+    departements: query.departements?.split(",") ?? [],
+    regions: query.regions?.split(",") ?? [],
   };
 }
 
@@ -27,6 +33,8 @@ export function convertUsersFiltersToQuery(organismesFilters: Partial<UsersFilte
     type_utilisateur: organismesFilters.type_utilisateur?.join(","),
     account_status: organismesFilters.account_status?.join(","),
     reseaux: organismesFilters.reseaux?.join(","),
+    departements: organismesFilters.departements?.join(","),
+    regions: organismesFilters.regions?.join(","),
   });
 }
 
@@ -48,6 +56,12 @@ export function filterUsersArrayFromUsersFilters(
         item.organismeReseaux.length > 0 &&
         item.organismeReseaux.some((reseau) => usersFilters.reseaux?.includes(reseau))
     );
+
+  if (usersFilters.departements?.length && usersFilters.departements?.length > 0)
+    filteredUsers = filteredUsers?.filter((item) => usersFilters.departements?.includes(item.organismeDepartement));
+
+  if (usersFilters.regions?.length && usersFilters.regions?.length > 0)
+    filteredUsers = filteredUsers?.filter((item) => usersFilters.regions?.includes(item.organismeRegion));
 
   return filteredUsers;
 }

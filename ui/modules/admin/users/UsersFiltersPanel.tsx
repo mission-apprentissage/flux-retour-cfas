@@ -9,6 +9,8 @@ import {
 } from "@/modules/models/pagination";
 
 import FiltreUsersAccountStatut from "./filters/FiltreUsersAccountStatut";
+import FiltreUsersDepartment from "./filters/FiltreUsersDepartements";
+import FiltreUsersRegion from "./filters/FiltreUsersRegion";
 import FiltreUsersReseaux from "./filters/FiltreUsersReseaux";
 import FiltreUserTypes from "./filters/FiltreUsersType";
 import {
@@ -63,8 +65,13 @@ const UsersFiltersPanel = () => {
       </Text>
       <HStack>
         {/* FILTRE Département */}
+        <FiltreUsersDepartment
+          value={usersFilters.departements}
+          onChange={(departements) => updateState({ departements })}
+        />
 
         {/* FILTRE Région */}
+        <FiltreUsersRegion value={usersFilters.regions} onChange={(regions) => updateState({ regions })} />
 
         {/* FILTRE Type Utilisateur */}
         <FiltreUserTypes

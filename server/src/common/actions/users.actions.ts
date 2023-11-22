@@ -198,7 +198,17 @@ export const getAllUsers = async (
                       },
                     },
                   },
-                  { $project: { type: 1, nom: 1, raison_sociale: 1, reseaux: 1, nature: 1 } },
+                  {
+                    $project: {
+                      type: 1,
+                      nom: 1,
+                      raison_sociale: 1,
+                      reseaux: 1,
+                      nature: 1,
+                      "adresse.departement": 1,
+                      "adresse.region": 1,
+                    },
+                  },
                 ],
               },
             },
