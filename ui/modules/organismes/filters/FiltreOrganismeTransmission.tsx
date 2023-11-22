@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-import { OrganismesFilterButton } from "./OrganismesFilterButton";
+import { FilterButton } from "../../../components/FilterButton/FilterButton";
 
 interface FiltreOrganismeTransmissionProps {
   fieldName: string;
@@ -17,12 +17,7 @@ function FiltreOrganismeTransmission(props: FiltreOrganismeTransmissionProps) {
 
   return (
     <div>
-      <OrganismesFilterButton
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        buttonLabel="Transmission"
-        badge={transmissions?.length}
-      />
+      <FilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Transmission" badge={transmissions?.length} />
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup

@@ -2,8 +2,8 @@ import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
 import { TYPES_ORGANISATION } from "@/common/internal/Organisation";
+import { FilterButton } from "@/components/FilterButton/FilterButton";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
-import { OrganismesFilterButton } from "@/modules/organismes/filters/OrganismesFilterButton";
 
 interface FiltreUsersTypesProps {
   value: string[];
@@ -16,7 +16,7 @@ function FiltreUserTypes(props: FiltreUsersTypesProps) {
 
   return (
     <div>
-      <OrganismesFilterButton
+      <FilterButton
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         buttonLabel="Type d'utilisateur"

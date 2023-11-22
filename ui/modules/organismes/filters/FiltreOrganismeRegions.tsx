@@ -4,7 +4,7 @@ import { REGIONS_SORTED } from "shared";
 
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-import { OrganismesFilterButton } from "./OrganismesFilterButton";
+import { FilterButton } from "../../../components/FilterButton/FilterButton";
 
 interface FiltreOrganismeRegionsProps {
   value: string[];
@@ -17,7 +17,7 @@ function FiltreOrganismeRegions(props: FiltreOrganismeRegionsProps) {
 
   return (
     <div>
-      <OrganismesFilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Région" badge={regions?.length} />
+      <FilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Région" badge={regions?.length} />
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup

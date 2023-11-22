@@ -5,7 +5,7 @@ import { DEPARTEMENTS_SORTED } from "shared";
 import useAuth from "@/hooks/useAuth";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-import { OrganismesFilterButton } from "./OrganismesFilterButton";
+import { FilterButton } from "../../../components/FilterButton/FilterButton";
 
 interface FiltreOrganismeDepartementsProps {
   value: string[];
@@ -35,12 +35,7 @@ function FiltreOrganismeDepartements(props: FiltreOrganismeDepartementsProps) {
 
   return (
     <div>
-      <OrganismesFilterButton
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        buttonLabel="Département"
-        badge={departements?.length}
-      />
+      <FilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel="Département" badge={departements?.length} />
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup
