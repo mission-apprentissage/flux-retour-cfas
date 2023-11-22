@@ -8,6 +8,7 @@ import {
   parsePaginationInfosFromQuery,
 } from "@/modules/models/pagination";
 
+import FiltreUsersAccountStatut from "./filters/FiltreUsersAccountStatut";
 import FiltreUserTypes from "./filters/FiltreUsersType";
 import {
   UsersFilters,
@@ -73,6 +74,10 @@ const UsersFiltersPanel = () => {
         {/* FILTRE Réseau */}
 
         {/* FILTRE Statut du compte */}
+        <FiltreUsersAccountStatut
+          value={usersFilters.account_status}
+          onChange={(account_status) => updateState({ account_status })}
+        />
 
         {/* FILTRE Période */}
 
