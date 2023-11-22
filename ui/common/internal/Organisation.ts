@@ -15,6 +15,20 @@ export const organisationTypes = [
   "ADMINISTRATEUR",
 ] as const;
 
+export const TYPES_ORGANISATION = [
+  { key: "ACADEMIE", nom: "Académie" },
+  { key: "ADMINISTRATEUR", nom: "Administrateur" },
+  { key: "CARIF_OREF_NATIONAL", nom: "Carif-Oref national" },
+  { key: "CARIF_OREF_REGIONAL", nom: "Carif-Oref régional" },
+  { key: "CONSEIL_REGIONAL", nom: "Conseil régional" },
+  { key: "DDETS", nom: "DDETS" },
+  { key: "DRAAF", nom: "DRAAF" },
+  { key: "DREETS", nom: "DREETS" },
+  { key: "OPERATEUR_PUBLIC_NATIONAL", nom: "Opérateur public national" },
+  { key: "ORGANISME_FORMATION", nom: "Organisme de formation" },
+  { key: "TETE_DE_RESEAU", nom: "Tête de réseau" },
+] as const;
+
 export type Organisation = { _id: string } & (
   | OrganisationOrganismeFormation
   | OrganisationTeteReseau

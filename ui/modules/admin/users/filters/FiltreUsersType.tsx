@@ -1,7 +1,7 @@
 import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
-import { organisationTypes } from "@/common/internal/Organisation";
+import { TYPES_ORGANISATION } from "@/common/internal/Organisation";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 import { OrganismesFilterButton } from "@/modules/organismes/filters/OrganismesFilterButton";
 
@@ -30,9 +30,9 @@ function FiltreUserTypes(props: FiltreUsersTypesProps) {
             onChange={(selectedTypesUtilisateurs: string[]) => props.onChange(selectedTypesUtilisateurs)}
           >
             <Stack>
-              {organisationTypes.map((type, i) => (
-                <Checkbox iconSize="0.5rem" value={type} key={i}>
-                  {type}
+              {TYPES_ORGANISATION.map((option, index) => (
+                <Checkbox iconSize="0.5rem" value={option.key} key={index}>
+                  {option.nom}
                 </Checkbox>
               ))}
             </Stack>
