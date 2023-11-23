@@ -9,7 +9,7 @@ import Page from "@/components/Page/Page";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const AccessibilitePage = () => {
-  const title = "Accessibilité";
+  const title = "Déclaration d’accessibilité";
   return (
     <Page>
       <Head>
