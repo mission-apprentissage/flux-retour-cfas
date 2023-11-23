@@ -93,10 +93,7 @@ const Footer = () => {
                 <Link href={"/accessibilite"}>Accessibilité : Non conforme</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/mentions-legales"} isExternal>
-                  Mentions légales
-                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
-                </Link>
+                <Link href={"/mentions-legales"}>Mentions légales</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href={"/cgu"}>Conditions générales d’utilisation</Link>
