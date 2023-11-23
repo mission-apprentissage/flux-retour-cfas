@@ -1,5 +1,4 @@
 import { User, UserOrganisation } from "@/common/internal/User";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 
 export type UserNormalized = {
   _id: string;
@@ -19,6 +18,8 @@ export type UserNormalized = {
   organismeReseaux: string[];
   organismeDepartement: string;
   organismeRegion: string;
+  organisationDepartement: string;
+  organisationRegion: string;
   nom: string;
   prenom: string;
   account_status: string;
@@ -34,6 +35,8 @@ export const toUserNormalized = (user: User): UserNormalized => {
   const organismeReseaux = user?.organisation?.organisme?.reseaux || [];
   const organismeDepartement = user?.organisation?.organisme?.adresse?.departement || "";
   const organismeRegion = user?.organisation?.organisme?.adresse?.region || "";
+  const organisationDepartement = user?.organisation?.code_departement || "";
+  const organisationRegion = user?.organisation?.code_region || "";
 
   return {
     ...user,
@@ -42,7 +45,9 @@ export const toUserNormalized = (user: User): UserNormalized => {
     organismeReseaux,
     organismeDepartement,
     organismeRegion,
-    created_at: formatDateDayMonthYear(user.created_at),
+    organisationDepartement,
+    organisationRegion,
+    created_at: user.created_at.toLocaleString(),
     organisationType: user?.organisation?.label || "",
     userType: user?.organisation?.type || "",
     normalizedOrganismeNom: organismeNom.toLowerCase(),

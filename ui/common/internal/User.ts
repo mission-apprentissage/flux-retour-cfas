@@ -26,6 +26,8 @@ export interface UserOrganisation {
   type: string;
   uai: string;
   siret: string;
+  code_departement: string;
+  code_region: string;
   organisme: UserOrganisme;
   label: string;
 }
