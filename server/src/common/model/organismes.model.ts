@@ -176,6 +176,7 @@ const schema = object(
     api_uai: string({ description: "Uai envoyé par l'erp" }),
     api_siret: string({ description: "Siret envoyé par l'erp" }),
     api_configuration_date: date({ description: "Date de l'interfaçage" }),
+    api_version: string({ description: "Version de l'api utilisée (v2 ou v3)" }),
 
     fiabilisation_statut: string({
       description: "Statut de fiabilisation de l'organisme",

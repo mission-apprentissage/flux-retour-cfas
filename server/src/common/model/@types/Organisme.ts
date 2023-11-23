@@ -998,6 +998,10 @@ export interface Organisme {
    */
   api_configuration_date?: Date;
   /**
+   * Version de l'API
+   */
+  api_version?: string;
+  /**
    * Statut de fiabilisation de l'organisme
    */
   fiabilisation_statut?:

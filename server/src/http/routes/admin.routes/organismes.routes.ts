@@ -71,6 +71,7 @@ export default () => {
         api_key: 1,
         mode_de_transmission: 1,
         mode_de_transmission_configuration_date: 1,
+        api_version: 1,
       });
       if (!organisme) {
         throw Boom.notFound(`Organisme with id ${id} not found`);
@@ -79,7 +80,7 @@ export default () => {
       res.json({
         transmission_date: organisme.mode_de_transmission_configuration_date,
         transmission_api_active: organisme.mode_de_transmission === "API",
-        transmission_api_version: undefined, // TODO
+        transmission_api_version: organisme.api_version,
         transmission_manuelle_active: organisme.mode_de_transmission === "MANUEL",
         parametrage_erp_active: !!organisme.api_key,
         erps: organisme.erps,
