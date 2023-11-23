@@ -90,7 +90,7 @@ const Footer = () => {
                 <Link href={"/sitemap.xml"}>Plan du site</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/accessibilite"}>Accessibilité : Non conforme</Link>
+                <Link href={"/accessibilite"}>Accessibilité : non conforme</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href={"/mentions-legales"} isExternal>
