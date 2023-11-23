@@ -76,12 +76,6 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: "/mentions-legales",
-        destination:
-          "https://mission-apprentissage.notion.site/Mentions-l-gales-002a2868ea2f46cdb2d73207d12b6075?pvs=4",
-        permanent: true,
-      },
-      {
         source: "/mention-information",
         destination:
           "https://mission-apprentissage.notion.site/Mention-d-information-7b1c32f4c2214e0c9523686b18ada6fa?pvs=4",
