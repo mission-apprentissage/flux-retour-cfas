@@ -1,14 +1,14 @@
 import { Badge, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { Dispatch, SetStateAction } from "react";
 
-interface OrganismesFilterButtonProps {
+interface FilterButtonProps {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   buttonLabel: string;
   badge?: number;
 }
 
-export function OrganismesFilterButton(props: OrganismesFilterButtonProps) {
+export function FilterButton(props: FilterButtonProps) {
   const hasFilters = props.badge !== undefined && props.badge > 0;
   return (
     <Button

@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
-import { OrganismesFilterButton } from "./OrganismesFilterButton";
+import { FilterButton } from "../../../components/FilterButton/FilterButton";
 
 interface FiltreYesNoProps {
   fieldName: string;
@@ -19,12 +19,7 @@ function FiltreYesNo(props: FiltreYesNoProps) {
 
   return (
     <div>
-      <OrganismesFilterButton
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        buttonLabel={buttonLabel}
-        badge={selectionItems?.length}
-      />
+      <FilterButton isOpen={isOpen} setIsOpen={setIsOpen} buttonLabel={buttonLabel} badge={selectionItems?.length} />
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="auto" p="3w">
           <CheckboxGroup
