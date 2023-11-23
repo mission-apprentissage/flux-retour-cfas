@@ -1,3 +1,5 @@
+import { ObjectId } from "bson";
+
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { InfoSiret } from "@/common/actions/infoSiret.actions-struct";
 import logger from "@/common/logger";
@@ -32,11 +34,8 @@ export const hydrateRaisonSocialeEtEnseigneOFAInconnus = async () => {
  * Si on récupère depuis l'API Entreprise l'enseigne OU la raison sociale alors on MAJ l'organisme avec
  * Si l'enseigne est null, on lui affecte la raison sociale
  * Si la raison sociale est nulle, on lui affecte l'enseigne
- * @param idOfa
- * @param siretOfa
- * @returns
  */
-const updateEnseigneRaisonSocialeOFAInconnu = async (idOfa, siretOfa) => {
+const updateEnseigneRaisonSocialeOFAInconnu = async (idOfa: ObjectId, siretOfa: string) => {
   const dataSiret: InfoSiret = await findDataFromSiret(siretOfa);
 
   if (dataSiret.messages.api_entreprise_status === "OK") {
