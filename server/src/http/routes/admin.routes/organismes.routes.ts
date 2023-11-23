@@ -59,6 +59,34 @@ export default () => {
     }
   );
 
+  router.get(
+    "/:id/parametrage-transmission",
+    validateRequestMiddleware({
+      params: objectIdSchema("id"),
+    }),
+    async ({ params }, res) => {
+      const { id } = params;
+      const organisme = await findOrganismeById(id as string, {
+        erps: 1,
+        api_key: 1,
+        mode_de_transmission: 1,
+        mode_de_transmission_configuration_date: 1,
+      });
+      if (!organisme) {
+        throw Boom.notFound(`Organisme with id ${id} not found`);
+      }
+
+      res.json({
+        transmission_date: organisme.mode_de_transmission_configuration_date,
+        transmission_api_active: organisme.mode_de_transmission === "API",
+        transmission_api_version: undefined, // TODO
+        transmission_manuelle_active: organisme.mode_de_transmission === "MANUEL",
+        parametrage_erp_active: !!organisme.api_key,
+        erps: organisme.erps,
+      });
+    }
+  );
+
   router.put(
     "/:id/hydrate",
     validateRequestMiddleware({

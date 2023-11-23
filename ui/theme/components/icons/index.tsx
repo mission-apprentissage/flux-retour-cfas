@@ -3,6 +3,7 @@ export * from "./ArrowDropRightLine";
 export * from "./ExternalLinkLine";
 export * from "./SubtractLine";
 export * from "./InfoCircle";
+export * from "./CloseCircle";
 export * from "./Cloud";
 export * from "./DownloadLine";
 export * from "./ArrowRightLine";
