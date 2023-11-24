@@ -117,6 +117,8 @@ services:
       MB_DB_TYPE: mysql
       MB_DB_CONNECTION_URI: "{{vault[env_type].MNA_TDB_METABASE_DB_URI}}"
       MB_ENCRYPTION_SECRET_KEY: "{{vault[env_type].MNA_TDB_METABASE_ENCRYPTION_SECRET_KEY}}"
+      MB_EMAIL_FROM_ADDRESS: "{{vault.METABASE_EMAIL_FROM_ADDRESS}}"
+      MB_EMAIL_FROM_NAME: "{{vault.METABASE_EMAIL_FROM_NAME}}"
       MB_PASSWORD_COMPLEXITY: strong
       MB_START_OF_WEEK: monday
       MB_EMAIL_SMTP_HOST: "{{vault[env_type].MNA_TDB_SMTP_HOST}}"
