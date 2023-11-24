@@ -61,7 +61,8 @@ export interface EffectifsQueue {
   date_inscription_formation?: any; // Date de début de la formation
   date_entree_formation?: any; // Date de début de la formation
   date_fin_formation?: any; // Date de fin de la formation
-  duree_theorique_formation?: any; // Durée théorique de la formation
+  duree_theorique_formation?: any; // Durée théorique de la formation en années
+  duree_theorique_formation_mois?: any; // Durée théorique de la formation en mois
   etablissement_responsable_uai?: any; // UAI de l'établissement responsable
   etablissement_responsable_siret?: any; // SIRET de l'établissement responsable
   etablissement_formateur_uai?: any; // UAI de l'établissement formateur

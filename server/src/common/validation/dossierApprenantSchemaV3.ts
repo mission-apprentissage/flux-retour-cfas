@@ -70,8 +70,9 @@ export const dossierApprenantSchemaV3Base = () =>
     siret_employeur_3: primitivesV3.employeur.siret.optional(),
     siret_employeur_4: primitivesV3.employeur.siret.optional(),
     formation_presentielle: primitivesV3.formation.presentielle.optional(),
-    // This field should have been required but sometimes, it is missing in YMAG
-    duree_theorique_formation: primitivesV3.formation.duree_theorique.optional(),
+    // These two fields should have been required but sometimes, it is missing in YMAG
+    duree_theorique_formation: primitivesV3.formation.duree_theorique.optional(), // Legacy, but still in use by ERPs and Excel import.
+    duree_theorique_formation_mois: primitivesV3.formation.duree_theorique_mois.optional(), // The new field.
 
     // REQUIRED FIELDS
     date_inscription_formation: primitivesV3.formation.date_inscription,

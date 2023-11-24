@@ -383,7 +383,16 @@ export const primitivesV3 = {
         .int()
         .min(1, "Le chiffre doit être supérieur ou égal à 1")
         .max(4, "Le chiffre doit être inférieur ou égal à 4")
-        .describe("Durée théorique de la formation")
+        .describe("Durée théorique de la formation en années")
+    ),
+    duree_theorique_mois: z.preprocess(
+      (v: any) => (v ? Number(v) : v),
+      z
+        .number()
+        .int()
+        .min(1, "Le chiffre doit être supérieur ou égal à 1")
+        .max(48, "Le chiffre doit être inférieur ou égal à 48")
+        .describe("Durée théorique de la formation en mois")
     ),
     date_exclusion: extensions.iso8601Date().openapi({
       description: "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",

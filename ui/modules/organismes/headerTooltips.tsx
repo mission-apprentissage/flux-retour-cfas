@@ -162,6 +162,7 @@ const headerTooltips = {
       correspondent à celles de votre calendrier de formation (donnée obligatoire).
     </>
   ),
+  // Even if legacy, this field can still be used, so we have to keep it.
   duree_theorique_formation: (
     <>
       Durée théorique de la formation, de la date d’inscription au diplôme, exprimée en <b>années</b> (donnée
@@ -170,6 +171,18 @@ const headerTooltips = {
       3 ans. Concernant le CAP, le BTS, le Master (M1 et M2) et les BP, la durée théorique de la formation est de 2 ans.
       Concernant les Licences PRO et les Mentions Complémentaires, la durée théorique de la formation est de 1 an.
       Concernant les formations dans lesquelles seule la 1ère ou dernière année se prépare par le biais de
+      l’apprentissage, on prendra en compte la durée théorique de la formation y compris les années non préparées sous
+      le statut apprenti.
+    </>
+  ),
+  duree_theorique_formation_mois: (
+    <>
+      Durée théorique de la formation, de la date d’inscription au diplôme, exprimée en <b>mois</b> (donnée
+      obligatoire). La durée théorique est censée être fixe et dépend du diplôme : 24 mois pour un CAP, pour un BTS et
+      36 mois pour un BAC PRO… Concernant le BAC PRO et les diplômes d’ingénieurs, la durée théorique de la formation
+      est de 36 mois. Concernant le CAP, le BTS, le Master (M1 et M2) et les BP, la durée théorique de la formation est
+      de 24 mois. Concernant les Licences PRO et les Mentions Complémentaires, la durée théorique de la formation est de
+      12 mois. Concernant les formations dans lesquelles seule la 1ère ou dernière année se prépare par le biais de
       l’apprentissage, on prendra en compte la durée théorique de la formation y compris les années non préparées sous
       le statut apprenti.
     </>

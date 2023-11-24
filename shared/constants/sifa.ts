@@ -8,7 +8,7 @@ export const requiredFieldsSifa = [
   "apprenant.dernier_organisme_uai",
   "apprenant.type_cfa",
   "formation.duree_formation_relle",
-  "formation.duree_theorique",
+  "formation.duree_theorique_mois",
 ];
 
 export const requiredApprenantAdresseFieldsSifa = [

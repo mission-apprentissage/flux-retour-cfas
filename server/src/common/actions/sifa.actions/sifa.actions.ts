@@ -168,7 +168,9 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
         : undefined,
       DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd),
-      DUR_FORM_THEO: effectif.formation.duree_theorique
+      DUR_FORM_THEO: effectif.formation.duree_theorique_mois
+        ? effectif.formation.duree_theorique_mois
+        : effectif.formation.duree_theorique
         ? effectif.formation.duree_theorique * 12
         : formationOrganisme?.duree_formation_theorique
         ? formationOrganisme?.duree_formation_theorique * 12

@@ -138,7 +138,10 @@ export const schema = object(
     date_inscription_formation: any({ description: formationProps.date_inscription.description }),
     date_entree_formation: any({ description: formationProps.date_entree.description }),
     date_fin_formation: any({ description: formationProps.date_fin.description }),
-    duree_theorique_formation: any({ description: "Durée théorique de la formation" }),
+    // Legacy field, do not drop because it is still used by ERPs and old Excel import
+    duree_theorique_formation: any({ description: "Durée théorique de la formation en années" }),
+    // New field, prefer this.
+    duree_theorique_formation_mois: any({ description: "Durée théorique de la formation en mois" }),
 
     etablissement_responsable_uai: any({ description: "UAI de l'établissement responsable" }),
     etablissement_responsable_siret: any({ description: "SIRET de l'établissement responsable" }),

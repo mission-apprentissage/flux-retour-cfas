@@ -10,7 +10,7 @@ export const EffectifFormation = memo(() => {
       <Grid gridTemplateColumns="repeat(2, 2fr)" gridGap="1w">
         <InputController name="formation.rncp" w="80" mb={0} />
         <InputController name="formation.cfd" w="80" mb={0} />
-        <InputController name="formation.duree_theorique" w="80" mb={0} />
+        <InputController name="formation.duree_theorique_mois" w="80" mb={0} />
         <InputController name="formation.duree_formation_relle" w="80" mb={0} />
         <InputController name="formation.annee" w="80" mb={0} />
         <InputController name="formation.date_inscription" w="80" mb={0} />
