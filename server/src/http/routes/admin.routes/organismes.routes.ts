@@ -67,6 +67,7 @@ export default () => {
     async ({ params }, res) => {
       const { id } = params;
       const organisme = await findOrganismeById(id as string, {
+        last_transmission_date: 1,
         erps: 1,
         api_key: 1,
         mode_de_transmission: 1,
@@ -78,11 +79,12 @@ export default () => {
       }
 
       res.json({
-        transmission_date: organisme.mode_de_transmission_configuration_date,
+        transmission_date: organisme.last_transmission_date,
         transmission_api_active: organisme.mode_de_transmission === "API",
         transmission_api_version: organisme.api_version,
         transmission_manuelle_active: organisme.mode_de_transmission === "MANUEL",
         parametrage_erp_active: !!organisme.api_key,
+        parametrage_erp_date: organisme.mode_de_transmission_configuration_date,
         erps: organisme.erps,
       });
     }

@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 
 import { _get } from "@/common/httpClient";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
 interface InfosTransmissionParametrageOFAProps {
@@ -12,6 +11,7 @@ interface InfosTransmissionParametrageOFAProps {
   transmission_api_version?: string;
   transmission_manuelle_active: boolean;
   parametrage_erp_active: boolean;
+  parametrage_erp_date: Date;
   erps: string[];
 }
 
@@ -49,13 +49,13 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
                   paddingY="2px"
                   backgroundColor="#ECEAE3"
                 >
-                  V.{parametrage.transmission_api_version}
+                  {parametrage.transmission_api_version}
                 </Badge>
               )}
               <Text>
                 (
                 {parametrage.transmission_date
-                  ? formatDateDayMonthYear(parametrage.transmission_date)
+                  ? new Date(parametrage.transmission_date).toLocaleDateString()
                   : "Date non disponible"}
                 )
               </Text>
@@ -70,9 +70,11 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
             <HStack spacing="1w">
               <BadgeYes />
               <Text>
+                (
                 {parametrage.transmission_date
-                  ? formatDateDayMonthYear(parametrage.transmission_date)
+                  ? new Date(parametrage.transmission_date).toLocaleDateString()
                   : "Date non disponible"}
+                )
               </Text>
             </HStack>
           ) : (
@@ -97,6 +99,13 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
                   {erp.toUpperCase()}
                 </Badge>
               ))}
+              <Text>
+                (
+                {parametrage.parametrage_erp_date
+                  ? new Date(parametrage.parametrage_erp_date).toLocaleDateString()
+                  : "Date non disponible"}
+                )
+              </Text>
             </HStack>
           ) : (
             <BadgeNo />
