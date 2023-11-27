@@ -1,4 +1,4 @@
-import { Spinner } from "@chakra-ui/react";
+import { Center, Spinner } from "@chakra-ui/react";
 import { GetServerSidePropsContext } from "next";
 import { ExtendedRecordMap } from "notion-types";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ export const getServerSideProps = async (context) => {
   try {
     const isInitial = isInitialServerSideProps(context);
     if (!isInitial) return { props: {} };
-    const dataSSR = await _get("/mentions-legales");
+    const dataSSR = await _get("/api/mentions-legales");
     return { props: { dataSSR } };
   } catch (e) {
     console.error(e);
@@ -32,10 +32,20 @@ export default function Home({ dataSSR }: { dataSSR: ExtendedRecordMap }) {
     if (dataSSR) return;
     (async () => {
       setIsLoading(true);
-      setData(await _get("/mentions-legales"));
+      setData(await _get("/api/mentions-legales"));
       setIsLoading(false);
     })();
   }, []);
 
-  return <SimplePage title="Mentions légales">{isLoading ? <Spinner /> : <NotionDoc recordMap={data} />}</SimplePage>;
+  return (
+    <SimplePage title="Mentions légales">
+      {isLoading ? (
+        <Center>
+          <Spinner />
+        </Center>
+      ) : (
+        <NotionDoc recordMap={data} />
+      )}
+    </SimplePage>
+  );
 }

@@ -212,7 +212,7 @@ function setupRoutes(app: Application) {
       })
     )
     .get(
-      "/mentions-legales",
+      "/api/mentions-legales",
       returnResult(async () => {
         const recordMap = await notion.getPage("Mentions-l-gales-002a2868ea2f46cdb2d73207d12b6075");
         return recordMap;
