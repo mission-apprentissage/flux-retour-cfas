@@ -536,4 +536,81 @@ describe("Routes administrateur", () => {
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" })).toBe(1);
     });
   });
+
+  describe("GET / - organismes/id/parametrage-transmission", () => {
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+      const organismeTest = await createOrganisme(sampleOrganismeWithUAI);
+      const response = await httpClient.post(`/api/v1/admin/organismes/${organismeTest?._id}/parametrage-transmission`);
+      expectUnauthorizedError(response);
+    });
+
+    it("Vérifie qu'on renvoie une exception si aucun organisme en base", async () => {
+      const response = await httpClient.post(`/api/v1/admin/organismes/${new ObjectId(18)}/parametrage-transmission`);
+      expect(response.status).toBe(401);
+    });
+
+    it("Vérifie qu'on renvoie des informations de transmissions sur un organisme transmettant avec l'API si on est authentifié en administrateur", async () => {
+      const sampleTransmissionDate = addDays(new Date(), -10);
+      const sampleConfigurationDate = addDays(new Date(), -15);
+
+      const organismeTransmissionApiTest = await createOrganisme({
+        ...sampleOrganismeWithUAI,
+        erps: ["ERP_TEST"],
+        last_transmission_date: sampleTransmissionDate,
+        mode_de_transmission: "API",
+        api_version: "V2",
+        mode_de_transmission_configuration_date: sampleConfigurationDate,
+        api_key: "SAMPLE_API_KEY",
+      });
+
+      let response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        `/api/v1/admin/organismes/${organismeTransmissionApiTest?._id}/parametrage-transmission`
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toEqual({
+        transmission_date: sampleTransmissionDate.toISOString(),
+        transmission_api_active: true,
+        transmission_api_version: "V2",
+        transmission_manuelle_active: false,
+        api_key_active: true,
+        parametrage_erp_active: true,
+        parametrage_erp_date: sampleConfigurationDate.toISOString(),
+        erps: ["ERP_TEST"],
+      });
+    });
+
+    it("Vérifie qu'on renvoie des informations de transmissions sur un organisme transmettant manuellement si on est authentifié en administrateur", async () => {
+      const sampleTransmissionDate = addDays(new Date(), -10);
+      const sampleConfigurationDate = addDays(new Date(), -15);
+
+      const organismeTransmissionManuelleTest = await createOrganisme({
+        ...sampleOrganismeWithUAI,
+        erps: ["ERP_TEST2"],
+        last_transmission_date: sampleTransmissionDate,
+        mode_de_transmission: "MANUEL",
+        mode_de_transmission_configuration_date: sampleConfigurationDate,
+        api_key: "SAMPLE_API_KEY",
+      });
+
+      let response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        `/api/v1/admin/organismes/${organismeTransmissionManuelleTest?._id}/parametrage-transmission`
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toEqual({
+        transmission_date: sampleTransmissionDate.toISOString(),
+        transmission_api_active: false,
+        transmission_manuelle_active: true,
+        api_key_active: true,
+        parametrage_erp_active: true,
+        parametrage_erp_date: sampleConfigurationDate.toISOString(),
+        erps: ["ERP_TEST2"],
+      });
+    });
+  });
 });

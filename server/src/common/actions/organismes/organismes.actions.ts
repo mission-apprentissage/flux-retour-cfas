@@ -183,7 +183,7 @@ export const updateOrganismeTransmission = async (
       $set: {
         ...(organisme.first_transmission_date ? {} : { first_transmission_date: new Date() }),
         last_transmission_date: new Date(),
-        ...(api_version ? {} : { api_version }),
+        ...(api_version ? { api_version } : {}),
         updated_at: new Date(),
       },
       ...(source ? { $addToSet: { erps: source } } : {}),

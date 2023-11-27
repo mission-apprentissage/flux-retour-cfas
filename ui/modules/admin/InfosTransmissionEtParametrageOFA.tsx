@@ -11,6 +11,7 @@ interface InfosTransmissionParametrageOFAProps {
   transmission_api_version?: string;
   transmission_manuelle_active: boolean;
   parametrage_erp_active: boolean;
+  api_key_active: boolean;
   parametrage_erp_date: Date;
   erps: string[];
 }
@@ -82,7 +83,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           )}
         </HStack>
         <HStack>
-          <Text>Paramétrage ERP :</Text>{" "}
+          <Text>Paramétrage ERP :</Text>
           {parametrage?.parametrage_erp_active ? (
             <HStack spacing="1w">
               <BadgeYes />
@@ -110,6 +111,10 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           ) : (
             <BadgeNo />
           )}
+        </HStack>
+        <HStack>
+          <Text>Clé d’API présente :</Text>
+          {parametrage?.api_key_active ? <BadgeYes /> : <BadgeNo />}
         </HStack>
       </Stack>
     </Box>
