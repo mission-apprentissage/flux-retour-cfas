@@ -212,7 +212,9 @@ export const mapEffectifQueueToEffectif = (
         date_inscription: dossierApprenant.date_inscription_formation,
         duree_theorique_mois: dossierApprenant.duree_theorique_formation_mois
           ? dossierApprenant.duree_theorique_formation_mois
-          : dossierApprenant.duree_theorique_formation * 12, // Legacy
+          : dossierApprenant.duree_theorique_formation
+          ? dossierApprenant.duree_theorique_formation * 12 // Legacy
+          : undefined,
         formation_presentielle: dossierApprenant.formation_presentielle,
         date_fin: dossierApprenant.date_fin_formation,
         date_entree: dossierApprenant.date_entree_formation,
