@@ -13,10 +13,15 @@ const isInitialServerSideProps = (context: GetServerSidePropsContext) =>
   context.req?.url?.indexOf("/_next/data/") === -1;
 
 export const getServerSideProps = async (context) => {
-  const isInitial = isInitialServerSideProps(context);
-  if (!isInitial) return { props: {} };
-  const dataSSR = await _get("/mentions-legales");
-  return { props: { dataSSR } };
+  try {
+    const isInitial = isInitialServerSideProps(context);
+    if (!isInitial) return { props: {} };
+    const dataSSR = await _get("/mentions-legales");
+    return { props: { dataSSR } };
+  } catch (e) {
+    console.error(e);
+    return { props: {} };
+  }
 };
 
 export default function Home({ dataSSR }: { dataSSR: ExtendedRecordMap }) {
