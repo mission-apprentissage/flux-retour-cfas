@@ -39,7 +39,7 @@ export const getEtablissement = async (siret: string): Promise<ApiEntEtablisseme
     axiosRetry(client, { retries: 3 });
 
     try {
-      let response = await client.get(`insee/sirene/etablissements/${siret}`, {
+      let response = await client.get(`insee/sirene/etablissements/diffusibles/${siret}`, {
         params: apiParams,
       });
       logger.debug(`[Entreprise API] Fetched etablissement ${siret} ${response.cached ? "(from cache)" : ""}`);
