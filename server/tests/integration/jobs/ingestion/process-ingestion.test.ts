@@ -756,8 +756,9 @@ describe("Processus d'ingestion", () => {
 
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
+        const { duree_theorique_formation_mois, ...miunimumWithoutDureeTheorique } = minimalSampleData;
         const { insertedId } = await effectifsQueueDb().insertOne({
-          ...minimalSampleData,
+          ...miunimumWithoutDureeTheorique,
           // Ajouter ici des cas particuliers qui sont automatiquement corrigés
           // Le numéro de téléphone est nullifié
           tel_apprenant: "",
@@ -769,6 +770,8 @@ describe("Processus d'ingestion", () => {
           nir_apprenant: "12 34567 89012 3 45",
           // Le sexe peut être un number
           sexe_apprenant: 2,
+          // duree_theorique_formation est transformé en mois
+          duree_theorique_formation: 2,
         });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
