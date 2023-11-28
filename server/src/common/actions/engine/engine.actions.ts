@@ -210,10 +210,14 @@ export const mapEffectifQueueToEffectif = (
               })
             : undefined,
         date_inscription: dossierApprenant.date_inscription_formation,
+        // Les ERPs (ou les anciens fichiers de téléversement) peuvent continuer à utiliser duree_theorique_formation
+        // qui est l'ancien champ en années (contrairement à duree_theorique_formation_mois qui est en mois).
+        // On assure donc une rétrocompatibilité discrète en convertissant le champ en mois si besoin et
+        // en mettant dans le bon champ.
         duree_theorique_mois: dossierApprenant.duree_theorique_formation_mois
           ? dossierApprenant.duree_theorique_formation_mois
           : dossierApprenant.duree_theorique_formation
-          ? dossierApprenant.duree_theorique_formation * 12 // Legacy
+          ? dossierApprenant.duree_theorique_formation * 12
           : undefined,
         formation_presentielle: dossierApprenant.formation_presentielle,
         date_fin: dossierApprenant.date_fin_formation,
