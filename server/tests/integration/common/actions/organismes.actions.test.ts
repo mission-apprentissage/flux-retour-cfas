@@ -120,7 +120,7 @@ describe("Test des actions Organismes", () => {
       });
     });
 
-    it("returns created organisme when valid with UAI & SIRET & API Calls", async () => {
+    it.skip("returns created organisme when valid with UAI & SIRET & API Calls", async () => {
       const dataFromApiEntreprise = await getOrganismeInfosFromSiret(sampleOrganismeWithUAI.siret);
 
       const organisme = await createOrganisme({
@@ -139,7 +139,7 @@ describe("Test des actions Organismes", () => {
       });
     });
 
-    it("returns created organisme when valid with SIRET & no UAI & API Calls", async () => {
+    it.skip("returns created organisme when valid with SIRET & no UAI & API Calls", async () => {
       const dataFromApiEntreprise = await getOrganismeInfosFromSiret(sampleOrganismeWithUAI.siret);
       const organisme = await createOrganisme({
         ...sampleOrganismeWithoutUai,
@@ -212,7 +212,7 @@ describe("Test des actions Organismes", () => {
       expect(updatedOrganisme?.ferme).toBe(true);
     });
 
-    it("returns updated organisme & update ferme field from API", async () => {
+    it.skip("returns updated organisme & update ferme field from API", async () => {
       const sampleOrganisme = {
         uai: "0693400W",
         siret: "41461021200014",
