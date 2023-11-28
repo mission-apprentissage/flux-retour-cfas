@@ -119,7 +119,7 @@ export const updateEffectif = async (_id: ObjectId, data, opt = { keepPreviousEr
 export function flatPathsWithoutEmpty(object: any) {
   const flattenKeys = (obj: any, path: any = []) =>
     !isObject(obj)
-      ? obj
+      ? obj !== "" && obj !== null && obj !== undefined
         ? { [path.join(".")]: obj }
         : {}
       : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
