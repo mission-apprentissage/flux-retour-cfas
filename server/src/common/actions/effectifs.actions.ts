@@ -116,21 +116,25 @@ export const updateEffectif = async (_id: ObjectId, data, opt = { keepPreviousEr
   return updated.value;
 };
 
+export function flatPathsWithoutEmpty(object: any) {
+  const flattenKeys = (obj: any, path: any = []) =>
+    !isObject(obj)
+      ? obj
+        ? { [path.join(".")]: obj }
+        : {}
+      : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
+  return Object.keys(flattenKeys(object));
+}
+
 /**
  * Méthode de mise à jour d'un effectif avec lock
- * @param {*} effectif
- * @returns
  */
 export const lockEffectif = async (effectif: WithId<Effectif>) => {
   const { apprenant, formation } = effectif;
 
   // Lock field
   let newLocker = { ...effectif.is_lock };
-  const flattenKeys = (obj: any, path: any = []) =>
-    !isObject(obj)
-      ? { [path.join(".")]: obj }
-      : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
-  const updatePaths = Object.keys(flattenKeys({ apprenant, formation }));
+  const updatePaths = flatPathsWithoutEmpty({ apprenant, formation });
 
   // Handle manually array fields
   const updatePathsFiltered = updatePaths
@@ -143,7 +147,6 @@ export const lockEffectif = async (effectif: WithId<Effectif>) => {
   }
 
   // Handle manually locked fields
-  // TODO Fix flattenKeys function for handling properly
   set(newLocker, "apprenant.date_de_naissance", true);
   set(newLocker, "apprenant.historique_statut", true);
   set(newLocker, "contrats", true);
