@@ -115,6 +115,8 @@ fileignoreconfig:
   checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
+- filename: server/src/common/actions/effectifs.actions.ts
+  checksum: 32225fd2335732e86cceb6b3bb90e5e4a93c976090cf9445c7243f555638fd86
 scopeconfig:
 - scope: node
 custom_patterns:
@@ -131,6 +133,4 @@ allowed_patterns:
 - ApiKey
 - api_key
 - tableau-de-bord@apprentissage\.beta\.gouv.fr
-version: "1.0"
-ge\.beta\.gouv.fr
 version: "1.0"
