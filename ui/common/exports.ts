@@ -118,7 +118,6 @@ export const effectifsExportColumns = [
   {
     label: "formation_date_debut_formation",
     key: "formation_date_debut_formation",
-    xlsxType: "date",
     width: 20,
   },
   {
