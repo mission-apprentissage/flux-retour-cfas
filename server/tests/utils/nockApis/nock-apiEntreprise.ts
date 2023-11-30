@@ -20,9 +20,9 @@ const realEtablissementDataBySiret = readdirSync(jsonEtablissementDataDir).reduc
 export const nockGetEtablissement = (callback?: any) => {
   nock(API_ENDPOINT)
     .persist()
-    .get(new RegExp("\\/insee\\/sirene\\/etablissements.*"))
+    .get(new RegExp("\\/insee\\/sirene\\/etablissements\\/diffusibles.*"))
     .reply(200, (uri) => {
-      const siret = uri.replace(/(\/v3\/insee\/sirene\/etablissements\/)([0-9]*).*/, "$2");
+      const siret = uri.replace(/(\/v3\/insee\/sirene\/etablissements\/diffusibles\/)([0-9]*).*/, "$2");
       return callback ? callback(siret) : realEtablissementDataBySiret[siret];
     });
 };
