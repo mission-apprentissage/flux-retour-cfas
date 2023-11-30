@@ -756,9 +756,9 @@ describe("Processus d'ingestion", () => {
 
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
-        const { duree_theorique_formation_mois, ...miunimumWithoutDureeTheorique } = minimalSampleData;
+        const { duree_theorique_formation_mois, ...minimumWithoutDureeTheorique } = minimalSampleData;
         const { insertedId } = await effectifsQueueDb().insertOne({
-          ...miunimumWithoutDureeTheorique,
+          ...minimumWithoutDureeTheorique,
           // Ajouter ici des cas particuliers qui sont automatiquement corrigés
           // Le numéro de téléphone est nullifié
           tel_apprenant: "",
