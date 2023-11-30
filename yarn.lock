@@ -19785,6 +19785,7 @@ request-debug@latest:
     luxon: 3.3.0
     next: 13.2.3
     next-plausible: 3.7.2
+    notion-client: ^6.16.0
     notion-types: ^6.16.0
     react: 18.2.0
     react-accessible-treeview: 2.8.0

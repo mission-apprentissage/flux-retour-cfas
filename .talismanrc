@@ -117,6 +117,8 @@ fileignoreconfig:
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
 - filename: server/src/common/actions/effectifs.actions.ts
   checksum: 32225fd2335732e86cceb6b3bb90e5e4a93c976090cf9445c7243f555638fd86
+- filename: ui/pages/mentions-legales.tsx
+  checksum: a2f835244846eceb8330f07846c128d318de81c5e46741be536b554726b4372c
 scopeconfig:
 - scope: node
 custom_patterns:
