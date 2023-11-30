@@ -458,9 +458,11 @@ const createOrUpdateEffectif = async (
   }
   itemProcessingInfos.effectif_id = effectifDb._id.toString();
 
-  // lock de tous les champs mis à jour par l'API pour ne pas permettre la modification côté UI
-  // TODO vérifier que ça marche bien
-  await lockEffectif(effectifDb);
+  // Lock de tous les champs (non vide) mis à jour par l'API pour ne pas permettre la modification côté UI
+  // Uniquement dans le cas où c'est bien par API et non par import manuel (a.k.a téléversement)
+  if (effectif.source !== "televersement") {
+    await lockEffectif(effectifDb);
+  }
 
   return { effectifId: effectifDb._id, itemProcessingInfos };
 };
