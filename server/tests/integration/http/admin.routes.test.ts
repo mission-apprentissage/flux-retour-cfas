@@ -10,6 +10,7 @@ import { auditLogsDb, effectifsDb, organisationsDb, organismesDb, usersMigration
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { PermissionsTestConfig, testPermissions } from "@tests/utils/permissions";
 import {
   RequestAsOrganisationFunc,
   expectUnauthorizedError,
@@ -534,6 +535,127 @@ describe("Routes administrateur", () => {
 
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-init" })).toBe(1);
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" })).toBe(1);
+    });
+  });
+
+  describe("GET / - organismes/id/parametrage-transmission", () => {
+    describe("Vérification des droits d'accès", () => {
+      let organismeTest;
+
+      beforeEach(async () => {
+        organismeTest = await createOrganisme(sampleOrganismeWithUAI);
+      });
+
+      it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+        const response = await httpClient.post(
+          `/api/v1/admin/organismes/${organismeTest?._id}/parametrage-transmission`
+        );
+        expectUnauthorizedError(response);
+      });
+
+      describe("Vérifie qu'on ne peut pas accéder à la route sans être administrateur", () => {
+        const accesOrganisme: PermissionsTestConfig<boolean> = {
+          "OF cible": false,
+          "OF responsable": false,
+          Administrateur: true,
+          "OF non lié": false,
+          "OF formateur": false,
+          "Tête de réseau même réseau": false,
+          "Tête de réseau autre réseau": false,
+          "DREETS même région": false,
+          "DREETS autre région": false,
+          "DRAAF même région": false,
+          "DRAAF autre région": false,
+          "Conseil Régional même région": false,
+          "Conseil Régional autre région": false,
+          "CARIF OREF régional même région": false,
+          "CARIF OREF régional autre région": false,
+          "DDETS même département": false,
+          "DDETS autre département": false,
+          "Académie même académie": false,
+          "Académie autre académie": false,
+          "Opérateur public national": false,
+          "CARIF OREF national": false,
+        };
+
+        testPermissions(accesOrganisme, async (organisation, allowed) => {
+          const response = await requestAsOrganisation(
+            organisation,
+            "get",
+            `/api/v1/admin/organismes/${organismeTest?._id}/parametrage-transmission`
+          );
+          expect(response.status).toStrictEqual(allowed ? 200 : 403);
+        });
+      });
+    });
+
+    it("Vérifie qu'on renvoie une exception si aucun organisme en base", async () => {
+      const response = await httpClient.post(`/api/v1/admin/organismes/${new ObjectId(18)}/parametrage-transmission`);
+      expect(response.status).toBe(401);
+    });
+
+    it("Vérifie qu'on renvoie des informations de transmissions sur un organisme transmettant avec l'API si on est authentifié en administrateur", async () => {
+      const sampleTransmissionDate = addDays(new Date(), -10);
+      const sampleConfigurationDate = addDays(new Date(), -15);
+
+      const organismeTransmissionApiTest = await createOrganisme({
+        ...sampleOrganismeWithUAI,
+        erps: ["ERP_TEST"],
+        last_transmission_date: sampleTransmissionDate,
+        mode_de_transmission: "API",
+        api_version: "V2",
+        mode_de_transmission_configuration_date: sampleConfigurationDate,
+        api_key: "SAMPLE_API_KEY",
+      });
+
+      let response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        `/api/v1/admin/organismes/${organismeTransmissionApiTest?._id}/parametrage-transmission`
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toEqual({
+        transmission_date: sampleTransmissionDate.toISOString(),
+        transmission_api_active: true,
+        transmission_api_version: "V2",
+        transmission_manuelle_active: false,
+        api_key_active: true,
+        parametrage_erp_active: true,
+        parametrage_erp_date: sampleConfigurationDate.toISOString(),
+        erps: ["ERP_TEST"],
+      });
+    });
+
+    it("Vérifie qu'on renvoie des informations de transmissions sur un organisme transmettant manuellement si on est authentifié en administrateur", async () => {
+      const sampleTransmissionDate = addDays(new Date(), -10);
+      const sampleConfigurationDate = addDays(new Date(), -15);
+
+      const organismeTransmissionManuelleTest = await createOrganisme({
+        ...sampleOrganismeWithUAI,
+        erps: ["ERP_TEST2"],
+        last_transmission_date: sampleTransmissionDate,
+        mode_de_transmission: "MANUEL",
+        mode_de_transmission_configuration_date: sampleConfigurationDate,
+        api_key: "SAMPLE_API_KEY",
+      });
+
+      let response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        `/api/v1/admin/organismes/${organismeTransmissionManuelleTest?._id}/parametrage-transmission`
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toEqual({
+        transmission_date: sampleTransmissionDate.toISOString(),
+        transmission_api_active: false,
+        transmission_manuelle_active: true,
+        api_key_active: true,
+        parametrage_erp_active: true,
+        parametrage_erp_date: sampleConfigurationDate.toISOString(),
+        erps: ["ERP_TEST2"],
+      });
     });
   });
 });

@@ -38,6 +38,7 @@ import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
+import InfosTransmissionEtParametrageOFA from "../admin/InfosTransmissionEtParametrageOFA";
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation } from "../auth/inscription/common";
 import { IndicateursEffectifs, IndicateursEffectifsAvecFormation, IndicateursOrganismes } from "../models/indicateurs";
@@ -570,6 +571,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               </HStack>
             )}
           </VStack>
+
+          {/* Infos Transmission / Paramétrage pour les administrateurs */}
+          {organisationType === "ADMINISTRATEUR" && <InfosTransmissionEtParametrageOFA mt="2w" organisme={organisme} />}
         </Container>
       </Box>
 

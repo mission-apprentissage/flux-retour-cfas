@@ -269,5 +269,28 @@ describe("Test des actions Organismes", () => {
       assert.deepStrictEqual(updated?.first_transmission_date, first_transmission_date);
       assert.notDeepStrictEqual(updated?.last_transmission_date, undefined);
     });
+
+    it("mets à jour la source et l'api_version pour un organisme", async () => {
+      const first_transmission_date = subDays(new Date(), 10);
+      const testSource = "TEST_ERP";
+      const testApiVersion = "v18";
+
+      const { _id } = await createOrganisme({ ...sampleOrganismeWithUAI, first_transmission_date });
+
+      // Vérification de la création avec first_transmission_date
+      const created = await findOrganismeById(_id);
+      assert(created);
+      assert.deepStrictEqual(created.first_transmission_date, first_transmission_date);
+
+      // MAJ de l'organisme et vérification de l'ajout de la source et api_key
+      await updateOrganismeTransmission(created, testSource, testApiVersion);
+
+      const updated = await findOrganismeById(_id);
+
+      assert.deepStrictEqual(updated?.first_transmission_date, first_transmission_date);
+      assert.deepStrictEqual(updated?.erps, [testSource]);
+      assert.deepStrictEqual(updated?.api_version, testApiVersion);
+      assert.notDeepStrictEqual(updated?.last_transmission_date, undefined);
+    });
   });
 });

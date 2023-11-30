@@ -174,7 +174,8 @@ export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
  */
 export const updateOrganismeTransmission = async (
   organisme: Pick<WithId<Organisme>, "_id" | "first_transmission_date">,
-  source?: string
+  source?: string,
+  api_version?: string
 ) => {
   const modifyResult = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -182,6 +183,7 @@ export const updateOrganismeTransmission = async (
       $set: {
         ...(organisme.first_transmission_date ? {} : { first_transmission_date: new Date() }),
         last_transmission_date: new Date(),
+        ...(api_version ? { api_version } : {}),
         updated_at: new Date(),
       },
       ...(source ? { $addToSet: { erps: source } } : {}),
@@ -189,7 +191,7 @@ export const updateOrganismeTransmission = async (
   );
 
   if (!modifyResult.value) {
-    throw new Error(`Could not set organisme transmission dates on organisme ${organisme._id.toString()}`);
+    throw new Error(`Could not set organisme transmission infos on organisme ${organisme._id.toString()}`);
   }
 };
 
