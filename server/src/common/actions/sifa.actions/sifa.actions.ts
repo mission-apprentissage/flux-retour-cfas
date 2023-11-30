@@ -168,9 +168,13 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
         : undefined,
       DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd),
-      DUR_FORM_THEO: effectif.formation.duree_theorique
-        ? effectif.formation.duree_theorique * 12
-        : formationOrganisme?.duree_formation_theorique
+      DUR_FORM_THEO: effectif.formation.duree_theorique_mois
+        ? effectif.formation.duree_theorique_mois
+        : // Les ERPs (ou les anciens fichiers de téléversement) pouvaient envoyer duree_theorique_formation
+        // qui est l'ancien champ en années (contrairement à duree_theorique_formation_mois qui est en mois).
+        // On assure donc une rétrocompatibilité discrète en convertissant le champ en mois si besoin et
+        // en mettant dans le bon champ.
+        formationOrganisme?.duree_formation_theorique
         ? formationOrganisme?.duree_formation_theorique * 12
         : undefined,
       DUR_FORM_REELLE: effectif.formation.duree_formation_relle,

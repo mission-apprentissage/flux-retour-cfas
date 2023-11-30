@@ -42,11 +42,11 @@ export const formationSchema = {
     min: 1,
     precision: 0,
   },
-  "formation.duree_theorique": {
+  "formation.duree_theorique_mois": {
     fieldType: "numberStepper",
     required: true,
-    label: "Durée théorique en années :",
-    requiredMessage: "Le nombre d'années théorique est obligatoire",
+    label: "Durée théorique en mois :",
+    requiredMessage: "Le nombre de mois théorique est obligatoire",
     validateMessage: " n'est pas un nombre d'année valide",
     mask: "C",
     maskBlocks: [
@@ -57,7 +57,7 @@ export const formationSchema = {
       },
     ],
     min: 1,
-    max: 4,
+    max: 48,
     precision: 0,
   },
   "formation.annee": {

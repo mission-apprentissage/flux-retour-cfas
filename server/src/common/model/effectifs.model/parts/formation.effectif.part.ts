@@ -37,7 +37,8 @@ export const formationEffectifSchema = object(
       email: string({ description: "Email du référent handicap" }),
     }),
     formation_presentielle: boolean({ description: "Formation en présentiel" }),
-    duree_theorique: integer({ description: "Durée théorique de la formation en mois" }),
+    duree_theorique: integer({ description: "Durée théorique de la formation en année" }), // legacy, should be empty soon
+    duree_theorique_mois: integer({ description: "Durée théorique de la formation en mois" }),
     date_fin: date({ description: "Date de fin de la formation" }),
     date_entree: date({ description: "Date d'entrée en formation" }),
   },

@@ -433,7 +433,7 @@ describe("Processus d'ingestion", () => {
         date_inscription_formation: "2021-09-01T00:00:00.000Z",
         date_entree_formation: "2021-09-01T00:00:00.000Z",
         date_fin_formation: "2022-06-30T00:00:00.000Z",
-        duree_theorique_formation: 2,
+        duree_theorique_formation_mois: 24,
         etablissement_responsable_uai: UAI_RESPONSABLE,
         etablissement_responsable_siret: SIRET_RESPONSABLE,
         etablissement_formateur_uai: UAI,
@@ -460,7 +460,7 @@ describe("Processus d'ingestion", () => {
         date_inscription_formation: "2021-09-01T00:00:00.000Z",
         date_entree_formation: "2021-09-01T00:00:00.000Z",
         date_fin_formation: "2022-06-30T00:00:00.000Z",
-        duree_theorique_formation: 2,
+        duree_theorique_formation_mois: 24,
         etablissement_responsable_uai: UAI_RESPONSABLE,
         etablissement_responsable_siret: SIRET_RESPONSABLE,
         etablissement_formateur_uai: UAI,
@@ -572,7 +572,7 @@ describe("Processus d'ingestion", () => {
               email: "a3@example-example.org",
             },
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
-            duree_theorique: 2,
+            duree_theorique_mois: 24,
             formation_presentielle: true,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
@@ -657,7 +657,7 @@ describe("Processus d'ingestion", () => {
             rncp: "RNCP123",
             annee: 1,
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
-            duree_theorique: 2,
+            duree_theorique_mois: 24,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
@@ -756,8 +756,9 @@ describe("Processus d'ingestion", () => {
 
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
+        const { duree_theorique_formation_mois, ...minimumWithoutDureeTheorique } = minimalSampleData;
         const { insertedId } = await effectifsQueueDb().insertOne({
-          ...minimalSampleData,
+          ...minimumWithoutDureeTheorique,
           // Ajouter ici des cas particuliers qui sont automatiquement corrigés
           // Le numéro de téléphone est nullifié
           tel_apprenant: "",
@@ -769,6 +770,8 @@ describe("Processus d'ingestion", () => {
           nir_apprenant: "12 34567 89012 3 45",
           // Le sexe peut être un number
           sexe_apprenant: 2,
+          // duree_theorique_formation est transformé en mois
+          duree_theorique_formation: 2,
         });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
@@ -811,7 +814,7 @@ describe("Processus d'ingestion", () => {
             rncp: "RNCP123",
             annee: 1,
             date_inscription: new Date("2021-09-01T00:00:00.000Z"),
-            duree_theorique: 2,
+            duree_theorique_mois: 24,
             date_fin: new Date("2022-06-30T00:00:00.000Z"),
             date_entree: new Date("2021-09-01T00:00:00.000Z"),
           },
