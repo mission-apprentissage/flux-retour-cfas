@@ -123,7 +123,6 @@ export const effectifsExportColumns = [
   {
     label: "formation_date_fin_formation",
     key: "formation_date_fin_formation",
-    xlsxType: "date",
     width: 20,
   },
 ] as const satisfies ReadonlyArray<ExportColumn>;
