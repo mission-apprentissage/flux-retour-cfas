@@ -10,6 +10,7 @@ import { auditLogsDb, effectifsDb, organisationsDb, organismesDb, usersMigration
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { PermissionsTestConfig, testPermissions } from "@tests/utils/permissions";
 import {
   RequestAsOrganisationFunc,
   expectUnauthorizedError,
@@ -538,10 +539,54 @@ describe("Routes administrateur", () => {
   });
 
   describe("GET / - organismes/id/parametrage-transmission", () => {
-    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-      const organismeTest = await createOrganisme(sampleOrganismeWithUAI);
-      const response = await httpClient.post(`/api/v1/admin/organismes/${organismeTest?._id}/parametrage-transmission`);
-      expectUnauthorizedError(response);
+    describe("Vérification des droits d'accès", () => {
+      let organismeTest;
+
+      beforeEach(async () => {
+        organismeTest = await createOrganisme(sampleOrganismeWithUAI);
+      });
+
+      it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+        const response = await httpClient.post(
+          `/api/v1/admin/organismes/${organismeTest?._id}/parametrage-transmission`
+        );
+        expectUnauthorizedError(response);
+      });
+
+      describe("Vérifie qu'on ne peut pas accéder à la route sans être administrateur", () => {
+        const accesOrganisme: PermissionsTestConfig<boolean> = {
+          "OF cible": false,
+          "OF responsable": false,
+          Administrateur: true,
+          "OF non lié": false,
+          "OF formateur": false,
+          "Tête de réseau même réseau": false,
+          "Tête de réseau autre réseau": false,
+          "DREETS même région": false,
+          "DREETS autre région": false,
+          "DRAAF même région": false,
+          "DRAAF autre région": false,
+          "Conseil Régional même région": false,
+          "Conseil Régional autre région": false,
+          "CARIF OREF régional même région": false,
+          "CARIF OREF régional autre région": false,
+          "DDETS même département": false,
+          "DDETS autre département": false,
+          "Académie même académie": false,
+          "Académie autre académie": false,
+          "Opérateur public national": false,
+          "CARIF OREF national": false,
+        };
+
+        testPermissions(accesOrganisme, async (organisation, allowed) => {
+          const response = await requestAsOrganisation(
+            organisation,
+            "get",
+            `/api/v1/admin/organismes/${organismeTest?._id}/parametrage-transmission`
+          );
+          expect(response.status).toStrictEqual(allowed ? 200 : 403);
+        });
+      });
     });
 
     it("Vérifie qu'on renvoie une exception si aucun organisme en base", async () => {
