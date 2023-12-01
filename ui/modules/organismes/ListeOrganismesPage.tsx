@@ -23,6 +23,7 @@ import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import { useOrganismesNormalizedLists } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
+import { ExternalLinkLine } from "@/theme/components/icons";
 
 import OrganismesACompleterPanelContent from "./tabs/OrganismesACompleterPanelContent";
 import OrganismesFiablesPanelContent from "./tabs/OrganismesFiablesPanelContent";
@@ -102,7 +103,23 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             </ListItem>
           )}
         </UnorderedList>
-        <Text fontStyle="italic">Sources : Catalogue et Référentiel de l’apprentissage</Text>
+        <Text fontStyle="italic">
+          Sources :{" "}
+          <Link href="https://catalogue-apprentissage.intercariforef.org/" isExternal color="action-high-blue-france">
+            Catalogue
+            <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} mr={1} />
+          </Link>{" "}
+          et{" "}
+          <Link href="https://referentiel.apprentissage.onisep.fr/" isExternal color="action-high-blue-france" ml={1}>
+            Référentiel de l’apprentissage
+            <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
+          </Link>
+        </Text>
+        <Text mt={4}>
+          Si des relations entre organismes ne devraient pas avoir lieu ou sont manquantes, vous devez vous rapprocher
+          de votre Carif-Oref régional afin de modifier les informations collectées (par ex&nbsp;: suppression du
+          formateur rattaché au responsable).
+        </Text>
 
         <HStack justifyContent="space-between">
           <Box />
