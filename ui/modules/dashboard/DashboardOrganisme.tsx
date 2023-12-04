@@ -810,7 +810,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       données peuvent être consultées <strong>exclusivement</strong> par votre organisme et les
                       administrations publiques dans le cadre de la{" "}
                       <Link
-                        href="/mention-information"
+                        href="/politique-de-confidentialite"
                         borderBottom="1px"
                         _hover={{ textDecoration: "none" }}
                         display="inline-flex"
