@@ -74,7 +74,6 @@
     "node-ovh-objectstorage": "2.0.5",
     "nodemailer": "6.8.0",
     "nodemailer-html-to-text": "3.2.0",
-    "notion-client": "^6.16.0",
     "oleoduc": "0.7.0",
     "omit-deep": "0.3.0",
     "openapi3-ts": "4.0.2",

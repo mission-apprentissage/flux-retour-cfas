@@ -8,7 +8,6 @@ import cors from "cors";
 import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
-import { NotionAPI } from "notion-client";
 import passport from "passport";
 import { typesEffectifNominatif } from "shared/constants/indicateurs";
 import swaggerUi from "swagger-ui-express";
@@ -140,8 +139,6 @@ import organismesRouter from "./routes/specific.routes/organismes.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
-const notion = new NotionAPI();
-
 /**
  * Create the express app
  */
@@ -209,13 +206,6 @@ function setupRoutes(app: Application) {
             mongodb: mongodbHealthy,
           },
         };
-      })
-    )
-    .get(
-      "/api/mentions-legales",
-      returnResult(async () => {
-        const recordMap = await notion.getPage("Mentions-l-gales-002a2868ea2f46cdb2d73207d12b6075");
-        return recordMap;
       })
     )
     .post(
