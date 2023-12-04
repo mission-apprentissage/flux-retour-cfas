@@ -356,8 +356,9 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                 Aucune erreur n&apos;a été détectée dans votre fichier.
               </Text>
               <Text fontSize="sm" color="grey.800">
-                Vous pouvez relire le détail ligne à ligne ci-dessous. Si vous êtes satisfait, vous pouvez valider
-                l&apos;import.
+                Vous pouvez relire le détail ligne à ligne ci-dessous (et défiler sur la droite). Si vous êtes
+                satisfait, vous pouvez valider l’import en cliquant sur le bouton dédié en bas de cette page.{" "}
+                <b>Votre fichier n’a pas encore été importé.</b>
               </Text>
             </Box>
           </Ribbons>
