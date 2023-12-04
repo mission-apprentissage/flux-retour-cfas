@@ -18137,7 +18137,6 @@ request-debug@latest:
     node-ovh-objectstorage: 2.0.5
     nodemailer: 6.8.0
     nodemailer-html-to-text: 3.2.0
-    notion-client: ^6.16.0
     oleoduc: 0.7.0
     omit-deep: 0.3.0
     openapi3-ts: 4.0.2
@@ -19785,6 +19784,7 @@ request-debug@latest:
     luxon: 3.3.0
     next: 13.2.3
     next-plausible: 3.7.2
+    notion-client: ^6.16.0
     notion-types: ^6.16.0
     react: 18.2.0
     react-accessible-treeview: 2.8.0

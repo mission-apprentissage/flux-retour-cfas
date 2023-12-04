@@ -1,51 +1,26 @@
-import { Center, Spinner } from "@chakra-ui/react";
-import { GetServerSidePropsContext } from "next";
+import { GetStaticProps, InferGetStaticPropsType } from "next";
+import { NotionAPI } from "notion-client";
 import { ExtendedRecordMap } from "notion-types";
-import { useEffect, useState } from "react";
+import { NotionRenderer } from "react-notion-x";
 
 import { _get } from "@/common/httpClient";
-import { NotionDoc } from "@/components/NotionDoc";
 import SimplePage from "@/components/Page/SimplePage";
 
 import "react-notion-x/src/styles.css";
 
-const isInitialServerSideProps = (context: GetServerSidePropsContext) =>
-  context.req?.url?.indexOf("/_next/data/") === -1;
+export const getStaticProps = (async () => {
+  const notion = new NotionAPI();
+  const recordMap = await notion.getPage("Mentions-l-gales-002a2868ea2f46cdb2d73207d12b6075");
+  // const data = await _get("/api/mentions-legales");
+  return { props: { data: recordMap }, revalidate: 60 * 30 };
+}) satisfies GetStaticProps<{
+  data: ExtendedRecordMap;
+}>;
 
-export const getServerSideProps = async (context) => {
-  try {
-    const isInitial = isInitialServerSideProps(context);
-    if (!isInitial) return { props: {} };
-    const dataSSR = await _get("/api/mentions-legales");
-    return { props: { dataSSR } };
-  } catch (e) {
-    console.error(e);
-    return { props: {} };
-  }
-};
-
-export default function Home({ dataSSR }: { dataSSR: ExtendedRecordMap }) {
-  const [data, setData] = useState(dataSSR);
-  const [isLoading, setIsLoading] = useState(!dataSSR);
-
-  useEffect(() => {
-    if (dataSSR) return;
-    (async () => {
-      setIsLoading(true);
-      setData(await _get("/api/mentions-legales"));
-      setIsLoading(false);
-    })();
-  }, []);
-
+export default function MentionsLegales({ data }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <SimplePage title="Mentions légales">
-      {isLoading ? (
-        <Center>
-          <Spinner />
-        </Center>
-      ) : (
-        <NotionDoc recordMap={data} />
-      )}
+      <NotionRenderer pageTitle={false} disableHeader={true} recordMap={data} fullPage={true} darkMode={false} />
     </SimplePage>
   );
 }
