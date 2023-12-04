@@ -103,6 +103,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             </ListItem>
           )}
         </UnorderedList>
+
         <Text fontStyle="italic">
           Sources :{" "}
           <Link href="https://catalogue-apprentissage.intercariforef.org/" isExternal color="action-high-blue-france">
@@ -115,11 +116,14 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
           </Link>
         </Text>
-        <Text mt={4}>
-          Si des relations entre organismes ne devraient pas avoir lieu ou sont manquantes, vous devez vous rapprocher
-          de votre Carif-Oref régional afin de modifier les informations collectées (par ex&nbsp;: suppression du
-          formateur rattaché au responsable).
-        </Text>
+
+        {["ORGANISME_FORMATION", "TETE_DE_RESEAU"].includes(organisationType) && (
+          <Text mt={4}>
+            Si des relations entre organismes ne devraient pas avoir lieu ou sont manquantes, vous devez vous rapprocher
+            de votre Carif-Oref régional afin de modifier les informations collectées (par ex&nbsp;: suppression du
+            formateur rattaché au responsable).
+          </Text>
+        )}
 
         <HStack justifyContent="space-between">
           <Box />
