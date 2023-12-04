@@ -83,7 +83,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           )}
         </HStack>
         <HStack>
-          <Text>Paramétrage ERP :</Text>
+          <Text>Paramétrage :</Text>
           {parametrage?.parametrage_erp_active ? (
             <HStack spacing="1w">
               <BadgeYes />
