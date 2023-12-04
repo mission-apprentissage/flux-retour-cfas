@@ -67,18 +67,17 @@ const nextConfig = {
       },
       {
         source: "/politique-confidentialite",
-        destination: "/mention-information",
+        destination: "/politique-de-confidentialite",
         permanent: true,
       },
       {
         source: "/protection-des-donnees",
-        destination: "/mention-information",
+        destination: "/politique-de-confidentialite",
         permanent: true,
       },
       {
         source: "/mention-information",
-        destination:
-          "https://mission-apprentissage.notion.site/Mention-d-information-7b1c32f4c2214e0c9523686b18ada6fa?pvs=4",
+        destination: "/politique-de-confidentialite",
         permanent: true,
       },
     ];

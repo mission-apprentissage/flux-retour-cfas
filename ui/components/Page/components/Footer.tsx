@@ -113,10 +113,7 @@ const Footer = () => {
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/mention-information"} isExternal>
-                  Mention d’information
-                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
-                </Link>
+                <Link href={"/politique-de-confidentialite"}>Politique de confidentialité</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="https://beta.gouv.fr/startups/tdb-apprentissage.html" isExternal>

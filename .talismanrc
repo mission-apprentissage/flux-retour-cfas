@@ -119,6 +119,8 @@ fileignoreconfig:
   checksum: 32225fd2335732e86cceb6b3bb90e5e4a93c976090cf9445c7243f555638fd86
 - filename: ui/pages/mentions-legales.tsx
   checksum: a2f835244846eceb8330f07846c128d318de81c5e46741be536b554726b4372c
+- filename: ui/pages/politique-de-confidentialite.tsx
+  checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
 scopeconfig:
 - scope: node
 custom_patterns:
