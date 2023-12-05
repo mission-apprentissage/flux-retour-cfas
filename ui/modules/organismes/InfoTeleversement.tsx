@@ -1,4 +1,6 @@
-import { Box, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { Box, HStack, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+
+import { ExternalLinkLine } from "@/theme/components/icons";
 
 export default function InfoTeleversement() {
   return (
@@ -19,7 +21,10 @@ export default function InfoTeleversement() {
           <ListItem>
             Pour téléverser vos effectifs, vous avez 2 options :
             <UnorderedList>
-              <ListItem>remplir directement le fichier-modèle (téléchargeable ci-dessus) avec vos effectifs,</ListItem>
+              <ListItem>
+                [Recommandé] remplir directement le fichier-modèle (téléchargeable ci-dessus) avec vos effectifs, et
+                enlever la ligne 2, dédiée aux exemples,
+              </ListItem>
               <ListItem>
                 créer un fichier personnalisé, en conservant les mêmes en-têtes de colonne que le fichier-modèle.
               </ListItem>
@@ -34,8 +39,12 @@ export default function InfoTeleversement() {
             chaque mois.
           </ListItem>
           <ListItem>
-            Si vous n’avez pas accès à Excel ou si vous ne l’utilisez pas, vous pouvez utiliser un convertisseur en
-            ligne. Pour les utilisateurs de Numbers, vous avez la possibilité d’exporter le fichier au format{" "}
+            Si vous n’avez pas accès à Excel ou si vous ne l’utilisez pas, vous pouvez utiliser un{" "}
+            <Link href="https://www.zamzar.com/fr/convert/numbers-to-xls/" isExternal textDecoration={"underline"}>
+              convertisseur en ligne
+              <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
+            </Link>
+            . Pour les utilisateurs de Numbers, vous avez la possibilité d’exporter le fichier au format{" "}
             <code>.xls</code> (Fichier &gt; Exporter vers &gt; Excel, décocher la case «&nbsp;Inclure une feuille de
             résumé&nbsp;»)
           </ListItem>
