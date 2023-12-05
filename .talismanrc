@@ -105,8 +105,6 @@ fileignoreconfig:
   checksum: 5fa50502b737d7e06efff5cd4128da53f4dc7a196428149e1695977175e92cab
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx
   checksum: 2740311625e562ca5a15d43eadbed83ae73113716a09b4fbdb2e1f0c79ad42df
-- filename: ui/modules/organismes/Televersement.tsx
-  checksum: 79608f856866cdf4e0232e5729f8909535c9cfe77155bd1799257aa74ff4104a
 - filename: ui/next.config.js
   checksum: e68b7b2b7828b9c665c02503b0505821e2b0ea41c91ae440fbce422c781ef07b
 - filename: ui/pages/auth/inscription/profil.tsx
@@ -121,6 +119,8 @@ fileignoreconfig:
   checksum: a2f835244846eceb8330f07846c128d318de81c5e46741be536b554726b4372c
 - filename: ui/pages/politique-de-confidentialite.tsx
   checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
+- filename: ui/modules/organismes/Televersement.tsx
+  checksum: 2322283e936e6f4a419f27f60e1bae886adffc99a40a085131685f4ca77597e3
 scopeconfig:
 - scope: node
 custom_patterns:

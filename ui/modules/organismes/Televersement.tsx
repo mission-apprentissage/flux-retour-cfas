@@ -33,8 +33,10 @@ import { cyrb53Hash, normalize } from "@/common/utils/stringUtils";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useToaster from "@/hooks/useToaster";
-import { FileDownloadIcon } from "@/modules/dashboard/icons";
 import { DownloadLine } from "@/theme/components/icons";
+import DownloadSimple from "@/theme/components/icons/DownloadSimple";
+import Eye from "@/theme/components/icons/Eye";
+import Video from "@/theme/components/icons/Video";
 
 import headerTooltips from "./headerTooltips";
 import InfoTeleversement from "./InfoTeleversement";
@@ -266,46 +268,18 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           Import des effectifs
         </Heading>
         <InfoBetaPanel />
-        <Button
-          as="a"
-          variant={"link"}
-          fontSize="md"
-          mt="2"
-          borderBottom="1px"
-          borderRadius="0"
-          mb="8"
-          lineHeight="6"
-          p="0"
-          _active={{
-            color: "bluefrance",
-          }}
-          href="/modele-import.xlsx"
-        >
-          <FileDownloadIcon mr="2" />
+        <ButtonTeleversement href="/modele-import.xlsx">
+          <DownloadSimple mr="2" />
           Télécharger le modèle Excel
-        </Button>
-
-        <Button
-          as="a"
-          variant={"link"}
-          target="_blank"
-          fontSize="md"
-          mt="2"
-          borderBottom="1px"
-          borderRadius="0"
-          mb="8"
-          ml="8"
-          lineHeight="6"
-          p="0"
-          _active={{
-            color: "bluefrance",
-          }}
-          href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20"
-        >
-          <FileDownloadIcon mr="2" />
+        </ButtonTeleversement>
+        <ButtonTeleversement href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20">
+          <Eye mr={2} />
           Guide des données
-        </Button>
-
+        </ButtonTeleversement>
+        <ButtonTeleversement href="https://www.canva.com/design/DAF0aDLacTk/ZxY16rI7C_vBzEuyrEpbIA/watch">
+          <Video mr="2" />
+          Tutoriel en vidéo
+        </ButtonTeleversement>
         {status === "validation_failure" && (
           <>
             <Ribbons variant="error" mb={8}>
@@ -348,7 +322,6 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             </HStack>
           </>
         )}
-
         {status === "validation_success" && (
           <Ribbons variant="success" mb={8}>
             <Box mb="8">
@@ -363,7 +336,6 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             </Box>
           </Ribbons>
         )}
-
         {data && filteredHeaders && (
           <Box overflowX="auto" mb="8">
             <Table fontSize="sm">
@@ -430,7 +402,6 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             </Table>
           </Box>
         )}
-
         {status === "validation_success" && (
           <>
             <Button
@@ -448,7 +419,6 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             </Button>
           </>
         )}
-
         {(status === "validation_failure" || status === null) && (
           <>
             <Box {...getRootProps<any>({ style })} mb={8} minH="200px">
@@ -554,4 +524,28 @@ function Header({ header }: { header: string }) {
     );
   }
   return <>{header}</>;
+}
+
+function ButtonTeleversement({ children, href }: { children: React.ReactNode; href: string }) {
+  return (
+    <Button
+      as="a"
+      variant={"link"}
+      target="_blank"
+      fontSize="md"
+      mt="2"
+      borderBottom="1px"
+      borderRadius="0"
+      mb="8"
+      mr="8"
+      lineHeight="6"
+      p="0"
+      _active={{
+        color: "bluefrance",
+      }}
+      href={href}
+    >
+      {children}
+    </Button>
+  );
 }
