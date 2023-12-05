@@ -3,7 +3,7 @@ import {
   NATIONALITE_APPRENANT_ENUM,
   SEXE_APPRENANT_ENUM,
 } from "@/common/constants/dossierApprenant";
-import { CODE_POSTAL_PATTERN, INE_REGEX_PATTERN } from "@/common/constants/validations";
+import { CODE_POSTAL_PATTERN, DERNIER_ORGANISME_UAI_PATTERN, INE_REGEX_PATTERN } from "@/common/constants/validations";
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 import { object, string, date, integer, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
 
@@ -132,7 +132,7 @@ export const apprenantSchema = object(
     dernier_organisme_uai: string({
       description:
         "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
-      pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789]|[0-9]{7}[a-zA-Z])$",
+      pattern: DERNIER_ORGANISME_UAI_PATTERN,
     }),
     type_cfa: string({
       enum: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],

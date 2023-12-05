@@ -13,6 +13,7 @@ import {
   INE_REGEX,
   NIR_LOOSE_REGEX,
   CODE_POSTAL_REGEX,
+  DERNIER_ORGANISME_UAI_REGEX,
 } from "@/common/constants/validations";
 
 import { telephoneConverter } from "./frenchTelephoneNumber";
@@ -460,7 +461,7 @@ export const primitivesV3 = {
     }),
   dernier_organisme_uai: z
     .string()
-    .regex(/^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789]|[0-9]{7}[a-zA-Z])$/, "UAI ou département")
+    .regex(DERNIER_ORGANISME_UAI_REGEX, "UAI ou département")
     .describe(
       "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département"
     )
