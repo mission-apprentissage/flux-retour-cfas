@@ -467,12 +467,25 @@ export const primitivesV3 = {
     .openapi({
       example: "0123456A",
     }),
-  type_cfa: z
-    .string()
-    .regex(/^(01|02|03|04|05|06|07|08|09|10)$/, "01 à 10")
-    .describe("Type de CFA")
-    .openapi({
-      enum: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
-      description: "Type de CFA",
-    }),
+  type_cfa: z.preprocess(
+    (input) => {
+      if (input) {
+        // Vérifie si l'entrée est un nombre entre 1 et 10 sans le zéro initial
+        const match = String(input).match(/^(1|2|3|4|5|6|7|8|9|10)$/);
+        if (match) {
+          // Rajoute un zéro devant si nécessaire
+          return match[0].length === 1 ? "0" + match[0] : match[0];
+        }
+      }
+      return input;
+    },
+    z
+      .string()
+      .regex(/^(01|02|03|04|05|06|07|08|09|10)$/, "01 à 10")
+      .describe("Type de CFA")
+      .openapi({
+        enum: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
+        description: "Type de CFA",
+      })
+  ),
 };

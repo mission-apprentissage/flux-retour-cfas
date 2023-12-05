@@ -108,6 +108,7 @@ export const schema = object(
       description:
         "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
     }),
+    type_cfa: any({ description: "Type de CFA (nomenclature SIFA)" }),
     obtention_diplome_formation: any(),
     date_obtention_diplome_formation: any({ description: formationProps.date_obtention_diplome.description }),
     date_exclusion_formation: any(),

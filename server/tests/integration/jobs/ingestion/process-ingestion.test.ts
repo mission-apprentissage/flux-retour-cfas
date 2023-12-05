@@ -415,6 +415,7 @@ describe("Processus d'ingestion", () => {
         responsable_apprenant_mail2: "a2@example.org",
         derniere_situation: 4001,
         dernier_organisme_uai: "1234567X",
+        type_cfa: "4",
         obtention_diplome_formation: true,
         date_obtention_diplome_formation: "2022-06-30T00:00:00.000Z",
         date_exclusion_formation: "2022-06-30T00:00:00.000Z",
@@ -540,6 +541,7 @@ describe("Processus d'ingestion", () => {
             responsable_mail2: "a2@example.org",
             derniere_situation: 4001,
             dernier_organisme_uai: "1234567X",
+            type_cfa: "04",
           },
           contrats: [
             {

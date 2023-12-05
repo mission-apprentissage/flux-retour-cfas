@@ -33,6 +33,7 @@ export interface EffectifsQueue {
   responsable_apprenant_mail2?: any; // Mail du responsable de l'apprenant
   derniere_situation?: any; // Situation de l'apprenant N-1
   dernier_organisme_uai?: any; // Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département
+  type_cfa?: any; // Type de CFA (nomenclature SIFA)
   obtention_diplome_formation?: any;
   date_obtention_diplome_formation?: any; // Date d'obtention du diplôme
   date_exclusion_formation?: any;
