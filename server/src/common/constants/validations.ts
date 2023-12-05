@@ -11,6 +11,9 @@ export const YEAR_RANGE_PATTERN = "^[12][0-9]{3}-[12][0-9]{3}$";
 export const NIR_REGEX_PATTERN = "^[0-9]{13}$";
 // Le NIR peut contenir 15 caractères (13 chiffres + 2 chiffres de contrôle)
 export const NIR_LOOSE_REGEX_PATTERN = "^[0-9]{13}([0-9]{2})?$";
+// Basé sur les recommandations SIFA
+export const DERNIER_ORGANISME_UAI_PATTERN =
+  "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$";
 
 // Numero INE (Identifiant National Elève)
 // Le numero INE composé de 11 caractères,
@@ -33,6 +36,7 @@ export const UAI_REGEX = new RegExp(UAI_REGEX_PATTERN);
 export const YEAR_RANGE_REGEX = new RegExp(YEAR_RANGE_PATTERN);
 export const NIR_REGEX = new RegExp(NIR_REGEX_PATTERN);
 export const NIR_LOOSE_REGEX = new RegExp(NIR_LOOSE_REGEX_PATTERN);
+export const DERNIER_ORGANISME_UAI_REGEX = new RegExp(DERNIER_ORGANISME_UAI_PATTERN);
 
 export const isValidCFD = (cfd) => typeof cfd === "string" && CFD_REGEX.test(cfd);
 export const isValidINE = (ine) => typeof ine === "string" && INE_REGEX.test(ine);
