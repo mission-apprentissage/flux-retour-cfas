@@ -11,7 +11,6 @@ import "react-notion-x/src/styles.css";
 export const getStaticProps = (async () => {
   const notion = new NotionAPI();
   const recordMap = await notion.getPage("Politique-de-confidentialit-7b1c32f4c2214e0c9523686b18ada6fa");
-  // const data = await _get("/api/mentions-legales");
   return { props: { data: recordMap }, revalidate: 60 * 30 };
 }) satisfies GetStaticProps<{
   data: ExtendedRecordMap;
