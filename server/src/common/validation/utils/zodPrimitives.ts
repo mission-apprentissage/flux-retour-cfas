@@ -3,7 +3,11 @@ import { subDays } from "date-fns";
 import { capitalize } from "lodash-es";
 import { z } from "zod";
 
-import { CODES_STATUT_APPRENANT_ENUM, SEXE_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
+import {
+  CODES_STATUT_APPRENANT_ENUM,
+  EFFECTIF_DERNIER_SITUATION,
+  SEXE_APPRENANT_ENUM,
+} from "@/common/constants/dossierApprenant";
 import {
   CFD_REGEX,
   CODE_NAF_REGEX,
@@ -446,19 +450,24 @@ export const primitivesV3 = {
       .describe("Code Insee de la commune de l'établissement de l'employeur"),
     code_naf: extensions.code_naf().describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
   },
-  derniere_situation: z.coerce
-    .number()
-    .int()
-    .describe("Situation de l'apprenant N-1")
-    .openapi({
-      enum: [
-        1003, 1005, 1009, 1013, 1015, 1017, 1018, 1019, 1021, 1023, 2001, 2003, 2005, 2007, 3001, 3101, 3003, 3103,
-        3009, 3109, 3011, 3111, 3031, 3131, 3032, 3132, 3033, 3133, 3117, 3119, 3021, 3121, 3023, 3123, 4001, 4101,
-        4003, 4103, 4005, 4105, 4007, 4107, 4009, 4011, 4111, 4013, 4113, 4015, 4115, 4017, 4117, 4019, 4119, 4021,
-        4121, 5901, 5903, 5905, 5907, 5909, 9900, 9999,
-      ],
-      type: "integer",
-    }),
+  derniere_situation: z.preprocess(
+    (v: any) => (v ? Number(v) : v),
+    z.coerce
+      .number()
+      .int()
+      .refine(
+        (e) => {
+          console.log(e);
+          return EFFECTIF_DERNIER_SITUATION.includes(e);
+        },
+        { message: "Format invalide (ex : 1003, 3111, 4017)" }
+      )
+      .describe("Situation de l'apprenant N-1")
+      .openapi({
+        enum: EFFECTIF_DERNIER_SITUATION,
+        type: "integer",
+      })
+  ),
   dernier_organisme_uai: z
     .string()
     .regex(DERNIER_ORGANISME_UAI_REGEX, "UAI ou département")
