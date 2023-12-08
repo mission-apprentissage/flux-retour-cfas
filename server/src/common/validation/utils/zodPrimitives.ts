@@ -455,13 +455,7 @@ export const primitivesV3 = {
     z.coerce
       .number()
       .int()
-      .refine(
-        (e) => {
-          console.log(e);
-          return EFFECTIF_DERNIER_SITUATION.includes(e);
-        },
-        { message: "Format invalide (ex : 1003, 3111, 4017)" }
-      )
+      .refine((e) => EFFECTIF_DERNIER_SITUATION.includes(e), { message: "Format invalide (ex : 1003, 3111, 4017)" })
       .describe("Situation de l'apprenant N-1")
       .openapi({
         enum: EFFECTIF_DERNIER_SITUATION,
