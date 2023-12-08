@@ -114,10 +114,13 @@ export const primitivesV1 = {
       .preprocess(
         (v: any) => (CODES_STATUT_APPRENANT_ENUM.includes(parseInt(v, 10) as any) ? parseInt(v, 10) : v),
         z
-          .number({ invalid_type_error: `Valeurs possibles: ${CODES_STATUT_APPRENANT_ENUM.join(",")}` })
+          .number({
+            invalid_type_error: `Valeurs possibles: ${CODES_STATUT_APPRENANT_ENUM.join(",")}`,
+          })
           .int()
-          .min(0)
-          .max(3)
+          .refine((value) => (CODES_STATUT_APPRENANT_ENUM as number[]).includes(value), {
+            message: `Valeurs valides: ${CODES_STATUT_APPRENANT_ENUM.join(",")}`,
+          })
       )
       .openapi({
         description: `Valeurs possibles: ${CODES_STATUT_APPRENANT_ENUM.join(",")}`,
