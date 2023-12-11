@@ -1030,6 +1030,10 @@ export interface Organisme {
    */
   creation_statut?: "ORGANISME_LIEU_FORMATION";
   /**
+   * Identifiant de l'organisme qui transmet les effectifs de cet organisme
+   */
+  organisme_transmetteur_id?: string;
+  /**
    * Date de mise à jour en base de données
    */
   updated_at?: Date;

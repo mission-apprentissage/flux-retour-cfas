@@ -132,7 +132,12 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       // création ou mise à jour de l'effectif
       const [{ effectifId, itemProcessingInfos }] = await Promise.all([
         createOrUpdateEffectif(effectif),
-        updateOrganismeTransmission(organisme, effectif.source, effectifQueue.api_version),
+        updateOrganismeTransmission(
+          organisme,
+          effectif.source,
+          effectifQueue.api_version,
+          effectifQueue.source_organisme_id
+        ),
       ]);
 
       // ajout des informations sur le traitement au logger

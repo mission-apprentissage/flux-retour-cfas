@@ -66,6 +66,7 @@ export default () => {
     }),
     async ({ params }, res) => {
       const { id } = params;
+
       const organisme = await findOrganismeById(id as string, {
         last_transmission_date: 1,
         erps: 1,
@@ -73,9 +74,17 @@ export default () => {
         mode_de_transmission: 1,
         mode_de_transmission_configuration_date: 1,
         api_version: 1,
+        organisme_transmetteur_id: 1,
       });
+
       if (!organisme) {
         throw Boom.notFound(`Organisme with id ${id} not found`);
+      }
+
+      let organismeTransmetteur;
+
+      if (organisme.organisme_transmetteur_id) {
+        organismeTransmetteur = await findOrganismeById(organisme.organisme_transmetteur_id);
       }
 
       res.json({
@@ -87,6 +96,16 @@ export default () => {
         parametrage_erp_active: !!organisme.mode_de_transmission_configuration_date,
         parametrage_erp_date: organisme.mode_de_transmission_configuration_date,
         erps: organisme.erps,
+        organisme_transmetteur_id: organisme.organisme_transmetteur_id,
+        ...(organismeTransmetteur
+          ? {
+              organisme_transmetteur: {
+                _id: organismeTransmetteur._id,
+                enseigne: organismeTransmetteur.enseigne,
+                raison_sociale: organismeTransmetteur.raison_sociale,
+              },
+            }
+          : {}),
       });
     }
   );

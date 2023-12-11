@@ -1,4 +1,4 @@
-import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/react";
+import { Badge, Box, HStack, Stack, Text, Link } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 
@@ -14,6 +14,11 @@ interface InfosTransmissionParametrageOFAProps {
   api_key_active: boolean;
   parametrage_erp_date: Date;
   erps: string[];
+  organisme_transmetteur?: {
+    _id: string;
+    enseigne?: string;
+    raison_sociale?: string;
+  };
 }
 
 const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
@@ -26,98 +31,115 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
   );
 
   return (
-    <Box borderColor="#0063CB" borderWidth="2px" p="2w" w="50%" {...props}>
-      <Stack>
-        <HStack color="#0063CB">
-          <Box as="i" className="ri-eye-fill" />
-          <Box>
-            <Text fontSize="zeta" fontWeight="bold">
-              Encart réservé aux administrateurs
+    <Stack borderColor="#0063CB" borderWidth="2px" w="fit-content" p="2w" {...props}>
+      <HStack color="#0063CB">
+        <Box as="i" className="ri-eye-fill" />
+        <Box>
+          <Text fontSize="zeta" fontWeight="bold">
+            Encart réservé aux administrateurs
+          </Text>
+        </Box>
+      </HStack>
+      <HStack>
+        <Text>Transmission API :</Text>
+        {parametrage?.transmission_api_active ? (
+          <HStack spacing="1w">
+            <BadgeYes />
+            {parametrage.transmission_api_version && (
+              <Badge
+                fontSize="epsilon"
+                textColor="grey.800"
+                textTransform="none"
+                paddingX="1w"
+                paddingY="2px"
+                backgroundColor="#ECEAE3"
+              >
+                {parametrage.transmission_api_version}
+              </Badge>
+            )}
+            <Text>
+              (
+              {parametrage.transmission_date
+                ? new Date(parametrage.transmission_date).toLocaleDateString()
+                : "Date non disponible"}
+              )
             </Text>
-          </Box>
-        </HStack>
+          </HStack>
+        ) : (
+          <BadgeNo />
+        )}
+      </HStack>
+      <HStack>
+        <Text>Transmission manuelle :</Text>
+        {parametrage?.transmission_manuelle_active ? (
+          <HStack spacing="1w">
+            <BadgeYes />
+            <Text>
+              (
+              {parametrage.transmission_date
+                ? new Date(parametrage.transmission_date).toLocaleDateString()
+                : "Date non disponible"}
+              )
+            </Text>
+          </HStack>
+        ) : (
+          <BadgeNo />
+        )}
+      </HStack>
+      <HStack>
+        <Text>Paramétrage :</Text>
+        {parametrage?.parametrage_erp_active ? (
+          <HStack spacing="1w">
+            <BadgeYes />
+            {parametrage.erps?.map((erp, index) => (
+              <Badge
+                key={index}
+                fontSize="epsilon"
+                textColor="grey.800"
+                textTransform="none"
+                paddingX="1w"
+                paddingY="2px"
+                backgroundColor="#ECEAE3"
+              >
+                {erp.toUpperCase()}
+              </Badge>
+            ))}
+            <Text>
+              (
+              {parametrage.parametrage_erp_date
+                ? new Date(parametrage.parametrage_erp_date).toLocaleDateString()
+                : "Date non disponible"}
+              )
+            </Text>
+          </HStack>
+        ) : (
+          <BadgeNo />
+        )}
+      </HStack>
+      <HStack>
+        <Text>Clé d’API présente :</Text>
+        {parametrage?.api_key_active ? <BadgeYes /> : <BadgeNo />}
+      </HStack>
+      {parametrage?.organisme_transmetteur ? (
         <HStack>
-          <Text>Transmission API :</Text>
-          {parametrage?.transmission_api_active ? (
-            <HStack spacing="1w">
-              <BadgeYes />
-              {parametrage.transmission_api_version && (
-                <Badge
-                  fontSize="epsilon"
-                  textColor="grey.800"
-                  textTransform="none"
-                  paddingX="1w"
-                  paddingY="2px"
-                  backgroundColor="#ECEAE3"
-                >
-                  {parametrage.transmission_api_version}
-                </Badge>
-              )}
-              <Text>
-                (
-                {parametrage.transmission_date
-                  ? new Date(parametrage.transmission_date).toLocaleDateString()
-                  : "Date non disponible"}
-                )
-              </Text>
-            </HStack>
-          ) : (
-            <BadgeNo />
-          )}
+          <Text>Organisme transmetteur des effectifs :</Text>
+          <Link
+            key={parametrage?.organisme_transmetteur._id}
+            href={`/organismes/${parametrage?.organisme_transmetteur._id}`}
+            target="_blank"
+            borderBottom="1px"
+            color="action-high-blue-france"
+            _hover={{ textDecoration: "none" }}
+          >
+            {parametrage?.organisme_transmetteur.enseigne ??
+              parametrage?.organisme_transmetteur.raison_sociale ??
+              "Organisme inconnu"}
+          </Link>
         </HStack>
-        <HStack>
-          <Text>Transmission manuelle :</Text>
-          {parametrage?.transmission_manuelle_active ? (
-            <HStack spacing="1w">
-              <BadgeYes />
-              <Text>
-                (
-                {parametrage.transmission_date
-                  ? new Date(parametrage.transmission_date).toLocaleDateString()
-                  : "Date non disponible"}
-                )
-              </Text>
-            </HStack>
-          ) : (
-            <BadgeNo />
-          )}
-        </HStack>
-        <HStack>
-          <Text>Paramétrage :</Text>
-          {parametrage?.parametrage_erp_active ? (
-            <HStack spacing="1w">
-              <BadgeYes />
-              {parametrage.erps?.map((erp, index) => (
-                <Badge
-                  key={index}
-                  fontSize="epsilon"
-                  textColor="grey.800"
-                  textTransform="none"
-                  paddingX="1w"
-                  paddingY="2px"
-                  backgroundColor="#ECEAE3"
-                >
-                  {erp.toUpperCase()}
-                </Badge>
-              ))}
-              <Text>
-                (
-                {parametrage.parametrage_erp_date
-                  ? new Date(parametrage.parametrage_erp_date).toLocaleDateString()
-                  : "Date non disponible"}
-                )
-              </Text>
-            </HStack>
-          ) : (
-            <BadgeNo />
-          )}
-        </HStack>
-        <HStack>
-          <Text>Clé d’API présente :</Text>
-          {parametrage?.api_key_active ? <BadgeYes /> : <BadgeNo />}
-        </HStack>
-      </Stack>
-    </Box>
+      ) : (
+        <></>
+      )}
+    </Stack>
   );
 };
 
