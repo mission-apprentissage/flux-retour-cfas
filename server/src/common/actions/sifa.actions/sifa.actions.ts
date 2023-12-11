@@ -50,6 +50,13 @@ export const isEligibleSIFA = (historique_statut: Effectif["apprenant"]["histori
   const historiqueSorted = historique_statut
     .filter(({ date_statut }) => date_statut <= endOfyear)
     .sort((a, b) => {
+      // Si les dates sont identiques, on préfère mettre le statut "apprenti" (3) en premier
+      // pour éviter de sortir de la liste des apprenants qui sont en contrat (et en même temps inscrits)
+      // dans les résultats de SIFA
+      // cf: https://tableaudebord-apprentissage.atlassian.net/browse/TM-554
+      if (new Date(a.date_statut).getTime() === new Date(b.date_statut).getTime()) {
+        return a.valeur_statut === CODES_STATUT_APPRENANT.apprenti ? -1 : 1;
+      }
       return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
     });
 
