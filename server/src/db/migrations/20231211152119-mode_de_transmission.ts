@@ -16,7 +16,7 @@ export const up = async (db: Db) => {
       $set: {
         mode_de_transmission: "API",
         mode_de_transmission_configuration_date: currentDate,
-        mode_de_transmission_configuration_author_fullname: "rap2h",
+        mode_de_transmission_configuration_author_fullname: "migration 2023-12",
         api_configuration_date: currentDate,
       },
     }
