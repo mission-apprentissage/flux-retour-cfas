@@ -63,7 +63,7 @@ export async function buildOrganismePermissions(
         viewContacts: true,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: sameRegion,
-        effectifsNominatifs: sameRegion ? ["inscritSansContrat", "rupturant", "abandon"] : false,
+        effectifsNominatifs: sameRegion ? ["rupturant"] : false,
         manageEffectifs: false,
         configurerModeTransmission: false,
       };
