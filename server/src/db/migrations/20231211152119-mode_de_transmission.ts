@@ -5,7 +5,7 @@ export const up = async (db: Db) => {
 
   await db.collection("organismes").updateMany(
     {
-      api_key: { $ne: "" },
+      api_key: { $exists : true },
       erps: { $exists: true, $not: { $size: 0 } },
       mode_de_transmission: { $exists: false },
       mode_de_transmission_configuration_date: { $exists: false },
