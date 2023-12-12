@@ -220,7 +220,7 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
   }
 
   dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut
-    .filter((e) => e)
+    .filter((e) => e) // Remove empty values
     .map((s) => {
       const statut = stripEmptyFields(s);
       if (statut.date_statut) {
@@ -234,13 +234,13 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
   if (nouveau_statut) {
     dataToUpdate.apprenant.historique_statut.push({
       valeur_statut: nouveau_statut.valeur_statut,
-      date_statut: nouveau_statut.date_statut,
+      date_statut: new Date(nouveau_statut.date_statut),
       date_reception: new Date(),
     });
   }
 
   dataToUpdate.contrats = dataToUpdate.contrats
-    .filter((e) => e)
+    .filter((e) => e) // Remove empty values
     .map((c) => {
       const contrat = stripEmptyFields(c);
       if (contrat.date_debut) {
