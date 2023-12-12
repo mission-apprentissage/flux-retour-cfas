@@ -219,16 +219,18 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
     dataToUpdate.apprenant.date_de_naissance = new Date(dataToUpdate.apprenant.date_de_naissance);
   }
 
-  dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut.map((s) => {
-    const statut = stripEmptyFields(s);
-    if (statut.date_statut) {
-      statut.date_statut = new Date(statut.date_statut);
-    }
-    if (statut.date_reception) {
-      statut.date_reception = new Date(statut.date_reception);
-    }
-    return statut;
-  });
+  dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut
+    .filter((e) => e) // Remove empty values
+    .map((s) => {
+      const statut = stripEmptyFields(s);
+      if (statut.date_statut) {
+        statut.date_statut = new Date(statut.date_statut);
+      }
+      if (statut.date_reception) {
+        statut.date_reception = new Date(statut.date_reception);
+      }
+      return statut;
+    });
   if (nouveau_statut) {
     dataToUpdate.apprenant.historique_statut.push({
       valeur_statut: nouveau_statut.valeur_statut,
@@ -237,19 +239,21 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
     });
   }
 
-  dataToUpdate.contrats = dataToUpdate.contrats.map((c) => {
-    const contrat = stripEmptyFields(c);
-    if (contrat.date_debut) {
-      contrat.date_debut = new Date(contrat.date_debut);
-    }
-    if (contrat.date_fin) {
-      contrat.date_fin = new Date(contrat.date_fin);
-    }
-    if (contrat.date_rupture) {
-      contrat.date_rupture = new Date(contrat.date_rupture);
-    }
-    return contrat;
-  });
+  dataToUpdate.contrats = dataToUpdate.contrats
+    .filter((e) => e) // Remove empty values
+    .map((c) => {
+      const contrat = stripEmptyFields(c);
+      if (contrat.date_debut) {
+        contrat.date_debut = new Date(contrat.date_debut);
+      }
+      if (contrat.date_fin) {
+        contrat.date_fin = new Date(contrat.date_fin);
+      }
+      if (contrat.date_rupture) {
+        contrat.date_rupture = new Date(contrat.date_rupture);
+      }
+      return contrat;
+    });
   if (nouveau_contrat) {
     dataToUpdate.contrats.push(nouveau_contrat);
   }
