@@ -122,7 +122,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
       </HStack>
       {parametrage?.organisme_transmetteur ? (
         <HStack>
-          <Text>Organisme transmetteur des effectifs :</Text>
+          <Text>Dernier organisme transmetteur des effectifs :</Text>
           <Link
             key={parametrage?.organisme_transmetteur._id}
             href={`/organismes/${parametrage?.organisme_transmetteur._id}`}
