@@ -498,7 +498,7 @@ function SectionApercuChiffresCles() {
                             (base des Carif-Oref)&nbsp;;
                           </ListItem>
                           <ListItem>identifiés par un SIRET (ouvert) et un UAI valable&nbsp;;</ListItem>
-                          <ListItem>ayant envoyé des données depuis le premier août&nbsp;;</ListItem>
+                          <ListItem>ayant envoyé des données&nbsp;;</ListItem>
                         </UnorderedList>
                         <Text as="p">
                           Ce nombre inclut&nbsp;: les OFA «&nbsp;historiques&nbsp;», les OFA académiques et

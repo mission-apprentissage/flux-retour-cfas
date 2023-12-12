@@ -1,4 +1,4 @@
-import { format, subMonths } from "date-fns";
+import { format } from "date-fns";
 import { z } from "zod";
 
 import { organismesDb } from "@/common/model/collections";
@@ -69,7 +69,8 @@ export async function getIndicateursOrganismesNature(filters: OrganismesFilters)
             {
               $match: {
                 last_transmission_date: {
-                  $gte: subMonths(new Date(), 6),
+                  $exists: true,
+                  $ne: null,
                 },
               },
             },
