@@ -7,7 +7,6 @@ export const up = async (db: Db) => {
     {
       api_key: { $exists: true },
       erps: { $exists: true, $not: { $size: 0 } },
-      mode_de_transmission: { $exists: false },
       mode_de_transmission_configuration_date: { $exists: false },
       mode_de_transmission_configuration_author_fullname: { $exists: false },
       api_configuration_date: { $exists: false },
