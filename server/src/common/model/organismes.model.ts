@@ -5,6 +5,7 @@ import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/valid
 
 import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";
 
+import effectifsModel from "./effectifs.model/effectifs.model";
 import { adresseSchema } from "./json-schema/adresseSchema";
 import {
   arrayOf,
@@ -195,6 +196,9 @@ const schema = object(
     creation_statut: string({
       description: "Flag pour identifier que c'est un organisme créé à partir d'un lieu",
       enum: [STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION],
+    }),
+    organisme_transmetteur_id: string({
+      description: effectifsModel.schema.properties.source_organisme_id.description,
     }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
