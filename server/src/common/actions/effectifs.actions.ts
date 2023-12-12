@@ -232,7 +232,7 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
   if (nouveau_statut) {
     dataToUpdate.apprenant.historique_statut.push({
       valeur_statut: nouveau_statut.valeur_statut,
-      date_statut: nouveau_statut.date_statut,
+      date_statut: new Date(nouveau_statut.date_statut),
       date_reception: new Date(),
     });
   }
