@@ -63,7 +63,7 @@ export async function buildOrganismePermissions(
         viewContacts: true,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: sameRegion,
-        effectifsNominatifs: sameRegion ? ["rupturant"] : false,
+        effectifsNominatifs: sameRegion ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
         configurerModeTransmission: false,
       };
@@ -107,7 +107,7 @@ export async function buildOrganismePermissions(
         viewContacts: true,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: sameAcademie,
-        effectifsNominatifs: false,
+        effectifsNominatifs: sameAcademie ? ["inscritSansContrat", "rupturant", "abandon"] : false,
         manageEffectifs: false,
         configurerModeTransmission: false,
       };
