@@ -91,7 +91,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     configurerModeTransmission: false,
   },
   "DREETS même région": {
-    effectifsNominatifs: ["rupturant"],
+    effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
     indicateursEffectifs: true,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
@@ -107,7 +107,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     configurerModeTransmission: false,
   },
   "DRAAF même région": {
-    effectifsNominatifs: ["rupturant"],
+    effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
     indicateursEffectifs: true,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
@@ -171,7 +171,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     configurerModeTransmission: false,
   },
   "Académie même académie": {
-    effectifsNominatifs: false,
+    effectifsNominatifs: ["inscritSansContrat", "rupturant", "abandon"],
     indicateursEffectifs: true,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
