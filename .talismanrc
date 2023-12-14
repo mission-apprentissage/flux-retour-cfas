@@ -38,9 +38,7 @@ fileignoreconfig:
 - filename: .infra/files/configs/metabase/setup-metabase.sh
   checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
 - filename: .infra/files/configs/mongodb/seed.gpg
-  checksum: 53e1d68a96810fea6f142f9c410cf8ae41e8a93c40397044e19d7811e513789b
-  ignore_detectors:
-  - filesize
+  checksum: d0f074c06b41c44ffa3584dbf2657d6c9557287a2043b8394ca83a858ca57e4d
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
@@ -65,6 +63,8 @@ fileignoreconfig:
   - filename
 - filename: server/src/commands.ts
   checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
+- filename: server/src/common/actions/effectifs.actions.ts
+  checksum: 32225fd2335732e86cceb6b3bb90e5e4a93c976090cf9445c7243f555638fd86
 - filename: server/src/common/actions/helpers/permissions-organisation.ts
   checksum: badad18721a816276dfa8de8445f4ef85054b68adf719b994607650d1f5d0884
 - filename: server/src/common/actions/helpers/permissions-organisme.ts
@@ -105,18 +105,16 @@ fileignoreconfig:
   checksum: 5fa50502b737d7e06efff5cd4128da53f4dc7a196428149e1695977175e92cab
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx
   checksum: 2740311625e562ca5a15d43eadbed83ae73113716a09b4fbdb2e1f0c79ad42df
+- filename: ui/modules/organismes/Televersement.tsx
+  checksum: 2322283e936e6f4a419f27f60e1bae886adffc99a40a085131685f4ca77597e3
 - filename: ui/next.config.js
   checksum: e68b7b2b7828b9c665c02503b0505821e2b0ea41c91ae440fbce422c781ef07b
 - filename: ui/pages/auth/inscription/profil.tsx
   checksum: 7873a0ce38104e5b892c011bb99621e115cbc0a30bf3b02f916142213d488df8
-- filename: ui/pages/organismes-formation.tsx
-  checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
-- filename: ui/public/modele-import.xlsx
-  checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
-- filename: server/src/common/actions/effectifs.actions.ts
-  checksum: 32225fd2335732e86cceb6b3bb90e5e4a93c976090cf9445c7243f555638fd86
 - filename: ui/pages/mentions-legales.tsx
   checksum: a2f835244846eceb8330f07846c128d318de81c5e46741be536b554726b4372c
+- filename: ui/pages/organismes-formation.tsx
+  checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
 - filename: ui/pages/politique-de-confidentialite.tsx
   checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
 - filename: ui/modules/organismes/Televersement.tsx
@@ -125,10 +123,12 @@ fileignoreconfig:
   checksum: 3d6f4bf51f463b07c6fb2b2c3cf68c0cd2a52b6fbd55fc60578c30e2d2a58b9b
 - filename: server/tests/integration/common/utils/mergeIgnoringNullPreferringNewArray.test.ts
   checksum: 01dd4eb56cfade47b72f04d21381aac27a90fae3e3ea3e08372225b27f5fe8ad
+- filename: ui/public/modele-import.xlsx
+  checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
 scopeconfig:
 - scope: node
 custom_patterns:
-- (?s)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}
+- "(?s)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
 allowed_patterns:
 - key
 - Key
@@ -140,5 +140,5 @@ allowed_patterns:
 - apiKey
 - ApiKey
 - api_key
-- tableau-de-bord@apprentissage\.beta\.gouv.fr
+- "tableau-de-bord@apprentissage\\.beta\\.gouv.fr"
 version: "1.0"
