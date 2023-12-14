@@ -25,6 +25,7 @@ import {
 } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
 import { formatError } from "@/common/utils/errorUtils";
+import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnoringNullPreferringNewArray";
 import { AddPrefix, addPrefixToProperties } from "@/common/utils/miscUtils";
 import dossierApprenantSchemaV1V2, {
   DossierApprenantSchemaV1V2ZodType,
@@ -429,6 +430,32 @@ async function transformEffectifQueueToEffectif(
 }
 
 /**
+ * Le but de cette fonction est de fusionner un effectif en base de données avec des nouvelles données.
+ * Le besoin est né suite à un problème qui faisait que les ajouts de données SIFA directement dans la plateforme
+ * étaient effacées chaque jour. Cela ne résout pas le problème des modifications de données qui seront écrasées,
+ * ce qui est un autre sujet métier plus complexe ("qu'est-ce qui fait autorité ? le dernier ? autre chose ?").
+ * Fonctionnement :
+ *  - Le statut d'historique est construit grâce à une fonction dédiée.
+ *  - On préfèrera toujours les valeurs non vides (null, undefined ou "") quelles que soient leur provenance.
+ *  - On préfèrera toujours les tableaux de newObject aux tableaux de previousObject (pas de fusion de tableau)
+ */
+export function mergeEffectif(effectifDb: Effectif, effectif: Effectif): Effectif {
+  return {
+    ...mergeIgnoringNullPreferringNewArray(effectifDb, effectif),
+    apprenant: {
+      ...mergeIgnoringNullPreferringNewArray(effectifDb.apprenant, effectif.apprenant),
+      // Update de l'historique de statut à la main
+      historique_statut: buildNewHistoriqueStatutApprenant(
+        effectifDb.apprenant.historique_statut,
+        effectif.apprenant?.historique_statut[0]?.valeur_statut,
+        effectif.apprenant?.historique_statut[0]?.date_statut
+      ),
+    },
+    updated_at: new Date(),
+  };
+}
+
+/**
  * Fonction de création ou de MAJ de l'effectif depuis la queue
  * @param effectif
  * @returns
@@ -442,21 +469,10 @@ const createOrUpdateEffectif = async (
 
   // Gestion des MAJ d'effectif
   if (effectifDb) {
-    // Update de l'historique
-    effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
-      effectifDb.apprenant.historique_statut,
-      effectif.apprenant?.historique_statut[0]?.valeur_statut,
-      effectif.apprenant?.historique_statut[0]?.date_statut
-    );
-    await effectifsDb().findOneAndUpdate(
-      { _id: effectifDb._id },
-      {
-        $set: {
-          ...effectif,
-          updated_at: new Date(),
-        },
-      }
-    );
+    // L'effectif est fusionné avec les nouvelles données.
+    // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
+    // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
+    await effectifsDb().findOneAndUpdate({ _id: effectifDb._id }, { $set: mergeEffectif(effectifDb, effectif) });
   } else {
     const { insertedId } = await effectifsDb().insertOne(effectif);
     effectifDb = { _id: insertedId, ...effectif };
