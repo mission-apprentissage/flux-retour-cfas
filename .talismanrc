@@ -121,6 +121,10 @@ fileignoreconfig:
   checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
 - filename: ui/modules/organismes/Televersement.tsx
   checksum: 2322283e936e6f4a419f27f60e1bae886adffc99a40a085131685f4ca77597e3
+- filename: server/tests/integration/jobs/ingestion/mergeEffectif.test.ts
+  checksum: 3d6f4bf51f463b07c6fb2b2c3cf68c0cd2a52b6fbd55fc60578c30e2d2a58b9b
+- filename: server/tests/integration/common/utils/mergeIgnoringNullPreferringNewArray.test.ts
+  checksum: 01dd4eb56cfade47b72f04d21381aac27a90fae3e3ea3e08372225b27f5fe8ad
 scopeconfig:
 - scope: node
 custom_patterns:
