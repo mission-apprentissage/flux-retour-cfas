@@ -178,7 +178,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
               } else if (booleanFields.includes(header)) {
                 acc[header] = parseExcelBoolean(row[index]);
               } else {
-                acc[header] = row[index];
+                acc[header] = row[index] === "" ? null : row[index];
               }
               return acc;
             }, {});
