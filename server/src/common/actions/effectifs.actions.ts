@@ -11,8 +11,11 @@ import { stripEmptyFields } from "../utils/miscUtils";
 
 /**
  * Méthode de build d'un effectif
+ *
+ * Dans le cas d'un effectif téléversé, on ne veut pas verrouiller les champs, même ceux dits "par défaut" (nom, prénom, etc.)
+ * Voir aussi la méthode lockEffectif
  */
-export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifData: T) => {
+export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifData: T, lockData: boolean = true) => {
   const defaultValues = defaultValuesEffectif();
   // note: I've tried to use ts-deepmerge, but typing doesn't work well
   return {
@@ -23,7 +26,7 @@ export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifD
       ...effectifData.apprenant,
     },
     is_lock: {
-      ...defaultValues.is_lock,
+      ...(lockData ? defaultValues.is_lock : { apprenant: {}, formation: {} }),
       ...effectifData.is_lock,
     },
     formation: {
@@ -31,24 +34,6 @@ export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifD
       ...effectifData.formation,
     },
   };
-};
-
-/**
- * Méthode de création d'un effectif
- */
-export const createEffectif = async <T extends Omit<Effectif, "organisme_id">>(
-  dataEffectif: T,
-  organisme: WithId<Organisme>
-) => {
-  const dataToInsert = mergeEffectifWithDefaults({
-    ...dataEffectif,
-    organisme_id: organisme._id,
-    _computed: addEffectifComputedFields(organisme),
-  });
-
-  const { insertedId } = await effectifsDb().insertOne(dataToInsert);
-
-  return insertedId;
 };
 
 /**

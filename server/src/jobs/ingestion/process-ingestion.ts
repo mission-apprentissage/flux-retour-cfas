@@ -425,7 +425,10 @@ async function transformEffectifQueueToEffectif(
   effectifQueue: DossierApprenantSchemaV1V2ZodType | DossierApprenantSchemaV3ZodType
 ): Promise<Effectif> {
   return await completeEffectifAddress(
-    mergeEffectifWithDefaults(mapEffectifQueueToEffectif(effectifQueue as any) as any)
+    mergeEffectifWithDefaults(
+      mapEffectifQueueToEffectif(effectifQueue as any) as any,
+      effectifQueue.source !== "televersement"
+    )
   );
 }
 
