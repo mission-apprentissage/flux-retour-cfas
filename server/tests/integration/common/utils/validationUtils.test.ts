@@ -47,6 +47,7 @@ describe("Validation Utils", () => {
       { input: "", output: "" },
       { input: "033638424988", output: "+33638424988" },
       { input: "0638424988", output: "+33638424988" },
+      { input: "(+)33638424988", output: "+33638424988" },
       { input: "12345678", output: "12345678" },
       { input: "ABCDEFGH", output: "ABCDEFGH" },
     ].forEach(({ input, output }) => {
