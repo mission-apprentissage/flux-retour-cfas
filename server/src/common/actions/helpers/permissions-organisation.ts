@@ -152,7 +152,15 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
             }
           : false;
       },
-      TETE_DE_RESEAU: false,
+      TETE_DE_RESEAU: async (organisation) => {
+        if (organisation.reseau !== "COMP_DU_DEVOIR") {
+          return false;
+        }
+
+        return {
+          "_computed.organisme.reseaux": organisation.reseau,
+        };
+      },
       DREETS: (organisation) => ({
         "_computed.organisme.region": organisation.code_region,
       }),

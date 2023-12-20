@@ -46,11 +46,12 @@ export async function buildOrganismePermissions(
 
     case "TETE_DE_RESEAU": {
       const sameReseau = (organisme.reseaux as string[])?.includes(organisation.reseau);
+      const compDuDevoir = organisation.reseau === "COMP_DU_DEVOIR";
       return {
         viewContacts: sameReseau,
         infoTransmissionEffectifs: sameReseau,
         indicateursEffectifs: sameReseau,
-        effectifsNominatifs: false,
+        effectifsNominatifs: sameReseau && compDuDevoir,
         manageEffectifs: false,
         configurerModeTransmission: false,
       };
