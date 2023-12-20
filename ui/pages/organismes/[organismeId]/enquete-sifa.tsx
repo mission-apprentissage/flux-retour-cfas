@@ -15,4 +15,4 @@ const PageEnqueteSIFADeSonOrganisme = () => {
   return <SimplePage title="Son enquête SIFA">{organisme && <SIFAPage modePublique={true} />}</SimplePage>;
 };
 
-export default withAuth(PageEnqueteSIFADeSonOrganisme, ["ORGANISME_FORMATION", "ADMINISTRATEUR"]);
+export default withAuth(PageEnqueteSIFADeSonOrganisme, ["ORGANISME_FORMATION", "ADMINISTRATEUR", "TETE_DE_RESEAU"]);

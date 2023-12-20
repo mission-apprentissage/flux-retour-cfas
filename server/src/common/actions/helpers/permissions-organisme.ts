@@ -52,7 +52,7 @@ export async function buildOrganismePermissions(
         infoTransmissionEffectifs: sameReseau,
         indicateursEffectifs: sameReseau,
         effectifsNominatifs: sameReseau && compDuDevoir,
-        manageEffectifs: false,
+        manageEffectifs: sameReseau && compDuDevoir,
         configurerModeTransmission: false,
       };
     }
