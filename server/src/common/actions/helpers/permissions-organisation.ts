@@ -1,7 +1,7 @@
 import { PermissionOrganisation } from "shared/constants/permissions";
 
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { Organisation, OrganisationByType } from "@/common/model/organisations.model";
+import { OrganisationByType } from "@/common/model/organisations.model";
 
 import { getOrganismeByUAIAndSIRET } from "../organismes/organismes.actions";
 
@@ -11,8 +11,12 @@ type QueryFilter<Result = false | object> = {
   [Type in keyof OrganisationByType]: Result | ((organisation: OrganisationByType[Type]) => Result | Promise<Result>);
 };
 
+type Context<Result = boolean | string[]> = {
+  [Type in keyof OrganisationByType]: Result | ((organisation: OrganisationByType[Type]) => Result | Promise<Result>);
+};
+
 type PermissionConfig = {
-  context?: Record<Organisation["type"], boolean | string[]>;
+  context?: Context;
   queryFilter: QueryFilter;
 };
 
@@ -131,7 +135,9 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
   TéléchargementListesNominatives: {
     context: {
       ORGANISME_FORMATION: true, // TODO seulement si aucun formateur
-      TETE_DE_RESEAU: false,
+      TETE_DE_RESEAU: async (organisation) => {
+        return organisation.reseau === "COMP_DU_DEVOIR";
+      },
       DREETS: ["inscritSansContrat", "rupturant", "abandon"],
       DRAAF: ["inscritSansContrat", "rupturant", "abandon"],
       CONSEIL_REGIONAL: false,
@@ -188,5 +194,6 @@ export async function getPermissionOrganisationQueryFilter(ctx: AuthContext, per
 }
 
 export async function getPermissionOrganisationContext(ctx: AuthContext, permission: PermissionOrganisation) {
-  return permissionsOrganisation[permission].context?.[ctx.organisation.type];
+  const permissionConfig = permissionsOrganisation[permission].context?.[ctx.organisation.type];
+  return typeof permissionConfig === "function" ? permissionConfig(ctx.organisation as any) : permissionConfig;
 }
