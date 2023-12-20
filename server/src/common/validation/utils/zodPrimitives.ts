@@ -140,7 +140,7 @@ export const primitivesV1 = {
         .string()
         .trim()
         .toUpperCase()
-        .regex(INE_REGEX, "INE invalide")
+        .transform((value) => (INE_REGEX.test(value) ? value : null))
         .describe("Identifiant National Élève de l'apprenant")
     ),
     email: z.string().trim().email("Email non valide").describe("Email de l'apprenant").openapi({
