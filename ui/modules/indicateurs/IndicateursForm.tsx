@@ -7,7 +7,7 @@ import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { OrganisationType } from "@/common/internal/Organisation";
+import { Organisation, OrganisationType } from "@/common/internal/Organisation";
 import { Organisme } from "@/common/internal/Organisme";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
@@ -54,7 +54,7 @@ interface IndicateursFormProps {
   organismeId?: string;
 }
 function IndicateursForm(props: IndicateursFormProps) {
-  const { auth, organisationType } = useAuth();
+  const { auth, organisationType, organisation } = useAuth();
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
 
@@ -320,7 +320,7 @@ function IndicateursForm(props: IndicateursFormProps) {
           permissionEffectifsNominatifs={
             props.organismeId
               ? organisme?.permissions?.effectifsNominatifs
-              : getPermissionsEffectifsNominatifs(organisationType, ownOrganisme)
+              : getPermissionsEffectifsNominatifs(organisation, ownOrganisme)
           }
           effectifsFilters={effectifsFilters}
           organismeId={props.organismeId}
@@ -449,15 +449,15 @@ function IndicateursForm(props: IndicateursFormProps) {
 export default IndicateursForm;
 
 function getPermissionsEffectifsNominatifs(
-  organisationType: OrganisationType,
+  organisation: Organisation,
   ownOrganisme?: Organisme
 ): boolean | TypeEffectifNominatif[] {
-  switch (organisationType) {
+  switch (organisation.type) {
     case "ORGANISME_FORMATION":
-      return organisationType !== "ORGANISME_FORMATION" || ownOrganisme?.organismesFormateurs?.length === 0; // OFA autorisé seulement si aucun formateur
+      return ownOrganisme?.organismesFormateurs?.length === 0; // OFA autorisé seulement si aucun formateur
 
     case "TETE_DE_RESEAU":
-      return false;
+      return organisation.reseau === "COMP_DU_DEVOIR";
 
     case "DREETS":
     case "DRAAF":
