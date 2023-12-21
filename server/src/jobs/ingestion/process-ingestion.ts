@@ -443,7 +443,7 @@ async function transformEffectifQueueToEffectif(
  *  - On préfèrera toujours les tableaux de newObject aux tableaux de previousObject (pas de fusion de tableau)
  */
 export function mergeEffectif(effectifDb: Effectif, effectif: Effectif): Effectif {
-  return {
+  const result = {
     ...mergeIgnoringNullPreferringNewArray(effectifDb, effectif),
     apprenant: {
       ...mergeIgnoringNullPreferringNewArray(effectifDb.apprenant, effectif.apprenant),
@@ -456,6 +456,8 @@ export function mergeEffectif(effectifDb: Effectif, effectif: Effectif): Effecti
     },
     updated_at: new Date(),
   };
+  delete result.created_at;
+  return result;
 }
 
 /**
