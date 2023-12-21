@@ -4,7 +4,7 @@ import {
   NATIONALITE_APPRENANT_ENUM,
   SEXE_APPRENANT_ENUM,
 } from "@/common/constants/dossierApprenant";
-import { CODE_POSTAL_PATTERN, DERNIER_ORGANISME_UAI_PATTERN, INE_REGEX_PATTERN } from "@/common/constants/validations";
+import { CODE_POSTAL_PATTERN, DERNIER_ORGANISME_UAI_PATTERN } from "@/common/constants/validations";
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 import { object, string, date, integer, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
 
@@ -15,7 +15,6 @@ export const apprenantSchema = object(
     ine: string({
       description: "N° INE de l'apprenant",
       example: "0494004062M",
-      pattern: INE_REGEX_PATTERN,
     }),
     nom: string({ description: "Nom de l'apprenant", pattern: "^.+$" }),
     prenom: string({ description: "Prénom de l'apprenant", pattern: "^.+$" }),
