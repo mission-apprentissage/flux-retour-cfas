@@ -1,5 +1,5 @@
 import { differenceInDays } from "date-fns";
-import { ERPS_BY_ID } from "shared";
+// import { ERPS_BY_ID } from "shared";
 
 import parentLogger from "@/common/logger";
 import { usersMigrationDb } from "@/common/model/collections";
@@ -120,46 +120,49 @@ export async function sendReminderEmails() {
       );
     }
 
+    // TODO: A réactiver prochainement quand les transmissions se feront correctement.
+    // NOTE: Ne pas oublier de remettre les tests unitaires en place reminder.test.ts
+
     // relance après 7 jours si organisme configuré mais pas de données
-    else if (
-      organisme.mode_de_transmission &&
-      !organisme.last_transmission_date &&
-      !user.reminder_missing_data_sent_date &&
-      differenceInDays(new Date(), organisme.mode_de_transmission_configuration_date) >= 7
-    ) {
-      logger.info(
-        {
-          user_id: user._id,
-          organisme_id: organisme._id,
-          siret: organisme.siret,
-          uai: organisme.uai,
-          mode_de_transmission: organisme.mode_de_transmission,
-          mode_de_transmission_configuration_date: organisme.mode_de_transmission_configuration_date,
-          erp: organisme.erps?.[0],
-          erp_unsupported: organisme.erp_unsupported,
-        },
-        "send email reminder_missing_data"
-      );
-      await sendEmail(user.email, "reminder_missing_data", {
-        recipient: {
-          civility: user.civility,
-          nom: user.nom,
-          prenom: user.prenom,
-        },
-        mode_de_transmission: organisme.mode_de_transmission,
-        erp: ERPS_BY_ID[organisme.erps?.[0]]?.name ?? "",
-        erp_unsupported: organisme.erp_unsupported,
-      });
-      await usersMigrationDb().updateOne(
-        {
-          _id: user._id,
-        },
-        {
-          $set: {
-            reminder_missing_data_sent_date: new Date(),
-          },
-        }
-      );
-    }
+    // else if (
+    //   organisme.mode_de_transmission &&
+    //   !organisme.last_transmission_date &&
+    //   !user.reminder_missing_data_sent_date &&
+    //   differenceInDays(new Date(), organisme.mode_de_transmission_configuration_date) >= 7
+    // ) {
+    //   logger.info(
+    //     {
+    //       user_id: user._id,
+    //       organisme_id: organisme._id,
+    //       siret: organisme.siret,
+    //       uai: organisme.uai,
+    //       mode_de_transmission: organisme.mode_de_transmission,
+    //       mode_de_transmission_configuration_date: organisme.mode_de_transmission_configuration_date,
+    //       erp: organisme.erps?.[0],
+    //       erp_unsupported: organisme.erp_unsupported,
+    //     },
+    //     "send email reminder_missing_data"
+    //   );
+    //   await sendEmail(user.email, "reminder_missing_data", {
+    //     recipient: {
+    //       civility: user.civility,
+    //       nom: user.nom,
+    //       prenom: user.prenom,
+    //     },
+    //     mode_de_transmission: organisme.mode_de_transmission,
+    //     erp: ERPS_BY_ID[organisme.erps?.[0]]?.name ?? "",
+    //     erp_unsupported: organisme.erp_unsupported,
+    //   });
+    //   await usersMigrationDb().updateOne(
+    //     {
+    //       _id: user._id,
+    //     },
+    //     {
+    //       $set: {
+    //         reminder_missing_data_sent_date: new Date(),
+    //       },
+    //     }
+    //   );
+    // }
   }
 }
