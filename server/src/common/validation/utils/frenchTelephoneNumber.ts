@@ -1,6 +1,11 @@
 export const telephoneConverter = (telephone: string | null) => {
   if (!telephone) return telephone;
-  let phone = String(telephone).replaceAll("-", "").replaceAll(".", "").replaceAll(" ", "");
+  let phone = String(telephone)
+    .trim()
+    .replaceAll("-", "")
+    .replaceAll(".", "")
+    .replaceAll(" ", "")
+    .replaceAll("(+)", "+");
 
   if (phone.length === 9) {
     return `+33${phone}`;
