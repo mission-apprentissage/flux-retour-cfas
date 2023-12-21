@@ -14,7 +14,6 @@ import {
   RNCP_REGEX,
   SIRET_REGEX,
   UAI_REGEX,
-  INE_REGEX,
   NIR_LOOSE_REGEX,
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
@@ -136,12 +135,7 @@ export const primitivesV1 = {
     ),
     ine: z.preprocess(
       (v: any) => (v ? String(v) : v),
-      z
-        .string()
-        .trim()
-        .toUpperCase()
-        .transform((value) => (INE_REGEX.test(value) ? value : null))
-        .describe("Identifiant National Élève de l'apprenant")
+      z.string().trim().toUpperCase().describe("Identifiant National Élève de l'apprenant")
     ),
     email: z.string().trim().email("Email non valide").describe("Email de l'apprenant").openapi({
       example: "gaston.lenotre@domain.tld",
