@@ -83,13 +83,15 @@ describe("Job send-reminder-emails", () => {
     // 0 nouveau mail envoyé car < 7j
     expect(sendEmail).toHaveBeenCalledTimes(0);
 
-    advanceTo("2023-10-17T12:00z");
-    await sendReminderEmails();
+    // TODO: à remettre en place lors de la rèactivation de l'e-mail de relance après 7 jours si organisme configuré mais pas de données
+
+    // advanceTo("2023-10-17T12:00z");
+    // await sendReminderEmails();
     // 1 nouveau mail envoyé car >= 7j et 1ère relance
     // expect(sendEmail).toHaveBeenCalledTimes(1);
 
-    advanceTo("2023-10-17T12:00z");
-    await sendReminderEmails();
+    // advanceTo("2023-10-17T12:00z");
+    // await sendReminderEmails();
     // 0 nouveau mail envoyé car relance déjà envoyée
     // expect(sendEmail).toHaveBeenCalledTimes(1);
   });
