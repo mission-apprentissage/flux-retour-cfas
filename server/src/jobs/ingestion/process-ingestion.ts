@@ -455,6 +455,7 @@ export function mergeEffectif(effectifDb: Effectif, effectif: Effectif): Effecti
       ),
     },
     updated_at: new Date(),
+    created_at: effectifDb.created_at, // Preserve the original created_at date
   };
 }
 
