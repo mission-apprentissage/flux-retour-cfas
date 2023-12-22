@@ -166,7 +166,7 @@ const SIFAPage = (props: SIFAPageProps) => {
                 </ListItem>
               </UnorderedList>
             </Text>
-            <Link variant="link" href="/InstructionsSIFA_31122022.pdf" mt={4} isExternal>
+            <Link variant="link" href="/InstructionsSIFA_31122023.pdf" mt={4} isExternal>
               Fichier d’instruction SIFA (2022)
               <DownloadLine mb={1} ml={2} fontSize="xs" />
             </Link>
