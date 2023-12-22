@@ -4,6 +4,7 @@ export interface DuplicateOrganismeDetail {
   siret: string;
   nom: string;
   raison_sociale: string;
+  enseigne: string;
   nature: string;
   ferme: boolean;
   last_transmission_date: Date;
