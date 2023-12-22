@@ -66,7 +66,7 @@ const RenderSubComponent = (row: Row<DuplicateOrganismeGroup>) => {
               <Stack>
                 <HStack spacing={4}>
                   <ArrowRightLine />
-                  <Text>{item.nom}</Text>
+                  <Text>{item.raison_sociale || item.enseigne || item.nom}</Text>
                 </HStack>
                 <HStack spacing={6}>
                   <Text color={item.uai ? "black" : "gray.500"}>UAI : {item.uai ?? "Inconnu"}</Text>

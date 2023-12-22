@@ -24,6 +24,7 @@ export const getDuplicatesOrganismes = async () => {
               uai: "$uai",
               siret: "$siret",
               raison_sociale: "$raison_sociale",
+              enseigne: "$enseigne",
               nature: "$nature",
               ferme: "$ferme",
               last_transmission_date: "$last_transmission_date",
