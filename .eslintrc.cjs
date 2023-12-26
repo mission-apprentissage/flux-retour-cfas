@@ -63,6 +63,7 @@ module.exports = {
           "**/test/**",
           "**/tests/**",
           "**/spec/**",
+          "server/scripts/**",
           "**/__tests__/**",
           "**/__mocks__/**",
           "**/test.{js,jsx,ts,tsx}",
