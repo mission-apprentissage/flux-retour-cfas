@@ -164,3 +164,6 @@ ui/next-env.d.ts
 
 SEED_PASSPHRASE.txt
 seed.gz
+
+server/outputs/
+!server/outputs/.gitkeep

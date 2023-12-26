@@ -16,7 +16,8 @@
     "dev": "tsup-node --env.TSUP_WATCH true",
     "init:dev": "yarn cli init:dev",
     "build": "tsup-node --env.NODE_ENV production",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate:import": "tsx scripts/generate-import-effectif.ts generate"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "6.1.0",
@@ -104,7 +105,7 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
-    "@faker-js/faker": "7.6.0",
+    "@faker-js/faker": "^8.3.1",
     "@jest/globals": "^29.7.0",
     "@types/boom": "7.3.2",
     "@types/bunyan": "1.8.8",
