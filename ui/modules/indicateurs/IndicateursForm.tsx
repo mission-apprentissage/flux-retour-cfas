@@ -465,6 +465,7 @@ function getPermissionsEffectifsNominatifs(
       return ["inscritSansContrat", "rupturant", "abandon"];
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAFPIC":
     case "ACADEMIE":
       return false;
 
@@ -510,6 +511,7 @@ function MessageBandeauIndicateurs({ organisationType }: { organisationType: Org
       break;
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAFPIC":
     case "ACADEMIE":
       text = (
         <>

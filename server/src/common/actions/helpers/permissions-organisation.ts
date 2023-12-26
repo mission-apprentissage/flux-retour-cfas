@@ -36,6 +36,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       DRAAF: {},
       CONSEIL_REGIONAL: {},
       CARIF_OREF_REGIONAL: {},
+      DRAFPIC: {},
       DDETS: {},
       ACADEMIE: {},
       OPERATEUR_PUBLIC_NATIONAL: {},
@@ -57,6 +58,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       DRAAF: {},
       CONSEIL_REGIONAL: {},
       CARIF_OREF_REGIONAL: {},
+      DRAFPIC: {},
       DDETS: {},
       ACADEMIE: {},
       OPERATEUR_PUBLIC_NATIONAL: {},
@@ -86,6 +88,9 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
         "adresse.region": organisation.code_region,
       }),
       CARIF_OREF_REGIONAL: (organisation) => ({
+        "adresse.region": organisation.code_region,
+      }),
+      DRAFPIC: (organisation) => ({
         "adresse.region": organisation.code_region,
       }),
       DDETS: (organisation) => ({
@@ -121,6 +126,9 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       CARIF_OREF_REGIONAL: (organisation) => ({
         "_computed.organisme.region": organisation.code_region,
       }),
+      DRAFPIC: (organisation) => ({
+        "_computed.organisme.region": organisation.code_region,
+      }),
       DDETS: (organisation) => ({
         "_computed.organisme.departement": organisation.code_departement,
       }),
@@ -142,6 +150,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       DRAAF: ["inscritSansContrat", "rupturant", "abandon"],
       CONSEIL_REGIONAL: false,
       CARIF_OREF_REGIONAL: false,
+      DRAFPIC: ["inscritSansContrat", "rupturant", "abandon"],
       DDETS: ["inscritSansContrat", "rupturant", "abandon"],
       ACADEMIE: ["inscritSansContrat", "rupturant", "abandon"],
       OPERATEUR_PUBLIC_NATIONAL: false,
@@ -175,6 +184,9 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       }),
       CONSEIL_REGIONAL: false,
       CARIF_OREF_REGIONAL: false,
+      DRAFPIC: (organisation) => ({
+        "_computed.organisme.region": organisation.code_region,
+      }),
       DDETS: (organisation) => ({
         "_computed.organisme.departement": organisation.code_departement,
       }),

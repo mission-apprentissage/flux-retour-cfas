@@ -28,6 +28,7 @@ export const organisationTypes = [
   "OPERATEUR_PUBLIC_NATIONAL",
   "CARIF_OREF_NATIONAL",
   "ADMINISTRATEUR",
+  "DRAFPIC",
 ];
 
 export type NewOrganisation =
@@ -65,7 +66,7 @@ export interface OrganisationCarifOrefNational {
 }
 
 export interface OrganisationOperateurPublicRegion {
-  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "CARIF_OREF_REGIONAL";
+  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "CARIF_OREF_REGIONAL" | "DRAFPIC";
   code_region: string;
 }
 
@@ -91,6 +92,7 @@ export type OrganisationByType = {
   DRAAF: OrganisationOperateurPublicRegion;
   CONSEIL_REGIONAL: OrganisationOperateurPublicRegion;
   CARIF_OREF_REGIONAL: OrganisationOperateurPublicRegion;
+  DRAFPIC: OrganisationOperateurPublicRegion;
   DDETS: OrganisationOperateurPublicDepartement;
   ACADEMIE: OrganisationOperateurPublicAcademie;
   ADMINISTRATEUR: OrganisationAdministrateur;
@@ -114,6 +116,8 @@ export function getOrganisationLabel(organisation: NewOrganisation): string {
       return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "CARIF_OREF_REGIONAL":
       return `CARIF OREF ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+    case "DRAFPIC":
+      return `DRAFPIC ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "DDETS":
       return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement}`;
     case "ACADEMIE":
@@ -139,6 +143,7 @@ function isPublicOrganisation(organisation: NewOrganisation): boolean {
     "OPERATEUR_PUBLIC_NATIONAL",
     "CARIF_OREF_NATIONAL",
     "ADMINISTRATEUR",
+    "DRAFPIC",
   ].includes(organisation.type);
 }
 
@@ -195,7 +200,7 @@ const schema = object(
     // si tête de réseau
     reseau: string({ enum: TETE_DE_RESEAUX.map((r) => r.key), description: "Nom du réseau" }),
 
-    // si DREETS, DRAAF, CONSEIL_REGIONAL, CARIF_OREF_REGIONAL
+    // si DREETS, DRAAF, CONSEIL_REGIONAL, CARIF_OREF_REGIONAL, DRAFPIC
     code_region: string({
       enum: REGIONS.map(({ code }) => code),
       description: "Code région",

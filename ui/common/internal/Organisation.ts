@@ -8,6 +8,7 @@ export const organisationTypes = [
   "DRAAF",
   "CONSEIL_REGIONAL",
   "CARIF_OREF_REGIONAL",
+  "DRAFPIC",
   "DDETS",
   "ACADEMIE",
   "OPERATEUR_PUBLIC_NATIONAL",
@@ -20,6 +21,7 @@ export const TYPES_ORGANISATION = [
   { key: "ADMINISTRATEUR", nom: "Administrateur" },
   { key: "CARIF_OREF_NATIONAL", nom: "Carif-Oref national" },
   { key: "CARIF_OREF_REGIONAL", nom: "Carif-Oref régional" },
+  { key: "DRAFPIC", nom: "DRAFPIC régional" },
   { key: "CONSEIL_REGIONAL", nom: "Conseil régional" },
   { key: "DDETS", nom: "DDETS" },
   { key: "DRAAF", nom: "DRAAF" },
@@ -68,7 +70,7 @@ export interface OrganisationCarifOrefNational extends AbstractOrganisation {
 }
 
 export interface OrganisationOperateurPublicRegion extends AbstractOrganisation {
-  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "CARIF_OREF_REGIONAL";
+  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "CARIF_OREF_REGIONAL" | "DRAFPIC";
   code_region: string;
 }
 
@@ -97,6 +99,7 @@ export function getOrganisationLabel(organisation: Organisation): string {
 
     case "DREETS":
     case "DRAAF":
+    case "DRAFPIC":
       return `${organisation.type} ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
     case "CONSEIL_REGIONAL":
       return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;

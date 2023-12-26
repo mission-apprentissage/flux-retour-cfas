@@ -221,6 +221,20 @@ const profilsOrganisation = [
     },
   },
   {
+    label: "DRAFPIC régional même région",
+    organisation: {
+      type: "DRAFPIC",
+      code_region: "53",
+    },
+  },
+  {
+    label: "DRAFPIC régional autre région",
+    organisation: {
+      type: "DRAFPIC",
+      code_region: "76",
+    },
+  },
+  {
     label: "DDETS même département",
     organisation: {
       type: "DDETS",
