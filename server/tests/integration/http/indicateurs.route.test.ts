@@ -290,10 +290,10 @@ describe("Route indicateurs", () => {
 
     describe("Permissions abandon", () => {
       const accesOrganisme: PermissionsTestConfig<false | any[]> = {
-        "OF cible": false, // car il possède un formateur, mais y accède théoriquement
+        "OF cible": effectifResult,
         "OF non lié": emptyResult,
         "OF formateur": emptyResult,
-        "OF responsable": false,
+        "OF responsable": effectifResult,
         "Tête de réseau même réseau": false,
         "Tête de réseau autre réseau": false,
         "DREETS même région": effectifResult,
@@ -330,10 +330,10 @@ describe("Route indicateurs", () => {
 
     describe("Permissions apprenti", () => {
       const accesOrganisme: PermissionsTestConfig<false | any[]> = {
-        "OF cible": false, // car il possède un formateur, mais y accède théoriquement
+        "OF cible": emptyResult,
         "OF non lié": emptyResult,
         "OF formateur": emptyResult,
-        "OF responsable": false,
+        "OF responsable": emptyResult,
         "Tête de réseau même réseau": false,
         "Tête de réseau autre réseau": false,
         "DREETS même région": false,

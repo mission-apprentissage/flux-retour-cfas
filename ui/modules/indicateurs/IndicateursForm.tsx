@@ -8,7 +8,6 @@ import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisation, OrganisationType } from "@/common/internal/Organisation";
-import { Organisme } from "@/common/internal/Organisme";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
@@ -320,7 +319,7 @@ function IndicateursForm(props: IndicateursFormProps) {
           permissionEffectifsNominatifs={
             props.organismeId
               ? organisme?.permissions?.effectifsNominatifs
-              : getPermissionsEffectifsNominatifs(organisation, ownOrganisme)
+              : getPermissionsEffectifsNominatifs(organisation)
           }
           effectifsFilters={effectifsFilters}
           organismeId={props.organismeId}
@@ -448,13 +447,10 @@ function IndicateursForm(props: IndicateursFormProps) {
 
 export default IndicateursForm;
 
-function getPermissionsEffectifsNominatifs(
-  organisation: Organisation,
-  ownOrganisme?: Organisme
-): boolean | TypeEffectifNominatif[] {
+function getPermissionsEffectifsNominatifs(organisation: Organisation): boolean | TypeEffectifNominatif[] {
   switch (organisation.type) {
     case "ORGANISME_FORMATION":
-      return ownOrganisme?.organismesFormateurs?.length === 0; // OFA autorisé seulement si aucun formateur
+      return true;
 
     case "TETE_DE_RESEAU":
       return organisation.reseau === "COMP_DU_DEVOIR";
