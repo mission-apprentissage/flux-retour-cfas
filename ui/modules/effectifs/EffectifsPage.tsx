@@ -18,8 +18,12 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useSetRecoilState } from "recoil";
 
+import { getStatutApprenantNameFromCode } from "@/common/constants/dossierApprenant";
+import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
+import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -72,10 +76,50 @@ function EffectifsPage(props: EffectifsPageProps) {
             {title}
           </Heading>
 
-          <Link variant="whiteBg" href={`${router.asPath}/televersement`}>
-            <AddIcon boxSize={3} mr={2} />
-            Ajouter via fichier Excel
-          </Link>
+          <div>
+            <Link variant="whiteBg" href={`${router.asPath}/televersement`}>
+              <AddIcon boxSize={3} mr={2} />
+              Ajouter via fichier Excel
+            </Link>
+            {organismesEffectifs?.length ? (
+              <DownloadButton
+                borderBottom={0}
+                variant="link"
+                ml={2}
+                action={() => {
+                  exportDataAsXlsx(
+                    `tdb-effectifs-${filtreAnneeScolaire}.xlsx`,
+                    organismesEffectifs?.map((effectif) => {
+                      return {
+                        organisme_uai: props.organisme.uai,
+                        organisme_siret: props.organisme.siret,
+                        organisme_nom: props.organisme.raison_sociale,
+                        organisme_nature: props.organisme.nature,
+                        apprenant_nom: effectif.nom,
+                        apprenant_prenom: effectif.prenom,
+                        apprenant_date_de_naissance: effectif.date_de_naissance,
+                        apprenant_statut: getStatutApprenantNameFromCode(
+                          effectif.historique_statut?.sort((a, b) => {
+                            return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
+                          })[0]?.valeur_statut
+                        ),
+                        formation_annee: effectif.formation?.annee,
+                        formation_cfd: effectif.formation?.cfd,
+                        formation_date_debut_formation: effectif.formation?.periode?.[0],
+                        formation_date_fin_formation: effectif.formation?.periode?.[1],
+                        formation_libelle_long: effectif.formation?.libelle_long,
+                        formation_niveau: effectif.formation?.niveau,
+                        formation_rncp: effectif.formation?.rncp,
+                      };
+                    }) || [],
+                    effectifsExportColumns
+                  );
+                }}
+              >
+                Télécharger la liste
+              </DownloadButton>
+            ) : null}
+          </div>
         </HStack>
 
         {organismesEffectifs && organismesEffectifs.length === 0 && (

@@ -36,6 +36,7 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
       formation: effectif.formation,
       nom: effectif.apprenant.nom,
       prenom: effectif.apprenant.prenom,
+      date_de_naissance: effectif.apprenant.date_de_naissance,
       historique_statut: effectif.apprenant.historique_statut,
       ...(sifa
         ? {
