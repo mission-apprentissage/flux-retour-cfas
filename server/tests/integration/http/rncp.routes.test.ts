@@ -47,6 +47,7 @@ describe("GET /api/v1/rncp/:code_rncp - retourne une fiche RNCP", () => {
         "OF formateur": true,
         "OF responsable": true,
         "Tête de réseau même réseau": true,
+        "Tête de réseau Responsable": true,
         "Tête de réseau autre réseau": true,
         "DREETS même région": true,
         "DREETS autre région": true,

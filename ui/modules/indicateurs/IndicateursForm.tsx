@@ -3,6 +3,7 @@ import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { isTeteDeReseauResponsable } from "shared";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
@@ -457,7 +458,7 @@ function getPermissionsEffectifsNominatifs(
       return ownOrganisme?.organismesFormateurs?.length === 0; // OFA autorisé seulement si aucun formateur
 
     case "TETE_DE_RESEAU":
-      return organisation.reseau === "COMP_DU_DEVOIR";
+      return isTeteDeReseauResponsable(organisation.reseau);
 
     case "DREETS":
     case "DRAAF":
