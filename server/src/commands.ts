@@ -599,18 +599,6 @@ program
   .action(createJobAction("fiabilisation:effectifs:transform-rupturants-en-abandons-depuis"));
 
 /**
- * Job d'analyse de la fiabilité des dossiersApprenants reçus
- */
-// program
-//   .command("fiabilisation:analyse:dossiersApprenants-recus")
-//   .description("Analyse de la fiabilité des dossiersApprenants reçus")
-//   .action(
-//     runJob(async () => {
-//       return analyseFiabiliteDossierApprenantsRecus();
-//     })
-//   );
-
-/**
  * Job d'affichage des stats fiabilisation
  */
 program

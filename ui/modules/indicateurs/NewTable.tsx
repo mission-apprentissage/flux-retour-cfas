@@ -49,14 +49,7 @@ function NewTable<T>(props: NewTableProps<T & { prominent?: boolean }>) {
       sorting: props.sortingState,
     },
     onPaginationChange: (updater) => {
-      // const oldState = table.getState().pagination;
       const newState = functionalUpdate(updater, table.getState().pagination);
-
-      // state externe désactivé au profit d'un state interne
-      // car ne fonctionne pas et réinitialise la table et la pagination
-      // if (newState.pageIndex !== oldState.pageIndex || newState.pageSize !== oldState.pageSize) {
-      //   props.onPaginationChange?.(newState);
-      // }
       setPagination(newState);
     },
     onSortingChange: (updater) => {
