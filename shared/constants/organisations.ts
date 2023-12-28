@@ -1,6 +1,6 @@
-import { sortAlphabeticallyBy } from "@/common/utils/sortAlphabetically";
+import { sortAlphabeticallyBy } from "../utils";
 
-export const ORGANISATIONS_NATIONALES = sortAlphabeticallyBy("nom", [
+export const ORGANISATIONS_NATIONALES = [
   {
     nom: "Services de la Première ministre",
     key: "Services de la Première ministre",
@@ -69,4 +69,8 @@ export const ORGANISATIONS_NATIONALES = sortAlphabeticallyBy("nom", [
     nom: "Ministère du Travail, du Plein emploi et de l'Insertion",
     key: "Ministère du Travail, du Plein emploi et de l'Insertion",
   },
-] as const);
+] as const;
+
+export type OrganisationsNationalesKey = (typeof ORGANISATIONS_NATIONALES)[number]["key"];
+
+export const ORGANISATIONS_NATIONALES_SORTED_BY_NAME = sortAlphabeticallyBy("nom", ORGANISATIONS_NATIONALES);

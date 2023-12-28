@@ -1,8 +1,6 @@
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
 import { useState } from "react";
-import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED } from "shared";
-
-import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
+import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED, ORGANISATIONS_NATIONALES_SORTED_BY_NAME } from "shared";
 
 import { InscriptionOrganistionChildProps } from "./common";
 
@@ -128,7 +126,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
               })
             }
           >
-            {ORGANISATIONS_NATIONALES.map((option, index) => (
+            {ORGANISATIONS_NATIONALES_SORTED_BY_NAME.map((option, index) => (
               <option value={option.key} key={index}>
                 {option.nom}
               </option>

@@ -1,7 +1,5 @@
-import { TETE_DE_RESEAUX, TeteDeReseauKey } from "shared";
+import { TETE_DE_RESEAUX, TeteDeReseauKey, ORGANISATIONS_NATIONALES, OrganisationsNationalesKey } from "shared";
 import { z } from "zod";
-
-import { ORGANISATIONS_NATIONALES, OrganisationsNationalesKey } from "@/common/constants/organisations";
 
 export const registrationSchema = {
   user: z.object({

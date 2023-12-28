@@ -8,9 +8,9 @@ import {
   REGIONS_BY_CODE,
   TETE_DE_RESEAUX,
   TETE_DE_RESEAUX_BY_ID,
+  ORGANISATIONS_NATIONALES,
 } from "shared";
 
-import { ORGANISATIONS_NATIONALES } from "@/common/constants/organisations";
 import { SIRET_REGEX_PATTERN, UAI_REGEX_PATTERN } from "@/common/constants/validations";
 
 import { date, object, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes";
