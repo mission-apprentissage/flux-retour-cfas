@@ -51,7 +51,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     configurerModeTransmission: true,
   },
   "OF responsable": {
-    effectifsNominatifs: false,
+    effectifsNominatifs: true,
     indicateursEffectifs: true,
     infoTransmissionEffectifs: true,
     manageEffectifs: true,
