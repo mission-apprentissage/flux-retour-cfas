@@ -514,25 +514,6 @@ program
   .action(createJobAction("purge:queues"));
 
 /**
- * Job de création d'un utilisateur
- */
-// program
-//   .command("create:user")
-//   .description("Création d'un utilisateur")
-//   .requiredOption("--email <string>", "Email de l'utilisateur")
-//   .option("--prenom <string>", "Prénom de l'utilisateur")
-//   .option("--nom <string>", "Nom de l'utilisateur")
-//   .action(
-//     runJob(async ({ email, prenom, nom }) => {
-//       return createUserAccount({
-//         email,
-//         prenom,
-//         nom,
-//       });
-//     })
-//   );
-
-/**
  * Job de création d'un utilisateur ERP legacy
  */
 program
