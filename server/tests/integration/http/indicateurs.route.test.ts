@@ -297,10 +297,10 @@ describe("Route indicateurs", () => {
     describe("Permissions abandon", () => {
       // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
       const accesOrganisme: PermissionsTestConfig<false | any[], "Tête de réseau Responsable"> = {
-        "OF cible": false, // car il possède un formateur, mais y accède théoriquement
+        "OF cible": effectifResult,
         "OF non lié": emptyResult,
         "OF formateur": emptyResult,
-        "OF responsable": false,
+        "OF responsable": effectifResult,
         "Tête de réseau même réseau": false,
         // "Tête de réseau Responsable": false,
         "Tête de réseau autre réseau": false,
@@ -339,10 +339,10 @@ describe("Route indicateurs", () => {
     describe("Permissions apprenti", () => {
       // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
       const accesOrganisme: PermissionsTestConfig<false | any[], "Tête de réseau Responsable"> = {
-        "OF cible": false, // car il possède un formateur, mais y accède théoriquement
+        "OF cible": emptyResult,
         "OF non lié": emptyResult,
         "OF formateur": emptyResult,
-        "OF responsable": false,
+        "OF responsable": emptyResult,
         "Tête de réseau même réseau": false,
         // "Tête de réseau Responsable": false,
         "Tête de réseau autre réseau": false,

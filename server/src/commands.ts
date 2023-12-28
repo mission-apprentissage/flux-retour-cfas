@@ -514,25 +514,6 @@ program
   .action(createJobAction("purge:queues"));
 
 /**
- * Job de création d'un utilisateur
- */
-// program
-//   .command("create:user")
-//   .description("Création d'un utilisateur")
-//   .requiredOption("--email <string>", "Email de l'utilisateur")
-//   .option("--prenom <string>", "Prénom de l'utilisateur")
-//   .option("--nom <string>", "Nom de l'utilisateur")
-//   .action(
-//     runJob(async ({ email, prenom, nom }) => {
-//       return createUserAccount({
-//         email,
-//         prenom,
-//         nom,
-//       });
-//     })
-//   );
-
-/**
  * Job de création d'un utilisateur ERP legacy
  */
 program
@@ -616,18 +597,6 @@ program
   .option("--nbJours <number>", "Nombre de jours dans le statut", (n) => parseInt(n, 10), 180)
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("fiabilisation:effectifs:transform-rupturants-en-abandons-depuis"));
-
-/**
- * Job d'analyse de la fiabilité des dossiersApprenants reçus
- */
-// program
-//   .command("fiabilisation:analyse:dossiersApprenants-recus")
-//   .description("Analyse de la fiabilité des dossiersApprenants reçus")
-//   .action(
-//     runJob(async () => {
-//       return analyseFiabiliteDossierApprenantsRecus();
-//     })
-//   );
 
 /**
  * Job d'affichage des stats fiabilisation

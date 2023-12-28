@@ -4,8 +4,6 @@ import { PermissionOrganisation } from "shared/constants/permissions";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { OrganisationByType } from "@/common/model/organisations.model";
 
-import { getOrganismeByUAIAndSIRET } from "../organismes/organismes.actions";
-
 import { findOrganismesAccessiblesByOrganisationOF } from "./permissions";
 
 type QueryFilter<Result = false | object> = {
@@ -135,7 +133,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
   },
   TéléchargementListesNominatives: {
     context: {
-      ORGANISME_FORMATION: true, // TODO seulement si aucun formateur
+      ORGANISME_FORMATION: true,
       TETE_DE_RESEAU: async (organisation) => {
         return isTeteDeReseauResponsable(organisation.reseau);
       },
@@ -150,15 +148,11 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
       ADMINISTRATEUR: true,
     },
     queryFilter: {
-      ORGANISME_FORMATION: async (organisation) => {
-        const organisme = await getOrganismeByUAIAndSIRET(organisation.uai, organisation.siret);
-        const hasNoFormateurs = !organisme.organismesFormateurs || organisme.organismesFormateurs.length === 0;
-        return hasNoFormateurs
-          ? {
-              organisme_id: organisme._id,
-            }
-          : false;
-      },
+      ORGANISME_FORMATION: async (organisation) => ({
+        organisme_id: {
+          $in: await findOrganismesAccessiblesByOrganisationOF(organisation),
+        },
+      }),
       TETE_DE_RESEAU: async (organisation) => {
         if (!isTeteDeReseauResponsable(organisation.reseau)) {
           return false;

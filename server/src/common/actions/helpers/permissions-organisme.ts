@@ -39,7 +39,7 @@ export async function buildOrganismePermissions(
         viewContacts: isOrganismeOrFormateur,
         infoTransmissionEffectifs: isOrganismeOrFormateur,
         indicateursEffectifs: isOrganismeOrFormateur,
-        effectifsNominatifs: isOrganismeCible, // OFA interdit sur les formateurs
+        effectifsNominatifs: isOrganismeOrFormateur,
         manageEffectifs: isOrganismeOrFormateur,
         configurerModeTransmission: isOrganismeCible,
       };
