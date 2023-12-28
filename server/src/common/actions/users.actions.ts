@@ -281,34 +281,6 @@ export const updateUser = async (_id, data: Partial<UsersMigration>) => {
   return updated.value;
 };
 
-/**
- * Méthode de mise à jour de l'organisme principal du l'utilisateur
- * @param {*} permissionProps
- * @returns
- */
-// export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
-//   const user = await usersMigrationDb().findOne({ email: userEmail });
-
-//   if (!user) {
-//     throw new Error("Unable to find user");
-//   }
-
-//   const main_organisme_id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
-//   if (!ObjectId.isValid(main_organisme_id)) throw new Error("Invalid id passed");
-
-//   const updated = await usersMigrationDb().findOneAndUpdate(
-//     { _id: user._id },
-//     {
-//       $set: {
-//         main_organisme_id,
-//       },
-//     },
-//     { returnDocument: "after" }
-//   );
-
-//   return updated.value;
-// };
-
 export const updateUserLastConnection = async (userId: ObjectId) => {
   await usersMigrationDb().findOneAndUpdate(
     { _id: userId },
