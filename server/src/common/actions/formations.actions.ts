@@ -32,20 +32,15 @@ export const getFormationWithRNCP = async (rncp: string, projection = {}) => {
 
 /**
  * Méthode de récupération d'une formation depuis un id
- * @param {string|ObjectId} id
- * @param {*} projection
- * @returns
  */
-export const findFormationById = async (id, projection = {}) => {
+export const findFormationById = async (id: string | ObjectId, projection = {}) => {
   return formationsDb().findOne({ _id: new ObjectId(id) }, { projection });
 };
 
 /**
  * Méthode d'extraction du niveau depuis le libelle de la formation
- * @param {*} niveauFormationLibelle
- * @returns
  */
-export const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
+export const getNiveauFormationFromLibelle = (niveauFormationLibelle?: string | null) => {
   if (niveauFormationLibelle == null || niveauFormationLibelle === "") return null;
 
   const niveau = niveauFormationLibelle.split(" ")[0];

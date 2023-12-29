@@ -3,6 +3,7 @@ import config from "@/config";
 
 import { OrganismesReferentiel } from "../model/@types";
 
+import MnaOrganisme from "./@types/MnaOrganisme";
 import getApiClient from "./client";
 
 // Cf Documentation : https://referentiel.apprentissage.onisep.fr/api/v1/doc/#/
@@ -61,11 +62,7 @@ export const fetchOrganismes = async () => {
   return organismes;
 };
 
-/**
- * @param {*} siret
- * @returns {Promise<import("./@types/MnaOrganisme.js").default|null>}
- */
-export const fetchOrganismeWithSiret = async (siret) => {
+export const fetchOrganismeWithSiret = async (siret: string): Promise<MnaOrganisme | null> => {
   try {
     const { data } = await axiosClient.get(`/organismes/${siret}`);
 
@@ -77,7 +74,7 @@ export const fetchOrganismeWithSiret = async (siret) => {
   }
 };
 
-export const fetchOrganismesWithUai = async (uai) => {
+export const fetchOrganismesWithUai = async (uai: string) => {
   try {
     const { data } = await axiosClient.get("/organismes", { params: { uais: uai } });
     return data;
