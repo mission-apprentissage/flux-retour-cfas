@@ -1,4 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
+import { ObjectId } from "mongodb";
 
 import logger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
@@ -23,9 +24,8 @@ export const updateLastTransmissionDateForOrganismes = async () => {
 
 /**
  * Fonction de set de la last_transmission_date en récupérant la date de MAJ des effectifs (updated_at) la plus récente
- * @param {*} organisme_id
  */
-const setLastTransmissionDateForOrganisme = async (organisme_id) => {
+const setLastTransmissionDateForOrganisme = async (organisme_id: ObjectId) => {
   const maxUpdatedDateForEffectifsForOrganisme = await effectifsDb()
     .find({ organisme_id })
     .sort({ updated_at: -1 })

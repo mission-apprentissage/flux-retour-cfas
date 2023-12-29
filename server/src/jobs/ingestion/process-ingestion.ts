@@ -69,7 +69,6 @@ export const startEffectifQueueProcessor = async (signal: AbortSignal) => {
 
 /**
  * Fonction de traitement des 100 premiers éléments de la file d'attente des effectifs
- * @param options
  * @returns true si des effectifs ont été traités
  */
 export async function processEffectifsQueue(options?: EffectifQueueProcessorOptions): Promise<ProcessItemsResult> {
@@ -106,8 +105,6 @@ export async function processEffectifQueueById(effectifQueueId: ObjectId): Promi
 }
 
 /**
- *
- * @param effectifQueue
  * @returns true si l'effectif est valide
  */
 async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): Promise<boolean> {
@@ -461,8 +458,6 @@ export function mergeEffectif(effectifDb: Effectif, effectif: Effectif): Effecti
 
 /**
  * Fonction de création ou de MAJ de l'effectif depuis la queue
- * @param effectif
- * @returns
  */
 const createOrUpdateEffectif = async (
   effectif: Effectif
