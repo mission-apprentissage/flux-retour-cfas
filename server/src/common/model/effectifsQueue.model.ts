@@ -1,6 +1,5 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { CODES_STATUT_APPRENANT_ENUM } from "@/common/constants/dossierApprenant";
+import { CODES_STATUT_APPRENANT_ENUM } from "shared";
 
 import effectifsModel from "./effectifs.model/effectifs.model";
 import { apprenantSchema } from "./effectifs.model/parts/apprenant.part";
