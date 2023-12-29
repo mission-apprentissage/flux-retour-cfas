@@ -1,12 +1,12 @@
 import { addDays } from "date-fns";
 import { getAnneesScolaireListFromDate } from "shared";
+import { CODES_STATUT_APPRENANT } from "shared/constants/dossierApprenant";
 
 import {
   abandonsIndicator,
   inscritsSansContratsIndicator,
   rupturantsIndicator,
 } from "@/common/actions/effectifs/indicators";
-import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
 

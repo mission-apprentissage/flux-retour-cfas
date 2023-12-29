@@ -1,13 +1,13 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
 import { capitalize } from "lodash-es";
-import { z } from "zod";
-
 import {
   CODES_STATUT_APPRENANT_ENUM,
   EFFECTIF_DERNIER_SITUATION,
   SEXE_APPRENANT_ENUM,
-} from "@/common/constants/dossierApprenant";
+} from "shared/constants/dossierApprenant";
+import { z } from "zod";
+
 import {
   CFD_REGEX,
   CODE_NAF_REGEX,

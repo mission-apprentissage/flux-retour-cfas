@@ -3,7 +3,8 @@ import {
   EFFECTIF_DERNIER_SITUATION,
   NATIONALITE_APPRENANT_ENUM,
   SEXE_APPRENANT_ENUM,
-} from "@/common/constants/dossierApprenant";
+} from "shared/constants/dossierApprenant";
+
 import { CODE_POSTAL_PATTERN, DERNIER_ORGANISME_UAI_PATTERN } from "@/common/constants/validations";
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 import { object, string, date, integer, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";

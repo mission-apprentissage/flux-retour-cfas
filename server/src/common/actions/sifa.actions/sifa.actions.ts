@@ -2,11 +2,11 @@ import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, getSIFADate } from "shared";
+import { CODES_STATUT_APPRENANT } from "shared/constants/dossierApprenant";
 
 import { findFormationById, getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
-import { CODES_STATUT_APPRENANT } from "@/common/constants/dossierApprenant";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { effectifsDb } from "@/common/model/collections";
 
