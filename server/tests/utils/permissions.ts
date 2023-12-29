@@ -158,6 +158,13 @@ const profilsOrganisation = [
     },
   },
   {
+    label: "Tête de réseau Responsable",
+    organisation: {
+      type: "TETE_DE_RESEAU",
+      reseau: "COMP_DU_DEVOIR",
+    },
+  },
+  {
     label: "Tête de réseau autre réseau",
     organisation: {
       type: "TETE_DE_RESEAU",
@@ -273,10 +280,14 @@ type ProfilLabel = (typeof profilsOrganisation)[number]["label"];
 
 export const profilsPermissionByLabel = profilsOrganisation.reduce(
   (acc, v) => ({ ...acc, [v.label]: v }),
-  {} as { [key in ProfilLabel]: ProfilPermission }
+  {} as {
+    [key in ProfilLabel]: ProfilPermission;
+  }
 );
 
-export type PermissionsTestConfig<ExpectedResult = boolean> = { [key in ProfilLabel]: ExpectedResult };
+export type PermissionsTestConfig<ExpectedResult = boolean, ExcludedCases extends ProfilLabel = never> = {
+  [key in Exclude<ProfilLabel, ExcludedCases>]: ExpectedResult;
+};
 
 type TestFunc<ExpectedResult> = (
   organisation: NewOrganisation,
@@ -287,14 +298,14 @@ type TestFunc<ExpectedResult> = (
 /**
  * Utilitaire pour exécuter un test avec tous les profils d'organisation
  */
-export function testPermissions<ExpectedResult>(
-  permissionsConfig: PermissionsTestConfig<ExpectedResult>,
+export function testPermissions<ExpectedResult, ExcludedCases extends ProfilLabel = never>(
+  permissionsConfig: PermissionsTestConfig<ExpectedResult, ExcludedCases>,
   testFunc: TestFunc<ExpectedResult>
 ) {
   Object.entries(permissionsConfig).forEach(([label, allowed]) => {
     const conf = profilsPermissionByLabel[label];
     it(`${conf.label} - ${allowed ? "ALLOWED" : "FORBIDDEN"}`, async () => {
-      await testFunc(conf.organisation, allowed, conf.label);
+      await testFunc(conf.organisation, allowed as ExpectedResult, conf.label);
     });
   });
 }

@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { isTeteDeReseauResponsable } from "shared/constants";
 import { PermissionsOrganisme } from "shared/constants/permissions";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
@@ -46,13 +47,13 @@ export async function buildOrganismePermissions(
 
     case "TETE_DE_RESEAU": {
       const sameReseau = (organisme.reseaux as string[])?.includes(organisation.reseau);
-      const compDuDevoir = organisation.reseau === "COMP_DU_DEVOIR";
+      const isResponsable = isTeteDeReseauResponsable(organisation.reseau);
       return {
         viewContacts: sameReseau,
         infoTransmissionEffectifs: sameReseau,
         indicateursEffectifs: sameReseau,
-        effectifsNominatifs: sameReseau && compDuDevoir,
-        manageEffectifs: sameReseau && compDuDevoir,
+        effectifsNominatifs: sameReseau && isResponsable,
+        manageEffectifs: sameReseau && isResponsable,
         configurerModeTransmission: false,
       };
     }

@@ -58,6 +58,7 @@ describe("Routes diverses", () => {
         "OF non lié": false,
         "OF formateur": false,
         "Tête de réseau même réseau": false,
+        "Tête de réseau Responsable": false,
         "Tête de réseau autre réseau": false,
         "DREETS même région": false,
         "DREETS autre région": false,

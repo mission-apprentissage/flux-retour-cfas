@@ -1,3 +1,4 @@
+import { isTeteDeReseauResponsable } from "shared/constants";
 import { PermissionOrganisation } from "shared/constants/permissions";
 
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -134,7 +135,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
     context: {
       ORGANISME_FORMATION: true,
       TETE_DE_RESEAU: async (organisation) => {
-        return organisation.reseau === "COMP_DU_DEVOIR";
+        return isTeteDeReseauResponsable(organisation.reseau);
       },
       DREETS: ["inscritSansContrat", "rupturant", "abandon"],
       DRAAF: ["inscritSansContrat", "rupturant", "abandon"],
@@ -153,7 +154,7 @@ const permissionsOrganisation: Record<PermissionOrganisation, PermissionConfig> 
         },
       }),
       TETE_DE_RESEAU: async (organisation) => {
-        if (organisation.reseau !== "COMP_DU_DEVOIR") {
+        if (!isTeteDeReseauResponsable(organisation.reseau)) {
           return false;
         }
 

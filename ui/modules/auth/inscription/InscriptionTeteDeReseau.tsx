@@ -2,7 +2,7 @@ import { Button, FormControl, FormErrorMessage, FormLabel, HStack, Input, Select
 import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/router";
 import React from "react";
-import { TETE_DE_RESEAUX_SORTED } from "shared";
+import { ITeteDeReseauKey, TETE_DE_RESEAUX_SORTED } from "shared";
 import * as Yup from "yup";
 
 import { _post } from "@/common/httpClient";
@@ -39,7 +39,7 @@ export const InscriptionTeteDeReseau = ({
           onChange={(e) => {
             setOrganisation({
               type: "TETE_DE_RESEAU",
-              reseau: e.target.value,
+              reseau: e.target.value as ITeteDeReseauKey,
             });
             setHideBackNextButtons?.(e.target.value === "AUTRE");
           }}
@@ -52,7 +52,7 @@ export const InscriptionTeteDeReseau = ({
         </Select>
       </FormControl>
 
-      {organisation?.type === "TETE_DE_RESEAU" && organisation?.reseau === "AUTRE" && (
+      {organisation?.type === "TETE_DE_RESEAU" && (organisation?.reseau as string) === "AUTRE" && (
         <>
           <Formik
             initialValues={{

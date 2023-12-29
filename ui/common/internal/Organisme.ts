@@ -1,3 +1,4 @@
+import { ITeteDeReseauKey } from "shared";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 // récupéré de l'API et adapté pour ne pas avoir certains champs optionnels
@@ -14,22 +15,7 @@ export interface Organisme {
   /**
    * Réseaux du CFA, s'ils existent
    */
-  reseaux?: (
-    | "ADEN"
-    | "CMA"
-    | "AGRI"
-    | "ANASUP"
-    | "CCI"
-    | "CFA_EC"
-    | "COMP_DU_DEVOIR"
-    | "GRETA"
-    | "UIMM"
-    | "BTP_CFA"
-    | "MFR"
-    | "AFTRAL"
-    | "GRETA_VAUCLUSE"
-    | "CFA_SAT"
-  )[];
+  reseaux?: ITeteDeReseauKey[];
   /**
    * ERPs rattachés au CFA, s'ils existent
    */

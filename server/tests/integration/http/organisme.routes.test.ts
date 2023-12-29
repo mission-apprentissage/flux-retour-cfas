@@ -82,6 +82,14 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     viewContacts: true,
     configurerModeTransmission: false,
   },
+  "Tête de réseau Responsable": {
+    effectifsNominatifs: true,
+    indicateursEffectifs: true,
+    infoTransmissionEffectifs: true,
+    manageEffectifs: true,
+    viewContacts: true,
+    configurerModeTransmission: false,
+  },
   "Tête de réseau autre réseau": {
     effectifsNominatifs: false,
     indicateursEffectifs: false,
@@ -263,7 +271,8 @@ describe("Routes /organismes/:id", () => {
         last_transmission_date: startOfDay(subMonths(new Date(), 1)).toISOString(),
       };
 
-      testPermissions<any>(
+      // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
+      testPermissions<any, "Tête de réseau Responsable">(
         {
           "OF cible": {
             ...commonExpectedOrganismeAttributes,
@@ -283,6 +292,10 @@ describe("Routes /organismes/:id", () => {
             ...commonExpectedOrganismeAttributes,
             ...infoTransmissionEffectifsAttributes,
           },
+          // "Tête de réseau Responsable": {
+          //   ...commonExpectedOrganismeAttributes,
+          //   ...infoTransmissionEffectifsAttributes,
+          // },
           "Tête de réseau autre réseau": {
             ...commonExpectedOrganismeAttributes,
           },
@@ -415,13 +428,15 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      testPermissions(
+      // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
+      testPermissions<boolean, "Tête de réseau Responsable">(
         {
           "OF cible": true,
           "OF responsable": true,
           "OF formateur": false,
           "OF non lié": false,
           "Tête de réseau même réseau": true,
+          // "Tête de réseau Responsable": true,
           "Tête de réseau autre réseau": false,
           "DREETS même région": true,
           "DREETS autre région": true,
@@ -544,13 +559,16 @@ describe("Routes /organismes/:id", () => {
           ),
         ]);
       });
-      testPermissions(
+
+      // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
+      testPermissions<boolean, "Tête de réseau Responsable">(
         {
           "OF cible": true,
           "OF responsable": true,
           "OF formateur": false,
           "OF non lié": false,
           "Tête de réseau même réseau": true,
+          // "Tête de réseau Responsable": true,
           "Tête de réseau autre réseau": false,
           "DREETS même région": true,
           "DREETS autre région": false,
@@ -607,6 +625,7 @@ describe("Routes /organismes/:id", () => {
           "OF formateur": true,
           "OF non lié": true,
           "Tête de réseau même réseau": true,
+          "Tête de réseau Responsable": true,
           "Tête de réseau autre réseau": true,
           "DREETS même région": true,
           "DREETS autre région": true,
@@ -687,13 +706,15 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      testPermissions(
+      // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
+      testPermissions<boolean, "Tête de réseau Responsable">(
         {
           "OF cible": true,
           "OF responsable": true,
           "OF formateur": false,
           "OF non lié": false,
           "Tête de réseau même réseau": true,
+          // "Tête de réseau Responsable": true,
           "Tête de réseau autre réseau": false,
           "DREETS même région": true,
           "DREETS autre région": false,
@@ -758,6 +779,7 @@ describe("Routes /organismes/:id", () => {
           "OF formateur": false,
           "OF responsable": false,
           "Tête de réseau même réseau": false,
+          "Tête de réseau Responsable": false,
           "Tête de réseau autre réseau": false,
           "DREETS même région": false,
           "DREETS autre région": false,
