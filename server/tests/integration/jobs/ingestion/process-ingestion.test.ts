@@ -1,5 +1,5 @@
 import { ObjectId, WithId } from "mongodb";
-import { CODES_STATUT_APPRENANT } from "shared/constants/dossierApprenant";
+import { CODES_STATUT_APPRENANT } from "shared";
 
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
 import { Effectif } from "@/common/model/@types";

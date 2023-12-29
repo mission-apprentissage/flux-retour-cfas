@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker/locale/fr";
 import merge from "lodash-es/merge";
 import { WithId } from "mongodb";
 import RandExp from "randexp";
-import { CODES_STATUT_APPRENANT } from "shared/constants/dossierApprenant";
+import { CODES_STATUT_APPRENANT } from "shared";
 import type { PartialDeep } from "type-fest";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";

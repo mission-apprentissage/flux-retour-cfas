@@ -1,4 +1,4 @@
-import { getStatutApprenantNameFromCode } from "shared/constants/dossierApprenant";
+import { getStatutApprenantNameFromCode } from "shared";
 
 export type FieldExport = {
   label: string;

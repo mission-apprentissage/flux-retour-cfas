@@ -17,7 +17,7 @@ import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useSetRecoilState } from "recoil";
-import { getStatutApprenantNameFromCode } from "shared/constants/dossierApprenant";
+import { getStatutApprenantNameFromCode } from "shared";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";

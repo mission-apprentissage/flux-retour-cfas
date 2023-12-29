@@ -1,6 +1,5 @@
 import { addDays } from "date-fns";
-import { getAnneesScolaireListFromDate } from "shared";
-import { CODES_STATUT_APPRENANT } from "shared/constants/dossierApprenant";
+import { getAnneesScolaireListFromDate, CODES_STATUT_APPRENANT } from "shared";
 
 import {
   abandonsIndicator,

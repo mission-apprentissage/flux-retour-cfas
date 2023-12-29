@@ -20,7 +20,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import React from "react";
-import { getStatutApprenantNameFromCode } from "shared/constants/dossierApprenant";
+import { getStatutApprenantNameFromCode } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { formatDateDayMonthYear, prettyPrintDate } from "@/common/utils/dateUtils";

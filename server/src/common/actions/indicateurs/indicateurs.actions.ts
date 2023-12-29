@@ -1,6 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "mongodb";
-import { CODES_STATUT_APPRENANT } from "shared/constants/dossierApprenant";
+import { CODES_STATUT_APPRENANT } from "shared";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import {

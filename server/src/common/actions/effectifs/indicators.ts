@@ -1,5 +1,5 @@
 import { addMonths } from "date-fns";
-import { CODES_STATUT_APPRENANT } from "shared/constants/dossierApprenant";
+import { CODES_STATUT_APPRENANT } from "shared";
 
 import {
   SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS,
