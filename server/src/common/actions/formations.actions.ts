@@ -33,7 +33,7 @@ export const getFormationWithRNCP = async (rncp: string, projection = {}) => {
 /**
  * Méthode de récupération d'une formation depuis un id
  */
-export const findFormationById = async (id: string | ObjectId, projection = {}) => {
+export const findFormationById = async (id?: string | ObjectId, projection = {}) => {
   return formationsDb().findOne({ _id: new ObjectId(id) }, { projection });
 };
 
