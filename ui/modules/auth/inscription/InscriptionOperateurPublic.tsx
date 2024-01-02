@@ -29,6 +29,10 @@ const typesOrganisation = [
     label: "Organisation nationale",
     value: "OPERATEUR_PUBLIC_NATIONAL",
   },
+  {
+    label: "DRAFPIC",
+    value: "DRAFPIC",
+  },
   // TODO, pas pris en compte pour l'instant, car il faut pouvoir enregistrer l'utilisateur / envoyer un mail
   // {
   //   label: "Autre opérateur public",
@@ -94,14 +98,14 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
           </Select>
         </FormControl>
       )}
-      {["DREETS", "DRAAF", "CONSEIL_REGIONAL"].includes(typeOrganisation as string) && (
+      {["DREETS", "DRAAF", "CONSEIL_REGIONAL", "DRAFPIC"].includes(typeOrganisation as string) && (
         <FormControl isRequired>
           <FormLabel>Votre territoire :</FormLabel>
           <Select
             placeholder="Sélectionner un territoire"
             onChange={(e) =>
               setOrganisation({
-                type: typeOrganisation as "DREETS" | "DRAAF" | "CONSEIL_REGIONAL",
+                type: typeOrganisation as "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "DRAFPIC",
                 code_region: e.target.value,
               })
             }

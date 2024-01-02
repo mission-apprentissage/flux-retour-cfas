@@ -1,7 +1,8 @@
 fileignoreconfig:
-- filename: .bin/scripts/deploy-log-decrypt.sh
-  checksum: c89510607e8ac698d67cafe1256e11a3f01825c7d4b8083ff2b77976223ae798
-- filename: .bin/scripts/deploy-log-encrypt.sh
+- filename: .infra/files/configs/mongodb/seed.gpg
+  checksum: afad84a009b2b171e32449290e77a3eb664c38764590d7da04d26ae23ebcf640
+version: ""
+n/scripts/deploy-log-encrypt.sh
   checksum: 8ebe245e2a3719defc295d0de3d02c42e2cb82cb2ecc9507ce0dd4273a428e5e
 - filename: .bin/scripts/seed-update.sh
   checksum: 5d6c4905865f66008d6ffd23eff04577bb8d1260022106b0be24062591bf0883
@@ -38,7 +39,7 @@ fileignoreconfig:
 - filename: .infra/files/configs/metabase/setup-metabase.sh
   checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
 - filename: .infra/files/configs/mongodb/seed.gpg
-  checksum: d0f074c06b41c44ffa3584dbf2657d6c9557287a2043b8394ca83a858ca57e4d
+  checksum: afad84a009b2b171e32449290e77a3eb664c38764590d7da04d26ae23ebcf640
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
@@ -85,6 +86,8 @@ fileignoreconfig:
   checksum: cc6eef59550fe79f35ddf54e74e8b7f72dc85bc3480261a8cea94fa19e16a882
 - filename: server/tests/integration/common/actions/users.actions.test.ts
   checksum: 77550fcbcd5120292fcf6eeca7a3019bc62d34e4ec3c402b94b6fcd84d0f0c15
+- filename: server/tests/integration/common/utils/mergeIgnoringNullPreferringNewArray.test.ts
+  checksum: 01dd4eb56cfade47b72f04d21381aac27a90fae3e3ea3e08372225b27f5fe8ad
 - filename: server/tests/integration/external/zod.test.ts
   checksum: 6e871e7294e90ce4917b687aa3ea21698792a4582013b5354cc43126c91ad2e2
 - filename: server/tests/integration/http/admin.routes.test.ts
@@ -95,6 +98,8 @@ fileignoreconfig:
   checksum: 5dac6833c2dc7f76b3c8b74c3e102968cfcb69bd1073046bcd434f44717f1384
 - filename: server/tests/integration/jobs/emails/reminder.test.ts
   checksum: 6268b3f12640edc2569bfd412081dc9d8092b15140e07fa01a29697f3d476158
+- filename: server/tests/integration/jobs/ingestion/mergeEffectif.test.ts
+  checksum: 3d6f4bf51f463b07c6fb2b2c3cf68c0cd2a52b6fbd55fc60578c30e2d2a58b9b
 - filename: server/tests/integration/jobs/ingestion/process-ingestion.test.ts
   checksum: 97afa4b5eb76c0d2dc041a0f9fff185b5502acb7b70c7227660e323f6df79bba
 - filename: shared/constants/plausible-goals.ts
@@ -117,22 +122,26 @@ fileignoreconfig:
   checksum: a527388d2a42b6441bc4b3de7eff5213458c77830c3b78875adf88737791cf14
 - filename: ui/pages/politique-de-confidentialite.tsx
   checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
-- filename: ui/modules/organismes/Televersement.tsx
-  checksum: 2322283e936e6f4a419f27f60e1bae886adffc99a40a085131685f4ca77597e3
-- filename: server/tests/integration/jobs/ingestion/mergeEffectif.test.ts
-  checksum: 3d6f4bf51f463b07c6fb2b2c3cf68c0cd2a52b6fbd55fc60578c30e2d2a58b9b
-- filename: server/tests/integration/common/utils/mergeIgnoringNullPreferringNewArray.test.ts
-  checksum: 01dd4eb56cfade47b72f04d21381aac27a90fae3e3ea3e08372225b27f5fe8ad
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
 scopeconfig:
 - scope: node
 custom_patterns:
-- "(?s)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
+- (?s)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}
 allowed_patterns:
 - key
 - Key
 - secret
+- SECRET
+- password
+- Password
+- pass
+- apiKey
+- ApiKey
+- api_key
+- tableau-de-bord@apprentissage\.beta\.gouv.fr
+version: "1.0"
+ret
 - SECRET
 - password
 - Password
