@@ -5,9 +5,6 @@ import React from "react";
 /**
  * A handy component to display a list of key/value pairs
  * largely inspired by @tanstack/react-table
- *
- * @param {*} param0
- * @returns
  */
 const InfoDetail = ({
   title,

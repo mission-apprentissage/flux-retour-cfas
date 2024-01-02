@@ -92,6 +92,17 @@ export async function buildOrganismePermissions(
         configurerModeTransmission: false,
       };
     }
+    case "DRAFPIC": {
+      const sameRegion = organisme.adresse?.region === organisation.code_region;
+      return {
+        viewContacts: true,
+        infoTransmissionEffectifs: true,
+        indicateursEffectifs: sameRegion,
+        effectifsNominatifs: sameRegion ? ["inscritSansContrat", "rupturant", "abandon"] : false,
+        manageEffectifs: false,
+        configurerModeTransmission: false,
+      };
+    }
     case "DDETS": {
       const sameDepartement = organisme.adresse?.departement === organisation.code_departement;
       return {
@@ -175,6 +186,7 @@ export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthConte
     case "DREETS":
     case "DRAAF":
     case "CONSEIL_REGIONAL":
+    case "DRAFPIC":
     case "CARIF_OREF_REGIONAL":
       return {
         "_computed.organisme.region": organisation.code_region,

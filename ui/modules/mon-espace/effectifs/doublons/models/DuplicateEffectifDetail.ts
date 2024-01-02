@@ -22,7 +22,7 @@ export interface DuplicateEffectifDetail {
     };
     historique_statut: [
       {
-        valeur_statut?: string;
+        valeur_statut?: 2 | 3 | 0;
         date_statut?: string;
         date_reception?: string;
       },

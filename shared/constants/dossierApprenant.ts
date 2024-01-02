@@ -30,11 +30,10 @@ const LABELS_STATUT_APPRENANT = [
 
 /**
  * Fonction de récupération d'un nom de statut depuis son code
- * @param {*} statutCode
- * @returns
  */
-export const getStatutApprenantNameFromCode = (statutCode) =>
-  LABELS_STATUT_APPRENANT.find((item) => item.code === statutCode)?.name ?? "NC";
+export const getStatutApprenantNameFromCode = (
+  statutCode?: (typeof CODES_STATUT_APPRENANT)[keyof typeof CODES_STATUT_APPRENANT]
+) => LABELS_STATUT_APPRENANT.find((item) => item.code === statutCode)?.name ?? "NC";
 
 /**
  * Liste des nom des indicateurs

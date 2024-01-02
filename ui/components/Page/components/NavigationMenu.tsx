@@ -25,6 +25,7 @@ function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): stri
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
       return "Mon territoire";
@@ -212,6 +213,7 @@ function getNavBarComponent(auth?: AuthContext): ReactElement {
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":

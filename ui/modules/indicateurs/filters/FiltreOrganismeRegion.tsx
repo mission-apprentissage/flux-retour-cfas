@@ -19,7 +19,8 @@ function isOrganisationOperateurPublicRegion(organisation): organisation is Orga
     organisation.type === "DREETS" ||
     organisation.type === "DRAAF" ||
     organisation.type === "CONSEIL_REGIONAL" ||
-    organisation.type === "CARIF_OREF_REGIONAL"
+    organisation.type === "CARIF_OREF_REGIONAL" ||
+    organisation.type === "DRAFPIC"
   );
 }
 

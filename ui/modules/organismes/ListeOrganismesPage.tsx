@@ -215,6 +215,7 @@ function getHeaderTitleFromOrganisationType(type: OrganisationType) {
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
       return "Les organismes de mon territoire";
@@ -241,6 +242,7 @@ function getTextContextFromOrganisationType(type: OrganisationType) {
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
       return "de votre territoire";

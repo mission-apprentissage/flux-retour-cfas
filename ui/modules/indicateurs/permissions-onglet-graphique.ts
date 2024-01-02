@@ -11,6 +11,7 @@ export function canViewOngletIndicateursVueGraphique(organisationType: Organisat
     case "DDETS":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAFPIC":
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
     case "CARIF_OREF_NATIONAL":
