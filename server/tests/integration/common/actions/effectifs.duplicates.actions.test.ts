@@ -19,10 +19,8 @@ const sampleOrganisme: Organisme = {
 
 /**
  * Fonction utilitaire d'ajout en doublon d'effectif
- * @param sampleEffectif
- * @param nbDuplicates
  */
-const insertDuplicateEffectifs = async (sampleEffectif, nbDuplicates = 2) => {
+const insertDuplicateEffectifs = async (sampleEffectif: any, nbDuplicates = 2) => {
   const insertedIdList: Promise<ObjectId>[] = [];
   for (let index = 0; index < nbDuplicates; index++) {
     insertedIdList.push(

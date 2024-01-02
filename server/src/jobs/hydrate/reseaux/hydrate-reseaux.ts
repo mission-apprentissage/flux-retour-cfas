@@ -43,7 +43,6 @@ const INPUT_FILES = [
 
 /**
  * Parse des réseaux depuis le csv
- * @param  {string} reseauText
  */
 const parseReseauxTextFromCsv = (reseauText: string): string[] => {
   if (!reseauText || RESEAU_NULL_VALUES.includes(reseauText)) return [];
@@ -52,8 +51,6 @@ const parseReseauxTextFromCsv = (reseauText: string): string[] => {
 
 /**
  * Fonction de transformation d'une ligne en objet organisme
- * @param {*} organismeFromFile
- * @returns
  */
 const mapFileOrganisme = (organismeFromFile: any) => {
   return {

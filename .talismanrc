@@ -124,6 +124,8 @@ n/scripts/deploy-log-encrypt.sh
   checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
+- filename: server/src/jobs/users/generate-password-update-token.ts
+  checksum: 5e033ffc0f5c1ddb56a91ef761e9e2e71c501c31c18a664b742af7ce623a8c06
 scopeconfig:
 - scope: node
 custom_patterns:
