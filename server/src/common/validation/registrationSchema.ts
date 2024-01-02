@@ -22,7 +22,10 @@ export const registrationSchema = {
       type: z.literal("TETE_DE_RESEAU"),
       reseau: z.enum(TETE_DE_RESEAUX.map((reseau) => reseau.key) as [TeteDeReseauKey, ...TeteDeReseauKey[]]),
     }),
-    z.object({ type: z.enum(["DREETS", "DRAAF", "CONSEIL_REGIONAL", "CARIF_OREF_REGIONAL"]), code_region: z.string() }),
+    z.object({
+      type: z.enum(["DREETS", "DRAAF", "CONSEIL_REGIONAL", "CARIF_OREF_REGIONAL", "DRAFPIC"]),
+      code_region: z.string(),
+    }),
     z.object({ type: z.literal("DDETS"), code_departement: z.string() }),
     z.object({ type: z.literal("ACADEMIE"), code_academie: z.string() }),
     z.object({

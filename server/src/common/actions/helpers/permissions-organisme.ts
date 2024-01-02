@@ -69,7 +69,8 @@ export async function getAcl(ctx: AuthContext): Promise<Acl> {
       };
     }
     case "DREETS":
-    case "DRAAF": {
+    case "DRAAF":
+    case "DRAFPIC": {
       const sameRegion = { region: { $in: [organisation.code_region] } };
       return {
         viewContacts: true,

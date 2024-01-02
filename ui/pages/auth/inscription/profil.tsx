@@ -99,6 +99,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
               );
 
             case "DREETS":
+            case "DRAFPIC":
             case "DRAAF":
               return (
                 <>

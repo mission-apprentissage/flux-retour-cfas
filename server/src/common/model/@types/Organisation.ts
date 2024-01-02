@@ -13,6 +13,7 @@ export interface Organisation {
     | "DRAAF"
     | "CONSEIL_REGIONAL"
     | "CARIF_OREF_REGIONAL"
+    | "DRAFPIC"
     | "DDETS"
     | "ACADEMIE"
     | "OPERATEUR_PUBLIC_NATIONAL"

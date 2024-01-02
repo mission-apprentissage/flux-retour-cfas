@@ -58,6 +58,7 @@ function getDashboardComponent(organisationType: OrganisationType) {
     case "DRAAF":
     case "CONSEIL_REGIONAL":
     case "CARIF_OREF_REGIONAL":
+    case "DRAFPIC":
     case "DDETS":
     case "ACADEMIE":
     case "OPERATEUR_PUBLIC_NATIONAL":
