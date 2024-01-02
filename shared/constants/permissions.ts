@@ -1,4 +1,5 @@
 import { TypeEffectifNominatif } from "./indicateurs";
+import { ITeteDeReseauKey } from "./networks";
 
 // Permissions Profils d'organisation vs Fonctionnalités de l'organisation (= 1er niveau d'onglet)
 export type PermissionOrganisation =
@@ -19,3 +20,20 @@ export type PermissionsOrganisme = {
 };
 
 export type PermissionOrganisme = keyof PermissionsOrganisme;
+
+export type PermissionScope = {
+  id?: { $in: ReadonlyArray<string> };
+  reseau?: { $in: ReadonlyArray<ITeteDeReseauKey> };
+  region?: { $in: ReadonlyArray<string> };
+  departement?: { $in: ReadonlyArray<string> };
+  academie?: { $in: ReadonlyArray<string> };
+};
+
+export type Acl = {
+  viewContacts: PermissionScope | boolean;
+  infoTransmissionEffectifs: PermissionScope | boolean;
+  indicateursEffectifs: PermissionScope | boolean;
+  effectifsNominatifs: { [key in TypeEffectifNominatif]: PermissionScope | boolean };
+  manageEffectifs: PermissionScope | boolean;
+  configurerModeTransmission: PermissionScope | boolean;
+};
