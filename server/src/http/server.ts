@@ -24,7 +24,11 @@ import {
 } from "@/common/actions/account.actions";
 import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
-import { effectifsFiltersTerritoireSchema, fullEffectifsFiltersSchema } from "@/common/actions/helpers/filters";
+import {
+  effectifsFiltersTerritoireSchema,
+  fullEffectifsFiltersSchema,
+  territoireFiltersSchema,
+} from "@/common/actions/helpers/filters";
 import { getPermissionOrganisationContext } from "@/common/actions/helpers/permissions-organisation";
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
@@ -641,7 +645,7 @@ function setupRoutes(app: Application) {
     .get(
       "/api/v1/indicateurs/organismes/par-departement",
       returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
+        const filters = await validateFullZodObjectSchema(req.query, territoireFiltersSchema);
         return await getIndicateursOrganismesParDepartement(req.user, filters);
       })
     )

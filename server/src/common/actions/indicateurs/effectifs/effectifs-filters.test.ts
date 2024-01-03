@@ -10,13 +10,11 @@ describe("Filtres Indicateurs", () => {
       const stages = buildEffectifMongoFilters({
         date: currentDate,
       });
-      assert.deepStrictEqual(stages, [
-        {
-          annee_scolaire: {
-            $in: ["2023-2023", "2022-2023"],
-          },
+      assert.deepStrictEqual(stages, {
+        annee_scolaire: {
+          $in: ["2023-2023", "2022-2023"],
         },
-      ]);
+      });
     });
 
     it("Gère le filtre organisme_departements", () => {
@@ -24,18 +22,14 @@ describe("Filtres Indicateurs", () => {
         date: currentDate,
         organisme_departements: ["56"],
       });
-      assert.deepStrictEqual(stages, [
-        {
-          annee_scolaire: {
-            $in: ["2023-2023", "2022-2023"],
-          },
+      assert.deepStrictEqual(stages, {
+        annee_scolaire: {
+          $in: ["2023-2023", "2022-2023"],
         },
-        {
-          "_computed.organisme.departement": {
-            $in: ["56"],
-          },
+        "_computed.organisme.departement": {
+          $in: ["56"],
         },
-      ]);
+      });
     });
 
     it("Gère le filtre organisme_regions", () => {
@@ -43,18 +37,14 @@ describe("Filtres Indicateurs", () => {
         date: currentDate,
         organisme_regions: ["25"],
       });
-      assert.deepStrictEqual(stages, [
-        {
-          annee_scolaire: {
-            $in: ["2023-2023", "2022-2023"],
-          },
+      assert.deepStrictEqual(stages, {
+        annee_scolaire: {
+          $in: ["2023-2023", "2022-2023"],
         },
-        {
-          "_computed.organisme.region": {
-            $in: ["25"],
-          },
+        "_computed.organisme.region": {
+          $in: ["25"],
         },
-      ]);
+      });
     });
 
     it("Gère le filtre organisme_reseaux", () => {
@@ -62,18 +52,14 @@ describe("Filtres Indicateurs", () => {
         date: currentDate,
         organisme_reseaux: ["AGRI"],
       });
-      assert.deepStrictEqual(stages, [
-        {
-          annee_scolaire: {
-            $in: ["2023-2023", "2022-2023"],
-          },
+      assert.deepStrictEqual(stages, {
+        annee_scolaire: {
+          $in: ["2023-2023", "2022-2023"],
         },
-        {
-          "_computed.organisme.reseaux": {
-            $in: ["AGRI"],
-          },
+        "_computed.organisme.reseaux": {
+          $in: ["AGRI"],
         },
-      ]);
+      });
     });
 
     it("Gère le filtre formation_cfds", () => {
@@ -81,18 +67,14 @@ describe("Filtres Indicateurs", () => {
         date: currentDate,
         formation_cfds: ["25021000"],
       });
-      assert.deepStrictEqual(stages, [
-        {
-          annee_scolaire: {
-            $in: ["2023-2023", "2022-2023"],
-          },
+      assert.deepStrictEqual(stages, {
+        annee_scolaire: {
+          $in: ["2023-2023", "2022-2023"],
         },
-        {
-          "formation.cfd": {
-            $in: ["25021000"],
-          },
+        "formation.cfd": {
+          $in: ["25021000"],
         },
-      ]);
+      });
     });
 
     it("Gère le filtre formation_niveaux", () => {
@@ -100,18 +82,14 @@ describe("Filtres Indicateurs", () => {
         date: currentDate,
         formation_niveaux: ["2"],
       });
-      assert.deepStrictEqual(stages, [
-        {
-          annee_scolaire: {
-            $in: ["2023-2023", "2022-2023"],
-          },
+      assert.deepStrictEqual(stages, {
+        annee_scolaire: {
+          $in: ["2023-2023", "2022-2023"],
         },
-        {
-          "formation.niveau": {
-            $in: ["2"],
-          },
+        "formation.niveau": {
+          $in: ["2"],
         },
-      ]);
+      });
     });
 
     it("Gère tous les filtres en même temps", () => {
@@ -123,38 +101,26 @@ describe("Filtres Indicateurs", () => {
         formation_cfds: ["25021000"],
         formation_niveaux: ["2"],
       });
-      assert.deepStrictEqual(stages, [
-        {
-          annee_scolaire: {
-            $in: ["2023-2023", "2022-2023"],
-          },
+      assert.deepStrictEqual(stages, {
+        annee_scolaire: {
+          $in: ["2023-2023", "2022-2023"],
         },
-        {
-          "_computed.organisme.region": {
-            $in: ["25"],
-          },
+        "_computed.organisme.region": {
+          $in: ["25"],
         },
-        {
-          "_computed.organisme.departement": {
-            $in: ["56"],
-          },
+        "_computed.organisme.departement": {
+          $in: ["56"],
         },
-        {
-          "_computed.organisme.reseaux": {
-            $in: ["AGRI"],
-          },
+        "_computed.organisme.reseaux": {
+          $in: ["AGRI"],
         },
-        {
-          "formation.cfd": {
-            $in: ["25021000"],
-          },
+        "formation.cfd": {
+          $in: ["25021000"],
         },
-        {
-          "formation.niveau": {
-            $in: ["2"],
-          },
+        "formation.niveau": {
+          $in: ["2"],
         },
-      ]);
+      });
     });
   });
 });
