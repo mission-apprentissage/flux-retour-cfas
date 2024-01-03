@@ -1,18 +1,15 @@
 import { strict as assert } from "assert";
 
-import { buildMongoFilters, fullEffectifsFiltersConfigurations } from "@/common/actions/helpers/filters";
+import { buildEffectifMongoFilters } from "./effectifs-filters";
 
 const currentDate = new Date("2023-02-14T10:00:00Z");
 
 describe("Filtres Indicateurs", () => {
-  describe("buildMongoFilters()", () => {
+  describe("buildEffectifMongoFilters()", () => {
     it("Gère le filtre date uniquement", () => {
-      const stages = buildMongoFilters(
-        {
-          date: currentDate,
-        },
-        fullEffectifsFiltersConfigurations
-      );
+      const stages = buildEffectifMongoFilters({
+        date: currentDate,
+      });
       assert.deepStrictEqual(stages, [
         {
           annee_scolaire: {
@@ -23,13 +20,10 @@ describe("Filtres Indicateurs", () => {
     });
 
     it("Gère le filtre organisme_departements", () => {
-      const stages = buildMongoFilters(
-        {
-          date: currentDate,
-          organisme_departements: ["56"],
-        },
-        fullEffectifsFiltersConfigurations
-      );
+      const stages = buildEffectifMongoFilters({
+        date: currentDate,
+        organisme_departements: ["56"],
+      });
       assert.deepStrictEqual(stages, [
         {
           annee_scolaire: {
@@ -45,13 +39,10 @@ describe("Filtres Indicateurs", () => {
     });
 
     it("Gère le filtre organisme_regions", () => {
-      const stages = buildMongoFilters(
-        {
-          date: currentDate,
-          organisme_regions: ["25"],
-        },
-        fullEffectifsFiltersConfigurations
-      );
+      const stages = buildEffectifMongoFilters({
+        date: currentDate,
+        organisme_regions: ["25"],
+      });
       assert.deepStrictEqual(stages, [
         {
           annee_scolaire: {
@@ -67,13 +58,10 @@ describe("Filtres Indicateurs", () => {
     });
 
     it("Gère le filtre organisme_reseaux", () => {
-      const stages = buildMongoFilters(
-        {
-          date: currentDate,
-          organisme_reseaux: ["AGRI"],
-        },
-        fullEffectifsFiltersConfigurations
-      );
+      const stages = buildEffectifMongoFilters({
+        date: currentDate,
+        organisme_reseaux: ["AGRI"],
+      });
       assert.deepStrictEqual(stages, [
         {
           annee_scolaire: {
@@ -89,13 +77,10 @@ describe("Filtres Indicateurs", () => {
     });
 
     it("Gère le filtre formation_cfds", () => {
-      const stages = buildMongoFilters(
-        {
-          date: currentDate,
-          formation_cfds: ["25021000"],
-        },
-        fullEffectifsFiltersConfigurations
-      );
+      const stages = buildEffectifMongoFilters({
+        date: currentDate,
+        formation_cfds: ["25021000"],
+      });
       assert.deepStrictEqual(stages, [
         {
           annee_scolaire: {
@@ -111,13 +96,10 @@ describe("Filtres Indicateurs", () => {
     });
 
     it("Gère le filtre formation_niveaux", () => {
-      const stages = buildMongoFilters(
-        {
-          date: currentDate,
-          formation_niveaux: ["2"],
-        },
-        fullEffectifsFiltersConfigurations
-      );
+      const stages = buildEffectifMongoFilters({
+        date: currentDate,
+        formation_niveaux: ["2"],
+      });
       assert.deepStrictEqual(stages, [
         {
           annee_scolaire: {
@@ -133,17 +115,14 @@ describe("Filtres Indicateurs", () => {
     });
 
     it("Gère tous les filtres en même temps", () => {
-      const stages = buildMongoFilters(
-        {
-          date: currentDate,
-          organisme_regions: ["25"],
-          organisme_departements: ["56"],
-          organisme_reseaux: ["AGRI"],
-          formation_cfds: ["25021000"],
-          formation_niveaux: ["2"],
-        },
-        fullEffectifsFiltersConfigurations
-      );
+      const stages = buildEffectifMongoFilters({
+        date: currentDate,
+        organisme_regions: ["25"],
+        organisme_departements: ["56"],
+        organisme_reseaux: ["AGRI"],
+        formation_cfds: ["25021000"],
+        formation_niveaux: ["2"],
+      });
       assert.deepStrictEqual(stages, [
         {
           annee_scolaire: {

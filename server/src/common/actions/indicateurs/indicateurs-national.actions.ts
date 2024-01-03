@@ -5,9 +5,10 @@ import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { tryCachedExecution } from "@/common/utils/cacheUtils";
 
-import { OrganismesFilters, buildMongoFilters, organismesFiltersConfigurations } from "../helpers/filters";
+import { TerritoireFilters } from "../helpers/filters";
 
 import { getIndicateursEffectifsParDepartement } from "./indicateurs.actions";
+import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 const indicateursNationalCacheExpirationMs = 3600 * 1000; // 1 hour
 
@@ -41,13 +42,13 @@ interface IndicateursOrganismesNature {
   formateurs: number;
 }
 
-export async function getIndicateursOrganismesNature(filters: OrganismesFilters): Promise<IndicateursOrganismesNature> {
+export async function getIndicateursOrganismesNature(filters: TerritoireFilters): Promise<IndicateursOrganismesNature> {
   const indicateurs = (await organismesDb()
     .aggregate([
       {
         $match: {
+          ...buildOrganismeMongoFilters(filters),
           $and: [
-            ...buildMongoFilters(filters, organismesFiltersConfigurations),
             {
               fiabilisation_statut: "FIABLE",
               ferme: false,
