@@ -1,3 +1,4 @@
+import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
 import {
   ITeteDeReseauKey,
@@ -31,7 +32,7 @@ export async function getAcl(organisation: Organisation): Promise<Acl> {
 
       if (!userOrganisme) {
         logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
-        throw new Error("organisme de l'organisation non trouvé");
+        throw Boom.forbidden("organisme de l'organisation non trouvé");
       }
 
       const linkedOrganismesIds = [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)].map((o) =>

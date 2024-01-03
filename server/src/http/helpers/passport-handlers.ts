@@ -45,7 +45,6 @@ export const authMiddleware = () => {
             impersonating = true;
             user.organisation_id = new ObjectId(jwtPayload.impersonatedOrganisation._id);
           }
-
           const organisation =
             jwtPayload.impersonatedOrganisation ?? (await getOrganisationById(user.organisation_id as ObjectId));
 
@@ -61,9 +60,13 @@ export const authMiddleware = () => {
             account_status: user.account_status,
             invalided_token: user.invalided_token,
             has_accept_cgu_version: "",
-            username: "",
             impersonating,
             organisation,
+            last_connection: user.last_connection,
+            created_at: user.created_at,
+            fonction: user.fonction,
+            password_updated_at: user.password_updated_at,
+            telephone: user.telephone,
             acl,
           };
 
