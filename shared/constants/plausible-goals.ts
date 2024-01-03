@@ -25,6 +25,10 @@ export const plausibleGoals = [
   "clic_homepage_page_aide",
   "clic_homepage_envoi_message",
 
+  // Page SIFA
+  "clic_depot_plateforme_sifa",
+  "clic_toggle_sifa_données_manquantes",
+
   // Téléchargements
   // - Page indicateurs
   "telechargement_liste_sans_contrats",
@@ -38,8 +42,9 @@ export const plausibleGoals = [
   "telechargement_liste_of_a_fiabiliser",
   "telechargement_liste_of_fiables",
 
-  // Anciens goals
+  // - Page SIFA
   "telechargement_sifa",
+  "telechargement_fichier_instruction_sifa",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
