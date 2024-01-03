@@ -1,4 +1,5 @@
 import React from "react";
+import { Acl } from "shared";
 
 import { Organisation } from "./Organisation";
 
@@ -19,6 +20,8 @@ export interface AuthContext<IOrganisation = Organisation> {
 
   // only admins can impersonate organisations
   impersonating?: boolean;
+
+  acl: Acl;
 }
 
 // contexte côté UI

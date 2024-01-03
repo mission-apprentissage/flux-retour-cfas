@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { Acl } from "shared/constants/permissions";
 
 import { Organisation } from "@/common/model/organisations.model";
 
@@ -25,4 +26,6 @@ export interface AuthContext<IOrganisation = Organisation> {
 
   // only admins can impersonate organisations
   impersonating?: boolean;
+
+  acl: Acl;
 }
