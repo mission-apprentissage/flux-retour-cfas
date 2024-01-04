@@ -81,7 +81,7 @@ const DashboardTransverse = () => {
   const indicateursEffectifs = useIndicateursEffectifsParDepartement(filters, router.isReady);
 
   const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
-    useIndicateursOrganismesParDepartement();
+    useIndicateursOrganismesParDepartement(filters.date);
 
   const onDateChange = useCallback((date: Date) => {
     router.push(

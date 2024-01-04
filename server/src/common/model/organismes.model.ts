@@ -53,7 +53,8 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ ferme: 1 }, { name: "ferme" }],
   [{ est_dans_le_referentiel: 1 }, { name: "est_dans_le_referentiel" }],
   [{ effectifs_count: 1 }, { name: "effectifs_count" }],
-  [{ fiabilisation_statut: 1 }, { name: "fiabilisation_statut" }],
+  [{ fiabilisation_statut: 1, ferme: 1, "adresse.departement": 1 }, {}],
+  [{ fiabilisation_statut: 1, ferme: 1, first_transmission_date: 1, "adresse.departement": 1 }, {}],
   [{ nature: 1 }, { name: "nature" }],
   [
     { nom: "text", siret: "text", uai: "text" },

@@ -28,7 +28,6 @@ import {
   dateFiltersSchema,
   effectifsFiltersTerritoireSchema,
   fullEffectifsFiltersSchema,
-  territoireFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
@@ -645,7 +644,7 @@ function setupRoutes(app: Application) {
     .get(
       "/api/v1/indicateurs/organismes/par-departement",
       returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, territoireFiltersSchema);
+        const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
         return await getIndicateursOrganismesParDepartement(req.user, filters);
       })
     )
