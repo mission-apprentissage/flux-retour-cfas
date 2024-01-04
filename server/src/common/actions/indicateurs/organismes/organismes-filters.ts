@@ -41,7 +41,7 @@ export function buildOrganismePerimetreMongoFilters(perimetre: PermissionScope |
   }, {});
 }
 export function buildOrganismeMongoFilters(
-  filters: TerritoireFilters & DateFilters,
+  filters: TerritoireFilters & Partial<DateFilters>,
   perimetre: PermissionScope | boolean
 ): Filter<Organisme>[] {
   const perimetreFilter = buildOrganismePerimetreMongoFilters(perimetre);
