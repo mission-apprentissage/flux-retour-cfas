@@ -25,6 +25,7 @@ import {
 import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
+  dateFiltersSchema,
   effectifsFiltersTerritoireSchema,
   fullEffectifsFiltersSchema,
   territoireFiltersSchema,
@@ -617,7 +618,7 @@ function setupRoutes(app: Application) {
     .get(
       "/api/v1/indicateurs/effectifs/par-departement",
       returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
+        const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
         return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
       })
     )

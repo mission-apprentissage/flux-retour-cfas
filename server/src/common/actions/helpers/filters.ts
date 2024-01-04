@@ -24,10 +24,16 @@ export const territoireFiltersSchema = {
 
 export type TerritoireFilters = z.infer<z.ZodObject<typeof territoireFiltersSchema>>;
 
+export const dateFiltersSchema = {
+  date: z.preprocess((str: any) => new Date(str ?? Date.now()), z.date()),
+};
+
+export type DateFilters = z.infer<z.ZodObject<typeof dateFiltersSchema>>;
+
 // Filtre des effectifs par territoire
 export const effectifsFiltersTerritoireSchema = {
   ...territoireFiltersSchema,
-  date: z.preprocess((str: any) => new Date(str ?? Date.now()), z.date()),
+  ...dateFiltersSchema,
 };
 
 export type EffectifsFiltersTerritoire = z.infer<z.ZodObject<typeof effectifsFiltersTerritoireSchema>>;

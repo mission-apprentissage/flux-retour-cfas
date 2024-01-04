@@ -3,6 +3,7 @@ import { Acl, CODES_STATUT_APPRENANT } from "shared";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import {
+  DateFilters,
   EffectifsFiltersTerritoire,
   FullEffectifsFilters,
   TerritoireFilters,
@@ -24,7 +25,7 @@ import {
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 export async function getIndicateursEffectifsParDepartement(
-  filters: FullEffectifsFilters,
+  filters: DateFilters,
   acl: Acl
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
   const indicateurs = await effectifsDb()
