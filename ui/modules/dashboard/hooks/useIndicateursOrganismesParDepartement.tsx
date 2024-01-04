@@ -8,7 +8,7 @@ type UsePublicIndicateursCoverage = {
   isLoading: boolean;
 };
 
-export function usePublicIndicateursCoverage(): UsePublicIndicateursCoverage {
+export function useIndicateursOrganismesParDepartement(): UsePublicIndicateursCoverage {
   const { data, isLoading } = useQuery<IndicateursOrganismesAvecDepartement[]>(
     ["indicateurs/organismes/par-departement"],
     () => _get("/api/v1/indicateurs/organismes/par-departement")

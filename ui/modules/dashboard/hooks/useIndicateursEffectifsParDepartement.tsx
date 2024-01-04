@@ -11,7 +11,7 @@ type UsePublicIndicateurs = {
   national: IndicateursEffectifs;
 };
 
-export function usePublicIndicateursEffectifs(
+export function useIndicateursEffectifsParDepartement(
   effectifsFilters: Partial<EffectifsFilters> & Pick<EffectifsFilters, "date">,
   enabled: boolean
 ): UsePublicIndicateurs {

@@ -44,8 +44,8 @@ import {
 } from "../models/effectifs-filters";
 
 import CarteFrance from "./CarteFrance";
-import { usePublicIndicateursCoverage } from "./hooks/usePublicIndicateursCoverage";
-import { usePublicIndicateursEffectifs } from "./hooks/usePublicIndicateursEffectifs";
+import { useIndicateursEffectifsParDepartement } from "./hooks/useIndicateursEffectifsParDepartement";
+import { useIndicateursOrganismesParDepartement } from "./hooks/useIndicateursOrganismesParDepartement";
 import IndicateursGrid from "./IndicateursGrid";
 
 function getPerimetreDescription(organisation: Organisation | null): string {
@@ -116,8 +116,8 @@ const DashboardTransverse = () => {
     return filters;
   }, [router.query]);
 
-  const indicateursEffectifs = usePublicIndicateursEffectifs({ date: effectifsFilters.date }, router.isReady);
-  const indicateursEffectifsFiltres = usePublicIndicateursEffectifs(effectifsFilters, router.isReady);
+  const indicateursEffectifs = useIndicateursEffectifsParDepartement({ date: effectifsFilters.date }, router.isReady);
+  const indicateursEffectifsFiltres = useIndicateursEffectifsParDepartement(effectifsFilters, router.isReady);
 
   const indicateursEffectifsAvecDepartement = indicateursEffectifs.parDepartement;
   const indicateursEffectifsAvecDepartementLoading = indicateursEffectifs.isLoading;
@@ -126,7 +126,7 @@ const DashboardTransverse = () => {
   const indicateursEffectifsNationaux = indicateursEffectifsFiltres.national;
 
   const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
-    usePublicIndicateursCoverage();
+    useIndicateursOrganismesParDepartement();
 
   function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
     router.push(
