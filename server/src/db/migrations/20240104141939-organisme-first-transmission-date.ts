@@ -1,0 +1,9 @@
+import { addJob } from "@/jobs/jobs_actions";
+
+export const up = async () => {
+  await addJob({
+    name: "tmp:patches:update-firstTransmissionDate-organismes",
+    payload: null,
+    queued: true,
+  });
+};
