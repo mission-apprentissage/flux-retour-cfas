@@ -14,10 +14,12 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TETE_DE_RESEAUX_BY_ID } from "shared";
 
 import { _get } from "@/common/httpClient";
 import {
   getOrganisationLabel,
+  Organisation,
   OrganisationOperateurPublicAcademie,
   OrganisationOperateurPublicDepartement,
   OrganisationOperateurPublicRegion,
@@ -46,8 +48,44 @@ import { usePublicIndicateursCoverage } from "./hooks/usePublicIndicateursCovera
 import { usePublicIndicateursEffectifs } from "./hooks/usePublicIndicateursEffectifs";
 import IndicateursGrid from "./IndicateursGrid";
 
+function getPerimetreDescription(organisation: Organisation | null): string {
+  if (!organisation) {
+    return "";
+  }
+
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION": {
+      return "Votre périmètre correspond à votre organisme et vos organismes formateurs";
+    }
+
+    case "TETE_DE_RESEAU":
+      return `Votre périmètre correspond aux organismes du réseau ${TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}`;
+
+    case "DREETS":
+    case "DRAAF":
+    case "DRAFPIC":
+    case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
+      return `Votre périmètre correspond aux organismes de la région ${
+        REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region
+      }`;
+    case "DDETS":
+      return `Votre périmètre correspond aux organismes du département ${
+        DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement
+      }`;
+    case "ACADEMIE":
+      return `Votre périmètre correspond aux organismes de l'académie de ${
+        ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie
+      }`;
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
+    case "ADMINISTRATEUR":
+      return "Votre périmètre contient tous les organismes nationaux";
+  }
+}
+
 const DashboardTransverse = () => {
-  const { auth } = useAuth();
+  const { auth, organisation } = useAuth();
   const router = useRouter();
 
   const effectifsFilters = useMemo(() => {
@@ -125,20 +163,36 @@ const DashboardTransverse = () => {
       <Container maxW="xl" p="8">
         {auth.organisation.type === "ADMINISTRATEUR" && <DashboardAdministrateur />}
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
-          Aperçu des données de l’apprentissage
+          Aperçu des données de l’apprentissage de votre périmètre
+          <Tooltip
+            background="bluefrance"
+            color="white"
+            label={
+              <Box padding="1w">
+                <Text as="p">{getPerimetreDescription(organisation)}</Text>
+              </Box>
+            }
+            aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+          >
+            <Box
+              as="i"
+              className="ri-information-line"
+              fontSize="epsilon"
+              color="#465F9D"
+              verticalAlign="super"
+              fontWeight="700"
+            />
+          </Tooltip>
         </Heading>
         <Text fontSize={14} mt="8">
-          Ces chiffres reflètent partiellement les effectifs de l’apprentissage
-          <Text as="span" fontWeight="bold">
-            {auth.organisation.type === "TETE_DE_RESEAU" && " dans votre réseau"}
-          </Text>
-          &nbsp;: une partie des organismes de formation en apprentissage ne transmettent pas encore leurs données au
-          tableau de bord (voir carte “Taux de couverture” ci-dessous).
+          Ces chiffres reflètent partiellement les effectifs de l’apprentissage de votre périmètre &nbsp;: une partie
+          des organismes de formation en apprentissage ne transmettent pas encore leurs données au tableau de bord (voir
+          carte “Taux de couverture” ci-dessous).
         </Text>
         <Text fontSize={14} mt="4">
           Le <strong>{formatDateDayMonthYear(effectifsFilters.date)}</strong>, le tableau de bord de l’apprentissage
           recense <strong>{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</strong> dans votre
-          territoire, dont <strong>{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</strong>,{" "}
+          périmètre, dont <strong>{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</strong>,{" "}
           <strong>
             {formatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes en formation sans contrat
           </strong>{" "}
@@ -214,7 +268,7 @@ const DashboardTransverse = () => {
         <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(2, 1fr)" gap={4} my={8}>
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
-              Répartition des effectifs au national
+              Répartition des effectifs de votre périmètre
               <Tooltip
                 background="bluefrance"
                 color="white"
@@ -269,7 +323,7 @@ const DashboardTransverse = () => {
 
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
-              Taux de couverture des organismes
+              Taux de couverture des organismes de votre périmètre
               <Tooltip
                 background="bluefrance"
                 color="white"
