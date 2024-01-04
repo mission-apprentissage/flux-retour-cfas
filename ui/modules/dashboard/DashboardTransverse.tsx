@@ -13,17 +13,11 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TETE_DE_RESEAUX_BY_ID } from "shared";
 
 import { _get } from "@/common/httpClient";
-import {
-  getOrganisationLabel,
-  Organisation,
-  OrganisationOperateurPublicAcademie,
-  OrganisationOperateurPublicDepartement,
-  OrganisationOperateurPublicRegion,
-} from "@/common/internal/Organisation";
+import { getOrganisationLabel, Organisation } from "@/common/internal/Organisation";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { formatCivility, formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
@@ -32,16 +26,10 @@ import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
-import FiltreOrganismeTerritoire from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import DashboardAdministrateur from "../admin/DashboardAdministrateur";
-import {
-  convertEffectifsFiltersToQuery,
-  EffectifsFilters,
-  EffectifsFiltersQuery,
-  parseEffectifsFiltersFromQuery,
-} from "../models/effectifs-filters";
+import { convertDateFiltersToQuery, parseQueryFieldDate } from "../models/effectifs-filters";
 
 import CarteFrance from "./CarteFrance";
 import { useIndicateursEffectifsParDepartement } from "./hooks/useIndicateursEffectifsParDepartement";
@@ -88,56 +76,23 @@ const DashboardTransverse = () => {
   const { auth, organisation } = useAuth();
   const router = useRouter();
 
-  const effectifsFilters = useMemo(() => {
-    const filters = parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery);
+  const filters = useMemo(() => ({ date: parseQueryFieldDate(router.query.date) }), [router.query]);
 
-    // si aucun filtre, on positionne le filtre initial sur le territoire de l'utilisateur
-    if (router.asPath === "/") {
-      if (
-        (auth.organisation as OrganisationOperateurPublicRegion).code_region &&
-        filters.organisme_regions.length === 0
-      ) {
-        filters.organisme_regions = [(auth.organisation as OrganisationOperateurPublicRegion).code_region];
-      } else if (
-        (auth.organisation as OrganisationOperateurPublicDepartement).code_departement &&
-        filters.organisme_departements.length === 0
-      ) {
-        filters.organisme_departements = [
-          (auth.organisation as OrganisationOperateurPublicDepartement).code_departement,
-        ];
-      } else if (
-        (auth.organisation as OrganisationOperateurPublicAcademie).code_academie &&
-        filters.organisme_academies.length === 0
-      ) {
-        filters.organisme_academies = [(auth.organisation as OrganisationOperateurPublicAcademie).code_academie];
-      }
-    }
-
-    return filters;
-  }, [router.query]);
-
-  const indicateursEffectifs = useIndicateursEffectifsParDepartement({ date: effectifsFilters.date }, router.isReady);
-  const indicateursEffectifsFiltres = useIndicateursEffectifsParDepartement(effectifsFilters, router.isReady);
-
-  const indicateursEffectifsAvecDepartement = indicateursEffectifs.parDepartement;
-  const indicateursEffectifsAvecDepartementLoading = indicateursEffectifs.isLoading;
-
-  const indicateursEffectifsAvecDepartementFiltresLoading = indicateursEffectifsFiltres.isLoading;
-  const indicateursEffectifsNationaux = indicateursEffectifsFiltres.national;
+  const indicateursEffectifs = useIndicateursEffectifsParDepartement(filters, router.isReady);
 
   const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
     useIndicateursOrganismesParDepartement();
 
-  function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
+  const onDateChange = useCallback((date: Date) => {
     router.push(
       {
         pathname: router.pathname,
-        query: convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }) as any,
+        query: { date: convertDateFiltersToQuery(date) },
       },
       undefined,
       { shallow: true }
     );
-  }
+  }, []);
 
   return (
     <Box>
@@ -190,36 +145,19 @@ const DashboardTransverse = () => {
           carte “Taux de couverture” ci-dessous).
         </Text>
         <Text fontSize={14} mt="4">
-          Le <strong>{formatDateDayMonthYear(effectifsFilters.date)}</strong>, le tableau de bord de l’apprentissage
-          recense <strong>{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</strong> dans votre
-          périmètre, dont <strong>{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</strong>,{" "}
+          Le <strong>{formatDateDayMonthYear(filters.date)}</strong>, le tableau de bord de l’apprentissage recense{" "}
+          <strong>{formatNumber(indicateursEffectifs.total.apprenants)} apprenants</strong> dans votre périmètre, dont{" "}
+          <strong>{formatNumber(indicateursEffectifs.total.apprentis)} apprentis</strong>,{" "}
           <strong>
-            {formatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes en formation sans contrat
+            {formatNumber(indicateursEffectifs.total.inscritsSansContrat)} jeunes en formation sans contrat
           </strong>{" "}
-          et <strong>{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</strong>.
+          et <strong>{formatNumber(indicateursEffectifs.total.rupturants)} rupturants</strong>.
         </Text>
         <HStack mt={8}>
           <Box>Filtrer par</Box>
-          <FiltreOrganismeTerritoire
-            value={{
-              regions: effectifsFilters.organisme_regions,
-              departements: effectifsFilters.organisme_departements,
-              academies: effectifsFilters.organisme_academies,
-              bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
-            }}
-            onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
-            onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
-            onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
-            onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
-            button={({ isOpen, setIsOpen, buttonLabel }) => (
-              <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
-                {buttonLabel}
-              </SecondarySelectButton>
-            )}
-          />
           <FiltreDate
-            value={effectifsFilters.date}
-            onChange={(date) => updateState({ date })}
+            value={filters.date}
+            onChange={onDateChange}
             button={({ isOpen, setIsOpen, buttonLabel }) => (
               <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
                 {buttonLabel}
@@ -251,12 +189,7 @@ const DashboardTransverse = () => {
           </Tooltip>
         </HStack>
 
-        {indicateursEffectifsNationaux && (
-          <IndicateursGrid
-            indicateursEffectifs={indicateursEffectifsNationaux}
-            loading={indicateursEffectifsAvecDepartementFiltresLoading}
-          />
-        )}
+        <IndicateursGrid indicateursEffectifs={indicateursEffectifs.total} loading={indicateursEffectifs.isLoading} />
 
         <Link href="/indicateurs" color="action-high-blue-france" borderBottom="1px">
           Explorer plus d’indicateurs
@@ -293,14 +226,14 @@ const DashboardTransverse = () => {
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
 
-            {indicateursEffectifsAvecDepartementLoading && (
+            {indicateursEffectifs.isLoading && (
               <Center h="100%">
                 <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
               </Center>
             )}
-            {indicateursEffectifsAvecDepartement && (
+            {!indicateursEffectifs.isLoading && (
               <CarteFrance
-                donneesAvecDepartement={indicateursEffectifsAvecDepartement}
+                donneesAvecDepartement={indicateursEffectifs.parDepartement}
                 dataKey="apprenants"
                 minColor="#DDEBFB"
                 maxColor="#366EC1"

@@ -36,9 +36,13 @@ function parseQueryField(value: string | string[] | undefined): string[] {
   return value.split(",");
 }
 
+export function parseQueryFieldDate(value: string | string[] | undefined): Date {
+  return new Date(parseQueryField(value)[0] ?? Date.now());
+}
+
 export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): EffectifsFilters {
   return {
-    date: new Date(parseQueryField(query.date)[0] ?? Date.now()),
+    date: parseQueryFieldDate(query.date),
     organisme_regions: parseQueryField(query.organisme_regions),
     organisme_departements: parseQueryField(query.organisme_departements),
     organisme_academies: parseQueryField(query.organisme_academies),
@@ -53,11 +57,15 @@ export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): Ef
   };
 }
 
+export function convertDateFiltersToQuery(date: Date | undefined | null) {
+  return date?.toISOString();
+}
+
 export function convertEffectifsFiltersToQuery(
   effectifsFilters: Partial<EffectifsFilters>
 ): Partial<EffectifsFiltersQuery> {
   return stripEmptyFields({
-    date: effectifsFilters.date?.toISOString(),
+    date: convertDateFiltersToQuery(effectifsFilters.date),
     organisme_regions: effectifsFilters.organisme_regions?.join(","),
     organisme_departements: effectifsFilters.organisme_departements?.join(","),
     organisme_academies: effectifsFilters.organisme_academies?.join(","),

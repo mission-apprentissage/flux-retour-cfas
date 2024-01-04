@@ -5,16 +5,16 @@ import { _get } from "@/common/httpClient";
 import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs, IndicateursEffectifsAvecDepartement } from "@/modules/models/indicateurs";
 
-type UsePublicIndicateurs = {
+type UseIndicateursEffectifsParDepartement = {
   isLoading: boolean;
   parDepartement: IndicateursEffectifsAvecDepartement[];
-  national: IndicateursEffectifs;
+  total: IndicateursEffectifs;
 };
 
 export function useIndicateursEffectifsParDepartement(
   effectifsFilters: Partial<EffectifsFilters> & Pick<EffectifsFilters, "date">,
   enabled: boolean
-): UsePublicIndicateurs {
+): UseIndicateursEffectifsParDepartement {
   const { date, ...rest } = effectifsFilters;
   const { data, isLoading } = useQuery<IndicateursEffectifsAvecDepartement[]>(
     ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString(), rest })],
@@ -25,7 +25,7 @@ export function useIndicateursEffectifsParDepartement(
     { enabled }
   );
 
-  const national = useMemo(
+  const total = useMemo(
     () =>
       (data ?? []).reduce(
         (acc, indicateursDepartement) => {
@@ -50,6 +50,6 @@ export function useIndicateursEffectifsParDepartement(
   return {
     isLoading,
     parDepartement: data ?? [],
-    national,
+    total,
   };
 }
