@@ -29,7 +29,6 @@ import {
   fullEffectifsFiltersSchema,
   territoireFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { getPermissionOrganisationContext } from "@/common/actions/helpers/permissions-organisation";
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import {
   getIndicateursNational,
@@ -619,7 +618,7 @@ function setupRoutes(app: Application) {
       "/api/v1/indicateurs/effectifs/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
-        return await getIndicateursEffectifsParDepartement(req.user, filters);
+        return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
       })
     )
     .get(
@@ -634,8 +633,8 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
         const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-        const permissions = await getPermissionOrganisationContext(req.user, "TéléchargementListesNominatives");
-        if (!permissions || (permissions instanceof Array && !permissions.includes(type))) {
+        const permissions = req.user.acl.effectifsNominatifs[type];
+        if (permissions === false) {
           throw Boom.forbidden("Permissions invalides");
         }
 
@@ -734,7 +733,7 @@ function setupRoutes(app: Application) {
       .get(
         "/organismes",
         returnResult(async (req) => {
-          return await listOrganisationOrganismes(req.user);
+          return await listOrganisationOrganismes(req.user.acl);
         })
       )
       .get(

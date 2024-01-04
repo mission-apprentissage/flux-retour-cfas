@@ -1,16 +1,13 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
-import { startOfDay, subMonths } from "date-fns";
-import { ObjectId, WithId } from "mongodb";
+import { WithId } from "mongodb";
 import { PermissionsOrganisme } from "shared/constants/permissions";
 
 import { IndicateursEffectifsAvecFormation } from "@/common/actions/indicateurs/indicateurs";
 import { Organisme } from "@/common/model/@types";
 import { Rncp } from "@/common/model/@types/Rncp";
 import { effectifsDb, organisationsDb, organismesDb, rncpDb, usersMigrationDb } from "@/common/model/collections";
-import { MapObjectIdToString } from "@/common/utils/mongoUtils";
-import { getCurrentTime } from "@/common/utils/timeUtils";
 import {
   historySequenceApprenti,
   historySequenceApprentiToAbandon,
@@ -25,7 +22,9 @@ import {
   commonEffectifsAttributes,
   organismes,
   testPermissions,
-  userOrganisme,
+  organismesByLabel,
+  organismeCibleId,
+  profilsPermissionByLabel,
 } from "@tests/utils/permissions";
 import {
   RequestAsOrganisationFunc,
@@ -111,7 +110,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     indicateursEffectifs: false,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
-    viewContacts: true,
+    viewContacts: false,
     configurerModeTransmission: false,
   },
   "DRAFPIC régional même région": {
@@ -127,7 +126,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     indicateursEffectifs: false,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
-    viewContacts: true,
+    viewContacts: false,
     configurerModeTransmission: false,
   },
   "DRAAF même région": {
@@ -143,7 +142,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     indicateursEffectifs: false,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
-    viewContacts: true,
+    viewContacts: false,
     configurerModeTransmission: false,
   },
   "Conseil Régional même région": {
@@ -159,7 +158,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     indicateursEffectifs: false,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
-    viewContacts: true,
+    viewContacts: false,
     configurerModeTransmission: false,
   },
   "CARIF OREF régional même région": {
@@ -175,7 +174,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     indicateursEffectifs: false,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
-    viewContacts: true,
+    viewContacts: false,
     configurerModeTransmission: false,
   },
   "DDETS même département": {
@@ -191,7 +190,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     indicateursEffectifs: false,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
-    viewContacts: true,
+    viewContacts: false,
     configurerModeTransmission: false,
   },
   "Académie même académie": {
@@ -207,7 +206,7 @@ const permissionsByOrganisation: PermissionsTestConfig<PermissionsOrganisme> = {
     indicateursEffectifs: false,
     infoTransmissionEffectifs: true,
     manageEffectifs: false,
-    viewContacts: true,
+    viewContacts: false,
     configurerModeTransmission: false,
   },
   "Opérateur public national": {
@@ -255,142 +254,88 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      const commonExpectedOrganismeAttributes: Partial<MapObjectIdToString<WithId<Organisme>>> = {
-        _id: id(1),
-        adresse: {
-          departement: "56", // morbihan
-          region: "53", // bretagne
-          academie: "14", // rennes
-          bassinEmploi: "5315", // rennes
-        },
-        reseaux: ["CCI"],
-        nature: "responsable_formateur",
-        raison_sociale: "ADEN Formations (Caen)",
-        fiabilisation_statut: "FIABLE",
-        ferme: false,
-        uai: "0000000A",
-        siret: "00000000000018",
-        organismesFormateurs: [
-          {
-            _id: id(2),
-          },
-        ],
-        organismesResponsables: [
-          {
-            _id: id(3),
-          },
-        ],
-      };
+      const publicKeys: (keyof WithId<Organisme>)[] = [
+        "_id",
+        "siret",
+        "uai",
+        "ferme",
+        "nature",
+        "qualiopi",
+        "prepa_apprentissage",
+        "enseigne",
+        "raison_sociale",
+        "reseaux",
+        "adresse",
+        "organismesResponsables",
+        "organismesFormateurs",
+        "fiabilisation_statut",
+      ];
+      const infoTransmissionEffectifsKeys: (keyof WithId<Organisme>)[] = [
+        ...publicKeys,
+        "erps",
+        "erp_unsupported",
+        "first_transmission_date",
+        "last_transmission_date",
+        "mode_de_transmission",
+        "mode_de_transmission_configuration_date",
+        "mode_de_transmission_configuration_author_fullname",
+      ];
+      const manageEffectifsKeys: (keyof WithId<Organisme>)[] = [
+        ...infoTransmissionEffectifsKeys,
+        "api_key",
+        "api_configuration_date",
+        "api_siret",
+        "api_uai",
+      ];
 
-      const infoTransmissionEffectifsAttributes = {
-        erps: ["YMAG"],
-        last_transmission_date: startOfDay(subMonths(new Date(), 1)).toISOString(),
-      };
-
-      // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
-      testPermissions<any, "Tête de réseau Responsable">(
+      testPermissions<(keyof WithId<Organisme>)[]>(
         {
-          "OF cible": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "OF responsable": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "OF formateur": {
-            ...commonExpectedOrganismeAttributes,
-          },
-          "OF non lié": {
-            ...commonExpectedOrganismeAttributes,
-          },
-          "Tête de réseau même réseau": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          // "Tête de réseau Responsable": {
-          //   ...commonExpectedOrganismeAttributes,
-          //   ...infoTransmissionEffectifsAttributes,
-          // },
-          "Tête de réseau autre réseau": {
-            ...commonExpectedOrganismeAttributes,
-          },
-          "DREETS même région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "DREETS autre région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "DRAFPIC régional même région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "DRAFPIC régional autre région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "DRAAF même région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "DRAAF autre région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "Conseil Régional même région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "Conseil Régional autre région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "CARIF OREF régional même région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "CARIF OREF régional autre région": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "DDETS même département": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "DDETS autre département": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "Académie même académie": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "Académie autre académie": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "Opérateur public national": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          "CARIF OREF national": {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
-          Administrateur: {
-            ...commonExpectedOrganismeAttributes,
-            ...infoTransmissionEffectifsAttributes,
-          },
+          "OF cible": manageEffectifsKeys,
+          "OF responsable": manageEffectifsKeys,
+          "OF formateur": publicKeys,
+          "OF non lié": publicKeys,
+          "Tête de réseau même réseau": infoTransmissionEffectifsKeys,
+          "Tête de réseau Responsable": manageEffectifsKeys,
+          "Tête de réseau autre réseau": publicKeys,
+          "DREETS même région": infoTransmissionEffectifsKeys,
+          "DREETS autre région": infoTransmissionEffectifsKeys,
+          "DRAFPIC régional même région": infoTransmissionEffectifsKeys,
+          "DRAFPIC régional autre région": infoTransmissionEffectifsKeys,
+          "DRAAF même région": infoTransmissionEffectifsKeys,
+          "DRAAF autre région": infoTransmissionEffectifsKeys,
+          "Conseil Régional même région": infoTransmissionEffectifsKeys,
+          "Conseil Régional autre région": infoTransmissionEffectifsKeys,
+          "CARIF OREF régional même région": infoTransmissionEffectifsKeys,
+          "CARIF OREF régional autre région": infoTransmissionEffectifsKeys,
+          "DDETS même département": infoTransmissionEffectifsKeys,
+          "DDETS autre département": infoTransmissionEffectifsKeys,
+          "Académie même académie": infoTransmissionEffectifsKeys,
+          "Académie autre académie": infoTransmissionEffectifsKeys,
+          "Opérateur public national": infoTransmissionEffectifsKeys,
+          "CARIF OREF national": infoTransmissionEffectifsKeys,
+          Administrateur: manageEffectifsKeys,
         },
-        async (organisation, expectedBody, organisationLabel) => {
-          const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}`);
-          expect(response.status).toStrictEqual(200);
-          expect(response.data).toStrictEqual({
-            ...expectedBody,
-            permissions: permissionsByOrganisation[organisationLabel as string],
-          });
+        async (organisation, keys, organisationLabel) => {
+          const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${organismeCibleId}`);
+          if (keys.length === 0) {
+            expect(response.status).toStrictEqual(403);
+          } else {
+            expect(response.status).toStrictEqual(200);
+            const expected = keys.reduce(
+              (acc, key) => {
+                if (organismesByLabel["OF cible"][key] !== undefined) {
+                  acc[key] = organismesByLabel["OF cible"][key];
+                }
+
+                return acc;
+              },
+              {
+                permissions: permissionsByOrganisation[organisationLabel as string],
+              }
+            );
+
+            expect(response.data).toEqual(JSON.parse(JSON.stringify(expected)));
+          }
         }
       );
     });
@@ -399,13 +344,7 @@ describe("Routes /organismes/:id", () => {
   describe("GET /organismes/:id/contacts - liste des contacts d'un organisme", () => {
     beforeEach(async () => {
       await Promise.all([
-        organisationsDb().insertOne({
-          _id: new ObjectId(id(1)),
-          type: "ORGANISME_FORMATION",
-          uai: userOrganisme.uai as string,
-          siret: userOrganisme.siret,
-          created_at: getCurrentTime(),
-        }),
+        organisationsDb().insertMany(Object.values(profilsPermissionByLabel)),
         usersMigrationDb().insertMany([
           {
             account_status: "CONFIRMED",
@@ -422,7 +361,7 @@ describe("Routes /organismes/:id", () => {
             telephone: "0102030405",
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
-            organisation_id: new ObjectId(id(1)),
+            organisation_id: profilsPermissionByLabel["OF cible"]._id,
           },
           {
             account_status: "CONFIRMED",
@@ -439,7 +378,7 @@ describe("Routes /organismes/:id", () => {
             telephone: "0102030406",
             password: testPasswordHash,
             has_accept_cgu_version: "v0.1",
-            organisation_id: new ObjectId(id(1)),
+            organisation_id: profilsPermissionByLabel["OF cible"]._id,
           },
         ]),
       ]);
@@ -452,36 +391,39 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
-      testPermissions<boolean, "Tête de réseau Responsable">(
+      testPermissions<boolean>(
         {
           "OF cible": true,
           "OF responsable": true,
           "OF formateur": false,
           "OF non lié": false,
           "Tête de réseau même réseau": true,
-          // "Tête de réseau Responsable": true,
+          "Tête de réseau Responsable": true,
           "Tête de réseau autre réseau": false,
           "DREETS même région": true,
-          "DREETS autre région": true,
+          "DREETS autre région": false,
           "DRAFPIC régional même région": true,
-          "DRAFPIC régional autre région": true,
+          "DRAFPIC régional autre région": false,
           "DRAAF même région": true,
-          "DRAAF autre région": true,
+          "DRAAF autre région": false,
           "Conseil Régional même région": true,
-          "Conseil Régional autre région": true,
+          "Conseil Régional autre région": false,
           "CARIF OREF régional même région": true,
-          "CARIF OREF régional autre région": true,
+          "CARIF OREF régional autre région": false,
           "DDETS même département": true,
-          "DDETS autre département": true,
+          "DDETS autre département": false,
           "Académie même académie": true,
-          "Académie autre académie": true,
+          "Académie autre académie": false,
           "Opérateur public national": true,
           "CARIF OREF national": true,
           Administrateur: true,
         },
         async (organisation, allowed, organisationLabel) => {
-          const response = await requestAsOrganisation(organisation, "get", `/api/v1/organismes/${id(1)}/contacts`);
+          const response = await requestAsOrganisation(
+            organisation,
+            "get",
+            `/api/v1/organismes/${organismeCibleId}/contacts`
+          );
           if (allowed) {
             expect(response.status).toStrictEqual(200);
             expect(response.data).toStrictEqual([

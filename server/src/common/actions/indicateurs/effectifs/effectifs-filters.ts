@@ -1,6 +1,7 @@
+import Boom from "boom";
 import { subYears } from "date-fns";
-import { Filter } from "mongodb";
-import { assertUnreachable, entries, getAnneesScolaireListFromDate } from "shared";
+import { Filter, ObjectId } from "mongodb";
+import { PermissionScope, assertUnreachable, entries, getAnneesScolaireListFromDate } from "shared";
 
 import { SIRET_REGEX } from "@/common/constants/validations";
 import { Effectif } from "@/common/model/@types";
@@ -30,8 +31,47 @@ function buildOrganismeSearchCondition(value: string) {
   return [{ "_computed.organisme.nom": new RegExp(escapeRegExp(value)) }]; // TODO probablement ajouter un champ nom (enseigne + raison_sociale) de l'organisme
 }
 
-export function buildEffectifMongoFilters(filters: FullEffectifsFilters): Filter<Effectif> {
-  return entries(filters).reduce((acc: Filter<Effectif>, [key, value]) => {
+export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | boolean): Filter<Effectif> {
+  if (perimetre === false) {
+    throw Boom.forbidden("Accés refusé");
+  }
+
+  if (perimetre === true) {
+    return {};
+  }
+
+  return entries(perimetre).reduce((acc: Filter<Effectif>, [key, value]) => {
+    switch (key) {
+      case "id":
+        acc["organisme_id"] = { $in: value.$in.map((v) => new ObjectId(v)) };
+        break;
+      case "region":
+        acc["_computed.organisme.region"] = value;
+        break;
+      case "departement":
+        acc["_computed.organisme.departement"] = value;
+        break;
+      case "academie":
+        acc["_computed.organisme.academie"] = value;
+        break;
+      case "reseau":
+        acc["_computed.organisme.reseaux"] = value;
+        break;
+      default:
+        assertUnreachable(key);
+    }
+
+    return acc;
+  }, {});
+}
+
+export function buildEffectifMongoFilters(
+  filters: FullEffectifsFilters,
+  perimetre: PermissionScope | boolean
+): Filter<Effectif>[] {
+  const perimetreFilter = buildEffectifPerimetreMongoFilters(perimetre);
+
+  const requestedFilter = entries(filters).reduce((acc: Filter<Effectif>, [key, value]) => {
     switch (key) {
       case "date":
         acc["annee_scolaire"] = { $in: getAnneesScolaireListFromDate(value) };
@@ -83,4 +123,6 @@ export function buildEffectifMongoFilters(filters: FullEffectifsFilters): Filter
 
     return acc;
   }, {});
+
+  return [requestedFilter, perimetreFilter];
 }

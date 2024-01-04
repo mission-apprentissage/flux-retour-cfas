@@ -1,3 +1,4 @@
+import { Filter, RootFilterOperators } from "mongodb";
 import { z } from "zod";
 
 export const organismeLookup = {
@@ -63,3 +64,13 @@ export const fullEffectifsFiltersSchema = {
 };
 
 export type FullEffectifsFilters = z.infer<z.ZodObject<typeof fullEffectifsFiltersSchema>>;
+
+export function combineFilters<T>(...filters: Filter<T>[]): RootFilterOperators<T> {
+  const nonEmptyFilters = filters.filter((f) => Object.keys(f).length > 0);
+
+  if (nonEmptyFilters.length === 0) return {};
+
+  return {
+    $and: nonEmptyFilters,
+  };
+}

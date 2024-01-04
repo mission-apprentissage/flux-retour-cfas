@@ -139,7 +139,7 @@ it("End to end - imposture d'organisation", async () => {
 
   // vérifie que l'organisation a changé
   response = await httpClient.get("/api/v1/session", { headers: { cookie } });
-  expect(response.data).toStrictEqual({
+  expect(response.data).toMatchObject({
     _id: expect.any(String),
     account_status: "CONFIRMED",
     civility: "Madame",
@@ -189,7 +189,11 @@ it("End to end - imposture d'organisation", async () => {
       },
       infoTransmissionEffectifs: true,
       manageEffectifs: false,
-      viewContacts: true,
+      viewContacts: {
+        region: {
+          $in: ["53"],
+        },
+      },
     },
   });
 
@@ -200,7 +204,7 @@ it("End to end - imposture d'organisation", async () => {
   // vérifie que l'organisation est revenue à la normale
   response = await httpClient.get("/api/v1/session", { headers: { cookie } });
   expect(response.status).toStrictEqual(200);
-  expect(response.data).toStrictEqual({
+  expect(response.data).toMatchObject({
     _id: expect.any(String),
     account_status: "CONFIRMED",
     civility: "Madame",
