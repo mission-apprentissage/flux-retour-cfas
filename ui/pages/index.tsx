@@ -26,7 +26,7 @@ import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDate } from "@/common/utils/dateUtils";
-import { formatNumber } from "@/common/utils/stringUtils";
+import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
@@ -434,7 +434,7 @@ function SectionApercuChiffresCles() {
               </Box>
               <Box>
                 <Text fontSize="40px" fontWeight="700" color="bluefrance">
-                  {formatNumber(organismes?.total)}
+                  {formatNumber(organismes?.total.totalOrganismes.total)}
                 </Text>
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                   organismes de formation en apprentissage
@@ -501,7 +501,7 @@ function SectionApercuChiffresCles() {
                 >
                   Soit&nbsp;
                   <Text as="b" fontSize="zeta">
-                    {organismes?.total.tauxCouverture.total}%
+                    {prettyFormatNumber(organismes?.total.tauxCouverture.total ?? 0)}%
                   </Text>
                   &nbsp;des établissements
                 </Tag>

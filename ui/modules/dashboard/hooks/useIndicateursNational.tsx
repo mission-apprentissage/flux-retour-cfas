@@ -37,6 +37,11 @@ type ApiResult = {
   indicateursOrganismes: IndicateursOrganismesAvecDepartement[];
 };
 
+function getTauxCouverture(transmetteurs: number, total: number): number {
+  if (total === 0) return 100;
+  return (transmetteurs / total) * 100;
+}
+
 export function useIndicateurNational(
   effectifsFilters: Partial<TerritoireFilters>,
   enabled: boolean
@@ -89,21 +94,21 @@ export function useIndicateurNational(
           acc.totalOrganismes.responsables += indicateursDepartement.totalOrganismes.responsables;
           acc.totalOrganismes.responsablesFormateurs += indicateursDepartement.totalOrganismes.responsablesFormateurs;
           acc.totalOrganismes.formateurs += indicateursDepartement.totalOrganismes.formateurs;
-          acc.totalOrganismes.inconnue += indicateursDepartement.totalOrganismes.inconnue;
+          acc.totalOrganismes.inconnues += indicateursDepartement.totalOrganismes.inconnues;
 
           acc.organismesTransmetteurs.total += indicateursDepartement.organismesTransmetteurs.total;
           acc.organismesTransmetteurs.responsables += indicateursDepartement.organismesTransmetteurs.responsables;
           acc.organismesTransmetteurs.responsablesFormateurs +=
             indicateursDepartement.organismesTransmetteurs.responsablesFormateurs;
           acc.organismesTransmetteurs.formateurs += indicateursDepartement.organismesTransmetteurs.formateurs;
-          acc.organismesTransmetteurs.inconnue += indicateursDepartement.organismesTransmetteurs.inconnue;
+          acc.organismesTransmetteurs.inconnues += indicateursDepartement.organismesTransmetteurs.inconnues;
 
           acc.organismesNonTransmetteurs.total += indicateursDepartement.organismesNonTransmetteurs.total;
           acc.organismesNonTransmetteurs.responsables += indicateursDepartement.organismesNonTransmetteurs.responsables;
           acc.organismesNonTransmetteurs.responsablesFormateurs +=
             indicateursDepartement.organismesNonTransmetteurs.responsablesFormateurs;
           acc.organismesNonTransmetteurs.formateurs += indicateursDepartement.organismesNonTransmetteurs.formateurs;
-          acc.organismesNonTransmetteurs.inconnue += indicateursDepartement.organismesNonTransmetteurs.inconnue;
+          acc.organismesNonTransmetteurs.inconnues += indicateursDepartement.organismesNonTransmetteurs.inconnues;
 
           return acc;
         },
@@ -113,44 +118,53 @@ export function useIndicateurNational(
             responsables: 0,
             responsablesFormateurs: 0,
             formateurs: 0,
-            inconnue: 0,
+            inconnues: 0,
           },
           totalOrganismes: {
             total: 0,
             responsables: 0,
             responsablesFormateurs: 0,
             formateurs: 0,
-            inconnue: 0,
+            inconnues: 0,
           },
           organismesTransmetteurs: {
             total: 0,
             responsables: 0,
             responsablesFormateurs: 0,
             formateurs: 0,
-            inconnue: 0,
+            inconnues: 0,
           },
           organismesNonTransmetteurs: {
             total: 0,
             responsables: 0,
             responsablesFormateurs: 0,
             formateurs: 0,
-            inconnue: 0,
+            inconnues: 0,
           },
         }
       ),
     };
 
-    data.total.tauxCouverture.total =
-      (data.total.organismesTransmetteurs.total / data.total.totalOrganismes.total) * 100;
-    data.total.tauxCouverture.responsables =
-      (data.total.organismesTransmetteurs.responsables / data.total.totalOrganismes.responsables) * 100;
-    data.total.tauxCouverture.responsablesFormateurs =
-      (data.total.organismesTransmetteurs.responsablesFormateurs / data.total.totalOrganismes.responsablesFormateurs) *
-      100;
-    data.total.tauxCouverture.formateurs =
-      (data.total.organismesTransmetteurs.formateurs / data.total.totalOrganismes.formateurs) * 100;
-    data.total.tauxCouverture.inconnue =
-      (data.total.organismesTransmetteurs.inconnue / data.total.totalOrganismes.inconnue) * 100;
+    data.total.tauxCouverture.total = getTauxCouverture(
+      data.total.organismesTransmetteurs.total,
+      data.total.totalOrganismes.total
+    );
+    data.total.tauxCouverture.responsables = getTauxCouverture(
+      data.total.organismesTransmetteurs.responsables,
+      data.total.totalOrganismes.responsables
+    );
+    data.total.tauxCouverture.responsablesFormateurs = getTauxCouverture(
+      data.total.organismesTransmetteurs.responsablesFormateurs,
+      data.total.totalOrganismes.responsablesFormateurs
+    );
+    data.total.tauxCouverture.formateurs = getTauxCouverture(
+      data.total.organismesTransmetteurs.formateurs,
+      data.total.totalOrganismes.formateurs
+    );
+    data.total.tauxCouverture.inconnues = getTauxCouverture(
+      data.total.organismesTransmetteurs.inconnues,
+      data.total.totalOrganismes.inconnues
+    );
 
     return data;
   }, [isSuccess, effectifParDepartement]);
