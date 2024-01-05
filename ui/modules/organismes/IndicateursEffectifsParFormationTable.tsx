@@ -20,12 +20,12 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useMemo, useState } from "react";
+import { IndicateursEffectifsAvecFormation } from "shared";
 
 import { _get } from "@/common/httpClient";
 
 import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
 import { niveauFormationByNiveau } from "../indicateurs/filters/FiltreFormationNiveau";
-import { IndicateursEffectifsAvecFormation } from "../models/indicateurs";
 
 interface CustomColumnDef {
   accessorKey: string;
@@ -119,11 +119,11 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
   const niveauxAvecFormations = useMemo(() => {
     return Object.values(
       props.formations.reduce<{ [key: string]: NiveauAvecFormations }>((acc, formation) => {
-        let formationsNiveau = acc[formation.rncp?.niveau];
+        let formationsNiveau = acc[formation.rncp?.niveau ?? ""];
         if (!formationsNiveau) {
-          formationsNiveau = acc[formation.rncp?.niveau] = {
-            niveau: formation.rncp?.niveau,
-            label: niveauFormationByNiveau[formation.rncp?.niveau] ?? "Sans niveau",
+          formationsNiveau = acc[formation.rncp?.niveau ?? ""] = {
+            niveau: `${formation.rncp?.niveau ?? ""}`,
+            label: niveauFormationByNiveau[formation.rncp?.niveau ?? ""] ?? "Sans niveau",
             formations: [],
           };
         }
