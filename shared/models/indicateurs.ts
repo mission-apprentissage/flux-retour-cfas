@@ -24,10 +24,34 @@ export type IndicateursEffectifsAvecFormation = IndicateursEffectifs & {
 };
 
 export interface IndicateursOrganismes {
-  tauxCouverture: number;
-  totalOrganismes: number;
-  organismesTransmetteurs: number;
-  organismesNonTransmetteurs: number;
+  tauxCouverture: {
+    total: number;
+    responsables: number;
+    responsablesFormateurs: number;
+    formateurs: number;
+    inconnue: number;
+  };
+  totalOrganismes: {
+    total: number;
+    responsables: number;
+    responsablesFormateurs: number;
+    formateurs: number;
+    inconnue: number;
+  };
+  organismesTransmetteurs: {
+    total: number;
+    responsables: number;
+    responsablesFormateurs: number;
+    formateurs: number;
+    inconnue: number;
+  };
+  organismesNonTransmetteurs: {
+    total: number;
+    responsables: number;
+    responsablesFormateurs: number;
+    formateurs: number;
+    inconnue: number;
+  };
 }
 
 export type IndicateursOrganismesAvecDepartement = IndicateursOrganismes & { departement: string };

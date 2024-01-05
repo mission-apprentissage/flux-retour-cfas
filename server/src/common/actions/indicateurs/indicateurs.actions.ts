@@ -15,6 +15,7 @@ import {
   DateFilters,
   EffectifsFiltersTerritoire,
   FullEffectifsFilters,
+  TerritoireFilters,
   combineFilters,
 } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
@@ -134,13 +135,13 @@ export async function getIndicateursEffectifsParDepartement(
 }
 
 export async function getIndicateursOrganismesParDepartement(
-  ctx: AuthContext,
-  filters: DateFilters
+  filters: DateFilters & TerritoireFilters,
+  acl: Acl
 ): Promise<IndicateursOrganismesAvecDepartement[]> {
   const indicateurs = (await organismesDb()
     .aggregate([
       {
-        $match: combineFilters(...buildOrganismeMongoFilters(filters, ctx.acl.infoTransmissionEffectifs), {
+        $match: combineFilters(...buildOrganismeMongoFilters(filters, acl.infoTransmissionEffectifs), {
           fiabilisation_statut: "FIABLE",
           ferme: false,
         }),
@@ -148,24 +149,126 @@ export async function getIndicateursOrganismesParDepartement(
       {
         $group: {
           _id: "$adresse.departement",
+          organismes: {
+            $sum: 1,
+          },
+          responsables: {
+            $sum: {
+              $cond: {
+                if: {
+                  $eq: ["$nature", "responsable"],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+          responsablesFormateurs: {
+            $sum: {
+              $cond: {
+                if: {
+                  $eq: ["$nature", "responsable_formateur"],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+          formateurs: {
+            $sum: {
+              $cond: {
+                if: {
+                  $eq: ["$nature", "formateur"],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
           organismesTransmetteurs: {
             $sum: {
               $cond: {
                 if: {
-                  $eq: [
+                  $ne: [
                     null,
                     {
                       $ifNull: ["$first_transmission_date", null],
                     },
                   ],
                 },
-                then: 0,
-                else: 1,
+                then: 1,
+                else: 0,
               },
             },
           },
-          totalOrganismes: {
-            $sum: 1,
+          responsableTransmetteurs: {
+            $sum: {
+              $cond: {
+                if: {
+                  $and: [
+                    {
+                      $ne: [
+                        null,
+                        {
+                          $ifNull: ["$first_transmission_date", null],
+                        },
+                      ],
+                    },
+                    {
+                      $eq: ["$nature", "responsable"],
+                    },
+                  ],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+          responsablesFormateursTransmetteurs: {
+            $sum: {
+              $cond: {
+                if: {
+                  $and: [
+                    {
+                      $ne: [
+                        null,
+                        {
+                          $ifNull: ["$first_transmission_date", null],
+                        },
+                      ],
+                    },
+                    {
+                      $eq: ["$nature", "responsable_formateur"],
+                    },
+                  ],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+          formateursTransmetteurs: {
+            $sum: {
+              $cond: {
+                if: {
+                  $and: [
+                    {
+                      $ne: [
+                        null,
+                        {
+                          $ifNull: ["$first_transmission_date", null],
+                        },
+                      ],
+                    },
+                    {
+                      $eq: ["$nature", "formateur"],
+                    },
+                  ],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
           },
         },
       },
@@ -173,20 +276,153 @@ export async function getIndicateursOrganismesParDepartement(
         $project: {
           _id: 0,
           departement: "$_id",
-          tauxCouverture: {
-            $multiply: [
-              100,
-              {
-                $divide: ["$organismesTransmetteurs", "$totalOrganismes"],
-              },
-            ],
+          totalOrganismes: {
+            total: "$organismes",
+            responsables: "$responsables",
+            responsablesFormateurs: "$responsablesFormateurs",
+            formateurs: "$formateurs",
+            inconnues: {
+              $subtract: [
+                "$organismes",
+                {
+                  $add: ["$responsables", "$responsablesFormateurs", "$formateurs"],
+                },
+              ],
+            },
           },
-          totalOrganismes: 1,
-          organismesTransmetteurs: 1,
-          organismesNonTransmetteurs: {
-            $subtract: ["$totalOrganismes", "$organismesTransmetteurs"],
+          organismesTransmetteurs: {
+            total: "$organismesTransmetteurs",
+            responsables: "$responsableTransmetteurs",
+            responsablesFormateurs: "$responsablesFormateursTransmetteurs",
+            formateurs: "$formateursTransmetteurs",
+            inconnues: {
+              $subtract: [
+                "$organismesTransmetteurs",
+                {
+                  $add: [
+                    "$responsableTransmetteurs",
+                    "$responsablesFormateursTransmetteurs",
+                    "$formateursTransmetteurs",
+                  ],
+                },
+              ],
+            },
           },
         },
+      },
+      {
+        $addFields:
+          /**
+           * newField: The new field name.
+           * expression: The new field expression.
+           */
+          {
+            tauxCouverture: {
+              total: {
+                $cond: {
+                  if: {
+                    $gte: [0, "$totalOrganismes.total"],
+                  },
+                  then: 100,
+                  else: {
+                    $multiply: [
+                      100,
+                      {
+                        $divide: ["$organismesTransmetteurs.total", "$totalOrganismes.total"],
+                      },
+                    ],
+                  },
+                },
+              },
+              responsables: {
+                $cond: {
+                  if: {
+                    $gte: [0, "$totalOrganismes.responsables"],
+                  },
+                  then: 100,
+                  else: {
+                    $multiply: [
+                      100,
+                      {
+                        $divide: ["$organismesTransmetteurs.responsables", "$totalOrganismes.responsables"],
+                      },
+                    ],
+                  },
+                },
+              },
+              responsablesFormateurs: {
+                $cond: {
+                  if: {
+                    $gte: [0, "$totalOrganismes.responsablesFormateurs"],
+                  },
+                  then: 100,
+                  else: {
+                    $multiply: [
+                      100,
+                      {
+                        $divide: [
+                          "$organismesTransmetteurs.responsablesFormateurs",
+                          "$totalOrganismes.responsablesFormateurs",
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+              formateurs: {
+                $cond: {
+                  if: {
+                    $gte: [0, "$totalOrganismes.formateurs"],
+                  },
+                  then: 100,
+                  else: {
+                    $multiply: [
+                      100,
+                      {
+                        $divide: ["$organismesTransmetteurs.formateurs", "$totalOrganismes.formateurs"],
+                      },
+                    ],
+                  },
+                },
+              },
+              inconnues: {
+                $cond: {
+                  if: {
+                    $gte: [0, "$totalOrganismes.inconnues"],
+                  },
+                  then: 100,
+                  else: {
+                    $multiply: [
+                      100,
+                      {
+                        $divide: ["$organismesTransmetteurs.inconnues", "$totalOrganismes.inconnues"],
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            organismesNonTransmetteurs: {
+              total: {
+                $subtract: ["$totalOrganismes.total", "$organismesTransmetteurs.total"],
+              },
+              responsables: {
+                $subtract: ["$totalOrganismes.responsables", "$organismesTransmetteurs.responsables"],
+              },
+              responsablesFormateurs: {
+                $subtract: [
+                  "$totalOrganismes.responsablesFormateurs",
+                  "$organismesTransmetteurs.responsablesFormateurs",
+                ],
+              },
+              formateurs: {
+                $subtract: ["$totalOrganismes.formateurs", "$organismesTransmetteurs.formateurs"],
+              },
+              inconnues: {
+                $subtract: ["$totalOrganismes.inconnues", "$organismesTransmetteurs.inconnues"],
+              },
+            },
+          },
       },
     ])
     .toArray()) as IndicateursOrganismesAvecDepartement[];
