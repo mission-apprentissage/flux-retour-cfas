@@ -8,7 +8,7 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import { usePlausibleTracking } from "@/hooks/plausible";
-import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
+import { EffectifsFiltersFull, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 
 import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "./icons";
 
@@ -64,23 +64,24 @@ const typeToGoalPlausible: { [key in Exclude<TypeEffectifNominatif, "inconnu">]:
   apprenant: "telechargement_liste_apprenants",
 };
 
-interface IndicateursGridProps {
+interface IndicateursGridPropsLoading {
+  loading: true;
+}
+
+interface IndicateursGridPropsReady {
   indicateursEffectifs: IndicateursEffectifs;
-  loading: boolean;
+  loading: false;
   permissionEffectifsNominatifs?: boolean | TypeEffectifNominatif[];
-  effectifsFilters?: EffectifsFilters;
+  effectifsFilters?: EffectifsFiltersFull;
   organismeId?: string;
 }
-function IndicateursGrid({
-  indicateursEffectifs,
-  loading,
-  permissionEffectifsNominatifs = false,
-  effectifsFilters,
-  organismeId,
-}: IndicateursGridProps) {
+
+type IndicateursGridProps = IndicateursGridPropsReady | IndicateursGridPropsLoading;
+
+function IndicateursGrid(props: IndicateursGridProps) {
   const { trackPlausibleEvent } = usePlausibleTracking();
 
-  if (loading) {
+  if (props.loading) {
     return (
       <Grid minH="240px" templateRows="repeat(2, 1fr)" templateColumns="repeat(6, 1fr)" gap={4} my={8}>
         <GridItem colSpan={2} rowSpan={2}>
@@ -102,9 +103,11 @@ function IndicateursGrid({
     );
   }
 
+  const { indicateursEffectifs, permissionEffectifsNominatifs = false, effectifsFilters, organismeId } = props;
+
   async function downloadEffectifsNominatifs(
     type: (typeof typesEffectifNominatif)[number],
-    effectifsFilters: EffectifsFilters
+    effectifsFilters: EffectifsFiltersFull
   ) {
     trackPlausibleEvent(typeToGoalPlausible[type]);
     const effectifs = await _get(
