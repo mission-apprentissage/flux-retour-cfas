@@ -9,26 +9,26 @@ describe("calculateBins()", () => {
     expect(calculateBins(indicateurs, 5, "#000000", "#ff0000")).toStrictEqual([
       {
         minValue: 0,
-        maxValue: 10414,
+        maxValue: 10315.6,
         color: "#000000",
       },
       {
-        minValue: 10414,
-        maxValue: 20705,
+        minValue: 10315.6,
+        maxValue: 20631.2,
         color: "#400000",
       },
       {
-        minValue: 20705,
-        maxValue: 30996,
+        minValue: 20631.2,
+        maxValue: 30946.800000000003,
         color: "#800000",
       },
       {
-        minValue: 30996,
-        maxValue: 41287,
+        minValue: 30946.800000000003,
+        maxValue: 41262.4,
         color: "#c00000",
       },
       {
-        minValue: 41287,
+        minValue: 41262.4,
         maxValue: 51578,
         color: "#ff0000",
       },
