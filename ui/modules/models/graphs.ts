@@ -11,12 +11,10 @@ export function calculateBins(
   maxColor: string,
   maxTo100?: boolean
 ): Bin[] {
-  if (data.length === 0) {
-    return [{ color: minColor, minValue: 0, maxValue: 100 }];
-  }
   const sortedData = [...data].sort((a, b) => a - b);
-  const dataMin = sortedData[0];
-  const dataMax = sortedData[sortedData.length - 1];
+  const dataMin = Math.min(0, sortedData[0] ?? 0);
+  const dataMax = Math.max(0, sortedData[sortedData.length - 1]);
+
   const binSize = (dataMax - dataMin) / numberOfBuckets;
 
   const bins = Array.from({ length: numberOfBuckets }, (_, i) => {
@@ -28,8 +26,6 @@ export function calculateBins(
 
     return { minValue, maxValue, color };
   });
-  // borne min à zéro pour un meilleur affichage
-  bins[0].minValue = 0;
   // Si c'est des porcentages, on met la borne max à 100
   if (maxTo100) bins[bins.length - 1].maxValue = 100;
   return bins;
