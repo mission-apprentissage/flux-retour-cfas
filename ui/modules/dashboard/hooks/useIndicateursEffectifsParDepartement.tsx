@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { IndicateursEffectifs, IndicateursEffectifsAvecDepartement } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
-import { IndicateursEffectifs, IndicateursEffectifsAvecDepartement } from "@/modules/models/indicateurs";
 
 type UseIndicateursEffectifsParDepartement = {
   isLoading: boolean;

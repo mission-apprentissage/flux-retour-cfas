@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axiosist";
+import { IndicateursEffectifsAvecOrganisme } from "shared";
 
-import { IndicateursEffectifsAvecOrganisme } from "@/common/actions/indicateurs/indicateurs";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { historySequenceApprentiToAbandon, historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";

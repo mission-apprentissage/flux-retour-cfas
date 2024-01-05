@@ -1,3 +1,5 @@
+import { Rncp } from "shared";
+
 import { getDbCollection } from "@/common/mongodb";
 
 import {
@@ -17,7 +19,6 @@ import { ContratDeca } from "./@types/ContratDeca";
 import { EffectifsQueue } from "./@types/EffectifsQueue";
 import { FormationsCatalogue } from "./@types/FormationsCatalogue";
 import { OrganismeSoltea } from "./@types/OrganismeSoltea";
-import { Rncp } from "./@types/Rncp";
 import auditLogsModelDescriptor, { IAuditLog } from "./auditLogs.model";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
 import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model";

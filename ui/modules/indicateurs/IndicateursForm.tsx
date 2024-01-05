@@ -3,8 +3,7 @@ import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { isTeteDeReseauResponsable } from "shared";
-import { TypeEffectifNominatif } from "shared/constants/indicateurs";
+import { isTeteDeReseauResponsable, TypeEffectifNominatif, IndicateursEffectifsAvecOrganisme } from "shared";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -32,7 +31,6 @@ import {
   EffectifsFiltersQuery,
   parseEffectifsFiltersFromQuery,
 } from "../models/effectifs-filters";
-import { IndicateursEffectifsAvecOrganisme } from "../models/indicateurs";
 import {
   convertPaginationInfosToQuery,
   PaginationInfos,

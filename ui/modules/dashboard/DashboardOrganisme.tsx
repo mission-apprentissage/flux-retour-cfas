@@ -20,7 +20,13 @@ import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { natureOrganismeDeFormationLabel, TETE_DE_RESEAUX_BY_ID } from "shared";
+import {
+  natureOrganismeDeFormationLabel,
+  TETE_DE_RESEAUX_BY_ID,
+  IndicateursEffectifs,
+  IndicateursEffectifsAvecFormation,
+  IndicateursOrganismes,
+} from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get, _post } from "@/common/httpClient";
@@ -41,7 +47,6 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 import InfosTransmissionEtParametrageOFA from "../admin/InfosTransmissionEtParametrageOFA";
 import { ExternalLinks } from "../admin/OrganismeDetail";
 import { NewOrganisation } from "../auth/inscription/common";
-import { IndicateursEffectifs, IndicateursEffectifsAvecFormation, IndicateursOrganismes } from "../models/indicateurs";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 import IndicateursEffectifsParFormationTable from "../organismes/IndicateursEffectifsParFormationTable";
 import InfoFiabilisationOrganisme from "../organismes/InfoFiabilisationOrganisme";

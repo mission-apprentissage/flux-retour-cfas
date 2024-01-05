@@ -1,6 +1,15 @@
 import { ObjectId } from "mongodb";
-import { Acl, CODES_STATUT_APPRENANT } from "shared";
-import { TypeEffectifNominatif } from "shared/constants/indicateurs";
+import {
+  Acl,
+  CODES_STATUT_APPRENANT,
+  IndicateursEffectifs,
+  IndicateursEffectifsAvecDepartement,
+  IndicateursEffectifsAvecFormation,
+  IndicateursEffectifsAvecOrganisme,
+  IndicateursOrganismes,
+  IndicateursOrganismesAvecDepartement,
+  TypeEffectifNominatif,
+} from "shared";
 
 import {
   DateFilters,
@@ -13,14 +22,6 @@ import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
-import {
-  IndicateursEffectifs,
-  IndicateursEffectifsAvecDepartement,
-  IndicateursEffectifsAvecFormation,
-  IndicateursEffectifsAvecOrganisme,
-  IndicateursOrganismes,
-  IndicateursOrganismesAvecDepartement,
-} from "./indicateurs";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 export async function getIndicateursEffectifsParDepartement(

@@ -1,3 +1,5 @@
+import { Rncp } from "./rncp";
+
 export interface IndicateursEffectifs {
   apprenants: number;
   apprentis: number;
@@ -18,8 +20,8 @@ export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & {
 
 export type IndicateursEffectifsAvecFormation = IndicateursEffectifs & {
   rncp_code: string | null;
-  rncp: Record<any, any> | null;
-}; // TODO importer le modèle complet
+  rncp: Rncp | null;
+};
 
 export interface IndicateursOrganismes {
   tauxCouverture: number;

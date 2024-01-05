@@ -9,7 +9,7 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
-import { typesEffectifNominatif } from "shared/constants/indicateurs";
+import { typesEffectifNominatif } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 // catch all unhandled promise rejections and call the error middleware
