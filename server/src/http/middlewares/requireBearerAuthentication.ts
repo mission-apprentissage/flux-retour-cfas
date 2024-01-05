@@ -9,13 +9,13 @@ export default function requireBearerAuthentication() {
     try {
       let token: string | undefined = req.headers.authorization;
       if (!token) {
-        throw Boom.forbidden("Missing API key");
+        throw Boom.forbidden("Clé API manquante");
       }
 
       if (token.startsWith("Bearer ")) {
         token = token.substring(7, token.length);
       } else {
-        throw Boom.forbidden("API key isn't valid");
+        throw Boom.forbidden("La clé API n'est pas valide");
       }
 
       res.locals.token = token;
