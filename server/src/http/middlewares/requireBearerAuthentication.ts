@@ -1,3 +1,4 @@
+import Boom from "boom";
 import { NextFunction, Response } from "express";
 
 // Bearer API_KEY
@@ -8,13 +9,13 @@ export default function requireBearerAuthentication() {
     try {
       let token: string | undefined = req.headers.authorization;
       if (!token) {
-        throw new Error("Jeton manquant");
+        throw Boom.forbidden("Missing API key");
       }
 
       if (token.startsWith("Bearer ")) {
         token = token.substring(7, token.length);
       } else {
-        throw new Error("Jeton invalide");
+        throw Boom.forbidden("API key isn't valid");
       }
 
       res.locals.token = token;
