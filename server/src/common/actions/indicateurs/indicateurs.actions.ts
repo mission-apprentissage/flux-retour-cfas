@@ -68,106 +68,50 @@ export async function getIndicateursEffectifsParDepartement(
         },
       },
       {
-        $facet: {
-          apprentis: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti,
-              },
-            },
-            {
-              $group: {
-                _id: "$departement",
-                apprentis: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          abandons: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
-              },
-            },
-            {
-              $group: {
-                _id: "$departement",
-                abandons: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          inscritsSansContrat: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-                "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
-              },
-            },
-            {
-              $group: {
-                _id: "$departement",
-                inscritsSansContrat: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          rupturants: [
-            { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
-            // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
-            {
-              $addFields: {
-                previousStatutAtDate: {
-                  $arrayElemAt: ["$apprenant.historique_statut", -2],
-                },
-              },
-            },
-            { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
-            {
-              $group: {
-                _id: "$departement",
-                rupturants: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          items: {
-            $concatArrays: ["$apprentis", "$abandons", "$inscritsSansContrat", "$rupturants"],
-          },
-        },
-      },
-      {
-        $unwind: "$items",
-      },
-      {
         $group: {
-          _id: "$items._id",
-          merge: {
-            $mergeObjects: "$items",
-          },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              {
-                apprenants: 0,
-                apprentis: 0,
-                inscritsSansContrat: 0,
-                abandons: 0,
-                rupturants: 0,
+          _id: "$departement",
+          apprentis: {
+            $sum: {
+              $cond: {
+                if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                then: 1,
+                else: 0,
               },
-              "$merge",
-            ],
+            },
+          },
+          abandons: {
+            $sum: {
+              $cond: {
+                if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+          inscritsSansContrat: {
+            $sum: {
+              $cond: {
+                if: {
+                  $and: [
+                    { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
+                    { $ne: ["$apprenant.historique_statut.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                  ],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+          inscrits: {
+            $sum: {
+              $cond: {
+                if: {
+                  $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
           },
         },
       },
@@ -176,12 +120,12 @@ export async function getIndicateursEffectifsParDepartement(
           _id: 0,
           departement: "$_id",
           apprenants: {
-            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
+            $sum: ["$apprentis", "$inscrits"],
           },
           apprentis: 1,
           inscritsSansContrat: 1,
           abandons: 1,
-          rupturants: 1,
+          rupturants: { $subtract: ["$inscrits", "$inscritsSansContrat"] },
         },
       },
     ])

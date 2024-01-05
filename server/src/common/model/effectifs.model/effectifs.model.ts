@@ -78,7 +78,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.organisme.reseaux": 1 }, {}],
   [{ "_computed.organisme.uai": 1 }, {}],
   [{ "_computed.organisme.siret": 1 }, {}],
-  [{ "_computed.organisme.fiable": 1 }, {}],
+  [{ "_computed.organisme.fiable": 1, annee_scolaire: 1 }, {}],
   [{ "_computed.formation.codes_rome": 1 }, {}],
   [{ "_computed.formation.opcos": 1 }, {}],
 ];
