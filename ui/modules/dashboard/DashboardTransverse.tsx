@@ -18,8 +18,7 @@ import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TETE_DE_RESEA
 
 import { _get } from "@/common/httpClient";
 import { getOrganisationLabel, Organisation } from "@/common/internal/Organisation";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
-import { formatCivility, formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
+import { formatCivility, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
@@ -143,15 +142,6 @@ const DashboardTransverse = () => {
           Ces chiffres reflètent partiellement les effectifs de l’apprentissage de votre périmètre &nbsp;: une partie
           des organismes de formation en apprentissage ne transmettent pas encore leurs données au tableau de bord (voir
           carte “Taux de couverture” ci-dessous).
-        </Text>
-        <Text fontSize={14} mt="4">
-          Le <strong>{formatDateDayMonthYear(filters.date)}</strong>, le tableau de bord de l’apprentissage recense{" "}
-          <strong>{formatNumber(indicateursEffectifs.total.apprenants)} apprenants</strong> dans votre périmètre, dont{" "}
-          <strong>{formatNumber(indicateursEffectifs.total.apprentis)} apprentis</strong>,{" "}
-          <strong>
-            {formatNumber(indicateursEffectifs.total.inscritsSansContrat)} jeunes en formation sans contrat
-          </strong>{" "}
-          et <strong>{formatNumber(indicateursEffectifs.total.rupturants)} rupturants</strong>.
         </Text>
         <HStack mt={8}>
           <Box>Filtrer par</Box>
