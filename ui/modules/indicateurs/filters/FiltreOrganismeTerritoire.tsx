@@ -79,6 +79,7 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
   }, [props.config]);
 
   const defaultLabel = props.config?.defaultLabel ?? "France";
+  const defaultIndex = [regions, academies, departements, bassinsEmploi].findIndex((v) => v.length > 0);
 
   const buttonLabel = `${
     REGIONS_BY_CODE[regions?.[0]]?.nom ??
@@ -94,7 +95,7 @@ const FiltreOrganismeTerritoire = (props: FiltreOrganismeTerritoireProps) => {
 
       {isOpen && (
         <SimpleOverlayMenu onClose={() => setIsOpen(false)} width="var(--chakra-sizes-lg)">
-          <Tabs variant="newsimple" fontSize="14px">
+          <Tabs variant="newsimple" fontSize="14px" defaultIndex={Math.max(0, defaultIndex)}>
             <TabList mx={8} mt={2}>
               {territoiresConfig.regions.length > 0 && (
                 <Tab fontSize="14px">Région ({territoiresConfig.regions.length})</Tab>
