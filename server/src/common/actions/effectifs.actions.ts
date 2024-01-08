@@ -45,23 +45,6 @@ export const insertEffectif = async (data: Effectif) => {
 };
 
 /**
- * Méthode de récupération des effectifs d'un organisme
- */
-export const findEffectifs = async (organisme_id: string | number | ObjectId, projection = {}) => {
-  return await effectifsDb()
-    .find({ organisme_id: new ObjectId(organisme_id) }, { projection })
-    .toArray();
-};
-
-/**
- * Méthode de récupération d'un effectif depuis un id
- */
-export const findEffectifById = async (id: string | ObjectId, projection = {}) => {
-  const found = await effectifsDb().findOne({ _id: new ObjectId(id) }, { projection });
-  return found;
-};
-
-/**
  * Méthode de mise à jour d'un effectif depuis son id
  */
 export const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErrors: false }) => {

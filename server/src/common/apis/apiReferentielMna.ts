@@ -1,9 +1,7 @@
-import logger from "@/common/logger";
 import config from "@/config";
 
 import { OrganismesReferentiel } from "../model/@types";
 
-import MnaOrganisme from "./@types/MnaOrganisme";
 import getApiClient from "./client";
 
 // Cf Documentation : https://referentiel.apprentissage.onisep.fr/api/v1/doc/#/
@@ -60,27 +58,4 @@ export const fetchOrganismes = async () => {
   });
 
   return organismes;
-};
-
-export const fetchOrganismeWithSiret = async (siret: string): Promise<MnaOrganisme | null> => {
-  try {
-    const { data } = await axiosClient.get(`/organismes/${siret}`);
-
-    return data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data || err.code;
-    logger.error("API REFERENTIEL fetchOrganismeWithSiret something went wrong:", errorMessage);
-    return null;
-  }
-};
-
-export const fetchOrganismesWithUai = async (uai: string) => {
-  try {
-    const { data } = await axiosClient.get("/organismes", { params: { uais: uai } });
-    return data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data || err.code;
-    logger.error("API REFERENTIEL fetchOrganismesWithUai something went wrong:", errorMessage);
-    return null;
-  }
 };
