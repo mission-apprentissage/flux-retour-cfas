@@ -31,6 +31,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           uai: "0000000A",
           siret: "00000000000018",
           nature: "formateur",
+          first_transmission_date: new Date("2023-01-01T00:00:00.000Z"),
         },
         {
           ...commonOrganismeAttributes,
@@ -38,6 +39,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           uai: "0000000B",
           siret: "00000000000026",
           nature: "responsable_formateur",
+          first_transmission_date: new Date("2023-01-01T00:00:00.000Z"),
         },
         {
           ...commonOrganismeAttributes,
@@ -45,6 +47,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           uai: "0000000C",
           siret: "00000000000034",
           nature: "responsable",
+          first_transmission_date: new Date("2023-01-01T00:00:00.000Z"),
         },
         {
           ...commonOrganismeAttributes,
@@ -52,6 +55,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           uai: "1111111B",
           siret: "11111111100006",
           nature: "responsable_formateur",
+          first_transmission_date: new Date("2023-01-01T00:00:00.000Z"),
         },
       ]),
       effectifsDb().insertMany([
@@ -118,13 +122,39 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           rupturants: 20,
         },
       ],
-      indicateursOrganismes: {
-        total: 4,
-        totalWithoutTransmissionDate: 4,
-        responsablesFormateurs: 2,
-        responsables: 1,
-        formateurs: 1,
-      },
+      indicateursOrganismes: [
+        {
+          departement: "56",
+          organismesNonTransmetteurs: {
+            formateurs: 0,
+            inconnues: 0,
+            responsables: 0,
+            responsablesFormateurs: 0,
+            total: 0,
+          },
+          organismesTransmetteurs: {
+            total: 4,
+            inconnues: 0,
+            responsablesFormateurs: 2,
+            responsables: 1,
+            formateurs: 1,
+          },
+          tauxCouverture: {
+            formateurs: 100,
+            inconnues: 100,
+            responsables: 100,
+            responsablesFormateurs: 100,
+            total: 100,
+          },
+          totalOrganismes: {
+            formateurs: 1,
+            inconnues: 0,
+            responsables: 1,
+            responsablesFormateurs: 2,
+            total: 4,
+          },
+        },
+      ],
     });
   });
 });
