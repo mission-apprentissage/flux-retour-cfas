@@ -160,10 +160,34 @@ describe("Route indicateurs", () => {
             ? [
                 {
                   departement: "56",
-                  tauxCouverture: 100,
-                  totalOrganismes: nbOrganismes,
-                  organismesTransmetteurs: nbOrganismes,
-                  organismesNonTransmetteurs: 0,
+                  organismesNonTransmetteurs: {
+                    formateurs: 0,
+                    inconnues: 0,
+                    responsables: 0,
+                    responsablesFormateurs: 0,
+                    total: 0,
+                  },
+                  organismesTransmetteurs: {
+                    formateurs: 0,
+                    inconnues: 0,
+                    responsables: 0,
+                    responsablesFormateurs: nbOrganismes,
+                    total: nbOrganismes,
+                  },
+                  tauxCouverture: {
+                    formateurs: 100,
+                    inconnues: 100,
+                    responsables: 100,
+                    responsablesFormateurs: 100,
+                    total: 100,
+                  },
+                  totalOrganismes: {
+                    formateurs: 0,
+                    inconnues: 0,
+                    responsables: 0,
+                    responsablesFormateurs: nbOrganismes,
+                    total: nbOrganismes,
+                  },
                 },
               ]
             : []
