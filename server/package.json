@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "6.1.0",
+    "@sentry/cli": "^2.24.1",
     "@sentry/integrations": "^7.80.0",
     "@sentry/node": "^7.80.0",
     "@sentry/tracing": "^7.80.0",

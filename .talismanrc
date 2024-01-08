@@ -1,6 +1,4 @@
 fileignoreconfig:
-- filename: .infra/files/configs/mongodb/seed.gpg
-  checksum: afad84a009b2b171e32449290e77a3eb664c38764590d7da04d26ae23ebcf640
 - filename: .bin/scripts/seed-update.sh
   checksum: 5d6c4905865f66008d6ffd23eff04577bb8d1260022106b0be24062591bf0883
 - filename: .bin/scripts/setup-local-env.sh
@@ -40,7 +38,7 @@ fileignoreconfig:
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
-  checksum: 3359b86f85d4a26aae009a80ef1ffbc83f70c823e36f8f6a19ac22250bca2595
+  checksum: cd5050c38004ddb506370a7dc4af508ed9fa98a80ec75ae82c44754143eef7c4
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
   checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml
@@ -56,9 +54,7 @@ fileignoreconfig:
 - filename: README.md
   checksum: b7e69d60da12cf1c9d127547e747002450730881270ee170755098f22e15a9c4
 - filename: server/.env.test
-  checksum: 292028fd86217934cd5618b59f22e6164473d05fb7038b71af6148c5d1630502
-  ignore_detectors:
-  - filename
+  checksum: c54009c7da990622a94d3d71cfb2384167c2d09ed4e2260c135193668ebd03fd
 - filename: server/src/commands.ts
   checksum: 1a90f45c469ee03251d899f54ba24bedfc2f9eadffeea69681dc3c1485efadde
 - filename: server/src/common/actions/effectifs.actions.ts
@@ -79,6 +75,8 @@ fileignoreconfig:
   checksum: 71c60b9fc5f4d0308146235adde75e4df34ebac59539cef321403b5966b061ad
 - filename: server/src/jobs/seed/start/index.ts
   checksum: bd018d4dab141be955d6e546f817b0aa58edc733e9e562272765d8211d2f3015
+- filename: server/src/jobs/users/generate-password-update-token.ts
+  checksum: 5e033ffc0f5c1ddb56a91ef761e9e2e71c501c31c18a664b742af7ce623a8c06
 - filename: server/static/open-api.json
   checksum: cc6eef59550fe79f35ddf54e74e8b7f72dc85bc3480261a8cea94fa19e16a882
 - filename: server/tests/integration/common/actions/users.actions.test.ts
@@ -103,6 +101,8 @@ fileignoreconfig:
   checksum: e77a9f86790a10fe8193f4e945228e7435308d4eb1d7769888b690ba234a66c5
 - filename: ui/components/Page/components/Footer.tsx
   checksum: 736fbc34e70cc8d948a03094fc0f85be607359367aa748eb8d6daaeb75e38382
+- filename: ui/config.public.ts
+  checksum: d948f62fa366a82e511d61a75043108e9caa195bd6f2cdb543e9ea56f0b7345c
 - filename: ui/modules/auth/inscription/InscriptionTeteDeReseau.tsx
   checksum: 5fa50502b737d7e06efff5cd4128da53f4dc7a196428149e1695977175e92cab
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx
@@ -121,8 +121,6 @@ fileignoreconfig:
   checksum: ecb4075e29596bc69091cf6a3a3836622cc0ccfa91359e6d96eaa026881886c6
 - filename: ui/public/modele-import.xlsx
   checksum: 437a1f461d7764c51f288128de18506f4c22078c109238a41e8883a813b7ac55
-- filename: server/src/jobs/users/generate-password-update-token.ts
-  checksum: 5e033ffc0f5c1ddb56a91ef761e9e2e71c501c31c18a664b742af7ce623a8c06
 scopeconfig:
 - scope: node
 custom_patterns:
@@ -138,5 +136,5 @@ allowed_patterns:
 - apiKey
 - ApiKey
 - api_key
-- "tableau-de-bord@apprentissage\\.beta\\.gouv.fr"
+- tableau-de-bord@apprentissage\.beta\.gouv.fr
 version: "1.0"

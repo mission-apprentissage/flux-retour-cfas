@@ -6,7 +6,7 @@ export interface PublicConfig {
   version: string;
 }
 
-const SENTRY_DSN = "https://362c29c6acbe4a599640109d87e77beb@o4504570758561792.ingest.sentry.io/4504570760265728";
+const SENTRY_DSN = "https://77feecd94eb54b3491f81e3c5aaa026c@sentry.apprentissage.beta.gouv.fr/6";
 
 function getProductionPublicConfig(): PublicConfig {
   const host = "cfas.apprentissage.beta.gouv.fr";

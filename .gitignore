@@ -167,3 +167,6 @@ seed.gz
 
 server/outputs/
 !server/outputs/.gitkeep
+
+# Sentry Config File
+.sentryclirc
