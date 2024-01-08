@@ -97,25 +97,23 @@ export async function getIndicateursEffectifsParDepartement(
                   $and: [
                     { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
                     {
-                      $in: {
-                        $eq: [
-                          0,
-                          {
-                            $size: {
-                              $filter: {
-                                input: "$apprenant.historique_statut",
-                                cond: {
-                                  $and: [
-                                    { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                                    { $lte: ["$$this.date_statut", filters.date] },
-                                  ],
-                                },
-                                limit: 1,
+                      $eq: [
+                        0,
+                        {
+                          $size: {
+                            $filter: {
+                              input: "$apprenant.historique_statut",
+                              cond: {
+                                $and: [
+                                  { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                                  { $lte: ["$$this.date_statut", filters.date] },
+                                ],
                               },
+                              limit: 1,
                             },
                           },
-                        ],
-                      },
+                        },
+                      ],
                     },
                   ],
                 },
