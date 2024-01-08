@@ -3,13 +3,12 @@ import { ObjectId } from "mongodb";
 import { maintenanceMessageDb } from "@/common/model/collections";
 import { defaultValuesMaintenanceMessage } from "@/common/model/maintenanceMessages.model";
 
+import { MaintenanceMessage } from "../model/@types";
+
 /**
  * Méthode de création d'un message de maintenance
- *
- * @param {*} param0
- * @returns
  */
-export const createMaintenanceMessage = async ({ name, msg, type, context, time, enabled }) => {
+export const createMaintenanceMessage = async ({ name, msg, type, context, time, enabled }: MaintenanceMessage) => {
   const data = {
     ...defaultValuesMaintenanceMessage(),
     type,
@@ -25,10 +24,8 @@ export const createMaintenanceMessage = async ({ name, msg, type, context, time,
 
 /**
  * Méthode de mise à jour d'un message de maintenance depuis son id
- * @param {*} _id
- * @returns
  */
-export const updateMaintenanceMessage = async (_id, data) => {
+export const updateMaintenanceMessage = async (_id: string | ObjectId, data: Partial<MaintenanceMessage>) => {
   const item = await maintenanceMessageDb().findOne({ _id: new ObjectId(_id) });
 
   if (!item) {
@@ -57,10 +54,8 @@ export const findMaintenanceMessages = async () => {
 
 /**
  * Méthode de suppression d'un message de maintenance depuis son id
- * @param {*} _id
- * @returns
  */
-export const removeMaintenanceMessage = async (_id) => {
+export const removeMaintenanceMessage = async (_id: string | ObjectId) => {
   const item = await maintenanceMessageDb().findOne({ _id: new ObjectId(_id) });
 
   if (!item) {

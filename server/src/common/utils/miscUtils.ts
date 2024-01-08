@@ -2,8 +2,6 @@ import crypto from "crypto";
 
 /**
  * Generates a random password with a fixed length and made of characters belonging to a specified wishlist
- * @param {*} length
- * @returns
  */
 export const generateRandomAlphanumericPhrase = (length = 20) => {
   const alphanumeric = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -31,9 +29,6 @@ export const arraysContainSameValues = (array1, array2) => {
 
 /**
  * Méthode de calcul de pourcentage
- * @param {*} count
- * @param {*} total
- * @returns
  */
 export const getPercentage = (count = 0, total = 0) => {
   if (total === 0) return 0;

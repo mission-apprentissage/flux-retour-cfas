@@ -6,6 +6,7 @@ import {
   updateMaintenanceMessage,
   removeMaintenanceMessage,
 } from "@/common/actions/maintenances.actions";
+import { MaintenanceMessage } from "@/common/model/@types";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 
 export default () => {
@@ -30,7 +31,7 @@ export default () => {
       msg: msg.replace(/(\[.*?\])\(##(.*?)\)/gim, "$1($2)"),
       enabled,
       time: new Date(),
-    });
+    } as MaintenanceMessage);
 
     return res.status(201).json(newMaintenanceMessage);
   });
