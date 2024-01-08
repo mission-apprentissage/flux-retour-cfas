@@ -43,6 +43,7 @@ export async function getIndicateursEffectifsParDepartement(
         $project: {
           departement: "$_computed.organisme.departement",
           "apprenant.historique_statut": {
+            // TODO: s'assurer que le tableau est TOUJOURS trié, puis supprimer cette étape
             $sortArray: {
               input: {
                 $filter: {
@@ -95,7 +96,25 @@ export async function getIndicateursEffectifsParDepartement(
                 if: {
                   $and: [
                     { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                    { $ne: ["$apprenant.historique_statut.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                    {
+                      $eq: [
+                        0,
+                        {
+                          $size: {
+                            $filter: {
+                              input: "$apprenant.historique_statut",
+                              cond: {
+                                $and: [
+                                  { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                                  { $lte: ["$$this.date_statut", filters.date] },
+                                ],
+                              },
+                              limit: 1,
+                            },
+                          },
+                        },
+                      ],
+                    },
                   ],
                 },
                 then: 1,
