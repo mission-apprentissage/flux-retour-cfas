@@ -11,6 +11,9 @@ export function calculateBins(
   maxColor: string,
   maxTo100?: boolean
 ): Bin[] {
+  if (data.length === 0) {
+    return [{ color: minColor, minValue: 0, maxValue: 100 }];
+  }
   const sortedData = [...data].sort((a, b) => a - b);
   const dataMin = Math.min(0, sortedData[0] ?? 0);
   const dataMax = Math.max(0, sortedData[sortedData.length - 1]);
