@@ -491,7 +491,7 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
 export async function getOrganismeByAPIKey(api_key: string) {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
-    throw Boom.notFound("Organisme not found with this api key");
+    throw Boom.forbidden("La clé API n'est pas valide");
   }
   return organisme as WithId<Organisme>;
 }

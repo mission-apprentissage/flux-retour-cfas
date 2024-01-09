@@ -1,0 +1,22 @@
+name: Post daily data in slack
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+    - cron: "0 22 * * *"
+
+jobs:
+  run:
+    name: "Send daily data in slack"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - run: node .github/workflows/cron.mjs
+        env:
+          SLACK_WEBHOOK: ${{secrets.SLACK_WEBHOOK_TDB_TEAM_URL}}
