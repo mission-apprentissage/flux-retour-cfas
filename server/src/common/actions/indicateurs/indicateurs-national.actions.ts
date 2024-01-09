@@ -5,20 +5,23 @@ import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { tryCachedExecution } from "@/common/utils/cacheUtils";
 
-import { OrganismesFilters, buildMongoFilters, organismesFiltersConfigurations } from "../helpers/filters";
+import { TerritoireFilters } from "../helpers/filters";
 
 import { getIndicateursEffectifsParDepartement } from "./indicateurs.actions";
+import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 const indicateursNationalCacheExpirationMs = 3600 * 1000; // 1 hour
 
 export const indicateursNationalFiltersSchema = {
-  date: z.preprocess((str: any) => new Date(str), z.date()),
+  date: z.preprocess((str: any) => new Date(str ?? Date.now()), z.date()),
   organisme_regions: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
 };
 
 export type IndicateursNationalFilters = z.infer<z.ZodObject<typeof indicateursNationalFiltersSchema>>;
 
 export async function getIndicateursNational(filters: IndicateursNationalFilters) {
+  const { date, ...territoireFilter } = filters;
+
   return await tryCachedExecution(
     `indicateurs-national:${format(filters.date, "yyyy-MM-dd")}:${filters.organisme_regions?.join(",")}`,
     indicateursNationalCacheExpirationMs,
@@ -26,7 +29,7 @@ export async function getIndicateursNational(filters: IndicateursNationalFilters
       const ctx = { organisation: { type: "ADMINISTRATEUR" } } as AuthContext; // Hack le temps de refactorer
       const [indicateursEffectifs, indicateursOrganismes] = await Promise.all([
         getIndicateursEffectifsParDepartement(ctx, filters),
-        getIndicateursOrganismesNature(filters),
+        getIndicateursOrganismesNature(territoireFilter),
       ]);
       return { indicateursEffectifs, indicateursOrganismes };
     }
@@ -41,13 +44,13 @@ interface IndicateursOrganismesNature {
   formateurs: number;
 }
 
-export async function getIndicateursOrganismesNature(filters: OrganismesFilters): Promise<IndicateursOrganismesNature> {
+export async function getIndicateursOrganismesNature(filters: TerritoireFilters): Promise<IndicateursOrganismesNature> {
   const indicateurs = (await organismesDb()
     .aggregate([
       {
         $match: {
+          ...buildOrganismeMongoFilters(filters),
           $and: [
-            ...buildMongoFilters(filters, organismesFiltersConfigurations),
             {
               fiabilisation_statut: "FIABLE",
               ferme: false,

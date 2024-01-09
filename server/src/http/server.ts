@@ -25,9 +25,9 @@ import {
 import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import {
-  effectifsFiltersSchema,
+  effectifsFiltersTerritoireSchema,
   fullEffectifsFiltersSchema,
-  organismesFiltersSchema,
+  territoireFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import { getPermissionOrganisationContext } from "@/common/actions/helpers/permissions-organisation";
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
@@ -445,7 +445,7 @@ function setupRoutes(app: Application) {
         "/indicateurs/effectifs",
         requireOrganismePermission("indicateursEffectifs"),
         returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
+          const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
           return await getOrganismeIndicateursEffectifs(req.user, res.locals.organismeId, filters);
         })
       )
@@ -615,7 +615,7 @@ function setupRoutes(app: Application) {
     .get(
       "/api/v1/indicateurs/effectifs/par-departement",
       returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersSchema);
+        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
         return await getIndicateursEffectifsParDepartement(req.user, filters);
       })
     )
@@ -642,7 +642,7 @@ function setupRoutes(app: Application) {
     .get(
       "/api/v1/indicateurs/organismes/par-departement",
       returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, organismesFiltersSchema);
+        const filters = await validateFullZodObjectSchema(req.query, territoireFiltersSchema);
         return await getIndicateursOrganismesParDepartement(req.user, filters);
       })
     )

@@ -3,15 +3,7 @@ import { ObjectId } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
-import {
-  EffectifsFilters,
-  FullEffectifsFilters,
-  OrganismesFilters,
-  buildMongoFilters,
-  effectifsFiltersConfigurations,
-  fullEffectifsFiltersConfigurations,
-  organismesFiltersConfigurations,
-} from "@/common/actions/helpers/filters";
+import { EffectifsFiltersTerritoire, FullEffectifsFilters, TerritoireFilters } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -19,6 +11,7 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { getPermissionOrganisationQueryFilter } from "../helpers/permissions-organisation";
 import { getOrganismeIndicateursEffectifsRestriction } from "../helpers/permissions-organisme";
 
+import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import {
   IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
@@ -27,19 +20,18 @@ import {
   IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
 } from "./indicateurs";
+import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 export async function getIndicateursEffectifsParDepartement(
   ctx: AuthContext,
-  filters: EffectifsFilters
+  filters: FullEffectifsFilters
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
-  const indicateurs = (await effectifsDb()
+  const indicateurs = await effectifsDb()
     .aggregate([
       {
         $match: {
-          $and: [
-            await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParDepartement"),
-            ...buildMongoFilters(filters, effectifsFiltersConfigurations),
-          ],
+          $and: [await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParDepartement")],
+          ...buildEffectifMongoFilters(filters),
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -190,22 +182,20 @@ export async function getIndicateursEffectifsParDepartement(
         },
       },
     ])
-    .toArray()) as IndicateursEffectifsAvecDepartement[];
-  return indicateurs;
+    .toArray();
+  return indicateurs as IndicateursEffectifsAvecDepartement[];
 }
 
 export async function getIndicateursOrganismesParDepartement(
   ctx: AuthContext,
-  filters: OrganismesFilters
+  filters: TerritoireFilters
 ): Promise<IndicateursOrganismesAvecDepartement[]> {
   const indicateurs = (await organismesDb()
     .aggregate([
       {
         $match: {
-          $and: [
-            await getPermissionOrganisationQueryFilter(ctx, "IndicateursOrganismesParDepartement"),
-            ...buildMongoFilters(filters, organismesFiltersConfigurations),
-          ],
+          $and: [await getPermissionOrganisationQueryFilter(ctx, "IndicateursOrganismesParDepartement")],
+          ...buildOrganismeMongoFilters(filters),
           fiabilisation_statut: "FIABLE",
           ferme: false,
         },
@@ -255,8 +245,8 @@ export async function getIndicateursEffectifsParOrganisme(
           $and: [
             await getOrganismeRestriction(organismeId),
             await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParOrganisme"),
-            ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
           ],
+          ...buildEffectifMongoFilters(filters),
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -453,11 +443,8 @@ export async function getOrganismeIndicateursEffectifsParFormation(
     .aggregate([
       {
         $match: {
-          $and: [
-            await getOrganismeRestriction(organismeId),
-            await getOrganismeIndicateursEffectifsRestriction(ctx),
-            ...buildMongoFilters(filters, effectifsFiltersConfigurations),
-          ],
+          $and: [await getOrganismeRestriction(organismeId), await getOrganismeIndicateursEffectifsRestriction(ctx)],
+          ...buildEffectifMongoFilters(filters),
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
         },
       },
@@ -649,11 +636,8 @@ export async function getEffectifsNominatifs(
     .aggregate([
       {
         $match: {
-          $and: [
-            await getOrganismeRestriction(organismeId),
-            permissionRestriction,
-            ...buildMongoFilters(filters, fullEffectifsFiltersConfigurations),
-          ],
+          $and: [await getOrganismeRestriction(organismeId), permissionRestriction],
+          ...buildEffectifMongoFilters(filters),
           "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables et à modifier si on veut masquer les effectifs des OF inconnus
         },
       },
@@ -798,17 +782,14 @@ export async function getEffectifsNominatifs(
 export async function getOrganismeIndicateursEffectifs(
   ctx: AuthContext,
   organismeId: ObjectId,
-  filters: EffectifsFilters
+  filters: EffectifsFiltersTerritoire
 ): Promise<IndicateursEffectifs> {
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
         $match: {
-          $and: [
-            await getOrganismeRestriction(organismeId),
-            await getOrganismeIndicateursEffectifsRestriction(ctx),
-            ...buildMongoFilters(filters, effectifsFiltersConfigurations),
-          ],
+          $and: [await getOrganismeRestriction(organismeId), await getOrganismeIndicateursEffectifsRestriction(ctx)],
+          ...buildEffectifMongoFilters(filters),
         },
       },
       {

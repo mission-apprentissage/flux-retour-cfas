@@ -1,10 +1,12 @@
-export function throwUnexpectedError(): never {
-  throw new Error("Unexpected Error");
+export function throwUnexpectedError(message: string = "Unexpected Error"): never {
+  throw new Error(message);
 }
 
-export function assertUnreachable(_key: never): never {
-  throwUnexpectedError();
+export function assertUnreachable(key: never): never {
+  throwUnexpectedError(`Unexpected case ${JSON.stringify(key)}`);
 }
+
+export function ignoretUnreachable(_key: never): void {}
 
 type ObjectEntry<T extends object> = { [K in keyof T]: [K, Required<T>[K]] }[keyof T] extends infer E
   ? E extends [infer K, infer V]

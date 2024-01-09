@@ -1,10 +1,4 @@
-import { subYears } from "date-fns";
-import { getAnneesScolaireListFromDate } from "shared";
 import { z } from "zod";
-
-import { SIRET_REGEX } from "@/common/constants/validations";
-import { escapeRegExp } from "@/common/utils/regexUtils";
-import { isValidUAI } from "@/common/utils/validationUtils";
 
 export const organismeLookup = {
   from: "organismes",
@@ -20,63 +14,22 @@ export interface FilterConfiguration {
   transformValue?: (value: any) => any;
 }
 
-export const organismesFiltersSchema = {
+export const territoireFiltersSchema = {
   organisme_regions: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   organisme_academies: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   organisme_bassinsEmploi: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
 };
 
-export type OrganismesFilters = z.infer<z.ZodObject<typeof organismesFiltersSchema>>;
+export type TerritoireFilters = z.infer<z.ZodObject<typeof territoireFiltersSchema>>;
 
-export const organismesFiltersConfigurations: { [key in keyof Required<OrganismesFilters>]: FilterConfiguration } = {
-  organisme_departements: {
-    matchKey: "adresse.departement",
-    transformValue: (value) => ({ $in: value }),
-  },
-  organisme_regions: {
-    matchKey: "adresse.region",
-    transformValue: (value) => ({ $in: value }),
-  },
-  organisme_academies: {
-    matchKey: "adresse.academie",
-    transformValue: (value) => ({ $in: value }),
-  },
-  organisme_bassinsEmploi: {
-    matchKey: "adresse.bassinEmploi",
-    transformValue: (value) => ({ $in: value }),
-  },
+// Filtre des effectifs par territoire
+export const effectifsFiltersTerritoireSchema = {
+  ...territoireFiltersSchema,
+  date: z.preprocess((str: any) => new Date(str ?? Date.now()), z.date()),
 };
 
-export const effectifsFiltersSchema = {
-  ...organismesFiltersSchema,
-  date: z.preprocess((str: any) => new Date(str), z.date()),
-};
-
-export type EffectifsFilters = z.infer<z.ZodObject<typeof effectifsFiltersSchema>>;
-
-export const effectifsFiltersConfigurations: { [key in keyof Required<EffectifsFilters>]: FilterConfiguration } = {
-  date: {
-    matchKey: "annee_scolaire",
-    transformValue: (value) => ({ $in: getAnneesScolaireListFromDate(value) }),
-  },
-  organisme_departements: {
-    matchKey: "_computed.organisme.departement",
-    transformValue: (value) => ({ $in: value }),
-  },
-  organisme_regions: {
-    matchKey: "_computed.organisme.region",
-    transformValue: (value) => ({ $in: value }),
-  },
-  organisme_academies: {
-    matchKey: "_computed.organisme.academie",
-    transformValue: (value) => ({ $in: value }),
-  },
-  organisme_bassinsEmploi: {
-    matchKey: "_computed.organisme.bassinEmploi",
-    transformValue: (value) => ({ $in: value }),
-  },
-};
+export type EffectifsFiltersTerritoire = z.infer<z.ZodObject<typeof effectifsFiltersTerritoireSchema>>;
 
 // [min, max[
 const intervalParTrancheAge = {
@@ -90,7 +43,7 @@ const intervalParTrancheAge = {
  * Utilisé pour la recherche détaillée des indicateurs effectifs
  */
 export const fullEffectifsFiltersSchema = {
-  ...effectifsFiltersSchema,
+  ...effectifsFiltersTerritoireSchema,
   organisme_search: z.string().optional(),
   organisme_reseaux: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
   // apprenant_genre: z.string(),
@@ -110,83 +63,3 @@ export const fullEffectifsFiltersSchema = {
 };
 
 export type FullEffectifsFilters = z.infer<z.ZodObject<typeof fullEffectifsFiltersSchema>>;
-
-export const fullEffectifsFiltersConfigurations: {
-  [key in keyof Required<FullEffectifsFilters>]: FilterConfiguration;
-} = {
-  ...effectifsFiltersConfigurations,
-  organisme_search: {
-    matchKey: "$or",
-    transformValue: (value) => {
-      if (isValidUAI(value)) {
-        return [{ "_computed.organisme.uai": value }];
-      }
-      if (SIRET_REGEX.test(value)) {
-        return [{ "_computed.organisme.siret": value }];
-      }
-      if (/^\d{3,}$/.test(value)) {
-        return [{ "_computed.organisme.siret": new RegExp(escapeRegExp(value)) }];
-      }
-      return [{ "_computed.organisme.nom": new RegExp(escapeRegExp(value)) }]; // TODO probablement ajouter un champ nom (enseigne + raison_sociale) de l'organisme
-    },
-  },
-  organisme_reseaux: {
-    matchKey: "_computed.organisme.reseaux",
-    transformValue: (value) => ({ $in: value }),
-  },
-
-  // apprenant_genre: {
-  //   matchKey: "", // encore inconnu, INE ou civilité avec api v3 ?
-  // },
-  apprenant_tranchesAge: {
-    matchKey: "$or",
-    transformValue: (keys) =>
-      keys.map((key) => {
-        const [min, max] = intervalParTrancheAge[key];
-        return {
-          "apprenant.date_de_naissance": {
-            $lt: subYears(new Date(), min),
-            $gte: subYears(new Date(), max),
-          },
-        };
-      }),
-  },
-  // apprenant_rqth: {
-  //   matchKey: "", // inconnu
-  // },
-
-  formation_annees: {
-    matchKey: "formation.annee",
-    transformValue: (value) => ({ $in: value }),
-  },
-  formation_niveaux: {
-    matchKey: "formation.niveau",
-    transformValue: (value) => ({ $in: value }),
-  },
-  formation_cfds: {
-    matchKey: "formation.cfd",
-    transformValue: (value) => ({ $in: value }),
-  },
-  formation_secteursProfessionnels: {
-    matchKey: "_computed.formation.codes_rome",
-    transformValue: (value) => ({ $in: value }),
-  },
-};
-
-export function buildMongoFilters<
-  Filters extends { [s: string]: any },
-  FiltersConfiguration = { [key in keyof Required<OrganismesFilters>]: FilterConfiguration },
->(filters: Filters, filtersConfiguration: FiltersConfiguration): any[] {
-  return Object.entries(filters).reduce((matchFilters, [filterName, filterValue]) => {
-    const filterConfiguration = filtersConfiguration[filterName];
-    if (!filterConfiguration) {
-      return matchFilters;
-    }
-    return [
-      ...matchFilters,
-      {
-        [filterConfiguration.matchKey]: filterConfiguration.transformValue?.(filterValue) ?? filterValue,
-      },
-    ];
-  }, [] as any[]);
-}
