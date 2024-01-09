@@ -277,6 +277,10 @@ type IndicateursEffectifsRestriction = {
 export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
   const scope = ctx.acl.indicateursEffectifs;
 
+  if (scope === false) {
+    throw Boom.forbidden("Accès non authorisé");
+  }
+
   if (scope === true) {
     return {};
   }
