@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import { STATUT_FIABILISATION_ORGANISME } from "shared";
 
@@ -87,6 +88,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       nbOrganismeCreated++;
     } catch (error) {
       nbOrganismeNotCreated++;
+      captureException(error);
       await createJobEvent({
         jobname: JOB_NAME,
         date: new Date(),
@@ -116,6 +118,7 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       nbOrganismeUpdated++;
     } catch (error) {
       nbOrganismeNotUpdated++;
+      captureException(error);
       await createJobEvent({
         jobname: JOB_NAME,
         date: new Date(),

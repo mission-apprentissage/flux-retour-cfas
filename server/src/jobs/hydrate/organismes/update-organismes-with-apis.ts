@@ -1,3 +1,5 @@
+import { captureException } from "@sentry/node";
+
 import { updateOrganismeFromApis } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
@@ -28,6 +30,7 @@ export const updateMultipleOrganismesWithApis = async () => {
       await updateOrganismeFromApis(organisme);
       nbOrganismeUpdated++;
     } catch (error: any) {
+      captureException(error);
       nbOrganismeNotUpdated++;
       logger.error({ error }, `Erreur lors de la mise à jour de l'organisme ${organisme._id}: ${error.message}`);
     }

@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import axios from "axios";
 import { plausibleGoals } from "shared";
 
@@ -31,5 +32,6 @@ export const seedPlausibleGoals = async () => {
     }
   } catch (error: any) {
     console.error(error?.response?.data);
+    captureException(error);
   }
 };

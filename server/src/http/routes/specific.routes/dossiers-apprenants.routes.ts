@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import express from "express";
 import Joi from "joi";
 
@@ -64,6 +65,7 @@ export default () => {
     } catch (e: any) {
       const err = formatError(e);
       logger.error({ err }, "POST /dossiers-apprenants error");
+      captureException(new Error("POST /dossiers-apprenants error", { cause: err }));
 
       res.status(400).json({
         status: "ERROR",

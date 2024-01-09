@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import Boom from "boom";
 
 export default () => {
@@ -27,6 +28,10 @@ export default () => {
         statusCode: rawError.status || 500,
         ...(!rawError.message ? { message: "Une erreur est survenue" } : {}),
       });
+    }
+
+    if (!boomError.isServer) {
+      captureException(rawError);
     }
 
     const { error, message, details, issues } = boomError.output.payload;

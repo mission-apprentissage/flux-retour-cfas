@@ -1,3 +1,5 @@
+import { captureException } from "@sentry/node";
+
 import { getNiveauFormationFromLibelle } from "@/common/actions/formations.actions";
 import logger from "@/common/logger";
 import { effectifsDb, formationsCatalogueDb } from "@/common/model/collections";
@@ -54,6 +56,7 @@ export async function hydrateEffectifsFormationsNiveaux() {
     } catch (err) {
       nbEffectifsNotUpdated++;
       logger.error(JSON.stringify(err));
+      captureException(err);
     }
   }
 

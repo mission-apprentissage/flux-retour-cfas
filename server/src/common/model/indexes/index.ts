@@ -1,3 +1,5 @@
+import { captureException } from "@sentry/node";
+
 import logger from "@/common/logger";
 import { modelDescriptors } from "@/common/model/collections";
 import { getDbCollection, getCollectionList } from "@/common/mongodb";
@@ -14,6 +16,7 @@ export const createIndexes = async () => {
           await getDbCollection(descriptor.collectionName).createIndex(index, options);
         } catch (err) {
           console.error(`Error creating indexes for ${descriptor.collectionName}: ${err}`);
+          captureException(new Error(`Error creating indexes for ${descriptor.collectionName}`, { cause: err }));
         }
       })
     );

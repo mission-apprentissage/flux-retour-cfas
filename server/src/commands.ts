@@ -176,6 +176,7 @@ function createJobAction(name) {
       }
     } catch (err) {
       logger.error(err);
+      captureException(err);
       program.error("Command failed", { exitCode: 2 });
     }
   };

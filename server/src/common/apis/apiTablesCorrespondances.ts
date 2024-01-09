@@ -1,3 +1,5 @@
+import { captureException } from "@sentry/node";
+
 import logger from "@/common/logger";
 import config from "@/config";
 
@@ -25,6 +27,7 @@ export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
       `getCfdInfo: something went wrong while requesting CFD "${cfd}"`,
       error.response?.data || error.message
     );
+    captureException(new Error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, { cause: error }));
     return null;
   }
 };
@@ -38,6 +41,11 @@ export const getCodePostalInfo = async (codePostal: string | null | undefined): 
     logger.error(
       `getCodePostalInfo: something went wrong while requesting code postal "${codePostal}": ${error.message}`,
       error.code || error.response?.status
+    );
+    captureException(
+      new Error(`getCodePostalInfo: something went wrong while requesting code postal "${codePostal}"`, {
+        cause: error,
+      })
     );
     return null;
   }

@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { addDays } from "date-fns";
 import { getAnneesScolaireListFromDate, CODES_STATUT_APPRENANT } from "shared";
 
@@ -121,5 +122,6 @@ const updateEffectifRupturantToAbandon = async (effectif, abandonDate) => {
     );
   } catch (err) {
     logger.error(err);
+    captureException(err);
   }
 };

@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
 
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
@@ -56,6 +57,7 @@ const updateEnseigneRaisonSocialeOFAInconnu = async (idOfa: ObjectId, siretOfa: 
       return false;
     } catch (err) {
       logger.error(`updateEnseigneRaisonSocialeOFAInconnu > Erreur > ${err}`);
+      captureException(err);
     }
   } else {
     logger.error(`updateEnseigneRaisonSocialeOFAInconnu > Erreur API > ${dataSiret.messages.api_entreprise_info}`);

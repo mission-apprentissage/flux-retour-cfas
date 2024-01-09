@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 
 import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
@@ -137,11 +138,11 @@ const hydrateReseauFile = async (filename: string) => {
 
               organismeUpdatedCount++;
             } catch (err) {
-              logger.error(
-                `Erreur pour le fichier ${filename} lors de la mise à jour de l'organisme SIRET : ${
-                  organismeFromFile.siret
-                } - UAI : ${organismeFromFile.uai} pour les réseaux : ${JSON.stringify(reseauxFromFile)}`
-              );
+              const msg = `Erreur pour le fichier ${filename} lors de la mise à jour de l'organisme SIRET : ${
+                organismeFromFile.siret
+              } - UAI : ${organismeFromFile.uai} pour les réseaux : ${JSON.stringify(reseauxFromFile)}`;
+              captureException(new Error(msg, { cause: err }));
+              logger.error(msg);
               organismeUpdateErrorCount++;
               logger.error(err);
             }
@@ -152,6 +153,7 @@ const hydrateReseauFile = async (filename: string) => {
         logger.debug(`Aucun organisme trouvé pour le SIRET ${organismeFromFile.siret}`);
       }
     } catch (err) {
+      captureException(err);
       logger.error(err);
     }
   });
