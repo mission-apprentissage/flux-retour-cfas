@@ -2,11 +2,10 @@ import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
 import { WithId } from "mongodb";
+import { IndicateursEffectifsAvecFormation, Rncp } from "shared";
 import { PermissionsOrganisme } from "shared/constants/permissions";
 
-import { IndicateursEffectifsAvecFormation } from "@/common/actions/indicateurs/indicateurs";
 import { Organisme } from "@/common/model/@types";
-import { Rncp } from "@/common/model/@types/Rncp";
 import { effectifsDb, organisationsDb, organismesDb, rncpDb, usersMigrationDb } from "@/common/model/collections";
 import {
   historySequenceApprenti,

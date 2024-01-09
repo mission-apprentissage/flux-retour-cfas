@@ -1,5 +1,4 @@
-import { ITeteDeReseauKey } from "shared";
-import { TypeEffectifNominatif } from "shared/constants/indicateurs";
+import { ITeteDeReseauKey, TypeEffectifNominatif } from "shared";
 
 // récupéré de l'API et adapté pour ne pas avoir certains champs optionnels
 export interface Organisme {

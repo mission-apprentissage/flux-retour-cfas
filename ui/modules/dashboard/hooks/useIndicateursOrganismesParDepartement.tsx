@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { IndicateursOrganismesAvecDepartement } from "shared";
 
 import { _get } from "@/common/httpClient";
-import { IndicateursOrganismesAvecDepartement } from "@/modules/models/indicateurs";
 
 type UsePublicIndicateursCoverage = {
   data: IndicateursOrganismesAvecDepartement[];

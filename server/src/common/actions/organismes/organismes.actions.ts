@@ -1,7 +1,6 @@
 import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
-import { getAnneesScolaireListFromDate } from "shared";
-import { Acl, PermissionsOrganisme } from "shared/constants/permissions";
+import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme } from "shared";
 import { v4 as uuidv4 } from "uuid";
 
 import {

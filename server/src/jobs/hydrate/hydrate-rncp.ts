@@ -6,9 +6,9 @@ import { PromisePool } from "@supercharge/promise-pool";
 import AdmZip from "adm-zip";
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
+import { Rncp } from "shared";
 
 import parentLogger from "@/common/logger";
-import { Rncp } from "@/common/model/@types/Rncp";
 import { rncpDb } from "@/common/model/collections";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
 import { getStaticFilePath } from "@/common/utils/getStaticFilePath";

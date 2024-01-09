@@ -22,6 +22,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { ReactNode, useMemo, useState } from "react";
+import { IndicateursEffectifsAvecDepartement } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
@@ -37,7 +38,6 @@ import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
 import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
 import { TeamIcon } from "@/modules/dashboard/icons";
 import { convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
-import { IndicateursEffectifsAvecDepartement } from "@/modules/models/indicateurs";
 import { LockFill } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });

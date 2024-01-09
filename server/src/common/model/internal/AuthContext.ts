@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Acl } from "shared/constants/permissions";
+import { Acl } from "shared";
 
 import { Organisation } from "@/common/model/organisations.model";
 

@@ -6,17 +6,17 @@ import { Bin, calculateBins } from "@/modules/models/graphs";
 
 const defaultFillColor = "#ffffff";
 
-interface Props<Data extends object> {
+interface Props<K extends string, Data extends { [key in K]: number }> {
   donneesAvecDepartement: (Data & { departement: string })[];
   tooltipContent: (donnees: Data) => JSX.Element;
 
-  dataKey: string; // 1 seule via param pour l'instant, sera géré plus tard via filtre interne uniquement
+  dataKey: K; // 1 seule via param pour l'instant, sera géré plus tard via filtre interne uniquement
   minColor: string;
   maxColor: string;
   pourcentage?: boolean;
 }
 
-function CarteFrance<Data extends object>(props: Props<Data>) {
+function CarteFrance<K extends string, Data extends { [key in K]: number }>(props: Props<K, Data>) {
   const [tooltipInfos, setTooltipInfos] = useState({
     x: 0,
     y: 0,

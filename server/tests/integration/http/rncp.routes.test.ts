@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axiosist";
+import { Rncp } from "shared";
 
-import { Rncp } from "@/common/model/@types/Rncp";
 import { organismesDb, rncpDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 import { organismes, testPermissions } from "@tests/utils/permissions";

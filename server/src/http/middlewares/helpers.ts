@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ObjectId } from "mongodb";
-import { PermissionOrganisme } from "shared/constants/permissions";
+import { PermissionOrganisme } from "shared";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
 import { effectifsDb } from "@/common/model/collections";
