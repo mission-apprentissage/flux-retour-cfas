@@ -139,8 +139,8 @@ const DashboardTransverse = () => {
           </Tooltip>
         </Heading>
         <Text fontSize={14} mt="8">
-          Ces chiffres reflètent partiellement les effectifs de l’apprentissage de votre périmètre&nbsp;: une partie
-          des organismes de formation en apprentissage ne transmettent pas encore leurs données au tableau de bord (voir
+          Ces chiffres reflètent partiellement les effectifs de l’apprentissage de votre périmètre&nbsp;: une partie des
+          organismes de formation en apprentissage ne transmettent pas encore leurs données au tableau de bord (voir
           carte «&nbsp;Taux de couverture&nbsp;» ci-dessous).
         </Text>
         <HStack mt={8}>
