@@ -20,5 +20,6 @@ export default function useAuth() {
     organisationType,
     refreshSession,
     organisation: auth?.organisation ?? null,
+    acl: auth?.acl ?? null,
   };
 }

@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import passport from "passport";
 import { Strategy, ExtractJwt, Strategy as JWTStrategy } from "passport-jwt";
 
+import { getAcl } from "@/common/actions/helpers/permissions-organisme";
 import { getOrganisationById } from "@/common/actions/organisations.actions";
 import { findSessionByToken, removeSession } from "@/common/actions/sessions.actions";
 import { getUserByEmail, updateUser } from "@/common/actions/users.actions";
@@ -25,7 +26,7 @@ export const authMiddleware = () => {
           if (Date.now() > exp * 1000) {
             throw Boom.unauthorized("Vous n'êtes pas connecté");
           }
-          const user = (await getUserByEmail(jwtPayload.email)) as AuthContext | null;
+          const user = await getUserByEmail(jwtPayload.email);
           if (!user) {
             throw Boom.unauthorized("Vous n'êtes pas connecté");
           }
@@ -38,13 +39,46 @@ export const authMiddleware = () => {
             throw Boom.forbidden("Votre compte n'est pas encore validé.");
           }
 
+          let impersonating;
+
           if (jwtPayload.impersonatedOrganisation) {
-            user.impersonating = true;
+            impersonating = true;
             user.organisation_id = new ObjectId(jwtPayload.impersonatedOrganisation._id);
           }
-          user.organisation =
+          const organisation =
             jwtPayload.impersonatedOrganisation ?? (await getOrganisationById(user.organisation_id as ObjectId));
-          done(null, user);
+
+          const acl = await getAcl(organisation);
+
+          const ctx: AuthContext = {
+            _id: user._id,
+            civility: user.civility,
+            nom: user.nom,
+            prenom: user.prenom,
+            email: user.email,
+            organisation_id: user.organisation_id,
+            account_status: user.account_status,
+            invalided_token: user.invalided_token,
+            has_accept_cgu_version: "",
+            impersonating,
+            organisation,
+            last_connection: user.last_connection,
+            created_at: user.created_at,
+            fonction: user.fonction,
+            password_updated_at: user.password_updated_at,
+            telephone: user.telephone,
+            acl,
+          };
+
+          if (user.has_accept_cgu_version) {
+            ctx.has_accept_cgu_version = user.has_accept_cgu_version;
+          }
+
+          if ("username" in user && typeof user.username === "string") {
+            ctx.username = user.username;
+          }
+
+          done(null, ctx);
         } catch (err) {
           done(err);
         }

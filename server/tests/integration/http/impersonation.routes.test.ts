@@ -160,6 +160,37 @@ it("End to end - imposture d'organisation", async () => {
       type: "DREETS",
     },
     organisation_id: expect.any(String),
+    acl: {
+      configurerModeTransmission: false,
+      effectifsNominatifs: {
+        abandon: {
+          region: {
+            $in: ["53"],
+          },
+        },
+        apprenant: false,
+        apprenti: false,
+        inconnu: false,
+        inscritSansContrat: {
+          region: {
+            $in: ["53"],
+          },
+        },
+        rupturant: {
+          region: {
+            $in: ["53"],
+          },
+        },
+      },
+      indicateursEffectifs: {
+        region: {
+          $in: ["53"],
+        },
+      },
+      infoTransmissionEffectifs: true,
+      manageEffectifs: false,
+      viewContacts: true,
+    },
   });
 
   response = await httpClient.delete("/api/v1/admin/impersonate", { headers: { cookie } });
@@ -188,5 +219,20 @@ it("End to end - imposture d'organisation", async () => {
       type: "ADMINISTRATEUR",
     },
     organisation_id: expect.any(String),
+    acl: {
+      configurerModeTransmission: true,
+      effectifsNominatifs: {
+        abandon: true,
+        apprenant: true,
+        apprenti: true,
+        inconnu: true,
+        inscritSansContrat: true,
+        rupturant: true,
+      },
+      indicateursEffectifs: true,
+      infoTransmissionEffectifs: true,
+      manageEffectifs: true,
+      viewContacts: true,
+    },
   });
 });

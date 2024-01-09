@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { Acl } from "shared/constants/permissions";
 
 import { Organisation } from "@/common/model/organisations.model";
 
@@ -21,8 +22,15 @@ export interface AuthContext<IOrganisation = Organisation> {
   // source organisme id for V3 API
   source_organisme_id?: string;
   // legacy field used for ERPs
-  username: string;
+  username?: string;
+  last_connection?: Date;
+  created_at?: Date;
+  fonction?: string;
+  password_updated_at?: Date;
+  telephone?: string;
 
   // only admins can impersonate organisations
   impersonating?: boolean;
+
+  acl: Acl;
 }

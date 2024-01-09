@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { _get } from "@/common/httpClient";
-import { EffectifsFilters } from "@/modules/models/effectifs-filters";
+import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 import { IndicateursEffectifs, IndicateursEffectifsAvecDepartement } from "@/modules/models/indicateurs";
 
 type UsePublicIndicateurs = {
@@ -15,13 +15,12 @@ export function usePublicIndicateursEffectifs(
   effectifsFilters: Partial<EffectifsFilters> & Pick<EffectifsFilters, "date">,
   enabled: boolean
 ): UsePublicIndicateurs {
+  const { date, ...rest } = effectifsFilters;
   const { data, isLoading } = useQuery<IndicateursEffectifsAvecDepartement[]>(
-    ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString() })],
+    ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString(), rest })],
     () =>
       _get("/api/v1/indicateurs/effectifs/par-departement", {
-        params: {
-          date: effectifsFilters.date,
-        },
+        params: convertEffectifsFiltersToQuery(effectifsFilters),
       }),
     { enabled }
   );

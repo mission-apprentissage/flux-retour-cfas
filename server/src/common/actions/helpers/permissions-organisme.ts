@@ -1,20 +1,28 @@
+import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
-import { ITeteDeReseauKey, isTeteDeReseauResponsable } from "shared/constants";
-import { TypeEffectifNominatif } from "shared/constants/indicateurs";
-import { Acl, PermissionScope, PermissionsOrganisme } from "shared/constants/permissions";
+import {
+  ITeteDeReseauKey,
+  isTeteDeReseauResponsable,
+  throwUnexpectedError,
+  TypeEffectifNominatif,
+  Acl,
+  PermissionScope,
+  PermissionsOrganisme,
+  assertUnreachable,
+} from "shared";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+import { Organisation } from "@/common/model/organisations.model";
 
 import { findOrganismeFormateursIds } from "./permissions";
 
 export type OrganismeWithPermissions = Organisme & { permissions: PermissionsOrganisme };
 
-export async function getAcl(ctx: AuthContext): Promise<Acl> {
-  const organisation = ctx.organisation;
+export async function getAcl(organisation: Organisation): Promise<Acl> {
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
       const userOrganisme = await organismesDb().findOne({
@@ -24,7 +32,7 @@ export async function getAcl(ctx: AuthContext): Promise<Acl> {
 
       if (!userOrganisme) {
         logger.error({ siret: organisation.siret, uai: organisation.uai }, "organisme de l'organisation non trouvé");
-        throw new Error("organisme de l'organisation non trouvé");
+        throw Boom.forbidden("organisme de l'organisation non trouvé");
       }
 
       const linkedOrganismesIds = [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)].map((o) =>
@@ -179,14 +187,6 @@ export async function getAcl(ctx: AuthContext): Promise<Acl> {
   }
 }
 
-function throwUnexpectedError(): never {
-  throw new Error("Unexpected Error");
-}
-
-function assertUnreachable(_key: never): never {
-  throwUnexpectedError();
-}
-
 function isInScope(scope: PermissionScope | boolean, organisme: WithId<Organisme>): boolean {
   if (typeof scope === "boolean") return scope;
 
@@ -230,8 +230,9 @@ export async function buildOrganismePermissions(
   ctx: AuthContext,
   organismeId: ObjectId
 ): Promise<PermissionsOrganisme> {
-  const [acl, organisme] = await Promise.all([getAcl(ctx), getOrganismeById(organismeId)]);
+  const organisme = await getOrganismeById(organismeId);
 
+  const acl = ctx.acl;
   const typeEffectifs = Object.keys(acl.effectifsNominatifs) as TypeEffectifNominatif[];
   const allowedEffectifsNominatifs = typeEffectifs.filter((type) =>
     isInScope(acl.effectifsNominatifs[type], organisme)
@@ -274,15 +275,14 @@ type IndicateursEffectifsRestriction = {
 
 // indicateurs.actions : getOrganismeIndicateursEffectifsParFormation, getOrganismeIndicateursEffectifs
 export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
-  const acl = await getAcl(ctx);
-  const scope = acl.indicateursEffectifs;
+  const scope = ctx.acl.indicateursEffectifs;
+
+  if (scope === false) {
+    throw Boom.forbidden("Accès non authorisé");
+  }
 
   if (scope === true) {
     return {};
-  }
-
-  if (scope === false) {
-    return { _id: null };
   }
 
   return Object.keys(scope).reduce((acc, k): IndicateursEffectifsRestriction => {

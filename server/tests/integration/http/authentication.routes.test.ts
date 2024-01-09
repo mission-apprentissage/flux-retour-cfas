@@ -89,6 +89,37 @@ describe("Authentification", () => {
         password_updated_at: date,
         prenom: "Jean",
         telephone: "",
+        acl: {
+          configurerModeTransmission: false,
+          effectifsNominatifs: {
+            abandon: {
+              region: {
+                $in: ["53"],
+              },
+            },
+            apprenant: false,
+            apprenti: false,
+            inconnu: false,
+            inscritSansContrat: {
+              region: {
+                $in: ["53"],
+              },
+            },
+            rupturant: {
+              region: {
+                $in: ["53"],
+              },
+            },
+          },
+          indicateursEffectifs: {
+            region: {
+              $in: ["53"],
+            },
+          },
+          infoTransmissionEffectifs: true,
+          manageEffectifs: false,
+          viewContacts: true,
+        },
       });
     });
 
