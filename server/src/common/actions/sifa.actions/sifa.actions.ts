@@ -173,7 +173,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           ? effectif.apprenant.dernier_organisme_uai
           : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
         : undefined,
-      DIPLOME: formatStringForSIFA(formationBcn?.libelle || effectif.formation.libelle_long || ""),
+      DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd),
       DUR_FORM_THEO: effectif.formation.duree_theorique_mois
         ? effectif.formation.duree_theorique_mois
         : // Les ERPs (ou les anciens fichiers de téléversement) pouvaient envoyer duree_theorique_formation
@@ -198,7 +198,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     };
 
     const apprenantFields = {
-      INE_RNIE: wrapNumString(effectif.apprenant.ine) ?? "ine",
+      INE: wrapNumString(effectif.apprenant.ine) ?? "",
       TEL_JEUNE: wrapNumString(effectif.apprenant.telephone?.replace("+33", "0")),
       MAIL_JEUNE: effectif.apprenant.courriel,
       HANDI: effectif.apprenant.rqth ? "1" : "0",
