@@ -32,7 +32,7 @@ export type PermissionScope = {
 export type Acl = {
   viewContacts: PermissionScope | boolean;
   infoTransmissionEffectifs: PermissionScope | boolean;
-  indicateursEffectifs: PermissionScope | true;
+  indicateursEffectifs: PermissionScope | boolean;
   effectifsNominatifs: { [key in TypeEffectifNominatif]: PermissionScope | boolean };
   manageEffectifs: PermissionScope | boolean;
   configurerModeTransmission: PermissionScope | boolean;
