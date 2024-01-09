@@ -192,8 +192,13 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       NAT_STR_JUR: "NC", // Unknown for now
     };
 
+    const notRequiredFields = {
+      TYPE_CFA: wrapNumString(effectif.apprenant.type_cfa),
+      RNCP: effectif.formation.rncp || "",
+    };
+
     const apprenantFields = {
-      INE: wrapNumString(effectif.apprenant.ine) ?? "ine",
+      INE: wrapNumString(effectif.apprenant.ine) ?? "",
       TEL_JEUNE: wrapNumString(effectif.apprenant.telephone?.replace("+33", "0")),
       MAIL_JEUNE: effectif.apprenant.courriel,
       HANDI: effectif.apprenant.rqth ? "1" : "0",
@@ -245,6 +250,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
 
     items.push({
       ...requiredFields,
+      ...notRequiredFields,
       ...apprenantFields,
       ...employeurFields,
       ...statutFields,

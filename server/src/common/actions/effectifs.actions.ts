@@ -38,7 +38,6 @@ export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifD
 
 /**
  * Méthode d'insertion d'un effectif en base de donnée
- * @returns
  */
 export const insertEffectif = async (data: Effectif) => {
   const { insertedId } = await effectifsDb().insertOne(data);
@@ -46,34 +45,9 @@ export const insertEffectif = async (data: Effectif) => {
 };
 
 /**
- * Méthode de récupération des effectifs d'un organisme
- * @param {*} organisme_id
- * @param {*} projection
- * @returns
- */
-export const findEffectifs = async (organisme_id, projection = {}) => {
-  return await effectifsDb()
-    .find({ organisme_id: new ObjectId(organisme_id) }, { projection })
-    .toArray();
-};
-
-/**
- * Méthode de récupération d'un effectif depuis un id
- * @param {string|ObjectId} id
- * @param {*} projection
- * @returns
- */
-export const findEffectifById = async (id, projection = {}) => {
-  const found = await effectifsDb().findOne({ _id: new ObjectId(id) }, { projection });
-  return found;
-};
-
-/**
  * Méthode de mise à jour d'un effectif depuis son id
- * @param {*} id
- * @returns
  */
-export const updateEffectif = async (_id: ObjectId, data, opt = { keepPreviousErrors: false }) => {
+export const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErrors: false }) => {
   const effectif = await effectifsDb().findOne({ _id });
   if (!effectif) {
     throw new Error(`Unable to find effectif ${_id.toString()}`);

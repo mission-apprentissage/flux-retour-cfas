@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { getSIFADate } from "shared";
 
@@ -102,6 +102,15 @@ const SIFAPage = (props: SIFAPageProps) => {
     [organismesEffectifs]
   );
   const [showOnlyMissingSifa, setShowOnlyMissingSifa] = useState(false);
+  const [hasTrackedMissingSifa, setHasTrackedMissingSifa] = useState(false);
+
+  const handleToggleMissingSifaChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!hasTrackedMissingSifa) {
+      trackPlausibleEvent("clic_toggle_sifa_données_manquantes");
+      setHasTrackedMissingSifa(true);
+    }
+    setShowOnlyMissingSifa(e.target.checked);
+  };
 
   if (isLoading) {
     return (
@@ -153,7 +162,12 @@ const SIFAPage = (props: SIFAPageProps) => {
                   Pour <strong>faciliter</strong> la remontée d’information avec les données demandées par l’enquête
                   SIFA, le tableau de bord vous permet de réaliser les contrôles, compléter les éventuelles données
                   manquantes et générer un fichier compatible à déposer sur la{" "}
-                  <Link variant="link" href="https://dep.adc.education.fr/sifa2/login" isExternal>
+                  <Link
+                    variant="link"
+                    href="https://dep.adc.education.fr/sifa2/login"
+                    isExternal
+                    plausibleGoal="clic_depot_plateforme_sifa"
+                  >
                     plateforme SIFA
                     <ExternalLinkLine w=".7rem" h=".7rem" ml={1} />
                   </Link>
@@ -166,7 +180,13 @@ const SIFAPage = (props: SIFAPageProps) => {
                 </ListItem>
               </UnorderedList>
             </Text>
-            <Link variant="link" href="/InstructionsSIFA_31122023.pdf" mt={4} isExternal>
+            <Link
+              variant="link"
+              href="/InstructionsSIFA_31122023.pdf"
+              mt={4}
+              isExternal
+              plausibleGoal="telechargement_fichier_instruction_sifa"
+            >
               Fichier d’instruction SIFA (2023)
               <DownloadLine mb={1} ml={2} fontSize="xs" />
             </Link>
@@ -180,7 +200,8 @@ const SIFAPage = (props: SIFAPageProps) => {
               Attention
             </Text>
             <Text color="grey.800">
-              Vérifiez que tous vos apprentis soient bien présents dans le fichier. Sinon, complétez-le.
+              Avant de téléverser votre fichier SIFA sur le portail dédié de la DEPP, veuillez supprimer la première
+              ligne d’en-tête.
             </Text>
           </Ribbons>
         </HStack>
@@ -214,9 +235,7 @@ const SIFAPage = (props: SIFAPageProps) => {
               id="show-only-incomplete-toggle"
               variant="icon"
               isChecked={showOnlyMissingSifa}
-              onChange={(e) => {
-                setShowOnlyMissingSifa(e.target.checked);
-              }}
+              onChange={handleToggleMissingSifaChange}
               mr={2}
             />
             <FormLabel htmlFor="show-only-incomplete-toggle" mb="0" mr="0" cursor="pointer">
