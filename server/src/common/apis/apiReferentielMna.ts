@@ -1,4 +1,3 @@
-import logger from "@/common/logger";
 import config from "@/config";
 
 import { OrganismesReferentiel } from "../model/@types";
@@ -59,31 +58,4 @@ export const fetchOrganismes = async () => {
   });
 
   return organismes;
-};
-
-/**
- * @param {*} siret
- * @returns {Promise<import("./@types/MnaOrganisme.js").default|null>}
- */
-export const fetchOrganismeWithSiret = async (siret) => {
-  try {
-    const { data } = await axiosClient.get(`/organismes/${siret}`);
-
-    return data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data || err.code;
-    logger.error("API REFERENTIEL fetchOrganismeWithSiret something went wrong:", errorMessage);
-    return null;
-  }
-};
-
-export const fetchOrganismesWithUai = async (uai) => {
-  try {
-    const { data } = await axiosClient.get("/organismes", { params: { uais: uai } });
-    return data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data || err.code;
-    logger.error("API REFERENTIEL fetchOrganismesWithUai something went wrong:", errorMessage);
-    return null;
-  }
 };

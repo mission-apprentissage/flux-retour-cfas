@@ -32,6 +32,10 @@ export const SIFA_FIELDS = [
     value: "DIPLOME",
   },
   {
+    label: "RNCP",
+    value: "RNCP",
+  },
+  {
     label: "DUR_FORM_THEO",
     value: "DUR_FORM_THEO",
   },
