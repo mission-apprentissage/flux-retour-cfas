@@ -29,28 +29,28 @@ export interface IndicateursOrganismes {
     responsables: number;
     responsablesFormateurs: number;
     formateurs: number;
-    inconnue: number;
+    inconnues: number;
   };
   totalOrganismes: {
     total: number;
     responsables: number;
     responsablesFormateurs: number;
     formateurs: number;
-    inconnue: number;
+    inconnues: number;
   };
   organismesTransmetteurs: {
     total: number;
     responsables: number;
     responsablesFormateurs: number;
     formateurs: number;
-    inconnue: number;
+    inconnues: number;
   };
   organismesNonTransmetteurs: {
     total: number;
     responsables: number;
     responsablesFormateurs: number;
     formateurs: number;
-    inconnue: number;
+    inconnues: number;
   };
 }
 

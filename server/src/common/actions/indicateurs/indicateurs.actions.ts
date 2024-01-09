@@ -26,7 +26,7 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 export async function getIndicateursEffectifsParDepartement(
-  filters: DateFilters,
+  filters: DateFilters & TerritoireFilters,
   acl: Acl
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
   const indicateurs = await effectifsDb()

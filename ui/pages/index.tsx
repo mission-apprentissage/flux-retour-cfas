@@ -19,16 +19,14 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { ReactNode, useMemo, useState } from "react";
-import { IndicateursEffectifsAvecDepartement } from "shared";
+import { ReactNode, useState } from "react";
 
 import { _get } from "@/common/httpClient";
 import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDate } from "@/common/utils/dateUtils";
-import { formatNumber } from "@/common/utils/stringUtils";
+import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
@@ -36,8 +34,9 @@ import useAuth from "@/hooks/useAuth";
 import CarteFrance from "@/modules/dashboard/CarteFrance";
 import DashboardOrganisme from "@/modules/dashboard/DashboardOrganisme";
 import DashboardTransverse from "@/modules/dashboard/DashboardTransverse";
+import { useIndicateurNational } from "@/modules/dashboard/hooks/useIndicateursNational";
 import { TeamIcon } from "@/modules/dashboard/icons";
-import { convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
+import { TerritoireFilters } from "@/modules/models/effectifs-filters";
 import { LockFill } from "@/theme/components/icons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -394,60 +393,17 @@ function CardLabel({ children }: { children: ReactNode }) {
   );
 }
 
-interface IndicateursNationalFilters {
-  date: Date;
-  organisme_regions?: string[];
-}
-
-interface IndicateursOrganismesNature {
-  total: number;
-  totalWithoutTransmissionDate: number;
-  responsables: number;
-  responsablesFormateurs: number;
-  formateurs: number;
-}
-
 function SectionApercuChiffresCles() {
   const router = useRouter();
-  const [indicateursFilters] = useState<IndicateursNationalFilters>({
+  const [indicateursFilters] = useState<TerritoireFilters>({
     date: new Date(),
+    organisme_regions: [],
+    organisme_departements: [],
+    organisme_academies: [],
+    organisme_bassinsEmploi: [],
   });
 
-  const { data: indicateursNational, isLoading: indicateursNationalLoading } = useQuery<{
-    indicateursEffectifs: IndicateursEffectifsAvecDepartement[];
-    indicateursOrganismes: IndicateursOrganismesNature;
-  }>(
-    ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(indicateursFilters))],
-    () =>
-      _get("/api/v1/indicateurs/national", {
-        params: convertEffectifsFiltersToQuery(indicateursFilters),
-      }),
-    {
-      enabled: router.isReady,
-    }
-  );
-
-  const indicateursEffectifsNationaux = useMemo(
-    () =>
-      (indicateursNational?.indicateursEffectifs ?? []).reduce(
-        (acc, indicateursDepartement) => {
-          acc.apprenants += indicateursDepartement.apprenants;
-          acc.apprentis += indicateursDepartement.apprentis;
-          acc.inscritsSansContrat += indicateursDepartement.inscritsSansContrat;
-          acc.abandons += indicateursDepartement.abandons;
-          acc.rupturants += indicateursDepartement.rupturants;
-          return acc;
-        },
-        {
-          apprenants: 0,
-          apprentis: 0,
-          inscritsSansContrat: 0,
-          abandons: 0,
-          rupturants: 0,
-        }
-      ),
-    [indicateursNational?.indicateursEffectifs]
-  );
+  const { effectifs, organismes, isReady } = useIndicateurNational(indicateursFilters, router.isReady);
 
   return (
     <Container maxW="xl" py="b" px="0" mt="20">
@@ -463,11 +419,10 @@ function SectionApercuChiffresCles() {
       </Text>
       <Text fontSize="sm" mt="4" p="3" bg="#F9F8F6" borderRadius="4px" lineHeight="1">
         Le <Text as="b">{formatDate(new Date(), "d MMMM yyyy")}</Text>, le tableau de bord de l’apprentissage recense
-        sur le territoire national{" "}
-        <Text as="b">{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</Text>, dont{" "}
-        <Text as="b">{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</Text>,{" "}
-        <Text as="b">{formatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes sans contrat</Text> et{" "}
-        <Text as="b">{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</Text>.
+        sur le territoire national <Text as="b">{formatNumber(effectifs?.total.apprenants)} apprenants</Text>, dont{" "}
+        <Text as="b">{formatNumber(effectifs?.total.apprentis)} apprentis</Text>,{" "}
+        <Text as="b">{formatNumber(effectifs?.total.inscritsSansContrat)} jeunes sans contrat</Text> et{" "}
+        <Text as="b">{formatNumber(effectifs?.total.rupturants)} rupturants</Text>.
       </Text>
 
       <Grid templateColumns={["1fr", "1fr", "1fr 2fr"]} gap={4} my={4}>
@@ -479,7 +434,7 @@ function SectionApercuChiffresCles() {
               </Box>
               <Box>
                 <Text fontSize="40px" fontWeight="700" color="bluefrance">
-                  {formatNumber(indicateursNational?.indicateursOrganismes?.total)}
+                  {formatNumber(organismes?.total.totalOrganismes.total)}
                 </Text>
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                   organismes de formation en apprentissage
@@ -519,8 +474,7 @@ function SectionApercuChiffresCles() {
                   </Tooltip>
                 </Text>
                 <Text fontSize="zeta" color="mgalt">
-                  transmettent au tableau de bord sur{" "}
-                  <b>{formatNumber(indicateursNational?.indicateursOrganismes?.totalWithoutTransmissionDate)}</b> OFA
+                  transmettent au tableau de bord sur <b>{formatNumber(organismes?.total.totalOrganismes.total)}</b> OFA
                   fiables.
                 </Text>
                 <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
@@ -528,15 +482,14 @@ function SectionApercuChiffresCles() {
                   dont&nbsp;:
                 </Text>
                 <Text fontSize="zeta">
-                  <Text as="b">{formatNumber(indicateursNational?.indicateursOrganismes?.responsables)}</Text>{" "}
-                  responsables
+                  <Text as="b">{formatNumber(organismes?.total.totalOrganismes?.responsables)}</Text> responsables
                 </Text>
                 <Text fontSize="zeta">
-                  <Text as="b">{formatNumber(indicateursNational?.indicateursOrganismes?.responsablesFormateurs)}</Text>{" "}
+                  <Text as="b">{formatNumber(organismes?.total.totalOrganismes?.responsablesFormateurs)}</Text>{" "}
                   responsables et formateurs
                 </Text>
                 <Text fontSize="zeta">
-                  <Text as="b">{formatNumber(indicateursNational?.indicateursOrganismes?.formateurs)}</Text> formateurs
+                  <Text as="b">{formatNumber(organismes?.total.totalOrganismes?.formateurs)}</Text> formateurs
                 </Text>
                 <Tag
                   mt={4}
@@ -548,11 +501,7 @@ function SectionApercuChiffresCles() {
                 >
                   Soit&nbsp;
                   <Text as="b" fontSize="zeta">
-                    {Math.round(
-                      (100 * (indicateursNational?.indicateursOrganismes?.total || 0)) /
-                        (indicateursNational?.indicateursOrganismes?.totalWithoutTransmissionDate || 1)
-                    )}
-                    %
+                    {prettyFormatNumber(organismes?.total.tauxCouverture.total ?? 0)}%
                   </Text>
                   &nbsp;des établissements
                 </Tag>
@@ -570,7 +519,7 @@ function SectionApercuChiffresCles() {
                 </Box>
                 <Box>
                   <Text fontSize="40px" fontWeight="700" color="bluefrance">
-                    {formatNumber(indicateursEffectifsNationaux?.apprenants)}
+                    {formatNumber(effectifs?.total.apprenants)}
                   </Text>
                   <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                     apprenants
@@ -609,27 +558,26 @@ function SectionApercuChiffresCles() {
                     dont&nbsp;:
                   </Text>
                   <Text fontSize="zeta">
-                    <Text as="b">{formatNumber(indicateursEffectifsNationaux?.apprentis)}</Text> apprentis
+                    <Text as="b">{formatNumber(effectifs?.total.apprentis)}</Text> apprentis
                   </Text>
                   <Text fontSize="zeta">
-                    <Text as="b">{formatNumber(indicateursEffectifsNationaux?.inscritsSansContrat)}</Text> en formation
-                    sans contrat
+                    <Text as="b">{formatNumber(effectifs?.total.inscritsSansContrat)}</Text> en formation sans contrat
                   </Text>
                   <Text fontSize="zeta">
-                    <Text as="b">{formatNumber(indicateursEffectifsNationaux?.rupturants)}</Text> rupturants
+                    <Text as="b">{formatNumber(effectifs?.total.rupturants)}</Text> rupturants
                   </Text>
                 </Box>
               </HStack>
             </Center>
-            {indicateursNationalLoading && (
+            {!isReady && (
               <Center h="100%" w="100%">
                 <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
               </Center>
             )}
             <Center h="100%" w="100%" p="8">
-              {indicateursNational?.indicateursEffectifs && (
+              {isReady && (
                 <CarteFrance
-                  donneesAvecDepartement={indicateursNational.indicateursEffectifs}
+                  donneesAvecDepartement={effectifs.parDepartement}
                   dataKey="apprenants"
                   minColor="#DDEBFB"
                   maxColor="#366EC1"

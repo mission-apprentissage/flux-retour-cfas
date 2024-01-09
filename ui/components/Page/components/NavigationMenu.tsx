@@ -116,6 +116,7 @@ function NavBarTransverse(): ReactElement {
       </NavItem>
       <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
       <NavItem to="/indicateurs">Mes indicateurs</NavItem>
+      <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
       <MenuQuestions />
     </>
   );
@@ -145,6 +146,9 @@ function NavBarOrganismeFormation(): ReactElement {
           Mon enquête SIFA
         </NavItem>
       )}
+      <NavItem to="/national/indicateurs" exactMatch>
+        Indicateurs Nationaux
+      </NavItem>
       <MenuQuestions />
 
       <NavItem to="/parametres" ml="auto">
