@@ -200,7 +200,8 @@ const SIFAPage = (props: SIFAPageProps) => {
               Attention
             </Text>
             <Text color="grey.800">
-              Vérifiez que tous vos apprentis soient bien présents dans le fichier. Sinon, complétez-le.
+              Avant de téléverser votre fichier SIFA sur le portail dédié de la DEPP, veuillez supprimer la première
+              ligne d’en-tête.
             </Text>
           </Ribbons>
         </HStack>
