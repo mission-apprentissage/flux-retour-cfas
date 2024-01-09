@@ -78,9 +78,18 @@ const DashboardTransverse = () => {
   const filters = useMemo(() => ({ date: parseQueryFieldDate(router.query.date) }), [router.query]);
 
   const indicateursEffectifs = useIndicateursEffectifsParDepartement(filters, router.isReady);
-
-  const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
-    useIndicateursOrganismesParDepartement(filters.date);
+  const indicateursOrganismes = useIndicateursOrganismesParDepartement(filters.date);
+  const tauxCouvertureParDepartement = useMemo(
+    () =>
+      indicateursOrganismes.data.map((d) => ({
+        departement: d.departement,
+        tauxCouverture: d.tauxCouverture.total,
+        totalOrganismes: d.totalOrganismes.total,
+        organismesTransmetteurs: d.organismesTransmetteurs.total,
+        organismesNonTransmetteurs: d.organismesNonTransmetteurs.total,
+      })),
+    [indicateursOrganismes.data]
+  );
 
   const onDateChange = useCallback((date: Date) => {
     router.push(
@@ -126,7 +135,7 @@ const DashboardTransverse = () => {
                 <Text as="p">{getPerimetreDescription(organisation)}</Text>
               </Box>
             }
-            aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+            aria-label={getPerimetreDescription(organisation)}
           >
             <Box
               as="i"
@@ -272,14 +281,14 @@ const DashboardTransverse = () => {
               </Tooltip>
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
-            {indicateursOrganismesAvecDepartementLoading && (
+            {indicateursOrganismes.isLoading && (
               <Center h="100%">
                 <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
               </Center>
             )}
-            {indicateursOrganismesAvecDepartement && (
+            {!indicateursOrganismes.isLoading && (
               <CarteFrance
-                donneesAvecDepartement={indicateursOrganismesAvecDepartement}
+                donneesAvecDepartement={tauxCouvertureParDepartement}
                 dataKey="tauxCouverture"
                 minColor="#ECF5E0"
                 maxColor="#4F6C21"

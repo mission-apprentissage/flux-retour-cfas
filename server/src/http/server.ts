@@ -642,7 +642,7 @@ function setupRoutes(app: Application) {
       "/api/v1/indicateurs/organismes/par-departement",
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursOrganismesParDepartement(req.user, filters);
+        return await getIndicateursOrganismesParDepartement(filters, req.user.acl);
       })
     )
     .post(
