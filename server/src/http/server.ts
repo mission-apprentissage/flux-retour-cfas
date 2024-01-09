@@ -367,9 +367,6 @@ function setupRoutes(app: Application) {
     requireBearerAuthentication(),
     async (req, res, next) => {
       const organisme = (await getOrganismeByAPIKey(res.locals.token)) as WithId<Organisme>;
-      if (!organisme) {
-        throw new Error("Unauthorized");
-      }
 
       let erpSource = "INCONNU";
       if (organisme.erps?.length) {
