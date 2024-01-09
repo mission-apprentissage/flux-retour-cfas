@@ -1,15 +1,16 @@
-import Boom from "boom";
 import { ObjectId } from "mongodb";
-import { CODES_STATUT_APPRENANT } from "shared";
+import { Acl, CODES_STATUT_APPRENANT } from "shared";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
-import { EffectifsFiltersTerritoire, FullEffectifsFilters, TerritoireFilters } from "@/common/actions/helpers/filters";
+import {
+  EffectifsFiltersTerritoire,
+  FullEffectifsFilters,
+  TerritoireFilters,
+  combineFilters,
+} from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-
-import { getPermissionOrganisationQueryFilter } from "../helpers/permissions-organisation";
-import { getOrganismeIndicateursEffectifsRestriction } from "../helpers/permissions-organisme";
 
 import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import {
@@ -23,17 +24,18 @@ import {
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 export async function getIndicateursEffectifsParDepartement(
-  ctx: AuthContext,
-  filters: FullEffectifsFilters
+  filters: FullEffectifsFilters,
+  acl: Acl
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
   const indicateurs = await effectifsDb()
     .aggregate([
       {
-        $match: {
-          $and: [await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParDepartement")],
-          ...buildEffectifMongoFilters(filters),
-          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
-        },
+        $match: combineFilters(
+          {
+            "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
+          },
+          ...buildEffectifMongoFilters(filters, acl.indicateursEffectifs)
+        ),
       },
       {
         $project: {
@@ -193,12 +195,10 @@ export async function getIndicateursOrganismesParDepartement(
   const indicateurs = (await organismesDb()
     .aggregate([
       {
-        $match: {
-          $and: [await getPermissionOrganisationQueryFilter(ctx, "IndicateursOrganismesParDepartement")],
-          ...buildOrganismeMongoFilters(filters),
+        $match: combineFilters(...buildOrganismeMongoFilters(filters, ctx.acl.infoTransmissionEffectifs), {
           fiabilisation_statut: "FIABLE",
           ferme: false,
-        },
+        }),
       },
       {
         $project: {
@@ -241,14 +241,13 @@ export async function getIndicateursEffectifsParOrganisme(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: {
-          $and: [
-            await getOrganismeRestriction(organismeId),
-            await getPermissionOrganisationQueryFilter(ctx, "IndicateursEffectifsParOrganisme"),
-          ],
-          ...buildEffectifMongoFilters(filters),
-          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
-        },
+        $match: combineFilters(
+          await getOrganismeRestriction(organismeId),
+          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
+          {
+            "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
+          }
+        ),
       },
       {
         $project: {
@@ -442,11 +441,13 @@ export async function getOrganismeIndicateursEffectifsParFormation(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: {
-          $and: [await getOrganismeRestriction(organismeId), await getOrganismeIndicateursEffectifsRestriction(ctx)],
-          ...buildEffectifMongoFilters(filters),
-          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
-        },
+        $match: combineFilters(
+          await getOrganismeRestriction(organismeId),
+          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
+          {
+            "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
+          }
+        ),
       },
       {
         $project: {
@@ -627,19 +628,16 @@ export async function getEffectifsNominatifs(
   type: TypeEffectifNominatif,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
-  const permissionRestriction = await getPermissionOrganisationQueryFilter(ctx, "TéléchargementListesNominatives");
-  if (!permissionRestriction) {
-    throw Boom.forbidden("Permissions invalides");
-  }
-
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: {
-          $and: [await getOrganismeRestriction(organismeId), permissionRestriction],
-          ...buildEffectifMongoFilters(filters),
-          "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables et à modifier si on veut masquer les effectifs des OF inconnus
-        },
+        $match: combineFilters(
+          await getOrganismeRestriction(organismeId),
+          ...buildEffectifMongoFilters(filters, ctx.acl.effectifsNominatifs[type]),
+          {
+            "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
+          }
+        ),
       },
       {
         $addFields: {
@@ -787,10 +785,10 @@ export async function getOrganismeIndicateursEffectifs(
   const indicateurs = (await effectifsDb()
     .aggregate([
       {
-        $match: {
-          $and: [await getOrganismeRestriction(organismeId), await getOrganismeIndicateursEffectifsRestriction(ctx)],
-          ...buildEffectifMongoFilters(filters),
-        },
+        $match: combineFilters(
+          await getOrganismeRestriction(organismeId),
+          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs)
+        ),
       },
       {
         $project: {

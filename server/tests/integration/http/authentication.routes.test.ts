@@ -118,7 +118,11 @@ describe("Authentification", () => {
           },
           infoTransmissionEffectifs: true,
           manageEffectifs: false,
-          viewContacts: true,
+          viewContacts: {
+            region: {
+              $in: ["53"],
+            },
+          },
         },
       });
     });

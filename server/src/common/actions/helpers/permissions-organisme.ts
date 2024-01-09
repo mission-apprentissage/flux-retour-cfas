@@ -1,7 +1,6 @@
 import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
 import {
-  ITeteDeReseauKey,
   isTeteDeReseauResponsable,
   throwUnexpectedError,
   TypeEffectifNominatif,
@@ -81,7 +80,7 @@ export async function getAcl(organisation: Organisation): Promise<Acl> {
     case "DRAFPIC": {
       const sameRegion = { region: { $in: [organisation.code_region] } };
       return {
-        viewContacts: true,
+        viewContacts: sameRegion,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: sameRegion,
         effectifsNominatifs: {
@@ -100,7 +99,7 @@ export async function getAcl(organisation: Organisation): Promise<Acl> {
     case "CARIF_OREF_REGIONAL": {
       const sameRegion = { region: { $in: [organisation.code_region] } };
       return {
-        viewContacts: true,
+        viewContacts: sameRegion,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: sameRegion,
         effectifsNominatifs: {
@@ -118,7 +117,7 @@ export async function getAcl(organisation: Organisation): Promise<Acl> {
     case "DDETS": {
       const sameDepartement = { departement: { $in: [organisation.code_departement] } };
       return {
-        viewContacts: true,
+        viewContacts: sameDepartement,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: sameDepartement,
         effectifsNominatifs: {
@@ -136,7 +135,7 @@ export async function getAcl(organisation: Organisation): Promise<Acl> {
     case "ACADEMIE": {
       const sameAcademie = { academie: { $in: [organisation.code_academie] } };
       return {
-        viewContacts: true,
+        viewContacts: sameAcademie,
         infoTransmissionEffectifs: true,
         indicateursEffectifs: sameAcademie,
         effectifsNominatifs: {
@@ -262,56 +261,4 @@ export async function getOrganismePermission<Perm extends keyof PermissionsOrgan
 ): Promise<PermissionsOrganisme[Perm]> {
   const permissionsOrganisme = await buildOrganismePermissions(ctx, organismeId);
   return permissionsOrganisme[permission];
-}
-
-type IndicateursEffectifsRestriction = {
-  _id?: null;
-  organisme_id?: { $in: ReadonlyArray<ObjectId> };
-  "_computed.organisme.reseaux"?: { $in: ReadonlyArray<ITeteDeReseauKey> };
-  "_computed.organisme.region"?: { $in: ReadonlyArray<string> };
-  "_computed.organisme.departement"?: { $in: ReadonlyArray<string> };
-  "_computed.organisme.academie"?: { $in: ReadonlyArray<string> };
-};
-
-// indicateurs.actions : getOrganismeIndicateursEffectifsParFormation, getOrganismeIndicateursEffectifs
-export async function getOrganismeIndicateursEffectifsRestriction(ctx: AuthContext): Promise<any> {
-  const scope = ctx.acl.indicateursEffectifs;
-
-  if (scope === false) {
-    throw Boom.forbidden("Accès non authorisé");
-  }
-
-  if (scope === true) {
-    return {};
-  }
-
-  return Object.keys(scope).reduce((acc, k): IndicateursEffectifsRestriction => {
-    const key = k as keyof PermissionScope;
-
-    switch (key) {
-      case "id": {
-        const criteria = scope[key] ?? throwUnexpectedError();
-        return { ...acc, organisme_id: { $in: criteria.$in.map((id) => new ObjectId(id)) } };
-      }
-      case "reseau": {
-        const criteria = scope[key] ?? throwUnexpectedError();
-        return { ...acc, "_computed.organisme.reseaux": criteria };
-      }
-      case "region": {
-        const criteria = scope[key] ?? throwUnexpectedError();
-        return { ...acc, "_computed.organisme.region": criteria };
-      }
-      case "departement": {
-        const criteria = scope[key] ?? throwUnexpectedError();
-        return { ...acc, "_computed.organisme.departement": criteria };
-      }
-      case "academie": {
-        const criteria = scope[key] ?? throwUnexpectedError();
-        return { ...acc, "_computed.organisme.academie": criteria };
-      }
-      default: {
-        assertUnreachable(key);
-      }
-    }
-  }, {});
 }

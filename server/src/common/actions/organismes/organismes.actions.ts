@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate } from "shared";
-import { PermissionsOrganisme } from "shared/constants/permissions";
+import { Acl, PermissionsOrganisme } from "shared/constants/permissions";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -21,8 +21,8 @@ import { cleanProjection } from "@/common/utils/mongoUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { ConfigurationERP } from "@/common/validation/configurationERPSchema";
 
-import { getPermissionOrganisationQueryFilter } from "../helpers/permissions-organisation";
 import { OrganismeWithPermissions, buildOrganismePermissions } from "../helpers/permissions-organisme";
+import { buildOrganismePerimetreMongoFilters } from "../indicateurs/organismes/organismes-filters";
 import { InfoSiret } from "../infoSiret.actions-struct";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
@@ -669,9 +669,9 @@ export async function listContactsOrganisme(organismeId: ObjectId) {
   return organisation ? await listContactsOrganisation(organisation._id) : [];
 }
 
-export async function listOrganisationOrganismes(ctx: AuthContext): Promise<WithId<OrganismeWithPermissions>[]> {
+export async function listOrganisationOrganismes(acl: Acl): Promise<WithId<OrganismeWithPermissions>[]> {
   const organismes = (await organismesDb()
-    .find(await getPermissionOrganisationQueryFilter(ctx, "ListeOrganismes"), {
+    .find(buildOrganismePerimetreMongoFilters(acl.viewContacts), {
       projection: getOrganismeListProjection(true),
     })
     .toArray()) as WithId<OrganismeWithPermissions>[];

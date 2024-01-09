@@ -58,29 +58,28 @@ describe("Route indicateurs", () => {
     });
 
     describe("Permissions", () => {
-      // "Tête de réseau Responsable" is difficult to test using current test case fixtures & structure
-      const accesOrganisme: PermissionsTestConfig<number, "Tête de réseau Responsable"> = {
+      const accesOrganisme: PermissionsTestConfig<number> = {
         "OF cible": 1,
         "OF non lié": 0,
         "OF formateur": 0,
         "OF responsable": 1,
         "Tête de réseau même réseau": 1,
-        // "Tête de réseau Responsable": 1,
+        "Tête de réseau Responsable": 1,
         "Tête de réseau autre réseau": 0,
         "DREETS même région": 1,
-        "DREETS autre région": 1,
+        "DREETS autre région": 0,
         "DRAFPIC régional même région": 1,
-        "DRAFPIC régional autre région": 1,
+        "DRAFPIC régional autre région": 0,
         "DRAAF même région": 1,
-        "DRAAF autre région": 1,
+        "DRAAF autre région": 0,
         "Conseil Régional même région": 1,
-        "Conseil Régional autre région": 1,
+        "Conseil Régional autre région": 0,
         "CARIF OREF régional même région": 1,
-        "CARIF OREF régional autre région": 1,
+        "CARIF OREF régional autre région": 0,
         "DDETS même département": 1,
-        "DDETS autre département": 1,
+        "DDETS autre département": 0,
         "Académie même académie": 1,
-        "Académie autre académie": 1,
+        "Académie autre académie": 0,
         "Opérateur public national": 1,
         "CARIF OREF national": 1,
         Administrateur: 1,
