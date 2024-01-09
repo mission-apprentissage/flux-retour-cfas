@@ -1,18 +1,18 @@
 import { stripEmptyFields } from "@/common/utils/misc";
 
 export interface EffectifsFiltersQuery {
-  date: string;
-  organisme_regions?: string;
-  organisme_departements?: string;
-  organisme_academies?: string;
-  organisme_bassinsEmploi?: string;
-  organisme_reseaux?: string;
-  organisme_search: string;
-  apprenant_tranchesAge?: string;
-  formation_annees?: string;
-  formation_niveaux?: string;
-  formation_cfds?: string;
-  formation_secteursProfessionnels?: string;
+  date?: string | string[];
+  organisme_regions?: string | string[];
+  organisme_departements?: string | string[];
+  organisme_academies?: string | string[];
+  organisme_bassinsEmploi?: string | string[];
+  organisme_reseaux?: string | string[];
+  organisme_search?: string | string[];
+  apprenant_tranchesAge?: string | string[];
+  formation_annees?: string | string[];
+  formation_niveaux?: string | string[];
+  formation_cfds?: string | string[];
+  formation_secteursProfessionnels?: string | string[];
 }
 
 export interface EffectifsFilters {
@@ -30,20 +30,26 @@ export interface EffectifsFilters {
   formation_secteursProfessionnels: string[];
 }
 
+function parseQueryField(value: string | string[] | undefined): string[] {
+  if (value == null) return [];
+  if (Array.isArray(value)) return value;
+  return value.split(",");
+}
+
 export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): EffectifsFilters {
   return {
-    date: new Date(query.date ?? Date.now()),
-    organisme_regions: query.organisme_regions?.split(",") ?? [],
-    organisme_departements: query.organisme_departements?.split(",") ?? [],
-    organisme_academies: query.organisme_academies?.split(",") ?? [],
-    organisme_bassinsEmploi: query.organisme_bassinsEmploi?.split(",") ?? [],
-    organisme_reseaux: query.organisme_reseaux?.split(",") ?? [],
-    organisme_search: query.organisme_search ?? "",
-    apprenant_tranchesAge: query.apprenant_tranchesAge?.split(",") ?? [],
-    formation_annees: query.formation_annees?.split(",").map((i) => parseInt(i, 10)) ?? [],
-    formation_niveaux: query.formation_niveaux?.split(",") ?? [],
-    formation_cfds: query.formation_cfds?.split(",") ?? [],
-    formation_secteursProfessionnels: query.formation_secteursProfessionnels?.split(",") ?? [],
+    date: new Date(parseQueryField(query.date)[0] ?? Date.now()),
+    organisme_regions: parseQueryField(query.organisme_regions),
+    organisme_departements: parseQueryField(query.organisme_departements),
+    organisme_academies: parseQueryField(query.organisme_academies),
+    organisme_bassinsEmploi: parseQueryField(query.organisme_bassinsEmploi),
+    organisme_reseaux: parseQueryField(query.organisme_reseaux),
+    organisme_search: parseQueryField(query.organisme_search)[0] ?? "",
+    apprenant_tranchesAge: parseQueryField(query.apprenant_tranchesAge),
+    formation_annees: parseQueryField(query.formation_annees).map((i) => parseInt(i, 10)),
+    formation_niveaux: parseQueryField(query.formation_niveaux),
+    formation_cfds: parseQueryField(query.formation_cfds),
+    formation_secteursProfessionnels: parseQueryField(query.formation_secteursProfessionnels),
   };
 }
 

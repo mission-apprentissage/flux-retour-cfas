@@ -12,7 +12,6 @@ import {
   Text,
   Tooltip,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
@@ -41,9 +40,10 @@ import {
   EffectifsFiltersQuery,
   parseEffectifsFiltersFromQuery,
 } from "../models/effectifs-filters";
-import { IndicateursEffectifsAvecDepartement, IndicateursOrganismesAvecDepartement } from "../models/indicateurs";
 
 import CarteFrance from "./CarteFrance";
+import { usePublicIndicateursCoverage } from "./hooks/usePublicIndicateursCoverage";
+import { usePublicIndicateursEffectifs } from "./hooks/usePublicIndicateursEffectifs";
 import IndicateursGrid from "./IndicateursGrid";
 
 const DashboardTransverse = () => {
@@ -78,61 +78,17 @@ const DashboardTransverse = () => {
     return filters;
   }, [router.query]);
 
-  const { data: indicateursEffectifsAvecDepartement, isLoading: indicateursEffectifsAvecDepartementLoading } = useQuery<
-    IndicateursEffectifsAvecDepartement[]
-  >(
-    ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString() })],
-    () =>
-      _get("/api/v1/indicateurs/effectifs/par-departement", {
-        params: {
-          date: effectifsFilters.date,
-        },
-      }),
-    {
-      enabled: router.isReady,
-    }
-  );
+  const indicateursEffectifs = usePublicIndicateursEffectifs({ date: effectifsFilters.date }, router.isReady);
+  const indicateursEffectifsFiltres = usePublicIndicateursEffectifs(effectifsFilters, router.isReady);
 
-  const {
-    data: indicateursEffectifsAvecDepartementFiltres,
-    isLoading: indicateursEffectifsAvecDepartementFiltresLoading,
-  } = useQuery<IndicateursEffectifsAvecDepartement[]>(
-    ["indicateurs/effectifs", JSON.stringify(convertEffectifsFiltersToQuery(effectifsFilters))],
-    () =>
-      _get("/api/v1/indicateurs/effectifs/par-departement", {
-        params: convertEffectifsFiltersToQuery(effectifsFilters),
-      }),
-    {
-      enabled: router.isReady,
-    }
-  );
+  const indicateursEffectifsAvecDepartement = indicateursEffectifs.parDepartement;
+  const indicateursEffectifsAvecDepartementLoading = indicateursEffectifs.isLoading;
 
-  const indicateursEffectifsNationaux = useMemo(
-    () =>
-      (indicateursEffectifsAvecDepartementFiltres ?? []).reduce(
-        (acc, indicateursDepartement) => {
-          acc.apprenants += indicateursDepartement.apprenants;
-          acc.apprentis += indicateursDepartement.apprentis;
-          acc.inscritsSansContrat += indicateursDepartement.inscritsSansContrat;
-          acc.abandons += indicateursDepartement.abandons;
-          acc.rupturants += indicateursDepartement.rupturants;
-          return acc;
-        },
-        {
-          apprenants: 0,
-          apprentis: 0,
-          inscritsSansContrat: 0,
-          abandons: 0,
-          rupturants: 0,
-        }
-      ),
-    [indicateursEffectifsAvecDepartementFiltres]
-  );
+  const indicateursEffectifsAvecDepartementFiltresLoading = indicateursEffectifsFiltres.isLoading;
+  const indicateursEffectifsNationaux = indicateursEffectifsFiltres.national;
 
   const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
-    useQuery<IndicateursOrganismesAvecDepartement[]>(["indicateurs/organismes/par-departement"], () =>
-      _get("/api/v1/indicateurs/organismes/par-departement")
-    );
+    usePublicIndicateursCoverage();
 
   function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
     router.push(
