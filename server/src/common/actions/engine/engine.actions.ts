@@ -50,7 +50,9 @@ export const buildNewHistoriqueStatutApprenant = (
     });
 
     // find new element index in sorted historique to remove subsequent ones
-    const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
+    const newElementIndex = historiqueSorted.findIndex((el) =>
+      isEqual(new Date(el.date_statut), new Date(newHistoriqueElement.date_statut))
+    );
     newHistoriqueStatutApprenant = historiqueSorted.slice(0, newElementIndex + 1);
   }
 
