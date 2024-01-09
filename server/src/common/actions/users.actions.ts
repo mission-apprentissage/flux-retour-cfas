@@ -67,8 +67,6 @@ export const authenticate = async (email: string, password: string) => {
 
 /**
  * Méthode de récupération d'un user depuis son email
- * @param {*} email
- * @returns
  */
 export const getUserByEmail = async (email: string) => {
   const user = await usersMigrationDb().findOne(
@@ -86,10 +84,8 @@ export const getUserByEmail = async (email: string) => {
 
 /**
  * Méthode de récupération d'un utilisateur et de ses détails depuis son id
- * @param {*} _id
- * @returns
  */
-export const getDetailedUserById = async (_id) => {
+export const getDetailedUserById = async (_id: string | ObjectId) => {
   const user = await usersMigrationDb()
     .aggregate([
       { $match: { _id: new ObjectId(_id) } },
@@ -163,8 +159,6 @@ export const getDetailedUserById = async (_id) => {
 
 /**
  * Méthode de récupération de la liste des utilisateurs en base
- * @param {*} query
- * @returns
  */
 export const getAllUsers = async (
   query = {},
@@ -257,10 +251,8 @@ export const removeUser = async (_idStr) => {
 
 /**
  * Méthode de mise à jour d'un user depuis son id
- * @param {*} _id
- * @returns
  */
-export const updateUser = async (_id, data: Partial<UsersMigration>) => {
+export const updateUser = async (_id: string | ObjectId, data: Partial<UsersMigration>) => {
   const user = await usersMigrationDb().findOne({ _id: new ObjectId(_id) });
 
   if (!user) {
@@ -310,8 +302,6 @@ export async function changePassword(authContext: AuthContext, password: string)
 
 /**
  * Génération d'un token d'update de mot de passe
- * @param {*} email
- * @returns
  */
 export const generatePasswordUpdateToken = async (email: string) => {
   const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
@@ -340,7 +330,7 @@ export const generatePasswordUpdateToken = async (email: string) => {
   return token;
 };
 
-export async function updateUserProfile(ctx: AuthContext, infos: any) {
+export async function updateUserProfile(ctx: AuthContext, infos: Partial<UsersMigration>) {
   await usersMigrationDb().findOneAndUpdate(
     { _id: ctx._id },
     {
@@ -372,8 +362,6 @@ export async function resendConfirmationEmail(userId: string): Promise<void> {
 
 /**
  * Fonction de récupération de la liste des utilisateurs liés à un organismeId
- * @param organismeId
- * @returns
  */
 export const getUsersLinkedToOrganismeId = async (organismeId: ObjectId) => {
   return await usersMigrationDb()

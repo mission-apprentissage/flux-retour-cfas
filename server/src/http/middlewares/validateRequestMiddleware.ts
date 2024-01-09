@@ -18,9 +18,6 @@ type ErrorListItem = { type: "Query" | "Params" | "Body"; errors: ZodError<any> 
 /**
  * Forked from https://github.com/Aquila169/zod-express-middleware/blob/c434943b385eca214533f6c38caf83d513477dc8/src/index.ts#L50
  * so we can control the error handling
- *
- * @param {*} schemas
- * @returns
  */
 function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
   schemas: RequestProcessing<TParams, TQuery, TBody>

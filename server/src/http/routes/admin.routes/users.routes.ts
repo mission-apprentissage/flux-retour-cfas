@@ -64,11 +64,11 @@ export default () => {
     async ({ body, params }, res) => {
       const { id } = params;
 
-      await updateUser(id, {
+      await updateUser(id as string, {
         ...body,
         invalided_token: true,
       });
-      const user = await getDetailedUserById(id);
+      const user = await getDetailedUserById(id as string);
       if (!user) {
         throw Boom.notFound(`User with id ${id} not found`);
       }
@@ -84,7 +84,7 @@ export default () => {
     }),
     async ({ params }, res) => {
       const { id } = params;
-      const user = await getDetailedUserById(id);
+      const user = await getDetailedUserById(id as string);
       if (!user) {
         throw Boom.notFound(`User with id ${id} not found`);
       }
