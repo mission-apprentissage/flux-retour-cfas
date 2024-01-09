@@ -27,9 +27,8 @@ import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon }
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {
   convertEffectifsFiltersToQuery,
-  EffectifsFilters,
-  EffectifsFiltersQuery,
-  parseEffectifsFiltersFromQuery,
+  EffectifsFiltersFullQuery,
+  parseEffectifsFiltersFullFromQuery,
 } from "../models/effectifs-filters";
 import {
   convertPaginationInfosToQuery,
@@ -64,7 +63,7 @@ function IndicateursForm(props: IndicateursFormProps) {
   const { effectifsFilters, sort } = useMemo(() => {
     const { pagination, sort } = parsePaginationInfosFromQuery(router.query as unknown as PaginationInfosQuery);
     return {
-      effectifsFilters: parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery),
+      effectifsFilters: parseEffectifsFiltersFullFromQuery(router.query as unknown as EffectifsFiltersFullQuery),
       pagination: pagination,
       sort: sort ?? [{ desc: false, id: "nom" }],
     };
@@ -112,7 +111,7 @@ function IndicateursForm(props: IndicateursFormProps) {
     [indicateursEffectifs]
   );
 
-  function updateState(newParams: Partial<{ [key in keyof EffectifsFilters & PaginationInfos]: any }>) {
+  function updateState(newParams: Partial<{ [key in keyof EffectifsFiltersFullQuery & PaginationInfos]: any }>) {
     void router.push(
       {
         pathname: router.pathname,

@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { IndicateursEffectifs, IndicateursEffectifsAvecDepartement } from "shared";
 
 import { _get } from "@/common/httpClient";
-import { EffectifsFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
+import { DateFilters, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 
 type UseIndicateursEffectifsParDepartement = {
   isLoading: boolean;
@@ -12,12 +12,11 @@ type UseIndicateursEffectifsParDepartement = {
 };
 
 export function useIndicateursEffectifsParDepartement(
-  effectifsFilters: Partial<EffectifsFilters> & Pick<EffectifsFilters, "date">,
+  effectifsFilters: DateFilters,
   enabled: boolean
 ): UseIndicateursEffectifsParDepartement {
-  const { date, ...rest } = effectifsFilters;
   const { data, isLoading } = useQuery<IndicateursEffectifsAvecDepartement[]>(
-    ["indicateurs/effectifs", JSON.stringify({ date: effectifsFilters.date.toISOString(), rest })],
+    ["indicateurs/effectifs", effectifsFilters.date.toISOString()],
     () =>
       _get("/api/v1/indicateurs/effectifs/par-departement", {
         params: convertEffectifsFiltersToQuery(effectifsFilters),

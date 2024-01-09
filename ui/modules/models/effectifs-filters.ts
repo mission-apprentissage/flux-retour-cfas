@@ -1,26 +1,21 @@
 import { stripEmptyFields } from "@/common/utils/misc";
 
-export interface EffectifsFiltersQuery {
-  date?: string | string[];
-  organisme_regions?: string | string[];
-  organisme_departements?: string | string[];
-  organisme_academies?: string | string[];
-  organisme_bassinsEmploi?: string | string[];
-  organisme_reseaux?: string | string[];
-  organisme_search?: string | string[];
-  apprenant_tranchesAge?: string | string[];
-  formation_annees?: string | string[];
-  formation_niveaux?: string | string[];
-  formation_cfds?: string | string[];
-  formation_secteursProfessionnels?: string | string[];
+export interface DateFilters {
+  date: Date;
 }
 
-export interface EffectifsFilters {
-  date: Date;
+export interface TerritoireFilters extends DateFilters {
   organisme_regions: string[];
   organisme_departements: string[];
   organisme_academies: string[];
   organisme_bassinsEmploi: string[];
+}
+
+export type QueryFilter<T> = {
+  [K in keyof T]?: string | string[];
+};
+
+export interface EffectifsFiltersFull extends TerritoireFilters {
   organisme_reseaux: string[];
   organisme_search: string;
   apprenant_tranchesAge: string[];
@@ -29,6 +24,8 @@ export interface EffectifsFilters {
   formation_cfds: string[];
   formation_secteursProfessionnels: string[];
 }
+
+export type EffectifsFiltersFullQuery = QueryFilter<EffectifsFiltersFull>;
 
 function parseQueryField(value: string | string[] | undefined): string[] {
   if (value == null) return [];
@@ -40,13 +37,19 @@ export function parseQueryFieldDate(value: string | string[] | undefined): Date 
   return new Date(parseQueryField(value)[0] ?? Date.now());
 }
 
-export function parseEffectifsFiltersFromQuery(query: EffectifsFiltersQuery): EffectifsFilters {
+export function parseTerritoireFiltersFromQuery(query: QueryFilter<TerritoireFilters>): TerritoireFilters {
   return {
     date: parseQueryFieldDate(query.date),
     organisme_regions: parseQueryField(query.organisme_regions),
     organisme_departements: parseQueryField(query.organisme_departements),
     organisme_academies: parseQueryField(query.organisme_academies),
     organisme_bassinsEmploi: parseQueryField(query.organisme_bassinsEmploi),
+  };
+}
+
+export function parseEffectifsFiltersFullFromQuery(query: QueryFilter<EffectifsFiltersFull>): EffectifsFiltersFull {
+  return {
+    ...parseTerritoireFiltersFromQuery(query),
     organisme_reseaux: parseQueryField(query.organisme_reseaux),
     organisme_search: parseQueryField(query.organisme_search)[0] ?? "",
     apprenant_tranchesAge: parseQueryField(query.apprenant_tranchesAge),
@@ -62,8 +65,8 @@ export function convertDateFiltersToQuery(date: Date | undefined | null) {
 }
 
 export function convertEffectifsFiltersToQuery(
-  effectifsFilters: Partial<EffectifsFilters>
-): Partial<EffectifsFiltersQuery> {
+  effectifsFilters: Partial<EffectifsFiltersFull>
+): Partial<QueryFilter<EffectifsFiltersFull>> {
   return stripEmptyFields({
     date: convertDateFiltersToQuery(effectifsFilters.date),
     organisme_regions: effectifsFilters.organisme_regions?.join(","),
