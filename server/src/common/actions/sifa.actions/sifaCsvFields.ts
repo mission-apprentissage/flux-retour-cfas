@@ -1,7 +1,7 @@
 export const SIFA_FIELDS = [
   {
-    label: "INE",
-    value: "INE",
+    label: "INE_RNIE",
+    value: "INE_RNIE",
   },
   {
     label: "NUMERO_UAI",
@@ -30,6 +30,10 @@ export const SIFA_FIELDS = [
   {
     label: "DIPLOME",
     value: "DIPLOME",
+  },
+  {
+    label: "RNCP",
+    value: "RNCP",
   },
   {
     label: "DUR_FORM_THEO",
