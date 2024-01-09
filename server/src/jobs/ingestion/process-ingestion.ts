@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import { Filter, ObjectId, WithId } from "mongodb";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
@@ -182,6 +183,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       return false;
     }
   } catch (err: any) {
+    captureException(err);
     itemLogger.error({ duration: Date.now() - start, err, detailedError: err }, "failed processing item");
     await effectifsQueueDb().updateOne(
       { _id: effectifQueue._id },

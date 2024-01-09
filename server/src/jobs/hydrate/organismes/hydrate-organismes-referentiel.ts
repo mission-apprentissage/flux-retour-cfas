@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 
 import { createJobEvent } from "@/common/actions/jobEvents.actions";
@@ -80,6 +81,7 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
     } as OrganismesReferentiel);
     nbOrganismeCreated++;
   } catch (error) {
+    captureException(error);
     nbOrganismeNotCreated++;
     await createJobEvent({
       jobname: JOB_NAME,

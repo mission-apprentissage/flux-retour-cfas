@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { v4 as uuidv4 } from "uuid";
 
 import logger from "@/common/logger";
@@ -129,6 +130,7 @@ export async function sendStoredEmail<T extends TemplateName>(
     await addEmailMessageId(emailToken, messageId);
   } catch (err: any) {
     logger.error({ err, template: templateName }, "error sending email");
+    captureException(err);
     await addEmailError(emailToken, err);
   }
 }

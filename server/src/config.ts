@@ -62,9 +62,6 @@ const config = {
       storageName: env.get("MNA_TDB_OVH_STORAGE_CONTAINER_NAME").asString(),
     },
   },
-  sentry: {
-    dsn: env.get("MNA_TDB_SENTRY_DSN").asString(),
-  },
   organismesConsultationApiKey: env.get("MNA_TDB_ORGANISMES_CONSULTATION_API_KEY").asString(),
 
   // API métiers externes

@@ -192,6 +192,7 @@ function setupRoutes(app: Application) {
           mongodbHealthy = true;
         } catch (err) {
           logger.error({ err }, "healthcheck failed");
+          Sentry.captureException(new Error("healthcheck failed", { cause: err }));
         }
 
         return {

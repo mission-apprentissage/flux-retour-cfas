@@ -1,3 +1,5 @@
+import { captureException } from "@sentry/node";
+
 import parentLogger from "@/common/logger";
 import config from "@/config";
 
@@ -43,6 +45,7 @@ export const getCatalogFormationsForOrganisme = async (uai: string, page = 1): P
     return formations;
   } catch (err: any) {
     logger.error("getFormationsForOrganisme error", err.response?.data || err.message);
+    captureException(new Error("getFormationsForOrganisme error", { cause: err }));
     return [];
   }
 };

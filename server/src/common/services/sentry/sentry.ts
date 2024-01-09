@@ -5,16 +5,18 @@ import config from "../../../config";
 
 export function getSentryOptions() {
   return {
-    dsn: config.sentry.dsn,
     tracesSampleRate: config.env === "production" ? 0.1 : 1.0,
-    tracePropagationTargets: [/\.apprentissage\.beta\.gouv\.fr$/],
+    tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/],
     environment: config.env,
-    enabled: false, // TODO: remettre `config.env !== "local",` quand l'intégration sera fonctionnelle
+    release: config.version,
+    enabled: config.env !== "local",
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Mongo({ useMongoose: false }),
-      new CaptureConsole({ levels: ["error"] }),
-      new ExtraErrorData({ depth: 8 }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new CaptureConsole({ levels: ["error"] }) as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new ExtraErrorData({ depth: 16 }) as any,
     ],
   };
 }

@@ -96,7 +96,9 @@ export const mergeOrganismeSansUaiDansOrganismeFiable = async (
         date: new Date(),
         data: `Impossible de déplacer l'effectif de l'organisme sans uai vers l'organisme fiable : ${err}`,
       });
-      throw new Error("Impossible de déplacer l'effectif de l'organisme sans uai vers l'organisme fiable : ", err);
+      throw new Error("Impossible de déplacer l'effectif de l'organisme sans uai vers l'organisme fiable : ", {
+        cause: err,
+      });
     });
   } else {
     // Si doublons, on garde les doublons les plus récents

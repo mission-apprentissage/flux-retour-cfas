@@ -1,8 +1,11 @@
+import { captureException } from "@sentry/node";
+
 import * as apiEntreprise from "@/common/apis/ApiEntreprise";
 import { SIRET_REGEX } from "@/common/constants/validations";
 import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "@/common/utils/adresseUtils";
 
 import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement";
+import logger from "../logger";
 
 import { InfoSiret } from "./infoSiret.actions-struct";
 
@@ -29,7 +32,7 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
   try {
     etablissementApiInfo = await apiEntreprise.getEtablissement(siret);
   } catch (e: any) {
-    console.error(e);
+    logger.error(e);
     if (e.reason === 451) {
       return {
         result: {
@@ -41,6 +44,7 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
         },
       };
     } else if (/^5[0-9]{2}/.test(`${e.reason}`)) {
+      captureException(e);
       return {
         result: {
           siret: siret,
