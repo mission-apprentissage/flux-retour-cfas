@@ -91,7 +91,7 @@ interface SIFAPageProps {
 
 const SIFAPage = (props: SIFAPageProps) => {
   const { trackPlausibleEvent } = usePlausibleTracking();
-  const { toastWarning } = useToaster();
+  const { toastWarning, toastSuccess } = useToaster();
   const organisme = useRecoilValue<any>(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
 
@@ -110,6 +110,26 @@ const SIFAPage = (props: SIFAPageProps) => {
       setHasTrackedMissingSifa(true);
     }
     setShowOnlyMissingSifa(e.target.checked);
+  };
+
+  const handleToastOnSifaDownload = () => {
+    const nbEffectifsInvalides = organismesEffectifs.filter((effectif) => effectif.requiredSifa.length > 0).length;
+
+    nbEffectifsInvalides > 0
+      ? toastWarning(
+          `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${nbEffectifsInvalides} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
+          {
+            isClosable: true,
+            duration: 20000,
+          }
+        )
+      : toastSuccess(
+          `Avant de téléverser votre fichier SIFA sur la plateforme dédiée, veuillez supprimer la première ligne d'en-tête.`,
+          {
+            isClosable: true,
+            duration: 20000,
+          }
+        );
   };
 
   if (isLoading) {
@@ -137,16 +157,7 @@ const SIFAPage = (props: SIFAPageProps) => {
               }-${new Date().toLocaleDateString()}.csv`,
               "text/plain"
             );
-            const nbEffectifsInvalides = organismesEffectifs.filter(
-              (effectif) => effectif.requiredSifa.length > 0
-            ).length;
-            toastWarning(
-              `Parmi les ${organismesEffectifs.length} effectifs que vous avez déclarés, ${nbEffectifsInvalides} d'entre eux ne comportent pas l'ensemble des informations requises pour l'enquête SIFA. Si vous ne les corrigez/complétez pas, votre fichier risque d'être rejeté. Vous pouvez soit les éditer directement sur la plateforme soit modifier votre fichier sur votre ordinateur.`,
-              {
-                isClosable: true,
-                duration: 20000,
-              }
-            );
+            handleToastOnSifaDownload();
           }}
         >
           Télécharger le fichier SIFA
