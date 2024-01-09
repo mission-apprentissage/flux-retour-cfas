@@ -13,93 +13,85 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TETE_DE_RESEAUX_BY_ID } from "shared";
 
 import { _get } from "@/common/httpClient";
-import {
-  getOrganisationLabel,
-  OrganisationOperateurPublicAcademie,
-  OrganisationOperateurPublicDepartement,
-  OrganisationOperateurPublicRegion,
-} from "@/common/internal/Organisation";
-import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
-import { formatCivility, formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
+import { getOrganisationLabel, Organisation } from "@/common/internal/Organisation";
+import { formatCivility, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
-import FiltreOrganismeTerritoire from "@/modules/indicateurs/filters/FiltreOrganismeTerritoire";
 import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import DashboardAdministrateur from "../admin/DashboardAdministrateur";
-import {
-  convertEffectifsFiltersToQuery,
-  EffectifsFilters,
-  EffectifsFiltersQuery,
-  parseEffectifsFiltersFromQuery,
-} from "../models/effectifs-filters";
+import { convertDateFiltersToQuery, parseQueryFieldDate } from "../models/effectifs-filters";
 
 import CarteFrance from "./CarteFrance";
-import { usePublicIndicateursCoverage } from "./hooks/usePublicIndicateursCoverage";
-import { usePublicIndicateursEffectifs } from "./hooks/usePublicIndicateursEffectifs";
+import { useIndicateursEffectifsParDepartement } from "./hooks/useIndicateursEffectifsParDepartement";
+import { useIndicateursOrganismesParDepartement } from "./hooks/useIndicateursOrganismesParDepartement";
 import IndicateursGrid from "./IndicateursGrid";
 
-const DashboardTransverse = () => {
-  const { auth } = useAuth();
-  const router = useRouter();
+function getPerimetreDescription(organisation: Organisation | null): string {
+  if (!organisation) {
+    return "";
+  }
 
-  const effectifsFilters = useMemo(() => {
-    const filters = parseEffectifsFiltersFromQuery(router.query as unknown as EffectifsFiltersQuery);
-
-    // si aucun filtre, on positionne le filtre initial sur le territoire de l'utilisateur
-    if (router.asPath === "/") {
-      if (
-        (auth.organisation as OrganisationOperateurPublicRegion).code_region &&
-        filters.organisme_regions.length === 0
-      ) {
-        filters.organisme_regions = [(auth.organisation as OrganisationOperateurPublicRegion).code_region];
-      } else if (
-        (auth.organisation as OrganisationOperateurPublicDepartement).code_departement &&
-        filters.organisme_departements.length === 0
-      ) {
-        filters.organisme_departements = [
-          (auth.organisation as OrganisationOperateurPublicDepartement).code_departement,
-        ];
-      } else if (
-        (auth.organisation as OrganisationOperateurPublicAcademie).code_academie &&
-        filters.organisme_academies.length === 0
-      ) {
-        filters.organisme_academies = [(auth.organisation as OrganisationOperateurPublicAcademie).code_academie];
-      }
+  switch (organisation.type) {
+    case "ORGANISME_FORMATION": {
+      return "Votre périmètre correspond à votre organisme et vos organismes formateurs";
     }
 
-    return filters;
-  }, [router.query]);
+    case "TETE_DE_RESEAU":
+      return `Votre périmètre correspond aux organismes du réseau ${TETE_DE_RESEAUX_BY_ID[organisation.reseau]?.nom}`;
 
-  const indicateursEffectifs = usePublicIndicateursEffectifs({ date: effectifsFilters.date }, router.isReady);
-  const indicateursEffectifsFiltres = usePublicIndicateursEffectifs(effectifsFilters, router.isReady);
+    case "DREETS":
+    case "DRAAF":
+    case "DRAFPIC":
+    case "CONSEIL_REGIONAL":
+    case "CARIF_OREF_REGIONAL":
+      return `Votre périmètre correspond aux organismes de la région ${
+        REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region
+      }`;
+    case "DDETS":
+      return `Votre périmètre correspond aux organismes du département ${
+        DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement
+      }`;
+    case "ACADEMIE":
+      return `Votre périmètre correspond aux organismes de l'académie de ${
+        ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie
+      }`;
+    case "OPERATEUR_PUBLIC_NATIONAL":
+    case "CARIF_OREF_NATIONAL":
+    case "ADMINISTRATEUR":
+      return "Votre périmètre contient tous les organismes nationaux";
+  }
+}
 
-  const indicateursEffectifsAvecDepartement = indicateursEffectifs.parDepartement;
-  const indicateursEffectifsAvecDepartementLoading = indicateursEffectifs.isLoading;
+const DashboardTransverse = () => {
+  const { auth, organisation } = useAuth();
+  const router = useRouter();
 
-  const indicateursEffectifsAvecDepartementFiltresLoading = indicateursEffectifsFiltres.isLoading;
-  const indicateursEffectifsNationaux = indicateursEffectifsFiltres.national;
+  const filters = useMemo(() => ({ date: parseQueryFieldDate(router.query.date) }), [router.query]);
+
+  const indicateursEffectifs = useIndicateursEffectifsParDepartement(filters, router.isReady);
 
   const { data: indicateursOrganismesAvecDepartement, isLoading: indicateursOrganismesAvecDepartementLoading } =
-    usePublicIndicateursCoverage();
+    useIndicateursOrganismesParDepartement(filters.date);
 
-  function updateState(newParams: Partial<{ [key in keyof EffectifsFilters]: any }>) {
+  const onDateChange = useCallback((date: Date) => {
     router.push(
       {
         pathname: router.pathname,
-        query: convertEffectifsFiltersToQuery({ ...effectifsFilters, ...newParams }) as any,
+        query: { date: convertDateFiltersToQuery(date) },
       },
       undefined,
       { shallow: true }
     );
-  }
+  }, []);
 
   return (
     <Box>
@@ -125,47 +117,37 @@ const DashboardTransverse = () => {
       <Container maxW="xl" p="8">
         {auth.organisation.type === "ADMINISTRATEUR" && <DashboardAdministrateur />}
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
-          Aperçu des données de l’apprentissage
+          Aperçu des données de l’apprentissage de votre périmètre
+          <Tooltip
+            background="bluefrance"
+            color="white"
+            label={
+              <Box padding="1w">
+                <Text as="p">{getPerimetreDescription(organisation)}</Text>
+              </Box>
+            }
+            aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
+          >
+            <Box
+              as="i"
+              className="ri-information-line"
+              fontSize="epsilon"
+              color="#465F9D"
+              verticalAlign="super"
+              fontWeight="700"
+            />
+          </Tooltip>
         </Heading>
         <Text fontSize={14} mt="8">
-          Ces chiffres reflètent partiellement les effectifs de l’apprentissage
-          <Text as="span" fontWeight="bold">
-            {auth.organisation.type === "TETE_DE_RESEAU" && " dans votre réseau"}
-          </Text>
-          &nbsp;: une partie des organismes de formation en apprentissage ne transmettent pas encore leurs données au
-          tableau de bord (voir carte “Taux de couverture” ci-dessous).
-        </Text>
-        <Text fontSize={14} mt="4">
-          Le <strong>{formatDateDayMonthYear(effectifsFilters.date)}</strong>, le tableau de bord de l’apprentissage
-          recense <strong>{formatNumber(indicateursEffectifsNationaux.apprenants)} apprenants</strong> dans votre
-          territoire, dont <strong>{formatNumber(indicateursEffectifsNationaux.apprentis)} apprentis</strong>,{" "}
-          <strong>
-            {formatNumber(indicateursEffectifsNationaux.inscritsSansContrat)} jeunes en formation sans contrat
-          </strong>{" "}
-          et <strong>{formatNumber(indicateursEffectifsNationaux.rupturants)} rupturants</strong>.
+          Ces chiffres reflètent partiellement les effectifs de l’apprentissage de votre périmètre&nbsp;: une partie des
+          organismes de formation en apprentissage ne transmettent pas encore leurs données au tableau de bord (voir
+          carte «&nbsp;Taux de couverture&nbsp;» ci-dessous).
         </Text>
         <HStack mt={8}>
           <Box>Filtrer par</Box>
-          <FiltreOrganismeTerritoire
-            value={{
-              regions: effectifsFilters.organisme_regions,
-              departements: effectifsFilters.organisme_departements,
-              academies: effectifsFilters.organisme_academies,
-              bassinsEmploi: effectifsFilters.organisme_bassinsEmploi,
-            }}
-            onRegionsChange={(regions) => updateState({ organisme_regions: regions })}
-            onDepartementsChange={(departements) => updateState({ organisme_departements: departements })}
-            onAcademiesChange={(academies) => updateState({ organisme_academies: academies })}
-            onBassinsEmploiChange={(bassinsEmploi) => updateState({ organisme_bassinsEmploi: bassinsEmploi })}
-            button={({ isOpen, setIsOpen, buttonLabel }) => (
-              <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
-                {buttonLabel}
-              </SecondarySelectButton>
-            )}
-          />
           <FiltreDate
-            value={effectifsFilters.date}
-            onChange={(date) => updateState({ date })}
+            value={filters.date}
+            onChange={onDateChange}
             button={({ isOpen, setIsOpen, buttonLabel }) => (
               <SecondarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
                 {buttonLabel}
@@ -197,12 +179,7 @@ const DashboardTransverse = () => {
           </Tooltip>
         </HStack>
 
-        {indicateursEffectifsNationaux && (
-          <IndicateursGrid
-            indicateursEffectifs={indicateursEffectifsNationaux}
-            loading={indicateursEffectifsAvecDepartementFiltresLoading}
-          />
-        )}
+        <IndicateursGrid indicateursEffectifs={indicateursEffectifs.total} loading={indicateursEffectifs.isLoading} />
 
         <Link href="/indicateurs" color="action-high-blue-france" borderBottom="1px">
           Explorer plus d’indicateurs
@@ -214,7 +191,7 @@ const DashboardTransverse = () => {
         <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(2, 1fr)" gap={4} my={8}>
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
-              Répartition des effectifs au national
+              Répartition des effectifs de votre périmètre
               <Tooltip
                 background="bluefrance"
                 color="white"
@@ -239,14 +216,14 @@ const DashboardTransverse = () => {
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
 
-            {indicateursEffectifsAvecDepartementLoading && (
+            {indicateursEffectifs.isLoading && (
               <Center h="100%">
                 <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.400" size="xl" />
               </Center>
             )}
-            {indicateursEffectifsAvecDepartement && (
+            {!indicateursEffectifs.isLoading && (
               <CarteFrance
-                donneesAvecDepartement={indicateursEffectifsAvecDepartement}
+                donneesAvecDepartement={indicateursEffectifs.parDepartement}
                 dataKey="apprenants"
                 minColor="#DDEBFB"
                 maxColor="#366EC1"
@@ -269,7 +246,7 @@ const DashboardTransverse = () => {
 
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
-              Taux de couverture des organismes
+              Taux de couverture des organismes de votre périmètre
               <Tooltip
                 background="bluefrance"
                 color="white"

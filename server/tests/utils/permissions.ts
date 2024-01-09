@@ -216,6 +216,7 @@ export const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organis
   created_at,
   updated_at: created_at,
   est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
+  first_transmission_date: startOfDay(subMonths(new Date(), 3)),
   last_transmission_date: startOfDay(subMonths(new Date(), 1)),
 };
 

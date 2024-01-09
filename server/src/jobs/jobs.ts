@@ -42,6 +42,7 @@ import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectif
 import { removeOrganismesAbsentsReferentielSansTransmission } from "./patches/remove-organismes-absentReferentiel-sansTransmission";
 import { removeOrganismeSansEnseigneNiRaisonSocialeNeTransmettantPlus } from "./patches/remove-organismes-sansEnseigneNiRaisonSocialeNeTransmettantPlus";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs";
+import { updateFirstTransmissionDateForOrganismes } from "./patches/update-firstTransmissionDates";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates";
 import { clearSeedAssets } from "./seed/clearAssets";
 import { seedAdmin, seedSample, seedSampleOrganismes, seedSampleUsers } from "./seed/start";
@@ -240,6 +241,8 @@ export async function runJob(job: IJobsCronTask | IJobsSimple): Promise<number> 
         return sendReminderEmails();
       case "tmp:patches:update-lastTransmissionDate-organismes":
         return updateLastTransmissionDateForOrganismes();
+      case "tmp:patches:update-firstTransmissionDate-organismes":
+        return updateFirstTransmissionDateForOrganismes();
       case "tmp:patches:remove-organismes-sansSiret-sansEffectifs":
         return removeOrganismesSansSiretSansEffectifs();
       case "tmp:patches:remove-organisme-effectifs":

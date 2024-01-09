@@ -3,9 +3,9 @@ import { Acl, CODES_STATUT_APPRENANT } from "shared";
 import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 
 import {
+  DateFilters,
   EffectifsFiltersTerritoire,
   FullEffectifsFilters,
-  TerritoireFilters,
   combineFilters,
 } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
@@ -24,7 +24,7 @@ import {
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 export async function getIndicateursEffectifsParDepartement(
-  filters: FullEffectifsFilters,
+  filters: DateFilters,
   acl: Acl
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
   const indicateurs = await effectifsDb()
@@ -190,7 +190,7 @@ export async function getIndicateursEffectifsParDepartement(
 
 export async function getIndicateursOrganismesParDepartement(
   ctx: AuthContext,
-  filters: TerritoireFilters
+  filters: DateFilters
 ): Promise<IndicateursOrganismesAvecDepartement[]> {
   const indicateurs = (await organismesDb()
     .aggregate([
@@ -201,31 +201,46 @@ export async function getIndicateursOrganismesParDepartement(
         }),
       },
       {
-        $project: {
-          departement: "$adresse.departement",
-          transmet: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 1, 0] },
-          ne_transmet_pas: { $cond: [{ $ne: [{ $ifNull: ["$last_transmission_date", ""] }, ""] }, 0, 1] },
-        },
-      },
-      {
         $group: {
-          _id: { departement: "$departement" },
-          total_transmet: { $sum: "$transmet" },
-          total_ne_transmet_pas: { $sum: "$ne_transmet_pas" },
+          _id: "$adresse.departement",
+          organismesTransmetteurs: {
+            $sum: {
+              $cond: {
+                if: {
+                  $eq: [
+                    null,
+                    {
+                      $ifNull: ["$first_transmission_date", null],
+                    },
+                  ],
+                },
+                then: 0,
+                else: 1,
+              },
+            },
+          },
+          totalOrganismes: {
+            $sum: 1,
+          },
         },
       },
       {
         $project: {
           _id: 0,
-          departement: "$_id.departement",
+          departement: "$_id",
           tauxCouverture: {
-            $multiply: [100, { $divide: ["$total_transmet", { $add: ["$total_transmet", "$total_ne_transmet_pas"] }] }],
+            $multiply: [
+              100,
+              {
+                $divide: ["$organismesTransmetteurs", "$totalOrganismes"],
+              },
+            ],
           },
-          totalOrganismes: {
-            $add: ["$total_transmet", "$total_ne_transmet_pas"],
+          totalOrganismes: 1,
+          organismesTransmetteurs: 1,
+          organismesNonTransmetteurs: {
+            $subtract: ["$totalOrganismes", "$organismesTransmetteurs"],
           },
-          organismesTransmetteurs: "$total_transmet",
-          organismesNonTransmetteurs: "$total_ne_transmet_pas",
         },
       },
     ])
