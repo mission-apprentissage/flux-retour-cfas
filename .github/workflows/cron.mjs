@@ -23,6 +23,31 @@ async function run() {
       apprenants: 0,
     }
   );
+  const organismes = data.indicateursOrganismes.reduce(
+    (acc, item) => {
+      acc.organismesTransmetteurs_responsables += item.organismesTransmetteurs.responsables;
+      acc.organismesTransmetteurs_responsablesFormateurs += item.organismesTransmetteurs.responsablesFormateurs;
+      acc.organismesTransmetteurs_formateurs += item.organismesTransmetteurs.formateurs;
+      acc.organismesTransmetteurs_inconnues += item.organismesTransmetteurs.inconnues;
+
+      acc.totalOrganismes_responsables += item.totalOrganismes.responsables;
+      acc.totalOrganismes_responsablesFormateurs += item.totalOrganismes.responsablesFormateurs;
+      acc.totalOrganismes_formateurs += item.totalOrganismes.formateurs;
+      acc.totalOrganismes_inconnues += item.totalOrganismes.inconnues;
+
+      return acc;
+    },
+    {
+      organismesTransmetteurs_responsables: 0,
+      organismesTransmetteurs_responsablesFormateurs: 0,
+      organismesTransmetteurs_formateurs: 0,
+      organismesTransmetteurs_inconnues: 0,
+      totalOrganismes_responsables: 0,
+      totalOrganismes_responsablesFormateurs: 0,
+      totalOrganismes_formateurs: 0,
+      totalOrganismes_inconnues: 0,
+    }
+  );
 
   const slackMessage = {
     text: "Chiffres clés du Tableau de Bord",
@@ -92,7 +117,7 @@ async function run() {
           {
             type: "rich_text_list",
             style: "bullet",
-            elements: Object.keys(data.indicateursOrganismes).map((key) => ({
+            elements: Object.keys(organismes).map((key) => ({
               type: "rich_text_section",
               elements: [
                 {
@@ -101,7 +126,7 @@ async function run() {
                 },
                 {
                   type: "text",
-                  text: intl.format(data.indicateursOrganismes[key]),
+                  text: intl.format(organismes[key]),
                 },
               ],
             })),
