@@ -2,11 +2,10 @@ import { faker } from "@faker-js/faker/locale/fr";
 import merge from "lodash-es/merge";
 import { WithId } from "mongodb";
 import RandExp from "randexp";
-import { CODES_STATUT_APPRENANT } from "shared";
+import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX } from "shared";
 import type { PartialDeep } from "type-fest";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
-import { CFD_REGEX, INE_REGEX, RNCP_REGEX } from "@/common/constants/validations";
 import { Effectif, Organisme } from "@/common/model/@types";
 import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
 

@@ -1,9 +1,8 @@
 import Boom from "boom";
 import { subYears } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
-import { PermissionScope, assertUnreachable, entries, getAnneesScolaireListFromDate } from "shared";
+import { PermissionScope, assertUnreachable, entries, getAnneesScolaireListFromDate, SIRET_REGEX } from "shared";
 
-import { SIRET_REGEX } from "@/common/constants/validations";
 import { Effectif } from "@/common/model/@types";
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { isValidUAI } from "@/common/utils/validationUtils";

@@ -1,7 +1,6 @@
-import { ACADEMIES, DEPARTEMENTS, REGIONS } from "shared";
+import { ACADEMIES, DEPARTEMENTS, REGIONS, CODE_INSEE_PATTERN, CODE_POSTAL_PATTERN } from "shared";
 
 import { PAYS } from "@/common/constants/pays";
-import { CODE_INSEE_PATTERN, CODE_POSTAL_PATTERN } from "@/common/constants/validations";
 
 import { integer, object, string } from "./jsonSchemaTypes";
 

@@ -1,4 +1,5 @@
-import { SIRET_REGEX_PATTERN } from "@/common/constants/validations";
+import { SIRET_REGEX_PATTERN } from "shared";
+
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 import { object, string, date, integer } from "@/common/model/json-schema/jsonSchemaTypes";
 

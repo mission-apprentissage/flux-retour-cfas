@@ -38,5 +38,7 @@ export const NIR_REGEX = new RegExp(NIR_REGEX_PATTERN);
 export const NIR_LOOSE_REGEX = new RegExp(NIR_LOOSE_REGEX_PATTERN);
 export const DERNIER_ORGANISME_UAI_REGEX = new RegExp(DERNIER_ORGANISME_UAI_PATTERN);
 
-export const isValidCFD = (cfd) => typeof cfd === "string" && CFD_REGEX.test(cfd);
-export const isValidINE = (ine) => typeof ine === "string" && INE_REGEX.test(ine);
+// TODO: create proper CFD type
+export const isValidCFD = (cfd: unknown): cfd is string => typeof cfd === "string" && CFD_REGEX.test(cfd);
+// TODO: create proper INE type
+export const isValidINE = (ine: unknown): ine is string => typeof ine === "string" && INE_REGEX.test(ine);

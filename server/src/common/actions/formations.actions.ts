@@ -1,9 +1,8 @@
 import { ObjectId } from "mongodb";
+import { isValidCFD } from "shared/constants/validations";
 
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
 import { formationsDb } from "@/common/model/collections";
-
-import { isValidCFD } from "../constants/validations";
 
 /**
  * Checks if formation with given CFD exists

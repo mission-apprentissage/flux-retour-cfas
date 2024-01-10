@@ -1,4 +1,5 @@
-import { RNCP_REGEX_PATTERN } from "@/common/constants/validations";
+import { RNCP_REGEX_PATTERN } from "shared";
+
 import { object, string, integer, arrayOf, objectId, date, boolean } from "@/common/model/json-schema/jsonSchemaTypes";
 
 import formationsModel from "../../formations.model";

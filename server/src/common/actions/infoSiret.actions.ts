@@ -1,7 +1,7 @@
 import { captureException } from "@sentry/node";
+import { SIRET_REGEX } from "shared";
 
 import * as apiEntreprise from "@/common/apis/ApiEntreprise";
-import { SIRET_REGEX } from "@/common/constants/validations";
 import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "@/common/utils/adresseUtils";
 
 import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement";

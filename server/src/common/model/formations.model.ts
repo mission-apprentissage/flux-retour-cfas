@@ -1,6 +1,5 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { CFD_REGEX_PATTERN } from "../constants/validations";
+import { CFD_REGEX_PATTERN } from "shared/constants/validations";
 
 import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "./json-schema/jsonSchemaTypes";
 
