@@ -34,6 +34,6 @@
     /* Output Formatting */
     "pretty": true
   },
-  "include": ["./**/*.ts", "./**/*.js"],
+  "include": ["./**/*.ts", "./**/*.js", "../shared/constants/pays.ts"],
   "exclude": ["**/node_modules", "coverage", "dist"]
 }

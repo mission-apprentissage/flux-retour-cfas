@@ -7,9 +7,8 @@ import {
   integer,
   object,
   string,
+  PAYS,
 } from "shared";
-
-import { PAYS } from "@/common/constants/pays";
 
 export const adresseSchema = object({
   numero: integer({

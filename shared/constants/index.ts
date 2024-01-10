@@ -1,5 +1,6 @@
 export * from "./erps";
 export * from "./fiabilisation";
+export * from "./pays";
 export * from "./networks";
 export * from "./indicateurs";
 export * from "./organismes";
