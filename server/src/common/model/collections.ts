@@ -28,7 +28,6 @@ import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model"
 import formationsModelDescriptor from "./formations.model";
 import formationsCatalogueModelDescriptor from "./formationsCatalogue.model";
 import invitationsModelDescriptor, { Invitation } from "./invitations.model";
-import jobModelDescriptor, { IJob } from "./job.model";
 import jobEventsModelDescriptor from "./jobEvents.model";
 import JwtSessionsModelDescriptor from "./jwtSessions.model";
 import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model";
@@ -47,7 +46,6 @@ export const modelDescriptors = [
   formationsModelDescriptor,
   formationsCatalogueModelDescriptor,
   jobEventsModelDescriptor,
-  jobModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
   MaintenanceMessagesModelDescriptor,
@@ -70,7 +68,6 @@ export const formationsCatalogueDb = () =>
   getDbCollection<FormationsCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<User>(usersModelDescriptor.collectionName);
 export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescriptor.collectionName);
-export const jobsDb = () => getDbCollection<IJob>(jobModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<UsersMigration>(usersMigrationModelDescriptor.collectionName);
 export const jwtSessionsDb = () => getDbCollection<JwtSession>(JwtSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDescriptor.collectionName);
