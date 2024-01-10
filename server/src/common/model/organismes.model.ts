@@ -15,11 +15,11 @@ import {
   string,
   stringOrNull,
 } from "shared";
+import { adresseSchema } from "shared/models/json-schema/adresseSchema";
 
 import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";
 
 import effectifsModel from "./effectifs.model/effectifs.model";
-import { adresseSchema } from "./json-schema/adresseSchema";
 
 const relationOrganismeSchema = object(
   {

@@ -11,9 +11,8 @@ import {
   integer,
   boolean,
   arrayOf,
+  adresseSchema,
 } from "shared";
-
-import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
 
 import { Effectif } from "../../@types";
 

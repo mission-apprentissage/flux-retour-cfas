@@ -34,6 +34,6 @@
     /* Output Formatting */
     "pretty": true
   },
-  "include": ["./**/*.ts", "./**/*.js", "../shared/constants/pays.ts"],
+  "include": ["./**/*.ts", "./**/*.js", "../shared/constants/pays.ts", "../shared/models/json-schema/adresseSchema.ts"],
   "exclude": ["**/node_modules", "coverage", "dist"]
 }
