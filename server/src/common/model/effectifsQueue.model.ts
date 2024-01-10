@@ -1,11 +1,10 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-import { CODES_STATUT_APPRENANT_ENUM } from "shared";
+import { CODES_STATUT_APPRENANT_ENUM, object, string, date, arrayOf, any, objectId } from "shared";
 
 import effectifsModel from "./effectifs.model/effectifs.model";
 import { apprenantSchema } from "./effectifs.model/parts/apprenant.part";
 import { contratSchema } from "./effectifs.model/parts/contrat.part";
 import { formationEffectifSchema } from "./effectifs.model/parts/formation.effectif.part";
-import { object, string, date, arrayOf, any, objectId } from "./json-schema/jsonSchemaTypes";
 import organismesModel from "./organismes.model";
 
 const collectionName = "effectifsQueue";

@@ -1,4 +1,4 @@
-import { object, stringOrNull } from "../../json-schema/jsonSchemaTypes";
+import { object, stringOrNull } from "shared";
 
 export const contratsDecaOrganismeFormationResponsableSchema = object({
   uaiCfa: stringOrNull({ description: "L'UAI de l'organisme responsable" }),

@@ -7,10 +7,15 @@ import {
   SIRET_REGEX_PATTERN,
   UAI_REGEX_PATTERN,
   YEAR_RANGE_PATTERN,
+  any,
+  arrayOf,
+  boolean,
+  date,
+  object,
+  objectId,
+  string,
 } from "shared";
 import { PartialDeep } from "type-fest";
-
-import { any, arrayOf, boolean, date, object, objectId, string } from "@/common/model/json-schema/jsonSchemaTypes";
 
 import { Effectif } from "../@types";
 

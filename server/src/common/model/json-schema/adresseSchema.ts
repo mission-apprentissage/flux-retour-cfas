@@ -1,8 +1,15 @@
-import { ACADEMIES, DEPARTEMENTS, REGIONS, CODE_INSEE_PATTERN, CODE_POSTAL_PATTERN } from "shared";
+import {
+  ACADEMIES,
+  DEPARTEMENTS,
+  REGIONS,
+  CODE_INSEE_PATTERN,
+  CODE_POSTAL_PATTERN,
+  integer,
+  object,
+  string,
+} from "shared";
 
 import { PAYS } from "@/common/constants/pays";
-
-import { integer, object, string } from "./jsonSchemaTypes";
 
 export const adresseSchema = object({
   numero: integer({

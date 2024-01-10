@@ -1,6 +1,5 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { object, objectId, string, boolean, number, array, arrayOf, stringOrNull } from "./json-schema/jsonSchemaTypes";
+import { object, objectId, string, boolean, number, array, arrayOf, stringOrNull } from "shared";
 
 const collectionName = "organismesReferentiel";
 

@@ -1,4 +1,4 @@
-import { object, string, stringOrNull } from "../../json-schema/jsonSchemaTypes";
+import { object, string, stringOrNull } from "shared";
 
 export const contratsDecaFormationSchema = object(
   {

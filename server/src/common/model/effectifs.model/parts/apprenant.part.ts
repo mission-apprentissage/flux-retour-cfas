@@ -5,10 +5,15 @@ import {
   SEXE_APPRENANT_ENUM,
   CODE_POSTAL_PATTERN,
   DERNIER_ORGANISME_UAI_PATTERN,
+  object,
+  string,
+  date,
+  integer,
+  boolean,
+  arrayOf,
 } from "shared";
 
 import { adresseSchema } from "@/common/model/json-schema/adresseSchema";
-import { object, string, date, integer, boolean, arrayOf } from "@/common/model/json-schema/jsonSchemaTypes";
 
 import { Effectif } from "../../@types";
 

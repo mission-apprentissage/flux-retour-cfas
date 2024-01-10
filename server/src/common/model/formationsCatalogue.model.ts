@@ -1,5 +1,4 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
 import {
   arrayOfOrNull,
   booleanOrNull,
@@ -9,7 +8,7 @@ import {
   objectOrNull,
   string,
   stringOrNull,
-} from "./json-schema/jsonSchemaTypes";
+} from "shared";
 
 const collectionName = "formationsCatalogue";
 

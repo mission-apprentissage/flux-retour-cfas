@@ -11,9 +11,12 @@ import {
   ORGANISATIONS_NATIONALES,
   SIRET_REGEX_PATTERN,
   UAI_REGEX_PATTERN,
+  date,
+  object,
+  objectId,
+  string,
+  stringOrNull,
 } from "shared";
-
-import { date, object, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes";
 
 // types en doublon avec l'UI
 export const organisationTypes = [

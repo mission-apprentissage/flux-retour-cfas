@@ -1,6 +1,5 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { object, string } from "./json-schema/jsonSchemaTypes";
+import { object, string } from "shared";
 
 const collectionName = "bassinsEmploi";
 

@@ -1,2 +1,3 @@
 export * from "./indicateurs";
 export * from "./rncp";
+export * from "./json-schema/jsonSchemaTypes";

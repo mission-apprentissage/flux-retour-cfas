@@ -1,6 +1,4 @@
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "shared";
-
-import { object, date, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET, object, date, objectId, string, stringOrNull } from "shared";
 
 const collectionName = "fiabilisationUaiSiret";
 

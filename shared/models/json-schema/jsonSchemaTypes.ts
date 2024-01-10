@@ -59,7 +59,7 @@ export function arrayOf<T extends JSONSchema>(items: JSONSchema4 | JSONSchema4[]
   };
 }
 
-export function arrayOfOrNull(items, custom = {}) {
+export function arrayOfOrNull<T extends JSONSchema4>(items: ReadonlyArray<T> | T | undefined, custom = {}) {
   return {
     bsonType: ["array", "null"],
     ...custom,
@@ -82,7 +82,7 @@ export function object<P extends JSONSchema["properties"], T extends JSONSchema>
     properties,
   };
 }
-export function objectOrNull(properties, custom = {}) {
+export function objectOrNull<P extends JSONSchema["properties"]>(properties: P, custom = {}) {
   return {
     bsonType: ["object", "null"],
     additionalProperties: false,

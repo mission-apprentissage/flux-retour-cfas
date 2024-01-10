@@ -1,4 +1,4 @@
-import { date, object, objectId } from "../json-schema/jsonSchemaTypes";
+import { date, object, objectId } from "shared";
 
 import { contratsDecaApprenantSchema } from "./parts/contratsDeca.apprenant.part";
 import { contratsDecaDetailsContratSchema } from "./parts/contratsDeca.detailsContrat.part";

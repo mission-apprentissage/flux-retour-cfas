@@ -1,4 +1,4 @@
-import { object, string, date, objectId } from "./json-schema/jsonSchemaTypes";
+import { object, string, date, objectId } from "shared";
 
 const collectionName = "jobEvents";
 

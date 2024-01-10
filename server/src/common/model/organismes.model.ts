@@ -5,13 +5,6 @@ import {
   STATUT_FIABILISATION_ORGANISME,
   SIRET_REGEX_PATTERN,
   UAI_REGEX_PATTERN,
-} from "shared";
-
-import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";
-
-import effectifsModel from "./effectifs.model/effectifs.model";
-import { adresseSchema } from "./json-schema/adresseSchema";
-import {
   arrayOf,
   boolean,
   date,
@@ -21,7 +14,12 @@ import {
   objectIdOrNull,
   string,
   stringOrNull,
-} from "./json-schema/jsonSchemaTypes";
+} from "shared";
+
+import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";
+
+import effectifsModel from "./effectifs.model/effectifs.model";
+import { adresseSchema } from "./json-schema/adresseSchema";
 
 const relationOrganismeSchema = object(
   {

@@ -1,7 +1,6 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "shared";
 import { CFD_REGEX_PATTERN } from "shared/constants/validations";
-
-import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "./json-schema/jsonSchemaTypes";
 
 const collectionName = "formations";
 

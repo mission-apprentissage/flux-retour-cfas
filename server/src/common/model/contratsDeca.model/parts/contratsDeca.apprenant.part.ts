@@ -1,4 +1,4 @@
-import { booleanOrNull, numberOrNull, object, string, stringOrNull } from "../../json-schema/jsonSchemaTypes";
+import { booleanOrNull, numberOrNull, object, string, stringOrNull } from "shared";
 
 export const contratsDecaApprenantSchema = object(
   {

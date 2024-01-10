@@ -1,4 +1,4 @@
-import { object, string } from "../../json-schema/jsonSchemaTypes";
+import { object, string } from "shared";
 
 export const contratsDecaEmployeurSchema = object(
   {
