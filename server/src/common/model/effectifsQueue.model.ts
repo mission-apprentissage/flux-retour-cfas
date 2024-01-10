@@ -1,9 +1,9 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { CODES_STATUT_APPRENANT_ENUM, object, string, date, arrayOf, any, objectId } from "shared";
 import { apprenantSchema } from "shared/models/data/effectifs/apprenant.part";
+import { contratSchema } from "shared/models/data/effectifs/contrat.part";
 
 import effectifsModel from "./effectifs.model/effectifs.model";
-import { contratSchema } from "./effectifs.model/parts/contrat.part";
 import { formationEffectifSchema } from "./effectifs.model/parts/formation.effectif.part";
 import organismesModel from "./organismes.model";
 

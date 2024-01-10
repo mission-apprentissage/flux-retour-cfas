@@ -1,4 +1,6 @@
-import { SIRET_REGEX_PATTERN, object, string, date, integer, adresseSchema } from "shared";
+import { SIRET_REGEX_PATTERN } from "../../../constants";
+import { adresseSchema } from "../../json-schema/adresseSchema";
+import { integer, object, string, date } from "../../json-schema/jsonSchemaTypes";
 
 export const contratSchema = object(
   {

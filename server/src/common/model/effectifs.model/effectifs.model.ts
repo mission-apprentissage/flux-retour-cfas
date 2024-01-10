@@ -16,12 +16,12 @@ import {
   string,
 } from "shared";
 import { apprenantSchema } from "shared/models/data/effectifs/apprenant.part";
+import { contratSchema } from "shared/models/data/effectifs/contrat.part";
 import { PartialDeep } from "type-fest";
 
 import { Effectif } from "../@types";
 
 import { defaultValuesApprenant } from "./parts/apprenant.part";
-import { contratSchema } from "./parts/contrat.part";
 import { defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
 import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part";
 
