@@ -30,7 +30,7 @@ export default () => {
       });
     }
 
-    if (!boomError.isServer) {
+    if (boomError.isServer) {
       captureException(rawError);
     }
 
