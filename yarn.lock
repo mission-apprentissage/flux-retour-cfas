@@ -12236,7 +12236,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json-schema@npm:0.4.0":
+"json-schema@npm:0.4.0, json-schema@npm:^0.4.0":
   version: 0.4.0
   resolution: "json-schema@npm:0.4.0"
   checksum: 66389434c3469e698da0df2e7ac5a3281bcff75e797a5c127db7c5b56270e01ae13d9afa3c03344f76e32e81678337a8c912bdbb75101c62e487dc3778461d72
@@ -18250,7 +18250,7 @@ request-debug@latest:
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
     zod: 3.21.4
     zod-express-middleware: 1.4.0
-    zod-to-json-schema: 3.21.4
+    zod-mongodb-schema: ^1.0.0
   languageName: unknown
   linkType: soft
 
@@ -18302,7 +18302,6 @@ request-debug@latest:
     type-fest: ^4.2.0
     typescript: ^5.1.6
     zod: 3.21.4
-    zod-to-json-schema: 3.21.4
   languageName: unknown
   linkType: soft
 
@@ -20899,12 +20898,25 @@ request-debug@latest:
   languageName: node
   linkType: hard
 
-"zod-to-json-schema@npm:3.21.4":
-  version: 3.21.4
-  resolution: "zod-to-json-schema@npm:3.21.4"
+"zod-mongodb-schema@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "zod-mongodb-schema@npm:1.0.0"
+  dependencies:
+    json-schema: ^0.4.0
+    zod-to-json-schema: ^3.21.4
   peerDependencies:
-    zod: ^3.21.4
-  checksum: 899c1f461fb6547c0b08a265c82040c250be9b88d3f408f2f3ff77a418fdfad7549077e589d418fccb312c1f6d555c3c7217b199cc9072762e1fab20716dd2a6
+    mongodb: ^6.2.0
+    zod: ^3.22.4
+  checksum: 6c78ff5e8aee2590b03154676c8e20b34bbd34975e805918875cc46fedb89f1b6690137ea3ea23057909fd38ab35ea73967cca875ad30eee5d3ce1baaaeb6f43
+  languageName: node
+  linkType: hard
+
+"zod-to-json-schema@npm:^3.21.4":
+  version: 3.22.3
+  resolution: "zod-to-json-schema@npm:3.22.3"
+  peerDependencies:
+    zod: ^3.22.4
+  checksum: 2747a3d1514f579006939c0edd6a420acae65ad016df223b09c4a542cbc8c0ae61b4d7b391228a211cde973635ed49c47b1449791982f3b32d799319bb174f42
   languageName: node
   linkType: hard
 

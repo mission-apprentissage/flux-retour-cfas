@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
-import { IModelDescriptor, zObjectId } from "./common";
+import { IModelDescriptor } from "./common";
 
 export const romeSchema = z
   .object({

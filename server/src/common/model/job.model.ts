@@ -1,9 +1,10 @@
 import { Jsonify } from "type-fest";
 import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 import { CronName, CronsMap } from "@/jobs/jobs";
 
-import { IModelDescriptor, zObjectId } from "./common";
+import { IModelDescriptor } from "./common";
 
 const collectionName = "jobs" as const;
 
