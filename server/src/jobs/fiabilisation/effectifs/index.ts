@@ -37,22 +37,39 @@ const getNbAbandonsADate = async () => (await abandonsIndicator.getListAtDate(ne
  * Méthode de suppression des effectifs inscrits sans contrats pour les années scolaires courantes
  * qui sont dans ce statut depuis nbJours
  */
-export const removeInscritsSansContratsDepuis = async (nbJours = 90) => {
-  const inscritsSansContratsIdsToRemove = (
-    await effectifsDb()
-      .aggregate([
-        ...filterStages,
-        ...inscritsSansContratsIndicator.getAtDateAggregationPipeline(new Date()),
-        ...getAggregateNbJoursDepuisStatutStages(nbJours),
-      ])
-      .toArray()
-  ).map((item) => item._id);
+export const transformSansContratsToAbandonsDepuis = async (nbJours = 90) => {
+  logger.info(`${await getNbAbandonsADate()} abandons à date avant lancement du script`);
 
-  const { deletedCount } = await effectifsDb().deleteMany({ _id: { $in: inscritsSansContratsIdsToRemove } });
-  logger.info(`Suppression de ${deletedCount} effectifs inscrits dans ce statut depuis ${nbJours} jours !`);
+  const dateAbandonToSet = addDays(new Date(), -90);
+
+  const inscritsSansContratsToTransform = await effectifsDb()
+    .aggregate([
+      ...filterStages,
+      ...inscritsSansContratsIndicator.getAtDateAggregationPipeline(new Date()),
+      ...getAggregateNbJoursDepuisStatutStages(nbJours),
+    ])
+    .toArray();
+
+  let nbUpdated = 0;
+  await Promise.all(
+    inscritsSansContratsToTransform.map(async (item) => {
+      const effectif = await effectifsDb().findOne({ _id: item._id });
+      if (!effectif) {
+        throw new Error(`Unable to find effectif ${item._id.toString()}`);
+      } else {
+        await updateEffectifToAbandon(effectif, dateAbandonToSet);
+        nbUpdated++;
+      }
+    })
+  );
+
+  logger.info(`${await getNbAbandonsADate()} abandons à date après lancement du script`);
+  logger.info(
+    `Transformation de ${nbUpdated} effectifs inscrits sans contrat dans ce statut depuis ${nbJours} jours en abandons effectuée avec succès !`
+  );
 
   return {
-    deletedCount,
+    nbUpdated,
   };
 };
 
@@ -80,7 +97,7 @@ export const transformRupturantsToAbandonsDepuis = async (nbJours = 180) => {
       if (!effectif) {
         throw new Error(`Unable to find effectif ${item._id.toString()}`);
       } else {
-        await updateEffectifRupturantToAbandon(effectif, dateAbandonToSet);
+        await updateEffectifToAbandon(effectif, dateAbandonToSet);
         nbUpdated++;
       }
     })
@@ -101,7 +118,7 @@ export const transformRupturantsToAbandonsDepuis = async (nbJours = 180) => {
  * @param {*} effectif
  * @param {*} abandonDate
  */
-const updateEffectifRupturantToAbandon = async (effectif, abandonDate) => {
+const updateEffectifToAbandon = async (effectif, abandonDate) => {
   try {
     // Ajout d'une entrée manuelle "ABANDON" à la date
     effectif.apprenant.historique_statut.push({

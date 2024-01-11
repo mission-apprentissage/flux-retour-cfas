@@ -10,7 +10,7 @@ import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
 import { sendReminderEmails } from "./emails/reminder";
-import { removeInscritsSansContratsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
+import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
 import { getStats } from "./fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
@@ -93,7 +93,7 @@ export const CronsMap = {
       await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
 
       // # Fiabilisation des effectifs : suppression des inscrits sans contrats depuis 90 jours & transformation des rupturants en abandon > 180 jours
-      await addJob({ name: "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours", queued: true });
+      await addJob({ name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis", queued: true });
       await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
 
       return 0;
@@ -231,8 +231,8 @@ export async function runJob(job: IJobsCronTask | IJobsSimple): Promise<number> 
 
         return { buildResults, updateResults };
       }
-      case "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours":
-        return removeInscritsSansContratsDepuis((job.payload as any)?.nbJours);
+      case "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis":
+        return transformSansContratsToAbandonsDepuis((job.payload as any)?.nbJours);
       case "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis":
         return transformRupturantsToAbandonsDepuis((job.payload as any)?.nbJours);
       case "fiabilisation:stats":
