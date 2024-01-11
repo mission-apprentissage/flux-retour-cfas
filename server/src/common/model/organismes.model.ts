@@ -17,9 +17,9 @@ import {
 } from "shared";
 import { adresseSchema } from "shared/models/json-schema/adresseSchema";
 
-import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";
+import effectifsModel from "@/common/model/effectifs.model/effectifs.model";
 
-import effectifsModel from "./effectifs.model/effectifs.model";
+import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";
 
 const relationOrganismeSchema = object(
   {

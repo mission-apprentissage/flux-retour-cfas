@@ -1,6 +1,7 @@
 import { Rncp } from "shared";
 import formationsModelDescriptor from "shared/models/data/formations.model";
 
+import effectifsModelDescriptor from "@/common/model/effectifs.model/effectifs.model";
 import { getDbCollection } from "@/common/mongodb";
 
 import {
@@ -23,7 +24,6 @@ import { OrganismeSoltea } from "./@types/OrganismeSoltea";
 import auditLogsModelDescriptor, { IAuditLog } from "./auditLogs.model";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
 import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model";
-import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
 import formationsCatalogueModelDescriptor from "./formationsCatalogue.model";

@@ -17,13 +17,14 @@ import {
 } from "shared";
 import { apprenantSchema } from "shared/models/data/effectifs/apprenant.part";
 import { contratSchema } from "shared/models/data/effectifs/contrat.part";
+import { formationEffectifSchema } from "shared/models/data/effectifs/formation.part";
 import { PartialDeep } from "type-fest";
 
 import { Effectif } from "../@types";
 
 import { defaultValuesApprenant } from "./parts/apprenant.part";
 import { defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
-import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part";
+import { defaultValuesFormationEffectif } from "./parts/formation.effectif.part";
 
 const collectionName = "effectifs";
 
