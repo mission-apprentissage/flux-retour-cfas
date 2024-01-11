@@ -1,6 +1,5 @@
 import { RNCP_REGEX_PATTERN, object, string, integer, arrayOf, objectId, date, boolean } from "shared";
-
-import formationsModel from "../../formations.model";
+import formationsModel from "shared/models/data/formations.model";
 
 const formationsProps = formationsModel.schema.properties;
 

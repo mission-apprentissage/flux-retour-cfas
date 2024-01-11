@@ -1,4 +1,5 @@
 import { Rncp } from "shared";
+import formationsModelDescriptor from "shared/models/data/formations.model";
 
 import { getDbCollection } from "@/common/mongodb";
 
@@ -25,7 +26,6 @@ import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
-import formationsModelDescriptor from "./formations.model";
 import formationsCatalogueModelDescriptor from "./formationsCatalogue.model";
 import invitationsModelDescriptor, { Invitation } from "./invitations.model";
 import jobEventsModelDescriptor from "./jobEvents.model";
