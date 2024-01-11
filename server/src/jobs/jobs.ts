@@ -92,7 +92,7 @@ export const CronsMap = {
       // # Mise a jour du nb d'effectifs
       await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
 
-      // # Fiabilisation des effectifs : suppression des inscrits sans contrats depuis 90 jours & transformation des rupturants en abandon > 180 jours
+      // # Fiabilisation des effectifs : transformation des inscrits sans contrats en abandon > 90 jours & transformation des rupturants en abandon > 180 jours
       await addJob({ name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis", queued: true });
       await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
 

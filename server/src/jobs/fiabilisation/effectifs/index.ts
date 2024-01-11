@@ -34,13 +34,10 @@ const getAggregateNbJoursDepuisStatutStages = (nbJours) => [
 const getNbAbandonsADate = async () => (await abandonsIndicator.getListAtDate(new Date(), filterStages)).length;
 
 /**
- * Méthode de suppression des effectifs inscrits sans contrats pour les années scolaires courantes
- * qui sont dans ce statut depuis nbJours
+ * Méthode de transformation des effectifs inscrits sans contrats en abandons (dans ce statut depuis nbJours)
  */
 export const transformSansContratsToAbandonsDepuis = async (nbJours = 90) => {
-  logger.info(`${await getNbAbandonsADate()} abandons à date avant lancement du script`);
-
-  const dateAbandonToSet = addDays(new Date(), -90);
+  const dateAbandonToSet = addDays(new Date(), -nbJours);
 
   const inscritsSansContratsToTransform = await effectifsDb()
     .aggregate([
@@ -63,7 +60,6 @@ export const transformSansContratsToAbandonsDepuis = async (nbJours = 90) => {
     })
   );
 
-  logger.info(`${await getNbAbandonsADate()} abandons à date après lancement du script`);
   logger.info(
     `Transformation de ${nbUpdated} effectifs inscrits sans contrat dans ce statut depuis ${nbJours} jours en abandons effectuée avec succès !`
   );
@@ -80,7 +76,7 @@ export const transformSansContratsToAbandonsDepuis = async (nbJours = 90) => {
 export const transformRupturantsToAbandonsDepuis = async (nbJours = 180) => {
   logger.info(`${await getNbAbandonsADate()} abandons à date avant lancement du script`);
 
-  const dateAbandonToSet = addDays(new Date(), -180);
+  const dateAbandonToSet = addDays(new Date(), -nbJours);
 
   const rupturantsToTransform = await effectifsDb()
     .aggregate([
@@ -125,8 +121,10 @@ const updateEffectifToAbandon = async (effectif, abandonDate) => {
       valeur_statut: CODES_STATUT_APPRENANT.abandon,
       date_statut: abandonDate,
       date_reception: abandonDate,
-      abandon_forced: true,
     });
+
+    // Ajout du champ abandon_forced dans apprenant
+    effectif.apprenant.abandon_forced = true;
 
     await effectifsDb().findOneAndUpdate(
       { _id: effectif._id },
