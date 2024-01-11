@@ -21,7 +21,7 @@ SENTRY_AUTH_TOKEN=$(ansible-vault view "${ansible_extra_opts[@]}" "$VAULT_FILE" 
 docker run \
   --platform=linux/amd64 \
   --rm \
-  -it \
+  -i \
   --entrypoint /bin/sh \
   -e SENTRY_AUTH_TOKEN="${SENTRY_AUTH_TOKEN}" \
   -e SENTRY_DSN="${SENTRY_DSN}" \
