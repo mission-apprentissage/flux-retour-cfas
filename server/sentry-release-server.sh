@@ -25,5 +25,3 @@ export SENTRY_PROJECT=tdb-api
 ../node_modules/.bin/sentry-cli sourcemaps inject ./dist 
 ../node_modules/.bin/sentry-cli sourcemaps upload ./dist
 ../node_modules/.bin/sentry-cli releases finalize "$PUBLIC_VERSION"
-
-../node_modules/.bin/sentry-cli releases deploys "$PUBLIC_VERSION" new -e ENVIRONMENT -t $DURATION
