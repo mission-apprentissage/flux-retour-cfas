@@ -15,12 +15,11 @@ import {
   objectId,
   string,
 } from "shared";
+import { Effectif } from "shared/models/data/@types";
 import { apprenantSchema } from "shared/models/data/effectifs/apprenant.part";
 import { contratSchema } from "shared/models/data/effectifs/contrat.part";
 import { formationEffectifSchema } from "shared/models/data/effectifs/formation.part";
 import { PartialDeep } from "type-fest";
-
-import { Effectif } from "../@types";
 
 import { defaultValuesApprenant } from "./parts/apprenant.part";
 import { defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";

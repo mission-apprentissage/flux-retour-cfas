@@ -1,8 +1,8 @@
 import { PromisePool } from "@supercharge/promise-pool";
 import { ArrayElement, ObjectId } from "mongodb";
+import { OrganismesReferentiel } from "shared/models/data/@types";
 
 import parentLogger from "@/common/logger";
-import { OrganismesReferentiel } from "@/common/model/@types";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 

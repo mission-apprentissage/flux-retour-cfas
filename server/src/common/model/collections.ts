@@ -1,9 +1,4 @@
 import { Rncp } from "shared";
-import formationsModelDescriptor from "shared/models/data/formations.model";
-
-import effectifsModelDescriptor from "@/common/model/effectifs.model/effectifs.model";
-import { getDbCollection } from "@/common/mongodb";
-
 import {
   Effectif,
   FiabilisationUaiSiret,
@@ -15,12 +10,17 @@ import {
   OrganismesReferentiel,
   User,
   UsersMigration,
-} from "./@types";
-import { BassinsEmploi } from "./@types/BassinsEmploi";
-import { ContratDeca } from "./@types/ContratDeca";
-import { EffectifsQueue } from "./@types/EffectifsQueue";
-import { FormationsCatalogue } from "./@types/FormationsCatalogue";
-import { OrganismeSoltea } from "./@types/OrganismeSoltea";
+} from "shared/models/data/@types";
+import { BassinsEmploi } from "shared/models/data/@types/BassinsEmploi";
+import { ContratDeca } from "shared/models/data/@types/ContratDeca";
+import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
+import { OrganismeSoltea } from "shared/models/data/@types/OrganismeSoltea";
+import formationsModelDescriptor from "shared/models/data/formations.model";
+
+import effectifsModelDescriptor from "@/common/model/effectifs.model/effectifs.model";
+import { getDbCollection } from "@/common/mongodb";
+
 import auditLogsModelDescriptor, { IAuditLog } from "./auditLogs.model";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
 import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model";

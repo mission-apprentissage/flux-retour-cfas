@@ -2,6 +2,7 @@ import { strict as assert } from "assert";
 
 import { subDays } from "date-fns";
 import { ObjectId } from "mongodb";
+import { Organisme } from "shared/models/data/@types";
 
 import {
   createOrganisme,
@@ -12,7 +13,6 @@ import {
   updateOrganismeFromApis,
 } from "@/common/actions/organismes/organismes.actions";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
-import { Organisme } from "@/common/model/@types";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";

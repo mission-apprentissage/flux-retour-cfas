@@ -9,10 +9,10 @@ import {
   PermissionsOrganisme,
   assertUnreachable,
 } from "shared";
+import { Organisme } from "shared/models/data/@types/Organisme";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
-import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { Organisation } from "@/common/model/organisations.model";

@@ -1,5 +1,6 @@
+import { OrganismesReferentiel } from "shared/models/data/@types";
+
 import logger from "@/common/logger";
-import { OrganismesReferentiel } from "@/common/model/@types";
 import { organismesReferentielDb } from "@/common/model/collections";
 
 /**

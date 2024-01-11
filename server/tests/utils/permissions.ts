@@ -1,10 +1,10 @@
 import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
+import { Effectif } from "shared/models/data/@types/Effectif";
+import { Organisme } from "shared/models/data/@types/Organisme";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
 import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
-import { Effectif } from "@/common/model/@types/Effectif";
-import { Organisme } from "@/common/model/@types/Organisme";
 import { NewOrganisation, Organisation } from "@/common/model/organisations.model";
 
 import { id } from "./testUtils";

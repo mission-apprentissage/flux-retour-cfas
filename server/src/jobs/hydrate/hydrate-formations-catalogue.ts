@@ -3,9 +3,9 @@ import { IncomingMessage } from "node:http";
 import axios from "axios";
 import JSONStream from "JSONStream";
 import { ObjectId, WithId } from "mongodb";
+import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 
 import parentLogger from "@/common/logger";
-import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb } from "@/common/model/collections";
 import { WithStringId } from "@/common/model/types";
 import config from "@/config";

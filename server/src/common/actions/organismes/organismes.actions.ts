@@ -1,6 +1,8 @@
 import Boom from "boom";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme } from "shared";
+import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { Organisme } from "shared/models/data/@types/Organisme";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -10,8 +12,6 @@ import {
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
 import logger from "@/common/logger";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
-import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb, effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";

@@ -2,8 +2,7 @@ import Boom from "boom";
 import { isToday } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
 import { PermissionScope, assertUnreachable, entries } from "shared";
-
-import { Organisme } from "@/common/model/@types";
+import { Organisme } from "shared/models/data/@types";
 
 import { DateFilters, TerritoireFilters } from "../../helpers/filters";
 

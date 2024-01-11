@@ -2,8 +2,8 @@ import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
 import { ObjectId, WithId } from "mongodb";
+import { UsersMigration } from "shared/models/data/@types/UsersMigration";
 
-import { UsersMigration } from "@/common/model/@types/UsersMigration";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { setTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";

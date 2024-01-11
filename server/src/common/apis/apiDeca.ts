@@ -1,10 +1,10 @@
 import axiosRetry from "axios-retry";
+import ApiDeca, { Contrat } from "shared/models/apis/@types/ApiDeca";
 
 import logger from "@/common/logger";
 import { ApiError, apiRateLimiter } from "@/common/utils/apiUtils";
 import config from "@/config";
 
-import ApiDeca, { Contrat } from "./@types/ApiDeca";
 import getApiClient from "./client";
 
 export const API_ENDPOINT = config.decaApi.endpoint;

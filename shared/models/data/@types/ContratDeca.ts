@@ -1,4 +1,4 @@
-import { Contrat } from "@/common/apis/@types/ApiDeca";
+import { Contrat } from "../../apis/@types/ApiDeca.d";
 
 export interface ContratDeca extends Contrat {
   created_at?: Date;

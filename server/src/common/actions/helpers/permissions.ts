@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
+import { Organisme } from "shared/models/data/@types/Organisme";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
-import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 

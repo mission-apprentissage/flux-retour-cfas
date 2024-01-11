@@ -1,9 +1,9 @@
 import { captureException } from "@sentry/node";
+import CatalogueFormation from "shared/models/apis/@types/CatalogueFormation";
 
 import parentLogger from "@/common/logger";
 import config from "@/config";
 
-import CatalogueFormation from "./@types/CatalogueFormation";
 import getApiClient from "./client";
 
 // Cf Documentation : https://catalogue.apprentissage.beta.gouv.fr/api/v1/docs

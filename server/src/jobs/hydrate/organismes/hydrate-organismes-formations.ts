@@ -1,10 +1,10 @@
 import { WithId } from "mongodb";
+import { Organisme } from "shared/models/data/@types";
+import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { ArrayElement } from "type-fest/source/internal";
 
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import parentLogger from "@/common/logger";
-import { Organisme } from "@/common/model/@types";
-import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 
 const logger = parentLogger.child({

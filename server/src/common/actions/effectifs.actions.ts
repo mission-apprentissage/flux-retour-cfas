@@ -1,12 +1,12 @@
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
+import { Organisme } from "shared/models/data/@types";
+import { Effectif } from "shared/models/data/@types/Effectif";
 
-import { Effectif } from "@/common/model/@types/Effectif";
 import { effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif, schema } from "@/common/model/effectifs.model/effectifs.model";
 
-import { Organisme } from "../model/@types";
 import { stripEmptyFields } from "../utils/miscUtils";
 
 /**
