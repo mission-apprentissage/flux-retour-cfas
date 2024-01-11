@@ -1152,7 +1152,7 @@ export interface Effectif {
      */
     formation_presentielle?: boolean;
     /**
-     * Durée théorique de la formation en années
+     * Durée théorique de la formation en année
      */
     duree_theorique?: number;
     /**
