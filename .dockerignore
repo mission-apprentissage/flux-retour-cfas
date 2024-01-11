@@ -25,7 +25,6 @@
 
 .git/
 .infra
-!.infra/sentry/release-server.sh
 **/.local
 **/dist
 **/coverage
