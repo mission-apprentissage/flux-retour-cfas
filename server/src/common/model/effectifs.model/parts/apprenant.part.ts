@@ -107,6 +107,9 @@ export const apprenantSchema = object(
           }),
           date_statut: date(),
           date_reception: date(),
+          abandon_forced: boolean({
+            description: "Le statut a été forcé en abandon",
+          }),
         },
         {
           required: ["valeur_statut", "date_statut"],
