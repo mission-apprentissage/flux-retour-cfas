@@ -125,6 +125,7 @@ const updateEffectifToAbandon = async (effectif, abandonDate) => {
       valeur_statut: CODES_STATUT_APPRENANT.abandon,
       date_statut: abandonDate,
       date_reception: abandonDate,
+      abandon_forced: true,
     });
 
     await effectifsDb().findOneAndUpdate(
