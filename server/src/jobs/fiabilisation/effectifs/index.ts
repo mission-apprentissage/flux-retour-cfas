@@ -121,10 +121,8 @@ const updateEffectifToAbandon = async (effectif, abandonDate) => {
       valeur_statut: CODES_STATUT_APPRENANT.abandon,
       date_statut: abandonDate,
       date_reception: abandonDate,
+      abandon_forced: true,
     });
-
-    // Ajout du champ abandon_forced dans apprenant
-    effectif.apprenant.abandon_forced = true;
 
     await effectifsDb().findOneAndUpdate(
       { _id: effectif._id },

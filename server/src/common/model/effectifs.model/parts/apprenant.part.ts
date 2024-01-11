@@ -107,6 +107,9 @@ export const apprenantSchema = object(
           }),
           date_statut: date(),
           date_reception: date(),
+          abandon_forced: boolean({
+            description: "Le statut a été forcé en abandon",
+          }),
         },
         {
           required: ["valeur_statut", "date_statut"],
@@ -182,9 +185,6 @@ export const apprenantSchema = object(
     }),
     responsable_mail2: string({
       description: "Adresse mail du responsable 2",
-    }),
-    abandon_forced: boolean({
-      description: "Le statut a été forcé en abandon",
     }),
   },
   {
