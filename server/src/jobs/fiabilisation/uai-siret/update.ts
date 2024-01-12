@@ -3,10 +3,10 @@ import {
   STATUT_CREATION_ORGANISME,
   STATUT_FIABILISATION_COUPLES_UAI_SIRET,
   STATUT_FIABILISATION_ORGANISME,
+  STATUT_PRESENCE_REFERENTIEL,
 } from "shared";
 
 import { createOrganisme, findOrganismeById } from "@/common/actions/organismes/organismes.actions";
-import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "@/common/model/collections";
 

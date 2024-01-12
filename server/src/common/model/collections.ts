@@ -20,12 +20,16 @@ import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLog
 import bassinsEmploiDescriptor from "shared/models/data/bassinsEmploi.model";
 import contratsDecaModelDescriptor from "shared/models/data/contratsDeca.model";
 import effectifsModelDescriptor from "shared/models/data/effectifs.model";
+import effectifsQueueModelDescriptor from "shared/models/data/effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
 import formationsModelDescriptor from "shared/models/data/formations.model";
 import formationsCatalogueModelDescriptor from "shared/models/data/formationsCatalogue.model";
 import invitationsModelDescriptor, { Invitation } from "shared/models/data/invitations.model";
 import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
 import JwtSessionsModelDescriptor from "shared/models/data/jwtSessions.model";
+import MaintenanceMessagesModelDescriptor from "shared/models/data/maintenanceMessages.model";
+import organisationsModelDescriptor, { Organisation } from "shared/models/data/organisations.model";
+import OrganismesModelDescriptor from "shared/models/data/organismes.model";
 import OrganismesReferentielModelDescriptor from "shared/models/data/organismesReferentiel.model";
 import OrganismesSolteaModelDescriptor from "shared/models/data/organismesSoltea.model";
 import rncpModelDescriptor from "shared/models/data/rncp.model";
@@ -34,11 +38,6 @@ import usersModelDescriptor from "shared/models/data/users.model";
 import usersMigrationModelDescriptor from "shared/models/data/usersMigration.model";
 
 import { getDbCollection } from "@/common/mongodb";
-
-import effectifsQueueModelDescriptor from "./effectifsQueue.model";
-import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model";
-import organisationsModelDescriptor, { Organisation } from "./organisations.model";
-import OrganismesModelDescriptor from "./organismes.model";
 
 export const modelDescriptors = [
   auditLogsModelDescriptor,

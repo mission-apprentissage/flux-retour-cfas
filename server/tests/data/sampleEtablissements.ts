@@ -1,4 +1,4 @@
-import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
+import { NATURE_ORGANISME_DE_FORMATION } from "shared";
 
 export default {
   19040492100016: {

@@ -3,6 +3,7 @@ export * from "./fiabilisation";
 export * from "./pays";
 export * from "./networks";
 export * from "./indicateurs";
+export * from "./organisme";
 export * from "./organismes";
 export * from "./organisations";
 export * from "./permissions";

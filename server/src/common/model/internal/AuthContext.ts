@@ -1,7 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Acl } from "shared";
-
-import { Organisation } from "@/common/model/organisations.model";
+import { Organisation } from "shared/models/data/organisations.model";
 
 export interface AuthContext<IOrganisation = Organisation> {
   _id: ObjectId;

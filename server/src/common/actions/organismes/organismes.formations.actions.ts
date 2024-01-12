@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
+import { NATURE_ORGANISME_DE_FORMATION } from "shared";
 
 import { createFormation, getFormationWithCfd } from "@/common/actions/formations.actions";
 import { getCatalogFormationsForOrganisme } from "@/common/apis/apiCatalogueMna";
-import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { formationsCatalogueDb } from "@/common/model/collections";
 
 import { findOrganismeByUai } from "./organismes.actions";

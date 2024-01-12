@@ -10,12 +10,12 @@ import {
   assertUnreachable,
 } from "shared";
 import { Organisme } from "shared/models/data/@types/Organisme";
+import { Organisation } from "shared/models/data/organisations.model";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { Organisation } from "@/common/model/organisations.model";
 
 import { findOrganismeFormateursIds } from "./permissions";
 

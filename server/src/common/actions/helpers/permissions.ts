@@ -1,10 +1,10 @@
 import { ObjectId } from "mongodb";
 import { Organisme } from "shared/models/data/@types/Organisme";
+import { OrganisationOrganismeFormation } from "shared/models/data/organisations.model";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
-import { OrganisationOrganismeFormation } from "@/common/model/organisations.model";
 
 /**
  * Liste tous les organismes accessibles pour une organisation (dont l'organisme lié à l'organisation)

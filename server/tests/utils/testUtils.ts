@@ -2,12 +2,12 @@ import { strict as assert } from "assert";
 
 import { AxiosResponse } from "axios";
 import axiosist from "axiosist";
+import { NewOrganisation, getOrganisationLabel } from "shared/models/data/organisations.model";
 
 import { createOrganisation } from "@/common/actions/organisations.actions";
 import { createSession } from "@/common/actions/sessions.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
-import { NewOrganisation, getOrganisationLabel } from "@/common/model/organisations.model";
 import { hash } from "@/common/utils/passwordUtils";
 import { resetTime } from "@/common/utils/timeUtils";
 import server from "@/http/server";
