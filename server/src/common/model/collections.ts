@@ -16,9 +16,9 @@ import { ContratDeca } from "shared/models/data/@types/ContratDeca";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { OrganismeSoltea } from "shared/models/data/@types/OrganismeSoltea";
+import effectifsModelDescriptor from "shared/models/data/effectifs.model";
 import formationsModelDescriptor from "shared/models/data/formations.model";
 
-import effectifsModelDescriptor from "@/common/model/effectifs.model/effectifs.model";
 import { getDbCollection } from "@/common/mongodb";
 
 import auditLogsModelDescriptor, { IAuditLog } from "./auditLogs.model";

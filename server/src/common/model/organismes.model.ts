@@ -15,9 +15,8 @@ import {
   string,
   stringOrNull,
 } from "shared";
+import effectifsModel from "shared/models/data/effectifs.model";
 import { adresseSchema } from "shared/models/json-schema/adresseSchema";
-
-import effectifsModel from "@/common/model/effectifs.model/effectifs.model";
 
 import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "../constants/organisme";
 
