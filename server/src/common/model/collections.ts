@@ -1,3 +1,4 @@
+import { getDbCollection } from "@/common/mongodb";
 import { Rncp } from "shared";
 import {
   Effectif,
@@ -16,14 +17,12 @@ import { ContratDeca } from "shared/models/data/@types/ContratDeca";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { OrganismeSoltea } from "shared/models/data/@types/OrganismeSoltea";
+import contratsDecaModelDescriptor from "shared/models/data/contratsDeca.model";
 import effectifsModelDescriptor from "shared/models/data/effectifs.model";
 import formationsModelDescriptor from "shared/models/data/formations.model";
 
-import { getDbCollection } from "@/common/mongodb";
-
 import auditLogsModelDescriptor, { IAuditLog } from "./auditLogs.model";
 import bassinsEmploiDescriptor from "./bassinsEmploi.model";
-import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model";
 import effectifsQueueModelDescriptor from "./effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
 import formationsCatalogueModelDescriptor from "./formationsCatalogue.model";
