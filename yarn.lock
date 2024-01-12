@@ -18318,6 +18318,7 @@ request-debug@latest:
     type-fest: ^4.2.0
     typescript: ^5.1.6
     zod: 3.21.4
+    zod-mongodb-schema: ^1.0.0
   languageName: unknown
   linkType: soft
 

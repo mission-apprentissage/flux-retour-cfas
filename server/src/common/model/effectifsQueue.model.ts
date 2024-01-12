@@ -1,4 +1,4 @@
-import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { CODES_STATUT_APPRENANT_ENUM, object, string, date, arrayOf, any, objectId } from "shared";
 import { apprenantSchema } from "shared/models/data/effectifs/apprenant.part";
 import { contratSchema } from "shared/models/data/effectifs/contrat.part";
