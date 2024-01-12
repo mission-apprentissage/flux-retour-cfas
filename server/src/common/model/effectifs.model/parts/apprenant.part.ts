@@ -25,7 +25,8 @@ export const apprenantSchema = object(
     }),
     date_de_naissance: date({ description: "Date de naissance de l'apprenant" }),
     code_postal_de_naissance: string({
-      description: "Le code postal doit contenir 5 caractères",
+      description:
+        "Le code postal doit contenir 5 caractères.  \nPour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  \n*Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
       example: "75000",
       pattern: CODE_POSTAL_PATTERN,
       maxLength: 5,
