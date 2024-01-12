@@ -13,7 +13,7 @@ export const ERPS = sortAlphabeticallyBy("name", [
     id: "gesti",
     name: "Gesti",
     apiV3: true,
-    helpFilePath: "/Gestibase-2023.pdf",
+    helpFilePath: "/Gestibase-2024.pdf",
   },
   {
     id: "ymag",

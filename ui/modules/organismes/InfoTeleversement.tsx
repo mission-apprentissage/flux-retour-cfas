@@ -2,7 +2,11 @@ import { Box, HStack, Link, ListItem, Text, UnorderedList } from "@chakra-ui/rea
 
 import { ExternalLinkLine } from "@/theme/components/icons";
 
-export default function InfoTeleversement() {
+interface InfoTeleversementProps {
+  maxInputLength: number;
+}
+
+export default function InfoTeleversement(props: InfoTeleversementProps) {
   return (
     <div>
       <Box color="#ef5800" mb="4">
@@ -58,6 +62,11 @@ export default function InfoTeleversement() {
             apprentis de votre établissement, et encourager vos sites formateurs à se créer un compte et faire
             l’opération également. Vous pouvez également le faire pour l’ensemble de vos sites. Dans ce cas, il faudra
             indiquer le SIRET et code UAI de chacun.
+          </ListItem>
+          <ListItem>
+            Notre solution de téléversement n’accepte pas les fichiers au-delà de {props.maxInputLength} lignes. Si vous
+            souhaitez transmettre plus de {props.maxInputLength} effectifs, il vous faudra téléverser un premier fichier
+            de 2000 lignes, puis renouveler l’opération avec un deuxième fichier comportant les effectif restants.
           </ListItem>
         </UnorderedList>
       </Box>
