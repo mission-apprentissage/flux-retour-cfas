@@ -130,8 +130,8 @@ export const apprenantSchema = object(
       description: "Situation de l'apprenant N-1",
     }),
     dernier_organisme_uai: string({
-      description:
-        "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
+      description: `Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation 
+        ou département.   \nPour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le "995" qui signifie "Non concerné"`,
       pattern: DERNIER_ORGANISME_UAI_PATTERN,
     }),
     type_cfa: string({
