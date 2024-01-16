@@ -218,7 +218,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
 
     const dernierContratActif = effectif.contrats?.[0];
     const employeurFields = {
-      SIRET_EMP: dernierContratActif?.siret,
+      SIRET_EMP: wrapNumString(dernierContratActif?.siret),
       TYPE_EMP: dernierContratActif?.type_employeur,
       DATE_DEB_CONT: dernierContratActif?.date_debut
         ? wrapNumString(
