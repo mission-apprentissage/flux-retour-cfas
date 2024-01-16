@@ -22,8 +22,9 @@ export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
         row[column.key] = new Date(row[column.key]);
       } else if (column.xlsxType === "string" && row[column.key]) {
         row[column.key] = {
-          f: `="${row[column.key]}"`,
+          v: row[column.key],
           t: "s",
+          w: `${row[column.key]}`,
         };
       }
     }
