@@ -9,7 +9,7 @@ import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { effectifsDb } from "@/common/model/collections";
 
-import { SIFA_FIELDS } from "./sifaCsvFields";
+import { SIFA_FIELDS, formatAN_FORM } from "./sifaCsvFields";
 
 const formatStringForSIFA = (str) => {
   if (!str) return undefined;
@@ -184,7 +184,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
         ? formationOrganisme?.duree_formation_theorique * 12
         : undefined,
       DUR_FORM_REELLE: effectif.formation.duree_formation_relle,
-      AN_FORM: effectif.formation.annee,
+      AN_FORM: formatAN_FORM(effectif.formation.annee),
       SIT_FORM: organismeFormateurUai,
       STATUT: "APP", // STATUT courant
       TYPE_CFA: wrapNumString(effectif.apprenant.type_cfa),
