@@ -107,12 +107,11 @@ export const generateSifa = async (organisme_id: ObjectId) => {
 
     let organismeResponsableUai = organisme.uai;
     let organismeFormateurUai = "";
-    let organismeLieuDeFormationUai = "NC";
 
     // Vu avec Nadine le 21 septembre 2023 dans Slack, si on a les 3 (c'est à dire en API v3) on les renseigne dans les champs suivants :
     // NUMERO_UAI = uai_organisme_responsable
     // SIT_FORM = uai_organisme_formateur
-    // UAI_EPLE = uai_organisme_lieu_de_formation
+    // UAI_EPLE = NC (car on ne peux pas le detérminer pour le moment)
     if (effectif.organisme_formateur_id && effectif.organisme_responsable_id && effectif.organisme_id) {
       //  organismeResponsableUai
       if (organismesUaiCache[effectif.organisme_responsable_id.toString()]) {
@@ -134,17 +133,10 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           organismeFormateurUai = organismeFormateur.uai;
         }
       }
-      // organismeLieuDeFormationUai
-      if (organismesUaiCache[effectif.organisme_id.toString()]) {
-        organismeLieuDeFormationUai = organismesUaiCache[effectif.organisme_id.toString()];
-      } else {
-        const organismeEple = await getOrganismeById(effectif.organisme_id);
-        if (organismeEple?.uai) {
-          organismesUaiCache[effectif.organisme_id.toString()] = organismeEple.uai;
-          organismeLieuDeFormationUai = organismeEple.uai;
-        }
-      }
     }
+
+    // Extraction du code diplome cfd
+    const codeDiplome = wrapNumString(formationBcn?.cfd || effectif.formation.cfd);
 
     const requiredFields = {
       NUMERO_UAI: organismeResponsableUai,
@@ -173,7 +165,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           ? effectif.apprenant.dernier_organisme_uai
           : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
         : undefined,
-      DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd),
+      DIPLOME: codeDiplome,
       DUR_FORM_THEO: effectif.formation.duree_theorique_mois
         ? effectif.formation.duree_theorique_mois
         : // Les ERPs (ou les anciens fichiers de téléversement) pouvaient envoyer duree_theorique_formation
@@ -188,13 +180,14 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       SIT_FORM: organismeFormateurUai,
       STATUT: "APP", // STATUT courant
       TYPE_CFA: wrapNumString(effectif.apprenant.type_cfa),
-      UAI_EPLE: organismeLieuDeFormationUai,
+      UAI_EPLE: "NC",
       NAT_STR_JUR: "NC", // Unknown for now
     };
 
     const notRequiredFields = {
       TYPE_CFA: wrapNumString(effectif.apprenant.type_cfa),
-      RNCP: effectif.formation.rncp || "",
+      // Si i n'y a pas de code displome on renseigne le RNCP
+      RNCP: !codeDiplome ? effectif.formation.rncp : "",
     };
 
     const apprenantFields = {
