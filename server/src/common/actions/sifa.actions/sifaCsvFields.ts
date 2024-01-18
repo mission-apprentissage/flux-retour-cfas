@@ -188,3 +188,8 @@ export const SIFA_FIELDS = [
     value: "SIRET_EMP",
   },
 ];
+
+export const formatAN_FORM = (year: number | undefined) => {
+  if (year == null) return year;
+  return `${year}A`;
+};
