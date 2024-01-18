@@ -364,7 +364,7 @@ function setupRoutes(app: Application) {
     ["/api/v3/dossiers-apprenants"],
     requireBearerAuthentication(),
     async (req, res, next) => {
-      const organisme = (await getOrganismeByAPIKey(res.locals.token)) as WithId<Organisme>;
+      const organisme = (await getOrganismeByAPIKey(res.locals.token, req.query)) as WithId<Organisme>;
 
       let erpSource = "INCONNU";
       if (organisme.erps?.length) {
@@ -376,6 +376,15 @@ function setupRoutes(app: Application) {
         source: erpSource,
         source_organisme_id: organisme._id.toString(),
       };
+
+      Sentry.setUser({
+        segment: "bearer",
+        ip_address: req.ip,
+        id: `organisme-${organisme._id.toString()}`,
+        username: `organisme: ${organisme.siret} / ${organisme.uai}`,
+      });
+      Sentry.setTag("erp", erpSource);
+
       next();
     },
     dossierApprenantRouter()
