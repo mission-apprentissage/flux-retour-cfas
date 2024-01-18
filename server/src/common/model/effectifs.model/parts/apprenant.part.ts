@@ -178,7 +178,7 @@ export const apprenantSchema = object(
       }),
     }),
     // V3 fields
-    nir: string({
+    has_nir: boolean({
       description: "Numéro de sécurité sociale de l'apprenant",
     }),
     responsable_mail1: string({
