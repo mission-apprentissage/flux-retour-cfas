@@ -9,39 +9,7 @@ import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { effectifsDb } from "@/common/model/collections";
 
-import { SIFA_FIELDS, formatAN_FORM } from "./sifaCsvFields";
-
-const formatStringForSIFA = (str) => {
-  if (!str) return undefined;
-  const accent = [
-    /[\300-\306]/g,
-    /[\340-\346]/g, // A, a
-    /[\310-\313]/g,
-    /[\350-\353]/g, // E, e
-    /[\314-\317]/g,
-    /[\354-\357]/g, // I, i
-    /[\322-\330]/g,
-    /[\362-\370]/g, // O, o
-    /[\331-\334]/g,
-    /[\371-\374]/g, // U, u
-    /[\321]/g,
-    /[\361]/g, // N, n
-    /[\307]/g,
-    /[\347]/g, // C, c
-  ];
-  const noaccent = ["A", "a", "E", "e", "I", "i", "O", "o", "U", "u", "N", "n", "C", "c"];
-
-  for (var i = 0; i < accent.length; i++) {
-    str = str.replace(accent[i], noaccent[i]);
-  }
-
-  return str.replaceAll(/[^0-9a-zA-Z\- ]/g, "") ?? undefined;
-};
-
-const wrapNumString = (str) => {
-  if (!str) return str;
-  return `="${str}"`;
-};
+import { SIFA_FIELDS, formatAN_FORM, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";
 
 export const isEligibleSIFA = (historique_statut: Effectif["apprenant"]["historique_statut"]) => {
   const endOfyear = getSIFADate(new Date());
@@ -137,11 +105,18 @@ export const generateSifa = async (organisme_id: ObjectId) => {
 
     // Extraction du code diplome cfd
     const codeDiplome = wrapNumString(formationBcn?.cfd || effectif.formation.cfd);
+    // Adresse de l'effectif
+    const effectifAddress = effectif.apprenant.adresse
+      ? effectif.apprenant.adresse?.complete ??
+        `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${
+          effectif.apprenant.adresse?.voie ?? ""
+        }`
+      : undefined;
 
     const requiredFields = {
       NUMERO_UAI: organismeResponsableUai,
-      NOM: formatStringForSIFA(effectif.apprenant.nom),
-      PRENOM1: formatStringForSIFA(effectif.apprenant.prenom),
+      NOM: formatStringForSIFA(effectif.apprenant.nom)?.slice(0, 100),
+      PRENOM1: formatStringForSIFA(effectif.apprenant.prenom)?.slice(0, 100),
       DATE_NAIS: effectif.apprenant.date_de_naissance
         ? wrapNumString(
             DateTime.fromJSDate(new Date(effectif.apprenant.date_de_naissance))
@@ -153,12 +128,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
 
       LIEU_NAIS: wrapNumString(cpNaissanceInfo?.code_commune_insee),
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2",
-      ADRESSE: effectif.apprenant.adresse
-        ? effectif.apprenant.adresse?.complete ??
-          `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${
-            effectif.apprenant.adresse?.voie ?? ""
-          }`
-        : undefined,
+      ADRESSE: effectifAddress?.slice(0, 200) || "",
       SIT_N_1: effectif.apprenant.derniere_situation,
       ETAB_N_1: effectif.apprenant.dernier_organisme_uai
         ? effectif.apprenant.dernier_organisme_uai.length === 8
@@ -179,7 +149,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
       AN_FORM: formatAN_FORM(effectif.formation.annee),
       SIT_FORM: organismeFormateurUai,
       STATUT: "APP", // STATUT courant
-      TYPE_CFA: wrapNumString(effectif.apprenant.type_cfa),
+      TYPE_CFA: wrapNumString(String(effectif.apprenant.type_cfa).padStart(2, "0")),
       UAI_EPLE: "NC",
       NAT_STR_JUR: "NC", // Unknown for now
     };
