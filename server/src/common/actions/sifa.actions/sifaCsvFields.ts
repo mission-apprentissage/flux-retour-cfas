@@ -195,6 +195,16 @@ export const formatAN_FORM = (year: number | undefined) => {
   return `${year}A`;
 };
 
+/*
+  Formattage de l'INE
+  Si l'INE est vide, retourner une formule afin de ne pas générer de colonne vide
+  dans le cas de SIFA
+  Voir https://tableaudebord-apprentissage.atlassian.net/browse/TM-703
+*/
+export const formatINE = (ine: string | undefined) => {
+  return wrapNumString(ine) ?? `=""`;
+};
+
 export const formatStringForSIFA = (str: string | undefined) => {
   if (typeof str !== "string" || str.length === 0) return undefined;
 
