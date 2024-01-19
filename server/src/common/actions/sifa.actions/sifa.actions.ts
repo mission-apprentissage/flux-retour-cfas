@@ -161,7 +161,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     };
 
     const apprenantFields = {
-      INE: wrapNumString(effectif.apprenant.ine) ?? "",
+      INE: wrapNumString(effectif.apprenant.ine) ?? `=""`,
       TEL_JEUNE: wrapNumString(effectif.apprenant.telephone?.replace("+33", "0")),
       MAIL_JEUNE: effectif.apprenant.courriel,
       HANDI: effectif.apprenant.rqth ? "1" : "0",
