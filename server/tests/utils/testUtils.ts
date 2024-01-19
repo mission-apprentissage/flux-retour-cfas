@@ -105,12 +105,10 @@ export type RequestAPIFunc = <T>(
 
 export function expectUnauthorizedError(response: any) {
   assert.strictEqual(response.status, 401);
-  assert.deepStrictEqual(response.data, "Unauthorized");
-  // ça serait bien d'avoir du JSON mais il faut voir avec passport...
-  // assert.deepStrictEqual(response.data, {
-  //   error: "Unauthorized",
-  //   message: "Vous n'êtes pas connecté",
-  // });
+  assert.deepStrictEqual(response.data, {
+    error: "Unauthorized",
+    message: "Unauthorized",
+  });
 }
 
 export function expectForbiddenError(response: any) {
