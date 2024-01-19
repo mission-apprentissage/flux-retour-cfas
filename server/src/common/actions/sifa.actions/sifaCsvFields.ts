@@ -189,7 +189,42 @@ export const SIFA_FIELDS = [
   },
 ];
 
+// Detecter la durée de formation
 export const formatAN_FORM = (year: number | undefined) => {
   if (year == null) return year;
   return `${year}A`;
+};
+
+export const formatStringForSIFA = (str: string | undefined) => {
+  if (typeof str !== "string" || str.length === 0) return undefined;
+
+  const accentsMap = {
+    A: /[\300-\306]/g,
+    a: /[\340-\346]/g,
+    E: /[\310-\313]/g,
+    e: /[\350-\353]/g,
+    I: /[\314-\317]/g,
+    i: /[\354-\357]/g,
+    O: /[\322-\330]/g,
+    o: /[\362-\370]/g,
+    U: /[\331-\334]/g,
+    u: /[\371-\374]/g,
+    N: /[\321]/g,
+    n: /[\361]/g,
+    C: /[\307]/g,
+    c: /[\347]/g,
+  };
+
+  // Remplace chaque accent par son homologue non accentué
+  for (const [replacement, regex] of Object.entries(accentsMap)) {
+    str = str.replace(regex, replacement);
+  }
+
+  // Remplacez les traits d'union par des espaces et supprimez tous les caractères non alphanumériques (hors espaces)
+  return str.replace(/-/g, " ").replace(/[^0-9a-zA-Z ]/g, "");
+};
+
+export const wrapNumString = (str: string | number | null | undefined) => {
+  if (str === null || str === undefined) return str;
+  return `="${str}"`;
 };
