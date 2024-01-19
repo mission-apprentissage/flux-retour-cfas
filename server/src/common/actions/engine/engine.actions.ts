@@ -180,7 +180,7 @@ export const mapEffectifQueueToEffectif = (
         sexe: dossierApprenant.sexe_apprenant,
         rqth: dossierApprenant.rqth_apprenant,
         date_rqth: dossierApprenant.date_rqth_apprenant,
-        nir: dossierApprenant.nir_apprenant,
+        has_nir: dossierApprenant.has_nir,
         responsable_mail1: dossierApprenant.responsable_apprenant_mail1,
         responsable_mail2: dossierApprenant.responsable_apprenant_mail2,
         derniere_situation: dossierApprenant.derniere_situation,

@@ -5,7 +5,7 @@ import effectifsModel from "./effectifs.model/effectifs.model";
 import { apprenantSchema } from "./effectifs.model/parts/apprenant.part";
 import { contratSchema } from "./effectifs.model/parts/contrat.part";
 import { formationEffectifSchema } from "./effectifs.model/parts/formation.effectif.part";
-import { object, string, date, arrayOf, any, objectId } from "./json-schema/jsonSchemaTypes";
+import { object, string, date, arrayOf, any, objectId, boolean } from "./json-schema/jsonSchemaTypes";
 import organismesModel from "./organismes.model";
 
 const collectionName = "effectifsQueue";
@@ -93,7 +93,7 @@ export const schema = object(
 
     // V3 FIELDS
     // OPTIONAL FIELDS
-    nir_apprenant: any({ description: "Identification nationale securité social" }),
+    has_nir: boolean({ description: "Identification nationale securité social" }),
     adresse_apprenant: any({ description: "Adresse de l'apprenant" }),
     code_postal_apprenant: any({ description: "Code postal de l'apprenant" }),
     code_postal_de_naissance_apprenant: any({ description: apprenantProps.code_postal_de_naissance.description }),
