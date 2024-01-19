@@ -112,7 +112,7 @@ export const CronsMap = {
     cron_string: "45 19 * * *",
     handler: async () => {
       // # Remplissage des contrats DECA
-      await addJob({ name: "hydrate:contratsDeca", queued: true });
+      await addJob({ name: "hydrate:contratsDeca", queued: true, payload: { drop: false, full: false } });
 
       return 0;
     },
