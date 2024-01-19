@@ -9,7 +9,7 @@ import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { Effectif } from "@/common/model/@types/Effectif";
 import { effectifsDb } from "@/common/model/collections";
 
-import { SIFA_FIELDS, formatAN_FORM, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";
+import { SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";
 
 export const isEligibleSIFA = (historique_statut: Effectif["apprenant"]["historique_statut"]) => {
   const endOfyear = getSIFADate(new Date());
@@ -161,7 +161,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     };
 
     const apprenantFields = {
-      INE: wrapNumString(effectif.apprenant.ine) ?? `=""`,
+      INE: formatINE(effectif.apprenant.ine),
       TEL_JEUNE: wrapNumString(effectif.apprenant.telephone?.replace("+33", "0")),
       MAIL_JEUNE: effectif.apprenant.courriel,
       HANDI: effectif.apprenant.rqth ? "1" : "0",
