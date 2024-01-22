@@ -17,10 +17,10 @@ import { stripEmptyFields } from "@/common/utils/miscUtils";
  */
 export const buildNewHistoriqueStatutApprenant = (
   historique_statut_apprenant_existant: Effectif["apprenant"]["historique_statut"],
-  updated_statut_apprenant: Effectif["apprenant"]["historique_statut"][0]["valeur_statut"],
-  updated_date_metier_mise_a_jour_statut: Date
+  updated_statut_apprenant?: Effectif["apprenant"]["historique_statut"][0]["valeur_statut"],
+  updated_date_metier_mise_a_jour_statut: Date = new Date()
 ) => {
-  if (!updated_statut_apprenant) return historique_statut_apprenant_existant;
+  if (updated_statut_apprenant == null) return historique_statut_apprenant_existant;
 
   let newHistoriqueStatutApprenant = historique_statut_apprenant_existant;
 
