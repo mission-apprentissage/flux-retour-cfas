@@ -15,11 +15,13 @@ import {
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import groupBy from "lodash.groupby";
+import router from "next/router";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { getSIFADate } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
+import { Organisme } from "@/common/internal/Organisme";
 import { downloadObject } from "@/common/utils/browser";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
@@ -86,6 +88,7 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
 };
 
 interface SIFAPageProps {
+  organisme: Organisme;
   modePublique: boolean;
 }
 
@@ -103,6 +106,10 @@ const SIFAPage = (props: SIFAPageProps) => {
   );
   const [showOnlyMissingSifa, setShowOnlyMissingSifa] = useState(false);
   const [hasTrackedMissingSifa, setHasTrackedMissingSifa] = useState(false);
+
+  const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
+    _get<any[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
+  );
 
   const handleToggleMissingSifaChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!hasTrackedMissingSifa) {
@@ -217,6 +224,7 @@ const SIFAPage = (props: SIFAPageProps) => {
           </Ribbons>
         </HStack>
       </Box>
+
       <Box mt={10}>
         <Text fontWeight="bold">
           Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre{" "}
@@ -255,6 +263,21 @@ const SIFAPage = (props: SIFAPageProps) => {
           </FormControl>
         </HStack>
       </Box>
+
+      {duplicates && duplicates?.length > 0 && (
+        <Ribbons variant="alert" my={6}>
+          <Box ml={3}>
+            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6} mb={4}>
+              Nous avons détecté {duplicates?.length} duplicat{duplicates?.length > 1 ? "s" : ""} pour l’année scolaire
+              en cours.
+            </Text>
+
+            <Link variant="whiteBg" href={`${router.asPath.replace("enquete-sifa", "effectifs")}/doublons`}>
+              Vérifier
+            </Link>
+          </Box>
+        </Ribbons>
+      )}
 
       <Box mt={10} mb={16}>
         {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]: [string, any]) => {
