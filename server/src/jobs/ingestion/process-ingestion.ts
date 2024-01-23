@@ -1,4 +1,4 @@
-import { captureException } from "@sentry/node";
+import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
 import { Filter, ObjectId, WithId } from "mongodb";
@@ -88,7 +88,7 @@ export async function processEffectifsQueue(options?: EffectifQueueProcessorOpti
 
   const res = await PromisePool.withConcurrency(10)
     .for(itemsToProcess)
-    .process(async (effectifQueued) => processEffectifQueueItem(effectifQueued));
+    .process(async (effectifQueued) => executeProcessEffectifQueueItem(effectifQueued));
   const totalValidItems = res.results.filter((valid) => valid).length;
 
   return {
@@ -103,7 +103,40 @@ export async function processEffectifQueueById(effectifQueueId: ObjectId): Promi
   if (!effectifQueue) {
     throw Error(`effectifQueue(id=${effectifQueueId.toString()}) non trouvé`);
   }
-  await processEffectifQueueItem(effectifQueue);
+  await executeProcessEffectifQueueItem(effectifQueue);
+}
+
+export function executeProcessEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>) {
+  return runWithAsyncContext(async () => {
+    const hub = getCurrentHub();
+    const transaction = hub?.startTransaction({
+      name: `QUEUE: Item`,
+      op: "queue.item",
+    });
+    hub?.configureScope((scope) => {
+      scope.setSpan(transaction);
+      scope.setTag("erp", effectifQueue.source);
+      scope.setTag("api_version", effectifQueue.api_version);
+      scope.setUser({ id: effectifQueue.source_organisme_id });
+      const ctx = {
+        source_organisme_id: effectifQueue.source_organisme_id,
+        updated_at: effectifQueue.updated_at,
+        created_at: effectifQueue.created_at,
+        processed_at: effectifQueue.processed_at,
+        validation_errors: effectifQueue.validation_errors,
+        effectif_id: effectifQueue.effectif_id,
+        id_erp_apprenant: effectifQueue.id_erp_apprenant,
+      };
+      scope.setContext("ctx", ctx);
+    });
+    const start = Date.now();
+    try {
+      return await processEffectifQueueItem(effectifQueue);
+    } finally {
+      transaction?.setMeasurement("queue.execute", Date.now() - start, "millisecond");
+      transaction?.finish();
+    }
+  });
 }
 
 /**
