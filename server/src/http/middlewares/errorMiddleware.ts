@@ -12,7 +12,7 @@ function shouldLogError(boomError, req) {
   // So we ignore errors from UI, as they will appear in tdb-ui Sentry project
   const isFromUi = req.header("referer")?.includes(config.publicUrl) || req.header("sec-fetch-mode")?.includes("cors");
 
-  return isFromUi;
+  return !isFromUi;
 }
 
 export default () => {
