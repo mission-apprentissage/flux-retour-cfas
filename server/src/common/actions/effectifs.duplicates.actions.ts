@@ -14,10 +14,10 @@ const getSanitizedNomPrenomPipeline = (
   {
     $addFields: {
       sanitizedNom: {
-        $concatArrays: [{ $regexFindAll: { input: { $toLower: nomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } }],
+        $regexFindAll: { input: { $toLower: nomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ },
       },
       sanitizedPrenom: {
-        $concatArrays: [{ $regexFindAll: { input: { $toLower: prenomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } }],
+        $regexFindAll: { input: { $toLower: prenomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ },
       },
     },
   },

@@ -108,7 +108,7 @@ const SIFAPage = (props: SIFAPageProps) => {
   const [hasTrackedMissingSifa, setHasTrackedMissingSifa] = useState(false);
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
-    _get<any[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
+    _get<Organisme[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
   );
 
   const handleToggleMissingSifaChange = (e: ChangeEvent<HTMLInputElement>) => {
