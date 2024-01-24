@@ -182,7 +182,7 @@ const SIFAPage = (props: SIFAPageProps) => {
                   manquantes et générer un fichier compatible à déposer sur la{" "}
                   <Link
                     variant="link"
-                    href="https://dep.adc.education.fr/sifa2/login"
+                    href="https://sifa.depp.education.fr/login"
                     isExternal
                     plausibleGoal="clic_depot_plateforme_sifa"
                   >
