@@ -65,7 +65,7 @@ function EffectifsPage(props: EffectifsPageProps) {
   );
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
-    _get<any[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
+    _get<Organisme[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
   );
 
   const effectifsByAnneeScolaire = useMemo(() => groupBy(organismesEffectifs, "annee_scolaire"), [organismesEffectifs]);

@@ -12,7 +12,7 @@ import EffectifDoublonDetailModal from "./EffectifDoublonDetailModal";
 import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
 
 const transformNomPrenomToPascalCase = (row) =>
-  `${toPascalCase(row.original?._id?.prenom_apprenant)} ${toPascalCase(row.original?._id?.nom_apprenant)}`;
+  `${toPascalCase(row.original?._id?.nom_apprenant)} ${toPascalCase(row.original?._id?.prenom_apprenant)} `;
 
 const defaultPaginationState = {
   pageIndex: 0,

@@ -519,11 +519,18 @@ function setupRoutes(app: Application) {
           await updateOrganismeEffectifs(res.locals.organismeId, req.query.sifa === "true", updated);
         })
       )
+      // Route handler
       .get(
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
-          return await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
+          let duplicates = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
+
+          if (duplicates.length === 0) {
+            duplicates = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId, false);
+          }
+
+          return duplicates;
         })
       )
       .get(
