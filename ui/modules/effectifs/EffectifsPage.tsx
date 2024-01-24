@@ -137,7 +137,11 @@ function EffectifsPage(props: EffectifsPageProps) {
                 scolaire en cours.
               </Text>
 
-              <Link variant="whiteBg" href={`${router.asPath}/doublons`}>
+              <Link
+                variant="whiteBg"
+                href={`${router.asPath}/doublons`}
+                plausibleGoal="clic_vérifier_doublons_effectifs"
+              >
                 Vérifier
               </Link>
             </Box>

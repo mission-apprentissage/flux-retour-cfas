@@ -272,7 +272,11 @@ const SIFAPage = (props: SIFAPageProps) => {
               en cours.
             </Text>
 
-            <Link variant="whiteBg" href={`${router.asPath.replace("enquete-sifa", "effectifs")}/doublons`}>
+            <Link
+              variant="whiteBg"
+              href={`${router.asPath.replace("enquete-sifa", "effectifs")}/doublons`}
+              plausibleGoal="clic_vérifier_doublons_effectifs"
+            >
               Vérifier
             </Link>
           </Box>

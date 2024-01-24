@@ -45,6 +45,12 @@ export const plausibleGoals = [
   // - Page SIFA
   "telechargement_sifa",
   "telechargement_fichier_instruction_sifa",
+
+  // - Page SIFA ou Page Effectifs
+  "clic_vérifier_doublons_effectifs",
+
+  // - Page Effectifs Doublons
+  "suppression_doublon_effectif",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
