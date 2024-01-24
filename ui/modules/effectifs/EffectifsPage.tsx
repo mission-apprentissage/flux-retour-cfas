@@ -140,7 +140,7 @@ function EffectifsPage(props: EffectifsPageProps) {
               <Link
                 variant="whiteBg"
                 href={`${router.asPath}/doublons`}
-                plausibleGoal="clic_vérifier_doublons_effectifs"
+                plausibleGoal="clic_verifier_doublons_effectifs"
               >
                 Vérifier
               </Link>

@@ -358,7 +358,7 @@ const EffectifDoublonDetailModal = ({
               <Button
                 variant="primary"
                 onClick={() => {
-                  trackPlausibleEvent("suppression_doublon_effectif");
+                  trackPlausibleEvent("suppression_doublons_effectifs");
                   onClose?.();
                   onOpenAlertDialog?.();
                 }}

@@ -275,7 +275,7 @@ const SIFAPage = (props: SIFAPageProps) => {
             <Link
               variant="whiteBg"
               href={`${router.asPath.replace("enquete-sifa", "effectifs")}/doublons`}
-              plausibleGoal="clic_vérifier_doublons_effectifs"
+              plausibleGoal="clic_verifier_doublons_effectifs"
             >
               Vérifier
             </Link>
