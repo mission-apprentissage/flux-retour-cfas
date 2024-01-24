@@ -25,6 +25,7 @@ import { getStatutApprenantNameFromCode } from "shared";
 import { _get } from "@/common/httpClient";
 import { formatDateDayMonthYear, prettyPrintDate } from "@/common/utils/dateUtils";
 import { toPascalCase } from "@/common/utils/stringUtils";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import { Close } from "@/theme/components/icons";
 
 import EffectifDoublonDeleteAlertDialog from "./EffectifDoublonDeleteAlertDialog";
@@ -41,6 +42,7 @@ const EffectifDoublonDetailModal = ({
 }) => {
   const { isOpen: isOpenAlertDialog, onOpen: onOpenAlertDialog, onClose: onCloseAlertDialog } = useDisclosure();
   const cancelRef = React.useRef();
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   return (
     <>
@@ -356,6 +358,7 @@ const EffectifDoublonDetailModal = ({
               <Button
                 variant="primary"
                 onClick={() => {
+                  trackPlausibleEvent("suppression_doublons_effectifs");
                   onClose?.();
                   onOpenAlertDialog?.();
                 }}
