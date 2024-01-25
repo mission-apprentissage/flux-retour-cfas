@@ -160,9 +160,9 @@ export const checkUaiMultiplesRelationsAndLieux_rewrite = async (couple: ICouple
   if (lieuxFormation) {
     return {
       ...couple,
-      uai_fiable: couple.uai, // TODO ??
-      siret_fiable: couple.siret, // TODO ??
-      statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+      // uai_fiable: couple.uai, // TODO ??
+      // siret_fiable: couple.siret, // TODO ??
+      statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.UAI_LIEU_FORMATION,
       rule: 4,
     };
   }
@@ -233,7 +233,7 @@ export const checkSiretMultiplesRelationsAndLieux_rewrite = async (couple: ICoup
       ...couple,
       uai_fiable: couple.uai, // TODO ??
       siret_fiable: couple.siret, // TODO ??
-      statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+      statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.UAI_LIEU_FORMATION,
       rule: 5,
     };
   }
