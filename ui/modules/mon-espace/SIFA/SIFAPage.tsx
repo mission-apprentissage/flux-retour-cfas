@@ -155,7 +155,7 @@ const SIFAPage = (props: SIFAPageProps) => {
           {props.modePublique ? "Son" : "Mon"} Enquête SIFA
         </Heading>
 
-        <HStack>
+        <HStack gap={4}>
           <SupportLink href={SIFA_GROUP}></SupportLink>
           <DownloadButton
             variant="secondary"
