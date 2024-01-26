@@ -2,8 +2,8 @@ import { ChevronDownIcon, SettingsIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ReactElement, useState } from "react";
+import { SUPPORT_PAGE_ACCUEIL } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { OrganisationType } from "@/common/internal/Organisation";
 import Link from "@/components/Links/Link";
@@ -262,7 +262,7 @@ const MenuQuestions = () => {
           </MenuItem>
           <MenuItem
             as="a"
-            href={`mailto:${CONTACT_ADDRESS}`}
+            href={SUPPORT_PAGE_ACCUEIL}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackPlausibleEvent("clic_homepage_envoi_message")}

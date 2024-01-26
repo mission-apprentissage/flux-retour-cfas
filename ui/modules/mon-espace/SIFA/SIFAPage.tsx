@@ -18,13 +18,14 @@ import groupBy from "lodash.groupby";
 import router from "next/router";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { getSIFADate } from "shared";
+import { getSIFADate, SIFA_GROUP } from "shared";
 
 import { _get, _getBlob } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { downloadObject } from "@/common/utils/browser";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
+import SupportLink from "@/components/Links/SupportLink";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { usePlausibleTracking } from "@/hooks/plausible";
@@ -153,22 +154,26 @@ const SIFAPage = (props: SIFAPageProps) => {
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
           {props.modePublique ? "Son" : "Mon"} Enquête SIFA
         </Heading>
-        <DownloadButton
-          variant="secondary"
-          action={async () => {
-            trackPlausibleEvent("telechargement_sifa");
-            downloadObject(
-              await _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`),
-              `tdb-données-sifa-${
-                organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"
-              }-${new Date().toLocaleDateString()}.csv`,
-              "text/plain"
-            );
-            handleToastOnSifaDownload();
-          }}
-        >
-          Télécharger le fichier SIFA
-        </DownloadButton>
+
+        <HStack gap={4}>
+          <SupportLink href={SIFA_GROUP}></SupportLink>
+          <DownloadButton
+            variant="secondary"
+            action={async () => {
+              trackPlausibleEvent("telechargement_sifa");
+              downloadObject(
+                await _getBlob(`/api/v1/organismes/${organisme._id}/sifa-export`),
+                `tdb-données-sifa-${
+                  organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"
+                }-${new Date().toLocaleDateString()}.csv`,
+                "text/plain"
+              );
+              handleToastOnSifaDownload();
+            }}
+          >
+            Télécharger le fichier SIFA
+          </DownloadButton>
+        </HStack>
       </Flex>
 
       <Box mt={10} px={14} py={10} bg="galt">
