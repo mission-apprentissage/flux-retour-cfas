@@ -1148,7 +1148,7 @@ export async function getOrganismeIndicateursOrganismes(organismeId: ObjectId): 
       {
         $match: {
           _id: {
-            $in: await findOrganismesFormateursIdsOfOrganisme(organismeId),
+            $in: await findOrganismesFormateursIdsOfOrganisme(organismeId, true),
           },
         },
       },
@@ -1192,6 +1192,6 @@ export async function getOrganismeIndicateursOrganismes(organismeId: ObjectId): 
 
 async function getOrganismeRestriction(organismeId?: ObjectId) {
   return organismeId
-    ? { organisme_id: { $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId))] } }
+    ? { organisme_id: { $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId, true))] } }
     : {};
 }

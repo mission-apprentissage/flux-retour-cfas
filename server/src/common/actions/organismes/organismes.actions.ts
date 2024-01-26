@@ -149,7 +149,7 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) =
 /**
  * Fonction de MAJ d'un organisme en appelant les API externes
  */
-export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
+export const updateOneOrganismeRelatedFormations = async (organisme: WithId<Organisme>) => {
   // Construction de l'arbre des formations de l'organisme
   const relatedFormations = (await getFormationsTreeForOrganisme(organisme.uai))?.formations || [];
 
@@ -687,7 +687,7 @@ export async function listOrganismesFormateurs(
     .find(
       {
         _id: {
-          $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId))],
+          $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId, true))],
         },
       },
       {
