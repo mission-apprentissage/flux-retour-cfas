@@ -26,6 +26,7 @@ import {
   IndicateursEffectifs,
   IndicateursEffectifsAvecFormation,
   IndicateursOrganismes,
+  GO_MODIFICATION_IDENTITE_ELEMENT_LINK,
 } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
@@ -37,6 +38,7 @@ import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
+import SupportLink from "@/components/Links/SupportLink";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import withAuth from "@/components/withAuth";
@@ -575,6 +577,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 </VStack>
               </HStack>
             )}
+            {!modePublique && <SupportLink href={GO_MODIFICATION_IDENTITE_ELEMENT_LINK}></SupportLink>}
           </VStack>
 
           {/* Infos Transmission / Paramétrage pour les administrateurs */}
