@@ -37,6 +37,9 @@ const relationOrganismeSchema = object(
     departement: string(),
     academie: string(),
     reseaux: arrayOf(string()),
+
+    // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
+    responsabilitePartielle: boolean(),
   },
   { additionalProperties: true }
 );

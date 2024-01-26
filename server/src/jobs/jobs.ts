@@ -32,7 +32,7 @@ import { hydrateOrganismesPrepaApprentissage } from "./hydrate/organismes/hydrat
 import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { hydrateOrganismesSoltea } from "./hydrate/organismes/hydrate-organismes-soltea";
-import { updateMultipleOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis";
+import { updateAllOrganismesRelatedFormations } from "./hydrate/organismes/update-organismes-with-apis";
 import { hydrateBassinsEmploi } from "./hydrate/reference/hydrate-bassins-emploi";
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
@@ -60,6 +60,9 @@ export const CronsMap = {
     handler: async () => {
       // # Remplissage des organismes issus du référentiel
       await addJob({ name: "hydrate:organismes-referentiel", queued: true });
+
+      // # Remplissage des formations issus du catalogue
+      await addJob({ name: "hydrate:formations-catalogue", queued: true });
 
       // # Remplissage des organismes depuis le référentiel
       await addJob({ name: "hydrate:organismes", queued: true });
@@ -200,7 +203,7 @@ export async function runJob(job: IJobsCronTask | IJobsSimple): Promise<number> 
       case "hydrate:organismes-effectifs-count":
         return hydrateOrganismesEffectifsCount();
       case "update:organismes-with-apis":
-        return updateMultipleOrganismesWithApis();
+        return updateAllOrganismesRelatedFormations();
       case "hydrate:opcos":
         return hydrateOrganismesOPCOs();
       case "hydrate:reseaux":

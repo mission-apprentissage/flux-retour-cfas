@@ -915,6 +915,7 @@ export interface Organisme {
     departement?: string;
     academie?: string;
     reseaux?: string[];
+    responsabilitePartielle: boolean;
   }[];
   organismesResponsables?: {
     siret?: string;
@@ -930,6 +931,7 @@ export interface Organisme {
     departement?: string;
     academie?: string;
     reseaux?: string[];
+    responsabilitePartielle: boolean;
   }[];
   /**
    * Date de la première transmission de données
