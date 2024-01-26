@@ -21,10 +21,6 @@ interface OrganismeInfos {
   reseaux?: string[];
 }
 
-const isFromSameSiren = (a: { siret: string }, b: { siret: string }) => {
-  return b.siret.startsWith(a.siret.slice(0, 9));
-};
-
 /**
  * Ce job peuple le champ organisme.organismesFormateurs et organismesResponsables avec les relations du référentiel
  * stockées dans la collection organismeReferentiel.
