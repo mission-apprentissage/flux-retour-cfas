@@ -2,8 +2,12 @@ import { ObjectId } from "bson";
 import express from "express";
 import { z } from "zod";
 
-import { getTransmissionStatusByOrganismeGroupedByDate } from "@/common/actions/indicateurs/transmissions/transmission.action";
+import {
+  getTransmissionStatusByOrganismeGroupedByDate,
+  getTransmissionStatusDetailsForAGivenDay,
+} from "@/common/actions/indicateurs/transmissions/transmission.action";
 import paginationSchema from "@/common/validation/paginationSchema";
+import { extensions } from "@/common/validation/utils/zodPrimitives";
 import { returnResult, requireOrganismePermission } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
@@ -19,7 +23,12 @@ export default () => {
     validateRequestMiddleware({ query: pagination }),
     returnResult(getAllTransmissionsByDate)
   );
-  router.get("/:id", getTransmissionByDate);
+  router.get(
+    "/:date",
+    requireOrganismePermission("configurerModeTransmission"),
+    validateRequestMiddleware({ params: z.object({ date: extensions.iso8601Date() }), query: pagination }),
+    returnResult(getTransmissionByDate)
+  );
 
   return router;
 };
@@ -31,6 +40,10 @@ const getAllTransmissionsByDate = async (req, res) => {
   return await getTransmissionStatusByOrganismeGroupedByDate(organismeIdString, page, limit);
 };
 
-const getTransmissionByDate = () => {
-  return returnResult(async () => {});
+const getTransmissionByDate = async (req, res) => {
+  const { page, limit } = req.query as Pagination;
+  const organismeId = res.locals.organismeId as ObjectId;
+  const date = req.params.date as string;
+  const organismeIdString = organismeId.toString();
+  return await getTransmissionStatusDetailsForAGivenDay(organismeIdString, date, page, limit);
 };
