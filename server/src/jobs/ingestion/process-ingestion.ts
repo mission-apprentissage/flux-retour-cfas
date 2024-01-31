@@ -296,6 +296,10 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
             return organisme;
           })(),
           (async () => {
+            if (!effectifQueued.formation_cfd) {
+              return null;
+            }
+
             const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.formation_cfd });
             itemProcessingInfos.formation_cfd = effectifQueued.formation_cfd;
             itemProcessingInfos.formation_found = !!formationFromCatalogue;
