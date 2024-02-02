@@ -10,7 +10,15 @@ module.exports = {
         prepareCmd: `.bin/mna-tdb release:app \${nextRelease.version} push`,
       },
     ],
-    "@semantic-release/github",
+    [
+      "@semantic-release/github",
+      {
+        // Do not comment to prevent useless notifications
+        successComment: false,
+        failComment: false,
+        releasedLabels: false,
+      },
+    ],
     [
       "semantic-release-slack-bot",
       {

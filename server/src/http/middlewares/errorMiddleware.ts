@@ -1,6 +1,20 @@
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 
+import config from "@/config";
+
+function shouldLogError(boomError, req) {
+  if (boomError.isServer) {
+    return true;
+  }
+
+  // We want to track client errors from ERP and other API actors
+  // So we ignore errors from UI, as they will appear in tdb-ui Sentry project
+  const isFromUi = req.header("referer")?.includes(config.publicUrl) || req.header("sec-fetch-mode")?.includes("cors");
+
+  return !isFromUi;
+}
+
 export default () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (rawError, req, res, next) => {
@@ -30,7 +44,7 @@ export default () => {
       });
     }
 
-    if (!boomError.isServer) {
+    if (shouldLogError(boomError, req)) {
       captureException(rawError);
     }
 

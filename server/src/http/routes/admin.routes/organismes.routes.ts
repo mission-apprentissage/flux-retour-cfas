@@ -6,7 +6,7 @@ import {
   findOrganismeById,
   getAllOrganismes,
   getDetailedOrganismeById,
-  updateOrganismeFromApis,
+  updateOneOrganismeRelatedFormations,
 } from "@/common/actions/organismes/organismes.actions";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
@@ -122,7 +122,7 @@ export default () => {
         throw Boom.notFound(`Organisme with id ${id} not found`);
       }
 
-      const updated = await updateOrganismeFromApis(organisme);
+      const updated = await updateOneOrganismeRelatedFormations(organisme);
 
       res.json(updated);
     }

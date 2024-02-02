@@ -8,7 +8,7 @@ import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model"
 import { formatError } from "@/common/utils/errorUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
-import dossierApprenantSchemaV3 from "@/common/validation/dossierApprenantSchemaV3";
+import { dossierApprenantSchemaV3Input } from "@/common/validation/dossierApprenantSchemaV3";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
@@ -25,7 +25,7 @@ export default () => {
       await Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).validateAsync(body, { abortEarly: false })
     ).map((e) => stripNullProperties(e));
     const isV3 = originalUrl.includes("/v3");
-    const validationSchema = isV3 ? dossierApprenantSchemaV3() : dossierApprenantSchemaV1V2();
+    const validationSchema = isV3 ? dossierApprenantSchemaV3Input() : dossierApprenantSchemaV1V2();
 
     const source = user.username || user.source;
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {
@@ -37,8 +37,12 @@ export default () => {
         ? undefined
         : result.error.issues.map(({ path, message }) => ({ message, path }));
 
+      // Nous ne pouvons pas garder le `nir_apprenant` en base
+      const { nir_apprenant, ...rest } = dossierApprenant;
+
       return {
-        ...dossierApprenant,
+        ...rest,
+        has_nir: Boolean(nir_apprenant),
         ...defaultValuesEffectifQueue(),
         ...(prettyValidationError ? { processed_at: new Date() } : {}),
         validation_errors: prettyValidationError || [],
