@@ -23,7 +23,8 @@ export const apprenantSchema = object(
     }),
     date_de_naissance: date({ description: "Date de naissance de l'apprenant" }),
     code_postal_de_naissance: string({
-      description: "Le code postal doit contenir 5 caractères",
+      description:
+        "Le code postal doit contenir 5 caractères.  \nPour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  \n*Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
       example: "75000",
       pattern: CODE_POSTAL_PATTERN,
       maxLength: 5,
@@ -105,6 +106,9 @@ export const apprenantSchema = object(
           }),
           date_statut: date(),
           date_reception: date(),
+          abandon_forced: boolean({
+            description: "Le statut a été forcé en abandon",
+          }),
         },
         {
           required: ["valeur_statut", "date_statut"],
@@ -124,8 +128,9 @@ export const apprenantSchema = object(
       description: "Situation de l'apprenant N-1",
     }),
     dernier_organisme_uai: string({
-      description:
-        "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
+      description: `Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
+      ou département.   \n* Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
+         \n* Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" `,
       pattern: DERNIER_ORGANISME_UAI_PATTERN,
     }),
     type_cfa: string({
@@ -155,9 +160,9 @@ export const apprenantSchema = object(
       courriel: string({ description: "Adresse mail de contact du representant légal" }),
       telephone: string({
         description: `Dans le cas d'un numéro français, il n'est pas
-      nécessaire de saisir le "0" car l'indicateur pays est
-      pré-renseigné.
-      Il doit contenir 9 chiffres après l'indicatif.`,
+    nécessaire de saisir le "0" car l'indicateur pays est
+    pré-renseigné.
+    Il doit contenir 9 chiffres après l'indicatif.`,
         example: "+33908070605",
         pattern: "^([+])?(\\d{7,12})$",
         maxLength: 13,
@@ -172,7 +177,7 @@ export const apprenantSchema = object(
       }),
     }),
     // V3 fields
-    nir: string({
+    has_nir: boolean({
       description: "Numéro de sécurité sociale de l'apprenant",
     }),
     responsable_mail1: string({

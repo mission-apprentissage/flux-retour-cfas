@@ -17,6 +17,8 @@ export function getSentryOptions() {
       new CaptureConsole({ levels: ["error"] }) as any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       new ExtraErrorData({ depth: 16 }) as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new Sentry.Integrations.Anr({ captureStackTrace: true }) as any,
     ],
   };
 }

@@ -229,11 +229,13 @@ export const organismesByLabel = {
     organismesFormateurs: [
       {
         _id: new ObjectId(id(2)),
+        responsabilitePartielle: false,
       },
     ] satisfies Organisme["organismesFormateurs"],
     organismesResponsables: [
       {
         _id: new ObjectId(id(3)),
+        responsabilitePartielle: false,
       },
     ] satisfies Organisme["organismesResponsables"],
   },
@@ -245,6 +247,7 @@ export const organismesByLabel = {
     organismesResponsables: [
       {
         _id: new ObjectId(id(1)),
+        responsabilitePartielle: false,
       },
     ] satisfies Organisme["organismesResponsables"],
   },
@@ -256,6 +259,7 @@ export const organismesByLabel = {
     organismesFormateurs: [
       {
         _id: new ObjectId(id(1)),
+        responsabilitePartielle: false,
       },
     ] satisfies Organisme["organismesFormateurs"],
   },

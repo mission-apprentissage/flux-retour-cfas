@@ -34,5 +34,5 @@ export default () => {
     })
   );
 
-  return passport.authenticate("jwtStrategy1", { session: false });
+  return passport.authenticate("jwtStrategy1", { session: false, failWithError: true });
 };
