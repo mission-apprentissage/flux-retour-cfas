@@ -1066,7 +1066,7 @@ export interface Effectif {
     /**
      * Numéro de sécurité sociale de l'apprenant
      */
-    nir?: string;
+    has_nir?: boolean;
     /**
      * Adresse mail du responsable 1
      */

@@ -23,7 +23,7 @@ export interface EffectifsQueue {
   contrat_date_debut?: any; // Date de début du contrat
   contrat_date_fin?: any; // Date de fin du contrat
   contrat_date_rupture?: any; // Date de rupture du contrat
-  nir_apprenant?: any; // Identification nationale securité social
+  has_nir?: boolean; // Identification nationale securité social
   adresse_apprenant?: any; // Adresse de l'apprenant
   code_postal_apprenant?: any; // Code postal de l'apprenant
   sexe_apprenant?: any; // Sexe de l'apprenant (M: Homme, F: Femme)

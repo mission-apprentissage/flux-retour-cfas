@@ -3,6 +3,8 @@ import { captureException } from "@sentry/node";
 import logger from "@/common/logger";
 import config from "@/config";
 
+import { tryCachedExecution } from "../utils/cacheUtils";
+
 import TabCoCfdInfo from "./@types/TabCoCfdInfo";
 import TabCoCodePostalInfo from "./@types/TabCoCodePostalInfo";
 import getApiClient from "./client";
@@ -34,19 +36,24 @@ export const getCfdInfo = async (cfd: string): Promise<TabCoCfdInfo | null> => {
 
 export const getCodePostalInfo = async (codePostal: string | null | undefined): Promise<TabCoCodePostalInfo | null> => {
   if (!codePostal) return null;
-  try {
-    const { data } = await client.post("/code-postal", { codePostal }, { cache: { methods: ["post"] } });
-    return data;
-  } catch (error: any) {
-    logger.error(
-      `getCodePostalInfo: something went wrong while requesting code postal "${codePostal}": ${error.message}`,
-      error.code || error.response?.status
-    );
-    captureException(
-      new Error(`getCodePostalInfo: something went wrong while requesting code postal "${codePostal}"`, {
-        cause: error,
-      })
-    );
-    return null;
-  }
+
+  const serviceFunc = async () => {
+    try {
+      const { data } = await client.post("/code-postal", { codePostal }, { cache: { methods: ["post"] } });
+      return data;
+    } catch (error: any) {
+      logger.error(
+        `getCodePostalInfo: something went wrong while requesting code postal "${codePostal}": ${error.message}`,
+        error.code || error.response?.status
+      );
+      captureException(
+        new Error(`getCodePostalInfo: something went wrong while requesting code postal "${codePostal}"`, {
+          cause: error,
+        })
+      );
+      return null;
+    }
+  };
+
+  return tryCachedExecution(`codePostalInfo-${codePostal}`, 3600_000, serviceFunc);
 };
