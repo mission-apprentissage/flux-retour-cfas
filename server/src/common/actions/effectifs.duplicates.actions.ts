@@ -13,12 +13,12 @@ const getSanitizedNomPrenomPipeline = (
 ) => [
   {
     $addFields: {
-      sanitizedNom: { $regexFindAll: { input: { $toLower: nomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
-    },
-  },
-  {
-    $addFields: {
-      sanitizedPrenom: { $regexFindAll: { input: { $toLower: prenomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ } },
+      sanitizedNom: {
+        $regexFindAll: { input: { $toLower: nomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ },
+      },
+      sanitizedPrenom: {
+        $regexFindAll: { input: { $toLower: prenomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ },
+      },
     },
   },
   {
@@ -26,10 +26,6 @@ const getSanitizedNomPrenomPipeline = (
       sanitizedNom: {
         $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
       },
-    },
-  },
-  {
-    $addFields: {
       sanitizedPrenom: {
         $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
       },
@@ -38,23 +34,29 @@ const getSanitizedNomPrenomPipeline = (
 ];
 
 /**
- * Méthode de récupération de la liste des doublons au sein d'un organisme
+ * Méthode de récupération de la liste des doublons au sein d'un organisme avec ou sans CFD
  * @param organisme_id
+ * @param include_formation_cfd
  */
-export const getDuplicatesEffectifsForOrganismeId = async (organisme_id: ObjectId) => {
+export const getDuplicatesEffectifsForOrganismeId = async (
+  organisme_id: ObjectId,
+  include_formation_cfd: boolean = true
+) => {
+  const groupStageId = {
+    nom_apprenant: "$sanitizedNom",
+    prenom_apprenant: "$sanitizedPrenom",
+    date_de_naissance_apprenant: "$apprenant.date_de_naissance",
+    annee_scolaire: "$annee_scolaire",
+    ...(include_formation_cfd && { formation_cfd: "$formation.cfd" }),
+  };
+
   return await effectifsDb()
     .aggregate([
       { $match: { organisme_id, annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } } },
       ...getSanitizedNomPrenomPipeline(),
       {
         $group: {
-          _id: {
-            nom_apprenant: "$sanitizedNom",
-            prenom_apprenant: "$sanitizedPrenom",
-            date_de_naissance_apprenant: "$apprenant.date_de_naissance",
-            annee_scolaire: "$annee_scolaire",
-            formation_cfd: "$formation.cfd",
-          },
+          _id: groupStageId,
           count: { $sum: 1 },
           duplicates: {
             $addToSet: {
@@ -72,6 +74,7 @@ export const getDuplicatesEffectifsForOrganismeId = async (organisme_id: ObjectI
           },
         },
       },
+      { $sort: { "_id.nom_apprenant": 1, "_id.prenom_apprenant": 1 } },
       { $match: { count: { $gt: 1 } } },
     ])
     .toArray();

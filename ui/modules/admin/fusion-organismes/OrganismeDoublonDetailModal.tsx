@@ -48,26 +48,24 @@ const OrganismeDoublonDetailModal = ({
 
   return (
     <>
-      <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose} size={"6xl"}>
+      <Modal isOpen={isOpen} onClose={onClose} size={"6xl"}>
         <ModalOverlay bg="rgba(0, 0, 0, 0.48)" />
-        <ModalContent bg="white" color="primaryText" borderRadius="none">
+        <ModalContent p={6} borderRadius="0">
           <Button
             display={"flex"}
             alignSelf={"flex-end"}
             color="bluefrance"
             fontSize={"epsilon"}
             onClick={() => {
-              onClose?.();
+              onClose();
             }}
-            variant="unstyled"
-            pt={10}
-            pb={6}
-            pr={10}
+            variant="link"
             fontWeight={400}
+            p={0}
+            m={4}
           >
-            Fermer{" "}
-            <Text as={"span"} ml={2}>
-              <Close boxSize={4} />
+            <Text as={"span"}>
+              Fermer <Close boxSize={4} />
             </Text>
           </Button>
           <ModalHeader>

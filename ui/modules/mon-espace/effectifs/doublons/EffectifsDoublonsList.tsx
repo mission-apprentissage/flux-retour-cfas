@@ -12,7 +12,7 @@ import EffectifDoublonDetailModal from "./EffectifDoublonDetailModal";
 import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
 
 const transformNomPrenomToPascalCase = (row) =>
-  `${toPascalCase(row.original?._id?.prenom_apprenant)} ${toPascalCase(row.original?._id?.nom_apprenant)}`;
+  `${toPascalCase(row.original?._id?.nom_apprenant)} ${toPascalCase(row.original?._id?.prenom_apprenant)} `;
 
 const defaultPaginationState = {
   pageIndex: 0,
@@ -62,20 +62,10 @@ const EffectifsDoublonsList = ({ data }) => {
           enableSorting: false,
         },
         {
-          header: () => "Code formation diplôme",
-          accessorKey: "_id",
-          cell: ({ row }) => (
-            <Text fontSize="1rem" pt={2} whiteSpace="nowrap">
-              {`CFD : ${row.original?._id?.formation_cfd}`}
-            </Text>
-          ),
-          enableSorting: false,
-        },
-        {
           header: () => "Nombre d'occurences",
           accessorKey: "_id",
           cell: ({ row }) => (
-            <HStack>
+            <HStack align="center" justify="center">
               <Alert mt={2} />
               <Text fontSize="1rem" pt={2} whiteSpace="nowrap">
                 {row?.original?.duplicates.length}
@@ -88,16 +78,14 @@ const EffectifsDoublonsList = ({ data }) => {
     />
   );
 };
-
 const RenderSubComponent = (row: Row<DuplicateEffectifGroup>) => {
   return (
-    <Stack spacing={1} mt={-2} ml={10}>
+    <Stack spacing={4} mt={-2} ml={10}>
       {row?.original?.duplicates
-        // Tri par date de création pour proposition de suppression du moins récent
         ?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
         .map((item, index) => (
           <Fragment key={index}>
-            <HStack spacing={4}>
+            <HStack spacing={6}>
               <ArrowRightLine />
               <Text>
                 <b>{`${transformNomPrenomToPascalCase(row)}`}</b>
@@ -105,20 +93,25 @@ const RenderSubComponent = (row: Row<DuplicateEffectifGroup>) => {
               <Text>
                 <i>{`créé le ${prettyPrintDate(item.created_at)}`}</i>
               </Text>
-              <Text>
-                <i>
-                  ERP source : <b>{item.source}</b>
-                </i>
-              </Text>
-
               <EffectifDoublonDetailModalContainer index={index} duplicateDetail={item} />
-
               {index === 0 && (
                 <HStack color="warning">
                   <Alert boxSize={4} mt={1} />
                   <Text fontSize="0.7rem"> Duplicat le plus ancien (à supprimer éventuellement)</Text>
                 </HStack>
               )}
+            </HStack>
+            <HStack spacing={16}>
+              <Text>
+                <i>
+                  Source : <b>{item.source}</b>
+                </i>
+              </Text>
+              <Text>
+                <i>
+                  Code formation diplôme : <b>{item?.formation?.cfd || "Non spécifié"}</b>
+                </i>
+              </Text>
             </HStack>
           </Fragment>
         ))}

@@ -404,7 +404,7 @@ describe("Processus d'ingestion", () => {
         contrat_date_debut: "2021-09-01T00:00:00.000Z",
         contrat_date_fin: "2022-06-30T00:00:00.000Z",
         contrat_date_rupture: "2022-06-30T00:00:00.000Z",
-        nir_apprenant: "123 45678901 23", // les espaces sont supprimés
+        has_nir: true,
         adresse_apprenant: "1 rue de la paix",
         code_postal_apprenant: "75000",
         code_postal_de_naissance_apprenant: "44000",
@@ -536,7 +536,7 @@ describe("Processus d'ingestion", () => {
             sexe: "F",
             rqth: true,
             date_rqth: new Date("2021-09-01T00:00:00.000Z"),
-            nir: "1234567890123",
+            has_nir: true,
             responsable_mail1: "a1@example.org",
             responsable_mail2: "a2@example.org",
             derniere_situation: 4001,
@@ -768,8 +768,7 @@ describe("Processus d'ingestion", () => {
           annee_scolaire: "2022-2022",
           // La chaine RNCP est ajoutée au début du nombre
           formation_rncp: "  12-3  ",
-          // Le NIR peut faire 15 caratères
-          nir_apprenant: "12 34567 89012 3 45",
+          has_nir: true,
           // Le sexe peut être un number
           sexe_apprenant: 2,
           // duree_theorique_formation est transformé en mois
@@ -807,7 +806,7 @@ describe("Processus d'ingestion", () => {
             nom: "DOE",
             prenom: "John",
             date_de_naissance: new Date("2000-10-28T00:00:00.000Z"),
-            nir: "1234567890123",
+            has_nir: true,
             sexe: "F",
           },
           contrats: [],
