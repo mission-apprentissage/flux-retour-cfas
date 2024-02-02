@@ -18,8 +18,8 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import React from "react";
-import { NATURE_ORGANISME } from "shared";
 
+import { NATURE_ORGANISME } from "@/common/constants/organismes";
 import { _get } from "@/common/httpClient";
 import { ArrowRightLine, Close } from "@/theme/components/icons";
 
