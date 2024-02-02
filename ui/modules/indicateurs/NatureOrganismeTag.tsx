@@ -1,5 +1,6 @@
 import { SystemProps, Tag } from "@chakra-ui/react";
-import { NATURE_ORGANISME } from "shared";
+
+import { NATURE_ORGANISME } from "@/common/constants/organismes";
 
 interface NatureOrganismeTagProps extends SystemProps {
   nature: keyof typeof NATURE_ORGANISME;
