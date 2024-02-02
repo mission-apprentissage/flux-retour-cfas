@@ -1,4 +1,4 @@
-import { Effectif } from "@/common/model/@types";
+import { Effectif } from "shared/models/data/@types";
 
 import { buildNewHistoriqueStatutApprenant } from "./engine.actions";
 

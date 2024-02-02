@@ -1,6 +1,7 @@
 import { captureException } from "@sentry/node";
 import { Option, program } from "commander";
 import listEndpoints from "express-list-endpoints";
+import { addJob, startJobProcessor as startJobProcessorFn } from "job-processor";
 import HttpTerminator from "lil-http-terminator";
 import { ObjectId } from "mongodb";
 
@@ -11,22 +12,13 @@ import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
-import { addJob, processor } from "./jobs/jobs_actions";
 import { seedPlausibleGoals } from "./jobs/seed/plausible/goals";
 import { generateTypes } from "./jobs/seed/types/generate-types";
 import { updateUserPassword } from "./jobs/users/update-user-password";
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
-  if (config.env !== "local" && config.env !== "preview") {
-    await addJob({
-      name: "crons:init",
-      queued: true,
-      payload: {},
-    });
-  }
-
-  await processor(signal);
+  await startJobProcessorFn(signal);
   logger.info(`Processor shut down`);
 }
 

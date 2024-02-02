@@ -1,5 +1,6 @@
 import Boom from "boom";
 import express from "express";
+import { getWarningOnEmail } from "shared/models/data/organisations.model";
 import { z } from "zod";
 
 import { rejectMembre, validateMembre } from "@/common/actions/organisations.actions";
@@ -10,7 +11,6 @@ import {
   resendConfirmationEmail,
   updateUser,
 } from "@/common/actions/users.actions";
-import { getWarningOnEmail } from "@/common/model/organisations.model";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import paginationShema from "@/common/validation/paginationSchema";
 import searchShema from "@/common/validation/searchSchema";

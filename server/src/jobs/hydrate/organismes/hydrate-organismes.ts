@@ -1,6 +1,6 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
-import { STATUT_FIABILISATION_ORGANISME } from "shared";
+import { STATUT_FIABILISATION_ORGANISME, STATUT_PRESENCE_REFERENTIEL } from "shared";
 
 import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import {
@@ -8,7 +8,6 @@ import {
   findOrganismeByUaiAndSiret,
   updateOrganisme,
 } from "@/common/actions/organismes/organismes.actions";
-import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 

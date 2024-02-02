@@ -1,10 +1,10 @@
 import axiosRetry from "axios-retry";
+import ApiEntEtablissement from "shared/models/apis/@types/ApiEntEtablissement";
 
 import logger from "@/common/logger";
 import { ApiError, apiRateLimiter } from "@/common/utils/apiUtils";
 import config from "@/config";
 
-import ApiEntEtablissement from "./@types/ApiEntEtablissement";
 import getApiClient from "./client";
 
 export const API_ENDPOINT = config.apiEntreprise.endpoint;
