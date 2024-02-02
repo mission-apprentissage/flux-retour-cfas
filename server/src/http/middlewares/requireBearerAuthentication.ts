@@ -15,7 +15,7 @@ export default function requireBearerAuthentication() {
       if (token.startsWith("Bearer ")) {
         token = token.substring(7, token.length);
       } else {
-        throw Boom.forbidden("La clé API n'est pas valide");
+        throw Boom.forbidden("La clé API doit etre au format Bearer");
       }
 
       res.locals.token = token;

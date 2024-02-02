@@ -10,6 +10,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
 
 const TEST_SIREN = "190404921";
+const ANNEE_SCOLAIRE = "2023-2024";
 
 const sampleOrganismeId = new ObjectId(id(1));
 const sampleOrganisme: Organisme = {
@@ -28,7 +29,7 @@ const insertDuplicateEffectifs = async (sampleEffectif: any, nbDuplicates = 2) =
         .insertOne({
           ...sampleEffectif,
           id_erp_apprenant: `ID_ERP_${index}`,
-          annee_scolaire: "2023-2024",
+          annee_scolaire: ANNEE_SCOLAIRE,
         })
         .then(({ insertedId }) => insertedId)
     );
@@ -39,135 +40,65 @@ const insertDuplicateEffectifs = async (sampleEffectif: any, nbDuplicates = 2) =
 
 const sanitizeString = (string) => string.replace(/\s/g, "").toLowerCase();
 
-describe("Test des actions Effectifs Duplicates", () => {
+describe("Tests des actions de détection des doublons dans les effectifs", () => {
   useMongo();
-  describe("getDuplicatesEffectifsForOrganismeId", () => {
-    beforeEach(async () => {
-      // Création d'un organisme de test
-      await organismesDb().insertOne(sampleOrganisme);
+
+  beforeEach(async () => {
+    await organismesDb().insertOne(sampleOrganisme);
+  });
+
+  const testDuplicateDetection = async (modification, expectedCount, includeFormationCFD = true) => {
+    const sampleEffectif = createSampleEffectif({
+      organisme: sampleOrganisme,
+      annee_scolaire: ANNEE_SCOLAIRE,
+      ...modification,
     });
 
-    it("Permet de vérifier la récupération de doublons d'effectifs", async () => {
-      // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({ organisme: sampleOrganisme, annee_scolaire: "2023-2024" });
-      await insertDuplicateEffectifs(sampleEffectif);
+    await insertDuplicateEffectifs(sampleEffectif, expectedCount);
+    const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId, includeFormationCFD);
 
-      const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
+    assert.equal(duplicates.length, expectedCount > 1 ? 1 : 0);
 
-      // Vérification de la récupération d'une liste avec un doublon identifié 2 fois sur les champs de la clé d'unicité
-      assert.equal(duplicates.length, 1);
-      assert.equal(duplicates[0].count, 2);
-      assert.equal(duplicates[0].duplicates.length, 2);
-
+    if (expectedCount > 1) {
+      assert.equal(duplicates[0].count, expectedCount);
+      assert.equal(duplicates[0].duplicates.length, expectedCount);
       assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
       assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
       assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
       assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
-      assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
-    });
+      if (includeFormationCFD) {
+        assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
+      } else {
+        assert.equal(duplicates[0]._id.formation_cfd, undefined);
+      }
+    }
+  };
 
-    it("Permet de vérifier la non récupération de doublons d'effectifs", async () => {
-      // Ajout d'effectif
-      await insertDuplicateEffectifs(
-        createSampleEffectif({ organisme: sampleOrganisme, annee_scolaire: "2023-2024" }),
-        1
-      );
-      const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
+  it("Permet de vérifier la récupération de doublons d'effectifs", async () => {
+    await testDuplicateDetection({}, 2);
+  });
 
-      // Vérification de la récupération des doublons
-      assert.equal(duplicates.length, 0);
-    });
+  it("Permet de vérifier la non récupération de doublons d'effectifs", async () => {
+    await testDuplicateDetection({}, 1);
+  });
 
-    it("Permet de vérifier la récupération de doublons d'effectifs avec un prénom multi-casse", async () => {
-      // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({
-        organisme: sampleOrganisme,
-        apprenant: { prenom: "SYlvAiN" },
-        annee_scolaire: "2023-2024",
-      });
-      await insertDuplicateEffectifs(sampleEffectif, 5);
+  it("Permet de vérifier la récupération de doublons d'effectifs avec un prénom multi-casse", async () => {
+    await testDuplicateDetection({ prenom: "SYlvAiN" }, 5);
+  });
 
-      const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
+  it("Permet de vérifier la récupération de doublons d'effectifs avec un nom multi-casse", async () => {
+    await testDuplicateDetection({ nom: "mBaPpe" }, 2);
+  });
 
-      // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
-      assert.equal(duplicates.length, 1);
-      assert.equal(duplicates[0].count, 5);
-      assert.equal(duplicates[0].duplicates.length, 5);
+  it("Permet de vérifier la récupération de doublons d'effectifs avec un prénom avec caractères spéciaux, accents et espace", async () => {
+    await testDuplicateDetection({ prenom: "JeAn- éDouArd" }, 5);
+  });
 
-      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
-      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
-      assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
-      assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
-      assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
-    });
+  it("Permet de vérifier la récupération de doublons d'effectifs avec un nom avec caractères spéciaux, accents et espace", async () => {
+    await testDuplicateDetection({ nom: "M' BaPpé" }, 5);
+  });
 
-    it("Permet de vérifier la récupération de doublons d'effectifs avec un nom multi-casse", async () => {
-      // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({
-        organisme: sampleOrganisme,
-        apprenant: { nom: "mBaPpe" },
-        annee_scolaire: "2023-2024",
-      });
-      await insertDuplicateEffectifs(sampleEffectif);
-
-      const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
-
-      // Vérification de la récupération d'une liste avec un doublon identifié 2 fois sur les champs de la clé d'unicité
-      assert.equal(duplicates.length, 1);
-      assert.equal(duplicates[0].count, 2);
-      assert.equal(duplicates[0].duplicates.length, 2);
-
-      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
-      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
-      assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
-      assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
-      assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
-    });
-
-    it("Permet de vérifier la récupération de doublons d'effectifs avec un prénom avec caractères spéciaux, accents et espace", async () => {
-      // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({
-        organisme: sampleOrganisme,
-        apprenant: { prenom: "JeAn- éDouArd" },
-        annee_scolaire: "2023-2024",
-      });
-      await insertDuplicateEffectifs(sampleEffectif, 5);
-
-      const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
-
-      // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
-      assert.equal(duplicates.length, 1);
-      assert.equal(duplicates[0].count, 5);
-      assert.equal(duplicates[0].duplicates.length, 5);
-
-      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), sanitizeString(sampleEffectif.apprenant.nom));
-      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), "jeanédouard"); // Transformation du prenom_apprenant en champ normalisé
-      assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
-      assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
-      assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
-    });
-
-    it("Permet de vérifier la récupération de doublons d'effectifs avec un nom avec caractères spéciaux, accents et espace", async () => {
-      // Ajout de 2 doublons d'effectifs
-      const sampleEffectif = createSampleEffectif({
-        organisme: sampleOrganisme,
-        apprenant: { nom: "M' BaPpé" },
-        annee_scolaire: "2023-2024",
-      });
-      await insertDuplicateEffectifs(sampleEffectif, 5);
-
-      const duplicates = await getDuplicatesEffectifsForOrganismeId(sampleOrganismeId);
-
-      // Vérification de la récupération d'une liste avec un doublon identifié 5 fois sur les champs de la clé d'unicité
-      assert.equal(duplicates.length, 1);
-      assert.equal(duplicates[0].count, 5);
-      assert.equal(duplicates[0].duplicates.length, 5);
-
-      assert.equal(sanitizeString(duplicates[0]._id.nom_apprenant), "mbappé"); // Transformation du nom en champ normalisé
-      assert.equal(sanitizeString(duplicates[0]._id.prenom_apprenant), sanitizeString(sampleEffectif.apprenant.prenom));
-      assert.deepEqual(duplicates[0]._id.date_de_naissance_apprenant, sampleEffectif.apprenant.date_de_naissance);
-      assert.equal(duplicates[0]._id.annee_scolaire, sampleEffectif.annee_scolaire);
-      assert.equal(duplicates[0]._id.formation_cfd, sampleEffectif.formation?.cfd);
-    });
+  it("Permet de vérifier la détection des doublons sans prendre en compte formation_cfd", async () => {
+    await testDuplicateDetection({}, 3, false);
   });
 });

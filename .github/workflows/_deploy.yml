@@ -77,6 +77,11 @@ jobs:
           ANSIBLE_REMOTE_USER: deploy
           ANSIBLE_BECOME_PASS: ${{ secrets.DEPLOY_PASS }}
 
+      - name: Notify sentry deployment
+        run: .bin/mna-tdb sentry:deploy "${{ inputs.app_version }}" "${{ inputs.environment }}"
+        env:
+          ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
+
       - name: Encrypt Error log on failure
         run: .bin/mna-tdb deploy:log:encrypt
         if: failure()
