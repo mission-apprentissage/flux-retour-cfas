@@ -1053,7 +1053,9 @@ exports[`validation-schema should create validation schema for effectifs: effect
         },
         "code_postal_de_naissance": {
           "bsonType": "string",
-          "description": "Le code postal doit contenir 5 caractères",
+          "description": "Le code postal doit contenir 5 caractères.  
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+*Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
           "example": "75000",
           "maxLength": 5,
           "minLength": 5,
@@ -1095,7 +1097,11 @@ exports[`validation-schema should create validation schema for effectifs: effect
         },
         "dernier_organisme_uai": {
           "bsonType": "string",
-          "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
+          "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation
+      ou département.   
+* Pour les apprentis en emploi l'année dernière, le numéro UAI n-1 à indiquer est le **995** qui signifie "Non concerné".
+         
+* Si cette information n'est pas connue, le numéro UAI n-1 à indiquer est le **993** qui signifie "Inconnu" ",
           "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
         },
         "derniere_situation": {
@@ -1166,6 +1172,10 @@ exports[`validation-schema should create validation schema for effectifs: effect
             9999,
           ],
         },
+        "has_nir": {
+          "bsonType": "bool",
+          "description": "Numéro de sécurité sociale de l'apprenant",
+        },
         "historique_statut": {
           "bsonType": "array",
           "description": "Historique du statut de l'apprenant",
@@ -1173,6 +1183,10 @@ exports[`validation-schema should create validation schema for effectifs: effect
             "additionalProperties": true,
             "bsonType": "object",
             "properties": {
+              "abandon_forced": {
+                "bsonType": "bool",
+                "description": "Le statut a été forcé en abandon",
+              },
               "date_reception": {
                 "bsonType": "date",
               },
@@ -1220,10 +1234,6 @@ exports[`validation-schema should create validation schema for effectifs: effect
             2,
             3,
           ],
-        },
-        "nir": {
-          "bsonType": "string",
-          "description": "Numéro de sécurité sociale de l'apprenant",
         },
         "nom": {
           "bsonType": "string",
@@ -1763,9 +1773,9 @@ exports[`validation-schema should create validation schema for effectifs: effect
             "telephone": {
               "bsonType": "string",
               "description": "Dans le cas d'un numéro français, il n'est pas
-      nécessaire de saisir le "0" car l'indicateur pays est
-      pré-renseigné.
-      Il doit contenir 9 chiffres après l'indicatif.",
+    nécessaire de saisir le "0" car l'indicateur pays est
+    pré-renseigné.
+    Il doit contenir 9 chiffres après l'indicatif.",
               "example": "+33908070605",
               "maxLength": 13,
               "minLength": 8,
@@ -2704,7 +2714,9 @@ exports[`validation-schema should create validation schema for effectifsQueue: e
         "array",
         "null",
       ],
-      "description": "Le code postal doit contenir 5 caractères",
+      "description": "Le code postal doit contenir 5 caractères.  
+Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » suivi du numéro de pays.  
+*Exemple : pour l’Allemagne le code pays est 109, il conviendra donc de saisir : « 99109 »*",
     },
     "contrat_date_debut": {
       "additionalProperties": true,
@@ -3143,6 +3155,10 @@ exports[`validation-schema should create validation schema for effectifsQueue: e
       ],
       "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
     },
+    "has_nir": {
+      "bsonType": "bool",
+      "description": "Identification nationale securité social",
+    },
     "id_erp_apprenant": {
       "additionalProperties": true,
       "bsonType": [
@@ -3190,18 +3206,6 @@ exports[`validation-schema should create validation schema for effectifsQueue: e
         "null",
       ],
       "description": "Libellé long de la formation visée",
-    },
-    "nir_apprenant": {
-      "additionalProperties": true,
-      "bsonType": [
-        "number",
-        "string",
-        "bool",
-        "object",
-        "array",
-        "null",
-      ],
-      "description": "Identification nationale securité social",
     },
     "nom_apprenant": {
       "additionalProperties": true,
@@ -5717,6 +5721,9 @@ exports[`validation-schema should create validation schema for organismes: organ
               "bsonType": "string",
             },
           },
+          "responsabilitePartielle": {
+            "bsonType": "bool",
+          },
           "siret": {
             "bsonType": "string",
           },
@@ -5776,6 +5783,9 @@ exports[`validation-schema should create validation schema for organismes: organ
             "items": {
               "bsonType": "string",
             },
+          },
+          "responsabilitePartielle": {
+            "bsonType": "bool",
           },
           "siret": {
             "bsonType": "string",
