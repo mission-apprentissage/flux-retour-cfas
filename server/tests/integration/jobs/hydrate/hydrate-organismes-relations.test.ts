@@ -1,6 +1,6 @@
 import { ObjectId, WithId } from "mongodb";
+import { Organisme, OrganismesReferentiel } from "shared/models/data/@types";
 
-import { Organisme, OrganismesReferentiel } from "@/common/model/@types";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 import { hydrateOrganismesFromReferentiel } from "@/jobs/hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesRelations } from "@/jobs/hydrate/organismes/hydrate-organismes-relations";

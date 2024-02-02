@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
+import { Effectif } from "shared/models/data/@types";
 
-import { Effectif } from "@/common/model/@types";
 import { mergeEffectif } from "@/jobs/ingestion/process-ingestion";
 
 describe("mergeEffectif", () => {
