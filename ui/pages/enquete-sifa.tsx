@@ -9,7 +9,11 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 const PageEnqueteSIFADeMonOrganisme = () => {
   const { organisme } = useEffectifsOrganismeOrganisation();
 
-  return <SimplePage title="Mon enquête SIFA">{organisme && <SIFAPage modePublique={false} />}</SimplePage>;
+  return (
+    <SimplePage title="Mon enquête SIFA">
+      {organisme && <SIFAPage modePublique={false} organisme={organisme} />}
+    </SimplePage>
+  );
 };
 
 export default withAuth(PageEnqueteSIFADeMonOrganisme, ["ORGANISME_FORMATION"]);

@@ -12,7 +12,11 @@ const PageEnqueteSIFADeSonOrganisme = () => {
   const router = useRouter();
   const { organisme } = useEffectifsOrganisme(router.query.organismeId as string);
 
-  return <SimplePage title="Son enquête SIFA">{organisme && <SIFAPage modePublique={true} />}</SimplePage>;
+  return (
+    <SimplePage title="Son enquête SIFA">
+      {organisme && <SIFAPage modePublique={true} organisme={organisme} />}
+    </SimplePage>
+  );
 };
 
 export default withAuth(PageEnqueteSIFADeSonOrganisme, ["ORGANISME_FORMATION", "ADMINISTRATEUR", "TETE_DE_RESEAU"]);

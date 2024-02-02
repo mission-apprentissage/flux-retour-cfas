@@ -10,15 +10,16 @@ jobs:
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  deploy_comment:
-    name: Add deploy comment
-    runs-on: ubuntu-latest
-    steps:
-      - name: Comment PR Preview
-        if: github.event.pull_request.state != 'closed'
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            To deploy this PR just add a comment with a simple :rocket:
-          comment_tag: deployment_instructions
-          mode: upsert
+  # Do not comment to prevent useless notifications
+  # deploy_comment:
+  #   name: Add deploy comment
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Comment PR Preview
+  #       if: github.event.pull_request.state != 'closed'
+  #       uses: thollander/actions-comment-pull-request@v2
+  #       with:
+  #         message: |
+  #           To deploy this PR just add a comment with a simple :rocket:
+  #         comment_tag: deployment_instructions
+  #         mode: upsert
