@@ -18,6 +18,8 @@ function Help() {
    echo "  seed:apply                                 Apply seed to a database"
    echo "  deploy:log:encrypt                         Encrypt Github ansible logs"
    echo "  deploy:log:dencrypt                        Decrypt Github ansible logs"
+   echo "  sentry:release                             Create sentry release for existing docker image"
+   echo "  sentry:deploy                              Notify deployment to sentry for existing sentry release"
    echo
    echo
 }
@@ -40,6 +42,14 @@ function release:interactive() {
 
 function release:app() {
   "${SCRIPT_DIR}/release-app.sh" "$@"
+}
+
+function sentry:release() {
+  "${SCRIPT_DIR}/sentry-release.sh" "$@"
+}
+
+function sentry:deploy() {
+  "${SCRIPT_DIR}/sentry-deploy.sh" "$@"
 }
 
 function deploy() {

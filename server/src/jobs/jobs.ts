@@ -12,7 +12,7 @@ import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
 import { validateModels } from "./db/schemaValidation";
 import { sendReminderEmails } from "./emails/reminder";
-import { removeInscritsSansContratsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
+import { transformSansContratsToAbandonsDepuis, transformRupturantsToAbandonsDepuis } from "./fiabilisation/effectifs";
 import { hydrateRaisonSocialeEtEnseigneOFAInconnus } from "./fiabilisation/ofa-inconnus";
 import { getStats } from "./fiabilisation/stats";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
@@ -34,7 +34,7 @@ import { hydrateOrganismesPrepaApprentissage } from "./hydrate/organismes/hydrat
 import { hydrateFromReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel";
 import { hydrateOrganismesRelations } from "./hydrate/organismes/hydrate-organismes-relations";
 import { hydrateOrganismesSoltea } from "./hydrate/organismes/hydrate-organismes-soltea";
-import { updateMultipleOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis";
+import { updateAllOrganismesRelatedFormations } from "./hydrate/organismes/update-organismes-with-apis";
 import { hydrateBassinsEmploi } from "./hydrate/reference/hydrate-bassins-emploi";
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux";
 import { removeDuplicatesEffectifsQueue } from "./ingestion/process-effectifs-queue-remove-duplicates";
@@ -69,6 +69,9 @@ export async function setupJobProcessor() {
                 // # Remplissage des organismes issus du référentiel
                 await addJob({ name: "hydrate:organismes-referentiel", queued: true });
 
+                // # Remplissage des formations issus du catalogue
+                await addJob({ name: "hydrate:formations-catalogue", queued: true });
+
                 // # Remplissage des organismes depuis le référentiel
                 await addJob({ name: "hydrate:organismes", queued: true });
 
@@ -100,9 +103,9 @@ export async function setupJobProcessor() {
                 // # Mise a jour du nb d'effectifs
                 await addJob({ name: "hydrate:organismes-effectifs-count", queued: true });
 
-                // # Fiabilisation des effectifs : suppression des inscrits sans contrats depuis 90 jours & transformation des rupturants en abandon > 180 jours
+                // # Fiabilisation des effectifs : transformation des inscrits sans contrats en abandon > 90 jours & transformation des rupturants en abandon > 180 jours
                 await addJob({
-                  name: "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours",
+                  name: "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
                   queued: true,
                 });
                 await addJob({ name: "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis", queued: true });
@@ -123,7 +126,7 @@ export async function setupJobProcessor() {
               cron_string: "45 19 * * *",
               handler: async () => {
                 // # Remplissage des contrats DECA
-                await addJob({ name: "hydrate:contratsDeca", queued: true });
+                await addJob({ name: "hydrate:contratsDeca", queued: true, payload: { drop: false, full: false } });
 
                 return 0;
               },
@@ -259,7 +262,7 @@ export async function setupJobProcessor() {
       },
       "update:organismes-with-apis": {
         handler: async () => {
-          return updateMultipleOrganismesWithApis();
+          return updateAllOrganismesRelatedFormations();
         },
       },
       "hydrate:opcos": {
@@ -321,15 +324,13 @@ export async function setupJobProcessor() {
           return { buildResults, updateResults };
         },
       },
-      "fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours": {
+      "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis": {
         handler: async (job) => {
-          return removeInscritsSansContratsDepuis((job.payload as any)?.nbJours);
+          return transformSansContratsToAbandonsDepuis((job.payload as any)?.nbJours);
         },
       },
       "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis": {
-        handler: async (job) => {
-          return transformRupturantsToAbandonsDepuis((job.payload as any)?.nbJours);
-        },
+        handler: async (job) => transformRupturantsToAbandonsDepuis((job.payload as any)?.nbJours),
       },
       "fiabilisation:stats": {
         handler: async () => {

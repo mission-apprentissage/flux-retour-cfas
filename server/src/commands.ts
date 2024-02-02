@@ -575,11 +575,11 @@ program
  * Job de suppression des inscrits sans contrats dans ce statut depuis un nb de jours donné
  */
 program
-  .command("fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours")
+  .command("fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis")
   .description("Suppression des inscrits sans contrats dans ce statut depuis un nombre de jours donné")
   .option("--nbJours <number>", "Nombre de jours dans le statut", (n) => parseInt(n, 10), 90)
   .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("fiabilisation:effectifs:remove-inscritsSansContrats-depuis-nbJours"));
+  .action(createJobAction("fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis"));
 
 /**
  * Job de transformation des rupturants en abandon dans ce statut depuis un nombre de jours donné

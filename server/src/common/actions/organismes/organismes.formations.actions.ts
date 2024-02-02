@@ -2,7 +2,6 @@ import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared";
 
 import { createFormation, getFormationWithCfd } from "@/common/actions/formations.actions";
-import { getCatalogFormationsForOrganisme } from "@/common/apis/apiCatalogueMna";
 import { formationsCatalogueDb } from "@/common/model/collections";
 
 import { findOrganismeByUai } from "./organismes.actions";
@@ -19,14 +18,18 @@ export const getFormationsTreeForOrganisme = async (uai: string | undefined) => 
     };
 
   // Récupération des formations liés à l'organisme
-  const catalogFormationsForOrganisme = await getCatalogFormationsForOrganisme(uai);
+  const catalogFormationsForOrganismeCursor = formationsCatalogueDb().find({
+    published: true,
+    catalogue_published: true,
+    $or: [{ etablissement_formateur_uai: uai }, { etablissement_gestionnaire_uai: uai }],
+  });
 
   // Construction d'une liste de formations pour cet organisme
   let formationsForOrganismeArray: any[] = [];
   let nbFormationsCreatedForOrganisme = 0;
   let nbFormationsNotCreatedForOrganisme = 0;
 
-  for (const currentFormation of catalogFormationsForOrganisme) {
+  for await (const currentFormation of catalogFormationsForOrganismeCursor) {
     let currentFormationId: ObjectId;
 
     // Récupération de la formation du catalogue dans le TDB, si pas présente on la crée

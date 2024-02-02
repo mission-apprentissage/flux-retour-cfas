@@ -21,16 +21,22 @@ export async function findOrganismesAccessiblesByOrganisationOF(
     throw new Error("organisme de l'organisation non trouvé");
   }
 
-  return [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)];
+  return [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme, true)];
 }
 
-export async function findOrganismesFormateursIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
+export async function findOrganismesFormateursIdsOfOrganisme(
+  organismeId: ObjectId,
+  withResponsabilitePartielle: boolean
+): Promise<ObjectId[]> {
   const organisme = await getOrganismeById(organismeId);
-  return findOrganismeFormateursIds(organisme);
+  return findOrganismeFormateursIds(organisme, withResponsabilitePartielle);
 }
 
-export function findOrganismeFormateursIds(organisme: Organisme): ObjectId[] {
-  return (organisme.organismesFormateurs ?? [])
-    .filter((organisme) => !!organisme._id)
-    .map((organisme) => organisme._id as ObjectId);
+export function findOrganismeFormateursIds(organisme: Organisme, withResponsabilitePartielle: boolean): ObjectId[] {
+  return (
+    (organisme.organismesFormateurs ?? [])
+      // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
+      .filter((organisme) => !!organisme._id && (withResponsabilitePartielle || !organisme.responsabilitePartielle))
+      .map((organisme) => organisme._id as ObjectId)
+  );
 }

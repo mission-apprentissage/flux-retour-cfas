@@ -68,6 +68,7 @@ export const apprenantSchema = {
   "apprenant.code_postal_de_naissance": {
     label: "Code postal de naissance :",
     validateMessage: "n'est pas un code postal valide",
+    showInfo: true,
     mask: "C",
     maskBlocks: [
       {
