@@ -1,4 +1,5 @@
-import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
 import { object, string, objectId } from "shared";
 
 const collectionName = "jwtSessions";

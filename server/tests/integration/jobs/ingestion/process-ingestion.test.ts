@@ -1,9 +1,9 @@
 import { ObjectId, WithId } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared";
+import { Effectif } from "shared/models/data/@types";
+import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
-import { Effectif } from "@/common/model/@types";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { createRandomDossierApprenantApiInput, createRandomOrganisme } from "@tests/data/randomizedSample";

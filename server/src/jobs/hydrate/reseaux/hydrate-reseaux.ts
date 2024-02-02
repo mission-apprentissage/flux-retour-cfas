@@ -1,7 +1,7 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
+import { STATUT_PRESENCE_REFERENTIEL } from "shared";
 
-import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";

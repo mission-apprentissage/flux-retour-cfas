@@ -1,9 +1,8 @@
 import { find } from "lodash-es";
 import { ACADEMIES, DEPARTEMENTS, defaultValuesAdresse } from "shared";
+import ApiEntEtablissement from "shared/models/apis/@types/ApiEntEtablissement";
 
 import * as apiEntreprise from "@/common/apis/ApiEntreprise";
-
-import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement";
 
 export const getDepartementCodeFromCodeInsee = (codeInsee) => {
   let code_dept = codeInsee.substring(0, 2);

@@ -2,13 +2,13 @@ import Boom from "boom";
 import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE } from "shared";
+import { UsersMigration } from "shared/models/data/@types/UsersMigration";
+import { Invitation } from "shared/models/data/invitations.model";
+import { NewOrganisation, Organisation } from "shared/models/data/organisations.model";
 
 import logger from "@/common/logger";
-import { UsersMigration } from "@/common/model/@types/UsersMigration";
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { Invitation } from "@/common/model/invitations.model";
-import { NewOrganisation, Organisation } from "@/common/model/organisations.model";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
