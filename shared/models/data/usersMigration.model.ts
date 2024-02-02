@@ -1,4 +1,5 @@
-import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
 import { object, objectId, string, boolean, any, arrayOf, date } from "shared";
 
 export const collectionName = "usersMigration";

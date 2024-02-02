@@ -1,4 +1,5 @@
-import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
 import {
   REGIONS,
   DEPARTEMENTS,
@@ -16,6 +17,9 @@ import {
   objectId,
   string,
   stringOrNull,
+  IRegionCode,
+  IDepartmentCode,
+  IAcademieCode,
 } from "shared";
 
 // types en doublon avec l'UI
@@ -114,17 +118,25 @@ export function getOrganisationLabel(organisation: NewOrganisation): string {
 
     case "DREETS":
     case "DRAAF":
-      return `${organisation.type} ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+      return `${organisation.type} ${
+        REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region
+      }`;
     case "CONSEIL_REGIONAL":
-      return `Conseil régional ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+      return `Conseil régional ${
+        REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region
+      }`;
     case "CARIF_OREF_REGIONAL":
-      return `CARIF OREF ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+      return `CARIF OREF ${REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region}`;
     case "DRAFPIC":
-      return `DRAFPIC ${REGIONS_BY_CODE[organisation.code_region]?.nom || organisation.code_region}`;
+      return `DRAFPIC ${REGIONS_BY_CODE[organisation.code_region as IRegionCode]?.nom || organisation.code_region}`;
     case "DDETS":
-      return `DDETS ${DEPARTEMENTS_BY_CODE[organisation.code_departement]?.nom || organisation.code_departement}`;
+      return `DDETS ${
+        DEPARTEMENTS_BY_CODE[organisation.code_departement as IDepartmentCode]?.nom || organisation.code_departement
+      }`;
     case "ACADEMIE":
-      return `Académie ${ACADEMIES_BY_CODE[organisation.code_academie]?.nom || organisation.code_academie}`;
+      return `Académie ${
+        ACADEMIES_BY_CODE[organisation.code_academie as IAcademieCode]?.nom || organisation.code_academie
+      }`;
 
     case "OPERATEUR_PUBLIC_NATIONAL":
       return organisation.nom;

@@ -1,4 +1,5 @@
 import express from "express";
+import { MaintenanceMessage } from "shared/models/data/@types";
 import { z } from "zod";
 
 import {
@@ -6,7 +7,6 @@ import {
   updateMaintenanceMessage,
   removeMaintenanceMessage,
 } from "@/common/actions/maintenances.actions";
-import { MaintenanceMessage } from "@/common/model/@types";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 
 export default () => {

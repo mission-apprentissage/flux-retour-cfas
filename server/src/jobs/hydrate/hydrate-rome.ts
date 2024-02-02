@@ -1,10 +1,10 @@
 import { PromisePool } from "@supercharge/promise-pool";
 import axios from "axios";
+import { IRome } from "shared/models/data/rome.model";
 import { read, utils } from "xlsx";
 
 import parentLogger from "@/common/logger";
 import { romeDb } from "@/common/model/collections";
-import { IRome } from "@/common/model/rome.model";
 
 const logger = parentLogger.child({
   module: "job:hydrate:rome",

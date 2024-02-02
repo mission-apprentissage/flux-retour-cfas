@@ -1,4 +1,5 @@
-import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
 import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } from "shared";
 
 const collectionName = "users";
