@@ -1,10 +1,10 @@
 import { captureException } from "@sentry/node";
+import { SIRET_REGEX } from "shared";
+import ApiEntEtablissement from "shared/models/apis/@types/ApiEntEtablissement";
 
 import * as apiEntreprise from "@/common/apis/ApiEntreprise";
-import { SIRET_REGEX } from "@/common/constants/validations";
 import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "@/common/utils/adresseUtils";
 
-import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement";
 import logger from "../logger";
 
 import { InfoSiret } from "./infoSiret.actions-struct";

@@ -1,7 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
+import { UsersMigration } from "shared/models/data/@types";
 
-import { UsersMigration } from "@/common/model/@types";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 import {

@@ -1,7 +1,10 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { getAnneesScolaireListFromDate, STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "shared";
+import {
+  getAnneesScolaireListFromDate,
+  STATUT_FIABILISATION_COUPLES_UAI_SIRET,
+  STATUT_PRESENCE_REFERENTIEL,
+} from "shared";
 
-import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
 import logger from "@/common/logger";
 import {
   effectifsDb,
