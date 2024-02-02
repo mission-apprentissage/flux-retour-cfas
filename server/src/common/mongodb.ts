@@ -1,9 +1,8 @@
 import { CollectionInfo, Document, MongoClient } from "mongodb";
 import omitDeep from "omit-deep";
+import { zodToMongoSchema } from "zod-mongodb-schema";
 
 import logger from "@/common/logger";
-
-import { zodToMongoSchema } from "./utils/mongoSchemaBuilder";
 
 let mongodbClient: MongoClient | null = null;
 

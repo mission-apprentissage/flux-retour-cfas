@@ -4,6 +4,7 @@ import config from "@/config";
 
 import { startCLI } from "./commands";
 import { connectToMongodb, configureDbSchemaValidation } from "./common/mongodb";
+import { setupJobProcessor } from "./jobs/jobs";
 import createGlobalServices from "./services";
 
 process.on("unhandledRejection", (err) => logger.error(err, "unhandledRejection"));
@@ -13,6 +14,10 @@ try {
   logger.warn("starting application");
   await connectToMongodb(config.mongodb.uri);
   await configureDbSchemaValidation(modelDescriptors); // à supprimer d'ici et mettre dans une commande distincte
+
+  // We need to setup even for server to be able to call addJob
+  await setupJobProcessor();
+
   createGlobalServices();
   startCLI();
 } catch (err) {

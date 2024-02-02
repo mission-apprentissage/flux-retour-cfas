@@ -4,8 +4,8 @@ import { AxiosInstance } from "axiosist";
 import { WithId } from "mongodb";
 import { IndicateursEffectifsAvecFormation, Rncp } from "shared";
 import { PermissionsOrganisme } from "shared/constants/permissions";
+import { Organisme } from "shared/models/data/@types";
 
-import { Organisme } from "@/common/model/@types";
 import { effectifsDb, organisationsDb, organismesDb, rncpDb, usersMigrationDb } from "@/common/model/collections";
 import {
   historySequenceApprenti,

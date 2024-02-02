@@ -10,8 +10,10 @@ import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
 import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
+import { Organisme } from "shared/models/data/@types";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
+
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
@@ -87,7 +89,6 @@ import { changePassword, updateUserProfile } from "@/common/actions/users.action
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { Organisme } from "@/common/model/@types";
 import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
