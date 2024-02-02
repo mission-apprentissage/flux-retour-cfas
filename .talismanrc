@@ -62,9 +62,9 @@ fileignoreconfig:
 - filename: server/src/common/actions/helpers/permissions-organisation.ts
   checksum: badad18721a816276dfa8de8445f4ef85054b68adf719b994607650d1f5d0884
 - filename: server/src/common/actions/helpers/permissions-organisme.ts
-  checksum: b980e33275848aecd671da9f0ba2aebbab69afe485b4a625e618ee8dd3afe777
+  checksum: 618eae577058697d6277466b4df335bb981138388102b177e208397aee1af99e
 - filename: server/src/common/actions/helpers/permissions.ts
-  checksum: a22c164f4ec74ab7adddc233131e6347e117345a1f20cd35d9918c12bb070604
+  checksum: cee386defbaeb5372af346a4cd114604a944b743399a4f62fb2beaed2e380598
 - filename: server/src/common/constants/validations.ts
   checksum: 3aa0789da5a8bcc45f7078a165f381254ec5714032a1dc7044bfe88cc06ade55
 - filename: server/src/common/model/organismes.model.ts
@@ -105,6 +105,8 @@ fileignoreconfig:
   checksum: 97afa4b5eb76c0d2dc041a0f9fff185b5502acb7b70c7227660e323f6df79bba
 - filename: shared/constants/plausible-goals.ts
   checksum: e77a9f86790a10fe8193f4e945228e7435308d4eb1d7769888b690ba234a66c5
+- filename: shared/models/data/organismes.model.ts
+  checksum: 5804acc02f3f2db4be7f218f725cf29286978d29319299a286d2337786a68c10
 - filename: ui/components/Page/components/Footer.tsx
   checksum: 736fbc34e70cc8d948a03094fc0f85be607359367aa748eb8d6daaeb75e38382
 - filename: ui/config.public.ts

@@ -1,4 +1,5 @@
-import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
+import { STATUT_PRESENCE_REFERENTIEL } from "shared";
+
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 

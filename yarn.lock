@@ -4178,7 +4178,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/node@npm:7.93.0, @sentry/node@npm:^7.93.0":
+"@sentry/node@npm:7.93.0":
   version: 7.93.0
   resolution: "@sentry/node@npm:7.93.0"
   dependencies:
@@ -4191,7 +4191,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/node@npm:^7.80.0":
+"@sentry/node@npm:^7.80.0, @sentry/node@npm:^7.93.0":
   version: 7.99.0
   resolution: "@sentry/node@npm:7.99.0"
   dependencies:
