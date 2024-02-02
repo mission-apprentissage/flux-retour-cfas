@@ -213,6 +213,7 @@ describe("Dossiers Apprenants Route", () => {
           {
             ...dossier,
             source: "userApi",
+            has_nir: false,
             validation_errors: [
               {
                 message: "Date invalide",

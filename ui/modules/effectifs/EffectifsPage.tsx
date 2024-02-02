@@ -39,6 +39,9 @@ interface EffectifsPageProps {
   modePublique: boolean;
 }
 function EffectifsPage(props: EffectifsPageProps) {
+  // Booléen temporaire pour la désactivation temporaire du bouton de téléchargement de la liste
+  const TMP_DEACTIVATE_DOWNLOAD_BUTTON = true;
+
   const router = useRouter();
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
 
@@ -62,7 +65,7 @@ function EffectifsPage(props: EffectifsPageProps) {
   );
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
-    _get<any[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
+    _get<Organisme[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
   );
 
   const effectifsByAnneeScolaire = useMemo(() => groupBy(organismesEffectifs, "annee_scolaire"), [organismesEffectifs]);
@@ -81,7 +84,7 @@ function EffectifsPage(props: EffectifsPageProps) {
               <AddIcon boxSize={3} mr={2} />
               Ajouter via fichier Excel
             </Link>
-            {organismesEffectifs?.length ? (
+            {!TMP_DEACTIVATE_DOWNLOAD_BUTTON && organismesEffectifs?.length ? (
               <DownloadButton
                 borderBottom={0}
                 variant="link"
@@ -134,7 +137,11 @@ function EffectifsPage(props: EffectifsPageProps) {
                 scolaire en cours.
               </Text>
 
-              <Link variant="whiteBg" href={`${router.asPath}/doublons`}>
+              <Link
+                variant="whiteBg"
+                href={`${router.asPath}/doublons`}
+                plausibleGoal="clic_verifier_doublons_effectifs"
+              >
                 Vérifier
               </Link>
             </Box>

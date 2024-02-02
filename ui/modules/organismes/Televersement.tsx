@@ -155,7 +155,9 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
 
         if (rawJsonData.length - 1 > POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH) {
           toastError(
-            `Le nombre de lignes dans le fichier est trop important (maximum ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes)`
+            `Pour des raisons techniques et de sécurité, votre fichier ne doit pas dépasser ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes.
+             Veuillez téléverser un premier fichier de ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes/effectifs et renouveler l'opération avec
+             un deuxième fichier comprenant le nombre de lignes restantes.`
           );
           setIsSubmitting(false);
           return;
@@ -445,7 +447,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                 </>
               )}
             </Box>
-            <InfoTeleversement />
+            <InfoTeleversement maxInputLength={POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} />
           </>
         )}
       </Container>

@@ -27,9 +27,9 @@ const AcknowledgeModal = ({
   bgOverlay?: string;
 }) => {
   return (
-    <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose} size={size}>
+    <Modal isOpen={isOpen} onClose={onClose} size={size}>
       <ModalOverlay bg={bgOverlay} />
-      <ModalContent bg="white" color="primaryText" borderRadius="none">
+      <ModalContent p={6} borderRadius="0">
         {canBeClosed && (
           <Button
             display={"flex"}
@@ -37,17 +37,15 @@ const AcknowledgeModal = ({
             color="bluefrance"
             fontSize={"epsilon"}
             onClick={() => {
-              onClose?.();
+              onClose();
             }}
-            variant="unstyled"
-            pt={10}
-            pb={6}
-            pr={10}
+            variant="link"
             fontWeight={400}
+            p={0}
+            m={4}
           >
-            Fermer{" "}
-            <Text as={"span"} ml={2}>
-              <Close boxSize={4} />
+            <Text as={"span"}>
+              Fermer <Close boxSize={4} />
             </Text>
           </Button>
         )}

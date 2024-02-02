@@ -17,6 +17,8 @@ _mna-tdb_completion() {
    "seed\:apply:'Apply seed to a database'"
    "deploy\:log\:encrypt:'Encrypt Github ansible logs'"
    "deploy\:log\:dencrypt:'Decrypt Github ansible logs'"
+   "sentry\:release:'Create sentry release for existing docker image'"
+   "sentry\:deploy:'Notify deployment to sentry for existing sentry release'"
   )
 
   # Set completion behavior based on the current word
