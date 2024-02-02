@@ -10,7 +10,7 @@ import {
   getOrganismeInfosFromSiret,
   updateOrganismeTransmission,
   updateOrganisme,
-  updateOrganismeFromApis,
+  updateOneOrganismeRelatedFormations,
 } from "@/common/actions/organismes/organismes.actions";
 import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
@@ -127,7 +127,7 @@ describe("Test des actions Organismes", () => {
         ...sampleOrganismeWithUAI,
         ...dataFromApiEntreprise,
       });
-      await updateOrganismeFromApis(organisme);
+      await updateOneOrganismeRelatedFormations(organisme);
       const created = await findOrganismeById(organisme._id);
 
       expect(created).toStrictEqual({
@@ -145,7 +145,7 @@ describe("Test des actions Organismes", () => {
         ...sampleOrganismeWithoutUai,
         ...dataFromApiEntreprise,
       });
-      await updateOrganismeFromApis(organisme);
+      await updateOneOrganismeRelatedFormations(organisme);
 
       const created = await findOrganismeById(organisme._id);
 
@@ -231,7 +231,7 @@ describe("Test des actions Organismes", () => {
         ...sampleOrganisme,
         ...dataFromApiEntreprise,
       });
-      const updatedOrganisme = await updateOrganismeFromApis(createdOrganisme);
+      const updatedOrganisme = await updateOneOrganismeRelatedFormations(createdOrganisme);
 
       expect(updatedOrganisme?.ferme).toBe(false);
     });

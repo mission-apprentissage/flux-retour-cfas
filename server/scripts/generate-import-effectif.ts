@@ -13,6 +13,10 @@ config({ path: ".env.local", override: true });
 
 const fakerFr = new Faker({ locale: [fr] });
 
+function optional(data) {
+  return fakerFr.helpers.arrayElement([data, ""]);
+}
+
 function fakeEffectif(formateur: Organisme, formation: FormationsCatalogue) {
   const lastName = fakerFr.person.lastName();
   const firstName = fakerFr.person.firstName();
@@ -56,12 +60,17 @@ function fakeEffectif(formateur: Organisme, formation: FormationsCatalogue) {
     }),
     adresse_apprenant: fakerFr.location.streetAddress(),
     code_postal_apprenant: fakerFr.helpers.fromRegExp("[0-9]{5}"),
-    ine_apprenant: fakerFr.helpers.fromRegExp("[0-9]{10}[a-z]"),
-    nir_apprenant: fakerFr.helpers.fromRegExp("[0-9]{13}"),
-    tel_apprenant: fakerFr.helpers.fromRegExp("0[6-7][0-9]{8}"),
+    ine_apprenant: optional(fakerFr.helpers.fromRegExp("[0-9]{10}[a-z]")),
+    nir_apprenant: optional(fakerFr.helpers.fromRegExp("[0-9]{13}")),
+    tel_apprenant: optional(fakerFr.helpers.fromRegExp("0[6-7][0-9]{8}")),
     rqth_apprenant: "",
     date_rqth_apprenant: "",
-    responsable_apprenant_mail1: "",
+    responsable_apprenant_mail1: optional(
+      fakerFr.internet.email({
+        firstName: "responsable",
+        provider: "gmail.com",
+      })
+    ),
     responsable_apprenant_mail2: "",
     dernier_organisme_uai: "",
     derniere_situation: "",
@@ -71,9 +80,9 @@ function fakeEffectif(formateur: Organisme, formation: FormationsCatalogue) {
     etablissement_formateur_siret: formateur.siret,
     etablissement_lieu_de_formation_uai: formateur.uai,
     etablissement_lieu_de_formation_siret: formateur.siret,
-    annee_scolaire: "2023-2024",
+    annee_scolaire: fakerFr.helpers.arrayElement(["2023-2024", "2024-2024"]),
     annee_formation: anneeFormation,
-    formation_rncp: formation.rncp_code,
+    formation_rncp: optional(formation.rncp_code),
     formation_cfd: formation.cfd,
     date_inscription_formation: dateInscription,
     date_entree_formation: dateEntree,
@@ -90,7 +99,7 @@ function fakeEffectif(formateur: Organisme, formation: FormationsCatalogue) {
     email_referent_handicap_formation: "",
     contrat_date_debut: "",
     contrat_date_fin: "",
-    siret_employeur: fakerEn.helpers.replaceSymbolWithNumber("##############"),
+    siret_employeur: optional(fakerEn.helpers.replaceSymbolWithNumber("##############")),
     contrat_date_rupture: "",
     cause_rupture_contrat: "",
     contrat_date_debut_2: "",

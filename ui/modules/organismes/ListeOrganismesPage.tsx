@@ -1,6 +1,4 @@
-import { ArrowForwardIcon } from "@chakra-ui/icons";
 import {
-  Box,
   Container,
   HStack,
   Heading,
@@ -14,12 +12,13 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { GESTION_ORGANISME_GROUP } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _get } from "@/common/httpClient";
-import { OrganisationType, getOrganisationLabel } from "@/common/internal/Organisation";
+import { OrganisationType } from "@/common/internal/Organisation";
 import { Organisme } from "@/common/internal/Organisme";
 import Link from "@/components/Links/Link";
+import SupportLink from "@/components/Links/SupportLink";
 import SimplePage from "@/components/Page/SimplePage";
 import { useOrganismesNormalizedLists } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
@@ -62,7 +61,7 @@ interface ListeOrganismesPageProps {
 
 function ListeOrganismesPage(props: ListeOrganismesPageProps) {
   const router = useRouter();
-  const { auth, organisationType } = useAuth();
+  const { organisationType } = useAuth();
 
   const title = `${props.modePublique ? "Ses" : "Mes"} organismes${
     props.activeTab === "a-completer" ? " non fiables" : ""
@@ -125,20 +124,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           </Text>
         )}
 
-        <HStack justifyContent="space-between">
-          <Box />
-          <Link
-            href={`mailto:${CONTACT_ADDRESS}?subject=Anomalie TDB [${getOrganisationLabel(auth.organisation)}]`}
-            target="_blank"
-            rel="noopener noreferrer"
-            color="action-high-blue-france"
-            borderBottom="1px"
-            _hover={{ textDecoration: "none" }}
-          >
-            <ArrowForwardIcon mr={2} />
-            Signaler une anomalie
-          </Link>
-        </HStack>
+        <SupportLink href={GESTION_ORGANISME_GROUP}></SupportLink>
 
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         {organismesACompleter.length === 0 && organismesNonRetenus.length === 0 ? (

@@ -178,6 +178,13 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
     dataToUpdate.apprenant.date_de_naissance = new Date(dataToUpdate.apprenant.date_de_naissance);
   }
 
+  // Le numero d'adresse est parfois envoyé en string, bloquant toute la mise à jour de l'effectif
+  // Si le numéro est présent, forcer le numéro a un nombre
+  if (dataToUpdate.apprenant.adresse.numero) {
+    const numero = Number(dataToUpdate.apprenant.adresse.numero);
+    dataToUpdate.apprenant.adresse.numero = !isNaN(numero) ? numero : null;
+  }
+
   dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut
     .filter((e) => e) // Remove empty values
     .map((s) => {
