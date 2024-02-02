@@ -1,5 +1,5 @@
 import { CreateIndexesOptions, IndexSpecification } from "mongodb";
-import { CODES_STATUT_APPRENANT_ENUM, object, string, date, arrayOf, any, objectId } from "shared";
+import { CODES_STATUT_APPRENANT_ENUM, object, string, date, arrayOf, any, objectId, boolean } from "shared";
 
 import effectifsModel from "./effectifs.model/effectifs.model";
 import { apprenantSchema } from "./effectifs.model/parts/apprenant.part";
@@ -92,7 +92,7 @@ export const schema = object(
 
     // V3 FIELDS
     // OPTIONAL FIELDS
-    nir_apprenant: any({ description: "Identification nationale securité social" }),
+    has_nir: boolean({ description: "Identification nationale securité social" }),
     adresse_apprenant: any({ description: "Adresse de l'apprenant" }),
     code_postal_apprenant: any({ description: "Code postal de l'apprenant" }),
     code_postal_de_naissance_apprenant: any({ description: apprenantProps.code_postal_de_naissance.description }),

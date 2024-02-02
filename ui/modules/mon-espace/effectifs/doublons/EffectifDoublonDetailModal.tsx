@@ -25,7 +25,8 @@ import { getStatutApprenantNameFromCode } from "shared";
 import { _get } from "@/common/httpClient";
 import { formatDateDayMonthYear, prettyPrintDate } from "@/common/utils/dateUtils";
 import { toPascalCase } from "@/common/utils/stringUtils";
-import { Close } from "@/theme/components/icons";
+import { usePlausibleTracking } from "@/hooks/plausible";
+import { Close, ArrowRightLine } from "@/theme/components/icons";
 
 import EffectifDoublonDeleteAlertDialog from "./EffectifDoublonDeleteAlertDialog";
 import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
@@ -41,41 +42,41 @@ const EffectifDoublonDetailModal = ({
 }) => {
   const { isOpen: isOpenAlertDialog, onOpen: onOpenAlertDialog, onClose: onCloseAlertDialog } = useDisclosure();
   const cancelRef = React.useRef();
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   return (
     <>
-      <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose} size={"5xl"}>
+      <Modal isOpen={isOpen} onClose={onClose} size={"5xl"}>
         <ModalOverlay bg="rgba(0, 0, 0, 0.48)" />
-        <ModalContent bg="white" color="primaryText" borderRadius="none">
+        <ModalContent p={6} borderRadius="0">
           <Button
             display={"flex"}
             alignSelf={"flex-end"}
             color="bluefrance"
             fontSize={"epsilon"}
             onClick={() => {
-              onClose?.();
+              onClose();
             }}
-            variant="unstyled"
-            pt={10}
-            pb={6}
-            pr={10}
+            variant="link"
             fontWeight={400}
+            p={0}
+            m={4}
           >
-            Fermer{" "}
-            <Text as={"span"} ml={2}>
-              <Close boxSize={4} />
+            <Text as={"span"}>
+              Fermer <Close boxSize={4} />
             </Text>
           </Button>
           <ModalHeader>
+            <ArrowRightLine mt="-0.5rem" />
             {duplicateDetail && (
-              <Text>
+              <Text as="span" ml="1rem" textStyle={"h4"}>
                 {`Détail de l'apprenant ${toPascalCase(duplicateDetail?.apprenant?.prenom)} ${toPascalCase(
                   duplicateDetail?.apprenant?.nom
                 )}`}
               </Text>
             )}
           </ModalHeader>
-          <ModalBody pb={6}>
+          <ModalBody mb={6}>
             {duplicateDetail && (
               <Stack spacing={6}>
                 <Text>Dossier créé le {prettyPrintDate(duplicateDetail?.created_at)}</Text>
@@ -356,6 +357,7 @@ const EffectifDoublonDetailModal = ({
               <Button
                 variant="primary"
                 onClick={() => {
+                  trackPlausibleEvent("suppression_doublons_effectifs");
                   onClose?.();
                   onOpenAlertDialog?.();
                 }}

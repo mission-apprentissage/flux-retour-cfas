@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import Boom from "boom";
 import { compose } from "compose-middleware";
 import { ObjectId } from "mongodb";
@@ -87,7 +88,7 @@ export const authMiddleware = () => {
   );
 
   return compose([
-    passport.authenticate("jwtStrategy2", { session: false }),
+    passport.authenticate("jwtStrategy2", { session: false, failWithError: true }),
     // TODO stratégie à supprimer pour récupérer la session associée en BDD
     async (req, res, next) => {
       const activeSession = await findSessionByToken(req.cookies[COOKIE_NAME]);
@@ -100,6 +101,13 @@ export const authMiddleware = () => {
           error: "Invalid jwt",
         });
       }
+      const ctx: AuthContext = req.user;
+      Sentry.setUser({
+        ip: req.ip,
+        id: ctx._id.toString(),
+        username: ctx.email,
+        segment: "jwt-2",
+      });
       next();
     },
   ]);

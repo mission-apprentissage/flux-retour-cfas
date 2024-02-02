@@ -71,6 +71,22 @@ jobs:
         id: get-version
         run: echo "VERSION=$(git describe --tags --abbrev=0 | cut -c2-)" >> "$GITHUB_OUTPUT"
 
+  sentry-release:
+    if: needs.release.outputs.VERSION != needs.release.outputs.PREV_VERSION
+    needs: ["release"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Create vault pwd file
+        run: echo ${{ secrets.VAULT_PWD }} > .infra/.vault_pwd.txt
+
+      - name: Create sentry release
+        run: .bin/mna-tdb sentry:release "${{ needs.release.outputs.VERSION }}" "${{ github.sha }}"
+        env:
+          ANSIBLE_VAULT_PASSWORD_FILE: .infra/.vault_pwd.txt
+
   docker-scout:
     if: needs.release.outputs.VERSION != needs.release.outputs.PREV_VERSION
     concurrency:
