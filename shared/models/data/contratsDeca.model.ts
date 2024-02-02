@@ -1,12 +1,12 @@
 import { date, object, objectId } from "shared";
 
-import { contratsDecaApprenantSchema } from "./parts/contratsDeca.apprenant.part";
-import { contratsDecaDetailsContratSchema } from "./parts/contratsDeca.detailsContrat.part";
-import { contratsDecaEmployeurSchema } from "./parts/contratsDeca.employeur.part";
-import { contratsDecaEtablissementFormationSchema } from "./parts/contratsDeca.etablissementFormation.part";
-import { contratsDecaFormationSchema } from "./parts/contratsDeca.formation.part";
-import { contratsDecaOrganismeFormationResponsableSchema } from "./parts/contratsDeca.organismeFormationResponsable.part";
-import { contratsDecaRuptureSchema } from "./parts/contratsDeca.rupture.part";
+import { contratsDecaApprenantSchema } from "./contratsDeca/contratsDeca.apprenant.part";
+import { contratsDecaDetailsContratSchema } from "./contratsDeca/contratsDeca.detailsContrat.part";
+import { contratsDecaEmployeurSchema } from "./contratsDeca/contratsDeca.employeur.part";
+import { contratsDecaEtablissementFormationSchema } from "./contratsDeca/contratsDeca.etablissementFormation.part";
+import { contratsDecaFormationSchema } from "./contratsDeca/contratsDeca.formation.part";
+import { contratsDecaOrganismeFormationResponsableSchema } from "./contratsDeca/contratsDeca.organismeFormationResponsable.part";
+import { contratsDecaRuptureSchema } from "./contratsDeca/contratsDeca.rupture.part";
 
 const collectionName = "contratsDeca";
 

@@ -16,29 +16,28 @@ import { ContratDeca } from "shared/models/data/@types/ContratDeca";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { OrganismeSoltea } from "shared/models/data/@types/OrganismeSoltea";
+import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
+import bassinsEmploiDescriptor from "shared/models/data/bassinsEmploi.model";
+import contratsDecaModelDescriptor from "shared/models/data/contratsDeca.model";
+import effectifsModelDescriptor from "shared/models/data/effectifs.model";
+import effectifsQueueModelDescriptor from "shared/models/data/effectifsQueue.model";
+import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
 import formationsModelDescriptor from "shared/models/data/formations.model";
+import formationsCatalogueModelDescriptor from "shared/models/data/formationsCatalogue.model";
+import invitationsModelDescriptor, { Invitation } from "shared/models/data/invitations.model";
+import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
+import JwtSessionsModelDescriptor from "shared/models/data/jwtSessions.model";
+import MaintenanceMessagesModelDescriptor from "shared/models/data/maintenanceMessages.model";
+import organisationsModelDescriptor, { Organisation } from "shared/models/data/organisations.model";
+import OrganismesModelDescriptor from "shared/models/data/organismes.model";
+import OrganismesReferentielModelDescriptor from "shared/models/data/organismesReferentiel.model";
+import OrganismesSolteaModelDescriptor from "shared/models/data/organismesSoltea.model";
+import rncpModelDescriptor from "shared/models/data/rncp.model";
+import romeModelDescriptor, { IRome } from "shared/models/data/rome.model";
+import usersModelDescriptor from "shared/models/data/users.model";
+import usersMigrationModelDescriptor from "shared/models/data/usersMigration.model";
 
-import effectifsModelDescriptor from "@/common/model/effectifs.model/effectifs.model";
 import { getDbCollection } from "@/common/mongodb";
-
-import auditLogsModelDescriptor, { IAuditLog } from "./auditLogs.model";
-import bassinsEmploiDescriptor from "./bassinsEmploi.model";
-import contratsDecaModelDescriptor from "./contratsDeca.model/contratsDeca.model";
-import effectifsQueueModelDescriptor from "./effectifsQueue.model";
-import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model";
-import formationsCatalogueModelDescriptor from "./formationsCatalogue.model";
-import invitationsModelDescriptor, { Invitation } from "./invitations.model";
-import jobEventsModelDescriptor from "./jobEvents.model";
-import JwtSessionsModelDescriptor from "./jwtSessions.model";
-import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model";
-import organisationsModelDescriptor, { Organisation } from "./organisations.model";
-import OrganismesModelDescriptor from "./organismes.model";
-import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model";
-import OrganismesSolteaModelDescriptor from "./organismesSoltea.model";
-import rncpModelDescriptor from "./rncp.model";
-import romeModelDescriptor, { IRome } from "./rome.model";
-import usersModelDescriptor from "./users.model";
-import usersMigrationModelDescriptor from "./usersMigration.model";
 
 export const modelDescriptors = [
   auditLogsModelDescriptor,

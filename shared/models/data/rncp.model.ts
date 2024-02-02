@@ -1,4 +1,5 @@
-import { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+
 import { arrayOf, boolean, number, object, objectId, string } from "shared";
 
 const collectionName = "rncp";

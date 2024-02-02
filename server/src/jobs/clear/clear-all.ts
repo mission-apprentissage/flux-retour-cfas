@@ -1,5 +1,6 @@
+import * as usersMigrationModelDescriptor from "shared/models/data/usersMigration.model";
+
 import logger from "@/common/logger";
-import * as usersMigrationModelDescriptor from "@/common/model/usersMigration.model";
 import { clearAllCollections, clearCollection } from "@/common/mongodb";
 
 export const clearUsers = async () => {

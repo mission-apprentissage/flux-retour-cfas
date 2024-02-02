@@ -1,9 +1,9 @@
 import { WithId } from "mongodb";
+import { NATURE_ORGANISME_DE_FORMATION } from "shared";
 import { Organisme } from "shared/models/data/@types";
 import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { ArrayElement } from "type-fest/source/internal";
 
-import { NATURE_ORGANISME_DE_FORMATION } from "@/common/constants/organisme";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 

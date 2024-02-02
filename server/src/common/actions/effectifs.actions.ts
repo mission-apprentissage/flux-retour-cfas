@@ -3,9 +3,10 @@ import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "loda
 import { ObjectId, WithId } from "mongodb";
 import { Organisme } from "shared/models/data/@types";
 import { Effectif } from "shared/models/data/@types/Effectif";
+import { schema } from "shared/models/data/effectifs.model";
 
 import { effectifsDb } from "@/common/model/collections";
-import { defaultValuesEffectif, schema } from "@/common/model/effectifs.model/effectifs.model";
+import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
 
