@@ -55,6 +55,7 @@
     "express-list-endpoints": "^6.0.0",
     "fast-xml-parser": "^4.2.7",
     "fs-extra": "10.1.0",
+    "job-processor": "^1.4.5",
     "joi": "17.6.0",
     "joi-password": "4.0.0",
     "json-schema": "0.4.0",

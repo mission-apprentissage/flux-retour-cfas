@@ -3,10 +3,10 @@ import merge from "lodash-es/merge";
 import { WithId } from "mongodb";
 import RandExp from "randexp";
 import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX } from "shared";
+import { Effectif, Organisme } from "shared/models/data/@types";
 import type { PartialDeep } from "type-fest";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
-import { Effectif, Organisme } from "@/common/model/@types";
 import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
 
 import sampleEtablissements from "./sampleEtablissements";

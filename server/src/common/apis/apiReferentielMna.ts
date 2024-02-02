@@ -1,6 +1,6 @@
-import config from "@/config";
+import { OrganismesReferentiel } from "shared/models/data/@types";
 
-import { OrganismesReferentiel } from "../model/@types";
+import config from "@/config";
 
 import getApiClient from "./client";
 

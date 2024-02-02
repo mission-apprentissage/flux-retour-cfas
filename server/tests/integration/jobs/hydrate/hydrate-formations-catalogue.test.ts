@@ -3,8 +3,8 @@ import { Readable } from "node:stream";
 
 import { ObjectId } from "mongodb";
 import nock from "nock";
+import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 
-import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 import { formationsCatalogueDb } from "@/common/model/collections";
 import { WithStringId } from "@/common/model/types";
 import config from "@/config";

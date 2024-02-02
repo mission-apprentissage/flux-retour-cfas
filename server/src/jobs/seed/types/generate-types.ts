@@ -18,7 +18,7 @@ export async function prettierOptions(path: string): Promise<prettier.Options> {
   };
 }
 
-const OUTPUT_DIR = "src/common/model/@types";
+const OUTPUT_DIR = "../shared/models/data/@types";
 const IGNORE_COLLECTIONS = [
   "archiveDossiersApprenants",
   "cfas",

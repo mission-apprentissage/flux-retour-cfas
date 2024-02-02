@@ -24,7 +24,8 @@
     "luhn": "^2.4.1",
     "react": "18.2.0",
     "type-fest": "^4.2.0",
-    "zod": "3.21.4"
+    "zod": "3.21.4",
+    "zod-mongodb-schema": "^1.0.0"
   },
   "devDependencies": {
     "bson": "^5.4.0",

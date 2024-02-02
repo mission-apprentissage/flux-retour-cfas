@@ -1,10 +1,10 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
+import { OrganismesReferentiel } from "shared/models/data/@types/OrganismesReferentiel";
 
 import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import { fetchOrganismes } from "@/common/apis/apiReferentielMna";
 import logger from "@/common/logger";
-import { OrganismesReferentiel } from "@/common/model/@types/OrganismesReferentiel";
 import { organismesReferentielDb } from "@/common/model/collections";
 
 const JOB_NAME = "hydrate-organismes-referentiel";

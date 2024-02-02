@@ -34,12 +34,6 @@
     /* Output Formatting */
     "pretty": true
   },
-  "include": [
-    "./**/*.ts",
-    "./**/*.js",
-    "../shared/constants/pays.ts",
-    "../shared/models/json-schema/adresseSchema.ts",
-    "../shared/models/data/effectifs/contrat.part.ts"
-  ],
+  "include": ["./**/*.ts", "./**/*.js"],
   "exclude": ["**/node_modules", "coverage", "dist"]
 }

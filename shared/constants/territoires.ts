@@ -101,9 +101,9 @@ export const REGIONS = [
 
 type IRegions = typeof REGIONS;
 type IRegion = IRegions[number];
-type IRegionCode = IRegion["code"];
+export type IRegionCode = IRegion["code"];
 
-export const REGIONS_BY_CODE = REGIONS.reduce(
+export const REGIONS_BY_CODE: Record<IRegionCode, IRegion> = REGIONS.reduce<Record<IRegionCode, IRegion>>(
   (acc, region) => {
     acc[region.code] = region;
     return acc;
@@ -1541,9 +1541,9 @@ export const DEPARTEMENTS = [
 
 type IDepartements = typeof DEPARTEMENTS;
 type IDepartement = IDepartements[number];
-type IDepartmentCode = IDepartement["code"];
+export type IDepartmentCode = IDepartement["code"];
 
-export const DEPARTEMENTS_BY_CODE = DEPARTEMENTS.reduce(
+export const DEPARTEMENTS_BY_CODE: Record<IDepartmentCode, IDepartement> = DEPARTEMENTS.reduce(
   (acc, departement) => {
     acc[departement.code] = departement;
     return acc;
@@ -1589,9 +1589,9 @@ export const ACADEMIES = [
 
 type IAcademies = typeof ACADEMIES;
 type IAcademie = IAcademies[number];
-type IAcademieCode = IAcademie["code"];
+export type IAcademieCode = IAcademie["code"];
 
-export const ACADEMIES_BY_CODE = ACADEMIES.reduce(
+export const ACADEMIES_BY_CODE: Record<IAcademieCode, IAcademie> = ACADEMIES.reduce(
   (acc, academie) => {
     acc[academie.code] = academie;
     return acc;
