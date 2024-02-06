@@ -32,6 +32,11 @@ export const checkCoupleFiable_rewrite = async (couple: ICouple) => {
     ...couple,
     uai_fiable: couple.uai,
     siret_fiable: couple.siret,
+    //   siret_responsable:
+    //   uai_responsable:
+    //   siret_formateur:
+    //   uai_formateur:
+    // nature ??
     statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.FIABLE,
     statut_organisme: STATUT_FIABILISATION_ORGANISME.FIABLE, //
     rule: 1,
@@ -61,6 +66,11 @@ export const checkMatchReferentielUaiUniqueSiretDifferent_rewrite = async (coupl
       ...couple,
       uai_fiable: couple.uai,
       siret_fiable: organismesReferentiel[0].siret,
+      //   siret_responsable:
+      //   uai_responsable:
+      //   siret_formateur:
+      //   uai_formateur:
+      // nature ??
       statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       rule: 2,
     };
@@ -90,6 +100,10 @@ export const checkMatchReferentielSiretUaiDifferent_rewrite = async (couple: ICo
       ...couple,
       uai_fiable: organismesReferentiel[0].uai,
       siret_fiable: couple.siret,
+      //   siret_responsable:
+      //   uai_responsable:
+      //   siret_formateur:
+      //   uai_formateur:
       statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
       rule: 3,
     };
@@ -145,6 +159,10 @@ export const checkUaiMultiplesRelationsAndLieux_rewrite = async (couple: ICouple
         ...couple,
         uai_fiable: couple.uai, // TODO ??
         siret_fiable: couple.siret, // TODO ??
+        //   siret_responsable:
+        //   uai_responsable:
+        //   siret_formateur:
+        //   uai_formateur:
         statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
         rule: 4,
       };
@@ -162,6 +180,10 @@ export const checkUaiMultiplesRelationsAndLieux_rewrite = async (couple: ICouple
       ...couple,
       // uai_fiable: couple.uai, // TODO ??
       // siret_fiable: couple.siret, // TODO ??
+      //   siret_responsable:
+      //   uai_responsable:
+      //   siret_formateur:
+      //   uai_formateur:
       statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.UAI_LIEU_FORMATION,
       rule: 4,
     };
@@ -216,6 +238,10 @@ export const checkSiretMultiplesRelationsAndLieux_rewrite = async (couple: ICoup
         ...couple,
         uai_fiable: couple.uai, // TODO ??
         siret_fiable: couple.siret, // TODO ??
+        //   siret_responsable:
+        //   uai_responsable:
+        //   siret_formateur:
+        //   uai_formateur:
         statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
         rule: 5,
       };
@@ -233,6 +259,10 @@ export const checkSiretMultiplesRelationsAndLieux_rewrite = async (couple: ICoup
       ...couple,
       uai_fiable: couple.uai, // TODO ??
       siret_fiable: couple.siret, // TODO ??
+      //   siret_responsable:
+      //   uai_responsable:
+      //   siret_formateur:
+      //   uai_formateur:
       statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.UAI_LIEU_FORMATION,
       rule: 5,
     };
@@ -254,6 +284,12 @@ export const checkUaiAucunLieuReferentiel_rewrite = async (couple: ICouple) => {
 
   return {
     ...couple,
+    // uai_fiable:
+    // siret_fiable:
+    //   siret_responsable:
+    //   uai_responsable:
+    //   siret_formateur:
+    //   uai_formateur:
     statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_PB_COLLECTE,
     statut_organisme: STATUT_FIABILISATION_ORGANISME.NON_FIABILISABLE_PB_COLLECTE,
     rule: 7,
@@ -276,7 +312,13 @@ export const checkUaiLieuReferentiel_rewrite = async (couple: ICouple) => {
     ...couple,
     siret_fiable: organismesMatchsUaiInLieuxReferentiel[0].siret,
     uai_fiable: couple.uai,
-    statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER,
+    // uai_fiable:
+    // siret_fiable:
+    //   siret_responsable:
+    //   uai_responsable:
+    //   siret_formateur:
+    //   uai_formateur:
+    statut_fiabilisation: STATUT_FIABILISATION_COUPLES_UAI_SIRET.A_FIABILISER, // STATUT_FIABILISATION_COUPLES_UAI_SIRET.UAI_LIEU_FORMATION,
     rule: 8,
   };
 };
@@ -294,6 +336,12 @@ export const checkCoupleNonFiabilisable_rewrite = async (couple: ICouple) => {
   // Ajout du couple avec statut de fiabilisation comme NON_FIABILISABLE en fonction de la présence de l'uai dans le référentiel
   return {
     ...couple,
+    // uai_fiable:
+    // siret_fiable:
+    //   siret_responsable:
+    //   uai_responsable:
+    //   siret_formateur:
+    //   uai_formateur:
     statut_fiabilisation: isUaiPresentInReferentiel
       ? STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_VALIDEE
       : STATUT_FIABILISATION_COUPLES_UAI_SIRET.NON_FIABILISABLE_UAI_NON_VALIDEE,

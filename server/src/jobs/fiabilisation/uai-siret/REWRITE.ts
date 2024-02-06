@@ -24,21 +24,25 @@ export interface ICoupleDefined {
  */
 export const fiabilisationUaiSiret = async (couple: ICouple) => {
   // Règle n°1 on vérifie si on a un couple fiable
-  let result: any = await checkCoupleFiable_rewrite(couple);
+  let result: any = await checkCoupleFiable_rewrite(couple); // Add etat_etablissement_ === 4
   if (result) return result;
 
-  // Règle n°2 on vérifie si on a un match sur l'UAI unique dans le référentiel mais avec un SIRET différent
-  result = await checkMatchReferentielUaiUniqueSiretDifferent_rewrite(couple);
-  if (result) {
+  {
     // TODO check uaiUniqueAmongAllCouplesTdb outside
-    return result;
-  }
 
-  // Règle n°3 on vérifie si on a un match sur le SIRET dans le référentiel mais avec un UAI différent
-  result = await checkMatchReferentielSiretUaiDifferent_rewrite(couple);
-  if (result) {
-    // TODO check siretUniqueAmongAllCouplesTdb outside
-    return result;
+    // Règle n°3 on vérifie si on a un match sur le SIRET dans le référentiel mais avec un UAI différent
+    result = await checkMatchReferentielSiretUaiDifferent_rewrite(couple);
+    if (result) {
+      // TODO check siretUniqueAmongAllCouplesTdb outside
+      return result;
+    }
+
+    // Règle n°2 on vérifie si on a un match sur l'UAI unique dans le référentiel mais avec un SIRET différent
+    result = await checkMatchReferentielUaiUniqueSiretDifferent_rewrite(couple);
+    if (result) {
+      // TODO check uaiUniqueAmongAllCouplesTdb outside
+      return result;
+    }
   }
 
   // Règle n°4 on vérifie pour les UAI multiples via les relations et les lieux
@@ -57,9 +61,6 @@ export const fiabilisationUaiSiret = async (couple: ICouple) => {
     return result;
   }
 
-  // Règle n°6 on vérifie les organismes inexistants
-  // Cette règle n'existe plus parce qu'on ne regarde plus dans la base ACCE
-
   // Règle n°7 on vérifie les UAI non trouvées dans les lieux du référentiel
   result = await checkUaiAucunLieuReferentiel_rewrite(couple);
   if (result) return result;
@@ -68,7 +69,10 @@ export const fiabilisationUaiSiret = async (couple: ICouple) => {
   result = await checkUaiLieuReferentiel_rewrite(couple);
   if (result) return result;
 
+  // Règle n°6 on vérifie les organismes inexistants ==> regle 8
+  // Cette règle n'existe plus parce qu'on ne regarde plus dans la base ACCE
+
   // Règle n°9 on vérifie les couples non fiabilisables, si l'UAI est validée cotée référentiel
-  result = await checkCoupleNonFiabilisable_rewrite(couple);
+  result = await checkCoupleNonFiabilisable_rewrite(couple); // TODO Initule aujourd'hui // pas de table siret/uai
   if (result) return result;
 };
