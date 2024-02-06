@@ -129,6 +129,7 @@ const TransmissionByDayTable = (props: TransmissionPageProps) => {
       paginationState={pagination}
       pageCount={totalCount}
       onLimitChange={onLimitChange}
+      loading={isFetching}
     />
   );
 };

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
-import Table2 from "@/components/Table/TableWithPagination";
+import TableWithPagination from "@/components/Table/TableWithPagination";
 
 const ErreurDisplayComponent = ({ effectif }) => {
   const errors = effectif.validation_errors;
@@ -114,13 +114,14 @@ const TransmissionDetailsTable = (props: TransmissionPageProps) => {
   }, [isFetching, error, data]);
 
   return (
-    <Table2
+    <TableWithPagination
       data={transmissionData}
       columns={transmissionByDayColumnDefs}
       onPageChange={(page) => onPageChange(page)}
       paginationState={pagination}
       pageCount={totalCount}
       onLimitChange={onLimitChange}
+      loading={isFetching}
     />
   );
 };
