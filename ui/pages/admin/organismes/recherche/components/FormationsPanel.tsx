@@ -36,7 +36,8 @@ export function FormationsPanel({ organisme, formations }: FormationsPanelProps)
   const sortedFormations = useMemo(() => {
     const intl = new Intl.Collator("fr");
 
-    return formations.toSorted((a, b) => {
+    const result = [...formations];
+    result.sort((a, b) => {
       if (!a.cfd && !b.cfd) return intl.compare(a.cle_ministere_educatif, b.cle_ministere_educatif);
       if (!a.cfd) return 1;
       if (!b.cfd) return -1;
@@ -45,6 +46,7 @@ export function FormationsPanel({ organisme, formations }: FormationsPanelProps)
 
       return intl.compare(a.annee?.num ?? "", b.annee?.num ?? "");
     });
+    return result;
   }, [formations]);
 
   if (organisme == null) return null;

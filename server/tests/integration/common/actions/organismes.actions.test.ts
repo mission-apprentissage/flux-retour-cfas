@@ -26,6 +26,8 @@ export const sampleOrganismeWithoutUai: Organisme = {
     region: "84",
     academie: "10",
   },
+  organismesFormateurs: [],
+  organismesResponsables: [],
 };
 
 export const sampleOrganismeWithUAI = {
@@ -224,6 +226,8 @@ describe("Test des actions Organismes", () => {
           region: "84",
           academie: "10",
         } as const,
+        organismesFormateurs: [],
+        organismesResponsables: [],
       };
 
       const dataFromApiEntreprise = await getOrganismeInfosFromSiret(sampleOrganismeWithUAI.siret);
