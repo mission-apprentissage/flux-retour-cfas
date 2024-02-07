@@ -6,6 +6,23 @@ import { FiabilisationUaiSiret, Organisme, OrganismesReferentiel, UsersMigration
 import { OffreFormation } from "../data/@types/OffreFormation";
 import { OrganisationOrganismeFormation } from "../data/organisations.model";
 
+export type TransmissionStat = {
+  date: string;
+  source_organisme: {
+    uai: string;
+    siret: string;
+    nom: string;
+  };
+  organisme: {
+    uai: string;
+    siret: string;
+    nom: string;
+  };
+  total: number;
+  error: number;
+  success: number;
+};
+
 export interface OrganismeSupportInfo {
   uai: string | null;
   siret: string;
@@ -18,6 +35,7 @@ export interface OrganismeSupportInfo {
   organisation: (OrganisationOrganismeFormation & { users: UsersMigration[] }) | null;
   etat: Array<"fermé" | "actif" | "inconnu">;
   effectifs: number;
+  transmissions: TransmissionStat[];
 }
 
 export type OrganismeSupportInfoJson = Jsonify<OrganismeSupportInfo>;

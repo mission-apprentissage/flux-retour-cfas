@@ -18,6 +18,8 @@ import {
   organismesReferentielDb,
 } from "@/common/model/collections";
 
+import { getTransmissionRelatedToOrganismeByDate } from "../indicateurs/transmissions/transmission.action";
+
 function getFormationEtablissment(formation: OffreFormation, siret: string) {
   if (formation.formateur.siret === siret) return formation.formateur;
   if (formation.gestionnaire.siret === siret) return formation.gestionnaire;
@@ -298,6 +300,8 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
             })
             .toArray();
 
+    const transmissions = tdbOrganisme == null ? [] : await getTransmissionRelatedToOrganismeByDate(tdbOrganisme._id);
+
     organismes.push({
       uai,
       siret,
@@ -314,6 +318,7 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
       organisation: organisationByUai.get(uai) ?? null,
       etat: Array.from(etat),
       effectifs: effectifs.length,
+      transmissions,
     });
   }
 

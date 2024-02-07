@@ -46,6 +46,7 @@ import { Label } from "./components/Label";
 import { ReferentielInfo } from "./components/ReferentielInfo";
 import { RelatedOrganismePanel } from "./components/RelatedOrganismePanel";
 import { TdbInfo } from "./components/TdbInfo";
+import { TransmissionsPanel } from "./components/TransmissionsPanel";
 import { UsersList } from "./components/UsersList";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -97,8 +98,6 @@ const Organisme = () => {
     ({ signal }) => _get<OrganismeSupportInfoJson[]>(`/api/v1/admin/organismes/search/${q}`, { signal }),
     { enabled: formik.isValid }
   );
-
-  console.log(formik.errors.q);
 
   return (
     <Page>
@@ -256,6 +255,14 @@ const Organisme = () => {
                 cell: ({ row }: CellContext<OrganismeSupportInfoJson, any>) => <Label value={row.original.effectifs} />,
               },
               {
+                header: () => "Transmissions",
+                accessorKey: "transmissions",
+                enableSorting: false,
+                cell: ({ row }: CellContext<OrganismeSupportInfoJson, any>) => (
+                  <Label value={row.original.transmissions.length} />
+                ),
+              },
+              {
                 size: 25,
                 header: () => " ",
                 cell: ({ row }: CellContext<OrganismeSupportInfoJson, any>) => {
@@ -289,6 +296,7 @@ const Organisme = () => {
                       </Tab>
                       <Tab fontWeight="bold">Mes Formateurs ({row.original.tdb?.organismesFormateurs.length ?? 0})</Tab>
                       <Tab fontWeight="bold">Mes Formations ({row.original.formations.length ?? 0})</Tab>
+                      <Tab fontWeight="bold">Mes Transmissions</Tab>
                     </TabList>
                     <TabPanels>
                       <TabPanel>
@@ -322,6 +330,9 @@ const Organisme = () => {
                       </TabPanel>
                       <TabPanel>
                         <FormationsPanel organisme={row.original.tdb} formations={row.original.formations} />
+                      </TabPanel>
+                      <TabPanel>
+                        <TransmissionsPanel organisme={row.original.tdb} transmissions={row.original.transmissions} />
                       </TabPanel>
                     </TabPanels>
                   </Tabs>
