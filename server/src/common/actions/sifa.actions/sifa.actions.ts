@@ -4,7 +4,7 @@ import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, getSIFADate, CODES_STATUT_APPRENANT } from "shared";
 import { Effectif } from "shared/models/data/@types/Effectif";
 
-import { findFormationById, getFormationWithCfd, getFormationWithRNCP } from "@/common/actions/formations.actions";
+import { getFormationCfd } from "@/common/actions/formations.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { effectifsDb } from "@/common/model/collections";
@@ -63,10 +63,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
   const items: any[] = [];
   const organismesUaiCache: Record<string, string> = {};
   for (const effectif of effectifs) {
-    const formationBcn =
-      (await findFormationById(effectif.formation.formation_id)) ||
-      (effectif.formation.cfd ? await getFormationWithCfd(effectif.formation.cfd) : null) ||
-      (effectif.formation.rncp ? await getFormationWithRNCP(effectif.formation.rncp) : null);
+    const formationCfd = await getFormationCfd(effectif);
     const formationOrganisme = organisme.relatedFormations?.find(
       (f) => f.formation_id?.toString() === effectif.formation.formation_id?.toString()
     );
@@ -104,7 +101,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     }
 
     // Extraction du code diplome cfd
-    const codeDiplome = wrapNumString(formationBcn?.cfd || effectif.formation.cfd);
+    const codeDiplome = wrapNumString(formationCfd);
     // Adresse de l'effectif
     const effectifAddress = effectif.apprenant.adresse
       ? effectif.apprenant.adresse?.complete ??
