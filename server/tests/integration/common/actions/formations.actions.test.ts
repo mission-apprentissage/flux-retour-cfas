@@ -5,8 +5,6 @@ import nock from "nock";
 
 import {
   createFormation,
-  existsFormation,
-  findFormationById,
   getFormationWithCfd,
   getNiveauFormationFromLibelle,
 } from "@/common/actions/formations.actions";
@@ -19,26 +17,6 @@ import { nockGetCfdInfo } from "@tests/utils/nockApis/nock-tablesCorrespondances
 describe("Tests des actions Formations", () => {
   useNock();
   useMongo();
-
-  describe("existsFormation", () => {
-    it("returns false when formation with formations collection is empty", async () => {
-      const shouldBeFalse = await existsFormation("blabla");
-      assert.equal(shouldBeFalse, false);
-    });
-
-    it("returns false when formation with given cfd does not exist", async () => {
-      // create a formation
-      await formationsDb().insertOne({ cfd: "0123456G" });
-      assert.equal(await existsFormation("blabla"), false);
-    });
-
-    it("returns true when formation with given cfd exists", async () => {
-      // create a formation
-      const cfd = "0123456G";
-      await formationsDb().insertOne({ cfd });
-      assert.equal(await existsFormation(cfd), true);
-    });
-  });
 
   describe("getFormationWithCfd", () => {
     it("returns null when formation does not exist", async () => {
@@ -85,7 +63,7 @@ describe("Tests des actions Formations", () => {
 
       const cfd = "13534005";
       const insertedId = await createFormation({ cfd });
-      const created = await findFormationById(insertedId);
+      const created = await formationsDb().findOne({ _id: insertedId });
 
       assert.deepEqual(omit(created, ["created_at", "_id"]), {
         cfd,
@@ -110,7 +88,7 @@ describe("Tests des actions Formations", () => {
 
       const cfd = "13534005";
       const insertedId = await createFormation({ cfd });
-      const created = await findFormationById(insertedId);
+      const created = await formationsDb().findOne({ _id: insertedId });
 
       assert.deepEqual(omit(created, ["created_at", "_id"]), {
         cfd,
