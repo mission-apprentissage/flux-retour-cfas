@@ -337,7 +337,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                             <ListItem>
                               Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme
                               «&nbsp;Inconnue&nbsp;» alors que votre organisme en possède une, veuillez nous la
-                              communiquer en cliquant sur le lien <i>«&nbsp;Signaler une anomalie&nbsp;»</i> ci dessous.
+                              communiquer en cliquant sur le lien <i>«&nbsp;Signaler une anomalie&nbsp;»</i> ci-dessous.
                               L’absence de ce numéro bloque l’enregistrement des contrats d’apprentissage. L’UAI est
                               recommandée pour être reconnu OFA.
                             </ListItem>
