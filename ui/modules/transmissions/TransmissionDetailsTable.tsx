@@ -2,18 +2,20 @@ import { Box, Text, Flex, SimpleGrid } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { AccessorKeyColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
+import { useSetRecoilState } from "recoil";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import TableWithPagination from "@/components/Table/TableWithPagination";
+import { transmissionDetailsCountAtom } from "@/hooks/tranmissions";
 
 const ErreurDisplayComponent = ({ effectif }) => {
   const errors = effectif.validation_errors;
   const id = effectif._id;
   return errors && errors.length ? (
-    errors.map(({ message, path }) => {
+    errors.map(({ message, path }, index) => {
       return (
-        <SimpleGrid columns={2} key={id} padding={2}>
+        <SimpleGrid columns={2} key={`${id}-${index}`} padding={2}>
           <Box>
             <Flex>{message}</Flex>
           </Box>
@@ -62,8 +64,9 @@ interface TransmissionPageProps {
 
 const TransmissionDetailsTable = (props: TransmissionPageProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
-  const [totalCount, setTotalCount] = useState(1);
+  const [totalPageCount, setTotalPageCount] = useState(1);
   const [transmissionData, setTransmissionData] = useState([]);
+  const setTotalCount = useSetRecoilState(transmissionDetailsCountAtom);
 
   const computeQueryResponse = (successData: { data: any; pagination: any }, error: any) => {
     if (error) {
@@ -84,11 +87,13 @@ const TransmissionDetailsTable = (props: TransmissionPageProps) => {
 
   const calculatePageCount = (paginationResult: { limit: number; total: number }) => {
     if (!paginationResult) {
+      setTotalCount(0);
       return;
     }
 
     const { limit, total } = paginationResult;
-    setTotalCount(Math.ceil(total / limit));
+    setTotalCount(total);
+    setTotalPageCount(Math.ceil(total / limit));
   };
 
   const onPageChange = (page: number) => {
@@ -100,7 +105,7 @@ const TransmissionDetailsTable = (props: TransmissionPageProps) => {
   };
 
   const { data, error, isFetching } = useQuery({
-    queryKey: ["transmissions", pagination],
+    queryKey: ["transmissions-details", pagination],
     queryFn: () =>
       _get(`/api/v1/organismes/${props.organisme._id}/transmission/${props.date}`, {
         params: {
@@ -119,7 +124,7 @@ const TransmissionDetailsTable = (props: TransmissionPageProps) => {
       columns={transmissionByDayColumnDefs}
       onPageChange={(page) => onPageChange(page)}
       paginationState={pagination}
-      pageCount={totalCount}
+      pageCount={totalPageCount}
       onLimitChange={onLimitChange}
       loading={isFetching}
     />

@@ -1,4 +1,4 @@
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { HStack, Text, Button } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { AccessorKeyColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
@@ -8,59 +8,67 @@ import { Organisme } from "@/common/internal/Organisme";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import Link from "@/components/Links/Link";
 import TableWithPagination from "@/components/Table/TableWithPagination";
-import { ArrowDropRightLine, Checkbox } from "@/theme/components/icons";
+import { ArrowRightLine, ValidateIcon } from "@/theme/components/icons";
 import { CloseCircle } from "@/theme/components/icons/CloseCircle";
 
+const computeTextErrorDisplay = (count = 0) => {
+  return Number(count) > 0 ? { color: "error", fontWeight: "bold" } : {};
+};
 const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
   {
-    header: () => "Date",
+    header: () => "Date de transmission",
     accessorKey: "day",
     cell: ({ row }) => <Text>{formatDateNumericDayMonthYear(row.original.day)}</Text>,
   },
   {
-    header: () => "Statut",
+    header: () => "Transmission",
     accessorKey: "status",
     cell: ({ row }) => <Text>{formatStatut(row.original.success, row.original.error)}</Text>,
   },
   {
-    header: () => "Import réussi",
+    header: () => "Effectifs transmis",
     accessorKey: "success",
-    cell: ({ row }) => <Text>{row.original.success}</Text>,
+    cell: ({ row }) => <Text fontSize="1rem">{row.original.success}</Text>,
   },
   {
-    header: () => "Import en échec",
+    header: () => "Effectifs en échec",
     accessorKey: "error",
-    cell: ({ row }) => <Text>{row.original.error}</Text>,
+    cell: ({ row }) => (
+      <Text fontSize="1rem" {...computeTextErrorDisplay(row.original.error)}>
+        {" "}
+        {row.original.error}
+      </Text>
+    ),
   },
   {
-    header: () => "Total",
+    header: () => "Total effectifs",
     accessorKey: "total",
-    cell: ({ row }) => <Text>{row.original.total}</Text>,
+    cell: ({ row }) => <Text fontSize="1rem">{row.original.total}</Text>,
   },
   {
     accessorKey: "more",
     enableSorting: false,
     header: () => "Voir",
     cell: ({ row }) => (
-      <Link href={`/transmissions/${row.original.day as any}`} flexGrow={1}>
-        <ArrowDropRightLine />
-      </Link>
+      <Button pl={0} pr={0} h={8} w={8} minW={8} backgroundColor="#F5F5FE">
+        <Link href={`/transmissions/${row.original.day as any}`}>
+          <ArrowRightLine fontSize="12px" color="#000091" />
+        </Link>
+      </Button>
     ),
   },
 ];
 
 const formatStatut = (success: number, error: number) => {
   return error ? (
-    <HStack paddingX="1w" paddingY="2px" borderRadius={6} lineHeight="2em" color="error">
-      <CloseCircle />
-      <Text fontSize="zeta" fontWeight="bold"></Text>
+    <HStack color="error">
+      <CloseCircle boxSize={4} />
+      <Text fontSize="1rem">Incomplète</Text>
     </HStack>
   ) : (
-    <HStack paddingX="1w" paddingY="2px" borderRadius={6} color="greensoft.600">
-      <Checkbox />
-      <Box>
-        <Text fontSize="zeta" fontWeight="bold"></Text>
-      </Box>
+    <HStack color="flatsuccess" w="full">
+      <ValidateIcon boxSize={4} />
+      <Text fontSize="1rem">Complète</Text>
     </HStack>
   );
 };
