@@ -18,7 +18,7 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
   {
     header: () => "Date de transmission",
     accessorKey: "day",
-    cell: ({ row }) => <Text>{formatDateNumericDayMonthYear(row.original.day)}</Text>,
+    cell: ({ row }) => <Text fontSize="1rem">{formatDateNumericDayMonthYear(row.original.day)}</Text>,
   },
   {
     header: () => "Transmission",

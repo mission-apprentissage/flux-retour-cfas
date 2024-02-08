@@ -30,6 +30,17 @@ export const formatDateNumericDayMonthYear = (date: string) => {
   return new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "numeric", year: "numeric" });
 };
 
+export const formatDateHourMinutesSecondsMs = (date: string) => {
+  const d = new Date(date);
+
+  return Intl.DateTimeFormat("fr-FR", {
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    fractionalSecondDigits: 3,
+  }).format(d);
+};
+
 export const getUniquesMonthAndYearFromDatesList = (input: { date: string | Date }[]) => {
   const output: Date[] = [];
 

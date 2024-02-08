@@ -150,10 +150,7 @@ function NavBarOrganismeFormation(): ReactElement {
         Indicateurs Nationaux
       </NavItem>
       <MenuQuestions />
-      <NavItem to="/transmissions" ml="auto">
-        Transmissions
-      </NavItem>
-      <NavItem to="/parametres">
+      <NavItem to="/parametres" ml="auto">
         <SettingsIcon mr={2} />
         Paramètres
       </NavItem>

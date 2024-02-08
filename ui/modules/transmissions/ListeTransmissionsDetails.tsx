@@ -1,5 +1,5 @@
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import { Container, Heading, HStack } from "@chakra-ui/react";
+import { Container, Heading, HStack, Text } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
 
 import { Organisme } from "@/common/internal/Organisme";
@@ -37,6 +37,7 @@ const ListeTransmissionsDetails = (props: ListeTransmissionsDetailsProps) => {
         <Heading as="h2" size="md" mb="4w">
           Visualisez les {transmissionDetailCount} effectifs en échec
         </Heading>
+        <Text mb={10}>Cliquez sur une ligne d’apprenant pour identifier les données en erreur.</Text>
         <TransmissionDetailsTable organisme={props.organisme} date={props.date}></TransmissionDetailsTable>
       </Container>
     </SimplePage>
