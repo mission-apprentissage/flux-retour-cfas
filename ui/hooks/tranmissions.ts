@@ -1,6 +1,6 @@
 import { atom } from "recoil";
 
 export const transmissionDetailsCountAtom = atom<any>({
-  key: "transmissions",
+  key: "transmissions-details",
   default: 0,
 });
