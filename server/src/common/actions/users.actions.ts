@@ -1,11 +1,11 @@
 import Boom from "boom";
 import { addHours } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
+import { UsersMigration } from "shared/models/data/@types/UsersMigration";
+import { getOrganisationLabel } from "shared/models/data/organisations.model";
 
-import { UsersMigration } from "@/common/model/@types/UsersMigration";
 import { usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { getOrganisationLabel } from "@/common/model/organisations.model";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken } from "@/common/utils/jwtUtils";
 import { generateRandomAlphanumericPhrase } from "@/common/utils/miscUtils";

@@ -1,6 +1,6 @@
 import { addDays, format } from "date-fns";
+import { Contrat } from "shared/models/apis/@types/ApiDeca";
 
-import { Contrat } from "@/common/apis/@types/ApiDeca";
 import { contratsDecaDb } from "@/common/model/collections";
 import { buildPeriodsToFetch, getLastDecaCreatedDateInDb } from "@/jobs/hydrate/deca/hydrate-deca";
 import { dataDeca } from "@tests/data/apiDeca";

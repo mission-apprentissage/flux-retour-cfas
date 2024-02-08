@@ -1,9 +1,10 @@
 import { strict as assert } from "assert";
 
+import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
+
 import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import { jobEventStatuts } from "@/common/constants/jobs";
 import { jobEventsDb } from "@/common/model/collections";
-import jobEventsModelDescriptor from "@/common/model/jobEvents.model";
 import { clearAllCollections, clearCollection } from "@/common/mongodb";
 import { useMongo } from "@tests/jest/setupMongo";
 

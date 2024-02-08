@@ -1,13 +1,9 @@
 import { Box, Container, Image, Text } from "@chakra-ui/react";
+import { AUTRE_AMELIORATION_ELEMENT_LINK } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
-import { getOrganisationLabel } from "@/common/internal/Organisation";
 import Link from "@/components/Links/Link";
-import useAuth from "@/hooks/useAuth";
 
 const SuggestFeature = () => {
-  const { auth } = useAuth();
-
   return (
     <Container
       maxW="xl"
@@ -33,15 +29,13 @@ const SuggestFeature = () => {
           mt="6"
           display="inline-flex"
           alignItems="center"
-          href={`mailto:${CONTACT_ADDRESS}?subject=Suggestion de fonctionnalité ou besoin exprimé sur TDB [${getOrganisationLabel(
-            auth.organisation
-          )}]`}
+          href={AUTRE_AMELIORATION_ELEMENT_LINK}
           target="_blank"
           rel="noopener noreferrer"
           isExternal
         >
           <Box as="i" className="ri-send-plane-fill" verticalAlign="middle" marginRight="1w" />
-          Envoyer un courriel
+          Nous écrire
         </Link>
       </Box>
       <Image src="/images/teamSolid0.svg" w="200px" alt="Graphique tableau de bord" flex="1" userSelect="none" />

@@ -34,7 +34,7 @@ fileignoreconfig:
 - filename: .infra/files/configs/metabase/setup-metabase.sh
   checksum: 4470146c147c48d94d780889d84616f08aa0f0f0b35301aab644d82b40a27a1e
 - filename: .infra/files/configs/mongodb/seed.gpg
-  checksum: 1ae0ef532f7eb9b2ba9c1f1c2bf7ce402b440c2a767f0311eed660d5905010ad
+  checksum: 92315cf6ea49a0effffe51f9a860122949a5c4f9b80edd5fe9311e6607994054
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
@@ -62,9 +62,13 @@ fileignoreconfig:
 - filename: server/src/common/actions/helpers/permissions-organisation.ts
   checksum: badad18721a816276dfa8de8445f4ef85054b68adf719b994607650d1f5d0884
 - filename: server/src/common/actions/helpers/permissions-organisme.ts
-  checksum: 175ea8c8298bb6336536043b18a5c809d713c842ae6ad1920ad88a98bbd39a3b
+  checksum: 618eae577058697d6277466b4df335bb981138388102b177e208397aee1af99e
+- filename: server/src/common/actions/helpers/permissions.ts
+  checksum: cee386defbaeb5372af346a4cd114604a944b743399a4f62fb2beaed2e380598
 - filename: server/src/common/constants/validations.ts
   checksum: 3aa0789da5a8bcc45f7078a165f381254ec5714032a1dc7044bfe88cc06ade55
+- filename: server/src/common/model/organismes.model.ts
+  checksum: 900ae0a462df0ad4ad99a871f930302c0dfa6884825cdf513ef15a00c5ed155b
 - filename: server/src/common/validation/utils/zodPrimitives.ts
   checksum: b791c3208a4177e29615e28268e527416805a8737c73b009933e56a6180774d3
 - filename: server/src/config.ts
@@ -73,6 +77,8 @@ fileignoreconfig:
   checksum: 412cb1977556e0650db7cafd2e9e6770bd48ccfe4a2bd52807e4c51d877e8f63
 - filename: server/src/jobs/hydrate/hydrate-rncp-romes.ts
   checksum: 71c60b9fc5f4d0308146235adde75e4df34ebac59539cef321403b5966b061ad
+- filename: server/src/jobs/hydrate/organismes/hydrate-organismes-relations.ts
+  checksum: 44736479df53c52069f2f96000016cc854144ca96683600c170d89677fecddf6
 - filename: server/src/jobs/seed/start/index.ts
   checksum: bd018d4dab141be955d6e546f817b0aa58edc733e9e562272765d8211d2f3015
 - filename: server/src/jobs/users/generate-password-update-token.ts
@@ -99,6 +105,8 @@ fileignoreconfig:
   checksum: 97afa4b5eb76c0d2dc041a0f9fff185b5502acb7b70c7227660e323f6df79bba
 - filename: shared/constants/plausible-goals.ts
   checksum: e77a9f86790a10fe8193f4e945228e7435308d4eb1d7769888b690ba234a66c5
+- filename: shared/models/data/organismes.model.ts
+  checksum: 5804acc02f3f2db4be7f218f725cf29286978d29319299a286d2337786a68c10
 - filename: ui/components/Page/components/Footer.tsx
   checksum: 736fbc34e70cc8d948a03094fc0f85be607359367aa748eb8d6daaeb75e38382
 - filename: ui/config.public.ts
@@ -106,7 +114,7 @@ fileignoreconfig:
 - filename: ui/modules/auth/inscription/InscriptionTeteDeReseau.tsx
   checksum: 5fa50502b737d7e06efff5cd4128da53f4dc7a196428149e1695977175e92cab
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx
-  checksum: 2740311625e562ca5a15d43eadbed83ae73113716a09b4fbdb2e1f0c79ad42df
+  checksum: 20dbe13a8a82dc7394ff87b0c469f5f45e8e0a9582dc12065c4664d5a65e37cc
 - filename: ui/modules/organismes/Televersement.tsx
   checksum: 2322283e936e6f4a419f27f60e1bae886adffc99a40a085131685f4ca77597e3
 - filename: ui/next.config.js

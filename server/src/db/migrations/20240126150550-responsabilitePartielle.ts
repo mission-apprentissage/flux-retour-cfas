@@ -1,4 +1,4 @@
-import { addJob } from "@/jobs/jobs_actions";
+import { addJob } from "job-processor";
 
 export const up = async () => {
   // # Remplissage des organismes issus du référentiel

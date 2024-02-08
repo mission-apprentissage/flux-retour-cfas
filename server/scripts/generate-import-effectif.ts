@@ -4,10 +4,9 @@ import { faker as fakerEn, Faker, fr } from "@faker-js/faker";
 import { program } from "commander";
 import { config } from "dotenv";
 import { MongoClient } from "mongodb";
+import { Organisme } from "shared/models/data/@types";
+import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { write, utils } from "xlsx";
-
-import { Organisme } from "@/common/model/@types";
-import { FormationsCatalogue } from "@/common/model/@types/FormationsCatalogue";
 
 config({ path: ".env" });
 config({ path: ".env.local", override: true });

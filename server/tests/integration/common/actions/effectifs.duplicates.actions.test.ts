@@ -1,9 +1,9 @@
 import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
+import { Organisme } from "shared/models/data/@types";
 
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
-import { Organisme } from "@/common/model/@types";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
