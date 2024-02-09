@@ -1,12 +1,13 @@
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
+import { Organisme } from "shared/models/data/@types";
+import { Effectif } from "shared/models/data/@types/Effectif";
+import { schema } from "shared/models/data/effectifs.model";
 
-import { Effectif } from "@/common/model/@types/Effectif";
 import { effectifsDb } from "@/common/model/collections";
-import { defaultValuesEffectif, schema } from "@/common/model/effectifs.model/effectifs.model";
+import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
-import { Organisme } from "../model/@types";
 import { stripEmptyFields } from "../utils/miscUtils";
 
 /**
@@ -176,6 +177,13 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
   }
   if (dataToUpdate.apprenant.date_de_naissance) {
     dataToUpdate.apprenant.date_de_naissance = new Date(dataToUpdate.apprenant.date_de_naissance);
+  }
+
+  // Le numero d'adresse est parfois envoyé en string, bloquant toute la mise à jour de l'effectif
+  // Si le numéro est présent, forcer le numéro a un nombre
+  if (dataToUpdate.apprenant.adresse.numero) {
+    const numero = Number(dataToUpdate.apprenant.adresse.numero);
+    dataToUpdate.apprenant.adresse.numero = !isNaN(numero) ? numero : null;
   }
 
   dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut

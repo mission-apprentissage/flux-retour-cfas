@@ -20,5 +20,5 @@ export default ({ apiKeyField = "apiKey", apiKeyValue }) => {
     })
   );
 
-  return passport.authenticate("apiKeyStrategy", { session: false });
+  return passport.authenticate("apiKeyStrategy", { session: false, failWithError: true });
 };

@@ -1,11 +1,11 @@
 import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
+import { STATUT_PRESENCE_REFERENTIEL } from "shared";
+import { Effectif } from "shared/models/data/@types/Effectif";
+import { Organisme } from "shared/models/data/@types/Organisme";
+import { NewOrganisation, Organisation } from "shared/models/data/organisations.model";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
-import { STATUT_PRESENCE_REFERENTIEL } from "@/common/constants/organisme";
-import { Effectif } from "@/common/model/@types/Effectif";
-import { Organisme } from "@/common/model/@types/Organisme";
-import { NewOrganisation, Organisation } from "@/common/model/organisations.model";
 
 import { id } from "./testUtils";
 
@@ -229,11 +229,13 @@ export const organismesByLabel = {
     organismesFormateurs: [
       {
         _id: new ObjectId(id(2)),
+        responsabilitePartielle: false,
       },
     ] satisfies Organisme["organismesFormateurs"],
     organismesResponsables: [
       {
         _id: new ObjectId(id(3)),
+        responsabilitePartielle: false,
       },
     ] satisfies Organisme["organismesResponsables"],
   },
@@ -245,6 +247,7 @@ export const organismesByLabel = {
     organismesResponsables: [
       {
         _id: new ObjectId(id(1)),
+        responsabilitePartielle: false,
       },
     ] satisfies Organisme["organismesResponsables"],
   },
@@ -256,6 +259,7 @@ export const organismesByLabel = {
     organismesFormateurs: [
       {
         _id: new ObjectId(id(1)),
+        responsabilitePartielle: false,
       },
     ] satisfies Organisme["organismesFormateurs"],
   },

@@ -1,6 +1,9 @@
 import Boom from "boom";
+import type { Request } from "express";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme } from "shared";
+import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { Organisme } from "shared/models/data/@types/Organisme";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -10,8 +13,6 @@ import {
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
 import logger from "@/common/logger";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
-import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb, effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { defaultValuesOrganisme } from "@/common/model/organismes.model";
@@ -148,7 +149,7 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) =
 /**
  * Fonction de MAJ d'un organisme en appelant les API externes
  */
-export const updateOrganismeFromApis = async (organisme: WithId<Organisme>) => {
+export const updateOneOrganismeRelatedFormations = async (organisme: WithId<Organisme>) => {
   // Construction de l'arbre des formations de l'organisme
   const relatedFormations = (await getFormationsTreeForOrganisme(organisme.uai))?.formations || [];
 
@@ -488,10 +489,10 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
   } as OrganismeWithPermissions;
 }
 
-export async function getOrganismeByAPIKey(api_key: string) {
+export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]) {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
-    throw Boom.forbidden("La clé API n'est pas valide");
+    throw Boom.forbidden("La clé API n'est pas valide", { queryString });
   }
   return organisme as WithId<Organisme>;
 }
@@ -686,7 +687,7 @@ export async function listOrganismesFormateurs(
     .find(
       {
         _id: {
-          $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId))],
+          $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId, true))],
         },
       },
       {

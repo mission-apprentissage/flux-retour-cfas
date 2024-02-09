@@ -9,13 +9,13 @@ import {
   PermissionsOrganisme,
   assertUnreachable,
 } from "shared";
+import { Organisme } from "shared/models/data/@types/Organisme";
+import { Organisation } from "shared/models/data/organisations.model";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
-import { Organisme } from "@/common/model/@types/Organisme";
 import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { Organisation } from "@/common/model/organisations.model";
 
 import { findOrganismeFormateursIds } from "./permissions";
 
@@ -34,10 +34,17 @@ export async function getAcl(organisation: Organisation): Promise<Acl> {
         throw Boom.forbidden("organisme de l'organisation non trouvé");
       }
 
-      const linkedOrganismesIds = [userOrganisme._id, ...findOrganismeFormateursIds(userOrganisme)].map((o) =>
-        o.toString()
-      );
-      const isOrganismeOrFormateur = { id: { $in: linkedOrganismesIds } };
+      // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
+      const linkedOrganismesWithPartialRespIds = [
+        userOrganisme._id,
+        ...findOrganismeFormateursIds(userOrganisme, true),
+      ].map((o) => o.toString());
+      const linkedOrganismesFullAccessIds = [
+        userOrganisme._id,
+        ...findOrganismeFormateursIds(userOrganisme, false),
+      ].map((o) => o.toString());
+      const isOrganismeOrFormateur = { id: { $in: linkedOrganismesWithPartialRespIds } };
+      const hasFullAccess = { id: { $in: linkedOrganismesFullAccessIds } };
       const isOrganismeCible = { id: { $in: [userOrganisme._id.toString()] } };
 
       return {
@@ -45,14 +52,14 @@ export async function getAcl(organisation: Organisation): Promise<Acl> {
         infoTransmissionEffectifs: isOrganismeOrFormateur,
         indicateursEffectifs: isOrganismeOrFormateur,
         effectifsNominatifs: {
-          apprenant: isOrganismeOrFormateur,
-          apprenti: isOrganismeOrFormateur,
-          inscritSansContrat: isOrganismeOrFormateur,
-          rupturant: isOrganismeOrFormateur,
-          abandon: isOrganismeOrFormateur,
-          inconnu: isOrganismeOrFormateur,
+          apprenant: hasFullAccess,
+          apprenti: hasFullAccess,
+          inscritSansContrat: hasFullAccess,
+          rupturant: hasFullAccess,
+          abandon: hasFullAccess,
+          inconnu: hasFullAccess,
         },
-        manageEffectifs: isOrganismeOrFormateur,
+        manageEffectifs: hasFullAccess,
         configurerModeTransmission: isOrganismeCible,
       };
     }

@@ -1,19 +1,19 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
 import { capitalize } from "lodash-es";
-import { CODES_STATUT_APPRENANT_ENUM, EFFECTIF_DERNIER_SITUATION, SEXE_APPRENANT_ENUM } from "shared";
-import { z } from "zod";
-
 import {
+  CODES_STATUT_APPRENANT_ENUM,
+  EFFECTIF_DERNIER_SITUATION,
+  SEXE_APPRENANT_ENUM,
   CFD_REGEX,
   CODE_NAF_REGEX,
   RNCP_REGEX,
   SIRET_REGEX,
   UAI_REGEX,
-  NIR_LOOSE_REGEX,
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
-} from "@/common/constants/validations";
+} from "shared";
+import { z } from "zod";
 
 import { telephoneConverter } from "./frenchTelephoneNumber";
 
@@ -295,25 +295,7 @@ export const primitivesV1 = {
 
 export const primitivesV3 = {
   apprenant: {
-    nir: z.preprocess(
-      (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
-      z
-        .string()
-        .trim()
-        // On indique juste "13 chiffres attendus", car ça ne devrait pas être 15 (on répare silencieusement quand même à la ligne suivante)
-        .regex(NIR_LOOSE_REGEX, "NIR invalide (13 chiffres attendus)")
-        .transform((value) => {
-          if (value.length === 15) {
-            return value.slice(0, -2);
-          }
-          return value;
-        })
-        .describe("NIR de l'apprenant")
-        .openapi({
-          example: "1234567890123",
-          type: "string",
-        })
-    ),
+    has_nir: z.boolean(),
     adresse: z.string().trim().describe("Adresse de l'apprenant"),
     code_postal: z.preprocess(
       (v: any) => (v ? String(v).trim().padStart(5, "0") : v),

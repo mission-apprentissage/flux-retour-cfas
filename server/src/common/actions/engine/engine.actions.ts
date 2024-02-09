@@ -1,12 +1,12 @@
 import { isEqual } from "date-fns";
 import { cloneDeep, get } from "lodash-es";
 import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "shared";
+import { Effectif } from "shared/models/data/@types/Effectif";
+import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import { PartialDeep } from "type-fest";
 
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import logger from "@/common/logger";
-import { Effectif } from "@/common/model/@types/Effectif";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import { effectifsDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 
@@ -17,10 +17,10 @@ import { stripEmptyFields } from "@/common/utils/miscUtils";
  */
 export const buildNewHistoriqueStatutApprenant = (
   historique_statut_apprenant_existant: Effectif["apprenant"]["historique_statut"],
-  updated_statut_apprenant: Effectif["apprenant"]["historique_statut"][0]["valeur_statut"],
-  updated_date_metier_mise_a_jour_statut: Date
+  updated_statut_apprenant?: Effectif["apprenant"]["historique_statut"][0]["valeur_statut"],
+  updated_date_metier_mise_a_jour_statut: Date = new Date()
 ) => {
-  if (!updated_statut_apprenant) return historique_statut_apprenant_existant;
+  if (updated_statut_apprenant == null) return historique_statut_apprenant_existant;
 
   let newHistoriqueStatutApprenant = historique_statut_apprenant_existant;
 
@@ -182,7 +182,7 @@ export const mapEffectifQueueToEffectif = (
         sexe: dossierApprenant.sexe_apprenant,
         rqth: dossierApprenant.rqth_apprenant,
         date_rqth: dossierApprenant.date_rqth_apprenant,
-        nir: dossierApprenant.nir_apprenant,
+        has_nir: dossierApprenant.has_nir,
         responsable_mail1: dossierApprenant.responsable_apprenant_mail1,
         responsable_mail2: dossierApprenant.responsable_apprenant_mail2,
         derniere_situation: dossierApprenant.derniere_situation,

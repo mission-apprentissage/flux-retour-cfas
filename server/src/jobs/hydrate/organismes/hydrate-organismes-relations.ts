@@ -1,8 +1,8 @@
 import { PromisePool } from "@supercharge/promise-pool";
 import { ArrayElement, ObjectId } from "mongodb";
+import { OrganismesReferentiel } from "shared/models/data/@types";
 
 import parentLogger from "@/common/logger";
-import { OrganismesReferentiel } from "@/common/model/@types";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 
@@ -29,6 +29,63 @@ interface OrganismeInfos {
  * s'il a les droits d'accès aux organismes formateurs liés (indiquer que les effectifs agrégés sont partiels).
  */
 export const hydrateOrganismesRelations = async () => {
+  // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
+  const organismeResponsablePartiels = await organismesReferentielDb()
+    .aggregate([
+      {
+        $addFields: {
+          siren: {
+            $substr: ["$siret", 0, 9],
+          },
+        },
+      },
+      {
+        $addFields: {
+          responsablesRelations: {
+            $filter: {
+              input: "$relations",
+              cond: {
+                $and: [
+                  {
+                    $eq: ["$$this.type", "formateur->responsable"],
+                  },
+                  {
+                    $ne: [
+                      "$siren",
+                      {
+                        $substr: ["$$this.siret", 0, 9],
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          $or: [
+            {
+              "responsablesRelations.1": {
+                $exists: true,
+              },
+            },
+            {
+              nature: "responsable_formateur",
+              "responsablesRelations.0": {
+                $exists: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: { uai: 1, siret: 1 },
+      },
+    ])
+    .toArray();
+
   const organismes = await organismesDb()
     .find(
       {},
@@ -89,18 +146,39 @@ export const hydrateOrganismesRelations = async () => {
         ])
         .toArray();
 
-      const organismesFormateurs = organismesLiés.filter((organisme) => organisme.type === "responsable->formateur");
-      const organismesResponsables = organismesLiés.filter((organisme) => organisme.type === "formateur->responsable");
+      const organismesFormateurs = organismesLiés.filter(
+        (organismeLié) => organismeLié.type === "responsable->formateur"
+      );
+      const organismesResponsables = organismesLiés.filter(
+        (organismeLié) => organismeLié.type === "formateur->responsable"
+      );
 
       function addOrganismesInfos({
         type,
-        ...organisme
+        ...relatedOrganismeData
       }: ArrayElement<OrganismesReferentiel["relations"]>): ArrayElement<OrganismesReferentiel["relations"]> &
-        OrganismeInfos {
+        OrganismeInfos & { responsabilitePartielle: boolean } {
         const { _id, enseigne, raison_sociale, commune, region, departement, academie, reseaux } =
-          organismeInfosBySIRETAndUAI[getOrganismeKey(organisme)] ?? {};
+          organismeInfosBySIRETAndUAI[getOrganismeKey(relatedOrganismeData)] ?? {};
+
+        // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
+        let responsabilitePartielle = false;
+        if (type === "responsable->formateur") {
+          // Le formateur pour lequel on est responsable a plusieurs responsable
+          // Nous sommes donc résponsable partiellement
+          responsabilitePartielle = organismeResponsablePartiels.some(
+            (o) => o.siret === relatedOrganismeData.siret && o.uai === relatedOrganismeData.uai
+          );
+        } else if (type === "formateur->responsable") {
+          // Nous avons plusieurs résponsables (nous inclus).
+          // Nos responsables sont donc partiels
+          responsabilitePartielle = organismeResponsablePartiels.some(
+            (o) => o.siret === organisme.siret && o.uai === organisme.uai
+          );
+        }
+
         return stripEmptyFields({
-          ...organisme,
+          ...relatedOrganismeData,
           _id,
           enseigne,
           raison_sociale,
@@ -109,6 +187,7 @@ export const hydrateOrganismesRelations = async () => {
           departement,
           academie,
           reseaux,
+          responsabilitePartielle,
         });
       }
 
@@ -126,10 +205,10 @@ export const hydrateOrganismesRelations = async () => {
         {
           $set: {
             organismesFormateurs: organismesFormateurs
-              .map((organisme) => addOrganismesInfos(organisme))
+              .map((organismeFormateur) => addOrganismesInfos(organismeFormateur))
               .filter((organisme) => organisme._id !== undefined),
             organismesResponsables: organismesResponsables
-              .map((organisme) => addOrganismesInfos(organisme))
+              .map((organismeResponsable) => addOrganismesInfos(organismeResponsable))
               .filter((organisme) => organisme._id !== undefined),
             updated_at: new Date(),
           },

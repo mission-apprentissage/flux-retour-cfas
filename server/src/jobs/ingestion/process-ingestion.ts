@@ -1,6 +1,9 @@
-import { captureException } from "@sentry/node";
+import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
+import Boom from "boom";
 import { Filter, ObjectId, WithId } from "mongodb";
+import { Effectif, FiabilisationUaiSiret, Organisme } from "shared/models/data/@types";
+import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
 import { lockEffectif, addEffectifComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
@@ -16,8 +19,6 @@ import {
   updateOrganismeTransmission,
 } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import { Effectif, FiabilisationUaiSiret, Organisme } from "@/common/model/@types";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import {
   effectifsDb,
   effectifsQueueDb,
@@ -87,7 +88,7 @@ export async function processEffectifsQueue(options?: EffectifQueueProcessorOpti
 
   const res = await PromisePool.withConcurrency(10)
     .for(itemsToProcess)
-    .process(async (effectifQueued) => processEffectifQueueItem(effectifQueued));
+    .process(async (effectifQueued) => executeProcessEffectifQueueItem(effectifQueued));
   const totalValidItems = res.results.filter((valid) => valid).length;
 
   return {
@@ -102,19 +103,53 @@ export async function processEffectifQueueById(effectifQueueId: ObjectId): Promi
   if (!effectifQueue) {
     throw Error(`effectifQueue(id=${effectifQueueId.toString()}) non trouvé`);
   }
-  await processEffectifQueueItem(effectifQueue);
+  await executeProcessEffectifQueueItem(effectifQueue);
+}
+
+export function executeProcessEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>) {
+  return runWithAsyncContext(async () => {
+    const hub = getCurrentHub();
+    const transaction = hub?.startTransaction({
+      name: `QUEUE: Item`,
+      op: "queue.item",
+    });
+    hub?.configureScope((scope) => {
+      scope.setSpan(transaction);
+      scope.setTag("erp", effectifQueue.source);
+      scope.setTag("api_version", effectifQueue.api_version);
+      scope.setUser({ id: effectifQueue.source_organisme_id });
+      const ctx = {
+        source_organisme_id: effectifQueue.source_organisme_id,
+        updated_at: effectifQueue.updated_at,
+        created_at: effectifQueue.created_at,
+        processed_at: effectifQueue.processed_at,
+        validation_errors: effectifQueue.validation_errors,
+        effectif_id: effectifQueue.effectif_id,
+        id_erp_apprenant: effectifQueue.id_erp_apprenant,
+      };
+      scope.setContext("ctx", ctx);
+    });
+    const start = Date.now();
+    try {
+      return await processEffectifQueueItem(effectifQueue);
+    } finally {
+      transaction?.setMeasurement("queue.execute", Date.now() - start, "millisecond");
+      transaction?.finish();
+    }
+  });
 }
 
 /**
  * @returns true si l'effectif est valide
  */
 async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): Promise<boolean> {
-  let itemLogger = logger.child({
+  const ctx = {
     _id: effectifQueue._id,
     siret: effectifQueue.siret_etablissement,
     uai: effectifQueue.uai_etablissement,
     created_at: effectifQueue.created_at,
-  });
+  };
+  let itemLogger = logger.child(ctx);
   const start = Date.now();
   try {
     // Phase de transformation d'une donnée de queue
@@ -183,8 +218,10 @@ async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): 
       return false;
     }
   } catch (err: any) {
+    const error = Boom.internal("failed processing item", ctx);
+    error.cause = err;
     captureException(err);
-    itemLogger.error({ duration: Date.now() - start, err, detailedError: err }, "failed processing item");
+    itemLogger.error({ duration: Date.now() - start, err: error, detailedError: err }, error.message);
     await effectifsQueueDb().updateOne(
       { _id: effectifQueue._id },
       {
@@ -259,6 +296,10 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
             return organisme;
           })(),
           (async () => {
+            if (!effectifQueued.formation_cfd) {
+              return null;
+            }
+
             const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.formation_cfd });
             itemProcessingInfos.formation_cfd = effectifQueued.formation_cfd;
             itemProcessingInfos.formation_found = !!formationFromCatalogue;
@@ -462,31 +503,43 @@ export function mergeEffectif(effectifDb: Effectif, effectif: Effectif): Effecti
  * Fonction de création ou de MAJ de l'effectif depuis la queue
  */
 const createOrUpdateEffectif = async (
-  effectif: Effectif
+  effectif: Effectif,
+  retryCount = 0
 ): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
   const itemProcessingInfos: ItemProcessingInfos = {};
   let effectifDb = await checkIfEffectifExists(effectif);
   itemProcessingInfos.effectif_new = !effectifDb;
 
-  // Gestion des MAJ d'effectif
-  if (effectifDb) {
-    // L'effectif est fusionné avec les nouvelles données.
-    // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
-    // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
-    await effectifsDb().findOneAndUpdate({ _id: effectifDb._id }, { $set: mergeEffectif(effectifDb, effectif) });
-  } else {
-    const { insertedId } = await effectifsDb().insertOne(effectif);
-    effectifDb = { _id: insertedId, ...effectif };
-  }
-  itemProcessingInfos.effectif_id = effectifDb._id.toString();
+  try {
+    // Gestion des MAJ d'effectif
+    if (effectifDb) {
+      // L'effectif est fusionné avec les nouvelles données.
+      // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
+      // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
+      await effectifsDb().findOneAndUpdate({ _id: effectifDb._id }, { $set: mergeEffectif(effectifDb, effectif) });
+    } else {
+      const { insertedId } = await effectifsDb().insertOne(effectif);
+      effectifDb = { _id: insertedId, ...effectif };
+    }
+    itemProcessingInfos.effectif_id = effectifDb._id.toString();
 
-  // Lock de tous les champs (non vide) mis à jour par l'API pour ne pas permettre la modification côté UI
-  // Uniquement dans le cas où c'est bien par API et non par import manuel (a.k.a téléversement)
-  if (effectif.source !== "televersement") {
-    await lockEffectif(effectifDb);
-  }
+    // Lock de tous les champs (non vide) mis à jour par l'API pour ne pas permettre la modification côté UI
+    // Uniquement dans le cas où c'est bien par API et non par import manuel (a.k.a téléversement)
+    if (effectif.source !== "televersement") {
+      await lockEffectif(effectifDb);
+    }
 
-  return { effectifId: effectifDb._id, itemProcessingInfos };
+    return { effectifId: effectifDb._id, itemProcessingInfos };
+  } catch (err) {
+    // Le code d'erreur 11000 correspond à une duplication d'index unique
+    // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue
+    if (typeof err === "object" && err !== null && "code" in err && err.code === 11000) {
+      // On ré-essaie une fois maximum
+      if (retryCount === 0) return createOrUpdateEffectif(effectif, retryCount + 1);
+    }
+
+    throw err;
+  }
 };
 
 async function findOrganismeWithStats(

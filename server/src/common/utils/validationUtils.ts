@@ -1,8 +1,7 @@
 import Joi from "joi";
 import { joiPasswordExtendCore } from "joi-password";
+import { UAI_REGEX } from "shared";
 import { z } from "zod";
-
-import { UAI_REGEX } from "@/common/constants/validations";
 
 const joiPassword = Joi.extend(joiPasswordExtendCore);
 

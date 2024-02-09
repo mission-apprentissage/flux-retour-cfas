@@ -98,7 +98,7 @@ describe("Components Users Test", () => {
         ...commonOrganismeAttributes,
         _id: new ObjectId(id(8)),
         siret: "00000000000026",
-        organismesResponsables: [{ _id: new ObjectId(id(1)) }],
+        organismesResponsables: [{ _id: new ObjectId(id(1)), responsabilitePartielle: false }],
       };
 
       // Création d'une organisation lié au couple UAI - SIRET du premier organisme de test + création d'utilisateurs liés

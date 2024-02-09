@@ -2,12 +2,12 @@ import { strict as assert } from "assert";
 
 import { AxiosResponse } from "axios";
 import axiosist from "axiosist";
+import { NewOrganisation, getOrganisationLabel } from "shared/models/data/organisations.model";
 
 import { createOrganisation } from "@/common/actions/organisations.actions";
 import { createSession } from "@/common/actions/sessions.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
-import { NewOrganisation, getOrganisationLabel } from "@/common/model/organisations.model";
 import { hash } from "@/common/utils/passwordUtils";
 import { resetTime } from "@/common/utils/timeUtils";
 import server from "@/http/server";
@@ -105,12 +105,10 @@ export type RequestAPIFunc = <T>(
 
 export function expectUnauthorizedError(response: any) {
   assert.strictEqual(response.status, 401);
-  assert.deepStrictEqual(response.data, "Unauthorized");
-  // ça serait bien d'avoir du JSON mais il faut voir avec passport...
-  // assert.deepStrictEqual(response.data, {
-  //   error: "Unauthorized",
-  //   message: "Vous n'êtes pas connecté",
-  // });
+  assert.deepStrictEqual(response.data, {
+    error: "Unauthorized",
+    message: "Unauthorized",
+  });
 }
 
 export function expectForbiddenError(response: any) {

@@ -17,7 +17,7 @@ import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useSetRecoilState } from "recoil";
-import { getStatutApprenantNameFromCode } from "shared";
+import { getStatutApprenantNameFromCode, EFFECTIFS_GROUP } from "shared";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -25,6 +25,7 @@ import { Organisme } from "@/common/internal/Organisme";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
+import SupportLink from "@/components/Links/SupportLink";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
@@ -39,6 +40,9 @@ interface EffectifsPageProps {
   modePublique: boolean;
 }
 function EffectifsPage(props: EffectifsPageProps) {
+  // Booléen temporaire pour la désactivation temporaire du bouton de téléchargement de la liste
+  const TMP_DEACTIVATE_DOWNLOAD_BUTTON = true;
+
   const router = useRouter();
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
 
@@ -62,7 +66,7 @@ function EffectifsPage(props: EffectifsPageProps) {
   );
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
-    _get<any[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
+    _get<Organisme[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
   );
 
   const effectifsByAnneeScolaire = useMemo(() => groupBy(organismesEffectifs, "annee_scolaire"), [organismesEffectifs]);
@@ -77,11 +81,14 @@ function EffectifsPage(props: EffectifsPageProps) {
           </Heading>
 
           <div>
-            <Link variant="whiteBg" href={`${router.asPath}/televersement`}>
-              <AddIcon boxSize={3} mr={2} />
-              Ajouter via fichier Excel
-            </Link>
-            {organismesEffectifs?.length ? (
+            <HStack gap={4}>
+              <SupportLink href={EFFECTIFS_GROUP}></SupportLink>
+              <Link variant="whiteBg" href={`${router.asPath}/televersement`}>
+                <AddIcon boxSize={3} mr={2} />
+                Ajouter via fichier Excel
+              </Link>
+            </HStack>
+            {!TMP_DEACTIVATE_DOWNLOAD_BUTTON && organismesEffectifs?.length ? (
               <DownloadButton
                 borderBottom={0}
                 variant="link"
@@ -134,7 +141,11 @@ function EffectifsPage(props: EffectifsPageProps) {
                 scolaire en cours.
               </Text>
 
-              <Link variant="whiteBg" href={`${router.asPath}/doublons`}>
+              <Link
+                variant="whiteBg"
+                href={`${router.asPath}/doublons`}
+                plausibleGoal="clic_verifier_doublons_effectifs"
+              >
                 Vérifier
               </Link>
             </Box>

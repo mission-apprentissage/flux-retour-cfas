@@ -1,4 +1,5 @@
-import { isValidCFD, isValidINE } from "@/common/constants/validations";
+import { isValidCFD, isValidINE } from "shared";
+
 import { telephoneConverter } from "@/common/validation/utils/frenchTelephoneNumber";
 
 describe("Validation Utils", () => {

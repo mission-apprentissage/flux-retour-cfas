@@ -9,9 +9,11 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId, WithId } from "mongodb";
 import passport from "passport";
-import { typesEffectifNominatif } from "shared";
+import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
+import { Organisme } from "shared/models/data/@types";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
+
 // catch all unhandled promise rejections and call the error middleware
 import "express-async-errors";
 
@@ -86,9 +88,7 @@ import { generateSifa } from "@/common/actions/sifa.actions/sifa.actions";
 import { changePassword, updateUserProfile } from "@/common/actions/users.actions";
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
-import { CODE_POSTAL_REGEX } from "@/common/constants/validations";
 import logger from "@/common/logger";
-import { Organisme } from "@/common/model/@types";
 import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
@@ -132,6 +132,7 @@ import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
+import transmissionRoutes from "./routes/specific.routes/transmission.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
@@ -364,7 +365,7 @@ function setupRoutes(app: Application) {
     ["/api/v3/dossiers-apprenants"],
     requireBearerAuthentication(),
     async (req, res, next) => {
-      const organisme = (await getOrganismeByAPIKey(res.locals.token)) as WithId<Organisme>;
+      const organisme = (await getOrganismeByAPIKey(res.locals.token, req.query)) as WithId<Organisme>;
 
       let erpSource = "INCONNU";
       if (organisme.erps?.length) {
@@ -376,6 +377,15 @@ function setupRoutes(app: Application) {
         source: erpSource,
         source_organisme_id: organisme._id.toString(),
       };
+
+      Sentry.setUser({
+        segment: "bearer",
+        ip_address: req.ip,
+        id: `organisme-${organisme._id.toString()}`,
+        username: `organisme: ${organisme.siret} / ${organisme.uai}`,
+      });
+      Sentry.setTag("erp", erpSource);
+
       next();
     },
     dossierApprenantRouter()
@@ -510,11 +520,18 @@ function setupRoutes(app: Application) {
           await updateOrganismeEffectifs(res.locals.organismeId, req.query.sifa === "true", updated);
         })
       )
+      // Route handler
       .get(
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
-          return await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
+          let duplicates = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
+
+          if (duplicates.length === 0) {
+            duplicates = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId, false);
+          }
+
+          return duplicates;
         })
       )
       .get(
@@ -603,6 +620,7 @@ function setupRoutes(app: Application) {
             })
           )
       )
+      .use("/transmission", transmissionRoutes())
   );
 
   /********************************

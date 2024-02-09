@@ -26,6 +26,7 @@ import {
   IndicateursEffectifs,
   IndicateursEffectifsAvecFormation,
   IndicateursOrganismes,
+  GO_MODIFICATION_IDENTITE_ELEMENT_LINK,
 } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
@@ -37,6 +38,7 @@ import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
+import SupportLink from "@/components/Links/SupportLink";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import withAuth from "@/components/withAuth";
@@ -186,6 +188,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const aucunEffectifTransmis = !organisme.first_transmission_date;
 
   const hasOrganismesFormateurs = organisme.organismesFormateurs && organisme.organismesFormateurs?.length > 0;
+  const hasResponsabilitePartielle =
+    organisationType === "ORGANISME_FORMATION" &&
+    organisme.organismesResponsables?.some((o) => o.responsabilitePartielle);
   const indicateursEffectifsPartielsMessage =
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
@@ -200,6 +205,36 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
         py="4"
         px="8"
       >
+        {/* Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef */}
+        {hasResponsabilitePartielle && (
+          <Container maxW="xl" p="8">
+            <Ribbons variant="warning">
+              <Text color="grey.800">
+                Nous fiabilisons les effectifs rattachés aux organismes avec lesquels vous êtes en relation en tant que
+                responsable ou responsable formateur. A cette fin nous sommes entrain de rattacher les effectifs aux
+                formations telles qu’elles sont déclarées au niveau du{" "}
+                <Link
+                  href="https://catalogue-apprentissage.intercariforef.org/"
+                  target="_blank"
+                  borderBottom="1px"
+                  _hover={{ textDecoration: "none" }}
+                >
+                  catalogue des formations en apprentissage
+                </Link>
+                .
+                <br />
+                <Link
+                  href="https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/8/create/64"
+                  target="_blank"
+                  borderBottom="1px"
+                  _hover={{ textDecoration: "none" }}
+                >
+                  Lien vers le support
+                </Link>
+              </Text>
+            </Ribbons>
+          </Container>
+        )}
         <Container maxW="xl" p="8">
           {isOFviewingItsPublicPage && (
             <HStack
@@ -301,11 +336,10 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                           <UnorderedList mt={4}>
                             <ListItem>
                               Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme
-                              «&nbsp;Inconnue&nbsp;» alors que votre organisme en possède une, veuillez nous écrire à
-                              tableau-de-bord@apprentissage.beta.gouv.fr en nous la communiquant ainsi que votre fiche
-                              UAI, afin que nous puissions la mettre à jour. L’absence de ce numéro bloque
-                              l’enregistrement des contrats d’apprentissage. L’UAI est recommandée pour être reconnu
-                              OFA.
+                              «&nbsp;Inconnue&nbsp;» alors que votre organisme en possède une, veuillez nous la
+                              communiquer en cliquant sur le lien <i>«&nbsp;Signaler une anomalie&nbsp;»</i> ci-dessous.
+                              L’absence de ce numéro bloque l’enregistrement des contrats d’apprentissage. L’UAI est
+                              recommandée pour être reconnu OFA.
                             </ListItem>
                             <ListItem>
                               Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des services
@@ -575,6 +609,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 </VStack>
               </HStack>
             )}
+            {!modePublique && <SupportLink href={GO_MODIFICATION_IDENTITE_ELEMENT_LINK}></SupportLink>}
           </VStack>
 
           {/* Infos Transmission / Paramétrage pour les administrateurs */}

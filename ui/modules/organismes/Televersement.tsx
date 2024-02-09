@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { TD_MANUEL_ELEMENT_LINK } from "shared";
 import XLSX from "xlsx";
 
 import { _post } from "@/common/httpClient";
@@ -155,7 +156,9 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
 
         if (rawJsonData.length - 1 > POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH) {
           toastError(
-            `Le nombre de lignes dans le fichier est trop important (maximum ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes)`
+            `Pour des raisons techniques et de sécurité, votre fichier ne doit pas dépasser ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes.
+             Veuillez téléverser un premier fichier de ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes/effectifs et renouveler l'opération avec
+             un deuxième fichier comprenant le nombre de lignes restantes.`
           );
           setIsSubmitting(false);
           return;
@@ -445,7 +448,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                 </>
               )}
             </Box>
-            <InfoTeleversement />
+            <InfoTeleversement maxInputLength={POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} />
           </>
         )}
       </Container>
@@ -493,8 +496,8 @@ function InfoBetaPanel() {
         Ce service est en phase d’amélioration, nous travaillons actuellement à le rendre pleinement fonctionnel.
         <br />
         Si vous constatez un dysfonctionnement lors de son utilisation, contactez-nous&nbsp;:{" "}
-        <a target="_blank" rel="noopener noreferrer" href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr">
-          tableau-de-bord@apprentissage.beta.gouv.fr
+        <a target="_blank" rel="noopener noreferrer" href={TD_MANUEL_ELEMENT_LINK}>
+          Centre de support
         </a>
         .
         <br />

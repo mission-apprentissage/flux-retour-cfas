@@ -434,7 +434,7 @@ function SectionApercuChiffresCles() {
               </Box>
               <Box>
                 <Text fontSize="40px" fontWeight="700" color="bluefrance">
-                  {formatNumber(organismes?.total.totalOrganismes.total)}
+                  {formatNumber(organismes?.total.organismesTransmetteurs.total)}
                 </Text>
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                   organismes de formation en apprentissage

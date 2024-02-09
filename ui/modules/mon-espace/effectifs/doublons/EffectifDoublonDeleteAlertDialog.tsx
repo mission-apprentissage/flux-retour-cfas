@@ -45,9 +45,8 @@ const EffectifDoublonDeleteAlertDialog = ({
             <br />
             <Ribbons variant="alert" mt={10}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                Attention, il vous faudra obligatoirement supprimer ce duplicat directement au sein de votre logiciel de
-                gestion, dans le cas contraire un nouveau duplicat réapparaitra à la prochaine transmission de vos
-                données !
+                Attention, veuillez vérifier que ce doublon n‘existe pas déjà dans votre système ERP pour éviter des
+                erreurs de synchronisation des données.
               </Text>
             </Ribbons>
           </AlertDialogBody>
