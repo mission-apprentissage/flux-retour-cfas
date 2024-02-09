@@ -13,39 +13,6 @@ import TableWithPagination from "@/components/Table/TableWithPagination";
 import { transmissionDetailsCountAtom } from "@/hooks/tranmissions";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
 
-// const ErreurDisplayComponent = ({ effectif }) => {
-//   const errors = effectif.validation_errors;
-//   const id = effectif._id;
-//   return errors && errors.length ? (
-//     errors.map(({ message, path }, index) => {
-//       return (
-//         <SimpleGrid columns={2} key={`${id}-${index}`} padding={2}>
-//           <Box>
-//             <Flex>{message}</Flex>
-//           </Box>
-//           <Box>
-//             <Flex flexDirection="column" pl={10}>
-//               <Box>
-//                 {path.map((v) => (
-//                   <Text key={`${id}-${message}`}>
-//                     {v} : {effectif[v] ?? <i>null</i>}
-//                   </Text>
-//                 ))}
-//               </Box>
-//             </Flex>
-//           </Box>
-//         </SimpleGrid>
-//       );
-//     })
-//   ) : (
-//     <Box padding={2}>
-//       <Text>
-//         <i>Erreur inconnue</i>
-//       </Text>
-//     </Box>
-//   );
-// };
-
 const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
   {
     size: 300,
@@ -64,7 +31,7 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     ),
   },
   {
-    size: 200,
+    size: 300,
     header: () => "Statut",
     accessorKey: "status",
     cell: ({ row }) => <EffectifStatutTag nature={row.original.statut_apprenant} />,
@@ -120,12 +87,6 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
       ) : null;
     },
   },
-  // {
-  //   size: 600,
-  //   header: () => "Erreur",
-  //   accessorKey: "error",
-  //   cell: ({ row }) => <ErreurDisplayComponent effectif={row.original} />,
-  // },
 ];
 
 interface TransmissionPageProps {

@@ -14,6 +14,7 @@ const EffectifStatutTag = ({ nature }: EffectifStatutTagProps) => {
       px={3}
       py={1}
       maxWidth="min-content"
+      display="inline"
     >
       {" "}
       {STATUT_APPRENANT_LABEL_MAP[nature] ? STATUT_APPRENANT_LABEL_MAP[nature].label : "Inconnue"}
