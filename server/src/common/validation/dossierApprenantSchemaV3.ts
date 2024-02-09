@@ -1,8 +1,7 @@
+import { NIR_LOOSE_REGEX } from "shared";
 import { z } from "zod";
 
 import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
-
-import { NIR_LOOSE_REGEX } from "../constants/validations";
 
 export const dossierApprenantSchemaV3Base = () =>
   z.object({

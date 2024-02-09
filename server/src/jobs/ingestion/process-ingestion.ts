@@ -2,6 +2,8 @@ import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/no
 import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
 import { Filter, ObjectId, WithId } from "mongodb";
+import { Effectif, FiabilisationUaiSiret, Organisme } from "shared/models/data/@types";
+import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
 import { lockEffectif, addEffectifComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
@@ -17,8 +19,6 @@ import {
   updateOrganismeTransmission,
 } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
-import { Effectif, FiabilisationUaiSiret, Organisme } from "@/common/model/@types";
-import { EffectifsQueue } from "@/common/model/@types/EffectifsQueue";
 import {
   effectifsDb,
   effectifsQueueDb,

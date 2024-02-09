@@ -1,12 +1,12 @@
 import { captureException } from "@sentry/node";
+import TabCoCfdInfo from "shared/models/apis/@types/TabCoCfdInfo";
+import TabCoCodePostalInfo from "shared/models/apis/@types/TabCoCodePostalInfo";
 
 import logger from "@/common/logger";
 import config from "@/config";
 
 import { tryCachedExecution } from "../utils/cacheUtils";
 
-import TabCoCfdInfo from "./@types/TabCoCfdInfo";
-import TabCoCodePostalInfo from "./@types/TabCoCodePostalInfo";
 import getApiClient from "./client";
 
 // Cf Documentation : https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/

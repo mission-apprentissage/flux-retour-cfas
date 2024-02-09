@@ -1,10 +1,10 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
 import { capitalize } from "lodash-es";
-import { CODES_STATUT_APPRENANT_ENUM, EFFECTIF_DERNIER_SITUATION, SEXE_APPRENANT_ENUM } from "shared";
-import { z } from "zod";
-
 import {
+  CODES_STATUT_APPRENANT_ENUM,
+  EFFECTIF_DERNIER_SITUATION,
+  SEXE_APPRENANT_ENUM,
   CFD_REGEX,
   CODE_NAF_REGEX,
   RNCP_REGEX,
@@ -12,7 +12,8 @@ import {
   UAI_REGEX,
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
-} from "@/common/constants/validations";
+} from "shared";
+import { z } from "zod";
 
 import { telephoneConverter } from "./frenchTelephoneNumber";
 

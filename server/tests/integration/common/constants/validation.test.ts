@@ -1,4 +1,4 @@
-import { DERNIER_ORGANISME_UAI_REGEX } from "@/common/constants/validations";
+import { DERNIER_ORGANISME_UAI_REGEX } from "shared";
 
 describe("Regex DERNIER_ORGANISME_UAI_REGEX", () => {
   describe("Cas valides", () => {

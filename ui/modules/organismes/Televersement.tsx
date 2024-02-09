@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { TD_MANUEL_ELEMENT_LINK } from "shared";
 import XLSX from "xlsx";
 
 import { _post } from "@/common/httpClient";
@@ -495,8 +496,8 @@ function InfoBetaPanel() {
         Ce service est en phase d’amélioration, nous travaillons actuellement à le rendre pleinement fonctionnel.
         <br />
         Si vous constatez un dysfonctionnement lors de son utilisation, contactez-nous&nbsp;:{" "}
-        <a target="_blank" rel="noopener noreferrer" href="mailto:tableau-de-bord@apprentissage.beta.gouv.fr">
-          tableau-de-bord@apprentissage.beta.gouv.fr
+        <a target="_blank" rel="noopener noreferrer" href={TD_MANUEL_ELEMENT_LINK}>
+          Centre de support
         </a>
         .
         <br />
