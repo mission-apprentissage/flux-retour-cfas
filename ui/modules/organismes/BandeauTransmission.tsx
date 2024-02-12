@@ -1,8 +1,7 @@
 import { SystemProps, Text } from "@chakra-ui/react";
 import { differenceInDays } from "date-fns";
-import { ERPS_BY_ID } from "shared";
+import { ERPS_BY_ID, TRANSMISSION_DONNEES_GROUP } from "shared";
 
-import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
@@ -73,12 +72,7 @@ function getContenuBandeauTransmission({
         Votre outil de gestion est {erpName}. Le tableau de bord ne reçoit pas vos effectifs. Veuillez vérifier à
         nouveau le paramétrage de votre ERP fait le{" "}
         {formatDateDayMonthYear(organisme.mode_de_transmission_configuration_date as string)}. En cas de difficultés,{" "}
-        <Link
-          variant="link"
-          color="inherit"
-          href={`mailto:${CONTACT_ADDRESS}?subject=Aide au paramétrage ERP`}
-          isExternal
-        >
+        <Link variant="link" color="inherit" href={TRANSMISSION_DONNEES_GROUP} isExternal>
           contactez-nous
         </Link>{" "}
         pour obtenir de l’aide.
