@@ -57,13 +57,10 @@ export const getDetailedEffectifById = async (_id: any) => {
     .aggregate(
       [
         { $match: { _id: new ObjectId(_id) } },
-        // lookup formations
         {
-          $lookup: {
-            from: "formations",
-            localField: "formation.formation_id",
-            foreignField: "_id",
-            as: "formation_detail",
+          // Retro-compatibilité sur un lookup non existant
+          $addField: {
+            formations: [],
           },
         },
         { $lookup: organismeLookup },

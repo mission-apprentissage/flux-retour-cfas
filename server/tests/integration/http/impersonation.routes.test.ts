@@ -59,7 +59,7 @@ describe("POST /api/v1/admin/impersonate - démarre une imposture d'organisation
 
       expect(response.status).toStrictEqual(allowed ? 200 : 403);
       expect(response.headers["set-cookie"]).toStrictEqual(
-        allowed ? [expect.stringMatching("flux-retour-cfas-local-jwt=eyJh.*")] : undefined
+        allowed ? [expect.stringMatching("flux-retour-cfas-test-jwt=eyJh.*")] : undefined
       );
     });
   });
@@ -110,7 +110,7 @@ describe("DELETE /api/v1/admin/impersonate - arrête l'imposture d'organisation"
         response = await httpClient.delete("/api/v1/admin/impersonate", { headers: { cookie } });
         expect(response.status).toStrictEqual(200);
         expect(response.headers["set-cookie"]).toStrictEqual([
-          expect.stringMatching("flux-retour-cfas-local-jwt=eyJh.*"),
+          expect.stringMatching("flux-retour-cfas-test-jwt=eyJh.*"),
         ]);
       } else {
         const response = await requestAsOrganisation(organisation, "delete", "/api/v1/admin/impersonate");
