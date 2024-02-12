@@ -45,6 +45,7 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
     pageCount: props.pageCount,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getRowCanExpand: () => true,
   });
 
   const changePage = (page: number) => {
@@ -136,7 +137,7 @@ function TableWithPagination<T>(props: TableWithPaginationProps<T & { prominent?
                     })}
                   </Tr>
 
-                  {props.isRowExpanded && (
+                  {row.getIsExpanded() && (
                     <Tr key={`rowExpanded_${index}`}>
                       <Td colSpan={row.getVisibleCells().length}>{props?.renderSubComponent?.(row)}</Td>
                     </Tr>

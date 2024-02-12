@@ -18,7 +18,7 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
   {
     header: () => "Date de transmission",
     accessorKey: "day",
-    cell: ({ row }) => <Text>{formatDateNumericDayMonthYear(row.original.day)}</Text>,
+    cell: ({ row }) => <Text fontSize="1rem">{formatDateNumericDayMonthYear(row.original.day)}</Text>,
   },
   {
     header: () => "Transmission",
@@ -49,13 +49,15 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     accessorKey: "more",
     enableSorting: false,
     header: () => "Voir",
-    cell: ({ row }) => (
-      <Button pl={0} pr={0} h={8} w={8} minW={8} backgroundColor="#F5F5FE">
+    cell: ({ row }) => {
+      return row.original.error ? (
         <Link href={`/transmissions/${row.original.day as any}`}>
-          <ArrowRightLine fontSize="12px" color="#000091" />
+          <Button pl={0} pr={0} h={8} w={8} minW={8} backgroundColor="#F5F5FE">
+            <ArrowRightLine fontSize="12px" color="#000091" />
+          </Button>
         </Link>
-      </Button>
-    ),
+      ) : null;
+    },
   },
 ];
 
