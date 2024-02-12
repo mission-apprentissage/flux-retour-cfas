@@ -1,5 +1,5 @@
-import { ObjectId } from "mongodb";
 import { isValidCFD } from "shared/constants/validations";
+import { Effectif } from "shared/models/data/@types";
 
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
 import { formationsDb } from "@/common/model/collections";
@@ -9,10 +9,31 @@ import { formationsDb } from "@/common/model/collections";
  * @param {string} cfd
  * @return {Promise<boolean>} Does it exist
  */
-export const existsFormation = async (cfd) => {
+const existsFormation = async (cfd) => {
   const count = await formationsDb().countDocuments({ cfd });
   return count !== 0;
 };
+
+export async function getFormationCfd(effectif: Effectif): Promise<string | null> {
+  if (effectif.formation?.cfd) {
+    const formation = await formationsDb().findOne({ cfd: effectif.formation.cfd });
+    if (formation) {
+      return formation.cfd;
+    }
+  }
+
+  if (effectif.formation?.rncp) {
+    const normalizedRncp = effectif.formation.rncp.toUpperCase().startsWith("RNCP")
+      ? effectif.formation.rncp.toUpperCase()
+      : `RNCP${effectif.formation.rncp}`;
+    const formation = await formationsDb().findOne({ rncps: { $in: [normalizedRncp] } });
+    if (formation) {
+      return formation.cfd;
+    }
+  }
+
+  return effectif.formation?.cfd ?? null;
+}
 
 /**
  * Returns formation if found with given CFD
@@ -21,19 +42,6 @@ export const existsFormation = async (cfd) => {
  */
 export const getFormationWithCfd = async (cfd: string, projection: any = {}) => {
   return formationsDb().findOne({ cfd }, { projection });
-};
-
-export const getFormationWithRNCP = async (rncp: string, projection = {}) => {
-  const normalizedRncp = rncp.toUpperCase().startsWith("RNCP") ? rncp.toUpperCase() : `RNCP${rncp}`;
-
-  return formationsDb().findOne({ rncps: { $in: [normalizedRncp] } }, { projection });
-};
-
-/**
- * Méthode de récupération d'une formation depuis un id
- */
-export const findFormationById = async (id?: string | ObjectId, projection = {}) => {
-  return formationsDb().findOne({ _id: new ObjectId(id) }, { projection });
 };
 
 /**

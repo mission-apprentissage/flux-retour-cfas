@@ -9,7 +9,7 @@ export function getSentryOptions() {
     tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/],
     environment: config.env,
     release: config.version,
-    enabled: config.env !== "local",
+    enabled: config.env !== "local" && config.env !== "test",
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Mongo({ useMongoose: false }),

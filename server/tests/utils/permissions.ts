@@ -303,25 +303,3 @@ export function testPermissions<ExpectedResult, ExcludedCases extends ProfilLabe
     });
   });
 }
-
-interface RelatedOrganisme {
-  siret: string;
-  uai: string;
-}
-export function generateRelatedFormations(
-  relatedOrganismes: RelatedOrganisme[]
-): Required<Organisme>["relatedFormations"] {
-  return [
-    {
-      formation_id: new ObjectId(id(1)),
-      annee_formation: -1,
-      duree_formation_theorique: 2,
-      organismes: relatedOrganismes.map((relatedOrganisme) => ({
-        organisme_id: new ObjectId(id(1)),
-        nature: "responsable", // pas utilisé
-        uai: relatedOrganisme.uai,
-        siret: relatedOrganisme.siret,
-      })),
-    },
-  ];
-}
