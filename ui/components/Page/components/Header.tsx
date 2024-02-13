@@ -88,6 +88,9 @@ const UserMenu = () => {
                   <MenuItem href="/admin/effectifs" icon={<Parametre boxSize={4} />}>
                     Gestion des effectifs
                   </MenuItem>
+                  <MenuItem href="/admin/organismes/recherche" icon={<Parametre boxSize={4} />}>
+                    Recherche organisme
+                  </MenuItem>
                   <MenuItem href="/admin/fusion-organismes" icon={<Parametre boxSize={4} />}>
                     Fusion d&apos;organismes
                   </MenuItem>

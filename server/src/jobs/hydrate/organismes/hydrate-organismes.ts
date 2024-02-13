@@ -83,6 +83,8 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
         est_dans_le_referentiel: uaiMultiplesInTdb
           ? STATUT_PRESENCE_REFERENTIEL.PRESENT_UAI_MULTIPLES_TDB
           : STATUT_PRESENCE_REFERENTIEL.PRESENT,
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
       nbOrganismeCreated++;
     } catch (error) {
