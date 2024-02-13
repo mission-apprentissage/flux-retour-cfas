@@ -4412,6 +4412,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@socialgouv/matomo-next@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "@socialgouv/matomo-next@npm:1.8.0"
+  peerDependencies:
+    next: ">= 9.5.5"
+  checksum: 810fc35234ceb417c6ceecb125d048c77458b6c3b6890fd3271eaa13c2cc2e77a84f4debc92e3a1ac84c5eea02cf09c3e788efb850afc8d63b341a64e0b41071
+  languageName: node
+  linkType: hard
+
 "@supercharge/promise-pool@npm:2.4.0":
   version: 2.4.0
   resolution: "@supercharge/promise-pool@npm:2.4.0"
@@ -19995,6 +20004,7 @@ request-debug@latest:
     "@nivo/pie": 0.80.0
     "@sentry/integrations": ^7.93.0
     "@sentry/nextjs": ^7.93.0
+    "@socialgouv/matomo-next": ^1.8.0
     "@tanstack/match-sorter-utils": 8.7.6
     "@tanstack/react-query": 4.26.1
     "@tanstack/react-table": 8.7.9
