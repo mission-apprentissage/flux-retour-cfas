@@ -2,6 +2,7 @@ import { captureException } from "@sentry/node";
 import express from "express";
 import Joi from "joi";
 
+import { updateOrganismeTransmissionDateAsTransmitter } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
@@ -58,6 +59,9 @@ export default () => {
       } else if (effectifsToQueue.length) {
         await effectifsQueueDb().insertMany(effectifsToQueue);
       }
+
+      await updateOrganismeTransmissionDateAsTransmitter(user.source_organisme_id);
+
       res.json({
         status: "OK",
         message: "Queued",

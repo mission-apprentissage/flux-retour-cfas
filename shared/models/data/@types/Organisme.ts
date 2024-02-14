@@ -1043,4 +1043,12 @@ export interface Organisme {
    * Date d'ajout en base de données
    */
   created_at?: Date;
+  /**
+   * Date de la première transmission de données en tant qu'organisme transmetteur
+   */
+  first_transmission_date_as_transmitter?: Date;
+  /**
+   * Date de la dernière transmission de données en tant qu'organisme transmetteur
+   */
+  last_transmission_date_as_transmitter?: Date;
 }

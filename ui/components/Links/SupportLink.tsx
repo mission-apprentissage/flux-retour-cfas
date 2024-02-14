@@ -3,8 +3,9 @@ import { HStack, Box, Link } from "@chakra-ui/react";
 
 interface SupportLinkProps {
   href: string;
+  label?: string;
 }
-const SupportLink = ({ href }: SupportLinkProps) => {
+const SupportLink = ({ href, label }: SupportLinkProps) => {
   return (
     <HStack justifyContent="space-between">
       <Box />
@@ -17,7 +18,7 @@ const SupportLink = ({ href }: SupportLinkProps) => {
         _hover={{ textDecoration: "none" }}
       >
         <ArrowForwardIcon mr={2} />
-        Signaler une anomalie
+        {label ?? "Signaler une anomalie"}
       </Link>
     </HStack>
   );

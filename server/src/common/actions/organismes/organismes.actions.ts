@@ -197,6 +197,25 @@ export const updateOrganismeTransmission = async (
   }
 };
 
+export const updateOrganismeTransmissionDateAsTransmitter = async (organismeId: string | undefined) => {
+  if (!organismeId) {
+    return;
+  }
+  const updatedData = await organismesDb().findOneAndUpdate(
+    { _id: new ObjectId(organismeId) },
+    {
+      $set: {
+        first_transmission_date_as_transmitter: new Date(),
+        last_transmission_date_as_transmitter: new Date(),
+      },
+    }
+  );
+
+  if (!updatedData.value) {
+    throw new Error(`Could not set organisme transmission infos on transmitter organisme ${organismeId}`);
+  }
+};
+
 /**
  * Returns sous-établissements by siret for an uai
  */
@@ -600,6 +619,9 @@ export async function resetConfigurationERP(organismeId: ObjectId): Promise<void
         api_configuration_date: 1,
         api_siret: 1,
         api_uai: 1,
+        api_key: 1,
+        first_transmission_date_as_transmitter: 1,
+        last_transmission_date_as_transmitter: 1,
         // pas besoin de réinitialiser api_key
       },
       $set: {
@@ -756,6 +778,8 @@ export function getOrganismeProjection(
     mode_de_transmission: permissionsOrganisme.infoTransmissionEffectifs,
     mode_de_transmission_configuration_date: permissionsOrganisme.infoTransmissionEffectifs,
     mode_de_transmission_configuration_author_fullname: permissionsOrganisme.infoTransmissionEffectifs,
+    first_transmission_date_as_transmitter: permissionsOrganisme.infoTransmissionEffectifs,
+    last_transmission_date_as_transmitter: permissionsOrganisme.infoTransmissionEffectifs,
 
     // configuration API
     api_key: permissionsOrganisme.manageEffectifs,

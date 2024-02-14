@@ -208,6 +208,12 @@ const schema = object(
     }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
+    first_transmission_date_as_transmitter: date({
+      description: "Date de la première transmission de données en tant qu'organisme transmetteur",
+    }),
+    last_transmission_date_as_transmitter: date({
+      description: "Date de la dernière transmission de données en tant qu'organisme transmetteur",
+    }),
   },
   { required: ["siret"], additionalProperties: true }
 );

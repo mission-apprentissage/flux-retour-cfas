@@ -982,4 +982,12 @@ export interface Organisme {
     effectifsNominatifs: boolean | TypeEffectifNominatif[];
     manageEffectifs: boolean;
   };
+  /**
+   * Date de la première transmission de données en tant qu'organisme transmetteur
+   */
+  first_transmission_date_as_transmitter?: Date;
+  /**
+   * Date de la dernière transmission de données en tant qu'organisme transmetteur
+   */
+  last_transmission_date_as_transmitter?: Date;
 }
