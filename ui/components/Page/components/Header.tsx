@@ -20,7 +20,6 @@ import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { _delete, _post } from "@/common/httpClient";
 import Link from "@/components/Links/Link";
 import MenuItem from "@/components/Links/MenuItem";
-import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import { Settings4Fill, UserFill } from "@/theme/components/icons";
 import { AccountFill } from "@/theme/components/icons/AccountFill";
@@ -31,7 +30,6 @@ import { SpyLineIcon } from "@/theme/components/icons/SpyLine";
 
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();
-  const { organisme } = useOrganisationOrganisme();
   const logout = async () => {
     await _post("/api/v1/auth/logout");
     window.location.href = "/";
@@ -75,7 +73,7 @@ const UserMenu = () => {
               <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
                 Rôles et habilitations
               </MenuItem>
-              {organisme && (
+              {organisationType === "ORGANISME_FORMATION" && (
                 <MenuItem href="/transmissions" icon={<Parametre boxSize={4} />}>
                   Transmissions
                 </MenuItem>
