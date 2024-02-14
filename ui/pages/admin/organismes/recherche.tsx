@@ -34,20 +34,19 @@ import { z } from "zod";
 
 import { _get, _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import { EtablissementInfo } from "@/components/admin/organismes/recherche/EtablissementInfo";
+import { FormationsInfo } from "@/components/admin/organismes/recherche/FormationsInfo";
+import { FormationsPanel } from "@/components/admin/organismes/recherche/FormationsPanel";
+import { Label } from "@/components/admin/organismes/recherche/Label";
+import { ReferentielInfo } from "@/components/admin/organismes/recherche/ReferentielInfo";
+import { RelatedOrganismePanel } from "@/components/admin/organismes/recherche/RelatedOrganismePanel";
+import { TdbInfo } from "@/components/admin/organismes/recherche/TdbInfo";
+import { TransmissionsPanel } from "@/components/admin/organismes/recherche/TransmissionsPanel";
+import { UsersList } from "@/components/admin/organismes/recherche/UsersList";
 import Page from "@/components/Page/Page";
 import Table from "@/components/Table/Table";
 import withAuth from "@/components/withAuth";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
-
-import { EtablissementInfo } from "./components/EtablissementInfo";
-import { FormationsInfo } from "./components/FormationsInfo";
-import { FormationsPanel } from "./components/FormationsPanel";
-import { Label } from "./components/Label";
-import { ReferentielInfo } from "./components/ReferentielInfo";
-import { RelatedOrganismePanel } from "./components/RelatedOrganismePanel";
-import { TdbInfo } from "./components/TdbInfo";
-import { TransmissionsPanel } from "./components/TransmissionsPanel";
-import { UsersList } from "./components/UsersList";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
