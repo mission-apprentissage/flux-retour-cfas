@@ -875,8 +875,8 @@ describe("Processus d'ingestion", () => {
                 message: requiredField.includes("date_")
                   ? "Date invalide"
                   : requiredField.includes("statut_apprenant")
-                  ? `Valeurs possibles: ${CODES_STATUT_APPRENANT.abandon},${CODES_STATUT_APPRENANT.inscrit},${CODES_STATUT_APPRENANT.apprenti}`
-                  : "String attendu",
+                    ? `Valeurs possibles: ${CODES_STATUT_APPRENANT.abandon},${CODES_STATUT_APPRENANT.inscrit},${CODES_STATUT_APPRENANT.apprenti}`
+                    : "String attendu",
                 path: [requiredField],
               },
             ],
