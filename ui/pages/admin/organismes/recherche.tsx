@@ -80,13 +80,12 @@ const Organisme = () => {
     return validate({ q });
   }, [q, validate]);
 
-  const isInitialValid = useMemo(() => {
+  const isValid = useMemo(() => {
     return Object.keys(initialErrors).length === 0;
   }, []);
 
   const formik = useFormik({
     initialValues: { q },
-    isInitialValid,
     initialErrors,
     validate,
     onSubmit,
@@ -95,7 +94,7 @@ const Organisme = () => {
   const { data, isFetching, isSuccess, error } = useQuery<OrganismeSupportInfoJson[], any>(
     ["organisme", "admin", "search", q],
     ({ signal }) => _get<OrganismeSupportInfoJson[]>(`/api/v1/admin/organismes/search/${q}`, { signal }),
-    { enabled: formik.isValid }
+    { enabled: isValid }
   );
 
   return (
