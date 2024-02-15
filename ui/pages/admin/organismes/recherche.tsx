@@ -82,7 +82,7 @@ const Organisme = () => {
 
   const isValid = useMemo(() => {
     return Object.keys(initialErrors).length === 0;
-  }, []);
+  }, [initialErrors]);
 
   const formik = useFormik({
     initialValues: { q },
