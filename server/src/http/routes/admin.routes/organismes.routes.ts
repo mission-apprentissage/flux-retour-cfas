@@ -47,7 +47,7 @@ export default () => {
   router.get(
     "/search/:q",
     validateRequestMiddleware({
-      params: z.object({ q: z.string() }),
+      params: z.object({ q: z.string().min(3) }),
     }),
     async ({ params }, res) => {
       const { q } = params;

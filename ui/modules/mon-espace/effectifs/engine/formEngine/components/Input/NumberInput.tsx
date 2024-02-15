@@ -55,6 +55,7 @@ export const NumberInput = (props: any) => {
           }
         }}
         value={localValue}
+        // @ts-expect-error placeholder ne semble pas être une propriété valide
         placeholder={example ? `Exemple : ${example}` : description}
         min={min}
         max={max}

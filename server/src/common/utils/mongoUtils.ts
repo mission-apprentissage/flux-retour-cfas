@@ -22,7 +22,7 @@ export function cleanProjection<
 export type MapObjectIdToString<Type> = Type extends ObjectId
   ? string
   : Type extends Record<any, any>
-  ? {
-      [K in keyof Type]: MapObjectIdToString<Type[K]>;
-    }
-  : Type;
+    ? {
+        [K in keyof Type]: MapObjectIdToString<Type[K]>;
+      }
+    : Type;
