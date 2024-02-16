@@ -1,6 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool";
 import { ArrayElement, ObjectId } from "mongodb";
-import { OrganismesReferentiel } from "shared/models/data/@types";
+import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
 import parentLogger from "@/common/logger";
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
@@ -128,7 +128,7 @@ export const hydrateOrganismesRelations = async () => {
     })
     .process(async (organisme) => {
       const organismesLiés = await organismesReferentielDb()
-        .aggregate<ArrayElement<OrganismesReferentiel["relations"]>>([
+        .aggregate<ArrayElement<IOrganismeReferentiel["relations"]>>([
           {
             $match: {
               siret: organisme.siret,
@@ -156,7 +156,7 @@ export const hydrateOrganismesRelations = async () => {
       function addOrganismesInfos({
         type,
         ...relatedOrganismeData
-      }: ArrayElement<OrganismesReferentiel["relations"]>): ArrayElement<OrganismesReferentiel["relations"]> &
+      }: ArrayElement<IOrganismeReferentiel["relations"]>): ArrayElement<IOrganismeReferentiel["relations"]> &
         OrganismeInfos & { responsabilitePartielle: boolean } {
         const { _id, enseigne, raison_sociale, commune, region, departement, academie, reseaux } =
           organismeInfosBySIRETAndUAI[getOrganismeKey(relatedOrganismeData)] ?? {};

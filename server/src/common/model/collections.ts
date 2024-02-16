@@ -7,7 +7,6 @@ import {
   JwtSession,
   MaintenanceMessage,
   Organisme,
-  OrganismesReferentiel,
   User,
   UsersMigration,
 } from "shared/models/data/@types";
@@ -28,7 +27,9 @@ import JwtSessionsModelDescriptor from "shared/models/data/jwtSessions.model";
 import MaintenanceMessagesModelDescriptor from "shared/models/data/maintenanceMessages.model";
 import organisationsModelDescriptor, { Organisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor from "shared/models/data/organismes.model";
-import OrganismesReferentielModelDescriptor from "shared/models/data/organismesReferentiel.model";
+import OrganismesReferentielModelDescriptor, {
+  IOrganismeReferentiel,
+} from "shared/models/data/organismesReferentiel.model";
 import OrganismesSolteaModelDescriptor from "shared/models/data/organismesSoltea.model";
 import rncpModelDescriptor from "shared/models/data/rncp.model";
 import romeModelDescriptor, { IRome } from "shared/models/data/rome.model";
@@ -71,7 +72,7 @@ export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDesc
 export const invitationsDb = () => getDbCollection<Invitation>(invitationsModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection<Organisation>(organisationsModelDescriptor.collectionName);
 export const organismesReferentielDb = () =>
-  getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
+  getDbCollection<IOrganismeReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
   getDbCollection<MaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);
