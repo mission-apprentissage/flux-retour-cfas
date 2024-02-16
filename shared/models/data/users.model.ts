@@ -1,6 +1,6 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } from "shared";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "users";
 
@@ -10,29 +10,26 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisme: 1 }, { name: "organisme" }],
 ];
 
-const schema = object(
-  {
-    _id: objectId(),
-    username: string({ description: "Le nom de l'utilisateur, utilisé pour l'authentification" }),
-    email: stringOrNull({ description: "Email de l'utilisateur" }),
-    password: string({ description: "Le mot de passe hashed" }),
-    password_update_token: stringOrNull({
-      description: "Token généré afin de sécuriser le changement de mot de passe",
-    }),
-    password_update_token_expiry: dateOrNull({
-      description: "Date d'expiration du token généré afin de sécuriser le changement de mot de passe",
-    }),
-    permissions: arrayOf(string()),
-    last_connection: date({ description: "Date de dernière connexion" }),
-    network: stringOrNull({ description: "Le réseau de CFA de l'utilisateur s'il est précisé" }),
-    region: stringOrNull({ description: "La région de l'utilisateur s'il est précisé" }),
-    organisme: stringOrNull({ description: "L'organisme d'appartenance de l'utilisateur s'il est précisé" }),
-    created_at: date({ description: "La date de création de l'utilisateur" }),
-  },
-  {
-    required: ["username", "created_at"],
-    additionalProperties: true, // Temporary for archive
-  }
-);
+const zUser = z.object({
+  _id: zObjectId,
+  username: z.string().describe("Le nom de l'utilisateur, utilisé pour l'authentification"),
+  email: z.string().nullish().describe("Email de l'utilisateur"),
+  password: z.string().optional().describe("Le mot de passe hashed"),
+  password_update_token: z.string().nullish().describe("Token généré afin de sécuriser le changement de mot de passe"),
+  password_update_token_expiry: z
+    .date()
+    .nullish()
+    .describe("Date d'expiration du token généré afin de sécuriser le changement de mot de passe"),
+  permissions: z.array(z.string()).optional(),
+  last_connection: z.date().optional().describe("Date de dernière connexion"),
+  network: z.string().nullish().describe("Le réseau de CFA de l'utilisateur s'il est précisé"),
+  region: z.string().nullish().describe("La région de l'utilisateur s'il est précisé"),
+  organisme: z.string().nullish().describe("L'organisme d'appartenance de l'utilisateur s'il est précisé"),
+  created_at: z.date().describe("La date de création de l'utilisateur"),
+  __v: z.number().optional(),
+  archived_at: z.date().optional(),
+});
 
-export default { schema, indexes, collectionName };
+export type IUser = z.output<typeof zUser>;
+
+export default { zod: zUser, indexes, collectionName };
