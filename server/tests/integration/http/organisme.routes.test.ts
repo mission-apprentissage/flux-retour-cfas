@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
-import { WithId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import { IndicateursEffectifsAvecFormation, Rncp } from "shared";
 import { PermissionsOrganisme } from "shared/constants/permissions";
 import { Organisme } from "shared/models/data/@types";
@@ -346,6 +346,7 @@ describe("Routes /organismes/:id", () => {
         organisationsDb().insertMany(Object.values(profilsPermissionByLabel)),
         usersMigrationDb().insertMany([
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -363,6 +364,7 @@ describe("Routes /organismes/:id", () => {
             organisation_id: profilsPermissionByLabel["OF cible"]._id,
           },
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),

@@ -106,6 +106,7 @@ describe("Routes administrateur", () => {
         }),
         usersMigrationDb().insertMany([
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -123,6 +124,7 @@ describe("Routes administrateur", () => {
             organisation_id: new ObjectId(id(1)),
           },
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -226,6 +228,7 @@ describe("Routes administrateur", () => {
         }),
         usersMigrationDb().insertMany([
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -243,6 +246,7 @@ describe("Routes administrateur", () => {
             organisation_id: new ObjectId(id(1)),
           },
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -314,6 +318,7 @@ describe("Routes administrateur", () => {
         }),
         usersMigrationDb().insertMany([
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -331,6 +336,7 @@ describe("Routes administrateur", () => {
             organisation_id: new ObjectId(id(1)),
           },
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -420,6 +426,7 @@ describe("Routes administrateur", () => {
         }),
         usersMigrationDb().insertMany([
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -437,6 +444,7 @@ describe("Routes administrateur", () => {
             organisation_id: new ObjectId(id(1)),
           },
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),

@@ -9,7 +9,6 @@ import {
   Organisme,
   OrganismesReferentiel,
   User,
-  UsersMigration,
 } from "shared/models/data/@types";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
@@ -33,7 +32,7 @@ import OrganismesSolteaModelDescriptor from "shared/models/data/organismesSoltea
 import rncpModelDescriptor from "shared/models/data/rncp.model";
 import romeModelDescriptor, { IRome } from "shared/models/data/rome.model";
 import usersModelDescriptor from "shared/models/data/users.model";
-import usersMigrationModelDescriptor from "shared/models/data/usersMigration.model";
+import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import { getDbCollection } from "@/common/mongodb";
 
@@ -65,7 +64,7 @@ export const formationsCatalogueDb = () =>
   getDbCollection<FormationsCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<User>(usersModelDescriptor.collectionName);
 export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescriptor.collectionName);
-export const usersMigrationDb = () => getDbCollection<UsersMigration>(usersMigrationModelDescriptor.collectionName);
+export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
 export const jwtSessionsDb = () => getDbCollection<JwtSession>(JwtSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDescriptor.collectionName);
 export const invitationsDb = () => getDbCollection<Invitation>(invitationsModelDescriptor.collectionName);
