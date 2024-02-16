@@ -6406,7 +6406,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bson@npm:*, bson@npm:^5.4.0, bson@npm:^5.5.0, bson@npm:^5.5.1":
+"bson@npm:*, bson@npm:^5.5.0, bson@npm:^5.5.1":
   version: 5.5.1
   resolution: "bson@npm:5.5.1"
   checksum: f49730504e8362e2c8d1eb0c272e5e125392c41fb7196fc35ccbc39718ee62569a1d197bd2342c3334cd420073d3fd5dc7dea764a7f219dcd79e0ce473dd2772
@@ -15033,38 +15033,6 @@ md5@latest:
   languageName: node
   linkType: hard
 
-"mongodb@npm:5.7.0":
-  version: 5.7.0
-  resolution: "mongodb@npm:5.7.0"
-  dependencies:
-    bson: ^5.4.0
-    mongodb-connection-string-url: ^2.6.0
-    saslprep: ^1.0.3
-    socks: ^2.7.1
-  peerDependencies:
-    "@aws-sdk/credential-providers": ^3.201.0
-    "@mongodb-js/zstd": ^1.1.0
-    kerberos: ^2.0.1
-    mongodb-client-encryption: ">=2.3.0 <3"
-    snappy: ^7.2.2
-  dependenciesMeta:
-    saslprep:
-      optional: true
-  peerDependenciesMeta:
-    "@aws-sdk/credential-providers":
-      optional: true
-    "@mongodb-js/zstd":
-      optional: true
-    kerberos:
-      optional: true
-    mongodb-client-encryption:
-      optional: true
-    snappy:
-      optional: true
-  checksum: 16357b6229abac165aecea15a6efa873ec8662a00411ecb9e49853f05a590be31aab63d404486125778eedaafe76d70e84eea682fa89b138decc247f4870d2ec
-  languageName: node
-  linkType: hard
-
 "mongodb@npm:^3.5.9":
   version: 3.7.4
   resolution: "mongodb@npm:3.7.4"
@@ -18200,7 +18168,7 @@ request-debug@latest:
   languageName: node
   linkType: hard
 
-"saslprep@npm:^1.0.0, saslprep@npm:^1.0.3":
+"saslprep@npm:^1.0.0":
   version: 1.0.3
   resolution: "saslprep@npm:1.0.3"
   dependencies:
@@ -18477,7 +18445,7 @@ request-debug@latest:
     luxon: 2.3.0
     migrate-mongo: 10.0.0
     mjml: ^4.15.3
-    mongodb: 5.7.0
+    mongodb: ^5.9.2
     nock: ^13.5.1
     node-ovh-objectstorage: 2.0.5
     nodemailer: ^6.9.9
@@ -18502,7 +18470,7 @@ request-debug@latest:
     ts-jest: ^29.1.2
     tsup: ^7.3.0
     tsx: 3.12.6
-    type-fest: ^3.13.1
+    type-fest: ^4.10.2
     typescript: ^5.3.3
     uuid: 8.3.2
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
@@ -19994,7 +19962,7 @@ request-debug@latest:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^3.0.0, type-fest@npm:^3.13.1, type-fest@npm:^3.8.0":
+"type-fest@npm:^3.0.0, type-fest@npm:^3.8.0":
   version: 3.13.1
   resolution: "type-fest@npm:3.13.1"
   checksum: c06b0901d54391dc46de3802375f5579868949d71f93b425ce564e19a428a0d411ae8d8cb0e300d330071d86152c3ea86e744c3f2860a42a79585b6ec2fdae8e

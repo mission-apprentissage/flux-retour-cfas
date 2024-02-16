@@ -1,6 +1,8 @@
-import { object, stringOrNull } from "shared";
+import { z } from "zod";
 
-export const contratsDecaOrganismeFormationResponsableSchema = object({
-  uaiCfa: stringOrNull({ description: "L'UAI de l'organisme responsable" }),
-  siret: stringOrNull({ description: "Le SIRET de l'organisme responsable" }),
-});
+export const zContratsDecaOrganismeFormationResponsableSchema = z
+  .object({
+    uaiCfa: z.string().nullish().describe("L'UAI de l'organisme responsable"),
+    siret: z.string().nullish().describe("Le SIRET de l'organisme responsable"),
+  })
+  .strict();

@@ -1,4 +1,5 @@
 import { addDays, format } from "date-fns";
+import { ObjectId } from "mongodb";
 import { Contrat } from "shared/models/apis/@types/ApiDeca";
 
 import { contratsDecaDb } from "@/common/model/collections";
@@ -18,7 +19,11 @@ describe("Job hydrateContratsDeca", () => {
 
       // Ajout des 2 contrats de test en base
       await contratsDecaDb().insertMany(
-        dataDeca.contrats.map((currentContrat) => ({ ...(currentContrat as Contrat), created_at: dateToTest }))
+        dataDeca.contrats.map((currentContrat) => ({
+          ...(currentContrat as Contrat),
+          _id: new ObjectId(),
+          created_at: dateToTest,
+        }))
       );
 
       await expect(getLastDecaCreatedDateInDb()).resolves.toStrictEqual(dateToTest);
@@ -30,7 +35,11 @@ describe("Job hydrateContratsDeca", () => {
 
       // Ajout des 2 contrats de test en base
       await contratsDecaDb().insertMany(
-        dataDeca.contrats.map((currentContrat) => ({ ...(currentContrat as Contrat), created_at: new Date() }))
+        dataDeca.contrats.map((currentContrat) => ({
+          ...(currentContrat as Contrat),
+          _id: new ObjectId(),
+          created_at: new Date(),
+        }))
       );
 
       await expect(getLastDecaCreatedDateInDb()).resolves.toStrictEqual(addDays(new Date(), -1));

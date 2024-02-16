@@ -1,5 +1,5 @@
-import { objectOrNull, string } from "shared";
+import { z } from "zod";
 
-export const contratsDecaRuptureSchema = objectOrNull({
-  dateEffetRupture: string({ description: "La date d'effet de la rupture" }),
+export const zContratsDecaRuptureSchema = z.object({
+  dateEffetRupture: z.string().optional().describe("La date d'effet de la rupture"),
 });
