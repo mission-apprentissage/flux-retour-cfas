@@ -6655,7 +6655,7 @@ exports[`validation-schema should create validation schema for organismesReferen
 
 exports[`validation-schema should create validation schema for organismesSoltea: organismesSoltea 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
     "_id": {
@@ -6679,6 +6679,21 @@ exports[`validation-schema should create validation schema for organismesSoltea:
         "null",
       ],
     },
+    "ligne1_adresse": {
+      "bsonType": "string",
+    },
+    "ligne2_adresse": {
+      "bsonType": "string",
+    },
+    "ligne3_adresse": {
+      "bsonType": "string",
+    },
+    "ligne4_adresse": {
+      "bsonType": "string",
+    },
+    "ligne5_adresse": {
+      "bsonType": "string",
+    },
     "raison_sociale": {
       "bsonType": [
         "string",
@@ -6700,6 +6715,9 @@ exports[`validation-schema should create validation schema for organismesSoltea:
       "description": "Code UAI de l'établissement",
     },
   },
+  "required": [
+    "_id",
+  ],
 }
 `;
 
