@@ -1,4 +1,3 @@
-import { Rncp } from "shared";
 import {
   Effectif,
   FiabilisationUaiSiret,
@@ -30,7 +29,7 @@ import organisationsModelDescriptor, { Organisation } from "shared/models/data/o
 import OrganismesModelDescriptor from "shared/models/data/organismes.model";
 import OrganismesReferentielModelDescriptor from "shared/models/data/organismesReferentiel.model";
 import OrganismesSolteaModelDescriptor from "shared/models/data/organismesSoltea.model";
-import rncpModelDescriptor from "shared/models/data/rncp.model";
+import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import romeModelDescriptor, { IRome } from "shared/models/data/rome.model";
 import usersModelDescriptor from "shared/models/data/users.model";
 import usersMigrationModelDescriptor from "shared/models/data/usersMigration.model";
@@ -82,6 +81,6 @@ export const bassinsEmploiDb = () => getDbCollection<IBassinEmploi>(bassinsEmplo
 export const organismesSolteaDb = () =>
   getDbCollection<OrganismeSoltea>(OrganismesSolteaModelDescriptor.collectionName);
 export const romeDb = () => getDbCollection<IRome>(romeModelDescriptor.collectionName);
-export const rncpDb = () => getDbCollection<Rncp>(rncpModelDescriptor.collectionName);
+export const rncpDb = () => getDbCollection<IRncp>(rncpModelDescriptor.collectionName);
 export const contratsDecaDb = () => getDbCollection<IContratDeca>(contratsDecaModelDescriptor.collectionName);
 export const auditLogsDb = () => getDbCollection<IAuditLog>(auditLogsModelDescriptor.collectionName);

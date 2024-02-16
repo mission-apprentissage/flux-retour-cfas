@@ -6747,6 +6747,7 @@ exports[`validation-schema should create validation schema for rncp: rncp 1`] = 
     },
   },
   "required": [
+    "_id",
     "rncp",
     "intitule",
     "etat_fiche",
