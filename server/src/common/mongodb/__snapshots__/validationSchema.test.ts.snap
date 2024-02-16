@@ -6,7 +6,7 @@ exports[`validation-schema should create validation schema for auditLogs: auditL
   "bsonType": "object",
   "properties": {
     "_id": {
-      "description": "Identifiant unique",
+      "bsonType": "objectId",
     },
     "action": {
       "bsonType": "string",
@@ -288,20 +288,25 @@ exports[`validation-schema should create validation schema for contratsDeca: con
       },
     },
     "rupture": {
-      "additionalProperties": false,
-      "bsonType": [
-        "object",
-        "null",
-      ],
-      "properties": {
-        "dateEffetRupture": {
-          "bsonType": "string",
-          "description": "La date d'effet de la rupture",
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "dateEffetRupture": {
+              "bsonType": "string",
+              "description": "La date d'effet de la rupture",
+            },
+          },
         },
-      },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
   },
   "required": [
+    "_id",
     "alternant",
     "formation",
     "etablissementFormation",
@@ -6757,7 +6762,7 @@ exports[`validation-schema should create validation schema for rome: rome 1`] = 
   "bsonType": "object",
   "properties": {
     "_id": {
-      "description": "Identifiant unique",
+      "bsonType": "objectId",
     },
     "code": {
       "bsonType": "string",

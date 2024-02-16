@@ -1,10 +1,5 @@
-import { object, string } from "shared";
+import { z } from "zod";
 
-export const contratsDecaEmployeurSchema = object(
-  {
-    codeIdcc: string({ description: "Le code IDCC de l'employeur" }),
-  },
-  {
-    required: ["codeIdcc"],
-  }
-);
+export const zContratsDecaEmployeurSchema = z.object({
+  codeIdcc: z.string().describe("Le code IDCC de l'employeur"),
+});

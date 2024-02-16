@@ -11,14 +11,12 @@ import {
   User,
   UsersMigration,
 } from "shared/models/data/@types";
-import { BassinsEmploi } from "shared/models/data/@types/BassinsEmploi";
-import { ContratDeca } from "shared/models/data/@types/ContratDeca";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { OrganismeSoltea } from "shared/models/data/@types/OrganismeSoltea";
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
-import bassinsEmploiDescriptor from "shared/models/data/bassinsEmploi.model";
-import contratsDecaModelDescriptor from "shared/models/data/contratsDeca.model";
+import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassinsEmploi.model";
+import contratsDecaModelDescriptor, { IContratDeca } from "shared/models/data/contratsDeca.model";
 import effectifsModelDescriptor from "shared/models/data/effectifs.model";
 import effectifsQueueModelDescriptor from "shared/models/data/effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
@@ -80,10 +78,10 @@ export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescrip
 export const effectifsQueueDb = () => getDbCollection<EffectifsQueue>(effectifsQueueModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
-export const bassinsEmploiDb = () => getDbCollection<BassinsEmploi>(bassinsEmploiDescriptor.collectionName);
+export const bassinsEmploiDb = () => getDbCollection<IBassinEmploi>(bassinsEmploiDescriptor.collectionName);
 export const organismesSolteaDb = () =>
   getDbCollection<OrganismeSoltea>(OrganismesSolteaModelDescriptor.collectionName);
 export const romeDb = () => getDbCollection<IRome>(romeModelDescriptor.collectionName);
 export const rncpDb = () => getDbCollection<Rncp>(rncpModelDescriptor.collectionName);
-export const contratsDecaDb = () => getDbCollection<ContratDeca>(contratsDecaModelDescriptor.collectionName);
+export const contratsDecaDb = () => getDbCollection<IContratDeca>(contratsDecaModelDescriptor.collectionName);
 export const auditLogsDb = () => getDbCollection<IAuditLog>(auditLogsModelDescriptor.collectionName);

@@ -1,5 +1,5 @@
-import { object, stringOrNull } from "shared";
+import { z } from "zod";
 
-export const contratsDecaEtablissementFormationSchema = object({
-  siret: stringOrNull({ description: "Le siret de l'établissement de la formation" }),
+export const zContratsDecaEtablissementFormationSchema = z.object({
+  siret: z.string().nullish().describe("Le siret de l'établissement de la formation"),
 });

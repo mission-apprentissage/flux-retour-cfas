@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { object, string } from "shared";
+import { z } from "zod";
 
 const collectionName = "bassinsEmploi";
 
@@ -8,12 +7,13 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ code_commune: 1 }, { name: "code_commune", unique: true }],
 ];
 
-const schema = object(
-  {
-    code_commune: string({ description: "Code commune" }),
-    code_zone_emploi: string({ description: "Code zone d'emploi" }),
-  },
-  { required: ["code_commune", "code_zone_emploi"], additionalProperties: true }
-);
+const zBassinEmploi = z
+  .object({
+    code_commune: z.string().describe("Code commune"),
+    code_zone_emploi: z.string().describe("Code zone d'emploi"),
+  })
+  .nonstrict();
 
-export default { schema, indexes, collectionName };
+export type IBassinEmploi = z.output<typeof zBassinEmploi>;
+
+export default { zod: zBassinEmploi, indexes, collectionName };
