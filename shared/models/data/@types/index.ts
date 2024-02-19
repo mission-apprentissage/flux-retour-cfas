@@ -6,4 +6,3 @@ export type { JwtSession } from "./JwtSession";
 export type { MaintenanceMessage } from "./MaintenanceMessage";
 export type { Organisme } from "./Organisme";
 export type { OrganismesReferentiel } from "./OrganismesReferentiel";
-export type { User } from "./User";
