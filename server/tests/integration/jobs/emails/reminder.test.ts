@@ -1,4 +1,5 @@
 import { advanceTo } from "jest-date-mock";
+import { ObjectId } from "mongodb";
 
 import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { sendEmail } from "@/common/services/mailer/mailer";
@@ -171,6 +172,7 @@ describe("Job send-reminder-emails", () => {
 
 async function createUser(user: { email: string; createdAt: string }) {
   await usersMigrationDb().insertOne({
+    _id: new ObjectId(),
     account_status: "CONFIRMED",
     invalided_token: false,
     password_updated_at: new Date(),

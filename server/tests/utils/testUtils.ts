@@ -2,6 +2,7 @@ import { strict as assert } from "assert";
 
 import { AxiosResponse } from "axios";
 import axiosist from "axiosist";
+import { ObjectId } from "mongodb";
 import { NewOrganisation, getOrganisationLabel } from "shared/models/data/organisations.model";
 
 import { createOrganisation } from "@/common/actions/organisations.actions";
@@ -41,6 +42,7 @@ export async function initTestApp() {
       const organisationId = existingOrganisation ? existingOrganisation._id : await createOrganisation(organisation);
       const userEmail = `${getOrganisationLabel(organisation)}@tdb.local`; // généré selon l'organisation
       await usersMigrationDb().insertOne({
+        _id: new ObjectId(),
         account_status: "CONFIRMED",
         invalided_token: false,
         password_updated_at: new Date(),

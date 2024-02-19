@@ -347,6 +347,7 @@ describe("Routes /organismes/:id", () => {
         organisationsDb().insertMany(Object.values(profilsPermissionByLabel)),
         usersMigrationDb().insertMany([
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),
@@ -364,6 +365,7 @@ describe("Routes /organismes/:id", () => {
             organisation_id: profilsPermissionByLabel["OF cible"]._id,
           },
           {
+            _id: new ObjectId(),
             account_status: "CONFIRMED",
             invalided_token: false,
             password_updated_at: new Date(),

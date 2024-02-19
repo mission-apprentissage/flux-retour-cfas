@@ -6903,7 +6903,7 @@ exports[`validation-schema should create validation schema for users: users 1`] 
 
 exports[`validation-schema should create validation schema for usersMigration: usersMigration 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
     "_id": {
@@ -6980,17 +6980,7 @@ exports[`validation-schema should create validation schema for usersMigration: u
           "openDate": {
             "bsonType": "date",
           },
-          "payload": {
-            "additionalProperties": true,
-            "bsonType": [
-              "number",
-              "string",
-              "bool",
-              "object",
-              "array",
-              "null",
-            ],
-          },
+          "payload": {},
           "sendDates": {
             "bsonType": "array",
             "items": {
@@ -7065,13 +7055,14 @@ exports[`validation-schema should create validation schema for usersMigration: u
     },
   },
   "required": [
+    "_id",
     "email",
+    "password",
     "civility",
     "nom",
     "prenom",
-    "password",
-    "account_status",
     "organisation_id",
+    "account_status",
   ],
 }
 `;
