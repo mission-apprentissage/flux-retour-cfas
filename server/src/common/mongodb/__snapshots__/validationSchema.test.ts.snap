@@ -6811,11 +6811,17 @@ exports[`validation-schema should create validation schema for rome: rome 1`] = 
 
 exports[`validation-schema should create validation schema for users: users 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
+    "__v": {
+      "bsonType": "number",
+    },
     "_id": {
       "bsonType": "objectId",
+    },
+    "archived_at": {
+      "bsonType": "date",
     },
     "created_at": {
       "bsonType": "date",
@@ -6858,9 +6864,13 @@ exports[`validation-schema should create validation schema for users: users 1`] 
       "description": "Token généré afin de sécuriser le changement de mot de passe",
     },
     "password_update_token_expiry": {
-      "bsonType": [
-        "date",
-        "null",
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
       ],
       "description": "Date d'expiration du token généré afin de sécuriser le changement de mot de passe",
     },
@@ -6883,6 +6893,7 @@ exports[`validation-schema should create validation schema for users: users 1`] 
     },
   },
   "required": [
+    "_id",
     "username",
     "created_at",
   ],
