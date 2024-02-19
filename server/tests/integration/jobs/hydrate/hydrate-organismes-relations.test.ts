@@ -1,5 +1,6 @@
 import { ObjectId, WithId } from "mongodb";
-import { Organisme, OrganismesReferentiel } from "shared/models/data/@types";
+import { OrganismesReferentiel } from "shared/models/data/@types";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 import { hydrateOrganismesFromReferentiel } from "@/jobs/hydrate/organismes/hydrate-organismes";
@@ -283,6 +284,6 @@ describe("Job hydrate:organismes-relations", () => {
         organismesResponsables: [],
         organismesFormateurs: [],
       },
-    ] as Organisme[]);
+    ] as IOrganisme[]);
   });
 });

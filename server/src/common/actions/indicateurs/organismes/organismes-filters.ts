@@ -2,11 +2,11 @@ import Boom from "boom";
 import { isToday } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
 import { PermissionScope, assertUnreachable, entries } from "shared";
-import { Organisme } from "shared/models/data/@types";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { DateFilters, TerritoireFilters } from "../../helpers/filters";
 
-export function buildOrganismePerimetreMongoFilters(perimetre: PermissionScope | boolean): Filter<Organisme> {
+export function buildOrganismePerimetreMongoFilters(perimetre: PermissionScope | boolean): Filter<IOrganisme> {
   if (perimetre === false) {
     throw Boom.forbidden("Accés refusé");
   }
@@ -15,7 +15,7 @@ export function buildOrganismePerimetreMongoFilters(perimetre: PermissionScope |
     return {};
   }
 
-  return entries(perimetre).reduce((acc: Filter<Organisme>, [key, value]) => {
+  return entries(perimetre).reduce((acc: Filter<IOrganisme>, [key, value]) => {
     switch (key) {
       case "id":
         acc["_id"] = { $in: value.$in.map((v) => new ObjectId(v)) };
@@ -42,10 +42,10 @@ export function buildOrganismePerimetreMongoFilters(perimetre: PermissionScope |
 export function buildOrganismeMongoFilters(
   filters: TerritoireFilters & Partial<DateFilters>,
   perimetre: PermissionScope | boolean
-): Filter<Organisme>[] {
+): Filter<IOrganisme>[] {
   const perimetreFilter = buildOrganismePerimetreMongoFilters(perimetre);
 
-  const requestedFilter = entries(filters).reduce((acc: Filter<Organisme>, [key, value]) => {
+  const requestedFilter = entries(filters).reduce((acc: Filter<IOrganisme>, [key, value]) => {
     switch (key) {
       case "date": {
         if (!isToday(value)) {

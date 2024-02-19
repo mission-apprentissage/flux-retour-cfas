@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^6.3.1",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.0",
     "json-schema": "0.4.0",

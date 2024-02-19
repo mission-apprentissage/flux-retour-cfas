@@ -1586,7 +1586,6 @@ export const ACADEMIES = [
   { nom: "Saint-Barthélemy", code: "77" },
   { nom: "Saint-Martin", code: "78" },
 ] as const;
-
 type IAcademies = typeof ACADEMIES;
 type IAcademie = IAcademies[number];
 export type IAcademieCode = IAcademie["code"];

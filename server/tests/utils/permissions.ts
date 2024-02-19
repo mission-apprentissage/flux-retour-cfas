@@ -2,8 +2,8 @@ import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared";
 import { Effectif } from "shared/models/data/@types/Effectif";
-import { Organisme } from "shared/models/data/@types/Organisme";
 import { NewOrganisation, Organisation } from "shared/models/data/organisations.model";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
 
@@ -197,28 +197,29 @@ export type PermissionsTestConfig<ExpectedResult = boolean, ExcludedCases extend
   [key in Exclude<ProfilLabel, ExcludedCases>]: ExpectedResult;
 };
 
-export const commonOrganismeAttributes: Omit<{ [key in keyof Organisme]: Organisme[key] }, "_id" | "siret" | "uai"> = {
-  adresse: {
-    departement: ofCible.departement, // morbihan
-    region: ofCible.region, // bretagne
-    academie: ofCible.academie, // rennes
-    bassinEmploi: "5315", // rennes
-  },
-  reseaux: [ofCible.reseaux.normal, ofCible.reseaux.responsable],
-  erps: ["YMAG"],
-  nature: "responsable_formateur",
-  raison_sociale: "ADEN Formations (Caen)",
-  fiabilisation_statut: "FIABLE",
-  ferme: false,
-  relatedFormations: [],
-  organismesFormateurs: [],
-  organismesResponsables: [],
-  created_at,
-  updated_at: created_at,
-  est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
-  first_transmission_date: startOfDay(subMonths(new Date(), 3)),
-  last_transmission_date: startOfDay(subMonths(new Date(), 1)),
-};
+export const commonOrganismeAttributes: Omit<{ [key in keyof IOrganisme]: IOrganisme[key] }, "_id" | "siret" | "uai"> =
+  {
+    adresse: {
+      departement: ofCible.departement, // morbihan
+      region: ofCible.region, // bretagne
+      academie: ofCible.academie, // rennes
+      bassinEmploi: "5315", // rennes
+    },
+    reseaux: [ofCible.reseaux.normal, ofCible.reseaux.responsable],
+    erps: ["YMAG"],
+    nature: "responsable_formateur",
+    raison_sociale: "ADEN Formations (Caen)",
+    fiabilisation_statut: "FIABLE",
+    ferme: false,
+    relatedFormations: [],
+    organismesFormateurs: [],
+    organismesResponsables: [],
+    created_at,
+    updated_at: created_at,
+    est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
+    first_transmission_date: startOfDay(subMonths(new Date(), 3)),
+    last_transmission_date: startOfDay(subMonths(new Date(), 1)),
+  };
 
 export const organismesByLabel = {
   "OF cible": {
@@ -231,13 +232,13 @@ export const organismesByLabel = {
         _id: new ObjectId(id(2)),
         responsabilitePartielle: false,
       },
-    ] satisfies Organisme["organismesFormateurs"],
+    ] satisfies IOrganisme["organismesFormateurs"],
     organismesResponsables: [
       {
         _id: new ObjectId(id(3)),
         responsabilitePartielle: false,
       },
-    ] satisfies Organisme["organismesResponsables"],
+    ] satisfies IOrganisme["organismesResponsables"],
   },
   "OF formateur": {
     ...commonOrganismeAttributes,
@@ -249,7 +250,7 @@ export const organismesByLabel = {
         _id: new ObjectId(id(1)),
         responsabilitePartielle: false,
       },
-    ] satisfies Organisme["organismesResponsables"],
+    ] satisfies IOrganisme["organismesResponsables"],
   },
   "OF responsable": {
     ...commonOrganismeAttributes,
@@ -261,7 +262,7 @@ export const organismesByLabel = {
         _id: new ObjectId(id(1)),
         responsabilitePartielle: false,
       },
-    ] satisfies Organisme["organismesFormateurs"],
+    ] satisfies IOrganisme["organismesFormateurs"],
   },
   "OF non lié": {
     ...commonOrganismeAttributes,
@@ -269,11 +270,11 @@ export const organismesByLabel = {
     uai: profilsPermissionByLabel["OF non lié"].uai,
     siret: profilsPermissionByLabel["OF non lié"].siret,
   },
-} as const satisfies Record<string, WithId<Organisme>>;
+} as const satisfies Record<string, WithId<IOrganisme>>;
 
 export const organismeCibleId = organismesByLabel["OF cible"]._id.toString();
 
-export const organismes: WithId<Organisme>[] = Object.values(organismesByLabel);
+export const organismes: WithId<IOrganisme>[] = Object.values(organismesByLabel);
 
 export const userOrganisme = organismesByLabel["OF cible"];
 

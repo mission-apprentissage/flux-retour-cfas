@@ -1,21 +1,22 @@
 import { faker } from "@faker-js/faker/locale/fr";
 import merge from "lodash-es/merge";
-import { WithId } from "mongodb";
+import { WithoutId } from "mongodb";
 import RandExp from "randexp";
 import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX } from "shared";
-import { Effectif, Organisme } from "shared/models/data/@types";
+import { Effectif } from "shared/models/data/@types";
+import { IOrganisme } from "shared/models/data/organismes.model";
 import type { PartialDeep } from "type-fest";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
 import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
 
-import sampleEtablissements from "./sampleEtablissements";
+import sampleEtablissements, { SampleEtablissement } from "./sampleEtablissements";
 import { sampleLibelles } from "./sampleLibelles";
 
 const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
 const getRandomFormationCfd = () => new RandExp(CFD_REGEX).gen().toUpperCase();
 const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
-const getRandomEtablissement = (siret?: string) =>
+const getRandomEtablissement = (siret?: string): SampleEtablissement =>
   siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
 const getRandomFormation = (annee_scolaire: string) => {
@@ -49,18 +50,20 @@ const getRandomAnneeScolaire = () => {
 };
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
-export const createRandomOrganisme = (params: any = {}) => {
+export const createRandomOrganisme = (params: Partial<IOrganisme> = {}): WithoutId<IOrganisme> => {
   const { ...etablissement } = getRandomEtablissement(params?.siret);
   return {
     ...etablissement,
     ...params,
+    created_at: new Date(),
+    updated_at: new Date(),
   };
 };
 
 export const createSampleEffectif = ({
   organisme,
   ...params
-}: PartialDeep<Effectif & { organisme: WithId<Organisme> }> = {}): Effectif => {
+}: PartialDeep<Effectif & { organisme: IOrganisme }> = {}): Effectif => {
   const annee_scolaire = getRandomAnneeScolaire();
 
   return merge(
@@ -83,7 +86,7 @@ export const createSampleEffectif = ({
       source_organisme_id: faker.string.uuid(),
       annee_scolaire,
       organisme_id: organisme?._id,
-      _computed: organisme ? addEffectifComputedFields(organisme as Organisme) : {},
+      _computed: organisme ? addEffectifComputedFields(organisme as IOrganisme) : {},
     } as Effectif,
     params
   );

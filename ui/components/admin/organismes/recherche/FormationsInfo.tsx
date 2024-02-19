@@ -1,26 +1,26 @@
 import { HStack, Text, Wrap } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
-import { OrganismeJson } from "shared/models/data/@types/Organisme";
+import { IOrganismeJson } from "shared/models/data/organismes.model";
 
 import { CardInfo } from "./CarInfo";
 import { Label } from "./Label";
 
 type FormationsInfoContentProps = {
-  organisme: OrganismeJson;
+  organisme: IOrganismeJson;
   formations: OffreFormation[];
 };
 
 function FormationsInfoContent({ organisme, formations }: FormationsInfoContentProps) {
   const nature = useMemo(() => organisme.nature ?? "inconnue", [organisme]);
-  const formateurs = useMemo(() => organisme.organismesFormateurs.length, [organisme]);
+  const formateurs = useMemo(() => organisme.organismesFormateurs?.length ?? 0, [organisme]);
   const formateursPartiels = useMemo(
-    () => organisme.organismesFormateurs.filter((formateur) => formateur.responsabilitePartielle).length,
+    () => organisme.organismesFormateurs?.filter((formateur) => formateur.responsabilitePartielle).length ?? 0,
     [organisme]
   );
-  const responsables = useMemo(() => organisme.organismesResponsables.length, [organisme]);
+  const responsables = useMemo(() => organisme.organismesResponsables?.length ?? 0, [organisme]);
   const responsablesPartiel = useMemo(
-    () => organisme.organismesResponsables.filter((responsable) => responsable.responsabilitePartielle).length,
+    () => organisme.organismesResponsables?.filter((responsable) => responsable.responsabilitePartielle).length ?? 0,
     [organisme]
   );
 
@@ -63,7 +63,7 @@ function FormationsInfoContent({ organisme, formations }: FormationsInfoContentP
 }
 
 type FormationsInfoProps = {
-  organisme?: OrganismeJson | null | undefined;
+  organisme?: IOrganismeJson | null | undefined;
   formations: OffreFormation[];
 };
 

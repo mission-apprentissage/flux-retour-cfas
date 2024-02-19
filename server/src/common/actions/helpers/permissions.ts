@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
-import { Organisme } from "shared/models/data/@types/Organisme";
 import { OrganisationOrganismeFormation } from "shared/models/data/organisations.model";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
@@ -32,7 +32,7 @@ export async function findOrganismesFormateursIdsOfOrganisme(
   return findOrganismeFormateursIds(organisme, withResponsabilitePartielle);
 }
 
-export function findOrganismeFormateursIds(organisme: Organisme, withResponsabilitePartielle: boolean): ObjectId[] {
+export function findOrganismeFormateursIds(organisme: IOrganisme, withResponsabilitePartielle: boolean): ObjectId[] {
   return (
     (organisme.organismesFormateurs ?? [])
       // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef

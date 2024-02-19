@@ -1,5 +1,6 @@
 import { strict as assert } from "assert";
 
+import { ObjectId } from "mongodb";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET, STATUT_FIABILISATION_ORGANISME } from "shared";
 import { OrganismesReferentiel } from "shared/models/data/@types";
 
@@ -37,12 +38,15 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme pour le couple
       await organismesDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_REFERENTIEL,
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
         organismesFormateurs: [],
         organismesResponsables: [],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
 
       const allReferentielOrganismes: OrganismesReferentiel[] = [organismeReferentiel];
@@ -73,12 +77,15 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme pour le couple
       await organismesDb().insertOne({
+        _id: new ObjectId(),
         uai: uaiTest,
         siret: siretTest,
         nature: "responsable",
         relatedFormations: [],
         organismesFormateurs: [],
         organismesResponsables: [],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
 
       const allReferentielOrganismes: OrganismesReferentiel[] = [organismeReferentiel];
@@ -326,12 +333,15 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme pour le couple
       await organismesDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_TDB,
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
         organismesFormateurs: [],
         organismesResponsables: [],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
 
       const isCouplePbCollecte = await checkUaiAucunLieuReferentiel(coupleTdb);
@@ -373,12 +383,15 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme pour le couple
       await organismesDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_TDB,
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
         organismesFormateurs: [],
         organismesResponsables: [],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
 
       const isCouplePbCollecte = await checkUaiAucunLieuReferentiel(coupleTdb);
@@ -433,12 +446,15 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme pour le couple
       await organismesDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_TDB,
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
         organismesFormateurs: [],
         organismesResponsables: [],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
 
       const isUAIInLieux = await checkUaiLieuReferentiel(coupleTdb);
@@ -463,12 +479,15 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme pour le couple
       await organismesDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_TDB,
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
         organismesFormateurs: [],
         organismesResponsables: [],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
 
       const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };
@@ -503,12 +522,15 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme pour le couple
       await organismesDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_TDB,
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
         organismesFormateurs: [],
         organismesResponsables: [],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
 
       const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };
@@ -540,12 +562,15 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme pour le couple
       await organismesDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_TDB,
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
         organismesFormateurs: [],
         organismesResponsables: [],
+        created_at: new Date(),
+        updated_at: new Date(),
       });
 
       const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };

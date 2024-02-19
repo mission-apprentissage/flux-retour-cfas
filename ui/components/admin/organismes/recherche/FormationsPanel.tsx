@@ -1,7 +1,7 @@
 import { Button, Text } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
-import { OrganismeJson } from "shared/models/data/@types/Organisme";
+import { IOrganismeJson } from "shared/models/data/organismes.model";
 
 import Table from "@/components/Table/Table";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
@@ -10,7 +10,7 @@ import { FormationsDetails } from "./FormationDetails";
 import { Label } from "./Label";
 
 type FormationsPanelProps = {
-  organisme: OrganismeJson | null;
+  organisme: IOrganismeJson | null;
   formations: OffreFormation[];
 };
 
@@ -22,7 +22,7 @@ function TextCellComponent({ value }) {
   );
 }
 
-function getNature(formation: OffreFormation, organisme: OrganismeJson) {
+function getNature(formation: OffreFormation, organisme: IOrganismeJson) {
   const isResponsable =
     formation.gestionnaire.siret === organisme.siret && formation.gestionnaire.uai === organisme.uai;
   const isFormateur = formation.formateur.siret === organisme.siret && formation.formateur.uai === organisme.uai;

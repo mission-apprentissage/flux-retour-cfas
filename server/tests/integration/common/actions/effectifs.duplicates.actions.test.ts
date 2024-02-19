@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
-import { Organisme } from "shared/models/data/@types";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
@@ -13,7 +13,7 @@ const TEST_SIREN = "190404921";
 const ANNEE_SCOLAIRE = "2023-2024";
 
 const sampleOrganismeId = new ObjectId(id(1));
-const sampleOrganisme: Organisme = {
+const sampleOrganisme: IOrganisme = {
   _id: sampleOrganismeId,
   ...createRandomOrganisme({ siret: `${TEST_SIREN}00016` }),
 };

@@ -290,9 +290,11 @@ const Organisme = () => {
                       <Tab fontWeight="bold">Général</Tab>
                       <Tab fontWeight="bold">Utilisateurs ({row.original.organisation?.users.length ?? 0})</Tab>
                       <Tab fontWeight="bold">
-                        Mes Responsables ({row.original.tdb?.organismesResponsables.length ?? 0})
+                        Mes Responsables ({row.original.tdb?.organismesResponsables?.length ?? 0})
                       </Tab>
-                      <Tab fontWeight="bold">Mes Formateurs ({row.original.tdb?.organismesFormateurs.length ?? 0})</Tab>
+                      <Tab fontWeight="bold">
+                        Mes Formateurs ({row.original.tdb?.organismesFormateurs?.length ?? 0})
+                      </Tab>
                       <Tab fontWeight="bold">Mes Formations ({row.original.formations.length ?? 0})</Tab>
                       <Tab fontWeight="bold">Mes Transmissions</Tab>
                     </TabList>
