@@ -1,10 +1,11 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
-import { ObjectId, WithId } from "mongodb";
-import { IndicateursEffectifsAvecFormation, Rncp } from "shared";
+import { ObjectId, WithId, WithoutId } from "mongodb";
+import { IndicateursEffectifsAvecFormation } from "shared";
 import { PermissionsOrganisme } from "shared/constants/permissions";
 import { Organisme } from "shared/models/data/@types";
+import { IRncp } from "shared/models/data/rncp.model";
 
 import { effectifsDb, organisationsDb, organismesDb, rncpDb, usersMigrationDb } from "@/common/model/collections";
 import {
@@ -643,7 +644,7 @@ describe("Routes /organismes/:id", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
-    const ficheRNCP: Rncp = {
+    const ficheRNCP: WithoutId<IRncp> = {
       rncp: "RNCP34956",
       actif: true,
       etat_fiche: "Publiée",
@@ -666,7 +667,7 @@ describe("Routes /organismes/:id", () => {
             },
           })
         ),
-        rncpDb().insertOne({ ...ficheRNCP }), // la copie par destructuring évite à insertOne d'ajouter _id à l'objet
+        rncpDb().insertOne({ _id: new ObjectId(), ...ficheRNCP }),
       ]);
     });
 
