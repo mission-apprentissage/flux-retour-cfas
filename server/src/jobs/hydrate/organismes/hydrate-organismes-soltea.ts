@@ -1,4 +1,5 @@
 import { PromisePool } from "@supercharge/promise-pool";
+import { ObjectId } from "mongodb";
 
 import parentLogger from "@/common/logger";
 import { organismesSolteaDb } from "@/common/model/collections";
@@ -41,6 +42,7 @@ export const hydrateOrganismesSoltea = async () => {
       departement,
     }: any) => {
       await organismesSolteaDb().insertOne({
+        _id: new ObjectId(),
         uai,
         siret,
         raison_sociale,

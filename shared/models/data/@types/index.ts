@@ -5,5 +5,4 @@ export type { JobEvent } from "./JobEvent";
 export type { JwtSession } from "./JwtSession";
 export type { MaintenanceMessage } from "./MaintenanceMessage";
 export type { Organisme } from "./Organisme";
-export type { User } from "./User";
 export type { UsersMigration } from "./UsersMigration";
