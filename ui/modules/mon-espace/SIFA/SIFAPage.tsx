@@ -34,10 +34,9 @@ import { organismeAtom } from "@/hooks/organismeAtoms";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useToaster from "@/hooks/useToaster";
 import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
-import EffectifsTable from "@/modules/mon-espace/effectifs/engine/EffectifsTable";
+import EffectifTableContainer from "@/modules/mon-espace/effectifs/engine/EffectifTableContainer";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import { DownloadLine, ExternalLinkLine } from "@/theme/components/icons";
-import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
 function useOrganismesEffectifs(organismeId: string) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
@@ -65,32 +64,6 @@ function useOrganismesEffectifs(organismeId: string) {
   return { isLoading: isFetching || isLoading, organismesEffectifs: data || [] };
 }
 
-const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, ...props }) => {
-  const [count, setCount] = useState(effectifs.length);
-  return (
-    <Box {...props}>
-      {count !== 0 && (
-        <HStack>
-          <DoubleChevrons />
-          <Text fontWeight="bold" textDecoration="underline">
-            {formation.libelle_long}
-          </Text>
-          <Text>
-            [Code diplôme {formation.cfd}] - [Code RNCP {formation.rncp}]
-          </Text>
-        </HStack>
-      )}
-      <EffectifsTable
-        canEdit={canEdit}
-        organismesEffectifs={effectifs}
-        searchValue={searchValue}
-        onCountItemsChange={(count) => setCount(count)}
-        modeSifa
-      />
-    </Box>
-  );
-};
-
 interface SIFAPageProps {
   organisme: Organisme;
   modePublique: boolean;
@@ -103,6 +76,7 @@ const SIFAPage = (props: SIFAPageProps) => {
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
 
   const [searchValue, setSearchValue] = useState("");
+  const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
 
   const organismesEffectifsGroupedBySco: any = useMemo(
     () => groupBy(organismesEffectifs, "annee_scolaire"),
@@ -328,16 +302,19 @@ const SIFAPage = (props: SIFAPageProps) => {
                 {anneSco} {!searchValue ? `- ${orgaEffectifs.length} apprenant(es) total` : ""}
               </Text>
               <Box p={4} style={{ borderColor: "dgalt", borderWidth: 1 }}>
-                {Object.entries(effectifsByCfd).map(([cfd, effectifs]: [string, any[]], i) => {
+                {Object.entries(effectifsByCfd).map(([cfd, effectifs]: [string, any[]]) => {
                   const { formation } = effectifs[0];
                   return (
-                    <EffectifsTableContainer
+                    <EffectifTableContainer
                       key={anneSco + cfd}
+                      tableId={anneSco + cfd}
                       canEdit={true}
                       effectifs={effectifs}
                       formation={formation}
                       searchValue={searchValue}
-                      {...(i === 0 ? {} : { mt: 14 })}
+                      modeSifa={true}
+                      triggerExpand={triggerExpand}
+                      onTriggerExpand={setTriggerExpand}
                     />
                   );
                 })}
