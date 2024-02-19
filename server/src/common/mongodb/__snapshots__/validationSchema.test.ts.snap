@@ -4788,10 +4788,11 @@ exports[`validation-schema should create validation schema for maintenanceMessag
     },
   },
   "required": [
+    "_id",
     "msg",
+    "name",
     "type",
     "context",
-    "name",
   ],
 }
 `;
