@@ -17,7 +17,7 @@ import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useSetRecoilState } from "recoil";
-import { getStatutApprenantNameFromCode, EFFECTIFS_GROUP } from "shared";
+import { getStatutApprenantNameFromCode, EFFECTIFS_GROUP, DuplicateEffectifGroupPagination } from "shared";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -66,7 +66,7 @@ function EffectifsPage(props: EffectifsPageProps) {
   );
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
-    _get<Organisme[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
+    _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
   );
 
   const effectifsByAnneeScolaire = useMemo(() => groupBy(organismesEffectifs, "annee_scolaire"), [organismesEffectifs]);
@@ -133,11 +133,11 @@ function EffectifsPage(props: EffectifsPageProps) {
           <BandeauTransmission organisme={props.organisme} modePublique={props.modePublique} />
         )}
 
-        {duplicates && duplicates?.length > 0 && (
+        {duplicates && duplicates?.totalItems > 0 && (
           <Ribbons variant="alert" mb={6}>
             <Box ml={3}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6} mb={4}>
-                Nous avons détecté {duplicates?.length} duplicat{duplicates?.length > 1 ? "s" : ""} pour l’année
+                Nous avons détecté {duplicates?.totalItems} duplicat{duplicates?.totalItems > 1 ? "s" : ""} pour l’année
                 scolaire en cours.
               </Text>
 

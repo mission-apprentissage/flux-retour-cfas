@@ -10,3 +10,6 @@ export function stripEmptyFields<T extends object>(object: T): T {
     return acc;
   }, {}) as T;
 }
+
+export const getNestedValue = (obj: Record<string, any>, path: string) =>
+  path.split(".").reduce((acc, part) => acc && acc[part], obj);

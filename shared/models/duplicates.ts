@@ -44,3 +44,28 @@ export interface DuplicateEffectifDetail {
     },
   ];
 }
+
+export interface DuplicateEffectifGroup {
+  _id: {
+    id_erp_apprenant: string;
+    annee_scolaire: string;
+  };
+  count: number;
+  duplicates: DuplicateEffectifDetail[];
+  firstNomApprenant: string;
+  firstPrenomApprenant: string;
+}
+
+export interface DuplicateEffectifGroupTransformer extends DuplicateEffectifGroup {
+  nom_apprenant: string;
+  prenom_apprenant: string;
+  date_de_naissance_apprenant: string | Date;
+  code_diplome_apprenant: string;
+  source: string;
+  dossier_cree_le: Date;
+}
+
+export interface DuplicateEffectifGroupPagination {
+  totalItems: number;
+  data: DuplicateEffectifGroup[];
+}
