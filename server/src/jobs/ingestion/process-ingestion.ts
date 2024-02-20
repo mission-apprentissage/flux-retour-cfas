@@ -317,7 +317,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
               siret: effectifQueued.etablissement_lieu_de_formation_siret,
             },
           });
-          return NEVER;
         }
         if (!organismeFormateur) {
           ctx.addIssue({
@@ -329,7 +328,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
               siret: effectifQueued.etablissement_formateur_siret,
             },
           });
-          return NEVER;
         }
         if (!organismeResponsable) {
           ctx.addIssue({
@@ -341,7 +339,10 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
               siret: effectifQueued.etablissement_responsable_siret,
             },
           });
-          return NEVER;
+        }
+
+        if (!organismeLieu || !organismeFormateur || !organismeResponsable) {
+          return;
         }
         // désactivé si non bloquant
         // if (!formation) {
