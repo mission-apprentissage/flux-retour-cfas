@@ -1,4 +1,4 @@
-import { Text } from "@chakra-ui/react";
+import { Link, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { AccessorKeyColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
@@ -15,9 +15,11 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     header: () => "Nom de l'établissement",
     accessorKey: "organisme_name",
     cell: ({ row }) => (
-      <Text fontSize="1rem" padding={1}>
-        {row.original.name}
-      </Text>
+      <Link href={`/organismes/${row.original.id}`} color="bluefrance">
+        <Text fontSize="1rem" padding={1}>
+          {row.original.name}
+        </Text>
+      </Link>
     ),
   },
   {

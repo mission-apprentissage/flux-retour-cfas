@@ -358,6 +358,7 @@ export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
 
   if (!transmissionsDetails) {
     return {
+      totalEffectifs: 0,
       pagination: {
         page,
         limit,
