@@ -1,6 +1,145 @@
+import type { ObjectId } from "bson";
 import { startOfDay, endOfDay } from "date-fns";
+import { TransmissionStat } from "shared/models";
 
 import { effectifsQueueDb } from "@/common/model/collections";
+
+const groupPipeline = {
+  total: {
+    $sum: 1,
+  },
+  error: {
+    $sum: {
+      $cond: {
+        if: {
+          $and: [
+            {
+              $ifNull: ["$validation_errors", false],
+            },
+          ],
+        },
+        then: 1,
+        else: 0,
+      },
+    },
+  },
+  success: {
+    $sum: {
+      $cond: {
+        if: {
+          $and: [
+            {
+              $eq: [
+                {
+                  $type: "$error",
+                },
+                "missing",
+              ],
+            },
+            {
+              $eq: [
+                {
+                  $type: "$validation_errors",
+                },
+                "missing",
+              ],
+            },
+          ],
+        },
+        then: 1,
+        else: 0,
+      },
+    },
+  },
+};
+
+export const getTransmissionRelatedToOrganismeByDate = async (organismeId: ObjectId): Promise<TransmissionStat[]> => {
+  return await effectifsQueueDb()
+    .aggregate<TransmissionStat>([
+      {
+        $match: {
+          $or: [{ source_organisme_id: organismeId.toString() }, { organisme_id: organismeId }],
+        },
+      },
+      {
+        $group: {
+          _id: {
+            date: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$processed_at",
+              },
+            },
+            source_organisme_id: "$source_organisme_id",
+            organisme_id: "$organisme_id",
+          },
+          ...groupPipeline,
+        },
+      },
+      {
+        $addFields: {
+          source_organisme_id: {
+            $toObjectId: "$_id.source_organisme_id",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "source_organisme_id",
+          foreignField: "_id",
+          as: "source_organisme",
+        },
+      },
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "_id.organisme_id",
+          foreignField: "_id",
+          as: "organisme",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id.date",
+          source_organisme: {
+            $first: "$source_organisme",
+          },
+          organisme: {
+            $first: "$organisme",
+          },
+          total: 1,
+          error: 1,
+          success: 1,
+        },
+      },
+      {
+        $project: {
+          date: 1,
+          source_organisme: {
+            uai: "$source_organisme.uai",
+            siret: "$source_organisme.siret",
+            nom: "$source_organisme.nom",
+          },
+          organisme: {
+            uai: "$organisme.uai",
+            siret: "$organisme.siret",
+            nom: "$organisme.nom",
+          },
+          total: 1,
+          error: 1,
+          success: 1,
+        },
+      },
+      {
+        $sort: {
+          date: -1,
+        },
+      },
+    ])
+    .toArray();
+};
 
 export const getTransmissionStatusByOrganismeGroupedByDate = async (
   organismeId: string,
@@ -22,52 +161,7 @@ export const getTransmissionStatusByOrganismeGroupedByDate = async (
               date: "$processed_at",
             },
           },
-          total: {
-            $sum: 1,
-          },
-          error: {
-            $sum: {
-              $cond: {
-                if: {
-                  $and: [
-                    {
-                      $ifNull: ["$validation_errors", false],
-                    },
-                  ],
-                },
-                then: 1,
-                else: 0,
-              },
-            },
-          },
-          success: {
-            $sum: {
-              $cond: {
-                if: {
-                  $and: [
-                    {
-                      $eq: [
-                        {
-                          $type: "$error",
-                        },
-                        "missing",
-                      ],
-                    },
-                    {
-                      $eq: [
-                        {
-                          $type: "$validation_errors",
-                        },
-                        "missing",
-                      ],
-                    },
-                  ],
-                },
-                then: 1,
-                else: 0,
-              },
-            },
-          },
+          ...groupPipeline,
         },
       },
       {

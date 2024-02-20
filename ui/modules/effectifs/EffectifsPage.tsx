@@ -28,10 +28,9 @@ import Link from "@/components/Links/Link";
 import SupportLink from "@/components/Links/SupportLink";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
 import { effectifsStateAtom } from "../mon-espace/effectifs/engine/atoms";
-import EffectifsTable from "../mon-espace/effectifs/engine/EffectifsTable";
+import EffectifsTableContainer from "../mon-espace/effectifs/engine/EffectifTableContainer";
 import { Input } from "../mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 
@@ -49,6 +48,8 @@ function EffectifsPage(props: EffectifsPageProps) {
   const [searchValue, setSearchValue] = useState("");
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
   const [filtreAnneeScolaire, setFiltreAnneeScolaire] = useState("all");
+
+  const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
 
   const { data: organismesEffectifs, isLoading } = useQuery(
     ["organismes", props.organisme._id, "effectifs"],
@@ -233,16 +234,18 @@ function EffectifsPage(props: EffectifsPageProps) {
                   {anneeScolaire} {!searchValue ? `- ${orgaEffectifs.length} apprenant(es) total` : ""}
                 </Text>
                 <Box p={4} borderColor="dgalt" borderWidth="1px">
-                  {Object.entries(effectifsByCfd).map(([cfd, effectifs], i) => {
+                  {Object.entries(effectifsByCfd).map(([cfd, effectifs]) => {
                     const { formation } = effectifs[0];
                     return (
                       <EffectifsTableContainer
                         key={`${anneeScolaire}${cfd}`}
+                        tableId={`${anneeScolaire}${cfd}`}
                         canEdit={true}
                         effectifs={effectifs}
                         formation={formation}
                         searchValue={searchValue}
-                        mt={i === 0 ? 0 : 14}
+                        triggerExpand={triggerExpand}
+                        onTriggerExpand={setTriggerExpand}
                       />
                     );
                   })}
@@ -268,30 +271,5 @@ const BadgeButton = ({ onClick, active = false, children, ...props }) => {
         </Circle>
       )}
     </Button>
-  );
-};
-
-const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, ...props }) => {
-  const [count, setCount] = useState(effectifs.length);
-  return (
-    <Box {...props}>
-      {count !== 0 && (
-        <HStack>
-          <DoubleChevrons />
-          <Text fontWeight="bold" textDecoration="underline">
-            {formation.libelle_long}
-          </Text>
-          <Text>
-            [Code diplôme {formation.cfd}] - [Code RNCP {formation.rncp}]
-          </Text>
-        </HStack>
-      )}
-      <EffectifsTable
-        canEdit={canEdit}
-        organismesEffectifs={effectifs}
-        searchValue={searchValue}
-        onCountItemsChange={(count) => setCount(count)}
-      />
-    </Box>
   );
 };

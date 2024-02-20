@@ -56,6 +56,8 @@ export const seedSampleOrganismes = async () => {
       siret: "51400512300062",
       nature: "responsable_formateur",
       ...buildAdresseFromUai("0333326L"),
+      organismesFormateurs: [],
+      organismesResponsables: [],
     });
   }
 
@@ -68,6 +70,8 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "ADEN Formations (Caen)",
       ...buildAdresseFromUai("0142321X"),
+      organismesFormateurs: [],
+      organismesResponsables: [],
     });
     logger.info("organisme A created");
   }
@@ -82,6 +86,8 @@ export const seedSampleOrganismes = async () => {
       nature: "inconnue",
       nom: "ADEN Formations (Damigny)",
       ...buildAdresseFromUai("0611309S"),
+      organismesFormateurs: [],
+      organismesResponsables: [],
     });
     logger.info("organisme B created");
   }
@@ -96,6 +102,8 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "AFPMA APPRENTISSAGE - Site de Peronnas",
       ...buildAdresseFromUai("0010856A"),
+      organismesFormateurs: [],
+      organismesResponsables: [],
     });
     logger.info("organisme C created");
   }
@@ -110,6 +118,8 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "MAISON FAMILIALE RURALE CFA - 26300 CHATEAUNEUF SUR ISERE",
       ...buildAdresseFromUai("0261098C"),
+      organismesFormateurs: [],
+      organismesResponsables: [],
     });
     logger.info("organisme Z created");
   }
@@ -122,6 +132,8 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "MIDISUP",
       ...buildAdresseFromUai("0312755B"),
+      organismesFormateurs: [],
+      organismesResponsables: [],
     });
     logger.info("organisme E created");
   }

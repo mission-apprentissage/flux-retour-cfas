@@ -147,13 +147,16 @@ export default async function createServer(): Promise<Application> {
 
   // Configure Sentry
   initSentryExpress(app);
-  // RequestHandler creates a separate execution context using domains, so that every
-  // transaction/span/breadcrumb is attached to its own Hub instance
-  app.use(Sentry.Handlers.requestHandler());
-  // TracingHandler creates a trace for every incoming request
-  app.use(Sentry.Handlers.tracingHandler());
 
-  if (config.env === "local") {
+  if (config.env !== "test") {
+    // RequestHandler creates a separate execution context using domains, so that every
+    // transaction/span/breadcrumb is attached to its own Hub instance
+    app.use(Sentry.Handlers.requestHandler());
+    // TracingHandler creates a trace for every incoming request
+    app.use(Sentry.Handlers.tracingHandler());
+  }
+
+  if (config.env === "local" || config.env === "test") {
     app.use(cors({ credentials: true, origin: config.publicUrl }));
   }
 

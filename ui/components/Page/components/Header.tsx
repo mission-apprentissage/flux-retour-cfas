@@ -30,7 +30,6 @@ import { SpyLineIcon } from "@/theme/components/icons/SpyLine";
 
 const UserMenu = () => {
   const { auth, organisationType } = useAuth();
-
   const logout = async () => {
     await _post("/api/v1/auth/logout");
     window.location.href = "/";
@@ -74,6 +73,11 @@ const UserMenu = () => {
               <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
                 Rôles et habilitations
               </MenuItem>
+              {organisationType === "ORGANISME_FORMATION" && (
+                <MenuItem href="/transmissions" icon={<Parametre boxSize={4} />}>
+                  Transmissions
+                </MenuItem>
+              )}
               {organisationType === "ADMINISTRATEUR" && (
                 <MenuGroup title="Administration">
                   <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
@@ -81,6 +85,9 @@ const UserMenu = () => {
                   </MenuItem>
                   <MenuItem href="/admin/effectifs" icon={<Parametre boxSize={4} />}>
                     Gestion des effectifs
+                  </MenuItem>
+                  <MenuItem href="/admin/organismes/recherche" icon={<Parametre boxSize={4} />}>
+                    Recherche organisme
                   </MenuItem>
                   <MenuItem href="/admin/fusion-organismes" icon={<Parametre boxSize={4} />}>
                     Fusion d&apos;organismes

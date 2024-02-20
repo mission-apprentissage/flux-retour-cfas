@@ -18,15 +18,15 @@ export interface Alternant {
   handicap: boolean?;
   courriel: string?;
   telephone: string?;
-  adresse: Adresse?;
+  adresse: Adresse;
   derniereClasse: string?;
 }
 
-export interface Adresse {
+export type Adresse = {
   numero: number?;
   voie: string?;
   codePostal: string?;
-}
+};
 
 export interface DetailsContrat {
   noContrat: string;

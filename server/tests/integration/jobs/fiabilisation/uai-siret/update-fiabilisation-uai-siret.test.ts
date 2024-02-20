@@ -20,6 +20,8 @@ describe("Job Update Fiabilisation UAI SIRET", () => {
         siret: "99370584100099",
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
       organisme1Id = organisme1Created.insertedId;
 
@@ -28,6 +30,8 @@ describe("Job Update Fiabilisation UAI SIRET", () => {
         siret: "12340584100099",
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
       organisme2Id = organisme2Created.insertedId;
 

@@ -59,6 +59,9 @@ interface EffectifsTableProps {
   searchValue?: string;
   RenderErrorImport?: (data: any) => any;
   onCountItemsChange?: (count: number) => any;
+  triggerExpand: any;
+  onTriggerExpand: any;
+  tableId: string;
 }
 
 const EffectifsTable = ({
@@ -70,6 +73,9 @@ const EffectifsTable = ({
   searchValue,
   RenderErrorImport = () => {},
   onCountItemsChange = () => {},
+  triggerExpand,
+  onTriggerExpand,
+  tableId,
 }: EffectifsTableProps) => {
   const [count, setCount] = useState(organismesEffectifs.length);
 
@@ -78,24 +84,25 @@ const EffectifsTable = ({
       {count > 0 && <Text>{count} apprenant(es)</Text>}
       <Table
         mt={4}
+        tableId={tableId}
         data={organismesEffectifs}
         searchValue={searchValue}
         onCountItemsChange={(count) => {
           setCount(count);
           onCountItemsChange(count);
         }}
+        triggerExpand={triggerExpand}
         columns={{
           ...(columns.includes("expander")
             ? {
                 expander: {
                   size: 25,
                   header: () => " ",
-                  cell: ({ row, table }) => {
+                  cell: ({ row }) => {
                     return row.getCanExpand() ? (
                       <Button
                         onClick={() => {
-                          if (table.getIsSomeRowsExpanded() && !row.getIsExpanded()) table.resetExpanded();
-                          row.toggleExpanded();
+                          onTriggerExpand({ tableId: tableId, rowId: row.id });
                         }}
                         cursor="pointer"
                       >

@@ -336,11 +336,10 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                           <UnorderedList mt={4}>
                             <ListItem>
                               Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme
-                              «&nbsp;Inconnue&nbsp;» alors que votre organisme en possède une, veuillez nous écrire à
-                              tableau-de-bord@apprentissage.beta.gouv.fr en nous la communiquant ainsi que votre fiche
-                              UAI, afin que nous puissions la mettre à jour. L’absence de ce numéro bloque
-                              l’enregistrement des contrats d’apprentissage. L’UAI est recommandée pour être reconnu
-                              OFA.
+                              «&nbsp;Inconnue&nbsp;» alors que votre organisme en possède une, veuillez nous la
+                              communiquer en cliquant sur le lien <i>«&nbsp;Signaler une anomalie&nbsp;»</i> ci-dessous.
+                              L’absence de ce numéro bloque l’enregistrement des contrats d’apprentissage. L’UAI est
+                              recommandée pour être reconnu OFA.
                             </ListItem>
                             <ListItem>
                               Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des services

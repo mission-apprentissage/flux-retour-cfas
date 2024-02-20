@@ -42,6 +42,13 @@ export default () => {
         statusCode: rawError.status || 500,
         ...(!rawError.message ? { message: "Une erreur est survenue" } : {}),
       });
+      if (config.env === "local") {
+        boomError.output.payload.details = {
+          rawError: {
+            message: rawError.message,
+          },
+        };
+      }
     }
 
     if (shouldLogError(boomError, req)) {
@@ -49,6 +56,11 @@ export default () => {
     }
 
     const { error, message, details, issues } = boomError.output.payload;
-    return res.status(boomError.output.statusCode).send({ error, message, details, issues });
+    return res.status(boomError.output.statusCode).send({
+      error,
+      message,
+      details,
+      issues,
+    });
   };
 };

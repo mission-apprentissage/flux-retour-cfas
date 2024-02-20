@@ -6,7 +6,7 @@ exports[`validation-schema should create validation schema for auditLogs: auditL
   "bsonType": "object",
   "properties": {
     "_id": {
-      "description": "Identifiant unique",
+      "bsonType": "objectId",
     },
     "action": {
       "bsonType": "string",
@@ -288,20 +288,25 @@ exports[`validation-schema should create validation schema for contratsDeca: con
       },
     },
     "rupture": {
-      "additionalProperties": false,
-      "bsonType": [
-        "object",
-        "null",
-      ],
-      "properties": {
-        "dateEffetRupture": {
-          "bsonType": "string",
-          "description": "La date d'effet de la rupture",
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "dateEffetRupture": {
+              "bsonType": "string",
+              "description": "La date d'effet de la rupture",
+            },
+          },
         },
-      },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
   },
   "required": [
+    "_id",
     "alternant",
     "formation",
     "etablissementFormation",
@@ -6650,7 +6655,7 @@ exports[`validation-schema should create validation schema for organismesReferen
 
 exports[`validation-schema should create validation schema for organismesSoltea: organismesSoltea 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
     "_id": {
@@ -6674,6 +6679,21 @@ exports[`validation-schema should create validation schema for organismesSoltea:
         "null",
       ],
     },
+    "ligne1_adresse": {
+      "bsonType": "string",
+    },
+    "ligne2_adresse": {
+      "bsonType": "string",
+    },
+    "ligne3_adresse": {
+      "bsonType": "string",
+    },
+    "ligne4_adresse": {
+      "bsonType": "string",
+    },
+    "ligne5_adresse": {
+      "bsonType": "string",
+    },
     "raison_sociale": {
       "bsonType": [
         "string",
@@ -6695,6 +6715,9 @@ exports[`validation-schema should create validation schema for organismesSoltea:
       "description": "Code UAI de l'établissement",
     },
   },
+  "required": [
+    "_id",
+  ],
 }
 `;
 
@@ -6742,6 +6765,7 @@ exports[`validation-schema should create validation schema for rncp: rncp 1`] = 
     },
   },
   "required": [
+    "_id",
     "rncp",
     "intitule",
     "etat_fiche",
@@ -6757,7 +6781,7 @@ exports[`validation-schema should create validation schema for rome: rome 1`] = 
   "bsonType": "object",
   "properties": {
     "_id": {
-      "description": "Identifiant unique",
+      "bsonType": "objectId",
     },
     "code": {
       "bsonType": "string",
@@ -6788,11 +6812,17 @@ exports[`validation-schema should create validation schema for rome: rome 1`] = 
 
 exports[`validation-schema should create validation schema for users: users 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
+    "__v": {
+      "bsonType": "number",
+    },
     "_id": {
       "bsonType": "objectId",
+    },
+    "archived_at": {
+      "bsonType": "date",
     },
     "created_at": {
       "bsonType": "date",
@@ -6835,9 +6865,13 @@ exports[`validation-schema should create validation schema for users: users 1`] 
       "description": "Token généré afin de sécuriser le changement de mot de passe",
     },
     "password_update_token_expiry": {
-      "bsonType": [
-        "date",
-        "null",
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
       ],
       "description": "Date d'expiration du token généré afin de sécuriser le changement de mot de passe",
     },
@@ -6860,6 +6894,7 @@ exports[`validation-schema should create validation schema for users: users 1`] 
     },
   },
   "required": [
+    "_id",
     "username",
     "created_at",
   ],
@@ -6868,7 +6903,7 @@ exports[`validation-schema should create validation schema for users: users 1`] 
 
 exports[`validation-schema should create validation schema for usersMigration: usersMigration 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
     "_id": {
@@ -6945,17 +6980,7 @@ exports[`validation-schema should create validation schema for usersMigration: u
           "openDate": {
             "bsonType": "date",
           },
-          "payload": {
-            "additionalProperties": true,
-            "bsonType": [
-              "number",
-              "string",
-              "bool",
-              "object",
-              "array",
-              "null",
-            ],
-          },
+          "payload": {},
           "sendDates": {
             "bsonType": "array",
             "items": {
@@ -7030,13 +7055,14 @@ exports[`validation-schema should create validation schema for usersMigration: u
     },
   },
   "required": [
+    "_id",
     "email",
+    "password",
     "civility",
     "nom",
     "prenom",
-    "password",
-    "account_status",
     "organisation_id",
+    "account_status",
   ],
 }
 `;

@@ -91,16 +91,15 @@ export function filterOrganismesArrayFromOrganismesFilters(
     });
 
   if (organismesFilters.transmission?.length && organismesFilters.transmission?.length > 0)
-    filteredOrganismes = filteredOrganismes?.filter(
-      (item) =>
-        organismesFilters.transmission?.some(
-          (filter) => (!!filter && !!item.last_transmission_date) || (!filter && !item.last_transmission_date)
-        )
+    filteredOrganismes = filteredOrganismes?.filter((item) =>
+      organismesFilters.transmission?.some(
+        (filter) => (!!filter && !!item.last_transmission_date) || (!filter && !item.last_transmission_date)
+      )
     );
 
   if (organismesFilters.etatUAI?.length && organismesFilters.etatUAI?.length > 0)
-    filteredOrganismes = filteredOrganismes?.filter(
-      (item) => organismesFilters.etatUAI?.some((filter) => (!!filter && !!item.uai) || (!filter && !item.uai))
+    filteredOrganismes = filteredOrganismes?.filter((item) =>
+      organismesFilters.etatUAI?.some((filter) => (!!filter && !!item.uai) || (!filter && !item.uai))
     );
 
   return filteredOrganismes;

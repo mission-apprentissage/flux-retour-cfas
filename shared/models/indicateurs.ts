@@ -1,4 +1,6 @@
-import { Rncp } from "./rncp";
+import type { WithoutId } from "mongodb";
+
+import { IRncp } from "./data/rncp.model";
 
 export interface IndicateursEffectifs {
   apprenants: number;
@@ -20,7 +22,7 @@ export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & {
 
 export type IndicateursEffectifsAvecFormation = IndicateursEffectifs & {
   rncp_code: string | null;
-  rncp: Rncp | null;
+  rncp: WithoutId<IRncp> | null;
 };
 
 export interface IndicateursOrganismes {

@@ -8,6 +8,7 @@ import {
   getDetailedOrganismeById,
   updateOneOrganismeRelatedFormations,
 } from "@/common/actions/organismes/organismes.actions";
+import { searchOrganismesSupportInfoBySiret } from "@/common/actions/organismes/organismes.admin.actions";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
 import paginationShema from "@/common/validation/paginationSchema";
@@ -40,6 +41,18 @@ export default () => {
         result.filter = filter;
       }
       return res.json(result);
+    }
+  );
+
+  router.get(
+    "/search/:q",
+    validateRequestMiddleware({
+      params: z.object({ q: z.string().min(3) }),
+    }),
+    async ({ params }, res) => {
+      const { q } = params;
+
+      res.json(await searchOrganismesSupportInfoBySiret(q));
     }
   );
 
