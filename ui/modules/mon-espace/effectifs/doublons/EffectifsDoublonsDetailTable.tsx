@@ -186,8 +186,8 @@ const EffectifsDoublonsDetailTable = ({ data }: { data: any }) => {
                 const value = attribute.render
                   ? attribute.render(duplicate)
                   : attribute.key.includes(".")
-                  ? getNestedValue(duplicate, attribute.key)
-                  : duplicate[attribute.key];
+                    ? getNestedValue(duplicate, attribute.key)
+                    : duplicate[attribute.key];
                 const displayValue = attribute.isDate && value ? formatDateDayMonthYear(value) : value;
                 return (
                   <Td
