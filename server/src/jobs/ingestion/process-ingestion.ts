@@ -342,7 +342,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
         }
 
         if (!organismeLieu || !organismeFormateur || !organismeResponsable) {
-          return;
+          return NEVER;
         }
         // désactivé si non bloquant
         // if (!formation) {
