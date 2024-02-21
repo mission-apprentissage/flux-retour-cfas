@@ -1,8 +1,8 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
+import Boom from "boom";
 import { OrganismesReferentiel } from "shared/models/data/@types/OrganismesReferentiel";
 
-import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import { fetchOrganismes } from "@/common/apis/apiReferentielMna";
 import logger from "@/common/logger";
 import { organismesReferentielDb } from "@/common/model/collections";
@@ -81,13 +81,12 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
     } as OrganismesReferentiel);
     nbOrganismeCreated++;
   } catch (error) {
-    captureException(error);
-    nbOrganismeNotCreated++;
-    await createJobEvent({
+    const err = Boom.internal("Erreur lors de la création de l'organisme-referentiel", {
+      organismeReferentiel,
       jobname: JOB_NAME,
-      date: new Date(),
-      action: "organisme-not-created",
-      data: { organismeReferentiel, error },
     });
+    err.cause = error;
+    captureException(err);
+    nbOrganismeNotCreated++;
   }
 };

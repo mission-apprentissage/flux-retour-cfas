@@ -487,16 +487,6 @@ program
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**
- * Job de purge des events
- */
-program
-  .command("purge:events")
-  .description("Purge des logs inutiles")
-  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("purge:events"));
-
-/**
  * Job de purge des queues
  */
 program
