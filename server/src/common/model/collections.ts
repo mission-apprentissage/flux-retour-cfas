@@ -4,7 +4,6 @@ import {
   Formation,
   JobEvent,
   JwtSession,
-  MaintenanceMessage,
   Organisme,
   OrganismesReferentiel,
 } from "shared/models/data/@types";
@@ -21,7 +20,7 @@ import formationsCatalogueModelDescriptor from "shared/models/data/formationsCat
 import invitationsModelDescriptor, { Invitation } from "shared/models/data/invitations.model";
 import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
 import JwtSessionsModelDescriptor from "shared/models/data/jwtSessions.model";
-import MaintenanceMessagesModelDescriptor from "shared/models/data/maintenanceMessages.model";
+import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
 import organisationsModelDescriptor, { Organisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor from "shared/models/data/organismes.model";
 import OrganismesReferentielModelDescriptor from "shared/models/data/organismesReferentiel.model";
@@ -69,7 +68,7 @@ export const organisationsDb = () => getDbCollection<Organisation>(organisations
 export const organismesReferentielDb = () =>
   getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
-  getDbCollection<MaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
+  getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<EffectifsQueue>(effectifsQueueModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>

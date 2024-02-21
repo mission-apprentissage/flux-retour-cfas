@@ -1,18 +1,18 @@
-import { object, objectId, string, date, boolean } from "shared";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "maintenanceMessages";
 
-const schema = object(
-  {
-    _id: objectId(),
-    msg: string({ description: "Message de maintenance" }),
-    name: string({ description: "email du créateur du message" }),
-    type: string({ enum: ["alert", "info"] }),
-    context: string({ enum: ["manuel", "automatique", "maintenance"] }),
-    time: date({ description: "Date de mise en place du message" }),
-    enabled: boolean({ description: "Message actif ou non" }),
-  },
-  { required: ["msg", "type", "context", "name"], additionalProperties: false }
-);
+export const zMaintenanceMessage = z.object({
+  _id: zObjectId,
+  msg: z.string({ description: "Message de maintenance" }),
+  name: z.string({ description: "email du créateur du message" }),
+  type: z.enum(["alert", "info"]),
+  context: z.enum(["manuel", "automatique", "maintenance"]),
+  time: z.date({ description: "Date de mise en place du message" }).optional(),
+  enabled: z.boolean({ description: "Message actif ou non" }).optional(),
+});
 
-export default { schema, indexes: [], collectionName };
+export type IMaintenanceMessage = z.output<typeof zMaintenanceMessage>;
+
+export default { zod: zMaintenanceMessage, indexes: [], collectionName };
