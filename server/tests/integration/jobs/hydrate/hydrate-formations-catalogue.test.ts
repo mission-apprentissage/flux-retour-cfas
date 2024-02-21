@@ -3,7 +3,7 @@ import { Readable } from "node:stream";
 
 import { ObjectId } from "mongodb";
 import nock from "nock";
-import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
+import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 
 import { formationsCatalogueDb } from "@/common/model/collections";
 import { WithStringId } from "@/common/model/types";
@@ -15,7 +15,22 @@ import { id } from "@tests/utils/testUtils";
 //
 // CFD pas obligatoire
 
-const fakeData = {
+const fakeData: Omit<
+  IFormationCatalogue,
+  | "_id"
+  | "cle_ministere_educatif"
+  | "intitule_long"
+  | "cfd"
+  | "rncp_code"
+  | "duree"
+  | "annee"
+  | "etablissement_gestionnaire_id"
+  | "etablissement_gestionnaire_siret"
+  | "etablissement_gestionnaire_uai"
+  | "etablissement_formateur_id"
+  | "etablissement_formateur_siret"
+  | "etablissement_formateur_uai"
+> = {
   cfd_outdated: false,
   nom_academie: "academie",
   num_academie: "01",
@@ -40,8 +55,13 @@ const fakeData = {
   niveau_formation_diplome: "a",
   niveau_entree_obligatoire: null,
   entierement_a_distance: false,
-  date_debut: [] as string[],
-  date_fin: [] as string[],
+  date_debut: [],
+  date_fin: [],
+  rome_codes: [],
+  periode: [],
+  tags: [],
+  ids_action: [],
+  modalites_entrees_sorties: [],
   nom_departement: "a",
   etablissement_gestionnaire_habilite_rncp: true,
   etablissement_gestionnaire_certifie_qualite: false,
@@ -75,7 +95,7 @@ const fakeData = {
 
 describe("Job hydrateFormationsCatalogue", () => {
   useMongo();
-  const formationsCatalogue: WithStringId<FormationsCatalogue>[] = [
+  const formationsCatalogue: WithStringId<IFormationCatalogue>[] = [
     {
       _id: id(1),
       cle_ministere_educatif: "AAA",

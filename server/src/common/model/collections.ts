@@ -8,7 +8,6 @@ import {
   OrganismesReferentiel,
 } from "shared/models/data/@types";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
-import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassinsEmploi.model";
 import contratsDecaModelDescriptor, { IContratDeca } from "shared/models/data/contratsDeca.model";
@@ -16,7 +15,7 @@ import effectifsModelDescriptor from "shared/models/data/effectifs.model";
 import effectifsQueueModelDescriptor from "shared/models/data/effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
 import formationsModelDescriptor from "shared/models/data/formations.model";
-import formationsCatalogueModelDescriptor from "shared/models/data/formationsCatalogue.model";
+import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import invitationsModelDescriptor, { Invitation } from "shared/models/data/invitations.model";
 import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
 import JwtSessionsModelDescriptor from "shared/models/data/jwtSessions.model";
@@ -57,7 +56,7 @@ export const modelDescriptors = [
 
 export const formationsDb = () => getDbCollection<Formation>(formationsModelDescriptor.collectionName);
 export const formationsCatalogueDb = () =>
-  getDbCollection<FormationsCatalogue>(formationsCatalogueModelDescriptor.collectionName);
+  getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<IUser>(usersModelDescriptor.collectionName);
 export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
