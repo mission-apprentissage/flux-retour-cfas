@@ -4,7 +4,8 @@ import { z } from "zod";
 
 import {
   getTransmissionStatusByOrganismeGroupedByDate,
-  getTransmissionStatusDetailsForAGivenDay,
+  getErrorsTransmissionStatusDetailsForAGivenDay,
+  getSuccessfulTransmissionStatusDetailsForAGivenDay,
 } from "@/common/actions/indicateurs/transmissions/transmission.action";
 import paginationSchema from "@/common/validation/paginationSchema";
 import { extensions } from "@/common/validation/utils/zodPrimitives";
@@ -24,10 +25,16 @@ export default () => {
     returnResult(getAllTransmissionsByDate)
   );
   router.get(
-    "/:date",
+    "/:date/error",
     requireOrganismePermission("configurerModeTransmission"),
     validateRequestMiddleware({ params: z.object({ date: extensions.iso8601Date() }), query: pagination }),
-    returnResult(getTransmissionByDate)
+    returnResult(getTransmissionByDateError)
+  );
+  router.get(
+    "/:date/success",
+    requireOrganismePermission("configurerModeTransmission"),
+    validateRequestMiddleware({ params: z.object({ date: extensions.iso8601Date() }), query: pagination }),
+    returnResult(getTransmissionByDateSuccess)
   );
 
   return router;
@@ -40,10 +47,18 @@ const getAllTransmissionsByDate = async (req, res) => {
   return await getTransmissionStatusByOrganismeGroupedByDate(organismeIdString, page, limit);
 };
 
-const getTransmissionByDate = async (req, res) => {
+const getTransmissionByDateError = async (req, res) => {
   const { page, limit } = req.query as Pagination;
   const organismeId = res.locals.organismeId as ObjectId;
   const date = req.params.date as string;
   const organismeIdString = organismeId.toString();
-  return await getTransmissionStatusDetailsForAGivenDay(organismeIdString, date, page, limit);
+  return await getErrorsTransmissionStatusDetailsForAGivenDay(organismeIdString, date, page, limit);
+};
+
+const getTransmissionByDateSuccess = async (req, res) => {
+  const { page, limit } = req.query as Pagination;
+  const organismeId = res.locals.organismeId as ObjectId;
+  const date = req.params.date as string;
+  const organismeIdString = organismeId.toString();
+  return await getSuccessfulTransmissionStatusDetailsForAGivenDay(organismeIdString, date, page, limit);
 };
