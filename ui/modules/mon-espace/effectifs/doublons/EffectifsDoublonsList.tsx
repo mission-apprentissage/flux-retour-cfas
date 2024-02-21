@@ -1,141 +1,124 @@
-import { Box, Button, Divider, HStack, Stack, Text, useDisclosure } from "@chakra-ui/react";
-import { Row } from "@tanstack/react-table";
-import React, { Fragment } from "react";
+import { Box } from "@chakra-ui/react";
+import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import React from "react";
+import { DuplicateEffectifGroup, DuplicateEffectifGroupTransformer } from "shared";
 
-import { formatDateDayMonthYear, prettyPrintDate } from "@/common/utils/dateUtils";
 import { toPascalCase } from "@/common/utils/stringUtils";
-import NewTable from "@/modules/indicateurs/NewTable";
-import { DuplicateEffectifGroup } from "@/modules/mon-espace/effectifs/doublons/models/DuplicateEffectifGroup";
-import { Alert, ArrowRightLine } from "@/theme/components/icons";
+import CustomTable from "@/components/Table/CustomTable";
 
-import EffectifDoublonDetailModal from "./EffectifDoublonDetailModal";
-import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
+import EffectifsDoublonsDetailTable from "./EffectifsDoublonsDetailTable";
 
-const transformNomPrenomToPascalCase = (row) =>
-  `${toPascalCase(row.original?._id?.nom_apprenant)} ${toPascalCase(row.original?._id?.prenom_apprenant)} `;
+const transformNomPrenomToPascalCase = (nom: string, prenom: string) => `${toPascalCase(nom)} ${toPascalCase(prenom)}`;
 
-const defaultPaginationState = {
-  pageIndex: 0,
-  pageSize: 5,
-};
+interface EffectifsDoublonsListProps {
+  data: any[];
+  onPageChange: (newPageIndex: number) => void;
+  pageIndex: number;
+  pageSize: number;
+  totalPages: number;
+  onPageSizeChange: (newPageSize: number) => void;
+}
 
-const EffectifsDoublonsList = ({ data }) => {
+const EffectifsDoublonsList = ({
+  data,
+  onPageChange,
+  pageIndex,
+  pageSize,
+  totalPages,
+  onPageSizeChange,
+}: EffectifsDoublonsListProps) => {
+  const transformedData: DuplicateEffectifGroupTransformer[] = data.map((item: DuplicateEffectifGroup) => {
+    const mostRecentDuplicate = item.duplicates[0];
+
+    const dateDeNaissanceApprenant = mostRecentDuplicate.apprenant?.date_de_naissance
+      ? new Date(mostRecentDuplicate.apprenant.date_de_naissance)
+      : "Date de naissance inconnue";
+
+    const dossierCreeLe = new Date(mostRecentDuplicate.created_at);
+
+    return {
+      ...item,
+      nom_apprenant: mostRecentDuplicate.apprenant?.nom || "",
+      prenom_apprenant: mostRecentDuplicate.apprenant?.prenom || "",
+      date_de_naissance_apprenant: dateDeNaissanceApprenant,
+      code_diplome_apprenant: mostRecentDuplicate.formation?.cfd || "",
+      source: mostRecentDuplicate.source,
+      dossier_cree_le: dossierCreeLe,
+    };
+  });
+
+  const columns: ColumnDef<DuplicateEffectifGroupTransformer>[] = [
+    {
+      accessorKey: "_id.annee_scolaire",
+      header: "Année Scolaire",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorFn: (row) => transformNomPrenomToPascalCase(row.nom_apprenant, row.prenom_apprenant),
+      id: "nom_complet",
+      header: "Nom de l’apprenant",
+      cell: (info) => info.getValue(),
+    },
+    {
+      id: "date_de_naissance_apprenant",
+      header: "Date de naissance",
+      accessorKey: "date_de_naissance_apprenant",
+      cell: (info) => {
+        const value = info.getValue();
+        if (value instanceof Date) {
+          return format(value, "dd/MM/yyyy");
+        }
+        return value;
+      },
+    },
+    {
+      id: "code_diplome_apprenant",
+      header: "Code Diplôme",
+      accessorKey: "code_diplome_apprenant",
+      cell: (info) => info.getValue(),
+    },
+    {
+      id: "occurrences",
+      header: "Occurences",
+      accessorFn: (row) => row.duplicates.length,
+      cell: (info) => info.getValue(),
+    },
+    {
+      id: "source",
+      header: "Source",
+      accessorKey: "source",
+      cell: (info) => info.getValue(),
+    },
+    {
+      id: "dossier_cree_le",
+      header: "Dossier créé le",
+      accessorKey: "dossier_cree_le",
+      cell: (info) => {
+        const value = info.getValue();
+        if (value instanceof Date) {
+          return format(value, "dd/MM/yyyy");
+        }
+        return value;
+      },
+    },
+  ];
+
   return (
-    <NewTable
-      mt={4}
-      data={data || []}
-      loading={false}
-      variant="third"
-      isRowExpanded={true}
-      renderSubComponent={RenderSubComponent}
-      paginationState={defaultPaginationState}
-      renderDivider={() => <Divider orientation="horizontal" verticalAlign="middle" opacity="1" />}
-      columns={[
-        {
-          header: () => "Année scolaire",
-          accessorKey: "_id",
-          cell: ({ row }) => (
-            <Text fontSize="1rem" pt={2} whiteSpace="nowrap">
-              {row.original?._id?.annee_scolaire}
-            </Text>
-          ),
-          enableSorting: false,
-        },
-        {
-          header: () => "Nom de l'apprenant",
-          accessorKey: "_id",
-          cell: ({ row }) => (
-            <Text fontSize="1rem" pt={2} whiteSpace="nowrap">
-              {transformNomPrenomToPascalCase(row)}
-            </Text>
-          ),
-          enableSorting: false,
-        },
-        {
-          header: () => "Né.e le",
-          accessorKey: "_id",
-          cell: ({ row }) => (
-            <Text fontSize="1rem" pt={2} whiteSpace="nowrap">
-              {`Né.e le ${formatDateDayMonthYear(row.original?._id?.date_de_naissance_apprenant)}`}
-            </Text>
-          ),
-          enableSorting: false,
-        },
-        {
-          header: () => "Nombre d'occurences",
-          accessorKey: "_id",
-          cell: ({ row }) => (
-            <HStack align="center" justify="center">
-              <Alert mt={2} />
-              <Text fontSize="1rem" pt={2} whiteSpace="nowrap">
-                {row?.original?.duplicates.length}
-              </Text>
-            </HStack>
-          ),
-          enableSorting: false,
-        },
-      ]}
+    <CustomTable
+      data={transformedData}
+      columns={columns}
+      showPagination={true}
+      pageCount={totalPages}
+      paginationState={{ pageIndex, pageSize }}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
+      renderRowSubComponent={({ row }) => (
+        <Box p="5" borderWidth="1px">
+          <EffectifsDoublonsDetailTable data={row} />
+        </Box>
+      )}
     />
-  );
-};
-const RenderSubComponent = (row: Row<DuplicateEffectifGroup>) => {
-  return (
-    <Stack spacing={4} mt={-2} ml={10}>
-      {row?.original?.duplicates
-        ?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-        .map((item, index) => (
-          <Fragment key={index}>
-            <HStack spacing={6}>
-              <ArrowRightLine />
-              <Text>
-                <b>{`${transformNomPrenomToPascalCase(row)}`}</b>
-              </Text>
-              <Text>
-                <i>{`créé le ${prettyPrintDate(item.created_at)}`}</i>
-              </Text>
-              <EffectifDoublonDetailModalContainer index={index} duplicateDetail={item} />
-              {index === 0 && (
-                <HStack color="warning">
-                  <Alert boxSize={4} mt={1} />
-                  <Text fontSize="0.7rem"> Duplicat le plus ancien (à supprimer éventuellement)</Text>
-                </HStack>
-              )}
-            </HStack>
-            <HStack spacing={16}>
-              <Text>
-                <i>
-                  Source : <b>{item.source}</b>
-                </i>
-              </Text>
-              <Text>
-                <i>
-                  Code formation diplôme : <b>{item?.formation?.cfd || "Non spécifié"}</b>
-                </i>
-              </Text>
-            </HStack>
-          </Fragment>
-        ))}
-    </Stack>
-  );
-};
-
-const EffectifDoublonDetailModalContainer = ({
-  index,
-  duplicateDetail,
-}: {
-  index: number;
-  duplicateDetail: DuplicateEffectifDetail;
-}) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  return (
-    <Fragment key={`detailModal_${index}`}>
-      <Button size="xs" variant="secondary" onClick={onOpen}>
-        <Box as="i" className="ri-eye-line" fontSize="epsilon" mr={2} />
-        <Text as="span">Voir en détail</Text>
-      </Button>
-
-      <EffectifDoublonDetailModal isOpen={isOpen} onClose={onClose} duplicateDetail={duplicateDetail} />
-    </Fragment>
   );
 };
 

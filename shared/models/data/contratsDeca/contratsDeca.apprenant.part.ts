@@ -1,26 +1,23 @@
-import { booleanOrNull, numberOrNull, object, string, stringOrNull } from "shared";
+import { z } from "zod";
 
-export const contratsDecaApprenantSchema = object(
-  {
-    nom: string({ description: "Le nom de l'alternant" }),
-    prenom: string({ description: "Le prenom de l'alternant" }),
-    sexe: string({ description: "Le sexe de l'alternant" }),
-    dateNaissance: string({ description: "La date de naissance de l'alternant" }),
-    departementNaissance: string({ description: "Le département de naissance de l'alternant" }),
-    nationalite: numberOrNull({ description: "Le code de la nationalité de l'alternant" }),
-    handicap: booleanOrNull({
-      description: "Indique si l'alternant est identifié comme porteur d'un handicap",
-    }),
-    courriel: stringOrNull({ description: "L'adresse email de l'alternant" }),
-    telephone: stringOrNull({ description: "Le numéro de téléphone de l'alternant" }),
-    adresse: object({
-      numero: numberOrNull({ description: "Le numéro de l'adresse" }),
-      voie: stringOrNull({ description: "La voie de l'adresse" }),
-      codePostal: stringOrNull({ description: "Le code postal de l'adresse" }),
-    }),
-    derniereClasse: stringOrNull({ description: "La dernière classe de l'apprenant" }),
-  },
-  {
-    required: ["nom", "prenom", "sexe", "dateNaissance", "departementNaissance"],
-  }
-);
+export const zContratsDecaApprenantSchema = z
+  .object({
+    nom: z.string().describe("Le nom de l'alternant"),
+    prenom: z.string().describe("Le prenom de l'alternant"),
+    sexe: z.string().describe("Le sexe de l'alternant"),
+    dateNaissance: z.string().describe("La date de naissance de l'alternant"),
+    departementNaissance: z.string().describe("Le département de naissance de l'alternant"),
+    nationalite: z.number().nullish().describe("Le code de la nationalité de l'alternant"),
+    handicap: z.boolean().nullish().describe("Indique si l'alternant est identifié comme porteur d'un handicap"),
+    courriel: z.string().nullish().describe("L'adresse email de l'alternant"),
+    telephone: z.string().nullish().describe("Le numéro de téléphone de l'alternant"),
+    adresse: z
+      .object({
+        numero: z.number().nullish().describe("Le numéro de l'adresse"),
+        voie: z.string().nullish().describe("La voie de l'adresse"),
+        codePostal: z.string().nullish().describe("Le code postal de l'adresse"),
+      })
+      .optional(),
+    derniereClasse: z.string().nullish().describe("La dernière classe de l'apprenant"),
+  })
+  .strict();

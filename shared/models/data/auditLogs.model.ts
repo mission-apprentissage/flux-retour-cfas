@@ -16,5 +16,5 @@ export type IAuditLog = z.output<typeof auditLogSchema>;
 export default {
   collectionName: "auditLogs",
   indexes: [],
-  zod: auditLogSchema.merge(z.object({ _id: zObjectId })).strict(),
+  zod: auditLogSchema.extend({ _id: zObjectId }).strict(),
 } as IModelDescriptor;

@@ -12,6 +12,67 @@ import { hydrateFormationsCatalogue } from "@/jobs/hydrate/hydrate-formations-ca
 import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
 
+//
+// CFD pas obligatoire
+
+const fakeData = {
+  cfd_outdated: false,
+  nom_academie: "academie",
+  num_academie: "01",
+  code_postal: "a",
+  code_commune_insee: "a",
+  num_departement: "a",
+  region: "a",
+  localite: "a",
+  intitule_court: "a",
+  diplome: "a",
+  niveau: "a",
+  onisep_url: "a",
+  onisep_intitule: "a",
+  onisep_libelle_poursuite: "a",
+  onisep_lien_site_onisepfr: "a",
+  onisep_discipline: "a",
+  duree_incoherente: false,
+  annee_incoherente: false,
+  lieu_formation_adresse: "a",
+  lieu_formation_siret: "a",
+  id_formation: "a",
+  niveau_formation_diplome: "a",
+  niveau_entree_obligatoire: null,
+  entierement_a_distance: false,
+  date_debut: [] as string[],
+  date_fin: [] as string[],
+  nom_departement: "a",
+  etablissement_gestionnaire_habilite_rncp: true,
+  etablissement_gestionnaire_certifie_qualite: false,
+  etablissement_gestionnaire_adresse: null,
+  etablissement_gestionnaire_code_postal: null,
+  etablissement_gestionnaire_code_commune_insee: null,
+  etablissement_gestionnaire_localite: null,
+  etablissement_gestionnaire_entreprise_raison_sociale: "a",
+  etablissement_gestionnaire_region: "a",
+  etablissement_gestionnaire_num_departement: null,
+  etablissement_gestionnaire_nom_departement: null,
+  etablissement_gestionnaire_nom_academie: null,
+  etablissement_gestionnaire_num_academie: null,
+  etablissement_gestionnaire_date_creation: "a",
+  etablissement_formateur_enseigne: null,
+  etablissement_formateur_habilite_rncp: true,
+  etablissement_formateur_certifie_qualite: false,
+  etablissement_formateur_adresse: null,
+  etablissement_formateur_code_postal: null,
+  etablissement_formateur_code_commune_insee: null,
+  etablissement_formateur_localite: null,
+  etablissement_formateur_entreprise_raison_sociale: "a",
+  etablissement_formateur_region: "a",
+  etablissement_formateur_num_departement: null,
+  etablissement_formateur_nom_departement: null,
+  etablissement_formateur_nom_academie: null,
+  etablissement_formateur_num_academie: null,
+  etablissement_formateur_date_creation: "a",
+  etablissement_reference: "gestionnaire",
+} as const;
+
 describe("Job hydrateFormationsCatalogue", () => {
   useMongo();
   const formationsCatalogue: WithStringId<FormationsCatalogue>[] = [
@@ -23,10 +84,13 @@ describe("Job hydrateFormationsCatalogue", () => {
       rncp_code: "aa",
       duree: "2",
       annee: "1",
+      etablissement_gestionnaire_id: "1",
       etablissement_gestionnaire_siret: "1",
       etablissement_gestionnaire_uai: "1",
+      etablissement_formateur_id: "1",
       etablissement_formateur_siret: "1",
       etablissement_formateur_uai: "1",
+      ...fakeData,
     },
     {
       _id: id(2),
@@ -36,10 +100,13 @@ describe("Job hydrateFormationsCatalogue", () => {
       rncp_code: "aa",
       duree: "2",
       annee: "1",
+      etablissement_gestionnaire_id: "1",
       etablissement_gestionnaire_siret: "1",
       etablissement_gestionnaire_uai: "1",
+      etablissement_formateur_id: "1",
       etablissement_formateur_siret: "1",
       etablissement_formateur_uai: "1",
+      ...fakeData,
     },
   ];
 
@@ -59,10 +126,13 @@ describe("Job hydrateFormationsCatalogue", () => {
       rncp_code: "aa",
       duree: "2",
       annee: "1",
+      etablissement_gestionnaire_id: "1",
       etablissement_gestionnaire_siret: "1",
       etablissement_gestionnaire_uai: "1",
+      etablissement_formateur_id: "1",
       etablissement_formateur_siret: "1",
       etablissement_formateur_uai: "1",
+      ...fakeData,
     });
 
     await hydrateFormationsCatalogue();

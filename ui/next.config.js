@@ -8,17 +8,19 @@ function inline(value) {
 
 const contentSecurityPolicy = `
       default-src 'self' https://plausible.io;
-      base-uri 'self';
+      base-uri 'self' https://stats.beta.gouv.fr;
       block-all-mixed-content;
       font-src 'self' https: data:;
       frame-ancestors 'self' https://cfas.apprentissage.beta.gouv.fr;
       frame-src 'self' https://plausible.io https://cfas.apprentissage.beta.gouv.fr https://cfas-recette.apprentissage.beta.gouv.fr;
-      img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://www.notion.so https://mission-apprentissage.notion.site data:;
+      img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://www.notion.so https://mission-apprentissage.notion.site https://stats.beta.gouv.fr data:;
       object-src 'none';
-      script-src 'self' https://plausible.io ${process.env.NEXT_PUBLIC_ENV === "local" ? "'unsafe-eval'" : ""};
+      script-src 'self' https://plausible.io https://stats.beta.gouv.fr ${
+        process.env.NEXT_PUBLIC_ENV === "local" ? "'unsafe-eval'" : ""
+      };
       script-src-attr 'none';
       style-src 'self' https: *.plausible.io 'unsafe-inline';
-      connect-src 'self' https://plausible.io  https://sentry.apprentissage.beta.gouv.fr ${
+      connect-src 'self' https://plausible.io https://stats.beta.gouv.fr https://sentry.apprentissage.beta.gouv.fr ${
         process.env.NEXT_PUBLIC_ENV === "local" ? "http://localhost:5001/" : ""
       };
       upgrade-insecure-requests;

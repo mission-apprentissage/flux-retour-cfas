@@ -248,8 +248,8 @@ export async function buildOrganismePermissions(
     allowedEffectifsNominatifs.length === 0
       ? false
       : allowedEffectifsNominatifs.length === typeEffectifs.length
-      ? true
-      : allowedEffectifsNominatifs;
+        ? true
+        : allowedEffectifsNominatifs;
 
   return {
     viewContacts: isInScope(acl.viewContacts, organisme),

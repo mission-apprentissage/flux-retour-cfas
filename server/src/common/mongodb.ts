@@ -3,6 +3,7 @@ import omitDeep from "omit-deep";
 import { zodToMongoSchema } from "zod-mongodb-schema";
 
 import logger from "@/common/logger";
+import config from "@/config";
 
 let mongodbClient: MongoClient | null = null;
 
@@ -23,7 +24,12 @@ export const connectToMongodb = async (uri) => {
   }
 
   logger.info("Connecting to MongoDB...");
-  const client = new MongoClient(uri);
+  const client = new MongoClient(uri, {
+    maxIdleTimeMS: 600_000,
+    minPoolSize: config.env === "local" ? 2 : 10,
+    maxPoolSize: 500,
+    heartbeatFrequencyMS: 60_000,
+  });
 
   await client.connect();
   mongodbClient = client;

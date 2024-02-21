@@ -51,6 +51,7 @@ export const plausibleGoals = [
 
   // - Page Effectifs Doublons
   "suppression_doublons_effectifs",
+  "suppression_doublons_effectifs_en_lot",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];

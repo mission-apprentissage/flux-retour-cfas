@@ -1,5 +1,5 @@
-import { ObjectId } from "mongodb";
-import { MaintenanceMessage } from "shared/models/data/@types";
+import { ObjectId, WithoutId } from "mongodb";
+import { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
 
 import { maintenanceMessageDb } from "@/common/model/collections";
 import { defaultValuesMaintenanceMessage } from "@/common/model/maintenanceMessages.model";
@@ -7,8 +7,16 @@ import { defaultValuesMaintenanceMessage } from "@/common/model/maintenanceMessa
 /**
  * Méthode de création d'un message de maintenance
  */
-export const createMaintenanceMessage = async ({ name, msg, type, context, time, enabled }: MaintenanceMessage) => {
+export const createMaintenanceMessage = async ({
+  name,
+  msg,
+  type,
+  context,
+  time,
+  enabled,
+}: WithoutId<IMaintenanceMessage>): Promise<IMaintenanceMessage> => {
   const data = {
+    _id: new ObjectId(),
     ...defaultValuesMaintenanceMessage(),
     type,
     name,
@@ -17,14 +25,14 @@ export const createMaintenanceMessage = async ({ name, msg, type, context, time,
     enabled: enabled || false,
     time: time,
   };
-  const { insertedId } = await maintenanceMessageDb().insertOne(data);
-  return { _id: insertedId, ...data };
+  await maintenanceMessageDb().insertOne(data);
+  return data;
 };
 
 /**
  * Méthode de mise à jour d'un message de maintenance depuis son id
  */
-export const updateMaintenanceMessage = async (_id: string | ObjectId, data: Partial<MaintenanceMessage>) => {
+export const updateMaintenanceMessage = async (_id: string | ObjectId, data: Partial<IMaintenanceMessage>) => {
   const item = await maintenanceMessageDb().findOne({ _id: new ObjectId(_id) });
 
   if (!item) {

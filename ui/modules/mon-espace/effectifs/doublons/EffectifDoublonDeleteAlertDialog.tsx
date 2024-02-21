@@ -10,24 +10,22 @@ import {
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
+import { DuplicateEffectifDetail } from "shared";
 
 import { _delete } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
-
-import { DuplicateEffectifDetail } from "./models/DuplicateEffectifDetail";
+import { ArrowRightLine } from "@/theme/components/icons";
 
 const EffectifDoublonDeleteAlertDialog = ({
   isOpen,
   onClose = () => {},
   cancelRef,
   duplicateDetail,
-  apprenantNomPrenom,
 }: {
   isOpen: boolean;
   onClose?: () => void;
   cancelRef;
   duplicateDetail: DuplicateEffectifDetail;
-  apprenantNomPrenom: string;
 }) => {
   const queryClient = useQueryClient();
 
@@ -36,14 +34,17 @@ const EffectifDoublonDeleteAlertDialog = ({
       <AlertDialogOverlay>
         <AlertDialogContent>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Suppression du duplicat d&apos;apprenant <b>{apprenantNomPrenom}</b>
+            <ArrowRightLine mt="-0.5rem" />
+            <Text as="span" ml="1rem" textStyle={"h4"}>
+              Suppression du duplicat d&apos;apprenant {duplicateDetail?.apprenant?.nom}{" "}
+              {duplicateDetail?.apprenant?.prenom}
+            </Text>
           </AlertDialogHeader>
 
           <AlertDialogBody>
-            Êtes vous sur.e de vouloir supprimer ce duplicat d&apos;apprenant ? <br />
-            Cette opération est irréversible.
-            <br />
-            <Ribbons variant="alert" mt={10}>
+            <Text fontWeight="bold">Cette opération est irréversible.</Text>
+            <Text>Êtes-vous sûr.e de vouloir supprimer ce duplicat d&apos;apprenant ?</Text>
+            <Ribbons variant="alert" mt={6}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
                 Attention, veuillez vérifier que ce doublon n‘existe pas déjà dans votre système ERP pour éviter des
                 erreurs de synchronisation des données.

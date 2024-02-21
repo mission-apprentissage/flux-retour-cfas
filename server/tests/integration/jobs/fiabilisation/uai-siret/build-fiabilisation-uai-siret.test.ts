@@ -41,6 +41,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
 
       const allReferentielOrganismes: OrganismesReferentiel[] = [organismeReferentiel];
@@ -75,6 +77,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: siretTest,
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
 
       const allReferentielOrganismes: OrganismesReferentiel[] = [organismeReferentiel];
@@ -326,6 +330,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
 
       const isCouplePbCollecte = await checkUaiAucunLieuReferentiel(coupleTdb);
@@ -371,6 +377,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
 
       const isCouplePbCollecte = await checkUaiAucunLieuReferentiel(coupleTdb);
@@ -429,6 +437,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
 
       const isUAIInLieux = await checkUaiLieuReferentiel(coupleTdb);
@@ -457,6 +467,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
 
       const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };
@@ -495,6 +507,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
 
       const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };
@@ -530,6 +544,8 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         siret: SIRET_REFERENTIEL,
         nature: "responsable",
         relatedFormations: [],
+        organismesFormateurs: [],
+        organismesResponsables: [],
       });
 
       const coupleTdb = { uai: UAI_TDB, siret: SIRET_REFERENTIEL };

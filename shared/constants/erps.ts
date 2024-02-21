@@ -37,6 +37,36 @@ export const ERPS = sortAlphabeticallyBy("name", [
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/fcamanager.pdf",
     helpFileSize: "288 ko",
   },
+  {
+    id: "aimaira",
+    name: "Aimaira",
+    apiV3: true,
+  },
+  {
+    id: "filiz",
+    name: "Filiz",
+    apiV3: true,
+  },
+  {
+    id: "hyperplanning",
+    name: "Hyperplanning",
+    apiV3: true,
+  },
+  {
+    id: "gescicca",
+    name: "Gescicca (CNAM)",
+    apiV3: true,
+  },
+  {
+    id: "charlemagne",
+    name: "Charlemagne",
+    apiV3: true,
+  },
+  {
+    id: "formasup-hdf",
+    name: "Formasup HDF",
+    apiV3: true,
+  },
 ] satisfies ERP[]);
 
 export const ERPS_BY_ID = ERPS.reduce(

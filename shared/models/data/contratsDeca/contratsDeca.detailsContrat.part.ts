@@ -1,15 +1,10 @@
-import { object, string, stringOrNull } from "shared";
+import { z } from "zod";
 
-export const contratsDecaDetailsContratSchema = object(
-  {
-    noContrat: string({ description: "Le numéro du contrat" }),
-    dateDebutContrat: string({ description: "La date de début du contrat" }),
-    dateFinContrat: string({ description: "La date de fin du contrat" }),
-    statut: string({ description: "Le statut du contrat" }),
-    dateEffetAvenant: stringOrNull({ description: "La date d'effet de l'avenant du contrat" }),
-    noAvenant: stringOrNull({ description: "Le numéro de l'avenant du contrat" }),
-  },
-  {
-    required: ["noContrat", "dateDebutContrat", "statut", "dateFinContrat"],
-  }
-);
+export const zContratsDecaDetailsContratSchema = z.object({
+  noContrat: z.string().describe("Le numéro du contrat"),
+  dateDebutContrat: z.string().describe("La date de début du contrat"),
+  statut: z.string().describe("Le statut du contrat"),
+  dateFinContrat: z.string().describe("La date de fin du contrat"),
+  dateEffetAvenant: z.string().nullish().describe("La date d'effet de l'avenant du contrat"),
+  noAvenant: z.string().nullish().describe("Le numéro de l'avenant du contrat"),
+});

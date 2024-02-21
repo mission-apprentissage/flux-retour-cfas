@@ -1,5 +1,8 @@
 type ApiEntEtablissement = {
   siret: string;
+  siren: string;
+  date_creation: number;
+  date_fermeture: number | null;
   etat_administratif: string;
   enseigne: any;
   activite_principale: {

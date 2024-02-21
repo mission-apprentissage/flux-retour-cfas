@@ -100,6 +100,8 @@ const updateOrganismeForCoupleFiabilise = async ({ uai_fiable, siret_fiable }: a
       siret: siret_fiable,
       fiabilisation_statut: STATUT_FIABILISATION_ORGANISME.FIABLE,
       creation_statut: STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION, // Ajout d'un flag pour identifier que c'est un organisme créé à partir d'un lieu
+      organismesFormateurs: [],
+      organismesResponsables: [],
     });
 
     organismeFiable = await findOrganismeById(organismeLieuToCreate?._id);

@@ -17,7 +17,7 @@ import groupBy from "lodash.groupby";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useSetRecoilState } from "recoil";
-import { getStatutApprenantNameFromCode, EFFECTIFS_GROUP } from "shared";
+import { getStatutApprenantNameFromCode, EFFECTIFS_GROUP, DuplicateEffectifGroupPagination } from "shared";
 
 import { effectifsExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -28,10 +28,9 @@ import Link from "@/components/Links/Link";
 import SupportLink from "@/components/Links/SupportLink";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { DoubleChevrons } from "@/theme/components/icons/DoubleChevrons";
 
 import { effectifsStateAtom } from "../mon-espace/effectifs/engine/atoms";
-import EffectifsTable from "../mon-espace/effectifs/engine/EffectifsTable";
+import EffectifsTableContainer from "../mon-espace/effectifs/engine/EffectifTableContainer";
 import { Input } from "../mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 
@@ -50,6 +49,8 @@ function EffectifsPage(props: EffectifsPageProps) {
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
   const [filtreAnneeScolaire, setFiltreAnneeScolaire] = useState("all");
 
+  const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
+
   const { data: organismesEffectifs, isLoading } = useQuery(
     ["organismes", props.organisme._id, "effectifs"],
     async () => {
@@ -66,7 +67,7 @@ function EffectifsPage(props: EffectifsPageProps) {
   );
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
-    _get<Organisme[]>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
+    _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
   );
 
   const effectifsByAnneeScolaire = useMemo(() => groupBy(organismesEffectifs, "annee_scolaire"), [organismesEffectifs]);
@@ -133,11 +134,11 @@ function EffectifsPage(props: EffectifsPageProps) {
           <BandeauTransmission organisme={props.organisme} modePublique={props.modePublique} />
         )}
 
-        {duplicates && duplicates?.length > 0 && (
+        {duplicates && duplicates?.totalItems > 0 && (
           <Ribbons variant="alert" mb={6}>
             <Box ml={3}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold" mr={6} mb={4}>
-                Nous avons détecté {duplicates?.length} duplicat{duplicates?.length > 1 ? "s" : ""} pour l’année
+                Nous avons détecté {duplicates?.totalItems} duplicat{duplicates?.totalItems > 1 ? "s" : ""} pour l’année
                 scolaire en cours.
               </Text>
 
@@ -233,16 +234,18 @@ function EffectifsPage(props: EffectifsPageProps) {
                   {anneeScolaire} {!searchValue ? `- ${orgaEffectifs.length} apprenant(es) total` : ""}
                 </Text>
                 <Box p={4} borderColor="dgalt" borderWidth="1px">
-                  {Object.entries(effectifsByCfd).map(([cfd, effectifs], i) => {
+                  {Object.entries(effectifsByCfd).map(([cfd, effectifs]) => {
                     const { formation } = effectifs[0];
                     return (
                       <EffectifsTableContainer
                         key={`${anneeScolaire}${cfd}`}
+                        tableId={`${anneeScolaire}${cfd}`}
                         canEdit={true}
                         effectifs={effectifs}
                         formation={formation}
                         searchValue={searchValue}
-                        mt={i === 0 ? 0 : 14}
+                        triggerExpand={triggerExpand}
+                        onTriggerExpand={setTriggerExpand}
                       />
                     );
                   })}
@@ -268,30 +271,5 @@ const BadgeButton = ({ onClick, active = false, children, ...props }) => {
         </Circle>
       )}
     </Button>
-  );
-};
-
-const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, ...props }) => {
-  const [count, setCount] = useState(effectifs.length);
-  return (
-    <Box {...props}>
-      {count !== 0 && (
-        <HStack>
-          <DoubleChevrons />
-          <Text fontWeight="bold" textDecoration="underline">
-            {formation.libelle_long}
-          </Text>
-          <Text>
-            [Code diplôme {formation.cfd}] - [Code RNCP {formation.rncp}]
-          </Text>
-        </HStack>
-      )}
-      <EffectifsTable
-        canEdit={canEdit}
-        organismesEffectifs={effectifs}
-        searchValue={searchValue}
-        onCountItemsChange={(count) => setCount(count)}
-      />
-    </Box>
   );
 };

@@ -1,4 +1,5 @@
 import { addHours, isBefore } from "date-fns";
+import { ObjectId } from "mongodb";
 
 import { usersDb } from "@/common/model/collections";
 import { generateRandomAlphanumericPhrase } from "@/common/utils/miscUtils";
@@ -64,6 +65,7 @@ export const createUserLegacy = async (userProps: any) => {
   if (user) throw new Error("User with this username already exists");
 
   const { insertedId } = await usersDb().insertOne({
+    _id: new ObjectId(),
     username,
     password: passwordHash,
     email,

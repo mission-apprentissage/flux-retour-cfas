@@ -1,8 +1,8 @@
 import Boom from "boom";
 import { addHours } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
-import { UsersMigration } from "shared/models/data/@types/UsersMigration";
 import { getOrganisationLabel } from "shared/models/data/organisations.model";
+import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import { usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
@@ -25,7 +25,9 @@ interface UserRegistration {
 }
 
 export const createUser = async (user: UserRegistration, organisationId: ObjectId): Promise<ObjectId> => {
-  const { insertedId } = await usersMigrationDb().insertOne({
+  const insertedId = new ObjectId();
+  await usersMigrationDb().insertOne({
+    _id: insertedId,
     account_status: "PENDING_EMAIL_VALIDATION",
     invalided_token: false,
     password_updated_at: getCurrentTime(),
@@ -252,7 +254,7 @@ export const removeUser = async (_idStr) => {
 /**
  * Méthode de mise à jour d'un user depuis son id
  */
-export const updateUser = async (_id: string | ObjectId, data: Partial<UsersMigration>) => {
+export const updateUser = async (_id: string | ObjectId, data: Partial<IUsersMigration>) => {
   const user = await usersMigrationDb().findOne({ _id: new ObjectId(_id) });
 
   if (!user) {
@@ -330,7 +332,7 @@ export const generatePasswordUpdateToken = async (email: string) => {
   return token;
 };
 
-export async function updateUserProfile(ctx: AuthContext, infos: Partial<UsersMigration>) {
+export async function updateUserProfile(ctx: AuthContext, infos: Partial<IUsersMigration>) {
   await usersMigrationDb().findOneAndUpdate(
     { _id: ctx._id },
     {
@@ -339,7 +341,7 @@ export async function updateUserProfile(ctx: AuthContext, infos: Partial<UsersMi
   );
 }
 
-export async function getUserById(userId: ObjectId): Promise<WithId<UsersMigration>> {
+export async function getUserById(userId: ObjectId): Promise<WithId<IUsersMigration>> {
   const user = await usersMigrationDb().findOne({ _id: userId });
   if (!user) {
     throw Boom.notFound(`missing user ${userId}`);

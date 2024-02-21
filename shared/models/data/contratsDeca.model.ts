@@ -1,39 +1,31 @@
-import { date, object, objectId } from "shared";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
-import { contratsDecaApprenantSchema } from "./contratsDeca/contratsDeca.apprenant.part";
-import { contratsDecaDetailsContratSchema } from "./contratsDeca/contratsDeca.detailsContrat.part";
-import { contratsDecaEmployeurSchema } from "./contratsDeca/contratsDeca.employeur.part";
-import { contratsDecaEtablissementFormationSchema } from "./contratsDeca/contratsDeca.etablissementFormation.part";
-import { contratsDecaFormationSchema } from "./contratsDeca/contratsDeca.formation.part";
-import { contratsDecaOrganismeFormationResponsableSchema } from "./contratsDeca/contratsDeca.organismeFormationResponsable.part";
-import { contratsDecaRuptureSchema } from "./contratsDeca/contratsDeca.rupture.part";
+import { zContratsDecaApprenantSchema } from "./contratsDeca/contratsDeca.apprenant.part";
+import { zContratsDecaDetailsContratSchema } from "./contratsDeca/contratsDeca.detailsContrat.part";
+import { zContratsDecaEmployeurSchema } from "./contratsDeca/contratsDeca.employeur.part";
+import { zContratsDecaEtablissementFormationSchema } from "./contratsDeca/contratsDeca.etablissementFormation.part";
+import { zContratsDecaFormationSchema } from "./contratsDeca/contratsDeca.formation.part";
+import { zContratsDecaOrganismeFormationResponsableSchema } from "./contratsDeca/contratsDeca.organismeFormationResponsable.part";
+import { zContratsDecaRuptureSchema } from "./contratsDeca/contratsDeca.rupture.part";
 
 const collectionName = "contratsDeca";
 
-const schema = object(
-  {
-    _id: objectId(),
-    alternant: contratsDecaApprenantSchema,
-    formation: contratsDecaFormationSchema,
-    etablissementFormation: contratsDecaEtablissementFormationSchema,
-    organismeFormationResponsable: contratsDecaOrganismeFormationResponsableSchema,
-    detailsContrat: contratsDecaDetailsContratSchema,
-    rupture: contratsDecaRuptureSchema,
-    employeur: contratsDecaEmployeurSchema,
+const zContratsDeca = z
+  .object({
+    _id: zObjectId,
+    alternant: zContratsDecaApprenantSchema,
+    formation: zContratsDecaFormationSchema,
+    etablissementFormation: zContratsDecaEtablissementFormationSchema,
+    organismeFormationResponsable: zContratsDecaOrganismeFormationResponsableSchema,
+    detailsContrat: zContratsDecaDetailsContratSchema,
+    rupture: zContratsDecaRuptureSchema.nullish(),
+    employeur: zContratsDecaEmployeurSchema,
 
-    created_at: date({ description: "Date d'ajout en base de données" }),
-  },
-  {
-    required: [
-      "alternant",
-      "formation",
-      "etablissementFormation",
-      "organismeFormationResponsable",
-      "detailsContrat",
-      "employeur",
-      "created_at",
-    ],
-  }
-);
+    created_at: z.date().describe("Date d'ajout en base de données"),
+  })
+  .strict();
 
-export default { schema, collectionName, indexes: [] };
+export type IContratDeca = z.output<typeof zContratsDeca>;
+
+export default { zod: zContratsDeca, collectionName, indexes: [] };

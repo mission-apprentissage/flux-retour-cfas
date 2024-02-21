@@ -6,7 +6,8 @@ import { PromisePool } from "@supercharge/promise-pool";
 import AdmZip from "adm-zip";
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
-import { Rncp } from "shared";
+import { WithoutId } from "mongodb";
+import { IRncp } from "shared/models/data/rncp.model";
 
 import parentLogger from "@/common/logger";
 import { rncpDb } from "@/common/model/collections";
@@ -76,7 +77,7 @@ export async function hydrateRNCP() {
   logger.info("parsing du xml");
   const parsedContent = parser.parse(zipData);
 
-  const fichesRNCP: Rncp[] = parsedContent.FICHES.FICHE.map((fiche) => {
+  const fichesRNCP: WithoutId<IRncp>[] = parsedContent.FICHES.FICHE.map((fiche): WithoutId<IRncp> => {
     return {
       rncp: fiche.NUMERO_FICHE,
       nouveaux_rncp: fiche.NOUVELLE_CERTIFICATION,
@@ -88,7 +89,7 @@ export async function hydrateRNCP() {
       actif: fiche.ACTIF === "Oui",
       // certains RNCP n'ont pas de ROME => undefined
       romes: fiche.CODES_ROME?.ROME?.map((rome) => rome.CODE) ?? [],
-    } as Rncp;
+    };
   });
 
   logger.info({ count: fichesRNCP.length }, "import des fiches rncp");

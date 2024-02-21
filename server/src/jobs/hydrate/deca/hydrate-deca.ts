@@ -1,5 +1,6 @@
 import { PromisePool } from "@supercharge/promise-pool";
 import { addDays, differenceInDays, format, isAfter } from "date-fns";
+import { ObjectId } from "mongodb";
 
 import { getAllContrats } from "@/common/apis/apiDeca";
 import parentLogger from "@/common/logger";
@@ -51,7 +52,7 @@ export const hydrateDeca = async ({ drop, full } = { drop: false, full: false })
           throw new Error(`Erreur lors de la récupération des données Deca : ${JSON.stringify(err)}`);
         })
         .process(async (currentContrat) => {
-          await contratsDecaDb().insertOne({ ...currentContrat, created_at: new Date() });
+          await contratsDecaDb().insertOne({ ...currentContrat, _id: new ObjectId(), created_at: new Date() });
         });
     } catch (err: any) {
       throw new Error(`Erreur lors de la récupération des données Deca : ${JSON.stringify(err)}`);

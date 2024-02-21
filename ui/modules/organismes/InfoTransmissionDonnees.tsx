@@ -135,10 +135,10 @@ export function getTranmissionDonneesState(
   return !permissionInfoTransmissionEffectifs
     ? "donnees_non_disponibles"
     : !lastTransmissionDate
-    ? "donnees_non_transmises"
-    : isBefore(new Date(lastTransmissionDate), subMonths(new Date(), 3))
-    ? "donnees_obsoletes"
-    : isBefore(new Date(lastTransmissionDate), subWeeks(new Date(), 1))
-    ? "donnees_anciennes"
-    : "donnees_recentes";
+      ? "donnees_non_transmises"
+      : isBefore(new Date(lastTransmissionDate), subMonths(new Date(), 3))
+        ? "donnees_obsoletes"
+        : isBefore(new Date(lastTransmissionDate), subWeeks(new Date(), 1))
+          ? "donnees_anciennes"
+          : "donnees_recentes";
 }

@@ -25,6 +25,118 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
+function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: Date) {
+  return [
+    {
+      $addFields: {
+        "apprenant.historique_statut": {
+          // TODO: s'assurer que le tableau est TOUJOURS trié, puis supprimer cette étape
+          $sortArray: {
+            input: {
+              $filter: {
+                input: "$apprenant.historique_statut",
+                as: "statut",
+                cond: {
+                  $lte: ["$$statut.date_statut", dateStatus],
+                },
+              },
+            },
+            sortBy: { date_statut: 1 },
+          },
+        },
+      },
+    },
+    {
+      $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+    },
+    {
+      $addFields: {
+        statut_apprenant_at_date: {
+          $last: "$apprenant.historique_statut",
+        },
+      },
+    },
+    {
+      $group: {
+        _id: groupBy,
+        apprentis: {
+          $sum: {
+            $cond: {
+              if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+              then: 1,
+              else: 0,
+            },
+          },
+        },
+        abandons: {
+          $sum: {
+            $cond: {
+              if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
+              then: 1,
+              else: 0,
+            },
+          },
+        },
+        inscritsSansContrat: {
+          $sum: {
+            $cond: {
+              if: {
+                $and: [
+                  { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
+                  {
+                    $eq: [
+                      0,
+                      {
+                        $size: {
+                          $filter: {
+                            input: "$apprenant.historique_statut",
+                            cond: {
+                              $and: [
+                                { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                                { $lte: ["$$this.date_statut", dateStatus] },
+                              ],
+                            },
+                            limit: 1,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              then: 1,
+              else: 0,
+            },
+          },
+        },
+        inscrits: {
+          $sum: {
+            $cond: {
+              if: {
+                $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit],
+              },
+              then: 1,
+              else: 0,
+            },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        apprenants: {
+          $sum: ["$apprentis", "$inscrits"],
+        },
+        apprentis: 1,
+        inscritsSansContrat: 1,
+        abandons: 1,
+        rupturants: { $subtract: ["$inscrits", "$inscritsSansContrat"] },
+      },
+    },
+  ];
+}
+
 export async function getIndicateursEffectifsParDepartement(
   filters: DateFilters & TerritoireFilters,
   acl: Acl
@@ -39,113 +151,16 @@ export async function getIndicateursEffectifsParDepartement(
           ...buildEffectifMongoFilters(filters, acl.indicateursEffectifs)
         ),
       },
-      {
-        $project: {
-          departement: "$_computed.organisme.departement",
-          "apprenant.historique_statut": {
-            // TODO: s'assurer que le tableau est TOUJOURS trié, puis supprimer cette étape
-            $sortArray: {
-              input: {
-                $filter: {
-                  input: "$apprenant.historique_statut",
-                  as: "statut",
-                  cond: {
-                    $lte: ["$$statut.date_statut", filters.date],
-                  },
-                },
-              },
-              sortBy: { date_statut: 1 },
-            },
-          },
-        },
-      },
-      {
-        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
-      },
-      {
-        $addFields: {
-          statut_apprenant_at_date: {
-            $last: "$apprenant.historique_statut",
-          },
-        },
-      },
-      {
-        $group: {
-          _id: "$departement",
-          apprentis: {
-            $sum: {
-              $cond: {
-                if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                then: 1,
-                else: 0,
-              },
-            },
-          },
-          abandons: {
-            $sum: {
-              $cond: {
-                if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
-                then: 1,
-                else: 0,
-              },
-            },
-          },
-          inscritsSansContrat: {
-            $sum: {
-              $cond: {
-                if: {
-                  $and: [
-                    { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                    {
-                      $eq: [
-                        0,
-                        {
-                          $size: {
-                            $filter: {
-                              input: "$apprenant.historique_statut",
-                              cond: {
-                                $and: [
-                                  { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                                  { $lte: ["$$this.date_statut", filters.date] },
-                                ],
-                              },
-                              limit: 1,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  ],
-                },
-                then: 1,
-                else: 0,
-              },
-            },
-          },
-          inscrits: {
-            $sum: {
-              $cond: {
-                if: {
-                  $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit],
-                },
-                then: 1,
-                else: 0,
-              },
-            },
-          },
-        },
-      },
+      ...buildIndicateursEffectifsPipeline("$_computed.organisme.departement", filters.date),
       {
         $project: {
           _id: 0,
           departement: "$_id",
-          apprenants: {
-            $sum: ["$apprentis", "$inscrits"],
-          },
+          apprenants: 1,
           apprentis: 1,
           inscritsSansContrat: 1,
           abandons: 1,
-          rupturants: { $subtract: ["$inscrits", "$inscritsSansContrat"] },
+          rupturants: 1,
         },
       },
     ])
@@ -464,139 +479,7 @@ export async function getIndicateursEffectifsParOrganisme(
           }
         ),
       },
-      {
-        $project: {
-          organisme_id: 1,
-          "apprenant.historique_statut": {
-            $sortArray: {
-              input: {
-                $filter: {
-                  input: "$apprenant.historique_statut",
-                  as: "statut",
-                  cond: {
-                    $lte: ["$$statut.date_statut", filters.date],
-                  },
-                },
-              },
-              sortBy: { date_statut: 1 },
-            },
-          },
-        },
-      },
-      {
-        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
-      },
-      {
-        $addFields: {
-          statut_apprenant_at_date: {
-            $last: "$apprenant.historique_statut",
-          },
-        },
-      },
-      {
-        $facet: {
-          apprentis: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti,
-              },
-            },
-            {
-              $group: {
-                _id: "$organisme_id",
-                apprentis: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          abandons: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
-              },
-            },
-            {
-              $group: {
-                _id: "$organisme_id",
-                abandons: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          inscritsSansContrat: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-                "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
-              },
-            },
-            {
-              $group: {
-                _id: "$organisme_id",
-                inscritsSansContrat: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          rupturants: [
-            { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
-            // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
-            {
-              $addFields: {
-                previousStatutAtDate: {
-                  $arrayElemAt: ["$apprenant.historique_statut", -2],
-                },
-              },
-            },
-            { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
-            {
-              $group: {
-                _id: "$organisme_id",
-                rupturants: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          items: {
-            $concatArrays: ["$apprentis", "$abandons", "$inscritsSansContrat", "$rupturants"],
-          },
-        },
-      },
-      {
-        $unwind: "$items",
-      },
-      {
-        $group: {
-          _id: "$items._id",
-          merge: {
-            $mergeObjects: "$items",
-          },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              {
-                apprenants: 0,
-                apprentis: 0,
-                inscritsSansContrat: 0,
-                abandons: 0,
-                rupturants: 0,
-              },
-              "$merge",
-            ],
-          },
-        },
-      },
+      ...buildIndicateursEffectifsPipeline("$organisme_id", filters.date),
       {
         $lookup: {
           from: "organismes",
@@ -634,9 +517,7 @@ export async function getIndicateursEffectifsParOrganisme(
           nom: "$organisme.nom",
           nature: "$organisme.nature",
 
-          apprenants: {
-            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
-          },
+          apprenants: 1,
           apprentis: 1,
           inscritsSansContrat: 1,
           abandons: 1,
@@ -664,146 +545,12 @@ export async function getOrganismeIndicateursEffectifsParFormation(
           }
         ),
       },
-      {
-        $project: {
-          "formation.rncp": 1,
-          "apprenant.historique_statut": {
-            $sortArray: {
-              input: {
-                $filter: {
-                  input: "$apprenant.historique_statut",
-                  as: "statut",
-                  cond: {
-                    $lte: ["$$statut.date_statut", filters.date],
-                  },
-                },
-              },
-              sortBy: { date_statut: 1 },
-            },
-          },
-        },
-      },
-      {
-        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
-      },
-      {
-        $addFields: {
-          statut_apprenant_at_date: {
-            $last: "$apprenant.historique_statut",
-          },
-        },
-      },
-      {
-        $facet: {
-          apprentis: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti,
-              },
-            },
-            {
-              $group: {
-                _id: "$formation.rncp",
-                apprentis: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          abandons: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
-              },
-            },
-            {
-              $group: {
-                _id: "$formation.rncp",
-                abandons: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          inscritsSansContrat: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-                "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
-              },
-            },
-            {
-              $group: {
-                _id: "$formation.rncp",
-                inscritsSansContrat: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-          rupturants: [
-            { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
-            // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
-            {
-              $addFields: {
-                previousStatutAtDate: {
-                  $arrayElemAt: ["$apprenant.historique_statut", -2],
-                },
-              },
-            },
-            { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
-            {
-              $group: {
-                _id: "$formation.rncp",
-                rupturants: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          items: {
-            $concatArrays: ["$apprentis", "$abandons", "$inscritsSansContrat", "$rupturants"],
-          },
-        },
-      },
-      {
-        $unwind: "$items",
-      },
-      {
-        $group: {
-          _id: "$items._id",
-          merge: {
-            $mergeObjects: "$items",
-          },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              {
-                apprenants: 0,
-                apprentis: 0,
-                inscritsSansContrat: 0,
-                abandons: 0,
-                rupturants: 0,
-              },
-              "$merge",
-            ],
-          },
-        },
-      },
+      ...buildIndicateursEffectifsPipeline("$formation.rncp", filters.date),
       {
         $project: {
           _id: 0,
           rncp_code: "$_id",
-          apprenants: {
-            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
-          },
+          apprenants: 1,
           apprentis: 1,
           inscritsSansContrat: 1,
           abandons: 1,
@@ -883,37 +630,11 @@ export async function getEffectifsNominatifs(
         },
       },
       {
-        $set: {
-          previousStatutAtDate: {
-            $arrayElemAt: ["$apprenant.historique_statut", -2],
-          },
-        },
-      },
-      {
-        $set: {
+        $addFields: {
           statut: {
             // pipeline commun entre statuts plutôt que $facet limité à 16Mo
             $switch: {
               branches: [
-                // l'ordre important ici, du statut le plus spécifique au plus générique
-                {
-                  case: {
-                    $and: [
-                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                      { $eq: ["$previousStatutAtDate.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                    ],
-                  },
-                  then: "rupturant" satisfies TypeEffectifNominatif,
-                },
-                {
-                  case: {
-                    $and: [
-                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                      { $ne: ["$apprenant.historique_statut.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                    ],
-                  },
-                  then: "inscritSansContrat" satisfies TypeEffectifNominatif,
-                },
                 {
                   case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
                   then: "apprenti" satisfies TypeEffectifNominatif,
@@ -921,6 +642,38 @@ export async function getEffectifsNominatifs(
                 {
                   case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
                   then: "abandon" satisfies TypeEffectifNominatif,
+                },
+                // l'ordre important ici, du statut le plus spécifique au plus générique
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
+                      {
+                        $eq: [
+                          0,
+                          {
+                            $size: {
+                              $filter: {
+                                input: "$apprenant.historique_statut",
+                                cond: {
+                                  $and: [
+                                    { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
+                                    { $lte: ["$$this.date_statut", filters.date] },
+                                  ],
+                                },
+                                limit: 1,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  then: "inscritSansContrat" satisfies TypeEffectifNominatif,
+                },
+                {
+                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
+                  then: "rupturant" satisfies TypeEffectifNominatif,
                 },
               ],
               default: "inconnu" satisfies TypeEffectifNominatif,
@@ -1005,124 +758,11 @@ export async function getOrganismeIndicateursEffectifs(
           ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs)
         ),
       },
-      {
-        $project: {
-          "apprenant.historique_statut": {
-            $sortArray: {
-              input: {
-                $filter: {
-                  input: "$apprenant.historique_statut",
-                  as: "statut",
-                  cond: {
-                    $lte: ["$$statut.date_statut", filters.date],
-                  },
-                },
-              },
-              sortBy: { date_statut: 1 },
-            },
-          },
-        },
-      },
-      {
-        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
-      },
-      {
-        $addFields: {
-          statut_apprenant_at_date: {
-            $last: "$apprenant.historique_statut",
-          },
-        },
-      },
-      {
-        $facet: {
-          apprentis: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti,
-              },
-            },
-            {
-              $count: "apprentis",
-            },
-          ],
-          abandons: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon,
-              },
-            },
-            {
-              $count: "abandons",
-            },
-          ],
-          inscritsSansContrat: [
-            {
-              $match: {
-                "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-                "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
-              },
-            },
-            {
-              $count: "inscritsSansContrat",
-            },
-          ],
-          rupturants: [
-            { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
-            // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
-            {
-              $addFields: {
-                previousStatutAtDate: {
-                  $arrayElemAt: ["$apprenant.historique_statut", -2],
-                },
-              },
-            },
-            { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
-            {
-              $count: "rupturants",
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          items: {
-            $concatArrays: ["$apprentis", "$abandons", "$inscritsSansContrat", "$rupturants"],
-          },
-        },
-      },
-      {
-        $unwind: "$items",
-      },
-      {
-        $group: {
-          _id: "$items._id",
-          merge: {
-            $mergeObjects: "$items",
-          },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              {
-                apprenants: 0,
-                apprentis: 0,
-                inscritsSansContrat: 0,
-                abandons: 0,
-                rupturants: 0,
-              },
-              "$merge",
-            ],
-          },
-        },
-      },
+      ...buildIndicateursEffectifsPipeline(null, filters.date),
       {
         $project: {
           _id: 0,
-          apprenants: {
-            $sum: ["$apprentis", "$inscritsSansContrat", "$rupturants"],
-          },
+          apprenants: 1,
           apprentis: 1,
           inscritsSansContrat: 1,
           abandons: 1,

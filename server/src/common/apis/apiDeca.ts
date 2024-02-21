@@ -48,8 +48,9 @@ export const getContratsDeca = async (dateDebut: string, dateFin: string, page: 
       );
 
       logger.debug(
-        `[API Deca] Récupération contrats du ${dateDebut} au ${dateFin} - page ${page} sur ${response?.data?.metadonnees
-          ?.totalPages} ${response.cached ? "(depuis le cache)" : ""}`
+        `[API Deca] Récupération contrats du ${dateDebut} au ${dateFin} - page ${page} sur ${
+          response?.data?.metadonnees?.totalPages
+        } ${response.cached ? "(depuis le cache)" : ""}`
       );
       if (!response?.data) {
         throw new ApiError("Api Deca", "No data received");

@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
-import { UsersMigration } from "shared/models/data/@types";
+import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -140,7 +140,7 @@ describe("Routes users", () => {
   });
 });
 
-async function createUserWithStatus(accountStatus: UsersMigration["account_status"]) {
+async function createUserWithStatus(accountStatus: IUsersMigration["account_status"]) {
   await usersMigrationDb().insertOne({
     _id: new ObjectId(id(1)),
     account_status: accountStatus,

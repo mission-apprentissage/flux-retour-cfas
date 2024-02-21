@@ -1,24 +1,19 @@
 import express from "express";
-import { MaintenanceMessage } from "shared/models/data/@types";
-import { z } from "zod";
+import { zMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
 
 import {
   createMaintenanceMessage,
   updateMaintenanceMessage,
   removeMaintenanceMessage,
 } from "@/common/actions/maintenances.actions";
-import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 
 export default () => {
   const router = express.Router();
 
   router.post("/", async (req, res) => {
-    const { msg, type, enabled, context } = await validateFullZodObjectSchema(req.body, {
-      msg: z.string(),
-      type: z.string(),
-      enabled: z.boolean(),
-      context: z.string(),
-    });
+    const { msg, type, enabled, context } = await zMaintenanceMessage
+      .pick({ msg: true, type: true, enabled: true, context: true })
+      .parseAsync(req.body);
 
     if (!msg || enabled === undefined) {
       return res.status(400).send({ error: "Erreur avec le message ou enabled" });
@@ -31,7 +26,7 @@ export default () => {
       msg: msg.replace(/(\[.*?\])\(##(.*?)\)/gim, "$1($2)"),
       enabled,
       time: new Date(),
-    } as MaintenanceMessage);
+    });
 
     return res.status(201).json(newMaintenanceMessage);
   });

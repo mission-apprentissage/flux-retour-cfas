@@ -96,7 +96,7 @@ fileignoreconfig:
 - filename: server/tests/integration/http/organisme.routes.test.ts
   checksum: c2769caf07b18b075ef9164b3711b7af46b1fac6de841ba66e377a31bcacf070
 - filename: server/tests/integration/http/password.route.test.ts
-  checksum: 5dac6833c2dc7f76b3c8b74c3e102968cfcb69bd1073046bcd434f44717f1384
+  checksum: 59c93e7b531d629bf459347e7fbd5d753f4688dff1eb59f52dfead8f442b8754
 - filename: server/tests/integration/jobs/emails/reminder.test.ts
   checksum: 6268b3f12640edc2569bfd412081dc9d8092b15140e07fa01a29697f3d476158
 - filename: server/tests/integration/jobs/ingestion/mergeEffectif.test.ts

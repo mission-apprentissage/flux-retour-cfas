@@ -58,13 +58,13 @@ export function filterUsersArrayFromUsersFilters(
     );
 
   if (usersFilters.departements?.length && usersFilters.departements?.length > 0)
-    filteredUsers = filteredUsers?.filter(
-      (item) => usersFilters.departements?.includes(item.organismeDepartement || item.organisationDepartement)
+    filteredUsers = filteredUsers?.filter((item) =>
+      usersFilters.departements?.includes(item.organismeDepartement || item.organisationDepartement)
     );
 
   if (usersFilters.regions?.length && usersFilters.regions?.length > 0) {
-    filteredUsers = filteredUsers?.filter(
-      (item) => usersFilters.regions?.includes(item.organismeRegion || item.organisationRegion)
+    filteredUsers = filteredUsers?.filter((item) =>
+      usersFilters.regions?.includes(item.organismeRegion || item.organisationRegion)
     );
   }
 
