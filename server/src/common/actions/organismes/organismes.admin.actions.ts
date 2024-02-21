@@ -4,7 +4,7 @@ import { OrganismeSupportInfo } from "shared/models";
 import { UsersMigration } from "shared/models/data/@types";
 import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
-import { OrganisationOrganismeFormation } from "shared/models/data/organisations.model";
+import { IOrganisationOrganismeFormation } from "shared/models/data/organisations.model";
 
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
@@ -222,7 +222,7 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
     getOffreFormations(siret),
     fiabilisationUaiSiretDb().find({ siret }).toArray(),
     organisationsDb()
-      .aggregate<OrganisationOrganismeFormation & { users: UsersMigration[] }>([
+      .aggregate<IOrganisationOrganismeFormation & { users: UsersMigration[] }>([
         { $match: { type: "ORGANISME_FORMATION", siret } },
         {
           $lookup: {

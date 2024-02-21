@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 import { Acl } from "shared";
-import { Organisation } from "shared/models/data/organisations.model";
+import { IOrganisation } from "shared/models/data/organisations.model";
 
-export interface AuthContext<IOrganisation = Organisation> {
+export interface AuthContext<I = IOrganisation> {
   _id: ObjectId;
   civility: string;
   nom: string;
@@ -14,7 +14,7 @@ export interface AuthContext<IOrganisation = Organisation> {
   invalided_token?: boolean;
 
   // populated via $lookup
-  organisation: IOrganisation;
+  organisation: I;
 
   // field used for ERPs
   source?: string;
