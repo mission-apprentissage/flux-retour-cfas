@@ -1,6 +1,6 @@
 import { WarningTwoIcon, InfoIcon } from "@chakra-ui/icons";
-import { Box, Table, Tbody, Text, Tr, Td, UnorderedList, TableContainer, ListItem } from "@chakra-ui/react";
-import { schema } from "shared/models/data/effectifsQueue.model";
+import { Box, Table, Tbody, Text, Tr, Td, UnorderedList, TableContainer, ListItem, Link } from "@chakra-ui/react";
+import { TD_MANUEL_ELEMENT_LINK } from "shared";
 
 import InfoTooltip from "@/components/InfoTooltip/InfoTooltip";
 
@@ -71,10 +71,10 @@ const attributes = [
   { label: "Type de CFA", value: "type_cfa" },
 ];
 interface EffectifQueueItemViewProps {
-  effectifQueueItem: typeof schema.properties;
+  effectifQueueItem: any; // use zod typings
 }
 
-const buildValidationError = (validation_errors: typeof schema.properties.validation_errors.items) => {
+const buildValidationError = (validation_errors: Array<any>) => {
   return validation_errors.reduce((acc: object, { message, path }) => {
     return {
       ...acc,
@@ -102,10 +102,21 @@ const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps
   const validationErrorFormated = buildValidationError(effectifQueueItem.validation_errors);
   return (
     <Box>
-      <Text color="#0063CB" fontSize={17} mt={5} mb={5}>
-        <InfoIcon mr={2} />
-        Veuillez corriger ces données directement dans votre ERP pour qu’elles soient correctement transmises.
-      </Text>
+      {effectifQueueItem.source !== "televersement" ? (
+        <Text color="#0063CB" fontSize={15} mt={5} mb={5}>
+          <InfoIcon mr={2} />
+          Veuillez corriger ces données directement dans votre ERP pour qu’elles soient correctement transmises.
+        </Text>
+      ) : (
+        <Text color="#0063CB" fontSize={15} mt={5} mb={5}>
+          <InfoIcon mr={2} />
+          Veuillez prendre connaissance des erreurs. Si des questions persistent, veuillez{" "}
+          <Link variant="link" color="inherit" href={TD_MANUEL_ELEMENT_LINK} isExternal>
+            nous contacter
+          </Link>
+        </Text>
+      )}
+
       <TableContainer>
         <Table variant="unstyled">
           <Tbody>
