@@ -1,7 +1,6 @@
 import { WarningTwoIcon, InfoIcon } from "@chakra-ui/icons";
 import { Box, Table, Tbody, Text, Tr, Td, UnorderedList, TableContainer, ListItem, Link } from "@chakra-ui/react";
 import { TD_MANUEL_ELEMENT_LINK } from "shared";
-import { schema } from "shared/models/data/effectifsQueue.model";
 
 import InfoTooltip from "@/components/InfoTooltip/InfoTooltip";
 
@@ -72,10 +71,10 @@ const attributes = [
   { label: "Type de CFA", value: "type_cfa" },
 ];
 interface EffectifQueueItemViewProps {
-  effectifQueueItem: typeof schema.properties | { source: string };
+  effectifQueueItem: any; // use zod typings
 }
 
-const buildValidationError = (validation_errors: typeof schema.properties.validation_errors.items) => {
+const buildValidationError = (validation_errors: Array<any>) => {
   return validation_errors.reduce((acc: object, { message, path }) => {
     return {
       ...acc,
