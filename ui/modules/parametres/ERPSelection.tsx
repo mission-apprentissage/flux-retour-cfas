@@ -25,7 +25,7 @@ export const ERPSelection = ({ organisme, onERPSelected }: ERPSelectionProps) =>
     setIsConfirmationInProgress(true);
     await _put(`/api/v1/organismes/${organisme._id}/configure-erp`, {
       mode_de_transmission: "API",
-      erps: [selectedERPId],
+      erpId: selectedERPId,
     });
     await onERPSelected();
     setIsConfirmationInProgress(false);

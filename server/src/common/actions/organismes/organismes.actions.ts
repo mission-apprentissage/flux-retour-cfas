@@ -174,7 +174,6 @@ export const updateOneOrganismeRelatedFormations = async (organisme: WithId<Orga
  */
 export const updateOrganismeTransmission = async (
   organisme: Pick<WithId<Organisme>, "_id" | "first_transmission_date">,
-  source?: string,
   api_version?: string,
   source_organisme_id?: string
 ) => {
@@ -188,7 +187,6 @@ export const updateOrganismeTransmission = async (
         ...(source_organisme_id ? { organisme_transmetteur_id: source_organisme_id } : {}),
         updated_at: new Date(),
       },
-      ...(source ? { $addToSet: { erps: source } } : {}),
     }
   );
 
@@ -593,16 +591,10 @@ export async function configureOrganismeERP(
     {
       $set: {
         mode_de_transmission: conf.mode_de_transmission,
-        erps: conf.erps ?? [],
-        ...(conf.erp_unsupported ? { erp_unsupported: conf.erp_unsupported } : {}),
         mode_de_transmission_configuration_date: new Date(),
         mode_de_transmission_configuration_author_fullname: `${ctx.prenom} ${ctx.nom}`,
+        ...(conf.erpId ? { erp_configured: conf.erpId } : {}),
       },
-      $unset: conf.erp_unsupported
-        ? {}
-        : {
-            erp_unsupported: 1,
-          },
     }
   );
 }
@@ -622,7 +614,7 @@ export async function resetConfigurationERP(organismeId: ObjectId): Promise<void
         api_key: 1,
         first_transmission_date_as_transmitter: 1,
         last_transmission_date_as_transmitter: 1,
-        // pas besoin de réinitialiser api_key
+        erp_configured: 1,
       },
       $set: {
         erps: [],
@@ -786,6 +778,7 @@ export function getOrganismeProjection(
     api_configuration_date: permissionsOrganisme.manageEffectifs,
     api_siret: permissionsOrganisme.manageEffectifs,
     api_uai: permissionsOrganisme.manageEffectifs,
+    erp_configured: permissionsOrganisme.manageEffectifs,
   });
 }
 

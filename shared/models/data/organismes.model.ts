@@ -214,6 +214,9 @@ const schema = object(
     last_transmission_date_as_transmitter: date({
       description: "Date de la dernière transmission de données en tant qu'organisme transmetteur",
     }),
+    erp_configured: string({
+      description: "Id de l'erp de tranmission configuré",
+    }),
   },
   { required: ["siret"], additionalProperties: true }
 );

@@ -41,9 +41,6 @@ export const TransmissionsConfiguration = ({ organisme, onKeyGenerated }: Transm
   const [isConfigurationModalDisplayed, setIsConfigurationModalDisplayed] = useState(false);
   const [isResetConfigurationInProgress, setIsResetConfigurationInProgress] = useState(false);
 
-  const erpId = organisme.erps[0]; // PAS BIEN
-  const erp = ERPS_BY_ID[erpId];
-
   const onGenerateKey = async () => {
     await _post(`/api/v1/organismes/${organisme._id}/api-key`);
     toastSuccess("Votre clé d’échange a été correctement générée.");
@@ -111,6 +108,14 @@ export const TransmissionsConfiguration = ({ organisme, onKeyGenerated }: Transm
         <ResetConfiguration></ResetConfiguration>
       </>
     );
+  }
+
+  const erpId = organisme.erp_configured;
+  const erp = erpId && ERPS_BY_ID[erpId];
+
+  if (!erp) {
+    //Add default view here
+    return;
   }
 
   return (

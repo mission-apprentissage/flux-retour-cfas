@@ -990,4 +990,9 @@ export interface Organisme {
    * Date de la dernière transmission de données en tant qu'organisme transmetteur
    */
   last_transmission_date_as_transmitter?: Date;
+
+  /**
+   * Id de l'erp congiguré pour la transmission
+   */
+  erp_configured?: string;
 }

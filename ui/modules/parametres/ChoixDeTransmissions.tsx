@@ -15,6 +15,15 @@ export const ChoixDeTransmission = ({ organisme, onERPSelected }: ChoixDeTransmi
   const setNavigationStep = useSetRecoilState(parametresNavigationAtom);
   const [isNoErpConfigurationLoading, setIsNoErpConfigurationLoading] = useState(false);
 
+  const onManualTransmissionSelected = async () => {
+    setIsNoErpConfigurationLoading(true);
+    await _put(`/api/v1/organismes/${organisme._id}/configure-erp`, {
+      mode_de_transmission: "MANUEL",
+    });
+    await onERPSelected();
+    setIsNoErpConfigurationLoading(false);
+  };
+
   return (
     <>
       <HStack gap={7} mt={6}>
@@ -52,18 +61,7 @@ export const ChoixDeTransmission = ({ organisme, onERPSelected }: ChoixDeTransmi
             Vous n’avez pas d’ERP ?
           </Heading>
           <Text pb={6}>Importez vos effectifs avec un fichier Excel</Text>
-          <Button
-            isLoading={isNoErpConfigurationLoading}
-            variant="secondary"
-            onClick={async () => {
-              setIsNoErpConfigurationLoading(true);
-              await _put(`/api/v1/organismes/${organisme._id}/configure-erp`, {
-                mode_de_transmission: "MANUEL",
-              });
-              await onERPSelected();
-              setIsNoErpConfigurationLoading(false);
-            }}
-          >
+          <Button isLoading={isNoErpConfigurationLoading} variant="secondary" onClick={onManualTransmissionSelected}>
             Choisir cette méthode
           </Button>
         </VStack>
