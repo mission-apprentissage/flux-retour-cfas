@@ -1,10 +1,11 @@
 import type { Jsonify } from "type-fest";
 
 import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement.d";
-import { FiabilisationUaiSiret, OrganismesReferentiel, UsersMigration } from "../data/@types";
+import { FiabilisationUaiSiret, OrganismesReferentiel } from "../data/@types";
 import { OffreFormation } from "../data/@types/OffreFormation";
 import { OrganisationOrganismeFormation } from "../data/organisations.model";
 import { IOrganisme } from "../data/organismes.model";
+import { IUsersMigration } from "../data/usersMigration.model";
 
 export type TransmissionStat = {
   date: string;
@@ -32,7 +33,7 @@ export interface OrganismeSupportInfo {
   fiabilisation: FiabilisationUaiSiret | null;
   formations: OffreFormation[];
   apiEntreprise: ApiEntEtablissement | null;
-  organisation: (OrganisationOrganismeFormation & { users: UsersMigration[] }) | null;
+  organisation: (OrganisationOrganismeFormation & { users: IUsersMigration[] }) | null;
   etat: Array<"fermé" | "actif" | "inconnu">;
   effectifs: number;
   transmissions: TransmissionStat[];

@@ -10,7 +10,7 @@ import { formatDateNumericDayMonthYear, formatDateHourMinutesSecondsMs } from "@
 import EffectifQueueItemView from "@/components/Effectif/EffectifQueueItemView";
 import EffectifStatutTag from "@/components/Effectif/EffectifStatusTag";
 import TableWithPagination from "@/components/Table/TableWithPagination";
-import { transmissionDetailsCountAtom } from "@/hooks/tranmissions";
+import { transmissionErrorsDetailsCountAtom } from "@/hooks/tranmissions";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
 
 const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
@@ -98,7 +98,7 @@ const TransmissionDetailsTable = (props: TransmissionPageProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
   const [totalPageCount, setTotalPageCount] = useState(1);
   const [transmissionData, setTransmissionData] = useState([]);
-  const setTotalCount = useSetRecoilState(transmissionDetailsCountAtom);
+  const setTotalCount = useSetRecoilState(transmissionErrorsDetailsCountAtom);
 
   const computeQueryResponse = (successData: { data: any; pagination: any }, error: any) => {
     if (error) {
@@ -139,7 +139,7 @@ const TransmissionDetailsTable = (props: TransmissionPageProps) => {
   const { data, error, isFetching } = useQuery({
     queryKey: ["transmissions-details", pagination],
     queryFn: () =>
-      _get(`/api/v1/organismes/${props.organisme._id}/transmission/${props.date}`, {
+      _get(`/api/v1/organismes/${props.organisme._id}/transmission/${props.date}/error`, {
         params: {
           page: pagination.pageIndex + 1,
           limit: pagination.pageSize,

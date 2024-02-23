@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axiosist";
-import { Rncp } from "shared";
+import { ObjectId } from "mongodb";
+import { IRncp } from "shared/models/data/rncp.model";
 
 import { organismesDb, rncpDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -13,7 +14,8 @@ let requestAsOrganisation: RequestAsOrganisationFunc;
 describe("GET /api/v1/rncp/:code_rncp - retourne une fiche RNCP", () => {
   useMongo();
 
-  const ficheRNCP: Rncp = {
+  const ficheRNCP: IRncp = {
+    _id: new ObjectId(),
     rncp: "RNCP34956",
     actif: true,
     etat_fiche: "Publiée",
@@ -28,10 +30,7 @@ describe("GET /api/v1/rncp/:code_rncp - retourne une fiche RNCP", () => {
     requestAsOrganisation = app.requestAsOrganisation;
   });
   beforeEach(async () => {
-    await Promise.all([
-      organismesDb().insertMany(organismes),
-      rncpDb().insertOne({ ...ficheRNCP }), // la copie par destructuring évite à insertOne d'ajouter _id à l'objet
-    ]);
+    await Promise.all([organismesDb().insertMany(organismes), rncpDb().insertOne(ficheRNCP)]);
   });
 
   it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
@@ -72,8 +71,8 @@ describe("GET /api/v1/rncp/:code_rncp - retourne une fiche RNCP", () => {
 
         expect(response.status).toStrictEqual(allowed ? 200 : 403);
         expect(response.data).toStrictEqual({
-          _id: expect.any(String),
           ...ficheRNCP,
+          _id: ficheRNCP._id.toString(),
         });
       }
     );

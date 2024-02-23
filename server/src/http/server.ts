@@ -24,7 +24,10 @@ import {
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
 import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
-import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
+import {
+  deleteOldestDuplicates,
+  getDuplicatesEffectifsForOrganismeIdWithPagination,
+} from "@/common/actions/effectifs.duplicates.actions";
 import {
   dateFiltersSchema,
   effectifsFiltersTerritoireSchema,
@@ -527,13 +530,23 @@ function setupRoutes(app: Application) {
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
-          let duplicates = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
+          const page = parseInt(req.query.page, 10) || 1;
+          const limit = parseInt(req.query.limit, 10) || 5;
 
-          if (duplicates.length === 0) {
-            duplicates = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId, false);
-          }
+          let duplicates = await getDuplicatesEffectifsForOrganismeIdWithPagination(
+            res.locals.organismeId,
+            page,
+            limit
+          );
 
           return duplicates;
+        })
+      )
+      .delete(
+        "/duplicates",
+        requireOrganismePermission("manageEffectifs"),
+        returnResult(async (req, res) => {
+          await deleteOldestDuplicates(res.locals.organismeId);
         })
       )
       .get(
