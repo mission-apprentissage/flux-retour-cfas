@@ -91,7 +91,7 @@ import { changePassword, updateUserProfile } from "@/common/actions/users.action
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -194,7 +194,7 @@ function setupRoutes(app: Application) {
       returnResult(async () => {
         let mongodbHealthy = false;
         try {
-          await jobEventsDb().findOne({});
+          await usersMigrationDb().findOne({});
           mongodbHealthy = true;
         } catch (err) {
           logger.error({ err }, "healthcheck failed");

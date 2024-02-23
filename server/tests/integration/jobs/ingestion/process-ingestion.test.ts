@@ -29,6 +29,7 @@ describe("Processus d'ingestion", () => {
   beforeEach(async () => {
     await organismesReferentielDb().insertMany([
       {
+        _id: new ObjectId(),
         uai: UAI,
         siret: SIRET,
         nature: "formateur",
@@ -36,6 +37,7 @@ describe("Processus d'ingestion", () => {
         relations: [],
       },
       {
+        _id: new ObjectId(),
         uai: UAI_RESPONSABLE,
         siret: SIRET_RESPONSABLE,
         nature: "responsable",
@@ -43,6 +45,7 @@ describe("Processus d'ingestion", () => {
         relations: [],
       },
       {
+        _id: new ObjectId(),
         uai: UAI_REFERENTIEL_FERME,
         siret: SIRET_REFERENTIEL_FERME,
         nature: "formateur",

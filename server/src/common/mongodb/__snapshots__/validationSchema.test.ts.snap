@@ -6717,6 +6717,7 @@ exports[`validation-schema should create validation schema for organismesReferen
     },
   },
   "required": [
+    "_id",
     "siret",
     "nature",
     "lieux_de_formation",

@@ -1,8 +1,9 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
-import { OrganismesReferentiel } from "shared/models/data/@types/OrganismesReferentiel";
+import Boom from "boom";
+import { ObjectId } from "mongodb";
+import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
-import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import { fetchOrganismes } from "@/common/apis/apiReferentielMna";
 import logger from "@/common/logger";
 import { organismesReferentielDb } from "@/common/model/collections";
@@ -64,6 +65,7 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
   // Ajout de l'organisme dans la collection
   try {
     await organismesReferentielDb().insertOne({
+      _id: new ObjectId(),
       ...(adresse ? { adresse } : {}),
       ...(contacts ? { contacts } : {}),
       ...(enseigne ? { enseigne } : {}),
@@ -78,16 +80,15 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
       lieux_de_formation: lieux_de_formation || [],
       relations: relations || [],
       ...(uai ? { uai } : {}),
-    } as OrganismesReferentiel);
+    } as IOrganismeReferentiel);
     nbOrganismeCreated++;
   } catch (error) {
-    captureException(error);
-    nbOrganismeNotCreated++;
-    await createJobEvent({
+    const err = Boom.internal("Erreur lors de la création de l'organisme-referentiel", {
+      organismeReferentiel,
       jobname: JOB_NAME,
-      date: new Date(),
-      action: "organisme-not-created",
-      data: { organismeReferentiel, error },
     });
+    err.cause = error;
+    captureException(err);
+    nbOrganismeNotCreated++;
   }
 };

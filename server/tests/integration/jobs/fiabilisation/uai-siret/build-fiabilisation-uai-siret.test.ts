@@ -2,7 +2,7 @@ import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
 import { STATUT_FIABILISATION_COUPLES_UAI_SIRET, STATUT_FIABILISATION_ORGANISME } from "shared";
-import { OrganismesReferentiel } from "shared/models/data/@types";
+import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
 import { organismesReferentielDb, fiabilisationUaiSiretDb, organismesDb } from "@/common/model/collections";
 import { buildFiabilisationCoupleForTdbCouple } from "@/jobs/fiabilisation/uai-siret/build";
@@ -49,7 +49,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         updated_at: new Date(),
       });
 
-      const allReferentielOrganismes: OrganismesReferentiel[] = [organismeReferentiel];
+      const allReferentielOrganismes: IOrganismeReferentiel[] = [organismeReferentiel];
       const isCoupleFiable = await checkCoupleFiable(coupleTdb, allReferentielOrganismes);
       assert.deepEqual(isCoupleFiable, true);
 
@@ -88,7 +88,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
         updated_at: new Date(),
       });
 
-      const allReferentielOrganismes: OrganismesReferentiel[] = [organismeReferentiel];
+      const allReferentielOrganismes: IOrganismeReferentiel[] = [organismeReferentiel];
       const isCoupleFiable = await checkCoupleFiable(coupleTdb, allReferentielOrganismes);
 
       // Vérification de la non création du couple en tant que FIABLE
@@ -513,6 +513,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Ajout d'un organisme au référentiel ayant cet UAI
       await organismesReferentielDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_TDB,
         siret: "12370584100099",
         nature: "formateur",
@@ -766,6 +767,7 @@ describe("Job Build Fiabilisation UAI SIRET", () => {
 
       // Création d'un autre organisme dans le Référentiel avec le couple contenant l'UAI du TDB
       await organismesReferentielDb().insertOne({
+        _id: new ObjectId(),
         uai: UAI_TDB,
         siret: SIRET_REFERENTIEL2,
         nature: "formateur",
