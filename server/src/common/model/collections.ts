@@ -1,10 +1,4 @@
-import {
-  Effectif,
-  FiabilisationUaiSiret,
-  Formation,
-  Organisme,
-  OrganismesReferentiel,
-} from "shared/models/data/@types";
+import { Effectif, FiabilisationUaiSiret, Formation, Organisme } from "shared/models/data/@types";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassinsEmploi.model";
@@ -20,7 +14,9 @@ import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtS
 import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
 import organisationsModelDescriptor, { Organisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor from "shared/models/data/organismes.model";
-import OrganismesReferentielModelDescriptor from "shared/models/data/organismesReferentiel.model";
+import OrganismesReferentielModelDescriptor, {
+  IOrganismeReferentiel,
+} from "shared/models/data/organismesReferentiel.model";
 import OrganismesSolteaModelDescriptor, { IOrganismeSoltea } from "shared/models/data/organismesSoltea.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import romeModelDescriptor, { IRome } from "shared/models/data/rome.model";
@@ -62,7 +58,7 @@ export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDesc
 export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection<Organisation>(organisationsModelDescriptor.collectionName);
 export const organismesReferentielDb = () =>
-  getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
+  getDbCollection<IOrganismeReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
   getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);

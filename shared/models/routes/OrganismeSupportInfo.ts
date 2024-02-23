@@ -2,9 +2,10 @@ import type { WithId } from "mongodb";
 import type { Jsonify } from "type-fest";
 
 import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement.d";
-import { FiabilisationUaiSiret, Organisme, OrganismesReferentiel } from "../data/@types";
+import { FiabilisationUaiSiret, Organisme } from "../data/@types";
 import { OffreFormation } from "../data/@types/OffreFormation";
 import { OrganisationOrganismeFormation } from "../data/organisations.model";
+import { IOrganismeReferentiel } from "../data/organismesReferentiel.model";
 import { IUsersMigration } from "../data/usersMigration.model";
 
 export type TransmissionStat = {
@@ -29,7 +30,7 @@ export interface OrganismeSupportInfo {
   siret: string;
   nom: string;
   tdb: WithId<Organisme> | null;
-  referentiel: OrganismesReferentiel | null;
+  referentiel: IOrganismeReferentiel | null;
   fiabilisation: FiabilisationUaiSiret | null;
   formations: OffreFormation[];
   apiEntreprise: ApiEntEtablissement | null;

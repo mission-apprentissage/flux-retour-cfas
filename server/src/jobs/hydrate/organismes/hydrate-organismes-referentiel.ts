@@ -1,7 +1,8 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
-import { OrganismesReferentiel } from "shared/models/data/@types/OrganismesReferentiel";
+import { ObjectId } from "mongodb";
+import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
 import { fetchOrganismes } from "@/common/apis/apiReferentielMna";
 import logger from "@/common/logger";
@@ -64,6 +65,7 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
   // Ajout de l'organisme dans la collection
   try {
     await organismesReferentielDb().insertOne({
+      _id: new ObjectId(),
       ...(adresse ? { adresse } : {}),
       ...(contacts ? { contacts } : {}),
       ...(enseigne ? { enseigne } : {}),
@@ -78,7 +80,7 @@ const insertOrganismeReferentiel = async (organismeReferentiel) => {
       lieux_de_formation: lieux_de_formation || [],
       relations: relations || [],
       ...(uai ? { uai } : {}),
-    } as OrganismesReferentiel);
+    } as IOrganismeReferentiel);
     nbOrganismeCreated++;
   } catch (error) {
     const err = Boom.internal("Erreur lors de la création de l'organisme-referentiel", {
