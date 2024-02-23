@@ -58,7 +58,7 @@
     "react-notion-x": "^6.16.0",
     "react-phone-input-2": "2.15.1",
     "recoil": "0.7.7",
-    "remixicon": "2.5.0",
+    "remixicon": "4.1.0",
     "shared": "workspace:*",
     "usehooks-ts": "^2.14.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",

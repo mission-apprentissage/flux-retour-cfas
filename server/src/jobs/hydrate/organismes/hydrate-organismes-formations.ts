@@ -1,7 +1,7 @@
 import { WithId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared";
 import { Organisme } from "shared/models/data/@types";
-import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
+import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import { ArrayElement } from "type-fest/source/internal";
 
 import parentLogger from "@/common/logger";
@@ -45,7 +45,7 @@ export const hydrateOrganismesFormations = async () => {
  * - (siret) gestionnaire ou formateur
  * - (uai) gestionnaire ou formateur
  */
-async function getFormationsByUAIAndSIRET(siret: string, uai: string | null): Promise<WithId<FormationsCatalogue>[]> {
+async function getFormationsByUAIAndSIRET(siret: string, uai: string | null): Promise<IFormationCatalogue[]> {
   {
     const formations = await formationsCatalogueDb()
       .find({
@@ -108,7 +108,7 @@ async function getFormationsByUAIAndSIRET(siret: string, uai: string | null): Pr
 type OrganismeFormation = ArrayElement<Organisme["relatedFormations"]>;
 type FormationOrganisme = ArrayElement<OrganismeFormation["organismes"]>;
 
-async function formatFormation(formationCatalogue: WithId<FormationsCatalogue>): Promise<OrganismeFormation> {
+async function formatFormation(formationCatalogue: WithId<IFormationCatalogue>): Promise<OrganismeFormation> {
   return {
     formation_id: formationCatalogue._id,
     cle_ministere_educatif: formationCatalogue.cle_ministere_educatif,
@@ -122,7 +122,7 @@ async function formatFormation(formationCatalogue: WithId<FormationsCatalogue>):
  * Méthode de construction de la liste des organismes avec leur nature, rattachés à une formation du catalogue
  */
 async function buildOrganismesListFromFormationCatalogue(
-  formationCatalogue: FormationsCatalogue
+  formationCatalogue: IFormationCatalogue
 ): Promise<FormationOrganisme[]> {
   const organismesLinkedToFormation: FormationOrganisme[] = [];
 
@@ -199,7 +199,7 @@ async function buildOrganismesListFromFormationCatalogue(
 }
 
 function isOrganismeResponsableFormateur(
-  formationCatalogue: FormationsCatalogue,
+  formationCatalogue: IFormationCatalogue,
   organismesLinkedToFormation: FormationOrganisme[]
 ): boolean {
   // Vérification si OF a la fois identifié gestionnaire (responsable) & formateur

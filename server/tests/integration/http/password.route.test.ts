@@ -39,6 +39,7 @@ describe("Password", () => {
     it("retourne 200 et envoie un mail si le mail est valide et l'utilisateur existe", async () => {
       (sendEmail as jest.MockedFunction<typeof sendEmail>).mockClear();
       await usersMigrationDb().insertOne({
+        _id: new ObjectId(),
         account_status: "CONFIRMED",
         created_at: new Date(date),
         civility: "Madame",
