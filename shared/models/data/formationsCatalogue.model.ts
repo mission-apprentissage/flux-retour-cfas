@@ -1,15 +1,6 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import {
-  arrayOfOrNull,
-  booleanOrNull,
-  numberOrNull,
-  object,
-  objectId,
-  objectOrNull,
-  string,
-  stringOrNull,
-} from "shared";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "formationsCatalogue";
 
@@ -27,192 +18,203 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ etablissement_gestionnaire_uai: 1 }, { name: "etablissement_gestionnaire_uai" }],
 ];
 
-const schema = object(
-  {
-    _id: objectId(),
-    cle_ministere_educatif: string(),
-    cfd: string(),
-    cfd_specialite: stringOrNull(),
-    cfd_outdated: booleanOrNull(),
-    cfd_date_fermeture: stringOrNull(),
-    cfd_entree: stringOrNull(),
-    nom_academie: stringOrNull(),
-    num_academie: stringOrNull(),
-    code_postal: stringOrNull(),
-    code_commune_insee: stringOrNull(),
-    num_departement: stringOrNull(),
-    nom_departement: stringOrNull(),
-    region: stringOrNull(),
-    localite: stringOrNull(),
-    nom: stringOrNull(),
-    intitule_rco: stringOrNull(),
-    intitule_long: string(),
-    intitule_court: stringOrNull(),
-    diplome: stringOrNull(),
-    niveau: stringOrNull(),
-    onisep_url: stringOrNull(),
-    onisep_intitule: stringOrNull(),
-    onisep_libelle_poursuite: stringOrNull(),
-    onisep_lien_site_onisepfr: stringOrNull(),
-    onisep_discipline: stringOrNull(),
-    onisep_domaine_sousdomaine: stringOrNull(),
-    rncp_code: stringOrNull(),
-    rncp_intitule: stringOrNull(),
-    rncp_eligible_apprentissage: booleanOrNull(),
-    rncp_details: objectOrNull({
-      date_fin_validite_enregistrement: stringOrNull(),
-      active_inactive: stringOrNull(),
-      etat_fiche_rncp: stringOrNull(),
-      niveau_europe: stringOrNull(),
-      code_type_certif: stringOrNull(),
-      type_certif: stringOrNull(),
-      ancienne_fiche: arrayOfOrNull(stringOrNull()),
-      nouvelle_fiche: arrayOfOrNull(stringOrNull()),
-      demande: numberOrNull(),
-      certificateurs: arrayOfOrNull(
-        objectOrNull({
-          certificateur: stringOrNull(),
-          siret_certificateur: stringOrNull(),
-        })
-      ),
-      nsf_code: stringOrNull(),
-      nsf_libelle: stringOrNull(),
-      romes: arrayOfOrNull(
-        objectOrNull({
-          rome: stringOrNull(),
-          libelle: stringOrNull(),
-        })
-      ),
+const zFormationCatalogue = z.object({
+  _id: zObjectId,
+  cle_ministere_educatif: z.string(),
+  cfd: z.string(),
+  cfd_specialite: z.string().nullish(),
+  cfd_outdated: z.boolean(),
+  cfd_date_fermeture: z.string().nullish(),
+  cfd_entree: z.string().nullish(),
+  nom_academie: z.string(),
+  num_academie: z.string(),
+  code_postal: z.string(),
+  code_commune_insee: z.string(),
+  num_departement: z.string(),
+  nom_departement: z.string(),
+  region: z.string(),
+  localite: z.string(),
+  nom: z.string().nullish(),
+  intitule_rco: z.string().nullish(),
+  intitule_long: z.string(),
+  intitule_court: z.string(),
+  diplome: z.string(),
+  niveau: z.string(),
+  onisep_url: z.string().nullish(),
+  onisep_intitule: z.string().nullish(),
+  onisep_libelle_poursuite: z.string().nullish(),
+  onisep_lien_site_onisepfr: z.string().nullish(),
+  onisep_discipline: z.string().nullish(),
+  onisep_domaine_sousdomaine: z.string().nullish(),
+  rncp_code: z.string().nullable(),
+  rncp_intitule: z.string().nullish(),
+  rncp_eligible_apprentissage: z.boolean().nullish(),
+  rncp_details: z
+    .object({
+      date_fin_validite_enregistrement: z.string().nullish(),
+      active_inactive: z.string().nullish(),
+      etat_fiche_rncp: z.string().nullish(),
+      niveau_europe: z.string().nullish(),
+      code_type_certif: z.string().nullish(),
+      type_certif: z.string().nullish(),
+      ancienne_fiche: z.array(z.string().nullish()).nullish(),
+      nouvelle_fiche: z.array(z.string().nullish()).nullish(),
+      demande: z.number().nullish(),
+      certificateurs: z
+        .array(
+          z
+            .object({
+              certificateur: z.string().nullish(),
+              siret_certificateur: z.string().nullish(),
+            })
+            .nullish()
+        )
+        .nullish(),
+      nsf_code: z.string().nullish(),
+      nsf_libelle: z.string().nullish(),
+      romes: z
+        .array(
+          z
+            .object({
+              rome: z.string().nullish(),
+              libelle: z.string().nullish(),
+            })
+            .nullish()
+        )
+        .nullish(),
 
-      blocs_competences: arrayOfOrNull(
-        objectOrNull({
-          numero_bloc: stringOrNull(),
-          intitule: stringOrNull(),
-          liste_competences: stringOrNull(),
-          modalites_evaluation: stringOrNull(),
+      blocs_competences: z
+        .array(
+          z
+            .object({
+              numero_bloc: z.string().nullish(),
+              intitule: z.string().nullish(),
+              liste_competences: z.string().nullish(),
+              modalites_evaluation: z.string().nullish(),
+            })
+            .nullish()
+        )
+        .nullish(),
+      voix_acces: z.string().nullish(),
+      partenaires: z
+        .array(
+          z
+            .object({
+              Nom_Partenaire: z.string().nullish(),
+              Siret_Partenaire: z.string().nullish(),
+              Habilitation_Partenaire: z.string().nullish(),
+            })
+            .nullish()
+        )
+        .nullish(),
+      rncp_outdated: z.boolean().nullish(),
+    })
+    .nullish(),
+  rome_codes: z.array(z.string().nullish()),
+  periode: z.array(z.string().nullish()),
+  capacite: z.string().nullish(),
+  duree: z.string(),
+  duree_incoherente: z.boolean(),
+  annee: z.string(),
+  annee_incoherente: z.boolean(),
+  published: z.boolean().nullish(),
+  forced_published: z.boolean().nullish(),
+  distance: z.number().nullish(),
+  lieu_formation_adresse: z.string(),
+  lieu_formation_adresse_computed: z.string().nullish(),
+  lieu_formation_siret: z.string().nullish(),
+  id_rco_formation: z.string().nullish(),
+  id_formation: z.string(),
+  id_action: z.string().nullish(),
+  ids_action: z.array(z.string().nullish()),
+  id_certifinfo: z.string().nullish(),
+  tags: z.array(z.string().nullish()),
+  libelle_court: z.string().nullish(),
+  niveau_formation_diplome: z.string(),
+  distance_lieu_formation_etablissement_formateur: z.string().nullish(),
+  niveau_entree_obligatoire: z.number().nullable(),
+  entierement_a_distance: z.boolean(),
+  france_competence_infos: z.string().nullish(),
+  catalogue_published: z.boolean().nullish(),
+  date_debut: z.array(z.string()),
+  date_fin: z.array(z.string()),
+  modalites_entrees_sorties: z.array(z.boolean().nullish()),
+  id_RCO: z.string().nullish(),
+  etablissement_gestionnaire_id: z.string().nullish(),
+  etablissement_gestionnaire_siret: z.string(),
+  etablissement_gestionnaire_enseigne: z.string().nullish(),
+  etablissement_gestionnaire_uai: z.string().nullable(),
+  etablissement_gestionnaire_published: z.boolean().nullish(),
+  etablissement_gestionnaire_habilite_rncp: z.boolean().nullish(),
+  etablissement_gestionnaire_certifie_qualite: z.boolean().nullish(),
+  etablissement_gestionnaire_adresse: z.string().nullish(),
+  etablissement_gestionnaire_code_postal: z.string().nullish(),
+  etablissement_gestionnaire_code_commune_insee: z.string().nullish(),
+  etablissement_gestionnaire_localite: z.string().nullish(),
+  etablissement_gestionnaire_complement_adresse: z.string().nullish(),
+  etablissement_gestionnaire_cedex: z.string().nullish(),
+  etablissement_gestionnaire_entreprise_raison_sociale: z.string(),
+  etablissement_gestionnaire_region: z.string().nullish(),
+  etablissement_gestionnaire_num_departement: z.string().nullish(),
+  etablissement_gestionnaire_nom_departement: z.string().nullish(),
+  etablissement_gestionnaire_nom_academie: z.string().nullish(),
+  etablissement_gestionnaire_num_academie: z.string().nullish(),
+  etablissement_gestionnaire_siren: z.string().nullish(),
+  etablissement_gestionnaire_nda: z.string().nullish(),
+  etablissement_gestionnaire_date_creation: z.string(),
+  etablissement_formateur_id: z.string().nullish(),
+  etablissement_formateur_siret: z.string(),
+  etablissement_formateur_enseigne: z.string().nullish(),
+  etablissement_formateur_uai: z.string().nullable(),
+  etablissement_formateur_published: z.boolean().nullish(),
+  etablissement_formateur_habilite_rncp: z.boolean().nullish(),
+  etablissement_formateur_certifie_qualite: z.boolean().nullish(),
+  etablissement_formateur_adresse: z.string().nullish(),
+  etablissement_formateur_code_postal: z.string().nullish(),
+  etablissement_formateur_code_commune_insee: z.string().nullish(),
+  etablissement_formateur_localite: z.string().nullish(),
+  etablissement_formateur_complement_adresse: z.string().nullish(),
+  etablissement_formateur_cedex: z.string().nullish(),
+  etablissement_formateur_entreprise_raison_sociale: z.string().nullish(),
+  etablissement_formateur_region: z.string().nullish(),
+  etablissement_formateur_num_departement: z.string().nullish(),
+  etablissement_formateur_nom_departement: z.string().nullish(),
+  etablissement_formateur_nom_academie: z.string().nullish(),
+  etablissement_formateur_num_academie: z.string().nullish(),
+  etablissement_formateur_siren: z.string().nullish(),
+  etablissement_formateur_nda: z.string().nullish(),
+  etablissement_formateur_date_creation: z.string().nullish(),
+  etablissement_reference: z.string().nullish(),
+  etablissement_reference_published: z.boolean().nullish(),
+  etablissement_reference_habilite_rncp: z.boolean().nullish(),
+  etablissement_reference_certifie_qualite: z.boolean().nullish(),
+  etablissement_reference_date_creation: z.string().nullish(),
+  bcn_mefs_10: z
+    .array(
+      z
+        .object({
+          mef10: z.string().nullish(),
+          modalite: z
+            .object({
+              duree: z.string().nullish(),
+              annee: z.string().nullish(),
+            })
+            .nullish(),
         })
-      ),
-      voix_acces: stringOrNull(),
-      partenaires: arrayOfOrNull(
-        objectOrNull({
-          Nom_Partenaire: stringOrNull(),
-          Siret_Partenaire: stringOrNull(),
-          Habilitation_Partenaire: stringOrNull(),
-        })
-      ),
-      rncp_outdated: booleanOrNull(),
-    }),
-    rome_codes: arrayOfOrNull(stringOrNull()),
-    periode: arrayOfOrNull(stringOrNull()),
-    capacite: stringOrNull(),
-    duree: string(),
-    duree_incoherente: booleanOrNull(),
-    annee: string(),
-    annee_incoherente: booleanOrNull(),
-    published: booleanOrNull(),
-    forced_published: booleanOrNull(),
-    distance: numberOrNull(),
-    lieu_formation_adresse: stringOrNull(),
-    lieu_formation_adresse_computed: stringOrNull(),
-    lieu_formation_siret: stringOrNull(),
-    id_rco_formation: stringOrNull(),
-    id_formation: stringOrNull(),
-    id_action: stringOrNull(),
-    ids_action: arrayOfOrNull(stringOrNull()),
-    id_certifinfo: stringOrNull(),
-    tags: arrayOfOrNull(stringOrNull()),
-    libelle_court: stringOrNull(),
-    niveau_formation_diplome: stringOrNull(),
-    distance_lieu_formation_etablissement_formateur: stringOrNull(),
-    niveau_entree_obligatoire: numberOrNull(),
-    entierement_a_distance: booleanOrNull(),
-    france_competence_infos: stringOrNull(),
-    catalogue_published: booleanOrNull(),
-    date_debut: arrayOfOrNull(stringOrNull()),
-    date_fin: arrayOfOrNull(stringOrNull()),
-    modalites_entrees_sorties: arrayOfOrNull(booleanOrNull()),
-    id_RCO: stringOrNull(),
-    etablissement_gestionnaire_id: stringOrNull(),
-    etablissement_gestionnaire_siret: string(),
-    etablissement_gestionnaire_enseigne: stringOrNull(),
-    etablissement_gestionnaire_uai: stringOrNull(),
-    etablissement_gestionnaire_published: booleanOrNull(),
-    etablissement_gestionnaire_habilite_rncp: booleanOrNull(),
-    etablissement_gestionnaire_certifie_qualite: booleanOrNull(),
-    etablissement_gestionnaire_adresse: stringOrNull(),
-    etablissement_gestionnaire_code_postal: stringOrNull(),
-    etablissement_gestionnaire_code_commune_insee: stringOrNull(),
-    etablissement_gestionnaire_localite: stringOrNull(),
-    etablissement_gestionnaire_complement_adresse: stringOrNull(),
-    etablissement_gestionnaire_cedex: stringOrNull(),
-    etablissement_gestionnaire_entreprise_raison_sociale: stringOrNull(),
-    etablissement_gestionnaire_region: stringOrNull(),
-    etablissement_gestionnaire_num_departement: stringOrNull(),
-    etablissement_gestionnaire_nom_departement: stringOrNull(),
-    etablissement_gestionnaire_nom_academie: stringOrNull(),
-    etablissement_gestionnaire_num_academie: stringOrNull(),
-    etablissement_gestionnaire_siren: stringOrNull(),
-    etablissement_gestionnaire_nda: stringOrNull(),
-    etablissement_gestionnaire_date_creation: stringOrNull(),
-    etablissement_formateur_id: stringOrNull(),
-    etablissement_formateur_siret: string(),
-    etablissement_formateur_enseigne: stringOrNull(),
-    etablissement_formateur_uai: stringOrNull(),
-    etablissement_formateur_published: booleanOrNull(),
-    etablissement_formateur_habilite_rncp: booleanOrNull(),
-    etablissement_formateur_certifie_qualite: booleanOrNull(),
-    etablissement_formateur_adresse: stringOrNull(),
-    etablissement_formateur_code_postal: stringOrNull(),
-    etablissement_formateur_code_commune_insee: stringOrNull(),
-    etablissement_formateur_localite: stringOrNull(),
-    etablissement_formateur_complement_adresse: stringOrNull(),
-    etablissement_formateur_cedex: stringOrNull(),
-    etablissement_formateur_entreprise_raison_sociale: stringOrNull(),
-    etablissement_formateur_region: stringOrNull(),
-    etablissement_formateur_num_departement: stringOrNull(),
-    etablissement_formateur_nom_departement: stringOrNull(),
-    etablissement_formateur_nom_academie: stringOrNull(),
-    etablissement_formateur_num_academie: stringOrNull(),
-    etablissement_formateur_siren: stringOrNull(),
-    etablissement_formateur_nda: stringOrNull(),
-    etablissement_formateur_date_creation: stringOrNull(),
-    etablissement_reference: stringOrNull(),
-    etablissement_reference_published: booleanOrNull(),
-    etablissement_reference_habilite_rncp: booleanOrNull(),
-    etablissement_reference_certifie_qualite: booleanOrNull(),
-    etablissement_reference_date_creation: stringOrNull(),
-    bcn_mefs_10: arrayOfOrNull(
-      objectOrNull({
-        mef10: stringOrNull(),
-        modalite: objectOrNull({
-          duree: stringOrNull(),
-          annee: stringOrNull(),
-        }),
-      })
-    ),
-    lieu_formation_geo_coordonnees: stringOrNull(),
-    geo_coordonnees_etablissement_gestionnaire: stringOrNull(),
-    geo_coordonnees_etablissement_formateur: stringOrNull(),
-    idea_geo_coordonnees_etablissement: stringOrNull(),
-    created_at: stringOrNull(),
-    last_update_at: stringOrNull(),
-    lieu_formation_geo_coordonnees_computed: stringOrNull(),
-  },
-  {
-    required: [
-      "cle_ministere_educatif",
-      "cfd",
-      "rncp_code",
-      "duree",
-      "annee",
-      "intitule_long",
-      "etablissement_gestionnaire_uai",
-      "etablissement_gestionnaire_siret",
-      "etablissement_formateur_uai",
-      "etablissement_formateur_siret",
-    ],
-    additionalProperties: true,
-  }
-);
+        .nullish()
+    )
+    .nullish(),
+  lieu_formation_geo_coordonnees: z.string().nullish(),
+  geo_coordonnees_etablissement_gestionnaire: z.string().nullish(),
+  geo_coordonnees_etablissement_formateur: z.string().nullish(),
+  idea_geo_coordonnees_etablissement: z.string().nullish(),
+  created_at: z.string().nullish(),
+  last_update_at: z.string().nullish(),
+  lieu_formation_geo_coordonnees_computed: z.string().nullish(),
+});
 
-export default { schema, indexes, collectionName };
+export type IFormationCatalogue = z.output<typeof zFormationCatalogue>;
+
+// Add passthrough to allow extra properties in database, as it's an external API we are not sure they will not add new properties
+// But doesn't allow extra properties in the code, do not use not referenced properties
+export default { zod: zFormationCatalogue.passthrough(), indexes, collectionName };

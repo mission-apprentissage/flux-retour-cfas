@@ -13,6 +13,7 @@ import React from "react";
 
 import { _delete } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import { ArrowRightLine } from "@/theme/components/icons";
 
 const EffectifDoublonDeleteAllAlertDialog = ({
@@ -29,6 +30,7 @@ const EffectifDoublonDeleteAllAlertDialog = ({
   organismeId: string;
 }) => {
   const queryClient = useQueryClient();
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   return (
     <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size={"4xl"}>
@@ -42,9 +44,7 @@ const EffectifDoublonDeleteAllAlertDialog = ({
           </AlertDialogHeader>
 
           <AlertDialogBody>
-            <Text fontWeight="bold">
-              Seuls les duplicats les plus anciens seront supprimés. Cette opération est irréversible.
-            </Text>
+            <Text fontWeight="bold">Seuls les duplicats les plus anciens seront supprimés.</Text>
             <Text>Cette opération est irréversible.</Text>
             <Ribbons variant="alert" mt={6}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
@@ -60,6 +60,7 @@ const EffectifDoublonDeleteAllAlertDialog = ({
             <Button
               colorScheme="red"
               onClick={async () => {
+                trackPlausibleEvent("suppression_doublons_effectifs_en_lot");
                 await _delete(`/api/v1/organismes/${organismeId}/duplicates`);
                 queryClient.invalidateQueries(["duplicates-effectifs"]);
                 onClose();

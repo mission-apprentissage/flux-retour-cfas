@@ -2,8 +2,8 @@ import { IncomingMessage } from "node:http";
 
 import axios from "axios";
 import JSONStream from "JSONStream";
-import { ObjectId, WithId } from "mongodb";
-import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
+import { ObjectId } from "mongodb";
+import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb } from "@/common/model/collections";
@@ -30,7 +30,6 @@ export const hydrateFormationsCatalogue = async () => {
     params: {
       limit: 150_000, // 150k pour tout avoir (91k total, 62k formations publiées)
       query: {
-        published: true,
         catalogue_published: true,
       },
     },
@@ -38,7 +37,7 @@ export const hydrateFormationsCatalogue = async () => {
 
   const queriesInProgress: Promise<any>[] = [];
   let totalFormations = 0;
-  let pendingFormations: WithId<FormationsCatalogue>[] = [];
+  let pendingFormations: IFormationCatalogue[] = [];
 
   function flushPendingFormations() {
     totalFormations += pendingFormations.length;
@@ -67,7 +66,7 @@ export const hydrateFormationsCatalogue = async () => {
   return new Promise<void>((resolve, reject) => {
     const parser = JSONStream.parse("*");
     res.data.pipe(parser);
-    parser.on("data", (formation: WithStringId<FormationsCatalogue>) => {
+    parser.on("data", (formation: WithStringId<IFormationCatalogue>) => {
       pendingFormations.push({
         ...formation,
         _id: new ObjectId(formation._id),

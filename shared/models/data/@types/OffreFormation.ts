@@ -14,12 +14,12 @@ type OptionalAdresse = {
 };
 
 interface Etablissement {
-  id_catalogue: string;
+  id_catalogue: string | null;
   siret: string;
   uai: string | null;
   enseigne: string | null;
   habilite_rncp: boolean | null;
-  certifie_qualite: boolean;
+  certifie_qualite: boolean | null;
   adresse: OptionalAdresse;
   raison_sociale: string;
   date_creation: string;

@@ -205,7 +205,7 @@ export const getTransmissionStatusByOrganismeGroupedByDate = async (
   return transmissions;
 };
 
-export const getTransmissionStatusDetailsForAGivenDay = async (
+export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
   organismeId: string,
   day: string,
   page: number = 1,
@@ -260,4 +260,117 @@ export const getTransmissionStatusDetailsForAGivenDay = async (
     transmissionsDetails.pagination.lastPage = Math.ceil(transmissionsDetails.pagination.total / limit);
   }
   return transmissionsDetails;
+};
+
+export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
+  organismeId: string,
+  day: string,
+  page: number = 1,
+  limit: number = 20
+) => {
+  const selectedDay = new Date(day);
+  const start = startOfDay(selectedDay);
+  const end = endOfDay(selectedDay);
+
+  const effectifCounts = await effectifsQueueDb()
+    .aggregate([
+      {
+        $match: {
+          source_organisme_id: organismeId,
+          processed_at: {
+            $gte: start,
+            $lte: end,
+          },
+          effectif_id: {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $count: "totalEffectifs",
+      },
+    ])
+    .next();
+
+  const transmissionsDetails = await effectifsQueueDb()
+    .aggregate([
+      {
+        $match: {
+          source_organisme_id: organismeId,
+          processed_at: {
+            $gte: start,
+            $lte: end,
+          },
+          effectif_id: {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$organisme_id",
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $facet: {
+          pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
+          data: [
+            {
+              $skip: (page - 1) * limit,
+            },
+            {
+              $limit: limit,
+            },
+            {
+              $lookup: {
+                from: "organismes",
+                localField: "_id",
+                foreignField: "_id",
+                as: "orga",
+                pipeline: [{ $project: { uai: 1, nom: 1, siret: 1, adresse: "$adresse.complete" } }],
+              },
+            },
+            {
+              $unwind: "$orga",
+            },
+            {
+              $project: {
+                id: "$_id",
+                uai: "$orga.uai",
+                name: "$orga.nom",
+                siret: "$orga.siret",
+                adresse: "$orga.adresse",
+                effectifCount: "$count",
+                _id: 0,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: "$pagination",
+      },
+    ])
+    .next();
+
+  if (!transmissionsDetails) {
+    return {
+      totalEffectifs: 0,
+      pagination: {
+        page,
+        limit,
+        lastPage: page,
+        total: 0,
+      },
+      data: [],
+    };
+  }
+
+  if (transmissionsDetails?.pagination) {
+    transmissionsDetails.pagination.lastPage = Math.ceil(transmissionsDetails.pagination.total / limit);
+  }
+  return { ...transmissionsDetails, ...effectifCounts };
 };
