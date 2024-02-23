@@ -30,7 +30,6 @@ export const hydrateFormationsCatalogue = async () => {
     params: {
       limit: 150_000, // 150k pour tout avoir (91k total, 62k formations publiées)
       query: {
-        published: true,
         catalogue_published: true,
       },
     },
