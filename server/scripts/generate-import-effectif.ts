@@ -17,7 +17,7 @@ function optional(data) {
   return fakerFr.helpers.arrayElement([data, ""]);
 }
 
-function fakeEffectif(formateur: IOrganisme, formation: IFormationsCatalogue) {
+function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
   const lastName = fakerFr.person.lastName();
   const firstName = fakerFr.person.firstName();
   const anneeFormation = Number(formation.annee);
