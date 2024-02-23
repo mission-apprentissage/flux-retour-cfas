@@ -15,7 +15,7 @@ import effectifsQueueModelDescriptor from "shared/models/data/effectifsQueue.mod
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
 import formationsModelDescriptor from "shared/models/data/formations.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
-import invitationsModelDescriptor, { Invitation } from "shared/models/data/invitations.model";
+import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
 import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
@@ -61,7 +61,7 @@ export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescrip
 export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
 export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDescriptor.collectionName);
-export const invitationsDb = () => getDbCollection<Invitation>(invitationsModelDescriptor.collectionName);
+export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection<Organisation>(organisationsModelDescriptor.collectionName);
 export const organismesReferentielDb = () =>
   getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);

@@ -4738,7 +4738,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
 
 exports[`validation-schema should create validation schema for invitations: invitations 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
     "_id": {
@@ -4766,6 +4766,7 @@ exports[`validation-schema should create validation schema for invitations: invi
     },
   },
   "required": [
+    "_id",
     "token",
     "email",
     "organisation_id",
