@@ -9,7 +9,7 @@ import {
   PermissionsOrganisme,
   assertUnreachable,
 } from "shared";
-import { Organisation } from "shared/models/data/organisations.model";
+import { IOrganisation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
@@ -21,7 +21,7 @@ import { findOrganismeFormateursIds } from "./permissions";
 
 export type OrganismeWithPermissions = IOrganisme & { permissions: PermissionsOrganisme };
 
-export async function getAcl(organisation: Organisation): Promise<Acl> {
+export async function getAcl(organisation: IOrganisation): Promise<Acl> {
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
       const userOrganisme = await organismesDb().findOne({

@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { OrganisationOrganismeFormation } from "shared/models/data/organisations.model";
+import { IOrganisationOrganismeFormation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
@@ -10,7 +10,7 @@ import { organismesDb } from "@/common/model/collections";
  * Liste tous les organismes accessibles pour une organisation (dont l'organisme lié à l'organisation)
  */
 export async function findOrganismesAccessiblesByOrganisationOF(
-  organisation: OrganisationOrganismeFormation
+  organisation: IOrganisationOrganismeFormation
 ): Promise<ObjectId[]> {
   const userOrganisme = await organismesDb().findOne({
     siret: organisation.siret,

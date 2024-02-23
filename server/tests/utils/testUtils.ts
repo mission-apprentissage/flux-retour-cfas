@@ -3,7 +3,7 @@ import { strict as assert } from "assert";
 import { AxiosResponse } from "axios";
 import axiosist from "axiosist";
 import { ObjectId } from "mongodb";
-import { NewOrganisation, getOrganisationLabel } from "shared/models/data/organisations.model";
+import { IOrganisationCreate, getOrganisationLabel } from "shared/models/data/organisations.model";
 
 import { createOrganisation } from "@/common/actions/organisations.actions";
 import { createSession } from "@/common/actions/sessions.actions";
@@ -14,7 +14,7 @@ import { resetTime } from "@/common/utils/timeUtils";
 import server from "@/http/server";
 
 export type RequestAsOrganisationFunc = <T>(
-  organisation: NewOrganisation,
+  organisation: IOrganisationCreate,
   method: Method,
   url: string,
   body?: T
@@ -33,7 +33,7 @@ export async function initTestApp() {
      * L'utilisateur et l'organisation sont créés à la volée
      */
     async requestAsOrganisation<T>(
-      organisation: NewOrganisation,
+      organisation: IOrganisationCreate,
       method: Method,
       url: string,
       body?: T

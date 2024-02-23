@@ -2,7 +2,7 @@ import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared";
 import { Effectif } from "shared/models/data/@types/Effectif";
-import { NewOrganisation, Organisation } from "shared/models/data/organisations.model";
+import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
@@ -189,7 +189,7 @@ export const profilsPermissionByLabel = {
     type: "ADMINISTRATEUR",
     created_at,
   },
-} as const satisfies Record<string, WithId<Organisation>>;
+} as const satisfies Record<string, IOrganisation>;
 
 type ProfilLabel = keyof typeof profilsPermissionByLabel;
 
@@ -285,7 +285,7 @@ export const commonEffectifsAttributes: Pick<Effectif, "organisme_id" | "_comput
 };
 
 type TestFunc<ExpectedResult> = (
-  organisation: NewOrganisation,
+  organisation: IOrganisationCreate,
   expectedResult: ExpectedResult,
   organisationLabel?: ProfilLabel
 ) => Promise<any>;

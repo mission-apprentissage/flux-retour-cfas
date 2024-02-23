@@ -12,7 +12,7 @@ import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invi
 import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
 import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
-import organisationsModelDescriptor, { Organisation } from "shared/models/data/organisations.model";
+import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
 import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organismes.model";
 import OrganismesReferentielModelDescriptor, {
   IOrganismeReferentiel,
@@ -56,7 +56,7 @@ export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigr
 export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<IOrganisme>(OrganismesModelDescriptor.collectionName);
 export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
-export const organisationsDb = () => getDbCollection<Organisation>(organisationsModelDescriptor.collectionName);
+export const organisationsDb = () => getDbCollection<IOrganisation>(organisationsModelDescriptor.collectionName);
 export const organismesReferentielDb = () =>
   getDbCollection<IOrganismeReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>

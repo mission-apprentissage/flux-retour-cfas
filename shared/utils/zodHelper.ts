@@ -12,3 +12,8 @@ export function zodEnumFromObjValues<K extends string>(obj: Record<any, K>): Zod
   const [firstKey, ...otherKeys] = Object.values(obj) as K[];
   return zodOpenApi.enum([firstKey, ...otherKeys]);
 }
+
+export function zodEnumFromArray<K extends string>(array: K[]): ZodEnum<[K, ...K[]]> {
+  const [firstKey, ...otherKeys] = array;
+  return zodOpenApi.enum([firstKey, ...otherKeys]);
+}

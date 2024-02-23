@@ -3,7 +3,7 @@ import escapeStringRegexp from "escape-string-regexp";
 import { OrganismeSupportInfo } from "shared/models";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
 import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
-import { OrganisationOrganismeFormation } from "shared/models/data/organisations.model";
+import { IOrganisationOrganismeFormation } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
@@ -222,7 +222,7 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
     getOffreFormations(siret),
     fiabilisationUaiSiretDb().find({ siret }).toArray(),
     organisationsDb()
-      .aggregate<OrganisationOrganismeFormation & { users: IUsersMigration[] }>([
+      .aggregate<IOrganisationOrganismeFormation & { users: IUsersMigration[] }>([
         { $match: { type: "ORGANISME_FORMATION", siret } },
         {
           $lookup: {
