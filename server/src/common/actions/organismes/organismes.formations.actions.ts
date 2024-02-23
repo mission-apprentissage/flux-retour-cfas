@@ -19,7 +19,6 @@ export const getFormationsTreeForOrganisme = async (uai: string | undefined) => 
 
   // Récupération des formations liés à l'organisme
   const catalogFormationsForOrganismeCursor = formationsCatalogueDb().find({
-    published: true,
     catalogue_published: true,
     $or: [{ etablissement_formateur_uai: uai }, { etablissement_gestionnaire_uai: uai }],
   });

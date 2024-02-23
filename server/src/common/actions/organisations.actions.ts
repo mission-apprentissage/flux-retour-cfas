@@ -2,9 +2,9 @@ import Boom from "boom";
 import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE } from "shared";
-import { UsersMigration } from "shared/models/data/@types/UsersMigration";
-import { Invitation } from "shared/models/data/invitations.model";
+import { IInvitation } from "shared/models/data/invitations.model";
 import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
+import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import logger from "@/common/logger";
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
@@ -34,7 +34,7 @@ export async function getOrganisationById(organisationId: ObjectId): Promise<IOr
   return organisation;
 }
 
-export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial<UsersMigration[]>> {
+export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial<IUsersMigration[]>> {
   return await usersMigrationDb()
     .find(
       {
@@ -59,7 +59,7 @@ export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial
     .toArray();
 }
 
-export async function listContactsOrganisation(organisationId: ObjectId): Promise<Partial<UsersMigration>[]> {
+export async function listContactsOrganisation(organisationId: ObjectId): Promise<Partial<IUsersMigration>[]> {
   return await usersMigrationDb()
     .find(
       {
@@ -106,6 +106,7 @@ export async function inviteUserToOrganisation(ctx: AuthContext, email: string):
   }
   const invitationToken = generateKey(50, "hex");
   await invitationsDb().insertOne({
+    _id: new ObjectId(),
     organisation_id: ctx.organisation_id,
     email,
     token: invitationToken,
@@ -305,8 +306,8 @@ export async function rejectInvitation(token: string): Promise<void> {
 
 // utilitaires
 
-async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Promise<Invitation> {
-  const invitation = await invitationsDb().findOne<Invitation>({
+async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Promise<IInvitation> {
+  const invitation = await invitationsDb().findOne<IInvitation>({
     organisation_id: ctx.organisation_id, // filtrage pour restreindre les accès
     _id: invitationId,
   });

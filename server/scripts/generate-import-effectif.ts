@@ -4,7 +4,7 @@ import { faker as fakerEn, Faker, fr } from "@faker-js/faker";
 import { program } from "commander";
 import { config } from "dotenv";
 import { MongoClient } from "mongodb";
-import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
+import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { write, utils } from "xlsx";
 
@@ -17,7 +17,7 @@ function optional(data) {
   return fakerFr.helpers.arrayElement([data, ""]);
 }
 
-function fakeEffectif(formateur: IOrganisme, formation: FormationsCatalogue) {
+function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
   const lastName = fakerFr.person.lastName();
   const firstName = fakerFr.person.firstName();
   const anneeFormation = Number(formation.annee);
@@ -153,7 +153,7 @@ program
     }
 
     const formationCles = formateur.relatedFormations.map((f) => f.cle_ministere_educatif);
-    const formations: FormationsCatalogue[] = (await client
+    const formations: IFormationCatalogue[] = (await client
       .db("flux-retour-cfas")
       .collection("formationsCatalogue")
       .find({ cle_ministere_educatif: { $in: formationCles } })

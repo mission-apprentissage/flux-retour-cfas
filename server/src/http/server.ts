@@ -24,7 +24,10 @@ import {
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
 import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
-import { getDuplicatesEffectifsForOrganismeId } from "@/common/actions/effectifs.duplicates.actions";
+import {
+  deleteOldestDuplicates,
+  getDuplicatesEffectifsForOrganismeIdWithPagination,
+} from "@/common/actions/effectifs.duplicates.actions";
 import {
   dateFiltersSchema,
   effectifsFiltersTerritoireSchema,
@@ -88,7 +91,7 @@ import { changePassword, updateUserProfile } from "@/common/actions/users.action
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -191,7 +194,7 @@ function setupRoutes(app: Application) {
       returnResult(async () => {
         let mongodbHealthy = false;
         try {
-          await jobEventsDb().findOne({});
+          await usersMigrationDb().findOne({});
           mongodbHealthy = true;
         } catch (err) {
           logger.error({ err }, "healthcheck failed");
@@ -527,13 +530,23 @@ function setupRoutes(app: Application) {
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
         returnResult(async (req, res) => {
-          let duplicates = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId);
+          const page = parseInt(req.query.page, 10) || 1;
+          const limit = parseInt(req.query.limit, 10) || 5;
 
-          if (duplicates.length === 0) {
-            duplicates = await getDuplicatesEffectifsForOrganismeId(res.locals.organismeId, false);
-          }
+          let duplicates = await getDuplicatesEffectifsForOrganismeIdWithPagination(
+            res.locals.organismeId,
+            page,
+            limit
+          );
 
           return duplicates;
+        })
+      )
+      .delete(
+        "/duplicates",
+        requireOrganismePermission("manageEffectifs"),
+        returnResult(async (req, res) => {
+          await deleteOldestDuplicates(res.locals.organismeId);
         })
       )
       .get(

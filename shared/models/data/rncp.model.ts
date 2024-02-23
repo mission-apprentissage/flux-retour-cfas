@@ -1,6 +1,6 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { arrayOf, boolean, number, object, objectId, string } from "shared";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "rncp";
 
@@ -9,19 +9,20 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ opcos: 1 }, {}],
 ];
 
-const schema = object(
-  {
-    _id: objectId(),
-    rncp: string(),
-    nouveaux_rncp: arrayOf(string()),
-    intitule: string(),
-    niveau: number(),
-    etat_fiche: string(),
-    actif: boolean(),
-    romes: arrayOf(string()),
-    opcos: arrayOf(string(), { description: "Information récupérée depuis les CSV des OPCOs et non le RNCP" }),
-  },
-  { required: ["rncp", "intitule", "etat_fiche", "actif", "romes"], additionalProperties: false }
-);
+const zRncp = z.object({
+  _id: zObjectId,
+  rncp: z.string(),
+  nouveaux_rncp: z.array(z.string()).optional(),
+  intitule: z.string(),
+  niveau: z.number().optional(),
+  etat_fiche: z.string(),
+  actif: z.boolean(),
+  romes: z.array(z.string()),
+  opcos: z
+    .array(z.string(), { description: "Information récupérée depuis les CSV des OPCOs et non le RNCP" })
+    .optional(),
+});
 
-export default { schema, indexes, collectionName };
+export type IRncp = z.output<typeof zRncp>;
+
+export default { zod: zRncp, indexes, collectionName };

@@ -1,8 +1,8 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
-import { ObjectId, WithId } from "mongodb";
-import { UsersMigration } from "shared/models/data/@types/UsersMigration";
+import { ObjectId } from "mongodb";
+import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { setTime } from "@/common/utils/timeUtils";
@@ -11,7 +11,7 @@ import { id, initTestApp, testPasswordHash } from "@tests/utils/testUtils";
 
 const date = "2022-10-10T00:00:00.000Z";
 
-const testUser: WithId<UsersMigration> = {
+const testUser: IUsersMigration = {
   _id: new ObjectId(id(1)),
   account_status: "CONFIRMED",
   invalided_token: false,

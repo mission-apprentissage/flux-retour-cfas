@@ -1,10 +1,10 @@
 import { ObjectId } from "bson";
 import escapeStringRegexp from "escape-string-regexp";
 import { OrganismeSupportInfo } from "shared/models";
-import { UsersMigration } from "shared/models/data/@types";
-import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
+import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import { IOrganisationOrganismeFormation } from "shared/models/data/organisations.model";
+import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
@@ -26,7 +26,7 @@ function getFormationEtablissment(formation: OffreFormation, siret: string) {
   return null;
 }
 
-function getOnisep(formationCatalogue: FormationsCatalogue): OffreFormation["onisep"] {
+function getOnisep(formationCatalogue: IFormationCatalogue): OffreFormation["onisep"] {
   if (
     !formationCatalogue.onisep_url ||
     !formationCatalogue.onisep_intitule ||
@@ -47,7 +47,7 @@ function getOnisep(formationCatalogue: FormationsCatalogue): OffreFormation["oni
   };
 }
 
-function getSessions(formationCatalogue: FormationsCatalogue): OffreFormation["sessions"] {
+function getSessions(formationCatalogue: IFormationCatalogue): OffreFormation["sessions"] {
   const sessions: OffreFormation["sessions"] = [];
   for (let i = 0; i < formationCatalogue.date_debut.length; i++) {
     sessions.push({
@@ -59,7 +59,7 @@ function getSessions(formationCatalogue: FormationsCatalogue): OffreFormation["s
   return sessions;
 }
 
-async function getRncps(formationCatalogue: FormationsCatalogue): Promise<OffreFormation["rncps"]> {
+async function getRncps(formationCatalogue: IFormationCatalogue): Promise<OffreFormation["rncps"]> {
   const tco = await getCfdInfo(formationCatalogue.cfd);
 
   if (!tco) {
@@ -96,7 +96,7 @@ async function getRncps(formationCatalogue: FormationsCatalogue): Promise<OffreF
   });
 }
 
-async function buildOffreDeFormation(formationCatalogue: FormationsCatalogue): Promise<OffreFormation> {
+async function buildOffreDeFormation(formationCatalogue: IFormationCatalogue): Promise<OffreFormation> {
   return {
     id_catalogue: formationCatalogue.id_formation,
     cle_ministere_educatif: formationCatalogue.cle_ministere_educatif,
@@ -145,7 +145,7 @@ async function buildOffreDeFormation(formationCatalogue: FormationsCatalogue): P
         nom_academie: formationCatalogue.nom_academie,
         num_academie: formationCatalogue.num_academie,
       },
-      siret: formationCatalogue.lieu_formation_siret,
+      siret: formationCatalogue.lieu_formation_siret ?? null,
     },
 
     entierement_a_distance: formationCatalogue.entierement_a_distance,
@@ -153,42 +153,42 @@ async function buildOffreDeFormation(formationCatalogue: FormationsCatalogue): P
     sessions: getSessions(formationCatalogue),
 
     gestionnaire: {
-      id_catalogue: formationCatalogue.etablissement_gestionnaire_id,
+      id_catalogue: formationCatalogue.etablissement_gestionnaire_id ?? null,
       siret: formationCatalogue.etablissement_gestionnaire_siret,
       uai: formationCatalogue.etablissement_gestionnaire_uai,
       enseigne: formationCatalogue.etablissement_gestionnaire_enseigne || null,
-      habilite_rncp: formationCatalogue.etablissement_gestionnaire_habilite_rncp,
-      certifie_qualite: formationCatalogue.etablissement_gestionnaire_certifie_qualite,
+      habilite_rncp: formationCatalogue.etablissement_gestionnaire_habilite_rncp ?? null,
+      certifie_qualite: formationCatalogue.etablissement_gestionnaire_certifie_qualite ?? null,
       adresse: {
-        code_postal: formationCatalogue.etablissement_gestionnaire_code_postal,
-        code_commune_insee: formationCatalogue.etablissement_gestionnaire_code_commune_insee,
-        num_departement: formationCatalogue.etablissement_gestionnaire_num_departement,
-        region: formationCatalogue.etablissement_gestionnaire_region,
-        localite: formationCatalogue.etablissement_gestionnaire_localite,
-        adresse: formationCatalogue.etablissement_gestionnaire_adresse,
-        nom_academie: formationCatalogue.etablissement_gestionnaire_nom_academie,
-        num_academie: formationCatalogue.etablissement_gestionnaire_num_academie,
+        code_postal: formationCatalogue.etablissement_gestionnaire_code_postal ?? null,
+        code_commune_insee: formationCatalogue.etablissement_gestionnaire_code_commune_insee ?? null,
+        num_departement: formationCatalogue.etablissement_gestionnaire_num_departement ?? null,
+        region: formationCatalogue.etablissement_gestionnaire_region ?? null,
+        localite: formationCatalogue.etablissement_gestionnaire_localite ?? null,
+        adresse: formationCatalogue.etablissement_gestionnaire_adresse ?? null,
+        nom_academie: formationCatalogue.etablissement_gestionnaire_nom_academie ?? null,
+        num_academie: formationCatalogue.etablissement_gestionnaire_num_academie ?? null,
       },
       raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale,
       date_creation: formationCatalogue.etablissement_gestionnaire_date_creation,
       reference: formationCatalogue.etablissement_reference === "gestionnaire",
     },
     formateur: {
-      id_catalogue: formationCatalogue.etablissement_formateur_id,
+      id_catalogue: formationCatalogue.etablissement_formateur_id ?? null,
       siret: formationCatalogue.etablissement_formateur_siret,
       uai: formationCatalogue.etablissement_formateur_uai,
       enseigne: formationCatalogue.etablissement_formateur_enseigne || null,
-      habilite_rncp: formationCatalogue.etablissement_formateur_habilite_rncp,
-      certifie_qualite: formationCatalogue.etablissement_formateur_certifie_qualite,
+      habilite_rncp: formationCatalogue.etablissement_formateur_habilite_rncp ?? null,
+      certifie_qualite: formationCatalogue.etablissement_formateur_certifie_qualite ?? null,
       adresse: {
-        code_postal: formationCatalogue.etablissement_gestionnaire_code_postal,
-        code_commune_insee: formationCatalogue.etablissement_gestionnaire_code_commune_insee,
-        num_departement: formationCatalogue.etablissement_gestionnaire_num_departement,
-        region: formationCatalogue.etablissement_gestionnaire_region,
-        localite: formationCatalogue.etablissement_gestionnaire_localite,
-        adresse: formationCatalogue.etablissement_gestionnaire_adresse,
-        nom_academie: formationCatalogue.etablissement_gestionnaire_nom_academie,
-        num_academie: formationCatalogue.etablissement_gestionnaire_num_academie,
+        code_postal: formationCatalogue.etablissement_gestionnaire_code_postal ?? null,
+        code_commune_insee: formationCatalogue.etablissement_gestionnaire_code_commune_insee ?? null,
+        num_departement: formationCatalogue.etablissement_gestionnaire_num_departement ?? null,
+        region: formationCatalogue.etablissement_gestionnaire_region ?? null,
+        localite: formationCatalogue.etablissement_gestionnaire_localite ?? null,
+        adresse: formationCatalogue.etablissement_gestionnaire_adresse ?? null,
+        nom_academie: formationCatalogue.etablissement_gestionnaire_nom_academie ?? null,
+        num_academie: formationCatalogue.etablissement_gestionnaire_num_academie ?? null,
       },
       raison_sociale: formationCatalogue.etablissement_gestionnaire_entreprise_raison_sociale,
       date_creation: formationCatalogue.etablissement_gestionnaire_date_creation,
@@ -222,7 +222,7 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
     getOffreFormations(siret),
     fiabilisationUaiSiretDb().find({ siret }).toArray(),
     organisationsDb()
-      .aggregate<IOrganisationOrganismeFormation & { users: UsersMigration[] }>([
+      .aggregate<IOrganisationOrganismeFormation & { users: IUsersMigration[] }>([
         { $match: { type: "ORGANISME_FORMATION", siret } },
         {
           $lookup: {

@@ -3664,52 +3664,68 @@ exports[`validation-schema should create validation schema for formationsCatalog
       "bsonType": "string",
     },
     "annee_incoherente": {
-      "bsonType": [
-        "bool",
-        "null",
-      ],
+      "bsonType": "bool",
     },
     "bcn_mefs_10": {
-      "bsonType": [
-        "array",
-        "null",
-      ],
-      "items": {
-        "additionalProperties": false,
-        "bsonType": [
-          "object",
-          "null",
-        ],
-        "properties": {
-          "mef10": {
-            "bsonType": [
-              "string",
-              "null",
-            ],
-          },
-          "modalite": {
-            "additionalProperties": false,
-            "bsonType": [
-              "object",
-              "null",
-            ],
-            "properties": {
-              "annee": {
-                "bsonType": [
-                  "string",
-                  "null",
+      "anyOf": [
+        {
+          "bsonType": "array",
+          "items": {
+            "anyOf": [
+              {
+                "not": {},
+              },
+              {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "bsonType": "object",
+                    "properties": {
+                      "mef10": {
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
+                      },
+                      "modalite": {
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "annee": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                              "duree": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
+                      },
+                    },
+                  },
+                  {
+                    "bsonType": "null",
+                  },
                 ],
               },
-              "duree": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-            },
+            ],
           },
         },
-      },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "capacite": {
       "bsonType": [
@@ -3739,10 +3755,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "cfd_outdated": {
-      "bsonType": [
-        "bool",
-        "null",
-      ],
+      "bsonType": "bool",
     },
     "cfd_specialite": {
       "bsonType": [
@@ -3754,16 +3767,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       "bsonType": "string",
     },
     "code_commune_insee": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "code_postal": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "created_at": {
       "bsonType": [
@@ -3772,34 +3779,19 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "date_debut": {
-      "bsonType": [
-        "array",
-        "null",
-      ],
+      "bsonType": "array",
       "items": {
-        "bsonType": [
-          "string",
-          "null",
-        ],
+        "bsonType": "string",
       },
     },
     "date_fin": {
-      "bsonType": [
-        "array",
-        "null",
-      ],
+      "bsonType": "array",
       "items": {
-        "bsonType": [
-          "string",
-          "null",
-        ],
+        "bsonType": "string",
       },
     },
     "diplome": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "distance": {
       "bsonType": [
@@ -3817,16 +3809,10 @@ exports[`validation-schema should create validation schema for formationsCatalog
       "bsonType": "string",
     },
     "duree_incoherente": {
-      "bsonType": [
-        "bool",
-        "null",
-      ],
+      "bsonType": "bool",
     },
     "entierement_a_distance": {
-      "bsonType": [
-        "bool",
-        "null",
-      ],
+      "bsonType": "bool",
     },
     "etablissement_formateur_adresse": {
       "bsonType": [
@@ -3994,10 +3980,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "etablissement_gestionnaire_date_creation": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "etablissement_gestionnaire_enseigne": {
       "bsonType": [
@@ -4006,10 +3989,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "etablissement_gestionnaire_entreprise_raison_sociale": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "etablissement_gestionnaire_habilite_rncp": {
       "bsonType": [
@@ -4159,10 +4139,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "id_formation": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "id_rco_formation": {
       "bsonType": [
@@ -4177,22 +4154,23 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "ids_action": {
-      "bsonType": [
-        "array",
-        "null",
-      ],
+      "bsonType": "array",
       "items": {
-        "bsonType": [
-          "string",
-          "null",
+        "anyOf": [
+          {
+            "not": {},
+          },
+          {
+            "bsonType": [
+              "string",
+              "null",
+            ],
+          },
         ],
       },
     },
     "intitule_court": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "intitule_long": {
       "bsonType": "string",
@@ -4216,10 +4194,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "lieu_formation_adresse": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "lieu_formation_adresse_computed": {
       "bsonType": [
@@ -4246,28 +4221,26 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "localite": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "modalites_entrees_sorties": {
-      "bsonType": [
-        "array",
-        "null",
-      ],
+      "bsonType": "array",
       "items": {
-        "bsonType": [
-          "bool",
-          "null",
+        "anyOf": [
+          {
+            "not": {},
+          },
+          {
+            "bsonType": [
+              "bool",
+              "null",
+            ],
+          },
         ],
       },
     },
     "niveau": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "niveau_entree_obligatoire": {
       "bsonType": [
@@ -4276,10 +4249,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "niveau_formation_diplome": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "nom": {
       "bsonType": [
@@ -4288,28 +4258,16 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "nom_academie": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "nom_departement": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "num_academie": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "num_departement": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "onisep_discipline": {
       "bsonType": [
@@ -4348,14 +4306,18 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "periode": {
-      "bsonType": [
-        "array",
-        "null",
-      ],
+      "bsonType": "array",
       "items": {
-        "bsonType": [
-          "string",
-          "null",
+        "anyOf": [
+          {
+            "not": {},
+          },
+          {
+            "bsonType": [
+              "string",
+              "null",
+            ],
+          },
         ],
       },
     },
@@ -4366,10 +4328,7 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "region": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
+      "bsonType": "string",
     },
     "rncp_code": {
       "bsonType": [
@@ -4378,229 +4337,315 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "rncp_details": {
-      "additionalProperties": false,
-      "bsonType": [
-        "object",
-        "null",
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "active_inactive": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "ancienne_fiche": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "not": {},
+                      },
+                      {
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
+                      },
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "blocs_competences": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "not": {},
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "intitule": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                              "liste_competences": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                              "modalites_evaluation": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                              "numero_bloc": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "certificateurs": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "not": {},
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "certificateur": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                              "siret_certificateur": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "code_type_certif": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "date_fin_validite_enregistrement": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "demande": {
+              "bsonType": [
+                "number",
+                "null",
+              ],
+            },
+            "etat_fiche_rncp": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "niveau_europe": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "nouvelle_fiche": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "not": {},
+                      },
+                      {
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
+                      },
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "nsf_code": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "nsf_libelle": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "partenaires": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "not": {},
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "Habilitation_Partenaire": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                              "Nom_Partenaire": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                              "Siret_Partenaire": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "rncp_outdated": {
+              "bsonType": [
+                "bool",
+                "null",
+              ],
+            },
+            "romes": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "not": {},
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "bsonType": "object",
+                            "properties": {
+                              "libelle": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                              "rome": {
+                                "bsonType": [
+                                  "string",
+                                  "null",
+                                ],
+                              },
+                            },
+                          },
+                          {
+                            "bsonType": "null",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "type_certif": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "voix_acces": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
       ],
-      "properties": {
-        "active_inactive": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "ancienne_fiche": {
-          "bsonType": [
-            "array",
-            "null",
-          ],
-          "items": {
-            "bsonType": [
-              "string",
-              "null",
-            ],
-          },
-        },
-        "blocs_competences": {
-          "bsonType": [
-            "array",
-            "null",
-          ],
-          "items": {
-            "additionalProperties": false,
-            "bsonType": [
-              "object",
-              "null",
-            ],
-            "properties": {
-              "intitule": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "liste_competences": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "modalites_evaluation": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "numero_bloc": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-            },
-          },
-        },
-        "certificateurs": {
-          "bsonType": [
-            "array",
-            "null",
-          ],
-          "items": {
-            "additionalProperties": false,
-            "bsonType": [
-              "object",
-              "null",
-            ],
-            "properties": {
-              "certificateur": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "siret_certificateur": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-            },
-          },
-        },
-        "code_type_certif": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "date_fin_validite_enregistrement": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande": {
-          "bsonType": [
-            "number",
-            "null",
-          ],
-        },
-        "etat_fiche_rncp": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "niveau_europe": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "nouvelle_fiche": {
-          "bsonType": [
-            "array",
-            "null",
-          ],
-          "items": {
-            "bsonType": [
-              "string",
-              "null",
-            ],
-          },
-        },
-        "nsf_code": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "nsf_libelle": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "partenaires": {
-          "bsonType": [
-            "array",
-            "null",
-          ],
-          "items": {
-            "additionalProperties": false,
-            "bsonType": [
-              "object",
-              "null",
-            ],
-            "properties": {
-              "Habilitation_Partenaire": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "Nom_Partenaire": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "Siret_Partenaire": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-            },
-          },
-        },
-        "rncp_outdated": {
-          "bsonType": [
-            "bool",
-            "null",
-          ],
-        },
-        "romes": {
-          "bsonType": [
-            "array",
-            "null",
-          ],
-          "items": {
-            "additionalProperties": false,
-            "bsonType": [
-              "object",
-              "null",
-            ],
-            "properties": {
-              "libelle": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "rome": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-            },
-          },
-        },
-        "type_certif": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "voix_acces": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-      },
     },
     "rncp_eligible_apprentissage": {
       "bsonType": [
@@ -4615,48 +4660,85 @@ exports[`validation-schema should create validation schema for formationsCatalog
       ],
     },
     "rome_codes": {
-      "bsonType": [
-        "array",
-        "null",
-      ],
+      "bsonType": "array",
       "items": {
-        "bsonType": [
-          "string",
-          "null",
+        "anyOf": [
+          {
+            "not": {},
+          },
+          {
+            "bsonType": [
+              "string",
+              "null",
+            ],
+          },
         ],
       },
     },
     "tags": {
-      "bsonType": [
-        "array",
-        "null",
-      ],
+      "bsonType": "array",
       "items": {
-        "bsonType": [
-          "string",
-          "null",
+        "anyOf": [
+          {
+            "not": {},
+          },
+          {
+            "bsonType": [
+              "string",
+              "null",
+            ],
+          },
         ],
       },
     },
   },
   "required": [
+    "_id",
     "cle_ministere_educatif",
     "cfd",
-    "rncp_code",
-    "duree",
-    "annee",
+    "cfd_outdated",
+    "nom_academie",
+    "num_academie",
+    "code_postal",
+    "code_commune_insee",
+    "num_departement",
+    "nom_departement",
+    "region",
+    "localite",
     "intitule_long",
-    "etablissement_gestionnaire_uai",
+    "intitule_court",
+    "diplome",
+    "niveau",
+    "rncp_code",
+    "rome_codes",
+    "periode",
+    "duree",
+    "duree_incoherente",
+    "annee",
+    "annee_incoherente",
+    "lieu_formation_adresse",
+    "id_formation",
+    "ids_action",
+    "tags",
+    "niveau_formation_diplome",
+    "niveau_entree_obligatoire",
+    "entierement_a_distance",
+    "date_debut",
+    "date_fin",
+    "modalites_entrees_sorties",
     "etablissement_gestionnaire_siret",
-    "etablissement_formateur_uai",
+    "etablissement_gestionnaire_uai",
+    "etablissement_gestionnaire_entreprise_raison_sociale",
+    "etablissement_gestionnaire_date_creation",
     "etablissement_formateur_siret",
+    "etablissement_formateur_uai",
   ],
 }
 `;
 
 exports[`validation-schema should create validation schema for invitations: invitations 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
     "_id": {
@@ -4684,6 +4766,7 @@ exports[`validation-schema should create validation schema for invitations: invi
     },
   },
   "required": [
+    "_id",
     "token",
     "email",
     "organisation_id",
@@ -4742,6 +4825,7 @@ exports[`validation-schema should create validation schema for jwtSessions: jwtS
     },
   },
   "required": [
+    "_id",
     "jwt",
   ],
 }
@@ -4788,10 +4872,11 @@ exports[`validation-schema should create validation schema for maintenanceMessag
     },
   },
   "required": [
+    "_id",
     "msg",
+    "name",
     "type",
     "context",
-    "name",
   ],
 }
 `;
@@ -6780,6 +6865,7 @@ exports[`validation-schema should create validation schema for organismesReferen
     },
   },
   "required": [
+    "_id",
     "siret",
     "nature",
     "lieux_de_formation",
@@ -6899,6 +6985,7 @@ exports[`validation-schema should create validation schema for rncp: rncp 1`] = 
     },
   },
   "required": [
+    "_id",
     "rncp",
     "intitule",
     "etat_fiche",
@@ -7036,7 +7123,7 @@ exports[`validation-schema should create validation schema for users: users 1`] 
 
 exports[`validation-schema should create validation schema for usersMigration: usersMigration 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
     "_id": {
@@ -7113,17 +7200,7 @@ exports[`validation-schema should create validation schema for usersMigration: u
           "openDate": {
             "bsonType": "date",
           },
-          "payload": {
-            "additionalProperties": true,
-            "bsonType": [
-              "number",
-              "string",
-              "bool",
-              "object",
-              "array",
-              "null",
-            ],
-          },
+          "payload": {},
           "sendDates": {
             "bsonType": "array",
             "items": {
@@ -7198,13 +7275,14 @@ exports[`validation-schema should create validation schema for usersMigration: u
     },
   },
   "required": [
+    "_id",
     "email",
+    "password",
     "civility",
     "nom",
     "prenom",
-    "password",
-    "account_status",
     "organisation_id",
+    "account_status",
   ],
 }
 `;

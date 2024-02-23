@@ -43,6 +43,8 @@ export default function Table({
   onSortingChange = null,
   sorting = undefined,
   pageSizes = [5, 10, 20, 30, 40, 50],
+  triggerExpand = undefined,
+  tableId = null,
   ...props
 }: any) {
   const data: any[] = useMemo(() => defaultData, [defaultData]); // TODO TO CHECK RE-RENDERER WITH [defaultData] instead of []
@@ -117,6 +119,16 @@ export default function Table({
     },
     // initialState: {},
   });
+
+  // In order to manage multi table with same toggle state
+  useEffect(() => {
+    triggerExpand &&
+      table.getRowModel().rows.forEach((row) => {
+        row.id === triggerExpand.rowId && tableId === triggerExpand.tableId
+          ? row.toggleExpanded()
+          : row.toggleExpanded(false);
+      });
+  }, [triggerExpand]);
 
   useEffect(() => {
     if (countItems.current !== table.getPrePaginationRowModel().rows.length) {
