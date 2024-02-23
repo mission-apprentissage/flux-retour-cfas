@@ -1,50 +1,49 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { Jsonify } from "type-fest";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 import {
-  TETE_DE_RESEAUX,
   STATUT_CREATION_ORGANISME,
   STATUT_FIABILISATION_ORGANISME,
-  SIRET_REGEX_PATTERN,
-  UAI_REGEX_PATTERN,
-  arrayOf,
-  boolean,
-  date,
-  integer,
-  object,
-  objectId,
-  objectIdOrNull,
-  string,
-  stringOrNull,
+  UAI_REGEX,
+  SIRET_REGEX,
+  TETE_DE_RESEAUX_BY_ID,
   NATURE_ORGANISME_DE_FORMATION,
   STATUT_PRESENCE_REFERENTIEL,
 } from "shared";
 import effectifsModel from "shared/models/data/effectifs.model";
-import { adresseSchema } from "shared/models/json-schema/adresseSchema";
+import { zAdresse } from "shared/models/json-schema/adresseSchema";
 
-const relationOrganismeSchema = object(
-  {
+import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper";
+
+const relationOrganismeSchema = z
+  .object({
     // infos référentiel
-    siret: string(),
-    uai: stringOrNull(),
-    referentiel: boolean(),
-    label: string(),
-    sources: arrayOf(string()),
+    siret: z.string().optional(),
+    uai: z.string().nullable().optional(),
+    referentiel: z.boolean().optional(),
+    label: z.string().optional(),
+    sources: z.array(z.string()).optional(),
 
     // infos TDB
-    _id: objectIdOrNull(),
-    enseigne: string(),
-    raison_sociale: string(),
-    commune: string(),
-    region: string(),
-    departement: string(),
-    academie: string(),
-    reseaux: arrayOf(string()),
+    _id: zObjectId.nullable().optional(),
+    enseigne: z.string().optional(),
+    raison_sociale: z.string().optional(),
+    commune: z.string().optional(),
+    region: z.string().optional(),
+    departement: z.string().optional(),
+    academie: z.string().optional(),
+    reseaux: z.array(z.string()).optional(),
+    date_collecte: z.string().optional(),
 
     // Fix temporaire https://www.notion.so/mission-apprentissage/Permission-CNAM-PACA-305ab62fb1bf46e4907180597f6a57ef
-    responsabilitePartielle: boolean(),
-  },
-  { additionalProperties: true }
-);
+    responsabilitePartielle: z.boolean().optional(),
+  })
+  .strict();
+
+export type IRelatedOrganisme = z.output<typeof relationOrganismeSchema>;
+export type IRelatedOrganismeJson = Jsonify<IRelatedOrganisme>;
 
 const collectionName = "organismes";
 
@@ -71,149 +70,183 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 // Si contributeurs = [] et !first_transmission_date Alors Organisme en stock "Non actif"
-const schema = object(
-  {
-    _id: objectId(),
-    uai: string({
-      description: "Code UAI de l'établissement",
-      pattern: UAI_REGEX_PATTERN,
-      maxLength: 8,
-      minLength: 8,
-    }),
-    siret: string({
-      description: "N° SIRET de l'établissement",
-      pattern: SIRET_REGEX_PATTERN,
-      maxLength: 14,
-      minLength: 14,
-    }),
-    opcos: arrayOf(string({}), {
-      description: "OPCOs du CFA, s'ils existent",
-    }),
-    reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) }), {
-      description: "Réseaux du CFA, s'ils existent",
-    }),
-    erps: arrayOf(
-      string(),
-      // TODO because legacy
-      // { enum: Object.values(ERPS).map(({ nomErp }) => nomErp) }
-      {
-        description: "ERPs rattachés au CFA, s'ils existent",
-      }
-    ),
-    erp_unsupported: string({
-      description: "ERP renseigné par l'utilisateur à la configuration quand il n'est pas supporté",
-    }),
-    effectifs_count: integer({ description: "Compteur sur le nombre d'effectifs de l'organisme" }),
-    effectifs_current_year_count: integer({
-      description: "Compteur sur le nombre d'effectifs de l'organisme sur l'année courante",
-    }),
-    nature: string({
-      description: "Nature de l'organisme de formation",
-      enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
-    }),
-    nom: string({ description: "Nom de l'organisme de formation" }),
-    enseigne: string({ description: "Enseigne de l'organisme de formation" }),
-    raison_sociale: string({ description: "Raison sociale de l'organisme de formation" }),
-    adresse: {
-      ...adresseSchema,
-      description: "Adresse de l'établissement",
-    },
-    relatedFormations: arrayOf(
-      object(
+const zOrganisme = z
+  .object({
+    _id: zObjectId,
+    uai: z
+      .string({
+        description: "Code UAI de l'établissement",
+      })
+      .regex(UAI_REGEX)
+      .optional(),
+    siret: z
+      .string({
+        description: "N° SIRET de l'établissement",
+      })
+      .regex(SIRET_REGEX),
+    opcos: z
+      .array(z.string(), {
+        description: "OPCOs du CFA, s'ils existent",
+      })
+      .optional(),
+    reseaux: z.array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID)).describe("Réseaux du CFA, s'ils existent").optional(),
+    erps: z
+      .array(
+        z.string()
+        // TODO because legacy
+        // { enum: Object.values(ERPS).map(({ nomErp }) => nomErp) }
+      )
+      .describe("ERPs rattachés au CFA, s'ils existent")
+      .optional(),
+    erp_unsupported: z
+      .string({
+        description: "ERP renseigné par l'utilisateur à la configuration quand il n'est pas supporté",
+      })
+      .optional(),
+    effectifs_count: z.number({ description: "Compteur sur le nombre d'effectifs de l'organisme" }).int().optional(),
+    effectifs_current_year_count: z
+      .number({
+        description: "Compteur sur le nombre d'effectifs de l'organisme sur l'année courante",
+      })
+      .int()
+      .optional(),
+    nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION)
+      .describe("Nature de l'organisme de formation")
+      .optional(),
+    nom: z.string({ description: "Nom de l'organisme de formation" }).optional(),
+    enseigne: z.string({ description: "Enseigne de l'organisme de formation" }).optional(),
+    raison_sociale: z.string({ description: "Raison sociale de l'organisme de formation" }).optional(),
+    adresse: zAdresse.describe("Adresse de l'établissement").optional(),
+    relatedFormations: z
+      .array(
+        z
+          .object({
+            formation_id: zObjectId.optional(),
+            cle_ministere_educatif: z
+              .string({
+                description: "Clé unique de la formation",
+              })
+              .optional(),
+            annee_formation: z
+              .number({
+                description: "Année millésime de la formation pour cet organisme",
+              })
+              .int()
+              .optional(),
+            organismes: z
+              .array(
+                z
+                  .object({
+                    organisme_id: zObjectId.optional(),
+                    nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
+                    uai: z
+                      .string({
+                        description: "Code UAI du lieu de formation (optionnel)",
+                      })
+                      .regex(UAI_REGEX)
+                      .optional(),
+                    siret: z
+                      .string({
+                        description: "Siret du lieu de formation (optionnel)",
+                      })
+                      .regex(SIRET_REGEX)
+                      .optional(),
+                    adresse: zAdresse.describe("Adresse du lieu de formation (optionnel)").optional(),
+                  })
+                  .strict()
+              )
+              .optional(),
+            duree_formation_theorique: z
+              .number({
+                description: "Durée théorique de la formation en mois pour cet organisme",
+              })
+              .int()
+              .optional(),
+          })
+          .strict(),
         {
-          formation_id: objectId(),
-          cle_ministere_educatif: string({
-            description: "Clé unique de la formation",
-          }),
-          annee_formation: integer({
-            description: "Année millésime de la formation pour cet organisme",
-          }),
-          organismes: arrayOf(
-            object(
-              {
-                organisme_id: objectId(),
-                nature: string({
-                  enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
-                }),
-                uai: string({
-                  description: "Code UAI du lieu de formation (optionnel)",
-                  pattern: UAI_REGEX_PATTERN,
-                  maxLength: 8,
-                  minLength: 8,
-                }),
-                siret: string({
-                  description: "Siret du lieu de formation (optionnel)",
-                  pattern: SIRET_REGEX_PATTERN,
-                  maxLength: 14,
-                  minLength: 14,
-                }),
-                adresse: {
-                  ...adresseSchema,
-                  description: "Adresse du lieu de formation (optionnel)",
-                },
-              },
-              { additionalProperties: true }
-            )
-          ),
-          duree_formation_theorique: integer({
-            description: "Durée théorique de la formation en mois pour cet organisme",
-          }),
-        },
-        { additionalProperties: true }
-      ),
-      {
-        description: "Formations de cet organisme",
-      }
-    ),
-    organismesFormateurs: arrayOf(relationOrganismeSchema),
-    organismesResponsables: arrayOf(relationOrganismeSchema),
-    first_transmission_date: date({ description: "Date de la première transmission de données" }),
-    last_transmission_date: date({ description: "Date de la dernière transmission de données" }),
-    est_dans_le_referentiel: string({
-      enum: Object.values(STATUT_PRESENCE_REFERENTIEL),
-      description: "Présence dans le referentiel ONISEP des organismes",
-    }),
-    ferme: boolean({ description: "Le siret est fermé" }),
-    qualiopi: boolean({ description: "a la certification Qualiopi" }),
-    prepa_apprentissage: boolean({ description: "fait de la prépa apprentissage" }),
+          description: "Formations de cet organisme",
+        }
+      )
+      .optional(),
+    organismesFormateurs: z.array(relationOrganismeSchema).optional(),
+    organismesResponsables: z.array(relationOrganismeSchema).optional(),
+    first_transmission_date: z.date({ description: "Date de la première transmission de données" }).optional(),
+    last_transmission_date: z.date({ description: "Date de la dernière transmission de données" }).optional(),
+    est_dans_le_referentiel: zodEnumFromObjValues(STATUT_PRESENCE_REFERENTIEL)
+      .describe("Présence dans le referentiel ONISEP des organismes")
+      .optional(),
+    ferme: z.boolean({ description: "Le siret est fermé" }).optional(),
+    qualiopi: z.boolean({ description: "a la certification Qualiopi" }).optional(),
+    prepa_apprentissage: z.boolean({ description: "fait de la prépa apprentissage" }).optional(),
 
     // TODO [tech] TO REMOVE LATER
-    access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
-    api_key: string({ description: "API key pour envoi de données" }),
-    api_uai: string({ description: "Uai envoyé par l'erp" }),
-    api_siret: string({ description: "Siret envoyé par l'erp" }),
-    api_configuration_date: date({ description: "Date de l'interfaçage" }),
-    api_version: stringOrNull({ description: "Version de l'api utilisée (v2 ou v3)" }),
+    access_token: z.string({ description: "Le token permettant l'accès au CFA à sa propre page" }).optional(),
+    api_key: z.string({ description: "API key pour envoi de données" }).optional(),
+    api_uai: z.string({ description: "Uai envoyé par l'erp" }).optional(),
+    api_siret: z.string({ description: "Siret envoyé par l'erp" }).optional(),
+    api_configuration_date: z.date({ description: "Date de l'interfaçage" }).optional(),
+    api_version: z.string({ description: "Version de l'api utilisée (v2 ou v3)" }).nullable().optional(),
 
-    fiabilisation_statut: string({
-      description: "Statut de fiabilisation de l'organisme",
-      enum: Object.values(STATUT_FIABILISATION_ORGANISME),
-    }),
-    mode_de_transmission: string({
-      description: "Mode de transmission des effectifs",
-      enum: ["API", "MANUEL"],
-    }),
-    mode_de_transmission_configuration_date: date({
-      description: "Date à laquelle le mode de transmission a été configuré",
-    }),
-    mode_de_transmission_configuration_author_fullname: string({
-      description: "Auteur de la configuration (prénom nom)",
-    }),
-    creation_statut: string({
-      description: "Flag pour identifier que c'est un organisme créé à partir d'un lieu",
-      enum: [STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION],
-    }),
-    organisme_transmetteur_id: string({
-      description: effectifsModel.schema.properties.source_organisme_id.description,
-    }),
-    updated_at: date({ description: "Date de mise à jour en base de données" }),
-    created_at: date({ description: "Date d'ajout en base de données" }),
-  },
-  { required: ["siret"], additionalProperties: true }
-);
+    fiabilisation_statut: zodEnumFromObjValues(STATUT_FIABILISATION_ORGANISME)
+      .describe("Statut de fiabilisation de l'organisme")
+      .optional(),
+    mode_de_transmission: z.enum(["API", "MANUEL"]).describe("Mode de transmission des effectifs").optional(),
+    mode_de_transmission_configuration_date: z
+      .date({
+        description: "Date à laquelle le mode de transmission a été configuré",
+      })
+      .optional(),
+    mode_de_transmission_configuration_author_fullname: z
+      .string({
+        description: "Auteur de la configuration (prénom nom)",
+      })
+      .optional(),
+    creation_statut: z
+      .enum([STATUT_CREATION_ORGANISME.ORGANISME_LIEU_FORMATION])
+      .describe("Flag pour identifier que c'est un organisme créé à partir d'un lieu")
+      .optional(),
+    organisme_transmetteur_id: z
+      .string({
+        description: effectifsModel.schema.properties.source_organisme_id.description,
+      })
+      .optional(),
+    updated_at: z.date({ description: "Date de mise à jour en base de données" }),
+    created_at: z.date({ description: "Date d'ajout en base de données" }),
+    natureValidityWarning: z.boolean().optional(),
+    formations: z.array(z.any()).max(0).optional(),
+  })
+  .strict();
+
+export type IOrganisme = z.output<typeof zOrganisme>;
+export type IOrganismeJson = Jsonify<IOrganisme>;
+
+export type IOrganismeOptional = Pick<
+  IOrganisme,
+  | "reseaux"
+  | "erps"
+  | "relatedFormations"
+  | "fiabilisation_statut"
+  | "ferme"
+  | "qualiopi"
+  | "prepa_apprentissage"
+  | "created_at"
+  | "updated_at"
+>;
 
 // Default value
-export function defaultValuesOrganisme() {
+export function defaultValuesOrganisme(): Pick<
+  IOrganisme,
+  | "reseaux"
+  | "erps"
+  | "relatedFormations"
+  | "fiabilisation_statut"
+  | "ferme"
+  | "qualiopi"
+  | "prepa_apprentissage"
+  | "created_at"
+  | "updated_at"
+> {
   return {
     reseaux: [],
     erps: [],
@@ -227,4 +260,4 @@ export function defaultValuesOrganisme() {
   };
 }
 
-export default { schema, indexes, collectionName };
+export default { zod: zOrganisme, indexes, collectionName };

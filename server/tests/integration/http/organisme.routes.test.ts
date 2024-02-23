@@ -1,10 +1,10 @@
 import { strict as assert } from "assert";
 
 import { AxiosInstance } from "axiosist";
-import { ObjectId, WithId, WithoutId } from "mongodb";
+import { ObjectId, WithoutId } from "mongodb";
 import { IndicateursEffectifsAvecFormation } from "shared";
 import { PermissionsOrganisme } from "shared/constants/permissions";
-import { Organisme } from "shared/models/data/@types";
+import { IOrganisme } from "shared/models/data/organismes.model";
 import { IRncp } from "shared/models/data/rncp.model";
 
 import { effectifsDb, organisationsDb, organismesDb, rncpDb, usersMigrationDb } from "@/common/model/collections";
@@ -254,7 +254,7 @@ describe("Routes /organismes/:id", () => {
     });
 
     describe("Permissions", () => {
-      const publicKeys: (keyof WithId<Organisme>)[] = [
+      const publicKeys: (keyof IOrganisme)[] = [
         "_id",
         "siret",
         "uai",
@@ -270,7 +270,7 @@ describe("Routes /organismes/:id", () => {
         "organismesFormateurs",
         "fiabilisation_statut",
       ];
-      const infoTransmissionEffectifsKeys: (keyof WithId<Organisme>)[] = [
+      const infoTransmissionEffectifsKeys: (keyof IOrganisme)[] = [
         ...publicKeys,
         "erps",
         "erp_unsupported",
@@ -280,7 +280,7 @@ describe("Routes /organismes/:id", () => {
         "mode_de_transmission_configuration_date",
         "mode_de_transmission_configuration_author_fullname",
       ];
-      const manageEffectifsKeys: (keyof WithId<Organisme>)[] = [
+      const manageEffectifsKeys: (keyof IOrganisme)[] = [
         ...infoTransmissionEffectifsKeys,
         "api_key",
         "api_configuration_date",
@@ -288,7 +288,7 @@ describe("Routes /organismes/:id", () => {
         "api_uai",
       ];
 
-      testPermissions<(keyof WithId<Organisme>)[]>(
+      testPermissions<(keyof IOrganisme)[]>(
         {
           "OF cible": manageEffectifsKeys,
           "OF responsable": manageEffectifsKeys,

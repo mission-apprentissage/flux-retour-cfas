@@ -7,10 +7,9 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application } from "express";
 import Joi from "joi";
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId } from "mongodb";
 import passport from "passport";
 import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
-import { Organisme } from "shared/models/data/@types";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -371,7 +370,7 @@ function setupRoutes(app: Application) {
     ["/api/v3/dossiers-apprenants"],
     requireBearerAuthentication(),
     async (req, res, next) => {
-      const organisme = (await getOrganismeByAPIKey(res.locals.token, req.query)) as WithId<Organisme>;
+      const organisme = await getOrganismeByAPIKey(res.locals.token, req.query);
 
       let erpSource = "INCONNU";
       if (organisme.erps?.length) {

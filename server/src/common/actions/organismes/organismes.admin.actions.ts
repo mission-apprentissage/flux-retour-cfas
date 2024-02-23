@@ -295,7 +295,7 @@ export async function findOrganismesSupportInfoBySiret(siret: string): Promise<O
         : await effectifsDb()
             .find({
               organisme_id: {
-                $in: [tdbOrganisme._id, ...tdbOrganisme.organismesFormateurs.map((f) => f._id as ObjectId)],
+                $in: [tdbOrganisme._id, ...(tdbOrganisme.organismesFormateurs?.map((f) => f._id as ObjectId) ?? [])],
               },
             })
             .toArray();

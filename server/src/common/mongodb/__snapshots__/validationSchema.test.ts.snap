@@ -5173,7 +5173,7 @@ exports[`validation-schema should create validation schema for organisations: or
 
 exports[`validation-schema should create validation schema for organismes: organismes 1`] = `
 {
-  "additionalProperties": true,
+  "additionalProperties": false,
   "bsonType": "object",
   "properties": {
     "_id": {
@@ -5233,47 +5233,29 @@ exports[`validation-schema should create validation schema for organismes: organ
         "code_insee": {
           "bsonType": "string",
           "description": "Le code insee doit contenir 5 caractères",
-          "example": "54318",
-          "maxLength": 5,
-          "minLength": 5,
           "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
         },
         "code_postal": {
           "bsonType": "string",
           "description": "Le code postal doit contenir 5 caractères",
-          "example": "75000",
-          "maxLength": 5,
-          "minLength": 5,
           "pattern": "^[0-9]{5}$",
         },
         "commune": {
           "bsonType": "string",
           "description": "Commune",
-          "example": "PARIS",
           "maxLength": 80,
         },
         "complement": {
           "bsonType": "string",
           "description": "Complément d'adresse",
-          "example": "Bâtiment ; Résidence ; Entrée ; Appartement ; Escalier ; Etage",
         },
         "complete": {
           "bsonType": "string",
           "description": "Adresse complète",
-          "example": "13 Bis Boulevard de la liberté 75000 PARIS",
         },
         "departement": {
           "bsonType": "string",
           "enum": [
-            "01",
-            "02",
-            "03",
-            "04",
-            "05",
-            "06",
-            "07",
-            "08",
-            "09",
             "10",
             "11",
             "12",
@@ -5293,8 +5275,6 @@ exports[`validation-schema should create validation schema for organismes: organ
             "27",
             "28",
             "29",
-            "2A",
-            "2B",
             "30",
             "31",
             "32",
@@ -5374,17 +5354,22 @@ exports[`validation-schema should create validation schema for organismes: organ
             "987",
             "988",
             "989",
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "2A",
+            "2B",
           ],
-          "example": "1 Ain, 99 Étranger",
-          "maxLength": 3,
-          "minLength": 1,
-          "pattern": "^([0-9][0-9]|2[AB]|9[012345]|97[12345678]|98[46789])$",
         },
         "numero": {
           "bsonType": "int",
           "description": "N° de la voie",
-          "example": 13,
-          "pattern": "^(?!0{1})[0-9]*$",
         },
         "pays": {
           "bsonType": "string",
@@ -5594,11 +5579,6 @@ exports[`validation-schema should create validation schema for organismes: organ
         "region": {
           "bsonType": "string",
           "enum": [
-            "01",
-            "02",
-            "03",
-            "04",
-            "06",
             "11",
             "24",
             "27",
@@ -5612,8 +5592,13 @@ exports[`validation-schema should create validation schema for organismes: organ
             "84",
             "93",
             "94",
-            "978",
             "977",
+            "978",
+            "01",
+            "02",
+            "03",
+            "04",
+            "06",
             "00",
           ],
         },
@@ -5626,12 +5611,10 @@ exports[`validation-schema should create validation schema for organismes: organ
             "Q",
             "C",
           ],
-          "example": "B",
         },
         "voie": {
           "bsonType": "string",
           "description": "Nom de voie",
-          "example": "Boulevard de la liberté",
         },
       },
     },
@@ -5723,6 +5706,10 @@ exports[`validation-schema should create validation schema for organismes: organ
       "bsonType": "date",
       "description": "Date de la première transmission de données",
     },
+    "formations": {
+      "bsonType": "array",
+      "maxItems": 0,
+    },
     "last_transmission_date": {
       "bsonType": "date",
       "description": "Date de la dernière transmission de données",
@@ -5754,6 +5741,9 @@ exports[`validation-schema should create validation schema for organismes: organ
         "inconnue",
       ],
     },
+    "natureValidityWarning": {
+      "bsonType": "bool",
+    },
     "nom": {
       "bsonType": "string",
       "description": "Nom de l'organisme de formation",
@@ -5772,19 +5762,27 @@ exports[`validation-schema should create validation schema for organismes: organ
     "organismesFormateurs": {
       "bsonType": "array",
       "items": {
-        "additionalProperties": true,
+        "additionalProperties": false,
         "bsonType": "object",
         "properties": {
           "_id": {
-            "bsonType": [
-              "objectId",
-              "null",
+            "anyOf": [
+              {
+                "bsonType": "objectId",
+              },
+              {
+                "bsonType": "null",
+              },
             ],
+            "description": "Identifiant unique",
           },
           "academie": {
             "bsonType": "string",
           },
           "commune": {
+            "bsonType": "string",
+          },
+          "date_collecte": {
             "bsonType": "string",
           },
           "departement": {
@@ -5835,19 +5833,27 @@ exports[`validation-schema should create validation schema for organismes: organ
     "organismesResponsables": {
       "bsonType": "array",
       "items": {
-        "additionalProperties": true,
+        "additionalProperties": false,
         "bsonType": "object",
         "properties": {
           "_id": {
-            "bsonType": [
-              "objectId",
-              "null",
+            "anyOf": [
+              {
+                "bsonType": "objectId",
+              },
+              {
+                "bsonType": "null",
+              },
             ],
+            "description": "Identifiant unique",
           },
           "academie": {
             "bsonType": "string",
           },
           "commune": {
+            "bsonType": "string",
+          },
+          "date_collecte": {
             "bsonType": "string",
           },
           "departement": {
@@ -5911,7 +5917,7 @@ exports[`validation-schema should create validation schema for organismes: organ
       "bsonType": "array",
       "description": "Formations de cet organisme",
       "items": {
-        "additionalProperties": true,
+        "additionalProperties": false,
         "bsonType": "object",
         "properties": {
           "annee_formation": {
@@ -5928,11 +5934,12 @@ exports[`validation-schema should create validation schema for organismes: organ
           },
           "formation_id": {
             "bsonType": "objectId",
+            "description": "Identifiant unique",
           },
           "organismes": {
             "bsonType": "array",
             "items": {
-              "additionalProperties": true,
+              "additionalProperties": false,
               "bsonType": "object",
               "properties": {
                 "adresse": {
@@ -5985,47 +5992,29 @@ exports[`validation-schema should create validation schema for organismes: organ
                     "code_insee": {
                       "bsonType": "string",
                       "description": "Le code insee doit contenir 5 caractères",
-                      "example": "54318",
-                      "maxLength": 5,
-                      "minLength": 5,
                       "pattern": "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
                     },
                     "code_postal": {
                       "bsonType": "string",
                       "description": "Le code postal doit contenir 5 caractères",
-                      "example": "75000",
-                      "maxLength": 5,
-                      "minLength": 5,
                       "pattern": "^[0-9]{5}$",
                     },
                     "commune": {
                       "bsonType": "string",
                       "description": "Commune",
-                      "example": "PARIS",
                       "maxLength": 80,
                     },
                     "complement": {
                       "bsonType": "string",
                       "description": "Complément d'adresse",
-                      "example": "Bâtiment ; Résidence ; Entrée ; Appartement ; Escalier ; Etage",
                     },
                     "complete": {
                       "bsonType": "string",
                       "description": "Adresse complète",
-                      "example": "13 Bis Boulevard de la liberté 75000 PARIS",
                     },
                     "departement": {
                       "bsonType": "string",
                       "enum": [
-                        "01",
-                        "02",
-                        "03",
-                        "04",
-                        "05",
-                        "06",
-                        "07",
-                        "08",
-                        "09",
                         "10",
                         "11",
                         "12",
@@ -6045,8 +6034,6 @@ exports[`validation-schema should create validation schema for organismes: organ
                         "27",
                         "28",
                         "29",
-                        "2A",
-                        "2B",
                         "30",
                         "31",
                         "32",
@@ -6126,17 +6113,22 @@ exports[`validation-schema should create validation schema for organismes: organ
                         "987",
                         "988",
                         "989",
+                        "01",
+                        "02",
+                        "03",
+                        "04",
+                        "05",
+                        "06",
+                        "07",
+                        "08",
+                        "09",
+                        "2A",
+                        "2B",
                       ],
-                      "example": "1 Ain, 99 Étranger",
-                      "maxLength": 3,
-                      "minLength": 1,
-                      "pattern": "^([0-9][0-9]|2[AB]|9[012345]|97[12345678]|98[46789])$",
                     },
                     "numero": {
                       "bsonType": "int",
                       "description": "N° de la voie",
-                      "example": 13,
-                      "pattern": "^(?!0{1})[0-9]*$",
                     },
                     "pays": {
                       "bsonType": "string",
@@ -6346,11 +6338,6 @@ exports[`validation-schema should create validation schema for organismes: organ
                     "region": {
                       "bsonType": "string",
                       "enum": [
-                        "01",
-                        "02",
-                        "03",
-                        "04",
-                        "06",
                         "11",
                         "24",
                         "27",
@@ -6364,8 +6351,13 @@ exports[`validation-schema should create validation schema for organismes: organ
                         "84",
                         "93",
                         "94",
-                        "978",
                         "977",
+                        "978",
+                        "01",
+                        "02",
+                        "03",
+                        "04",
+                        "06",
                         "00",
                       ],
                     },
@@ -6378,12 +6370,10 @@ exports[`validation-schema should create validation schema for organismes: organ
                         "Q",
                         "C",
                       ],
-                      "example": "B",
                     },
                     "voie": {
                       "bsonType": "string",
                       "description": "Nom de voie",
-                      "example": "Boulevard de la liberté",
                     },
                   },
                 },
@@ -6399,19 +6389,16 @@ exports[`validation-schema should create validation schema for organismes: organ
                 },
                 "organisme_id": {
                   "bsonType": "objectId",
+                  "description": "Identifiant unique",
                 },
                 "siret": {
                   "bsonType": "string",
                   "description": "Siret du lieu de formation (optionnel)",
-                  "maxLength": 14,
-                  "minLength": 14,
                   "pattern": "^[0-9]{14}$",
                 },
                 "uai": {
                   "bsonType": "string",
                   "description": "Code UAI du lieu de formation (optionnel)",
-                  "maxLength": 8,
-                  "minLength": 8,
                   "pattern": "^[0-9]{7}[a-zA-Z]$",
                 },
               },
@@ -6454,15 +6441,11 @@ exports[`validation-schema should create validation schema for organismes: organ
     "siret": {
       "bsonType": "string",
       "description": "N° SIRET de l'établissement",
-      "maxLength": 14,
-      "minLength": 14,
       "pattern": "^[0-9]{14}$",
     },
     "uai": {
       "bsonType": "string",
       "description": "Code UAI de l'établissement",
-      "maxLength": 8,
-      "minLength": 8,
       "pattern": "^[0-9]{7}[a-zA-Z]$",
     },
     "updated_at": {
@@ -6471,7 +6454,10 @@ exports[`validation-schema should create validation schema for organismes: organ
     },
   },
   "required": [
+    "_id",
     "siret",
+    "updated_at",
+    "created_at",
   ],
 }
 `;

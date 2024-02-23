@@ -385,3 +385,11 @@ export const PAYS = [
   { code: "ZM", label: "ZAMBIE", value: "ZAMBIE", libelle: "RÉPUBLIQUE DE ZAMBIE", actif: "Oui" },
   { code: "ZW", label: "ZIMBABWE", value: "ZIMBABWE", libelle: "RÉPUBLIQUE DU ZIMBABWE", actif: "Oui" },
 ];
+
+export type IPays = (typeof PAYS)[number];
+export type IPaysCode = IPays["code"];
+
+export const PAYS_BY_CODE: Record<IPaysCode, IPays> = PAYS.reduce<Record<IPaysCode, IPays>>((acc, pays) => {
+  acc[pays.code] = pays;
+  return acc;
+}, {});

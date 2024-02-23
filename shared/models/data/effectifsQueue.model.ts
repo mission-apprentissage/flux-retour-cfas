@@ -25,7 +25,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 
 const effectifsProps = effectifsModel.schema.properties;
 const formationProps = formationEffectifSchema.properties;
-const organismeProps = organismesModel.schema.properties;
+const organismeProps = organismesModel.zod.shape;
 const contratProps = contratSchema.properties;
 const apprenantProps = apprenantSchema.properties;
 

@@ -2,8 +2,9 @@ import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/no
 import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
 import { Filter, ObjectId, WithId } from "mongodb";
-import { Effectif, FiabilisationUaiSiret, Organisme } from "shared/models/data/@types";
+import { Effectif, FiabilisationUaiSiret } from "shared/models/data/@types";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { IOrganisme } from "shared/models/data/organismes.model";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
 import { lockEffectif, addEffectifComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
@@ -258,7 +259,7 @@ type ItemProcessingInfos = {
   AddPrefix<"organisme_responsable_", OrganismeSearchStatsInfos>;
 
 async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQueue): Promise<{
-  result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: WithId<Organisme> }>;
+  result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: IOrganisme }>;
   itemProcessingInfos: ItemProcessingInfos;
 }> {
   const itemProcessingInfos: ItemProcessingInfos = {};
@@ -391,7 +392,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
 }
 
 async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: EffectifsQueue): Promise<{
-  result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: WithId<Organisme> }>;
+  result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: IOrganisme }>;
   itemProcessingInfos: ItemProcessingInfos;
 }> {
   const itemProcessingInfos: ItemProcessingInfos = {};
@@ -547,7 +548,7 @@ async function findOrganismeWithStats(
   uai_etablissement: string,
   siret_etablissement?: string,
   projection = {}
-): Promise<{ organisme: WithId<Organisme> | null; stats: OrganismeSearchStatsInfos }> {
+): Promise<{ organisme: IOrganisme | null; stats: OrganismeSearchStatsInfos }> {
   const stats: OrganismeSearchStatsInfos = {};
 
   // 1. On essaie de corriger l'UAI et le SIRET avec la collection fiabilisationUaiSiret

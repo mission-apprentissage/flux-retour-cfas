@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import {
   deleteOldestDuplicates,
@@ -15,7 +16,7 @@ const TEST_SIREN = "190404921";
 const ANNEE_SCOLAIRE = "2023-2024";
 
 const sampleOrganismeId = new ObjectId(id(1));
-const sampleOrganisme = {
+const sampleOrganisme: IOrganisme = {
   _id: sampleOrganismeId,
   ...createRandomOrganisme({ siret: `${TEST_SIREN}00016` }),
 };

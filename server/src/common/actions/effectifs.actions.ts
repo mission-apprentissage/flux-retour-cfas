@@ -1,9 +1,9 @@
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId, WithId } from "mongodb";
-import { Organisme } from "shared/models/data/@types";
 import { Effectif } from "shared/models/data/@types/Effectif";
 import { schema } from "shared/models/data/effectifs.model";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
@@ -126,7 +126,7 @@ export const lockEffectif = async (effectif: WithId<Effectif>) => {
   return updated.value;
 };
 
-export const addEffectifComputedFields = (organisme: Organisme): Effectif["_computed"] => {
+export const addEffectifComputedFields = (organisme: IOrganisme): Effectif["_computed"] => {
   return {
     organisme: {
       ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),

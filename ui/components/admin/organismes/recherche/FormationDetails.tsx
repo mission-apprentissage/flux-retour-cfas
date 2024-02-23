@@ -1,6 +1,6 @@
 import { Box, HStack, Link, SimpleGrid, Text } from "@chakra-ui/react";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
-import { OrganismeJson } from "shared/models/data/@types/Organisme";
+import { IOrganismeJson } from "shared/models/data/organismes.model";
 
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import NewTable from "@/modules/indicateurs/NewTable";
@@ -10,7 +10,7 @@ import { CardInfo } from "./CarInfo";
 import { Label } from "./Label";
 
 type FormationsDetailsProps = {
-  organisme: OrganismeJson;
+  organisme: IOrganismeJson;
   formation: Partial<OffreFormation>;
 };
 
@@ -18,7 +18,7 @@ function formatAdresse(adresse: OffreFormation["lieu_formation"]["adresse"]) {
   return [adresse.adresse, adresse.code_postal, adresse.localite].join(" ");
 }
 type OrganismeRefProps = {
-  self: OrganismeJson;
+  self: IOrganismeJson;
   organismeRef: OffreFormation["formateur"] | OffreFormation["gestionnaire"] | undefined | null;
 };
 

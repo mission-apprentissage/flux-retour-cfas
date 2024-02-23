@@ -1,7 +1,7 @@
 import { WithId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared";
-import { Organisme } from "shared/models/data/@types";
 import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import { IOrganisme } from "shared/models/data/organismes.model";
 import { ArrayElement } from "type-fest/source/internal";
 
 import parentLogger from "@/common/logger";
@@ -20,7 +20,7 @@ export const hydrateOrganismesFormations = async () => {
   const organismesCursor = organismesDb().find({}, { projection: { _id: 1, uai: 1, siret: 1 } });
 
   while (await organismesCursor.hasNext()) {
-    const organisme = (await organismesCursor.next()) as WithId<Organisme>;
+    const organisme = (await organismesCursor.next()) as IOrganisme;
     const formations = await getFormationsByUAIAndSIRET(organisme.siret, organisme.uai ?? null);
     logger.info(
       { uai: organisme.uai, siret: organisme.siret, formations: formations.length },
@@ -105,7 +105,7 @@ async function getFormationsByUAIAndSIRET(siret: string, uai: string | null): Pr
   return [];
 }
 
-type OrganismeFormation = ArrayElement<Organisme["relatedFormations"]>;
+type OrganismeFormation = ArrayElement<IOrganisme["relatedFormations"]>;
 type FormationOrganisme = ArrayElement<OrganismeFormation["organismes"]>;
 
 async function formatFormation(formationCatalogue: WithId<IFormationCatalogue>): Promise<OrganismeFormation> {
