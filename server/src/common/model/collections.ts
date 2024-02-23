@@ -2,7 +2,6 @@ import {
   Effectif,
   FiabilisationUaiSiret,
   Formation,
-  JobEvent,
   Organisme,
   OrganismesReferentiel,
 } from "shared/models/data/@types";
@@ -57,7 +56,6 @@ export const formationsDb = () => getDbCollection<Formation>(formationsModelDesc
 export const formationsCatalogueDb = () =>
   getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<IUser>(usersModelDescriptor.collectionName);
-export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
 export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDescriptor.collectionName);
