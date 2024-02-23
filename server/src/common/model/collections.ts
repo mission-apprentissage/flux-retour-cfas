@@ -1,4 +1,4 @@
-import { Effectif, FiabilisationUaiSiret, Formation, JobEvent, Organisme } from "shared/models/data/@types";
+import { Effectif, FiabilisationUaiSiret, Formation, Organisme } from "shared/models/data/@types";
 import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassinsEmploi.model";
@@ -52,7 +52,6 @@ export const formationsDb = () => getDbCollection<Formation>(formationsModelDesc
 export const formationsCatalogueDb = () =>
   getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<IUser>(usersModelDescriptor.collectionName);
-export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
 export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDescriptor.collectionName);

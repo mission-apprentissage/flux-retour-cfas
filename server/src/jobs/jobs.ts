@@ -6,7 +6,6 @@ import config from "@/config";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
 
 import { clear, clearUsers } from "./clear/clear-all";
-import { purgeEvents } from "./clear/purge-events";
 import { purgeQueues } from "./clear/purge-queues";
 import { findInvalidDocuments } from "./db/findInvalidDocuments";
 import { recreateIndexes } from "./db/recreateIndexes";
@@ -97,7 +96,6 @@ export async function setupJobProcessor() {
                 await addJob({ name: "effectifs-formation-niveaux", queued: true });
 
                 // # Purge des collections events et queues
-                await addJob({ name: "purge:events", queued: true });
                 await addJob({ name: "purge:queues", queued: true });
 
                 // # Mise a jour du nb d'effectifs
@@ -278,11 +276,6 @@ export async function setupJobProcessor() {
       "hydrate:ofa-inconnus": {
         handler: async () => {
           return hydrateRaisonSocialeEtEnseigneOFAInconnus();
-        },
-      },
-      "purge:events": {
-        handler: async (job) => {
-          return purgeEvents((job.payload as any)?.nbDaysToKeep);
         },
       },
       "purge:queues": {
