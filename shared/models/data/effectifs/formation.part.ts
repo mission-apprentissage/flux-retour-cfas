@@ -1,47 +1,54 @@
-import { RNCP_REGEX_PATTERN } from "../../../constants";
-import { object, string, integer, arrayOf, objectId, date, boolean } from "../../json-schema/jsonSchemaTypes";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
+
+import { RNCP_REGEX } from "../../../constants";
 import formationsModel from "../formations.model";
 
-const formationsProps = formationsModel.schema.properties;
+const formationsProps = formationsModel.zod.shape;
 
-export const formationEffectifSchema = object(
-  {
-    // TODO formation_id devrait être un objectId pointant vers la collection formations (à remplir au moment de l'import)
-    formation_id: objectId({ description: "ID de la formation" }),
-    // DEBUT champs collectés qui servent à retrouver le champ formation_id
-    // une fois le champs formation_id rempli, ces champs ne sont plus utile
-    cfd: formationsProps.cfd,
-    rncp: string({
+export const zFormationEffectif = z.object({
+  // TODO formation_id devrait être un objectId pointant vers la collection formations (à remplir au moment de l'import)
+  formation_id: zObjectId.describe("ID de la formation").nullish(),
+  // DEBUT champs collectés qui servent à retrouver le champ formation_id
+  // une fois le champs formation_id rempli, ces champs ne sont plus utile
+  cfd: formationsProps.cfd.nullish(),
+  rncp: z
+    .string({
       description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-      pattern: RNCP_REGEX_PATTERN,
-      maxLength: 9,
-    }),
-    libelle_long: string({ description: "Libellé long de la formation visée" }),
-    niveau: formationsProps.niveau,
-    niveau_libelle: formationsProps.niveau_libelle,
-    annee: integer({ description: "Numéro de l'année dans la formation (promo)" }),
-    // FIN champs collectés
-    date_obtention_diplome: date({ description: "Date d'obtention du diplôme" }),
-    duree_formation_relle: integer({ description: "Durée réelle de la formation en mois" }),
-    periode: arrayOf(integer(), { description: "Période de la formation, en année (peut être sur plusieurs années)" }),
-    // V3 - REQUIRED FIELDS (optionel pour l'instant pour supporter V2)
-    date_inscription: date({ description: "Date d'inscription" }),
-    // V3 - OPTIONAL FIELDS
-    obtention_diplome: boolean({ description: "Diplôme obtenu" }), // vrai si date_obtention_diplome non null
-    date_exclusion: date({ description: "Date d'exclusion" }),
-    cause_exclusion: string({ description: "Cause de l'exclusion" }),
-    referent_handicap: object({
-      nom: string({ description: "Nom du référent handicap" }),
-      prenom: string({ description: "Prénom du référent handicap" }),
-      email: string({ description: "Email du référent handicap" }),
-    }),
-    formation_presentielle: boolean({ description: "Formation en présentiel" }),
-    duree_theorique: integer({ description: "Durée théorique de la formation en année" }), // legacy, should be empty soon
-    duree_theorique_mois: integer({ description: "Durée théorique de la formation en mois" }),
-    date_fin: date({ description: "Date de fin de la formation" }),
-    date_entree: date({ description: "Date d'entrée en formation" }),
-  },
-  {
-    additionalProperties: true,
-  }
-);
+    })
+    .regex(RNCP_REGEX)
+    .nullish(),
+  libelle_long: z.string({ description: "Libellé long de la formation visée" }).nullish(),
+  libelle_court: z.string({ description: "Libellé court de la formation visée" }).nullish(),
+  niveau: formationsProps.niveau.nullish(),
+  niveau_libelle: formationsProps.niveau_libelle.nullish(),
+  annee: z.number({ description: "Numéro de l'année dans la formation (promo)" }).int().nullish(),
+  // FIN champs collectés
+  date_obtention_diplome: z.date({ description: "Date d'obtention du diplôme" }).nullish(),
+  duree_formation_relle: z.number({ description: "Durée réelle de la formation en mois" }).int().nullish(),
+  periode: z
+    .array(z.number().int(), {
+      description: "Période de la formation, en année (peut être sur plusieurs années)",
+    })
+    .nullish(),
+  // V3 - REQUIRED FIELDS (optionel pour l'instant pour supporter V2)
+  date_inscription: z.date({ description: "Date d'inscription" }).nullish(),
+  // V3 - OPTIONAL FIELDS
+  obtention_diplome: z.boolean({ description: "Diplôme obtenu" }).nullish(), // vrai si date_obtention_diplome non null
+  date_exclusion: z.date({ description: "Date d'exclusion" }).nullish(),
+  cause_exclusion: z.string({ description: "Cause de l'exclusion" }).nullish(),
+  referent_handicap: z
+    .object({
+      nom: z.string({ description: "Nom du référent handicap" }).nullish(),
+      prenom: z.string({ description: "Prénom du référent handicap" }).nullish(),
+      email: z.string({ description: "Email du référent handicap" }).nullish(),
+    })
+    .nullish(),
+  formation_presentielle: z.boolean({ description: "Formation en présentiel" }).nullish(),
+  duree_theorique: z.number({ description: "Durée théorique de la formation en année" }).int().nullish(), // legacy, should be empty soon
+  duree_theorique_mois: z.number({ description: "Durée théorique de la formation en mois" }).int().nullish(),
+  date_fin: z.date({ description: "Date de fin de la formation" }).nullish(),
+  date_entree: z.date({ description: "Date d'entrée en formation" }).nullish(),
+});
+
+export type IFormationEffectif = z.output<typeof zFormationEffectif>;

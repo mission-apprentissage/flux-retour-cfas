@@ -1,4 +1,4 @@
-import { ZodEnum } from "zod";
+import { Primitive, RawCreateParams, ZodEnum, ZodType, ZodTypeAny } from "zod";
 
 import { zodOpenApi } from "../models/zodOpenApi";
 
@@ -16,4 +16,10 @@ export function zodEnumFromObjValues<K extends string>(obj: Record<any, K>): Zod
 export function zodEnumFromArray<K extends string>(array: K[]): ZodEnum<[K, ...K[]]> {
   const [firstKey, ...otherKeys] = array;
   return zodOpenApi.enum([firstKey, ...otherKeys]);
+}
+
+export function zodLiteralUnion<K extends Primitive>(list: readonly K[], params?: RawCreateParams): ZodType<K> {
+  if (list.length < 2) throw new Error("zodLiteralUnion: you must provide at least 2 values");
+  const [firstValue, secondValue, ...otherValues] = list.map((e) => zodOpenApi.literal(e)) as ZodTypeAny[];
+  return zodOpenApi.union([firstValue, secondValue, ...otherValues], params);
 }

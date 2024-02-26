@@ -145,3 +145,5 @@ export const adresseSchema = object({
     description: "Code Bassin d'emploi",
   }),
 });
+
+export type IAdresse = zodOpenApi.output<typeof zAdresse>;

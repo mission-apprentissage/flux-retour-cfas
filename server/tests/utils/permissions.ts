@@ -1,7 +1,7 @@
 import { startOfDay, subMonths } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared";
-import { Effectif } from "shared/models/data/@types/Effectif";
+import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 
@@ -278,7 +278,7 @@ export const organismes: WithId<IOrganisme>[] = Object.values(organismesByLabel)
 
 export const userOrganisme = organismesByLabel["OF cible"];
 
-export const commonEffectifsAttributes: Pick<Effectif, "organisme_id" | "_computed"> = {
+export const commonEffectifsAttributes: Pick<IEffectif, "organisme_id" | "_computed"> = {
   organisme_id: userOrganisme._id,
 
   _computed: addEffectifComputedFields(userOrganisme),

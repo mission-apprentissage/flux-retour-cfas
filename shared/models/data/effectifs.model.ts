@@ -1,19 +1,14 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
-import {
-  ACADEMIES,
-  DEPARTEMENTS,
-  REGIONS,
-  SIRET_REGEX_PATTERN,
-  TETE_DE_RESEAUX,
-  UAI_REGEX_PATTERN,
-  YEAR_RANGE_PATTERN,
-} from "../../constants";
-import { any, arrayOf, boolean, date, object, objectId, string } from "../json-schema/jsonSchemaTypes";
+import { SIRET_REGEX, TETE_DE_RESEAUX_BY_ID, UAI_REGEX, YEAR_RANGE_REGEX } from "../../constants";
+import { zodEnumFromObjKeys } from "../../utils/zodHelper";
+import { zAdresse } from "../json-schema/adresseSchema";
 
-import { apprenantSchema } from "./effectifs/apprenant.part";
-import { contratSchema } from "./effectifs/contrat.part";
-import { formationEffectifSchema } from "./effectifs/formation.part";
+import { zApprenant } from "./effectifs/apprenant.part";
+import { zContrat } from "./effectifs/contrat.part";
+import { zFormationEffectif } from "./effectifs/formation.part";
 
 const collectionName = "effectifs";
 
@@ -86,84 +81,93 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.formation.opcos": 1 }, {}],
 ];
 
-export const schema = object(
-  {
-    _id: objectId({ description: "Identifiant MongoDB de l'effectif" }),
-    organisme_id: objectId({ description: "Organisme id (lieu de formation de l'apprenant pour la v3)" }),
-    organisme_responsable_id: objectId({ description: "Organisme responsable id" }),
-    organisme_formateur_id: objectId({ description: "Organisme formateur id" }),
+export const zEffectif = z.object({
+  _id: zObjectId.describe("Identifiant MongoDB de l'effectif"),
+  organisme_id: zObjectId.describe("Organisme id (lieu de formation de l'apprenant pour la v3)"),
+  organisme_responsable_id: zObjectId.describe("Organisme responsable id").nullish(),
+  organisme_formateur_id: zObjectId.describe("Organisme formateur id").nullish(),
 
-    id_erp_apprenant: string({ description: "Identifiant de l'apprenant dans l'erp" }),
-    source: string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),
-    source_organisme_id: string({ description: "Identifiant de l'organisme id source transmettant" }),
-    annee_scolaire: string({
+  id_erp_apprenant: z.string({ description: "Identifiant de l'apprenant dans l'erp" }),
+  source: z.string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),
+  source_organisme_id: z.string({ description: "Identifiant de l'organisme id source transmettant" }).nullish(),
+  annee_scolaire: z
+    .string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
-      pattern: YEAR_RANGE_PATTERN,
-    }),
-    apprenant: apprenantSchema,
-    formation: formationEffectifSchema,
-    contrats: arrayOf(contratSchema, {
+    })
+    .regex(YEAR_RANGE_REGEX),
+  apprenant: zApprenant,
+  formation: zFormationEffectif.nullish(),
+  contrats: z
+    .array(zContrat, {
       // Note: anciennement dans apprenant.contrats
       description: "Historique des contrats de l'apprenant",
-    }),
-    is_lock: any({ description: "Indique les champs verrouillés" }),
-    updated_at: date({ description: "Date de mise à jour en base de données" }),
-    created_at: date({ description: "Date d'ajout en base de données" }),
-    archive: boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }),
-    validation_errors: arrayOf(
-      object({
-        fieldName: string({ description: "Nom du champ en erreur" }),
-        type: string({ description: "Type d'erreur" }),
-        inputValue: string({ description: "Valeur fournie en entrée" }),
-        message: string({ description: "Message de l'erreur" }),
+    })
+    .nullish(),
+  // TODO: remove any
+  is_lock: z.any(),
+  updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
+  created_at: z.date({ description: "Date d'ajout en base de données" }).nullish(),
+  archive: z.boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }).nullish(),
+  validation_errors: z
+    .array(
+      z.object({
+        fieldName: z.string({ description: "Nom du champ en erreur" }).nullish(),
+        type: z.string({ description: "Type d'erreur" }).nullish(),
+        inputValue: z.string({ description: "Valeur fournie en entrée" }).nullish(),
+        message: z.string({ description: "Message de l'erreur" }).nullish(),
       }),
       {
         description: "Erreurs de validation de cet effectif",
       }
-    ),
-    _computed: object(
+    )
+    .nullish(),
+  _computed: z
+    .object(
       {
-        organisme: object({
-          region: string({
-            enum: REGIONS.map(({ code }) => code),
-          }),
-          departement: string({
-            example: "1 Ain, 99 Étranger",
-            pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
-            enum: DEPARTEMENTS.map(({ code }) => code),
-            maxLength: 3,
-            minLength: 1,
-          }),
-          academie: string({
-            enum: ACADEMIES.map(({ code }) => code),
-          }),
-          reseaux: arrayOf(string({ enum: TETE_DE_RESEAUX.map((r) => r.key) })),
-          bassinEmploi: string({}),
+        organisme: z
+          .object({
+            region: zAdresse.shape.region.nullish(),
+            departement: zAdresse.shape.departement.nullish(),
+            academie: zAdresse.shape.academie.nullish(),
+            reseaux: z
+              .array(zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID))
+              .describe("Réseaux du CFA, s'ils existent")
+              .nullish(),
+            bassinEmploi: z.string({}).nullish(),
 
-          // 2 champs utiles seulement pour les indicateurs v1
-          // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
-          uai: string({
-            pattern: UAI_REGEX_PATTERN,
-            maxLength: 8,
-            minLength: 8,
-          }),
-          siret: string({ pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
-          fiable: boolean({ description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false` }),
-        }),
-        formation: object({
-          codes_rome: arrayOf(string()),
-          opcos: arrayOf(string()),
-        }),
+            // 2 champs utiles seulement pour les indicateurs v1
+            // à supprimer avec les prochains dashboards indicateurs/effectifs pour utiliser organisme_id
+            uai: z
+              .string({
+                description: "Code UAI de l'établissement",
+              })
+              .regex(UAI_REGEX)
+              .nullish(),
+            siret: z
+              .string({
+                description: "N° SIRET de l'établissement",
+              })
+              .regex(SIRET_REGEX)
+              .nullish(),
+            fiable: z
+              .boolean({ description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false` })
+              .nullish(),
+          })
+          .nullish(),
+        formation: z
+          .object({
+            codes_rome: z.array(z.string()).nullish(),
+            opcos: z.array(z.string()).nullish(),
+          })
+          .nullish(),
       },
       {
         description: "Propriétés calculées ou récupérées d'autres collections",
       }
-    ),
-  },
-  {
-    required: ["apprenant", "id_erp_apprenant", "organisme_id", "source", "annee_scolaire"],
-    additionalProperties: true,
-  }
-);
+    )
+    .nullish(),
+});
 
-export default { schema, indexes, collectionName };
+export type IEffectif = z.output<typeof zEffectif>;
+
+export default { zod: zEffectif, indexes, collectionName };

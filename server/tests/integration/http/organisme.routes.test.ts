@@ -655,18 +655,20 @@ describe("Routes /organismes/:id", () => {
 
     beforeEach(async () => {
       await Promise.all([
-        effectifsDb().insertOne(
-          createSampleEffectif({
-            ...commonEffectifsAttributes,
-            annee_scolaire: anneeScolaire,
-            apprenant: {
-              historique_statut: historySequenceInscritToApprenti,
-            },
-            formation: {
-              rncp: ficheRNCP.rncp,
-            },
-          })
-        ),
+        effectifsDb()
+          .insertOne(
+            createSampleEffectif({
+              ...commonEffectifsAttributes,
+              annee_scolaire: anneeScolaire,
+              apprenant: {
+                historique_statut: historySequenceInscritToApprenti,
+              },
+              formation: {
+                rncp: ficheRNCP.rncp,
+              },
+            })
+          )
+          .catch((e) => console.error(JSON.stringify(e.errInfo.details.schemaRulesNotSatisfied, null, 2))),
         rncpDb().insertOne({ _id: new ObjectId(), ...ficheRNCP }),
       ]);
     });

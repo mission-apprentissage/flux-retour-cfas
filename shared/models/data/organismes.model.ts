@@ -208,7 +208,7 @@ const zOrganisme = z
       .optional(),
     organisme_transmetteur_id: z
       .string({
-        description: effectifsModel.schema.properties.source_organisme_id.description,
+        description: effectifsModel.zod.shape.source_organisme_id.description,
       })
       .optional(),
     updated_at: z.date({ description: "Date de mise à jour en base de données" }),

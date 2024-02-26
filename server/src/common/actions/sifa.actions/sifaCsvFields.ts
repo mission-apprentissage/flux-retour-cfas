@@ -190,7 +190,7 @@ export const SIFA_FIELDS = [
 ];
 
 // Detecter la durée de formation
-export const formatAN_FORM = (year: number | undefined) => {
+export const formatAN_FORM = (year: number | undefined | null) => {
   if (year == null) return year;
   return `${year}A`;
 };
@@ -201,7 +201,7 @@ export const formatAN_FORM = (year: number | undefined) => {
   dans le cas de SIFA
   Voir https://tableaudebord-apprentissage.atlassian.net/browse/TM-703
 */
-export const formatINE = (ine: string | undefined) => {
+export const formatINE = (ine: string | undefined | null) => {
   return wrapNumString(ine) ?? `=""`;
 };
 

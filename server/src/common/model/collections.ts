@@ -1,12 +1,11 @@
-import { Effectif, FiabilisationUaiSiret, Formation } from "shared/models/data/@types";
-import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { FiabilisationUaiSiret } from "shared/models/data/@types";
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassinsEmploi.model";
 import contratsDecaModelDescriptor, { IContratDeca } from "shared/models/data/contratsDeca.model";
-import effectifsModelDescriptor from "shared/models/data/effectifs.model";
-import effectifsQueueModelDescriptor from "shared/models/data/effectifsQueue.model";
+import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
+import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
-import formationsModelDescriptor from "shared/models/data/formations.model";
+import formationsModelDescriptor, { IFormation } from "shared/models/data/formations.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
@@ -48,7 +47,7 @@ export const modelDescriptors = [
   rncpModelDescriptor,
 ];
 
-export const formationsDb = () => getDbCollection<Formation>(formationsModelDescriptor.collectionName);
+export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
 export const formationsCatalogueDb = () =>
   getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<IUser>(usersModelDescriptor.collectionName);
@@ -61,8 +60,8 @@ export const organismesReferentielDb = () =>
   getDbCollection<IOrganismeReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
   getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
-export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);
-export const effectifsQueueDb = () => getDbCollection<EffectifsQueue>(effectifsQueueModelDescriptor.collectionName);
+export const effectifsDb = () => getDbCollection<IEffectif>(effectifsModelDescriptor.collectionName);
+export const effectifsQueueDb = () => getDbCollection<IEffectifQueue>(effectifsQueueModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
 export const bassinsEmploiDb = () => getDbCollection<IBassinEmploi>(bassinsEmploiDescriptor.collectionName);

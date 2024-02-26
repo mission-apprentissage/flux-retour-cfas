@@ -2,8 +2,9 @@ import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/no
 import { PromisePool } from "@supercharge/promise-pool";
 import Boom from "boom";
 import { Filter, ObjectId, WithId } from "mongodb";
-import { Effectif, FiabilisationUaiSiret } from "shared/models/data/@types";
-import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { FiabilisationUaiSiret } from "shared/models/data/@types";
+import { IEffectif } from "shared/models/data/effectifs.model";
+import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
@@ -75,7 +76,7 @@ export const startEffectifQueueProcessor = async (signal: AbortSignal) => {
  * @returns true si des effectifs ont été traités
  */
 export async function processEffectifsQueue(options?: EffectifQueueProcessorOptions): Promise<ProcessItemsResult> {
-  const filter: Filter<EffectifsQueue> = {
+  const filter: Filter<IEffectifQueue> = {
     ...(options?.force ? {} : { processed_at: { $exists: false } }),
     ...(options?.since ? { created_at: { $gt: options.since } } : {}),
   };
@@ -107,7 +108,7 @@ export async function processEffectifQueueById(effectifQueueId: ObjectId): Promi
   await executeProcessEffectifQueueItem(effectifQueue);
 }
 
-export function executeProcessEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>) {
+export function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) {
   return runWithAsyncContext(async () => {
     const hub = getCurrentHub();
     const transaction = hub?.startTransaction({
@@ -118,7 +119,7 @@ export function executeProcessEffectifQueueItem(effectifQueue: WithId<EffectifsQ
       scope.setSpan(transaction);
       scope.setTag("erp", effectifQueue.source);
       scope.setTag("api_version", effectifQueue.api_version);
-      scope.setUser({ id: effectifQueue.source_organisme_id });
+      scope.setUser({ id: effectifQueue.source_organisme_id ?? undefined });
       const ctx = {
         source_organisme_id: effectifQueue.source_organisme_id,
         updated_at: effectifQueue.updated_at,
@@ -143,7 +144,7 @@ export function executeProcessEffectifQueueItem(effectifQueue: WithId<EffectifsQ
 /**
  * @returns true si l'effectif est valide
  */
-async function processEffectifQueueItem(effectifQueue: WithId<EffectifsQueue>): Promise<boolean> {
+async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): Promise<boolean> {
   const ctx = {
     _id: effectifQueue._id,
     siret: effectifQueue.siret_etablissement,
@@ -258,8 +259,8 @@ type ItemProcessingInfos = {
   AddPrefix<"organisme_formateur_", OrganismeSearchStatsInfos> &
   AddPrefix<"organisme_responsable_", OrganismeSearchStatsInfos>;
 
-async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQueue): Promise<{
-  result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: IOrganisme }>;
+async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQueue): Promise<{
+  result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }>;
   itemProcessingInfos: ItemProcessingInfos;
 }> {
   const itemProcessingInfos: ItemProcessingInfos = {};
@@ -391,8 +392,8 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
   };
 }
 
-async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: EffectifsQueue): Promise<{
-  result: SafeParseReturnType<EffectifsQueue, { effectif: Effectif; organisme: IOrganisme }>;
+async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectifQueue): Promise<{
+  result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }>;
   itemProcessingInfos: ItemProcessingInfos;
 }> {
   const itemProcessingInfos: ItemProcessingInfos = {};
@@ -465,7 +466,7 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: Effectifs
 
 async function transformEffectifQueueToEffectif(
   effectifQueue: DossierApprenantSchemaV1V2ZodType | DossierApprenantSchemaV3ZodType
-): Promise<Effectif> {
+): Promise<IEffectif> {
   return await completeEffectifAddress(
     mergeEffectifWithDefaults(
       mapEffectifQueueToEffectif(effectifQueue as any) as any,
@@ -484,7 +485,7 @@ async function transformEffectifQueueToEffectif(
  *  - On préfèrera toujours les valeurs non vides (null, undefined ou "") quelles que soient leur provenance.
  *  - On préfèrera toujours les tableaux de newObject aux tableaux de previousObject (pas de fusion de tableau)
  */
-export function mergeEffectif(effectifDb: Effectif, effectif: Effectif): Effectif {
+export function mergeEffectif(effectifDb: IEffectif, effectif: IEffectif): IEffectif {
   return {
     ...mergeIgnoringNullPreferringNewArray(effectifDb, effectif),
     apprenant: {
@@ -505,7 +506,7 @@ export function mergeEffectif(effectifDb: Effectif, effectif: Effectif): Effecti
  * Fonction de création ou de MAJ de l'effectif depuis la queue
  */
 const createOrUpdateEffectif = async (
-  effectif: Effectif,
+  effectif: IEffectif,
   retryCount = 0
 ): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
   const itemProcessingInfos: ItemProcessingInfos = {};
@@ -520,8 +521,8 @@ const createOrUpdateEffectif = async (
       // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
       await effectifsDb().findOneAndUpdate({ _id: effectifDb._id }, { $set: mergeEffectif(effectifDb, effectif) });
     } else {
-      const { insertedId } = await effectifsDb().insertOne(effectif);
-      effectifDb = { _id: insertedId, ...effectif };
+      effectifDb = { ...effectif, _id: new ObjectId() };
+      await effectifsDb().insertOne(effectifDb);
     }
     itemProcessingInfos.effectif_id = effectifDb._id.toString();
 

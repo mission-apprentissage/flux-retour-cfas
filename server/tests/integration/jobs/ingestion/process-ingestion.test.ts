@@ -1,7 +1,7 @@
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId, WithId, WithoutId } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared";
-import { Effectif } from "shared/models/data/@types";
-import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { IEffectif } from "shared/models/data/effectifs.model";
+import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 
 import { createOrganisme, findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
 import { effectifsDb, effectifsQueueDb, organismesReferentielDb } from "@/common/model/collections";
@@ -19,7 +19,7 @@ const SIRET_REFERENTIEL_FERME = "44370584100099";
 const UAI_RESPONSABLE = "0755805C";
 const SIRET_RESPONSABLE = "77568013501139";
 
-const sortByPath = (array: { path?: string[] }[] | undefined) =>
+const sortByPath = (array: { path?: string[] }[] | undefined | null) =>
   array?.sort((a, b) => ((a?.path?.[0] || "") < (b?.path?.[0] || "") ? -1 : 1));
 
 describe("Processus d'ingestion", () => {
@@ -94,6 +94,7 @@ describe("Processus d'ingestion", () => {
           source: "apiUser",
           source_organisme_id: "9999999",
           created_at: new Date(),
+          _id: new ObjectId(),
         };
 
         const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
@@ -146,6 +147,7 @@ describe("Processus d'ingestion", () => {
           source: "apiUser",
           source_organisme_id: "9999999",
           created_at: new Date(),
+          _id: new ObjectId(),
         };
 
         const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
@@ -284,6 +286,7 @@ describe("Processus d'ingestion", () => {
         // Création et ingestion d'un dossier valide pour un jeune inscrit à une date donnée
         await effectifsQueueDb().insertOne({
           ...commonSampleData,
+          _id: new ObjectId(),
           statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
           date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
         });
@@ -294,6 +297,7 @@ describe("Processus d'ingestion", () => {
         // Création d'un dossier pour la même clé d'unicité envoyé le lendemain avec un nouveau statut et nouvelle date métier
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...commonSampleData,
+          _id: new ObjectId(),
           statut_apprenant: CODES_STATUT_APPRENANT.apprenti, // MAJ du statut
           date_metier_mise_a_jour_statut: "2022-12-30T04:05:47.647Z", // MAJ de la date
         });
@@ -341,6 +345,7 @@ describe("Processus d'ingestion", () => {
         // Création d'un dossier pour la même clé d'unicité envoyé le lendemain avec un nouveau statut et nouvelle date métier
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...commonSampleData,
+          _id: new ObjectId(),
           id_formation: "77733777",
           statut_apprenant: CODES_STATUT_APPRENANT.apprenti, // MAJ du statut
           date_metier_mise_a_jour_statut: "2022-12-30T04:05:47.647Z", // MAJ de la date
@@ -389,7 +394,7 @@ describe("Processus d'ingestion", () => {
     });
 
     describe("Ingestion de nouvelles données valides v3", () => {
-      const commonSampleData: EffectifsQueue = {
+      const commonSampleData: WithoutId<IEffectifQueue> = {
         nom_apprenant: "Doe",
         prenom_apprenant: "John",
         date_de_naissance_apprenant: "2000-10-28T00:00:00.000Z",
@@ -450,7 +455,7 @@ describe("Processus d'ingestion", () => {
         source_organisme_id: "9999999",
       };
 
-      const minimalSampleData: EffectifsQueue = {
+      const minimalSampleData: IEffectifQueue = {
         nom_apprenant: "Doe",
         prenom_apprenant: "John",
         date_de_naissance_apprenant: "2000-10-28T00:00:00.000Z",
@@ -474,6 +479,7 @@ describe("Processus d'ingestion", () => {
         created_at: new Date(),
         source: "SOURCE_TEST",
         source_organisme_id: "9999999",
+        _id: new ObjectId(),
       };
 
       it("Vérifie l'ingestion valide d'un nouveau dossier valide v3 pour un organisme fiable", async () => {
@@ -483,7 +489,7 @@ describe("Processus d'ingestion", () => {
         const organismeResponsableForInput = await findOrganismeByUaiAndSiret(UAI_RESPONSABLE, SIRET_RESPONSABLE);
         if (!organismeResponsableForInput) throw new Error("Organisme responsable non trouvé");
 
-        const { insertedId } = await effectifsQueueDb().insertOne({ ...commonSampleData });
+        const { insertedId } = await effectifsQueueDb().insertOne({ ...commonSampleData, _id: new ObjectId() });
         const result = await processEffectifsQueue();
         const updatedInput = await effectifsQueueDb().findOne({ _id: insertedId });
 
@@ -494,8 +500,8 @@ describe("Processus d'ingestion", () => {
         const organismeForInputUpdated = await findOrganismeByUaiAndSiret(UAI, SIRET);
         expect(organismeForInputUpdated?.erps).toStrictEqual([commonSampleData.source]);
 
-        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
-        if (!effectifForInput) throw new Error("Effectif non trouvé");
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id as ObjectId });
+        if (!effectifForInput) throw new Error("IEffectif non trouvé");
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
 
@@ -604,7 +610,7 @@ describe("Processus d'ingestion", () => {
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
           organisme_formateur_id: new ObjectId(organismeForInput._id),
-        } satisfies WithId<Effectif>);
+        } satisfies WithId<IEffectif>);
       });
 
       it("Vérifie l'ingestion valide d'un nouveau dossier valide v3 pour un organisme fiable avec seulement les champs obligatoires", async () => {
@@ -622,8 +628,8 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
-        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
-        if (!effectifForInput) throw new Error("Effectif non trouvé");
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id as any });
+        if (!effectifForInput) throw new Error("IEffectif non trouvé");
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
 
@@ -688,7 +694,7 @@ describe("Processus d'ingestion", () => {
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
           organisme_formateur_id: new ObjectId(organismeForInput._id),
-        } satisfies WithId<Effectif>);
+        } satisfies WithId<IEffectif>);
       });
 
       it("Vérifie l'ingestion et la mise à jour valide d'un dossier valide v3 déja existant pour un organisme fiable", async () => {
@@ -698,6 +704,7 @@ describe("Processus d'ingestion", () => {
         // Ingestion d'un premier dossier et traitement.
         await effectifsQueueDb().insertOne({
           ...commonSampleData,
+          _id: new ObjectId(),
           id_erp_apprenant: "987654321",
           statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
           date_metier_mise_a_jour_statut: "2023-07-12T04:05:47.647Z",
@@ -707,6 +714,7 @@ describe("Processus d'ingestion", () => {
         // Création d'un dossier pour la même clé d'unicité envoyé le lendemain avec un nouveau statut et nouvelle date métier
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...commonSampleData,
+          _id: new ObjectId(),
           id_erp_apprenant: "987654321",
           statut_apprenant: CODES_STATUT_APPRENANT.apprenti, // MAJ du statut
           date_metier_mise_a_jour_statut: "2023-07-13T04:05:47.647Z", // MAJ de la date
@@ -719,7 +727,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
-        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id as any });
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
         expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
@@ -784,8 +792,8 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
-        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id });
-        if (!effectifForInput) throw new Error("Effectif non trouvé");
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id as any });
+        if (!effectifForInput) throw new Error("IEffectif non trouvé");
 
         expect(result).toStrictEqual({
           totalProcessed: 1,
@@ -844,7 +852,7 @@ describe("Processus d'ingestion", () => {
           organisme_id: new ObjectId(organismeForInput._id),
           organisme_responsable_id: new ObjectId(organismeResponsableForInput._id),
           organisme_formateur_id: new ObjectId(organismeForInput._id),
-        } satisfies WithId<Effectif>);
+        } satisfies WithId<IEffectif>);
       });
     });
   });
@@ -860,6 +868,7 @@ describe("Processus d'ingestion", () => {
             siret_etablissement: SIRET,
             source_organisme_id: "9999999",
             created_at: new Date(),
+            _id: new ObjectId(),
           });
 
           const result = await processEffectifsQueue();
@@ -894,6 +903,7 @@ describe("Processus d'ingestion", () => {
 
       it("Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format de l'id_formation / rncp pour un organisme fiable", async () => {
         const { insertedId } = await effectifsQueueDb().insertOne({
+          _id: new ObjectId(),
           ...createRandomDossierApprenantApiInput({
             annee_scolaire: "2021-2022",
             uai_etablissement: UAI,
@@ -937,7 +947,7 @@ describe("Processus d'ingestion", () => {
       });
 
       it("Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format du nom / prenom du jeune pour un organisme fiable", async () => {
-        const sampleData: EffectifsQueue = {
+        const sampleData: IEffectifQueue = {
           ine_apprenant: "402957826QH",
           nom_apprenant: 12,
           prenom_apprenant: 18,
@@ -959,6 +969,7 @@ describe("Processus d'ingestion", () => {
           source: "apiUser",
           source_organisme_id: "9999999",
           created_at: new Date(),
+          _id: new ObjectId(),
         };
 
         const { insertedId } = await effectifsQueueDb().insertOne({ ...sampleData });
@@ -1007,6 +1018,7 @@ describe("Processus d'ingestion", () => {
           }),
           source_organisme_id: "9999999",
           created_at: new Date(),
+          _id: new ObjectId(),
         });
         const result = await processEffectifsQueue();
 
@@ -1050,7 +1062,7 @@ describe("Processus d'ingestion", () => {
       it.each([[2024], ["2024"], ["2021,2022"], ["2023-2025"], ["2010-2026"], ["2023-2021"]])(
         "Vérifie qu'on ne crée pas de donnée et remonte une erreur lorsque le dossier ne respecte pas le format de l'année scolaire pour un organisme fiable",
         async (wrongAnneeScolaire) => {
-          const sampleData: EffectifsQueue = {
+          const sampleData: IEffectifQueue = {
             ine_apprenant: "402957826QH",
             nom_apprenant: "SMITH",
             prenom_apprenant: "Jean",
@@ -1072,6 +1084,7 @@ describe("Processus d'ingestion", () => {
             source: "apiUser",
             source_organisme_id: "9999999",
             created_at: new Date(),
+            _id: new ObjectId(),
           };
 
           const { insertedId } = await effectifsQueueDb().insertOne({
@@ -1110,7 +1123,7 @@ describe("Processus d'ingestion", () => {
     });
 
     describe("Ingestion de mises à jour de données invalides", () => {
-      const commonSampleData: EffectifsQueue = {
+      const commonSampleData: WithoutId<IEffectifQueue> = {
         ine_apprenant: "772957826QH",
         nom_apprenant: "MBAPPE",
         prenom_apprenant: "Kylian",
@@ -1136,6 +1149,7 @@ describe("Processus d'ingestion", () => {
         // Création et ingestion d'un dossier valide pour un jeune inscrit à une date donnée
         await effectifsQueueDb().insertOne({
           ...commonSampleData,
+          _id: new ObjectId(),
           statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
           date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
         });
@@ -1144,6 +1158,7 @@ describe("Processus d'ingestion", () => {
         // Création d'un dossier pour la même clé d'unicité envoyé le lendemain avec un statut non valide et nouvelle date métier
         const { insertedId } = await effectifsQueueDb().insertOne({
           ...commonSampleData,
+          _id: new ObjectId(),
           statut_apprenant: "test", // MAJ du statut avec un statut invalide
           date_metier_mise_a_jour_statut: "2022-12-30T04:05:47.647Z", // MAJ de la date
         });

@@ -1,14 +1,16 @@
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
-import { ObjectId, WithId } from "mongodb";
-import { Effectif } from "shared/models/data/@types/Effectif";
-import { schema } from "shared/models/data/effectifs.model";
+import { ObjectId } from "mongodb";
+import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import type { Paths } from "type-fest";
 
 import { effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
+
+import { legacySchema } from "./effectif.legacy_schema";
 
 /**
  * Méthode de build d'un effectif
@@ -16,7 +18,7 @@ import { stripEmptyFields } from "../utils/miscUtils";
  * Dans le cas d'un effectif téléversé, on ne veut pas verrouiller les champs, même ceux dits "par défaut" (nom, prénom, etc.)
  * Voir aussi la méthode lockEffectif
  */
-export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifData: T, lockData: boolean = true) => {
+export const mergeEffectifWithDefaults = <T extends Partial<IEffectif>>(effectifData: T, lockData: boolean = true) => {
   const defaultValues = defaultValuesEffectif();
   // note: I've tried to use ts-deepmerge, but typing doesn't work well
   return {
@@ -35,14 +37,6 @@ export const mergeEffectifWithDefaults = <T extends Partial<Effectif>>(effectifD
       ...effectifData.formation,
     },
   };
-};
-
-/**
- * Méthode d'insertion d'un effectif en base de donnée
- */
-export const insertEffectif = async (data: Effectif) => {
-  const { insertedId } = await effectifsDb().insertOne(data);
-  return { _id: insertedId, ...data };
 };
 
 /**
@@ -76,20 +70,22 @@ export const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPrevi
   return updated.value;
 };
 
-export function flatPathsWithoutEmpty(object: any) {
-  const flattenKeys = (obj: any, path: any = []) =>
-    !isObject(obj)
-      ? obj !== "" && obj !== null && obj !== undefined
-        ? { [path.join(".")]: obj }
-        : {}
-      : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
-  return Object.keys(flattenKeys(object));
+export function flatPathsWithoutEmpty<T>(object: T): Paths<T>[] {
+  const flattenKeys = (obj: unknown, path: string[] = []): Record<string, unknown> => {
+    if (isObject(obj)) {
+      return reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
+    }
+
+    return obj !== "" && obj !== null && obj !== undefined ? { [path.join(".")]: obj } : {};
+  };
+
+  return Object.keys(flattenKeys(object)) as Paths<T>[];
 }
 
 /**
  * Méthode de mise à jour d'un effectif avec lock
  */
-export const lockEffectif = async (effectif: WithId<Effectif>) => {
+export const lockEffectif = async (effectif: IEffectif) => {
   const { apprenant, formation } = effectif;
 
   // Lock field
@@ -126,7 +122,7 @@ export const lockEffectif = async (effectif: WithId<Effectif>) => {
   return updated.value;
 };
 
-export const addEffectifComputedFields = (organisme: IOrganisme): Effectif["_computed"] => {
+export const addEffectifComputedFields = (organisme: IOrganisme): IEffectif["_computed"] => {
   return {
     organisme: {
       ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
@@ -245,7 +241,7 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
 }
 
 function buildEffectifResult(effectif) {
-  const { properties: effectifSchema } = schema;
+  const { properties: effectifSchema } = legacySchema;
 
   function customizer(objValue, srcValue) {
     if (objValue !== undefined) {
