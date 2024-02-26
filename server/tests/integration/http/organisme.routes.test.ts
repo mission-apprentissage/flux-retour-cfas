@@ -485,48 +485,52 @@ describe("Routes /organismes/:id", () => {
       beforeEach(async () => {
         await effectifsDb().insertMany([
           // 5 apprentis
-          ...generate(5, () =>
-            createSampleEffectif({
+          ...generate(5, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({
               ...commonEffectifsAttributes,
               annee_scolaire: anneeScolaire,
               apprenant: {
                 historique_statut: historySequenceApprenti,
               },
-            })
-          ),
+            }),
+          })),
 
           // 10 Inscrit
-          ...generate(10, () =>
-            createSampleEffectif({
+          ...generate(10, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({
               ...commonEffectifsAttributes,
               annee_scolaire: anneeScolaire,
               apprenant: {
                 historique_statut: historySequenceInscrit,
               },
-            })
-          ),
+            }),
+          })),
 
           // 15 ApprentiToAbandon
-          ...generate(15, () =>
-            createSampleEffectif({
+          ...generate(15, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({
               ...commonEffectifsAttributes,
               annee_scolaire: anneeScolaire,
               apprenant: {
                 historique_statut: historySequenceApprentiToAbandon,
               },
-            })
-          ),
+            }),
+          })),
 
           // 20 ApprentiToInscrit
-          ...generate(20, () =>
-            createSampleEffectif({
+          ...generate(20, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({
               ...commonEffectifsAttributes,
               annee_scolaire: anneeScolaire,
               apprenant: {
                 historique_statut: historySequenceApprentiToInscrit,
               },
-            })
-          ),
+            }),
+          })),
         ]);
       });
 
@@ -655,20 +659,19 @@ describe("Routes /organismes/:id", () => {
 
     beforeEach(async () => {
       await Promise.all([
-        effectifsDb()
-          .insertOne(
-            createSampleEffectif({
-              ...commonEffectifsAttributes,
-              annee_scolaire: anneeScolaire,
-              apprenant: {
-                historique_statut: historySequenceInscritToApprenti,
-              },
-              formation: {
-                rncp: ficheRNCP.rncp,
-              },
-            })
-          )
-          .catch((e) => console.error(JSON.stringify(e.errInfo.details.schemaRulesNotSatisfied, null, 2))),
+        effectifsDb().insertOne({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceInscritToApprenti,
+            },
+            formation: {
+              rncp: ficheRNCP.rncp,
+            },
+          }),
+        }),
         rncpDb().insertOne({ _id: new ObjectId(), ...ficheRNCP }),
       ]);
     });

@@ -266,7 +266,10 @@ describe("Routes administrateur", () => {
         ]),
         effectifsDb().insertMany([
           // effectifs sur le non fiable
-          ...generate(5, () => createSampleEffectif({ organisme_id: createdWithoutUai._id })),
+          ...generate(5, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({ organisme_id: createdWithoutUai._id }),
+          })),
         ]),
       ]);
 
@@ -356,20 +359,22 @@ describe("Routes administrateur", () => {
         ]),
         effectifsDb().insertMany([
           // 5 apprentis sur le non fiable
-          ...generate(5, () =>
-            createSampleEffectif({
+          ...generate(5, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({
               organisme_id: createdWithoutUai._id,
               annee_scolaire: anneeScolaire,
-            })
-          ),
+            }),
+          })),
 
           // 10 Inscrit sur le fiable
-          ...generate(10, () =>
-            createSampleEffectif({
+          ...generate(10, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({
               organisme_id: createdWithUai._id,
               annee_scolaire: anneeScolaire,
-            })
-          ),
+            }),
+          })),
         ]),
       ]);
 
@@ -467,11 +472,13 @@ describe("Routes administrateur", () => {
           [
             ...commonEffectifs.map((item) => ({
               ...item,
+              _id: new ObjectId(),
               organisme_id: createdWithUai._id,
               created_at: duplicateOldDate,
             })),
             ...commonEffectifs.map((item) => ({
               ...item,
+              _id: new ObjectId(),
               organisme_id: createdWithoutUai._id,
               created_at: duplicateRecentDate,
             })),
@@ -480,20 +487,22 @@ describe("Routes administrateur", () => {
         ),
         // Insertion d'effectifs distincts sur les 2 organismes
         effectifsDb().insertMany([
-          ...generate(6, () =>
-            createSampleEffectif({
+          ...generate(6, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({
               annee_scolaire: anneeScolaire,
               organisme_id: createdWithUai._id,
               created_at: new Date(),
-            })
-          ),
-          ...generate(4, () =>
-            createSampleEffectif({
+            }),
+          })),
+          ...generate(4, () => ({
+            _id: new ObjectId(),
+            ...createSampleEffectif({
               annee_scolaire: anneeScolaire,
               organisme_id: createdWithoutUai._id,
               created_at: new Date(),
-            })
-          ),
+            }),
+          })),
         ]),
       ]);
 

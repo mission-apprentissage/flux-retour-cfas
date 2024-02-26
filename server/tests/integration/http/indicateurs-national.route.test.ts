@@ -60,48 +60,52 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
       ]),
       effectifsDb().insertMany([
         // 5 apprentis
-        ...generate(5, () =>
-          createSampleEffectif({
+        ...generate(5, () => ({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
             ...commonEffectifsAttributes,
             annee_scolaire: anneeScolaire,
             apprenant: {
               historique_statut: historySequenceApprenti,
             },
-          })
-        ),
+          }),
+        })),
 
         // 10 Inscrit
-        ...generate(10, () =>
-          createSampleEffectif({
+        ...generate(10, () => ({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
             ...commonEffectifsAttributes,
             annee_scolaire: anneeScolaire,
             apprenant: {
               historique_statut: historySequenceInscrit,
             },
-          })
-        ),
+          }),
+        })),
 
         // 15 ApprentiToAbandon
-        ...generate(15, () =>
-          createSampleEffectif({
+        ...generate(15, () => ({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
             ...commonEffectifsAttributes,
             annee_scolaire: anneeScolaire,
             apprenant: {
               historique_statut: historySequenceApprentiToAbandon,
             },
-          })
-        ),
+          }),
+        })),
 
         // 20 ApprentiToInscrit
-        ...generate(20, () =>
-          createSampleEffectif({
+        ...generate(20, () => ({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
             ...commonEffectifsAttributes,
             annee_scolaire: anneeScolaire,
             apprenant: {
               historique_statut: historySequenceApprentiToInscrit,
             },
-          })
-        ),
+          }),
+        })),
       ]),
     ]);
   });
