@@ -20,7 +20,12 @@ export interface Effectif {
   /**
    * Identifiant de l'apprenant dans l'erp
    */
+
   id_erp_apprenant: string;
+  /**
+   * Organisme lieu id
+   */
+  organisme_lieu_id?: ObjectId;
   /**
    * Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)
    */

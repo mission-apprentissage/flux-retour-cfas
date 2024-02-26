@@ -342,7 +342,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
           });
         }
 
-        if (!organismeLieu || !organismeFormateur || !organismeResponsable) {
+        if (!organismeFormateur) {
           return NEVER;
         }
         // désactivé si non bloquant
@@ -378,10 +378,11 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: EffectifsQu
         return {
           effectif: {
             ...effectif,
-            organisme_id: organismeLieu?._id,
+            organisme_id: organismeFormateur?._id,
             organisme_formateur_id: organismeFormateur?._id,
             organisme_responsable_id: organismeResponsable?._id,
-            _computed: addEffectifComputedFields(organismeLieu),
+            organisme_lieu_id: organismeFormateur?._id,
+            _computed: addEffectifComputedFields(organismeFormateur),
           },
           organisme: organismeLieu,
         };
