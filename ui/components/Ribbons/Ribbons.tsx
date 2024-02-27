@@ -5,7 +5,7 @@ import { ErrorIcon, ValidateIcon, Alert, InfoCircle, Warning } from "@/theme/com
 
 const stylesMap = {
   success: { color: "flatsuccess", bg: "white", borderColor: "flatsuccess", borderWidth: 1 },
-  error: { color: "flaterror", bg: "galt2", borderColor: undefined, borderWidth: undefined },
+  error: { color: "flaterror", bg: "white", borderColor: "flaterror", borderWidth: 1 },
   warning: { color: "warning2", bg: "white", borderColor: "warning2", borderWidth: 1 },
   info: { color: "plaininfo", bg: "white", borderColor: "plaininfo", borderWidth: 1 },
   info_clear: { color: "bluefrance", bg: "white", borderColor: undefined, borderWidth: undefined },
