@@ -15,7 +15,6 @@ import TransmissionsErrorTab from "./TransmissionsErrorTab";
 interface ListeTransmissionsDetailsProps {
   organisme: Organisme;
   date: string;
-  summary;
 }
 
 const ListeTransmissionsDetails = (props: ListeTransmissionsDetailsProps) => {
