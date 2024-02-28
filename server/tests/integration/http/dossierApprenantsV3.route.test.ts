@@ -1,0 +1,42 @@
+import { AxiosInstance } from "axiosist";
+import { v4 as uuidv4 } from "uuid";
+
+import { createOrganisme } from "@/common/actions/organismes/organismes.actions";
+import { createRandomOrganisme, createRandomDossierApprenantApiInput } from "@tests/data/randomizedSample";
+import { useMongo } from "@tests/jest/setupMongo";
+import { initTestApp } from "@tests/utils/testUtils";
+
+const API_ENDPOINT_URL = "/api/v3/dossiers-apprenants";
+let httpClient: AxiosInstance;
+
+const uai = "0802004U";
+const siret = "77937827200016";
+const api_key = uuidv4();
+
+describe("Dossier Apprenants Route V3", () => {
+  useMongo();
+  let randomOrganisme;
+  beforeEach(async () => {
+    const app = await initTestApp();
+    randomOrganisme = createRandomOrganisme({ uai, siret, api_key });
+    await createOrganisme(randomOrganisme);
+    httpClient = app.httpClient;
+  });
+
+  describe("POST v3/dossiers-apprenants", () => {
+    it("Vérifie que les données additionnelles ne mettent pas l'API en erreur", async () => {
+      const dossier = {
+        ...createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret }),
+        bidule: "blabla",
+      };
+
+      const response = await httpClient.post(`${API_ENDPOINT_URL}`, [dossier], {
+        headers: {
+          Authorization: `Bearer ${api_key}`,
+        },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+      expect(response.status).toBe(200);
+    });
+  });
+});
