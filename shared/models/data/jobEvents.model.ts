@@ -1,16 +1,14 @@
-import { object, string, date, objectId } from "shared";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "jobEvents";
 
-const schema = object(
-  {
-    _id: objectId(),
-    jobname: string({ description: "Le nom du job" }),
-    date: date({ description: "La date de l'evenement" }),
-    action: string({ description: "L'action en cours" }),
-    data: object({}, { additionalProperties: true, description: "La donnée liéé à l'action" }),
-  },
-  { required: ["jobname", "action", "date"] }
-);
+const zJobEvent = z.object({
+  _id: zObjectId,
+  jobname: z.string({ description: "Le nom du job" }),
+  date: z.date({ description: "La date de l'evenement" }),
+  action: z.string({ description: "L'action en cours" }),
+  data: z.object({}, { description: "La donnée liéé à l'action" }).passthrough().nullish(),
+});
 
-export default { schema, collectionName, indexes: [] };
+export default { zod: zJobEvent, collectionName, indexes: [] };
