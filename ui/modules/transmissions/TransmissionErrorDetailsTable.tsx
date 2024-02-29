@@ -1,8 +1,5 @@
 import { Text, Button } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 import { AccessorKeyColumnDef } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
-import { useSetRecoilState } from "recoil";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -10,7 +7,6 @@ import { formatDateNumericDayMonthYear, formatDateHourMinutesSecondsMs } from "@
 import EffectifQueueItemView from "@/components/Effectif/EffectifQueueItemView";
 import EffectifStatutTag from "@/components/Effectif/EffectifStatusTag";
 import TableWithPagination from "@/components/Table/TableWithPagination";
-import { transmissionErrorsDetailsCountAtom } from "@/hooks/tranmissions";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
 
 const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
@@ -92,73 +88,31 @@ const transmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
 interface TransmissionPageProps {
   organisme: Organisme;
   date: string;
+  onPaginationChange: (pagination: any) => void;
+  pagination: any;
+  transmissionData: any;
+  totalPageCount: number;
+  isFetching: boolean;
 }
 
 const TransmissionDetailsTable = (props: TransmissionPageProps) => {
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
-  const [totalPageCount, setTotalPageCount] = useState(1);
-  const [transmissionData, setTransmissionData] = useState([]);
-  const setTotalCount = useSetRecoilState(transmissionErrorsDetailsCountAtom);
-
-  const computeQueryResponse = (successData: { data: any; pagination: any }, error: any) => {
-    if (error) {
-      computeError();
-      return;
-    }
-    computeSuccess(successData);
-  };
-
-  const computeSuccess = (successData: { data: any; pagination: any }) => {
-    calculatePageCount(successData?.pagination);
-    setTransmissionData(successData?.data ?? []);
-  };
-
-  const computeError = () => {
-    setTransmissionData([]);
-  };
-
-  const calculatePageCount = (paginationResult: { limit: number; total: number }) => {
-    if (!paginationResult) {
-      setTotalCount(0);
-      return;
-    }
-
-    const { limit, total } = paginationResult;
-    setTotalCount(total);
-    setTotalPageCount(Math.ceil(total / limit));
-  };
-
   const onPageChange = (page: number) => {
-    setPagination({ ...pagination, pageIndex: page });
+    props.onPaginationChange({ ...props.pagination, pageIndex: page });
   };
 
   const onLimitChange = (limit: number) => {
-    setPagination({ pageIndex: 0, pageSize: limit });
+    props.onPaginationChange({ pageIndex: 0, pageSize: limit });
   };
-
-  const { data, error, isFetching } = useQuery({
-    queryKey: ["transmissions-details", pagination],
-    queryFn: () =>
-      _get(`/api/v1/organismes/${props.organisme._id}/transmission/${props.date}/error`, {
-        params: {
-          page: pagination.pageIndex + 1,
-          limit: pagination.pageSize,
-        },
-      }),
-  });
-  useEffect(() => {
-    computeQueryResponse(data, error);
-  }, [isFetching, error, data]);
 
   return (
     <TableWithPagination
-      data={transmissionData}
+      data={props.transmissionData}
       columns={transmissionByDayColumnDefs}
       onPageChange={(page) => onPageChange(page)}
-      paginationState={pagination}
-      pageCount={totalPageCount}
+      paginationState={props.pagination}
+      pageCount={props.totalPageCount}
       onLimitChange={onLimitChange}
-      loading={isFetching}
+      loading={props.isFetching}
       isRowExpanded={true}
       renderSubComponent={(row) => <EffectifQueueItemView effectifQueueItem={row.original} />}
     />

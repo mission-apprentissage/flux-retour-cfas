@@ -8,8 +8,9 @@ import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import { transmissionSuccessDetailsCountAtom, transmissionErrorsDetailsCountAtom } from "@/hooks/tranmissions";
-import TransmissionErrorDetailsTable from "@/modules/transmissions/TransmissionErrorDetailsTable";
 import TransmissionSuccessDetailsTable from "@/modules/transmissions/TransmissionsSuccessDetailsTable";
+
+import TransmissionsErrorTab from "./TransmissionsErrorTab";
 
 interface ListeTransmissionsDetailsProps {
   organisme: Organisme;
@@ -19,7 +20,6 @@ interface ListeTransmissionsDetailsProps {
 const ListeTransmissionsDetails = (props: ListeTransmissionsDetailsProps) => {
   const transmissionSuccessDetailCount = useRecoilValue(transmissionSuccessDetailsCountAtom);
   const transmissionErrorsDetailCount = useRecoilValue(transmissionErrorsDetailsCountAtom);
-
   return (
     <SimplePage>
       <Container maxW="xl" p="8">
@@ -46,13 +46,7 @@ const ListeTransmissionsDetails = (props: ListeTransmissionsDetailsProps) => {
 
           <TabPanels>
             <TabPanel px="0">
-              <Box mt={10} mb={10}>
-                <Text>Cliquez sur une ligne d’apprenant pour identifier les données en erreur.</Text>
-              </Box>
-              <TransmissionErrorDetailsTable
-                organisme={props.organisme}
-                date={props.date}
-              ></TransmissionErrorDetailsTable>
+              <TransmissionsErrorTab organisme={props.organisme} date={props.date} />
             </TabPanel>
             <TabPanel px="0">
               <Box mt={10} mb={10}>

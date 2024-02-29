@@ -215,6 +215,143 @@ export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
   const start = startOfDay(selectedDay);
   const end = endOfDay(selectedDay);
 
+  const aggregateUnknownOrganisme = await effectifsQueueDb()
+    .aggregate([
+      {
+        $match: {
+          source_organisme_id: organismeId,
+          processed_at: {
+            $gte: start,
+            $lte: end,
+          },
+          validation_errors: {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $facet: {
+          numberErrors: [
+            {
+              $group: {
+                _id: null,
+                total: {
+                  $sum: { $size: "$validation_errors" },
+                },
+              },
+            },
+            {
+              $project: {
+                total: "$total",
+                _id: 0,
+              },
+            },
+          ],
+          lieu: [
+            {
+              $match: {
+                validation_errors: {
+                  $elemMatch: {
+                    message: "organisme non trouvé",
+                  },
+                },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  uai: "$etablissement_lieu_de_formation_uai",
+                  siret: "$etablissement_lieu_de_formation_siret",
+                },
+                effectifCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $project: {
+                uai: "$_id.uai",
+                siret: "$_id.siret",
+                effectifCount: "$effectifCount",
+                numberErrors: "$numberErrors",
+                _id: 0,
+              },
+            },
+          ],
+          formateur: [
+            {
+              $match: {
+                validation_errors: {
+                  $elemMatch: {
+                    message: "organisme formateur non trouvé",
+                  },
+                },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  uai: "$etablissement_formateur_uai",
+                  siret: "$etablissement_formateur_siret",
+                },
+                effectifCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $project: {
+                uai: "$_id.uai",
+                siret: "$_id.siret",
+                effectifCount: "$effectifCount",
+                numberErrors: "$numberErrors",
+                _id: 0,
+              },
+            },
+          ],
+          responsable: [
+            {
+              $match: {
+                validation_errors: {
+                  $elemMatch: {
+                    message: "organisme responsable non trouvé",
+                  },
+                },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  uai: "$etablissement_responsable_uai",
+                  siret: "$etablissement_responsable_siret",
+                },
+                effectifCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $project: {
+                uai: "$_id.uai",
+                siret: "$_id.siret",
+                effectifCount: "$effectifCount",
+                numberErrors: "$numberErrors",
+                _id: 0,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          numberErrors: {
+            $arrayElemAt: ["$numberErrors", 0],
+          },
+        },
+      },
+    ])
+    .next();
+
   const transmissionsDetails = await effectifsQueueDb()
     .aggregate([
       {
@@ -246,6 +383,7 @@ export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
 
   if (!transmissionsDetails) {
     return {
+      summary: {},
       pagination: {
         page,
         limit,
@@ -259,7 +397,10 @@ export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
   if (transmissionsDetails?.pagination) {
     transmissionsDetails.pagination.lastPage = Math.ceil(transmissionsDetails.pagination.total / limit);
   }
-  return transmissionsDetails;
+  return {
+    summary: aggregateUnknownOrganisme,
+    ...transmissionsDetails,
+  };
 };
 
 export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
