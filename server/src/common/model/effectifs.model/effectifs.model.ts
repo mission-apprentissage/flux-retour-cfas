@@ -1,20 +1,38 @@
-import { Effectif } from "shared/models/data/@types";
-import { PartialDeep } from "type-fest";
+import { IFormationEffectif } from "shared/models/data/effectifs/formation.part";
+import { IEffectif } from "shared/models/data/effectifs.model";
 
-import { defaultValuesApprenant } from "./parts/apprenant.part";
-import { defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part";
-import { defaultValuesFormationEffectif } from "./parts/formation.effectif.part";
+export type IEffectifDefault = {
+  apprenant: Pick<IEffectif["apprenant"], "historique_statut">;
+  contrats: IEffectif["contrats"];
+  formation: Pick<IFormationEffectif, "periode">;
+  is_lock: IEffectif["is_lock"];
+  validation_errors: IEffectif["validation_errors"];
+  _computed: Partial<IEffectif["_computed"]>;
+  updated_at: IEffectif["updated_at"];
+  created_at: IEffectif["created_at"];
+};
 
-// Default value
-export function defaultValuesEffectif() {
+export function defaultValuesEffectif(): IEffectifDefault {
   return {
-    apprenant: defaultValuesApprenant(),
+    apprenant: {
+      historique_statut: [],
+    },
     contrats: [],
-    formation: defaultValuesFormationEffectif(),
-    is_lock: defaultValuesEffectifFieldsLocker(),
+    formation: {
+      periode: [],
+    },
+    is_lock: {
+      apprenant: {
+        nom: true,
+        prenom: true,
+      },
+      formation: {
+        cfd: true,
+      },
+    },
     validation_errors: [],
     _computed: {},
     updated_at: new Date(),
     created_at: new Date(),
-  } satisfies PartialDeep<Effectif>;
+  };
 }

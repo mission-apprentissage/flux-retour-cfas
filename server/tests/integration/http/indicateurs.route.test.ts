@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axiosist";
+import { ObjectId } from "mongodb";
 import { IndicateursEffectifsAvecOrganisme } from "shared";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
@@ -40,15 +41,16 @@ describe("Route indicateurs", () => {
     const anneeScolaire = "2022-2023";
 
     beforeEach(async () => {
-      await effectifsDb().insertOne(
-        createSampleEffectif({
+      await effectifsDb().insertOne({
+        _id: new ObjectId(),
+        ...createSampleEffectif({
           ...commonEffectifsAttributes,
           annee_scolaire: anneeScolaire,
           apprenant: {
             historique_statut: historySequenceInscritToApprenti,
           },
-        })
-      );
+        }),
+      });
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
@@ -203,15 +205,16 @@ describe("Route indicateurs", () => {
     const anneeScolaire = "2022-2023";
 
     beforeEach(async () => {
-      await effectifsDb().insertOne(
-        createSampleEffectif({
+      await effectifsDb().insertOne({
+        _id: new ObjectId(),
+        ...createSampleEffectif({
           ...commonEffectifsAttributes,
           annee_scolaire: anneeScolaire,
           apprenant: {
             historique_statut: historySequenceInscritToApprenti,
           },
-        })
-      );
+        }),
+      });
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
@@ -288,13 +291,16 @@ describe("Route indicateurs", () => {
     const emptyResult = [];
 
     beforeEach(async () => {
-      const effectif = createSampleEffectif({
-        ...commonEffectifsAttributes,
-        annee_scolaire: anneeScolaire,
-        apprenant: {
-          historique_statut: historySequenceApprentiToAbandon,
-        },
-      });
+      const effectif = {
+        _id: new ObjectId(),
+        ...createSampleEffectif({
+          ...commonEffectifsAttributes,
+          annee_scolaire: anneeScolaire,
+          apprenant: {
+            historique_statut: historySequenceApprentiToAbandon,
+          },
+        }),
+      };
       await effectifsDb().insertOne(effectif);
 
       // petit hack pour muter l'objet :-°

@@ -1,11 +1,12 @@
 import { ObjectId } from "mongodb";
-import { Effectif } from "shared/models/data/@types";
+import { IEffectif } from "shared/models/data/effectifs.model";
 
 import { mergeEffectif } from "@/jobs/ingestion/process-ingestion";
 
 describe("mergeEffectif", () => {
   it("should merge effectif", async () => {
-    const previousEffectif: Effectif = {
+    const previousEffectif: IEffectif = {
+      _id: new ObjectId(),
       source: "apiUser",
       apprenant: {
         nom: "FLEURY",

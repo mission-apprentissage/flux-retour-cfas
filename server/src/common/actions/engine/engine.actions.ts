@@ -1,8 +1,8 @@
 import { isEqual } from "date-fns";
 import { cloneDeep, get } from "lodash-es";
 import { DEPARTEMENTS_BY_CODE, ACADEMIES_BY_CODE, REGIONS_BY_CODE } from "shared";
-import { Effectif } from "shared/models/data/@types/Effectif";
-import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { IEffectif } from "shared/models/data/effectifs.model";
+import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { PartialDeep } from "type-fest";
 
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
@@ -16,8 +16,8 @@ import { stripEmptyFields } from "@/common/utils/miscUtils";
  * Va append au tableau un nouvel élément si nécessaire
  */
 export const buildNewHistoriqueStatutApprenant = (
-  historique_statut_apprenant_existant: Effectif["apprenant"]["historique_statut"],
-  updated_statut_apprenant?: Effectif["apprenant"]["historique_statut"][0]["valeur_statut"],
+  historique_statut_apprenant_existant: IEffectif["apprenant"]["historique_statut"],
+  updated_statut_apprenant?: IEffectif["apprenant"]["historique_statut"][0]["valeur_statut"],
   updated_date_metier_mise_a_jour_statut: Date = new Date()
 ) => {
   if (updated_statut_apprenant == null) return historique_statut_apprenant_existant;
@@ -60,7 +60,9 @@ export const buildNewHistoriqueStatutApprenant = (
 /**
  * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
  */
-export const completeEffectifAddress = async <T extends Partial<Effectif>>(effectifData: T): Promise<T> => {
+export const completeEffectifAddress = async <T extends { apprenant: Partial<IEffectif["apprenant"]> }>(
+  effectifData: T
+): Promise<T> => {
   if (!effectifData.apprenant?.adresse) {
     return effectifData;
   }
@@ -70,7 +72,7 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
   if (!codePostalOrCodeInsee) {
     return effectifData;
   }
-  const effectifDataWithAddress: T & { apprenant: Effectif["apprenant"] } = cloneDeep(effectifData);
+  const effectifDataWithAddress = cloneDeep(effectifData);
 
   const cpInfo = await getCodePostalInfo(codePostalOrCodeInsee);
   const adresseInfo = cpInfo?.result;
@@ -102,7 +104,7 @@ export const completeEffectifAddress = async <T extends Partial<Effectif>>(effec
  * annee_scolaire : Année scolaire dans laquelle se trouve le jeune pour cette formation dans cet établissement
  */
 export const checkIfEffectifExists = async (
-  effectif: Effectif,
+  effectif: IEffectif,
   queryKeys = ["id_erp_apprenant", "organisme_id", "formation.cfd", "annee_scolaire"]
 ) => {
   // Recherche de l'effectif via sa clé d'unicité
@@ -118,14 +120,14 @@ export const checkIfEffectifExists = async (
 export const mapEffectifQueueToEffectif = (
   // devrait être le schéma validé
   // dossierApprenant: DossierApprenantSchemaV1V2ZodType | DossierApprenantSchemaV3ZodType
-  dossierApprenant: EffectifsQueue
-): PartialDeep<Effectif> => {
+  dossierApprenant: IEffectifQueue
+): PartialDeep<IEffectif> => {
   const newHistoriqueStatut = {
     valeur_statut: dossierApprenant.statut_apprenant,
     date_statut: new Date(dossierApprenant.date_metier_mise_a_jour_statut),
     date_reception: new Date(),
   };
-  const contrats: PartialDeep<Effectif["contrats"]> = [
+  const contrats: PartialDeep<IEffectif["contrats"]> = [
     stripEmptyFields({
       date_debut: dossierApprenant.contrat_date_debut,
       date_fin: dossierApprenant.contrat_date_fin,
@@ -156,7 +158,7 @@ export const mapEffectifQueueToEffectif = (
     }),
   ].filter((contrat) => contrat.date_debut || contrat.date_fin || contrat.date_rupture);
 
-  return stripEmptyFields<PartialDeep<Effectif>>({
+  return stripEmptyFields<PartialDeep<IEffectif>>({
     annee_scolaire: dossierApprenant.annee_scolaire,
     source: dossierApprenant.source,
     source_organisme_id: dossierApprenant.source_organisme_id,
@@ -176,7 +178,7 @@ export const mapEffectifQueueToEffectif = (
         complete: dossierApprenant.adresse_apprenant,
       }),
       // Optional v3 fields
-      ...stripEmptyFields<PartialDeep<Effectif["apprenant"]>>({
+      ...stripEmptyFields<PartialDeep<IEffectif["apprenant"]>>({
         sexe: dossierApprenant.sexe_apprenant,
         rqth: dossierApprenant.rqth_apprenant,
         date_rqth: dossierApprenant.date_rqth_apprenant,
@@ -195,7 +197,7 @@ export const mapEffectifQueueToEffectif = (
       libelle_long: dossierApprenant.libelle_long_formation,
       periode: dossierApprenant.periode_formation,
       annee: dossierApprenant.annee_formation,
-      ...stripEmptyFields<PartialDeep<NonNullable<Effectif["formation"]>>>({
+      ...stripEmptyFields<PartialDeep<NonNullable<IEffectif["formation"]>>>({
         obtention_diplome: dossierApprenant.obtention_diplome_formation,
         date_obtention_diplome: dossierApprenant.date_obtention_diplome_formation,
         date_exclusion: dossierApprenant.date_exclusion_formation,

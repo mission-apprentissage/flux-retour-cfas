@@ -4,7 +4,6 @@ import { capitalize } from "lodash-es";
 import {
   CODES_STATUT_APPRENANT_ENUM,
   EFFECTIF_DERNIER_SITUATION,
-  SEXE_APPRENANT_ENUM,
   CFD_REGEX,
   CODE_NAF_REGEX,
   RNCP_REGEX,
@@ -313,7 +312,6 @@ export const primitivesV3 = {
         .regex(/^[MF]$/, "M, H ou F attendu")
         .describe("Sexe de l'apprenant")
         .openapi({
-          enum: SEXE_APPRENANT_ENUM,
           example: "M",
         })
     ),
@@ -430,10 +428,11 @@ export const primitivesV3 = {
     z.coerce
       .number()
       .int()
-      .refine((e) => EFFECTIF_DERNIER_SITUATION.includes(e), { message: "Format invalide (ex : 1003, 3111, 4017)" })
+      .refine((e) => EFFECTIF_DERNIER_SITUATION.includes(e as any), {
+        message: "Format invalide (ex : 1003, 3111, 4017)",
+      })
       .describe("Situation de l'apprenant N-1")
       .openapi({
-        enum: EFFECTIF_DERNIER_SITUATION,
         type: "integer",
       })
   ),

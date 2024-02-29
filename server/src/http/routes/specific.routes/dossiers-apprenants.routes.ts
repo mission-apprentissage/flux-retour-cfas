@@ -8,7 +8,7 @@ import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model"
 import { formatError } from "@/common/utils/errorUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 import dossierApprenantSchemaV1V2 from "@/common/validation/dossierApprenantSchemaV1V2";
-import { dossierApprenantSchemaV3Input } from "@/common/validation/dossierApprenantSchemaV3";
+import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "@/common/validation/dossierApprenantSchemaV3";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
@@ -37,8 +37,11 @@ export default () => {
         ? undefined
         : result.error.issues.map(({ path, message }) => ({ message, path }));
 
+      // Suppression des données additionnelles envoyé dans le body
+      const cleansedData = stripModelAdditionalKeys(validationSchema, dossierApprenant);
+
       // Nous ne pouvons pas garder le `nir_apprenant` en base
-      const { nir_apprenant, ...rest } = dossierApprenant;
+      const { nir_apprenant, ...rest } = cleansedData;
 
       return {
         ...rest,

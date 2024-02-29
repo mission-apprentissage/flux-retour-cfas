@@ -22,6 +22,10 @@ export const REGIONS = [
     code: "04",
   },
   {
+    code: "05",
+    nom: "Saint-Pierre-et-Miquelon",
+  },
+  {
     nom: "Mayotte",
     code: "06",
   },
@@ -100,7 +104,7 @@ export const REGIONS = [
 ] as const;
 
 type IRegions = typeof REGIONS;
-type IRegion = IRegions[number];
+export type IRegion = IRegions[number];
 export type IRegionCode = IRegion["code"];
 
 export const REGIONS_BY_CODE: Record<IRegionCode, IRegion> = REGIONS.reduce<Record<IRegionCode, IRegion>>(
@@ -1537,10 +1541,16 @@ export const DEPARTEMENTS = [
       nom: "Guadeloupe",
     },
   },
-] as const;
+] as const satisfies Array<{
+  nom: string;
+  code: string;
+  uaiCode: string;
+  region: Pick<IRegion, "nom" | "code">;
+  academie: IAcademie;
+}>;
 
 type IDepartements = typeof DEPARTEMENTS;
-type IDepartement = IDepartements[number];
+export type IDepartement = IDepartements[number];
 export type IDepartmentCode = IDepartement["code"];
 
 export const DEPARTEMENTS_BY_CODE: Record<IDepartmentCode, IDepartement> = DEPARTEMENTS.reduce(
@@ -1587,7 +1597,7 @@ export const ACADEMIES = [
   { nom: "Saint-Martin", code: "78" },
 ] as const;
 type IAcademies = typeof ACADEMIES;
-type IAcademie = IAcademies[number];
+export type IAcademie = IAcademies[number];
 export type IAcademieCode = IAcademie["code"];
 
 export const ACADEMIES_BY_CODE: Record<IAcademieCode, IAcademie> = ACADEMIES.reduce(

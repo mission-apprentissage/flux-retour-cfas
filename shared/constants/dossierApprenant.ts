@@ -22,9 +22,8 @@ export const STATUT_APPRENANT_LABEL_MAP = {
 /**
  * Sexe des apprenants (M=Homme, F=Femme)
  */
-export const SEXE_APPRENANT_ENUM = ["M", "F"];
+export const SEXE_APPRENANT_ENUM = ["M", "F"] as const;
 
-export const NATIONALITE_APPRENANT_ENUM = [1, 2, 3];
 /**
  * Nom des statuts
  */
@@ -58,4 +57,4 @@ export const EFFECTIF_DERNIER_SITUATION = [
   3109, 3011, 3111, 3031, 3131, 3032, 3132, 3033, 3133, 3117, 3119, 3021, 3121, 3023, 3123, 4001, 4101, 4003, 4103,
   4005, 4105, 4007, 4107, 4009, 4011, 4111, 4013, 4113, 4015, 4115, 4017, 4117, 4019, 4119, 4021, 4121, 5901, 5903,
   5905, 5907, 5909, 9900, 9999,
-];
+] as const;

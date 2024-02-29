@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import omit from "lodash.omit";
+import { ObjectId } from "mongodb";
 import nock from "nock";
 
 import {
@@ -27,7 +28,10 @@ describe("Tests des actions Formations", () => {
     it("returns formation with given cfd when it exists", async () => {
       // create a formation
       const cfd = "2502000D";
-      const { insertedId } = await formationsDb().insertOne({ cfd });
+      const { insertedId } = await formationsDb().insertOne({
+        _id: new ObjectId(),
+        cfd,
+      });
 
       const found = await getFormationWithCfd(cfd);
       assert.equal(found?._id.equals(insertedId), true);
@@ -42,7 +46,10 @@ describe("Tests des actions Formations", () => {
     it("throws when formation with given cfd already exists", async () => {
       const cfd = "2502000D";
       // create formation in db
-      await formationsDb().insertOne({ cfd });
+      await formationsDb().insertOne({
+        _id: new ObjectId(),
+        cfd,
+      });
 
       await expect(createFormation({ cfd })).rejects.toThrowError("A Formation with CFD 2502000D already exists");
     });

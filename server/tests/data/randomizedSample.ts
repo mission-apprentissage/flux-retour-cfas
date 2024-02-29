@@ -3,7 +3,7 @@ import merge from "lodash-es/merge";
 import { WithoutId } from "mongodb";
 import RandExp from "randexp";
 import { CODES_STATUT_APPRENANT, CFD_REGEX, INE_REGEX, RNCP_REGEX } from "shared";
-import { Effectif } from "shared/models/data/@types";
+import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { PartialDeep } from "type-fest";
 
@@ -63,7 +63,7 @@ export const createRandomOrganisme = (params: Partial<IOrganisme> = {}): Without
 export const createSampleEffectif = ({
   organisme,
   ...params
-}: PartialDeep<Effectif & { organisme: IOrganisme }> = {}): Effectif => {
+}: PartialDeep<IEffectif & { organisme: IOrganisme }> = {}): WithoutId<IEffectif> => {
   const annee_scolaire = getRandomAnneeScolaire();
 
   return merge(
@@ -87,7 +87,7 @@ export const createSampleEffectif = ({
       annee_scolaire,
       organisme_id: organisme?._id,
       _computed: organisme ? addEffectifComputedFields(organisme as IOrganisme) : {},
-    } as Effectif,
+    } as WithoutId<IEffectif>,
     params
   );
 };

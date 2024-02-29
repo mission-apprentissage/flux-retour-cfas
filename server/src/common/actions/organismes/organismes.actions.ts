@@ -2,7 +2,7 @@ import Boom from "boom";
 import type { Request } from "express";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme } from "shared";
-import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
+import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme, defaultValuesOrganisme } from "shared/models/data/organismes.model";
 import { v4 as uuidv4 } from "uuid";
 
@@ -202,8 +202,8 @@ export const updateOneOrganismeRelatedFormations = async (organisme: WithId<IOrg
 export const updateOrganismeTransmission = async (
   organisme: Pick<WithId<IOrganisme>, "_id" | "first_transmission_date">,
   source?: string,
-  api_version?: string,
-  source_organisme_id?: string
+  api_version?: string | null | undefined,
+  source_organisme_id?: string | null | undefined
 ) => {
   const modifyResult = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -835,7 +835,7 @@ export function getOrganismeListProjection(
   });
 }
 
-export async function getInvalidUaisFromDossierApprenant(data: Partial<EffectifsQueue>[]): Promise<string[]> {
+export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
   const uais = new Set<string>();
   for (const dossier of data) {
     if (dossier.etablissement_formateur_uai) uais.add(dossier.etablissement_formateur_uai);
@@ -852,7 +852,7 @@ export async function getInvalidUaisFromDossierApprenant(data: Partial<Effectifs
   return invalidsUais;
 }
 
-export async function getInvalidSiretsFromDossierApprenant(data: Partial<EffectifsQueue>[]): Promise<string[]> {
+export async function getInvalidSiretsFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
   const sirets = new Set<string>();
   for (const dossier of data) {
     if (dossier.etablissement_formateur_siret) sirets.add(dossier.etablissement_formateur_siret);

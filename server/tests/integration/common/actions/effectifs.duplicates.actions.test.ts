@@ -31,11 +31,14 @@ const insertDuplicateEffectifs = async (totalEffectifs = 5, duplicatesCount = 2)
     const idErpApprenant = `ID_ERP_${i}`;
 
     for (let j = 0; j < duplicatesCount; j++) {
-      const effectif = createSampleEffectif({
-        organisme: sampleOrganisme,
-        annee_scolaire: ANNEE_SCOLAIRE,
-        id_erp_apprenant: idErpApprenant,
-      });
+      const effectif = {
+        _id: new ObjectId(),
+        ...createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: ANNEE_SCOLAIRE,
+          id_erp_apprenant: idErpApprenant,
+        }),
+      };
 
       const { insertedId } = await effectifsDb().insertOne(effectif);
       insertedIdList.push(insertedId);

@@ -1,4 +1,4 @@
-import { Effectif } from "shared/models/data/@types";
+import { IEffectif } from "shared/models/data/effectifs.model";
 
 import { buildNewHistoriqueStatutApprenant } from "./engine.actions";
 
@@ -16,7 +16,7 @@ describe("buildNewHistoriqueStatutApprenant", () => {
   });
 
   it("doit retourner l'historique existant si la nouvelle valeur de statut est vide", () => {
-    const existant: Effectif["apprenant"]["historique_statut"] = [
+    const existant: IEffectif["apprenant"]["historique_statut"] = [
       {
         valeur_statut: 2,
         date_statut: juillet,
@@ -31,7 +31,7 @@ describe("buildNewHistoriqueStatutApprenant", () => {
   });
 
   it.each([[0], [2], [3]])("doit ajouter le nouveau statut dans l'historique", (valeur) => {
-    const existant: Effectif["apprenant"]["historique_statut"] = [
+    const existant: IEffectif["apprenant"]["historique_statut"] = [
       {
         valeur_statut: 2,
         date_statut: juillet,
