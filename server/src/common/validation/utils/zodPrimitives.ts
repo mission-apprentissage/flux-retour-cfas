@@ -423,19 +423,21 @@ export const primitivesV3 = {
       .describe("Code Insee de la commune de l'établissement de l'employeur"),
     code_naf: extensions.code_naf().describe("Code NAF de l'employeur").openapi({ example: "1071D" }),
   },
-  derniere_situation: z.preprocess(
-    (v: any) => (v ? Number(v) : v),
-    z.coerce
-      .number()
-      .int()
-      .refine((e) => EFFECTIF_DERNIER_SITUATION.includes(e as any), {
-        message: "Format invalide (ex : 1003, 3111, 4017)",
-      })
-      .describe("Situation de l'apprenant N-1")
-      .openapi({
-        type: "integer",
-      })
-  ),
+  derniere_situation: z
+    .preprocess(
+      (v: any) => (v ? Number(v) : v),
+      z.coerce
+        .number()
+        .int()
+        .refine((e) => EFFECTIF_DERNIER_SITUATION.includes(e as any), {
+          message: "Format invalide (ex : 1003, 3111, 4017)",
+        })
+    )
+    .describe("Situation de l'apprenant N-1")
+    .openapi({
+      type: "integer",
+      enum: EFFECTIF_DERNIER_SITUATION as any,
+    }),
   dernier_organisme_uai: z
     .string()
     .regex(DERNIER_ORGANISME_UAI_REGEX, "UAI ou département")

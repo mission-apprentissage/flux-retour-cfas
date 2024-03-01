@@ -92,7 +92,7 @@
     "shared": "workspace:*",
     "sinon": "15.0.2",
     "swagger-jsdoc": "6.2.8",
-    "swagger-ui-express": "4.6.2",
+    "swagger-ui-express": "5.0.0",
     "tcp-port-used": "1.0.2",
     "tsx": "3.12.6",
     "type-fest": "^4.10.2",
