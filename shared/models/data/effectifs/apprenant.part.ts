@@ -8,7 +8,7 @@ import {
   DERNIER_ORGANISME_UAI_REGEX,
 } from "../../../constants";
 import { zodLiteralUnion } from "../../../utils/zodHelper";
-import { zAdresse } from "../../json-schema/adresseSchema";
+import { zAdresse } from "../../parts/adresseSchema";
 
 export const zApprenant = z.object({
   ine: z
