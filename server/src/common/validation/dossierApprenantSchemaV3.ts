@@ -5,10 +5,12 @@ import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimiti
 
 export const stripModelAdditionalKeys = (validationSchema, data) => {
   const strippedData = Object.keys(validationSchema.shape).reduce((acc, curr) => {
-    return {
-      ...acc,
-      [curr]: data[curr],
-    };
+    return data[curr] !== undefined
+      ? {
+          ...acc,
+          [curr]: data[curr],
+        }
+      : acc;
   }, {} as any);
 
   delete strippedData._id;
