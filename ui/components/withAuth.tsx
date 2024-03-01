@@ -1,9 +1,9 @@
 import { useRouter } from "next/router";
+import { IOrganisationType } from "shared";
 
-import { OrganisationType } from "@/common/internal/Organisation";
 import useAuth from "@/hooks/useAuth";
 
-const withAuth = (Component: any, authorizedOrganisationTypes: OrganisationType[] = []) => {
+const withAuth = (Component: any, authorizedOrganisationTypes: IOrganisationType[] = []) => {
   const AuthenticatedPage = (props) => {
     const router = useRouter();
     const { auth, organisationType } = useAuth();

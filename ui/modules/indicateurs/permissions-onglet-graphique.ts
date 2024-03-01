@@ -1,6 +1,6 @@
-import { OrganisationType } from "@/common/internal/Organisation";
+import { IOrganisationType } from "shared";
 
-export function canViewOngletIndicateursVueGraphique(organisationType: OrganisationType): boolean {
+export function canViewOngletIndicateursVueGraphique(organisationType: IOrganisationType): boolean {
   switch (organisationType) {
     case "ORGANISME_FORMATION":
       return false;

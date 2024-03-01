@@ -1,4 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import type { Jsonify } from "type-fest";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
@@ -122,7 +123,7 @@ export type IOrganisationOperateurPublicAcademie = z.output<typeof zOrganisation
 export type IOrganisationAdministrateur = z.output<typeof zOrganisationAdmin>;
 
 // types structurés pour faciliter les permissions
-export type OrganisationByType = {
+export type IOrganisationByType = {
   ORGANISME_FORMATION: IOrganisationOrganismeFormation;
   TETE_DE_RESEAU: IOrganisationTeteReseau;
   DREETS: IOrganisationOperateurPublicRegion;
@@ -138,6 +139,7 @@ export type OrganisationByType = {
 };
 
 export type IOrganisation = z.output<typeof zOrganisation>;
+export type IOrganisationJson = Jsonify<IOrganisation>;
 
 export type IOrganisationCreate = z.output<typeof zOrganisationCreate>;
 
@@ -158,6 +160,21 @@ export const organisationTypes: IOrganisationType[] = [
   "ADMINISTRATEUR",
   "DRAFPIC",
 ];
+
+export const TYPES_ORGANISATION = [
+  { key: "ACADEMIE", nom: "Académie" },
+  { key: "ADMINISTRATEUR", nom: "Administrateur" },
+  { key: "CARIF_OREF_NATIONAL", nom: "Carif-Oref national" },
+  { key: "CARIF_OREF_REGIONAL", nom: "Carif-Oref régional" },
+  { key: "DRAFPIC", nom: "DRAFPIC régional" },
+  { key: "CONSEIL_REGIONAL", nom: "Conseil régional" },
+  { key: "DDETS", nom: "DDETS" },
+  { key: "DRAAF", nom: "DRAAF" },
+  { key: "DREETS", nom: "DREETS" },
+  { key: "OPERATEUR_PUBLIC_NATIONAL", nom: "Opérateur public national" },
+  { key: "ORGANISME_FORMATION", nom: "Organisme de formation" },
+  { key: "TETE_DE_RESEAU", nom: "Tête de réseau" },
+] as const satisfies Array<{ key: IOrganisationType; nom: string }>;
 
 export function getOrganisationLabel(organisation: IOrganisationCreate): string {
   switch (organisation.type) {

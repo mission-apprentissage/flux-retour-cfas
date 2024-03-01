@@ -1,8 +1,8 @@
 import { Button, HStack, Stack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { IOrganisationType } from "shared";
 
-import { OrganisationType } from "@/common/internal/Organisation";
 import useAuth from "@/hooks/useAuth";
 
 import {
@@ -74,7 +74,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     );
   };
 
-  const isAllowedToShowFilterDepartement = (type: OrganisationType) => {
+  const isAllowedToShowFilterDepartement = (type: IOrganisationType) => {
     switch (type) {
       case "TETE_DE_RESEAU":
       case "DREETS":
@@ -93,7 +93,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     }
   };
 
-  const isAllowedToShowFilterRegions = (type: OrganisationType) => {
+  const isAllowedToShowFilterRegions = (type: IOrganisationType) => {
     switch (type) {
       case "TETE_DE_RESEAU":
       case "OPERATEUR_PUBLIC_NATIONAL":
@@ -106,7 +106,7 @@ const OrganismesFilterPanel = (props: OrganismeFiltersListVisibilityProps) => {
     }
   };
 
-  const isAllowedToShowFilterUAI = (type: OrganisationType) => {
+  const isAllowedToShowFilterUAI = (type: IOrganisationType) => {
     switch (type) {
       case "ADMINISTRATEUR":
         return true;

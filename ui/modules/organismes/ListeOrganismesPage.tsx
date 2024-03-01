@@ -12,10 +12,9 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { GESTION_ORGANISME_GROUP } from "shared";
+import { GESTION_ORGANISME_GROUP, IOrganisationType } from "shared";
 
 import { _get } from "@/common/httpClient";
-import { OrganisationType } from "@/common/internal/Organisation";
 import { Organisme } from "@/common/internal/Organisme";
 import Link from "@/components/Links/Link";
 import SupportLink from "@/components/Links/SupportLink";
@@ -189,7 +188,7 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
 
 export default ListeOrganismesPage;
 
-function getHeaderTitleFromOrganisationType(type: OrganisationType) {
+function getHeaderTitleFromOrganisationType(type: IOrganisationType) {
   switch (type) {
     case "ORGANISME_FORMATION":
       return "Mes organismes";
@@ -216,7 +215,7 @@ function getHeaderTitleFromOrganisationType(type: OrganisationType) {
   }
 }
 
-function getTextContextFromOrganisationType(type: OrganisationType) {
+function getTextContextFromOrganisationType(type: IOrganisationType) {
   switch (type) {
     case "ORGANISME_FORMATION":
       return "rattachés à votre organisme";

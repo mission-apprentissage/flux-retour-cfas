@@ -2,10 +2,9 @@ import { ChevronDownIcon, SettingsIcon } from "@chakra-ui/icons";
 import { Box, Container, Flex, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ReactElement, useState } from "react";
-import { SUPPORT_PAGE_ACCUEIL } from "shared";
+import { IOrganisationType, SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { AuthContext } from "@/common/internal/AuthContext";
-import { OrganisationType } from "@/common/internal/Organisation";
 import Link from "@/components/Links/Link";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import { usePlausibleTracking } from "@/hooks/plausible";
@@ -13,7 +12,7 @@ import useAuth from "@/hooks/useAuth";
 import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 import { Close, MenuFill, ParentGroupIcon } from "@/theme/components/icons";
 
-function getMesOrganismesLabelFromOrganisationType(type: OrganisationType): string {
+function getMesOrganismesLabelFromOrganisationType(type: IOrganisationType): string {
   switch (type) {
     case "ORGANISME_FORMATION":
       return "Mes organismes";

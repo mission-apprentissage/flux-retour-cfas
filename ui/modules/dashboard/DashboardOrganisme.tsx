@@ -27,6 +27,7 @@ import {
   IndicateursEffectifsAvecFormation,
   IndicateursOrganismes,
   GO_MODIFICATION_IDENTITE_ELEMENT_LINK,
+  IOrganisationCreate,
 } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
@@ -48,7 +49,6 @@ import { DashboardWelcome } from "@/theme/components/icons/DashboardWelcome";
 
 import InfosTransmissionEtParametrageOFA from "../admin/InfosTransmissionEtParametrageOFA";
 import { ExternalLinks } from "../admin/OrganismeDetail";
-import { NewOrganisation } from "../auth/inscription/common";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 import IndicateursEffectifsParFormationTable from "../organismes/IndicateursEffectifsParFormationTable";
 import InfoFiabilisationOrganisme from "../organismes/InfoFiabilisationOrganisme";
@@ -298,10 +298,10 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 size="xs"
                 ml={4}
                 onClick={async () => {
-                  await _post<NewOrganisation>("/api/v1/admin/impersonate", {
+                  await _post<IOrganisationCreate>("/api/v1/admin/impersonate", {
                     type: "ORGANISME_FORMATION",
                     siret: organisme.siret,
-                    uai: organisme.uai ?? (null as any), // peut être absent si non présent dans le référentiel
+                    uai: organisme.uai ?? null, // peut être absent si non présent dans le référentiel
                   });
                   location.href = "/";
                 }}

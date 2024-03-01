@@ -1,6 +1,6 @@
 import { Box, Text, Radio, RadioGroup, Stack, FormControl, FormLabel, Select } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { REGIONS_SORTED } from "shared";
+import { IRegionCode, REGIONS_SORTED } from "shared";
 
 import { InscriptionOrganistionChildProps } from "./common";
 
@@ -40,7 +40,7 @@ export const InscriptionCarifOref = ({ setOrganisation }: InscriptionOrganistion
             onChange={(e) =>
               setOrganisation({
                 type: "CARIF_OREF_REGIONAL",
-                code_region: e.target.value,
+                code_region: e.target.value as IRegionCode,
               })
             }
           >
