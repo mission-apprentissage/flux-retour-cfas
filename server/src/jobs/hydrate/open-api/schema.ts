@@ -86,11 +86,11 @@ const httpAuth = registry.registerComponent("securitySchemes", "httpAuth", {
   type: "http",
   scheme: "basic",
 });
-const apiKeyAuth = registry.registerComponent("securitySchemes", "apiKeyAuth", {
+
+const bearerAuth = registry.registerComponent("securitySchemes", "apiKeyAuth", {
   description: "Méthode d'authentification pour la V3 avec une clé d'API",
-  type: "apiKey",
-  name: "api_key",
-  in: "header",
+  type: "http",
+  scheme: "bearer",
 });
 
 registry.registerPath({
@@ -181,7 +181,7 @@ registry.registerPath({
   path: "/v3/dossiers-apprenants",
   summary: "Import des dossiers apprenants",
   description: "Permet la création ou la mise à jour de plusieurs dossiers apprenants",
-  security: [{ [apiKeyAuth.name]: [] }],
+  security: [{ [bearerAuth.name]: [] }],
   tags: ["v3"],
   request: {
     body: {
@@ -210,6 +210,23 @@ registry.registerPath({
               enum: ["Queued"],
             }),
             data: z.array(dossierApprenantSchemaV3WithErrors),
+          }),
+        },
+      },
+    },
+    "403": {
+      description: "La clé d'API n'est pas valide.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.string().openapi({
+              description: "Forbidden",
+              enum: ["Forbidden"],
+            }),
+            message: z.string().openapi({
+              description: "La clé API n'est pas valide",
+              enum: ["Clé API manquante", "La clé API n'est pas valide", "La clé API doit etre au format Bearer"],
+            }),
           }),
         },
       },
