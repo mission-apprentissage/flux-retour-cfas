@@ -58,20 +58,20 @@ export const TransmissionsConfiguration = ({ organisme, onKeyGenerated }: Transm
     return (
       <>
         <AcknowledgeModal
-          title="Réinitialiser la configuration"
+          title="Souhaitez-vous réinitialiser la configuration ?"
           acknowledgeText="Accepter"
           isOpen={isConfigurationModalDisplayed}
           onAcknowledgement={onConfigurationReset}
           onClose={() => setIsConfigurationModalDisplayed(false)}
           bgOverlay="rgba(0, 0, 0, 0.28)"
+          canBeCanceled
         >
-          En réinitialisant la configuration, vous ne serez plus en possibilité de transmettre les données via ERP.
-          Êtes-vous sûr de vouloir réinitiliaser la configuration ?
+          En réinitialisant la configuration, vos effectifs ne seront plus transmis via votre ERP. Êtes-vous certain de
+          vouloir effectuer cette action ?
         </AcknowledgeModal>
         <Button
-          variant="primary"
+          variant="secondary"
           px={6}
-          mt={6}
           isLoading={isResetConfigurationInProgress}
           onClick={async () => setIsConfigurationModalDisplayed(true)}
         >
@@ -121,22 +121,32 @@ export const TransmissionsConfiguration = ({ organisme, onKeyGenerated }: Transm
   return (
     <>
       <VStack alignItems="start" gap={8} w="fit-content">
-        <Ribbons variant="success" fontSize="gamma" fontWeight="bold">
-          <Box color="grey.800">Votre établissement utilise {erp.name}.</Box>
-        </Ribbons>
         (
         <>
           {organisme.last_transmission_date_as_transmitter ? (
             <Flex justifyContent="center" alignItems="center">
-              <Ribbons variant="success" fontSize="gamma" fontWeight="bold" display="inline">
-                <Box color="grey.800">Votre établissement transmet.</Box>
+              <Ribbons variant="success" display="inline">
+                <Box color="grey.800" fontSize="gamma" fontWeight="bold">
+                  Votre établissement transmet bien ses effectifs via {erp.name}.
+                </Box>
+
+                {organisme.mode_de_transmission_configuration_date && (
+                  <Text color="#3A3A3A">
+                    (configuré le {formatDateNumericDayMonthYear(organisme.mode_de_transmission_configuration_date)} par{" "}
+                    {organisme.mode_de_transmission_configuration_author_fullname})
+                  </Text>
+                )}
                 <Link fontSize="lg" href="/transmissions" color="bluefrance">
+                  <ArrowForwardIcon mr={2} />
                   Voir les transmission
                 </Link>
               </Ribbons>
             </Flex>
           ) : (
             <>
+              <Ribbons variant="success" fontSize="gamma" fontWeight="bold">
+                <Box color="grey.800">Votre établissement utilise {erp.name}.</Box>
+              </Ribbons>
               <Heading as="h2" fontWeight="700" fontSize="24px">
                 Démarrer l’interfaçage avec {erp.name}.
               </Heading>
@@ -162,6 +172,7 @@ export const TransmissionsConfiguration = ({ organisme, onKeyGenerated }: Transm
               <Input type="text" name="apiKey" value={organisme.api_key} required readOnly w="380px" />
 
               <HStack gap={3}>
+                <ResetConfiguration></ResetConfiguration>
                 <CopyToClipboard
                   text={organisme.api_key}
                   onCopy={() => {
@@ -175,6 +186,7 @@ export const TransmissionsConfiguration = ({ organisme, onKeyGenerated }: Transm
             </>
           ) : (
             <HStack gap={3}>
+              <ResetConfiguration></ResetConfiguration>
               <AppButton variant="primary" action={onGenerateKey}>
                 Générer la clé d’échange
               </AppButton>
@@ -221,7 +233,6 @@ export const TransmissionsConfiguration = ({ organisme, onKeyGenerated }: Transm
             </Button>
           </VStack>
         ) : null}
-        <ResetConfiguration></ResetConfiguration>
       </VStack>
     </>
   );

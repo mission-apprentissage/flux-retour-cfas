@@ -1,11 +1,12 @@
 import { Button, FormControl, FormLabel, HStack, Select, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { useSetRecoilState } from "recoil";
-import { EFF_ERREUR_ELEMENT_LINK, ERPS } from "shared";
+import { TD_PARAMETRAGE_ELEMENT_LINK, ERPS } from "shared";
 
 import { _delete, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import SupportLink from "@/components/Links/SupportLink";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import { parametresNavigationAtom, ParametresNavigationStep } from "@/hooks/parametresAtoms";
 
 interface ERPSelectionProps {
@@ -67,8 +68,13 @@ export const ERPSelection = ({ organisme, onERPSelected }: ERPSelectionProps) =>
         </Button>
       </HStack>
       <HStack mt={5}>
-        <Text>{"Votre ERP n'est pas listé ci-dessus ?"}</Text>
-        <SupportLink href={EFF_ERREUR_ELEMENT_LINK} label="Veuillez nous faire une demande "></SupportLink>
+        <Ribbons variant="info" maxW={550}>
+          <Text color={"#3A3A3A"} mb={2}>
+            Votre ERP n’est pas listé ? Votre établissement utilise un outil de gestion développé en interne ? Notre
+            équipe vous accompagne à interfaçer votre outil avec notre API.
+          </Text>
+          <SupportLink href={TD_PARAMETRAGE_ELEMENT_LINK} label="Contactez nous"></SupportLink>
+        </Ribbons>
       </HStack>
     </>
   );

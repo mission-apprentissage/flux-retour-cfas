@@ -215,15 +215,21 @@ const zOrganisme = z
     created_at: z.date({ description: "Date d'ajout en base de données" }),
     natureValidityWarning: z.boolean().optional(),
     formations: z.array(z.any()).max(0).optional(),
-    first_transmission_date_as_transmitter: z.date({
-      description: "Date de la première transmission de données en tant qu'organisme transmetteur",
-    }),
-    last_transmission_date_as_transmitter: z.date({
-      description: "Date de la dernière transmission de données en tant qu'organisme transmetteur",
-    }),
-    erp_configured: z.string({
-      description: "Id de l'erp de tranmission configuré",
-    }),
+    first_transmission_date_as_transmitter: z
+      .date({
+        description: "Date de la première transmission de données en tant qu'organisme transmetteur",
+      })
+      .optional(),
+    last_transmission_date_as_transmitter: z
+      .date({
+        description: "Date de la dernière transmission de données en tant qu'organisme transmetteur",
+      })
+      .optional(),
+    erp_configured: z
+      .string({
+        description: "Id de l'erp de tranmission configuré",
+      })
+      .optional(),
   })
   .strict();
 

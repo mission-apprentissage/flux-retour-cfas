@@ -15,6 +15,7 @@ const AcknowledgeModal = ({
   canBeClosed = true,
   onAcknowledgement,
   bgOverlay = "rgba(0, 0, 0, 0.48)",
+  canBeCanceled = false,
 }: {
   isOpen: boolean;
   onClose?: () => void;
@@ -25,6 +26,7 @@ const AcknowledgeModal = ({
   canBeClosed?: boolean;
   onAcknowledgement?: () => void;
   bgOverlay?: string;
+  canBeCanceled?: boolean;
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={size}>
@@ -57,6 +59,17 @@ const AcknowledgeModal = ({
         </ModalHeader>
         <ModalBody pb={6}>{children}</ModalBody>
         <ModalFooter>
+          {canBeCanceled && (
+            <Button
+              variant="secondary"
+              mr={4}
+              onClick={() => {
+                onClose();
+              }}
+            >
+              Annuler
+            </Button>
+          )}
           <Button
             variant="primary"
             onClick={() => {
