@@ -205,7 +205,7 @@ export const getTransmissionStatusByOrganismeGroupedByDate = async (
   return transmissions;
 };
 
-export const getTransmissionStatusDetailsForAGivenDay = async (
+export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
   organismeId: string,
   day: string,
   page: number = 1,
@@ -214,6 +214,143 @@ export const getTransmissionStatusDetailsForAGivenDay = async (
   const selectedDay = new Date(day);
   const start = startOfDay(selectedDay);
   const end = endOfDay(selectedDay);
+
+  const aggregateUnknownOrganisme = await effectifsQueueDb()
+    .aggregate([
+      {
+        $match: {
+          source_organisme_id: organismeId,
+          processed_at: {
+            $gte: start,
+            $lte: end,
+          },
+          validation_errors: {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $facet: {
+          numberErrors: [
+            {
+              $group: {
+                _id: null,
+                total: {
+                  $sum: { $size: "$validation_errors" },
+                },
+              },
+            },
+            {
+              $project: {
+                total: "$total",
+                _id: 0,
+              },
+            },
+          ],
+          lieu: [
+            {
+              $match: {
+                validation_errors: {
+                  $elemMatch: {
+                    message: "organisme non trouvé",
+                  },
+                },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  uai: "$etablissement_lieu_de_formation_uai",
+                  siret: "$etablissement_lieu_de_formation_siret",
+                },
+                effectifCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $project: {
+                uai: "$_id.uai",
+                siret: "$_id.siret",
+                effectifCount: "$effectifCount",
+                numberErrors: "$numberErrors",
+                _id: 0,
+              },
+            },
+          ],
+          formateur: [
+            {
+              $match: {
+                validation_errors: {
+                  $elemMatch: {
+                    message: "organisme formateur non trouvé",
+                  },
+                },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  uai: "$etablissement_formateur_uai",
+                  siret: "$etablissement_formateur_siret",
+                },
+                effectifCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $project: {
+                uai: "$_id.uai",
+                siret: "$_id.siret",
+                effectifCount: "$effectifCount",
+                numberErrors: "$numberErrors",
+                _id: 0,
+              },
+            },
+          ],
+          responsable: [
+            {
+              $match: {
+                validation_errors: {
+                  $elemMatch: {
+                    message: "organisme responsable non trouvé",
+                  },
+                },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  uai: "$etablissement_responsable_uai",
+                  siret: "$etablissement_responsable_siret",
+                },
+                effectifCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $project: {
+                uai: "$_id.uai",
+                siret: "$_id.siret",
+                effectifCount: "$effectifCount",
+                numberErrors: "$numberErrors",
+                _id: 0,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          numberErrors: {
+            $arrayElemAt: ["$numberErrors", 0],
+          },
+        },
+      },
+    ])
+    .next();
 
   const transmissionsDetails = await effectifsQueueDb()
     .aggregate([
@@ -246,6 +383,7 @@ export const getTransmissionStatusDetailsForAGivenDay = async (
 
   if (!transmissionsDetails) {
     return {
+      summary: {},
       pagination: {
         page,
         limit,
@@ -259,5 +397,121 @@ export const getTransmissionStatusDetailsForAGivenDay = async (
   if (transmissionsDetails?.pagination) {
     transmissionsDetails.pagination.lastPage = Math.ceil(transmissionsDetails.pagination.total / limit);
   }
-  return transmissionsDetails;
+  return {
+    summary: aggregateUnknownOrganisme,
+    ...transmissionsDetails,
+  };
+};
+
+export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
+  organismeId: string,
+  day: string,
+  page: number = 1,
+  limit: number = 20
+) => {
+  const selectedDay = new Date(day);
+  const start = startOfDay(selectedDay);
+  const end = endOfDay(selectedDay);
+
+  const effectifCounts = await effectifsQueueDb()
+    .aggregate([
+      {
+        $match: {
+          source_organisme_id: organismeId,
+          processed_at: {
+            $gte: start,
+            $lte: end,
+          },
+          effectif_id: {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $count: "totalEffectifs",
+      },
+    ])
+    .next();
+
+  const transmissionsDetails = await effectifsQueueDb()
+    .aggregate([
+      {
+        $match: {
+          source_organisme_id: organismeId,
+          processed_at: {
+            $gte: start,
+            $lte: end,
+          },
+          effectif_id: {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$organisme_id",
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $facet: {
+          pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
+          data: [
+            {
+              $skip: (page - 1) * limit,
+            },
+            {
+              $limit: limit,
+            },
+            {
+              $lookup: {
+                from: "organismes",
+                localField: "_id",
+                foreignField: "_id",
+                as: "orga",
+                pipeline: [{ $project: { uai: 1, nom: 1, siret: 1, adresse: "$adresse.complete" } }],
+              },
+            },
+            {
+              $unwind: "$orga",
+            },
+            {
+              $project: {
+                id: "$_id",
+                uai: "$orga.uai",
+                name: "$orga.nom",
+                siret: "$orga.siret",
+                adresse: "$orga.adresse",
+                effectifCount: "$count",
+                _id: 0,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: "$pagination",
+      },
+    ])
+    .next();
+
+  if (!transmissionsDetails) {
+    return {
+      totalEffectifs: 0,
+      pagination: {
+        page,
+        limit,
+        lastPage: page,
+        total: 0,
+      },
+      data: [],
+    };
+  }
+
+  if (transmissionsDetails?.pagination) {
+    transmissionsDetails.pagination.lastPage = Math.ceil(transmissionsDetails.pagination.total / limit);
+  }
+  return { ...transmissionsDetails, ...effectifCounts };
 };

@@ -1,5 +1,5 @@
 import Boom from "boom";
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId } from "mongodb";
 import {
   isTeteDeReseauResponsable,
   throwUnexpectedError,
@@ -9,8 +9,8 @@ import {
   PermissionsOrganisme,
   assertUnreachable,
 } from "shared";
-import { Organisme } from "shared/models/data/@types/Organisme";
-import { Organisation } from "shared/models/data/organisations.model";
+import { IOrganisation } from "shared/models/data/organisations.model";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
@@ -19,9 +19,9 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { findOrganismeFormateursIds } from "./permissions";
 
-export type OrganismeWithPermissions = Organisme & { permissions: PermissionsOrganisme };
+export type OrganismeWithPermissions = IOrganisme & { permissions: PermissionsOrganisme };
 
-export async function getAcl(organisation: Organisation): Promise<Acl> {
+export async function getAcl(organisation: IOrganisation): Promise<Acl> {
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
       const userOrganisme = await organismesDb().findOne({
@@ -193,7 +193,7 @@ export async function getAcl(organisation: Organisation): Promise<Acl> {
   }
 }
 
-function isInScope(scope: PermissionScope | boolean, organisme: WithId<Organisme>): boolean {
+function isInScope(scope: PermissionScope | boolean, organisme: IOrganisme): boolean {
   if (typeof scope === "boolean") return scope;
 
   return Object.keys(scope).every((k) => {

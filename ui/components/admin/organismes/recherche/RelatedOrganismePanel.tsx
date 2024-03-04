@@ -1,7 +1,7 @@
 import { Button, HStack, SimpleGrid, Text } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
-import { OrganismeJson } from "shared/models/data/@types/Organisme";
+import { IOrganismeJson, IRelatedOrganismeJson } from "shared/models/data/organismes.model";
 
 import Table from "@/components/Table/Table";
 import { AddFill, SubtractLine } from "@/theme/components/icons";
@@ -11,7 +11,7 @@ import { FormationsDetails } from "./FormationDetails";
 import { Label } from "./Label";
 
 type RelatedOrganismePanelProps = {
-  organisme: OrganismeJson | null;
+  organisme: IOrganismeJson | null;
   formations: OffreFormation[];
   type: "responsables" | "formateurs";
 };
@@ -24,12 +24,12 @@ function TextCellComponent({ value }) {
   );
 }
 
-function getRelatedFormationToOrganisme(organisme: OrganismeJson, toOrganismeId: unknown) {
+function getRelatedFormationToOrganisme(organisme: IOrganismeJson, toOrganismeId: unknown) {
   return organisme.relatedFormations?.filter((f) => f.organismes?.some((o) => o.organisme_id === toOrganismeId)) ?? [];
 }
 
 type RelatedOrganismeFormationListProps = {
-  organisme: OrganismeJson;
+  organisme: IOrganismeJson;
   relatedFormations: Array<OffreFormation | (Partial<OffreFormation> & { cle_ministere_educatif: string })>;
 };
 
@@ -106,9 +106,9 @@ function RelatedOrganismeFormationList({ organisme, relatedFormations }: Related
 }
 
 type RelatedOrganismeProps = {
-  organisme: OrganismeJson;
+  organisme: IOrganismeJson;
   formations: OffreFormation[];
-  relatedOrganisme: OrganismeJson["organismesFormateurs"][number] | OrganismeJson["organismesResponsables"][number];
+  relatedOrganisme: IRelatedOrganismeJson;
 };
 
 function RelatedOrganisme({ organisme, relatedOrganisme, formations }: RelatedOrganismeProps) {
@@ -124,11 +124,13 @@ function RelatedOrganisme({ organisme, relatedOrganisme, formations }: RelatedOr
     const result: RelatedOrganismeFormationListProps["relatedFormations"] = [];
 
     for (const relatedFormation of getRelatedFormationToOrganisme(organisme, relatedOrganisme._id)) {
-      const formation = formationByCleMe.get(relatedFormation.cle_ministere_educatif) ?? {
-        cle_ministere_educatif: relatedFormation.cle_ministere_educatif,
-      };
+      if (relatedFormation.cle_ministere_educatif != null) {
+        const formation = formationByCleMe.get(relatedFormation.cle_ministere_educatif) ?? {
+          cle_ministere_educatif: relatedFormation.cle_ministere_educatif,
+        };
 
-      result.push(formation);
+        result.push(formation);
+      }
     }
 
     const intl = new Intl.Collator("fr");

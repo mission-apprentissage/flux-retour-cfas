@@ -1,8 +1,8 @@
 import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
+import Boom from "boom";
 import { STATUT_FIABILISATION_ORGANISME, STATUT_PRESENCE_REFERENTIEL } from "shared";
 
-import { createJobEvent } from "@/common/actions/jobEvents.actions";
 import {
   createOrganisme,
   findOrganismeByUaiAndSiret,
@@ -23,7 +23,6 @@ let nbOrganismeNotUpdated = 0;
  * 1. On va créer tous les organismes "stock" non présents dans le tdb mais existants dans le référentiel
  * 2. Pour les organismes déjà présents va MAJ les organismes présent
  * Le format adresse des organismes du référentiel est différent du format tdb donc on va transformer le champ adresse
- * En cas d'erreurs on log via un createJobEvent()
  */
 export const hydrateOrganismesFromReferentiel = async () => {
   // On reset tous les organismes comme non présents dans le référentiel
@@ -88,14 +87,13 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       });
       nbOrganismeCreated++;
     } catch (error) {
-      nbOrganismeNotCreated++;
-      captureException(error);
-      await createJobEvent({
+      const err = Boom.internal("Erreur lors de la création de l'organisme", {
+        organismeFromReferentiel,
         jobname: JOB_NAME,
-        date: new Date(),
-        action: "organisme-not-created",
-        data: { organisme: organismeFromReferentiel, error },
       });
+      err.cause = error;
+      nbOrganismeNotCreated++;
+      captureException(err);
     }
   } else {
     // Update de l'organisme sans appels API si existant
@@ -119,13 +117,12 @@ const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
       nbOrganismeUpdated++;
     } catch (error) {
       nbOrganismeNotUpdated++;
-      captureException(error);
-      await createJobEvent({
+      const err = Boom.internal("Erreur lors de la mise à jour de l'organisme", {
+        organismeFromReferentiel,
         jobname: JOB_NAME,
-        date: new Date(),
-        action: "organisme-notUpdated",
-        data: { organisme: updatedOrganisme, error },
       });
+      err.cause = error;
+      captureException(err);
     }
   }
 };

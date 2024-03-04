@@ -1,5 +1,5 @@
 import { find } from "lodash-es";
-import { ACADEMIES, DEPARTEMENTS, defaultValuesAdresse } from "shared";
+import { ACADEMIES, DEPARTEMENTS, IDepartmentCode } from "shared";
 import ApiEntEtablissement from "shared/models/apis/@types/ApiEntEtablissement";
 
 import * as apiEntreprise from "@/common/apis/ApiEntreprise";
@@ -11,7 +11,7 @@ export const getDepartementCodeFromCodeInsee = (codeInsee) => {
 
 export const buildAdresseFromApiEntreprise = async (siret) => {
   const etablissementApiInfo: ApiEntEtablissement = await apiEntreprise.getEtablissement(siret);
-  if (!etablissementApiInfo) return defaultValuesAdresse();
+  if (!etablissementApiInfo) return {};
 
   // Handle departement
   let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_commune);
@@ -45,7 +45,7 @@ export const buildAdresseFromApiEntreprise = async (siret) => {
   };
 };
 
-export const findDataByDepartementNum = (code_dept) => {
+export const findDataByDepartementNum = (code_dept: IDepartmentCode) => {
   const data = find(DEPARTEMENTS, (departement) => departement.code === code_dept);
   if (!data) {
     return { nom_dept: null, nom_region: null, code_region: null, nom_academie: null, num_academie: null };

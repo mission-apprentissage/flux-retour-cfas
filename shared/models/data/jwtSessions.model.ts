@@ -1,17 +1,16 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { object, string, objectId } from "shared";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "jwtSessions";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ jwt: 1 }, { unique: true }]];
 
-const schema = object(
-  {
-    _id: objectId(),
-    jwt: string({ description: "Session token" }),
-  },
-  { required: ["jwt"], additionalProperties: false }
-);
+const zJwtSession = z.object({
+  _id: zObjectId,
+  jwt: z.string({ description: "Session token" }),
+});
 
-export default { schema, indexes, collectionName };
+export type IJwtSession = z.output<typeof zJwtSession>;
+
+export default { zod: zJwtSession, indexes, collectionName };

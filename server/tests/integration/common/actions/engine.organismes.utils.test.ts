@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 import { isOrganismeFiableForCouple } from "@/common/actions/engine/engine.organismes.utils";
 import { organismesReferentielDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -15,6 +17,7 @@ describe("Tests des actions  engine utilitaires organismes", () => {
       // Création d'un organisme dans le référentiel avec un couple fiable et création d'un organisme ferme
       await organismesReferentielDb().insertMany([
         {
+          _id: new ObjectId(),
           uai: UAI_REFERENTIEL,
           siret: SIRET_REFERENTIEL,
           nature: "formateur",
@@ -22,6 +25,7 @@ describe("Tests des actions  engine utilitaires organismes", () => {
           relations: [],
         },
         {
+          _id: new ObjectId(),
           uai: UAI_REFERENTIEL_FERME,
           siret: SIRET_REFERENTIEL_FERME,
           nature: "formateur",

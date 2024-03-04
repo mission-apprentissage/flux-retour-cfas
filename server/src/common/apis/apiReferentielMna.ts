@@ -1,4 +1,4 @@
-import { OrganismesReferentiel } from "shared/models/data/@types";
+import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
 import config from "@/config";
 
@@ -35,7 +35,7 @@ const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
 export const fetchOrganismes = async () => {
   const {
     data: { organismes },
-  } = await axiosClient.get<{ organismes: OrganismesReferentiel[] }>("/organismes", {
+  } = await axiosClient.get<{ organismes: IOrganismeReferentiel[] }>("/organismes", {
     params: {
       items_par_page: 50000,
       champs: DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(","),

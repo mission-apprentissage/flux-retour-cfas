@@ -3,6 +3,21 @@ import { z } from "zod";
 
 import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
+export const stripModelAdditionalKeys = (validationSchema, data) => {
+  const strippedData = Object.keys(validationSchema.shape).reduce((acc, curr) => {
+    return data[curr] !== undefined
+      ? {
+          ...acc,
+          [curr]: data[curr],
+        }
+      : acc;
+  }, {} as any);
+
+  delete strippedData._id;
+
+  return strippedData;
+};
+
 export const dossierApprenantSchemaV3Base = () =>
   z.object({
     // REQUIRED FIELDS

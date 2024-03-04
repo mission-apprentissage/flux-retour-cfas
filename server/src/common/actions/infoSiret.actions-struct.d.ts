@@ -14,8 +14,8 @@ export type InfoSiret = {
     code_insee_localite?: string;
     localite?: string;
     num_departement?: string;
-    num_region?: string;
-    num_academie?: string;
+    num_region?: string | null;
+    num_academie?: string | null;
     adresse?: string;
     type_voie?: string;
     commune_implantation_nom?: string;

@@ -1,7 +1,8 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
-import { CFD_REGEX_PATTERN } from "../../constants";
-import { object, string, date, objectId, dateOrNull, stringOrNull, arrayOf } from "../json-schema/jsonSchemaTypes";
+import { CFD_REGEX } from "../../constants";
 
 const collectionName = "formations";
 
@@ -12,28 +13,31 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ rncps: 1 }, { name: "rncps" }],
 ];
 
-const schema = object(
-  {
-    _id: objectId(),
-    cfd: string({ description: "Code CFD de la formation", pattern: CFD_REGEX_PATTERN, maxLength: 8 }),
-    cfd_start_date: dateOrNull({ description: "Date d'ouverture du CFD" }),
-    cfd_end_date: dateOrNull({ description: "Date de fermeture du CFD" }),
-    libelle: stringOrNull({ description: "Libellé normalisé depuis Tables de Correspondances" }),
-    rncps: arrayOf(string(), {
+const zFormation = z.object({
+  _id: zObjectId,
+  cfd: z.string({ description: "Code CFD de la formation" }).regex(CFD_REGEX),
+  cfd_start_date: z.date({ description: "Date d'ouverture du CFD" }).nullish(),
+  cfd_end_date: z.date({ description: "Date de fermeture du CFD" }).nullish(),
+  libelle: z.string({ description: "Libellé normalisé depuis Tables de Correspondances" }).nullish(),
+  rncps: z
+    .array(z.string(), {
       description: "Liste des codes RNCPs de la formation récupéré depuis Tables de Correspondances",
-    }),
-    niveau: stringOrNull({ description: "Niveau de formation récupéré via Tables de Correspondances" }),
-    niveau_libelle: stringOrNull({
+    })
+    .nullish(),
+  niveau: z.string({ description: "Niveau de formation récupéré via Tables de Correspondances" }).nullish(),
+  niveau_libelle: z
+    .string({
       description: "Libellé du niveau de formation récupéré via Tables de Correspondances",
-    }),
-    metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à la formation" }),
-    duree: stringOrNull({ description: "Durée de la formation théorique" }),
-    annee: stringOrNull({ description: "Année de la formation (cursus)" }),
+    })
+    .nullish(),
+  metiers: z.array(z.string(), { description: "Les domaines métiers rattachés à la formation" }).nullish(),
+  duree: z.string({ description: "Durée de la formation théorique" }).nullish(),
+  annee: z.string({ description: "Année de la formation (cursus)" }).nullish(),
 
-    updated_at: dateOrNull({ description: "Date d'update en base de données" }),
-    created_at: date({ description: "Date d'ajout en base de données" }),
-  },
-  { required: ["cfd"] }
-);
+  updated_at: z.date({ description: "Date d'update en base de données" }).nullish(),
+  created_at: z.date({ description: "Date d'ajout en base de données" }).nullish(),
+});
 
-export default { schema, indexes, collectionName };
+export type IFormation = z.output<typeof zFormation>;
+
+export default { zod: zFormation, indexes, collectionName };

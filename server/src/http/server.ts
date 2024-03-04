@@ -7,10 +7,9 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application } from "express";
 import Joi from "joi";
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId } from "mongodb";
 import passport from "passport";
 import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
-import { Organisme } from "shared/models/data/@types";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -92,7 +91,7 @@ import { changePassword, updateUserProfile } from "@/common/actions/users.action
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsDb, jobEventsDb, organisationsDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -195,7 +194,7 @@ function setupRoutes(app: Application) {
       returnResult(async () => {
         let mongodbHealthy = false;
         try {
-          await jobEventsDb().findOne({});
+          await usersMigrationDb().findOne({});
           mongodbHealthy = true;
         } catch (err) {
           logger.error({ err }, "healthcheck failed");
@@ -371,7 +370,7 @@ function setupRoutes(app: Application) {
     ["/api/v3/dossiers-apprenants"],
     requireBearerAuthentication(),
     async (req, res, next) => {
-      const organisme = (await getOrganismeByAPIKey(res.locals.token, req.query)) as WithId<Organisme>;
+      const organisme = await getOrganismeByAPIKey(res.locals.token, req.query);
 
       let erpSource = "INCONNU";
       if (organisme.erps?.length) {

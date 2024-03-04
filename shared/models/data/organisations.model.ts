@@ -1,29 +1,150 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 import {
-  REGIONS,
-  DEPARTEMENTS,
-  ACADEMIES,
   ACADEMIES_BY_CODE,
   DEPARTEMENTS_BY_CODE,
   REGIONS_BY_CODE,
-  TETE_DE_RESEAUX,
   TETE_DE_RESEAUX_BY_ID,
   ORGANISATIONS_NATIONALES,
-  SIRET_REGEX_PATTERN,
-  UAI_REGEX_PATTERN,
-  date,
-  object,
-  objectId,
-  string,
-  stringOrNull,
   IRegionCode,
   IDepartmentCode,
   IAcademieCode,
+  SIRET_REGEX,
+  UAI_REGEX,
 } from "shared";
 
+import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
+
+const collectionName = "organisations";
+
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+
+const zOrganisationBase = z.object({
+  _id: zObjectId,
+  created_at: z.date({ description: "Date de création en base de données" }),
+});
+
+const zOrganisationOrganismeCreate = z.object({
+  type: z.literal("ORGANISME_FORMATION"),
+  siret: z.string({ description: "N° SIRET" }).regex(SIRET_REGEX),
+  uai: z
+    .string({
+      description: "Code UAI de l'organisme (seulement pour les utilisateurs OF)",
+    })
+    .regex(UAI_REGEX)
+    .nullable(),
+});
+
+const zOrganisationReaseauCreate = z.object({
+  type: z.literal("TETE_DE_RESEAU"),
+  reseau: zodEnumFromObjKeys(TETE_DE_RESEAUX_BY_ID).describe("Réseau du CFA, s'il existe"),
+});
+
+const zOrganisationRegionalCreate = z.object({
+  type: z.enum(["DREETS", "DRAAF", "CONSEIL_REGIONAL", "CARIF_OREF_REGIONAL", "DRAFPIC"]),
+  code_region: zodEnumFromObjKeys(REGIONS_BY_CODE).describe("Code région"),
+});
+
+const zOrganisationDepartementalCreate = z.object({
+  type: z.literal("DDETS"),
+  code_departement: zodEnumFromObjKeys(DEPARTEMENTS_BY_CODE).openapi({
+    examples: ["01", "59"],
+    description: "Code département",
+  }),
+});
+
+const zOrganisationAcademieCreate = z.object({
+  type: z.literal("ACADEMIE"),
+  code_academie: zodEnumFromObjKeys(ACADEMIES_BY_CODE).describe("Code académie"),
+});
+
+const zOrganisationNationalCreate = z.object({
+  type: z.literal("OPERATEUR_PUBLIC_NATIONAL"),
+  nom: zodEnumFromArray(ORGANISATIONS_NATIONALES.map(({ key }) => key)).describe("Nom de l'organisation nationale"),
+});
+
+// TODO: à supprimer pour merger avec zOrganisationNational?
+const zOrganisationCarifOrefCreate = z.object({
+  type: z.literal("CARIF_OREF_NATIONAL"),
+});
+
+const zOrganisationAdminCreate = z.object({
+  type: z.literal("ADMINISTRATEUR"),
+});
+
+const zOrganisationOrganisme = zOrganisationBase.merge(zOrganisationOrganismeCreate);
+const zOrganisationReaseau = zOrganisationBase.merge(zOrganisationReaseauCreate);
+const zOrganisationRegional = zOrganisationBase.merge(zOrganisationRegionalCreate);
+const zOrganisationDepartemental = zOrganisationBase.merge(zOrganisationDepartementalCreate);
+const zOrganisationAcademie = zOrganisationBase.merge(zOrganisationAcademieCreate);
+const zOrganisationNational = zOrganisationBase.merge(zOrganisationNationalCreate);
+const zOrganisationCarifOref = zOrganisationBase.merge(zOrganisationCarifOrefCreate);
+const zOrganisationAdmin = zOrganisationBase.merge(zOrganisationAdminCreate);
+
+export const zOrganisation = z.discriminatedUnion("type", [
+  zOrganisationOrganisme,
+  zOrganisationReaseau,
+  zOrganisationRegional,
+  zOrganisationDepartemental,
+  zOrganisationAcademie,
+  zOrganisationNational,
+  zOrganisationCarifOref,
+  zOrganisationAdmin,
+]);
+
+export const zOrganisationCreate = z.discriminatedUnion("type", [
+  zOrganisationOrganismeCreate,
+  zOrganisationReaseauCreate,
+  zOrganisationRegionalCreate,
+  zOrganisationDepartementalCreate,
+  zOrganisationAcademieCreate,
+  zOrganisationNationalCreate,
+  zOrganisationCarifOrefCreate,
+  zOrganisationAdminCreate,
+]);
+
+export type IOrganisationOrganismeFormation = z.output<typeof zOrganisationOrganisme>;
+
+export type IOrganisationTeteReseau = z.output<typeof zOrganisationReaseau>;
+
+export type IOrganisationOperateurPublicNational = z.output<typeof zOrganisationNational>;
+
+export type IOrganisationCarifOrefNational = z.output<typeof zOrganisationCarifOref>;
+
+export type IOrganisationOperateurPublicRegion = z.output<typeof zOrganisationRegional>;
+
+export type IOrganisationOperateurPublicDepartement = z.output<typeof zOrganisationDepartemental>;
+
+export type IOrganisationOperateurPublicAcademie = z.output<typeof zOrganisationAcademie>;
+
+export type IOrganisationAdministrateur = z.output<typeof zOrganisationAdmin>;
+
+// types structurés pour faciliter les permissions
+export type OrganisationByType = {
+  ORGANISME_FORMATION: IOrganisationOrganismeFormation;
+  TETE_DE_RESEAU: IOrganisationTeteReseau;
+  DREETS: IOrganisationOperateurPublicRegion;
+  DRAAF: IOrganisationOperateurPublicRegion;
+  CONSEIL_REGIONAL: IOrganisationOperateurPublicRegion;
+  CARIF_OREF_REGIONAL: IOrganisationOperateurPublicRegion;
+  DRAFPIC: IOrganisationOperateurPublicRegion;
+  DDETS: IOrganisationOperateurPublicDepartement;
+  ACADEMIE: IOrganisationOperateurPublicAcademie;
+  ADMINISTRATEUR: IOrganisationAdministrateur;
+  OPERATEUR_PUBLIC_NATIONAL: IOrganisationOperateurPublicNational;
+  CARIF_OREF_NATIONAL: IOrganisationCarifOrefNational;
+};
+
+export type IOrganisation = z.output<typeof zOrganisation>;
+
+export type IOrganisationCreate = z.output<typeof zOrganisationCreate>;
+
+export type IOrganisationType = IOrganisation["type"];
+
 // types en doublon avec l'UI
-export const organisationTypes = [
+export const organisationTypes: IOrganisationType[] = [
   "ORGANISME_FORMATION",
   "TETE_DE_RESEAU",
   "DREETS",
@@ -38,76 +159,7 @@ export const organisationTypes = [
   "DRAFPIC",
 ];
 
-export type NewOrganisation =
-  | OrganisationOrganismeFormation
-  | OrganisationTeteReseau
-  | OrganisationOperateurPublicRegion
-  | OrganisationOperateurPublicDepartement
-  | OrganisationOperateurPublicAcademie
-  | OrganisationOperateurPublicNational
-  | OrganisationCarifOrefNational
-  | OrganisationAdministrateur;
-
-export type Organisation = NewOrganisation & { created_at: Date };
-
-export type OrganisationType = (typeof organisationTypes)[number];
-
-export interface OrganisationOrganismeFormation {
-  type: "ORGANISME_FORMATION";
-  siret: string;
-  uai: string | null;
-}
-
-export interface OrganisationTeteReseau {
-  type: "TETE_DE_RESEAU";
-  reseau: (typeof TETE_DE_RESEAUX)[number]["key"];
-}
-
-export interface OrganisationOperateurPublicNational {
-  type: "OPERATEUR_PUBLIC_NATIONAL";
-  nom: (typeof ORGANISATIONS_NATIONALES)[number]["key"];
-}
-
-export interface OrganisationCarifOrefNational {
-  type: "CARIF_OREF_NATIONAL";
-}
-
-export interface OrganisationOperateurPublicRegion {
-  type: "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "CARIF_OREF_REGIONAL" | "DRAFPIC";
-  code_region: string;
-}
-
-export interface OrganisationOperateurPublicDepartement {
-  type: "DDETS";
-  code_departement: string;
-}
-
-export interface OrganisationOperateurPublicAcademie {
-  type: "ACADEMIE";
-  code_academie: string;
-}
-
-export interface OrganisationAdministrateur {
-  type: "ADMINISTRATEUR";
-}
-
-// types structurés pour faciliter les permissions
-export type OrganisationByType = {
-  ORGANISME_FORMATION: OrganisationOrganismeFormation;
-  TETE_DE_RESEAU: OrganisationTeteReseau;
-  DREETS: OrganisationOperateurPublicRegion;
-  DRAAF: OrganisationOperateurPublicRegion;
-  CONSEIL_REGIONAL: OrganisationOperateurPublicRegion;
-  CARIF_OREF_REGIONAL: OrganisationOperateurPublicRegion;
-  DRAFPIC: OrganisationOperateurPublicRegion;
-  DDETS: OrganisationOperateurPublicDepartement;
-  ACADEMIE: OrganisationOperateurPublicAcademie;
-  ADMINISTRATEUR: OrganisationAdministrateur;
-  OPERATEUR_PUBLIC_NATIONAL: OrganisationOperateurPublicNational;
-  CARIF_OREF_NATIONAL: OrganisationCarifOrefNational;
-};
-
-export function getOrganisationLabel(organisation: NewOrganisation): string {
+export function getOrganisationLabel(organisation: IOrganisationCreate): string {
   switch (organisation.type) {
     case "ORGANISME_FORMATION": {
       return `OFA UAI : ${organisation.uai || "Inconnu"} - SIRET : ${organisation.siret}`;
@@ -147,7 +199,7 @@ export function getOrganisationLabel(organisation: NewOrganisation): string {
   }
 }
 
-function isPublicOrganisation(organisation: NewOrganisation): boolean {
+function isPublicOrganisation(organisation: IOrganisationCreate): boolean {
   return [
     "DREETS",
     "DRAAF",
@@ -162,7 +214,7 @@ function isPublicOrganisation(organisation: NewOrganisation): boolean {
   ].includes(organisation.type);
 }
 
-export function getWarningOnEmail(email: string, organisation: Organisation & { domains: [string] }) {
+export function getWarningOnEmail(email: string, organisation: IOrganisationCreate & { domains: [string] }) {
   let warning;
   if (!isPublicOrganisation(organisation)) {
     return;
@@ -190,62 +242,4 @@ export function getWarningOnEmail(email: string, organisation: Organisation & { 
   return warning;
 }
 
-const collectionName = "organisations";
-
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
-
-const schema = object(
-  {
-    _id: objectId(),
-
-    type: string({
-      description: "Type d'organisation (exemple DREETS, ACADEMIE, etc)",
-      enum: organisationTypes,
-    }),
-
-    // si OFRF, OFR, OFF
-    siret: string({ description: "N° SIRET", pattern: SIRET_REGEX_PATTERN, maxLength: 14, minLength: 14 }),
-    uai: stringOrNull({
-      description: "Code UAI de l'organisme (seulement pour les utilisateurs OF)",
-      pattern: UAI_REGEX_PATTERN,
-      maxLength: 8,
-      minLength: 8,
-    }),
-
-    // si tête de réseau
-    reseau: string({ enum: TETE_DE_RESEAUX.map((r) => r.key), description: "Nom du réseau" }),
-
-    // si DREETS, DRAAF, CONSEIL_REGIONAL, CARIF_OREF_REGIONAL, DRAFPIC
-    code_region: string({
-      enum: REGIONS.map(({ code }) => code),
-      description: "Code région",
-    }),
-
-    // si DDETS
-    code_departement: string({
-      example: "1 Ain, 99 Étranger",
-      pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
-      enum: DEPARTEMENTS.map(({ code }) => code),
-      maxLength: 3,
-      minLength: 1,
-      description: "Code département",
-    }),
-
-    // si académie
-    code_academie: string({
-      enum: ACADEMIES.map(({ code }) => code),
-      description: "Code académie",
-    }),
-
-    // si opérateur public national
-    nom: string({
-      enum: ORGANISATIONS_NATIONALES.map(({ key }) => key),
-      description: "Nom de l'organisation nationale",
-    }),
-
-    created_at: date({ description: "Date de création en base de données" }),
-  },
-  { required: ["type"], additionalProperties: true }
-);
-
-export default { schema, indexes, collectionName };
+export default { zod: zOrganisation, indexes, collectionName };

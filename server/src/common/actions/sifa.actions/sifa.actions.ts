@@ -2,7 +2,7 @@ import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, getSIFADate, CODES_STATUT_APPRENANT } from "shared";
-import { Effectif } from "shared/models/data/@types/Effectif";
+import { IEffectif } from "shared/models/data/effectifs.model";
 
 import { getFormationCfd } from "@/common/actions/formations.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
@@ -11,7 +11,7 @@ import { effectifsDb } from "@/common/model/collections";
 
 import { SIFA_FIELDS, formatAN_FORM, formatINE, formatStringForSIFA, wrapNumString } from "./sifaCsvFields";
 
-export const isEligibleSIFA = (historique_statut: Effectif["apprenant"]["historique_statut"]) => {
+export const isEligibleSIFA = (historique_statut: IEffectif["apprenant"]["historique_statut"]) => {
   const endOfyear = getSIFADate(new Date());
 
   const historiqueSorted = historique_statut
@@ -58,14 +58,14 @@ export const generateSifa = async (organisme_id: ObjectId) => {
         },
       })
       .toArray()
-  ).filter((effectif) => isEligibleSIFA(effectif.apprenant.historique_statut)) as Required<WithId<Effectif>>[];
+  ).filter((effectif) => isEligibleSIFA(effectif.apprenant.historique_statut)) as Required<WithId<IEffectif>>[];
 
   const items: any[] = [];
   const organismesUaiCache: Record<string, string> = {};
   for (const effectif of effectifs) {
     const formationCfd = await getFormationCfd(effectif);
     const formationOrganisme = organisme.relatedFormations?.find(
-      (f) => f.formation_id?.toString() === effectif.formation.formation_id?.toString()
+      (f) => f.formation_id?.toString() === effectif.formation?.formation_id?.toString()
     );
     const cpInfo = await getCodePostalInfo(effectif.apprenant.code_postal_de_naissance);
     const cpNaissanceInfo = cpInfo?.result;
@@ -133,7 +133,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
         : undefined,
       DIPLOME: codeDiplome,
-      DUR_FORM_THEO: effectif.formation.duree_theorique_mois
+      DUR_FORM_THEO: effectif.formation?.duree_theorique_mois
         ? effectif.formation.duree_theorique_mois
         : // Les ERPs (ou les anciens fichiers de téléversement) pouvaient envoyer duree_theorique_formation
           // qui est l'ancien champ en années (contrairement à duree_theorique_formation_mois qui est en mois).
@@ -142,8 +142,8 @@ export const generateSifa = async (organisme_id: ObjectId) => {
           formationOrganisme?.duree_formation_theorique
           ? formationOrganisme?.duree_formation_theorique * 12
           : undefined,
-      DUR_FORM_REELLE: effectif.formation.duree_formation_relle,
-      AN_FORM: formatAN_FORM(effectif.formation.annee),
+      DUR_FORM_REELLE: effectif.formation?.duree_formation_relle,
+      AN_FORM: formatAN_FORM(effectif.formation?.annee),
       SIT_FORM: organismeFormateurUai,
       STATUT: "APP", // STATUT courant
       TYPE_CFA: wrapNumString(String(effectif.apprenant.type_cfa).padStart(2, "0")),
@@ -154,7 +154,7 @@ export const generateSifa = async (organisme_id: ObjectId) => {
     const notRequiredFields = {
       TYPE_CFA: wrapNumString(effectif.apprenant.type_cfa),
       // Si i n'y a pas de code displome on renseigne le RNCP
-      RNCP: !codeDiplome ? effectif.formation.rncp : "",
+      RNCP: !codeDiplome ? effectif.formation?.rncp : "",
     };
 
     const apprenantFields = {

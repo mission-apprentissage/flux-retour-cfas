@@ -1,10 +1,11 @@
-import type { WithId } from "mongodb";
 import type { Jsonify } from "type-fest";
 
 import ApiEntEtablissement from "../apis/@types/ApiEntEtablissement.d";
-import { FiabilisationUaiSiret, Organisme, OrganismesReferentiel } from "../data/@types";
+import { FiabilisationUaiSiret } from "../data/@types";
 import { OffreFormation } from "../data/@types/OffreFormation";
-import { OrganisationOrganismeFormation } from "../data/organisations.model";
+import { IOrganisationOrganismeFormation } from "../data/organisations.model";
+import { IOrganisme } from "../data/organismes.model";
+import { IOrganismeReferentiel } from "../data/organismesReferentiel.model";
 import { IUsersMigration } from "../data/usersMigration.model";
 
 export type TransmissionStat = {
@@ -28,12 +29,12 @@ export interface OrganismeSupportInfo {
   uai: string | null;
   siret: string;
   nom: string;
-  tdb: WithId<Organisme> | null;
-  referentiel: OrganismesReferentiel | null;
+  tdb: IOrganisme | null;
+  referentiel: IOrganismeReferentiel | null;
   fiabilisation: FiabilisationUaiSiret | null;
   formations: OffreFormation[];
   apiEntreprise: ApiEntEtablissement | null;
-  organisation: (OrganisationOrganismeFormation & { users: IUsersMigration[] }) | null;
+  organisation: (IOrganisationOrganismeFormation & { users: IUsersMigration[] }) | null;
   etat: Array<"fermé" | "actif" | "inconnu">;
   effectifs: number;
   transmissions: TransmissionStat[];

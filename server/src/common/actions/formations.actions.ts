@@ -1,5 +1,6 @@
+import { ObjectId } from "mongodb";
 import { isValidCFD } from "shared/constants/validations";
-import { Effectif } from "shared/models/data/@types";
+import { IEffectif } from "shared/models/data/effectifs.model";
 
 import { getCfdInfo } from "@/common/apis/apiTablesCorrespondances";
 import { formationsDb } from "@/common/model/collections";
@@ -14,7 +15,7 @@ const existsFormation = async (cfd) => {
   return count !== 0;
 };
 
-export async function getFormationCfd(effectif: Effectif): Promise<string | null> {
+export async function getFormationCfd(effectif: IEffectif): Promise<string | null> {
   if (effectif.formation?.cfd) {
     const formation = await formationsDb().findOne({ cfd: effectif.formation.cfd });
     if (formation) {
@@ -88,6 +89,7 @@ export const createFormation = async ({
   const libelleFormationBuilt = formationInfo?.intitule_long || "";
 
   const { insertedId } = await formationsDb().insertOne({
+    _id: new ObjectId(),
     cfd,
     cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
     cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO

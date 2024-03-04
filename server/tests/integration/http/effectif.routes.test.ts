@@ -32,16 +32,17 @@ describe("Routes diverses", () => {
     let effectifId: ObjectId;
 
     beforeEach(async () => {
-      const { insertedId } = await effectifsDb().insertOne(
-        createSampleEffectif({
+      const { insertedId } = await effectifsDb().insertOne({
+        _id: new ObjectId(),
+        ...createSampleEffectif({
           ...commonEffectifsAttributes,
           annee_scolaire: anneeScolaire,
           apprenant: {
             historique_statut: historySequenceInscritToApprenti,
           },
           organisme_id: organismes[0]._id,
-        })
-      );
+        }),
+      });
       effectifId = insertedId;
     });
 

@@ -1,12 +1,12 @@
 import { find } from "lodash-es";
-import { DEPARTEMENTS } from "shared";
+import { DEPARTEMENTS, IAdresse, IDepartement } from "shared";
 
 import { isValidUAI } from "./validationUtils";
 
 const SPECIFIC_UAI_CODES_CORSE1 = { code: "2A", uaiCode: "620" };
 const SPECIFIC_UAI_CODES_CORSE2 = { code: "2B", uaiCode: "720" };
 
-const getLocalisationInfoFromUai = (uai) => {
+const getLocalisationInfoFromUai = (uai: string): IDepartement | undefined => {
   const infoCodeFromUai = getDepartementCodeFromUai(uai);
 
   // TODO [tech] : gérer proprement les cas de la corse
@@ -18,14 +18,14 @@ const getLocalisationInfoFromUai = (uai) => {
   return find(DEPARTEMENTS, (departement) => departement.code === infoCodeFromUai);
 };
 
-export const buildAdresseFromUai = (uai) => {
+export const buildAdresseFromUai = (uai: string): { adresse?: IAdresse } => {
   const localisationInfo = getLocalisationInfoFromUai(uai);
   if (!localisationInfo) return {};
   return {
     adresse: {
       departement: localisationInfo.code,
       region: localisationInfo.region.code,
-      academie: localisationInfo.academie.code.toString(),
+      academie: localisationInfo.academie.code,
     },
   };
 };

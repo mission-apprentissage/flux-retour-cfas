@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import {
   deleteOldestDuplicates,
@@ -15,7 +16,7 @@ const TEST_SIREN = "190404921";
 const ANNEE_SCOLAIRE = "2023-2024";
 
 const sampleOrganismeId = new ObjectId(id(1));
-const sampleOrganisme = {
+const sampleOrganisme: IOrganisme = {
   _id: sampleOrganismeId,
   ...createRandomOrganisme({ siret: `${TEST_SIREN}00016` }),
 };
@@ -30,11 +31,14 @@ const insertDuplicateEffectifs = async (totalEffectifs = 5, duplicatesCount = 2)
     const idErpApprenant = `ID_ERP_${i}`;
 
     for (let j = 0; j < duplicatesCount; j++) {
-      const effectif = createSampleEffectif({
-        organisme: sampleOrganisme,
-        annee_scolaire: ANNEE_SCOLAIRE,
-        id_erp_apprenant: idErpApprenant,
-      });
+      const effectif = {
+        _id: new ObjectId(),
+        ...createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: ANNEE_SCOLAIRE,
+          id_erp_apprenant: idErpApprenant,
+        }),
+      };
 
       const { insertedId } = await effectifsDb().insertOne(effectif);
       insertedIdList.push(insertedId);

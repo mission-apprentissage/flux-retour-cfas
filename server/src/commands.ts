@@ -13,7 +13,6 @@ import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { seedPlausibleGoals } from "./jobs/seed/plausible/goals";
-import { generateTypes } from "./jobs/seed/types/generate-types";
 import { updateUserPassword } from "./jobs/users/update-user-password";
 
 async function startJobProcessor(signal: AbortSignal) {
@@ -487,16 +486,6 @@ program
 program.command("init:dev").description("Initialisation du projet en local").action(createJobAction("init:dev"));
 
 /**
- * Job de purge des events
- */
-program
-  .command("purge:events")
-  .description("Purge des logs inutiles")
-  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("purge:events"));
-
-/**
  * Job de purge des queues
  */
 program
@@ -605,12 +594,6 @@ program
   .description("Envoi des emails de relance")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("send-reminder-emails"));
-
-program
-  .command("dev:generate-ts-types")
-  .description("Generation des types TS à partir des schemas de la base de données")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(generateTypes);
 
 program
   .command("dev:list-http-endpoints")

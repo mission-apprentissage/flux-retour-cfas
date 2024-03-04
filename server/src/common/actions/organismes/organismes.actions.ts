@@ -2,8 +2,8 @@ import Boom from "boom";
 import type { Request } from "express";
 import { ObjectId, WithId } from "mongodb";
 import { getAnneesScolaireListFromDate, Acl, PermissionsOrganisme } from "shared";
-import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
-import { Organisme } from "shared/models/data/@types/Organisme";
+import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
+import { IOrganisme, defaultValuesOrganisme } from "shared/models/data/organismes.model";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -15,7 +15,6 @@ import { listContactsOrganisation } from "@/common/actions/organisations.actions
 import logger from "@/common/logger";
 import { organismesDb, effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
-import { defaultValuesOrganisme } from "@/common/model/organismes.model";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { cleanProjection } from "@/common/utils/mongoUtils";
 import { IReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
@@ -27,31 +26,59 @@ import { InfoSiret } from "../infoSiret.actions-struct";
 
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions";
 
+export type IOrganismeCreate = Partial<
+  Pick<
+    IOrganisme,
+    | "reseaux"
+    | "erps"
+    | "relatedFormations"
+    | "fiabilisation_statut"
+    | "ferme"
+    | "qualiopi"
+    | "prepa_apprentissage"
+    | "created_at"
+    | "updated_at"
+  >
+> &
+  Omit<
+    IOrganisme,
+    | "_id"
+    | "reseaux"
+    | "erps"
+    | "relatedFormations"
+    | "fiabilisation_statut"
+    | "ferme"
+    | "qualiopi"
+    | "prepa_apprentissage"
+    | "created_at"
+    | "updated_at"
+  >;
+
 /**
  * Méthode de création d'un organisme
  * Checks uai format & existence
  */
-export const createOrganisme = async (data: Organisme) => {
+export const createOrganisme = async (data: IOrganismeCreate): Promise<IOrganisme> => {
   if ((await organismesDb().countDocuments({ uai: data.uai, siret: data.siret })) > 0) {
     throw new Error(`Un organisme avec l'UAI ${data.uai} et le siret ${data.siret} existe déjà`);
   }
 
-  const dataToInsert = {
+  const organisme: IOrganisme = {
+    _id: new ObjectId(),
     ...defaultValuesOrganisme(),
     ...stripEmptyFields(data),
   };
-  const { insertedId } = await organismesDb().insertOne(dataToInsert);
-  return {
-    _id: insertedId,
-    ...dataToInsert,
-  };
+  await organismesDb().insertOne(organisme);
+  return organisme;
 };
+
+type OrganismeInfoFromSiret = Pick<IOrganisme, "nom" | "enseigne" | "raison_sociale" | "adresse" | "ferme">;
 
 /**
  * Fonction de récupération d'informations depuis SIRET via API Entreprise via siret
  */
-export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial<Organisme>> => {
-  let organismeInfos: Partial<Organisme> = {};
+export const getOrganismeInfosFromSiret = async (siret: string): Promise<Partial<OrganismeInfoFromSiret>> => {
+  let organismeInfos: Partial<OrganismeInfoFromSiret> = {};
 
   if (siret) {
     const dataSiret: InfoSiret = await findDataFromSiret(siret);
@@ -125,7 +152,7 @@ export const findOrganismeById = async (id: string | ObjectId, projection = {}) 
 /**
  * Méthode de mise à jour d'un organisme depuis son id
  */
-export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) => {
+export const updateOrganisme = async (_id: ObjectId, data: Partial<IOrganisme>) => {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
@@ -143,13 +170,13 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<Organisme>) =
     { returnDocument: "after" }
   );
 
-  return updated.value as WithId<Organisme>;
+  return updated.value as WithId<IOrganisme>;
 };
 
 /**
  * Fonction de MAJ d'un organisme en appelant les API externes
  */
-export const updateOneOrganismeRelatedFormations = async (organisme: WithId<Organisme>) => {
+export const updateOneOrganismeRelatedFormations = async (organisme: WithId<IOrganisme>) => {
   // Construction de l'arbre des formations de l'organisme
   const relatedFormations = (await getFormationsTreeForOrganisme(organisme.uai))?.formations || [];
 
@@ -162,7 +189,7 @@ export const updateOneOrganismeRelatedFormations = async (organisme: WithId<Orga
     { returnDocument: "after" }
   );
 
-  return updated.value as WithId<Organisme>;
+  return updated.value as WithId<IOrganisme>;
 };
 
 /**
@@ -173,7 +200,7 @@ export const updateOneOrganismeRelatedFormations = async (organisme: WithId<Orga
  * Ajout de la source à la liste des ERPs
  */
 export const updateOrganismeTransmission = async (
-  organisme: Pick<WithId<Organisme>, "_id" | "first_transmission_date">,
+  organisme: Pick<WithId<IOrganisme>, "_id" | "first_transmission_date">,
   api_version?: string,
   source_organisme_id?: string
 ) => {
@@ -243,7 +270,7 @@ export const deleteOrganismeAndEffectifs = async (id: ObjectId) => {
 
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) throw new Error(`Unable to find organisme ${_id.toString()}`);
-  if (!organisme.uai) throw new Error(`Organisme ${_id.toString()} doesn't have any UAI`);
+  if (!organisme.uai) throw new Error(`IOrganisme ${_id.toString()} doesn't have any UAI`);
 
   // Suppression des effectifs liés puis de l'organisme
   const { deletedCount: deletedEffectifs } = await effectifsDb().deleteMany({ organisme_id: id });
@@ -429,7 +456,7 @@ export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
   );
 
   if (!updated.value) {
-    throw Boom.notFound(`Organisme ${organismeId} not found`);
+    throw Boom.notFound(`IOrganisme ${organismeId} not found`);
   }
 
   return updated?.value.api_key;
@@ -479,7 +506,7 @@ export const getStatOrganismes = async () => {
 export async function getOrganismeById(_id: ObjectId) {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
-    throw Boom.notFound(`Organisme ${_id} not found`);
+    throw Boom.notFound(`IOrganisme ${_id} not found`);
   }
   return organisme;
 }
@@ -497,7 +524,7 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
     }
   );
   if (!organisme) {
-    throw Boom.notFound(`Organisme ${organismeId} not found`);
+    throw Boom.notFound(`IOrganisme ${organismeId} not found`);
   }
 
   return {
@@ -506,15 +533,15 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
   } as OrganismeWithPermissions;
 }
 
-export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]) {
+export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]): Promise<IOrganisme> {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
     throw Boom.forbidden("La clé API n'est pas valide", { queryString });
   }
-  return organisme as WithId<Organisme>;
+  return organisme;
 }
 
-export async function findOrganismesBySIRET(siret: string): Promise<Organisme[]> {
+export async function findOrganismesBySIRET(siret: string): Promise<IOrganisme[]> {
   const organismes = await organismesDb()
     .find(
       {
@@ -542,7 +569,7 @@ export async function findOrganismesBySIRET(siret: string): Promise<Organisme[]>
   return organismes;
 }
 
-export async function findOrganismesByUAI(uai: string): Promise<Organisme[]> {
+export async function findOrganismesByUAI(uai: string): Promise<IOrganisme[]> {
   const organismes = await organismesDb()
     .find(
       {
@@ -570,7 +597,7 @@ export async function findOrganismesByUAI(uai: string): Promise<Organisme[]> {
   return organismes;
 }
 
-export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<WithId<Organisme>> {
+export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<WithId<IOrganisme>> {
   const organisme = await organismesDb().findOne({
     uai: uai as any,
     siret: siret,
@@ -639,7 +666,7 @@ export async function resetConfigurationERP(organismeId: ObjectId): Promise<void
 }
 
 export async function verifyOrganismeAPIKeyToUser(organismeId: ObjectId, verif: IReqPostVerifyUser): Promise<any> {
-  const organisme = (await organismesDb().findOne({ _id: organismeId })) as WithId<Organisme>;
+  const organisme = (await organismesDb().findOne({ _id: organismeId })) as WithId<IOrganisme>;
   if (!organisme) {
     throw Boom.notFound("Aucun organisme trouvé");
   }
@@ -746,7 +773,7 @@ async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
 export function getOrganismeProjection(
   permissionsOrganisme: PermissionsOrganisme
 ): Partial<WithId<OrganismeWithPermissions>> {
-  return cleanProjection<Organisme>({
+  return cleanProjection<IOrganisme>({
     _id: 1,
     siret: 1,
     uai: 1,
@@ -825,7 +852,7 @@ export function getOrganismeListProjection(
   });
 }
 
-export async function getInvalidUaisFromDossierApprenant(data: Partial<EffectifsQueue>[]): Promise<string[]> {
+export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
   const uais = new Set<string>();
   for (const dossier of data) {
     if (dossier.etablissement_formateur_uai) uais.add(dossier.etablissement_formateur_uai);
@@ -842,7 +869,7 @@ export async function getInvalidUaisFromDossierApprenant(data: Partial<Effectifs
   return invalidsUais;
 }
 
-export async function getInvalidSiretsFromDossierApprenant(data: Partial<EffectifsQueue>[]): Promise<string[]> {
+export async function getInvalidSiretsFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
   const sirets = new Set<string>();
   for (const dossier of data) {
     if (dossier.etablissement_formateur_siret) sirets.add(dossier.etablissement_formateur_siret);

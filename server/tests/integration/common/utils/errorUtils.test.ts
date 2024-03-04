@@ -8,13 +8,13 @@ describe("ErrorUtils", () => {
   useMongo();
   it("display details for Document failed validation on one document", async () => {
     try {
-      await effectifsDb().insertOne({ name: "test" } as any);
+      await effectifsDb().insertOne({} as any);
     } catch (error) {
       const newError = formatError(error);
       assert.deepEqual(newError.message, "Document failed validation");
       assert.deepEqual(
         newError.toString(),
-        'Document failed validation: [{"operatorName":"required","specifiedAs":{"required":["apprenant","id_erp_apprenant","organisme_id","source","annee_scolaire"]},"missingProperties":["annee_scolaire","apprenant","id_erp_apprenant","organisme_id","source"]}]'
+        'Document failed validation: [{"operatorName":"required","specifiedAs":{"required":["_id","organisme_id","id_erp_apprenant","source","annee_scolaire","apprenant"]},"missingProperties":["annee_scolaire","apprenant","id_erp_apprenant","organisme_id","source"]}]'
       );
     }
   });

@@ -1,18 +1,18 @@
 import { Text } from "@chakra-ui/react";
 import { OrganismeSupportInfo } from "shared";
-import { OrganismeJson } from "shared/models/data/@types/Organisme";
+import { IOrganismeJson } from "shared/models/data/organismes.model";
 
 import NewTable from "@/modules/indicateurs/NewTable";
 
 import { Label } from "./Label";
 
 type TransmissionsPanelProps = {
-  organisme: OrganismeJson | null;
+  organisme: IOrganismeJson | null;
   transmissions: OrganismeSupportInfo["transmissions"];
 };
 
 type OrganismeRefProps = {
-  self: OrganismeJson;
+  self: IOrganismeJson;
   organismeRef:
     | OrganismeSupportInfo["transmissions"][number]["source_organisme"]
     | OrganismeSupportInfo["transmissions"][number]["organisme"]

@@ -3,7 +3,7 @@ import {
   STATUT_FIABILISATION_ORGANISME,
   NATURE_ORGANISME_DE_FORMATION,
 } from "shared";
-import { OrganismesReferentiel } from "shared/models/data/@types";
+import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
 import { isOrganismeFiableForCouple } from "@/common/actions/engine/engine.organismes.utils";
 import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "@/common/model/collections";
@@ -17,7 +17,7 @@ import { fiabilisationUaiSiretDb, organismesDb, organismesReferentielDb } from "
  */
 export const checkCoupleFiable = async (
   coupleUaiSiretTdbToCheck,
-  organismesFromReferentiel: OrganismesReferentiel[] = []
+  organismesFromReferentiel: IOrganismeReferentiel[] = []
 ) => {
   const organismeFiableForCouple = await isOrganismeFiableForCouple(
     coupleUaiSiretTdbToCheck.uai,

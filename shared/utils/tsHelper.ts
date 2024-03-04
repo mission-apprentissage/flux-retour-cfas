@@ -19,3 +19,6 @@ type ObjectEntry<T extends object> = { [K in keyof T]: [K, Required<T>[K]] }[key
 export function entries<T extends object>(obj: T): ObjectEntry<T>[] {
   return Object.entries(obj) as ObjectEntry<T>[];
 }
+
+// see https://github.com/microsoft/TypeScript/issues/31501
+export type OmitUnion<T, K extends keyof any> = T extends any ? Pick<T, Exclude<keyof T, K>> : never;

@@ -1,5 +1,4 @@
 export * from "./indicateurs";
 export * from "./duplicates";
-export * from "./json-schema/adresseSchema";
-export * from "./json-schema/jsonSchemaTypes";
+export * from "./parts/adresseSchema";
 export * from "./routes/index";

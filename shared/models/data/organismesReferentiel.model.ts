@@ -1,6 +1,6 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
-
-import { object, objectId, string, boolean, number, array, arrayOf, stringOrNull } from "shared";
+import { z } from "zod";
+import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "organismesReferentiel";
 
@@ -24,104 +24,90 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   ],
 ];
 
-const schema = object(
-  {
-    _id: objectId(),
-    siret: string(),
-    uai: string(),
-    raison_sociale: string(),
-    enseigne: string(),
-    siege_social: boolean(),
-    numero_declaration_activite: string(),
-    etat_administratif: string({ enum: ["actif", "fermé"] }),
-    nature: string({ enum: ["responsable", "formateur", "responsable_formateur", "inconnue"] }),
-    adresse: object(
-      {
-        label: string(),
-        code_postal: string(),
-        code_insee: string(),
-        localite: string(),
-        departement: object(
-          {
-            code: string(),
-            nom: string(),
-          },
-          { required: ["code", "nom"] }
-        ),
-        region: object(
-          {
-            code: string(),
-            nom: string(),
-          },
-          { required: ["code", "nom"] }
-        ),
-        academie: object(
-          {
-            code: string(),
-            nom: string(),
-          },
-          { required: ["code", "nom"] }
-        ),
-        geojson: object(
-          {
-            type: string(),
-            geometry: object(
-              {
-                type: string(),
-                coordinates: array(),
-              },
-              { required: ["type", "coordinates"] }
-            ),
-            properties: object({
-              score: number(),
-              source: string(),
-            }),
-          },
-          { required: ["type", "geometry"] }
-        ),
-      },
-      { required: ["code_postal", "code_insee", "localite", "region", "academie"] }
-    ),
-    forme_juridique: object(
-      {
-        code: string(),
-        label: string(),
-      },
-      { required: ["code", "label"] }
-    ),
-    qualiopi: boolean(),
-    lieux_de_formation: arrayOf(object({ uai: string(), uai_fiable: boolean() }, { additionalProperties: true })),
-    contacts: arrayOf(
-      object(
-        {
-          email: string(),
-          confirmé: boolean(),
-          date_collecte: string(),
-          sources: arrayOf(string()),
-        },
-        { additionalProperties: true }
-      ),
-      {
-        description: "Formations de cet organisme",
-      }
-    ),
-    relations: arrayOf(
-      object(
-        {
-          type: string({
-            enum: ["formateur->responsable", "responsable->formateur", "entreprise"],
+const zOrganismeReferentiel = z.object({
+  _id: zObjectId,
+  siret: z.string(),
+  uai: z.string().optional(),
+  raison_sociale: z.string().optional(),
+  enseigne: z.string().optional(),
+  siege_social: z.boolean().optional(),
+  numero_declaration_activite: z.string().optional(),
+  etat_administratif: z.enum(["actif", "fermé"]).optional(),
+  nature: z.enum(["responsable", "formateur", "responsable_formateur", "inconnue"]),
+  adresse: z
+    .object({
+      label: z.string().optional(),
+      code_postal: z.string(),
+      code_insee: z.string(),
+      localite: z.string(),
+      departement: z
+        .object({
+          code: z.string(),
+          nom: z.string(),
+        })
+        .optional(),
+      region: z.object({
+        code: z.string(),
+        nom: z.string(),
+      }),
+      academie: z.object({
+        code: z.string(),
+        nom: z.string(),
+      }),
+      geojson: z
+        .object({
+          type: z.string(),
+          geometry: z.object({
+            type: z.string(),
+            coordinates: z.array(z.any()),
           }),
-          siret: string(),
-          uai: stringOrNull(),
-          referentiel: boolean(),
-          label: string(),
-          sources: arrayOf(string()),
-        },
-        { additionalProperties: true }
-      )
-    ),
-  },
-  { required: ["siret", "nature", "lieux_de_formation"] }
-);
+          properties: z
+            .object({
+              score: z.number().optional(),
+              source: z.string().optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+  forme_juridique: z
+    .object({
+      code: z.string(),
+      label: z.string(),
+    })
+    .optional(),
+  qualiopi: z.boolean().optional(),
+  lieux_de_formation: z.array(z.object({ uai: z.string().optional(), uai_fiable: z.boolean().optional() }).nonstrict()),
+  contacts: z
+    .array(
+      z
+        .object({
+          email: z.string().optional(),
+          confirmé: z.boolean().optional(),
+          date_collecte: z.string().optional(),
+          sources: z.array(z.string()).optional(),
+        })
+        .nonstrict()
+    )
+    .describe("Formations de cet organisme")
+    .optional(),
+  relations: z
+    .array(
+      z
+        .object({
+          type: z.enum(["formateur->responsable", "responsable->formateur", "entreprise"]).optional(),
+          siret: z.string().optional(),
+          uai: z.string().nullable().optional(),
+          referentiel: z.boolean().optional(),
+          label: z.string().optional(),
+          sources: z.array(z.string()).optional(),
+        })
+        .nonstrict()
+    )
+    .optional(),
+});
 
-export default { schema, indexes, collectionName };
+export type IOrganismeReferentiel = z.output<typeof zOrganismeReferentiel>;
+
+export default { zod: zOrganismeReferentiel, indexes, collectionName };

@@ -2,7 +2,7 @@ import Boom from "boom";
 import { subYears } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
 import { PermissionScope, assertUnreachable, entries, getAnneesScolaireListFromDate, SIRET_REGEX } from "shared";
-import { Effectif } from "shared/models/data/@types";
+import { IEffectif } from "shared/models/data/effectifs.model";
 
 import { escapeRegExp } from "@/common/utils/regexUtils";
 import { isValidUAI } from "@/common/utils/validationUtils";
@@ -30,7 +30,7 @@ function buildOrganismeSearchCondition(value: string) {
   return [{ "_computed.organisme.nom": new RegExp(escapeRegExp(value)) }]; // TODO probablement ajouter un champ nom (enseigne + raison_sociale) de l'organisme
 }
 
-export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | boolean): Filter<Effectif> {
+export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | boolean): Filter<IEffectif> {
   if (perimetre === false) {
     throw Boom.forbidden("Accés refusé");
   }
@@ -39,7 +39,7 @@ export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | 
     return {};
   }
 
-  return entries(perimetre).reduce((acc: Filter<Effectif>, [key, value]) => {
+  return entries(perimetre).reduce((acc: Filter<IEffectif>, [key, value]) => {
     switch (key) {
       case "id":
         acc["organisme_id"] = { $in: value.$in.map((v) => new ObjectId(v)) };
@@ -67,10 +67,10 @@ export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | 
 export function buildEffectifMongoFilters(
   filters: FullEffectifsFilters,
   perimetre: PermissionScope | boolean
-): Filter<Effectif>[] {
+): Filter<IEffectif>[] {
   const perimetreFilter = buildEffectifPerimetreMongoFilters(perimetre);
 
-  const requestedFilter = entries(filters).reduce((acc: Filter<Effectif>, [key, value]) => {
+  const requestedFilter = entries(filters).reduce((acc: Filter<IEffectif>, [key, value]) => {
     switch (key) {
       case "date":
         acc["annee_scolaire"] = { $in: getAnneesScolaireListFromDate(value) };

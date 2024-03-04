@@ -1,4 +1,9 @@
 import { NATURE_ORGANISME_DE_FORMATION } from "shared";
+import { IOrganisme } from "shared/models/data/organismes.model";
+
+export type SampleEtablissement = Pick<IOrganisme, "uai" | "siret" | "nom" | "nature" | "adresse" | "reseaux"> & {
+  uai: string;
+};
 
 export default {
   19040492100016: {
@@ -171,4 +176,4 @@ export default {
       voie: "BDDE LA LIBERTE",
     },
   },
-};
+} as const satisfies Record<string, SampleEtablissement>;

@@ -7,7 +7,6 @@ import { DuplicateEffectifGroup } from "shared";
 import { _get } from "@/common/httpClient";
 import Link from "@/components/Links/Link";
 import { organismeAtom } from "@/hooks/organismeAtoms";
-import { usePlausibleTracking } from "@/hooks/plausible";
 import { usePagination } from "@/hooks/usePagination";
 
 import EffectifDoublonDeleteAllAlertDialog from "./EffectifDoublonDeleteAllAlertDialog";
@@ -16,7 +15,6 @@ import EffectifsDoublonsList from "./EffectifsDoublonsList";
 const EffectifsDoublonsPage = ({ isMine }) => {
   const organisme = useRecoilValue(organismeAtom);
   const { isOpen: isOpenAlertDialog, onOpen: onOpenAlertDialog, onClose: onCloseAlertDialog } = useDisclosure();
-  const { trackPlausibleEvent } = usePlausibleTracking();
   const cancelRef = useRef();
   const { pageIndex, pageSize, onPageChange, totalPages, totalCount, setTotalItemsCount, onPageSizeChange } =
     usePagination();
@@ -78,7 +76,6 @@ const EffectifsDoublonsPage = ({ isMine }) => {
           aria-label="Supprimer en lot"
           variant="secondary"
           onClick={() => {
-            trackPlausibleEvent("suppression_doublons_effectifs_en_lot");
             onOpenAlertDialog();
           }}
         >

@@ -14,6 +14,7 @@ import { DuplicateEffectifDetail } from "shared";
 
 import { _delete } from "@/common/httpClient";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import { ArrowRightLine } from "@/theme/components/icons";
 
 const EffectifDoublonDeleteAlertDialog = ({
@@ -28,6 +29,7 @@ const EffectifDoublonDeleteAlertDialog = ({
   duplicateDetail: DuplicateEffectifDetail;
 }) => {
   const queryClient = useQueryClient();
+  const { trackPlausibleEvent } = usePlausibleTracking();
 
   return (
     <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size={"4xl"}>
@@ -59,6 +61,7 @@ const EffectifDoublonDeleteAlertDialog = ({
             <Button
               colorScheme="red"
               onClick={async () => {
+                trackPlausibleEvent("suppression_doublons_effectifs");
                 await _delete(`/api/v1/effectif/${duplicateDetail?.id}`);
                 queryClient.invalidateQueries(["duplicates-effectifs"]);
                 onClose();

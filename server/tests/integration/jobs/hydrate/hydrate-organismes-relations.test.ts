@@ -1,5 +1,6 @@
-import { ObjectId, WithId } from "mongodb";
-import { Organisme, OrganismesReferentiel } from "shared/models/data/@types";
+import { ObjectId } from "mongodb";
+import { IOrganisme } from "shared/models/data/organismes.model";
+import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
 import { organismesDb, organismesReferentielDb } from "@/common/model/collections";
 import { hydrateOrganismesFromReferentiel } from "@/jobs/hydrate/organismes/hydrate-organismes";
@@ -15,7 +16,7 @@ describe("Job hydrate:organismes-relations", () => {
     OFA 1 responsable de OFA 4 5
     OFA 1 même entreprise que OFA 6
     */
-    const organismesReferentiel: WithId<OrganismesReferentiel>[] = [
+    const organismesReferentiel: IOrganismeReferentiel[] = [
       {
         _id: new ObjectId(id(1)),
         siret: "00000000000018",
@@ -283,6 +284,6 @@ describe("Job hydrate:organismes-relations", () => {
         organismesResponsables: [],
         organismesFormateurs: [],
       },
-    ] as Organisme[]);
+    ] as IOrganisme[]);
   });
 });

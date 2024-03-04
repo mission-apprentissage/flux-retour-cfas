@@ -3,7 +3,7 @@ import { strict as assert } from "assert";
 import { subDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared";
-import { Organisme } from "shared/models/data/@types";
+import { IOrganisme } from "shared/models/data/organismes.model";
 
 import {
   createOrganisme,
@@ -12,12 +12,13 @@ import {
   updateOrganismeTransmission,
   updateOrganisme,
   updateOneOrganismeRelatedFormations,
+  IOrganismeCreate,
 } from "@/common/actions/organismes/organismes.actions";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
 
-export const sampleOrganismeWithoutUai: Organisme = {
+export const sampleOrganismeWithoutUai: IOrganismeCreate = {
   siret: "41461021200014",
   nom: "ETABLISSEMENT TEST",
   nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
@@ -31,11 +32,11 @@ export const sampleOrganismeWithoutUai: Organisme = {
 };
 
 export const sampleOrganismeWithUAI = {
-  uai: "0693400W",
   ...sampleOrganismeWithoutUai,
+  uai: "0693400W",
 };
 
-const sampleOrganismeWithoutUAIOutput: Organisme = {
+const sampleOrganismeWithoutUAIOutput: IOrganisme = {
   ...sampleOrganismeWithoutUai,
   reseaux: [],
   erps: [],
@@ -44,11 +45,17 @@ const sampleOrganismeWithoutUAIOutput: Organisme = {
   ferme: false,
   prepa_apprentissage: false,
   qualiopi: false,
+  _id: new ObjectId(),
+  created_at: new Date(),
+  updated_at: new Date(),
 };
 
-const sampleOrganismeWithUAIOutput: Organisme = {
-  uai: sampleOrganismeWithUAI.uai,
+const sampleOrganismeWithUAIOutput: IOrganisme = {
   ...sampleOrganismeWithoutUAIOutput,
+  uai: sampleOrganismeWithUAI.uai,
+  _id: new ObjectId(),
+  created_at: new Date(),
+  updated_at: new Date(),
 };
 
 const fieldsAddedByApiCalls = {
@@ -152,11 +159,11 @@ describe("Test des actions Organismes", () => {
       const created = await findOrganismeById(organisme._id);
 
       expect(created).toStrictEqual({
-        _id: expect.anything(),
         ...sampleOrganismeWithoutUAIOutput,
         ...fieldsAddedByApiCalls,
         created_at: expect.anything(),
         updated_at: expect.anything(),
+        _id: expect.anything(),
       });
     });
   });

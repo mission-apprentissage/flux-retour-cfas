@@ -96,16 +96,13 @@ const createCollectionIfDoesNotExist = async (collectionName) => {
 export const configureDbSchemaValidation = async (modelDescriptors) => {
   const db = getDatabase();
   await Promise.all(
-    modelDescriptors.map(async ({ collectionName, schema, zod }) => {
+    modelDescriptors.map(async ({ collectionName, zod }) => {
       await createCollectionIfDoesNotExist(collectionName);
 
-      if (!schema && !zod) {
+      if (!zod) {
         return;
       }
-      let convertedSchema = schema;
-      if (zod) {
-        convertedSchema = zodToMongoSchema(zod);
-      }
+      let convertedSchema = zodToMongoSchema(zod);
       if (!convertedSchema) {
         return;
       }

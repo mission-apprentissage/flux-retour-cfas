@@ -1,4 +1,4 @@
-import { OrganismesReferentiel } from "shared/models/data/@types";
+import { IOrganismeReferentiel } from "shared/models/data/organismesReferentiel.model";
 
 import logger from "@/common/logger";
 import { organismesReferentielDb } from "@/common/model/collections";
@@ -9,7 +9,7 @@ import { organismesReferentielDb } from "@/common/model/collections";
 export const isOrganismeFiableForCouple = async (
   uai: string | undefined,
   siret: string | undefined,
-  organismesFromReferentiel: OrganismesReferentiel[] = []
+  organismesFromReferentiel: IOrganismeReferentiel[] = []
 ) => {
   try {
     // Si la liste des of du référentiel fournie est vide on refresh les données depuis la base

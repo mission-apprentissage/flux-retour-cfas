@@ -1,29 +1,21 @@
-import {
-  Effectif,
-  FiabilisationUaiSiret,
-  Formation,
-  JobEvent,
-  JwtSession,
-  Organisme,
-  OrganismesReferentiel,
-} from "shared/models/data/@types";
-import { EffectifsQueue } from "shared/models/data/@types/EffectifsQueue";
-import { FormationsCatalogue } from "shared/models/data/@types/FormationsCatalogue";
+import { FiabilisationUaiSiret } from "shared/models/data/@types";
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassinsEmploi.model";
 import contratsDecaModelDescriptor, { IContratDeca } from "shared/models/data/contratsDeca.model";
-import effectifsModelDescriptor from "shared/models/data/effectifs.model";
-import effectifsQueueModelDescriptor from "shared/models/data/effectifsQueue.model";
+import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
+import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
-import formationsModelDescriptor from "shared/models/data/formations.model";
-import formationsCatalogueModelDescriptor from "shared/models/data/formationsCatalogue.model";
-import invitationsModelDescriptor, { Invitation } from "shared/models/data/invitations.model";
+import formationsModelDescriptor, { IFormation } from "shared/models/data/formations.model";
+import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import jobEventsModelDescriptor from "shared/models/data/jobEvents.model";
-import JwtSessionsModelDescriptor from "shared/models/data/jwtSessions.model";
+import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
 import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
-import organisationsModelDescriptor, { Organisation } from "shared/models/data/organisations.model";
-import OrganismesModelDescriptor from "shared/models/data/organismes.model";
-import OrganismesReferentielModelDescriptor from "shared/models/data/organismesReferentiel.model";
+import organisationsModelDescriptor, { IOrganisation } from "shared/models/data/organisations.model";
+import OrganismesModelDescriptor, { IOrganisme } from "shared/models/data/organismes.model";
+import OrganismesReferentielModelDescriptor, {
+  IOrganismeReferentiel,
+} from "shared/models/data/organismesReferentiel.model";
 import OrganismesSolteaModelDescriptor, { IOrganismeSoltea } from "shared/models/data/organismesSoltea.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import romeModelDescriptor, { IRome } from "shared/models/data/rome.model";
@@ -55,22 +47,21 @@ export const modelDescriptors = [
   rncpModelDescriptor,
 ];
 
-export const formationsDb = () => getDbCollection<Formation>(formationsModelDescriptor.collectionName);
+export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
 export const formationsCatalogueDb = () =>
-  getDbCollection<FormationsCatalogue>(formationsCatalogueModelDescriptor.collectionName);
+  getDbCollection<IFormationCatalogue>(formationsCatalogueModelDescriptor.collectionName);
 export const usersDb = () => getDbCollection<IUser>(usersModelDescriptor.collectionName);
-export const jobEventsDb = () => getDbCollection<JobEvent>(jobEventsModelDescriptor.collectionName);
 export const usersMigrationDb = () => getDbCollection<IUsersMigration>(usersMigrationModelDescriptor.collectionName);
-export const jwtSessionsDb = () => getDbCollection<JwtSession>(JwtSessionsModelDescriptor.collectionName);
-export const organismesDb = () => getDbCollection<Organisme>(OrganismesModelDescriptor.collectionName);
-export const invitationsDb = () => getDbCollection<Invitation>(invitationsModelDescriptor.collectionName);
-export const organisationsDb = () => getDbCollection<Organisation>(organisationsModelDescriptor.collectionName);
+export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModelDescriptor.collectionName);
+export const organismesDb = () => getDbCollection<IOrganisme>(OrganismesModelDescriptor.collectionName);
+export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
+export const organisationsDb = () => getDbCollection<IOrganisation>(organisationsModelDescriptor.collectionName);
 export const organismesReferentielDb = () =>
-  getDbCollection<OrganismesReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
+  getDbCollection<IOrganismeReferentiel>(OrganismesReferentielModelDescriptor.collectionName);
 export const maintenanceMessageDb = () =>
   getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
-export const effectifsDb = () => getDbCollection<Effectif>(effectifsModelDescriptor.collectionName);
-export const effectifsQueueDb = () => getDbCollection<EffectifsQueue>(effectifsQueueModelDescriptor.collectionName);
+export const effectifsDb = () => getDbCollection<IEffectif>(effectifsModelDescriptor.collectionName);
+export const effectifsQueueDb = () => getDbCollection<IEffectifQueue>(effectifsQueueModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
 export const bassinsEmploiDb = () => getDbCollection<IBassinEmploi>(bassinsEmploiDescriptor.collectionName);
