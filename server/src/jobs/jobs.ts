@@ -78,7 +78,7 @@ export async function setupJobProcessor() {
                 await addJob({ name: "hydrate:organismes-relations", queued: true });
 
                 // # Mise a jour des bassin d'emploi
-                await addJob({ name: "hydrate:organismes-bassinEmploi", queued: true });
+                await addJob({ name: "hydrate:organismes-bassins-emploi", queued: true });
 
                 // # Remplissage des OPCOs
                 await addJob({ name: "hydrate:opcos", queued: true });
