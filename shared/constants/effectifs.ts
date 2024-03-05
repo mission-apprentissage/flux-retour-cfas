@@ -1,0 +1,12 @@
+export const STATUT_APPRENANT = {
+  ABANDON: "ABANDON",
+  PRE_INSCRIT: "PRE_INSCRIT",
+  INSCRIT: "INSCRIT",
+  APPRENTI: "APPRENTI",
+  RUPTURANT: "RUPTURANT",
+  DIPLOME: "DIPLOME",
+} as const;
+
+export type StatutApprenant = (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT];
+
+export const STATUT_APPRENANT_VALUES = Object.values(STATUT_APPRENANT);
