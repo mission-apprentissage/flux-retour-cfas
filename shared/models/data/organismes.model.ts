@@ -13,7 +13,7 @@ import {
   STATUT_PRESENCE_REFERENTIEL,
 } from "shared";
 import effectifsModel from "shared/models/data/effectifs.model";
-import { zAdresse } from "shared/models/json-schema/adresseSchema";
+import { zAdresse } from "shared/models/parts/adresseSchema";
 
 import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper";
 

@@ -11,7 +11,7 @@ import {
   YEAR_RANGE_REGEX,
 } from "../../constants";
 import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
-import { zAdresse } from "../json-schema/adresseSchema";
+import { zAdresse } from "../parts/adresseSchema";
 
 import { zApprenant } from "./effectifs/apprenant.part";
 import { zContrat } from "./effectifs/contrat.part";

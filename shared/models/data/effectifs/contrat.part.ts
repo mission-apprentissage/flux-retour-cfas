@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { SIRET_REGEX } from "../../../constants";
-import { zAdresse } from "../../json-schema/adresseSchema";
+import { zAdresse } from "../../parts/adresseSchema";
 
 export const zContrat = z.object({
   siret: z.string({ description: "N° SIRET de l'employeur" }).regex(SIRET_REGEX).nullish(),

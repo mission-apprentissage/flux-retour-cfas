@@ -3440,7 +3440,14 @@ exports[`validation-schema should create validation schema for fiabilisationUaiS
       "bsonType": "objectId",
     },
     "created_at": {
-      "bsonType": "date",
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
     },
     "siret": {
       "bsonType": [
@@ -3450,30 +3457,50 @@ exports[`validation-schema should create validation schema for fiabilisationUaiS
       "description": "Le SIRET du couple à fiabiliser",
     },
     "siret_fiable": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
       "description": "Le SIRET fiable lié au couple à fiabiliser",
     },
     "type": {
-      "bsonType": "string",
-      "description": "Statut de fiabilisation du couple UAI SIRET",
-      "enum": [
-        "FIABLE",
-        "A_FIABILISER",
-        "NON_FIABILISABLE_INEXISTANT",
-        "NON_FIABILISABLE_PB_COLLECTE",
-        "NON_FIABILISABLE_UAI_VALIDEE",
-        "NON_FIABILISABLE_UAI_NON_VALIDEE",
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "description": "Statut de fiabilisation du couple UAI SIRET",
+          "enum": [
+            "FIABLE",
+            "A_FIABILISER",
+            "NON_FIABILISABLE_INEXISTANT",
+            "NON_FIABILISABLE_PB_COLLECTE",
+            "NON_FIABILISABLE_UAI_VALIDEE",
+            "NON_FIABILISABLE_UAI_NON_VALIDEE",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
       ],
+      "description": "Statut de fiabilisation du couple UAI SIRET",
     },
     "uai": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
       "description": "L'UAI du couple à fiabiliser",
     },
     "uai_fiable": {
-      "bsonType": "string",
+      "bsonType": [
+        "string",
+        "null",
+      ],
       "description": "L'UAI fiable lié au couple à fiabiliser",
     },
   },
+  "required": [
+    "_id",
+  ],
 }
 `;
 
@@ -4748,10 +4775,18 @@ exports[`validation-schema should create validation schema for jobEvents: jobEve
       "description": "L'action en cours",
     },
     "data": {
-      "additionalProperties": true,
-      "bsonType": "object",
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "bsonType": "object",
+          "description": "La donnée liéé à l'action",
+          "properties": {},
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
       "description": "La donnée liéé à l'action",
-      "properties": {},
     },
     "date": {
       "bsonType": "date",
@@ -4763,9 +4798,10 @@ exports[`validation-schema should create validation schema for jobEvents: jobEve
     },
   },
   "required": [
+    "_id",
     "jobname",
-    "action",
     "date",
+    "action",
   ],
 }
 `;

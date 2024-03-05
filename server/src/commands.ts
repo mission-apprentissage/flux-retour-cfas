@@ -13,7 +13,6 @@ import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { seedPlausibleGoals } from "./jobs/seed/plausible/goals";
-import { generateTypes } from "./jobs/seed/types/generate-types";
 import { updateUserPassword } from "./jobs/users/update-user-password";
 
 async function startJobProcessor(signal: AbortSignal) {
@@ -601,12 +600,6 @@ program
   .description("Envoi des emails de relance")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("send-reminder-emails"));
-
-program
-  .command("dev:generate-ts-types")
-  .description("Generation des types TS à partir des schemas de la base de données")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(generateTypes);
 
 program
   .command("dev:list-http-endpoints")

@@ -35,7 +35,6 @@ describe("Dossier Apprenants Route V3", () => {
           Authorization: `Bearer ${api_key}`,
         },
       });
-      console.log(JSON.stringify(response.data, null, 2));
       expect(response.status).toBe(200);
     });
   });
