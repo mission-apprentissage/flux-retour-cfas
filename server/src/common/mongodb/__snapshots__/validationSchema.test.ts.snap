@@ -660,6 +660,97 @@ exports[`validation-schema should create validation schema for effectifs: effect
                 },
               ],
             },
+            "statut": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "en_cours": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "enum": [
+                            "ABANDON",
+                            "PRE_INSCRIT",
+                            "INSCRIT",
+                            "APPRENTI",
+                            "RUPTURANT",
+                            "DIPLOME",
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "historique": {
+                      "anyOf": [
+                        {
+                          "bsonType": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "not": {},
+                              },
+                              {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "bsonType": "object",
+                                    "properties": {
+                                      "annee": {
+                                        "bsonType": [
+                                          "string",
+                                          "null",
+                                        ],
+                                      },
+                                      "mois": {
+                                        "bsonType": [
+                                          "string",
+                                          "null",
+                                        ],
+                                      },
+                                      "valeur": {
+                                        "anyOf": [
+                                          {
+                                            "bsonType": "string",
+                                            "enum": [
+                                              "ABANDON",
+                                              "PRE_INSCRIT",
+                                              "INSCRIT",
+                                              "APPRENTI",
+                                              "RUPTURANT",
+                                              "DIPLOME",
+                                            ],
+                                          },
+                                          {
+                                            "bsonType": "null",
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  },
+                                  {
+                                    "bsonType": "null",
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
           },
         },
         {
