@@ -2,8 +2,15 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { SIRET_REGEX, TETE_DE_RESEAUX_BY_ID, UAI_REGEX, YEAR_RANGE_REGEX } from "../../constants";
-import { zodEnumFromObjKeys } from "../../utils/zodHelper";
+import {
+  SIRET_REGEX,
+  STATUT_APPRENANT,
+  STATUT_APPRENANT_VALUES,
+  TETE_DE_RESEAUX_BY_ID,
+  UAI_REGEX,
+  YEAR_RANGE_REGEX,
+} from "../../constants";
+import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
 import { zAdresse } from "../json-schema/adresseSchema";
 
 import { zApprenant } from "./effectifs/apprenant.part";
@@ -80,6 +87,10 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.formation.codes_rome": 1 }, {}],
   [{ "_computed.formation.opcos": 1 }, {}],
 ];
+
+const StatutApprenantEnum = zodEnumFromArray(
+  STATUT_APPRENANT_VALUES as (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT][]
+);
 
 export const zEffectif = z.object({
   _id: zObjectId.describe("Identifiant MongoDB de l'effectif"),
@@ -158,6 +169,22 @@ export const zEffectif = z.object({
           .object({
             codes_rome: z.array(z.string()).nullish(),
             opcos: z.array(z.string()).nullish(),
+          })
+          .nullish(),
+        statut: z
+          .object({
+            en_cours: StatutApprenantEnum.nullish(),
+            historique: z
+              .array(
+                z
+                  .object({
+                    mois: z.string().nullish(),
+                    annee: z.string().nullish(),
+                    valeur: StatutApprenantEnum.nullish(),
+                  })
+                  .nullish()
+              )
+              .nullish(),
           })
           .nullish(),
       },

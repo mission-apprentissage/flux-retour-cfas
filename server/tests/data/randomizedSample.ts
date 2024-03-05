@@ -19,7 +19,27 @@ const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
 const getRandomEtablissement = (siret?: string): SampleEtablissement =>
   siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
-const getRandomFormation = (annee_scolaire: string) => {
+const getRandomDateInRange = (start: Date, end: Date): Date => {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+};
+
+const addMonthsToDate = (date: Date, months: number): Date => {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
+};
+export const createRandomFormation = (annee_scolaire: string, dateEntreeParam?: Date, dateFinParam?: Date) => {
+  const [startYear] = annee_scolaire.split("-").map(Number);
+  const dateInscriptionStart = new Date(startYear, 6, 1);
+  const dateInscriptionEnd = new Date(startYear, 8, 30);
+
+  // Use provided dates or generate random dates if not provided
+  const dateInscription = dateEntreeParam || getRandomDateInRange(dateInscriptionStart, dateInscriptionEnd);
+  const dateEntree = dateEntreeParam || getRandomDateInRange(dateInscription, new Date(startYear, 9, 30));
+  const durations = [24, 36, 48];
+  const duree_theorique_mois = faker.helpers.arrayElement(durations);
+  const dateFin = dateFinParam || addMonthsToDate(dateEntree, duree_theorique_mois);
+
   return {
     cfd: getRandomFormationCfd(),
     periode: getRandomPeriodeFormation(annee_scolaire),
@@ -29,6 +49,10 @@ const getRandomFormation = (annee_scolaire: string) => {
     niveau: "5",
     niveau_libelle: "5 (BTS, DUT...)",
     annee: getRandomAnneeFormation(),
+    duree_theorique_mois: duree_theorique_mois,
+    date_inscription: dateInscription,
+    date_entree: dateEntree,
+    date_fin: dateFin,
   };
 };
 
@@ -65,6 +89,7 @@ export const createSampleEffectif = ({
   ...params
 }: PartialDeep<IEffectif & { organisme: IOrganisme }> = {}): WithoutId<IEffectif> => {
   const annee_scolaire = getRandomAnneeScolaire();
+  const formation = createRandomFormation(annee_scolaire);
 
   return merge(
     {
@@ -77,7 +102,7 @@ export const createSampleEffectif = ({
         historique_statut: [],
       },
       contrats: [],
-      formation: getRandomFormation(annee_scolaire),
+      formation: formation,
       validation_errors: [],
       created_at: new Date(),
       updated_at: new Date(),
@@ -87,9 +112,9 @@ export const createSampleEffectif = ({
       annee_scolaire,
       organisme_id: organisme?._id,
       _computed: organisme ? addEffectifComputedFields(organisme as IOrganisme) : {},
-    } as WithoutId<IEffectif>,
+    },
     params
-  );
+  ) as WithoutId<IEffectif>;
 };
 
 export const createRandomDossierApprenantApiInput = (
@@ -97,7 +122,7 @@ export const createRandomDossierApprenantApiInput = (
 ): DossierApprenantSchemaV1V2ZodType => {
   const annee_scolaire = getRandomAnneeScolaire();
   const { uai, siret } = getRandomEtablissement();
-  const formation = getRandomFormation(annee_scolaire);
+  const formation = createRandomFormation(annee_scolaire);
 
   return {
     ine_apprenant: getRandomIne(),
