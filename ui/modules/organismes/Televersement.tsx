@@ -20,6 +20,7 @@ import {
   Switch,
   FormLabel,
   Tooltip,
+  Link,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -34,7 +35,7 @@ import { cyrb53Hash, normalize } from "@/common/utils/stringUtils";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useToaster from "@/hooks/useToaster";
-import { DownloadLine } from "@/theme/components/icons";
+import { DownloadLine, Warning } from "@/theme/components/icons";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 import Eye from "@/theme/components/icons/Eye";
 import Video from "@/theme/components/icons/Video";
@@ -469,8 +470,21 @@ function ImportSuccess({ organismeId, isMine }: { organismeId: string; isMine: b
               Import réussi !
             </Text>
             <Text fontSize="md" color="grey.800">
-              Vous pourrez consulter vos effectifs dans quelques minutes, le temps que le traitement soit effectué.
+              Vos effectifs sont en attente d&apos;affichage sur votre espace et seront disponibles dans quelques
+              minutes, le temps que le traitement soit effectué. Information : Transmettez vos effectifs au tableau de
+              bord une fois par mois, de préférence entre le 1 et le 5 du mois. Cela permet de garantir la fraîcheur des
+              données. Pour chaque nouveau téléversement, vos données seront mises à jour ou complétées.
             </Text>
+            <HStack alignItems={"center"} mt={2} color="flatwarm">
+              <Warning boxSize={5} />
+              <Text>
+                Veuillez consulter le{" "}
+                <Link href="/transmissions" textDecoration={"underline"}>
+                  rapport de transmission
+                </Link>{" "}
+                pour identifier et réparer les erreurs potentielles.
+              </Text>
+            </HStack>
           </Box>
         </Ribbons>
         <Button
