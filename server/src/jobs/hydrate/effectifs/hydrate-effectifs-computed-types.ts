@@ -37,7 +37,7 @@ export async function hydrateEffectifsComputedTypes(evaluationDate = new Date())
   logger.info(`${nbEffectifsMisAJour} effectifs mis à jour, ${nbEffectifsNonMisAJour} effectifs non mis à jour.`);
 }
 
-function genererHistoriqueStatut(effectif: IEffectif, endDate: Date) {
+export function genererHistoriqueStatut(effectif: IEffectif, endDate: Date) {
   if (!effectif?.formation?.date_entree) {
     return [];
   }
@@ -80,7 +80,7 @@ function gererErreurMiseAJour(err: unknown, effectif: IEffectif) {
   captureException(err);
 }
 
-function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): StatutApprenant | null {
+export function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): StatutApprenant | null {
   const currentDate = evaluationDate || new Date();
   const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000; // 90 jours en millisecondes
   const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en millisecondes
