@@ -254,10 +254,7 @@ describe("Processus d'ingestion", () => {
               uai: "0802004U",
               fiable: false,
             },
-            statut: {
-              en_cours: null,
-              historique: [],
-            },
+            statut: null,
           },
         });
       });
