@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
-import { IOrganisationType } from "shared";
 import { useEffect, useState } from "react";
+import { IOrganisationType } from "shared";
 import { useLocalStorage } from "usehooks-ts";
 
 import useAuth from "@/hooks/useAuth";

@@ -660,6 +660,65 @@ exports[`validation-schema should create validation schema for effectifs: effect
                 },
               ],
             },
+            "statut": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "en_cours": {
+                      "bsonType": "string",
+                      "enum": [
+                        "ABANDON",
+                        "PRE_INSCRIT",
+                        "INSCRIT",
+                        "APPRENTI",
+                        "RUPTURANT",
+                        "DIPLOME",
+                      ],
+                    },
+                    "historique": {
+                      "bsonType": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "bsonType": "object",
+                        "properties": {
+                          "annee": {
+                            "bsonType": "string",
+                          },
+                          "mois": {
+                            "bsonType": "string",
+                          },
+                          "valeur": {
+                            "bsonType": "string",
+                            "enum": [
+                              "ABANDON",
+                              "PRE_INSCRIT",
+                              "INSCRIT",
+                              "APPRENTI",
+                              "RUPTURANT",
+                              "DIPLOME",
+                            ],
+                          },
+                        },
+                        "required": [
+                          "mois",
+                          "annee",
+                          "valeur",
+                        ],
+                      },
+                    },
+                  },
+                  "required": [
+                    "en_cours",
+                    "historique",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
           },
         },
         {

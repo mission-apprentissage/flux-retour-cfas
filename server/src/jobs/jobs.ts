@@ -19,6 +19,7 @@ import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/bu
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
+import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
 import { hydrateFormationsCatalogue } from "./hydrate/hydrate-formations-catalogue";
 import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
@@ -78,7 +79,7 @@ export async function setupJobProcessor() {
                 await addJob({ name: "hydrate:organismes-relations", queued: true });
 
                 // # Mise a jour des bassin d'emploi
-                await addJob({ name: "hydrate:organismes-bassinEmploi", queued: true });
+                await addJob({ name: "hydrate:organismes-bassins-emploi", queued: true });
 
                 // # Remplissage des OPCOs
                 await addJob({ name: "hydrate:opcos", queued: true });
@@ -194,6 +195,11 @@ export async function setupJobProcessor() {
       "hydrate:effectifs-computed": {
         handler: async () => {
           return hydrateEffectifsComputed();
+        },
+      },
+      "hydrate:effectifs-computed-types": {
+        handler: async () => {
+          return hydrateEffectifsComputedTypes();
         },
       },
       "hydrate:effectifs-formation-niveaux": {

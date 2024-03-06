@@ -38,6 +38,8 @@ import dossierApprenantSchemaV3, {
   DossierApprenantSchemaV3ZodType,
 } from "@/common/validation/dossierApprenantSchemaV3";
 
+import { determineNewStatut, genererHistoriqueStatut } from "../hydrate/effectifs/hydrate-effectifs-computed-types";
+
 const logger = parentLogger.child({
   module: "processor",
 });
@@ -509,21 +511,41 @@ const createOrUpdateEffectif = async (
   effectif: IEffectif,
   retryCount = 0
 ): Promise<{ effectifId: ObjectId; itemProcessingInfos: ItemProcessingInfos }> => {
+  const effectifWithComputedFields = {
+    ...effectif,
+    _computed: {
+      ...effectif._computed,
+      statut:
+        effectif.formation && effectif.formation.date_entree
+          ? {
+              en_cours: determineNewStatut(effectif),
+              historique: genererHistoriqueStatut(effectif, new Date()),
+            }
+          : null,
+    },
+  };
   const itemProcessingInfos: ItemProcessingInfos = {};
-  let effectifDb = await checkIfEffectifExists(effectif);
+  let effectifDb = await checkIfEffectifExists(effectifWithComputedFields);
   itemProcessingInfos.effectif_new = !effectifDb;
 
   try {
     // Gestion des MAJ d'effectif
     if (effectifDb) {
+      const mergedEffectif = mergeEffectif(effectifDb, effectifWithComputedFields);
       // L'effectif est fusionné avec les nouvelles données.
       // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
       // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
-      await effectifsDb().findOneAndUpdate({ _id: effectifDb._id }, { $set: mergeEffectif(effectifDb, effectif) });
+      await effectifsDb().findOneAndUpdate(
+        { _id: effectifDb._id },
+        {
+          $set: mergedEffectif,
+        }
+      );
     } else {
-      effectifDb = { ...effectif, _id: new ObjectId() };
+      effectifDb = { ...effectifWithComputedFields, _id: new ObjectId() };
       await effectifsDb().insertOne(effectifDb);
     }
+
     itemProcessingInfos.effectif_id = effectifDb._id.toString();
 
     // Lock de tous les champs (non vide) mis à jour par l'API pour ne pas permettre la modification côté UI

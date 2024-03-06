@@ -2,8 +2,15 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { SIRET_REGEX, TETE_DE_RESEAUX_BY_ID, UAI_REGEX, YEAR_RANGE_REGEX } from "../../constants";
-import { zodEnumFromObjKeys } from "../../utils/zodHelper";
+import {
+  SIRET_REGEX,
+  STATUT_APPRENANT,
+  STATUT_APPRENANT_VALUES,
+  TETE_DE_RESEAUX_BY_ID,
+  UAI_REGEX,
+  YEAR_RANGE_REGEX,
+} from "../../constants";
+import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
 import { zAdresse } from "../parts/adresseSchema";
 
 import { zApprenant } from "./effectifs/apprenant.part";
@@ -80,6 +87,21 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.formation.codes_rome": 1 }, {}],
   [{ "_computed.formation.opcos": 1 }, {}],
 ];
+
+const StatutApprenantEnum = zodEnumFromArray(
+  STATUT_APPRENANT_VALUES as (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT][]
+);
+
+const zEffectifComputedStatut = z.object({
+  en_cours: StatutApprenantEnum,
+  historique: z.array(
+    z.object({
+      mois: z.string(),
+      annee: z.string(),
+      valeur: StatutApprenantEnum,
+    })
+  ),
+});
 
 export const zEffectif = z.object({
   _id: zObjectId.describe("Identifiant MongoDB de l'effectif"),
@@ -160,6 +182,8 @@ export const zEffectif = z.object({
             opcos: z.array(z.string()).nullish(),
           })
           .nullish(),
+        // @TODO: nullish en attendant la migration et passage en nullable ensuite (migration: 20240305085918-effectifs-types.ts)
+        statut: zEffectifComputedStatut.nullish(),
       },
       {
         description: "Propriétés calculées ou récupérées d'autres collections",
@@ -169,5 +193,6 @@ export const zEffectif = z.object({
 });
 
 export type IEffectif = z.output<typeof zEffectif>;
+export type IEffectifComputedStatut = z.output<typeof zEffectifComputedStatut>;
 
 export default { zod: zEffectif, indexes, collectionName };
