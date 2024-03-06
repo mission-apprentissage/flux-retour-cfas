@@ -171,20 +171,17 @@ export const zEffectif = z.object({
             opcos: z.array(z.string()).nullish(),
           })
           .nullish(),
+        // nullish en attendant la migration et passage en nullable ensuite
         statut: z
           .object({
-            en_cours: StatutApprenantEnum.nullish(),
-            historique: z
-              .array(
-                z
-                  .object({
-                    mois: z.string().nullish(),
-                    annee: z.string().nullish(),
-                    valeur: StatutApprenantEnum.nullish(),
-                  })
-                  .nullish()
-              )
-              .nullish(),
+            en_cours: StatutApprenantEnum,
+            historique: z.array(
+              z.object({
+                mois: z.string(),
+                annee: z.string(),
+                valeur: StatutApprenantEnum,
+              })
+            ),
           })
           .nullish(),
       },
