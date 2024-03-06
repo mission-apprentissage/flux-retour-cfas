@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 export const collectionName = "usersMigration";
 
@@ -12,7 +11,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 export const zUsersMigration = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   email: z.string().describe("Email utilisateur"),
   password: z.string().describe("Le mot de passe hashé"),
   civility: z.enum(["Madame", "Monsieur"]).describe("civilité"),
@@ -20,7 +19,7 @@ export const zUsersMigration = z.object({
   prenom: z.string().describe("Le prénom de l'utilisateur"),
   telephone: z.string().optional().describe("Le téléphone de l'utilisateur"),
   fonction: z.string().optional().describe("La fonction de l'utilisateur"),
-  organisation_id: zObjectId.describe("Organisation à laquelle appartient l'utilisateur"),
+  organisation_id: z.any().describe("Organisation à laquelle appartient l'utilisateur"),
 
   // Internal
   account_status: z

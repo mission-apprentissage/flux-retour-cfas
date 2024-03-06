@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 import { RNCP_REGEX } from "../../../constants";
 import formationsModel from "../formations.model";
@@ -8,7 +7,7 @@ const formationsProps = formationsModel.zod.shape;
 
 export const zFormationEffectif = z.object({
   // TODO formation_id devrait être un objectId pointant vers la collection formations (à remplir au moment de l'import)
-  formation_id: zObjectId.describe("ID de la formation").nullish(),
+  formation_id: z.any().describe("ID de la formation").nullish(),
   // DEBUT champs collectés qui servent à retrouver le champ formation_id
   // une fois le champs formation_id rempli, ces champs ne sont plus utile
   cfd: formationsProps.cfd.nullish(),

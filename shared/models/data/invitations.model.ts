@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "invitations";
 
@@ -10,11 +9,11 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 const zInvitation = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   token: z.string({ description: "Jeton d'invitation" }),
   email: z.string({ description: "Email destinataire" }),
-  organisation_id: zObjectId.describe("Organisation cible de l'invitation"),
-  author_id: zObjectId.describe("Auteur de l'invitation"),
+  organisation_id: z.any().describe("Organisation cible de l'invitation"),
+  author_id: z.any().describe("Auteur de l'invitation"),
   created_at: z.date({ description: "Date de création en base de données" }),
 });
 

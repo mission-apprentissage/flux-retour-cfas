@@ -1,9 +1,9 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
-import { CODES_STATUT_APPRENANT_ENUM, zAdresse } from "shared";
+import { CODES_STATUT_APPRENANT_ENUM } from "shared/constants";
 import effectifsModel from "shared/models/data/effectifs.model";
+import { zAdresse } from "shared/models/parts/adresseSchema";
 
 import { zContrat } from "./effectifs/contrat.part";
 import { zFormationEffectif } from "./effectifs/formation.part";
@@ -34,8 +34,8 @@ const apprenantProps = effectifsProps.apprenant.shape;
 export const internalFields = {
   source: z.string({ description: effectifsProps.source.description }),
   source_organisme_id: z.string({ description: effectifsProps.source_organisme_id.description }).nullish(),
-  effectif_id: zObjectId.describe("Id de l'effectif associé").nullish(),
-  organisme_id: zObjectId.describe("Id de l'organisme associé").nullish(),
+  effectif_id: z.any().describe("Id de l'effectif associé").nullish(),
+  organisme_id: z.any().describe("Id de l'organisme associé").nullish(),
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }),
   processed_at: z.date({ description: "Date de process des données" }).nullish(),
@@ -63,7 +63,7 @@ export const internalFields = {
  * Une 2eme validation plus poussée (SIRET, formation, ...) est effectuée au moment de la creation de l'effectif et l'erreur est stockée dans le champ `error`.
  */
 export const zEffectifQueue = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   // required fields to create an effectif
   nom_apprenant: z.any({ description: apprenantProps.nom.description }),
   prenom_apprenant: z.any({ description: apprenantProps.prenom.description }),

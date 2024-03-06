@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "organismesSoltea";
 
@@ -10,7 +9,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 const zOrganismeSoltea = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   uai: z.string().nullish().describe("Code UAI de l'établissement"),
   siret: z.string().nullish().describe("N° SIRET de l'établissement"),
   raison_sociale: z.string().nullish(),

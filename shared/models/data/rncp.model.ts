@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "rncp";
 
@@ -10,7 +9,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 const zRncp = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   rncp: z.string(),
   nouveaux_rncp: z.array(z.string()).optional(),
   intitule: z.string(),

@@ -1,14 +1,13 @@
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
-import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "shared";
+import { STATUT_FIABILISATION_COUPLES_UAI_SIRET } from "shared/constants";
 
 import { zodEnumFromObjValues } from "../../utils/zodHelper";
 
 const collectionName = "fiabilisationUaiSiret";
 
 export const zFiabilisationUaiSiret = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   created_at: z.date().nullish(),
   type: zodEnumFromObjValues(STATUT_FIABILISATION_COUPLES_UAI_SIRET)
     .describe("Statut de fiabilisation du couple UAI SIRET")

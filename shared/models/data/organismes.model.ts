@@ -1,7 +1,6 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import type { Jsonify } from "type-fest";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 import {
   STATUT_CREATION_ORGANISME,
@@ -11,7 +10,7 @@ import {
   TETE_DE_RESEAUX_BY_ID,
   NATURE_ORGANISME_DE_FORMATION,
   STATUT_PRESENCE_REFERENTIEL,
-} from "shared";
+} from "shared/constants";
 import effectifsModel from "shared/models/data/effectifs.model";
 import { zAdresse } from "shared/models/parts/adresseSchema";
 
@@ -27,7 +26,7 @@ const relationOrganismeSchema = z
     sources: z.array(z.string()).optional(),
 
     // infos TDB
-    _id: zObjectId.nullable().optional(),
+    _id: z.any().nullable().optional(),
     enseigne: z.string().optional(),
     raison_sociale: z.string().optional(),
     commune: z.string().optional(),
@@ -72,7 +71,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 // Si contributeurs = [] et !first_transmission_date Alors Organisme en stock "Non actif"
 const zOrganisme = z
   .object({
-    _id: zObjectId,
+    _id: z.any(),
     uai: z
       .string({
         description: "Code UAI de l'établissement",
@@ -121,7 +120,7 @@ const zOrganisme = z
       .array(
         z
           .object({
-            formation_id: zObjectId.optional(),
+            formation_id: z.any().optional(),
             cle_ministere_educatif: z
               .string({
                 description: "Clé unique de la formation",
@@ -137,7 +136,7 @@ const zOrganisme = z
               .array(
                 z
                   .object({
-                    organisme_id: zObjectId.optional(),
+                    organisme_id: z.any().optional(),
                     nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION).optional(),
                     uai: z
                       .string({

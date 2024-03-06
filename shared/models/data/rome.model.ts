@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 import { IModelDescriptor } from "./common";
 
@@ -17,5 +16,5 @@ export type IRome = z.output<typeof romeSchema>;
 export default {
   collectionName: "rome",
   indexes: [[{ code: 1 }, { unique: true }]],
-  zod: romeSchema.merge(z.object({ _id: zObjectId })).strict(),
+  zod: romeSchema.merge(z.object({ _id: z.any() })).strict(),
 } as IModelDescriptor;

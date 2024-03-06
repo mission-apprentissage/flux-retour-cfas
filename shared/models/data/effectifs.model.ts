@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 import {
   SIRET_REGEX,
@@ -104,10 +103,10 @@ const zEffectifComputedStatut = z.object({
 });
 
 export const zEffectif = z.object({
-  _id: zObjectId.describe("Identifiant MongoDB de l'effectif"),
-  organisme_id: zObjectId.describe("Organisme id (lieu de formation de l'apprenant pour la v3)"),
-  organisme_responsable_id: zObjectId.describe("Organisme responsable id").nullish(),
-  organisme_formateur_id: zObjectId.describe("Organisme formateur id").nullish(),
+  _id: z.any().describe("Identifiant MongoDB de l'effectif"),
+  organisme_id: z.any().describe("Organisme id (lieu de formation de l'apprenant pour la v3)"),
+  organisme_responsable_id: z.any().describe("Organisme responsable id").nullish(),
+  organisme_formateur_id: z.any().describe("Organisme formateur id").nullish(),
 
   id_erp_apprenant: z.string({ description: "Identifiant de l'apprenant dans l'erp" }),
   source: z.string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),

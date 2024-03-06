@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 import { CFD_REGEX } from "../../constants";
 
@@ -14,7 +13,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 const zFormation = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   cfd: z.string({ description: "Code CFD de la formation" }).regex(CFD_REGEX),
   cfd_start_date: z.date({ description: "Date d'ouverture du CFD" }).nullish(),
   cfd_end_date: z.date({ description: "Date de fermeture du CFD" }).nullish(),

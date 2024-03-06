@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 import { zContratsDecaApprenantSchema } from "./contratsDeca/contratsDeca.apprenant.part";
 import { zContratsDecaDetailsContratSchema } from "./contratsDeca/contratsDeca.detailsContrat.part";
@@ -13,7 +12,7 @@ const collectionName = "contratsDeca";
 
 const zContratsDeca = z
   .object({
-    _id: zObjectId,
+    _id: z.any(),
     alternant: zContratsDecaApprenantSchema,
     formation: zContratsDecaFormationSchema,
     etablissementFormation: zContratsDecaEtablissementFormationSchema,

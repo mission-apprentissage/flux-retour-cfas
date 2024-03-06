@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "formationsCatalogue";
 
@@ -19,7 +18,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 const zFormationCatalogue = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   cle_ministere_educatif: z.string(),
   cfd: z.string(),
   cfd_specialite: z.string().nullish(),

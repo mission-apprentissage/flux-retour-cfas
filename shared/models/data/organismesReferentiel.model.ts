@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "organismesReferentiel";
 
@@ -25,7 +24,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 const zOrganismeReferentiel = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   siret: z.string(),
   uai: z.string().optional(),
   raison_sociale: z.string().optional(),

@@ -1,7 +1,6 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import type { Jsonify } from "type-fest";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 import {
   ACADEMIES_BY_CODE,
@@ -14,7 +13,7 @@ import {
   IAcademieCode,
   SIRET_REGEX,
   UAI_REGEX,
-} from "shared";
+} from "shared/constants";
 
 import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
 
@@ -23,7 +22,7 @@ const collectionName = "organisations";
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
 
 const zOrganisationBase = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   created_at: z.date({ description: "Date de création en base de données" }),
 });
 

@@ -1,6 +1,5 @@
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "users";
 
@@ -11,7 +10,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 const zUser = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   username: z.string().describe("Le nom de l'utilisateur, utilisé pour l'authentification"),
   email: z.string().nullish().describe("Email de l'utilisateur"),
   password: z.string().optional().describe("Le mot de passe hashed"),

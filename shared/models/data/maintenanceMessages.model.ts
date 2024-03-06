@@ -1,10 +1,9 @@
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "maintenanceMessages";
 
 export const zMaintenanceMessage = z.object({
-  _id: zObjectId,
+  _id: z.any(),
   msg: z.string({ description: "Message de maintenance" }),
   name: z.string({ description: "email du créateur du message" }),
   type: z.enum(["alert", "info"]),

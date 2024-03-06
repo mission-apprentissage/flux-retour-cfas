@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { zObjectId } from "zod-mongodb-schema";
 
 import { IModelDescriptor } from "./common";
 
@@ -16,5 +15,5 @@ export type IAuditLog = z.output<typeof auditLogSchema>;
 export default {
   collectionName: "auditLogs",
   indexes: [],
-  zod: auditLogSchema.extend({ _id: zObjectId }).strict(),
+  zod: auditLogSchema.extend({ _id: z.any() }).strict(),
 } as IModelDescriptor;
