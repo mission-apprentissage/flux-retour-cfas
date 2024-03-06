@@ -1,9 +1,7 @@
 import React from "react";
-import { Acl } from "shared";
+import { Acl, IOrganisationJson } from "shared";
 
-import { Organisation } from "./Organisation";
-
-export interface AuthContext<IOrganisation = Organisation> {
+export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisationJson> {
   _id: string;
   civility: "Madame" | "Monsieur";
   nom: string;

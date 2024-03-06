@@ -4,11 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
+import { IOrganisationType } from "shared";
 import { useLocalStorage } from "usehooks-ts";
 import { z } from "zod";
 
 import { _post } from "@/common/httpClient";
-import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -161,7 +161,7 @@ const ConnexionAPIPage = () => {
   const ConnexionAPIContent = ({
     authorizedOrganisationTypes = [],
   }: {
-    authorizedOrganisationTypes: OrganisationType[];
+    authorizedOrganisationTypes: IOrganisationType[];
   }) => {
     const router = useRouter();
     const { auth, organisationType } = useAuth();

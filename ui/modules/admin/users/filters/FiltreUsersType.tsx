@@ -1,7 +1,7 @@
 import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
 import { useState } from "react";
+import { TYPES_ORGANISATION } from "shared";
 
-import { TYPES_ORGANISATION } from "@/common/internal/Organisation";
 import { FilterButton } from "@/components/FilterButton/FilterButton";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 

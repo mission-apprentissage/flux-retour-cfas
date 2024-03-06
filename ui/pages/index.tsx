@@ -21,9 +21,9 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
+import { IOrganisationType } from "shared";
 
 import { _get } from "@/common/httpClient";
-import { OrganisationType } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDate } from "@/common/utils/dateUtils";
 import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
@@ -46,7 +46,7 @@ function DashboardOwnOrganisme() {
   return <DashboardOrganisme organisme={organisme} modePublique={false} />;
 }
 
-function getDashboardComponent(organisationType: OrganisationType) {
+function getDashboardComponent(organisationType: IOrganisationType) {
   switch (organisationType) {
     case "ORGANISME_FORMATION": {
       return <DashboardOwnOrganisme />;

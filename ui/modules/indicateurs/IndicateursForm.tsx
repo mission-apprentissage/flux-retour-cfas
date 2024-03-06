@@ -3,11 +3,16 @@ import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { isTeteDeReseauResponsable, TypeEffectifNominatif, IndicateursEffectifsAvecOrganisme } from "shared";
+import {
+  isTeteDeReseauResponsable,
+  TypeEffectifNominatif,
+  IndicateursEffectifsAvecOrganisme,
+  IOrganisationJson,
+  IOrganisationType,
+} from "shared";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
-import { Organisation, OrganisationType } from "@/common/internal/Organisation";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
@@ -445,7 +450,7 @@ function IndicateursForm(props: IndicateursFormProps) {
 
 export default IndicateursForm;
 
-function getPermissionsEffectifsNominatifs(organisation: Organisation): boolean | TypeEffectifNominatif[] {
+function getPermissionsEffectifsNominatifs(organisation: IOrganisationJson): boolean | TypeEffectifNominatif[] {
   switch (organisation.type) {
     case "ORGANISME_FORMATION":
       return true;
@@ -472,7 +477,7 @@ function getPermissionsEffectifsNominatifs(organisation: Organisation): boolean 
   }
 }
 
-function MessageBandeauIndicateurs({ organisationType }: { organisationType: OrganisationType }) {
+function MessageBandeauIndicateurs({ organisationType }: { organisationType: IOrganisationType }) {
   let text: string | null | JSX.Element = null;
 
   switch (organisationType) {

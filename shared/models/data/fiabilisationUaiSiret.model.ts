@@ -7,7 +7,7 @@ import { zodEnumFromObjValues } from "../../utils/zodHelper";
 
 const collectionName = "fiabilisationUaiSiret";
 
-const zFiabilisationUaiSiret = z.object({
+export const zFiabilisationUaiSiret = z.object({
   _id: zObjectId,
   created_at: z.date().nullish(),
   type: zodEnumFromObjValues(STATUT_FIABILISATION_COUPLES_UAI_SIRET)

@@ -1,6 +1,15 @@
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
 import { useState } from "react";
-import { ACADEMIES_SORTED, DEPARTEMENTS_SORTED, REGIONS_SORTED, ORGANISATIONS_NATIONALES_SORTED_BY_NAME } from "shared";
+import {
+  ACADEMIES_SORTED,
+  DEPARTEMENTS_SORTED,
+  REGIONS_SORTED,
+  ORGANISATIONS_NATIONALES_SORTED_BY_NAME,
+  IAcademieCode,
+  IDepartmentCode,
+  IRegionCode,
+  OrganisationsNationalesKey,
+} from "shared";
 
 import { InscriptionOrganistionChildProps } from "./common";
 
@@ -66,7 +75,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
             onChange={(e) =>
               setOrganisation({
                 type: typeOrganisation,
-                code_academie: e.target.value,
+                code_academie: e.target.value as IAcademieCode,
               })
             }
           >
@@ -86,7 +95,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
             onChange={(e) =>
               setOrganisation({
                 type: typeOrganisation,
-                code_departement: e.target.value,
+                code_departement: e.target.value as IDepartmentCode,
               })
             }
           >
@@ -106,7 +115,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
             onChange={(e) =>
               setOrganisation({
                 type: typeOrganisation as "DREETS" | "DRAAF" | "CONSEIL_REGIONAL" | "DRAFPIC",
-                code_region: e.target.value,
+                code_region: e.target.value as IRegionCode,
               })
             }
           >
@@ -126,7 +135,7 @@ export const InscriptionOperateurPublic = ({ setOrganisation }: InscriptionOrgan
             onChange={(e) =>
               setOrganisation({
                 type: typeOrganisation,
-                nom: e.target.value,
+                nom: e.target.value as OrganisationsNationalesKey,
               })
             }
           >

@@ -2,11 +2,12 @@ import { Box, Button, HStack, Link, Text } from "@chakra-ui/react";
 import NavLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { IOrganisationCreate } from "shared";
 
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
-import { NewOrganisation, SetterOrganisation } from "@/modules/auth/inscription/common";
+import { SetterOrganisation } from "@/modules/auth/inscription/common";
 import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCarifOref";
 import { InscriptionOF } from "@/modules/auth/inscription/InscriptionOF";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
@@ -18,7 +19,7 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 const RegisterConfigurationOrganisationPage = () => {
   const router = useRouter();
   const typeOrganisation = router.query.typeOrganisation as CategorieCompteInscription;
-  const [organisation, setOrganisation] = useState<NewOrganisation | null>(null);
+  const [organisation, setOrganisation] = useState<IOrganisationCreate | null>(null);
   const [hideBackNextButtons, setHideBackNextButtons] = useState<boolean>(false);
 
   return (

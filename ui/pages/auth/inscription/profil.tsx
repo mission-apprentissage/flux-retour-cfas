@@ -22,12 +22,17 @@ import {
 import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TETE_DE_RESEAUX_BY_ID } from "shared";
+import {
+  ACADEMIES_BY_CODE,
+  DEPARTEMENTS_BY_CODE,
+  IOrganisationJson,
+  REGIONS_BY_CODE,
+  TETE_DE_RESEAUX_BY_ID,
+} from "shared";
 import * as Yup from "yup";
 import YupPassword from "yup-password";
 
 import { _get, _post } from "@/common/httpClient";
-import { Organisation } from "@/common/internal/Organisation";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { CGU_VERSION } from "@/components/legal/Cgu";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -39,7 +44,7 @@ YupPassword(Yup); // extend yup
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
+function OrganisationRibbon({ organisation }: { organisation: IOrganisationJson }) {
   const { toastError } = useToaster();
   const isOrganismeFormation = organisation.type === "ORGANISME_FORMATION";
 
@@ -178,7 +183,7 @@ function OrganisationRibbon({ organisation }: { organisation: Organisation }) {
 const PageFormulaireProfil = () => {
   const router = useRouter();
   const { toastError } = useToaster();
-  const [organisation, setOrganisation] = useState<Organisation | null>(null);
+  const [organisation, setOrganisation] = useState<IOrganisationJson | null>(null);
   const [fixedEmail, setFixedEmail] = useState("");
 
   // try to use the invitation token if provided
@@ -214,7 +219,7 @@ const PageFormulaireProfil = () => {
 
 export default PageFormulaireProfil;
 
-function ProfileForm({ organisation, fixedEmail }: { organisation: Organisation; fixedEmail: string }) {
+function ProfileForm({ organisation, fixedEmail }: { organisation: IOrganisationJson; fixedEmail: string }) {
   const router = useRouter();
   const { toastSuccess, toastError } = useToaster();
   const passwordMinLength = organisation.type === "ADMINISTRATEUR" ? 20 : 12;

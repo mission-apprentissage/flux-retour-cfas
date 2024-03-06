@@ -1,7 +1,5 @@
 import { usePlausible } from "next-plausible";
-import { PlausibleGoalType } from "shared";
-
-import { getOrganisationLabel } from "@/common/internal/Organisation";
+import { PlausibleGoalType, getOrganisationLabel } from "shared";
 
 import useAuth from "./useAuth";
 

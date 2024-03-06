@@ -14,10 +14,16 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
-import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TETE_DE_RESEAUX_BY_ID } from "shared";
+import {
+  ACADEMIES_BY_CODE,
+  DEPARTEMENTS_BY_CODE,
+  getOrganisationLabel,
+  IOrganisationJson,
+  REGIONS_BY_CODE,
+  TETE_DE_RESEAUX_BY_ID,
+} from "shared";
 
 import { _get } from "@/common/httpClient";
-import { getOrganisationLabel, Organisation } from "@/common/internal/Organisation";
 import { formatCivility, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
@@ -35,7 +41,7 @@ import { useIndicateursEffectifsParDepartement } from "./hooks/useIndicateursEff
 import { useIndicateursOrganismesParDepartement } from "./hooks/useIndicateursOrganismesParDepartement";
 import IndicateursGrid from "./IndicateursGrid";
 
-function getPerimetreDescription(organisation: Organisation | null): string {
+function getPerimetreDescription(organisation: IOrganisationJson | null): string {
   if (!organisation) {
     return "";
   }

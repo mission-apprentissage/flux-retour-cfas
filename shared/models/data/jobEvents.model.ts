@@ -3,7 +3,7 @@ import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "jobEvents";
 
-const zJobEvent = z.object({
+export const zJobEvent = z.object({
   _id: zObjectId,
   jobname: z.string({ description: "Le nom du job" }),
   date: z.date({ description: "La date de l'evenement" }),

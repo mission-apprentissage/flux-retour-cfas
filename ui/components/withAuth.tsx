@@ -1,11 +1,11 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { IOrganisationType } from "shared";
 import { useLocalStorage } from "usehooks-ts";
 
-import { OrganisationType } from "@/common/internal/Organisation";
 import useAuth from "@/hooks/useAuth";
 
-const withAuth = (Component: any, authorizedOrganisationTypes: OrganisationType[] = []) => {
+const withAuth = (Component: any, authorizedOrganisationTypes: IOrganisationType[] = []) => {
   const AuthenticatedPage = (props) => {
     const [_, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl", "");
     const [canDisplay, setCanDisplay] = useState(false);

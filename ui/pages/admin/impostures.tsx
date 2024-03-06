@@ -1,12 +1,12 @@
 import { Heading, Container, Text, Box } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { IOrganisationCreate } from "shared";
 
 import { _post, _put, _delete } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
-import { NewOrganisation } from "@/modules/auth/inscription/common";
 import SearchBySIRETForm from "@/modules/auth/inscription/components/SearchBySIRETForm";
 import { InscriptionCarifOref } from "@/modules/auth/inscription/InscriptionCarifOref";
 import { InscriptionOperateurPublic } from "@/modules/auth/inscription/InscriptionOperateurPublic";
@@ -16,7 +16,7 @@ import { ExternalLinkLine } from "@/theme/components/icons";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 function ImposturesPage() {
-  const [organisation, setOrganisation] = useState<NewOrganisation | null>(null);
+  const [organisation, setOrganisation] = useState<IOrganisationCreate | null>(null);
 
   useEffect(() => {
     if (organisation) {
@@ -24,8 +24,8 @@ function ImposturesPage() {
     }
   }, [organisation]);
 
-  async function impersonate(organisation: NewOrganisation) {
-    await _post<NewOrganisation>("/api/v1/admin/impersonate", organisation);
+  async function impersonate(organisation: IOrganisationCreate) {
+    await _post<IOrganisationCreate>("/api/v1/admin/impersonate", organisation);
     location.href = "/";
   }
 
