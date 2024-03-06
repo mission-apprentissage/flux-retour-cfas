@@ -171,7 +171,7 @@ export const zEffectif = z.object({
             opcos: z.array(z.string()).nullish(),
           })
           .nullish(),
-        // nullish en attendant la migration et passage en nullable ensuite
+        // @TODO: nullish en attendant la migration et passage en nullable ensuite (migration: 20240305085918-effectifs-types.ts)
         statut: z
           .object({
             en_cours: StatutApprenantEnum,
