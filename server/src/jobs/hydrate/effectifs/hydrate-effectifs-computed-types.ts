@@ -1,8 +1,9 @@
 import { captureException } from "@sentry/node";
+import Boom from "boom";
 import { endOfMonth } from "date-fns";
-import { MongoServerError } from "mongodb";
+import { MongoServerError, UpdateFilter } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import { IEffectif } from "shared/models/data/effectifs.model";
+import { IEffectif, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 
 import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
@@ -19,11 +20,13 @@ export async function hydrateEffectifsComputedTypes(evaluationDate = new Date())
     try {
       const newStatut = determineNewStatut(effectif, evaluationDate);
       const historiqueStatut = genererHistoriqueStatut(effectif, evaluationDate);
-
-      const updateObj = {
+      const computedStatut: IEffectifComputedStatut = {
+        en_cours: newStatut,
+        historique: historiqueStatut,
+      };
+      const updateObj: UpdateFilter<IEffectif> = {
         $set: {
-          "_computed.statut.en_cours": newStatut,
-          "_computed.statut.historique": historiqueStatut,
+          "_computed.statut": computedStatut,
         },
       };
 
@@ -43,7 +46,7 @@ export function genererHistoriqueStatut(effectif: IEffectif, endDate: Date) {
   }
 
   const dateEntree = new Date(effectif.formation.date_entree);
-  const historiqueStatut: { mois: string; annee: string; valeur: StatutApprenant | null }[] = [];
+  const historiqueStatut: { mois: string; annee: string; valeur: StatutApprenant }[] = [];
 
   for (let date = new Date(dateEntree); date <= endDate; date.setMonth(date.getMonth() + 1)) {
     const dernierJourDuMois = endOfMonth(date);
@@ -80,7 +83,7 @@ function gererErreurMiseAJour(err: unknown, effectif: IEffectif) {
   captureException(err);
 }
 
-export function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): StatutApprenant | null {
+export function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): StatutApprenant {
   const currentDate = evaluationDate || new Date();
   const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000; // 90 jours en millisecondes
   const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en millisecondes
@@ -126,5 +129,5 @@ export function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): 
     return STATUT_APPRENANT.ABANDON;
   }
 
-  return null;
+  throw Boom.internal("Aucun statut trouvé pour l'effectif", { id: effectif._id });
 }

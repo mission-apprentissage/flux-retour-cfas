@@ -515,10 +515,13 @@ const createOrUpdateEffectif = async (
     ...effectif,
     _computed: {
       ...effectif._computed,
-      statut: {
-        en_cours: determineNewStatut(effectif),
-        historique: genererHistoriqueStatut(effectif, new Date()),
-      },
+      statut:
+        effectif.formation && effectif.formation.date_entree
+          ? {
+              en_cours: determineNewStatut(effectif),
+              historique: genererHistoriqueStatut(effectif, new Date()),
+            }
+          : null,
     },
   };
   const itemProcessingInfos: ItemProcessingInfos = {};
