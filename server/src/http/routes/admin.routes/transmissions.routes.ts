@@ -22,11 +22,6 @@ export default () => {
     validateRequestMiddleware({ params: z.object({ date: extensions.iso8601Date() }), query: pagination }),
     returnResult(getTransmissionByDateErrorAdmin)
   );
-  // router.get(
-  //   "/:date/success",
-  //   validateRequestMiddleware({ params: z.object({ date: extensions.iso8601Date() }), query: pagination }),
-  //   returnResult(getTransmissionByDateSuccessAdmin)
-  // );
 
   return router;
 };
@@ -41,11 +36,3 @@ const getTransmissionByDateErrorAdmin = async (req) => {
   const date = req.params.date as string;
   return await getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay(date, page, limit);
 };
-
-// const getTransmissionByDateSuccessAdmin = async (req, res) => {
-//   const { page, limit } = req.query as Pagination;
-//   const organismeId = res.locals.organismeId as ObjectId;
-//   const date = req.params.date as string;
-//   const organismeIdString = organismeId.toString();
-//   return await getAllSuccessfulTransmissionStatusDetailsForAGivenDay(organismeIdString, date, page, limit);
-// };
