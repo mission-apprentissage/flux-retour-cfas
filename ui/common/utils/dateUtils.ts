@@ -1,4 +1,7 @@
-import fr, { endOfMonth, format } from "date-fns";
+// eslint-disable-next-line import/no-duplicates
+import { endOfMonth, format } from "date-fns";
+// eslint-disable-next-line import/no-duplicates
+import { fr } from "date-fns/locale";
 
 // TODO [tech] TO REMOVE
 export const prettyPrintDate = (date) => {

@@ -34,6 +34,7 @@ const nextConfig = {
   experimental: {
     appDir: false,
     typedRoutes: true,
+    topLevelAwait: true,
   },
   output: "standalone",
   eslint: {

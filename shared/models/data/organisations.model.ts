@@ -6,16 +6,15 @@ import { zObjectId } from "zod-mongodb-schema";
 import {
   ACADEMIES_BY_CODE,
   DEPARTEMENTS_BY_CODE,
-  REGIONS_BY_CODE,
-  TETE_DE_RESEAUX_BY_ID,
-  ORGANISATIONS_NATIONALES,
-  IRegionCode,
-  IDepartmentCode,
   IAcademieCode,
+  IDepartmentCode,
+  IRegionCode,
+  ORGANISATIONS_NATIONALES,
+  REGIONS_BY_CODE,
   SIRET_REGEX,
+  TETE_DE_RESEAUX_BY_ID,
   UAI_REGEX,
-} from "shared";
-
+} from "../../constants";
 import { zodEnumFromArray, zodEnumFromObjKeys } from "../../utils/zodHelper";
 
 const collectionName = "organisations";

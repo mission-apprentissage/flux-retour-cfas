@@ -2,8 +2,10 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { CODES_STATUT_APPRENANT_ENUM, zAdresse } from "shared";
 import effectifsModel from "shared/models/data/effectifs.model";
+
+import { CODES_STATUT_APPRENANT_ENUM } from "../../constants";
+import { zAdresse } from "../parts/adresseSchema";
 
 import { zContrat } from "./effectifs/contrat.part";
 import { zFormationEffectif } from "./effectifs/formation.part";

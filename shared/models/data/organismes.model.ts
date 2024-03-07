@@ -3,18 +3,18 @@ import type { Jsonify } from "type-fest";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import {
-  STATUT_CREATION_ORGANISME,
-  STATUT_FIABILISATION_ORGANISME,
-  UAI_REGEX,
-  SIRET_REGEX,
-  TETE_DE_RESEAUX_BY_ID,
-  NATURE_ORGANISME_DE_FORMATION,
-  STATUT_PRESENCE_REFERENTIEL,
-} from "shared";
 import effectifsModel from "shared/models/data/effectifs.model";
 import { zAdresse } from "shared/models/parts/adresseSchema";
 
+import {
+  NATURE_ORGANISME_DE_FORMATION,
+  SIRET_REGEX,
+  STATUT_CREATION_ORGANISME,
+  STATUT_FIABILISATION_ORGANISME,
+  STATUT_PRESENCE_REFERENTIEL,
+  TETE_DE_RESEAUX_BY_ID,
+  UAI_REGEX,
+} from "../../constants";
 import { zodEnumFromObjKeys, zodEnumFromObjValues } from "../../utils/zodHelper";
 
 const relationOrganismeSchema = z
