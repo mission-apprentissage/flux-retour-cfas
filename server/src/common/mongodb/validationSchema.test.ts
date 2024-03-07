@@ -1,4 +1,4 @@
-import { zodToMongoSchema } from "zod-mongodb-schema";
+import { zodToMongoSchema } from "shared";
 
 import { modelDescriptors } from "@/common/model/collections";
 

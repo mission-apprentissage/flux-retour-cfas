@@ -17787,7 +17787,6 @@ __metadata:
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
     zod: 3.21.4
     zod-express-middleware: 1.4.0
-    zod-mongodb-schema: ^1.0.0
   languageName: unknown
   linkType: soft
 
@@ -17863,7 +17862,7 @@ __metadata:
     type-fest: ^4.11.1
     typescript: ^5.3.3
     zod: 3.21.4
-    zod-mongodb-schema: ^1.0.1
+    zod-mongodb-schema: ^1.0.2
   languageName: unknown
   linkType: soft
 
@@ -20356,16 +20355,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod-mongodb-schema@npm:^1.0.0, zod-mongodb-schema@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "zod-mongodb-schema@npm:1.0.1"
+"zod-mongodb-schema@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "zod-mongodb-schema@npm:1.0.2"
   dependencies:
     json-schema: ^0.4.0
     zod-to-json-schema: ^3.21.4
   peerDependencies:
-    bson: ^6.0.0
+    bson: " ^5.0.0 || ^6.0.0"
     zod: ^3.22.4
-  checksum: e3e586e65d7287ff068efb26d26478036e44578799bd65d5421bcce5a9da8253a6204f84b533141c2a95c6dc2b2ec3093d0760623005464db7ea29ad68eb339a
+  checksum: 63f872bfcfdaeb83061452e7137d7763a93b89a8f423a0dc2b5e904d295b7e7f3d204bec0691a0c344ef7cc1afb0a3d84a1508e66f472d16e3401f3db4f8d31f
   languageName: node
   linkType: hard
 

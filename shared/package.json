@@ -26,7 +26,7 @@
     "react": "18.2.0",
     "type-fest": "^4.11.1",
     "zod": "3.21.4",
-    "zod-mongodb-schema": "^1.0.1"
+    "zod-mongodb-schema": "^1.0.2"
   },
   "devDependencies": {
     "bson": "^5.5.1",

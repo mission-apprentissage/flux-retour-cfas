@@ -90,8 +90,7 @@
     "uuid": "8.3.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
     "zod": "3.21.4",
-    "zod-express-middleware": "1.4.0",
-    "zod-mongodb-schema": "^1.0.0"
+    "zod-express-middleware": "1.4.0"
   },
   "prettier": {
     "printWidth": 120,
