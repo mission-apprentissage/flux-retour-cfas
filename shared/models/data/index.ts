@@ -18,3 +18,4 @@ export * from "./rncp.model";
 export * from "./rome.model";
 export * from "./users.model";
 export * from "./usersMigration.model";
+export { zodToMongoSchema } from "zod-mongodb-schema";
