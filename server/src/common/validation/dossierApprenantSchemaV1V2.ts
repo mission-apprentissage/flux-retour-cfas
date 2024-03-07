@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { primitivesV1 } from "@/common/validation/utils/zodPrimitives";
+import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
 /**
  * Note: ce schema est seulement utilisé pour générer la documentation OpenAPI pour l'API v1.
@@ -37,6 +37,12 @@ const dossierApprenantSchemaV1V2 = () =>
     contrat_date_debut: primitivesV1.contrat.date_debut.optional(),
     contrat_date_fin: primitivesV1.contrat.date_fin.optional(),
     contrat_date_rupture: primitivesV1.contrat.date_rupture.optional(),
+
+    // OPTIONAL V2 BUT REQUIRED V3
+
+    date_inscription_formation: primitivesV3.formation.date_inscription.optional(),
+    date_entree_formation: primitivesV3.formation.date_entree.optional(),
+    date_fin_formation: primitivesV3.formation.date_fin.optional(),
   });
 
 export type DossierApprenantSchemaV1V2ZodType = z.input<ReturnType<typeof dossierApprenantSchemaV1V2>>;
