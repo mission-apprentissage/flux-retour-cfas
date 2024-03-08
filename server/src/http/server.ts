@@ -349,7 +349,6 @@ function setupRoutes(app: Application) {
     }),
     returnResult(async (req) => {
       const { username, password } = req.body;
-      console.log(username, password);
       const authenticatedUser = await authenticateLegacy(username, password);
       if (!authenticatedUser) {
         throw Boom.unauthorized();

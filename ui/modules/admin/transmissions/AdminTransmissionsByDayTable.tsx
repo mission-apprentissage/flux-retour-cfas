@@ -34,7 +34,6 @@ const adminTransmissionByDayColumnDefs: AccessorKeyColumnDef<any, any>[] = [
     accessorKey: "error",
     cell: ({ row }) => (
       <Text fontSize="1rem" {...computeTextErrorDisplay(row.original.error)}>
-        {" "}
         {row.original.error}
       </Text>
     ),
