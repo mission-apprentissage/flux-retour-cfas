@@ -80,6 +80,9 @@ const UserMenu = () => {
               )}
               {organisationType === "ADMINISTRATEUR" && (
                 <MenuGroup title="Administration">
+                  <MenuItem href="/admin/transmissions" icon={<Parametre boxSize={4} />}>
+                    Toutes les transmissions
+                  </MenuItem>
                   <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
                     Gestion des utilisateurs
                   </MenuItem>

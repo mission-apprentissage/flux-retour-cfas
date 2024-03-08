@@ -14,7 +14,13 @@ const withAuth = (Component: any, authorizedOrganisationTypes: IOrganisationType
     const { auth, organisationType } = useAuth();
 
     useEffect(() => {
-      if (!auth && typeof window !== "undefined" && !authorizedOrganisationTypes.includes(organisationType)) {
+      if (!auth) {
+        setOriginConnexionUrl(router.asPath);
+        router.push("/auth/connexion");
+        return;
+      }
+
+      if (authorizedOrganisationTypes.length && !authorizedOrganisationTypes.includes(organisationType)) {
         setOriginConnexionUrl(router.asPath);
         router.push("/auth/connexion");
         return;
