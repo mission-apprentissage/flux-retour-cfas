@@ -106,12 +106,11 @@ export function useOrganismesFiltered(organismes: OrganismeNormalized[]) {
 }
 
 export function useOrganismesNormalizedLists(organismes: Organisme[]) {
-  const { organismesFiables, organismesACompleter, organismesNonRetenus, nbOrganismesFermes } = useMemo(() => {
+  const { organismesFiables, organismesACompleter, organismesNonRetenus } = useMemo(() => {
     const organismesFiables: OrganismeNormalized[] = [];
     const organismesACompleter: OrganismeNormalized[] = [];
     const organismesNonRetenus: OrganismeNormalized[] = [];
 
-    let nbOrganismesFermes = 0;
     (organismes || []).forEach((organisme: OrganismeNormalized) => {
       // We need to memorize organismes with normalized names to be avoid running the normalization on each keystroke.
       organisme.normalizedName = normalize(organisme.enseigne ?? organisme.raison_sociale ?? "");
@@ -127,13 +126,9 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
         (organisme.ferme && !organisme.last_transmission_date) ||
         (!organisme.enseigne && !organisme.raison_sociale)
       ) {
-        nbOrganismesFermes++;
         organismesNonRetenus.push(organisme);
       } else {
         organismesACompleter.push(organisme);
-        if (organisme.ferme) {
-          nbOrganismesFermes++;
-        }
       }
     });
 
@@ -141,7 +136,6 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
       organismesFiables,
       organismesACompleter,
       organismesNonRetenus,
-      nbOrganismesFermes,
     };
   }, [organismes]);
 
@@ -149,7 +143,6 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
     organismesFiables,
     organismesACompleter,
     organismesNonRetenus,
-    nbOrganismesFermes,
   };
 }
 
