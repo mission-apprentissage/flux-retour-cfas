@@ -160,14 +160,24 @@ const OrganismesFormationPage = () => {
               content: (
                 <Text>
                   Situation 1 : vous utilisez un des logiciels de gestion (ERP) branchés au tableau de bord, vous pouvez
-                  transmettre vos données en quelques clics en vous appuyant sur les documents pas à pas transmis par
-                  votre fournisseur d’ERP.
-                  <br />
-                  <br />
-                  Situation 2 : vous utilisez un autre logiciel de gestion (ERP) qui n’est pas encore branché, consultez
-                  la{" "}
+                  transmettre vos données en quelques clics à l’aide des tutoriels qui vous seront proposés sur l’écran
+                  de paramétrage et{" "}
                   <Link
-                    href="https://www.notion.so/b1d9662adb374507b9d26089f4421290?pvs=21"
+                    href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="action-high-blue-france"
+                    borderBottom="1px"
+                    _hover={{ textDecoration: "none" }}
+                  >
+                    dans notre FAQ
+                  </Link>
+                  <br />
+                  <br />
+                  Situation 2 : vous utilisez un autre logiciel de gestion (ERP) qui n’est pas encore branché, demandez
+                  à votre ERP de se brancher au Tableau de bord et transmettez-lui la{" "}
+                  <Link
+                    href="https://mission-apprentissage.notion.site/Documentation-d-int-gration-API-v3-Tableau-de-bord-de-l-apprentissage-918e2bfcff78478b8f310f27eebdeb27"
                     target="_blank"
                     rel="noopener noreferrer"
                     color="action-high-blue-france"
@@ -176,14 +186,24 @@ const OrganismesFormationPage = () => {
                   >
                     documentation API ERP
                   </Link>{" "}
-                  afin de lui demander de se brancher au tableau de bord. En attendant que votre demande soit prise en
-                  compte, vous pouvez transmettre vos effectifs sans logiciel supplémentaire grâce à une fonctionnalité
-                  accessible depuis votre espace personnel (voir ci-dessous Situation 3).
+                  . En attendant que votre demande soit prise en compte, vous pouvez transmettre vos effectifs par
+                  fichier Excel dans l’onglet “Mes effectifs” de votre Tableau de bord. (voir ci-dessous Situation 3).
                   <br />
                   <br />
                   Situation 3 : vous utilisez vos propres outils de suivi de vos effectifs en apprentissage, vous pouvez
-                  transmettre vos effectifs sans logiciel supplémentaire grâce à une fonctionnalité accessible depuis
-                  votre espace personnel, onglet “Mes effectifs”.
+                  transmettre vos effectifs par fichier Excel dans l’onglet “Mes effectifs” de votre Tableau de bord. Si
+                  vous utilisez un SI “maison” vous pouvez également envisager d’utiliser notre API et brancher votre
+                  SI, pour cela voici notre{" "}
+                  <Link
+                    href="https://mission-apprentissage.notion.site/Documentation-d-int-gration-API-v3-Tableau-de-bord-de-l-apprentissage-918e2bfcff78478b8f310f27eebdeb27"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="action-high-blue-france"
+                    borderBottom="1px"
+                    _hover={{ textDecoration: "none" }}
+                  >
+                    documentation API ERP
+                  </Link>{" "}
                   <br />
                   <br />
                   L’équipe du tableau de bord reste également à vos côtés pour vous accompagner&nbsp;:{" "}
