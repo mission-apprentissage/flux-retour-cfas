@@ -62,12 +62,11 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
   const router = useRouter();
   const { organisationType } = useAuth();
 
-  const title = `${props.modePublique ? "Ses" : "Mes"} organismes${
-    props.activeTab === "a-completer" ? " non fiables" : ""
-  }`;
+  const title = `${props.modePublique ? "Ses" : "Mes"} organismes${props.activeTab === "a-completer" ? " non fiables" : ""}`;
 
-  const { organismesFiables, organismesACompleter, organismesNonRetenus, nbOrganismesFermes } =
-    useOrganismesNormalizedLists(props.organismes);
+  const { organismesFiables, organismesACompleter, organismesNonRetenus } = useOrganismesNormalizedLists(
+    props.organismes
+  );
 
   return (
     <SimplePage title={title}>
@@ -86,18 +85,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           {organismesACompleter.length !== 0 && (
             <ListItem>
               les <strong>{organismesACompleter.length}</strong> établissements <strong>non-fiabilisés</strong>
-              {nbOrganismesFermes > 0 && (
-                <>
-                  {" "}
-                  dont <strong>{nbOrganismesFermes}</strong> établissement
-                  {nbOrganismesFermes > 1 ? "s" : ""}{" "}
-                  <strong>
-                    fermé
-                    {nbOrganismesFermes > 1 ? "s" : ""}
-                  </strong>
-                  .
-                </>
-              )}
             </ListItem>
           )}
         </UnorderedList>
