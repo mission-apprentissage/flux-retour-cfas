@@ -46,6 +46,7 @@ COPY --from=builder_server /app/node_modules ./node_modules
 
 EXPOSE 5000
 WORKDIR /app/server
+ENV NODE_OPTIONS=--max_old_space_size=2048
 CMD ["node", "dist/index.js", "start"]
 
 
