@@ -320,6 +320,11 @@ export const primitivesV3 = {
       .iso8601Date()
       .describe("Date de la reconnaissance travailleur handicapé")
       .openapi({ example: "2010-10-28T00:00:00.000Z" }),
+    telephone: z
+      .string()
+      .regex(/^([+])?(\d{7,12})$/)
+      .describe("Téléphone de l'apprenant")
+      .openapi({ example: "+33908070605" }),
   },
   responsable: {
     email: z
