@@ -3164,7 +3164,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 
 exports[`validation-schema should create validation schema for effectifsQueue: effectifsQueue 1`] = `
 {
-  "additionalProperties": false,
+  "additionalProperties": true,
   "bsonType": "object",
   "properties": {
     "_id": {
