@@ -160,4 +160,4 @@ export const zEffectifQueue = z.object({
 
 export type IEffectifQueue = z.output<typeof zEffectifQueue>;
 
-export default { zod: zEffectifQueue, indexes, collectionName };
+export default { zod: zEffectifQueue.passthrough(), indexes, collectionName };
