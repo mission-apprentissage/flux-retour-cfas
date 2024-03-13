@@ -53,7 +53,7 @@
     "express-list-endpoints": "^6.0.0",
     "fast-xml-parser": "^4.3.4",
     "fs-extra": "10.1.0",
-    "job-processor": "^1.4.7",
+    "job-processor": "^1.4.10",
     "joi": "^17.12.1",
     "joi-password": "^4.2.0",
     "json2csv": "5.0.7",
