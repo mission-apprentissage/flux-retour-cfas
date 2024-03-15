@@ -67,6 +67,16 @@ export const ERPS = sortAlphabeticallyBy("name", [
     name: "Formasup HDF",
     apiV3: true,
   },
+  {
+    id: "ammon",
+    name: "Ammon",
+    apiV3: true,
+  },
+  {
+    id: "formasup-paca",
+    name: "Formasup PACA",
+    apiV3: true,
+  },
 ] satisfies ERP[]);
 
 export const ERPS_BY_ID = ERPS.reduce(
