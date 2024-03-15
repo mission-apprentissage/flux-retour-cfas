@@ -138,13 +138,15 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           >
             <TabList>
               <Tab fontWeight="bold">Organismes fiables ({organismesFiables.length})</Tab>
-              <Tab fontWeight="bold">
-                <HStack>
-                  <i className="ri-alarm-warning-fill"></i>
-                  <Text>OFA : corrections attendues ({organismesACompleter.length})</Text>
-                </HStack>
-              </Tab>
-              {organisationType === "ADMINISTRATEUR" && (
+              {organismesACompleter.length !== 0 && (
+                <Tab fontWeight="bold">
+                  <HStack>
+                    <i className="ri-alarm-warning-fill"></i>
+                    <Text>OFA : corrections attendues ({organismesACompleter.length})</Text>
+                  </HStack>
+                </Tab>
+              )}
+              {organisationType === "ADMINISTRATEUR" && organismesNonRetenus.length !== 0 && (
                 <Tab fontWeight="bold">
                   <HStack>
                     <i className="ri-close-circle-fill"></i>
@@ -157,10 +159,12 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               <TabPanel>
                 <OrganismesFiablesPanelContent organismes={organismesFiables} />
               </TabPanel>
-              <TabPanel>
-                <OrganismesACompleterPanelContent organismes={organismesACompleter} />
-              </TabPanel>
-              {organisationType === "ADMINISTRATEUR" && (
+              {organismesACompleter.length !== 0 && (
+                <TabPanel>
+                  <OrganismesACompleterPanelContent organismes={organismesACompleter} />
+                </TabPanel>
+              )}
+              {organisationType === "ADMINISTRATEUR" && organismesNonRetenus.length !== 0 && (
                 <TabPanel>
                   <OrganismesNonRetenusPanelContent organismes={organismesNonRetenus} />
                 </TabPanel>
