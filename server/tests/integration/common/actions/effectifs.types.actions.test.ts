@@ -190,7 +190,7 @@ describe("hydrateEffectifsComputedTypes", () => {
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
   });
 
-  it("doit correctement gérer plusieurs contrats avec rupture de moins de moins de 180 jours", async () => {
+  it("doit correctement gérer plusieurs contrats avec rupture de moins de 180 jours", async () => {
     const ruptureFirstContratDate = new Date(evaluationDate.getTime());
     ruptureFirstContratDate.setDate(ruptureFirstContratDate.getDate() - 250);
 
@@ -349,5 +349,153 @@ describe("hydrateEffectifsComputedTypes", () => {
       { mois: "06", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "07", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
     ]);
+  });
+
+  it("doit correctement gérer un statut à partir de l'historique_statut", async () => {
+    const effectif = createSampleEffectif({
+      apprenant: {
+        historique_statut: [
+          {
+            valeur_statut: 3,
+            date_statut: new Date("2021-09-06T00:00:00.000Z"),
+            date_reception: new Date("2022-07-06T22:00:22.548Z"),
+          },
+          {
+            valeur_statut: 2,
+            date_statut: new Date("2022-07-06T15:26:00.000Z"),
+            date_reception: new Date("2022-07-12T22:00:17.906Z"),
+          },
+          {
+            valeur_statut: 3,
+            date_statut: new Date("2022-10-29T00:00:00.000Z"),
+            date_reception: new Date("2022-10-29T22:00:38.848Z"),
+          },
+          {
+            valeur_statut: 3,
+            date_statut: new Date("2023-01-05T00:00:00.000Z"),
+            date_reception: new Date("2023-01-02T22:00:18.565Z"),
+          },
+        ],
+      },
+      organisme: sampleOrganisme,
+      contrats: [],
+      formation: {
+        ...createRandomFormation("2021-2023"),
+        periode: [2021, 2023],
+        date_inscription: null,
+        date_entree: null,
+        date_fin: null,
+      },
+    });
+
+    const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
+    await hydrateEffectifsComputedTypes(new Date(2023, 6, 1));
+
+    const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
+
+    expect(updatedEffectif?._computed?.statut?.en_cours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.APPRENTI);
+
+    expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+    expect(updatedEffectif?._computed?.statut?.historique).toEqual([
+      { mois: "09", annee: "2021", valeur: "APPRENTI" },
+      { mois: "10", annee: "2021", valeur: "APPRENTI" },
+      { mois: "11", annee: "2021", valeur: "APPRENTI" },
+      { mois: "12", annee: "2021", valeur: "APPRENTI" },
+      { mois: "01", annee: "2022", valeur: "APPRENTI" },
+      { mois: "02", annee: "2022", valeur: "APPRENTI" },
+      { mois: "03", annee: "2022", valeur: "APPRENTI" },
+      { mois: "04", annee: "2022", valeur: "APPRENTI" },
+      { mois: "05", annee: "2022", valeur: "APPRENTI" },
+      { mois: "06", annee: "2022", valeur: "APPRENTI" },
+      { mois: "07", annee: "2022", valeur: "INSCRIT" },
+      { mois: "08", annee: "2022", valeur: "INSCRIT" },
+      { mois: "09", annee: "2022", valeur: "INSCRIT" },
+      { mois: "10", annee: "2022", valeur: "APPRENTI" },
+      { mois: "11", annee: "2022", valeur: "APPRENTI" },
+      { mois: "12", annee: "2022", valeur: "APPRENTI" },
+      { mois: "01", annee: "2023", valeur: "APPRENTI" },
+      { mois: "02", annee: "2023", valeur: "APPRENTI" },
+      { mois: "03", annee: "2023", valeur: "APPRENTI" },
+      { mois: "04", annee: "2023", valeur: "APPRENTI" },
+      { mois: "05", annee: "2023", valeur: "APPRENTI" },
+      { mois: "06", annee: "2023", valeur: "APPRENTI" },
+      { mois: "07", annee: "2023", valeur: "APPRENTI" },
+      { mois: "08", annee: "2023", valeur: "APPRENTI" },
+      { mois: "09", annee: "2023", valeur: "APPRENTI" },
+      { mois: "10", annee: "2023", valeur: "APPRENTI" },
+      { mois: "11", annee: "2023", valeur: "APPRENTI" },
+      { mois: "12", annee: "2023", valeur: "APPRENTI" },
+    ]);
+  });
+
+  it("ne doit pas gérer de statut sans l'historique_statut", async () => {
+    const effectif = createSampleEffectif({
+      apprenant: {
+        historique_statut: [],
+      },
+      organisme: sampleOrganisme,
+      contrats: [],
+      formation: {
+        ...createRandomFormation("2021-2023"),
+        periode: [2021, 2023],
+        date_inscription: null,
+        date_entree: null,
+        date_fin: null,
+      },
+    });
+
+    const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
+    await hydrateEffectifsComputedTypes(new Date(2023, 6, 1));
+
+    const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
+
+    expect(updatedEffectif?._computed?.statut).toBeUndefined();
+  });
+
+  it("ne doit pas gérer de statut sans periode de formation", async () => {
+    const effectif = createSampleEffectif({
+      apprenant: {
+        historique_statut: [
+          {
+            valeur_statut: 3,
+            date_statut: new Date("2021-09-06T00:00:00.000Z"),
+            date_reception: new Date("2022-07-06T22:00:22.548Z"),
+          },
+          {
+            valeur_statut: 2,
+            date_statut: new Date("2022-07-06T15:26:00.000Z"),
+            date_reception: new Date("2022-07-12T22:00:17.906Z"),
+          },
+          {
+            valeur_statut: 3,
+            date_statut: new Date("2022-10-29T00:00:00.000Z"),
+            date_reception: new Date("2022-10-29T22:00:38.848Z"),
+          },
+          {
+            valeur_statut: 3,
+            date_statut: new Date("2023-01-05T00:00:00.000Z"),
+            date_reception: new Date("2023-01-02T22:00:18.565Z"),
+          },
+        ],
+      },
+      organisme: sampleOrganisme,
+      contrats: [],
+      formation: {
+        ...createRandomFormation("2021-2023"),
+        periode: null,
+        date_inscription: null,
+        date_entree: null,
+        date_fin: null,
+      },
+    });
+
+    const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
+    await hydrateEffectifsComputedTypes(new Date(2023, 6, 1));
+
+    const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
+
+    expect(updatedEffectif?._computed?.statut).toBeUndefined();
   });
 });

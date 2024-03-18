@@ -197,7 +197,7 @@ export async function setupJobProcessor() {
           return hydrateEffectifsComputed();
         },
       },
-      "hydrate:effectifs-computed-types": {
+      "tmp:effectifs:update_computed_statut": {
         handler: async () => {
           return hydrateEffectifsComputedTypes();
         },
