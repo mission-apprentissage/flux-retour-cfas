@@ -194,5 +194,6 @@ export const zEffectif = z.object({
 
 export type IEffectif = z.output<typeof zEffectif>;
 export type IEffectifComputedStatut = z.output<typeof zEffectifComputedStatut>;
+export type IEffectifApprenant = z.infer<typeof zApprenant>;
 
 export default { zod: zEffectif, indexes, collectionName };
