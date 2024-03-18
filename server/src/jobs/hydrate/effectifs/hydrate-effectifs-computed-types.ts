@@ -9,16 +9,30 @@ import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
 
 export async function hydrateEffectifsComputedTypes(evaluationDate = new Date()) {
-  const effectifsToUpdate = await effectifsDb().find().toArray();
   let nbEffectifsMisAJour = 0;
+  let nbEffectifsNonMisAJour = 0;
 
-  for (const effectif of effectifsToUpdate) {
-    const isSuccess = await updateEffectifStatut(effectif, evaluationDate);
-    if (isSuccess) nbEffectifsMisAJour++;
+  try {
+    const cursor = effectifsDb().find();
+
+    while (await cursor.hasNext()) {
+      const effectif = await cursor.next();
+
+      if (effectif) {
+        const isSuccess = await updateEffectifStatut(effectif, evaluationDate);
+        if (isSuccess) {
+          nbEffectifsMisAJour++;
+        } else {
+          nbEffectifsNonMisAJour++;
+        }
+      }
+    }
+
+    logger.info(`${nbEffectifsMisAJour} effectifs mis à jour, ${nbEffectifsNonMisAJour} effectifs non mis à jour.`);
+  } catch (err) {
+    logger.error(`Échec de la mise à jour des effectifs: ${err}`);
+    captureException(err);
   }
-
-  const nbEffectifsNonMisAJour = effectifsToUpdate.length - nbEffectifsMisAJour;
-  logger.info(`${nbEffectifsMisAJour} effectifs mis à jour, ${nbEffectifsNonMisAJour} effectifs non mis à jour.`);
 }
 
 async function updateEffectifStatut(effectif: IEffectif, evaluationDate: Date): Promise<boolean> {
