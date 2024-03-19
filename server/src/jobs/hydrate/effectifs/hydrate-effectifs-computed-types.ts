@@ -65,7 +65,11 @@ function createUpdateObject(effectif: IEffectif, evaluationDate: Date): UpdateFi
     : determineNewStatutFromHistorique(effectif.apprenant.historique_statut, effectif.formation?.periode);
   const historiqueStatut = effectif.formation?.date_entree
     ? genererHistoriqueStatut(effectif, evaluationDate)
-    : genererHistoriqueStatutFromApprenant(effectif.apprenant.historique_statut, effectif.formation?.periode);
+    : genererHistoriqueStatutFromApprenant(
+        effectif.apprenant.historique_statut,
+        effectif.formation?.periode,
+        evaluationDate
+      );
 
   return {
     $set: {
@@ -123,7 +127,6 @@ export function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): 
   const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000; // 90 jours en millisecondes
   const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en millisecondes
 
-  // Si la date de fin de la formation est passée et que le diplôme a été obtenu
   if (
     effectif.formation?.date_fin &&
     new Date(effectif.formation.date_fin) < currentDate &&
@@ -132,15 +135,11 @@ export function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): 
     return STATUT_APPRENANT.DIPLOME;
   }
 
-  // Si dans les 90 jours suivant la date d'entrée, considérer comme INSCRIT
-  const dateEntree = effectif.formation?.date_entree ? new Date(effectif.formation.date_entree) : null;
-  if (dateEntree && currentDate.getTime() - dateEntree.getTime() <= ninetyDaysInMs) {
-    return STATUT_APPRENANT.INSCRIT;
-  }
-
-  // Vérifie les conditions des contrats pour APPRENTI et RUPTURANT
   let hasCurrentContract = false;
   let hasRecentRupture = false;
+  let ruptureDateAfterEntry = false;
+
+  const dateEntree = effectif.formation?.date_entree ? new Date(effectif.formation.date_entree) : null;
 
   effectif.contrats?.forEach((contract) => {
     const dateDebut = new Date(contract.date_debut);
@@ -151,20 +150,34 @@ export function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): 
       hasCurrentContract = true;
     }
 
-    if (dateRupture && currentDate.getTime() - dateRupture.getTime() <= oneEightyDaysInMs) {
+    if (dateEntree && dateRupture && currentDate.getTime() - dateRupture.getTime() <= oneEightyDaysInMs) {
       hasRecentRupture = true;
+      ruptureDateAfterEntry = dateRupture > dateEntree;
     }
   });
 
   if (hasCurrentContract) return STATUT_APPRENANT.APPRENTI;
-  if (hasRecentRupture) return STATUT_APPRENANT.RUPTURANT;
 
-  // Si la date d'entrée est dépassée de plus de 90 jours et qu'aucune autre condition n'est remplie, considérer comme ABANDON
+  if (
+    hasRecentRupture &&
+    ruptureDateAfterEntry &&
+    dateEntree &&
+    currentDate.getTime() - dateEntree.getTime() <= ninetyDaysInMs
+  ) {
+    return STATUT_APPRENANT.INSCRIT;
+  } else if (hasRecentRupture) {
+    return STATUT_APPRENANT.RUPTURANT;
+  }
+
+  if (dateEntree && currentDate.getTime() - dateEntree.getTime() <= ninetyDaysInMs) {
+    return STATUT_APPRENANT.INSCRIT;
+  }
+
   if (dateEntree && currentDate.getTime() - dateEntree.getTime() > ninetyDaysInMs) {
     return STATUT_APPRENANT.ABANDON;
   }
 
-  throw Boom.internal("Aucun statut trouvé pour l'effectif", { id: effectif._id });
+  throw Boom.internal("No status found for the learner", { id: effectif._id });
 }
 
 export function determineNewStatutFromHistorique(
@@ -181,7 +194,7 @@ export function determineNewStatutFromHistorique(
 
   const filteredStatut = historiqueStatut.filter((statut) => {
     const statutYear = new Date(statut.date_statut).getFullYear();
-    return statutYear >= formationPeriode[0] && statutYear <= formationPeriode[1];
+    return statutYear <= formationPeriode[1];
   });
 
   if (filteredStatut.length === 0) {
@@ -197,7 +210,8 @@ export function determineNewStatutFromHistorique(
 
 function genererHistoriqueStatutFromApprenant(
   historiqueStatut: IEffectifApprenant["historique_statut"],
-  formationPeriode: number[] | null | undefined
+  formationPeriode: number[] | null | undefined,
+  endDate: Date
 ): IEffectifComputedStatut["historique"] {
   if (!formationPeriode) {
     console.error("Formation period is undefined or null");
@@ -209,7 +223,6 @@ function genererHistoriqueStatutFromApprenant(
 
   const startDate =
     sortedStatut.length > 0 ? new Date(sortedStatut[0].date_statut) : new Date(formationPeriode[0], 0, 1);
-  const endDate = new Date(formationPeriode[1], 11, 31);
 
   let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
   const historique: IEffectifComputedStatut["historique"] = [];

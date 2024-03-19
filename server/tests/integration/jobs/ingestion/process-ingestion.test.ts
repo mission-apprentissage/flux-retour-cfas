@@ -608,12 +608,12 @@ describe("Processus d'ingestion", () => {
                 {
                   annee: "2021",
                   mois: "09",
-                  valeur: "INSCRIT",
+                  valeur: "APPRENTI",
                 },
                 {
                   annee: "2021",
                   mois: "10",
-                  valeur: "INSCRIT",
+                  valeur: "APPRENTI",
                 },
                 {
                   annee: "2021",
