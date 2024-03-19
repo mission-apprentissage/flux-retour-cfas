@@ -124,8 +124,8 @@ export function genererHistoriqueStatut(effectif: IEffectif, endDate: Date) {
 
 export function determineNewStatut(effectif: IEffectif, evaluationDate?: Date): StatutApprenant {
   const currentDate = evaluationDate || new Date();
-  const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000; // 90 jours en milliseconds
-  const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en milliseconds
+  const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000; // 90 jours en millisecondes
+  const oneEightyDaysInMs = 180 * 24 * 60 * 60 * 1000; // 180 jours en millisecondes
 
   if (
     effectif.formation?.date_fin &&
