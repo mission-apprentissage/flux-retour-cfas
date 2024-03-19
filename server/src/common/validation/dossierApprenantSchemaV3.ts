@@ -36,7 +36,7 @@ export const dossierApprenantSchemaV3Base = () =>
     // OPTIONAL FIELDS
     ine_apprenant: primitivesV1.apprenant.ine.optional(),
     email_contact: primitivesV1.apprenant.email.optional(),
-    tel_apprenant: primitivesV1.apprenant.telephone.nullish(),
+    tel_apprenant: primitivesV3.apprenant.telephone.nullish(),
     // The following field is missing in V3
     // siret_etablissement: primitivesV1.etablissement_responsable.siret.optional(),
     // code_commune_insee_apprenant: primitivesV1.apprenant.code_commune_insee.optional(),
