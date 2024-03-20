@@ -60,7 +60,9 @@ const EffectifDoublonDeleteAllAlertDialog = ({
             <Button
               colorScheme="red"
               onClick={async () => {
-                trackPlausibleEvent("suppression_doublons_effectifs_en_lot");
+                trackPlausibleEvent("suppression_doublons_effectifs_en_lot", undefined, {
+                  nb_doublons_supprimes_lot: dusplicateCount,
+                });
                 await _delete(`/api/v1/organismes/${organismeId}/duplicates`);
                 queryClient.invalidateQueries(["duplicates-effectifs"]);
                 onClose();
