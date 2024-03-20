@@ -211,18 +211,20 @@ export function determineNewStatutFromHistorique(
 function genererHistoriqueStatutFromApprenant(
   historiqueStatut: IEffectifApprenant["historique_statut"],
   formationPeriode: number[] | null | undefined,
-  endDate: Date
+  evaluationEndDate: Date
 ): IEffectifComputedStatut["historique"] {
   if (!formationPeriode) {
     console.error("Formation period is undefined or null");
     return [];
   }
+  const periodeEndDate = new Date(formationPeriode[1], 11, 31);
   const sortedStatut = historiqueStatut.sort(
     (a, b) => new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime()
   );
 
   const startDate =
     sortedStatut.length > 0 ? new Date(sortedStatut[0].date_statut) : new Date(formationPeriode[0], 0, 1);
+  const endDate = periodeEndDate < evaluationEndDate ? periodeEndDate : evaluationEndDate;
 
   let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
   const historique: IEffectifComputedStatut["historique"] = [];
