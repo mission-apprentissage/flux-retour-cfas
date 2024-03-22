@@ -519,6 +519,7 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
 export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]): Promise<IOrganisme> {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
+    logger.error({ module: "transmission", api_key, queryString }, "Cannot find organisme from api_key");
     throw Boom.forbidden("La clé API n'est pas valide", { queryString });
   }
   return organisme;
