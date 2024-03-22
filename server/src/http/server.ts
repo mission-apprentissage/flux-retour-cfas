@@ -23,7 +23,7 @@ import {
   registerUnknownNetwork,
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
-import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
+import { getEffectifForm, updateEffectifFromForm, createEffectifFromForm } from "@/common/actions/effectifs.actions";
 import {
   deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
@@ -104,6 +104,7 @@ import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema }
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "@/common/validation/dossierApprenantSchemaV3";
+import { effectifCreationSchema, IEffectifCreationSchema } from "@/common/validation/effectifsCreationSchema";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
@@ -637,6 +638,17 @@ function setupRoutes(app: Application) {
           )
       )
       .use("/transmission", transmissionRoutes())
+      .post(
+        "/effectif",
+        requireOrganismePermission("manageEffectifs"),
+        returnResult(async (req, res) => {
+          const data: IEffectifCreationSchema = await validateFullZodObjectSchema(
+            req.body,
+            effectifCreationSchema.shape
+          );
+          return await createEffectifFromForm(data, res.locals.organismeId);
+        })
+      )
   );
 
   /********************************

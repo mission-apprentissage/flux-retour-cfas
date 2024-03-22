@@ -3,15 +3,17 @@ import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "loda
 import { ObjectId } from "mongodb";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import { cyrb53Hash, normalize } from "shared/utils/crypt";
 import type { Paths } from "type-fest";
 
 import { effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
+import { IEffectifCreationSchema } from "../validation/effectifsCreationSchema";
 
 import { legacySchema } from "./effectif.legacy_schema";
-
+import { getOrganismeById } from "./organismes/organismes.actions";
 /**
  * Méthode de build d'un effectif
  *
@@ -358,3 +360,58 @@ const flattenKeys = (obj: any, path: any = []) =>
   !isObject(obj)
     ? { [path.join(".")]: obj }
     : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
+
+export const createEffectifFromForm = async (data: IEffectifCreationSchema, organismeId: string) => {
+  const id_erp_apprenant = cyrb53Hash(
+    normalize(data.apprenant.prenom || "").trim() +
+      normalize(data.apprenant.nom || "").trim() +
+      (data.apprenant.date_de_naissance?.toString() || "").trim()
+  );
+
+  const organismeLieuId = new ObjectId(data.organisme.organisme_lieu_id);
+  const organismeFormationId = new ObjectId(data.organisme.organisme_formateur_id);
+  const organismeResponsableId = new ObjectId(data.organisme.organisme_responsable_id);
+
+  const organismeLieu = await getOrganismeById(organismeLieuId);
+
+  const newEffectif: IEffectif = {
+    _id: new ObjectId(),
+    source: "formulaire",
+    source_organisme_id: organismeId.toString(),
+    annee_scolaire: data.annee_scolaire,
+    validation_errors: [],
+    organisme_id: organismeLieuId,
+    organisme_responsable_id: organismeResponsableId,
+    organisme_formateur_id: organismeFormationId,
+    id_erp_apprenant,
+    apprenant: {
+      ...data.apprenant,
+      historique_statut: [],
+    },
+    is_lock: {
+      apprenant: {},
+      formation: {},
+    },
+    formation: data.formation,
+    contrats: data.contrats,
+    created_at: new Date(),
+    updated_at: new Date(),
+    _computed: addEffectifComputedFields(organismeLieu),
+  };
+
+  // To be compliant to the unique indexes
+  const found = !!(await effectifsDb().findOne({
+    organisme_id: newEffectif.organisme_id,
+    annee_scolaire: newEffectif.annee_scolaire,
+    id_erp_apprenant: newEffectif.id_erp_apprenant,
+    "apprenant.nom": newEffectif.apprenant.nom,
+    "apprenant.prenom": newEffectif.apprenant.prenom,
+    "formation.cfd": newEffectif.formation?.cfd,
+    "formation.annee": newEffectif.formation?.annee,
+  }));
+  if (found) {
+    throw Boom.conflict("L'effectif existe déjà");
+  }
+  await effectifsDb().insertOne(newEffectif);
+  return;
+};
