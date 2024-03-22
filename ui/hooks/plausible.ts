@@ -14,7 +14,6 @@ export function usePlausibleTracking() {
       props?: Record<string, string | number | boolean>
     ) {
       const eventProps: Record<string, string | number | boolean | undefined> = {
-        userEmail: auth?.email,
         organisationType: auth?.organisation?.type,
         organisationNom: auth?.organisation ? getOrganisationLabel(auth.organisation) : undefined,
         ...(currentPath ? { currentPath: currentPath } : {}),
