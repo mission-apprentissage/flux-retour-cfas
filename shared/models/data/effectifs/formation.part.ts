@@ -24,7 +24,7 @@ export const zFormationEffectif = z.object({
   niveau_libelle: formationsProps.niveau_libelle.nullish(),
   annee: z.number({ description: "Numéro de l'année dans la formation (promo)" }).int().nullish(),
   // FIN champs collectés
-  date_obtention_diplome: z.date({ description: "Date d'obtention du diplôme" }).nullish(),
+  date_obtention_diplome: z.coerce.date({ description: "Date d'obtention du diplôme" }).nullish(),
   duree_formation_relle: z.number({ description: "Durée réelle de la formation en mois" }).int().nullish(),
   periode: z
     .array(z.number().int(), {
@@ -32,10 +32,10 @@ export const zFormationEffectif = z.object({
     })
     .nullish(),
   // V3 - REQUIRED FIELDS (optionel pour l'instant pour supporter V2)
-  date_inscription: z.date({ description: "Date d'inscription" }).nullish(),
+  date_inscription: z.coerce.date({ description: "Date d'inscription" }).nullish(),
   // V3 - OPTIONAL FIELDS
   obtention_diplome: z.boolean({ description: "Diplôme obtenu" }).nullish(), // vrai si date_obtention_diplome non null
-  date_exclusion: z.date({ description: "Date d'exclusion" }).nullish(),
+  date_exclusion: z.coerce.date({ description: "Date d'exclusion" }).nullish(),
   cause_exclusion: z.string({ description: "Cause de l'exclusion" }).nullish(),
   referent_handicap: z
     .object({
@@ -47,8 +47,8 @@ export const zFormationEffectif = z.object({
   formation_presentielle: z.boolean({ description: "Formation en présentiel" }).nullish(),
   duree_theorique: z.number({ description: "Durée théorique de la formation en année" }).int().nullish(), // legacy, should be empty soon
   duree_theorique_mois: z.number({ description: "Durée théorique de la formation en mois" }).int().nullish(),
-  date_fin: z.date({ description: "Date de fin de la formation" }).nullish(),
-  date_entree: z.date({ description: "Date d'entrée en formation" }).nullish(),
+  date_fin: z.coerce.date({ description: "Date de fin de la formation" }).nullish(),
+  date_entree: z.coerce.date({ description: "Date d'entrée en formation" }).nullish(),
 });
 
 export type IFormationEffectif = z.output<typeof zFormationEffectif>;
