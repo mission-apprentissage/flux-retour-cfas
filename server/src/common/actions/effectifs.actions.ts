@@ -1,6 +1,7 @@
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
+import { IEffectifCreationSchema } from "shared/models/apis/effectifsCreationSchema";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { cyrb53Hash, normalize } from "shared/utils/crypt";
@@ -10,7 +11,6 @@ import { effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
-import { IEffectifCreationSchema } from "../validation/effectifsCreationSchema";
 
 import { legacySchema } from "./effectif.legacy_schema";
 import { getOrganismeById } from "./organismes/organismes.actions";
