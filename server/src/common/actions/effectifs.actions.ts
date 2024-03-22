@@ -409,9 +409,9 @@ export const createEffectifFromForm = async (data: IEffectifCreationSchema, orga
     "formation.cfd": newEffectif.formation?.cfd,
     "formation.annee": newEffectif.formation?.annee,
   }));
-  // if (found) {
-  //   throw
-  // }
+  if (found) {
+    throw Boom.conflict("L'effectif existe déjà");
+  }
   await effectifsDb().insertOne(newEffectif);
   return;
 };
