@@ -5,7 +5,7 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisationCreate, IOrganisation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 
-import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
+import { addComputedFields } from "@/common/actions/effectifs.actions";
 
 import { id } from "./testUtils";
 
@@ -281,7 +281,7 @@ export const userOrganisme = organismesByLabel["OF cible"];
 export const commonEffectifsAttributes: Pick<IEffectif, "organisme_id" | "_computed"> = {
   organisme_id: userOrganisme._id,
 
-  _computed: addEffectifComputedFields(userOrganisme),
+  _computed: addComputedFields({ organisme: userOrganisme }),
 };
 
 type TestFunc<ExpectedResult> = (

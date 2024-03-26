@@ -254,7 +254,91 @@ describe("Processus d'ingestion", () => {
               uai: "0802004U",
               fiable: false,
             },
-            statut: null,
+            statut: {
+              en_cours: "APPRENTI",
+              historique: [
+                {
+                  annee: "2022",
+                  mois: "12",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "01",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "02",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "03",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "04",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "05",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "06",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "07",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "08",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "09",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "10",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "11",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2023",
+                  mois: "12",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2024",
+                  mois: "01",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2024",
+                  mois: "02",
+                  valeur: "APPRENTI",
+                },
+                {
+                  annee: "2024",
+                  mois: "03",
+                  valeur: "APPRENTI",
+                },
+              ],
+            },
           },
         });
       });
