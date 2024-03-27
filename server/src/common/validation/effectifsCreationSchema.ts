@@ -5,10 +5,12 @@ import { z } from "zod";
 
 import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
-export const effectifCreationSchema = z.object({
-  annee_scolaire: primitivesV1.formation.annee_scolaire,
+export const effectifCreationCoordonnesSchema = z.object({
   apprenant: zApprenant.omit({ historique_statut: true }),
-  contrats: z.array(zContrat),
+});
+
+export const effectifCreationFormationSchema = z.object({
+  annee_scolaire: primitivesV1.formation.annee_scolaire,
   formation: zFormationEffectif,
   organisme: z.object({
     organisme_responsable_id: z.string(),
@@ -18,4 +20,18 @@ export const effectifCreationSchema = z.object({
   }),
 });
 
+export const effectifCreationContratsSchema = z.object({
+  contrats: z.array(zContrat),
+});
+
+export const effectifCreationSchema = z.object({
+  ...effectifCreationCoordonnesSchema.shape,
+  ...effectifCreationFormationSchema.shape,
+  ...effectifCreationContratsSchema.shape,
+});
+
 export type IEffectifCreationSchema = z.output<typeof effectifCreationSchema>;
+
+export type IEffectifCreationContratsSchema = z.output<typeof effectifCreationContratsSchema>;
+export type IEffectifCreationFormationSchema = z.output<typeof effectifCreationFormationSchema>;
+export type IEffectifCreationCoordonnesSchema = z.output<typeof effectifCreationCoordonnesSchema>;

@@ -134,6 +134,7 @@ import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes"
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
+import manageUpdateEffectifs from "./routes/specific.routes/effectif.update.routes";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
@@ -762,6 +763,15 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         await effectifsDb().deleteOne({ _id: new ObjectId(req.params.id) });
       })
+    )
+    .use(
+      "/api/v3/effectif/:id",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      (req, res, next) => {
+        res.locals.effectifId = new ObjectId((req.params as any).id);
+        next();
+      },
+      manageUpdateEffectifs()
     );
 
   /********************************
