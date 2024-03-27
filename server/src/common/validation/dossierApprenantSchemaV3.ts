@@ -1,4 +1,3 @@
-import { NIR_LOOSE_REGEX } from "shared";
 import { z } from "zod";
 
 import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
@@ -128,10 +127,8 @@ export const dossierApprenantSchemaV3Input = () => {
           .preprocess(
             (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
             z
-              .string()
-              .trim()
+              .any()
               // On indique juste "13 chiffres attendus", car ça ne devrait pas être 15 (on répare silencieusement quand même à la ligne suivante)
-              .regex(NIR_LOOSE_REGEX, "NIR invalide (13 chiffres attendus)")
               .describe("NIR de l'apprenant")
               .openapi({
                 example: "1234567890123",
