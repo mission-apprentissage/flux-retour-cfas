@@ -2,6 +2,8 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
+import { effectifCreationSchema } from "../apis/effectifsCreationSchema";
+
 export const collectionName = "usersMigration";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
@@ -65,6 +67,7 @@ export const zUsersMigration = z.object({
     )
     .optional(),
   unsubscribe: z.boolean().optional().describe("unsubscribe email"),
+  draft_effectif_form: effectifCreationSchema.deepPartial().nullish(),
 });
 
 export type IUsersMigration = z.output<typeof zUsersMigration>;

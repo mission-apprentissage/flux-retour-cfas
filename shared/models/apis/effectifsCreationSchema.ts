@@ -1,9 +1,9 @@
+import { z } from "zod";
+
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
 import { zContrat } from "shared/models/data/effectifs/contrat.part";
 import { zFormationEffectif } from "shared/models/data/effectifs/formation.part";
-import { z } from "zod";
-
-import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
+import { primitivesV1, primitivesV3 } from "shared/models/data/zodPrimitives";
 
 export const effectifCreationSchema = z.object({
   annee_scolaire: primitivesV1.formation.annee_scolaire,

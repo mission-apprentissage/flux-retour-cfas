@@ -10,6 +10,8 @@ import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
+import { effectifCreationSchema, IEffectifCreationSchema } from "shared/models/apis/effectifsCreationSchema";
+import { extensions, primitivesV1, primitivesV3 } from "shared/models/data/zodPrimitives";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -104,12 +106,10 @@ import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema }
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "@/common/validation/dossierApprenantSchemaV3";
-import { effectifCreationSchema, IEffectifCreationSchema } from "@/common/validation/effectifsCreationSchema";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
-import { extensions, primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
@@ -137,6 +137,7 @@ import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
+import userRoutes from "./routes/specific.routes/user.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
@@ -435,7 +436,8 @@ function setupRoutes(app: Application) {
           has_accept_cgu_version: req.params.version,
         });
       })
-    );
+    )
+    .use("/api/v1/user", userRoutes());
 
   /********************************
    * API pour un organisme   *
