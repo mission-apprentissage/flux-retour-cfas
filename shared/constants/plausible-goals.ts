@@ -52,6 +52,9 @@ export const plausibleGoals = [
   // - Page Effectifs Doublons
   "suppression_doublons_effectifs",
   "suppression_doublons_effectifs_en_lot",
+
+  // - Cerfa
+  "clic_redirection_cerfa",
 ] as const;
 
 export type PlausibleGoalType = (typeof plausibleGoals)[number];
