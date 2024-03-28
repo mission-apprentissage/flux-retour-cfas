@@ -1,5 +1,7 @@
 import { Box, HStack, Text, Image, Button, Link } from "@chakra-ui/react";
 
+import { Organisme } from "@/common/internal/Organisme";
+import { usePlausibleTracking } from "@/hooks/plausible";
 import Edition from "@/theme/components/icons/Edition";
 
 const style = {
@@ -32,7 +34,20 @@ const buttonStyle = {
   fontWeight: 500,
 };
 
-const CerfaLink = () => {
+interface CerfaLinkProps {
+  organisme: Organisme;
+}
+const CerfaLink = (props: CerfaLinkProps) => {
+  const externaLink = `https://contrat.apprentissage.beta.gouv.fr/cerfa?utm_source=tdb&utm_content=${props.organisme._id}`;
+  const { trackPlausibleEvent } = usePlausibleTracking();
+
+  const onLinkClicked = () => {
+    trackPlausibleEvent("clic_redirection_cerfa", undefined, {
+      uai: props.organisme?.uai?.toString() ?? "",
+      siret: props.organisme.siret,
+    });
+  };
+
   return (
     <Box style={style}>
       <HStack>
@@ -47,7 +62,7 @@ const CerfaLink = () => {
           <Text mb={"12px"} fontSize={14} style={contentStyle}>
             Remplissez vos prochains contrats CERFA : simple, rapide et sans erreur.
           </Text>
-          <Link href="https://contrat.apprentissage.beta.gouv.fr/" isExternal>
+          <Link href={externaLink} onClick={onLinkClicked} isExternal>
             <Button variant="primary" padding={"8px 24px"} mr={1}>
               <Edition></Edition>
               <Text ml={2} style={buttonStyle}>
