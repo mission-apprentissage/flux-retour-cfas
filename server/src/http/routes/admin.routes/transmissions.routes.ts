@@ -1,4 +1,5 @@
 import express from "express";
+import { extensions } from "shared/models/data/zodPrimitives";
 import { z } from "zod";
 
 import {
@@ -6,7 +7,6 @@ import {
   getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay,
 } from "@/common/actions/indicateurs/transmissions/transmission.action";
 import paginationSchema from "@/common/validation/paginationSchema";
-import { extensions } from "@/common/validation/utils/zodPrimitives";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 

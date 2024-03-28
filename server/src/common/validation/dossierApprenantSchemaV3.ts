@@ -1,7 +1,6 @@
 import { NIR_LOOSE_REGEX } from "shared";
+import { primitivesV1, primitivesV3 } from "shared/models/data/zodPrimitives";
 import { z } from "zod";
-
-import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
 export const stripModelAdditionalKeys = (validationSchema, data) => {
   const strippedData = Object.keys(validationSchema.shape).reduce((acc, curr) => {
