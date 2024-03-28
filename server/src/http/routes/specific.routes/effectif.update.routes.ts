@@ -1,8 +1,6 @@
 import Boom from "boom";
 import express from "express";
 import { ObjectId } from "mongodb";
-
-import { effectifsDb } from "@/common/model/collections";
 import {
   effectifCreationContratsSchema,
   effectifCreationFormationSchema,
@@ -10,7 +8,9 @@ import {
   IEffectifCreationContratsSchema,
   IEffectifCreationFormationSchema,
   IEffectifCreationCoordonnesSchema,
-} from "@/common/validation/effectifsCreationSchema";
+} from "shared/models/apis/effectifsCreationSchema";
+
+import { effectifsDb } from "@/common/model/collections";
 import { returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
