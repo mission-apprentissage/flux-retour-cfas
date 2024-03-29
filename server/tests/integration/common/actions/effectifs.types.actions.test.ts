@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns";
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
@@ -380,10 +381,10 @@ describe("hydrateEffectifsComputedTypes", () => {
     expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
     expect(updatedEffectif?._computed?.statut?.parcours).toEqual([
-      { valeur: "INSCRIT", date: new Date("2023-09-30T22:00:00.000Z") },
-      { valeur: "APPRENTI", date: new Date("2023-11-14T22:00:00.000Z") },
-      { valeur: "RUPTURANT", date: new Date("2024-10-23T22:00:00.000Z") },
-      { valeur: "APPRENTI", date: new Date("2024-11-02T22:00:00.000Z") },
+      { valeur: "INSCRIT", date: parseISO("2023-09-30T22:00:00.000Z") },
+      { valeur: "APPRENTI", date: parseISO("2023-11-14T22:00:00.000Z") },
+      { valeur: "RUPTURANT", date: parseISO("2024-10-23T22:00:00.000Z") },
+      { valeur: "APPRENTI", date: parseISO("2024-11-02T22:00:00.000Z") },
     ]);
   });
 
@@ -466,10 +467,10 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.parcours).toEqual([
-      { valeur: STATUT_APPRENANT.INSCRIT, date: new Date("2021-09-06T00:00:00.000Z") },
-      { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2021-10-06T00:00:00.000Z") },
-      { valeur: STATUT_APPRENANT.RUPTURANT, date: new Date("2022-07-06T15:26:00.000Z") },
-      { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2022-10-29T00:00:00.000Z") },
+      { valeur: STATUT_APPRENANT.INSCRIT, date: parseISO("2021-09-06T00:00:00.000Z") },
+      { valeur: STATUT_APPRENANT.APPRENTI, date: parseISO("2021-10-06T00:00:00.000Z") },
+      { valeur: STATUT_APPRENANT.RUPTURANT, date: parseISO("2022-07-06T15:26:00.000Z") },
+      { valeur: STATUT_APPRENANT.APPRENTI, date: parseISO("2022-10-29T00:00:00.000Z") },
     ]);
   });
 
