@@ -53,6 +53,9 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement gérer un début de formation sans contrat de plus de 90 jours", async () => {
@@ -75,6 +78,9 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement gérer un seul contrat sans rupture", async () => {
@@ -99,6 +105,9 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement gérer un seul contrat avec rupture de moins de 180 jours", async () => {
@@ -127,6 +136,9 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement gérer un seul contrat avec rupture de plus de 180 jours", async () => {
@@ -155,6 +167,9 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement gérer plusieurs contrats avec un contrat en cours", async () => {
@@ -187,6 +202,9 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement gérer plusieurs contrats avec rupture de moins de 180 jours", async () => {
@@ -223,6 +241,9 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement gérer plusieurs contrats avec rupture de moins de plus de 180 jours", async () => {
@@ -259,6 +280,9 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement gérer le statut de 'Diplômé'", async () => {
@@ -287,8 +311,12 @@ describe("hydrateEffectifsComputedTypes", () => {
 
     expect(updatedEffectif?._computed?.statut?.en_cours).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.DIPLOME);
+
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
     expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
   });
 
   it("doit correctement générer l'historique du statut de l'apprenant", async () => {
@@ -348,6 +376,15 @@ describe("hydrateEffectifsComputedTypes", () => {
       { mois: "06", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "07", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
     ]);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours?.length).toBeGreaterThan(0);
+    expect(updatedEffectif?._computed?.statut?.parcours).toEqual([
+      { valeur: "INSCRIT", date: new Date("2023-09-30T22:00:00.000Z") },
+      { valeur: "APPRENTI", date: new Date("2023-11-14T22:00:00.000Z") },
+      { valeur: "RUPTURANT", date: new Date("2024-10-23T22:00:00.000Z") },
+      { valeur: "APPRENTI", date: new Date("2024-11-02T22:00:00.000Z") },
+    ]);
   });
 
   it("doit correctement gérer un statut à partir de l'historique_statut", async () => {
@@ -355,8 +392,13 @@ describe("hydrateEffectifsComputedTypes", () => {
       apprenant: {
         historique_statut: [
           {
-            valeur_statut: 3,
+            valeur_statut: 2,
             date_statut: new Date("2021-09-06T00:00:00.000Z"),
+            date_reception: new Date("2022-07-06T22:00:22.548Z"),
+          },
+          {
+            valeur_statut: 3,
+            date_statut: new Date("2021-10-06T00:00:00.000Z"),
             date_reception: new Date("2022-07-06T22:00:22.548Z"),
           },
           {
@@ -396,9 +438,8 @@ describe("hydrateEffectifsComputedTypes", () => {
     expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.APPRENTI);
 
     expect(updatedEffectif?._computed?.statut?.historique).toBeDefined();
-    expect(updatedEffectif?._computed?.statut?.historique?.length).toBeGreaterThan(0);
     expect(updatedEffectif?._computed?.statut?.historique).toEqual([
-      { mois: "09", annee: "2021", valeur: STATUT_APPRENANT.APPRENTI },
+      { mois: "09", annee: "2021", valeur: STATUT_APPRENANT.INSCRIT },
       { mois: "10", annee: "2021", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "11", annee: "2021", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "12", annee: "2021", valeur: STATUT_APPRENANT.APPRENTI },
@@ -408,9 +449,9 @@ describe("hydrateEffectifsComputedTypes", () => {
       { mois: "04", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "05", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "06", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-      { mois: "07", annee: "2022", valeur: STATUT_APPRENANT.INSCRIT },
-      { mois: "08", annee: "2022", valeur: STATUT_APPRENANT.INSCRIT },
-      { mois: "09", annee: "2022", valeur: STATUT_APPRENANT.INSCRIT },
+      { mois: "07", annee: "2022", valeur: STATUT_APPRENANT.RUPTURANT },
+      { mois: "08", annee: "2022", valeur: STATUT_APPRENANT.RUPTURANT },
+      { mois: "09", annee: "2022", valeur: STATUT_APPRENANT.RUPTURANT },
       { mois: "10", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "11", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "12", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
@@ -421,6 +462,14 @@ describe("hydrateEffectifsComputedTypes", () => {
       { mois: "05", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "06", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
       { mois: "07", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
+    ]);
+
+    expect(updatedEffectif?._computed?.statut?.parcours).toBeDefined();
+    expect(updatedEffectif?._computed?.statut?.parcours).toEqual([
+      { valeur: STATUT_APPRENANT.INSCRIT, date: new Date("2021-09-06T00:00:00.000Z") },
+      { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2021-10-06T00:00:00.000Z") },
+      { valeur: STATUT_APPRENANT.RUPTURANT, date: new Date("2022-07-06T15:26:00.000Z") },
+      { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2022-10-29T00:00:00.000Z") },
     ]);
   });
 
