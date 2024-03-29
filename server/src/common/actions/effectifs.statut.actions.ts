@@ -1,6 +1,6 @@
 import { captureException } from "@sentry/node";
 import Boom from "boom";
-import { endOfMonth } from "date-fns";
+import { addDays, endOfMonth } from "date-fns";
 import { MongoServerError, UpdateFilter } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
@@ -315,19 +315,19 @@ function generateParcoursFromDateEntree(
   if (lastParcoursValeur === STATUT_APPRENANT.INSCRIT && timeSinceEntry > ninetyDaysInMs) {
     parcours.push({
       valeur: STATUT_APPRENANT.ABANDON,
-      date: new Date(lastParcoursDate.getTime() + ninetyDaysInMs),
+      date: addDays(lastParcoursDate, 90),
     });
   } else if (lastParcoursValeur === STATUT_APPRENANT.RUPTURANT && timeSinceEntry > oneEightyDaysInMs) {
     parcours.push({
       valeur: STATUT_APPRENANT.ABANDON,
-      date: new Date(lastParcoursDate.getTime() + oneEightyDaysInMs),
+      date: addDays(lastParcoursDate, 180),
     });
   }
 
   if (effectif.formation?.date_fin && effectif.formation.obtention_diplome) {
     parcours.push({
       valeur: STATUT_APPRENANT.DIPLOME,
-      date: new Date(effectif.formation?.date_fin),
+      date: effectif.formation?.date_fin,
     });
   }
 
@@ -359,7 +359,7 @@ function generateParcoursFromHistorique(
 
     parcours.push({
       valeur,
-      date: new Date(historique.date_statut),
+      date: historique.date_statut,
     });
   });
 
