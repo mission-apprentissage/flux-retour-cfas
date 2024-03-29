@@ -287,7 +287,7 @@ function generateParcoursFromDateEntree(
 ): { valeur: StatutApprenant; date: Date }[] {
   let parcours: { valeur: StatutApprenant; date: Date }[] = [];
 
-  const entryDate = new Date(effectif.formation!.date_entree!);
+  const entryDate = effectif.formation!.date_entree!;
 
   parcours.push({
     valeur: STATUT_APPRENANT.INSCRIT,
@@ -295,8 +295,8 @@ function generateParcoursFromDateEntree(
   });
 
   effectif.contrats?.forEach((contract) => {
-    const contractStartDate = new Date(contract.date_debut);
-    const contractEndDate = contract.date_rupture ? new Date(contract.date_rupture) : null;
+    const contractStartDate = contract.date_debut;
+    const contractEndDate = contract.date_rupture ? contract.date_rupture : null;
 
     if (contractStartDate >= entryDate) {
       parcours.push({ valeur: STATUT_APPRENANT.APPRENTI, date: contractStartDate });
