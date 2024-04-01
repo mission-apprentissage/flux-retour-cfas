@@ -14,3 +14,4 @@ export * from "./sifa";
 export * from "./support";
 export * from "./territoires";
 export * from "./validations";
+export * from "./link";
