@@ -7491,7 +7491,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns-tz@npm:^2.0.0":
+"date-fns-tz@npm:^2.0.1":
   version: 2.0.1
   resolution: "date-fns-tz@npm:2.0.1"
   peerDependencies:
@@ -17854,7 +17854,7 @@ __metadata:
     "@asteasolutions/zod-to-openapi": ^6.4.0
     bson: ^5.5.1
     date-fns: ^2.30.0
-    date-fns-tz: ^2.0.0
+    date-fns-tz: ^2.0.1
     lodash-es: ^4.17.21
     luhn: ^2.4.1
     mongodb: ^5.9.2
