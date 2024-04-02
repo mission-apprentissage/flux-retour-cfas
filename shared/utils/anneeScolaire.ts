@@ -1,4 +1,5 @@
 import { endOfYear, subYears } from "date-fns";
+import { zonedTimeToUtc } from "date-fns-tz";
 
 const AUGUST_MONTH_INDEX = 7;
 
