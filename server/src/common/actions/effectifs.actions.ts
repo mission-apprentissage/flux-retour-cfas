@@ -13,7 +13,9 @@ import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.
 import { stripEmptyFields } from "../utils/miscUtils";
 
 import { legacySchema } from "./effectif.legacy_schema";
+import { createComputedStatutObject } from "./effectifs.statut.actions";
 import { getOrganismeById } from "./organismes/organismes.actions";
+
 /**
  * Méthode de build d'un effectif
  *
@@ -124,19 +126,35 @@ export const lockEffectif = async (effectif: IEffectif) => {
   return updated.value;
 };
 
-export const addEffectifComputedFields = (organisme: IOrganisme): IEffectif["_computed"] => {
-  return {
-    organisme: {
-      ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
-      ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
-      ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
-      ...(organisme.adresse?.bassinEmploi ? { bassinEmploi: organisme.adresse.bassinEmploi } : {}),
-      ...(organisme.uai ? { uai: organisme.uai } : {}),
-      ...(organisme.siret ? { siret: organisme.siret } : {}),
-      ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
-      fiable: organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme,
-    },
-  };
+export const addComputedFields = ({
+  organisme,
+  effectif,
+}: {
+  organisme?: IOrganisme;
+  effectif?: IEffectif;
+}): Partial<IEffectif["_computed"]> => {
+  const computedFields: Partial<IEffectif["_computed"]> = {};
+
+  if (organisme) {
+    const { adresse, uai, siret, reseaux, fiabilisation_statut, ferme } = organisme;
+    computedFields.organisme = {
+      ...(adresse?.region && { region: adresse?.region }),
+      ...(adresse?.departement && { departement: adresse?.departement }),
+      ...(adresse?.academie && { academie: adresse?.academie }),
+      ...(adresse?.bassinEmploi && { bassinEmploi: adresse?.bassinEmploi }),
+      ...(uai && { uai }),
+      ...(siret && { siret }),
+      ...(reseaux && { reseaux }),
+      fiable: fiabilisation_statut === "FIABLE" && !ferme,
+    };
+  }
+
+  if (effectif) {
+    const statut = createComputedStatutObject(effectif, new Date());
+    computedFields.statut = statut;
+  }
+
+  return computedFields;
 };
 
 export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
@@ -396,8 +414,10 @@ export const createEffectifFromForm = async (data: IEffectifCreationSchema, orga
     contrats: data.contrats,
     created_at: new Date(),
     updated_at: new Date(),
-    _computed: addEffectifComputedFields(organismeLieu),
+    _computed: addComputedFields({ organisme: organismeLieu }),
   };
+
+  // TODO : Add status effectif computed
 
   // To be compliant to the unique indexes
   const found = !!(await effectifsDb().findOne({

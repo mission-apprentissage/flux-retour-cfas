@@ -7,7 +7,7 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { PartialDeep } from "type-fest";
 
-import { addEffectifComputedFields } from "@/common/actions/effectifs.actions";
+import { addComputedFields } from "@/common/actions/effectifs.actions";
 import { DossierApprenantSchemaV1V2ZodType } from "@/common/validation/dossierApprenantSchemaV1V2";
 
 import sampleEtablissements, { SampleEtablissement } from "./sampleEtablissements";
@@ -91,30 +91,37 @@ export const createSampleEffectif = ({
   const annee_scolaire = getRandomAnneeScolaire();
   const formation = createRandomFormation(annee_scolaire);
 
-  return merge(
-    {
-      apprenant: {
-        ine: getRandomIne(),
-        nom: faker.person.lastName().toUpperCase(),
-        prenom: faker.person.firstName(),
-        courriel: faker.internet.email(),
-        date_de_naissance: getRandomDateNaissance(),
-        historique_statut: [],
-      },
-      contrats: [],
-      formation: formation,
-      validation_errors: [],
-      created_at: new Date(),
-      updated_at: new Date(),
-      id_erp_apprenant: faker.string.uuid(),
-      source: faker.lorem.word(),
-      source_organisme_id: faker.string.uuid(),
-      annee_scolaire,
-      organisme_id: organisme?._id,
-      _computed: organisme ? addEffectifComputedFields(organisme as IOrganisme) : {},
+  let baseEffectif: PartialDeep<IEffectif> = {
+    apprenant: {
+      ine: getRandomIne(),
+      nom: faker.person.lastName().toUpperCase(),
+      prenom: faker.person.firstName(),
+      courriel: faker.internet.email(),
+      date_de_naissance: getRandomDateNaissance(),
+      historique_statut: [],
     },
-    params
-  ) as WithoutId<IEffectif>;
+    contrats: [],
+    formation: formation,
+    validation_errors: [],
+    created_at: new Date(),
+    updated_at: new Date(),
+    id_erp_apprenant: faker.string.uuid(),
+    source: faker.lorem.word(),
+    source_organisme_id: faker.string.uuid(),
+    annee_scolaire,
+    organisme_id: organisme?._id,
+  };
+
+  let computedFields = addComputedFields({
+    organisme: organisme as IOrganisme,
+    effectif: merge({}, baseEffectif, params) as IEffectif,
+  });
+
+  let fullEffectif = merge({}, baseEffectif, params, {
+    _computed: computedFields,
+  });
+
+  return fullEffectif as WithoutId<IEffectif>;
 };
 
 export const createRandomDossierApprenantApiInput = (

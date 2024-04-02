@@ -1,4 +1,5 @@
 import { addJob, initJobProcessor } from "job-processor";
+import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
@@ -134,6 +135,14 @@ export async function setupJobProcessor() {
               },
             },
 
+            "Mettre à jour les statuts d'effectifs le 1er de chaque mois à 00h45": {
+              cron_string: "45 0 1 * *",
+              handler: async () => {
+                await addJob({ name: "hydrate:effectifs:update_computed_statut", queued: true });
+                return 0;
+              },
+            },
+
             // TODO : Checker si coté métier l'archivage est toujours prévu ?
             // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
             //   cron_string: "45 12 1 * *",
@@ -250,6 +259,13 @@ export async function setupJobProcessor() {
       "hydrate:contratsDeca": {
         handler: async (job) => {
           return hydrateDeca(job.payload as any);
+        },
+      },
+      "hydrate:effectifs:update_computed_statut": {
+        handler: async () => {
+          return hydrateEffectifsComputedTypes({
+            query: { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } },
+          });
         },
       },
       "dev:generate-open-api": {

@@ -8,7 +8,7 @@ import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { NEVER, SafeParseReturnType, ZodIssueCode } from "zod";
 
-import { lockEffectif, addEffectifComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
+import { lockEffectif, addComputedFields, mergeEffectifWithDefaults } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
   mapEffectifQueueToEffectif,
@@ -37,8 +37,6 @@ import dossierApprenantSchemaV1V2, {
 import dossierApprenantSchemaV3, {
   DossierApprenantSchemaV3ZodType,
 } from "@/common/validation/dossierApprenantSchemaV3";
-
-import { determineNewStatut, genererHistoriqueStatut } from "../hydrate/effectifs/hydrate-effectifs-computed-types";
 
 const logger = parentLogger.child({
   module: "processor",
@@ -384,7 +382,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
             organisme_id: organismeLieu?._id,
             organisme_formateur_id: organismeFormateur?._id,
             organisme_responsable_id: organismeResponsable?._id,
-            _computed: addEffectifComputedFields(organismeLieu),
+            _computed: addComputedFields({ organisme: organismeLieu, effectif }),
           },
           organisme: organismeLieu,
         };
@@ -456,7 +454,7 @@ async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectif
           effectif: {
             ...effectif,
             organisme_id: organisme?._id,
-            _computed: addEffectifComputedFields(organisme),
+            _computed: addComputedFields({ organisme, effectif }),
           },
           organisme: organisme,
         };
@@ -485,7 +483,7 @@ async function transformEffectifQueueToEffectif(
  * Fonctionnement :
  *  - Le statut d'historique est construit grâce à une fonction dédiée.
  *  - On préfèrera toujours les valeurs non vides (null, undefined ou "") quelles que soient leur provenance.
- *  - On préfèrera toujours les tableaux de newObject aux tableaux de previousObject (pas de fusion de tableau)
+ *  - On préfèrera toujours les tableaux de newObject aux tablea  ux de previousObject (pas de fusion de tableau)
  */
 export function mergeEffectif(effectifDb: IEffectif, effectif: IEffectif): IEffectif {
   return {
@@ -515,13 +513,6 @@ const createOrUpdateEffectif = async (
     ...effectif,
     _computed: {
       ...effectif._computed,
-      statut:
-        effectif.formation && effectif.formation.date_entree
-          ? {
-              en_cours: determineNewStatut(effectif),
-              historique: genererHistoriqueStatut(effectif, new Date()),
-            }
-          : null,
     },
   };
   const itemProcessingInfos: ItemProcessingInfos = {};
