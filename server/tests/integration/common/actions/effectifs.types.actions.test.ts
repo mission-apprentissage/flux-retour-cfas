@@ -14,10 +14,10 @@ const TEST_SIREN = "190404921";
 const ANNEE_SCOLAIRE = "2023-2024";
 
 const formationDateEntree = new Date("2023-09-30T00:00:00.000Z");
-const formationDateFin = new Date("2026-07-28T00:00:00.000Z");
+const formationDateFin = new Date("2026-06-28T00:00:00.000Z");
 const formation = createRandomFormation(ANNEE_SCOLAIRE, formationDateEntree, formationDateFin);
 
-const evaluationDate = new Date(2025, 6, 1);
+const evaluationDate = new Date("2025-07-01T00:00:00.000Z");
 
 const sampleOrganismeId = new ObjectId(id(1));
 const sampleOrganisme: IOrganisme = {
@@ -222,12 +222,13 @@ describe("hydrateEffectifsComputedTypes", () => {
           { mois: "04", annee: "2025", valeur: "APPRENTI" },
           { mois: "05", annee: "2025", valeur: "APPRENTI" },
           { mois: "06", annee: "2025", valeur: "APPRENTI" },
+          { mois: "07", annee: "2025", valeur: "APPRENTI" },
         ],
         parcours: [
           { valeur: "INSCRIT", date: new Date("2023-09-30T00:00:00.000Z") },
           { valeur: "APPRENTI", date: new Date("2023-11-14T00:00:00.000Z") },
-          { valeur: "RUPTURANT", date: new Date("2024-10-23T00:00:00.000Z") },
-          { valeur: "APPRENTI", date: new Date("2024-11-02T00:00:00.000Z") },
+          { valeur: "RUPTURANT", date: new Date("2024-10-24T00:00:00.000Z") },
+          { valeur: "APPRENTI", date: new Date("2024-11-03T00:00:00.000Z") },
         ],
       });
     });
