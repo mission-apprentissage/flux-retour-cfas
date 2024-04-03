@@ -1,4 +1,3 @@
-import { parseISO } from "date-fns";
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
@@ -309,10 +308,10 @@ describe("hydrateEffectifsComputedTypes", () => {
           { mois: "07", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
         ],
         parcours: [
-          { valeur: STATUT_APPRENANT.INSCRIT, date: parseISO("2021-09-06T00:00:00.000Z") },
-          { valeur: STATUT_APPRENANT.APPRENTI, date: parseISO("2021-10-06T00:00:00.000Z") },
-          { valeur: STATUT_APPRENANT.RUPTURANT, date: parseISO("2022-07-06T15:26:00.000Z") },
-          { valeur: STATUT_APPRENANT.APPRENTI, date: parseISO("2022-10-29T00:00:00.000Z") },
+          { valeur: STATUT_APPRENANT.INSCRIT, date: new Date("2021-09-06T00:00:00.000Z") },
+          { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2021-10-06T00:00:00.000Z") },
+          { valeur: STATUT_APPRENANT.RUPTURANT, date: new Date("2022-07-06T15:26:00.000Z") },
+          { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2022-10-29T00:00:00.000Z") },
         ],
       });
     });
