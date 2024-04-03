@@ -82,7 +82,7 @@ const OrganismeDetail = ({ data }) => {
               <Text bgColor="galtDark" px={2}>
                 {value || "SIRET INCONNU"}
               </Text>
-              {value && <ExternalLinks search={value} siret={value} />}
+              {value && <ExternalLinks search={value} siret={value} isAdmin={true} />}
             </HStack>
           ),
         },
