@@ -139,8 +139,8 @@ describe("Processus d'ingestion", () => {
           statut_apprenant: 3,
           date_metier_mise_a_jour_statut: "2022-12-28T04:05:47.647Z",
           annee_formation: 0,
-          periode_formation: "2022-2024",
-          annee_scolaire: "2024-2025",
+          periode_formation: "2021-2023",
+          annee_scolaire: "2022-2023",
           id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
           tel_apprenant: "+33 534648662",
           code_commune_insee_apprenant: "05109",
@@ -206,7 +206,7 @@ describe("Processus d'ingestion", () => {
           formation: {
             cfd: "50033610",
             annee: 0,
-            periode: [2022, 2024],
+            periode: [2021, 2023],
             libelle_long: "TECHNICIEN D'ETUDES DU BATIMENT OPTION A : ETUDES ET ECONOMIE (BAC PRO)",
           },
           id_erp_apprenant: "9a890d67-e233-46d5-8611-06d6648e7611",
@@ -238,7 +238,7 @@ describe("Processus d'ingestion", () => {
           },
           validation_errors: [],
 
-          annee_scolaire: "2024-2025",
+          annee_scolaire: "2022-2023",
           // other added fields
           _id: expect.anything(),
           created_at: expect.any(Date),
@@ -322,19 +322,10 @@ describe("Processus d'ingestion", () => {
                   mois: "12",
                   valeur: "APPRENTI",
                 },
+              ],
+              parcours: [
                 {
-                  annee: "2024",
-                  mois: "01",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2024",
-                  mois: "02",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2024",
-                  mois: "03",
+                  date: new Date("2022-12-28T04:05:47.647Z"),
                   valeur: "APPRENTI",
                 },
               ],
@@ -739,111 +730,12 @@ describe("Processus d'ingestion", () => {
                   mois: "06",
                   valeur: "DIPLOME",
                 },
-                {
-                  annee: "2022",
-                  mois: "07",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2022",
-                  mois: "08",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2022",
-                  mois: "09",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2022",
-                  mois: "10",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2022",
-                  mois: "11",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2022",
-                  mois: "12",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "01",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "02",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "03",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "04",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "05",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "06",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "07",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "08",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "09",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "10",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "11",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2023",
-                  mois: "12",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2024",
-                  mois: "01",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2024",
-                  mois: "02",
-                  valeur: "DIPLOME",
-                },
-                {
-                  annee: "2024",
-                  mois: "03",
-                  valeur: "DIPLOME",
-                },
+              ],
+              parcours: [
+                { date: new Date("2021-09-01T00:00:00.000Z"), valeur: "INSCRIT" },
+                { date: new Date("2021-09-01T00:00:00.000Z"), valeur: "APPRENTI" },
+                { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "RUPTURANT" },
+                { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "DIPLOME" },
               ],
             },
           },
@@ -983,109 +875,14 @@ describe("Processus d'ingestion", () => {
                   mois: "06",
                   valeur: "ABANDON",
                 },
+              ],
+              parcours: [
                 {
-                  annee: "2022",
-                  mois: "07",
-                  valeur: "ABANDON",
+                  date: new Date("2021-09-01T00:00:00.000Z"),
+                  valeur: "INSCRIT",
                 },
                 {
-                  annee: "2022",
-                  mois: "08",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "09",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "10",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "11",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "12",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "01",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "02",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "03",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "04",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "05",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "06",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "07",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "08",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "09",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "10",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "11",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "12",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2024",
-                  mois: "01",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2024",
-                  mois: "02",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2024",
-                  mois: "03",
+                  date: new Date("2021-11-30T00:00:00.000Z"),
                   valeur: "ABANDON",
                 },
               ],
@@ -1302,109 +1099,14 @@ describe("Processus d'ingestion", () => {
                   mois: "06",
                   valeur: "ABANDON",
                 },
+              ],
+              parcours: [
                 {
-                  annee: "2022",
-                  mois: "07",
-                  valeur: "ABANDON",
+                  date: new Date("2021-09-01T00:00:00.000Z"),
+                  valeur: "INSCRIT",
                 },
                 {
-                  annee: "2022",
-                  mois: "08",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "09",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "10",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "11",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "12",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "01",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "02",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "03",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "04",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "05",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "06",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "07",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "08",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "09",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "10",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "11",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2023",
-                  mois: "12",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2024",
-                  mois: "01",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2024",
-                  mois: "02",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2024",
-                  mois: "03",
+                  date: new Date("2021-11-30T00:00:00.000Z"),
                   valeur: "ABANDON",
                 },
               ],
