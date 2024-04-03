@@ -229,10 +229,10 @@ describe("hydrateEffectifsComputedTypes", () => {
           { mois: "07", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
         ],
         parcours: [
-          { valeur: "INSCRIT", date: parseISO("2023-09-30T22:00:00.000Z") },
-          { valeur: "APPRENTI", date: parseISO("2023-11-14T22:00:00.000Z") },
-          { valeur: "RUPTURANT", date: parseISO("2024-10-23T22:00:00.000Z") },
-          { valeur: "APPRENTI", date: parseISO("2024-11-02T22:00:00.000Z") },
+          { valeur: "INSCRIT", date: new Date("2023-10-01T00:00:00.000Z") },
+          { valeur: "APPRENTI", date: new Date("2023-11-15T00:00:00.000Z") },
+          { valeur: "RUPTURANT", date: new Date("2024-10-24T00:00:00.000Z") },
+          { valeur: "APPRENTI", date: new Date("2024-11-03T00:00:00.000Z") },
         ],
       });
     });
