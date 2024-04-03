@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import { addDaysUTC } from "shared/utils";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { hydrateEffectifsComputedTypes } from "@/jobs/hydrate/effectifs/hydrate-effectifs-computed-types";
@@ -185,12 +186,12 @@ describe("hydrateEffectifsComputedTypes", () => {
         organisme: sampleOrganisme,
         contrats: [
           {
-            date_debut: new Date(formation.date_entree.getTime() + 45 * 24 * 60 * 60 * 1000),
+            date_debut: addDaysUTC(formation.date_entree, 45),
             date_fin: formation.date_fin,
             date_rupture: ruptureFirstContratDate,
           },
           {
-            date_debut: new Date(ruptureFirstContratDate.getTime() + 10 * 24 * 60 * 60 * 1000),
+            date_debut: addDaysUTC(ruptureFirstContratDate, 10),
             date_fin: formation.date_fin,
           },
         ],
@@ -229,10 +230,10 @@ describe("hydrateEffectifsComputedTypes", () => {
           { mois: "07", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
         ],
         parcours: [
-          { valeur: "INSCRIT", date: new Date("2023-10-01T00:00:00.000Z") },
-          { valeur: "APPRENTI", date: new Date("2023-11-15T00:00:00.000Z") },
-          { valeur: "RUPTURANT", date: new Date("2024-10-24T00:00:00.000Z") },
-          { valeur: "APPRENTI", date: new Date("2024-11-03T00:00:00.000Z") },
+          { valeur: "INSCRIT", date: new Date("2023-09-30T22:00:00.000Z") },
+          { valeur: "APPRENTI", date: new Date("2023-11-14T00:00:00.000Z") },
+          { valeur: "RUPTURANT", date: new Date("2024-10-23T22:00:00.000Z") },
+          { valeur: "APPRENTI", date: new Date("2024-11-02T00:00:00.000Z") },
         ],
       });
     });
