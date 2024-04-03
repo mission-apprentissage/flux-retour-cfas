@@ -708,10 +708,38 @@ exports[`validation-schema should create validation schema for effectifs: effect
                         ],
                       },
                     },
+                    "parcours": {
+                      "bsonType": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "bsonType": "object",
+                        "properties": {
+                          "date": {
+                            "bsonType": "date",
+                          },
+                          "valeur": {
+                            "bsonType": "string",
+                            "enum": [
+                              "ABANDON",
+                              "PRE_INSCRIT",
+                              "INSCRIT",
+                              "APPRENTI",
+                              "RUPTURANT",
+                              "DIPLOME",
+                            ],
+                          },
+                        },
+                        "required": [
+                          "date",
+                          "valeur",
+                        ],
+                      },
+                    },
                   },
                   "required": [
                     "en_cours",
                     "historique",
+                    "parcours",
                   ],
                 },
                 {
