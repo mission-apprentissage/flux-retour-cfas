@@ -176,11 +176,7 @@ describe("hydrateEffectifsComputedTypes", () => {
 
   describe("apprenent sans date de formation", () => {
     it("doit générer l'historique du statut de l'apprenant", async () => {
-      const ruptureFirstContratDate = new Date(evaluationDate.getTime());
-      ruptureFirstContratDate.setDate(ruptureFirstContratDate.getDate() - 250);
-
-      const ruptureSecondContratDate = new Date(evaluationDate.getTime());
-      ruptureSecondContratDate.setDate(ruptureSecondContratDate.getDate() - 181);
+      const ruptureFirstContratDate = addDaysUTC(evaluationDate, -250);
 
       const effectif = createSampleEffectif({
         organisme: sampleOrganisme,
@@ -232,7 +228,7 @@ describe("hydrateEffectifsComputedTypes", () => {
         parcours: [
           { valeur: "INSCRIT", date: new Date("2023-09-30T22:00:00.000Z") },
           { valeur: "APPRENTI", date: new Date("2023-11-14T00:00:00.000Z") },
-          { valeur: "RUPTURANT", date: new Date("2024-10-23T22:00:00.000Z") },
+          { valeur: "RUPTURANT", date: new Date("2024-10-23T00:00:00.000Z") },
           { valeur: "APPRENTI", date: new Date("2024-11-02T00:00:00.000Z") },
         ],
       });
