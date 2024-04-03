@@ -1,5 +1,5 @@
 import { Box, ListItem, Stack, Text, UnorderedList } from "@chakra-ui/react";
-import { REFERENTIEL_ONISEP } from "shared";
+import { REFERENTIEL_ONISEP, FAQ_REFERENCER_ETABLISSEMENT } from "shared";
 
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -41,7 +41,17 @@ function OrganismesACompleterPanelContent({ organismes }: { organismes: Organism
           <Text fontWeight="bold">
             Aidez-nous à fiabiliser ces organismes en menant des actions correctives selon les manquements constatés.
           </Text>
-          <Text fontWeight="bold">Pour cela, lisez l’article “Comment bien référencer un établissement ?”</Text>
+          <Text fontWeight="bold">
+            Pour cela, lisez l’article{" "}
+            <Link
+              href={FAQ_REFERENCER_ETABLISSEMENT}
+              isExternal={true}
+              borderBottom="1px"
+              _hover={{ textDecoration: "none" }}
+            >
+              “Comment bien référencer un établissement ?”
+            </Link>
+          </Text>
         </Box>
       </Ribbons>
 

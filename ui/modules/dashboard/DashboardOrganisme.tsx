@@ -88,8 +88,18 @@ const FiabilisationInfo = () => {
           <UnorderedList>
             <ListItem mt={2}>
               {" "}
-              Si votre UAI est affiché comme “Inconnu”, veuillez signaler votre numéro et sa fiche en complétant ce
-              formulaire pour qu’il soit mis à jour sur le{" "}
+              Si votre UAI est affiché comme “Inconnu”, veuillez signaler votre numéro et sa fiche en adressant un
+              courriel à{" "}
+              <Link
+                href={`mailto:referentiel-uai-siret@onisep.fr`}
+                target="_blank"
+                textDecoration="underline"
+                isExternal
+                whiteSpace="nowrap"
+              >
+                referentiel-uai-siret@onisep.fr
+              </Link>{" "}
+              pour qu’il soit mis à jour sur le{" "}
               <Link isExternal href={REFERENTIEL_ONISEP} textDecoration="underline">
                 Référentiel de l’apprentissage
               </Link>

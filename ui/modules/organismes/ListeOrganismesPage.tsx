@@ -12,12 +12,11 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { GESTION_ORGANISME_GROUP, IOrganisationType } from "shared";
+import { IOrganisationType } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import Link from "@/components/Links/Link";
-import SupportLink from "@/components/Links/SupportLink";
 import SimplePage from "@/components/Page/SimplePage";
 import { useOrganismesNormalizedLists } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
@@ -109,8 +108,6 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
             formateur rattaché au responsable).
           </Text>
         )}
-
-        <SupportLink href={GESTION_ORGANISME_GROUP}></SupportLink>
 
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         {organismesACompleter.length === 0 && organismesNonRetenus.length === 0 ? (
