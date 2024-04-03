@@ -736,7 +736,6 @@ describe("Processus d'ingestion", () => {
                 { date: new Date("2021-09-01T00:00:00.000Z"), valeur: "APPRENTI" },
                 { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "RUPTURANT" },
                 { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "DIPLOME" },
-                { date: new Date("2022-12-27T01:00:00.000Z"), valeur: "ABANDON" },
               ],
             },
           },
@@ -883,7 +882,7 @@ describe("Processus d'ingestion", () => {
                   valeur: "INSCRIT",
                 },
                 {
-                  date: new Date("2021-11-30T01:00:00.000Z"),
+                  date: new Date("2021-11-30T00:00:00.000Z"),
                   valeur: "ABANDON",
                 },
               ],
@@ -1107,7 +1106,7 @@ describe("Processus d'ingestion", () => {
                   valeur: "INSCRIT",
                 },
                 {
-                  date: new Date("2021-11-30T01:00:00.000Z"),
+                  date: new Date("2021-11-30T00:00:00.000Z"),
                   valeur: "ABANDON",
                 },
               ],

@@ -1,9 +1,10 @@
 import { captureException } from "@sentry/node";
 import Boom from "boom";
-import { addDays, endOfMonth } from "date-fns";
+import { endOfMonth } from "date-fns";
 import { MongoServerError, UpdateFilter } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
+import { addDaysUTC } from "shared/utils";
 
 import logger from "../logger";
 import { effectifsDb } from "../model/collections";
@@ -288,6 +289,7 @@ function generateParcoursFromDateEntree(
   let parcours: { valeur: StatutApprenant; date: Date }[] = [];
 
   const entryDate = effectif.formation!.date_entree!;
+  const finalDate = effectif.formation!.date_fin!;
 
   parcours.push({
     valeur: STATUT_APPRENANT.INSCRIT,
@@ -310,24 +312,25 @@ function generateParcoursFromDateEntree(
   const lastParcoursDate = parcours[parcours.length - 1].date;
   const lastParcoursValeur = parcours[parcours.length - 1].valeur;
 
-  const timeSinceEntry = evaluationDate.getTime() - entryDate.getTime();
+  const potentialNewDate90 = addDaysUTC(lastParcoursDate, 90);
+  const potentialNewDate180 = addDaysUTC(lastParcoursDate, 180);
 
-  if (lastParcoursValeur === STATUT_APPRENANT.INSCRIT && timeSinceEntry > ninetyDaysInMs) {
+  if (lastParcoursValeur === STATUT_APPRENANT.INSCRIT && potentialNewDate90 < finalDate) {
     parcours.push({
       valeur: STATUT_APPRENANT.ABANDON,
-      date: addDays(lastParcoursDate, 90),
+      date: potentialNewDate90,
     });
-  } else if (lastParcoursValeur === STATUT_APPRENANT.RUPTURANT && timeSinceEntry > oneEightyDaysInMs) {
+  } else if (lastParcoursValeur === STATUT_APPRENANT.RUPTURANT && potentialNewDate180 < finalDate) {
     parcours.push({
       valeur: STATUT_APPRENANT.ABANDON,
-      date: addDays(lastParcoursDate, 180),
+      date: potentialNewDate180,
     });
   }
 
   if (effectif.formation?.date_fin && effectif.formation.obtention_diplome) {
     parcours.push({
       valeur: STATUT_APPRENANT.DIPLOME,
-      date: effectif.formation?.date_fin,
+      date: finalDate,
     });
   }
 
