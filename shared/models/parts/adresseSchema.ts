@@ -10,7 +10,7 @@ import { zodEnumFromObjKeys } from "../../utils/zodHelper";
 import { zodOpenApi } from "../zodOpenApi";
 
 export const zAdresse = zodOpenApi.object({
-  numero: zodOpenApi
+  numero: zodOpenApi.coerce
     .number({
       description: "N° de la voie",
     })

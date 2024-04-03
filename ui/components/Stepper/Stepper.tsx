@@ -3,7 +3,7 @@ import { useState, useMemo, ComponentType } from "react";
 
 interface Step {
   title: string;
-  component: ComponentType;
+  component: any;
 }
 
 interface StepperComponentProps {
@@ -46,6 +46,21 @@ const StepperComponent = ({ steps }: StepperComponentProps) => {
     [currentStepIndex]
   );
 
+  const previous = useMemo(
+    () => ({
+      canGo: currentStepIndex > 0,
+      action: () => currentStepIndex > 0 && setCurrentStepIndex(currentStepIndex - 1),
+    }),
+    [currentStepIndex]
+  );
+  const next = useMemo(
+    () => ({
+      canGo: currentStepIndex + 1 < steps.length,
+      action: () => currentStepIndex + 1 < steps.length && setCurrentStepIndex(currentStepIndex + 1),
+    }),
+    [currentStepIndex]
+  );
+
   return (
     <Box>
       <VStack alignItems={"start"}>
@@ -67,19 +82,7 @@ const StepperComponent = ({ steps }: StepperComponentProps) => {
           ) : null}
         </Box>
       </VStack>
-      <currentStep.component />
-      <HStack justifyContent="end">
-        {currentStepIndex > 0 && (
-          <Button variant="secondary" onClick={() => setCurrentStepIndex(currentStepIndex - 1)} type="submit">
-            <Text as="span">Retour à l&apos;étape suivante</Text>
-          </Button>
-        )}
-        {nextStep && (
-          <Button variant="primary" onClick={() => setCurrentStepIndex(currentStepIndex + 1)} type="submit">
-            <Text as="span">Enregistrer et passer à l&apos;étape suivante</Text>
-          </Button>
-        )}
-      </HStack>
+      <currentStep.component previous={previous} next={next} />
     </Box>
   );
 };
