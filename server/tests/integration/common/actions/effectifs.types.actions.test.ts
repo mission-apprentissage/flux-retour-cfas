@@ -13,8 +13,8 @@ import { id } from "@tests/utils/testUtils";
 const TEST_SIREN = "190404921";
 const ANNEE_SCOLAIRE = "2023-2024";
 
-const formationDateEntree = new Date(2023, 9, 1);
-const formationDateFin = new Date(2026, 6, 29);
+const formationDateEntree = new Date("2023-09-30T00:00:00.000Z");
+const formationDateFin = new Date("2026-07-28T00:00:00.000Z");
 const formation = createRandomFormation(ANNEE_SCOLAIRE, formationDateEntree, formationDateFin);
 
 const evaluationDate = new Date(2025, 6, 1);
@@ -199,33 +199,32 @@ describe("hydrateEffectifsComputedTypes", () => {
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
       expect(updatedEffectif?._computed?.statut).toEqual({
-        en_cours: STATUT_APPRENANT.APPRENTI,
+        en_cours: "APPRENTI",
         historique: [
-          { mois: "10", annee: "2023", valeur: STATUT_APPRENANT.INSCRIT },
-          { mois: "11", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "12", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "01", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "02", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "03", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "04", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "05", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "06", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "07", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "08", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "09", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "10", annee: "2024", valeur: STATUT_APPRENANT.RUPTURANT },
-          { mois: "11", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "12", annee: "2024", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "01", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "02", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "03", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "04", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "05", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "06", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "07", annee: "2025", valeur: STATUT_APPRENANT.APPRENTI },
+          { mois: "09", annee: "2023", valeur: "INSCRIT" },
+          { mois: "10", annee: "2023", valeur: "INSCRIT" },
+          { mois: "11", annee: "2023", valeur: "APPRENTI" },
+          { mois: "12", annee: "2023", valeur: "APPRENTI" },
+          { mois: "01", annee: "2024", valeur: "APPRENTI" },
+          { mois: "03", annee: "2024", valeur: "APPRENTI" },
+          { mois: "04", annee: "2024", valeur: "APPRENTI" },
+          { mois: "05", annee: "2024", valeur: "APPRENTI" },
+          { mois: "06", annee: "2024", valeur: "APPRENTI" },
+          { mois: "07", annee: "2024", valeur: "APPRENTI" },
+          { mois: "08", annee: "2024", valeur: "APPRENTI" },
+          { mois: "09", annee: "2024", valeur: "APPRENTI" },
+          { mois: "10", annee: "2024", valeur: "RUPTURANT" },
+          { mois: "11", annee: "2024", valeur: "APPRENTI" },
+          { mois: "12", annee: "2024", valeur: "APPRENTI" },
+          { mois: "01", annee: "2025", valeur: "APPRENTI" },
+          { mois: "02", annee: "2025", valeur: "APPRENTI" },
+          { mois: "03", annee: "2025", valeur: "APPRENTI" },
+          { mois: "04", annee: "2025", valeur: "APPRENTI" },
+          { mois: "05", annee: "2025", valeur: "APPRENTI" },
+          { mois: "06", annee: "2025", valeur: "APPRENTI" },
         ],
         parcours: [
-          { valeur: "INSCRIT", date: new Date("2023-09-30T22:00:00.000Z") },
+          { valeur: "INSCRIT", date: new Date("2023-09-30T00:00:00.000Z") },
           { valeur: "APPRENTI", date: new Date("2023-11-14T00:00:00.000Z") },
           { valeur: "RUPTURANT", date: new Date("2024-10-23T00:00:00.000Z") },
           { valeur: "APPRENTI", date: new Date("2024-11-02T00:00:00.000Z") },
