@@ -296,6 +296,15 @@ program
   .action(createJobAction("tmp:patches:remove-organismes-sansEnseigneNiRaisonSociale-neTransmettantPlus"));
 
 /**
+ * Job (temporaire) de suppression de metiers dans organismes
+ */
+program
+  .command("tmp:patches:remove-metiers-from-organisme")
+  .description("[TEMPORAIRE] Suppression de metiers dans organismes")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:patches:remove-metiers-from-organisme"));
+
+/**
  * Job d'initialisation de données de test
  */
 program.command("seed:sample").description("Seed sample data").action(createJobAction("seed:sample"));
