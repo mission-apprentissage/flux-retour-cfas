@@ -3759,6 +3759,12 @@ exports[`validation-schema should create validation schema for formationsCatalog
                     "additionalProperties": false,
                     "bsonType": "object",
                     "properties": {
+                      "date_fermeture": {
+                        "bsonType": [
+                          "string",
+                          "null",
+                        ],
+                      },
                       "mef10": {
                         "bsonType": [
                           "string",
