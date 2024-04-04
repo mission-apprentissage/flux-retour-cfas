@@ -7,12 +7,13 @@ import {
   IEffectifCreationFormationSchema,
 } from "shared/models/apis/effectifsCreationSchema";
 
+import { _get, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import StepperComponent from "@/components/Stepper/Stepper";
 
-import EffectfCoordonneesComponent from "./steps/EffectifCoordonneesComponent";
+import EffectifCoordonneesComponent from "./steps/EffectifCoordonneesComponent";
 
 interface EffectifCreationPageProps {
   organisme: Organisme;
@@ -23,10 +24,17 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
   const [contrats, setContrats] = useState({} as IEffectifCreationContratsSchema);
   const [formation, setFormation] = useState({} as IEffectifCreationFormationSchema);
 
+  const onCoordonneesValidate = async (data: IEffectifCreationCoordonnesSchema) => {
+    const r = await _put("/api/v1/user/effectif-draft", data);
+    console.log(r);
+  };
+
   const steps = [
     {
       title: "Renseigner les coordonnées de l'apprenant",
-      component: (props) => <EffectfCoordonneesComponent data={coordonnees} onValidate={setCoordonnees} {...props} />,
+      component: (props) => (
+        <EffectifCoordonneesComponent data={coordonnees} onValidate={onCoordonneesValidate} {...props} />
+      ),
     },
     {
       title: "Renseigner la formation de l'apprenant",

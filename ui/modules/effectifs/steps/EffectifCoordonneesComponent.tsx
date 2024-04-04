@@ -30,7 +30,7 @@ interface EffectfCoordonneesComponent {
   next: any;
 }
 
-const EffectfCoordonneesComponent = ({ data, previous, next }: EffectfCoordonneesComponent) => {
+const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: EffectfCoordonneesComponent) => {
   const {
     register,
     handleSubmit,
@@ -58,8 +58,9 @@ const EffectfCoordonneesComponent = ({ data, previous, next }: EffectfCoordonnee
     fontWeight: "700",
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: IEffectifCreationCoordonnesSchema) => {
     console.log(data);
+    onValidate(data);
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -94,8 +95,12 @@ const EffectfCoordonneesComponent = ({ data, previous, next }: EffectfCoordonnee
               <FormLabel>Sexe</FormLabel>
               <RadioGroup defaultValue="F">
                 <HStack spacing="24px">
-                  <Radio value="F">Femme</Radio>
-                  <Radio value="H">Homme</Radio>
+                  <Radio value="F" {...register("apprenant.sexe")}>
+                    Femme
+                  </Radio>
+                  <Radio value="H" {...register("apprenant.sexe")}>
+                    Homme
+                  </Radio>
                 </HStack>
               </RadioGroup>
             </FormControl>
@@ -105,14 +110,14 @@ const EffectfCoordonneesComponent = ({ data, previous, next }: EffectfCoordonnee
               <FormLabel>L’apprenti(e) est né(e) en France (Metropolitaine, DOM-TOM…) :</FormLabel>
               <RadioGroup>
                 <HStack spacing="24px">
-                  <Radio value="Oui">Oui</Radio>
-                  <Radio value="Non">Non</Radio>
+                  <Radio value="true">Oui</Radio>
+                  <Radio value="false">Non</Radio>
                 </HStack>
               </RadioGroup>
             </FormControl>
             <FormControl>
               <FormLabel>Nationalité</FormLabel>
-              <Select placeholder="Sélectionnez">
+              <Select placeholder="Sélectionnez" {...register("apprenant.nationalite")}>
                 <option value="1">Française</option>
                 <option value="2">Union Européenne</option>
                 <option value="3">Etranger hors Union Européenne</option>
@@ -163,7 +168,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next }: EffectfCoordonnee
             </FormControl>
             <FormControl flex={1}>
               <FormLabel>Indice de répétition</FormLabel>
-              <Select placeholder="Sélectionnez">
+              <Select placeholder="Sélectionnez" {...register("apprenant.adresse.repetition_voie")}>
                 {INDICE_DE_REPETITION_OPTIONS.map(({ value, label }) => (
                   <option key={value} value={value}>
                     {label}
@@ -261,8 +266,12 @@ const EffectfCoordonneesComponent = ({ data, previous, next }: EffectfCoordonnee
               </FormLabel>
               <RadioGroup>
                 <HStack spacing="24px">
-                  <Radio value="Oui">Oui</Radio>
-                  <Radio value="Non">Non</Radio>
+                  <Radio value="true" {...register("apprenant.inscription_sportif_haut_niveau")}>
+                    Oui
+                  </Radio>
+                  <Radio value="false" {...register("apprenant.inscription_sportif_haut_niveau")}>
+                    Non
+                  </Radio>
                 </HStack>
               </RadioGroup>
             </FormControl>
@@ -272,8 +281,10 @@ const EffectfCoordonneesComponent = ({ data, previous, next }: EffectfCoordonnee
               <FormLabel>Déclare bénéficier de la reconnaissance de la qualité de travailleur handicapé : </FormLabel>
               <RadioGroup>
                 <HStack spacing="24px">
-                  <Radio value="Oui">Oui</Radio>
-                  <Radio value="Non">Non</Radio>
+                  <Radio value="true" {...register("apprenant.rqth")}>
+                    Oui
+                  </Radio>
+                  <Radio value="false">Non</Radio>
                 </HStack>
               </RadioGroup>
             </FormControl>
@@ -330,8 +341,8 @@ const EffectfCoordonneesComponent = ({ data, previous, next }: EffectfCoordonnee
               <FormLabel>L'apprenti est sous la responsabilité d'un représentant légal (non émancipé) </FormLabel>
               <RadioGroup>
                 <HStack spacing="24px">
-                  <Radio value="Oui">Oui</Radio>
-                  <Radio value="Non">Non</Radio>
+                  <Radio value="true">Oui</Radio>
+                  <Radio value="false">Non</Radio>
                 </HStack>
               </RadioGroup>
             </FormControl>
