@@ -18,26 +18,30 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   IEffectifCreationCoordonnesSchema,
+  IEffectifCreationSchema,
   effectifCreationCoordonnesSchema,
 } from "shared/models/apis/effectifsCreationSchema";
 
 import { INDICE_DE_REPETITION_OPTIONS } from "@/modules/mon-espace/effectifs/engine/effectifForm/domain/indiceDeRepetionOptions";
 
 interface EffectfCoordonneesComponent {
-  data: IEffectifCreationCoordonnesSchema;
+  data: IEffectifCreationSchema;
   onValidate: any;
   previous: any;
   next: any;
 }
 
 const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: EffectfCoordonneesComponent) => {
+  const { apprenant } = data;
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue
   } = useForm({
     mode: "onBlur",
-    defaultValues: data,
+    defaultValues: { apprenant },
     resolver: zodResolver(effectifCreationCoordonnesSchema),
   });
   console.log(errors);
@@ -58,9 +62,10 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
     fontWeight: "700",
   };
 
-  const onSubmit = (data: IEffectifCreationCoordonnesSchema) => {
+  const onSubmit = async (data: IEffectifCreationCoordonnesSchema) => {
     console.log(data);
-    onValidate(data);
+    await onValidate(data);
+    next.action()
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -89,7 +94,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
           <HStack style={rowStyle}>
             <FormControl isInvalid={!!errors.apprenant?.date_de_naissance?.message}>
               <FormLabel>Date de naissance</FormLabel>
-              <Input variant="effectifForm" type="date" {...register("apprenant.date_de_naissance")} />
+              <Input variant="effectifForm" type="date" {...register("apprenant.date_de_naissance")} defaultValue={apprenant.date_de_naissance?.substring(0, 10)} />
             </FormControl>
             <FormControl isInvalid={!!errors.apprenant?.sexe?.message}>
               <FormLabel>Sexe</FormLabel>
@@ -98,7 +103,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
                   <Radio value="F" {...register("apprenant.sexe")}>
                     Femme
                   </Radio>
-                  <Radio value="H" {...register("apprenant.sexe")}>
+                  <Radio value="M" {...register("apprenant.sexe")}>
                     Homme
                   </Radio>
                 </HStack>
@@ -117,7 +122,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
             <FormControl>
               <FormLabel>Nationalité</FormLabel>
-              <Select placeholder="Sélectionnez" {...register("apprenant.nationalite")}>
+              <Select placeholder="Sélectionnez" {...register("apprenant.nationalite", { setValueAs: v => parseInt(v) })} >
                 <option value="1">Française</option>
                 <option value="2">Union Européenne</option>
                 <option value="3">Etranger hors Union Européenne</option>
@@ -168,7 +173,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
             <FormControl flex={1}>
               <FormLabel>Indice de répétition</FormLabel>
-              <Select placeholder="Sélectionnez" {...register("apprenant.adresse.repetition_voie")}>
+              <Select placeholder="Sélectionnez" {...register("apprenant.adresse.repetition_voie", { setValueAs: v => v !== '' ? v : undefined })}>
                 {INDICE_DE_REPETITION_OPTIONS.map(({ value, label }) => (
                   <option key={value} value={value}>
                     {label}
@@ -264,12 +269,12 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
               <FormLabel>
                 Déclare être inscrit sur la liste des sportifs, entraîneurs, arbitres et juges sportifs de haut niveau :{" "}
               </FormLabel>
-              <RadioGroup>
+              <RadioGroup defaultValue="false" onChange={(e) => setValue("apprenant.inscription_sportif_haut_niveau", Boolean(e))}>
                 <HStack spacing="24px">
-                  <Radio value="true" {...register("apprenant.inscription_sportif_haut_niveau")}>
+                  <Radio value="true" >
                     Oui
                   </Radio>
-                  <Radio value="false" {...register("apprenant.inscription_sportif_haut_niveau")}>
+                  <Radio value="false" >
                     Non
                   </Radio>
                 </HStack>
@@ -279,12 +284,14 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
           <HStack style={rowStyle}>
             <FormControl flex={4}>
               <FormLabel>Déclare bénéficier de la reconnaissance de la qualité de travailleur handicapé : </FormLabel>
-              <RadioGroup>
+              <RadioGroup onChange={(e) => setValue("apprenant.rqth", Boolean(e))} defaultValue="false">
                 <HStack spacing="24px">
-                  <Radio value="true" {...register("apprenant.rqth")}>
+                  <Radio value="true" >
                     Oui
                   </Radio>
-                  <Radio value="false">Non</Radio>
+                  <Radio value="false">
+                    Non
+                  </Radio>
                 </HStack>
               </RadioGroup>
             </FormControl>
@@ -408,7 +415,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
           </Button>
         )}
       </HStack>
-    </form>
+    </form >
   );
 };
 

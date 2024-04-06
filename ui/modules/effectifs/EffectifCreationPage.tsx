@@ -1,6 +1,6 @@
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Container, Heading, HStack } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   IEffectifCreationCoordonnesSchema,
   IEffectifCreationContratsSchema,
@@ -12,7 +12,7 @@ import { Organisme } from "@/common/internal/Organisme";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import StepperComponent from "@/components/Stepper/Stepper";
-
+import { useQuery } from "@tanstack/react-query";
 import EffectifCoordonneesComponent from "./steps/EffectifCoordonneesComponent";
 
 interface EffectifCreationPageProps {
@@ -20,6 +20,9 @@ interface EffectifCreationPageProps {
 }
 
 const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
+
+
+
   const [coordonnees, setCoordonnees] = useState({} as IEffectifCreationCoordonnesSchema);
   const [contrats, setContrats] = useState({} as IEffectifCreationContratsSchema);
   const [formation, setFormation] = useState({} as IEffectifCreationFormationSchema);
@@ -29,11 +32,30 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
     console.log(r);
   };
 
-  const steps = [
+  const getDraft = async () => {
+    return await _get("/api/v1/user/effectif-draft")
+  }
+
+  const { data, error, isFetching } = useQuery({
+    queryKey: ["effectif-query"],
+    queryFn: getDraft
+  });
+
+  useEffect(() => {
+    if (!data) {
+      return
+    }
+    const { apprenant, annee_scolaire, formation, organisme, contrats } = data;
+    console.log(apprenant)
+    setCoordonnees({ apprenant })
+    console.log(coordonnees)
+  }, [isFetching, error, data]);
+
+  const steps = useMemo(() => ([
     {
       title: "Renseigner les coordonnées de l'apprenant",
       component: (props) => (
-        <EffectifCoordonneesComponent data={coordonnees} onValidate={onCoordonneesValidate} {...props} />
+        <EffectifCoordonneesComponent onValidate={onCoordonneesValidate} {...props} />
       ),
     },
     {
@@ -48,7 +70,8 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
       title: "Relecture finale et validation",
       component: () => null,
     },
-  ];
+  ]), [coordonnees]);
+
   return (
     <SimplePage>
       <Container maxW="xl" p="8">
@@ -66,7 +89,7 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
             Retour au tableau des effectifs
           </Link>
         </HStack>
-        <StepperComponent steps={steps} />
+        {!isFetching && <StepperComponent steps={steps} data={data} />}
       </Container>
     </SimplePage>
   );

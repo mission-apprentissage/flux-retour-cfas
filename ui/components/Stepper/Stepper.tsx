@@ -8,6 +8,7 @@ interface Step {
 
 interface StepperComponentProps {
   steps: Array<Step>;
+  data: any;
 }
 
 const LinearStepper = ({ index, size }) => {
@@ -23,7 +24,7 @@ const LinearStepper = ({ index, size }) => {
     </HStack>
   );
 };
-const StepperComponent = ({ steps }: StepperComponentProps) => {
+const StepperComponent = ({ steps, data }: StepperComponentProps) => {
   const stepLabelStyle = {
     color: "#3A3A3A",
     fontSize: "14px",
@@ -82,7 +83,7 @@ const StepperComponent = ({ steps }: StepperComponentProps) => {
           ) : null}
         </Box>
       </VStack>
-      <currentStep.component previous={previous} next={next} />
+      <currentStep.component previous={previous} next={next} data={data} />
     </Box>
   );
 };
