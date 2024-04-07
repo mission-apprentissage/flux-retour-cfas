@@ -193,6 +193,7 @@ const zFormationCatalogue = z.object({
     .array(
       z
         .object({
+          date_fermeture: z.string().nullish(),
           mef10: z.string().nullish(),
           modalite: z
             .object({

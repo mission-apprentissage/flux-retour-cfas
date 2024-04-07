@@ -1,4 +1,5 @@
 import { Box, ListItem, Stack, Text, UnorderedList } from "@chakra-ui/react";
+import { REFERENTIEL_ONISEP, FAQ_REFERENCER_ETABLISSEMENT } from "shared";
 
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -20,41 +21,36 @@ function OrganismesACompleterPanelContent({ organismes }: { organismes: Organism
           </Text>
           <UnorderedList styleType="'- '">
             <ListItem>
-              Un couple UAI-SIRET qui n’est pas <strong>validé</strong> dans le{" "}
-              <Link
-                href="https://referentiel.apprentissage.onisep.fr/"
-                isExternal={true}
-                borderBottom="1px"
-                _hover={{ textDecoration: "none" }}
-              >
+              Un couple UAI-SIRET n’est pas <strong>validé</strong> ou un code UAI est répertorié comme{" "}
+              <strong>inconnu</strong> ou <strong>non validé</strong> dans le{" "}
+              <Link href={REFERENTIEL_ONISEP} isExternal={true} borderBottom="1px" _hover={{ textDecoration: "none" }}>
                 Référentiel de l’apprentissage
               </Link>
               .
-            </ListItem>
-            <ListItem>
-              Un code UAI est répertorié comme <strong>inconnu</strong> ou non <strong>validé</strong> dans le{" "}
-              <Link
-                href="https://referentiel.apprentissage.onisep.fr/"
-                isExternal={true}
-                borderBottom="1px"
-                _hover={{ textDecoration: "none" }}
-              >
-                Référentiel de l’apprentissage
-              </Link>
-              .
-            </ListItem>
-            <ListItem>
-              L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE, est{" "}
-              <strong>fermé</strong>.
             </ListItem>
             <ListItem>
               La nature de l’organisme (déduite des relations entre organismes - base des Carif-Oref) est{" "}
               <strong>inconnue</strong>.
             </ListItem>
+            <ListItem>
+              L’état administratif du SIRET de l’établissement, tel qu’il est enregistré auprès de l’INSEE, est{" "}
+              <strong>fermé</strong>.
+            </ListItem>
           </UnorderedList>
 
           <Text fontWeight="bold">
             Aidez-nous à fiabiliser ces organismes en menant des actions correctives selon les manquements constatés.
+          </Text>
+          <Text fontWeight="bold">
+            Pour cela, lisez l’article{" "}
+            <Link
+              href={FAQ_REFERENCER_ETABLISSEMENT}
+              isExternal={true}
+              borderBottom="1px"
+              _hover={{ textDecoration: "none" }}
+            >
+              “Comment bien référencer un établissement ?”
+            </Link>
           </Text>
         </Box>
       </Ribbons>

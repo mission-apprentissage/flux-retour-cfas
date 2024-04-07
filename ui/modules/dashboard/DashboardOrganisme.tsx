@@ -1,4 +1,4 @@
-import { ArrowForwardIcon, ViewIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, ViewIcon, ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import {
   Badge,
   Box,
@@ -15,19 +15,24 @@ import {
   VStack,
   Wrap,
   Link,
+  Collapse,
 } from "@chakra-ui/react";
 import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   natureOrganismeDeFormationLabel,
   TETE_DE_RESEAUX_BY_ID,
   IndicateursEffectifs,
   IndicateursEffectifsAvecFormation,
   IndicateursOrganismes,
-  GO_MODIFICATION_IDENTITE_ELEMENT_LINK,
   IOrganisationCreate,
+  REFERENTIEL_ONISEP,
+  CARIF_OREF,
+  CATALOGUE_APPRENTISSAGE,
+  ANNUAIRE_ENTREPRISE,
+  STATUT_FIABILISATION_ORGANISME,
 } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
@@ -40,7 +45,6 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import CerfaLink from "@/components/Cerfa/CerfaLink";
-import SupportLink from "@/components/Links/SupportLink";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import withAuth from "@/components/withAuth";
@@ -59,6 +63,74 @@ import ContactsModal from "./ContactsModal";
 import { FileDownloadIcon } from "./icons";
 import IndicateursGrid from "./IndicateursGrid";
 
+const FiabilisationInfo = () => {
+  const [show, setShow] = useState(false);
+  const handleToggle = () => setShow(!show);
+
+  const linkStyle = {
+    color: "#000091",
+    textDecoration: "underline",
+    textUnderlineOffset: "4px",
+    cursor: "pointer",
+  };
+
+  return (
+    <Ribbons variant="warning" w="full" mt={3}>
+      <Box color="black">
+        <Text fontWeight="bold" mb={2}>
+          Votre organisme nécessite des actions de votre part pour être considéré comme fiable et ainsi mieux
+          transmettre vos effectifs.
+        </Text>
+        <Text style={linkStyle} onClick={handleToggle}>
+          {" "}
+          {show ? <ChevronDownIcon /> : <ChevronUpIcon />} Voir le détail des actions
+        </Text>
+        <Collapse in={show}>
+          <UnorderedList>
+            <ListItem mt={2}>
+              {" "}
+              Si votre UAI est affiché comme “Inconnu”, veuillez signaler votre numéro et sa fiche en adressant un
+              courriel à{" "}
+              <Link
+                href={`mailto:referentiel-uai-siret@onisep.fr`}
+                target="_blank"
+                textDecoration="underline"
+                isExternal
+                whiteSpace="nowrap"
+              >
+                referentiel-uai-siret@onisep.fr
+              </Link>{" "}
+              pour qu’il soit mis à jour sur le{" "}
+              <Link isExternal href={REFERENTIEL_ONISEP} textDecoration="underline">
+                Référentiel de l’apprentissage
+              </Link>
+              .
+            </ListItem>
+            <ListItem mt={2}>
+              La nature de votre organisme est “Inconnue” ou les relations affichées sont incorrectes, veuillez la
+              déclarer ou les corriger auprès du{" "}
+              <Link isExternal href={CARIF_OREF} textDecoration="underline">
+                Carif-Oref régional
+              </Link>
+              . (voir également{" "}
+              <Link isExternal href={CATALOGUE_APPRENTISSAGE} textDecoration="underline">
+                Catalogue de l’apprentissage
+              </Link>
+              )
+            </ListItem>
+            <ListItem mt={2}>
+              Si d’autres informations affichées (SIRET, adresse, raison sociale...) sont erronées, veuillez consulter{" "}
+              <Link isExternal href={ANNUAIRE_ENTREPRISE} textDecoration="underline">
+                l’Annuaire des entreprises
+              </Link>
+              .
+            </ListItem>
+          </UnorderedList>
+        </Collapse>
+      </Box>
+    </Ribbons>
+  );
+};
 const natureOrganismeDeFormationTooltip = {
   responsable: (
     <>
@@ -195,6 +267,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const indicateursEffectifsPartielsMessage =
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
+  const isFiable = organisme.fiabilisation_statut === STATUT_FIABILISATION_ORGANISME.FIABLE;
+
   return (
     <Box>
       <Box
@@ -271,8 +345,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 <Text color="bluefrance" fontWeight={700} textTransform="uppercase">
                   {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
                 </Text>
-              </HStack>
-              <HStack mt="4" gap="4">
                 {organisme.permissions?.infoTransmissionEffectifs && (
                   <InfoTransmissionDonnees
                     modeBadge={true}
@@ -283,38 +355,28 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 {organisme.fiabilisation_statut && (
                   <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
                 )}
+                {organisationType === "ADMINISTRATEUR" && (
+                  <>
+                    <Button
+                      variant="outline"
+                      borderColor="#B60000"
+                      color="#B60000"
+                      size="xs"
+                      ml={4}
+                      onClick={async () => {
+                        await _post<IOrganisationCreate>("/api/v1/admin/impersonate", {
+                          type: "ORGANISME_FORMATION",
+                          siret: organisme.siret,
+                          uai: organisme.uai ?? null, // peut être absent si non présent dans le référentiel
+                        });
+                        location.href = "/";
+                      }}
+                    >
+                      Imposture
+                    </Button>
+                  </>
+                )}
               </HStack>
-
-              {/* DEBUG pour les administrateurs */}
-              {organisationType === "ADMINISTRATEUR" && (
-                <>
-                  <ExternalLinks
-                    search={organisme.siret}
-                    siret={organisme.siret}
-                    fontSize={"omega"}
-                    display="inline-block"
-                    mt={6}
-                  />
-
-                  <Button
-                    variant="outline"
-                    borderColor="#B60000"
-                    color="#B60000"
-                    size="xs"
-                    ml={4}
-                    onClick={async () => {
-                      await _post<IOrganisationCreate>("/api/v1/admin/impersonate", {
-                        type: "ORGANISME_FORMATION",
-                        siret: organisme.siret,
-                        uai: organisme.uai ?? null, // peut être absent si non présent dans le référentiel
-                      });
-                      location.href = "/";
-                    }}
-                  >
-                    Imposture
-                  </Button>
-                </>
-              )}
 
               <VStack gap={2} alignItems={"baseline"} mt="6">
                 <Wrap fontSize="epsilon" textColor="grey.800">
@@ -615,9 +677,18 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     </VStack>
                   </HStack>
                 )}
-                {!modePublique && <SupportLink href={GO_MODIFICATION_IDENTITE_ELEMENT_LINK}></SupportLink>}
               </VStack>
-
+              <HStack mt={3}>
+                <Text>Voir l&apos;établissement sur :</Text>
+                <ExternalLinks
+                  search={organisme.siret}
+                  siret={organisme.siret}
+                  fontSize={"omega"}
+                  display="inline-block"
+                  isAdmin={organisationType === "ADMINISTRATEUR"}
+                />
+              </HStack>
+              {!isFiable && <FiabilisationInfo />}
               {/* Infos Transmission / Paramétrage pour les administrateurs */}
               {organisationType === "ADMINISTRATEUR" && (
                 <InfosTransmissionEtParametrageOFA mt="2w" organisme={organisme} />
@@ -642,7 +713,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 (année scolaire 2023-2024)
               </Text>
             </Heading>
-
             {indicateursEffectifsPartielsMessage && (
               <Ribbons variant="warning" mt="0.5rem">
                 <Text color="grey.800">

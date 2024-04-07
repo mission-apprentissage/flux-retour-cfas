@@ -11,9 +11,9 @@
     "npm": "please-use-yarn"
   },
   "scripts": {
-    "cli": "cross-env TZ='Europe/Paris' node dist/index.js",
+    "cli": "node dist/index.js",
     "build:dev": "tsup-node",
-    "dev": "cross-env TZ='Europe/Paris' tsup-node --env.TSUP_WATCH true",
+    "dev": "tsup-node --env.TSUP_WATCH true",
     "init:dev": "yarn cli init:dev",
     "build": "tsup-node --env.NODE_ENV production",
     "typecheck": "tsc --noEmit",
