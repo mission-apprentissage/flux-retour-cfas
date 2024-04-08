@@ -8,6 +8,7 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import { usePlausibleTracking } from "@/hooks/plausible";
+import useAuth from "@/hooks/useAuth";
 import { EffectifsFiltersFull, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
 
 import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "./icons";
@@ -71,7 +72,6 @@ interface IndicateursGridPropsLoading {
 interface IndicateursGridPropsReady {
   indicateursEffectifs: IndicateursEffectifs;
   loading: false;
-  permissionEffectifsNominatifs?: boolean | TypeEffectifNominatif[];
   effectifsFilters?: EffectifsFiltersFull;
   organismeId?: string;
 }
@@ -80,6 +80,13 @@ type IndicateursGridProps = IndicateursGridPropsReady | IndicateursGridPropsLoad
 
 function IndicateursGrid(props: IndicateursGridProps) {
   const { trackPlausibleEvent } = usePlausibleTracking();
+  const { auth } = useAuth();
+
+  const permissionEffectifsNominatifs = auth.acl
+    ? Object.entries(auth.acl.effectifsNominatifs)
+        .filter(([, v]) => v !== false)
+        .map(([k]) => k)
+    : [];
 
   if (props.loading) {
     return (
@@ -103,7 +110,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
     );
   }
 
-  const { indicateursEffectifs, permissionEffectifsNominatifs = false, effectifsFilters, organismeId } = props;
+  const { indicateursEffectifs, effectifsFilters, organismeId } = props;
 
   async function downloadEffectifsNominatifs(
     type: (typeof typesEffectifNominatif)[number],
@@ -147,22 +154,19 @@ function IndicateursGrid(props: IndicateursGridProps) {
           icon={<ApprenantsIcon />}
           big={true}
         >
-          {(permissionEffectifsNominatifs instanceof Array
-            ? permissionEffectifsNominatifs.includes("apprenant")
-            : permissionEffectifsNominatifs) &&
-            effectifsFilters && (
-              <DownloadButton
-                variant="link"
-                fontSize="sm"
-                p="0"
-                mt="2"
-                isDisabled={indicateursEffectifs.apprenants === 0}
-                title={indicateursEffectifs.apprenants === 0 ? "Aucun effectif à télécharger" : ""}
-                action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
-              >
-                Télécharger la liste
-              </DownloadButton>
-            )}
+          {permissionEffectifsNominatifs.includes("apprenant") && effectifsFilters && (
+            <DownloadButton
+              variant="link"
+              fontSize="sm"
+              p="0"
+              mt="2"
+              isDisabled={indicateursEffectifs.apprenants === 0}
+              title={indicateursEffectifs.apprenants === 0 ? "Aucun effectif à télécharger" : ""}
+              action={async () => downloadEffectifsNominatifs("apprenant", effectifsFilters)}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
@@ -179,22 +183,19 @@ function IndicateursGrid(props: IndicateursGridProps) {
           }
           icon={<ApprentisIcon />}
         >
-          {(permissionEffectifsNominatifs instanceof Array
-            ? permissionEffectifsNominatifs.includes("apprenti")
-            : permissionEffectifsNominatifs) &&
-            effectifsFilters && (
-              <DownloadButton
-                variant="link"
-                fontSize="sm"
-                p="0"
-                mt="2"
-                isDisabled={indicateursEffectifs.apprentis === 0}
-                title={indicateursEffectifs.apprentis === 0 ? "Aucun effectif à télécharger" : ""}
-                action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
-              >
-                Télécharger la liste
-              </DownloadButton>
-            )}
+          {permissionEffectifsNominatifs.includes("apprenti") && effectifsFilters && (
+            <DownloadButton
+              variant="link"
+              fontSize="sm"
+              p="0"
+              mt="2"
+              isDisabled={indicateursEffectifs.apprentis === 0}
+              title={indicateursEffectifs.apprentis === 0 ? "Aucun effectif à télécharger" : ""}
+              action={async () => downloadEffectifsNominatifs("apprenti", effectifsFilters)}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
@@ -212,22 +213,19 @@ function IndicateursGrid(props: IndicateursGridProps) {
           }
           icon={<RupturantsIcon />}
         >
-          {(permissionEffectifsNominatifs instanceof Array
-            ? permissionEffectifsNominatifs.includes("rupturant")
-            : permissionEffectifsNominatifs) &&
-            effectifsFilters && (
-              <DownloadButton
-                variant="link"
-                fontSize="sm"
-                p="0"
-                mt="2"
-                isDisabled={indicateursEffectifs.rupturants === 0}
-                title={indicateursEffectifs.rupturants === 0 ? "Aucun effectif à télécharger" : ""}
-                action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
-              >
-                Télécharger la liste
-              </DownloadButton>
-            )}
+          {permissionEffectifsNominatifs.includes("rupturant") && effectifsFilters && (
+            <DownloadButton
+              variant="link"
+              fontSize="sm"
+              p="0"
+              mt="2"
+              isDisabled={indicateursEffectifs.rupturants === 0}
+              title={indicateursEffectifs.rupturants === 0 ? "Aucun effectif à télécharger" : ""}
+              action={async () => downloadEffectifsNominatifs("rupturant", effectifsFilters)}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
@@ -244,22 +242,19 @@ function IndicateursGrid(props: IndicateursGridProps) {
           }
           icon={<InscritsSansContratsIcon />}
         >
-          {(permissionEffectifsNominatifs instanceof Array
-            ? permissionEffectifsNominatifs.includes("inscritSansContrat")
-            : permissionEffectifsNominatifs) &&
-            effectifsFilters && (
-              <DownloadButton
-                variant="link"
-                fontSize="sm"
-                p="0"
-                mt="2"
-                isDisabled={indicateursEffectifs.inscritsSansContrat === 0}
-                title={indicateursEffectifs.inscritsSansContrat === 0 ? "Aucun effectif à télécharger" : ""}
-                action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
-              >
-                Télécharger la liste
-              </DownloadButton>
-            )}
+          {permissionEffectifsNominatifs.includes("inscritSansContrat") && effectifsFilters && (
+            <DownloadButton
+              variant="link"
+              fontSize="sm"
+              p="0"
+              mt="2"
+              isDisabled={indicateursEffectifs.inscritsSansContrat === 0}
+              title={indicateursEffectifs.inscritsSansContrat === 0 ? "Aucun effectif à télécharger" : ""}
+              action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
       <GridItem bg="galt" colSpan={2}>
@@ -279,22 +274,19 @@ function IndicateursGrid(props: IndicateursGridProps) {
           }
           icon={<AbandonsIcon />}
         >
-          {(permissionEffectifsNominatifs instanceof Array
-            ? permissionEffectifsNominatifs.includes("abandon")
-            : permissionEffectifsNominatifs) &&
-            effectifsFilters && (
-              <DownloadButton
-                variant="link"
-                fontSize="sm"
-                p="0"
-                mt="2"
-                isDisabled={indicateursEffectifs.abandons === 0}
-                title={indicateursEffectifs.abandons === 0 ? "Aucun effectif à télécharger" : ""}
-                action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}
-              >
-                Télécharger la liste
-              </DownloadButton>
-            )}
+          {permissionEffectifsNominatifs.includes("abandon") && effectifsFilters && (
+            <DownloadButton
+              variant="link"
+              fontSize="sm"
+              p="0"
+              mt="2"
+              isDisabled={indicateursEffectifs.abandons === 0}
+              title={indicateursEffectifs.abandons === 0 ? "Aucun effectif à télécharger" : ""}
+              action={async () => downloadEffectifsNominatifs("abandon", effectifsFilters)}
+            >
+              Télécharger la liste
+            </DownloadButton>
+          )}
         </Card>
       </GridItem>
     </Grid>
