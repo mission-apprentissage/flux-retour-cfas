@@ -15,13 +15,12 @@ interface EffectifProps {
   parcours: Statut["parcours"];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Effectif = React.memo(function EffectifMemo({ modeSifa = false, canEdit = false, parcours }: EffectifProps) {
   const { controller: effectifFormController } = useEffectifForm({ schema: effectifFormSchema });
   const { isLoading } = useInitEffectifForm({
     controller: effectifFormController,
     modeSifa,
-    canEdit: false,
+    canEdit,
   });
   useAutoSave({ controller: effectifFormController });
 

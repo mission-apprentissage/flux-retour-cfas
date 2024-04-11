@@ -51,7 +51,7 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: D
     },
     {
       $group: {
-        _id: groupBy ? `${groupBy}` : null,
+        _id: groupBy,
         apprentis: {
           $sum: {
             $cond: [{ $eq: ["$dernierStatutMois.valeur", STATUT_APPRENANT.APPRENTI] }, 1, 0],
