@@ -1,10 +1,14 @@
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Container, Heading, HStack } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {
   IEffectifCreationCoordonnesSchema,
   IEffectifCreationContratsSchema,
   IEffectifCreationFormationSchema,
+  IEffectifCreationCoordonnesFormSchema,
+  effectifCreationCoordonnesFormSchema,
+  effectifCreationCoordonnesSchema,
 } from "shared/models/apis/effectifsCreationSchema";
 
 import { _get, _post, _put } from "@/common/httpClient";
@@ -12,7 +16,7 @@ import { Organisme } from "@/common/internal/Organisme";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import StepperComponent from "@/components/Stepper/Stepper";
-import { useQuery } from "@tanstack/react-query";
+
 import EffectifCoordonneesComponent from "./steps/EffectifCoordonneesComponent";
 
 interface EffectifCreationPageProps {
@@ -20,10 +24,7 @@ interface EffectifCreationPageProps {
 }
 
 const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
-
-
-
-  const [coordonnees, setCoordonnees] = useState({} as IEffectifCreationCoordonnesSchema);
+  const [coordonnees, setCoordonnees] = useState({} as IEffectifCreationCoordonnesFormSchema);
   const [contrats, setContrats] = useState({} as IEffectifCreationContratsSchema);
   const [formation, setFormation] = useState({} as IEffectifCreationFormationSchema);
 
@@ -33,44 +34,47 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
   };
 
   const getDraft = async () => {
-    return await _get("/api/v1/user/effectif-draft")
-  }
+    const draft = await _get("/api/v1/user/effectif-draft");
+    const formattedDraft = effectifCreationCoordonnesSchema.parse(draft);
+    return effectifCreationCoordonnesFormSchema.parse(formattedDraft);
+  };
 
   const { data, error, isFetching } = useQuery({
     queryKey: ["effectif-query"],
-    queryFn: getDraft
+    queryFn: getDraft,
   });
 
   useEffect(() => {
     if (!data) {
-      return
+      return;
     }
     const { apprenant, annee_scolaire, formation, organisme, contrats } = data;
-    console.log(apprenant)
-    setCoordonnees({ apprenant })
-    console.log(coordonnees)
+    console.log(apprenant);
+    setCoordonnees({ apprenant });
+    console.log(coordonnees);
   }, [isFetching, error, data]);
 
-  const steps = useMemo(() => ([
-    {
-      title: "Renseigner les coordonnées de l'apprenant",
-      component: (props) => (
-        <EffectifCoordonneesComponent onValidate={onCoordonneesValidate} {...props} />
-      ),
-    },
-    {
-      title: "Renseigner la formation de l'apprenant",
-      component: () => null,
-    },
-    {
-      title: "Renseigner le contrat d'apprentissage de l'apprenant",
-      component: () => null,
-    },
-    {
-      title: "Relecture finale et validation",
-      component: () => null,
-    },
-  ]), [coordonnees]);
+  const steps = useMemo(
+    () => [
+      {
+        title: "Renseigner les coordonnées de l'apprenant",
+        component: (props) => <EffectifCoordonneesComponent onValidate={onCoordonneesValidate} {...props} />,
+      },
+      {
+        title: "Renseigner la formation de l'apprenant",
+        component: () => null,
+      },
+      {
+        title: "Renseigner le contrat d'apprentissage de l'apprenant",
+        component: () => null,
+      },
+      {
+        title: "Relecture finale et validation",
+        component: () => null,
+      },
+    ],
+    [coordonnees]
+  );
 
   return (
     <SimplePage>

@@ -30,8 +30,20 @@ export const effectifCreationSchema = z.object({
   ...effectifCreationContratsSchema.shape,
 });
 
+export const effectifCreationCoordonnesFormSchema = effectifCreationCoordonnesSchema.transform(({ apprenant }) => {
+  return {
+    apprenant: {
+      ...apprenant,
+      date_de_naissance: apprenant.date_de_naissance?.toISOString().split("T")[0],
+      date_rqth: apprenant.date_rqth?.toISOString().split("T")[0],
+    },
+  };
+});
+
 export type IEffectifCreationSchema = z.output<typeof effectifCreationSchema>;
 
 export type IEffectifCreationContratsSchema = z.output<typeof effectifCreationContratsSchema>;
 export type IEffectifCreationFormationSchema = z.output<typeof effectifCreationFormationSchema>;
 export type IEffectifCreationCoordonnesSchema = z.output<typeof effectifCreationCoordonnesSchema>;
+
+export type IEffectifCreationCoordonnesFormSchema = z.output<typeof effectifCreationCoordonnesFormSchema>;
