@@ -1,4 +1,5 @@
 import { Box, HStack, Text, Image, Button, Link } from "@chakra-ui/react";
+import { useSearchParams } from "next/navigation";
 
 import { Organisme } from "@/common/internal/Organisme";
 import { usePlausibleTracking } from "@/hooks/plausible";
@@ -38,8 +39,22 @@ interface CerfaLinkProps {
   organisme: Organisme;
 }
 const CerfaLink = (props: CerfaLinkProps) => {
-  const externaLink = `https://contrat.apprentissage.beta.gouv.fr/cerfa?utm_source=tdb&utm_content=${props.organisme._id}`;
+  const CERFA_URL = `https://contrat.apprentissage.beta.gouv.fr/cerfa`;
+
   const { trackPlausibleEvent } = usePlausibleTracking();
+  const searchParams = useSearchParams();
+
+  const buildUrlWithUtm = () => {
+    const url = new URL(CERFA_URL);
+    const utmSource = "tdb";
+    const utmCampaign = searchParams.get("utm_campaign");
+    const utmContent = props.organisme._id;
+
+    url.searchParams.set("utm_source", utmSource);
+    url.searchParams.set("utm_content", utmContent);
+    utmCampaign && url.searchParams.set("utm_campaign", utmCampaign);
+    return url.toString();
+  };
 
   const onLinkClicked = () => {
     trackPlausibleEvent("clic_redirection_cerfa", undefined, {
@@ -62,7 +77,7 @@ const CerfaLink = (props: CerfaLinkProps) => {
           <Text mb={"12px"} fontSize={14} style={contentStyle}>
             Remplissez vos prochains contrats CERFA : simple, rapide et sans erreur.
           </Text>
-          <Link href={externaLink} onClick={onLinkClicked} isExternal>
+          <Link href={buildUrlWithUtm()} onClick={onLinkClicked} isExternal>
             <Button variant="primary" padding={"8px 24px"} mr={1}>
               <Edition></Edition>
               <Text ml={2} style={buttonStyle}>
