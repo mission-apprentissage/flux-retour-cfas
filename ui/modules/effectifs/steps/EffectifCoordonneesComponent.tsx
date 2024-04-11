@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { DERNIER_DIPLOME_OBTENU, PAYS, SITUATION_AVANT_CONTRAT } from "shared";
 import {
   IEffectifCreationCoordonnesSchema,
   IEffectifCreationSchema,
@@ -23,7 +24,6 @@ import {
 } from "shared/models/apis/effectifsCreationSchema";
 
 import { INDICE_DE_REPETITION_OPTIONS } from "@/modules/mon-espace/effectifs/engine/effectifForm/domain/indiceDeRepetionOptions";
-import { PAYS } from "shared";
 
 interface EffectfCoordonneesComponent {
   data: IEffectifCreationSchema;
@@ -241,7 +241,9 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
               <FormLabel>Pays</FormLabel>
               <Select placeholder="Sélectionnez" {...register("apprenant.adresse.pays")}>
                 {PAYS.map(({ code, label }) => (
-                  <option value={code}>{label}</option>
+                  <option key={code} value={code}>
+                    {label}
+                  </option>
                 ))}
               </Select>
             </FormControl>
@@ -313,20 +315,30 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
           <HStack style={rowStyle}>
             <FormControl flex={1}>
               <FormLabel>Situation avant ce contrat</FormLabel>
-              <Select placeholder="Sélectionnez">
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
+              <Select
+                placeholder="Sélectionnez"
+                {...register("apprenant.situation_avant_contrat", { setValueAs: (v) => parseInt(v) })}
+              >
+                {SITUATION_AVANT_CONTRAT.map(({ label, value }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </Select>
             </FormControl>
           </HStack>
           <HStack style={rowStyle}>
             <FormControl flex={1} style={inputStyle}>
               <FormLabel>Dernier diplôme ou titre préparé</FormLabel>
-              <Select placeholder="Sélectionnez">
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
+              <Select
+                placeholder="Sélectionnez"
+                {...register("apprenant.dernier_diplome", { setValueAs: (v) => parseInt(v) })}
+              >
+                {DERNIER_DIPLOME_OBTENU.map(({ label, value }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </Select>
             </FormControl>
             <FormControl flex={1}>
