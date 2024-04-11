@@ -122,7 +122,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           apprenants: 35,
           abandons: 15,
           apprentis: 5,
-          inscritsSansContrat: 10,
+          inscrits: 10,
           rupturants: 20,
         },
       ],

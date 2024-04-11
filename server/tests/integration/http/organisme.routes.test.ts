@@ -574,7 +574,7 @@ describe("Routes /organismes/:id", () => {
             expect(response.data).toStrictEqual({
               apprenants: 35,
               apprentis: 5,
-              inscritsSansContrat: 10,
+              inscrits: 10,
               abandons: 15,
               rupturants: 20,
             });
@@ -728,7 +728,7 @@ describe("Routes /organismes/:id", () => {
                 rncp: ficheRNCP,
                 apprenants: 1,
                 apprentis: 1,
-                inscritsSansContrat: 0,
+                inscrits: 0,
                 rupturants: 0,
                 abandons: 0,
               } satisfies IndicateursEffectifsAvecFormation,
