@@ -15,6 +15,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { DERNIER_DIPLOME_OBTENU, PAYS, SITUATION_AVANT_CONTRAT } from "shared";
 import {
@@ -32,9 +33,10 @@ interface EffectfCoordonneesComponent {
   next: any;
 }
 
-const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: EffectfCoordonneesComponent) => {
+const EffectfCoordonneesComponent = ({ data, next, onValidate }: EffectfCoordonneesComponent) => {
+  const [representantForm, setRepresentantForm] = useState(false);
+
   const { apprenant } = data;
-  console.log(apprenant);
   const {
     register,
     handleSubmit,
@@ -45,7 +47,6 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
     defaultValues: { apprenant },
     resolver: zodResolver(effectifCreationCoordonnesSchema),
   });
-  console.log(errors);
   const style = {
     border: "2px solid #F9F8F6",
     padding: "32px",
@@ -68,7 +69,6 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
   };
 
   const onSubmit = async (data: IEffectifCreationCoordonnesSchema) => {
-    console.log(data);
     await onValidate(data);
     next.action();
   };
@@ -78,7 +78,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
         <VStack>
           <HStack style={rowStyle}>
             <FormControl style={inputStyle} isInvalid={!!errors.apprenant?.prenom?.message}>
-              <FormLabel>Prénom de l'apprenti(e)</FormLabel>
+              <FormLabel>Prénom de l&apos;apprenti(e)</FormLabel>
               <Input
                 variant="effectifForm"
                 placeholder="Exemple: Nathan"
@@ -91,7 +91,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
 
             <FormControl isInvalid={!!errors.apprenant?.nom?.message}>
-              <FormLabel>Nom de naissance de l'apprenti(e)</FormLabel>
+              <FormLabel>Nom de naissance de l&apos;apprenti(e)</FormLabel>
               <Input variant="effectifForm" placeholder="Exemple: Dupond" {...register("apprenant.nom")} />
               <FormErrorMessage>{errors.apprenant?.nom?.message}</FormErrorMessage>
             </FormControl>
@@ -166,7 +166,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
           </HStack>
           <HStack style={rowStyle}>
-            <Text style={subTitleStyle}>Adresse et contact de l'apprenti(e)</Text>
+            <Text style={subTitleStyle}>Adresse et contact de l&apos;apprenti(e)</Text>
           </HStack>
           <HStack style={rowStyle}>
             <FormControl flex={1} isInvalid={!!errors.apprenant?.adresse?.numero?.message} style={inputStyle}>
@@ -205,7 +205,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
           </HStack>
           <HStack style={rowStyle}>
             <FormControl isInvalid={!!errors.apprenant?.adresse?.complement?.message}>
-              <FormLabel>Complément d'adresse (optionnel)</FormLabel>
+              <FormLabel>Complément d&apos;adresse (optionnel)</FormLabel>
               <Input
                 variant="effectifForm"
                 placeholder="Exemple : Hôtel de ville, Entrée, Bâtiment ; Étage ; Service ; "
@@ -250,7 +250,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
           </HStack>
           <HStack style={rowStyle}>
             <FormControl flex={1} isInvalid={!!errors.apprenant?.telephone?.message} style={inputStyle}>
-              <FormLabel>Téléphone de l'apprenti(e)</FormLabel>
+              <FormLabel>Téléphone de l&apos;apprenti(e)</FormLabel>
               <InputGroup>
                 <InputLeftAddon backgroundColor="#e6e6e6">+33</InputLeftAddon>
                 <Input
@@ -264,7 +264,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
 
             <FormControl flex={1} isInvalid={!!errors.apprenant?.courriel?.message}>
-              <FormLabel>Courriel de l'apprenti(e)</FormLabel>
+              <FormLabel>Courriel de l&apos;apprenti(e)</FormLabel>
               <Input
                 variant="effectifForm"
                 placeholder="Exemple: genial@mail.com"
@@ -275,7 +275,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
           </HStack>
           <HStack style={rowStyle}>
-            <Text style={subTitleStyle}>Informations supplémentaires sur l'apprenti(e)</Text>
+            <Text style={subTitleStyle}>Informations supplémentaires sur l&apos;apprenti(e)</Text>
           </HStack>
           <HStack style={rowStyle}>
             <FormControl>
@@ -313,7 +313,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
           </HStack>
           <HStack style={rowStyle}>
-            <FormControl flex={1}>
+            <FormControl flex={1} style={inputStyle}>
               <FormLabel>Situation avant ce contrat</FormLabel>
               <Select
                 placeholder="Sélectionnez"
@@ -326,9 +326,7 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
                 ))}
               </Select>
             </FormControl>
-          </HStack>
-          <HStack style={rowStyle}>
-            <FormControl flex={1} style={inputStyle}>
+            <FormControl flex={1}>
               <FormLabel>Dernier diplôme ou titre préparé</FormLabel>
               <Select
                 placeholder="Sélectionnez"
@@ -339,14 +337,6 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
                     {label}
                   </option>
                 ))}
-              </Select>
-            </FormControl>
-            <FormControl flex={1}>
-              <FormLabel>Dernier classe/année suivie </FormLabel>
-              <Select placeholder="Sélectionnez">
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
               </Select>
             </FormControl>
           </HStack>
@@ -366,8 +356,13 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
           </HStack>
           <HStack style={rowStyle}>
             <FormControl>
-              <FormLabel>L'apprenti est sous la responsabilité d'un représentant légal (non émancipé) </FormLabel>
-              <RadioGroup>
+              <FormLabel>
+                L&apos;apprenti est sous la responsabilité d&apos;un représentant légal (non émancipé){" "}
+              </FormLabel>
+              <RadioGroup
+                onChange={(v) => setRepresentantForm(v === "false")}
+                value={representantForm ? "false" : "true"}
+              >
                 <HStack spacing="24px">
                   <Radio value="true">Oui</Radio>
                   <Radio value="false">Non</Radio>
@@ -376,7 +371,11 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
           </HStack>
           <HStack style={rowStyle}>
-            <FormControl isInvalid={!!errors.apprenant?.representant_legal?.nom?.message} style={inputStyle}>
+            <FormControl
+              isDisabled={representantForm}
+              isInvalid={!!errors.apprenant?.representant_legal?.nom?.message}
+              style={inputStyle}
+            >
               <FormLabel>Nom représentant </FormLabel>
               <Input
                 variant="effectifForm"
@@ -386,7 +385,10 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
               />
               <FormErrorMessage>{errors.apprenant?.representant_legal?.nom?.message}</FormErrorMessage>
             </FormControl>
-            <FormControl isInvalid={!!errors.apprenant?.representant_legal?.prenom?.message}>
+            <FormControl
+              isDisabled={representantForm}
+              isInvalid={!!errors.apprenant?.representant_legal?.prenom?.message}
+            >
               <FormLabel>Prénom représentant </FormLabel>
               <Input
                 variant="effectifForm"
@@ -398,7 +400,11 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
             </FormControl>
           </HStack>
           <HStack style={rowStyle}>
-            <FormControl isInvalid={!!errors.apprenant?.representant_legal?.courriel?.message} style={inputStyle}>
+            <FormControl
+              isDisabled={representantForm}
+              isInvalid={!!errors.apprenant?.representant_legal?.courriel?.message}
+              style={inputStyle}
+            >
               <FormLabel>Courriel représentant </FormLabel>
               <Input
                 variant="effectifForm"
@@ -408,7 +414,10 @@ const EffectfCoordonneesComponent = ({ data, previous, next, onValidate }: Effec
               />
               <FormErrorMessage>{errors.apprenant?.representant_legal?.courriel?.message}</FormErrorMessage>
             </FormControl>
-            <FormControl isInvalid={!!errors.apprenant?.representant_legal?.telephone?.message}>
+            <FormControl
+              isDisabled={representantForm}
+              isInvalid={!!errors.apprenant?.representant_legal?.telephone?.message}
+            >
               <FormLabel>Téléphone représentant </FormLabel>
               <InputGroup>
                 <InputLeftAddon backgroundColor="#e6e6e6">+33</InputLeftAddon>
