@@ -17,7 +17,10 @@ import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
 import StepperComponent from "@/components/Stepper/Stepper";
 
+import EffectifContratsComponent from "./steps/EffectifContratsComponent";
 import EffectifCoordonneesComponent from "./steps/EffectifCoordonneesComponent";
+import EffectifFormationComponent from "./steps/EffectifFomationComponent";
+import EffectifValidationComponent from "./steps/EffectifValidationComponent";
 
 interface EffectifCreationPageProps {
   organisme: Organisme;
@@ -28,9 +31,26 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
   const [contrats, setContrats] = useState({} as IEffectifCreationContratsSchema);
   const [formation, setFormation] = useState({} as IEffectifCreationFormationSchema);
 
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
   const onCoordonneesValidate = async (data: IEffectifCreationCoordonnesSchema) => {
-    const r = await _put("/api/v1/user/effectif-draft", data);
-    console.log(r);
+    await _put("/api/v1/user/effectif-draft", data);
+    refetch();
+  };
+
+  const onFormationValidate = async () => {
+    console.log("Formation validate");
+    await refetch();
+  };
+
+  const onContratValidate = async () => {
+    console.log("Formation validate");
+    await refetch();
+  };
+
+  const onEffectifValidate = async () => {
+    console.log("onEffectifValidate");
+    await refetch();
   };
 
   const getDraft = async () => {
@@ -39,7 +59,7 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
     return effectifCreationCoordonnesFormSchema.parse(formattedDraft);
   };
 
-  const { data, error, isFetching } = useQuery({
+  const { data, error, isFetching, refetch } = useQuery({
     queryKey: ["effectif-query"],
     queryFn: getDraft,
   });
@@ -49,32 +69,28 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
       return;
     }
     const { apprenant, annee_scolaire, formation, organisme, contrats } = data;
-    console.log(apprenant);
+
     setCoordonnees({ apprenant });
-    console.log(coordonnees);
   }, [isFetching, error, data]);
 
-  const steps = useMemo(
-    () => [
-      {
-        title: "Renseigner les coordonnées de l'apprenant",
-        component: (props) => <EffectifCoordonneesComponent onValidate={onCoordonneesValidate} {...props} />,
-      },
-      {
-        title: "Renseigner la formation de l'apprenant",
-        component: () => null,
-      },
-      {
-        title: "Renseigner le contrat d'apprentissage de l'apprenant",
-        component: () => null,
-      },
-      {
-        title: "Relecture finale et validation",
-        component: () => null,
-      },
-    ],
-    [coordonnees]
-  );
+  const steps = [
+    {
+      title: "Renseigner les coordonnées de l'apprenant",
+      component: (props) => <EffectifCoordonneesComponent onValidate={onCoordonneesValidate} {...props} />,
+    },
+    {
+      title: "Renseigner la formation de l'apprenant",
+      component: (props) => <EffectifFormationComponent onValidate={onFormationValidate} {...props} />,
+    },
+    {
+      title: "Renseigner le contrat d'apprentissage de l'apprenant",
+      component: (props) => <EffectifContratsComponent onValidate={onContratValidate} {...props} />,
+    },
+    {
+      title: "Relecture finale et validation",
+      component: (props) => <EffectifValidationComponent onValidate={onEffectifValidate} {...props} />,
+    },
+  ];
 
   return (
     <SimplePage>
@@ -93,7 +109,14 @@ const EffectifCreationPage = ({ organisme }: EffectifCreationPageProps) => {
             Retour au tableau des effectifs
           </Link>
         </HStack>
-        {!isFetching && <StepperComponent steps={steps} data={data} />}
+        {!isFetching && (
+          <StepperComponent
+            currentStepIndex={currentStepIndex}
+            setCurrentStepIndex={setCurrentStepIndex}
+            steps={steps}
+            data={data}
+          />
+        )}
       </Container>
     </SimplePage>
   );

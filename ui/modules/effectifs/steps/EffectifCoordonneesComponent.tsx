@@ -434,11 +434,6 @@ const EffectfCoordonneesComponent = ({ data, next, onValidate }: EffectfCoordonn
         </VStack>
       </Box>
       <HStack justifyContent="end">
-        {/* {previous.canGo && (
-          <Button variant="secondary" onClick={() => previous.action()} type="submit">
-            <Text as="span">Retour à l&apos;étape suivante</Text>
-          </Button>
-        )} */}
         {next.canGo && (
           <Button variant="primary" type="submit">
             <Text as="span">Enregistrer et passer à l&apos;étape suivante</Text>

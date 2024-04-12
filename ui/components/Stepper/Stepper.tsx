@@ -9,6 +9,8 @@ interface Step {
 interface StepperComponentProps {
   steps: Array<Step>;
   data: any;
+  currentStepIndex: any;
+  setCurrentStepIndex: any;
 }
 
 const LinearStepper = ({ index, size }) => {
@@ -24,7 +26,7 @@ const LinearStepper = ({ index, size }) => {
     </HStack>
   );
 };
-const StepperComponent = ({ steps, data }: StepperComponentProps) => {
+const StepperComponent = ({ steps, data, currentStepIndex, setCurrentStepIndex }: StepperComponentProps) => {
   const stepLabelStyle = {
     color: "#3A3A3A",
     fontSize: "14px",
@@ -40,27 +42,23 @@ const StepperComponent = ({ steps, data }: StepperComponentProps) => {
     fontSize: "20px",
     fontWeight: "700",
   };
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const currentStep = useMemo(() => steps[currentStepIndex], [currentStepIndex]);
-  const nextStep = useMemo(
-    () => (currentStepIndex + 1 < steps.length ? steps[currentStepIndex + 1] : null),
-    [currentStepIndex]
-  );
 
-  const previous = useMemo(
-    () => ({
-      canGo: currentStepIndex > 0,
-      action: () => currentStepIndex > 0 && setCurrentStepIndex(currentStepIndex - 1),
-    }),
-    [currentStepIndex]
-  );
-  const next = useMemo(
-    () => ({
-      canGo: currentStepIndex + 1 < steps.length,
-      action: () => currentStepIndex + 1 < steps.length && setCurrentStepIndex(currentStepIndex + 1),
-    }),
-    [currentStepIndex]
-  );
+  const currentStep = steps[currentStepIndex];
+  const nextStep = currentStepIndex + 1 < steps.length ? steps[currentStepIndex + 1] : null;
+
+  const previous = {
+    canGo: currentStepIndex > 0,
+    action: () => currentStepIndex > 0 && setCurrentStepIndex(currentStepIndex - 1),
+  };
+
+  const next = {
+    canGo: true,
+    action: () => {
+      if (currentStepIndex + 1 < steps.length) {
+        setCurrentStepIndex(currentStepIndex + 1);
+      }
+    },
+  };
 
   return (
     <Box>
