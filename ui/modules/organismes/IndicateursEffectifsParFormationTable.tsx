@@ -53,7 +53,7 @@ const formationsTableColumnsDefs: CustomColumnDef[] = [
     ),
   },
   {
-    accessorKey: "inscritsSansContrat",
+    accessorKey: "inscrits",
     header: () => (
       <>
         <InscritsSansContratsIcon w="16px" />
@@ -199,7 +199,7 @@ function IndicateursEffectifsParFormationTable(props: IndicateursEffectifsParFor
                       </Text>
                     </Td>
                     <Td>{formation.apprentis}</Td>
-                    <Td>{formation.inscritsSansContrat}</Td>
+                    <Td>{formation.inscrits}</Td>
                     <Td>{formation.rupturants}</Td>
                     <Td>{formation.abandons}</Td>
                   </Tr>
