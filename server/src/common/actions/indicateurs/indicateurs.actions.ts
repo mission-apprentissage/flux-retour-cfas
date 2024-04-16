@@ -8,6 +8,7 @@ import {
   IndicateursEffectifsAvecOrganisme,
   IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
+  STATUT_APPRENANT,
   TypeEffectifNominatif,
 } from "shared";
 
@@ -25,34 +26,31 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: Date) {
+function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: Date) {
+  const currentYear = currentDate.getUTCFullYear().toString();
+  const currentMonth = (currentDate.getUTCMonth() + 1).toString().padStart(2, "0");
+
   return [
     {
       $addFields: {
-        "apprenant.historique_statut": {
-          // TODO: s'assurer que le tableau est TOUJOURS trié, puis supprimer cette étape
-          $sortArray: {
-            input: {
+        dernierStatut: {
+          $arrayElemAt: [
+            {
               $filter: {
-                input: "$apprenant.historique_statut",
+                input: "$_computed.statut.historique",
                 as: "statut",
                 cond: {
-                  $lte: ["$$statut.date_statut", dateStatus],
+                  $and: [
+                    { $lte: ["$$statut.annee", currentYear] },
+                    {
+                      $or: [{ $lt: ["$$statut.annee", currentYear] }, { $lte: ["$$statut.mois", currentMonth] }],
+                    },
+                  ],
                 },
               },
             },
-            sortBy: { date_statut: 1 },
-          },
-        },
-      },
-    },
-    {
-      $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
-    },
-    {
-      $addFields: {
-        statut_apprenant_at_date: {
-          $last: "$apprenant.historique_statut",
+            -1,
+          ],
         },
       },
     },
@@ -61,77 +59,33 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: D
         _id: groupBy,
         apprentis: {
           $sum: {
-            $cond: {
-              if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-              then: 1,
-              else: 0,
-            },
-          },
-        },
-        abandons: {
-          $sum: {
-            $cond: {
-              if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
-              then: 1,
-              else: 0,
-            },
-          },
-        },
-        inscritsSansContrat: {
-          $sum: {
-            $cond: {
-              if: {
-                $and: [
-                  { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                  {
-                    $eq: [
-                      0,
-                      {
-                        $size: {
-                          $filter: {
-                            input: "$apprenant.historique_statut",
-                            cond: {
-                              $and: [
-                                { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                                { $lte: ["$$this.date_statut", dateStatus] },
-                              ],
-                            },
-                            limit: 1,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                ],
-              },
-              then: 1,
-              else: 0,
-            },
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.APPRENTI] }, 1, 0],
           },
         },
         inscrits: {
           $sum: {
-            $cond: {
-              if: {
-                $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit],
-              },
-              then: 1,
-              else: 0,
-            },
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.INSCRIT] }, 1, 0],
+          },
+        },
+        abandons: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.ABANDON] }, 1, 0],
+          },
+        },
+        rupturants: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] }, 1, 0],
           },
         },
       },
     },
     {
       $project: {
-        _id: 1,
-        apprenants: {
-          $sum: ["$apprentis", "$inscrits"],
-        },
+        apprenants: { $sum: ["$apprentis", "$inscrits", "$rupturants"] },
         apprentis: 1,
-        inscritsSansContrat: 1,
+        inscrits: 1,
         abandons: 1,
-        rupturants: { $subtract: ["$inscrits", "$inscritsSansContrat"] },
+        rupturants: 1,
       },
     },
   ];
@@ -158,7 +112,7 @@ export async function getIndicateursEffectifsParDepartement(
           departement: "$_id",
           apprenants: 1,
           apprentis: 1,
-          inscritsSansContrat: 1,
+          inscrits: 1,
           abandons: 1,
           rupturants: 1,
         },
@@ -519,7 +473,7 @@ export async function getIndicateursEffectifsParOrganisme(
 
           apprenants: 1,
           apprentis: 1,
-          inscritsSansContrat: 1,
+          inscrits: 1,
           abandons: 1,
           rupturants: 1,
         },
@@ -552,7 +506,7 @@ export async function getOrganismeIndicateursEffectifsParFormation(
           rncp_code: "$_id",
           apprenants: 1,
           apprentis: 1,
-          inscritsSansContrat: 1,
+          inscrits: 1,
           abandons: 1,
           rupturants: 1,
         },
@@ -764,7 +718,7 @@ export async function getOrganismeIndicateursEffectifs(
           _id: 0,
           apprenants: 1,
           apprentis: 1,
-          inscritsSansContrat: 1,
+          inscrits: 1,
           abandons: 1,
           rupturants: 1,
         },
@@ -775,7 +729,7 @@ export async function getOrganismeIndicateursEffectifs(
     indicateurs ?? {
       apprenants: 0,
       apprentis: 0,
-      inscritsSansContrat: 0,
+      inscrits: 0,
       abandons: 0,
       rupturants: 0,
     }
