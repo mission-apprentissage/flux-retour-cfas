@@ -1,9 +1,14 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 
-import { createComputedStatutObject } from "@/common/actions/effectifs.statut.actions";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
-import { createSampleEffectif, createRandomFormation } from "@tests/data/randomizedSample";
+import {
+  historySequenceApprenti,
+  historySequenceApprentiToAbandon,
+  historySequenceApprentiToInscrit,
+  historySequenceInscrit,
+} from "@tests/data/historySequenceSamples";
+import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { commonEffectifsAttributes, commonOrganismeAttributes } from "@tests/utils/permissions";
 import { generate, id, initTestApp } from "@tests/utils/testUtils";
@@ -11,16 +16,13 @@ import { generate, id, initTestApp } from "@tests/utils/testUtils";
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 
-const ANNEE_SCOLAIRE = "2022-2023";
-
-const date = "2023-04-13T10:00:00.000Z";
-
 describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effectifs et organismes au national ", () => {
   useMongo();
   beforeEach(async () => {
     app = await initTestApp();
     httpClient = app.httpClient;
 
+    const anneeScolaire = "2022-2023";
     await Promise.all([
       organismesDb().insertMany([
         {
@@ -58,112 +60,58 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
       ]),
       effectifsDb().insertMany([
         // 5 apprentis
-        ...generate(5, () => {
-          const effectif = {
-            _id: new ObjectId(),
-            ...createSampleEffectif({
-              ...commonEffectifsAttributes,
-              formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
-              annee_scolaire: ANNEE_SCOLAIRE,
-              contrats: [
-                {
-                  date_debut: new Date(date),
-                },
-              ],
-            }),
-          };
-
-          const effectifGenerated = {
-            ...effectif,
-            _computed: {
-              ...effectif._computed,
-              statut: createComputedStatutObject(effectif, new Date(date)),
+        ...generate(5, () => ({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceApprenti,
             },
-          };
-
-          return effectifGenerated;
-        }),
+          }),
+        })),
 
         // 10 Inscrit
-        ...generate(10, () => {
-          const moinsDe90Jours = new Date(new Date(date).getTime());
-          moinsDe90Jours.setDate(moinsDe90Jours.getDate() + 89);
-
-          return {
-            _id: new ObjectId(),
-            ...createSampleEffectif({
-              ...commonEffectifsAttributes,
-              formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
-              annee_scolaire: ANNEE_SCOLAIRE,
-            }),
-          };
-        }),
-
-        // // 15 ApprentiToAbandon
-        ...generate(15, () => {
-          const plusDe180Jours = new Date(new Date(date).getTime());
-          plusDe180Jours.setDate(plusDe180Jours.getDate() - 191);
-
-          const effectif = {
-            _id: new ObjectId(),
-            ...createSampleEffectif({
-              ...commonEffectifsAttributes,
-              formation: createRandomFormation(ANNEE_SCOLAIRE, plusDe180Jours),
-              annee_scolaire: ANNEE_SCOLAIRE,
-              contrats: [
-                {
-                  date_debut: plusDe180Jours,
-                  date_fin: plusDe180Jours,
-                  date_rupture: plusDe180Jours,
-                },
-              ],
-            }),
-          };
-
-          const effectifGenerated = {
-            ...effectif,
-            _computed: {
-              ...effectif._computed,
-              statut: createComputedStatutObject(effectif, new Date(date)),
+        ...generate(10, () => ({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceInscrit,
             },
-          };
+          }),
+        })),
 
-          return effectifGenerated;
-        }),
+        // 15 ApprentiToAbandon
+        ...generate(15, () => ({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceApprentiToAbandon,
+            },
+          }),
+        })),
 
         // 20 ApprentiToInscrit
-        ...generate(20, () => {
-          const effectif = {
-            _id: new ObjectId(),
-            ...createSampleEffectif({
-              ...commonEffectifsAttributes,
-              formation: createRandomFormation(ANNEE_SCOLAIRE, new Date(date)),
-              annee_scolaire: ANNEE_SCOLAIRE,
-              contrats: [
-                {
-                  date_debut: new Date(date),
-                  date_fin: new Date(date),
-                  date_rupture: new Date(date),
-                },
-              ],
-            }),
-          };
-
-          const effectifGenerated = {
-            ...effectif,
-            _computed: {
-              ...effectif._computed,
-              statut: createComputedStatutObject(effectif, new Date(date)),
+        ...generate(20, () => ({
+          _id: new ObjectId(),
+          ...createSampleEffectif({
+            ...commonEffectifsAttributes,
+            annee_scolaire: anneeScolaire,
+            apprenant: {
+              historique_statut: historySequenceApprentiToInscrit,
             },
-          };
-
-          return effectifGenerated;
-        }),
+          }),
+        })),
       ]),
     ]);
   });
 
   it("Accès public", async () => {
+    const date = "2023-04-13T10:00:00.000Z";
     const response = await httpClient.get(`/api/v1/indicateurs/national?date=${date}`);
 
     expect(response.status).toEqual(200);
@@ -174,7 +122,7 @@ describe("GET /api/v1/indicateurs/national - liste des indicateurs sur les effec
           apprenants: 35,
           abandons: 15,
           apprentis: 5,
-          inscrits: 10,
+          inscritsSansContrat: 10,
           rupturants: 20,
         },
       ],
