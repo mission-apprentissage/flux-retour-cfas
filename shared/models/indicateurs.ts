@@ -5,7 +5,7 @@ import { IRncp } from "./data/rncp.model";
 export interface IndicateursEffectifs {
   apprenants: number;
   apprentis: number;
-  inscrits: number;
+  inscritsSansContrat: number;
   abandons: number;
   rupturants: number;
 }

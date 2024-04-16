@@ -29,8 +29,8 @@ export const indicateursParOrganismeExportColumns = [
     width: 10,
   },
   {
-    label: "inscrits",
-    key: "inscrits",
+    label: "inscritsSansContrat",
+    key: "inscritsSansContrat",
     width: 16,
   },
   {
