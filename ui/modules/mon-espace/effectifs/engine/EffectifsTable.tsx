@@ -172,9 +172,9 @@ const EffectifsTable = ({
                   size: 170,
                   header: () => "Statut courant apprenant(e)",
                   cell: ({ row }) => {
-                    const { statut } = organismesEffectifs[row.id];
+                    const statut = organismesEffectifs[row.id]?.statut;
 
-                    if (!statut.parcours.length) {
+                    if (!statut || !statut.parcours.length) {
                       return (
                         <Text fontSize="1rem" fontWeight="bold" color="redmarianne">
                           Aucun statut
