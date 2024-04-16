@@ -67,7 +67,7 @@ export function useIndicateurNational(
         (acc, indicateursDepartement) => {
           acc.apprenants += indicateursDepartement.apprenants;
           acc.apprentis += indicateursDepartement.apprentis;
-          acc.inscrits += indicateursDepartement.inscrits;
+          acc.inscritsSansContrat += indicateursDepartement.inscritsSansContrat;
           acc.abandons += indicateursDepartement.abandons;
           acc.rupturants += indicateursDepartement.rupturants;
           return acc;
@@ -75,7 +75,7 @@ export function useIndicateurNational(
         {
           apprenants: 0,
           apprentis: 0,
-          inscrits: 0,
+          inscritsSansContrat: 0,
           abandons: 0,
           rupturants: 0,
         }
