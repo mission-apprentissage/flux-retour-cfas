@@ -26,21 +26,26 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: Date) {
-  const year = dateStatus.getUTCFullYear().toString();
-  const month = (dateStatus.getUTCMonth() + 1).toString().padStart(2, "0");
+function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: Date) {
+  const currentYear = currentDate.getUTCFullYear().toString();
+  const currentMonth = (currentDate.getUTCMonth() + 1).toString().padStart(2, "0");
 
   return [
     {
       $addFields: {
-        dernierStatutMois: {
+        dernierStatut: {
           $arrayElemAt: [
             {
               $filter: {
                 input: "$_computed.statut.historique",
                 as: "statut",
                 cond: {
-                  $and: [{ $eq: ["$$statut.annee", year] }, { $eq: ["$$statut.mois", month] }],
+                  $and: [
+                    { $lte: ["$$statut.annee", currentYear] },
+                    {
+                      $or: [{ $lt: ["$$statut.annee", currentYear] }, { $lte: ["$$statut.mois", currentMonth] }],
+                    },
+                  ],
                 },
               },
             },
@@ -54,22 +59,22 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: D
         _id: groupBy,
         apprentis: {
           $sum: {
-            $cond: [{ $eq: ["$dernierStatutMois.valeur", STATUT_APPRENANT.APPRENTI] }, 1, 0],
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.APPRENTI] }, 1, 0],
           },
         },
         inscrits: {
           $sum: {
-            $cond: [{ $eq: ["$dernierStatutMois.valeur", STATUT_APPRENANT.INSCRIT] }, 1, 0],
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.INSCRIT] }, 1, 0],
           },
         },
         abandons: {
           $sum: {
-            $cond: [{ $eq: ["$dernierStatutMois.valeur", STATUT_APPRENANT.ABANDON] }, 1, 0],
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.ABANDON] }, 1, 0],
           },
         },
         rupturants: {
           $sum: {
-            $cond: [{ $eq: ["$dernierStatutMois.valeur", STATUT_APPRENANT.RUPTURANT] }, 1, 0],
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] }, 1, 0],
           },
         },
       },
