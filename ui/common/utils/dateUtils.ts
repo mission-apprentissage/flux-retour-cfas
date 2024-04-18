@@ -29,7 +29,7 @@ export const formatDateDayMonthYear = (date: string | Date) => {
   return new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 };
 
-export const formatDateNumericDayMonthYear = (date: string) => {
+export const formatDateNumericDayMonthYear = (date: string| Date) => {
   return new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "numeric", year: "numeric" });
 };
 

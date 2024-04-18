@@ -19,7 +19,7 @@ const EffectifValidationComponent = ({ data, previous, next, onValidate }: Effec
   return (
     <>
       <Box style={style}>
-        <EffectifResumeComponent />
+        <EffectifResumeComponent effectif={data} />
       </Box>
       <HStack justifyContent="end">
         {previous.canGo && (
