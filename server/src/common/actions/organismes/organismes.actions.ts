@@ -436,6 +436,7 @@ export const updateEffectifsCountWithHierarchy = async (organisme_id: ObjectId) 
     {
       $set: {
         effectifs_count_with_hierarchy: count,
+        is_transmission_target: !!count,
       },
     },
     { bypassDocumentValidation: true }
