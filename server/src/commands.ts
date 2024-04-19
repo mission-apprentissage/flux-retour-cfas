@@ -472,6 +472,15 @@ program
   .action(createJobAction("hydrate:organismes-effectifs-count"));
 
 /**
+ * Mise à jour des organismes avec le nombre d'effectifs hierarchisé
+ */
+program
+  .command("hydrate:organismes-effectifs-count-with-hierarchy")
+  .description("Mise à jour des organismes avec le nombre d'effectifs hierarchisé")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:organismes-effectifs-count-with-hierarchy"));
+
+/**
  * Job de mise à jour des organismes en allant appeler des API externes pour remplir
  * - Les informations liés au SIRET (API Entreprise)
  * - L'arbre des formations (API Catalogue)
