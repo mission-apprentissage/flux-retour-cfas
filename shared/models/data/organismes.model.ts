@@ -110,13 +110,6 @@ const zOrganisme = z
       })
       .int()
       .optional(),
-    effectifs_count_with_hierarchy: z
-      .number({
-        description:
-          "Compteur sur le nombre d'effectifs de l'organisme en comptant les effectifs des organismes formateur dont il est reponsable",
-      })
-      .int()
-      .nullish(),
     nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION)
       .describe("Nature de l'organisme de formation")
       .optional(),

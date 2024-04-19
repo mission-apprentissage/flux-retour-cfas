@@ -3,6 +3,7 @@ import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLog
 import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassinsEmploi.model";
 import contratsDecaModelDescriptor, { IContratDeca } from "shared/models/data/contratsDeca.model";
 import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
+import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
 import formationsModelDescriptor, { IFormation } from "shared/models/data/formations.model";
@@ -61,6 +62,7 @@ export const organismesReferentielDb = () =>
 export const maintenanceMessageDb = () =>
   getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<IEffectif>(effectifsModelDescriptor.collectionName);
+export const effectifsDECADb = () => getDbCollection<IEffectifDECA>(effectifsDECAModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<IEffectifQueue>(effectifsQueueModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
