@@ -428,6 +428,20 @@ export const updateEffectifsCount = async (organisme_id: ObjectId) => {
   );
 };
 
+export const updateEffectifsCountWithHierarchy = async (organisme_id: ObjectId) => {
+  const organismesIdsList = await findOrganismesFormateursIdsOfOrganisme(organisme_id, true);
+  const count = await effectifsDb().countDocuments({ organisme_id: { $in: [organisme_id, ...organismesIdsList] } });
+  return organismesDb().findOneAndUpdate(
+    { _id: organisme_id },
+    {
+      $set: {
+        effectifs_count_with_hierarchy: count,
+      },
+    },
+    { bypassDocumentValidation: true }
+  );
+};
+
 /**
  * Génération d'une api key s'il n'existe pas
  */

@@ -110,6 +110,13 @@ const zOrganisme = z
       })
       .int()
       .optional(),
+    effectifs_count_with_hierarchy: z
+      .number({
+        description:
+          "Compteur sur le nombre d'effectifs de l'organisme en comptant les effectifs des organismes formateur dont il est reponsable",
+      })
+      .int()
+      .nullish(),
     nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION)
       .describe("Nature de l'organisme de formation")
       .optional(),
@@ -215,6 +222,12 @@ const zOrganisme = z
     created_at: z.date({ description: "Date d'ajout en base de données" }),
     natureValidityWarning: z.boolean().optional(),
     formations: z.array(z.any()).max(0).optional(),
+    is_transmission_target: z
+      .boolean({
+        description:
+          "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
+      })
+      .nullish(),
   })
   .strict();
 
