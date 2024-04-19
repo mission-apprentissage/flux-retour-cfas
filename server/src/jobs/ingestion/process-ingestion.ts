@@ -19,6 +19,7 @@ import { getNiveauFormationFromLibelle } from "@/common/actions/formations.actio
 import {
   findOrganismeByUaiAndSiret,
   updateOrganismeTransmission,
+  updateOrganismesHasTransmittedWithHierarchy,
 } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import {
@@ -26,6 +27,7 @@ import {
   effectifsQueueDb,
   fiabilisationUaiSiretDb,
   formationsCatalogueDb,
+  organismesDb,
 } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
 import { formatError } from "@/common/utils/errorUtils";
@@ -158,9 +160,10 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
     const { result, itemProcessingInfos } = await (effectifQueue.api_version === "v3"
       ? transformEffectifQueueV3ToEffectif(effectifQueue)
       : transformEffectifQueueV1V2ToEffectif(effectifQueue));
-
     // ajout des informations sur le traitement au logger
     itemLogger = itemLogger.child({ ...itemProcessingInfos, format: effectifQueue.api_version });
+
+    handleDECAMechanism(result);
 
     if (result.success) {
       const { effectif, organisme } = result.data;
@@ -599,3 +602,14 @@ async function findOrganismeWithStats(
   }
   return { organisme, stats };
 }
+
+const handleDECAMechanism = async (result) => {
+  if (!result?.data?.organisme) {
+    logger.error("Cannot find target organisme for this transmission");
+    return;
+  }
+
+  const orga_id = result.data.organisme._id;
+  const orga = await organismesDb().findOne({ _id: orga_id });
+  return updateOrganismesHasTransmittedWithHierarchy(orga, true);
+};
