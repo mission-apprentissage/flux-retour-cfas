@@ -5899,6 +5899,18 @@ exports[`validation-schema should create validation schema for organismes: organ
       "bsonType": "int",
       "description": "Compteur sur le nombre d'effectifs de l'organisme",
     },
+    "effectifs_count_with_hierarchy": {
+      "anyOf": [
+        {
+          "bsonType": "int",
+          "description": "Compteur sur le nombre d'effectifs de l'organisme en comptant les effectifs des organismes formateur dont il est reponsable",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Compteur sur le nombre d'effectifs de l'organisme en comptant les effectifs des organismes formateur dont il est reponsable",
+    },
     "effectifs_current_year_count": {
       "bsonType": "int",
       "description": "Compteur sur le nombre d'effectifs de l'organisme sur l'année courante",
@@ -5952,6 +5964,13 @@ exports[`validation-schema should create validation schema for organismes: organ
     "formations": {
       "bsonType": "array",
       "maxItems": 0,
+    },
+    "is_transmission_target": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+      "description": "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
     },
     "last_transmission_date": {
       "bsonType": "date",
