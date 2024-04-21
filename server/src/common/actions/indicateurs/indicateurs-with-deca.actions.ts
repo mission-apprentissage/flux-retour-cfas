@@ -77,10 +77,10 @@ export const getOrganismeIndicateursEffectifs = async (
 
   return {
     apprenants: eff.apprenants + effDECA.apprenants,
-    apprentis: eff.apprenants + effDECA.apprentis,
-    inscritsSansContrat: eff.apprenants + effDECA.inscritsSansContrat,
-    abandons: eff.apprenants + effDECA.abandons,
-    rupturants: eff.apprenants + effDECA.rupturants,
+    apprentis: eff.apprentis + effDECA.apprentis,
+    inscritsSansContrat: eff.inscritsSansContrat + effDECA.inscritsSansContrat,
+    abandons: eff.abandons + effDECA.abandons,
+    rupturants: eff.rupturants + effDECA.rupturants,
   };
 };
 
