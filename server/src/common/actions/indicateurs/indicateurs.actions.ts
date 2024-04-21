@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import {
   Acl,
   CODES_STATUT_APPRENANT,
@@ -19,7 +19,7 @@ import {
   combineFilters,
 } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
@@ -137,17 +137,98 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: D
   ];
 }
 
-export async function getIndicateursEffectifsParDepartement(
+const buildDECAFilter = (decaMode) => (decaMode ? { isDecaCompatible: true } : {});
+
+// Attention ca marche pas, il faut ensuite merger par departement et sommer les valeurs
+export const getIndicateursEffectifsParDepartement = async (filters: DateFilters & TerritoireFilters, acl: Acl) => {
+  const indicateurs = [
+    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDb(), false)),
+    ...(await getIndicateursEffectifsParDepartementGenerique(filters, acl, effectifsDECADb(), true)),
+  ];
+
+  const mapDepartement = indicateurs.reduce((acc, { departement, ...rest }) => {
+    return acc[departement]
+      ? {
+          ...acc,
+          [departement]: {
+            departement,
+            apprentis: acc[departement].apprentis + rest.apprentis,
+            abandons: acc[departement].abandons + rest.abandons,
+            inscritsSansContrat: acc[departement].inscritsSansContrat + rest.inscritsSansContrat,
+            apprenants: acc[departement].apprenants + rest.apprenants,
+            rupturants: acc[departement].rupturants + rest.rupturants,
+          },
+        }
+      : {
+          ...acc,
+          [departement]: {
+            departement,
+            ...rest,
+          },
+        };
+  }, {});
+  return Object.values(mapDepartement);
+};
+
+export const getIndicateursEffectifsParOrganisme = async (
+  ctx: AuthContext,
+  filters: FullEffectifsFilters,
+  organismeId?: ObjectId
+) => [
+  ...(await getIndicateursEffectifsParOrganismeGenerique(ctx, filters, effectifsDb(), false, organismeId)),
+  ...(await getIndicateursEffectifsParOrganismeGenerique(ctx, filters, effectifsDECADb(), true, organismeId)),
+];
+
+export const getEffectifsNominatifs = async (
+  ctx: AuthContext,
+  filters: FullEffectifsFilters,
+  type: TypeEffectifNominatif,
+  organismeId?: ObjectId
+) => [
+  ...(await getEffectifsNominatifsGenerique(ctx, filters, type, effectifsDb(), false, organismeId)),
+  ...(await getEffectifsNominatifsGenerique(ctx, filters, type, effectifsDECADb(), true, organismeId)),
+];
+
+export const getOrganismeIndicateursEffectifs = async (
+  ctx: AuthContext,
+  organismeId: ObjectId,
+  filters: EffectifsFiltersTerritoire
+) => {
+  const eff = await getOrganismeIndicateursEffectifsGenerique(ctx, organismeId, filters, effectifsDb(), false);
+  const effDECA = await getOrganismeIndicateursEffectifsGenerique(ctx, organismeId, filters, effectifsDECADb(), true);
+
+  return {
+    apprenants: eff.apprenants + effDECA.apprenants,
+    apprentis: eff.apprenants + effDECA.apprentis,
+    inscritsSansContrat: eff.apprenants + effDECA.inscritsSansContrat,
+    abandons: eff.apprenants + effDECA.abandons,
+    rupturants: eff.apprenants + effDECA.rupturants,
+  };
+};
+
+export const getOrganismeIndicateursEffectifsParFormation = async (
+  ctx: AuthContext,
+  organismeId: ObjectId,
+  filters: FullEffectifsFilters
+) => [
+  ...(await getOrganismeIndicateursEffectifsParFormationGenerique(ctx, organismeId, filters, effectifsDb())),
+  ...(await getOrganismeIndicateursEffectifsParFormationGenerique(ctx, organismeId, filters, effectifsDECADb(), true)),
+];
+
+export async function getIndicateursEffectifsParDepartementGenerique(
   filters: DateFilters & TerritoireFilters,
-  acl: Acl
+  acl: Acl,
+  db: Collection<any>,
+  decaMode: boolean = false
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
-  const indicateurs = await effectifsDb()
+  const indicateurs = await db
     .aggregate([
       {
         $match: combineFilters(
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
           },
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, acl.indicateursEffectifs)
         ),
       },
@@ -463,16 +544,19 @@ export async function getIndicateursOrganismesParDepartement(
   return indicateurs;
 }
 
-export async function getIndicateursEffectifsParOrganisme(
+export async function getIndicateursEffectifsParOrganismeGenerique(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
+  db: Collection<any>,
+  decaMode: boolean = false,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
-  const indicateurs = (await effectifsDb()
+  const indicateurs = (await db
     .aggregate([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -529,16 +613,19 @@ export async function getIndicateursEffectifsParOrganisme(
   return indicateurs;
 }
 
-export async function getOrganismeIndicateursEffectifsParFormation(
+export async function getOrganismeIndicateursEffectifsParFormationGenerique(
   ctx: AuthContext,
   organismeId: ObjectId,
-  filters: FullEffectifsFilters
+  filters: FullEffectifsFilters,
+  db: Collection<any>,
+  decaMode: boolean = false
 ): Promise<IndicateursEffectifsAvecFormation[]> {
-  const indicateurs = (await effectifsDb()
+  const indicateurs = (await db
     .aggregate([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -584,17 +671,20 @@ export async function getOrganismeIndicateursEffectifsParFormation(
   return indicateurs;
 }
 
-export async function getEffectifsNominatifs(
+export async function getEffectifsNominatifsGenerique(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
   type: TypeEffectifNominatif,
+  db: Collection<any>,
+  decaMode: boolean = false,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
-  const indicateurs = (await effectifsDb()
+  const indicateurs = (await db
     .aggregate([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.effectifsNominatifs[type]),
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -745,16 +835,19 @@ export async function getEffectifsNominatifs(
   return indicateurs;
 }
 
-export async function getOrganismeIndicateursEffectifs(
+export async function getOrganismeIndicateursEffectifsGenerique(
   ctx: AuthContext,
   organismeId: ObjectId,
-  filters: EffectifsFiltersTerritoire
+  filters: EffectifsFiltersTerritoire,
+  db: Collection<any>,
+  decaMode: boolean = false
 ): Promise<IndicateursEffectifs> {
-  const indicateurs = (await effectifsDb()
+  const indicateurs = (await db
     .aggregate([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs)
         ),
       },
