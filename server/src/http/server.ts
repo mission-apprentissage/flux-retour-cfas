@@ -39,9 +39,11 @@ import {
   getEffectifsNominatifs,
   getIndicateursEffectifsParDepartement,
   getIndicateursEffectifsParOrganisme,
-  getIndicateursOrganismesParDepartement,
   getOrganismeIndicateursEffectifs,
   getOrganismeIndicateursEffectifsParFormation,
+} from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
+import {
+  getIndicateursOrganismesParDepartement,
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
