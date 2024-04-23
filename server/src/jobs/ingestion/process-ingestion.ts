@@ -283,8 +283,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
             effectifQueued?.etablissement_lieu_de_formation_uai,
             effectifQueued?.etablissement_lieu_de_formation_siret
           );
-          console.log("bonjour");
-          console.log(organisme?.nom);
           organismeTarget = organisme;
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_lieu_", stats));
           return organisme;
