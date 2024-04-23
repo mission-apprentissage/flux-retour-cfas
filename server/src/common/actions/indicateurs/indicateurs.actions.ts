@@ -27,9 +27,6 @@ import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
 function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: Date) {
-  const currentYear = currentDate.getUTCFullYear().toString();
-  const currentMonth = (currentDate.getUTCMonth() + 1).toString().padStart(2, "0");
-
   return [
     {
       $addFields: {
@@ -37,15 +34,10 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: 
           $arrayElemAt: [
             {
               $filter: {
-                input: "$_computed.statut.historique",
+                input: "$_computed.statut.parcours",
                 as: "statut",
                 cond: {
-                  $and: [
-                    { $lte: ["$$statut.annee", currentYear] },
-                    {
-                      $or: [{ $lt: ["$$statut.annee", currentYear] }, { $lte: ["$$statut.mois", currentMonth] }],
-                    },
-                  ],
+                  $lte: ["$$statut.date", currentDate],
                 },
               },
             },
@@ -56,7 +48,7 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: 
     },
     {
       $group: {
-        _id: groupBy,
+        _id: "$groupBy",
         apprentis: {
           $sum: {
             $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.APPRENTI] }, 1, 0],
@@ -77,15 +69,21 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: 
             $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] }, 1, 0],
           },
         },
+        finDeFormation: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.FIN_DE_FORMATION] }, 1, 0],
+          },
+        },
       },
     },
     {
       $project: {
-        apprenants: { $sum: ["$apprentis", "$inscrits", "$rupturants"] },
+        apprenants: { $sum: ["$apprentis", "$inscrits", "$rupturants", "$finDeFormation"] },
         apprentis: 1,
         inscrits: 1,
         abandons: 1,
         rupturants: 1,
+        finDeFormation: 1,
       },
     },
   ];

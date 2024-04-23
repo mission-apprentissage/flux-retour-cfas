@@ -4,7 +4,7 @@ export const STATUT_APPRENANT = {
   INSCRIT: "INSCRIT",
   APPRENTI: "APPRENTI",
   RUPTURANT: "RUPTURANT",
-  DIPLOME: "DIPLOME",
+  FIN_DE_FORMATION: "FIN_DE_FORMATION",
 } as const;
 
 export type StatutApprenant = (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT];
@@ -17,7 +17,7 @@ const STATUT_NAME: { [key in StatutApprenant]: string } = {
   INSCRIT: "Sans contrat",
   APPRENTI: "Apprenti",
   RUPTURANT: "Rupturant",
-  DIPLOME: "Diplômé",
+  FIN_DE_FORMATION: "Fin de formation",
 };
 
 export function getStatut(statut: StatutApprenant): string {
@@ -26,14 +26,7 @@ export function getStatut(statut: StatutApprenant): string {
 
 export interface Statut {
   en_cours: string;
-  historique: HistoriqueStatut[];
   parcours: ParcoursStatut[];
-}
-
-interface HistoriqueStatut {
-  mois: string;
-  annee: string;
-  valeur: StatutApprenant;
 }
 
 interface ParcoursStatut {
