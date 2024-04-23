@@ -275,7 +275,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
     .transform(async (effectifQueued, ctx) => {
       const [effectif, organismeLieu, organismeFormateur, organismeResponsable, formation] = await Promise.all([
         (async () => {
-          logger.info("lolol");
           return await transformEffectifQueueToEffectif(effectifQueued);
         })(),
         (async () => {
