@@ -2,10 +2,9 @@ import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { IndicateursEffectifsAvecOrganisme } from "shared";
 
-import { createComputedStatutObject } from "@/common/actions/effectifs.statut.actions";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
-import { historySequenceApprentiToAbandon } from "@tests/data/historySequenceSamples";
-import { createRandomFormation, createSampleEffectif } from "@tests/data/randomizedSample";
+import { historySequenceApprentiToAbandon, historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
+import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import {
   PermissionsTestConfig,
@@ -41,30 +40,17 @@ describe("Route indicateurs", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
-    const effectif = {
-      _id: new ObjectId(),
-      ...createSampleEffectif({
-        ...commonEffectifsAttributes,
-        formation: createRandomFormation(anneeScolaire, new Date(date)),
-        annee_scolaire: anneeScolaire,
-        contrats: [
-          {
-            date_debut: new Date(date),
-          },
-        ],
-      }),
-    };
-
-    const effectifGenerated = {
-      ...effectif,
-      _computed: {
-        ...effectif._computed,
-        statut: createComputedStatutObject(effectif, new Date(date)),
-      },
-    };
-
     beforeEach(async () => {
-      await effectifsDb().insertOne(effectifGenerated);
+      await effectifsDb().insertOne({
+        _id: new ObjectId(),
+        ...createSampleEffectif({
+          ...commonEffectifsAttributes,
+          annee_scolaire: anneeScolaire,
+          apprenant: {
+            historique_statut: historySequenceInscritToApprenti,
+          },
+        }),
+      });
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
@@ -115,10 +101,9 @@ describe("Route indicateurs", () => {
                   departement: "56",
                   apprenants: nbApprentis,
                   apprentis: nbApprentis,
-                  inscrits: 0,
+                  inscritsSansContrat: 0,
                   rupturants: 0,
                   abandons: 0,
-                  finDeFormation: 0,
                 },
               ]
             : []
@@ -219,30 +204,17 @@ describe("Route indicateurs", () => {
     const date = "2022-10-10T00:00:00.000Z";
     const anneeScolaire = "2022-2023";
 
-    const effectif = {
-      _id: new ObjectId(),
-      ...createSampleEffectif({
-        ...commonEffectifsAttributes,
-        formation: createRandomFormation(anneeScolaire, new Date(date)),
-        annee_scolaire: anneeScolaire,
-        contrats: [
-          {
-            date_debut: new Date(date),
-          },
-        ],
-      }),
-    };
-
-    const effectifGenerated = {
-      ...effectif,
-      _computed: {
-        ...effectif._computed,
-        statut: createComputedStatutObject(effectif, new Date(date)),
-      },
-    };
-
     beforeEach(async () => {
-      await effectifsDb().insertOne(effectifGenerated);
+      await effectifsDb().insertOne({
+        _id: new ObjectId(),
+        ...createSampleEffectif({
+          ...commonEffectifsAttributes,
+          annee_scolaire: anneeScolaire,
+          apprenant: {
+            historique_statut: historySequenceInscritToApprenti,
+          },
+        }),
+      });
     });
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
@@ -298,10 +270,9 @@ describe("Route indicateurs", () => {
                   uai: "0000000A",
                   apprenants: nbApprentis,
                   apprentis: nbApprentis,
-                  inscrits: 0,
+                  inscritsSansContrat: 0,
                   rupturants: 0,
                   abandons: 0,
-                  finDeFormation: 0,
                 } satisfies IndicateursEffectifsAvecOrganisme,
               ]
             : []
@@ -319,27 +290,18 @@ describe("Route indicateurs", () => {
     let effectifResult: any[] = [];
     const emptyResult = [];
 
-    const effectif = {
-      _id: new ObjectId(),
-      ...createSampleEffectif({
-        ...commonEffectifsAttributes,
-        annee_scolaire: anneeScolaire,
-        apprenant: {
-          historique_statut: historySequenceApprentiToAbandon,
-        },
-      }),
-    };
-
-    const effectifGenerated = {
-      ...effectif,
-      _computed: {
-        ...effectif._computed,
-        statut: createComputedStatutObject(effectif, new Date(date)),
-      },
-    };
-
     beforeEach(async () => {
-      await effectifsDb().insertOne(effectifGenerated);
+      const effectif = {
+        _id: new ObjectId(),
+        ...createSampleEffectif({
+          ...commonEffectifsAttributes,
+          annee_scolaire: anneeScolaire,
+          apprenant: {
+            historique_statut: historySequenceApprentiToAbandon,
+          },
+        }),
+      };
+      await effectifsDb().insertOne(effectif);
 
       // petit hack pour muter l'objet :-°
       effectifResult.splice(0, 1, {
