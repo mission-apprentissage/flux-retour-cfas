@@ -674,39 +674,8 @@ exports[`validation-schema should create validation schema for effectifs: effect
                         "INSCRIT",
                         "APPRENTI",
                         "RUPTURANT",
-                        "DIPLOME",
+                        "FIN_DE_FORMATION",
                       ],
-                    },
-                    "historique": {
-                      "bsonType": "array",
-                      "items": {
-                        "additionalProperties": false,
-                        "bsonType": "object",
-                        "properties": {
-                          "annee": {
-                            "bsonType": "string",
-                          },
-                          "mois": {
-                            "bsonType": "string",
-                          },
-                          "valeur": {
-                            "bsonType": "string",
-                            "enum": [
-                              "ABANDON",
-                              "PRE_INSCRIT",
-                              "INSCRIT",
-                              "APPRENTI",
-                              "RUPTURANT",
-                              "DIPLOME",
-                            ],
-                          },
-                        },
-                        "required": [
-                          "mois",
-                          "annee",
-                          "valeur",
-                        ],
-                      },
                     },
                     "parcours": {
                       "bsonType": "array",
@@ -725,7 +694,7 @@ exports[`validation-schema should create validation schema for effectifs: effect
                               "INSCRIT",
                               "APPRENTI",
                               "RUPTURANT",
-                              "DIPLOME",
+                              "FIN_DE_FORMATION",
                             ],
                           },
                         },
@@ -738,7 +707,6 @@ exports[`validation-schema should create validation schema for effectifs: effect
                   },
                   "required": [
                     "en_cours",
-                    "historique",
                     "parcours",
                   ],
                 },
