@@ -5,9 +5,10 @@ import { IRncp } from "./data/rncp.model";
 export interface IndicateursEffectifs {
   apprenants: number;
   apprentis: number;
-  inscritsSansContrat: number;
+  inscrits: number;
   abandons: number;
   rupturants: number;
+  finDeFormation: number;
 }
 
 export type IndicateursEffectifsAvecDepartement = IndicateursEffectifs & { departement: string };
