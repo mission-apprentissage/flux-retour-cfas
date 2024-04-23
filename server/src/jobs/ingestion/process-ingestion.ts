@@ -33,6 +33,7 @@ import { sleep } from "@/common/utils/asyncUtils";
 import { formatError } from "@/common/utils/errorUtils";
 import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnoringNullPreferringNewArray";
 import { AddPrefix, addPrefixToProperties } from "@/common/utils/miscUtils";
+import { validateContrat } from "@/common/validation/contratsDossierApprenantSchemaV3";
 import dossierApprenantSchemaV1V2, {
   DossierApprenantSchemaV1V2ZodType,
 } from "@/common/validation/dossierApprenantSchemaV1V2";
@@ -157,13 +158,13 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
   const start = Date.now();
   try {
     // Phase de transformation d'une donnée de queue
-    const { result, itemProcessingInfos } = await (effectifQueue.api_version === "v3"
+    const { result, itemProcessingInfos, organismeTarget } = await (effectifQueue.api_version === "v3"
       ? transformEffectifQueueV3ToEffectif(effectifQueue)
       : transformEffectifQueueV1V2ToEffectif(effectifQueue));
     // ajout des informations sur le traitement au logger
     itemLogger = itemLogger.child({ ...itemProcessingInfos, format: effectifQueue.api_version });
 
-    handleDECAMechanism(result);
+    handleDECAMechanism(organismeTarget);
 
     if (result.success) {
       const { effectif, organisme } = result.data;
@@ -265,205 +266,203 @@ type ItemProcessingInfos = {
 async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQueue): Promise<{
   result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }>;
   itemProcessingInfos: ItemProcessingInfos;
+  organismeTarget: IOrganisme;
 }> {
   const itemProcessingInfos: ItemProcessingInfos = {};
-  return {
-    result: await dossierApprenantSchemaV3()
-      .transform(async (effectifQueued, ctx) => {
-        const [effectif, organismeLieu, organismeFormateur, organismeResponsable, formation] = await Promise.all([
-          (async () => {
-            return await transformEffectifQueueToEffectif(effectifQueued);
-          })(),
-          (async () => {
-            const { organisme, stats } = await findOrganismeWithStats(
-              effectifQueued?.etablissement_lieu_de_formation_uai,
-              effectifQueued?.etablissement_lieu_de_formation_siret
-            );
-            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_lieu_", stats));
-            return organisme;
-          })(),
-          (async () => {
-            const { organisme, stats } = await findOrganismeWithStats(
-              effectifQueued?.etablissement_formateur_uai,
-              effectifQueued?.etablissement_formateur_siret,
-              { _id: 1 }
-            );
-            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_formateur_", stats));
-            return organisme;
-          })(),
-          (async () => {
-            const { organisme, stats } = await findOrganismeWithStats(
-              effectifQueued?.etablissement_responsable_uai,
-              effectifQueued?.etablissement_responsable_siret,
-              { _id: 1 }
-            );
-            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_responsable_", stats));
-            return organisme;
-          })(),
-          (async () => {
-            if (!effectifQueued.formation_cfd) {
-              return null;
-            }
+  let organismeTarget: any;
 
-            const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.formation_cfd });
-            itemProcessingInfos.formation_cfd = effectifQueued.formation_cfd;
-            itemProcessingInfos.formation_found = !!formationFromCatalogue;
-            return formationFromCatalogue;
-          })(),
-        ]);
-
-        if (!organismeLieu) {
-          ctx.addIssue({
-            code: ZodIssueCode.custom,
-            message: "organisme non trouvé",
-            path: ["etablissement_lieu_de_formation_uai", "etablissement_lieu_de_formation_siret"],
-            params: {
-              uai: effectifQueued.etablissement_lieu_de_formation_uai,
-              siret: effectifQueued.etablissement_lieu_de_formation_siret,
-            },
-          });
-        }
-        if (!organismeFormateur) {
-          ctx.addIssue({
-            code: ZodIssueCode.custom,
-            message: "organisme formateur non trouvé",
-            path: ["etablissement_formateur_uai", "etablissement_formateur_siret"],
-            params: {
-              uai: effectifQueued.etablissement_formateur_uai,
-              siret: effectifQueued.etablissement_formateur_siret,
-            },
-          });
-        }
-        if (!organismeResponsable) {
-          ctx.addIssue({
-            code: ZodIssueCode.custom,
-            message: "organisme responsable non trouvé",
-            path: ["etablissement_responsable_uai", "etablissement_responsable_siret"],
-            params: {
-              uai: effectifQueued.etablissement_responsable_uai,
-              siret: effectifQueued.etablissement_responsable_siret,
-            },
-          });
-        }
-
-        if (!organismeLieu || !organismeFormateur || !organismeResponsable) {
-          return NEVER;
-        }
-        // désactivé si non bloquant
-        // if (!formation) {
-        //   ctx.addIssue({
-        //     code: ZodIssueCode.custom,
-        //     message: "formation non trouvée dans le catalogue",
-        //     params: {
-        //       cfd: effectifQueued.formation_cfd,
-        //     },
-        //   });
-        // }
-
-        // Set du niveau de la formation depuis le catalogue
-        if (formation && effectif.formation) {
-          effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
-          effectif.formation.niveau_libelle = formation.niveau;
-
-          // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
-          // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
-          if (effectif.formation.date_fin && effectif.formation.date_entree) {
-            effectif.formation.duree_formation_relle = Math.round(
-              (effectif.formation.date_fin.getTime() - effectif.formation.date_entree.getTime()) /
-                1000 /
-                60 /
-                60 /
-                24 /
-                30
-            );
+  const result = await dossierApprenantSchemaV3()
+    .transform(async (effectifQueued, ctx) => {
+      const [effectif, organismeLieu, organismeFormateur, organismeResponsable, formation] = await Promise.all([
+        (async () => {
+          logger.info("lolol");
+          return await transformEffectifQueueToEffectif(effectifQueued);
+        })(),
+        (async () => {
+          const { organisme, stats } = await findOrganismeWithStats(
+            effectifQueued?.etablissement_lieu_de_formation_uai,
+            effectifQueued?.etablissement_lieu_de_formation_siret
+          );
+          console.log("bonjour");
+          console.log(organisme?.nom);
+          organismeTarget = organisme;
+          Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_lieu_", stats));
+          return organisme;
+        })(),
+        (async () => {
+          const { organisme, stats } = await findOrganismeWithStats(
+            effectifQueued?.etablissement_formateur_uai,
+            effectifQueued?.etablissement_formateur_siret,
+            { _id: 1 }
+          );
+          Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_formateur_", stats));
+          return organisme;
+        })(),
+        (async () => {
+          const { organisme, stats } = await findOrganismeWithStats(
+            effectifQueued?.etablissement_responsable_uai,
+            effectifQueued?.etablissement_responsable_siret,
+            { _id: 1 }
+          );
+          Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_responsable_", stats));
+          return organisme;
+        })(),
+        (async () => {
+          if (!effectifQueued.formation_cfd) {
+            return null;
           }
-        }
 
-        return {
-          effectif: {
-            ...effectif,
-            organisme_id: organismeLieu?._id,
-            organisme_formateur_id: organismeFormateur?._id,
-            organisme_responsable_id: organismeResponsable?._id,
-            _computed: addComputedFields({ organisme: organismeLieu, effectif }),
+          const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.formation_cfd });
+          itemProcessingInfos.formation_cfd = effectifQueued.formation_cfd;
+          itemProcessingInfos.formation_found = !!formationFromCatalogue;
+          return formationFromCatalogue;
+        })(),
+      ]);
+
+      if (!organismeLieu) {
+        ctx.addIssue({
+          code: ZodIssueCode.custom,
+          message: "organisme non trouvé",
+          path: ["etablissement_lieu_de_formation_uai", "etablissement_lieu_de_formation_siret"],
+          params: {
+            uai: effectifQueued.etablissement_lieu_de_formation_uai,
+            siret: effectifQueued.etablissement_lieu_de_formation_siret,
           },
-          organisme: organismeLieu,
-        };
-      })
-      .safeParseAsync(rawEffectifQueued),
+        });
+      }
+      if (!organismeFormateur) {
+        ctx.addIssue({
+          code: ZodIssueCode.custom,
+          message: "organisme formateur non trouvé",
+          path: ["etablissement_formateur_uai", "etablissement_formateur_siret"],
+          params: {
+            uai: effectifQueued.etablissement_formateur_uai,
+            siret: effectifQueued.etablissement_formateur_siret,
+          },
+        });
+      }
+      if (!organismeResponsable) {
+        ctx.addIssue({
+          code: ZodIssueCode.custom,
+          message: "organisme responsable non trouvé",
+          path: ["etablissement_responsable_uai", "etablissement_responsable_siret"],
+          params: {
+            uai: effectifQueued.etablissement_responsable_uai,
+            siret: effectifQueued.etablissement_responsable_siret,
+          },
+        });
+      }
+      validateContrat(effectifQueued, "", ctx);
+      validateContrat(effectifQueued, "_2", ctx);
+      validateContrat(effectifQueued, "_3", ctx);
+      validateContrat(effectifQueued, "_4", ctx);
+
+      if (!organismeLieu || !organismeFormateur || !organismeResponsable) {
+        return NEVER;
+      }
+
+      // Set du niveau de la formation depuis le catalogue
+      if (formation && effectif.formation) {
+        effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
+        effectif.formation.niveau_libelle = formation.niveau;
+
+        // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
+        // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
+        if (effectif.formation.date_fin && effectif.formation.date_entree) {
+          effectif.formation.duree_formation_relle = Math.round(
+            (effectif.formation.date_fin.getTime() - effectif.formation.date_entree.getTime()) /
+              1000 /
+              60 /
+              60 /
+              24 /
+              30
+          );
+        }
+      }
+
+      return {
+        effectif: {
+          ...effectif,
+          organisme_id: organismeLieu?._id,
+          organisme_formateur_id: organismeFormateur?._id,
+          organisme_responsable_id: organismeResponsable?._id,
+          _computed: addComputedFields({ organisme: organismeLieu, effectif }),
+        },
+        organisme: organismeLieu,
+      };
+    })
+    .safeParseAsync(rawEffectifQueued);
+
+  return {
+    result,
     itemProcessingInfos,
+    organismeTarget,
   };
 }
 
 async function transformEffectifQueueV1V2ToEffectif(rawEffectifQueued: IEffectifQueue): Promise<{
   result: SafeParseReturnType<IEffectifQueue, { effectif: IEffectif; organisme: IOrganisme }>;
   itemProcessingInfos: ItemProcessingInfos;
+  organismeTarget: any;
 }> {
   const itemProcessingInfos: ItemProcessingInfos = {};
-  return {
-    result: await dossierApprenantSchemaV1V2()
-      .transform(async (effectifQueued, ctx) => {
-        const [effectif, organisme, formation] = await Promise.all([
-          (async () => {
-            return await transformEffectifQueueToEffectif(effectifQueued);
-          })(),
-          (async () => {
-            const { organisme, stats } = await findOrganismeWithStats(
-              effectifQueued.uai_etablissement,
-              effectifQueued.siret_etablissement
-            );
-            Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
-            return organisme;
-          })(),
-          (async () => {
-            const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.id_formation });
-            itemProcessingInfos.formation_cfd = effectifQueued.id_formation;
-            itemProcessingInfos.formation_found = !!formationFromCatalogue;
-            return formationFromCatalogue;
-          })(),
-        ]);
+  let organismeTarget;
 
-        if (!organisme) {
-          ctx.addIssue({
-            code: ZodIssueCode.custom,
-            message: "organisme non trouvé",
-            path: ["uai_etablissement", "siret_etablissement"],
-            params: {
-              uai: effectifQueued.uai_etablissement,
-              siret: effectifQueued.siret_etablissement,
-            },
-          });
-          return NEVER;
-        }
+  const result = await dossierApprenantSchemaV1V2()
+    .transform(async (effectifQueued, ctx) => {
+      const [effectif, organisme, formation] = await Promise.all([
+        (async () => {
+          return await transformEffectifQueueToEffectif(effectifQueued);
+        })(),
+        (async () => {
+          const { organisme, stats } = await findOrganismeWithStats(
+            effectifQueued.uai_etablissement,
+            effectifQueued.siret_etablissement
+          );
+          organismeTarget = organisme;
+          Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_", stats));
+          return organisme;
+        })(),
+        (async () => {
+          const formationFromCatalogue = await formationsCatalogueDb().findOne({ cfd: effectifQueued.id_formation });
+          itemProcessingInfos.formation_cfd = effectifQueued.id_formation;
+          itemProcessingInfos.formation_found = !!formationFromCatalogue;
+          return formationFromCatalogue;
+        })(),
+      ]);
 
-        // Set du niveau de la formation depuis le catalogue
-        if (formation && effectif.formation) {
-          effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
-          effectif.formation.niveau_libelle = formation.niveau;
-        }
-
-        // désactivé si non bloquant
-        // if (!formation) {
-        //   ctx.addIssue({
-        //     code: ZodIssueCode.custom,
-        //     message: "formation non trouvée dans le catalogue",
-        //     params: {
-        //       cfd: effectifQueued.id_formation,
-        //     },
-        //   });
-        // }
-
-        return {
-          effectif: {
-            ...effectif,
-            organisme_id: organisme?._id,
-            _computed: addComputedFields({ organisme, effectif }),
+      if (!organisme) {
+        ctx.addIssue({
+          code: ZodIssueCode.custom,
+          message: "organisme non trouvé",
+          path: ["uai_etablissement", "siret_etablissement"],
+          params: {
+            uai: effectifQueued.uai_etablissement,
+            siret: effectifQueued.siret_etablissement,
           },
-          organisme: organisme,
-        };
-      })
-      .safeParseAsync(rawEffectifQueued),
+        });
+        return NEVER;
+      }
+
+      // Set du niveau de la formation depuis le catalogue
+      if (formation && effectif.formation) {
+        effectif.formation.niveau = getNiveauFormationFromLibelle(formation.niveau);
+        effectif.formation.niveau_libelle = formation.niveau;
+      }
+      return {
+        effectif: {
+          ...effectif,
+          organisme_id: organisme?._id,
+          _computed: addComputedFields({ organisme, effectif }),
+        },
+        organisme: organisme,
+      };
+    })
+    .safeParseAsync(rawEffectifQueued);
+  return {
+    result,
     itemProcessingInfos,
+    organismeTarget,
   };
 }
 
@@ -603,13 +602,13 @@ async function findOrganismeWithStats(
   return { organisme, stats };
 }
 
-const handleDECAMechanism = async (result) => {
-  if (!result?.data?.organisme) {
+const handleDECAMechanism = async (organismeTarget) => {
+  if (!organismeTarget) {
     logger.error("Cannot find target organisme for this transmission");
     return;
   }
 
-  const orga_id = result.data.organisme._id;
+  const orga_id = organismeTarget._id;
   const orga = await organismesDb().findOne({ _id: orga_id });
   return updateOrganismesHasTransmittedWithHierarchy(orga, true);
 };
