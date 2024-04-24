@@ -12647,6 +12647,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.clonedeep@npm:4.5.0"
+  checksum: 92c46f094b064e876a23c97f57f81fbffd5d760bf2d8a1c61d85db6d1e488c66b0384c943abee4f6af7debf5ad4e4282e74ff83177c9e63d8ff081a4837c3489
+  languageName: node
+  linkType: hard
+
 "lodash.debounce@npm:4.0.8, lodash.debounce@npm:^4.0.8":
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
@@ -17751,6 +17758,7 @@ __metadata:
     jsonwebtoken: 8.5.1
     lil-http-terminator: ^1.2.3
     lodash-es: 4.17.21
+    lodash.clonedeep: ^4.5.0
     lodash.groupby: 4.6.0
     lodash.indexby: 3.1.1
     lodash.omit: 4.5.0
