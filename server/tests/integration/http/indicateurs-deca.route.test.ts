@@ -237,8 +237,6 @@ const testDeca = async (nbEffR, nbEffF, nbEffR_DECA, nbEffF_DECA, expected_nbEff
     "get",
     `/api/v1/organismes/${idForm.toString()}/indicateurs/effectifs?date=2024-04-24T15:04:33.359Z`
   );
-  console.log(responseResp.data);
-  console.log(responseForm.data);
   fromDECA
     ? expect((await effectifsDECADb().find({ isDecaCompatible: true }).toArray()).length).toBeGreaterThan(0)
     : expect((await effectifsDECADb().find({ isDecaCompatible: true }).toArray()).length).toBe(0);
