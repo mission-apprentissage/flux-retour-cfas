@@ -213,6 +213,16 @@ const createEffDECA = (org) => ({
   isDecaCompatible: true,
 });
 
+/**
+ *
+ * @param nbEffR Nombre d'effectif transmis présent chez le responsable
+ * @param nbEffF  Nombre d'effectif transmis présent chez le formateur
+ * @param nbEffR_DECA Nombre d'effectif DECA présent chez le responsable
+ * @param nbEffF_DECA Nombre d'effectif DECA présent chez le formateur
+ * @param expected_nbEffR Nombre d'effectif attendu en indicateur chez le reponsable ( cumulé avec hierarchie )
+ * @param expected_nbEffF Nombre d'effectif attendu en indicateur chez le formateur
+ * @param fromDECA Indique si les données sont cénsées provenir de DECA ou des vrais effectifs
+ */
 const testDeca = async (nbEffR, nbEffF, nbEffR_DECA, nbEffF_DECA, expected_nbEffR, expected_nbEffF, fromDECA) => {
   const effR = [...new Array(nbEffR)].map(() => createEff(organismeResponsable));
   const effF = [...new Array(nbEffF)].map(() => createEff(organismeFormateur));
