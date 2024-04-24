@@ -164,8 +164,6 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
     // ajout des informations sur le traitement au logger
     itemLogger = itemLogger.child({ ...itemProcessingInfos, format: effectifQueue.api_version });
 
-    handleDECAMechanism(organismeTarget);
-
     if (result.success) {
       const { effectif, organisme } = result.data;
 
@@ -201,8 +199,6 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
       );
 
       itemLogger.info({ duration: Date.now() - start }, "processed item");
-
-      return true;
     } else {
       // MAJ de la queue pour indiquer que les données ont été traitées
       await effectifsQueueDb().updateOne(
@@ -220,9 +216,9 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
       );
 
       itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
-
-      return false;
     }
+    await handleDECAMechanism(organismeTarget);
+    return result.success;
   } catch (err: any) {
     const error = Boom.internal("failed processing item", ctx);
     error.cause = err;
@@ -604,7 +600,6 @@ const handleDECAMechanism = async (organismeTarget) => {
     logger.error("Cannot find target organisme for this transmission");
     return;
   }
-
   const orga_id = organismeTarget._id;
   const orga = await organismesDb().findOne({ _id: orga_id });
   return updateOrganismesHasTransmittedWithHierarchy(orga, true);
