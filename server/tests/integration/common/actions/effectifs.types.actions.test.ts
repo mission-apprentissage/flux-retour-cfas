@@ -172,7 +172,6 @@ describe("hydrateEffectifsComputedTypes", () => {
       await hydrateEffectifsComputedTypes({ evaluationDate: evaluationDateAfterDiploma });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
-      console.log("CONSOLE LOG ~ it ~ updatedEffectif:", updatedEffectif?._computed?.statut?.parcours);
 
       expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.FIN_DE_FORMATION);
     });
