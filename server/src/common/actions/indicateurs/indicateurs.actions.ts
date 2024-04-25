@@ -78,8 +78,12 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: 
     },
     {
       $project: {
-        apprenants: { $sum: ["$apprentis", "$inscrits", "$rupturants", "$finDeFormation"] },
-        apprentis: 1,
+        apprenants: {
+          $sum: ["$apprentis", "$inscrits", "$rupturants", "$finDeFormation"],
+        },
+        apprentis: {
+          $sum: ["$apprentis", "$finDeFormation"],
+        },
         inscrits: 1,
         abandons: 1,
         rupturants: 1,
