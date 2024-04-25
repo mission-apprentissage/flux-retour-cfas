@@ -1,39 +1,14 @@
 import { Box, Text, HStack, Button, Tooltip, UnorderedList, ListItem } from "@chakra-ui/react";
-import { useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
-import React, { useEffect, useRef, useState } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { ERPS } from "shared";
+import React, { useState } from "react";
+import { useRecoilValue } from "recoil";
+import { ERPS, getStatut } from "shared";
 
 import Table from "@/components/Table/Table";
 import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "@/theme/components/icons";
 
-import { effectifIdAtom } from "./atoms";
-import Effectif from "./Effectif";
+import EffectifTableDetails from "./EffectifsTableDetails";
 import { effectifStateSelector } from "./formEngine/atoms";
-
-const EffectifDetails = ({ row, modeSifa = false, canEdit = false }) => {
-  const queryClient = useQueryClient();
-  const prevEffectifId = useRef(null);
-  const setEffectifId = useSetRecoilState(effectifIdAtom);
-
-  useEffect(() => {
-    if (prevEffectifId.current !== row.original.id) {
-      prevEffectifId.current = row.original.id;
-      setEffectifId(row.original.id);
-    }
-  }, [queryClient, row, setEffectifId]);
-
-  if (!row.original.id) {
-    return null;
-  }
-
-  return (
-    <Box>
-      <Effectif modeSifa={modeSifa} canEdit={canEdit} />
-    </Box>
-  );
-};
 
 const ShowErrorInCell = ({ item, fieldName, value }) => {
   const { validation_errors } = item;
@@ -197,22 +172,16 @@ const EffectifsTable = ({
                   size: 170,
                   header: () => "Statut courant apprenant(e)",
                   cell: ({ row }) => {
-                    const { historique_statut } = organismesEffectifs[row.id];
+                    const statut = organismesEffectifs[row.id]?.statut;
 
-                    const statut_text = {
-                      2: "Inscrit",
-                      3: "En contrat",
-                      0: "Abandon",
-                    };
-
-                    if (!historique_statut.length) {
+                    if (!statut || !statut.parcours.length) {
                       return (
                         <Text fontSize="1rem" fontWeight="bold" color="redmarianne">
                           Aucun statut
                         </Text>
                       );
                     }
-                    const historiqueSorted = historique_statut.sort((a, b) => {
+                    const historiqueSorted = statut.parcours.sort((a, b) => {
                       return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
                     });
                     const current = [...historiqueSorted].pop();
@@ -220,10 +189,10 @@ const EffectifsTable = ({
                     return (
                       <HStack textAlign="left">
                         <Text fontSize="1rem" fontWeight="bold">
-                          {statut_text[current.valeur_statut]}
+                          {getStatut(current.valeur)}
                         </Text>
                         <Text fontSize="0.8rem">
-                          (depuis {DateTime.fromISO(current.date_statut).setLocale("fr-FR").toFormat("dd/MM/yyyy")})
+                          (depuis {DateTime.fromISO(current.date).setLocale("fr-FR").toFormat("dd/MM/yyyy")})
                         </Text>
                       </HStack>
                     );
@@ -532,7 +501,7 @@ const EffectifsTable = ({
         }}
         getRowCanExpand={() => true}
         renderSubComponent={({ row }) => {
-          return <EffectifDetails row={row} modeSifa={modeSifa} canEdit={canEdit} />;
+          return <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} />;
         }}
       />
     </Box>
