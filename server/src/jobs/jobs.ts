@@ -44,6 +44,7 @@ import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectif
 import { removeOrganismesAbsentsReferentielSansTransmission } from "./patches/remove-organismes-absentReferentiel-sansTransmission";
 import { removeOrganismeSansEnseigneNiRaisonSocialeNeTransmettantPlus } from "./patches/remove-organismes-sansEnseigneNiRaisonSocialeNeTransmettantPlus";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs";
+import { removeMetiersFromOrganisme } from "./patches/removeMetiersFromOrganisme";
 import { updateFirstTransmissionDateForOrganismes } from "./patches/update-firstTransmissionDates";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates";
 import { clearSeedAssets } from "./seed/clearAssets";
@@ -388,6 +389,11 @@ export async function setupJobProcessor() {
       "tmp:patches:remove-organismes-sansEnseigneNiRaisonSociale-neTransmettantPlus": {
         handler: async () => {
           return removeOrganismeSansEnseigneNiRaisonSocialeNeTransmettantPlus();
+        },
+      },
+      "tmp:patches:remove-metiers-from-organisme": {
+        handler: async () => {
+          return removeMetiersFromOrganisme();
         },
       },
       "process:effectifs-queue:remove-duplicates": {

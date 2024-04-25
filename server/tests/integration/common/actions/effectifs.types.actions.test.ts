@@ -145,9 +145,13 @@ describe("hydrateEffectifsComputedTypes", () => {
   });
 
   describe("apprenent en formation avec diplome", () => {
-    it("doit avoir le statut diplômé", async () => {
+    it("doit avoir le statut fin de formation", async () => {
       const formationWithDiploma = {
-        ...createRandomFormation(ANNEE_SCOLAIRE, formationDateEntree, formationDateFin),
+        ...createRandomFormation(
+          "2023-2024",
+          new Date("2023-12-20T00:00:00.000+00:00"),
+          new Date("2024-08-11T00:00:00.000+00:00")
+        ),
         obtention_diplome: true,
       };
 
@@ -155,8 +159,8 @@ describe("hydrateEffectifsComputedTypes", () => {
         organisme: sampleOrganisme,
         contrats: [
           {
-            date_debut: formation.date_entree,
-            date_fin: formation.date_fin,
+            date_debut: new Date("2023-01-23T00:00:00.000Z"),
+            date_fin: new Date("2024-06-30T00:00:00.000Z"),
           },
         ],
         formation: formationWithDiploma,
@@ -169,11 +173,11 @@ describe("hydrateEffectifsComputedTypes", () => {
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 
-      expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.DIPLOME);
+      expect(updatedEffectif?._computed?.statut?.en_cours).toEqual(STATUT_APPRENANT.FIN_DE_FORMATION);
     });
   });
 
-  describe("apprenent sans date de formation", () => {
+  describe("apprenent en formation avec plusieurs contrats", () => {
     it("doit générer l'historique du statut de l'apprenant", async () => {
       const ruptureFirstContratDate = addDaysUTC(evaluationDate, -250);
 
@@ -200,30 +204,6 @@ describe("hydrateEffectifsComputedTypes", () => {
 
       expect(updatedEffectif?._computed?.statut).toEqual({
         en_cours: "APPRENTI",
-        historique: [
-          { mois: "09", annee: "2023", valeur: "INSCRIT" },
-          { mois: "10", annee: "2023", valeur: "INSCRIT" },
-          { mois: "11", annee: "2023", valeur: "APPRENTI" },
-          { mois: "12", annee: "2023", valeur: "APPRENTI" },
-          { mois: "01", annee: "2024", valeur: "APPRENTI" },
-          { mois: "03", annee: "2024", valeur: "APPRENTI" },
-          { mois: "04", annee: "2024", valeur: "APPRENTI" },
-          { mois: "05", annee: "2024", valeur: "APPRENTI" },
-          { mois: "06", annee: "2024", valeur: "APPRENTI" },
-          { mois: "07", annee: "2024", valeur: "APPRENTI" },
-          { mois: "08", annee: "2024", valeur: "APPRENTI" },
-          { mois: "09", annee: "2024", valeur: "APPRENTI" },
-          { mois: "10", annee: "2024", valeur: "RUPTURANT" },
-          { mois: "11", annee: "2024", valeur: "APPRENTI" },
-          { mois: "12", annee: "2024", valeur: "APPRENTI" },
-          { mois: "01", annee: "2025", valeur: "APPRENTI" },
-          { mois: "02", annee: "2025", valeur: "APPRENTI" },
-          { mois: "03", annee: "2025", valeur: "APPRENTI" },
-          { mois: "04", annee: "2025", valeur: "APPRENTI" },
-          { mois: "05", annee: "2025", valeur: "APPRENTI" },
-          { mois: "06", annee: "2025", valeur: "APPRENTI" },
-          { mois: "07", annee: "2025", valeur: "APPRENTI" },
-        ],
         parcours: [
           { valeur: "INSCRIT", date: new Date("2023-09-30T00:00:00.000Z") },
           { valeur: "APPRENTI", date: new Date("2023-11-14T00:00:00.000Z") },
@@ -232,33 +212,25 @@ describe("hydrateEffectifsComputedTypes", () => {
         ],
       });
     });
+  });
 
+  describe("apprenent sans date de formation", () => {
     it("doit gérer un statut à partir de l'historique_statut", async () => {
       const effectif = createSampleEffectif({
         apprenant: {
           historique_statut: [
-            {
-              valeur_statut: 2,
-              date_statut: new Date("2021-09-06T00:00:00.000Z"),
-              date_reception: new Date("2022-07-06T22:00:22.548Z"),
-            },
             {
               valeur_statut: 3,
               date_statut: new Date("2021-10-06T00:00:00.000Z"),
               date_reception: new Date("2022-07-06T22:00:22.548Z"),
             },
             {
-              valeur_statut: 2,
-              date_statut: new Date("2022-07-06T15:26:00.000Z"),
-              date_reception: new Date("2022-07-12T22:00:17.906Z"),
-            },
-            {
-              valeur_statut: 3,
+              valeur_statut: 0,
               date_statut: new Date("2022-10-29T00:00:00.000Z"),
               date_reception: new Date("2022-10-29T22:00:38.848Z"),
             },
             {
-              valeur_statut: 3,
+              valeur_statut: 2,
               date_statut: new Date("2023-01-05T00:00:00.000Z"),
               date_reception: new Date("2023-01-02T22:00:18.565Z"),
             },
@@ -267,55 +239,26 @@ describe("hydrateEffectifsComputedTypes", () => {
         organisme: sampleOrganisme,
         contrats: [],
         formation: {
-          ...createRandomFormation("2022-2023"),
+          ...createRandomFormation("2021-2023"),
           periode: [2021, 2023],
           date_inscription: null,
           date_entree: null,
           date_fin: null,
         },
       });
-
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
       await hydrateEffectifsComputedTypes({ evaluationDate: new Date(2023, 6, 1) });
-
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
-
       expect(updatedEffectif?._computed?.statut).toEqual({
-        en_cours: STATUT_APPRENANT.APPRENTI,
-        historique: [
-          { mois: "09", annee: "2021", valeur: STATUT_APPRENANT.INSCRIT },
-          { mois: "10", annee: "2021", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "11", annee: "2021", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "12", annee: "2021", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "01", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "02", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "03", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "04", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "05", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "06", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "07", annee: "2022", valeur: STATUT_APPRENANT.RUPTURANT },
-          { mois: "08", annee: "2022", valeur: STATUT_APPRENANT.RUPTURANT },
-          { mois: "09", annee: "2022", valeur: STATUT_APPRENANT.RUPTURANT },
-          { mois: "10", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "11", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "12", annee: "2022", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "01", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "02", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "03", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "04", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "05", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "06", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-          { mois: "07", annee: "2023", valeur: STATUT_APPRENANT.APPRENTI },
-        ],
+        en_cours: STATUT_APPRENANT.RUPTURANT,
         parcours: [
-          { valeur: STATUT_APPRENANT.INSCRIT, date: new Date("2021-09-06T00:00:00.000Z") },
+          { valeur: STATUT_APPRENANT.INSCRIT, date: new Date("2021-08-01T00:00:00.000Z") },
           { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2021-10-06T00:00:00.000Z") },
-          { valeur: STATUT_APPRENANT.RUPTURANT, date: new Date("2022-07-06T15:26:00.000Z") },
-          { valeur: STATUT_APPRENANT.APPRENTI, date: new Date("2022-10-29T00:00:00.000Z") },
+          { valeur: STATUT_APPRENANT.ABANDON, date: new Date("2022-10-29T00:00:00.000Z") },
+          { valeur: STATUT_APPRENANT.RUPTURANT, date: new Date("2023-01-05T00:00:00.000Z") },
         ],
       });
     });
-
     it("ne doit pas gérer de statut sans l'historique_statut", async () => {
       const effectif = createSampleEffectif({
         apprenant: {
@@ -331,15 +274,11 @@ describe("hydrateEffectifsComputedTypes", () => {
           date_fin: null,
         },
       });
-
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
       await hydrateEffectifsComputedTypes({ evaluationDate: new Date(2023, 6, 1) });
-
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
-
       expect(updatedEffectif?._computed?.statut).toBeNull();
     });
-
     it("ne doit pas gérer de statut sans periode de formation", async () => {
       const effectif = createSampleEffectif({
         apprenant: {
@@ -366,12 +305,9 @@ describe("hydrateEffectifsComputedTypes", () => {
           date_fin: null,
         },
       });
-
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
       await hydrateEffectifsComputedTypes({ evaluationDate: new Date(2023, 6, 1) });
-
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
-
       expect(updatedEffectif?._computed?.statut).toBeNull();
     });
   });

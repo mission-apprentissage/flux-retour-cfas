@@ -11,9 +11,9 @@
     "npm": "please-use-yarn"
   },
   "scripts": {
-    "cli": "cross-env TZ='Europe/Paris' node dist/index.js",
+    "cli": "node dist/index.js",
     "build:dev": "tsup-node",
-    "dev": "cross-env TZ='Europe/Paris' tsup-node --env.TSUP_WATCH true",
+    "dev": "tsup-node --env.TSUP_WATCH true",
     "init:dev": "yarn cli init:dev",
     "build": "tsup-node --env.NODE_ENV production",
     "typecheck": "tsc --noEmit",
@@ -60,6 +60,7 @@
     "jsonwebtoken": "8.5.1",
     "lil-http-terminator": "^1.2.3",
     "lodash-es": "4.17.21",
+    "lodash.clonedeep": "^4.5.0",
     "lodash.groupby": "4.6.0",
     "lodash.indexby": "3.1.1",
     "lodash.omit": "4.5.0",

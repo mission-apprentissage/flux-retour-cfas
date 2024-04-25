@@ -1,40 +1,424 @@
-import { Box, HStack, Heading, Text, Link, Flex } from "@chakra-ui/react";
+import { Box, HStack, Heading, Text, Link, Flex, UnorderedList, ListItem } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 
 import Section from "@/components/Section/Section";
 import Sommaire from "@/components/Sommaire/Sommaire";
 
-export const CGU_VERSION = "v0.1";
+export const CGU_VERSION = "v0.3";
 
 const anchors = {
-  ChampApplication: "champ-application",
-  Objet: "objet",
-  Definition: "definition",
-  FonctionnaliteLieesAuxComptesDesUtilisateurs: "fonctionnalite-liees-aux-comptes-des-utilisateurs",
-  PresentationDesServices: "presentation-des-services",
-  Securite: "securite",
-  Hyperliens: "hyperliens",
-  Responsabilites: "responsabilites",
-  MiseAjourDesConditionsUtilisation: "mise-a-jour-des-conditions-utilisation",
+  ChampPreambule: "champ-preambule",
+  ChampDefinition: "champ-definition",
+  ChampObjet: "champ-objet",
+  ChampAcceptation: "champ-acceptation",
+  ChampMaj: "champ-maj",
+  ChampVigueur: "champ-vigueur",
+  ChampCreation: "champ-creation",
+  ChampPresentation: "champ-presentation",
+  ChampPlateforme: "champ-plateform",
+  ChampConfidentialite: "champ-confidentialite",
+  ChampResponsabilite: "champ-responsabilite",
+  ChampUtilisateur: "champ-utilisateur",
+  ChampPropiete: "champ-propriete",
+  ChampProtectioon: "champ-protection",
+  ChampDroit: "champ-droit",
 };
 
+const computeArticle = ({ anchorLink, anchorName, anchorTitle, anchorComponent }) => (
+  <Section mt={4} id={anchorLink}>
+    <Heading as={"h3"} textStyle="h6" mb={5}>
+      {anchorTitle} - {anchorName}
+    </Heading>
+    {anchorComponent ? anchorComponent() : null}
+  </Section>
+);
+
+const componentPreambule = () => (
+  <Text>
+    La Plateforme Tableau de bord de l’apprentissage (ci-après la Plateforme) est un système d’information ayant pour
+    objet :
+    <UnorderedList pl={10} pt={5}>
+      <ListItem>
+        La mise à disposition à différents acteurs de données clés concernant l’apprentissage en temps réel.
+      </ListItem>
+    </UnorderedList>
+    <br />
+    La Plateforme est créée et administrée par la Délégation générale à l&apos;Emploi et à la Formation professionnelle
+    du ministère du Travail (ci-après « la DGEFP »).
+    <br />
+    <br />
+    L’Utilisateur reconnaît que l’utilisation de la Plateforme nécessite le respect de l’ensemble des dispositions des
+    présentes et adhère sans réserve aux présentes conditions générales d’utilisation.
+  </Text>
+);
+
+const componentDefinition = () => (
+  <Text>
+    Les termes ci-dessous définis ont, entre les parties, la signification suivante :
+    <UnorderedList pl={10} pt={5}>
+      <ListItem mb={2}>
+        <strong>« DGEFP »</strong> : Délégation générale à l’emploi et à la formation professionnelle ;
+      </ListItem>
+      <ListItem mb={2}>
+        <strong>« Tableau de bord de l’apprentissage »</strong> : Service numérique destiné à mettre à disposition de
+        différents acteurs les données clés concernant l’apprentissage en temps réel ;
+      </ListItem>
+      <ListItem mb={2}>
+        <strong>« Ministère »</strong> : Ministère du Travail, du plein Emploi et de l’Insertion ;
+      </ListItem>
+      <ListItem mb={2}>
+        <strong>« Utilisateur »</strong> : désigne toute personne qui utilise les services proposés par la « Plateforme
+        » (CFA ou organisme de formation, opérateur public, réseau d’organismes de formation, membre du Réseau des
+        Carif-Oref).
+      </ListItem>
+    </UnorderedList>
+  </Text>
+);
+
+const componentObjet = () => (
+  <Text>
+    Les présentes conditions générales d’utilisation ont pour objet de définir les modalités d’utilisation de la
+    Plateforme, les fonctionnalités de la Plateforme et les responsabilités de la DGEFP et des Utilisateurs.
+  </Text>
+);
+
+const componentAcceptation = () => (
+  <Text>
+    Les présentes conditions générales ont valeur contractuelle et sont opposables à l’Utilisateur dès leur acceptation
+    par ce dernier.
+    <br />
+    <br />
+    A défaut d’acceptation des présentes conditions générales d’utilisation, l’Utilisateur ne pourra pas bénéficier des
+    services de la plateforme.
+    <br />
+    <br />
+    Les présentes conditions générales d’utilisation sont opposables pendant toute la durée d’utilisation de la
+    Plateforme et l’utilisateur reste responsable de toute action effectuée durant l’utilisation de la Plateforme.
+  </Text>
+);
+
+const componentMaj = () => (
+  <Text>
+    Les termes des présentes conditions générales d’utilisation peuvent être amendés à tout moment, sans préavis, en
+    fonction des modifications apportées à la Plateforme, de l’évolution de la législation ou pour tout autre motif jugé
+    nécessaire. Chaque modification donne lieu à une nouvelle version qui est acceptée par l’Utilisateur.
+    <br />
+    <br />
+    L&apos;Utilisateur sera informé en cas de modification des Conditions Générales d&apos;Utilisation.
+    <br />
+    <br />
+    Si l&apos;Utilisateur s&apos;oppose aux modifications apportées, il est libre de cesser d&apos;utiliser à tout
+    moment les services de la Plateforme.
+  </Text>
+);
+
+const componentVigueur = () => (
+  <Text>
+    Les présentes conditions générales d’utilisation entrent en vigueur à compter de leur date de mise en ligne sur la
+    Plateforme.
+    <br />
+    <br />
+    Les anciennes conditions générales d’utilisation peuvent être consultées à tout moment grâce à un versionnage mis en
+    place par la Plateforme.
+  </Text>
+);
+
+const componentCreation = () => (
+  <Text>
+    La procédure de création de compte permet aux Utilisateurs de se créer un compte associé à leur type de profil et
+    d’accéder aux fonctionnalités de la Plateforme. L’Utilisateur est titulaire d&apos;un compte personnel, accessible
+    par son identifiant personnel et un mot de passe qui doit contenir au moins douze caractères, une lettre minuscule,
+    une lettre majuscule, un caractère spécial, un chiffre. Un seul compte peut être attribué par Utilisateur.
+    <br />
+    <br />
+    L’Utilisateur doit indiquer une adresse électronique valide, personnelle et professionnelle notamment des adresses
+    génériques.
+    <br />
+    <br />
+    Il incombe à l’Utilisateur de s’assurer qu’il a seul accès à son courrier électronique.
+    <br />
+    <br />
+    Tout accès à, et toute utilisation de la Plateforme à partir de l’adresse électronique de l’Utilisateur est présumé
+    comme émanant exclusivement de l’Utilisateur.
+    <br />
+    <br />
+    L’Utilisateur est responsable de la sincérité des informations qu’il fournit et s’engage à mettre à jour les
+    informations le concernant ou à aviser la DGEFP sans délai de toute modification affectant sa situation.
+    <br />
+    <br />
+    En cas d’utilisation frauduleuse de son compte, l’Utilisateur s’engage à prévenir immédiatement la DGEFP. Cette
+    notification devra être adressée à la DGEFP via l’adresse e-mail suivante :
+    <Link
+      href={`mailto:tableau-de-bord@apprentissage.beta.gouv.fr`}
+      target="_blank"
+      textDecoration="underline"
+      isExternal
+      whiteSpace="nowrap"
+      color="action-high-blue-france"
+    >
+      tableau-de-bord@apprentissage.beta.gouv.fr
+    </Link>
+    .La date de réception de cette notification fera foi entre les parties. En l’absence de cette notification,
+    l’utilisation est présumée être celle de l’Utilisateur. Il lui reviendra de s’assurer de l’usurpation ou de la
+    compromission éventuelle.
+    <br />
+    <br />
+  </Text>
+);
+
+const componentPresentation = () => (
+  <Text>
+    Le Tableau de bord de l’apprentissage permet :
+    <UnorderedList pl={10} pt={5}>
+      <ListItem mb={2}>Le pilotage des dispositifs relatifs à la politique de l’apprentissage ;</ListItem>
+      <ListItem mb={2}>
+        L’aide à ceux qui peuvent agir à accompagner les apprentis en situation de rupture ou sans contrat ;
+      </ListItem>
+      <ListItem mb={2}>
+        La simplification de la délivrance d’informations par les CFA, en utilisant la donnée pour préremplir les
+        enquêtes nationales qui leur sont demandées ;
+      </ListItem>
+      <ListItem mb={2}>Le remplissage de contrats CERFA</ListItem>
+    </UnorderedList>
+    <br />
+    <br />
+    Chaque Utilisateur peut :
+    <UnorderedList pl={10} pt={5}>
+      <ListItem mb={2}>Consulter des données de l’apprentissage à des fins de pilotage ;</ListItem>
+      <ListItem mb={2}>Exporter des fichiers sous format agrégat de données de l’apprentissage ;</ListItem>
+      <ListItem mb={2}>
+        Consulter pour une partie des Utilisateurs habilités des listes nominatives d’apprentis en situation de rupture
+        ou d’abandon à des fins d’accompagnement ;
+      </ListItem>
+      <ListItem mb={2}>
+        Permettre aux organismes de formation de déposer des fichiers de données pour alimenter les chiffres de la
+        Plateforme ;
+      </ListItem>
+      <ListItem mb={2}>Optimiser la création de ses contrats d’apprentissage via un formulaire CERFA assisté</ListItem>
+    </UnorderedList>
+  </Text>
+);
+
+const componentPlatefome = () => (
+  <Text>
+    La DGEFP se réserve le droit, sans préavis, ni indemnité, de fermer temporairement l’accès à une ou plusieurs
+    fonctionnalités de la Plateforme pour effectuer une mise à jour, des modifications ou changement sur les méthodes
+    opérationnelles, les serveurs et les heures d’accessibilité. Cette liste n’est pas limitative. Dans ce cas, la DGEFP
+    peut indiquer une date de réouverture du compte ou d’accessibilité à une ou plusieurs fonctionnalités.
+    <br />
+    <br />
+    En cas d’impossibilité d’accéder et/ou d’utiliser la Plateforme, l’Utilisateur peut toujours s’adresser à la DGEFP
+    pour obtenir des informations via l’adresse suivante :
+    <Link
+      href={`mailto:tableau-de-bord@apprentissage.beta.gouv.fr`}
+      target="_blank"
+      textDecoration="underline"
+      isExternal
+      whiteSpace="nowrap"
+      color="action-high-blue-france"
+    >
+      tableau-de-bord@apprentissage.beta.gouv.fr
+    </Link>
+  </Text>
+);
+
+const componentConfidentialite = () => (
+  <Text>
+    La DGEFP met en place les moyens nécessaires pour assurer le bon fonctionnement de la Plateforme et pour assurer la
+    sécurité et la confidentialité des données des Utilisateurs.
+  </Text>
+);
+
+const componentResponsabilite = () => (
+  <Text>
+    La DGEFP ne saurait être responsable :
+    <UnorderedList pl={10} pt={5}>
+      <ListItem mb={2}>
+        En raison d&apos;une interruption du service quelle que soit la durée ou la fréquence de cette interruption et
+        quelle qu&apos;en soit la cause, notamment en raison d&apos;une maintenance nécessaire au fonctionnement, de
+        pannes éventuelles, d&apos;aléas techniques liés à la nature du réseau Internet, d&apos;actes de malveillance ou
+        de toute atteinte portée au fonctionnement de la Plateforme ;
+      </ListItem>
+      <ListItem mb={2}>
+        Sauf faute ou négligence prouvée de la DGEFP, des atteintes à la confidentialité des données personnelles de
+        l’Utilisateur résultant de l’utilisation de son identifiant ou de son mot de passe ;
+      </ListItem>
+      <ListItem mb={2}>
+        Des conséquences provoquées par le caractère erroné ou frauduleux des informations fournies par un Utilisateur ;
+      </ListItem>
+      <ListItem mb={2}>
+        Des dommages directs ou indirects résultant de l&apos;attitude, de la conduite ou du comportement d&apos;un
+        autre Utilisateur ;
+      </ListItem>
+      <ListItem mb={2}>
+        Des atteintes à la sécurité du système d’information, ainsi qu’aux données, pouvant causer des dommages aux
+        matériels informatiques des Utilisateurs et à leurs données dès lors que le fait ne lui est pas imputable.
+      </ListItem>
+    </UnorderedList>
+  </Text>
+);
+
+const componentUtilisateur = () => (
+  <Text>
+    Dans le cadre de l’utilisation de la Plateforme, l’Utilisateur s’engage à :
+    <UnorderedList pl={10} pt={5}>
+      <ListItem mb={2}>
+        Se conformer aux stipulations décrites dans les Conditions Générales d&apos;Utilisation et aux dispositions des
+        lois et règlements en vigueur, et à respecter les droits des tiers ;
+      </ListItem>
+      <ListItem mb={2}>
+        Ne créer qu&apos;un seul compte utilisateur et ne communiquer que des informations, fichiers et autres contenus
+        conformes à la réalité, honnêtes et loyaux ;
+      </ListItem>
+      <ListItem mb={2}>
+        Ne pas divulguer via la Plateforme des propos ou des contenus illicites, et notamment tous contenus contrefaits,
+        diffamatoires, injurieux, insultants, obscènes, offensants, discriminatoires, violents, xénophobes, incitant à
+        la haine raciale ou faisant l&apos;apologie du terrorisme, ou tout autre contenu contraire à la législation et
+        réglementation applicable ainsi qu&apos;aux bonnes mœurs et aux règles de bienséance ;
+      </ListItem>
+      <ListItem mb={2}>
+        Ne pas intégrer et diffuser via la Plateforme du contenu qui serait contraire à la finalité de celle-ci ;
+      </ListItem>
+      <ListItem mb={2}>
+        Ne pas communiquer ou envoyer, par l&apos;intermédiaire de la plateforme, du contenu, quel qu&apos;il soit, qui
+        comprendrait des liens pointant vers des sites internet illicites, offensants ou incompatibles avec la finalité
+        du Site.
+      </ListItem>
+    </UnorderedList>
+    En outre, l&apos;Utilisateur garantit expressément la véracité et la réalité des informations qu&apos;il communique
+    sur la Plateforme. Il est, par ailleurs, seul responsable de la préservation et de la confidentialité de son
+    identifiant et mot de passe.
+    <br />
+    <br />
+    En cas de manquement à une ou plusieurs de ces obligations, la DGEFP se réserve le droit de suspendre l’accès et/ou
+    de supprimer le compte de l&apos;Utilisateur responsable.
+  </Text>
+);
+
+const componentPropriete = () => (
+  <Text>
+    La Plateforme et tous les éléments qui le composent notamment les programmes, données, textes, images, sons,
+    dessins, graphismes etc. sont la propriété de la DGEFP ou font l&apos;objet d&apos;une concession accordée à son
+    profit. Toute copie, reproduction, représentation, adaptation, diffusion, intégrale ou partielle de la Plateforme,
+    par quelque procédé que ce soit et sur quelque support que ce soit est soumise à l’accord préalable écrit de la
+    DGEFP, sous réserve des exceptions prévues par le Code de propriété intellectuelle.
+    <br />
+    <br />
+    Toute utilisation non autorisée des contenus ou informations de la Plateforme, notamment à des fins d’exploitation
+    commerciale, pourra faire l’objet de poursuites sur la base d’une action en contrefaçon et/ou d’une action en
+    concurrence déloyale et/ou parasitisme de la part de la DGEFP.
+  </Text>
+);
+
+const componentProtection = () => (
+  <Text>
+    Les données à caractère personnel sont traitées par la DGEFP et les utilisateurs dans le respect des dispositions de
+    la Loi n° 78-17 du 6 janvier 1978 relative à l’informatique, aux fichiers et aux libertés, dans sa version en
+    vigueur, ainsi qu’au Règlement Général sur la Protection des Données (RGPD).
+    <br />
+    <br />
+    Conformément à l’article L. 322-2 du code des relations entre le public et l’administration, la réutilisation
+    éventuelle d&apos;informations publiques comportant des données à caractère personnel est subordonnée au respect des
+    dispositions de la loi n° 78-17 du 6 janvier 1978 relative à l&apos;informatique, aux fichiers et aux libertés.
+  </Text>
+);
+
+const componentDroit = () => (
+  <Text>
+    Les Conditions Générales d&apos;Utilisation sont régies par le droit français. Toute difficulté relative à la
+    validité, l&apos;application ou l&apos;interprétation des Conditions Générales d&apos;Utilisation seront soumises, à
+    défaut d&apos;accord amiable, à la compétence du Tribunal Administratif de Paris, auquel les parties attribuent
+    compétence territoriale, quel que soit le lieu d&apos;exécution de la Plateforme ou le domicile du défendeur. Cette
+    attribution de compétence s&apos;applique également en cas de procédure en référé, de pluralité de défendeurs ou
+    d&apos;appel en garantie.
+  </Text>
+);
+
 const SommaireData = [
-  { anchorTitle: "Article 1", anchorName: "Champ d’application", anchorLink: "champ-application" },
-  { anchorTitle: "Article 2", anchorName: "Objet", anchorLink: "objet" },
-  { anchorTitle: "Article 3", anchorName: "Définitions", anchorLink: "definition" },
+  {
+    anchorTitle: "Article 1",
+    anchorName: "Préambule",
+    anchorLink: anchors.ChampPreambule,
+    anchorComponent: componentPreambule,
+  },
+  {
+    anchorTitle: "Article 2",
+    anchorName: "Définitions",
+    anchorLink: anchors.ChampDefinition,
+    anchorComponent: componentDefinition,
+  },
+  { anchorTitle: "Article 3", anchorName: "Objet", anchorLink: anchors.ChampObjet, anchorComponent: componentObjet },
   {
     anchorTitle: "Article 4",
-    anchorName: "Fonctionnalités liées aux comptes des utilisateurs",
-    anchorLink: "fonctionnalite-liees-aux-comptes-des-utilisateurs",
+    anchorName: "Acceptation",
+    anchorLink: anchors.ChampAcceptation,
+    anchorComponent: componentAcceptation,
   },
-  { anchorTitle: "Article 5", anchorName: "Présentation des services", anchorLink: "presentation-des-services" },
-  { anchorTitle: "Article 6", anchorName: "Sécurité", anchorLink: "securite" },
-  { anchorTitle: "Article 7", anchorName: "Hyperliens", anchorLink: "hyperliens" },
-  { anchorTitle: "Article 8", anchorName: "Responsabilités", anchorLink: "responsabilites" },
+  {
+    anchorTitle: "Article 5",
+    anchorName: "Mise à jour des conditions générales d’utilisation",
+    anchorLink: anchors.ChampMaj,
+    anchorComponent: componentMaj,
+  },
+  {
+    anchorTitle: "Article 6",
+    anchorName: "Entrée en vigueur",
+    anchorLink: anchors.ChampVigueur,
+    anchorComponent: componentVigueur,
+  },
+  {
+    anchorTitle: "Article 7",
+    anchorName: "Création du compte",
+    anchorLink: anchors.ChampCreation,
+    anchorComponent: componentCreation,
+  },
+  {
+    anchorTitle: "Article 8",
+    anchorName: "Présentation de la Plateforme",
+    anchorLink: anchors.ChampPresentation,
+    anchorComponent: componentPresentation,
+  },
   {
     anchorTitle: "Article 9",
-    anchorName: "Mise à jour des conditions d'utilisation",
-    anchorLink: "mise-a-jour-des-conditions-utilisation",
+    anchorName: "Accès à la « Plateforme »",
+    anchorLink: anchors.ChampPlateforme,
+    anchorComponent: componentPlatefome,
+  },
+  {
+    anchorTitle: "Article 10",
+    anchorName: "Confidentialité/sécurité",
+    anchorLink: anchors.ChampConfidentialite,
+    anchorComponent: componentConfidentialite,
+  },
+  {
+    anchorTitle: "Article 11",
+    anchorName: "Responsabilité du Ministère",
+    anchorLink: anchors.ChampResponsabilite,
+    anchorComponent: componentResponsabilite,
+  },
+  {
+    anchorTitle: "Article 12",
+    anchorName: "Responsabilité des Utilisateurs",
+    anchorLink: anchors.ChampUtilisateur,
+    anchorComponent: componentUtilisateur,
+  },
+  {
+    anchorTitle: "Article 13",
+    anchorName: "Propriété intellectuelle",
+    anchorLink: anchors.ChampPropiete,
+    anchorComponent: componentPropriete,
+  },
+  {
+    anchorTitle: "Article 14",
+    anchorName: "Protection des données à caractère personnel",
+    anchorLink: anchors.ChampProtectioon,
+    anchorComponent: componentProtection,
+  },
+  {
+    anchorTitle: "Article 15",
+    anchorName: "Droit applicable et attribution de compétence",
+    anchorLink: anchors.ChampDroit,
+    anchorComponent: componentDroit,
   },
 ];
 
@@ -74,293 +458,15 @@ export const Cgu = ({ onLoad, isWrapped }: { onLoad?: () => void; isWrapped?: bo
           <Heading textStyle="h2" color="grey.800" mt={5}>
             CONDITIONS GÉNÉRALES D&apos;UTILISATION DU TABLEAU DE BORD DE L’APPRENTISSAGE
           </Heading>
-          <Text>Dernière mise à jour le : 3 novembre 2022 - {CGU_VERSION} </Text>
+          <Text>Dernière mise à jour le : 29 mars 2024 - {CGU_VERSION} </Text>
           <Text mt={4}>
             Les présentes conditions générales d’utilisation (dites « CGU ») définissent les conditions d’accès et
             d’utilisation des Services par l’Utilisateur.
           </Text>
         </Section>
-        <Section mt={4} id={anchors.ChampApplication}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 1 – Champ d’application
-          </Heading>
-          <Text>
-            Le tableau de bord est d’accès libre et gratuit à tout Utilisateur. La simple visite du tableau de bord
-            suppose l’acceptation par tout Utilisateur des présentes conditions générales d’utilisation.
-          </Text>
-        </Section>
-        <Section mt={4} id={anchors.Objet}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 2 – Objet
-          </Heading>
-          <Text>
-            Le tableau de bord a pour objectif de mettre à disposition des différents acteurs les données clés de
-            l’apprentissage en temps réel.
-          </Text>
-        </Section>
-        <Section mt={4} id={anchors.Definition}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 3 – Définitions
-          </Heading>
-          <Text>
-            Les termes ci-dessous définis ont entre les parties la signification suivante :
-            <br />
-            <br />
-            <strong>« Utilisateur »</strong> : toute personne ayant accès aux services du tableau de bord
-            <br />
-            <br />
-            <strong>« Authentification » </strong> : fonctionnalité qui permet aux utilisateurs titulaires d&apos;un
-            compte d&apos;accéder aux services proposés sur le tableau de bord.
-            <br />
-            <br />
-            <strong>« Services »</strong> : ensemble des prestations proposées sur le tableau de bord. Elles sont les
-            suivantes : création d&apos;un compte utilisateur, consultation des données, export des données, saisie de
-            données, accès à la documentation.
-            <br />
-            <br />
-            <strong>« Tableau de bord »</strong> : service en ligne permettant de consulter, exporter, saisir des
-            données.
-            <br />
-            <br />
-          </Text>
-        </Section>
-        <Section mt={4} id={anchors.FonctionnaliteLieesAuxComptesDesUtilisateurs}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 4 – Fonctionnalités liées aux comptes des utilisateurs
-          </Heading>
-          <Text>
-            L&apos;accès à certaines données du tableau de bord est restreint à une inscription à un compte :
-            <Link color="primary" href="https://cfas.apprentissage.beta.gouv.fr/login">
-              https://cfas.apprentissage.beta.gouv.fr/login
-            </Link>
-            . Les services proposés ne sont accessibles qu&apos;aux seuls utilisateurs munis d&apos;un identifiant
-            d&apos;authentification et d&apos;un mot de passe.
-            <br />
-            <br />
-            De la même façon, la connexion au compte permet d’accéder, de façon contextualisée selon le profil de
-            l’utilisateur à tout ou partie des fonctionnalités.
-            <br />
-            <br />
-            La procédure de création de compte permet aux utilisateurs de se créer un compte associé à leur type de
-            profil et d&apos;accéder aux fonctionnalités de consultation de certaines données, d’export des données et
-            de saisie de données.
-            <br />
-            <br />
-            L&apos;utilisateur est titulaire d&apos;un compte personnel, accessible par son identifiant personnel et par
-            un mot de passe dès lors que toutes les formalités nécessaires à son inscription sont accomplies.
-            <br />
-            <br />
-            Un seul compte peut être attribué par utilisateur (même adresse électronique).
-            <br />
-            <br />
-            Le mot de passe est strictement personnel et confidentiel. Il contient au moins 12 caractères comprenant
-            majuscules, minuscules, chiffres, et caractères spéciaux.
-            <br />
-            <br />
-            En cas d&apos;oubli de son mot de passe ou de compromission, l’utilisateur utilise la fonctionnalité « oubli
-            de mot de passe » et suit les instructions fournies par le tableau de bord.
-          </Text>
-        </Section>
-        <Section mt={4} id={anchors.PresentationDesServices}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 5 – Présentation des services
-          </Heading>
-          <Text>
-            Le tableau de bord permet aux utilisateurs :
-            <br />
-            <br />
-            - de consulter des données de l’apprentissage à des fins de pilotage ;
-            <br />
-            - d’exporter des fichiers de données de l’apprentissage ;
-            <br />
-            - de s’informer sur les données de l’apprentissage exposées sur le tableau de bord ;
-            <br />
-            - de consulter des listes nominatives d’apprentis en situation de rupture ou d’abandon à des fins
-            d’accompagnement ;
-            <br />
-            - de déposer des fichiers de données pour alimenter les chiffres du tableau de bord ;
-            <br />
-            - d’exposer certaines données sur leurs interfaces à l’aide d’une API dont la documentation est mise à
-            disposition par la Mission interministérielle de l’apprentissage ;
-            <br />
-            - d’exposer leurs données sur le tableau de bord à l’aide d’une API dont la documentation est mise à
-            disposition par la Mission interministérielle de l’apprentissage.
-            <br />
-            <br />
-            Le tableau de bord est, en principe, accessible en permanence.
-            <br />
-            <br />
-            La Mission interministérielle de l’apprentissage se réserve le droit, sans préavis, ni indemnité, de fermer
-            temporairement l&apos;accès à un ou plusieurs services du tableau de bord pour effectuer une mise à jour,
-            des modifications ou changements sur les méthodes opérationnelles, les serveurs et les heures
-            d&apos;accessibilité. Cette liste n&apos;est pas limitative.
-            <br />
-            <br />
-            Dans ce cas, la Mission interministérielle de l’apprentissage peut indiquer une date de réouverture du
-            compte ou d&apos;accessibilité à un ou plusieurs services.
-          </Text>
-        </Section>
-        <Section mt={4} id={anchors.Securite}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 6 - Sécurité
-          </Heading>
-          <Text>
-            Le tableau de bord comporte un accès sécurisé qui permet de consulter certaines données. Tout accès
-            frauduleux est interdit et sanctionné pénalement. Il en est de même pour toute entrave ou altération du
-            fonctionnement de ce système, ou en cas d&apos;introduction, de suppression ou de modification des données
-            qui y sont contenues.
-            <br />
-            <br />
-            L&apos;utilisateur s&apos;engage à ne pas perturber le bon fonctionnement de ce système. Il veille notamment
-            à ne pas introduire de virus ou toute autre technologie nuisible au tableau de bord.
-            <br />
-            <br />
-            La Mission interministérielle de l’apprentissage fait ses meilleurs efforts, conformément aux règles de
-            l&apos;art, pour sécuriser le service eu égard à la complexité de l&apos;internet.
-          </Text>
-        </Section>
-        <Section mt={4} id={anchors.Hyperliens}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 7 – Hyperliens
-          </Heading>
-          <Text>
-            La Mission interministérielle de l’apprentissage se réserve la possibilité de mettre en place des hyperliens
-            sur le tableau de bord donnant accès à des pages internet autres que celles de son interface.
-            <br />
-            <br />
-            Les utilisateurs sont formellement informés que les sites auxquels ils peuvent accéder par
-            l&apos;intermédiaire des liens hypertextes n’appartiennent pas tous à la Mission interministérielle de
-            l’apprentissage.
-            <br />
-            <br />
-            La Mission interministérielle de l’apprentissage ne saurait être responsable de l&apos;accès par les
-            utilisateurs par les liens hypertextes mis en place dans le cadre du tableau de bord à d&apos;autres
-            ressources présentes sur le réseau.
-            <br />
-            <br />
-            La Mission interministérielle de l’apprentissage décline toute responsabilité quant au contenu des
-            informations fournies sur ces ressources présentes sur le réseau au titre de l&apos;activation des liens
-            hypertextes.
-          </Text>
-        </Section>
-        <Section mt={4} id={anchors.Responsabilites}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 8 – Responsabilités
-          </Heading>
-          <Text as={"h4"} fontSize="20px" fontWeight="700" mb={5}>
-            8.1. Limites de la responsabilité de la Mission interministérielle de l’apprentissage
-          </Text>
-          <Text>
-            La Mission interministérielle de l’apprentissage ne saurait être tenue pour responsable des conséquences
-            provoquées par le caractère erroné ou frauduleux des informations fournies par l&apos;utilisateur.
-            <br />
-            <br />
-            L&apos;utilisateur reste en toute circonstance responsable de l&apos;utilisation qu&apos;il fait des
-            services du tableau de bord. La Mission interministérielle de l’apprentissage ne saurait être responsable de
-            l&apos;impossibilité d&apos;utiliser le tableau de bord et les services.
-            <br />
-            <br />
-            La Mission interministérielle de l’apprentissage ne saurait être responsable des atteintes à la sécurité
-            informatique pouvant causer des dommages aux matériels informatiques des utilisateurs et à leurs données.
-            <br />
-            <br />
-            La Mission interministérielle de l’apprentissage n&apos;est pas responsable des conditions
-            d&apos;utilisation du service par les utilisateurs.
-            <br />
-            <br />
-            La responsabilité de la Mission interministérielle de l’apprentissage ne saurait être recherchée en cas
-            d&apos;usage frauduleux ou abusif ou, à la suite d&apos;une divulgation volontaire ou involontaire, à
-            quiconque, des codes d&apos;accès confiés à l&apos;utilisateur.
-            <br />
-            <br />
-            La responsabilité de la Mission interministérielle de l’apprentissage ne peut être engagée en cas de
-            dommages directs ou indirects résultant de l&apos;utilisation du tableau de bord.
-            <br />
-            <br />
-            La responsabilité de la Mission interministérielle de l’apprentissage ne pourra être recherchée ni retenue
-            en cas d&apos;indisponibilité temporaire ou totale de tout ou partie de l&apos;accès au tableau de bord,
-            d&apos;une difficulté liée au temps de réponse et d&apos;une manière générale, d&apos;un défaut de
-            performance quelconque.
-          </Text>
-          <br />
-          <Text as={"h4"} fontSize="20px" fontWeight="700" mt={4}>
-            8.2. Responsabilité des utilisateurs
-          </Text>
-          <Text>
-            <br />
-            L&apos;utilisateur s&apos;engage à utiliser le tableau de bord et les services, ainsi que l&apos;ensemble
-            des informations auxquelles il pourra avoir accès en conformité avec les stipulations des présentes
-            conditions générales d&apos;utilisation.
-            <br />
-            <br />
-            L&apos;utilisateur est seul responsable de la préservation et de la confidentialité de son mot de passe et
-            autres données confidentielles qui lui seraient éventuellement transmises par la Mission interministérielle
-            de l’apprentissage.
-            <br />
-            <br />
-            L&apos;utilisateur est responsable de la sincérité des informations qu&apos;il fournit et s&apos;engage à
-            mettre à jour les informations le concernant ou à aviser la Mission interministérielle de l’apprentissage
-            sans délai de toute modification affectant sa situation.
-            <br />
-            <br />
-            En cas d&apos;utilisation frauduleuse de son compte ou vol de son mot de passe, l&apos;utilisateur
-            s&apos;engage à prévenir immédiatement la Mission interministérielle de l’apprentissage et à modifier sans
-            délai son mot de passe.
-            <br />
-            <br />
-            Cette notification devra être adressée à la Mission interministérielle de l’apprentissage par courrier
-            électronique à l&apos;adresse : tableau-de-bord@apprentissage.beta.gouv.fr. La date de réception de ce
-            courrier électronique fera foi entre les parties.
-            <br />
-            <br />
-            L&apos;utilisateur s&apos;engage à ne pas perturber l&apos;usage que pourraient faire les autres
-            utilisateurs du tableau de bord, de ne pas accéder aux comptes membres tiers et de ne pas accéder à des
-            parties du tableau de bord dont l&apos;accès est réservé.
-            <br />
-            <br />
-            L&apos;utilisateur s&apos;engage à utiliser le service ainsi que l&apos;ensemble des informations auxquelles
-            il pourra avoir accès, dans un but conforme à l&apos;ordre public, aux bonnes mœurs et aux droits des tiers.
-            <br />
-            <br />
-            L&apos;utilisateur s&apos;engage à ne commettre aucun acte pouvant mettre en cause la sécurité informatique
-            de la Mission interministérielle de l’apprentissage ou des autres utilisateurs.
-            <br />
-            <br />
-            L&apos;utilisateur s&apos;engage à ne pas interférer ou interrompre le fonctionnement normal du tableau de
-            bord.
-            <br />
-            <br />
-            L&apos;utilisateur s&apos;engage à ne pas collecter, utiliser, ou effectuer un traitement quelconque des
-            données personnelles des autres utilisateurs.
-            <br />
-            <br />
-            Toute utilisation frauduleuse ou hors usage initial du tableau de bord est interdite.
-            <br />
-            <br />
-            L&apos;Utilisateur s&apos;engage à ne pas commercialiser les données reçues et à ne pas les communiquer à
-            des tiers en dehors des cas prévus par la loi.
-            <br />
-            <br />
-            L&apos;Utilisateur s&apos;engage à ne pas mettre en ligne des contenus ou informations contraires aux
-            dispositions légales et réglementaires en vigueur susceptibles de mettre en péril le fonctionnement du
-            tableau de bord.
-            <br />
-            <br />
-            Toute tentative d&apos;accès non autorisé aux services, à d&apos;autres comptes, aux systèmes informatiques
-            ou à d&apos;autres réseaux connectés ou à l&apos;un des services via le piratage ou toute autre méthode est
-            interdite.
-          </Text>
-        </Section>
-        <Section mt={4} id={anchors.MiseAjourDesConditionsUtilisation}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 9 – Mise à jour des conditions d’utilisation
-          </Heading>
-          <Text>
-            Les termes des CGU doivent être acceptés au moment de la connexion. Toute modification des CGU réalisée en
-            fonction des modifications apportées au site, de l’évolution de la législation ou pour tout autre motif jugé
-            nécessaire, nécessite votre consentement.
-          </Text>
-        </Section>
+        {SommaireData.map(({ anchorLink, anchorName, anchorTitle, anchorComponent }) =>
+          computeArticle({ anchorLink, anchorName, anchorTitle, anchorComponent })
+        )}
       </Box>
     </HStack>
   );

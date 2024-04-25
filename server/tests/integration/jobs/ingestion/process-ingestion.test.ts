@@ -255,78 +255,19 @@ describe("Processus d'ingestion", () => {
               fiable: false,
             },
             statut: {
-              en_cours: "APPRENTI",
-              historique: [
-                {
-                  annee: "2022",
-                  mois: "12",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "01",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "02",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "03",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "04",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "05",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "06",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "07",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "08",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "09",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "10",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "11",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2023",
-                  mois: "12",
-                  valeur: "APPRENTI",
-                },
-              ],
+              en_cours: "FIN_DE_FORMATION",
               parcours: [
+                {
+                  date: new Date("2021-08-01T00:00:00.000Z"),
+                  valeur: "INSCRIT",
+                },
                 {
                   date: new Date("2022-12-28T04:05:47.647Z"),
                   valeur: "APPRENTI",
+                },
+                {
+                  date: new Date("2023-07-31T00:00:00.000Z"),
+                  valeur: "FIN_DE_FORMATION",
                 },
               ],
             },
@@ -678,64 +619,12 @@ describe("Processus d'ingestion", () => {
             },
 
             statut: {
-              en_cours: "DIPLOME",
-              historique: [
-                {
-                  annee: "2021",
-                  mois: "09",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2021",
-                  mois: "10",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2021",
-                  mois: "11",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2021",
-                  mois: "12",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2022",
-                  mois: "01",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2022",
-                  mois: "02",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2022",
-                  mois: "03",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2022",
-                  mois: "04",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2022",
-                  mois: "05",
-                  valeur: "APPRENTI",
-                },
-                {
-                  annee: "2022",
-                  mois: "06",
-                  valeur: "DIPLOME",
-                },
-              ],
+              en_cours: "FIN_DE_FORMATION",
               parcours: [
                 { date: new Date("2021-09-01T00:00:00.000Z"), valeur: "INSCRIT" },
                 { date: new Date("2021-09-01T00:00:00.000Z"), valeur: "APPRENTI" },
                 { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "RUPTURANT" },
-                { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "DIPLOME" },
+                { date: new Date("2022-06-30T00:00:00.000Z"), valeur: "FIN_DE_FORMATION" },
               ],
             },
           },
@@ -824,58 +713,6 @@ describe("Processus d'ingestion", () => {
             },
             statut: {
               en_cours: "ABANDON",
-              historique: [
-                {
-                  annee: "2021",
-                  mois: "09",
-                  valeur: "INSCRIT",
-                },
-                {
-                  annee: "2021",
-                  mois: "10",
-                  valeur: "INSCRIT",
-                },
-                {
-                  annee: "2021",
-                  mois: "11",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2021",
-                  mois: "12",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "01",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "02",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "03",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "04",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "05",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "06",
-                  valeur: "ABANDON",
-                },
-              ],
               parcours: [
                 {
                   date: new Date("2021-09-01T00:00:00.000Z"),
@@ -1048,58 +885,6 @@ describe("Processus d'ingestion", () => {
 
             statut: {
               en_cours: "ABANDON",
-              historique: [
-                {
-                  annee: "2021",
-                  mois: "09",
-                  valeur: "INSCRIT",
-                },
-                {
-                  annee: "2021",
-                  mois: "10",
-                  valeur: "INSCRIT",
-                },
-                {
-                  annee: "2021",
-                  mois: "11",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2021",
-                  mois: "12",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "01",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "02",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "03",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "04",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "05",
-                  valeur: "ABANDON",
-                },
-                {
-                  annee: "2022",
-                  mois: "06",
-                  valeur: "ABANDON",
-                },
-              ],
               parcours: [
                 {
                   date: new Date("2021-09-01T00:00:00.000Z"),
