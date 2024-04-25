@@ -1,5 +1,6 @@
 import { captureException } from "@sentry/node";
 import Boom from "boom";
+import { cloneDeep } from "lodash-es";
 import { MongoServerError, UpdateFilter } from "mongodb";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import { IEffectif, IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
@@ -152,9 +153,6 @@ export function determineStatutsByContrats(
   const dateFin = effectif.formation.date_fin ? new Date(effectif.formation.date_fin) : currentDate;
   const effectiveDateFin = dateFin < currentDate ? dateFin : currentDate;
 
-  if (dateEntree) statuts.push({ valeur: STATUT_APPRENANT.INSCRIT, date: dateEntree });
-
-  let latestRuptureDate;
   let contracts =
     effectif.contrats
       ?.map((contract) => ({
@@ -163,6 +161,15 @@ export function determineStatutsByContrats(
       }))
       .sort((a, b) => a.dateDebut.getTime() - b.dateDebut.getTime()) || [];
 
+  const earliestContract = contracts[0]?.dateDebut;
+
+  if (dateEntree && earliestContract && earliestContract < dateEntree) {
+    statuts.push({ valeur: STATUT_APPRENANT.INSCRIT, date: earliestContract });
+  } else if (dateEntree) {
+    statuts.push({ valeur: STATUT_APPRENANT.INSCRIT, date: dateEntree });
+  }
+
+  let latestRuptureDate;
   contracts.forEach((contract, index) => {
     const { dateDebut, dateRupture } = contract;
 
@@ -205,7 +212,9 @@ function determineNewStatutFromHistorique(
     throw new Error("La période de formation est nulle ou indéfinie");
   }
 
-  const sortedHistoriqueStatut = historiqueStatut.sort(
+  const clonedHistoriqueStatut = cloneDeep(historiqueStatut);
+
+  const sortedHistoriqueStatut = clonedHistoriqueStatut.sort(
     (a, b) => new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime()
   );
 
@@ -213,9 +222,17 @@ function determineNewStatutFromHistorique(
   let inscriptionDate =
     startYear !== endYear ? new Date(`${startYear}-08-01T00:00:00Z`) : new Date(`${startYear}-01-01T00:00:00Z`);
 
-  if (sortedHistoriqueStatut[0].valeur_statut === 0) {
-    inscriptionDate = new Date(sortedHistoriqueStatut[0].date_statut);
+  if (sortedHistoriqueStatut[0].valeur_statut === 2) {
+    inscriptionDate = sortedHistoriqueStatut[0].date_statut;
     sortedHistoriqueStatut.shift();
+  }
+
+  if (sortedHistoriqueStatut.length > 0 && sortedHistoriqueStatut[0].date_statut) {
+    let earliestStatutDate = new Date(sortedHistoriqueStatut[0].date_statut);
+
+    if (earliestStatutDate < inscriptionDate) {
+      inscriptionDate = earliestStatutDate;
+    }
   }
 
   const parcours: { valeur: StatutApprenant; date: Date }[] = [
@@ -223,13 +240,10 @@ function determineNewStatutFromHistorique(
   ];
 
   sortedHistoriqueStatut.forEach((statut) => {
-    const statutYear = new Date(statut.date_statut).getFullYear();
-    if (statutYear >= startYear && statutYear <= endYear) {
-      parcours.push({
-        valeur: mapValeurStatutToStatutApprenant(statut.valeur_statut),
-        date: new Date(statut.date_statut),
-      });
-    }
+    parcours.push({
+      valeur: mapValeurStatutToStatutApprenant(statut.valeur_statut),
+      date: new Date(statut.date_statut),
+    });
   });
 
   return parcours;
