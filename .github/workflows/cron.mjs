@@ -8,7 +8,7 @@ async function run() {
   const effectifs = data.indicateursEffectifs.reduce(
     (acc, item) => {
       acc.apprentis += item.apprentis;
-      acc.inscritsSansContrat += item.inscritsSansContrat;
+      acc.inscrits += item.inscrits;
       acc.abandons += item.abandons;
       acc.rupturants += item.rupturants;
       acc.apprenants += item.apprenants;
@@ -17,7 +17,7 @@ async function run() {
     },
     {
       apprentis: 0,
-      inscritsSansContrat: 0,
+      inscrits: 0,
       abandons: 0,
       rupturants: 0,
       apprenants: 0,

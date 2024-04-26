@@ -231,7 +231,7 @@ function IndicateursGrid(props: IndicateursGridProps) {
       <GridItem bg="galt" colSpan={2}>
         <Card
           label="dont jeunes sans contrat"
-          count={indicateursEffectifs.inscritsSansContrat}
+          count={indicateursEffectifs.inscrits}
           tooltipLabel={
             <div>
               <b>Jeune sans contrat</b>
@@ -248,8 +248,8 @@ function IndicateursGrid(props: IndicateursGridProps) {
               fontSize="sm"
               p="0"
               mt="2"
-              isDisabled={indicateursEffectifs.inscritsSansContrat === 0}
-              title={indicateursEffectifs.inscritsSansContrat === 0 ? "Aucun effectif à télécharger" : ""}
+              isDisabled={indicateursEffectifs.inscrits === 0}
+              title={indicateursEffectifs.inscrits === 0 ? "Aucun effectif à télécharger" : ""}
               action={async () => downloadEffectifsNominatifs("inscritSansContrat", effectifsFilters)}
             >
               Télécharger la liste

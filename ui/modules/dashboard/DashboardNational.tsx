@@ -84,9 +84,7 @@ const DashboardTransverse = () => {
           Le <strong>{formatDateDayMonthYear(new Date())}</strong>, le tableau de bord de l’apprentissage recense{" "}
           <strong>{formatNumber(indicateursGlobaux.effectifs?.total.apprenants)} apprenants</strong>, dont{" "}
           <strong>{formatNumber(indicateursGlobaux.effectifs?.total.apprentis)} apprentis</strong>,{" "}
-          <strong>
-            {formatNumber(indicateursGlobaux.effectifs?.total.inscritsSansContrat)} jeunes en formation sans contrat
-          </strong>{" "}
+          <strong>{formatNumber(indicateursGlobaux.effectifs?.total.inscrits)} jeunes en formation sans contrat</strong>{" "}
           et <strong>{formatNumber(indicateursGlobaux.effectifs?.total.rupturants)} rupturants</strong>.
         </Text>
         <HStack mt={8}>
@@ -200,7 +198,7 @@ const DashboardTransverse = () => {
                       <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
                       <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
                       <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
-                      <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
+                      <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscrits}</Box>
                       <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
                     </>
                   ) : (

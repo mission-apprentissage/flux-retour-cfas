@@ -248,7 +248,7 @@ const DashboardTransverse = () => {
                       <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
                       <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
                       <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
-                      <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
+                      <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscrits}</Box>
                       <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
                     </>
                   ) : (

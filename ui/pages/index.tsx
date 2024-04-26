@@ -421,7 +421,7 @@ function SectionApercuChiffresCles() {
         Le <Text as="b">{formatDate(new Date(), "d MMMM yyyy")}</Text>, le tableau de bord de l’apprentissage recense
         sur le territoire national <Text as="b">{formatNumber(effectifs?.total.apprenants)} apprenants</Text>, dont{" "}
         <Text as="b">{formatNumber(effectifs?.total.apprentis)} apprentis</Text>,{" "}
-        <Text as="b">{formatNumber(effectifs?.total.inscritsSansContrat)} jeunes sans contrat</Text> et{" "}
+        <Text as="b">{formatNumber(effectifs?.total.inscrits)} jeunes sans contrat</Text> et{" "}
         <Text as="b">{formatNumber(effectifs?.total.rupturants)} rupturants</Text>.
       </Text>
 
@@ -561,7 +561,7 @@ function SectionApercuChiffresCles() {
                     <Text as="b">{formatNumber(effectifs?.total.apprentis)}</Text> apprentis
                   </Text>
                   <Text fontSize="zeta">
-                    <Text as="b">{formatNumber(effectifs?.total.inscritsSansContrat)}</Text> en formation sans contrat
+                    <Text as="b">{formatNumber(effectifs?.total.inscrits)}</Text> en formation sans contrat
                   </Text>
                   <Text fontSize="zeta">
                     <Text as="b">{formatNumber(effectifs?.total.rupturants)}</Text> rupturants
@@ -586,7 +586,7 @@ function SectionApercuChiffresCles() {
                       <>
                         <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
                         <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
-                        <Box>Jeunes en formation sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
+                        <Box>Jeunes en formation sans contrat&nbsp;: {indicateurs.inscrits}</Box>
                         <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
                         <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
                       </>

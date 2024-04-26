@@ -29,7 +29,7 @@ const allIndicateurAcl: Acl = {
 
 export async function getIndicateursNational(filters: TerritoireFilters & DateFilters) {
   const cacheKey = Object.keys(filters)
-    .toSorted()
+    .sort()
     .reduce((acc, key) => {
       if (key === "date") {
         return acc + `:date=${format(filters.date, "yyyy-MM-dd")}`;

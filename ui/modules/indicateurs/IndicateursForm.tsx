@@ -93,7 +93,7 @@ function IndicateursForm(props: IndicateursFormProps) {
         (acc, indicateursParOrganisme) => {
           acc.apprenants += indicateursParOrganisme.apprenants;
           acc.apprentis += indicateursParOrganisme.apprentis;
-          acc.inscritsSansContrat += indicateursParOrganisme.inscritsSansContrat;
+          acc.inscrits += indicateursParOrganisme.inscrits;
           acc.abandons += indicateursParOrganisme.abandons;
           acc.rupturants += indicateursParOrganisme.rupturants;
           return acc;
@@ -101,7 +101,7 @@ function IndicateursForm(props: IndicateursFormProps) {
         {
           apprenants: 0,
           apprentis: 0,
-          inscritsSansContrat: 0,
+          inscrits: 0,
           abandons: 0,
           rupturants: 0,
         }
@@ -390,7 +390,7 @@ function IndicateursForm(props: IndicateursFormProps) {
               ),
             },
             {
-              accessorKey: "inscritsSansContrat",
+              accessorKey: "inscrits",
               header: () => (
                 <>
                   <InscritsSansContratsIcon w="16px" />
