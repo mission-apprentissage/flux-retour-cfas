@@ -32,7 +32,7 @@ export const getIndicateursEffectifsParDepartement = async (filters: DateFilters
             departement,
             apprentis: acc[departement].apprentis + rest.apprentis,
             abandons: acc[departement].abandons + rest.abandons,
-            inscritsSansContrat: acc[departement].inscritsSansContrat + rest.inscritsSansContrat,
+            inscrits: acc[departement].inscrits + rest.inscrits,
             apprenants: acc[departement].apprenants + rest.apprenants,
             rupturants: acc[departement].rupturants + rest.rupturants,
           },
@@ -78,7 +78,7 @@ export const getOrganismeIndicateursEffectifs = async (
   return {
     apprenants: eff.apprenants + effDECA.apprenants,
     apprentis: eff.apprentis + effDECA.apprentis,
-    inscritsSansContrat: eff.inscritsSansContrat + effDECA.inscritsSansContrat,
+    inscrits: eff.inscrits + effDECA.inscrits,
     abandons: eff.abandons + effDECA.abandons,
     rupturants: eff.rupturants + effDECA.rupturants,
   };
