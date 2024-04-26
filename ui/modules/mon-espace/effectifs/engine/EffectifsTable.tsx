@@ -5,6 +5,7 @@ import { useRecoilValue } from "recoil";
 import { ERPS, getStatut } from "shared";
 
 import Table from "@/components/Table/Table";
+import EffectifResumeComponent from "@/modules/effectifs/EffectifResumeComponent";
 import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "@/theme/components/icons";
 
 import EffectifTableDetails from "./EffectifsTableDetails";
@@ -172,7 +173,7 @@ const EffectifsTable = ({
                   size: 170,
                   header: () => "Statut courant apprenant(e)",
                   cell: ({ row }) => {
-                    const statut = organismesEffectifs[row.id]?.statut;
+                    const statut = organismesEffectifs[row.id]?._computed.statut;
 
                     if (!statut || !statut.parcours.length) {
                       return (
@@ -231,7 +232,7 @@ const EffectifsTable = ({
                         />
                       );
                     }
-                    return getValue();
+                    return organismesEffectifs[row.id].apprenant.nom;
                   },
                 },
               }
@@ -268,7 +269,7 @@ const EffectifsTable = ({
                         />
                       );
                     }
-                    return getValue();
+                    return organismesEffectifs[row.id].apprenant.prenom;
                   },
                 },
               }
@@ -501,7 +502,8 @@ const EffectifsTable = ({
         }}
         getRowCanExpand={() => true}
         renderSubComponent={({ row }) => {
-          return <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} />;
+          //return <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} />;
+          return <EffectifResumeComponent effectif={organismesEffectifs[row.id]} />;
         }}
       />
     </Box>

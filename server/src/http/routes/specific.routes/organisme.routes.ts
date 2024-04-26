@@ -24,35 +24,7 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
     })
     .toArray();
 
-  return effectifs
-    .filter((effectif) => !sifa || isEligibleSIFA(effectif.apprenant.historique_statut))
-    .map((effectif) => ({
-      id: effectif._id.toString(),
-      id_erp_apprenant: effectif.id_erp_apprenant,
-      organisme_id: organismeId,
-      annee_scolaire: effectif.annee_scolaire,
-      source: effectif.source,
-      validation_errors: effectif.validation_errors,
-      formation: effectif.formation,
-      nom: effectif.apprenant.nom,
-      prenom: effectif.apprenant.prenom,
-      date_de_naissance: effectif.apprenant.date_de_naissance,
-      historique_statut: effectif.apprenant.historique_statut,
-      statut: effectif._computed?.statut,
-      ...(sifa
-        ? {
-            requiredSifa: compact(
-              [
-                ...(!effectif.apprenant.adresse?.complete
-                  ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
-                  : requiredFieldsSifa),
-              ].map((fieldName) =>
-                !get(effectif, fieldName) || get(effectif, fieldName) === "" ? fieldName : undefined
-              )
-            ),
-          }
-        : {}),
-    }));
+  return effectifs.filter((effectif) => !sifa || isEligibleSIFA(effectif.apprenant.historique_statut));
 }
 
 export async function updateOrganismeEffectifs(

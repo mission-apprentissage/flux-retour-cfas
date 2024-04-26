@@ -1,27 +1,10 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionItem,
-  AccordionPanel,
-  Collapse,
-  Text,
-  Box,
-  HStack,
-  VStack,
-} from "@chakra-ui/react";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Text, Box, HStack, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { useState } from "react";
 import { IEffectifCreationSchema } from "shared/models/apis/effectifsCreationSchema";
 
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import { PlainArrowRight } from "@/theme/components/icons/PlainArrowRight";
-
-const headerStyle = {
-  backgroundColor: "#F9F8F6",
-  color: "#3A3A3A",
-  fontWeight: "700",
-  fontSize: "18px",
-};
 
 const titleRowStyle = {
   padding: "0px 12px",
@@ -72,7 +55,6 @@ interface EffectifResumeComponentProps {
   effectif: IEffectifCreationSchema;
 }
 const EffectifResumeComponent = ({ effectif }: EffectifResumeComponentProps) => {
-  console.log(effectif);
   const [showStatut, setShowStatut] = useState(false);
   const [showCoordonnees, setShowCoordonnees] = useState(false);
   const [showFormation, setShowFormation] = useState(false);
