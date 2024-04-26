@@ -41,6 +41,7 @@ export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false)
       prenom: effectif.apprenant.prenom,
       date_de_naissance: effectif.apprenant.date_de_naissance,
       historique_statut: effectif.apprenant.historique_statut,
+      statut: effectif._computed?.statut,
       ...(sifa
         ? {
             requiredSifa: compact(
