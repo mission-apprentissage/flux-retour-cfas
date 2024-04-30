@@ -81,31 +81,42 @@ export const EffectifForm = memo(
                 requiredSifa={requiredSifaByBlock.statuts}
               >
                 <VStack align="stretch" spacing={4} px={2} py={3}>
-                  <HStack justifyContent="space-between">
-                    <Text fontSize={14}>Statut actuel</Text>
-                    <Text fontSize={14} fontWeight="semibold">
-                      {getStatut(currentStatus.valeur)}
-                    </Text>
-                  </HStack>
-                  <HStack justifyContent="space-between">
-                    <Text fontSize={14}>Date de déclaration du statut</Text>
-                    <Text fontSize={14} fontWeight="semibold">
-                      {new Date(currentStatus.date).toLocaleDateString()}
-                    </Text>
-                  </HStack>
-                  <Divider my={4} />
-                  <VStack align="stretch">
-                    <Text fontSize={14} mb={2}>
-                      Anciens statuts
-                    </Text>
-                    {historyStatus.map((status, idx) => (
-                      <HStack key={idx} justifyContent="space-start">
+                  {parcours.length > 1 ? (
+                    <>
+                      <HStack justifyContent="space-between">
+                        <Text fontSize={14}>Statut actuel</Text>
                         <Text fontSize={14} fontWeight="semibold">
-                          {getStatut(status.valeur)} déclaré le {new Date(status.date).toLocaleDateString()}
+                          {getStatut(currentStatus.valeur)}
                         </Text>
                       </HStack>
-                    ))}
-                  </VStack>
+                      <HStack justifyContent="space-between">
+                        <Text fontSize={14}>Date de déclaration du statut</Text>
+                        <Text fontSize={14} fontWeight="semibold">
+                          {new Date(currentStatus.date).toLocaleDateString()}
+                        </Text>
+                      </HStack>
+                      <Divider my={4} />
+                      <VStack align="stretch">
+                        <Text fontSize={14} mb={2}>
+                          Anciens statuts
+                        </Text>
+                        {historyStatus.map((status, idx) => (
+                          <HStack key={idx} justifyContent="space-start">
+                            <Text fontSize={14} fontWeight="semibold">
+                              {getStatut(status.valeur)} déclaré le {new Date(status.date).toLocaleDateString()}
+                            </Text>
+                          </HStack>
+                        ))}
+                      </VStack>
+                    </>
+                  ) : (
+                    <HStack justifyContent="space-between">
+                      <Text fontSize={14}>Statut actuel</Text>
+                      <Text fontSize={14} fontWeight="semibold">
+                        Aucun statut
+                      </Text>
+                    </HStack>
+                  )}
                 </VStack>
               </AccordionItemChild>
             )}
