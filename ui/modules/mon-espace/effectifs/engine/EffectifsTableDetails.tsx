@@ -24,7 +24,7 @@ const EffectifTableDetails = ({ row, modeSifa = false, canEdit = false }) => {
 
   return (
     <Box>
-      <Effectif modeSifa={modeSifa} canEdit={canEdit} parcours={row.original.statut.parcours || []} />
+      <Effectif modeSifa={modeSifa} canEdit={canEdit} parcours={row?.original?.statut?.parcours || []} />
     </Box>
   );
 };
