@@ -210,7 +210,7 @@ const createEffDECA = (org) => ({
   organisme_id: org._id,
   organisme_formateur_id: org._id,
   organisme_responsable_id: org._id,
-  isDecaCompatible: true,
+  is_deca_compatible: true,
 });
 
 /**
@@ -248,8 +248,8 @@ const testDeca = async (nbEffR, nbEffF, nbEffR_DECA, nbEffF_DECA, expected_nbEff
     `/api/v1/organismes/${idForm.toString()}/indicateurs/effectifs?date=2024-04-24T15:04:33.359Z`
   );
   fromDECA
-    ? expect((await effectifsDECADb().find({ isDecaCompatible: true }).toArray()).length).toBeGreaterThan(0)
-    : expect((await effectifsDECADb().find({ isDecaCompatible: true }).toArray()).length).toBe(0);
+    ? expect((await effectifsDECADb().find({ is_deca_compatible: true }).toArray()).length).toBeGreaterThan(0)
+    : expect((await effectifsDECADb().find({ is_deca_compatible: true }).toArray()).length).toBe(0);
   expect(responseResp.data.abandons).toBe(expected_nbEffR);
   expect(responseForm.data.abandons).toBe(expected_nbEffF);
 };

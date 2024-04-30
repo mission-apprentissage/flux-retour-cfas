@@ -15,13 +15,13 @@ import {
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
+import { normalize } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import { normalize } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";

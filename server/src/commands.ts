@@ -446,6 +446,14 @@ program
   .action(createJobAction("hydrate:contratsDeca"));
 
 program
+  .command("hydrate:contratsDecaRaw")
+  .description("Remplissage des contrats Deca")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .option("-d, --drop", "Supprime les contrats existants avant de les recréer", false)
+  .option("-f, --full", "Récupère l'intégralité des données disponibles via l'API Deca", false)
+  .action(createJobAction("hydrate:contratsDecaRaw"));
+
+program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)

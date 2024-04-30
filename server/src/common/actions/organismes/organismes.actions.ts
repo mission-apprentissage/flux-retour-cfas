@@ -466,7 +466,7 @@ export const updateOrganismesHasTransmittedWithHierarchy = async (
     },
     {
       $set: {
-        isDecaCompatible: !computedStatus,
+        is_deca_compatible: !computedStatus,
       },
     }
   );

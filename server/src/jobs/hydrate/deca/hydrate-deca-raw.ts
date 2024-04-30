@@ -1,0 +1,124 @@
+import { normalize } from "path";
+
+import { captureException } from "@sentry/node";
+import { WithoutId } from "mongodb";
+import { IDecaRaw } from "shared/models/data/decaRaw.model";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { cyrb53Hash, getYearFromDate } from "shared/utils";
+
+import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
+import parentLogger from "@/common/logger";
+import { decaRawDb, effectifsDECADb } from "@/common/model/collections";
+import { __dirname } from "@/common/utils/esmUtils";
+
+const logger = parentLogger.child({ module: "job:hydrate:contratsDecaRaw" });
+
+export async function hydrateDecaRaw() {
+  let count = 0;
+
+  try {
+    const cursor = decaRawDb()
+      .find({
+        dispositif: "APPR",
+        "organisme_formation.uai_cfa": { $exists: true },
+        "organisme_formation.siret": { $exists: true },
+        "formation.date_debut_formation": { $exists: true },
+        "formation.date_fin_formation": { $exists: true },
+      })
+      .limit(1000);
+
+    for await (const document of cursor) {
+      try {
+        await updateEffectifDeca(document);
+        count++;
+      } catch (docError) {
+        logger.error(`Error updating document ${document._id}: ${docError}`);
+        // Handle document-specific errors or continue processing the next document
+      }
+    }
+
+    if (count === 0) {
+      console.log("No documents found matching the criteria.");
+    }
+  } catch (err) {
+    logger.error(`Échec de la mise à jour des effectifs: ${err}`);
+    captureException(err);
+  } finally {
+    logger.info(`Collection contratsDeca initialized successfully. Processed count: ${count}`);
+  }
+}
+
+async function updateEffectifDeca(document: IDecaRaw) {
+  const newDocument = await transformDocument(document);
+
+  return await effectifsDECADb().insertOne(newDocument as IEffectifDECA);
+}
+
+async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffectifDECA>> {
+  const {
+    alternant,
+    formation,
+    employeur,
+    organisme_formation,
+    date_debut_contrat,
+    date_fin_contrat,
+    date_effet_rupture,
+  } = document;
+  const { nom, prenom, date_naissance } = alternant;
+  const { date_debut_formation, date_fin_formation, code_diplome, rncp, intitule_ou_qualification } = formation;
+  const { siret, denomination, naf, adresse } = employeur;
+  const { uai_cfa, siret: orgSiret } = organisme_formation;
+
+  const startYear = getYearFromDate(date_debut_formation);
+  const endYear = getYearFromDate(date_fin_formation);
+
+  const organisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
+
+  if (!startYear || !endYear) {
+    throw new Error("Start year and end year must be defined");
+  }
+
+  if (!date_debut_contrat || !date_fin_contrat) {
+    throw new Error("Contract start and end dates are required");
+  }
+
+  return {
+    apprenant: {
+      nom,
+      prenom,
+      date_de_naissance: date_naissance,
+      historique_statut: [],
+      has_nir: false,
+    },
+    contrats: [
+      {
+        siret,
+        denomination,
+        type_employeur: null,
+        naf,
+        adresse: { code_postal: adresse.code_postal },
+        date_debut: date_debut_contrat,
+        date_fin: date_fin_contrat,
+        date_rupture: date_effet_rupture,
+      },
+    ],
+    formation: {
+      cfd: code_diplome,
+      rncp,
+      periode: [startYear, endYear],
+      libelle_court: intitule_ou_qualification,
+      libelle_long: intitule_ou_qualification,
+      date_inscription: date_debut_formation,
+      date_entree: date_debut_formation,
+      date_fin: date_fin_formation,
+    },
+    organisme_id: organisme._id,
+    validation_errors: [],
+    created_at: new Date(),
+    updated_at: new Date(),
+    id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (date_naissance || "")),
+    source: "DECA",
+    annee_scolaire: `${startYear}-${endYear}`,
+    is_deca_compatible: true,
+  };
+}

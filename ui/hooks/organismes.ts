@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { normalize } from "shared";
 
 import { _get, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
-import { normalize } from "@/common/utils/stringUtils";
 import { OrganismeNormalized } from "@/modules/organismes/ListeOrganismesPage";
 import {
   OrganismesFiltersQuery,
