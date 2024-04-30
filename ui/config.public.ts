@@ -2,7 +2,7 @@ export interface PublicConfig {
   sentry_dsn: string;
   baseUrl: string;
   host: string;
-  env: "local" | "recette" | "production" | "preview";
+  env: "local" | "recette" | "production" | "preview" | "preprod";
   version: string;
   matomo: {
     url: string;
@@ -38,6 +38,24 @@ function getRecettePublicConfig(): PublicConfig {
   return {
     sentry_dsn: SENTRY_DSN,
     env: "recette",
+    host,
+    baseUrl: `https://${host}`,
+    matomo: {
+      url: "https://stats.beta.gouv.fr",
+      siteId: "",
+      jsTrackerFile: "",
+      disableCookies: true,
+    },
+    version: getVersion(),
+  };
+}
+
+function getPreprodPublicConfig(): PublicConfig {
+  const host = "tableau-de-bord-preprod.apprentissage.beta.gouv.fr";
+
+  return {
+    sentry_dsn: SENTRY_DSN,
+    env: "preprod",
     host,
     baseUrl: `https://${host}`,
     matomo: {
@@ -108,6 +126,7 @@ function getEnv(): PublicConfig["env"] {
   switch (env) {
     case "production":
     case "recette":
+    case "preprod":
     case "preview":
     case "local":
       return env;
@@ -122,6 +141,8 @@ function getPublicConfig(): PublicConfig {
       return getProductionPublicConfig();
     case "recette":
       return getRecettePublicConfig();
+    case "preprod":
+      return getPreprodPublicConfig();
     case "preview":
       return getPreviewPublicConfig();
     case "local":

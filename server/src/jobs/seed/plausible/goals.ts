@@ -5,6 +5,7 @@ import { plausibleGoals } from "shared";
 const plausibleDomains = [
   "cfas.apprentissage.beta.gouv.fr",
   "cfas-recette.apprentissage.beta.gouv.fr",
+  "tableau-de-bord-preprod.apprentissage.beta.gouv.fr",
   "cfas-dev.apprentissage.beta.gouv.fr",
 ];
 
