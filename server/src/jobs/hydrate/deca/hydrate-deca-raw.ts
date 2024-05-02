@@ -138,7 +138,9 @@ function adjustDateRanges(startYear: number, endYear: number) {
   const targetEntryYear = 2023;
   const targetEndYear = 2024;
 
-  return startYear === targetEntryYear || endYear === targetEndYear
+  return startYear === targetEntryYear ||
+    endYear === targetEndYear ||
+    (startYear < targetEntryYear && endYear > targetEndYear)
     ? `${targetEntryYear}-${targetEndYear}`
     : `${startYear}-${endYear}`;
 }
