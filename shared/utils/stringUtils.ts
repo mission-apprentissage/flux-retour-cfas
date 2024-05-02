@@ -1,4 +1,4 @@
-export function normalize(string) {
+export function normalize(string: string | null | undefined) {
   return string === null || string === undefined
     ? ""
     : string
