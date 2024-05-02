@@ -378,6 +378,12 @@ program
   .action(createJobAction("tmp:effectifs:update_computed_statut"));
 
 program
+  .command("hydrate:effectifs:update_computed_statut")
+  .description("Remplissage du champ effectifs._computed avec les types des effectifs")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:effectifs:update_computed_statut"));
+
+program
   .command("hydrate:effectifs-formation-niveaux")
   .description("Remplissage du champ niveau des formations des effectifs")
   .option("-q, --queued", "Run job asynchronously", false)

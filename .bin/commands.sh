@@ -44,6 +44,10 @@ function release:app() {
   "${SCRIPT_DIR}/release-app.sh" "$@"
 }
 
+function build:image() {
+  "${SCRIPT_DIR}/build-images.sh" "$@"
+}
+
 function sentry:release() {
   "${SCRIPT_DIR}/sentry-release.sh" "$@"
 }

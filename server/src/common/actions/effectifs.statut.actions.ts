@@ -227,10 +227,12 @@ function determineNewStatutFromHistorique(
     sortedHistoriqueStatut.shift();
   }
 
-  let earliestStatutDate = new Date(sortedHistoriqueStatut[0].date_statut);
+  if (sortedHistoriqueStatut.length > 0 && sortedHistoriqueStatut[0].date_statut) {
+    let earliestStatutDate = new Date(sortedHistoriqueStatut[0].date_statut);
 
-  if (earliestStatutDate < inscriptionDate) {
-    inscriptionDate = earliestStatutDate;
+    if (earliestStatutDate < inscriptionDate) {
+      inscriptionDate = earliestStatutDate;
+    }
   }
 
   const parcours: { valeur: StatutApprenant; date: Date }[] = [
@@ -238,13 +240,10 @@ function determineNewStatutFromHistorique(
   ];
 
   sortedHistoriqueStatut.forEach((statut) => {
-    const statutYear = new Date(statut.date_statut).getFullYear();
-    if (statutYear >= startYear && statutYear <= endYear) {
-      parcours.push({
-        valeur: mapValeurStatutToStatutApprenant(statut.valeur_statut),
-        date: new Date(statut.date_statut),
-      });
-    }
+    parcours.push({
+      valeur: mapValeurStatutToStatutApprenant(statut.valeur_statut),
+      date: new Date(statut.date_statut),
+    });
   });
 
   return parcours;

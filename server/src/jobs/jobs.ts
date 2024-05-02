@@ -141,7 +141,7 @@ export async function setupJobProcessor() {
             "Mettre à jour les statuts d'effectifs le 1er de chaque mois à 00h45": {
               cron_string: "45 0 1 * *",
               handler: async () => {
-                await addJob({ name: "hydrate:effectifs:update_computed_statut", queued: true });
+                await addJob({ name: "hydrate:effectifs:update_computed_statut_month", queued: true });
                 return 0;
               },
             },
@@ -214,6 +214,11 @@ export async function setupJobProcessor() {
           return hydrateEffectifsComputedTypes();
         },
       },
+      "hydrate:effectifs:update_computed_statut": {
+        handler: async () => {
+          return await addJob({ name: "tmp:effectifs:update_computed_statut", queued: true });
+        },
+      },
       "hydrate:effectifs-formation-niveaux": {
         handler: async () => {
           return hydrateEffectifsFormationsNiveaux();
@@ -269,7 +274,7 @@ export async function setupJobProcessor() {
           return hydrateDecaRaw();
         },
       },
-      "hydrate:effectifs:update_computed_statut": {
+      "hydrate:effectifs:update_computed_statut_month": {
         handler: async () => {
           return hydrateEffectifsComputedTypes({
             query: { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } },
