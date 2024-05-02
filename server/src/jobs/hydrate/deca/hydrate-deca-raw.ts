@@ -124,8 +124,21 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     updated_at: new Date(),
     id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (date_naissance || "")),
     source: "DECA",
-    annee_scolaire: `${startYear}-${endYear}`,
+    annee_scolaire: adjustDateRanges(startYear, endYear),
   };
 
-  return { ...effectif, _computed: addComputedFields({ organisme, effectif }), is_deca_compatible: true };
+  return {
+    ...effectif,
+    _computed: addComputedFields({ organisme, effectif }),
+    is_deca_compatible: !organisme.is_transmission_target,
+  };
+}
+
+function adjustDateRanges(startYear: number, endYear: number) {
+  const targetEntryYear = 2023;
+  const targetEndYear = 2024;
+
+  return startYear === targetEntryYear || endYear === targetEndYear
+    ? `${targetEntryYear}-${targetEndYear}`
+    : `${startYear}-${endYear}`;
 }
