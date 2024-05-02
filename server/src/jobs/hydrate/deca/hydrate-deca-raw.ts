@@ -76,15 +76,15 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
   const organisme: IOrganisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
 
   if (!organisme) {
-    throw new Error("Start year and end year must be defined");
+    throw new Error("L'organisme n'a pas été trouvé dans la base de données");
   }
 
   if (!startYear || !endYear) {
-    throw new Error("Start year and end year must be defined");
+    throw new Error("L'année de début et l'année de fin doivent être définies");
   }
 
   if (!date_debut_contrat || !date_fin_contrat) {
-    throw new Error("Contract start and end dates are required");
+    throw new Error("Les dates de début et de fin de contrat sont requises");
   }
 
   const effectif = {
