@@ -76,15 +76,15 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
   const organisme: IOrganisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
 
   if (!organisme) {
-    throw new Error("Start year and end year must be defined");
+    throw new Error("L'organisme n'a pas été trouvé dans la base de données");
   }
 
   if (!startYear || !endYear) {
-    throw new Error("Start year and end year must be defined");
+    throw new Error("L'année de début et l'année de fin doivent être définies");
   }
 
   if (!date_debut_contrat || !date_fin_contrat) {
-    throw new Error("Contract start and end dates are required");
+    throw new Error("Les dates de début et de fin de contrat sont requises");
   }
 
   const effectif = {
@@ -124,8 +124,12 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     updated_at: new Date(),
     id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (date_naissance || "")),
     source: "DECA",
-    annee_scolaire: `${startYear}-${endYear}`,
+    annee_scolaire: startYear <= 2023 && endYear >= 2024 ? "2023-2024" : `${startYear}-${endYear}`,
   };
 
-  return { ...effectif, _computed: addComputedFields({ organisme, effectif }), is_deca_compatible: true };
+  return {
+    ...effectif,
+    _computed: addComputedFields({ organisme, effectif }),
+    is_deca_compatible: !organisme.is_transmission_target,
+  };
 }
