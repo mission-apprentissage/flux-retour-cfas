@@ -19,6 +19,7 @@ import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
 import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
+import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
@@ -266,6 +267,11 @@ export async function setupJobProcessor() {
       "hydrate:contratsDeca": {
         handler: async (job) => {
           return hydrateDeca(job.payload as any);
+        },
+      },
+      "hydrate:contrats-deca-raw": {
+        handler: async () => {
+          return hydrateDecaRaw();
         },
       },
       "hydrate:effectifs:update_computed_statut_month": {

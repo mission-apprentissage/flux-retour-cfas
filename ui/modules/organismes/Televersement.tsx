@@ -24,14 +24,13 @@ import {
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { TD_MANUEL_ELEMENT_LINK } from "shared";
+import { cyrb53Hash, normalize, TD_MANUEL_ELEMENT_LINK } from "shared";
 import XLSX from "xlsx";
 
 import { _post } from "@/common/httpClient";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
-import { cyrb53Hash, normalize } from "@/common/utils/stringUtils";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import useToaster from "@/hooks/useToaster";

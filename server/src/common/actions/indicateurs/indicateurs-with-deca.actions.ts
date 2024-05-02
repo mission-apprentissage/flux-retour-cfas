@@ -15,7 +15,7 @@ import {
   getOrganismeIndicateursEffectifsGenerique,
 } from "./indicateurs.actions";
 
-export const buildDECAFilter = (decaMode) => (decaMode ? { isDecaCompatible: true } : {});
+export const buildDECAFilter = (decaMode) => (decaMode ? { is_deca_compatible: true } : {});
 
 // Attention ca marche pas, il faut ensuite merger par departement et sommer les valeurs
 export const getIndicateursEffectifsParDepartement = async (filters: DateFilters & TerritoireFilters, acl: Acl) => {

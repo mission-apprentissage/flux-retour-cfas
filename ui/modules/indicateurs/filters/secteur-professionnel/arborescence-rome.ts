@@ -1,6 +1,6 @@
 // ROME = Répertoire Opérationnel des Métiers et des Emplois
 
-import { normalize } from "@/common/utils/stringUtils";
+import { normalize } from "shared";
 
 export type FamilleMetier = {
   id: string;
