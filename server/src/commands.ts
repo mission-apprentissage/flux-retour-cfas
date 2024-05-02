@@ -452,12 +452,12 @@ program
   .action(createJobAction("hydrate:contratsDeca"));
 
 program
-  .command("hydrate:contratsDecaRaw")
+  .command("hydrate:contrats-deca-raw")
   .description("Remplissage des contrats Deca")
   .option("-q, --queued", "Run job asynchronously", false)
   .option("-d, --drop", "Supprime les contrats existants avant de les recréer", false)
   .option("-f, --full", "Récupère l'intégralité des données disponibles via l'API Deca", false)
-  .action(createJobAction("hydrate:contratsDecaRaw"));
+  .action(createJobAction("hydrate:contrats-deca-raw"));
 
 program
   .command("dev:generate-open-api")

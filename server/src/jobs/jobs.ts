@@ -269,7 +269,7 @@ export async function setupJobProcessor() {
           return hydrateDeca(job.payload as any);
         },
       },
-      "hydrate:contratsDecaRaw": {
+      "hydrate:contrats-deca-raw": {
         handler: async () => {
           return hydrateDecaRaw();
         },

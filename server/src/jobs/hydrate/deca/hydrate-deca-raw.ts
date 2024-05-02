@@ -13,21 +13,21 @@ import parentLogger from "@/common/logger";
 import { decaRawDb, effectifsDECADb } from "@/common/model/collections";
 import { __dirname } from "@/common/utils/esmUtils";
 
-const logger = parentLogger.child({ module: "job:hydrate:contratsDecaRaw" });
+const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
 export async function hydrateDecaRaw() {
   let count = 0;
 
   try {
-    const cursor = decaRawDb()
-      .find({
-        dispositif: "APPR",
-        "organisme_formation.uai_cfa": { $exists: true },
-        "organisme_formation.siret": { $exists: true },
-        "formation.date_debut_formation": { $exists: true },
-        "formation.date_fin_formation": { $exists: true },
-      })
-      .limit(10000);
+    await effectifsDECADb().drop();
+
+    const cursor = decaRawDb().find({
+      dispositif: "APPR",
+      "organisme_formation.uai_cfa": { $exists: true },
+      "organisme_formation.siret": { $exists: true },
+      "formation.date_debut_formation": { $exists: true },
+      "formation.date_fin_formation": { $exists: true },
+    });
 
     for await (const document of cursor) {
       try {
