@@ -1,11 +1,13 @@
 import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
-import { WithoutId } from "mongodb";
+import { ObjectId, WithoutId } from "mongodb";
+import { IOrganisme } from "shared/models";
 import { IDecaRaw } from "shared/models/data/decaRaw.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
+import { addComputedFields } from "@/common/actions/effectifs.actions";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { decaRawDb, effectifsDECADb } from "@/common/model/collections";
@@ -25,7 +27,7 @@ export async function hydrateDecaRaw() {
         "formation.date_debut_formation": { $exists: true },
         "formation.date_fin_formation": { $exists: true },
       })
-      .limit(1000);
+      .limit(10000);
 
     for await (const document of cursor) {
       try {
@@ -33,7 +35,6 @@ export async function hydrateDecaRaw() {
         count++;
       } catch (docError) {
         logger.error(`Error updating document ${document._id}: ${docError}`);
-        // Handle document-specific errors or continue processing the next document
       }
     }
 
@@ -72,7 +73,11 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
   const startYear = getYearFromDate(date_debut_formation);
   const endYear = getYearFromDate(date_fin_formation);
 
-  const organisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
+  const organisme: IOrganisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
+
+  if (!organisme) {
+    throw new Error("Start year and end year must be defined");
+  }
 
   if (!startYear || !endYear) {
     throw new Error("Start year and end year must be defined");
@@ -82,7 +87,8 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     throw new Error("Contract start and end dates are required");
   }
 
-  return {
+  const effectif = {
+    _id: new ObjectId(),
     apprenant: {
       nom,
       prenom,
@@ -119,6 +125,7 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (date_naissance || "")),
     source: "DECA",
     annee_scolaire: `${startYear}-${endYear}`,
-    is_deca_compatible: true,
   };
+
+  return { ...effectif, _computed: addComputedFields({ organisme, effectif }), is_deca_compatible: true };
 }

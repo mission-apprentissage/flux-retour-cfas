@@ -94,13 +94,6 @@ const StatutApprenantEnum = zodEnumFromArray(
 
 const zEffectifComputedStatut = z.object({
   en_cours: StatutApprenantEnum,
-  historique: z.array(
-    z.object({
-      mois: z.string(),
-      annee: z.string(),
-      valeur: StatutApprenantEnum,
-    })
-  ),
   parcours: z.array(
     z.object({
       date: z.date(),
