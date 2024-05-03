@@ -34,6 +34,8 @@ import EffectifsTableContainer from "../mon-espace/effectifs/engine/EffectifTabl
 import { Input } from "../mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import BandeauTransmission from "../organismes/BandeauTransmission";
 
+import SelectionAjoutEffectifModal from "./modal/SelectionAjoutEffectifModal";
+
 interface EffectifsPageProps {
   organisme: Organisme;
   modePublique: boolean;
@@ -49,6 +51,7 @@ function EffectifsPage(props: EffectifsPageProps) {
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
   const [filtreAnneeScolaire, setFiltreAnneeScolaire] = useState("all");
 
+  const [modal, setModal] = useState(false);
   const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
 
   const { data: organismesEffectifs, isLoading } = useQuery(
@@ -84,10 +87,19 @@ function EffectifsPage(props: EffectifsPageProps) {
           <div>
             <HStack gap={4}>
               <SupportLink href={EFFECTIFS_GROUP}></SupportLink>
-              <Link variant="whiteBg" href={`${router.asPath}/televersement`}>
+              <Button size="md" variant="secondary" onClick={() => setModal(true)}>
                 <AddIcon boxSize={3} mr={2} />
-                Ajouter via fichier Excel
-              </Link>
+                <Text as="span">Ajouter apprenant(s)</Text>
+              </Button>
+              <SelectionAjoutEffectifModal
+                onClose={() => setModal(false)}
+                onValidate={(path: string) => {
+                  setModal(false);
+                  router.push(`${router.asPath}/${path}`);
+                }}
+                title="Ajouter un ou plusieurs apprenants"
+                isOpen={modal}
+              ></SelectionAjoutEffectifModal>
             </HStack>
             {!TMP_DEACTIVATE_DOWNLOAD_BUTTON && organismesEffectifs?.length ? (
               <DownloadButton

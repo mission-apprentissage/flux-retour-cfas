@@ -1,6 +1,8 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { subDays } from "date-fns";
 import { capitalize } from "lodash-es";
+import { z } from "zod";
+
 import {
   CODES_STATUT_APPRENANT_ENUM,
   EFFECTIF_DERNIER_SITUATION,
@@ -11,10 +13,9 @@ import {
   UAI_REGEX,
   CODE_POSTAL_REGEX,
   DERNIER_ORGANISME_UAI_REGEX,
-} from "shared";
-import { z } from "zod";
+} from "shared/constants";
 
-import { telephoneConverter } from "./frenchTelephoneNumber";
+import { telephoneConverter } from "../../../server/src/common/validation/utils/frenchTelephoneNumber";
 
 extendZodWithOpenApi(z);
 

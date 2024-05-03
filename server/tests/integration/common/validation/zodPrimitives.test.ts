@@ -1,4 +1,4 @@
-import { primitivesV3 } from "@/common/validation/utils/zodPrimitives";
+import { primitivesV3 } from "shared/models/data/zodPrimitives";
 
 describe("Regex primitivesV3", () => {
   describe("derniere_situation", () => {

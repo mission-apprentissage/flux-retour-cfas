@@ -10,6 +10,8 @@ import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
+import { effectifCreationSchema, IEffectifCreationSchema } from "shared/models/apis/effectifsCreationSchema";
+import { extensions, primitivesV1, primitivesV3 } from "shared/models/data/zodPrimitives";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -23,7 +25,7 @@ import {
   registerUnknownNetwork,
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
-import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
+import { getEffectifForm, updateEffectifFromForm, createEffectifFromForm } from "@/common/actions/effectifs.actions";
 import {
   deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
@@ -108,7 +110,6 @@ import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
-import { extensions, primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
@@ -133,9 +134,12 @@ import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes"
 import usersAdmin from "./routes/admin.routes/users.routes";
 import emails from "./routes/emails.routes";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes";
+import manageUpdateEffectifs from "./routes/specific.routes/effectif.update.routes";
+import formationsRoutes from "./routes/specific.routes/formations.routes";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "./routes/specific.routes/organisme.routes";
 import organismesRouter from "./routes/specific.routes/organismes.routes";
 import transmissionRoutes from "./routes/specific.routes/transmission.routes";
+import userRoutes from "./routes/specific.routes/user.routes";
 
 const openapiSpecs = JSON.parse(fs.readFileSync(openApiFilePath, "utf8"));
 
@@ -434,7 +438,8 @@ function setupRoutes(app: Application) {
           has_accept_cgu_version: req.params.version,
         });
       })
-    );
+    )
+    .use("/api/v1/user", userRoutes());
 
   /********************************
    * API pour un organisme   *
@@ -637,6 +642,18 @@ function setupRoutes(app: Application) {
           )
       )
       .use("/transmission", transmissionRoutes())
+      .use("/formation", requireOrganismePermission("manageEffectifs"), formationsRoutes())
+      .post(
+        "/effectif",
+        requireOrganismePermission("manageEffectifs"),
+        returnResult(async (req, res) => {
+          const data: IEffectifCreationSchema = await validateFullZodObjectSchema(
+            req.body,
+            effectifCreationSchema.shape
+          );
+          return await createEffectifFromForm(data, res.locals.organismeId);
+        })
+      )
   );
 
   /********************************
@@ -750,6 +767,15 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         await effectifsDb().deleteOne({ _id: new ObjectId(req.params.id) });
       })
+    )
+    .use(
+      "/api/v3/effectif/:id",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      (req, res, next) => {
+        res.locals.effectifId = new ObjectId((req.params as any).id);
+        next();
+      },
+      manageUpdateEffectifs()
     );
 
   /********************************

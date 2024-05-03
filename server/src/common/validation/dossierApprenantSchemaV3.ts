@@ -1,6 +1,5 @@
+import { primitivesV1, primitivesV3 } from "shared/models/data/zodPrimitives";
 import { z } from "zod";
-
-import { primitivesV1, primitivesV3 } from "@/common/validation/utils/zodPrimitives";
 
 import { validateContrat } from "./contratsDossierApprenantSchemaV3";
 

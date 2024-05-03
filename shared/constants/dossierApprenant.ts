@@ -57,3 +57,117 @@ export const EFFECTIF_DERNIER_SITUATION = [
   4105, 4007, 4107, 4009, 4011, 4111, 4013, 4113, 4015, 4115, 4017, 4117, 4019, 4119, 4021, 4121, 4023, 4123, 4025,
   4125, 4027, 4127, 5901, 5903, 5905, 5907, 5909, 9900, 9999,
 ] as const;
+
+export const SITUATION_AVANT_CONTRAT = [
+  {
+    label: "11 - Scolarité type collège (y. c. SEGPA, DIMA, CPA, CLIPA,MFR,...)",
+    value: 11,
+  },
+  {
+    label: "12 - Autres instituts médico-éducatifs et pédagogiques (IME, IMP)",
+    value: 12,
+  },
+  {
+    label: "21 - Second cycle général et technologique",
+    value: 21,
+  },
+  {
+    label: "31 - Second cycle professionnel (lycée professionnel, MFR, ...)",
+    value: 31,
+  },
+  {
+    label: "41 - Enseignement supérieur (y. c. CPGE)",
+    value: 41,
+  },
+  {
+    label: "51 - Contrat de professionnalisation",
+    value: 51,
+  },
+  {
+    label: "52 - Stagiaire",
+    value: 52,
+  },
+  {
+    label: "53 - En emploi",
+    value: 53,
+  },
+  {
+    label: "54 - Demandeur d’emploi, chômage",
+    value: 54,
+  },
+  {
+    label: "90 - Autre situation",
+    value: 90,
+  },
+  {
+    label: "99 - Inconnue",
+    value: 99,
+  },
+];
+
+export const DERNIER_DIPLOME_OBTENU = [
+  {
+    label: "1 - Aucun diplôme",
+    value: 1,
+  },
+  {
+    label: "2 - Certificat de formation générale (obtenu après une 3ème d’insertion ou une SEGPA)",
+    value: 2,
+  },
+  {
+    label: "3 - Brevet des collèges",
+    value: 3,
+  },
+  {
+    label: "4 - CAP / CAPA",
+    value: 4,
+  },
+  {
+    label: "5 - BEP / BEPA",
+    value: 5,
+  },
+  {
+    label: "6 - Autre diplôme de niveau 3 (ex niveau V)",
+    value: 6,
+  },
+  {
+    label: "7 - Bac général ou technologique",
+    value: 7,
+  },
+  {
+    label: "8 - Bac professionnel / Bac professionnel agricole",
+    value: 8,
+  },
+  {
+    label: "9 - Brevet professionnel / BPA / Brevet de maîtrise",
+    value: 9,
+  },
+  {
+    label: "10 - Autre diplôme de niveau 4 (niveau Bac) (ex niveau IV)",
+    value: 10,
+  },
+  {
+    label: "11 - BTS / BTSA",
+    value: 11,
+  },
+  {
+    label: "12 - DUT",
+    value: 12,
+  },
+  {
+    label: "13 - Autre diplôme de niveau 5 (bac + 2) (ex niveau III)",
+    value: 13,
+  },
+  {
+    label: "14 - Diplôme de niveaux 6, 7 et 8 (bac + 3 ou plus) (ex niveaux II ou I)",
+    value: 14,
+  },
+  {
+    label: "15 - BUT Bachelor Universitaire de Technologie",
+    value: 15,
+  },
+  {
+    label: "99 - Inconnu",
+    value: 99,
+  },
+];

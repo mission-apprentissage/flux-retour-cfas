@@ -23,7 +23,7 @@ export const zApprenant = zodOpenApi.object({
       description: "Sexe de l'apprenant (M: Homme, F: Femme)",
     })
     .nullish(),
-  date_de_naissance: zodOpenApi.date({ description: "Date de naissance de l'apprenant" }).nullish(),
+  date_de_naissance: zodOpenApi.coerce.date({ description: "Date de naissance de l'apprenant" }).nullish(),
   code_postal_de_naissance: zodOpenApi
     .string({
       description:
@@ -47,7 +47,7 @@ export const zApprenant = zodOpenApi.object({
       description: "Apprenant en situation d'handicape (RQTH)",
     })
     .nullish(),
-  date_rqth: zodOpenApi
+  date_rqth: zodOpenApi.coerce
     .date({
       description: "Date de la reconnaissance travailleur handicapé",
     })
