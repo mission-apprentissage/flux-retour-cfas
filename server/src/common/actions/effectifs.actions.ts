@@ -5,7 +5,7 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
@@ -155,7 +155,12 @@ export const addComputedFields = ({
 };
 
 export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
-  const effectif = await effectifsDb().findOne({ _id: effectifId });
+  let effectif = await effectifsDb().findOne({ _id: effectifId });
+
+  if (!effectif) {
+    effectif = await effectifsDECADb().findOne({ _id: effectifId });
+  }
+
   return buildEffectifResult(effectif);
 }
 
