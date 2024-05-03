@@ -25,7 +25,7 @@ export const ERPS = sortAlphabeticallyBy("name", [
     id: "scform",
     name: "SC Form",
     apiV3: true,
-    helpFilePath: "/SC-form-2023.pdf",
+    helpFilePath: "/SC-form-2024.pdf",
   },
   {
     id: "formasup",
