@@ -5,6 +5,8 @@ fileignoreconfig:
   checksum: c688cb656af49c2f824ae7a0c9664bf7bdecdcf29d93ec4a99976fb08dcd9285
   ignore_detectors:
   - filename
+- filename: .github/workflows/_build.yml
+  checksum: 397f274299f7bf2468411768d001e310a80c31899732b0361c402903e37fa3b4
 - filename: .github/workflows/_deploy.yml
   checksum: 7f31b52856bb49b25da7d4bf4aea3492cce9aec2ef4c30e9968f605006062592
 - filename: .github/workflows/ci.yml
@@ -38,7 +40,7 @@ fileignoreconfig:
 - filename: .infra/files/scripts/seed.sh
   checksum: a7052d0a4ce7ca9e36e4072aa0a651d32b5db91643cc9d80cfe821f0efe0dc2a
 - filename: .infra/vault/vault.yml
-  checksum: 72f50b0545da8f59d9e60f40d7d4df75c2be1a220ec98ee79dd686d4ae786a0b
+  checksum: 0a47929f0aa53717f31e2aa38528132cad22b78335255e56aafacd350797ec01
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/dev/docker-compose.env.yml
   checksum: fa8c4331bd9b5a35772d5f5ea52c36393e0336bf8c70aedb9e5c214e4f8c9636
 - filename: .infra_previous/ansible/roles/setup/files/app/.overrides/production/docker-compose.env.yml

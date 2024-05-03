@@ -16,7 +16,7 @@ const TransmissionsErrorSummary = (props: TransmissionsErrorSummaryProps) => {
     <Ribbons variant="error" w="full">
       <Box color="black">
         <HStack mb={2}>
-          <Text fontWeight={"bold"}>{props.summary.numberErrors?.total} erreurs ont été détéctées.</Text>
+          <Text fontWeight={"bold"}>{props.summary.numberErrors?.total} erreurs ont été détectées.</Text>
         </HStack>
         <UnorderedList p={2}>
           {props.summary.lieu?.map(({ uai, siret, effectifCount }) => (
