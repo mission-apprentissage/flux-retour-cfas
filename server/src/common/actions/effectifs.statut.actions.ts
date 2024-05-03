@@ -240,13 +240,10 @@ function determineNewStatutFromHistorique(
   ];
 
   sortedHistoriqueStatut.forEach((statut) => {
-    const statutYear = new Date(statut.date_statut).getFullYear();
-    if (statutYear >= startYear && statutYear <= endYear) {
-      parcours.push({
-        valeur: mapValeurStatutToStatutApprenant(statut.valeur_statut),
-        date: new Date(statut.date_statut),
-      });
-    }
+    parcours.push({
+      valeur: mapValeurStatutToStatutApprenant(statut.valeur_statut),
+      date: new Date(statut.date_statut),
+    });
   });
 
   return parcours;
