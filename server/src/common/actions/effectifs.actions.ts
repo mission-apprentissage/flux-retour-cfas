@@ -265,6 +265,13 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
 function buildEffectifResult(effectif) {
   const { properties: effectifSchema } = legacySchema;
 
+  if (!effectif.is_lock) {
+    effectif.is_lock = {
+      apprenant: {},
+      formation: {},
+    };
+  }
+
   function customizer(objValue, srcValue) {
     if (objValue !== undefined) {
       return {
