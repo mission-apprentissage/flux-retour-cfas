@@ -2,9 +2,12 @@ import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
 import { ObjectId, WithoutId } from "mongodb";
-import { IOrganisme } from "shared/models";
+import { IEffectif, IOrganisme } from "shared/models";
 import { IDecaRaw } from "shared/models/data/decaRaw.model";
+import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
+import { zContrat } from "shared/models/data/effectifs/contrat.part";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
 import { addComputedFields } from "@/common/actions/effectifs.actions";
@@ -64,10 +67,22 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     date_debut_contrat,
     date_fin_contrat,
     date_effet_rupture,
+    type_contrat,
   } = document;
-  const { nom, prenom, date_naissance } = alternant;
+  const {
+    nom,
+    prenom,
+    date_naissance,
+    handicap,
+    telephone,
+    sexe,
+    nationalite,
+    courriel,
+    adresse: adresseAlternant,
+    derniere_classe,
+  } = alternant;
   const { date_debut_formation, date_fin_formation, code_diplome, rncp, intitule_ou_qualification } = formation;
-  const { siret, denomination, naf, adresse } = employeur;
+  const { siret, denomination, naf, adresse, nombre_de_salaries } = employeur;
   const { uai_cfa, siret: orgSiret } = organisme_formation;
 
   const startYear = getYearFromDate(date_debut_formation);
@@ -87,25 +102,38 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
     throw new Error("Les dates de début et de fin de contrat sont requises");
   }
 
-  const effectif = {
+  const effectif: IEffectifDECA = {
     _id: new ObjectId(),
+    deca_raw_id: document._id,
     apprenant: {
       nom,
       prenom,
       date_de_naissance: date_naissance,
+      nationalite: nationalite as zodOpenApi.TypeOf<typeof zApprenant>["nationalite"],
       historique_statut: [],
       has_nir: false,
+      rqth: handicap,
+      sexe: sexe === 1 ? "M" : sexe === 0 ? "F" : null,
+      telephone,
+      courriel,
+      adresse: {
+        numero: adresseAlternant.numero ? parseInt(adresseAlternant.numero, 10) : undefined,
+        voie: adresseAlternant.voie,
+        code_postal: adresseAlternant.code_postal,
+      },
+      situation_avant_contrat: derniere_classe as zodOpenApi.TypeOf<typeof zApprenant>["situation_avant_contrat"],
     },
     contrats: [
       {
         siret,
         denomination,
-        type_employeur: null,
+        type_employeur: parseInt(type_contrat, 10) as zodOpenApi.TypeOf<typeof zContrat>["type_employeur"],
         naf,
         adresse: { code_postal: adresse.code_postal },
         date_debut: date_debut_contrat,
         date_fin: date_fin_contrat,
         date_rupture: date_effet_rupture,
+        nombre_de_salaries,
       },
     ],
     formation: {
@@ -119,6 +147,8 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
       date_fin: date_fin_formation,
     },
     organisme_id: organisme._id,
+    organisme_responsable_id: organisme._id,
+    organisme_formateur_id: organisme._id,
     validation_errors: [],
     created_at: new Date(),
     updated_at: new Date(),
@@ -129,7 +159,7 @@ async function transformDocument(document: IDecaRaw): Promise<WithoutId<IEffecti
 
   return {
     ...effectif,
-    _computed: addComputedFields({ organisme, effectif }),
+    _computed: addComputedFields({ organisme, effectif: effectif as IEffectif }),
     is_deca_compatible: !organisme.is_transmission_target,
   };
 }

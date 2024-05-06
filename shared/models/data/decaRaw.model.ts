@@ -27,6 +27,8 @@ const zAlternant = z.object({
   derniere_classe: z.number(),
   nationalite: z.number(),
   sexe: z.number(),
+  telephone: z.string(),
+  courriel: z.string(),
 });
 
 const zEmployeur = z.object({
