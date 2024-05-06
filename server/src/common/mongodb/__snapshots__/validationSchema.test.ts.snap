@@ -349,6 +349,9 @@ exports[`validation-schema should create validation schema for decaRaw: decaRaw 
             "code_postal",
           ],
         },
+        "courriel": {
+          "bsonType": "string",
+        },
         "date_naissance": {
           "anyOf": [
             {
@@ -382,6 +385,9 @@ exports[`validation-schema should create validation schema for decaRaw: decaRaw 
         "sexe": {
           "bsonType": "number",
         },
+        "telephone": {
+          "bsonType": "string",
+        },
       },
       "required": [
         "handicap",
@@ -392,6 +398,8 @@ exports[`validation-schema should create validation schema for decaRaw: decaRaw 
         "derniere_classe",
         "nationalite",
         "sexe",
+        "telephone",
+        "courriel",
       ],
     },
     "created_at": {
