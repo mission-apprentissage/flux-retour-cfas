@@ -88,7 +88,40 @@ export const getOrganismeIndicateursEffectifsParFormation = async (
   ctx: AuthContext,
   organismeId: ObjectId,
   filters: FullEffectifsFilters
-) => [
-  ...(await getOrganismeIndicateursEffectifsParFormationGenerique(ctx, organismeId, filters, effectifsDb())),
-  ...(await getOrganismeIndicateursEffectifsParFormationGenerique(ctx, organismeId, filters, effectifsDECADb(), true)),
-];
+) => {
+  const indicateurs = [
+    ...(await getOrganismeIndicateursEffectifsParFormationGenerique(ctx, organismeId, filters, effectifsDb())),
+    ...(await getOrganismeIndicateursEffectifsParFormationGenerique(
+      ctx,
+      organismeId,
+      filters,
+      effectifsDECADb(),
+      true
+    )),
+  ];
+
+  const mapRNCP = indicateurs.reduce((acc, { rncp_code, ...rest }) => {
+    const rncp = rncp_code ?? "null";
+    return acc[rncp]
+      ? {
+          ...acc,
+          [rncp]: {
+            rncp_code,
+            apprentis: acc[rncp].apprentis + rest.apprentis,
+            abandons: acc[rncp].abandons + rest.abandons,
+            inscrits: acc[rncp].inscrits + rest.inscrits,
+            apprenants: acc[rncp].apprenants + rest.apprenants,
+            rupturants: acc[rncp].rupturants + rest.rupturants,
+          },
+        }
+      : {
+          ...acc,
+          [rncp]: {
+            rncp_code,
+            ...rest,
+          },
+        };
+  }, {});
+
+  return Object.values(mapRNCP);
+};
