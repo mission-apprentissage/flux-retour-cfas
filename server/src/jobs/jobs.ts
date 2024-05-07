@@ -19,6 +19,7 @@ import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
 import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
+import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
@@ -27,6 +28,7 @@ import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateROME } from "./hydrate/hydrate-rome";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
+import { hydrateOrganismesEffectifsCountWithHierarchy } from "./hydrate/organismes/hydrate-effectifs-count-with-hierarchy";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesBassinEmploi } from "./hydrate/organismes/hydrate-organismes-bassinEmploi";
@@ -267,6 +269,11 @@ export async function setupJobProcessor() {
           return hydrateDeca(job.payload as any);
         },
       },
+      "hydrate:contrats-deca-raw": {
+        handler: async () => {
+          return hydrateDecaRaw();
+        },
+      },
       "hydrate:effectifs:update_computed_statut_month": {
         handler: async () => {
           return hydrateEffectifsComputedTypes({
@@ -287,6 +294,11 @@ export async function setupJobProcessor() {
       "hydrate:organismes-effectifs-count": {
         handler: async () => {
           return hydrateOrganismesEffectifsCount();
+        },
+      },
+      "hydrate:organismes-effectifs-count-with-hierarchy": {
+        handler: async () => {
+          return hydrateOrganismesEffectifsCountWithHierarchy();
         },
       },
       "update:organismes-with-apis": {

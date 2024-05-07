@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { PermissionOrganisme } from "shared";
 
 import { getOrganismePermission } from "@/common/actions/helpers/permissions-organisme";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 // catch errors and return the result of the request handler
@@ -65,7 +65,12 @@ export function requireEffectifOrganismePermission<TParams = any, TQuery = any, 
   return async (req, res, next) => {
     try {
       // On récupère l'organisme rattaché à l'effectif
-      const effectif = await effectifsDb().findOne({ _id: new ObjectId((req.params as any).id) });
+      let effectif = await effectifsDb().findOne({ _id: new ObjectId((req.params as any).id) });
+
+      if (!effectif) {
+        effectif = await effectifsDECADb().findOne({ _id: new ObjectId((req.params as any).id) });
+      }
+
       if (!effectif) {
         throw Boom.notFound("effectif non trouvé");
       }

@@ -215,6 +215,12 @@ const zOrganisme = z
     created_at: z.date({ description: "Date d'ajout en base de données" }),
     natureValidityWarning: z.boolean().optional(),
     formations: z.array(z.any()).max(0).optional(),
+    is_transmission_target: z
+      .boolean({
+        description:
+          "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
+      })
+      .nullish(),
   })
   .strict();
 

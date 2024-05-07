@@ -452,6 +452,14 @@ program
   .action(createJobAction("hydrate:contratsDeca"));
 
 program
+  .command("hydrate:contrats-deca-raw")
+  .description("Remplissage des contrats Deca")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .option("-d, --drop", "Supprime les contrats existants avant de les recréer", false)
+  .option("-f, --full", "Récupère l'intégralité des données disponibles via l'API Deca", false)
+  .action(createJobAction("hydrate:contrats-deca-raw"));
+
+program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)
@@ -476,6 +484,15 @@ program
   .description("Mise à jour des organismes avec le nombre d'effectifs")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:organismes-effectifs-count"));
+
+/**
+ * Mise à jour des organismes avec le nombre d'effectifs hierarchisé
+ */
+program
+  .command("hydrate:organismes-effectifs-count-with-hierarchy")
+  .description("Mise à jour des organismes avec le nombre d'effectifs hierarchisé")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:organismes-effectifs-count-with-hierarchy"));
 
 /**
  * Job de mise à jour des organismes en allant appeler des API externes pour remplir

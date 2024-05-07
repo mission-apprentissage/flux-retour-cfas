@@ -318,6 +318,300 @@ exports[`validation-schema should create validation schema for contratsDeca: con
 }
 `;
 
+exports[`validation-schema should create validation schema for decaRaw: decaRaw 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+      "description": "Identifiant MongoDB de l'effectif",
+    },
+    "alternant": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "adresse": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "code_postal": {
+              "bsonType": "string",
+            },
+            "numero": {
+              "bsonType": "string",
+            },
+            "voie": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "code_postal",
+          ],
+        },
+        "courriel": {
+          "bsonType": "string",
+        },
+        "date_naissance": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+              "description": "Date de naissance de l'alternant",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Date de naissance de l'alternant",
+        },
+        "departement_naissance": {
+          "bsonType": "string",
+        },
+        "derniere_classe": {
+          "bsonType": "number",
+        },
+        "handicap": {
+          "bsonType": "bool",
+        },
+        "nationalite": {
+          "bsonType": "number",
+        },
+        "nom": {
+          "bsonType": "string",
+        },
+        "prenom": {
+          "bsonType": "string",
+        },
+        "sexe": {
+          "bsonType": "number",
+        },
+        "telephone": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "handicap",
+        "nom",
+        "prenom",
+        "adresse",
+        "departement_naissance",
+        "derniere_classe",
+        "nationalite",
+        "sexe",
+        "telephone",
+        "courriel",
+      ],
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de création de l'enregistrement dans la base de données",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de création de l'enregistrement dans la base de données",
+    },
+    "date_debut_contrat": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de début du contrat",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de début du contrat",
+    },
+    "date_effet_rupture": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date d'effet de la rupture du contrat",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date d'effet de la rupture du contrat",
+    },
+    "date_fin_contrat": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de fin du contrat",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de fin du contrat",
+    },
+    "dispositif": {
+      "bsonType": "string",
+    },
+    "employeur": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "adresse": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "code_postal": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "code_postal",
+          ],
+        },
+        "code_idcc": {
+          "bsonType": "string",
+        },
+        "denomination": {
+          "bsonType": "string",
+        },
+        "naf": {
+          "bsonType": "string",
+        },
+        "nombre_de_salaries": {
+          "bsonType": "number",
+        },
+        "siret": {
+          "bsonType": "string",
+        },
+        "telephone": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "adresse",
+        "code_idcc",
+        "denomination",
+        "naf",
+        "nombre_de_salaries",
+        "siret",
+        "telephone",
+      ],
+    },
+    "etablissement_formation": {
+      "additionalProperties": true,
+      "bsonType": "object",
+      "properties": {},
+    },
+    "flag_correction": {
+      "bsonType": "bool",
+    },
+    "formation": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "code_diplome": {
+          "bsonType": "string",
+        },
+        "date_debut_formation": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+              "description": "Date de début de la formation",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Date de début de la formation",
+        },
+        "date_fin_formation": {
+          "anyOf": [
+            {
+              "bsonType": "date",
+              "description": "Date de fin de la formation",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "Date de fin de la formation",
+        },
+        "intitule_ou_qualification": {
+          "bsonType": "string",
+        },
+        "rncp": {
+          "bsonType": "string",
+        },
+        "type_diplome": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "code_diplome",
+        "rncp",
+        "intitule_ou_qualification",
+        "type_diplome",
+      ],
+    },
+    "no_contrat": {
+      "bsonType": "string",
+    },
+    "organisme_formation": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "siret": {
+          "bsonType": "string",
+        },
+        "uai_cfa": {
+          "bsonType": "string",
+        },
+      },
+      "required": [
+        "uai_cfa",
+        "siret",
+      ],
+    },
+    "rupture_avant_debut": {
+      "bsonType": "bool",
+    },
+    "statut": {
+      "bsonType": "string",
+    },
+    "type_contrat": {
+      "bsonType": "string",
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de dernière mise à jour de l'enregistrement dans la base de données",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de dernière mise à jour de l'enregistrement dans la base de données",
+    },
+  },
+  "required": [
+    "_id",
+    "rupture_avant_debut",
+    "statut",
+    "alternant",
+    "employeur",
+    "flag_correction",
+    "formation",
+    "no_contrat",
+    "organisme_formation",
+    "type_contrat",
+    "dispositif",
+    "etablissement_formation",
+  ],
+}
+`;
+
 exports[`validation-schema should create validation schema for effectifs: effectifs 1`] = `
 {
   "additionalProperties": false,
@@ -5920,6 +6214,13 @@ exports[`validation-schema should create validation schema for organismes: organ
     "formations": {
       "bsonType": "array",
       "maxItems": 0,
+    },
+    "is_transmission_target": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+      "description": "Indique si cet organisme ( ou un de ces organismes formateur dont il est le responsable ) a été la cible ou non de transmissions d'effectif",
     },
     "last_transmission_date": {
       "bsonType": "date",

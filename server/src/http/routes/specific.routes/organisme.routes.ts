@@ -8,10 +8,13 @@ import {
 } from "shared";
 
 import { isEligibleSIFA } from "@/common/actions/sifa.actions/sifa.actions";
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
 
 export async function getOrganismeEffectifs(organismeId: ObjectId, sifa = false) {
-  const effectifs = await effectifsDb()
+  const organisme = await organismesDb().findOne({ _id: organismeId });
+  const db = organisme?.is_transmission_target ? effectifsDb() : effectifsDECADb();
+
+  const effectifs = await db
     .find({
       organisme_id: organismeId,
       ...(sifa
