@@ -1,7 +1,6 @@
 import { Collection, ObjectId } from "mongodb";
 import {
   Acl,
-  CODES_STATUT_APPRENANT,
   IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
   IndicateursEffectifsAvecFormation,
@@ -558,6 +557,22 @@ export async function getEffectifsNominatifsGenerique(
   decaMode: boolean = false,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
+  const computedType = (t: TypeEffectifNominatif) => {
+    switch (t) {
+      case "apprenant":
+        return ["APPRENTI", "INSCRIT", "RUPTURANT", "FIN_DE_FORMATION"];
+      case "apprenti":
+        return ["APPRENTI", "FIN_DE_FORMATION"];
+      case "inscritSansContrat":
+        return ["INSCRIT"];
+      case "rupturant":
+        return ["RUPTURANT"];
+      case "abandon":
+        return ["ABANDON"];
+      default:
+        return [t];
+    }
+  };
   const indicateurs = (await db
     .aggregate([
       {
@@ -572,92 +587,40 @@ export async function getEffectifsNominatifsGenerique(
       },
       {
         $addFields: {
-          "apprenant.historique_statut": {
+          "_computed.statut.parcours": {
             $sortArray: {
               input: {
                 $filter: {
-                  input: "$apprenant.historique_statut",
+                  input: "$_computed.statut.parcours",
                   as: "statut",
                   cond: {
-                    $lte: ["$$statut.date_statut", filters.date],
+                    $lte: ["$$statut.date", filters.date],
                   },
                 },
               },
-              sortBy: { date_statut: 1 },
+              sortBy: { date: 1 },
             },
           },
         },
       },
       {
-        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+        $match: { "_computed.statut.parcours": { $not: { $size: 0 } } },
       },
       {
         $addFields: {
           statut_apprenant_at_date: {
-            $last: "$apprenant.historique_statut",
+            $last: "$_computed.statut.parcours",
           },
         },
       },
       {
         $addFields: {
-          statut: {
-            // pipeline commun entre statuts plutôt que $facet limité à 16Mo
-            $switch: {
-              branches: [
-                {
-                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                  then: "apprenti" satisfies TypeEffectifNominatif,
-                },
-                {
-                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
-                  then: "abandon" satisfies TypeEffectifNominatif,
-                },
-                // l'ordre important ici, du statut le plus spécifique au plus générique
-                {
-                  case: {
-                    $and: [
-                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                      {
-                        $eq: [
-                          0,
-                          {
-                            $size: {
-                              $filter: {
-                                input: "$apprenant.historique_statut",
-                                cond: {
-                                  $and: [
-                                    { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                                    { $lte: ["$$this.date_statut", filters.date] },
-                                  ],
-                                },
-                                limit: 1,
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  then: "inscritSansContrat" satisfies TypeEffectifNominatif,
-                },
-                {
-                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                  then: "rupturant" satisfies TypeEffectifNominatif,
-                },
-              ],
-              default: "inconnu" satisfies TypeEffectifNominatif,
-            },
-          },
+          statut: "$statut_apprenant_at_date.valeur",
         },
       },
       {
         $match: {
-          statut:
-            type === "apprenant"
-              ? {
-                  $in: ["apprenti", "inscritSansContrat", "rupturant"] satisfies TypeEffectifNominatif[],
-                }
-              : { $eq: type },
+          statut: { $in: computedType(type) },
         },
       },
       {
