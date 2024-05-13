@@ -322,6 +322,10 @@ describe("Route indicateurs", () => {
       ...createSampleEffectif({
         ...commonEffectifsAttributes,
         annee_scolaire: anneeScolaire,
+        formation: {
+          date_entree: new Date("2020-11-15T00:00:00.00"),
+          date_fin: new Date(),
+        },
         apprenant: {
           historique_statut: historySequenceApprentiToAbandon,
         },
@@ -344,7 +348,7 @@ describe("Route indicateurs", () => {
         apprenant_date_de_naissance: effectif.apprenant.date_de_naissance?.toISOString().substring(0, 10),
         apprenant_nom: effectif.apprenant.nom,
         apprenant_prenom: effectif.apprenant.prenom,
-        apprenant_statut: "abandon",
+        apprenant_statut: "ABANDON",
         formation_annee: effectif.formation?.annee,
         formation_cfd: effectif.formation?.cfd,
         formation_date_debut_formation: effectif.formation?.periode?.[0],
