@@ -2,6 +2,7 @@ import { addJob, initJobProcessor } from "job-processor";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import logger from "@/common/logger";
+import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
@@ -441,6 +442,11 @@ export async function setupJobProcessor() {
       "indexes:recreate": {
         handler: async (job) => {
           return recreateIndexes((job.payload as any)?.drop);
+        },
+      },
+      "indexes:collection:create": {
+        handler: async (job) => {
+          return createCollectionIndexes((job.payload as any)?.collection);
         },
       },
       "db:validate": {

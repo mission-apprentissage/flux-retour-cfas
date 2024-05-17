@@ -101,6 +101,7 @@ const createEff = (org) => ({
 
 const createEffDECA = (org) => ({
   _id: new ObjectId(),
+  deca_raw_id: new ObjectId(),
   apprenant: {
     historique_statut: [
       {
@@ -147,48 +148,6 @@ const createEffDECA = (org) => ({
     },
     statut: {
       en_cours: "ABANDON",
-      historique: [
-        {
-          mois: "09",
-          annee: "2023",
-          valeur: "INSCRIT",
-        },
-        {
-          mois: "10",
-          annee: "2023",
-          valeur: "INSCRIT",
-        },
-        {
-          mois: "11",
-          annee: "2023",
-          valeur: "ABANDON",
-        },
-        {
-          mois: "12",
-          annee: "2023",
-          valeur: "ABANDON",
-        },
-        {
-          mois: "01",
-          annee: "2024",
-          valeur: "ABANDON",
-        },
-        {
-          mois: "02",
-          annee: "2024",
-          valeur: "ABANDON",
-        },
-        {
-          mois: "03",
-          annee: "2024",
-          valeur: "ABANDON",
-        },
-        {
-          mois: "04",
-          annee: "2024",
-          valeur: "ABANDON",
-        },
-      ],
       parcours: [
         {
           valeur: "INSCRIT",
