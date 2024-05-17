@@ -48,6 +48,7 @@ export const modelDescriptors = [
   contratsDecaModelDescriptor,
   romeModelDescriptor,
   rncpModelDescriptor,
+  effectifsDECAModelDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
