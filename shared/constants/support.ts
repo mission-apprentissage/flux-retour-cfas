@@ -32,3 +32,4 @@ export const SIFA_AUTRE_ELEMENT_LINK = `${SIFA_GROUP}/create/59`;
 
 export const AUTRE_AMELIORATION_ELEMENT_LINK = `${AUTRE_GROUP}/create/55`;
 export const AUTRE_ANOMALIE_ELEMENT_LINK = `${AUTRE_GROUP}/create/49`;
+export const AUTRE_MODIF_RESEAU_ELEMENT_LINK = `${AUTRE_GROUP}/create/79`;
