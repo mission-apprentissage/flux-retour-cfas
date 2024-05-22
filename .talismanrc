@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: ui/components/Page/components/Footer.tsx
+  checksum: 531b22a70ecf2772a72889c3bb5bc90008ccdf78ee1f196457d668a69920ebf2
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx
   checksum: 3bcfa6a077baaf2011d152e3a0c44175f2a44d6f83c4486575cccc3f93f4b2e4
 - filename: .bin/scripts/seed-update.sh
