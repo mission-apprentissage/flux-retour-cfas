@@ -1,4 +1,4 @@
-import { Box, Center, Grid, GridItem, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Center, Grid, GridItem, HStack, Skeleton, Text } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import { PlausibleGoalType, TypeEffectifNominatif, typesEffectifNominatif, IndicateursEffectifs } from "shared";
 
@@ -7,6 +7,7 @@ import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 import { EffectifsFiltersFull, convertEffectifsFiltersToQuery } from "@/modules/models/effectifs-filters";
@@ -32,23 +33,9 @@ function Card({ label, count, tooltipLabel, icon, big = false, children }: CardP
           <Text fontSize={big ? "40px" : "28px"} fontWeight="700">
             {formatNumber(count)}
           </Text>
-          <Text fontSize={12} whiteSpace="nowrap">
+          <Text fontSize={12}>
             {label}
-            <Tooltip
-              background="bluefrance"
-              color="white"
-              label={<Box padding="1w">{tooltipLabel}</Box>}
-              aria-label={tooltipLabel as any}
-            >
-              <Box
-                as="i"
-                className="ri-information-line"
-                fontSize="epsilon"
-                color="grey.500"
-                marginLeft="1w"
-                verticalAlign="middle"
-              />
-            </Tooltip>
+            <InfoTooltip contentComponent={() => <Box padding="1w">{tooltipLabel}</Box>} />
           </Text>
           {children}
         </Box>

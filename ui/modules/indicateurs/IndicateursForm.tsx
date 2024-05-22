@@ -1,5 +1,5 @@
 import { EditIcon } from "@chakra-ui/icons";
-import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
@@ -11,7 +11,8 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
+import NatureOrganismeTooltip from "@/components/Tooltip/NatureOrganismeTooltip";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
@@ -152,28 +153,17 @@ function IndicateursForm(props: IndicateursFormProps) {
         <SimpleGrid gap={3}>
           <Flex fontWeight="700" textTransform="uppercase">
             <Text>Date</Text>
-            <Tooltip
-              background="bluefrance"
-              color="white"
-              label={
-                <Box padding="1w">
+            <InfoTooltip
+              contentComponent={() => (
+                <Box>
                   <Text as="p">La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois.</Text>
                   <Text as="p" mt="4">
                     À noter&nbsp;: la période de référence pour l&apos;année scolaire court du 1er août au 31 juillet
                   </Text>
                 </Box>
-              }
+              )}
               aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
-            >
-              <Box
-                as="i"
-                className="ri-information-line"
-                fontSize="epsilon"
-                color="grey.500"
-                ml="1w"
-                fontWeight="normal"
-              />
-            </Tooltip>
+            />
           </Flex>
 
           <FiltreDate
@@ -373,7 +363,7 @@ function IndicateursForm(props: IndicateursFormProps) {
               header: () => (
                 <>
                   Nature
-                  <TooltipNatureOrganisme />
+                  <NatureOrganismeTooltip />
                 </>
               ),
               cell: ({ getValue }) => <NatureOrganismeTag nature={getValue()} />,

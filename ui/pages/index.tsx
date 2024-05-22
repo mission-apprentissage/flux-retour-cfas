@@ -15,7 +15,6 @@ import {
   Stack,
   Tag,
   Text,
-  Tooltip,
   UnorderedList,
   VStack,
 } from "@chakra-ui/react";
@@ -29,6 +28,7 @@ import { formatDate } from "@/common/utils/dateUtils";
 import { formatNumber, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SimplePage from "@/components/Page/SimplePage";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
 import CarteFrance from "@/modules/dashboard/CarteFrance";
@@ -436,13 +436,12 @@ function SectionApercuChiffresCles() {
                 <Text fontSize="40px" fontWeight="700" color="bluefrance">
                   {formatNumber(organismes?.total.organismesTransmetteurs.total)}
                 </Text>
+
                 <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                   organismes de formation en apprentissage
-                  <Tooltip
-                    background="bluefrance"
-                    color="white"
-                    label={
-                      <Box padding="1w">
+                  <InfoTooltip
+                    contentComponent={() => (
+                      <Box>
                         <b>Organismes de formation en apprentissage (OFA)</b>
                         <Text as="p">Nombre d’organismes reconnus par le tableau de bord comme&nbsp;:</Text>
                         <UnorderedList>
@@ -461,17 +460,8 @@ function SectionApercuChiffresCles() {
                           d’entreprise, les lycées avec une section apprentissage, les prépa-apprentissage.
                         </Text>
                       </Box>
-                    }
-                  >
-                    <Box
-                      as="i"
-                      className="ri-information-line"
-                      fontSize="epsilon"
-                      color="grey.500"
-                      marginLeft="1w"
-                      verticalAlign="middle"
-                    />
-                  </Tooltip>
+                    )}
+                  />
                 </Text>
                 <Text fontSize="zeta" color="mgalt">
                   transmettent au tableau de bord sur <b>{formatNumber(organismes?.total.totalOrganismes.total)}</b> OFA
@@ -523,11 +513,9 @@ function SectionApercuChiffresCles() {
                   </Text>
                   <Text fontSize="zeta" fontWeight="700" lineHeight="1em" color="bluefrance">
                     apprenants
-                    <Tooltip
-                      background="bluefrance"
-                      color="white"
-                      label={
-                        <Box padding="1w">
+                    <InfoTooltip
+                      contentComponent={() => (
+                        <Box>
                           <b>Nombre d’apprenants en contrat d’apprentissage</b>
                           <br />
                           Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation.
@@ -541,17 +529,8 @@ function SectionApercuChiffresCles() {
                             </ListItem>
                           </UnorderedList>
                         </Box>
-                      }
-                    >
-                      <Box
-                        as="i"
-                        className="ri-information-line"
-                        fontSize="epsilon"
-                        color="grey.500"
-                        marginLeft="1w"
-                        verticalAlign="middle"
-                      />
-                    </Tooltip>
+                      )}
+                    />
                   </Text>
                   <Divider size="md" my={2} borderBottomWidth="2px" opacity="1" />
                   <Text fontSize="zeta" color="mgalt">

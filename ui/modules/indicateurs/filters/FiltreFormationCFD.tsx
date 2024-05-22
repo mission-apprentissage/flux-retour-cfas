@@ -14,7 +14,6 @@ import {
   Text,
   Th,
   Thead,
-  Tooltip,
   Tr,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
@@ -22,6 +21,7 @@ import { useState } from "react";
 
 import { _post } from "@/common/httpClient";
 import InputLegend from "@/components/InputLegend/InputLegend";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";
 
 import { FilterButton } from "../FilterButton";
@@ -108,11 +108,9 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
                     <Th>Libellé de la formation</Th>
                     <Th>
                       CFD
-                      <Tooltip
-                        background="bluefrance"
-                        color="white"
-                        label={
-                          <Box padding="1w">
+                      <InfoTooltip
+                        contentComponent={() => (
+                          <Box>
                             <b>Code Formation Diplôme (CFD)</b>
                             <Text as="p">
                               Codification qui concerne l’ensemble des diplômes technologiques et professionnels des
@@ -125,27 +123,16 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
                               l’apprentissage.
                             </Text>
                           </Box>
-                        }
+                        )}
                         aria-label="Code Formation Diplôme. Codification qui concerne l’ensemble des diplômes technologiques et professionnels des
                         ministères certificateurs."
-                      >
-                        <Box
-                          as="i"
-                          className="ri-information-line"
-                          fontSize="epsilon"
-                          color="grey.500"
-                          marginLeft="1v"
-                          verticalAlign="middle"
-                        />
-                      </Tooltip>
+                      />
                     </Th>
                     <Th>
                       RNCP
-                      <Tooltip
-                        background="bluefrance"
-                        color="white"
-                        label={
-                          <Box padding="1w">
+                      <InfoTooltip
+                        contentComponent={() => (
+                          <Box>
                             <b>Répertoire national des certifications professionnelles (RNCP)</b>
                             <Text as="p">
                               Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la
@@ -154,18 +141,9 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
                               RNCP est confiée à France compétences.
                             </Text>
                           </Box>
-                        }
+                        )}
                         aria-label=" Le Répertoire national des certifications professionnelles (RNCP) sert à tenir à la disposition de tous une information constamment à jour sur les diplômes et les titres à finalité professionnelle ainsi que sur les certificats de qualification."
-                      >
-                        <Box
-                          as="i"
-                          className="ri-information-line"
-                          fontSize="epsilon"
-                          color="grey.500"
-                          marginLeft="1v"
-                          verticalAlign="middle"
-                        />
-                      </Tooltip>
+                      />
                     </Th>
                     <Th>Date de validité du CFD</Th>
                   </Tr>
