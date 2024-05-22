@@ -123,7 +123,7 @@ const Footer = () => {
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link
-                  href="https://mission-apprentissage.notion.site/Journal-des-volutions-6de190f453e6455eb0804a911646d1df"
+                  href="https://www.notion.so/mission-apprentissage/Journal-des-volutions-5c9bec4ae3c3451da671f3f684ee994f"
                   isExternal
                 >
                   Journal des évolutions
