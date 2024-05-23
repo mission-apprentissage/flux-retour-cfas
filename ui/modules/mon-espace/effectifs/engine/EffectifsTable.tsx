@@ -281,7 +281,10 @@ const EffectifsTable = ({
                       Source
                       <InfoTooltip
                         contentComponent={() => (
-                          <Text>D&rsquo;où vient la donnée? Exemple la transmission a été faite depuis un ERP</Text>
+                          <Text>
+                            Ce champ indique la provenance de la donnée. Par exemple, la transmission est réalisée par
+                            un ERP ou via un téléversement de fichier Excel.
+                          </Text>
                         )}
                       />
                     </Box>
@@ -352,8 +355,8 @@ const EffectifsTable = ({
                         contentComponent={() => (
                           <Text>
                             {modeSifa
-                              ? "Si les données sont suffissantes pour SIFA"
-                              : "les données contiennent elles des erreurs"}
+                              ? "Ce champ indique si les données renseignées sont complètes pour l'enquête SIFA ou non."
+                              : "Ce champ indique si les données affichées contiennent des erreurs ou non."}
                           </Text>
                         )}
                       />
@@ -377,19 +380,19 @@ const EffectifsTable = ({
                           <HStack color="warning" w="full" pl={5}>
                             <Alert boxSize={4} />{" "}
                             <Text fontSize="1rem">{requiredSifa.length} manquante(s) pour SIFA</Text>
+                            <InfoTooltip
+                              headerComponent={() => "Champ(s) manquant(s) :"}
+                              contentComponent={() => (
+                                <Box>
+                                  <UnorderedList>
+                                    {requiredSifa.map((fieldName, i) => (
+                                      <ListItem key={i}>{fieldName}</ListItem>
+                                    ))}
+                                  </UnorderedList>
+                                </Box>
+                              )}
+                            />
                           </HStack>
-                          <InfoTooltip
-                            contentComponent={() => (
-                              <Box>
-                                <Text fontWeight="bold">Champ(s) manquant(s) :</Text>
-                                <UnorderedList>
-                                  {requiredSifa.map((fieldName, i) => (
-                                    <ListItem key={i}>{fieldName}</ListItem>
-                                  ))}
-                                </UnorderedList>
-                              </Box>
-                            )}
-                          />
                         </Box>
                       );
                     };

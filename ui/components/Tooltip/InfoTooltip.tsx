@@ -38,12 +38,21 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ headerComponent, conte
     <PopoverContent boxShadow="md" whiteSpace="normal">
       <PopoverArrow />
       {headerComponent && (
-        <PopoverHeader color="black" fontSize={16} fontWeight="bold">
+        <PopoverHeader border="none" pt={3} px={5} color="black" fontSize={16} fontWeight="bold" lineHeight={1.5}>
           {headerComponent()}
         </PopoverHeader>
       )}
       {contentComponent && (
-        <PopoverBody color="black" fontSize={16} fontWeight="normal" p={5}>
+        <PopoverBody
+          color="black"
+          fontSize={16}
+          fontWeight="normal"
+          px={5}
+          lineHeight={1.5}
+          pt={headerComponent ? 0 : 5}
+          pb={5}
+          textTransform="none"
+        >
           {contentComponent()}
         </PopoverBody>
       )}
