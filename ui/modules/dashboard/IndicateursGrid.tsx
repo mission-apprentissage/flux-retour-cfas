@@ -17,12 +17,13 @@ import { AbandonsIcon, ApprenantsIcon, ApprentisIcon, InscritsSansContratsIcon, 
 interface CardProps {
   label: string;
   count: number;
-  tooltipLabel: ReactNode;
+  tooltipHeader: ReactNode | string;
+  tooltipLabel: ReactNode | string;
   icon: ReactNode;
   big?: boolean;
   children?: ReactNode;
 }
-function Card({ label, count, tooltipLabel, icon, big = false, children }: CardProps) {
+function Card({ label, count, tooltipHeader, tooltipLabel, icon, big = false, children }: CardProps) {
   return (
     <Center h="100%" justifyContent={big ? "center" : "start"} py="6" px="10">
       <HStack gap={3}>
@@ -35,7 +36,7 @@ function Card({ label, count, tooltipLabel, icon, big = false, children }: CardP
           </Text>
           <Text fontSize={12}>
             {label}
-            <InfoTooltip contentComponent={() => <Box padding="1w">{tooltipLabel}</Box>} />
+            <InfoTooltip headerComponent={() => tooltipHeader} contentComponent={() => <Box>{tooltipLabel}</Box>} />
           </Text>
           {children}
         </Box>
@@ -124,10 +125,9 @@ function IndicateursGrid(props: IndicateursGridProps) {
         <Card
           label="apprenants"
           count={indicateursEffectifs.apprenants}
+          tooltipHeader="Nombre d’apprenants en contrat d’apprentissage"
           tooltipLabel={
             <>
-              <b>Nombre d’apprenants en contrat d’apprentissage</b>
-              <br />
               Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation. Est
               considéré comme un apprenant, un jeune inscrit en formation dans un organisme de formation en
               apprentissage. Il peut être&nbsp;:
@@ -160,13 +160,12 @@ function IndicateursGrid(props: IndicateursGridProps) {
         <Card
           label="dont apprentis"
           count={indicateursEffectifs.apprentis}
+          tooltipHeader="Apprenti"
           tooltipLabel={
-            <div>
-              <b>Apprenti</b>
-              <br />
+            <>
               Un apprenti est un jeune apprenant inscrit en centre de formation et ayant signé un contrat dans une
               entreprise qui le forme.
-            </div>
+            </>
           }
           icon={<ApprentisIcon />}
         >
@@ -189,14 +188,13 @@ function IndicateursGrid(props: IndicateursGridProps) {
         <Card
           label="dont rupturants"
           count={indicateursEffectifs.rupturants}
+          tooltipHeader="Rupturant"
           tooltipLabel={
-            <div>
-              <b>Rupturant</b>
-              <br />
+            <>
               Un jeune est considéré en rupture lorsqu’il ne travaille plus dans l’entreprise qui l’accueillait.
               Néanmoins, il reste inscrit dans le centre de formation et dispose d’un délai de 6 mois pour retrouver une
               entreprise auprès de qui se former. Il est considéré comme stagiaire de la formation professionnelle.
-            </div>
+            </>
           }
           icon={<RupturantsIcon />}
         >
@@ -219,13 +217,12 @@ function IndicateursGrid(props: IndicateursGridProps) {
         <Card
           label="dont jeunes sans contrat"
           count={indicateursEffectifs.inscrits}
+          tooltipHeader="Jeune sans contrat"
           tooltipLabel={
-            <div>
-              <b>Jeune sans contrat</b>
-              <br />
+            <>
               Un jeune sans contrat est un jeune inscrit qui débute sa formation sans contrat signé en entreprise. Le
               jeune dispose d’un délai de 3 mois pour trouver son entreprise et continuer sereinement sa formation.
-            </div>
+            </>
           }
           icon={<InscritsSansContratsIcon />}
         >
@@ -248,10 +245,9 @@ function IndicateursGrid(props: IndicateursGridProps) {
         <Card
           label="sorties d’apprentissage"
           count={indicateursEffectifs.abandons}
+          tooltipHeader="Sorties d’apprentissage (anciennement “abandons”)"
           tooltipLabel={
             <div>
-              <b>Sorties d’apprentissage (anciennement “abandons”)</b>
-              <br />
               Il s’agit du nombre d’apprenants ou apprentis qui ont définitivement quitté le centre de formation à la
               date affichée. Cette indication est basée sur un statut transmis par les organismes de formation. Ces
               situations peuvent être consécutives à une rupture de contrat d’apprentissage avec départ du centre de

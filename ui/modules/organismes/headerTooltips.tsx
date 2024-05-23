@@ -217,8 +217,8 @@ const headerTooltips = {
       (donnée facultative).
     </>
   ),
-  contrat_date_debut: <>Date de début du premier contrat (donnée facultative).</>,
-  contrat_date_fin: <>Date de fin du premier contrat (donnée facultative).</>,
+  contrat_date_debut: <>Date de début du premier contrat (donnée obligatoire si contrat d&apos;apprentissage signé).</>,
+  contrat_date_fin: <>Date de fin du premier contrat (donnée obligatoire si contrat d&apos;apprentissage signé).</>,
   siret_employeur: (
     <>
       Donnée obligatoire seulement si il y a eu un contrat signé entre un apprenti et un employeur. Format

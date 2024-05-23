@@ -89,9 +89,9 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
       <>
         Transmission au tableau
         <InfoTooltip
+          headerComponent={() => "État de la donnée"}
           contentComponent={() => (
             <Box>
-              <b>État de la donnée</b>
               <Text as="p">5 états concernant la donnée sont identifiés&nbsp;:</Text>
               <UnorderedList>
                 <ListItem>l’OFA transmet des données depuis moins d’1 semaine (vert)</ListItem>

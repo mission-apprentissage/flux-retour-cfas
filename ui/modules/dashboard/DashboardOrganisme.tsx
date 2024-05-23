@@ -404,6 +404,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                     isExternal
                                     href="mailto:referentiel-uai-siret@onisep.fr"
                                     textDecoration="underline"
+                                    display="inline"
                                   >
                                     referentiel-uai-siret@onisep.fr
                                   </Link>{" "}
@@ -415,7 +416,12 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                   Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des
                                   services du rectorat de l’académie où se situe votre CFA. Plus d’informations dans la
                                   page d’
-                                  <Link isExternal href={FAQ_REFERENCER_ETABLISSEMENT} textDecoration="underline">
+                                  <Link
+                                    isExternal
+                                    href={FAQ_REFERENCER_ETABLISSEMENT}
+                                    textDecoration="underline"
+                                    display="inline"
+                                  >
                                     Aide et FAQ
                                   </Link>
                                   .
@@ -468,8 +474,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                 organismes.
                               </Text>
                               <Link
-                                textDecoration={"underline"}
                                 isExternal
+                                textDecoration="underline"
+                                display="inline"
                                 href="https://www.intercariforef.org/referencer-son-offre-de-formation"
                               >
                                 En savoir plus sur la démarche.
@@ -502,8 +509,13 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                         <InfoTooltip
                           contentComponent={() => (
                             <Box>
-                              La donnée Certifié qualiopiprovient de la{" "}
-                              <Link isExternal href={LIST_PUBIC_ORGANISMES_DE_FORMATIONS} textDecoration="underline">
+                              La donnée Certifié qualiopi provient de la{" "}
+                              <Link
+                                isExternal
+                                href={LIST_PUBIC_ORGANISMES_DE_FORMATIONS}
+                                textDecoration="underline"
+                                display="inline"
+                              >
                                 Liste Publique des Organismes de Formations
                               </Link>
                               . Si cette information est erronée, merci de leur signaler.
@@ -532,6 +544,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                 isExternal
                                 href="mailto:tableau-de-bord@apprentissage.gouv.fr"
                                 textDecoration="underline"
+                                display="inline"
                               >
                                 tableau-de-bord@apprentissage.gouv.fr
                               </Link>

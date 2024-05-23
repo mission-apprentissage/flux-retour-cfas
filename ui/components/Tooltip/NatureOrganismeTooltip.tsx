@@ -5,12 +5,17 @@ import { InfoTooltip } from "./InfoTooltip";
 export default function NatureOrganismeTooltip() {
   return (
     <InfoTooltip
+      headerComponent={() => "Nature de l’organisme de formation"}
       contentComponent={() => (
         <Box>
-          <b>Nature de l’organisme de formation</b>
           <Text as="p">
             La donnée «&nbsp;Nature&nbsp;» est déduite des relations entre les organismes (base des Carif-Oref). Le{" "}
-            <Link href="https://catalogue-apprentissage.intercariforef.org/" textDecoration="underLine">
+            <Link
+              isExternal
+              href="https://catalogue-apprentissage.intercariforef.org/"
+              textDecoration="underLine"
+              display="inline"
+            >
               Catalogue
             </Link>{" "}
             des formations en apprentissage identifie trois natures :
@@ -24,8 +29,13 @@ export default function NatureOrganismeTooltip() {
             Si la cellule contient «&nbsp;inconnue&nbsp;», cela signifie que l’organisme n’a pas déclaré son offre de
             formation dans la base de son Carif-Oref : Inviter l’organisme à référencer ses formations en apprentissage
             auprès du{" "}
-            <Link href="https://catalogue-apprentissage.intercariforef.org/" textDecoration="underLine">
-              Carif-oref régional
+            <Link
+              isExternal
+              href="https://catalogue-apprentissage.intercariforef.org/"
+              textDecoration="underLine"
+              display="inline"
+            >
+              Carif-Oref régional
             </Link>
             .
           </Text>
