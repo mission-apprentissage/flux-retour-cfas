@@ -1,12 +1,12 @@
-import { Box, ListItem, Text, Tooltip, UnorderedList, Link } from "@chakra-ui/react";
+import { Box, ListItem, Text, UnorderedList, Link } from "@chakra-ui/react";
 
-export default function TooltipNatureOrganisme() {
+import { InfoTooltip } from "./InfoTooltip";
+
+export default function NatureOrganismeTooltip() {
   return (
-    <Tooltip
-      background="bluefrance"
-      color="white"
-      label={
-        <Box padding="1w">
+    <InfoTooltip
+      contentComponent={() => (
+        <Box>
           <b>Nature de l’organisme de formation</b>
           <Text as="p">
             La donnée «&nbsp;Nature&nbsp;» est déduite des relations entre les organismes (base des Carif-Oref). Le{" "}
@@ -30,17 +30,8 @@ export default function TooltipNatureOrganisme() {
             .
           </Text>
         </Box>
-      }
+      )}
       aria-label="La donnée Nature est déduite des relations entre les organismes (base des Carif-Oref)"
-    >
-      <Box
-        as="i"
-        className="ri-information-line"
-        fontSize="epsilon"
-        color="grey.500"
-        marginLeft="1v"
-        verticalAlign="middle"
-      />
-    </Tooltip>
+    />
   );
 }

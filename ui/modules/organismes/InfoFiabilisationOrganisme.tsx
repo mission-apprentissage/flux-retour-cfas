@@ -1,20 +1,20 @@
-import { WarningTwoIcon, InfoOutlineIcon } from "@chakra-ui/icons";
-import { Box, HStack, ListItem, Text, UnorderedList, Link } from "@chakra-ui/react";
+import { WarningTwoIcon } from "@chakra-ui/icons";
+import { HStack, ListItem, Text, UnorderedList, Link } from "@chakra-ui/react";
 import { STATUT_FIABILISATION_ORGANISME } from "shared";
 import { REFERENTIEL_ONISEP } from "shared/constants";
 
-import BasicTooltip from "@/components/InfoTooltip/BasicTooltip";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import { Checkbox } from "@/theme/components/icons";
 
 function InfoFiabilisationOrganisme({ fiabilisationStatut }: { fiabilisationStatut?: string }) {
   const FiableTooltip = () => (
-    <Box color="black" minW={400} w={400}>
+    <>
       <Text fontWeight="bold" mb={2}>
         Organisme considéré comme non-fiable si au moins l’une des conditions suivantes est remplie
       </Text>
       <UnorderedList>
         <ListItem>
-          L’<strong>UAI</strong> est inconnu ou non-validé dans le
+          L’<strong>UAI</strong> est inconnu ou non-validé dans le{" "}
           <Link isExternal href={REFERENTIEL_ONISEP} textDecoration="underline">
             Référentiel
           </Link>
@@ -28,7 +28,7 @@ function InfoFiabilisationOrganisme({ fiabilisationStatut }: { fiabilisationStat
           est fermé
         </ListItem>
       </UnorderedList>
-    </Box>
+    </>
   );
   const isFiable = fiabilisationStatut === STATUT_FIABILISATION_ORGANISME.FIABLE;
   return (
@@ -44,7 +44,7 @@ function InfoFiabilisationOrganisme({ fiabilisationStatut }: { fiabilisationStat
       <Text fontSize="zeta" fontWeight="bold">
         {isFiable ? "Organisme fiable" : "Organisme non fiable"}
       </Text>
-      <BasicTooltip contentComponent={() => <FiableTooltip />} triggerComponent={() => <InfoOutlineIcon />} />
+      <InfoTooltip contentComponent={() => <FiableTooltip />} />
     </HStack>
   );
 }

@@ -1,11 +1,12 @@
-import { Box, Text, HStack, Button, Tooltip, UnorderedList, ListItem } from "@chakra-ui/react";
+import { Box, Text, HStack, Button, UnorderedList, ListItem } from "@chakra-ui/react";
 import { DateTime } from "luxon";
 import React, { useState } from "react";
 import { useRecoilValue } from "recoil";
 import { ERPS, getStatut } from "shared";
 
 import Table from "@/components/Table/Table";
-import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "@/theme/components/icons";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
+import { AddFill, Alert, SubtractLine, ValidateIcon } from "@/theme/components/icons";
 
 import EffectifTableDetails from "./EffectifsTableDetails";
 import { effectifStateSelector } from "./formEngine/atoms";
@@ -204,22 +205,12 @@ const EffectifsTable = ({
             ? {
                 nom: {
                   header: () => (
-                    <>
-                      <Tooltip
-                        label={<Text>Donnée obligatoire</Text>}
-                        aria-label="A tooltip"
-                        background="bluefrance"
-                        color="white"
-                        padding="2w"
-                      >
-                        <Box>
-                          Nom
-                          <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-                            *
-                          </Box>
-                        </Box>
-                      </Tooltip>
-                    </>
+                    <Box>
+                      Nom{" "}
+                      <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
+                        *
+                      </Box>
+                    </Box>
                   ),
                   cell: ({ row, getValue }) => {
                     if (show === "errorInCell") {
@@ -241,22 +232,12 @@ const EffectifsTable = ({
                 prenom: {
                   size: 110,
                   header: () => (
-                    <>
-                      <Tooltip
-                        label={<Text>Donnée obligatoire</Text>}
-                        aria-label="A tooltip"
-                        background="bluefrance"
-                        color="white"
-                        padding="2w"
-                      >
-                        <Box>
-                          Prénom
-                          <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-                            *
-                          </Box>
-                        </Box>
-                      </Tooltip>
-                    </>
+                    <Box>
+                      Prénom{" "}
+                      <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
+                        *
+                      </Box>
+                    </Box>
                   ),
                   cell: ({ row, getValue }) => {
                     if (show === "errorInCell") {
@@ -296,24 +277,14 @@ const EffectifsTable = ({
                 source: {
                   size: 130,
                   header: () => (
-                    <>
-                      <Tooltip
-                        label={
+                    <Box>
+                      Source
+                      <InfoTooltip
+                        contentComponent={() => (
                           <Text>D&rsquo;où vient la donnée? Exemple la transmission a été faite depuis un ERP</Text>
-                        }
-                        aria-label="A tooltip"
-                        background="bluefrance"
-                        color="white"
-                        padding="2w"
-                      >
-                        <Box>
-                          Source
-                          <Text as="span" ml={1}>
-                            <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
-                          </Text>
-                        </Box>
-                      </Tooltip>
-                    </>
+                        )}
+                      />
+                    </Box>
                   ),
                   cell: ({ row }) => {
                     const { source } = organismesEffectifs[row.id];
@@ -339,22 +310,10 @@ const EffectifsTable = ({
                 action: {
                   size: 90,
                   header: () => (
-                    <>
-                      <Tooltip
-                        label={<Text>Action à faire</Text>}
-                        aria-label="A tooltip"
-                        background="bluefrance"
-                        color="white"
-                        padding="2w"
-                      >
-                        <Box>
-                          Action
-                          <Text as="span" ml={1}>
-                            <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
-                          </Text>
-                        </Box>
-                      </Tooltip>
-                    </>
+                    <Box>
+                      Action
+                      <InfoTooltip contentComponent={() => <Text>Action à faire</Text>} />
+                    </Box>
                   ),
                   cell: ({ row }) => {
                     const { toUpdate } = organismesEffectifs[row.id];
@@ -373,22 +332,10 @@ const EffectifsTable = ({
                 errorState: {
                   size: 120,
                   header: () => (
-                    <>
-                      <Tooltip
-                        label={<Text>Détails</Text>}
-                        aria-label="A tooltip"
-                        background="bluefrance"
-                        color="white"
-                        padding="2w"
-                      >
-                        <Box>
-                          Erreur(s) sur la donnée
-                          <Text as="span" ml={1}>
-                            <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
-                          </Text>
-                        </Box>
-                      </Tooltip>
-                    </>
+                    <Box>
+                      Erreur(s) sur la donnée
+                      <InfoTooltip contentComponent={() => <Text>Détails</Text>} />
+                    </Box>
                   ),
                   cell: ({ row }) => RenderErrorImport(organismesEffectifs[row.id]),
                 },
@@ -399,28 +346,18 @@ const EffectifsTable = ({
                 state: {
                   size: 200,
                   header: () => (
-                    <>
-                      <Tooltip
-                        label={
+                    <Box>
+                      État de la donnée
+                      <InfoTooltip
+                        contentComponent={() => (
                           <Text>
                             {modeSifa
                               ? "Si les données sont suffissantes pour SIFA"
                               : "les données contiennent elles des erreurs"}
                           </Text>
-                        }
-                        aria-label="A tooltip"
-                        background="bluefrance"
-                        color="white"
-                        padding="2w"
-                      >
-                        <Box pl={5}>
-                          État de la donnée
-                          <Text as="span" ml={1}>
-                            <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
-                          </Text>
-                        </Box>
-                      </Tooltip>
-                    </>
+                        )}
+                      />
+                    </Box>
                   ),
                   cell: ({ row }) => {
                     const { id } = organismesEffectifs[row.id];
@@ -436,55 +373,48 @@ const EffectifsTable = ({
                         );
 
                       return (
-                        <Tooltip
-                          label={
-                            <Box>
-                              <Text fontWeight="bold">Champ(s) manquant(s) :</Text>
-                              <UnorderedList>
-                                {requiredSifa.map((fieldName, i) => (
-                                  <ListItem key={i}>{fieldName}</ListItem>
-                                ))}
-                              </UnorderedList>
-                            </Box>
-                          }
-                          aria-label="A tooltip"
-                          background="bluefrance"
-                          color="white"
-                          padding="2w"
-                        >
+                        <Box>
                           <HStack color="warning" w="full" pl={5}>
                             <Alert boxSize={4} />{" "}
                             <Text fontSize="1rem">{requiredSifa.length} manquante(s) pour SIFA</Text>
                           </HStack>
-                        </Tooltip>
+                          <InfoTooltip
+                            contentComponent={() => (
+                              <Box>
+                                <Text fontWeight="bold">Champ(s) manquant(s) :</Text>
+                                <UnorderedList>
+                                  {requiredSifa.map((fieldName, i) => (
+                                    <ListItem key={i}>{fieldName}</ListItem>
+                                  ))}
+                                </UnorderedList>
+                              </Box>
+                            )}
+                          />
+                        </Box>
                       );
                     };
 
                     const ValidationsErrorsInfo = ({ validation_errors }) => {
                       if (!validation_errors?.length) return null;
                       return (
-                        <Tooltip
-                          label={
-                            <Box maxW="350px">
-                              <Text fontWeight="bold">Champ(s) en erreur(s) :</Text>
-                              <UnorderedList>
-                                {validation_errors.map(({ fieldName }, i) => (
-                                  <ListItem key={i}>{fieldName}</ListItem>
-                                ))}
-                              </UnorderedList>
-                            </Box>
-                          }
-                          aria-label="A tooltip"
-                          background="bluefrance"
-                          color="white"
-                          padding="2w"
-                          maxW="350px"
-                        >
+                        <Box>
                           <HStack color="redmarianne" w="full" pl={5}>
                             <Alert boxSize={4} />{" "}
                             <Text fontSize="1rem">{validation_errors.length} erreur(s) de transmission</Text>
                           </HStack>
-                        </Tooltip>
+                          <InfoTooltip
+                            contentComponent={() => (
+                              <Box>
+                                <Text fontWeight="bold">Champ(s) en erreur(s) :</Text>
+                                <UnorderedList>
+                                  {validation_errors.map(({ fieldName }, i) => (
+                                    <ListItem key={i}>{fieldName}</ListItem>
+                                  ))}
+                                </UnorderedList>
+                              </Box>
+                            )}
+                          />
+                        </Box>
                       );
                     };
 

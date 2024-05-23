@@ -10,7 +10,6 @@ import {
   Heading,
   ListItem,
   Text,
-  Tooltip,
   UnorderedList,
   VStack,
   Wrap,
@@ -33,6 +32,8 @@ import {
   CATALOGUE_APPRENTISSAGE,
   ANNUAIRE_ENTREPRISE,
   STATUT_FIABILISATION_ORGANISME,
+  LIST_PUBIC_ORGANISMES_DE_FORMATIONS,
+  FAQ_REFERENCER_ETABLISSEMENT,
 } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
@@ -47,6 +48,7 @@ import DownloadButton from "@/components/buttons/DownloadButton";
 import CerfaLink from "@/components/Cerfa/CerfaLink";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
@@ -137,12 +139,10 @@ const natureOrganismeDeFormationTooltip = {
       <Text>Organismes responsables</Text>
       <UnorderedList mt={4}>
         <ListItem>
-          Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur ;
+          Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur.
         </ListItem>
-        <ListItem>
-          Est signataire de la convention de formation ; Demande et reçoit les financements de l’OPCO ;
-        </ListItem>
-        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations ;</ListItem>
+        <ListItem>Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</ListItem>
+        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations.</ListItem>
         <ListItem>
           Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
           sein de l’UFA.
@@ -152,13 +152,11 @@ const natureOrganismeDeFormationTooltip = {
   ),
   formateur: (
     <>
-      <Text>Organismes formateurs</Text>
-      <UnorderedList mt={4}>
-        <ListItem>
-          Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
-          d’activité (NDA))
-        </ListItem>
-      </UnorderedList>
+      <Text>Organisme formateur</Text>
+      <Text>
+        Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+        d’activité (NDA))
+      </Text>
     </>
   ),
   responsable_formateur: (
@@ -167,11 +165,11 @@ const natureOrganismeDeFormationTooltip = {
       <UnorderedList mt={4}>
         <ListItem>
           Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
-          d’activité (NDA)) ;
+          d’activité (NDA)).
         </ListItem>
-        <ListItem>Est signataire de la convention de formation ;</ListItem>
-        <ListItem>Demande et reçoit les financements de l’OPCO ;</ListItem>
-        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations ;</ListItem>
+        <ListItem>Est signataire de la convention de formation.</ListItem>
+        <ListItem>Demande et reçoit les financements de l’OPCO.</ListItem>
+        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations.</ListItem>
         <ListItem>
           Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
           sein de l’UFA.
@@ -392,40 +390,40 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     >
                       {organisme.uai || "Inconnue"}
                       {!organisme.uai && (
-                        <Tooltip
-                          background="bluefrance"
-                          color="white"
-                          label={
-                            <Box padding="2w">
+                        <InfoTooltip
+                          contentComponent={() => (
+                            <Box>
                               <Text>
                                 <strong>Votre UAI est inconnue</strong>
                               </Text>
                               <UnorderedList mt={4}>
                                 <ListItem>
                                   Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme « Inconnue »
-                                  alors que votre organisme en possède une, veuillez la communiquer en écrivant à
-                                  referentiel-uai-siret@onisep.fr pour qu&apos;il soit mis à jour. L&apos;absence de ce
-                                  numéro bloque l&apos;enregistrement des contrats d&apos;apprentissage. L&apos;UAl est
-                                  recommandée pour être reconnu OFA.
+                                  alors que votre organisme en possède une, veuillez la communiquer en écrivant à{" "}
+                                  <Link
+                                    isExternal
+                                    href="mailto:referentiel-uai-siret@onisep.fr"
+                                    textDecoration="underline"
+                                  >
+                                    referentiel-uai-siret@onisep.fr
+                                  </Link>{" "}
+                                  avec la fiche UAI, afin qu’elle soit mise à jour. L&apos;absence de ce numéro bloque
+                                  l’enregistrement des contrats d’apprentissage. L&apos;UAI est recommandée pour être
+                                  reconnu OFA.
                                 </ListItem>
                                 <ListItem>
                                   Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des
                                   services du rectorat de l’académie où se situe votre CFA. Plus d’informations dans la
-                                  page d’Aide et FAQ.
+                                  page d’
+                                  <Link isExternal href={FAQ_REFERENCER_ETABLISSEMENT} textDecoration="underline">
+                                    Aide et FAQ
+                                  </Link>
+                                  .
                                 </ListItem>
                               </UnorderedList>
                             </Box>
-                          }
-                        >
-                          <Box
-                            as="i"
-                            className="ri-information-line"
-                            fontSize="epsilon"
-                            color="grey.500"
-                            marginLeft="1w"
-                            verticalAlign="middle"
-                          />
-                        </Tooltip>
+                          )}
+                        />
                       )}
                     </Badge>
                   </HStack>
@@ -456,11 +454,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     >
                       {natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}
                       {natureOrganismeDeFormationLabel[organisme.nature] === "Inconnue" && (
-                        <Tooltip
-                          background="bluefrance"
-                          color="white"
-                          label={
-                            <Box padding="2w">
+                        <InfoTooltip
+                          contentComponent={() => (
+                            <Box>
                               <Text>
                                 <strong>Votre Nature est inconnue</strong>
                               </Text>
@@ -479,34 +475,13 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                 En savoir plus sur la démarche.
                               </Link>
                             </Box>
-                          }
-                        >
-                          <Box
-                            as="i"
-                            className="ri-information-line"
-                            fontSize="epsilon"
-                            color="grey.500"
-                            marginLeft="1w"
-                            verticalAlign="middle"
-                          />
-                        </Tooltip>
+                          )}
+                        />
                       )}
                       {natureOrganismeDeFormationTooltip[organisme.nature] && (
-                        <Tooltip
-                          background="bluefrance"
-                          color="white"
-                          label={<Box padding="2w">{natureOrganismeDeFormationTooltip[organisme.nature]}</Box>}
-                          aria-label={natureOrganismeDeFormationTooltip[organisme.nature]}
-                        >
-                          <Box
-                            as="i"
-                            className="ri-information-line"
-                            fontSize="epsilon"
-                            color="grey.500"
-                            marginLeft="1w"
-                            verticalAlign="middle"
-                          />
-                        </Tooltip>
+                        <InfoTooltip
+                          contentComponent={() => <Box>{natureOrganismeDeFormationTooltip[organisme.nature]}</Box>}
+                        />
                       )}
                     </Badge>
                   </HStack>
@@ -524,25 +499,17 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                       >
                         {organisme.qualiopi ? "Oui" : "Non"}
 
-                        <Tooltip
-                          background="bluefrance"
-                          color="white"
-                          label={
-                            <Box padding="2w">
-                              La donnée Certifié qualiopi provient de la Liste Publique des Organismes de Formations. Si
-                              cette information est erronée, merci de leur signaler.
+                        <InfoTooltip
+                          contentComponent={() => (
+                            <Box>
+                              La donnée Certifié qualiopiprovient de la{" "}
+                              <Link isExternal href={LIST_PUBIC_ORGANISMES_DE_FORMATIONS} textDecoration="underline">
+                                Liste Publique des Organismes de Formations
+                              </Link>
+                              . Si cette information est erronée, merci de leur signaler.
                             </Box>
-                          }
-                        >
-                          <Box
-                            as="i"
-                            className="ri-information-line"
-                            fontSize="epsilon"
-                            color="grey.500"
-                            marginLeft="1w"
-                            verticalAlign="middle"
-                          />
-                        </Tooltip>
+                          )}
+                        />
                       </Badge>
                       <Text>Prépa-apprentissage&nbsp;:</Text>
                       <Badge
@@ -554,26 +521,23 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                         textTransform="none"
                       >
                         {organisme.prepa_apprentissage ? "Oui" : "Non"}
-                        <Tooltip
-                          background="bluefrance"
-                          color="white"
-                          label={
-                            <Box padding="2w">
+                        <InfoTooltip
+                          contentComponent={() => (
+                            <Box>
                               La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
                               d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
-                              bénéficiaire à définir son projet d’apprentissage.
+                              bénéficiaire à définir son projet d’apprentissage. Si cette information est erronée et que
+                              votre établissement propose une prépa-apprentissage, veuillez nous écrire à{" "}
+                              <Link
+                                isExternal
+                                href="mailto:tableau-de-bord@apprentissage.gouv.fr"
+                                textDecoration="underline"
+                              >
+                                tableau-de-bord@apprentissage.gouv.fr
+                              </Link>
                             </Box>
-                          }
-                        >
-                          <Box
-                            as="i"
-                            className="ri-information-line"
-                            fontSize="epsilon"
-                            color="grey.500"
-                            marginLeft="1w"
-                            verticalAlign="middle"
-                          />
-                        </Tooltip>
+                          )}
+                        />
                       </Badge>
                     </HStack>
                   )}
