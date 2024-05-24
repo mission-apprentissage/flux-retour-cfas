@@ -19,7 +19,6 @@ import {
   HStack,
   Switch,
   FormLabel,
-  Tooltip,
   Image,
   Link,
 } from "@chakra-ui/react";
@@ -34,6 +33,7 @@ import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import useToaster from "@/hooks/useToaster";
 import { DownloadLine, ValidateIcon, Warning } from "@/theme/components/icons";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
@@ -567,16 +567,10 @@ function Header({ header }: { header: string }) {
     return (
       <>
         {header}
-        <Tooltip background="bluefrance" color="white" label={<Box padding="2w">{headerTooltips[header]}</Box>}>
-          <Box
-            as="i"
-            className="ri-information-line"
-            fontSize="epsilon"
-            color="grey.500"
-            marginLeft="1v"
-            verticalAlign="middle"
-          />
-        </Tooltip>
+        <InfoTooltip
+          contentComponent={() => <Box padding="2w">{headerTooltips[header]}</Box>}
+          aria-label="État de la donnée."
+        />
       </>
     );
   }

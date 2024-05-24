@@ -2,7 +2,7 @@ import { WarningTwoIcon, InfoIcon } from "@chakra-ui/icons";
 import { Box, Table, Tbody, Text, Tr, Td, UnorderedList, TableContainer, ListItem, Link } from "@chakra-ui/react";
 import { TD_MANUEL_ELEMENT_LINK } from "shared";
 
-import InfoTooltip from "@/components/InfoTooltip/InfoTooltip";
+import { InfoTooltip } from "../Tooltip/InfoTooltip";
 
 const attributes = [
   { label: "Nom de naissance", value: "nom_apprenant" },
@@ -129,21 +129,10 @@ const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps
                   {effectifQueueItem[rowItem.value]}
                   {validationErrorFormated[rowItem.value] ? (
                     <InfoTooltip
-                      minW={{ base: "100%", lg: "max-content" }}
-                      descriptionComponent={
+                      headerComponent={() => <Text>{rowItem.value}</Text>}
+                      contentComponent={() => (
                         <DescriptionErrorListComponent errorList={validationErrorFormated[rowItem.value]} />
-                      }
-                      label={rowItem.value}
-                      customIcon={
-                        <Box
-                          as="i"
-                          className="ri-information-line"
-                          fontSize="epsilon"
-                          color="grey.500"
-                          marginLeft="1w"
-                          verticalAlign="middle"
-                        />
-                      }
+                      )}
                     />
                   ) : null}
                 </Td>

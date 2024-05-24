@@ -17,7 +17,6 @@ import {
   RadioGroup,
   Spinner,
   Text,
-  Tooltip,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/router";
@@ -36,6 +35,7 @@ import { _get, _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { CGU_VERSION } from "@/components/legal/Cgu";
 import Ribbons from "@/components/Ribbons/Ribbons";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import useToaster from "@/hooks/useToaster";
 import InscriptionWrapper from "@/modules/auth/inscription/InscriptionWrapper";
 import { Check, ShowPassword } from "@/theme/components/icons";
@@ -311,11 +311,9 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: IOrganisation
               >
                 <FormLabel>
                   Votre courriel
-                  <Tooltip
-                    background="bluefrance"
-                    color="white"
-                    label={
-                      <Box padding="1w">
+                  <InfoTooltip
+                    contentComponent={() => (
+                      <Box>
                         <Text as="p">
                           Pour des raisons de sécurité, merci d&apos;utiliser un email nominatif professionnel lié à
                           votre organisation.
@@ -332,20 +330,11 @@ function ProfileForm({ organisation, fixedEmail }: { organisation: IOrganisation
                           tableau-de-bord@apprentissage.beta.gouv.fr.
                         </Text>
                       </Box>
-                    }
+                    )}
                     aria-label="Pour des raisons de sécurité, merci d'utiliser un email nominatif professionnel lié à votre organisation.
                     Exemples : prenom.nom@cfa-dumoulin.fr ou équivalent. Nous ne pouvons pas valider les emails (@gmail, @hotmail, @orange, etc.), ni les mails génériques (contact@, apprentissage@...).
                     Si cela vous est impossible, merci de nous contacter à tableau-de-bord@apprentissage.beta.gouv.fr."
-                  >
-                    <Box
-                      as="i"
-                      className="ri-error-warning-line"
-                      fontSize="epsilon"
-                      color="red.500"
-                      marginLeft="1w"
-                      verticalAlign="middle"
-                    />
-                  </Tooltip>
+                  />
                 </FormLabel>
                 <Input {...field} id={field.name} placeholder="Ex : jeandupont@cfa.fr" />
                 <FormErrorMessage>{meta.error}</FormErrorMessage>
