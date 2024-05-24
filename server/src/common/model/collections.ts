@@ -4,6 +4,7 @@ import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassi
 import contratsDecaModelDescriptor, { IContratDeca } from "shared/models/data/contratsDeca.model";
 import decaRawModelDescriptor, { IDecaRaw } from "shared/models/data/decaRaw.model";
 import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
+import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
@@ -49,6 +50,7 @@ export const modelDescriptors = [
   romeModelDescriptor,
   rncpModelDescriptor,
   effectifsDECAModelDescriptor,
+  effectifsArchiveModelDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
@@ -65,6 +67,8 @@ export const organismesReferentielDb = () =>
 export const maintenanceMessageDb = () =>
   getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<IEffectif>(effectifsModelDescriptor.collectionName);
+export const effectifsArchiveDb = () =>
+  getDbCollection<IEffectifArchive>(effectifsArchiveModelDescriptor.collectionName);
 export const effectifsDECADb = () => getDbCollection<IEffectifDECA>(effectifsDECAModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<IEffectifQueue>(effectifsQueueModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>

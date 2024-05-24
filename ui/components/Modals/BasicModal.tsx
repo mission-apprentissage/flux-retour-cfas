@@ -20,10 +20,16 @@ interface BasicModalProps extends Omit<ModalProps, "children" | "isOpen" | "onCl
   button: ReactNode | string;
   children: ReactNode;
   title?: string;
+  handleClose: any;
 }
 
-export function BasicModal({ triggerType, button, children, title, ...modalProps }: BasicModalProps) {
+export function BasicModal({ triggerType, button, children, title, handleClose, ...modalProps }: BasicModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const customClose = () => {
+    onClose();
+    handleClose?.();
+  };
 
   const renderTrigger = () => {
     if (typeof button === "string") {
@@ -48,7 +54,7 @@ export function BasicModal({ triggerType, button, children, title, ...modalProps
     <>
       {renderTrigger()}
 
-      <Modal isOpen={isOpen} onClose={onClose} {...modalProps}>
+      <Modal isOpen={isOpen} onClose={customClose} {...modalProps}>
         <ModalOverlay />
         <ModalContent p={6} borderRadius="0">
           <Button
@@ -57,7 +63,7 @@ export function BasicModal({ triggerType, button, children, title, ...modalProps
             color="bluefrance"
             fontSize={"epsilon"}
             onClick={() => {
-              onClose();
+              customClose();
             }}
             variant="link"
             fontWeight={400}

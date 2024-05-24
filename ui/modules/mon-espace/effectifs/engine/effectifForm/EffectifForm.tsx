@@ -3,24 +3,142 @@ import {
   AccordionButton,
   AccordionItem,
   AccordionPanel,
+  FormLabel,
   Box,
   Divider,
   HStack,
   Text,
   VStack,
+  Select,
+  FormControl,
+  Input,
 } from "@chakra-ui/react";
+import { UseQueryResult } from "@tanstack/react-query";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Statut, getStatut } from "shared";
+import { MOTIF_SUPPRESSION, MOTIF_SUPPRESSION_LABEL, Statut, getStatut } from "shared";
 
+import { _post } from "@/common/httpClient";
+import AppButton from "@/components/buttons/Button";
+import { BasicModal } from "@/components/Modals/BasicModal";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import { effectifStateSelector, valuesSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
+import { Trash } from "@/theme/components/icons";
 import { ErrorPill } from "@/theme/components/icons/ErrorPill";
 import { PlainArrowRight } from "@/theme/components/icons/PlainArrowRight";
 
 import { EffectifApprenant } from "./blocks/apprenant/EffectifApprenant";
 import { ApprenantContrats } from "./blocks/contrats/EffectifContrats";
 import { EffectifFormation } from "./blocks/formation/EffectifFormation";
+
+const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
+  const [successDeletion, setSuccessDeletion] = useState<"SUCCES" | "ERREUR" | null>(null);
+  const [selectedDeletionReason, setSelectedDeletionReason] = useState(null);
+  const [deletionOtherReason, setDeletionOtherReason] = useState("");
+
+  const deleteEffectif = async () => {
+    try {
+      await _post(`/api/v1/effectif/${id}/delete`, {
+        motif: selectedDeletionReason,
+        description: selectedDeletionReason === MOTIF_SUPPRESSION.Autre ? deletionOtherReason : null,
+      });
+      setSuccessDeletion("SUCCES");
+    } catch (e) {
+      setSuccessDeletion("ERREUR");
+    }
+  };
+
+  const checkModalButtonEnabled = () => {
+    if (!selectedDeletionReason) {
+      return false;
+    }
+    switch (selectedDeletionReason) {
+      case MOTIF_SUPPRESSION.MauvaiseManip:
+      case MOTIF_SUPPRESSION.Autre:
+        return !!deletionOtherReason && deletionOtherReason.trim().length;
+      default:
+        return true;
+    }
+  };
+
+  return (
+    <Box>
+      <BasicModal
+        triggerType="link"
+        button={
+          <AppButton color="#CE0500" borderColor="#CE0500" leftIcon={<Trash height={4} width={4} />} action={() => {}}>
+            <Text>Supprimer l&apos;apprenant</Text>
+          </AppButton>
+        }
+        title={`Supprimer l'apprenant(e) ${prenom} ${nom}`}
+        size="6xl"
+        handleClose={() => successDeletion === "SUCCES" && refetch()}
+      >
+        {!successDeletion && (
+          <Box>
+            <Ribbons variant="info" mb={4}>
+              <Text color="#3A3A3A">
+                Veuillez noter que si vous transmettez via ERP ou si vous téléversez un fichier Excel avec ce même
+                apprenant, il apparaîtra à nouveau sur votre espace Tableau de bord.
+              </Text>
+            </Ribbons>
+            <FormControl isRequired onChange={(e: any) => setSelectedDeletionReason(e.target.value)}>
+              <FormLabel>Motif de supppression</FormLabel>
+              <Select>
+                <option selected hidden disabled value="">
+                  Sélectionnez une option
+                </option>
+                {MOTIF_SUPPRESSION_LABEL.map(({ id, label }) => (
+                  <option value={id} key={id}>
+                    {label}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            {(selectedDeletionReason === MOTIF_SUPPRESSION.Autre ||
+              selectedDeletionReason === MOTIF_SUPPRESSION.MauvaiseManip) && (
+              <FormControl isRequired mt={5}>
+                <FormLabel>Veuillez préciser la raison</FormLabel>
+                <Input onChange={(e) => setDeletionOtherReason(e.target.value)} placeholder="Votre texte ici"></Input>
+              </FormControl>
+            )}
+
+            <Box mt={5} flexFlow="row-reverse" display="flex">
+              <AppButton
+                variant="primary"
+                leftIcon={<Trash height={4} width={4} />}
+                action={deleteEffectif}
+                isDisabled={!checkModalButtonEnabled()}
+              >
+                <Text>Supprimer l&apos;apprenant(e)</Text>
+              </AppButton>
+            </Box>
+          </Box>
+        )}
+        {successDeletion === "SUCCES" && (
+          <Box>
+            <Ribbons variant="success" color="#3A3A3A">
+              <Text fontWeight="bold">L&apos;apprenant(e) a été supprimé(e) avec succès.</Text>
+              <Text>
+                Veuillez noter que si vous transmettez via ERP ou si vous téléversez un fichier Excel avec ce même
+                apprenant, il apparaîtra à nouveau sur votre espace Tableau de bord.
+              </Text>
+            </Ribbons>
+          </Box>
+        )}
+        {successDeletion === "ERREUR" && (
+          <Box>
+            <Ribbons variant="error" color="#3A3A3A">
+              <Text fontWeight="bold">La suppression de l&apos;apprenant(e) a échoué.</Text>
+              <Text>Veuillez contacter l&apos;équipe du Tableau de bord de l&apos;apprentissage.</Text>
+            </Ribbons>
+          </Box>
+        )}
+      </BasicModal>{" "}
+    </Box>
+  );
+};
 
 const useOpenAccordionToLocation = () => {
   const scrolledRef = useRef(false);
@@ -52,7 +170,15 @@ const useOpenAccordionToLocation = () => {
 
 // eslint-disable-next-line react/display-name, @typescript-eslint/no-unused-vars
 export const EffectifForm = memo(
-  ({ modeSifa = false, parcours }: { modeSifa: boolean; parcours: Statut["parcours"] }) => {
+  ({
+    modeSifa = false,
+    parcours,
+    refetch,
+  }: {
+    modeSifa: boolean;
+    parcours: Statut["parcours"];
+    refetch: (options: { throwOnError: boolean; cancelRefetch: boolean }) => Promise<UseQueryResult>;
+  }) => {
     const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
 
     const effectifId = useRecoilValue<any>(effectifIdAtom);
@@ -65,6 +191,12 @@ export const EffectifForm = memo(
 
     return (
       <Box my={2} px={5}>
+        <SuppressionEffectifComponent
+          nom={values?.apprenant.nom}
+          prenom={values?.apprenant.prenom}
+          id={effectifId}
+          refetch={refetch}
+        />
         <Accordion
           allowMultiple
           mt={2}

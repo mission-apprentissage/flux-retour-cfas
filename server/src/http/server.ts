@@ -9,7 +9,7 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
-import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
+import { typesEffectifNominatif, CODE_POSTAL_REGEX, zEffectifArchive } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -93,7 +93,7 @@ import { changePassword, updateUserProfile } from "@/common/actions/users.action
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { effectifsArchiveDb, effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -744,6 +744,28 @@ function setupRoutes(app: Application) {
       requireEffectifOrganismePermission("manageEffectifs"),
       returnResult(async (req) => {
         return await updateEffectifFromForm(new ObjectId(req.params.id), req.body);
+      })
+    )
+    .post(
+      "/api/v1/effectif/:id/delete",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        const { motif, description } = await validateFullZodObjectSchema(req.body, {
+          motif: zEffectifArchive.shape.suppression.shape.motif,
+          description: zEffectifArchive.shape.suppression.shape.description,
+        });
+        const effectif: any = await effectifsDb().findOne({ _id: new ObjectId(req.params.id) });
+        await effectifsArchiveDb().insertOne({
+          ...effectif,
+          _id: new ObjectId(),
+          suppression: {
+            user_id: req.user._id,
+            motif,
+            description,
+            date: new Date(),
+          },
+        });
+        await effectifsDb().deleteOne({ _id: new ObjectId(req.params.id) });
       })
     )
     .delete(
