@@ -20,7 +20,7 @@ interface BasicModalProps extends Omit<ModalProps, "children" | "isOpen" | "onCl
   button: ReactNode | string;
   children: ReactNode;
   title?: string;
-  handleClose: any;
+  handleClose?: any;
 }
 
 export function BasicModal({ triggerType, button, children, title, handleClose, ...modalProps }: BasicModalProps) {
