@@ -16,10 +16,11 @@ import {
 import { UseQueryResult } from "@tanstack/react-query";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { MOTIF_SUPPRESSION, MOTIF_SUPPRESSION_LABEL, Statut, getStatut } from "shared";
+import { EFF_EDITION_ELEMENT_LINK, MOTIF_SUPPRESSION, MOTIF_SUPPRESSION_LABEL, Statut, getStatut } from "shared";
 
 import { _post } from "@/common/httpClient";
 import AppButton from "@/components/buttons/Button";
+import Link from "@/components/Links/Link";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
@@ -118,9 +119,11 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
         )}
         {successDeletion === "SUCCES" && (
           <Box>
-            <Ribbons variant="success" color="#3A3A3A">
-              <Text fontWeight="bold">L&apos;apprenant(e) a été supprimé(e) avec succès.</Text>
-              <Text>
+            <Ribbons variant="success">
+              <Text fontWeight="bold" color="#3A3A3A" fontSize="21px" mb={2}>
+                L&apos;apprenant(e) a été supprimé(e) avec succès.
+              </Text>
+              <Text color="#3A3A3A">
                 Veuillez noter que si vous transmettez via ERP ou si vous téléversez un fichier Excel avec ce même
                 apprenant, il apparaîtra à nouveau sur votre espace Tableau de bord.
               </Text>
@@ -129,9 +132,17 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
         )}
         {successDeletion === "ERREUR" && (
           <Box>
-            <Ribbons variant="error" color="#3A3A3A">
-              <Text fontWeight="bold">La suppression de l&apos;apprenant(e) a échoué.</Text>
-              <Text>Veuillez contacter l&apos;équipe du Tableau de bord de l&apos;apprentissage.</Text>
+            <Ribbons variant="error">
+              <Text fontWeight="bold" color="#3A3A3A" fontSize="21px" mb={2}>
+                La suppression de l&apos;apprenant(e) a échoué.
+              </Text>
+              <Text color="#3A3A3A">
+                Veuillez{" "}
+                <Link variant="link" color="bluefrance" href={EFF_EDITION_ELEMENT_LINK} isExternal>
+                  contacter
+                </Link>{" "}
+                l&apos;équipe du Tableau de bord de l&apos;apprentissage.
+              </Text>
             </Ribbons>
           </Box>
         )}
