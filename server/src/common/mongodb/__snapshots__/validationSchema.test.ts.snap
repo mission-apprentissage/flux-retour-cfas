@@ -3758,6 +3758,7 @@ exports[`validation-schema should create validation schema for effectifsArchive:
                               "EN_HORS_MURS",
                               "EN_CFA_ACADEMIQUE",
                               "EN_EPLE",
+                              "EDUSERVICE",
                             ],
                           },
                         },
