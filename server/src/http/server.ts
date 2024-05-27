@@ -105,7 +105,10 @@ import { algoUAI } from "@/common/utils/uaiUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "@/common/validation/dossierApprenantSchemaV3";
+import {
+  computeWarningsForDossierApprenantSchemaV3,
+  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
+} from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
@@ -604,7 +607,8 @@ function setupRoutes(app: Application) {
                 .safeParseAsync(
                   Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
                 );
-              return data;
+              const warnings = computeWarningsForDossierApprenantSchemaV3(req.body);
+              return { ...data, warnings };
             })
           )
           .use(
