@@ -160,8 +160,8 @@ const SIFAPage = (props: SIFAPageProps) => {
               <ListItem>
                 <Text>
                   Pour <strong>faciliter</strong> la remontée d’information avec les données demandées par l’enquête
-                  SIFA, le tableau de bord vous permet de réaliser les contrôles, compléter les éventuelles données
-                  manquantes et générer un fichier compatible à déposer sur la{" "}
+                  SIFA, le Tableau de Bord vous permet de réaliser les contrôles, compléter d’éventuelles données
+                  manquantes de vos effectifs et générer un fichier compatible à déposer sur la{" "}
                   <Link
                     variant="link"
                     href="https://sifa.depp.education.fr/login"
@@ -177,9 +177,14 @@ const SIFAPage = (props: SIFAPageProps) => {
               </ListItem>
               <ListItem>
                 <Text>
-                  La remontée SIFA est <strong>annuelle</strong>. La date d’observation est fixée au{" "}
-                  <strong>31 décembre de l’année N</strong> et l’ouverture de l’application permettant la collecte est
-                  prévue début janvier.
+                  Transmettre vos effectifs au Tableau de bord <strong>ne vous dispense pas</strong> de répondre à
+                  l’enquête annuelle SIFA.
+                </Text>
+              </ListItem>
+              <ListItem>
+                <Text>
+                  La date d’observation est fixée au <strong>31 décembre de l’année N</strong> et le portail SIFA
+                  permettant la collecte est ouvert début janvier.
                 </Text>
               </ListItem>
             </UnorderedList>
@@ -204,14 +209,17 @@ const SIFAPage = (props: SIFAPageProps) => {
             </Text>
             <Text color="grey.800">
               <UnorderedList spacing={2} px={6}>
-                <ListItem>Vérifiez que tous vos apprentis soient bien présents dans le fichier.</ListItem>
                 <ListItem>
-                  Avant de téléverser votre fichier SIFA sur le portail de la DEPP, veuillez en supprimer la première
-                  ligne d‘en-tête de colonnes.
+                  Vérifiez que tous vos apprentis soient bien présents dans le fichier. Si non, téléchargez le fichier
+                  et complétez à la main avec vos effectifs manquants.
                 </ListItem>
                 <ListItem>
-                  Attention ! Si vous ouvrez le fichier avec Excel, veuillez le sauvegarder (Fichier &gt; Enregistrer
-                  sous) au format{" "}
+                  Avant de téléverser votre fichier SIFA sur le portail de la DEPP, veuillez en{" "}
+                  <strong>supprimer la première ligne</strong> d‘en-tête de colonnes.
+                </ListItem>
+                <ListItem>
+                  <strong>Attention ! Si vous ouvrez le fichier avec Excel</strong>, veuillez le sauvegarder (Fichier
+                  &gt; Enregistrer sous) au format{" "}
                   <BasicModal
                     triggerType="link"
                     button="CSV (délimiteur point-virgule)"
@@ -227,6 +235,20 @@ const SIFAPage = (props: SIFAPageProps) => {
                     />
                   </BasicModal>{" "}
                   après suppression de la première ligne pour assurer la compatibilité avec l‘enquête SIFA.
+                </ListItem>
+                <ListItem>
+                  L’enquête SIFA sera terminée dès lors que le fichier est accepté par la plateforme SIFA.
+                </ListItem>
+                <ListItem>
+                  En cas de difficultés ou questions, veuillez lire la{" "}
+                  <Link
+                    href={"https://mission-apprentissage.notion.site/Enqu-te-SIFA-a546590b47764051bf1c486b1d57d227"}
+                    textDecoration={"underline"}
+                    isExternal
+                  >
+                    FAQ dédiée
+                  </Link>
+                  .
                 </ListItem>
               </UnorderedList>
             </Text>
