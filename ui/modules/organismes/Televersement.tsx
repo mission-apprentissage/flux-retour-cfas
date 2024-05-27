@@ -21,21 +21,28 @@ import {
   FormLabel,
   Image,
   Link,
+  VStack,
+  Grid,
+  Badge,
 } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { cyrb53Hash, normalize, TD_MANUEL_ELEMENT_LINK } from "shared";
+import { cyrb53Hash, normalize, TRANSMISSION_DONNEES_GROUP } from "shared";
 import XLSX from "xlsx";
 
 import { _post } from "@/common/httpClient";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
+import ButtonTeleversement from "@/components/buttons/ButtonTeleversement";
+import SupportLink from "@/components/Links/SupportLink";
+import { BasicModal } from "@/components/Modals/BasicModal";
 import SimplePage from "@/components/Page/SimplePage";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import useToaster from "@/hooks/useToaster";
-import { DownloadLine, ValidateIcon, Warning } from "@/theme/components/icons";
+import { Book, DownloadLine, ValidateIcon, Warning } from "@/theme/components/icons";
 import DownloadSimple from "@/theme/components/icons/DownloadSimple";
 import Eye from "@/theme/components/icons/Eye";
 import Video from "@/theme/components/icons/Video";
@@ -126,6 +133,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   const [columsWithErrors, setColumsWithErrors] = useState<string[]>([]);
   const [showOnlyColumnsAndLinesWithErrors, setShowOnlyColumnsAndLinesWithErrors] = useState(false);
   const [status, setStatus] = useState<Status | null>(null);
+  const router = useRouter();
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
     // On drop, read the file and parse it, then return data with validation errors.
@@ -237,8 +245,9 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
       alignItems: "center",
       padding: "20px",
       borderWidth: 2,
-      borderColor: "#E5E5E5",
+      borderColor: "#000091",
       borderStyle: "dashed",
+      borderRadius: 6,
       color: "#9c9c9c",
       transition: "border .24s ease-in-out",
       ...(isDragActive
@@ -268,66 +277,127 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   return (
     <SimplePage title="Import des effectifs">
       <Container maxW="xl" p="8">
-        <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb="4w">
-          Import des effectifs
-        </Heading>
-        <InfoBetaPanel />
-        <ButtonTeleversement href="/modele-import.xlsx">
-          <DownloadSimple mr="2" />
-          Télécharger le modèle Excel
-        </ButtonTeleversement>
-        <ButtonTeleversement href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20">
-          <Eye mr={2} />
-          Guide des données
-        </ButtonTeleversement>
-        <ButtonTeleversement href="https://www.canva.com/design/DAF0aDLacTk/ZxY16rI7C_vBzEuyrEpbIA/watch">
-          <Video mr="2" />
-          Tutoriel en vidéo
-        </ButtonTeleversement>
-        {status === "validation_failure" && (
-          <>
-            <Ribbons variant="error" mb={8}>
-              <Box mb="8">
-                <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
-                  {errorsCount === 1
-                    ? "Une erreur a été détectée dans votre fichier"
-                    : `${errorsCount} erreurs ont été détectées dans votre fichier.`}
-                </Text>
-                <Text fontSize="sm" color="grey.800">
-                  Vous pouvez voir le détail ligne à ligne ci-dessous. Vous devez modifier votre fichier et
-                  l&apos;importer à nouveau.
-                </Text>
-                {missingHeaders.length > 0 && (
-                  <Text fontSize="sm" color="grey.800">
-                    Les colonnes suivantes sont obligatoires et n’ont pas été trouvées, veuillez vérifier leur présence
-                    dans le fichier&nbsp;:{" "}
-                    <UnorderedList mt="4">
-                      {missingHeaders.map((header) => (
-                        <ListItem key={header} color="red.500">
-                          {header}
-                        </ListItem>
-                      ))}
-                    </UnorderedList>
+        <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
+          <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
+            Import des effectifs{" "}
+            <Badge
+              backgroundColor="#FEECC2"
+              color="#716043"
+              padding="0px 8px 0px 4px"
+              borderRadius="4px"
+              fontSize={14}
+              p={1}
+            >
+              <Flex alignItems="center">
+                <Image alt="eclair" src="/images/eclair.svg" mr={1} />
+                version beta
+              </Flex>
+            </Badge>
+          </Heading>
+
+          <HStack gap={4}>
+            <SupportLink href={TRANSMISSION_DONNEES_GROUP}></SupportLink>
+          </HStack>
+        </Flex>
+
+        <Box mt={10} px={14} py={10} bg="galt">
+          <Grid templateColumns="1fr" gap={6}>
+            <Box>
+              <UnorderedList styleType="disc" spacing={3} pl={5}>
+                <ListItem>
+                  <Text>
+                    Déclarez tous vos apprenants <strong>en apprentissage</strong>, y compris les apprentis en contrat,
+                    ceux dont le contrat a été rompu, les jeunes sans contrat et les cas d&apos;abandon éventuels.
                   </Text>
-                )}
-              </Box>
-            </Ribbons>
-            <HStack my={8}>
-              <Switch
-                id="show-only-errors"
-                variant="icon"
-                onChange={(e) => {
-                  setShowOnlyColumnsAndLinesWithErrors(e.target.checked);
-                }}
-              />
-              <FormLabel htmlFor="show-only-errors">
-                Afficher uniquement les lignes et colonnes avec données en erreur
-              </FormLabel>
-            </HStack>
-          </>
-        )}
+                </ListItem>
+                <ListItem>
+                  <Text>
+                    Afin de garantir la fraîcheur des données et de permettre un soutien constant de vos apprenants,
+                    nous vous recommandons de nous transmettre les effectifs <strong>une fois par mois</strong>, de
+                    préférence entre le 1er et le 5 de chaque mois.
+                  </Text>
+                </ListItem>
+              </UnorderedList>
+              <Flex mt={4} gap="6" mb={5}>
+                <ButtonTeleversement href="/modele-import.xlsx">
+                  <DownloadSimple mr="2" />
+                  Télécharger le modèle Excel
+                </ButtonTeleversement>
+                <BasicModal
+                  renderTrigger={(onOpen) => (
+                    <ButtonTeleversement
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpen();
+                      }}
+                    >
+                      <Eye mr={2} />
+                      Les données obligatoires
+                    </ButtonTeleversement>
+                  )}
+                  title="Les données obligatoires à renseigner"
+                  size="4xl"
+                >
+                  <InfoTeleversement />
+                </BasicModal>
+                <ButtonTeleversement href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20">
+                  <Book mr={2} />
+                  Guide des données
+                </ButtonTeleversement>
+                <ButtonTeleversement href="https://www.canva.com/design/DAF0aDLacTk/ZxY16rI7C_vBzEuyrEpbIA/watch">
+                  <Video mr="2" />
+                  Tutoriel en vidéo
+                </ButtonTeleversement>
+              </Flex>
+
+              {status === "validation_failure" && (
+                <>
+                  <Ribbons variant="error" mb={8}>
+                    <Box mb="8">
+                      <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
+                        {errorsCount === 1
+                          ? "Une erreur a été détectée dans votre fichier"
+                          : `${errorsCount} erreurs ont été détectées dans votre fichier.`}
+                      </Text>
+                      <Text fontSize="sm" color="grey.800">
+                        Vous pouvez voir le détail ligne à ligne ci-dessous. Vous devez modifier votre fichier et
+                        l&apos;importer à nouveau.
+                      </Text>
+                      {missingHeaders.length > 0 && (
+                        <Text fontSize="sm" color="grey.800">
+                          Les colonnes suivantes sont obligatoires et n’ont pas été trouvées, veuillez vérifier leur
+                          présence dans le fichier&nbsp;:{" "}
+                          <UnorderedList mt="4">
+                            {missingHeaders.map((header) => (
+                              <ListItem key={header} color="red.500">
+                                {header}
+                              </ListItem>
+                            ))}
+                          </UnorderedList>
+                        </Text>
+                      )}
+                    </Box>
+                  </Ribbons>
+                  <HStack my={8}>
+                    <Switch
+                      id="show-only-errors"
+                      variant="icon"
+                      onChange={(e) => {
+                        setShowOnlyColumnsAndLinesWithErrors(e.target.checked);
+                      }}
+                    />
+                    <FormLabel htmlFor="show-only-errors">
+                      Afficher uniquement les lignes et colonnes avec données en erreur
+                    </FormLabel>
+                  </HStack>
+                </>
+              )}
+              <InfoBetaPanel />
+            </Box>
+          </Grid>
+        </Box>
         {status === "validation_success" && (
-          <Ribbons variant="success" mb={8}>
+          <Ribbons variant="success" my={8}>
             <Box mb="8">
               <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
                 Le format de votre fichier a été correctement rempli.
@@ -340,72 +410,83 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
             </Box>
           </Ribbons>
         )}
-        {data && filteredHeaders && (
-          <Box overflowX="auto" mb="8">
-            <Table fontSize="sm">
-              <Thead>
-                <Tr>
-                  <Th>
-                    <Header header="Ligne" />
-                  </Th>
-                  <Th>Statut</Th>
-                  {filteredHeaders.map((key) => (
-                    <Th key={key}>
-                      <Header header={key} />
+
+        <Box mt={10}>
+          <Text fontWeight="bold" fontSize={20}>
+            Sélectionner un document à importer
+          </Text>
+          <VStack align="start" mt={3} spacing={0}>
+            <Text>Sélectionner un fichier contenant vos effectifs à importer (maximum 2000).</Text>
+            <Text>Si vous utilisez plusieurs fichiers, merci d’importer vos documents un par un.</Text>
+          </VStack>
+
+          {data && filteredHeaders && (
+            <Box overflowX="auto" mb="8">
+              <Table fontSize="sm">
+                <Thead>
+                  <Tr>
+                    <Th>
+                      <Header header="Ligne" />
                     </Th>
-                  ))}
-                </Tr>
-              </Thead>
-              <Tbody>
-                {data.map((row: any, index: number) => {
-                  if (showOnlyColumnsAndLinesWithErrors && row.errors.length === 0) return null;
-                  return (
-                    <Tr key={index}>
-                      <Td>{index + 2}</Td>
-                      <Td>
-                        {row.errors.length === 0 ? (
-                          <Flex color="green.500" alignItems="center">
-                            <CheckIcon />
-                            <Text ml="2">Valide</Text>
-                          </Flex>
-                        ) : (
-                          <Flex color="red.500" alignItems="center">
-                            <WarningTwoIcon />
-                            <Text ml="2">
-                              {row.errors.length}&nbsp;erreur{row.errors.length > 1 ? "s" : ""}
-                            </Text>
-                          </Flex>
-                        )}
-                      </Td>
-                      {filteredHeaders.map((key) => {
-                        if (row.errors.length > 0) {
-                          const error = row.errors.find((e: any) => e.key === key);
-                          if (error) {
-                            return (
-                              <Td key={key}>
-                                <Text color="grey.500">
-                                  {(dateFields.includes(key)
-                                    ? fromIsoLikeDateStringToFrenchDate(row[key])
-                                    : row[key]) || "Donnée manquante"}
-                                </Text>
-                                <Text color="red.500">{error.message.replace("String", "Texte")}</Text>
-                              </Td>
-                            );
+                    <Th>Statut</Th>
+                    {filteredHeaders.map((key) => (
+                      <Th key={key}>
+                        <Header header={key} />
+                      </Th>
+                    ))}
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {data.map((row: any, index: number) => {
+                    if (showOnlyColumnsAndLinesWithErrors && row.errors.length === 0) return null;
+                    return (
+                      <Tr key={index}>
+                        <Td>{index + 2}</Td>
+                        <Td>
+                          {row.errors.length === 0 ? (
+                            <Flex color="green.500" alignItems="center">
+                              <CheckIcon />
+                              <Text ml="2">Valide</Text>
+                            </Flex>
+                          ) : (
+                            <Flex color="red.500" alignItems="center">
+                              <WarningTwoIcon />
+                              <Text ml="2">
+                                {row.errors.length}&nbsp;erreur{row.errors.length > 1 ? "s" : ""}
+                              </Text>
+                            </Flex>
+                          )}
+                        </Td>
+                        {filteredHeaders.map((key) => {
+                          if (row.errors.length > 0) {
+                            const error = row.errors.find((e: any) => e.key === key);
+                            if (error) {
+                              return (
+                                <Td key={key}>
+                                  <Text color="grey.500">
+                                    {(dateFields.includes(key)
+                                      ? fromIsoLikeDateStringToFrenchDate(row[key])
+                                      : row[key]) || "Donnée manquante"}
+                                  </Text>
+                                  <Text color="red.500">{error.message.replace("String", "Texte")}</Text>
+                                </Td>
+                              );
+                            }
                           }
-                        }
-                        return (
-                          <Td key={key}>
-                            {dateFields.includes(key) ? fromIsoLikeDateStringToFrenchDate(row[key]) : row[key]}
-                          </Td>
-                        );
-                      })}
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
-          </Box>
-        )}
+                          return (
+                            <Td key={key}>
+                              {dateFields.includes(key) ? fromIsoLikeDateStringToFrenchDate(row[key]) : row[key]}
+                            </Td>
+                          );
+                        })}
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+            </Box>
+          )}
+        </Box>
         {status === "validation_success" && (
           <>
             <Button
@@ -425,7 +506,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         )}
         {(status === "validation_failure" || status === null) && (
           <>
-            <Box {...getRootProps<any>({ style })} mb={8} minH="200px">
+            <Box {...getRootProps<any>({ style })} my={8} minH="200px">
               {isSubmitting ? (
                 <Box textAlign="center" flex="1" flexDirection="column">
                   <Spinner />
@@ -449,8 +530,20 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                 </>
               )}
             </Box>
-            <InfoTeleversement maxInputLength={POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} />
           </>
+        )}
+        {status === null && (
+          <Link
+            onClick={() => {
+              router.back();
+            }}
+            color="bluefrance"
+            borderBottom="1px solid"
+            _hover={{ cursor: "pointer", textDecoration: "none", borderBottom: "2px solid" }}
+          >
+            <Box as="i" className="ri-arrow-left-line" marginRight="1w" />
+            Retour à l’étape précédente
+          </Link>
         )}
       </Container>
     </SimplePage>
@@ -543,20 +636,47 @@ function ImportSuccess({ organismeId, isMine }: { organismeId: string; isMine: b
 function InfoBetaPanel() {
   return (
     <Ribbons variant="info" mb={6}>
-      <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-        Service d’import de vos effectifs en version bêta.
+      <Text color="#3A3A3A" fontSize="gamma" fontWeight="bold" mb={4}>
+        Quelques conseils sur le remplissage du fichier Excel :
       </Text>
-      <Text color="grey.800" mt={4} textStyle="sm">
-        Ce service est en phase d’amélioration, nous travaillons actuellement à le rendre pleinement fonctionnel.
-        <br />
-        Si vous constatez un dysfonctionnement lors de son utilisation, contactez-nous&nbsp;:{" "}
-        <a target="_blank" rel="noopener noreferrer" href={TD_MANUEL_ELEMENT_LINK}>
-          Centre de support
-        </a>
-        .
-        <br />
-        Nous vous prions de bien vouloir nous excuser pour l’éventuel désagrément rencontré et vous remercions de votre
-        patience.
+      <Text color="grey.800">
+        <UnorderedList spacing={2} px={6}>
+          <ListItem>Vérifiez que tous vos apprentis soient bien présents dans le fichier.</ListItem>
+          <ListItem>
+            Pour téléverser vos effectifs, vous avez 2 options : remplir directement le modèle Excel (téléchargeable
+            ci-dessus) avec vos effectifs, ou créer un fichier personnalisé, en conservant les mêmes en-têtes de colonne
+            que le fichier-modèle.
+          </ListItem>
+          <ListItem>
+            Actuellement, il n&apos;est pas possible de téléverser deux fichiers en même temps, mais nous y travaillons.
+          </ListItem>
+          <ListItem>
+            Si votre établissement ne comptabilise aucun effectif en apprentissage à la date du jour, il n’est pas
+            nécessaire d’ajouter un fichier.
+          </ListItem>
+          <ListItem>
+            Nous nous basons sur les dates de contrat, de rupture, de formation et d’exclusion pour déterminer le statut
+            d’un effectif. Veuillez remplir les colonnes associées à ces évènements.
+          </ListItem>
+          <ListItem>
+            Si vous n&apos;avez pas accès à Excel ou si vous ne l&apos;utilisez pas, vous pouvez utiliser un{" "}
+            <Link
+              isExternal
+              href="https://www.zamzar.com/fr/convert/numbers-to-xls/"
+              textDecoration="underLine"
+              display="inline"
+            >
+              convertisseur en ligne
+            </Link>{" "}
+            . Pour les utilisateurs de Numbers (ou autre logiciel), vous avez la possibilité d’exporter le fichier au
+            format .xls (Fichier &gt; Exporter vers &gt; Excel)
+          </ListItem>
+          <ListItem>
+            Aujourd’hui, le téléversement régulier de vos effectifs au tableau de bord ne vous dispense pas à répondre à
+            l’enquête annuelle SIFA. Cependant, cela facilitera la préparation du fichier nécessaire à cette enquête
+            (voir l’onglet “Mon enquête SIFA”).
+          </ListItem>
+        </UnorderedList>
       </Text>
     </Ribbons>
   );
@@ -565,38 +685,14 @@ function InfoBetaPanel() {
 function Header({ header }: { header: string }) {
   if (headerTooltips[header]) {
     return (
-      <>
+      <Flex>
         {header}
         <InfoTooltip
           contentComponent={() => <Box padding="2w">{headerTooltips[header]}</Box>}
           aria-label="État de la donnée."
         />
-      </>
+      </Flex>
     );
   }
   return <>{header}</>;
-}
-
-function ButtonTeleversement({ children, href }: { children: React.ReactNode; href: string }) {
-  return (
-    <Button
-      as="a"
-      variant={"link"}
-      target="_blank"
-      fontSize="md"
-      mt="2"
-      borderBottom="1px"
-      borderRadius="0"
-      mb="8"
-      mr="8"
-      lineHeight="6"
-      p="0"
-      _active={{
-        color: "bluefrance",
-      }}
-      href={href}
-    >
-      {children}
-    </Button>
-  );
 }
