@@ -23,7 +23,7 @@ import {
   registerUnknownNetwork,
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
-import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
+import { getEffectifForm, softDeleteEffectif, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import {
   deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
@@ -93,7 +93,7 @@ import { changePassword, updateUserProfile } from "@/common/actions/users.action
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsArchiveDb, effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -754,18 +754,8 @@ function setupRoutes(app: Application) {
           motif: zEffectifArchive.shape.suppression.shape.motif,
           description: zEffectifArchive.shape.suppression.shape.description,
         });
-        const effectif: any = await effectifsDb().findOne({ _id: new ObjectId(req.params.id) });
-        await effectifsArchiveDb().insertOne({
-          ...effectif,
-          _id: new ObjectId(),
-          suppression: {
-            user_id: req.user._id,
-            motif,
-            description,
-            date: new Date(),
-          },
-        });
-        await effectifsDb().deleteOne({ _id: new ObjectId(req.params.id) });
+
+        await softDeleteEffectif(req.params.id, req.user._id, { motif, description });
       })
     )
     .delete(
