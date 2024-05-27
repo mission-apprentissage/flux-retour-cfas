@@ -24,7 +24,7 @@ function BandeauTransmission({
   ...props
 }: BandeauTransmissionProps & SystemProps) {
   return (
-    <Ribbons variant="warning" {...props}>
+    <Ribbons variant="alert" {...props}>
       <Text color="grey.800">{getContenuBandeauTransmission({ organisme, modePublique, modeIndicateurs })}</Text>
     </Ribbons>
   );
@@ -46,12 +46,14 @@ function getContenuBandeauTransmission({
   if (!organisme.mode_de_transmission) {
     return (
       <>
-        Les {modeIndicateurs ? "indicateurs sont nuls" : "effectifs sont vides"} car votre établissement ne transmet pas
-        encore ses effectifs. Veuillez{" "}
+        {modeIndicateurs ? "Les indicateurs sont nuls, car les " : "Les "}
+        effectifs ne sont pas encore transmis. Votre CFA ou les organismes dont vous avez la gestion peuvent transmettre
+        les effectifs. Si vous souhaitez démarrer le partage, cliquez sur “
         <Link href="/parametres" borderBottom="1px" _hover={{ textDecoration: "none" }}>
           paramétrer
-        </Link>{" "}
-        votre moyen de transmission.
+        </Link>
+        ” et laissez-vous guider. Le couple UAI/SIRET de chaque établissement doit être bien renseigné pour éviter les
+        erreurs de transmission.
       </>
     );
   }
