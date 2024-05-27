@@ -28,7 +28,7 @@ import {
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { cyrb53Hash, normalize, TRANSMISSION_DONNEES_GROUP } from "shared";
+import { cyrb53Hash, normalize, TD_MANUEL_ELEMENT_LINK } from "shared";
 import XLSX from "xlsx";
 
 import { _post } from "@/common/httpClient";
@@ -296,7 +296,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           </Heading>
 
           <HStack gap={4}>
-            <SupportLink href={TRANSMISSION_DONNEES_GROUP}></SupportLink>
+            <SupportLink href={TD_MANUEL_ELEMENT_LINK}></SupportLink>
           </HStack>
         </Flex>
 
