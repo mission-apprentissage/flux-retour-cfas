@@ -690,7 +690,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
         {organisme.permissions?.indicateursEffectifs ? (
           <>
             <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-              Aperçu de {modePublique ? "ses" : "vos"} effectifs
+              Aperçu de {modePublique ? "ses" : "vos"} indicateurs
               {hasOrganismesFormateurs && " et établissements"}
               <Text fontSize="gamma" as="span" ml="2">
                 (année scolaire 2023-2024)
@@ -707,9 +707,11 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               </Ribbons>
             )}
 
-            {aucunEffectifTransmis && (
-              <BandeauTransmission organisme={organisme} modePublique={modePublique} modeIndicateurs />
-            )}
+            {aucunEffectifTransmis &&
+              indicateursEffectifs &&
+              Object.values(indicateursEffectifs).every((value) => value === 0) && (
+                <BandeauTransmission organisme={organisme} modePublique={modePublique} modeIndicateurs />
+              )}
 
             {indicateursEffectifs && (
               <IndicateursGrid indicateursEffectifs={indicateursEffectifs} loading={indicateursEffectifsLoading} />
