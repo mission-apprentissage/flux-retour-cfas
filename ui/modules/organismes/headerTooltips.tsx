@@ -140,7 +140,13 @@ const headerTooltips = {
   formation_cfd: (
     <>
       Vous pouvez trouver le Code Diplôme de la formation sur le{" "}
-      <Link href={"https://formulaire.defenseurdesdroits.fr/"} textDecoration={"underline"} color="white" isExternal>
+      <Link
+        href={"https://formulaire.defenseurdesdroits.fr/"}
+        display="inline"
+        textDecoration={"underline"}
+        color="white"
+        isExternal
+      >
         Catalogue de l’apprentissage
       </Link>
       , en indiquant le SIRET de votre établissement (donnée obligatoire).

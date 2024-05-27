@@ -136,7 +136,9 @@ const FiabilisationInfo = () => {
 const natureOrganismeDeFormationTooltip = {
   responsable: (
     <>
-      <Text>Organismes responsables</Text>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organismes responsables
+      </Text>
       <UnorderedList mt={4}>
         <ListItem>
           Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur.
@@ -152,7 +154,9 @@ const natureOrganismeDeFormationTooltip = {
   ),
   formateur: (
     <>
-      <Text>Organisme formateur</Text>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organisme formateur
+      </Text>
       <Text>
         Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
         d’activité (NDA))
@@ -161,7 +165,9 @@ const natureOrganismeDeFormationTooltip = {
   ),
   responsable_formateur: (
     <>
-      <Text>Organismes responsables et formateurs</Text>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organismes responsables et formateurs
+      </Text>
       <UnorderedList mt={4}>
         <ListItem>
           Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
