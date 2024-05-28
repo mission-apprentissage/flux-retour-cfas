@@ -6243,9 +6243,14 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           "description": "Date de suppression",
         },
         "description": {
-          "bsonType": [
-            "string",
-            "null",
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "maxLength": 150,
+            },
+            {
+              "bsonType": "null",
+            },
           ],
         },
         "motif": {
@@ -8132,28 +8137,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           "description": "Sexe de l'apprenant (M: Homme, F: Femme)",
         },
         "situation_avant_contrat": {
-          "anyOf": [
-            {
-              "bsonType": "number",
-              "description": "Situation de l'apprenant avant le contrat",
-              "enum": [
-                11,
-                12,
-                21,
-                31,
-                41,
-                51,
-                52,
-                53,
-                54,
-                90,
-                99,
-              ],
-            },
-            {
-              "bsonType": "null",
-            },
-          ],
+          "bsonType": "number",
           "description": "Situation de l'apprenant avant le contrat",
         },
         "telephone": {
@@ -8198,6 +8182,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         "nom",
         "prenom",
         "historique_statut",
+        "situation_avant_contrat",
       ],
     },
     "archive": {
