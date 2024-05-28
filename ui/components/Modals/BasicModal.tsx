@@ -16,14 +16,23 @@ import React, { ReactNode, ReactElement } from "react";
 import { Close, ArrowRightLine } from "@/theme/components/icons";
 
 interface BasicModalProps extends Omit<ModalProps, "children" | "isOpen" | "onClose"> {
-  triggerType: "button" | "link";
-  button: ReactNode | string;
+  triggerType?: "button" | "link";
+  button?: ReactNode | string;
   children: ReactNode;
   title?: string;
-  handleClose?: any;
+  handleClose?: () => void;
+  renderTrigger?: (onOpen: () => void) => ReactNode;
 }
 
-export function BasicModal({ triggerType, button, children, title, handleClose, ...modalProps }: BasicModalProps) {
+export function BasicModal({
+  triggerType = "button",
+  button = "Open Modal",
+  children,
+  title,
+  handleClose,
+  renderTrigger,
+  ...modalProps
+}: BasicModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const customClose = () => {
@@ -31,7 +40,7 @@ export function BasicModal({ triggerType, button, children, title, handleClose, 
     handleClose?.();
   };
 
-  const renderTrigger = () => {
+  const defaultRenderTrigger = () => {
     if (typeof button === "string") {
       if (triggerType === "link") {
         return (
@@ -52,7 +61,7 @@ export function BasicModal({ triggerType, button, children, title, handleClose, 
 
   return (
     <>
-      {renderTrigger()}
+      {renderTrigger ? renderTrigger(onOpen) : defaultRenderTrigger()}
 
       <Modal isOpen={isOpen} onClose={customClose} {...modalProps}>
         <ModalOverlay />
