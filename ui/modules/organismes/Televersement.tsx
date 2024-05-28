@@ -1,4 +1,4 @@
-import { CheckIcon, WarningTwoIcon } from "@chakra-ui/icons";
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon, WarningTwoIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -24,6 +24,7 @@ import {
   VStack,
   Grid,
   Badge,
+  Collapse,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
@@ -281,8 +282,8 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700">
             Import des effectifs{" "}
             <Badge
-              backgroundColor="#FEECC2"
-              color="#716043"
+              backgroundColor="#FEE7FC"
+              color="#6E445A"
               padding="0px 8px 0px 4px"
               borderRadius="4px"
               fontSize={14}
@@ -634,50 +635,67 @@ function ImportSuccess({ organismeId, isMine }: { organismeId: string; isMine: b
 }
 
 function InfoBetaPanel() {
+  const [show, setShow] = useState(false);
+  const handleToggle = () => setShow(!show);
+
+  const linkStyle = {
+    color: "#000091",
+    textDecoration: "underline",
+    textUnderlineOffset: "4px",
+    cursor: "pointer",
+  };
+
   return (
     <Ribbons variant="info" mb={6}>
       <Text color="#3A3A3A" fontSize="gamma" fontWeight="bold" mb={4}>
         Quelques conseils sur le remplissage du fichier Excel :
       </Text>
-      <Text color="grey.800">
-        <UnorderedList spacing={2} px={6}>
-          <ListItem>Vérifiez que tous vos apprentis soient bien présents dans le fichier.</ListItem>
-          <ListItem>
-            Pour téléverser vos effectifs, vous avez 2 options : remplir directement le modèle Excel (téléchargeable
-            ci-dessus) avec vos effectifs, ou créer un fichier personnalisé, en conservant les mêmes en-têtes de colonne
-            que le fichier-modèle.
-          </ListItem>
-          <ListItem>
-            Actuellement, il n&apos;est pas possible de téléverser deux fichiers en même temps, mais nous y travaillons.
-          </ListItem>
-          <ListItem>
-            Si votre établissement ne comptabilise aucun effectif en apprentissage à la date du jour, il n’est pas
-            nécessaire d’ajouter un fichier.
-          </ListItem>
-          <ListItem>
-            Nous nous basons sur les dates de contrat, de rupture, de formation et d’exclusion pour déterminer le statut
-            d’un effectif. Veuillez remplir les colonnes associées à ces évènements.
-          </ListItem>
-          <ListItem>
-            Si vous n&apos;avez pas accès à Excel ou si vous ne l&apos;utilisez pas, vous pouvez utiliser un{" "}
-            <Link
-              isExternal
-              href="https://www.zamzar.com/fr/convert/numbers-to-xls/"
-              textDecoration="underLine"
-              display="inline"
-            >
-              convertisseur en ligne
-            </Link>{" "}
-            . Pour les utilisateurs de Numbers (ou autre logiciel), vous avez la possibilité d’exporter le fichier au
-            format .xls (Fichier &gt; Exporter vers &gt; Excel)
-          </ListItem>
-          <ListItem>
-            Aujourd’hui, le téléversement régulier de vos effectifs au tableau de bord ne vous dispense pas à répondre à
-            l’enquête annuelle SIFA. Cependant, cela facilitera la préparation du fichier nécessaire à cette enquête
-            (voir l’onglet “Mon enquête SIFA”).
-          </ListItem>
-        </UnorderedList>
+      <Text style={linkStyle} onClick={handleToggle} mb={2}>
+        {" "}
+        {!show ? <ChevronDownIcon /> : <ChevronUpIcon />} Voir les détails
       </Text>
+      <Collapse in={show}>
+        <Text color="grey.800">
+          <UnorderedList spacing={2} px={6}>
+            <ListItem>Vérifiez que tous vos apprentis soient bien présents dans le fichier.</ListItem>
+            <ListItem>
+              Pour téléverser vos effectifs, vous avez 2 options : remplir directement le modèle Excel (téléchargeable
+              ci-dessus) avec vos effectifs, ou créer un fichier personnalisé, en conservant les mêmes en-têtes de
+              colonne que le fichier-modèle.
+            </ListItem>
+            <ListItem>
+              Nous nous basons sur les dates de contrat, de rupture, de formation et d’exclusion pour déterminer le
+              statut d’un effectif. Veuillez remplir les colonnes associées à ces évènements.
+            </ListItem>
+            <ListItem>
+              Actuellement, il n&apos;est pas possible de téléverser deux fichiers en même temps, mais nous y
+              travaillons.
+            </ListItem>
+            <ListItem>
+              Si votre établissement ne comptabilise aucun effectif en apprentissage à la date du jour, il n’est pas
+              nécessaire d’ajouter un fichier.
+            </ListItem>
+            <ListItem>
+              Si vous n&apos;avez pas accès à Excel ou si vous ne l&apos;utilisez pas, vous pouvez utiliser un{" "}
+              <Link
+                isExternal
+                href="https://www.zamzar.com/fr/convert/numbers-to-xls/"
+                textDecoration="underLine"
+                display="inline"
+              >
+                convertisseur en ligne
+              </Link>{" "}
+              . Pour les utilisateurs de Numbers (ou autre logiciel), vous avez la possibilité d’exporter le fichier au
+              format .xls (Fichier &gt; Exporter vers &gt; Excel)
+            </ListItem>
+            <ListItem>
+              Aujourd’hui, le téléversement régulier de vos effectifs au tableau de bord ne vous dispense pas de
+              répondre à l’enquête annuelle SIFA. Cependant, cela facilitera la préparation du fichier nécessaire à
+              cette enquête (voir l’onglet “Mon enquête SIFA”).
+            </ListItem>
+          </UnorderedList>
+        </Text>
+      </Collapse>
     </Ribbons>
   );
 }

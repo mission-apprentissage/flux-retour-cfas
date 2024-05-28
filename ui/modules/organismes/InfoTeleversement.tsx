@@ -34,11 +34,11 @@ export default function InfoTeleversement() {
             <ListItem>N° UAI de l’établissement responsable</ListItem>
             <ListItem>SIRET de l’établissement responsable</ListItem>
             <ListItem>N° UAI de l’établissement formateur</ListItem>
+            <ListItem>SIRET de l’établissement formateur</ListItem>
+            <ListItem>N° UAI du lieu de formation</ListItem>
           </UnorderedList>
 
           <UnorderedList>
-            <ListItem>SIRET de l’établissement formateur</ListItem>
-            <ListItem>N° UAI du lieu de formation</ListItem>
             <ListItem>SIRET du lieu de formation</ListItem>
             <ListItem>Année de formation concernée</ListItem>
             <ListItem>Date d’inscription en formation</ListItem>
@@ -49,6 +49,8 @@ export default function InfoTeleversement() {
             <ListItem>Diplôme de la formation</ListItem>
             <ListItem>Code RNCP de la formation</ListItem>
             <ListItem>SIRET de l’employeur </ListItem>
+            <ListItem>Date de début de contrat (si contrat en cours)</ListItem>
+            <ListItem>Date de fin de contrat (si contrat en cours)</ListItem>
             <ListItem>Date de rupture du contrat (si pertinent)</ListItem>
           </UnorderedList>
         </Grid>
