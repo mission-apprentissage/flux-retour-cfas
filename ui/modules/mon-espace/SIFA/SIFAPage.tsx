@@ -53,7 +53,7 @@ function useOrganismesEffectifs(organismeId: string) {
   }, [queryClient, organismeId]);
 
   const {
-    data: { fromDECA, organismesEffectifs },
+    data: organismesEffectifs,
     isLoading,
     isFetching,
     refetch,
@@ -66,10 +66,10 @@ function useOrganismesEffectifs(organismeId: string) {
     setCurrentEffectifsState(newEffectifsState);
     setEffectifFromDecaState(fromDECA);
 
-    return { fromDECA, organismesEffectifs };
+    return organismesEffectifs;
   });
 
-  return { isLoading: isFetching || isLoading, organismesEffectifs: organismesEffectifs || [], refetch, fromDECA };
+  return { isLoading: isFetching || isLoading, organismesEffectifs: organismesEffectifs || [], refetch };
 }
 
 interface SIFAPageProps {
