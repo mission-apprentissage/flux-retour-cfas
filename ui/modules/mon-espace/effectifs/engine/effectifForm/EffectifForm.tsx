@@ -23,7 +23,7 @@ import AppButton from "@/components/buttons/Button";
 import Link from "@/components/Links/Link";
 import { BasicModal } from "@/components/Modals/BasicModal";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import { effectifIdAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+import { effectifIdAtom, effectifFromDecaAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import { effectifStateSelector, valuesSelector } from "@/modules/mon-espace/effectifs/engine/formEngine/atoms";
 import { Trash } from "@/theme/components/icons";
 import { ErrorPill } from "@/theme/components/icons/ErrorPill";
@@ -193,6 +193,7 @@ export const EffectifForm = memo(
     const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
 
     const effectifId = useRecoilValue<any>(effectifIdAtom);
+    const fromDECA = useRecoilValue<any>(effectifFromDecaAtom);
     const { validationErrorsByBlock, requiredSifaByBlock } = useRecoilValue<any>(effectifStateSelector(effectifId));
     const values = useRecoilValue<any>(valuesSelector);
 
@@ -202,12 +203,14 @@ export const EffectifForm = memo(
 
     return (
       <Box my={2} px={5}>
-        <SuppressionEffectifComponent
-          nom={values?.apprenant.nom}
-          prenom={values?.apprenant.prenom}
-          id={effectifId}
-          refetch={refetch}
-        />
+        {!fromDECA && (
+          <SuppressionEffectifComponent
+            nom={values?.apprenant.nom}
+            prenom={values?.apprenant.prenom}
+            id={effectifId}
+            refetch={refetch}
+          />
+        )}
         <Accordion
           allowMultiple
           mt={2}

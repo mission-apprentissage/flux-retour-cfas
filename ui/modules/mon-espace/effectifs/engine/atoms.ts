@@ -32,6 +32,11 @@ export const effectifIdAtom = atom({
   default: null,
 });
 
+export const effectifFromDecaAtom = atom({
+  key: "effectifFromDecaAtom",
+  default: null,
+});
+
 export const effectifsStateAtom = atom({
   key: "effectifsStateAtom",
   // eslint-disable-next-line no-undef
