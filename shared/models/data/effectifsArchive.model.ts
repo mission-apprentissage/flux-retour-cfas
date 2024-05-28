@@ -81,7 +81,7 @@ export const zEffectifArchive = zEffectif.extend({
   suppression: z.object({
     user_id: zObjectId.describe("Identifiant MongoDB de l'utilisateur responsable de la suppression").nullish(),
     motif: z.nativeEnum(MOTIF_SUPPRESSION),
-    description: z.string().nullish(),
+    description: z.string().max(150).nullish(),
     date: z.date({ description: "Date de suppression" }),
   }),
 });

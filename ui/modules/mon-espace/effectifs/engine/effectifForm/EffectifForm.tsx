@@ -85,7 +85,7 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
               </Text>
             </Ribbons>
             <FormControl isRequired onChange={(e: any) => setSelectedDeletionReason(e.target.value)}>
-              <FormLabel>Motif de supppression</FormLabel>
+              <FormLabel>Motif de suppression</FormLabel>
               <Select>
                 <option selected hidden disabled value="">
                   Sélectionnez une option
@@ -101,7 +101,11 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
               selectedDeletionReason === MOTIF_SUPPRESSION.MauvaiseManip) && (
               <FormControl isRequired mt={5}>
                 <FormLabel>Veuillez préciser la raison</FormLabel>
-                <Input onChange={(e) => setDeletionOtherReason(e.target.value)} placeholder="Votre texte ici"></Input>
+                <Input
+                  onChange={(e) => setDeletionOtherReason(e.target.value)}
+                  placeholder="Votre texte ici"
+                  maxLength={150}
+                ></Input>
               </FormControl>
             )}
 
