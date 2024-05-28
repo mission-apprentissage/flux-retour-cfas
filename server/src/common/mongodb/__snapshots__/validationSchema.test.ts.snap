@@ -6243,9 +6243,14 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           "description": "Date de suppression",
         },
         "description": {
-          "bsonType": [
-            "string",
-            "null",
+          "anyOf": [
+            {
+              "bsonType": "string",
+              "maxLength": 150,
+            },
+            {
+              "bsonType": "null",
+            },
           ],
         },
         "motif": {
