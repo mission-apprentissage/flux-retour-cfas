@@ -115,7 +115,7 @@ export const TETE_DE_RESEAUX = [
     responsable: false,
   },
   {
-    nom: "EDUSERVICE", // Réseau Education Nationale
+    nom: "EDUSERVICES", // Réseau Education Nationale
     key: "EDUSERVICE",
     responsable: false,
   },

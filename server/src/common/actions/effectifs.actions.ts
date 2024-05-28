@@ -5,7 +5,7 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
-import { effectifsDECADb, effectifsDb } from "@/common/model/collections";
+import { effectifsArchiveDb, effectifsDECADb, effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
@@ -260,6 +260,31 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
   });
 
   return buildEffectifResult(effectifUpdated);
+}
+
+export async function softDeleteEffectif(
+  effectifId: ObjectId,
+  userId: ObjectId,
+  {
+    motif,
+    description,
+  }: {
+    motif: string;
+    description: string | null | undefined;
+  }
+) {
+  const effectif: any = await effectifsDb().findOne({ _id: new ObjectId(effectifId) });
+  await effectifsArchiveDb().insertOne({
+    ...effectif,
+    _id: new ObjectId(),
+    suppression: {
+      user_id: userId,
+      motif,
+      description,
+      date: new Date(),
+    },
+  });
+  await effectifsDb().deleteOne({ _id: new ObjectId(effectifId) });
 }
 
 function buildEffectifResult(effectif) {

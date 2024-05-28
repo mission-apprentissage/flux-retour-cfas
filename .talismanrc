@@ -1,4 +1,8 @@
 fileignoreconfig:
+- filename: ui/modules/organismes/Televersement.tsx
+  checksum: 8de0a20f971af68a8163bcd96fb2bb46f8d7dd64415d55d138c4102ff9af9026
+- filename: ui/modules/mon-espace/SIFA/SIFAPage.tsx
+  checksum: 351bfd9e64f0438011c621c9357e582218e186f396a4246453f40dd246c38348
 - filename: ui/components/Page/components/Footer.tsx
   checksum: 531b22a70ecf2772a72889c3bb5bc90008ccdf78ee1f196457d668a69920ebf2
 - filename: ui/modules/dashboard/DashboardOrganisme.tsx

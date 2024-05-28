@@ -136,7 +136,9 @@ const FiabilisationInfo = () => {
 const natureOrganismeDeFormationTooltip = {
   responsable: (
     <>
-      <Text>Organismes responsables</Text>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organismes responsables
+      </Text>
       <UnorderedList mt={4}>
         <ListItem>
           Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur.
@@ -152,7 +154,9 @@ const natureOrganismeDeFormationTooltip = {
   ),
   formateur: (
     <>
-      <Text>Organisme formateur</Text>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organisme formateur
+      </Text>
       <Text>
         Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
         d’activité (NDA))
@@ -161,7 +165,9 @@ const natureOrganismeDeFormationTooltip = {
   ),
   responsable_formateur: (
     <>
-      <Text>Organismes responsables et formateurs</Text>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organismes responsables et formateurs
+      </Text>
       <UnorderedList mt={4}>
         <ListItem>
           Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
@@ -684,7 +690,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
         {organisme.permissions?.indicateursEffectifs ? (
           <>
             <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-              Aperçu de {modePublique ? "ses" : "vos"} effectifs
+              Aperçu de {modePublique ? "ses" : "vos"} indicateurs
               {hasOrganismesFormateurs && " et établissements"}
               <Text fontSize="gamma" as="span" ml="2">
                 (année scolaire 2023-2024)
@@ -701,9 +707,11 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               </Ribbons>
             )}
 
-            {aucunEffectifTransmis && (
-              <BandeauTransmission organisme={organisme} modePublique={modePublique} modeIndicateurs />
-            )}
+            {aucunEffectifTransmis &&
+              indicateursEffectifs &&
+              Object.values(indicateursEffectifs).every((value) => value === 0) && (
+                <BandeauTransmission organisme={organisme} modePublique={modePublique} modeIndicateurs />
+              )}
 
             {indicateursEffectifs && (
               <IndicateursGrid indicateursEffectifs={indicateursEffectifs} loading={indicateursEffectifsLoading} />

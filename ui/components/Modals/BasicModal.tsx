@@ -16,16 +16,31 @@ import React, { ReactNode, ReactElement } from "react";
 import { Close, ArrowRightLine } from "@/theme/components/icons";
 
 interface BasicModalProps extends Omit<ModalProps, "children" | "isOpen" | "onClose"> {
-  triggerType: "button" | "link";
-  button: ReactNode | string;
+  triggerType?: "button" | "link";
+  button?: ReactNode | string;
   children: ReactNode;
   title?: string;
+  handleClose?: () => void;
+  renderTrigger?: (onOpen: () => void) => ReactNode;
 }
 
-export function BasicModal({ triggerType, button, children, title, ...modalProps }: BasicModalProps) {
+export function BasicModal({
+  triggerType = "button",
+  button = "Open Modal",
+  children,
+  title,
+  handleClose,
+  renderTrigger,
+  ...modalProps
+}: BasicModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const renderTrigger = () => {
+  const customClose = () => {
+    onClose();
+    handleClose?.();
+  };
+
+  const defaultRenderTrigger = () => {
     if (typeof button === "string") {
       if (triggerType === "link") {
         return (
@@ -46,9 +61,9 @@ export function BasicModal({ triggerType, button, children, title, ...modalProps
 
   return (
     <>
-      {renderTrigger()}
+      {renderTrigger ? renderTrigger(onOpen) : defaultRenderTrigger()}
 
-      <Modal isOpen={isOpen} onClose={onClose} {...modalProps}>
+      <Modal isOpen={isOpen} onClose={customClose} {...modalProps}>
         <ModalOverlay />
         <ModalContent p={6} borderRadius="0">
           <Button
@@ -57,7 +72,7 @@ export function BasicModal({ triggerType, button, children, title, ...modalProps
             color="bluefrance"
             fontSize={"epsilon"}
             onClick={() => {
-              onClose();
+              customClose();
             }}
             variant="link"
             fontWeight={400}

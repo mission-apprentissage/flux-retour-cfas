@@ -51,20 +51,21 @@ function EffectifsPage(props: EffectifsPageProps) {
 
   const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
 
-  const { data: organismesEffectifs, isLoading } = useQuery(
-    ["organismes", props.organisme._id, "effectifs"],
-    async () => {
-      const organismesEffectifs = await _get<any[]>(`/api/v1/organismes/${props.organisme._id}/effectifs`);
-      // met à jour l'état de validation de chaque effectif (nécessaire pour le formulaire)
-      setCurrentEffectifsState(
-        organismesEffectifs.reduce((acc, { id, validation_errors }) => {
-          acc.set(id, { validation_errors, requiredSifa: [] });
-          return acc;
-        }, new Map())
-      );
-      return organismesEffectifs;
-    }
-  );
+  const {
+    data: organismesEffectifs,
+    isFetching,
+    refetch,
+  } = useQuery(["organismes", props.organisme._id, "effectifs"], async () => {
+    const organismesEffectifs = await _get<any[]>(`/api/v1/organismes/${props.organisme._id}/effectifs`);
+    // met à jour l'état de validation de chaque effectif (nécessaire pour le formulaire)
+    setCurrentEffectifsState(
+      organismesEffectifs.reduce((acc, { id, validation_errors }) => {
+        acc.set(id, { validation_errors, requiredSifa: [] });
+        return acc;
+      }, new Map())
+    );
+    return organismesEffectifs;
+  });
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
     _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
@@ -153,7 +154,7 @@ function EffectifsPage(props: EffectifsPageProps) {
           </Ribbons>
         )}
 
-        {isLoading && (
+        {isFetching && (
           <Center h="200px">
             <Spinner />
           </Center>
@@ -219,14 +220,6 @@ function EffectifsPage(props: EffectifsPageProps) {
           </>
         )}
 
-        <Ribbons variant="alert" w="full" mt={6}>
-          <Text color="grey.800">
-            L‘édition des informations d‘un apprenti est temporairement indisponible car nous effectuons des mises à
-            jour. Cette fonctionnalité sera à nouveau disponible prochainement, veuillez nous excuser pour la gêne
-            occasionnée.
-          </Text>
-        </Ribbons>
-
         <Box mt={10} mb={16}>
           {Object.entries<any[]>(effectifsByAnneeScolaire).map(([anneeScolaire, effectifs]) => {
             if (filtreAnneeScolaire !== "all" && anneeScolaire !== filtreAnneeScolaire) {
@@ -254,6 +247,7 @@ function EffectifsPage(props: EffectifsPageProps) {
                         searchValue={searchValue}
                         triggerExpand={triggerExpand}
                         onTriggerExpand={setTriggerExpand}
+                        refetch={refetch}
                       />
                     );
                   })}
