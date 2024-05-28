@@ -9,7 +9,7 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
-import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
+import { typesEffectifNominatif, CODE_POSTAL_REGEX, zEffectifArchive } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -23,7 +23,7 @@ import {
   registerUnknownNetwork,
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
-import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
+import { getEffectifForm, softDeleteEffectif, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import {
   deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
@@ -744,6 +744,18 @@ function setupRoutes(app: Application) {
       requireEffectifOrganismePermission("manageEffectifs"),
       returnResult(async (req) => {
         return await updateEffectifFromForm(new ObjectId(req.params.id), req.body);
+      })
+    )
+    .post(
+      "/api/v1/effectif/:id/delete",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        const { motif, description } = await validateFullZodObjectSchema(req.body, {
+          motif: zEffectifArchive.shape.suppression.shape.motif,
+          description: zEffectifArchive.shape.suppression.shape.description,
+        });
+
+        await softDeleteEffectif(req.params.id, req.user._id, { motif, description });
       })
     )
     .delete(
