@@ -51,17 +51,20 @@ function useOrganismesEffectifs(organismeId: string) {
     }
   }, [queryClient, organismeId]);
 
-  const { data, isLoading, isFetching } = useQuery<any, any>(["organismesEffectifs", organismeId], async () => {
-    const organismesEffectifs = await _get(`/api/v1/organismes/${organismeId}/effectifs?sifa=true`);
-    const newEffectifsState = new Map();
-    for (const { id, validation_errors, requiredSifa } of organismesEffectifs as any) {
-      newEffectifsState.set(id, { validation_errors, requiredSifa });
+  const { data, isLoading, isFetching, refetch } = useQuery<any, any>(
+    ["organismesEffectifs", organismeId],
+    async () => {
+      const organismesEffectifs = await _get(`/api/v1/organismes/${organismeId}/effectifs?sifa=true`);
+      const newEffectifsState = new Map();
+      for (const { id, validation_errors, requiredSifa } of organismesEffectifs as any) {
+        newEffectifsState.set(id, { validation_errors, requiredSifa });
+      }
+      setCurrentEffectifsState(newEffectifsState);
+      return organismesEffectifs;
     }
-    setCurrentEffectifsState(newEffectifsState);
-    return organismesEffectifs;
-  });
+  );
 
-  return { isLoading: isFetching || isLoading, organismesEffectifs: data || [] };
+  return { isLoading: isFetching || isLoading, organismesEffectifs: data || [], refetch };
 }
 
 interface SIFAPageProps {
@@ -73,7 +76,7 @@ const SIFAPage = (props: SIFAPageProps) => {
   const { trackPlausibleEvent } = usePlausibleTracking();
   const { toastWarning, toastSuccess } = useToaster();
   const organisme = useRecoilValue<any>(organismeAtom);
-  const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
+  const { isLoading, organismesEffectifs, refetch } = useOrganismesEffectifs(organisme._id);
 
   const [searchValue, setSearchValue] = useState("");
   const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
@@ -344,6 +347,7 @@ const SIFAPage = (props: SIFAPageProps) => {
                       modeSifa={true}
                       triggerExpand={triggerExpand}
                       onTriggerExpand={setTriggerExpand}
+                      refetch={refetch}
                     />
                   );
                 })}

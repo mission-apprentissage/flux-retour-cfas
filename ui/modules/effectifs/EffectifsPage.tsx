@@ -51,20 +51,21 @@ function EffectifsPage(props: EffectifsPageProps) {
 
   const [triggerExpand, setTriggerExpand] = useState({} as { tableId: string; rowId: string });
 
-  const { data: organismesEffectifs, isLoading } = useQuery(
-    ["organismes", props.organisme._id, "effectifs"],
-    async () => {
-      const organismesEffectifs = await _get<any[]>(`/api/v1/organismes/${props.organisme._id}/effectifs`);
-      // met à jour l'état de validation de chaque effectif (nécessaire pour le formulaire)
-      setCurrentEffectifsState(
-        organismesEffectifs.reduce((acc, { id, validation_errors }) => {
-          acc.set(id, { validation_errors, requiredSifa: [] });
-          return acc;
-        }, new Map())
-      );
-      return organismesEffectifs;
-    }
-  );
+  const {
+    data: organismesEffectifs,
+    isFetching,
+    refetch,
+  } = useQuery(["organismes", props.organisme._id, "effectifs"], async () => {
+    const organismesEffectifs = await _get<any[]>(`/api/v1/organismes/${props.organisme._id}/effectifs`);
+    // met à jour l'état de validation de chaque effectif (nécessaire pour le formulaire)
+    setCurrentEffectifsState(
+      organismesEffectifs.reduce((acc, { id, validation_errors }) => {
+        acc.set(id, { validation_errors, requiredSifa: [] });
+        return acc;
+      }, new Map())
+    );
+    return organismesEffectifs;
+  });
 
   const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
     _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
@@ -153,7 +154,7 @@ function EffectifsPage(props: EffectifsPageProps) {
           </Ribbons>
         )}
 
-        {isLoading && (
+        {isFetching && (
           <Center h="200px">
             <Spinner />
           </Center>
@@ -254,6 +255,7 @@ function EffectifsPage(props: EffectifsPageProps) {
                         searchValue={searchValue}
                         triggerExpand={triggerExpand}
                         onTriggerExpand={setTriggerExpand}
+                        refetch={refetch}
                       />
                     );
                   })}

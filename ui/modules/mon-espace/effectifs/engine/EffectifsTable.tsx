@@ -1,4 +1,5 @@
 import { Box, Text, HStack, Button, UnorderedList, ListItem } from "@chakra-ui/react";
+import { UseQueryResult } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import React, { useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -38,6 +39,7 @@ interface EffectifsTableProps {
   triggerExpand: any;
   onTriggerExpand: any;
   tableId: string;
+  refetch: (options: { throwOnError: boolean; cancelRefetch: boolean }) => Promise<UseQueryResult>;
 }
 
 const EffectifsTable = ({
@@ -52,6 +54,7 @@ const EffectifsTable = ({
   triggerExpand,
   onTriggerExpand,
   tableId,
+  refetch,
 }: EffectifsTableProps) => {
   const [count, setCount] = useState(organismesEffectifs.length);
 
@@ -434,7 +437,7 @@ const EffectifsTable = ({
         }}
         getRowCanExpand={() => true}
         renderSubComponent={({ row }) => {
-          return <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} />;
+          return <EffectifTableDetails row={row} modeSifa={modeSifa} canEdit={canEdit} refetch={refetch} />;
         }}
       />
     </Box>
