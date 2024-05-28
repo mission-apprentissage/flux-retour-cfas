@@ -298,13 +298,6 @@ const SIFAPage = (props: SIFAPageProps) => {
         </HStack>
       </Box>
 
-      <Ribbons variant="alert" w="full" mt={6}>
-        <Text color="grey.800">
-          L‘édition des informations d‘un apprenti est temporairement indisponible car nous effectuons des mises à jour.
-          Cette fonctionnalité sera à nouveau disponible prochainement, veuillez nous excuser pour la gêne occasionnée.
-        </Text>
-      </Ribbons>
-
       {duplicates && duplicates?.totalItems > 0 && (
         <Ribbons variant="alert" my={6}>
           <Box ml={3}>
