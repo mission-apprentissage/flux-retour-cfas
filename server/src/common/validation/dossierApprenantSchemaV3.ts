@@ -199,6 +199,23 @@ export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret
   );
 }
 
+export function computeWarningsForDossierApprenantSchemaV3(data) {
+  return {
+    contratCount: countContratWarning(data),
+  };
+}
+
+const countContratWarning = (data) => {
+  return data.reduce(
+    (acc: number, { contrat_date_debut, contrat_date_debut_2, contrat_date_debut_3, contrat_date_debut_4 }) => {
+      return !contrat_date_debut && !contrat_date_debut_2 && !contrat_date_debut_3 && !contrat_date_debut_4
+        ? acc + 1
+        : acc;
+    },
+    0
+  );
+};
+
 export type DossierApprenantSchemaV3BaseWithApiDataType = z.input<
   ReturnType<typeof dossierApprenantSchemaV3BaseWithApiData>
 >;

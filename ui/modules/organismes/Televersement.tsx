@@ -130,6 +130,7 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
   const [headers, setHeaders] = useState<string[] | null>(null);
   const [data, setData] = useState<any[] | null>(null);
   const [errorsCount, setErrorsCount] = useState(0);
+  const [warnings, setWarnings] = useState<{ contratCount?: number }>({});
   const [missingHeaders, setMissingHeaders] = useState<string[]>([]);
   const [columsWithErrors, setColumsWithErrors] = useState<string[]>([]);
   const [showOnlyColumnsAndLinesWithErrors, setShowOnlyColumnsAndLinesWithErrors] = useState(false);
@@ -199,11 +200,11 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
 
         // Send data to API for validation.
         const res = await _post(`/api/v1/organismes/${organismeId}/upload/validate`, toEffectifsQueue(jsonData));
-
         // The response is an array of errors (zod)
         // Iterate over the array and add the error to the corresponding row
         const errors = res.error?.issues || [];
         setErrorsCount(errors.length);
+        setWarnings(res.warnings);
         const errorsByRow = errors.reduce((acc: any, error: any) => {
           const row = error.path[0];
           const message = error.message;
@@ -350,7 +351,6 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                   Tutoriel en vidéo
                 </ButtonTeleversement>
               </Flex>
-
               {status === "validation_failure" && (
                 <>
                   <Ribbons variant="error" mb={8}>
@@ -379,19 +379,39 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
                       )}
                     </Box>
                   </Ribbons>
-                  <HStack my={8}>
-                    <Switch
-                      id="show-only-errors"
-                      variant="icon"
-                      onChange={(e) => {
-                        setShowOnlyColumnsAndLinesWithErrors(e.target.checked);
-                      }}
-                    />
-                    <FormLabel htmlFor="show-only-errors">
-                      Afficher uniquement les lignes et colonnes avec données en erreur
-                    </FormLabel>
-                  </HStack>
                 </>
+              )}
+              {!!warnings.contratCount && (
+                <Ribbons variant="warning" mb={8}>
+                  <Box mb="8">
+                    <Text fontSize="md" fontWeight="bold" mb="2" color="grey.800">
+                      {warnings.contratCount}
+                      {warnings.contratCount === 1
+                        ? " apprenant n'a aucune date de début et de fin de contrat renseignée."
+                        : " apprenants n'ont aucune date de début et de fin de contrat renseignée."}
+                    </Text>
+                    <Text fontSize="sm" color="grey.800">
+                      Nous nous basons sur les dates de contrat, de rupture, de formation et d&apos;exclusion pour
+                      déterminer le statut d&apos;un effectif. N&apos;oubliez pas de remplir les dates de contrat quand
+                      il y en a un, sans quoi les apprentis passent automatiquement en statut &quot;abandon&quot; 3 mois
+                      après leur date d&apos;inscription ou 6 mois après leur date de rupture.
+                    </Text>
+                  </Box>
+                </Ribbons>
+              )}
+              {status === "validation_failure" && (
+                <HStack my={8}>
+                  <Switch
+                    id="show-only-errors"
+                    variant="icon"
+                    onChange={(e) => {
+                      setShowOnlyColumnsAndLinesWithErrors(e.target.checked);
+                    }}
+                  />
+                  <FormLabel htmlFor="show-only-errors">
+                    Afficher uniquement les lignes et colonnes avec données en erreur
+                  </FormLabel>
+                </HStack>
               )}
               <InfoBetaPanel />
             </Box>
