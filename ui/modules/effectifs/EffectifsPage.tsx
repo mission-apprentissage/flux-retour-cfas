@@ -221,14 +221,6 @@ function EffectifsPage(props: EffectifsPageProps) {
           </>
         )}
 
-        <Ribbons variant="alert" w="full" mt={6}>
-          <Text color="grey.800">
-            L‘édition des informations d‘un apprenti est temporairement indisponible car nous effectuons des mises à
-            jour. Cette fonctionnalité sera à nouveau disponible prochainement, veuillez nous excuser pour la gêne
-            occasionnée.
-          </Text>
-        </Ribbons>
-
         <Box mt={10} mb={16}>
           {Object.entries<any[]>(effectifsByAnneeScolaire).map(([anneeScolaire, effectifs]) => {
             if (filtreAnneeScolaire !== "all" && anneeScolaire !== filtreAnneeScolaire) {
