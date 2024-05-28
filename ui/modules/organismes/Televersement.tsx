@@ -660,20 +660,20 @@ function InfoBetaPanel() {
             <ListItem>Vérifiez que tous vos apprentis soient bien présents dans le fichier.</ListItem>
             <ListItem>
               Pour téléverser vos effectifs, vous avez 2 options : remplir directement le modèle Excel (téléchargeable
-              ci-dessus) avec vos effectifs, ou créer un fichier personnalisé, en conservant les mêmes en-têtes de
-              colonne que le fichier-modèle.
+              ci-dessus) avec vos effectifs, ou créer un fichier personnalisé, en{" "}
+              <strong>conservant les mêmes en-têtes de colonne</strong> que le fichier-modèle.
             </ListItem>
             <ListItem>
               Nous nous basons sur les dates de contrat, de rupture, de formation et d’exclusion pour déterminer le
-              statut d’un effectif. Veuillez remplir les colonnes associées à ces évènements.
+              statut d’un effectif. Veuillez <strong>remplir les colonnes associées à ces évènements</strong>.
             </ListItem>
             <ListItem>
               Actuellement, il n&apos;est pas possible de téléverser deux fichiers en même temps, mais nous y
               travaillons.
             </ListItem>
             <ListItem>
-              Si votre établissement ne comptabilise aucun effectif en apprentissage à la date du jour, il n’est pas
-              nécessaire d’ajouter un fichier.
+              Si votre établissement ne comptabilise <strong>aucun effectif</strong> en apprentissage à la date du jour,
+              il n’est pas nécessaire d’ajouter un fichier.
             </ListItem>
             <ListItem>
               Si vous n&apos;avez pas accès à Excel ou si vous ne l&apos;utilisez pas, vous pouvez utiliser un{" "}
