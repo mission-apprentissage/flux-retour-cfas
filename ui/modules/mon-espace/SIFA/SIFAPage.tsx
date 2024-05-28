@@ -33,7 +33,7 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useToaster from "@/hooks/useToaster";
-import { effectifsStateAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
+import { effectifsStateAtom, effectifFromDecaAtom } from "@/modules/mon-espace/effectifs/engine/atoms";
 import EffectifTableContainer from "@/modules/mon-espace/effectifs/engine/EffectifTableContainer";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 import { DownloadLine, ExternalLinkLine } from "@/theme/components/icons";
@@ -42,6 +42,7 @@ function useOrganismesEffectifs(organismeId: string) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const queryClient = useQueryClient();
   const prevOrganismeId = useRef<string | null>(null);
+  const setEffectifFromDecaState = useSetRecoilState(effectifFromDecaAtom);
 
   useEffect(() => {
     if (prevOrganismeId.current !== organismeId) {
@@ -51,20 +52,24 @@ function useOrganismesEffectifs(organismeId: string) {
     }
   }, [queryClient, organismeId]);
 
-  const { data, isLoading, isFetching, refetch } = useQuery<any, any>(
-    ["organismesEffectifs", organismeId],
-    async () => {
-      const organismesEffectifs = await _get(`/api/v1/organismes/${organismeId}/effectifs?sifa=true`);
-      const newEffectifsState = new Map();
-      for (const { id, validation_errors, requiredSifa } of organismesEffectifs as any) {
-        newEffectifsState.set(id, { validation_errors, requiredSifa });
-      }
-      setCurrentEffectifsState(newEffectifsState);
-      return organismesEffectifs;
+  const {
+    data: { fromDECA, organismesEffectifs },
+    isLoading,
+    isFetching,
+    refetch,
+  } = useQuery<any, any>(["organismesEffectifs", organismeId], async () => {
+    const { fromDECA, organismesEffectifs } = await _get(`/api/v1/organismes/${organismeId}/effectifs?sifa=true`);
+    const newEffectifsState = new Map();
+    for (const { id, validation_errors, requiredSifa } of organismesEffectifs as any) {
+      newEffectifsState.set(id, { validation_errors, requiredSifa });
     }
-  );
+    setCurrentEffectifsState(newEffectifsState);
+    setEffectifFromDecaState(fromDECA);
 
-  return { isLoading: isFetching || isLoading, organismesEffectifs: data || [], refetch };
+    return { fromDECA, organismesEffectifs };
+  });
+
+  return { isLoading: isFetching || isLoading, organismesEffectifs: organismesEffectifs || [], refetch, fromDECA };
 }
 
 interface SIFAPageProps {
