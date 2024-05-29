@@ -35,7 +35,7 @@ import { EffectifFormation } from "./blocks/formation/EffectifFormation";
 
 const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
   const [successDeletion, setSuccessDeletion] = useState<"SUCCES" | "ERREUR" | null>(null);
-  const [selectedDeletionReason, setSelectedDeletionReason] = useState(null);
+  const [selectedDeletionReason, setSelectedDeletionReason] = useState<MOTIF_SUPPRESSION | null>(null);
   const [deletionOtherReason, setDeletionOtherReason] = useState("");
 
   const deleteEffectif = async () => {
@@ -48,6 +48,11 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
     } catch (e) {
       setSuccessDeletion("ERREUR");
     }
+  };
+
+  const onDeletionReasonChange = (reason: MOTIF_SUPPRESSION) => {
+    setSelectedDeletionReason(reason);
+    setDeletionOtherReason("");
   };
 
   const checkModalButtonEnabled = () => {
@@ -84,7 +89,7 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
                 apprenant, il apparaîtra à nouveau sur votre espace Tableau de bord.
               </Text>
             </Ribbons>
-            <FormControl isRequired onChange={(e: any) => setSelectedDeletionReason(e.target.value)}>
+            <FormControl isRequired onChange={(e: any) => onDeletionReasonChange(e.target.value)}>
               <FormLabel>Motif de suppression</FormLabel>
               <Select>
                 <option selected hidden disabled value="">
@@ -103,6 +108,7 @@ const SuppressionEffectifComponent = ({ nom, prenom, id, refetch }) => {
                 <FormLabel>Veuillez préciser la raison</FormLabel>
                 <Input
                   onChange={(e) => setDeletionOtherReason(e.target.value)}
+                  value={deletionOtherReason}
                   placeholder="Votre texte ici"
                   maxLength={150}
                 ></Input>
