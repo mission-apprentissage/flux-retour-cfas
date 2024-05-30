@@ -1,7 +1,9 @@
 import { captureException } from "@sentry/node";
 import express from "express";
 import Joi from "joi";
+import { ObjectId } from "mongodb";
 
+import { updateOrganisme } from "@/common/actions/organismes/organismes.actions";
 import logger from "@/common/logger";
 import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
@@ -56,6 +58,15 @@ export default () => {
         api_version: isV3 ? "v3" : "v2",
       };
     });
+
+    // Si une erreur est détectée, on met à jour l'organisme pour indiquer qu'il y a des erreurs de transmission
+    const hasError = effectifsToQueue.find((effectif) => effectif.validation_errors?.length);
+    if (hasError) {
+      await updateOrganisme(new ObjectId(user.source_organisme_id), {
+        has_transmission_errors: true,
+        transmission_errors_date: new Date(),
+      });
+    }
 
     try {
       if (effectifsToQueue.length === 1) {

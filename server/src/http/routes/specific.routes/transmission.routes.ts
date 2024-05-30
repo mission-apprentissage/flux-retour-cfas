@@ -7,6 +7,7 @@ import {
   getErrorsTransmissionStatusDetailsForAGivenDay,
   getSuccessfulTransmissionStatusDetailsForAGivenDay,
 } from "@/common/actions/indicateurs/transmissions/transmission.action";
+import { updateOrganisme } from "@/common/actions/organismes/organismes.actions";
 import paginationSchema from "@/common/validation/paginationSchema";
 import { extensions } from "@/common/validation/utils/zodPrimitives";
 import { returnResult, requireOrganismePermission } from "@/http/middlewares/helpers";
@@ -35,6 +36,15 @@ export default () => {
     requireOrganismePermission("configurerModeTransmission"),
     validateRequestMiddleware({ params: z.object({ date: extensions.iso8601Date() }), query: pagination }),
     returnResult(getTransmissionByDateSuccess)
+  );
+  router.put(
+    "/reset-notification",
+    requireOrganismePermission("configurerModeTransmission"),
+    returnResult(async (req, res) => {
+      await updateOrganisme(res.locals.organismeId, {
+        has_transmission_errors: false,
+      });
+    })
   );
 
   return router;
