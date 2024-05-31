@@ -13412,6 +13412,39 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
   "additionalProperties": false,
   "bsonType": "object",
   "properties": {
+    "_computed": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "formation": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "cfd": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "libelle": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+            "rncp": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+            },
+          },
+        },
+      },
+      "required": [
+        "formation",
+      ],
+    },
     "_id": {
       "bsonType": "objectId",
       "description": "Identifiant unique MongoDB de l'instance voeu",
@@ -13431,6 +13464,17 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
         },
       ],
       "description": "Date de suppresion du voeux",
+    },
+    "formation_catalogue_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant unique",
     },
     "is_contacted": {
       "bsonType": "bool",
@@ -13896,6 +13940,14 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
             },
           ],
         },
+        "uai_cio_etab_accueil": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
         "ville": {
           "anyOf": [
             {},
@@ -13938,6 +13990,7 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
     "created_at",
     "is_contacted",
     "raw",
+    "_computed",
   ],
 }
 `;

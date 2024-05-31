@@ -14,6 +14,7 @@ export const zVoeuAffelnet = z.object({
   created_at: z.date({ description: "Date d'ajout en base de données" }),
   deleted_at: z.date({ description: "Date de suppresion du voeux" }).nullish(),
   is_contacted: z.boolean({ description: "Indique si le jeune a été contacté" }),
+  formation_catalogue_id: zObjectId.nullish(),
   raw: z.object({
     academie: z.any().nullish(),
     ine: z.any().nullish(),
@@ -72,9 +73,17 @@ export const zVoeuAffelnet = z.object({
     ville_etab_accueil: z.any().nullish(),
     siret_uai_gestionnaire: z.any().nullish(),
     cle_ministere_educatif: z.any().nullish(),
+    uai_cio_etab_accueil: z.any().nullish(),
+  }),
+  _computed: z.object({
+    formation: z.object({
+      libelle: z.string().nullish(),
+      rncp: z.string().nullish(),
+      cfd: z.string().nullish(),
+    }),
   }),
 });
 
 export type IVoeuAffelnet = z.output<typeof zVoeuAffelnet>;
-
+export type IVoeuAffelnetRaw = z.output<typeof zVoeuAffelnet.shape.raw>;
 export default { zod: zVoeuAffelnet, indexes, collectionName };
