@@ -24,6 +24,53 @@ export default () => {
 
   return router;
 };
+const findDeletedVoeux = async (date: Date) => {
+  const currentDate = new Date();
+  const aggregation = [
+    {
+      $group: {
+        _id: "$voeu_id",
+        data: {
+          $top: {
+            output: ["$_id", "$created_at", "$revision"],
+            sortBy: {
+              revision: -1,
+            },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: {
+          $arrayElemAt: ["$data", 0],
+        },
+        voeu_id: "$_id",
+        created_at: {
+          $arrayElemAt: ["$data", 1],
+        },
+        revision: {
+          $arrayElemAt: ["$data", 2],
+        },
+      },
+    },
+    {
+      $match: {
+        created_at: {
+          $lt: date,
+        },
+      },
+    },
+  ];
+
+  const cursor = voeuxAffelnetDb().aggregate(aggregation);
+  while (await cursor.hasNext()) {
+    const voeu = await cursor.next();
+    if (voeu) {
+      await voeuxAffelnetDb().updateOne({ _id: voeu._id }, { $set: { deleted_at: currentDate } });
+    }
+  }
+};
 
 const createVoeux = async (req) => {
   const currentDate = new Date();
@@ -108,8 +155,7 @@ const createVoeux = async (req) => {
         const previous = await voeuxAffelnetDb().findOne(
           {
             "raw.ine": voeuRaw.ine,
-            organisme_formateur_id: orgaFormateur._id,
-            organisme_responsable_id: orgaResponsable._id,
+            "raw.cle_ministere_educatif": voeuRaw.cle_ministere_educatif,
           },
           {
             sort: { revision: -1 },
@@ -124,5 +170,7 @@ const createVoeux = async (req) => {
         logger.error(e);
       }
     });
+
+  await findDeletedVoeux(currentDate);
   return;
 };

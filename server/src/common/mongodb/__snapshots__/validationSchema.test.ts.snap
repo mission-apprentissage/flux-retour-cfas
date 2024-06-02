@@ -13948,6 +13948,22 @@ exports[`validation-schema should create validation schema for voeuxAffelnet: vo
             },
           ],
         },
+        "uai_etablissement_responsable": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
+        "uai_etatblissement_formateur": {
+          "anyOf": [
+            {},
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
         "ville": {
           "anyOf": [
             {},

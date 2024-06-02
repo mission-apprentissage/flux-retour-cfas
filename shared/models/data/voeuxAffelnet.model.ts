@@ -74,6 +74,8 @@ export const zVoeuAffelnet = z.object({
     siret_uai_gestionnaire: z.any().nullish(),
     cle_ministere_educatif: z.any().nullish(),
     uai_cio_etab_accueil: z.any().nullish(),
+    uai_etatblissement_formateur: z.any().nullish(),
+    uai_etablissement_responsable: z.any().nullish(),
   }),
   _computed: z.object({
     formation: z.object({
