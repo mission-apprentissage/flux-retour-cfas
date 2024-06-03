@@ -967,6 +967,11 @@ export interface Organisme {
    */
   mode_de_transmission_configuration_author_fullname?: string;
   /**
+   * Gestion erreurs transmission
+   */
+  has_transmission_errors?: boolean;
+  transmission_errors_date?: string;
+  /**
    * Date de mise à jour en base de données
    */
   updated_at?: string;
