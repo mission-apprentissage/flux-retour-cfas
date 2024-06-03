@@ -59,16 +59,18 @@ export default () => {
       };
     });
 
-    // Si une erreur est détectée, on met à jour l'organisme pour indiquer qu'il y a des erreurs de transmission
-    const hasError = effectifsToQueue.find((effectif) => effectif.validation_errors?.length);
-    if (hasError) {
-      await updateOrganisme(new ObjectId(user.source_organisme_id), {
-        has_transmission_errors: true,
-        transmission_errors_date: new Date(),
-      });
-    }
-
     try {
+      if (isV3 && !user.source_organisme_id) {
+        // Si une erreur est détectée, on met à jour l'organisme pour indiquer qu'il y a des erreurs de transmission
+        const hasError = effectifsToQueue.find((effectif) => effectif.validation_errors?.length);
+        if (hasError) {
+          await updateOrganisme(new ObjectId(user.source_organisme_id), {
+            has_transmission_errors: true,
+            transmission_errors_date: new Date(),
+          });
+        }
+      }
+
       if (effectifsToQueue.length === 1) {
         await effectifsQueueDb().insertOne(effectifsToQueue[0]);
       } else if (effectifsToQueue.length) {
