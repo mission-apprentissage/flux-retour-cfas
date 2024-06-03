@@ -11969,6 +11969,10 @@ exports[`validation-schema should create validation schema for organismes: organ
       "bsonType": "array",
       "maxItems": 0,
     },
+    "has_transmission_errors": {
+      "bsonType": "bool",
+      "description": "Indique si cet organisme a une transmissions d'effectif en erreur",
+    },
     "is_transmission_target": {
       "bsonType": [
         "bool",
@@ -12710,6 +12714,10 @@ exports[`validation-schema should create validation schema for organismes: organ
       "bsonType": "string",
       "description": "N° SIRET de l'établissement",
       "pattern": "^[0-9]{14}$",
+    },
+    "transmission_errors_date": {
+      "bsonType": "date",
+      "description": "Date d'erreur de transmission",
     },
     "uai": {
       "bsonType": "string",

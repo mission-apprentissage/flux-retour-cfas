@@ -46,6 +46,7 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import CerfaLink from "@/components/Cerfa/CerfaLink";
+import NotificationTransmissionError from "@/components/Notifications/TransmissionErrors";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
@@ -696,6 +697,9 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                 (année scolaire 2023-2024)
               </Text>
             </Heading>
+
+            <NotificationTransmissionError organisme={organisme} />
+
             {indicateursEffectifsPartielsMessage && (
               <Ribbons variant="warning" mt="0.5rem">
                 <Text color="grey.800">
