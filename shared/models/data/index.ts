@@ -2,6 +2,7 @@ export * from "./auditLogs.model";
 export * from "./bassinsEmploi.model";
 export * from "./contratsDeca.model";
 export * from "./effectifs.model";
+export * from "./effectifsArchive.model";
 export * from "./effectifsQueue.model";
 export * from "./fiabilisationUaiSiret.model";
 export * from "./formations.model";

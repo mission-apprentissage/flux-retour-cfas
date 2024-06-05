@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import React, { memo, useCallback, useMemo, useState } from "react";
 
-import InfoTooltip from "@/components/InfoTooltip/InfoTooltip";
+import InputTooltip from "@/components/Tooltip/InputTooltip";
 import { validField } from "@/modules/mon-espace/effectifs/engine/formEngine/utils/validField";
 
 import { ConsentInput } from "./ConsentInput";
@@ -168,7 +168,7 @@ export const InputField = memo(({ mt, mb, ml, mr, w, ...props }: any) => {
         </InputGroup>
         {description && (
           <Box>
-            <InfoTooltip description={description} label={label} />
+            <InputTooltip description={description} label={label} />
           </Box>
         )}
       </HStack>

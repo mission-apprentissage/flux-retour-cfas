@@ -25,7 +25,7 @@ export const ERPS = sortAlphabeticallyBy("name", [
     id: "scform",
     name: "SC Form",
     apiV3: true,
-    helpFilePath: "/SC-form-2023.pdf",
+    helpFilePath: "/SC-form-2024.pdf",
   },
   {
     id: "formasup",
@@ -65,6 +65,16 @@ export const ERPS = sortAlphabeticallyBy("name", [
   {
     id: "formasup-hdf",
     name: "Formasup HDF",
+    apiV3: true,
+  },
+  {
+    id: "ammon",
+    name: "Ammon",
+    apiV3: true,
+  },
+  {
+    id: "formasup-paca",
+    name: "Formasup PACA",
     apiV3: true,
   },
 ] satisfies ERP[]);

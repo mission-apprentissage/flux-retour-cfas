@@ -588,9 +588,6 @@ export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = asyn
             $gte: start,
             $lte: end,
           },
-          validation_errors: {
-            $exists: true,
-          },
         },
       },
       {
@@ -607,32 +604,44 @@ export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = asyn
         },
       },
       {
-        $lookup: {
-          from: "organismes",
-          localField: "source_organisme_id",
-          foreignField: "_id",
-          as: "source_organisme",
-        },
-      },
-      {
-        $unwind: "$source_organisme",
-      },
-      {
-        $project: {
-          _id: 0,
-          "organisme.nom": "$source_organisme.nom",
-          "organisme.id": "$source_organisme._id",
-          "organisme.uai": "$source_organisme.uai",
-          "organisme.siret": "$source_organisme.siret",
-          success: "$success",
-          error: "$error",
-          total: "$total",
-        },
-      },
-      {
         $facet: {
           pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
-          data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+          data: [
+            { $sort: { error: -1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            {
+              $lookup: {
+                from: "organismes",
+                localField: "source_organisme_id",
+                foreignField: "_id",
+                as: "source_organisme",
+              },
+            },
+            {
+              $unwind: "$source_organisme",
+            },
+            {
+              $project: {
+                _id: 0,
+                "organisme.nom": "$source_organisme.nom",
+                "organisme.id": "$source_organisme._id",
+                "organisme.uai": "$source_organisme.uai",
+                "organisme.siret": "$source_organisme.siret",
+                success: "$success",
+                error: "$error",
+                total: "$total",
+                successRate: {
+                  $multiply: [
+                    {
+                      $divide: ["$success", "$total"],
+                    },
+                    100,
+                  ],
+                },
+              },
+            },
+          ],
         },
       },
       { $unwind: { path: "$pagination" } },

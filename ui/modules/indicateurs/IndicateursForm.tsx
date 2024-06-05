@@ -1,15 +1,9 @@
 import { EditIcon } from "@chakra-ui/icons";
-import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Button, Divider, Flex, Heading, HStack, SimpleGrid, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import {
-  isTeteDeReseauResponsable,
-  TypeEffectifNominatif,
-  IndicateursEffectifsAvecOrganisme,
-  IOrganisationJson,
-  IOrganisationType,
-} from "shared";
+import { IndicateursEffectifsAvecOrganisme, IOrganisationType } from "shared";
 
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
@@ -17,8 +11,9 @@ import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
 import Ribbons from "@/components/Ribbons/Ribbons";
-import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
-import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
+import NatureOrganismeTooltip from "@/components/Tooltip/NatureOrganismeTooltip";
+import { useOrganisationOrganisme } from "@/hooks/organismes";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 import FiltreApprenantTrancheAge from "@/modules/indicateurs/filters/FiltreApprenantTrancheAge";
@@ -56,11 +51,10 @@ interface IndicateursFormProps {
   organismeId?: string;
 }
 function IndicateursForm(props: IndicateursFormProps) {
-  const { auth, organisationType, organisation } = useAuth();
+  const { auth, organisationType } = useAuth();
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleTracking();
 
-  const { organisme } = useOrganisme(props.organismeId);
   const { organisme: ownOrganisme } = useOrganisationOrganisme(
     organisationType === "ORGANISME_FORMATION" && !!props.organismeId
   );
@@ -100,7 +94,7 @@ function IndicateursForm(props: IndicateursFormProps) {
         (acc, indicateursParOrganisme) => {
           acc.apprenants += indicateursParOrganisme.apprenants;
           acc.apprentis += indicateursParOrganisme.apprentis;
-          acc.inscritsSansContrat += indicateursParOrganisme.inscritsSansContrat;
+          acc.inscrits += indicateursParOrganisme.inscrits;
           acc.abandons += indicateursParOrganisme.abandons;
           acc.rupturants += indicateursParOrganisme.rupturants;
           return acc;
@@ -108,7 +102,7 @@ function IndicateursForm(props: IndicateursFormProps) {
         {
           apprenants: 0,
           apprentis: 0,
-          inscritsSansContrat: 0,
+          inscrits: 0,
           abandons: 0,
           rupturants: 0,
         }
@@ -156,35 +150,20 @@ function IndicateursForm(props: IndicateursFormProps) {
           </Button>
         </HStack>
 
-        {/* <Box bg="#F5F5FE;" p={4} my={2} textAlign="center">
-          Récap des filtres
-        </Box> */}
-
         <SimpleGrid gap={3}>
           <Flex fontWeight="700" textTransform="uppercase">
             <Text>Date</Text>
-            <Tooltip
-              background="bluefrance"
-              color="white"
-              label={
-                <Box padding="1w">
+            <InfoTooltip
+              contentComponent={() => (
+                <Box>
                   <Text as="p">La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois.</Text>
                   <Text as="p" mt="4">
                     À noter&nbsp;: la période de référence pour l&apos;année scolaire court du 1er août au 31 juillet
                   </Text>
                 </Box>
-              }
+              )}
               aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
-            >
-              <Box
-                as="i"
-                className="ri-information-line"
-                fontSize="epsilon"
-                color="grey.500"
-                ml="1w"
-                fontWeight="normal"
-              />
-            </Tooltip>
+            />
           </Flex>
 
           <FiltreDate
@@ -258,9 +237,6 @@ function IndicateursForm(props: IndicateursFormProps) {
             onChange={(cfds) => updateState({ formation_cfds: cfds })}
           />
 
-          {/* <IndicateursFilter label="Type de formation">
-            <Box>Liste des filtres</Box>
-          </IndicateursFilter> */}
           <IndicateursFilter label="Niveau de formation" badge={effectifsFilters.formation_niveaux.length}>
             <FiltreFormationNiveau
               value={effectifsFilters.formation_niveaux}
@@ -319,11 +295,6 @@ function IndicateursForm(props: IndicateursFormProps) {
         <IndicateursGrid
           indicateursEffectifs={indicateursEffectifsTotaux}
           loading={indicateursEffectifsLoading}
-          permissionEffectifsNominatifs={
-            props.organismeId
-              ? organisme?.permissions?.effectifsNominatifs
-              : getPermissionsEffectifsNominatifs(organisation)
-          }
           effectifsFilters={effectifsFilters}
           organismeId={props.organismeId}
         />
@@ -392,7 +363,7 @@ function IndicateursForm(props: IndicateursFormProps) {
               header: () => (
                 <>
                   Nature
-                  <TooltipNatureOrganisme />
+                  <NatureOrganismeTooltip />
                 </>
               ),
               cell: ({ getValue }) => <NatureOrganismeTag nature={getValue()} />,
@@ -409,7 +380,7 @@ function IndicateursForm(props: IndicateursFormProps) {
               ),
             },
             {
-              accessorKey: "inscritsSansContrat",
+              accessorKey: "inscrits",
               header: () => (
                 <>
                   <InscritsSansContratsIcon w="16px" />
@@ -449,33 +420,6 @@ function IndicateursForm(props: IndicateursFormProps) {
 }
 
 export default IndicateursForm;
-
-function getPermissionsEffectifsNominatifs(organisation: IOrganisationJson): boolean | TypeEffectifNominatif[] {
-  switch (organisation.type) {
-    case "ORGANISME_FORMATION":
-      return true;
-
-    case "TETE_DE_RESEAU":
-      return isTeteDeReseauResponsable(organisation.reseau);
-
-    case "DREETS":
-    case "DRAAF":
-    case "DDETS":
-      return ["inscritSansContrat", "rupturant", "abandon"];
-    case "CONSEIL_REGIONAL":
-    case "CARIF_OREF_REGIONAL":
-    case "DRAFPIC":
-    case "ACADEMIE":
-      return false;
-
-    case "OPERATEUR_PUBLIC_NATIONAL":
-    case "CARIF_OREF_NATIONAL":
-      return false;
-
-    case "ADMINISTRATEUR":
-      return true;
-  }
-}
 
 function MessageBandeauIndicateurs({ organisationType }: { organisationType: IOrganisationType }) {
   let text: string | null | JSX.Element = null;

@@ -5,7 +5,8 @@ import { tryCachedExecution } from "@/common/utils/cacheUtils";
 
 import { DateFilters, TerritoireFilters } from "../helpers/filters";
 
-import { getIndicateursEffectifsParDepartement, getIndicateursOrganismesParDepartement } from "./indicateurs.actions";
+import { getIndicateursEffectifsParDepartement } from "./indicateurs-with-deca.actions";
+import { getIndicateursOrganismesParDepartement } from "./indicateurs.actions";
 
 const indicateursNationalCacheExpirationMs = 3600 * 1000; // 1 hour
 
@@ -29,7 +30,7 @@ const allIndicateurAcl: Acl = {
 
 export async function getIndicateursNational(filters: TerritoireFilters & DateFilters) {
   const cacheKey = Object.keys(filters)
-    .toSorted()
+    .sort()
     .reduce((acc, key) => {
       if (key === "date") {
         return acc + `:date=${format(filters.date, "yyyy-MM-dd")}`;

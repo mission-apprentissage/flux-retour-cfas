@@ -9,22 +9,22 @@ import {
   InputRightElement,
   ListItem,
   Text,
-  Tooltip,
   UnorderedList,
 } from "@chakra-ui/react";
 import { AccessorKeyColumnDef, SortingState } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
+import { normalize } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
-import { normalize } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
 import Link from "@/components/Links/Link";
-import TooltipNatureOrganisme from "@/components/tooltips/TooltipNatureOrganisme";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
+import NatureOrganismeTooltip from "@/components/Tooltip/NatureOrganismeTooltip";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import NatureOrganismeTag from "@/modules/indicateurs/NatureOrganismeTag";
 import NewTable from "@/modules/indicateurs/NewTable";
@@ -78,7 +78,7 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     header: () => (
       <>
         Nature
-        <TooltipNatureOrganisme />
+        <NatureOrganismeTooltip />
       </>
     ),
     cell: ({ getValue }) => <NatureOrganismeTag nature={getValue()} />,
@@ -88,12 +88,10 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     header: () => (
       <>
         Transmission au tableau
-        <Tooltip
-          background="bluefrance"
-          color="white"
-          label={
-            <Box padding="1w">
-              <b>État de la donnée</b>
+        <InfoTooltip
+          headerComponent={() => "État de la donnée"}
+          contentComponent={() => (
+            <Box>
               <Text as="p">5 états concernant la donnée sont identifiés&nbsp;:</Text>
               <UnorderedList>
                 <ListItem>l’OFA transmet des données depuis moins d’1 semaine (vert)</ListItem>
@@ -103,18 +101,9 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
                 <ListItem>Non-disponible&nbsp;: Les droits d’accès à cette information sont restreints.</ListItem>
               </UnorderedList>
             </Box>
-          }
+          )}
           aria-label="État de la donnée."
-        >
-          <Box
-            as="i"
-            className="ri-information-line"
-            fontSize="epsilon"
-            color="grey.500"
-            marginLeft="1v"
-            verticalAlign="middle"
-          />
-        </Tooltip>
+        />
       </>
     ),
     sortUndefined: 1,
@@ -130,30 +119,19 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     header: () => (
       <>
         État
-        <Tooltip
-          background="bluefrance"
-          color="white"
-          label={
-            <Box padding="1w">
+        <InfoTooltip
+          contentComponent={() => (
+            <Box>
               <b>État de l’établissement</b>
               <Text as="p">
                 Indication de l’état administratif du SIRET de l’établissement, tel qu’il est renseigné sur l’INSEE. Si
                 cette information est erronée, merci de leur signaler.
               </Text>
             </Box>
-          }
+          )}
           aria-label="Indication de l’état administratif du SIRET de l’établissement, tel qu’il est renseigné
-          sur l’INSEE."
-        >
-          <Box
-            as="i"
-            className="ri-information-line"
-            fontSize="epsilon"
-            color="grey.500"
-            marginLeft="1v"
-            verticalAlign="middle"
-          />
-        </Tooltip>
+        sur l’INSEE."
+        />
       </>
     ),
     cell: ({ getValue }) => (
@@ -178,29 +156,18 @@ const organismesTableColumnsDefs: AccessorKeyColumnDef<OrganismeNormalized, any>
     header: () => (
       <>
         Localisation
-        <Tooltip
-          background="bluefrance"
-          color="white"
-          label={
-            <Box padding="1w">
+        <InfoTooltip
+          contentComponent={() => (
+            <Box>
               <Text as="p">
                 Nom de la commune, code postal et code commune INSEE de l’établissement qui accueille physiquement les
                 apprentis et les forme.
               </Text>
             </Box>
-          }
+          )}
           aria-label="Nom de la commune, code postal et code commune INSEE de l’établissement qui accueille
-    physiquement les apprentis et les forme."
-        >
-          <Box
-            as="i"
-            className="ri-information-line"
-            fontSize="epsilon"
-            color="grey.500"
-            marginLeft="1v"
-            verticalAlign="middle"
-          />
-        </Tooltip>
+        physiquement les apprentis et les forme."
+        />
       </>
     ),
     cell: ({ row }) => (

@@ -25,7 +25,7 @@ import { replaceLinks } from "@/common/utils/markdownUtils";
 import { ExternalLinkLine, InfoCircle } from "@/theme/components/icons";
 
 // eslint-disable-next-line react/display-name
-const InfoTooltip = memo(
+const InputTooltip = memo(
   ({ description, descriptionComponent, label, history, customIcon = null, noHistory = true, ...rest }: any) => {
     return (
       <Popover placement="bottom">
@@ -101,4 +101,4 @@ const InfoTooltip = memo(
   }
 );
 
-export default InfoTooltip;
+export default InputTooltip;

@@ -9,11 +9,19 @@ import { v4 as uuidv4 } from "uuid";
 import {
   findOrganismesAccessiblesByOrganisationOF,
   findOrganismesFormateursIdsOfOrganisme,
+  findOrganismeFormateursIds,
+  findOrganismeResponsablesIds,
 } from "@/common/actions/helpers/permissions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import { listContactsOrganisation } from "@/common/actions/organisations.actions";
 import logger from "@/common/logger";
-import { organismesDb, effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import {
+  organismesDb,
+  effectifsDb,
+  organisationsDb,
+  usersMigrationDb,
+  effectifsDECADb,
+} from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { cleanProjection } from "@/common/utils/mongoUtils";
@@ -428,6 +436,42 @@ export const updateEffectifsCount = async (organisme_id: ObjectId) => {
   );
 };
 
+export const updateOrganismesHasTransmittedWithHierarchy = async (
+  organisme: IOrganisme | null,
+  forceStatus: boolean = false
+) => {
+  if (!organisme || (organisme && organisme.is_transmission_target)) {
+    return;
+  }
+  const organismeFormateursIds = findOrganismeFormateursIds(organisme, true);
+  const organismeResponsableIds = findOrganismeResponsablesIds(organisme);
+  const statusFromCount =
+    (await effectifsDb().countDocuments({
+      organisme_id: { $in: [organisme._id, ...organismeFormateursIds, ...organismeResponsableIds] },
+    })) > 0;
+
+  const computedStatus = statusFromCount || forceStatus;
+  await organismesDb().updateMany(
+    { _id: { $in: [organisme._id, ...organismeFormateursIds, ...organismeResponsableIds] } },
+    {
+      $set: {
+        is_transmission_target: computedStatus,
+      },
+    },
+    { bypassDocumentValidation: true }
+  );
+  await effectifsDECADb().updateMany(
+    {
+      organisme_id: { $in: [organisme._id, ...organismeFormateursIds, ...organismeResponsableIds] },
+    },
+    {
+      $set: {
+        is_deca_compatible: !computedStatus,
+      },
+    }
+  );
+};
+
 /**
  * Génération d'une api key s'il n'existe pas
  */
@@ -519,6 +563,7 @@ export async function getOrganismeDetails(ctx: AuthContext, organismeId: ObjectI
 export async function getOrganismeByAPIKey(api_key: string, queryString: Request["query"]): Promise<IOrganisme> {
   const organisme = await organismesDb().findOne({ api_key });
   if (!organisme) {
+    logger.error({ module: "transmission", api_key, queryString }, "Cannot find organisme from api_key");
     throw Boom.forbidden("La clé API n'est pas valide", { queryString });
   }
   return organisme;
@@ -776,6 +821,8 @@ export function getOrganismeProjection(
     organismesResponsables: 1,
     organismesFormateurs: 1,
     fiabilisation_statut: 1,
+    has_transmission_errors: 1,
+    transmission_errors_date: 1,
     erps: permissionsOrganisme.infoTransmissionEffectifs,
     erp_unsupported: permissionsOrganisme.infoTransmissionEffectifs,
     first_transmission_date: permissionsOrganisme.infoTransmissionEffectifs,

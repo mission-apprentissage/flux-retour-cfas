@@ -11,6 +11,9 @@
     "recette": {
       "targets": ["server", "ui-recette"]
     },
+    "preprod": {
+      "targets": ["server", "ui-preprod"]
+    },
     "preview": {
       "targets": ["server", "ui-preview"]
     },
@@ -46,7 +49,7 @@
     "ui": {
       "inherits": ["common"],
       "matrix": {
-        "ENV": ["production", "recette", "preview", "local"]
+        "ENV": ["production", "recette", "preprod", "preview", "local"]
       },
       "name": "ui-${ENV}",
       "args": {

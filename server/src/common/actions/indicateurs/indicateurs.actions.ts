@@ -1,13 +1,13 @@
-import { ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import {
   Acl,
-  CODES_STATUT_APPRENANT,
   IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
   IndicateursEffectifsAvecFormation,
   IndicateursEffectifsAvecOrganisme,
   IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
+  STATUT_APPRENANT,
   TypeEffectifNominatif,
 } from "shared";
 
@@ -19,40 +19,30 @@ import {
   combineFilters,
 } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
+import { buildDECAFilter } from "./indicateurs-with-deca.actions";
 import { buildOrganismeMongoFilters } from "./organismes/organismes-filters";
 
-function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: Date) {
+function buildIndicateursEffectifsPipeline(groupBy: string | null, currentDate: Date) {
   return [
     {
       $addFields: {
-        "apprenant.historique_statut": {
-          // TODO: s'assurer que le tableau est TOUJOURS trié, puis supprimer cette étape
-          $sortArray: {
-            input: {
+        dernierStatut: {
+          $arrayElemAt: [
+            {
               $filter: {
-                input: "$apprenant.historique_statut",
+                input: "$_computed.statut.parcours",
                 as: "statut",
                 cond: {
-                  $lte: ["$$statut.date_statut", dateStatus],
+                  $lte: ["$$statut.date", currentDate],
                 },
               },
             },
-            sortBy: { date_statut: 1 },
-          },
-        },
-      },
-    },
-    {
-      $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
-    },
-    {
-      $addFields: {
-        statut_apprenant_at_date: {
-          $last: "$apprenant.historique_statut",
+            -1,
+          ],
         },
       },
     },
@@ -61,93 +51,62 @@ function buildIndicateursEffectifsPipeline(groupBy: string | null, dateStatus: D
         _id: groupBy,
         apprentis: {
           $sum: {
-            $cond: {
-              if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-              then: 1,
-              else: 0,
-            },
-          },
-        },
-        abandons: {
-          $sum: {
-            $cond: {
-              if: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
-              then: 1,
-              else: 0,
-            },
-          },
-        },
-        inscritsSansContrat: {
-          $sum: {
-            $cond: {
-              if: {
-                $and: [
-                  { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                  {
-                    $eq: [
-                      0,
-                      {
-                        $size: {
-                          $filter: {
-                            input: "$apprenant.historique_statut",
-                            cond: {
-                              $and: [
-                                { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                                { $lte: ["$$this.date_statut", dateStatus] },
-                              ],
-                            },
-                            limit: 1,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                ],
-              },
-              then: 1,
-              else: 0,
-            },
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.APPRENTI] }, 1, 0],
           },
         },
         inscrits: {
           $sum: {
-            $cond: {
-              if: {
-                $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit],
-              },
-              then: 1,
-              else: 0,
-            },
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.INSCRIT] }, 1, 0],
+          },
+        },
+        abandons: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.ABANDON] }, 1, 0],
+          },
+        },
+        rupturants: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.RUPTURANT] }, 1, 0],
+          },
+        },
+        finDeFormation: {
+          $sum: {
+            $cond: [{ $eq: ["$dernierStatut.valeur", STATUT_APPRENANT.FIN_DE_FORMATION] }, 1, 0],
           },
         },
       },
     },
     {
       $project: {
-        _id: 1,
         apprenants: {
-          $sum: ["$apprentis", "$inscrits"],
+          $sum: ["$apprentis", "$inscrits", "$rupturants", "$finDeFormation"],
         },
-        apprentis: 1,
-        inscritsSansContrat: 1,
+        apprentis: {
+          $sum: ["$apprentis", "$finDeFormation"],
+        },
+        inscrits: 1,
         abandons: 1,
-        rupturants: { $subtract: ["$inscrits", "$inscritsSansContrat"] },
+        rupturants: 1,
+        finDeFormation: 1,
       },
     },
   ];
 }
 
-export async function getIndicateursEffectifsParDepartement(
+export async function getIndicateursEffectifsParDepartementGenerique(
   filters: DateFilters & TerritoireFilters,
-  acl: Acl
+  acl: Acl,
+  db: Collection<any>,
+  decaMode: boolean = false
 ): Promise<IndicateursEffectifsAvecDepartement[]> {
-  const indicateurs = await effectifsDb()
+  const indicateurs = await db
     .aggregate([
       {
         $match: combineFilters(
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
           },
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, acl.indicateursEffectifs)
         ),
       },
@@ -158,7 +117,7 @@ export async function getIndicateursEffectifsParDepartement(
           departement: "$_id",
           apprenants: 1,
           apprentis: 1,
-          inscritsSansContrat: 1,
+          inscrits: 1,
           abandons: 1,
           rupturants: 1,
         },
@@ -463,16 +422,19 @@ export async function getIndicateursOrganismesParDepartement(
   return indicateurs;
 }
 
-export async function getIndicateursEffectifsParOrganisme(
+export async function getIndicateursEffectifsParOrganismeGenerique(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
+  db: Collection<any>,
+  decaMode: boolean = false,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
-  const indicateurs = (await effectifsDb()
+  const indicateurs = (await db
     .aggregate([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -519,7 +481,7 @@ export async function getIndicateursEffectifsParOrganisme(
 
           apprenants: 1,
           apprentis: 1,
-          inscritsSansContrat: 1,
+          inscrits: 1,
           abandons: 1,
           rupturants: 1,
         },
@@ -529,16 +491,19 @@ export async function getIndicateursEffectifsParOrganisme(
   return indicateurs;
 }
 
-export async function getOrganismeIndicateursEffectifsParFormation(
+export async function getOrganismeIndicateursEffectifsParFormationGenerique(
   ctx: AuthContext,
   organismeId: ObjectId,
-  filters: FullEffectifsFilters
+  filters: FullEffectifsFilters,
+  db: Collection<any>,
+  decaMode: boolean = false
 ): Promise<IndicateursEffectifsAvecFormation[]> {
-  const indicateurs = (await effectifsDb()
+  const indicateurs = (await db
     .aggregate([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -552,7 +517,7 @@ export async function getOrganismeIndicateursEffectifsParFormation(
           rncp_code: "$_id",
           apprenants: 1,
           apprentis: 1,
-          inscritsSansContrat: 1,
+          inscrits: 1,
           abandons: 1,
           rupturants: 1,
         },
@@ -584,17 +549,36 @@ export async function getOrganismeIndicateursEffectifsParFormation(
   return indicateurs;
 }
 
-export async function getEffectifsNominatifs(
+export async function getEffectifsNominatifsGenerique(
   ctx: AuthContext,
   filters: FullEffectifsFilters,
   type: TypeEffectifNominatif,
+  db: Collection<any>,
+  decaMode: boolean = false,
   organismeId?: ObjectId
 ): Promise<IndicateursEffectifsAvecOrganisme[]> {
-  const indicateurs = (await effectifsDb()
+  const computedType = (t: TypeEffectifNominatif) => {
+    switch (t) {
+      case "apprenant":
+        return ["APPRENTI", "INSCRIT", "RUPTURANT", "FIN_DE_FORMATION"];
+      case "apprenti":
+        return ["APPRENTI", "FIN_DE_FORMATION"];
+      case "inscritSansContrat":
+        return ["INSCRIT"];
+      case "rupturant":
+        return ["RUPTURANT"];
+      case "abandon":
+        return ["ABANDON"];
+      default:
+        return [t];
+    }
+  };
+  const indicateurs = (await db
     .aggregate([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.effectifsNominatifs[type]),
           {
             "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
@@ -603,92 +587,40 @@ export async function getEffectifsNominatifs(
       },
       {
         $addFields: {
-          "apprenant.historique_statut": {
+          "_computed.statut.parcours": {
             $sortArray: {
               input: {
                 $filter: {
-                  input: "$apprenant.historique_statut",
+                  input: "$_computed.statut.parcours",
                   as: "statut",
                   cond: {
-                    $lte: ["$$statut.date_statut", filters.date],
+                    $lte: ["$$statut.date", filters.date],
                   },
                 },
               },
-              sortBy: { date_statut: 1 },
+              sortBy: { date: 1 },
             },
           },
         },
       },
       {
-        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+        $match: { "_computed.statut.parcours": { $not: { $size: 0 } } },
       },
       {
         $addFields: {
           statut_apprenant_at_date: {
-            $last: "$apprenant.historique_statut",
+            $last: "$_computed.statut.parcours",
           },
         },
       },
       {
         $addFields: {
-          statut: {
-            // pipeline commun entre statuts plutôt que $facet limité à 16Mo
-            $switch: {
-              branches: [
-                {
-                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                  then: "apprenti" satisfies TypeEffectifNominatif,
-                },
-                {
-                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.abandon] },
-                  then: "abandon" satisfies TypeEffectifNominatif,
-                },
-                // l'ordre important ici, du statut le plus spécifique au plus générique
-                {
-                  case: {
-                    $and: [
-                      { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                      {
-                        $eq: [
-                          0,
-                          {
-                            $size: {
-                              $filter: {
-                                input: "$apprenant.historique_statut",
-                                cond: {
-                                  $and: [
-                                    { $eq: ["$$this.valeur_statut", CODES_STATUT_APPRENANT.apprenti] },
-                                    { $lte: ["$$this.date_statut", filters.date] },
-                                  ],
-                                },
-                                limit: 1,
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  then: "inscritSansContrat" satisfies TypeEffectifNominatif,
-                },
-                {
-                  case: { $eq: ["$statut_apprenant_at_date.valeur_statut", CODES_STATUT_APPRENANT.inscrit] },
-                  then: "rupturant" satisfies TypeEffectifNominatif,
-                },
-              ],
-              default: "inconnu" satisfies TypeEffectifNominatif,
-            },
-          },
+          statut: "$statut_apprenant_at_date.valeur",
         },
       },
       {
         $match: {
-          statut:
-            type === "apprenant"
-              ? {
-                  $in: ["apprenti", "inscritSansContrat", "rupturant"] satisfies TypeEffectifNominatif[],
-                }
-              : { $eq: type },
+          statut: { $in: computedType(type) },
         },
       },
       {
@@ -745,16 +677,19 @@ export async function getEffectifsNominatifs(
   return indicateurs;
 }
 
-export async function getOrganismeIndicateursEffectifs(
+export async function getOrganismeIndicateursEffectifsGenerique(
   ctx: AuthContext,
   organismeId: ObjectId,
-  filters: EffectifsFiltersTerritoire
+  filters: EffectifsFiltersTerritoire,
+  db: Collection<any>,
+  decaMode: boolean = false
 ): Promise<IndicateursEffectifs> {
-  const indicateurs = (await effectifsDb()
+  const indicateurs = (await db
     .aggregate([
       {
         $match: combineFilters(
           await getOrganismeRestriction(organismeId),
+          buildDECAFilter(decaMode),
           ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs)
         ),
       },
@@ -764,7 +699,7 @@ export async function getOrganismeIndicateursEffectifs(
           _id: 0,
           apprenants: 1,
           apprentis: 1,
-          inscritsSansContrat: 1,
+          inscrits: 1,
           abandons: 1,
           rupturants: 1,
         },
@@ -775,7 +710,7 @@ export async function getOrganismeIndicateursEffectifs(
     indicateurs ?? {
       apprenants: 0,
       apprentis: 0,
-      inscritsSansContrat: 0,
+      inscrits: 0,
       abandons: 0,
       rupturants: 0,
     }

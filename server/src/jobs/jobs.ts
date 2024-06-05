@@ -1,6 +1,8 @@
 import { addJob, initJobProcessor } from "job-processor";
+import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import logger from "@/common/logger";
+import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
 import { create as createMigration, status as statusMigration, up as upMigration } from "@/jobs/migrations/migrations";
@@ -18,6 +20,7 @@ import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build";
 import { resetOrganismesFiabilisationStatut } from "./fiabilisation/uai-siret/build.utils";
 import { updateOrganismesFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update";
 import { hydrateDeca } from "./hydrate/deca/hydrate-deca";
+import { hydrateDecaRaw } from "./hydrate/deca/hydrate-deca-raw";
 import { hydrateEffectifsComputed } from "./hydrate/effectifs/hydrate-effectifs-computed";
 import { hydrateEffectifsComputedTypes } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
 import { hydrateEffectifsFormationsNiveaux } from "./hydrate/effectifs/hydrate-effectifs-formations-niveaux";
@@ -26,6 +29,7 @@ import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateROME } from "./hydrate/hydrate-rome";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
+import { hydrateOrganismesEffectifsCountWithHierarchy } from "./hydrate/organismes/hydrate-effectifs-count-with-hierarchy";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesBassinEmploi } from "./hydrate/organismes/hydrate-organismes-bassinEmploi";
@@ -43,6 +47,7 @@ import { removeOrganismeAndEffectifs } from "./patches/remove-organisme-effectif
 import { removeOrganismesAbsentsReferentielSansTransmission } from "./patches/remove-organismes-absentReferentiel-sansTransmission";
 import { removeOrganismeSansEnseigneNiRaisonSocialeNeTransmettantPlus } from "./patches/remove-organismes-sansEnseigneNiRaisonSocialeNeTransmettantPlus";
 import { removeOrganismesSansSiretSansEffectifs } from "./patches/remove-organismes-sansSiret-sansEffectifs";
+import { removeMetiersFromOrganisme } from "./patches/removeMetiersFromOrganisme";
 import { updateFirstTransmissionDateForOrganismes } from "./patches/update-firstTransmissionDates";
 import { updateLastTransmissionDateForOrganismes } from "./patches/update-lastTransmissionDates";
 import { clearSeedAssets } from "./seed/clearAssets";
@@ -134,6 +139,14 @@ export async function setupJobProcessor() {
               },
             },
 
+            "Mettre à jour les statuts d'effectifs le 1er de chaque mois à 00h45": {
+              cron_string: "45 0 1 * *",
+              handler: async () => {
+                await addJob({ name: "hydrate:effectifs:update_computed_statut_month", queued: true });
+                return 0;
+              },
+            },
+
             // TODO : Checker si coté métier l'archivage est toujours prévu ?
             // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
             //   cron_string: "45 12 1 * *",
@@ -197,9 +210,14 @@ export async function setupJobProcessor() {
           return hydrateEffectifsComputed();
         },
       },
-      "hydrate:effectifs-computed-types": {
+      "tmp:effectifs:update_computed_statut": {
         handler: async () => {
           return hydrateEffectifsComputedTypes();
+        },
+      },
+      "hydrate:effectifs:update_computed_statut": {
+        handler: async () => {
+          return await addJob({ name: "tmp:effectifs:update_computed_statut", queued: true });
         },
       },
       "hydrate:effectifs-formation-niveaux": {
@@ -252,6 +270,18 @@ export async function setupJobProcessor() {
           return hydrateDeca(job.payload as any);
         },
       },
+      "hydrate:contrats-deca-raw": {
+        handler: async () => {
+          return hydrateDecaRaw();
+        },
+      },
+      "hydrate:effectifs:update_computed_statut_month": {
+        handler: async () => {
+          return hydrateEffectifsComputedTypes({
+            query: { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } },
+          });
+        },
+      },
       "dev:generate-open-api": {
         handler: async () => {
           return hydrateOpenApi();
@@ -265,6 +295,11 @@ export async function setupJobProcessor() {
       "hydrate:organismes-effectifs-count": {
         handler: async () => {
           return hydrateOrganismesEffectifsCount();
+        },
+      },
+      "hydrate:organismes-effectifs-count-with-hierarchy": {
+        handler: async () => {
+          return hydrateOrganismesEffectifsCountWithHierarchy();
         },
       },
       "update:organismes-with-apis": {
@@ -374,6 +409,11 @@ export async function setupJobProcessor() {
           return removeOrganismeSansEnseigneNiRaisonSocialeNeTransmettantPlus();
         },
       },
+      "tmp:patches:remove-metiers-from-organisme": {
+        handler: async () => {
+          return removeMetiersFromOrganisme();
+        },
+      },
       "process:effectifs-queue:remove-duplicates": {
         handler: async () => {
           return removeDuplicatesEffectifsQueue();
@@ -402,6 +442,11 @@ export async function setupJobProcessor() {
       "indexes:recreate": {
         handler: async (job) => {
           return recreateIndexes((job.payload as any)?.drop);
+        },
+      },
+      "indexes:collection:create": {
+        handler: async (job) => {
+          return createCollectionIndexes((job.payload as any)?.collection);
         },
       },
       "db:validate": {

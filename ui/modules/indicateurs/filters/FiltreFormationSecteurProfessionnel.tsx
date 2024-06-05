@@ -15,9 +15,9 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import TreeView, { flattenTree } from "react-accessible-treeview";
+import { normalize } from "shared";
 
 import { _get, _getUI, _post } from "@/common/httpClient";
-import { normalize } from "@/common/utils/stringUtils";
 import InputLegend from "@/components/InputLegend/InputLegend";
 import { ArrowTriangleDownIcon } from "@/modules/dashboard/icons";
 import SimpleOverlayMenu from "@/modules/dashboard/SimpleOverlayMenu";

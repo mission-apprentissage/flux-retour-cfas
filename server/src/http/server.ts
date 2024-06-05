@@ -9,7 +9,7 @@ import express, { Application } from "express";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
-import { typesEffectifNominatif, CODE_POSTAL_REGEX } from "shared";
+import { typesEffectifNominatif, CODE_POSTAL_REGEX, zEffectifArchive } from "shared";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -23,7 +23,7 @@ import {
   registerUnknownNetwork,
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
-import { getEffectifForm, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
+import { getEffectifForm, softDeleteEffectif, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import {
   deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
@@ -39,9 +39,11 @@ import {
   getEffectifsNominatifs,
   getIndicateursEffectifsParDepartement,
   getIndicateursEffectifsParOrganisme,
-  getIndicateursOrganismesParDepartement,
   getOrganismeIndicateursEffectifs,
   getOrganismeIndicateursEffectifsParFormation,
+} from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
+import {
+  getIndicateursOrganismesParDepartement,
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
@@ -103,7 +105,10 @@ import { algoUAI } from "@/common/utils/uaiUtils";
 import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
-import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "@/common/validation/dossierApprenantSchemaV3";
+import {
+  computeWarningsForDossierApprenantSchemaV3,
+  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
+} from "@/common/validation/dossierApprenantSchemaV3";
 import loginSchemaLegacy from "@/common/validation/loginSchemaLegacy";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
@@ -602,7 +607,8 @@ function setupRoutes(app: Application) {
                 .safeParseAsync(
                   Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
                 );
-              return data;
+              const warnings = computeWarningsForDossierApprenantSchemaV3(req.body);
+              return { ...data, warnings };
             })
           )
           .use(
@@ -742,6 +748,18 @@ function setupRoutes(app: Application) {
       requireEffectifOrganismePermission("manageEffectifs"),
       returnResult(async (req) => {
         return await updateEffectifFromForm(new ObjectId(req.params.id), req.body);
+      })
+    )
+    .post(
+      "/api/v1/effectif/:id/delete",
+      requireEffectifOrganismePermission("manageEffectifs"),
+      returnResult(async (req) => {
+        const { motif, description } = await validateFullZodObjectSchema(req.body, {
+          motif: zEffectifArchive.shape.suppression.shape.motif,
+          description: zEffectifArchive.shape.suppression.shape.description,
+        });
+
+        await softDeleteEffectif(req.params.id, req.user._id, { motif, description });
       })
     )
     .delete(

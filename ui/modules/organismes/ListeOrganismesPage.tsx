@@ -12,12 +12,11 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { GESTION_ORGANISME_GROUP, IOrganisationType } from "shared";
+import { AUTRE_MODIF_RESEAU_ELEMENT_LINK, IOrganisationType } from "shared";
 
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import Link from "@/components/Links/Link";
-import SupportLink from "@/components/Links/SupportLink";
 import SimplePage from "@/components/Page/SimplePage";
 import { useOrganismesNormalizedLists } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
@@ -104,13 +103,13 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
 
         {["ORGANISME_FORMATION", "TETE_DE_RESEAU"].includes(organisationType) && (
           <Text mt={4}>
-            Si des relations entre organismes ne devraient pas avoir lieu ou sont manquantes, vous devez vous rapprocher
-            de votre Carif-Oref régional afin de modifier les informations collectées (par ex&nbsp;: suppression du
-            formateur rattaché au responsable).
+            Si des organismes de la liste ci-dessous sont manquants ou ne devraient pas apparaître, veuillez{" "}
+            <Link variant="link" color="inherit" href={AUTRE_MODIF_RESEAU_ELEMENT_LINK} isExternal>
+              nous contacter
+            </Link>
+            .
           </Text>
         )}
-
-        <SupportLink href={GESTION_ORGANISME_GROUP}></SupportLink>
 
         {/* Si pas d'organismes non fiables alors on affiche pas les onglets et juste une seule liste */}
         {organismesACompleter.length === 0 && organismesNonRetenus.length === 0 ? (
@@ -138,13 +137,15 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
           >
             <TabList>
               <Tab fontWeight="bold">Organismes fiables ({organismesFiables.length})</Tab>
-              <Tab fontWeight="bold">
-                <HStack>
-                  <i className="ri-alarm-warning-fill"></i>
-                  <Text>OFA : corrections attendues ({organismesACompleter.length})</Text>
-                </HStack>
-              </Tab>
-              {organisationType === "ADMINISTRATEUR" && (
+              {organismesACompleter.length !== 0 && (
+                <Tab fontWeight="bold">
+                  <HStack>
+                    <i className="ri-alarm-warning-fill"></i>
+                    <Text>OFA : corrections attendues ({organismesACompleter.length})</Text>
+                  </HStack>
+                </Tab>
+              )}
+              {organisationType === "ADMINISTRATEUR" && organismesNonRetenus.length !== 0 && (
                 <Tab fontWeight="bold">
                   <HStack>
                     <i className="ri-close-circle-fill"></i>
@@ -157,10 +158,12 @@ function ListeOrganismesPage(props: ListeOrganismesPageProps) {
               <TabPanel>
                 <OrganismesFiablesPanelContent organismes={organismesFiables} />
               </TabPanel>
-              <TabPanel>
-                <OrganismesACompleterPanelContent organismes={organismesACompleter} />
-              </TabPanel>
-              {organisationType === "ADMINISTRATEUR" && (
+              {organismesACompleter.length !== 0 && (
+                <TabPanel>
+                  <OrganismesACompleterPanelContent organismes={organismesACompleter} />
+                </TabPanel>
+              )}
+              {organisationType === "ADMINISTRATEUR" && organismesNonRetenus.length !== 0 && (
                 <TabPanel>
                   <OrganismesNonRetenusPanelContent organismes={organismesNonRetenus} />
                 </TabPanel>

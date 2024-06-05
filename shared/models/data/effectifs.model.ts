@@ -94,10 +94,9 @@ const StatutApprenantEnum = zodEnumFromArray(
 
 const zEffectifComputedStatut = z.object({
   en_cours: StatutApprenantEnum,
-  historique: z.array(
+  parcours: z.array(
     z.object({
-      mois: z.string(),
-      annee: z.string(),
+      date: z.date(),
       valeur: StatutApprenantEnum,
     })
   ),
@@ -109,9 +108,17 @@ export const zEffectif = z.object({
   organisme_responsable_id: zObjectId.describe("Organisme responsable id").nullish(),
   organisme_formateur_id: zObjectId.describe("Organisme formateur id").nullish(),
 
-  id_erp_apprenant: z.string({ description: "Identifiant de l'apprenant dans l'erp" }),
-  source: z.string({ description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)" }),
-  source_organisme_id: z.string({ description: "Identifiant de l'organisme id source transmettant" }).nullish(),
+  id_erp_apprenant: z.string({
+    description: "Identifiant de l'apprenant dans l'erp",
+  }),
+  source: z.string({
+    description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
+  }),
+  source_organisme_id: z
+    .string({
+      description: "Identifiant de l'organisme id source transmettant",
+    })
+    .nullish(),
   annee_scolaire: z
     .string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
@@ -129,7 +136,11 @@ export const zEffectif = z.object({
   is_lock: z.any(),
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }).nullish(),
-  archive: z.boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }).nullish(),
+  archive: z
+    .boolean({
+      description: "Dossier apprenant est archivé (rétention maximum 5 ans)",
+    })
+    .nullish(),
   validation_errors: z
     .array(
       z.object({
@@ -172,7 +183,9 @@ export const zEffectif = z.object({
               .regex(SIRET_REGEX)
               .nullish(),
             fiable: z
-              .boolean({ description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false` })
+              .boolean({
+                description: `organismes.fiabilisation_statut == "FIABLE" && ferme != false`,
+              })
               .nullish(),
           })
           .nullish(),
@@ -194,5 +207,6 @@ export const zEffectif = z.object({
 
 export type IEffectif = z.output<typeof zEffectif>;
 export type IEffectifComputedStatut = z.output<typeof zEffectifComputedStatut>;
+export type IEffectifApprenant = z.infer<typeof zApprenant>;
 
 export default { zod: zEffectif, indexes, collectionName };

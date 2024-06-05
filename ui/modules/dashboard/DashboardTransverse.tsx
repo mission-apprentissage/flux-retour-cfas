@@ -1,17 +1,5 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Center,
-  Container,
-  Divider,
-  Grid,
-  GridItem,
-  Heading,
-  HStack,
-  Spinner,
-  Text,
-  Tooltip,
-} from "@chakra-ui/react";
+import { Box, Center, Container, Divider, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
 import {
@@ -28,6 +16,7 @@ import { formatCivility, prettyFormatNumber } from "@/common/utils/stringUtils";
 import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import withAuth from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
 import FiltreDate from "@/modules/indicateurs/filters/FiltreDate";
@@ -133,25 +122,14 @@ const DashboardTransverse = () => {
         {auth.organisation.type === "ADMINISTRATEUR" && <DashboardAdministrateur />}
         <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={3}>
           Aperçu des données de l’apprentissage de votre périmètre
-          <Tooltip
-            background="bluefrance"
-            color="white"
-            label={
-              <Box padding="1w">
+          <InfoTooltip
+            contentComponent={() => (
+              <Box>
                 <Text as="p">{getPerimetreDescription(organisation)}</Text>
               </Box>
-            }
+            )}
             aria-label={getPerimetreDescription(organisation)}
-          >
-            <Box
-              as="i"
-              className="ri-information-line"
-              fontSize="epsilon"
-              color="#465F9D"
-              verticalAlign="super"
-              fontWeight="700"
-            />
-          </Tooltip>
+          />
         </Heading>
         <Text fontSize={14} mt="8">
           Ces chiffres reflètent partiellement les effectifs de l’apprentissage de votre périmètre&nbsp;: une partie des
@@ -170,28 +148,17 @@ const DashboardTransverse = () => {
             )}
           />
 
-          <Tooltip
-            background="bluefrance"
-            color="white"
-            label={
-              <Box padding="1w">
+          <InfoTooltip
+            contentComponent={() => (
+              <Box>
                 <Text as="p">La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois.</Text>
                 <Text as="p" mt="4">
                   À noter&nbsp;: la période de référence pour l&apos;année scolaire court du 1er août au 31 juillet
                 </Text>
               </Box>
-            }
+            )}
             aria-label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. À noter : la période de référence pour l'année scolaire court du 1er août au 31 juillet"
-          >
-            <Box
-              as="i"
-              className="ri-information-line"
-              fontSize="epsilon"
-              color="grey.500"
-              ml="1w"
-              fontWeight="normal"
-            />
-          </Tooltip>
+          />
         </HStack>
 
         <IndicateursGrid indicateursEffectifs={indicateursEffectifs.total} loading={indicateursEffectifs.isLoading} />
@@ -207,27 +174,16 @@ const DashboardTransverse = () => {
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Répartition des effectifs de votre périmètre
-              <Tooltip
-                background="bluefrance"
-                color="white"
-                label={
-                  <Box padding="1w">
+              <InfoTooltip
+                contentComponent={() => (
+                  <Box>
                     Répartition du nombre d’apprenants et de sorties d’apprentissage à l’instant T, par départements.
                     Ces chiffres correspondent aux données à la date du jour, et peuvent varier d’un jour à l’autre
                     selon les données transmises par les organismes de formation en apprentissage.
                   </Box>
-                }
+                )}
                 aria-label="Informations sur la répartition des effectifs au national"
-              >
-                <Box
-                  as="i"
-                  className="ri-information-line"
-                  fontSize="epsilon"
-                  color="grey.500"
-                  marginLeft="1w"
-                  verticalAlign="middle"
-                />
-              </Tooltip>
+              />
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
 
@@ -248,7 +204,7 @@ const DashboardTransverse = () => {
                       <Box>Apprenants&nbsp;: {indicateurs.apprenants}</Box>
                       <Box>Apprentis&nbsp;: {indicateurs.apprentis}</Box>
                       <Box>Rupturants&nbsp;: {indicateurs.rupturants}</Box>
-                      <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscritsSansContrat}</Box>
+                      <Box>Jeunes sans contrat&nbsp;: {indicateurs.inscrits}</Box>
                       <Box>Sorties d’apprentissage&nbsp;: {indicateurs.abandons}</Box>
                     </>
                   ) : (
@@ -262,29 +218,18 @@ const DashboardTransverse = () => {
           <GridItem bg="galt" py="8" px="12">
             <Heading as="h3" color="#3558A2" fontSize="gamma" fontWeight="700" mb={3}>
               Taux de couverture des organismes de votre périmètre
-              <Tooltip
-                background="bluefrance"
-                color="white"
-                label={
-                  <Box padding="1w">
+              <InfoTooltip
+                contentComponent={() => (
+                  <Box>
                     Ce taux traduit le nombre d’organismes dispensant une formation en apprentissage (sauf responsables)
                     qui transmettent au tableau de bord. Les organismes qui transmettent mais ne font pas partie du
                     référentiel ne rentrent pas en compte dans ce taux. Il est conseillé d’avoir un minimum de 80%
                     d’établissements transmetteurs afin de garantir la viabilité des enquêtes menées auprès de ces
                     derniers.
                   </Box>
-                }
+                )}
                 aria-label="Informations sur le taux de couverture des organismes"
-              >
-                <Box
-                  as="i"
-                  className="ri-information-line"
-                  fontSize="epsilon"
-                  color="grey.500"
-                  marginLeft="1w"
-                  verticalAlign="middle"
-                />
-              </Tooltip>
+              />
             </Heading>
             <Divider size="md" my={4} borderBottomWidth="2px" opacity="1" />
             {indicateursOrganismes.isLoading && (

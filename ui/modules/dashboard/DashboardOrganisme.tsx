@@ -1,4 +1,4 @@
-import { ArrowForwardIcon, ViewIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, ViewIcon, ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import {
   Badge,
   Box,
@@ -10,24 +10,30 @@ import {
   Heading,
   ListItem,
   Text,
-  Tooltip,
   UnorderedList,
   VStack,
   Wrap,
   Link,
+  Collapse,
 } from "@chakra-ui/react";
 import { PieCustomLayerProps, ResponsivePie } from "@nivo/pie";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   natureOrganismeDeFormationLabel,
   TETE_DE_RESEAUX_BY_ID,
   IndicateursEffectifs,
   IndicateursEffectifsAvecFormation,
   IndicateursOrganismes,
-  GO_MODIFICATION_IDENTITE_ELEMENT_LINK,
   IOrganisationCreate,
+  REFERENTIEL_ONISEP,
+  CARIF_OREF,
+  CATALOGUE_APPRENTISSAGE,
+  ANNUAIRE_ENTREPRISE,
+  STATUT_FIABILISATION_ORGANISME,
+  LIST_PUBIC_ORGANISMES_DE_FORMATIONS,
+  FAQ_REFERENCER_ETABLISSEMENT,
 } from "shared";
 
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
@@ -39,9 +45,11 @@ import { formatDate } from "@/common/utils/dateUtils";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatCivility, formatSiretSplitted } from "@/common/utils/stringUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
-import SupportLink from "@/components/Links/SupportLink";
+import CerfaLink from "@/components/Cerfa/CerfaLink";
+import NotificationTransmissionError from "@/components/Notifications/TransmissionErrors";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
+import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import useAuth from "@/hooks/useAuth";
@@ -58,18 +66,86 @@ import ContactsModal from "./ContactsModal";
 import { FileDownloadIcon } from "./icons";
 import IndicateursGrid from "./IndicateursGrid";
 
+const FiabilisationInfo = () => {
+  const [show, setShow] = useState(false);
+  const handleToggle = () => setShow(!show);
+
+  const linkStyle = {
+    color: "#000091",
+    textDecoration: "underline",
+    textUnderlineOffset: "4px",
+    cursor: "pointer",
+  };
+
+  return (
+    <Ribbons variant="warning" w="full" mt={3}>
+      <Box color="black">
+        <Text fontWeight="bold" mb={2}>
+          Votre organisme nécessite des actions de votre part pour être considéré comme fiable et ainsi mieux
+          transmettre vos effectifs.
+        </Text>
+        <Text style={linkStyle} onClick={handleToggle}>
+          {" "}
+          {show ? <ChevronDownIcon /> : <ChevronUpIcon />} Voir le détail des actions
+        </Text>
+        <Collapse in={show}>
+          <UnorderedList>
+            <ListItem mt={2}>
+              {" "}
+              Si votre UAI est affiché comme “Inconnu”, veuillez signaler votre numéro et sa fiche en adressant un
+              courriel à{" "}
+              <Link
+                href={`mailto:referentiel-uai-siret@onisep.fr`}
+                target="_blank"
+                textDecoration="underline"
+                isExternal
+                whiteSpace="nowrap"
+              >
+                referentiel-uai-siret@onisep.fr
+              </Link>{" "}
+              pour qu’il soit mis à jour sur le{" "}
+              <Link isExternal href={REFERENTIEL_ONISEP} textDecoration="underline">
+                Référentiel de l’apprentissage
+              </Link>
+              .
+            </ListItem>
+            <ListItem mt={2}>
+              La nature de votre organisme est “Inconnue” ou les relations affichées sont incorrectes, veuillez la
+              déclarer ou les corriger auprès du{" "}
+              <Link isExternal href={CARIF_OREF} textDecoration="underline">
+                Carif-Oref régional
+              </Link>
+              . (voir également{" "}
+              <Link isExternal href={CATALOGUE_APPRENTISSAGE} textDecoration="underline">
+                Catalogue de l’apprentissage
+              </Link>
+              )
+            </ListItem>
+            <ListItem mt={2}>
+              Si d’autres informations affichées (SIRET, adresse, raison sociale...) sont erronées, veuillez consulter{" "}
+              <Link isExternal href={ANNUAIRE_ENTREPRISE} textDecoration="underline">
+                l’Annuaire des entreprises
+              </Link>
+              .
+            </ListItem>
+          </UnorderedList>
+        </Collapse>
+      </Box>
+    </Ribbons>
+  );
+};
 const natureOrganismeDeFormationTooltip = {
   responsable: (
     <>
-      <Text>Organismes responsables</Text>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organismes responsables
+      </Text>
       <UnorderedList mt={4}>
         <ListItem>
-          Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur ;
+          Ne dispense pas de formation mais délègue à des organismes responsable et formateur ou uniquement formateur.
         </ListItem>
-        <ListItem>
-          Est signataire de la convention de formation ; Demande et reçoit les financements de l’OPCO ;
-        </ListItem>
-        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations ;</ListItem>
+        <ListItem>Est signataire de la convention de formation. Demande et reçoit les financements de l’OPCO.</ListItem>
+        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations.</ListItem>
         <ListItem>
           Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
           sein de l’UFA.
@@ -79,26 +155,28 @@ const natureOrganismeDeFormationTooltip = {
   ),
   formateur: (
     <>
-      <Text>Organismes formateurs</Text>
-      <UnorderedList mt={4}>
-        <ListItem>
-          Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
-          d’activité (NDA))
-        </ListItem>
-      </UnorderedList>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organisme formateur
+      </Text>
+      <Text>
+        Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
+        d’activité (NDA))
+      </Text>
     </>
   ),
   responsable_formateur: (
     <>
-      <Text>Organismes responsables et formateurs</Text>
+      <Text pt={3} px={5} color="black" fontWeight="bold" lineHeight={1.5}>
+        Organismes responsables et formateurs
+      </Text>
       <UnorderedList mt={4}>
         <ListItem>
           Dispense des actions de formation par apprentissage déclaré auprès des services de l’Etat (n° de déclaration
-          d’activité (NDA)) ;
+          d’activité (NDA)).
         </ListItem>
-        <ListItem>Est signataire de la convention de formation ;</ListItem>
-        <ListItem>Demande et reçoit les financements de l’OPCO ;</ListItem>
-        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations ;</ListItem>
+        <ListItem>Est signataire de la convention de formation.</ListItem>
+        <ListItem>Demande et reçoit les financements de l’OPCO.</ListItem>
+        <ListItem>Est responsable auprès de l’administration du respect de ses missions et obligations.</ListItem>
         <ListItem>
           Est titulaire de la certification qualité en tant que CFA et est garant du respect des critères qualité au
           sein de l’UFA.
@@ -194,6 +272,8 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
   const indicateursEffectifsPartielsMessage =
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(auth, organisme);
 
+  const isFiable = organisme.fiabilisation_statut === STATUT_FIABILISATION_ORGANISME.FIABLE;
+
   return (
     <Box>
       <Box
@@ -236,384 +316,374 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
           </Container>
         )}
         <Container maxW="xl" p="8">
-          {isOFviewingItsPublicPage && (
-            <HStack
-              paddingX="1w"
-              paddingY="2px"
-              display="inline-flex"
-              borderRadius={6}
-              backgroundColor="#0000911A"
-              color="bluefrance"
-              mb="6"
-            >
-              <ViewIcon boxSize="6" />
-              <Box>
-                <Text fontSize="epsilon" fontWeight="bold">
-                  Ceci est votre établissement
-                </Text>
-                <Text fontSize="small">Vue en page publique</Text>
-              </Box>
-            </HStack>
-          )}
-
-          <Heading textStyle="h2" color="grey.800" size="md">
-            <DashboardWelcome mr="2" />
-            Bienvenue sur{" "}
-            {modePublique
-              ? "le tableau de bord de"
-              : `votre espace, ${formatCivility(auth.civility)} ${auth.prenom} ${auth.nom}`}
-          </Heading>
-
-          <HStack mt="4" gap="4" alignItems="center">
-            <Text color="bluefrance" fontWeight={700} textTransform="uppercase">
-              {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
-            </Text>
-            {organisme.permissions?.infoTransmissionEffectifs && (
-              <InfoTransmissionDonnees
-                modeBadge={true}
-                lastTransmissionDate={organisme.last_transmission_date}
-                permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
-              />
-            )}
-            {organisme.fiabilisation_statut && (
-              <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
-            )}
-          </HStack>
-
-          {/* DEBUG pour les administrateurs */}
-          {organisationType === "ADMINISTRATEUR" && (
-            <>
-              <ExternalLinks
-                search={organisme.siret}
-                siret={organisme.siret}
-                fontSize={"omega"}
-                display="inline-block"
-                mt={6}
-              />
-
-              <Button
-                variant="outline"
-                borderColor="#B60000"
-                color="#B60000"
-                size="xs"
-                ml={4}
-                onClick={async () => {
-                  await _post<IOrganisationCreate>("/api/v1/admin/impersonate", {
-                    type: "ORGANISME_FORMATION",
-                    siret: organisme.siret,
-                    uai: organisme.uai ?? null, // peut être absent si non présent dans le référentiel
-                  });
-                  location.href = "/";
-                }}
-              >
-                Imposture
-              </Button>
-            </>
-          )}
-
-          <VStack gap={2} alignItems={"baseline"} mt="6">
-            <Wrap fontSize="epsilon" textColor="grey.800">
-              <HStack>
-                <Text>UAI&nbsp;:</Text>
-                <Badge
-                  fontSize="epsilon"
-                  textColor="grey.800"
-                  textTransform="none"
+          <HStack>
+            <Box flex={3} maxW="xl" p="8">
+              {isOFviewingItsPublicPage && (
+                <HStack
                   paddingX="1w"
                   paddingY="2px"
-                  backgroundColor="#ECEAE3"
+                  display="inline-flex"
+                  borderRadius={6}
+                  backgroundColor="#0000911A"
+                  color="bluefrance"
+                  mb="6"
                 >
-                  {organisme.uai || "Inconnue"}
-                  {!organisme.uai && (
-                    <Tooltip
-                      background="bluefrance"
-                      color="white"
-                      label={
-                        <Box padding="2w">
-                          <Text>
-                            <strong>Votre UAI est inconnue</strong>
-                          </Text>
-                          <UnorderedList mt={4}>
-                            <ListItem>
-                              Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme
-                              «&nbsp;Inconnue&nbsp;» alors que votre organisme en possède une, veuillez nous la
-                              communiquer en cliquant sur le lien <i>«&nbsp;Signaler une anomalie&nbsp;»</i> ci-dessous.
-                              L’absence de ce numéro bloque l’enregistrement des contrats d’apprentissage. L’UAI est
-                              recommandée pour être reconnu OFA.
-                            </ListItem>
-                            <ListItem>
-                              Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des services
-                              du rectorat de l’académie où se situe votre CFA. Plus d’informations dans la page d’Aide
-                              et FAQ.
-                            </ListItem>
-                          </UnorderedList>
-                        </Box>
-                      }
-                    >
-                      <Box
-                        as="i"
-                        className="ri-information-line"
-                        fontSize="epsilon"
-                        color="grey.500"
-                        marginLeft="1w"
-                        verticalAlign="middle"
-                      />
-                    </Tooltip>
-                  )}
-                </Badge>
-              </HStack>
-
-              <HStack>
-                <Text>SIRET&nbsp;:</Text>
-                <Badge
-                  fontSize="epsilon"
-                  textColor="grey.800"
-                  paddingX="1w"
-                  paddingY="2px"
-                  backgroundColor="#ECEAE3"
-                  textTransform="none"
-                >
-                  {formatSiretSplitted(organisme.siret)} ({organisme.ferme ? "fermé" : "en activité"})
-                </Badge>
-              </HStack>
-
-              <HStack>
-                <Text>Nature&nbsp;:</Text>
-                <Badge
-                  fontSize="epsilon"
-                  textTransform="none"
-                  textColor="grey.800"
-                  paddingX="1w"
-                  paddingY="2px"
-                  backgroundColor="#ECEAE3"
-                >
-                  {natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}
-                  {natureOrganismeDeFormationLabel[organisme.nature] === "Inconnue" && (
-                    <Tooltip
-                      background="bluefrance"
-                      color="white"
-                      label={
-                        <Box padding="2w">
-                          <Text>
-                            <strong>Votre Nature est inconnue</strong>
-                          </Text>
-                          <Text mt="2w">
-                            Si votre organisme a pour nature «&nbsp;Inconnue&nbsp;», cela signifie que l’offre de
-                            formation n’est pas collectée ou mal référencée par le Carif-Oref. Adressez-vous auprès de
-                            votre Carif-Oref régional pour renseigner cette donnée. Veuillez noter que la modification
-                            de la nature d’un organisme impacte ses relations avec les autres organismes.
-                          </Text>
-                          <Link
-                            textDecoration={"underline"}
-                            isExternal
-                            href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-                          >
-                            En savoir plus sur la démarche.
-                          </Link>
-                        </Box>
-                      }
-                    >
-                      <Box
-                        as="i"
-                        className="ri-information-line"
-                        fontSize="epsilon"
-                        color="grey.500"
-                        marginLeft="1w"
-                        verticalAlign="middle"
-                      />
-                    </Tooltip>
-                  )}
-                  {natureOrganismeDeFormationTooltip[organisme.nature] && (
-                    <Tooltip
-                      background="bluefrance"
-                      color="white"
-                      label={<Box padding="2w">{natureOrganismeDeFormationTooltip[organisme.nature]}</Box>}
-                      aria-label={natureOrganismeDeFormationTooltip[organisme.nature]}
-                    >
-                      <Box
-                        as="i"
-                        className="ri-information-line"
-                        fontSize="epsilon"
-                        color="grey.500"
-                        marginLeft="1w"
-                        verticalAlign="middle"
-                      />
-                    </Tooltip>
-                  )}
-                </Badge>
-              </HStack>
-
-              {modePublique && (
-                <HStack>
-                  <Text>Certifié Qualiopi&nbsp;:</Text>
-                  <Badge
-                    fontSize="epsilon"
-                    textColor="grey.800"
-                    paddingX="1w"
-                    paddingY="2px"
-                    backgroundColor="#ECEAE3"
-                    textTransform="none"
-                  >
-                    {organisme.qualiopi ? "Oui" : "Non"}
-
-                    <Tooltip
-                      background="bluefrance"
-                      color="white"
-                      label={
-                        <Box padding="2w">
-                          La donnée Certifié qualiopi provient de la Liste Publique des Organismes de Formations. Si
-                          cette information est erronée, merci de leur signaler.
-                        </Box>
-                      }
-                    >
-                      <Box
-                        as="i"
-                        className="ri-information-line"
-                        fontSize="epsilon"
-                        color="grey.500"
-                        marginLeft="1w"
-                        verticalAlign="middle"
-                      />
-                    </Tooltip>
-                  </Badge>
-                  <Text>Prépa-apprentissage&nbsp;:</Text>
-                  <Badge
-                    fontSize="epsilon"
-                    textColor="grey.800"
-                    paddingX="1w"
-                    paddingY="2px"
-                    backgroundColor="#ECEAE3"
-                    textTransform="none"
-                  >
-                    {organisme.prepa_apprentissage ? "Oui" : "Non"}
-                    <Tooltip
-                      background="bluefrance"
-                      color="white"
-                      label={
-                        <Box padding="2w">
-                          La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
-                          d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
-                          bénéficiaire à définir son projet d’apprentissage.
-                        </Box>
-                      }
-                    >
-                      <Box
-                        as="i"
-                        className="ri-information-line"
-                        fontSize="epsilon"
-                        color="grey.500"
-                        marginLeft="1w"
-                        verticalAlign="middle"
-                      />
-                    </Tooltip>
-                  </Badge>
+                  <ViewIcon boxSize="6" />
+                  <Box>
+                    <Text fontSize="epsilon" fontWeight="bold">
+                      Ceci est votre établissement
+                    </Text>
+                    <Text fontSize="small">Vue en page publique</Text>
+                  </Box>
                 </HStack>
               )}
-            </Wrap>
 
-            {organisme.reseaux && organisme.reseaux?.length > 0 && (
-              <HStack>
-                <Text>
-                  Cet organisme fait partie {organisme.reseaux?.length === 1 ? "du réseau" : "des réseaux"}&nbsp;:
+              <Heading textStyle="h2" color="grey.800" size="md">
+                <DashboardWelcome mr="2" />
+                Bienvenue sur{" "}
+                {modePublique
+                  ? "le tableau de bord de"
+                  : `votre espace, ${formatCivility(auth.civility)} ${auth.prenom} ${auth.nom}`}
+              </Heading>
+
+              <HStack mt="4" gap="4" alignItems="center">
+                <Text color="bluefrance" fontWeight={700} textTransform="uppercase">
+                  {organisme.enseigne || organisme.raison_sociale || "Organisme inconnu"}
                 </Text>
-                {organisme.reseaux.map((reseau) => (
-                  <Badge
-                    fontSize="epsilon"
-                    textColor="grey.800"
-                    paddingX="1w"
-                    paddingY="2px"
-                    backgroundColor="#ECEAE3"
-                    textTransform="none"
-                    key={reseau}
-                  >
-                    {TETE_DE_RESEAUX_BY_ID[reseau]?.nom}
-                  </Badge>
-                ))}
+                {organisme.permissions?.infoTransmissionEffectifs && (
+                  <InfoTransmissionDonnees
+                    modeBadge={true}
+                    lastTransmissionDate={organisme.last_transmission_date}
+                    permissionInfoTransmissionEffectifs={organisme.permissions?.infoTransmissionEffectifs}
+                  />
+                )}
+                {organisme.fiabilisation_statut && (
+                  <InfoFiabilisationOrganisme fiabilisationStatut={organisme.fiabilisation_statut} />
+                )}
+                {organisationType === "ADMINISTRATEUR" && (
+                  <>
+                    <Button
+                      variant="outline"
+                      borderColor="#B60000"
+                      color="#B60000"
+                      size="xs"
+                      ml={4}
+                      onClick={async () => {
+                        await _post<IOrganisationCreate>("/api/v1/admin/impersonate", {
+                          type: "ORGANISME_FORMATION",
+                          siret: organisme.siret,
+                          uai: organisme.uai ?? null, // peut être absent si non présent dans le référentiel
+                        });
+                        location.href = "/";
+                      }}
+                    >
+                      Imposture
+                    </Button>
+                  </>
+                )}
               </HStack>
-            )}
 
-            <HStack>
-              <Text>Raison sociale&nbsp;:</Text>
-              <Text fontWeight="bold">{organisme.raison_sociale || "Inconnue"}</Text>
-            </HStack>
-
-            <HStack>
-              <Text>Domiciliation&nbsp;:</Text>
-              <Text fontWeight="bold">{organisme.adresse?.complete || "Inconnue"}</Text>
-            </HStack>
-
-            {modePublique && organisme.permissions?.viewContacts && (
-              <>
-                <Box>
-                  <Text display="inline-block">Responsable identifié de l’établissement&nbsp;:</Text>
-                  {contacts &&
-                    (contacts.length > 0 ? (
-                      <>
-                        <Text display="inline-block" ml={2} fontWeight="bold">
-                          {contacts[0].prenom}{" "}
-                          <Text as="span" textTransform="uppercase">
-                            {contacts[0].nom}
-                          </Text>
-                          , {contacts[0].fonction} - {contacts[0].telephone}
-                        </Text>
-                        <Link
-                          href={`mailto:${contacts[0].email}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          borderBottom="1px"
-                          _hover={{ textDecoration: "none" }}
-                          color="action-high-blue-france"
-                          display="inline-flex"
-                          alignItems="center"
-                          ml={6}
-                        >
-                          <ArrowForwardIcon mr={2} />
-                          Envoyer un courriel
-                        </Link>
-                        {contacts.length >= 2 && <ContactsModal contacts={contacts.slice(1)} ml={6} />}
-                      </>
-                    ) : (
-                      <Text display="inline-block" ml={2} fontWeight="bold">
-                        Inconnu - Compte tableau de bord non créé à ce jour
-                      </Text>
-                    ))}
-                </Box>
-                {contacts && contacts.length > 0 && (
+              <VStack gap={2} alignItems={"baseline"} mt="6">
+                <Wrap fontSize="epsilon" textColor="grey.800">
                   <HStack>
-                    <Text>Compte créé le&nbsp;:</Text>
-                    <Text fontWeight="bold">{formatDate(new Date(contacts[0].created_at), "dd/MM/yyyy")}</Text>
+                    <Text>UAI&nbsp;:</Text>
+                    <Badge
+                      fontSize="epsilon"
+                      textColor="grey.800"
+                      textTransform="none"
+                      paddingX="1w"
+                      paddingY="2px"
+                      backgroundColor="#ECEAE3"
+                    >
+                      {organisme.uai || "Inconnue"}
+                      {!organisme.uai && (
+                        <InfoTooltip
+                          contentComponent={() => (
+                            <Box>
+                              <Text>
+                                <strong>Votre UAI est inconnue</strong>
+                              </Text>
+                              <UnorderedList mt={4}>
+                                <ListItem>
+                                  Si votre Unité Administrative Immatriculée (UAI) est répertoriée comme « Inconnue »
+                                  alors que votre organisme en possède une, veuillez la communiquer en écrivant à{" "}
+                                  <Link
+                                    isExternal
+                                    href="mailto:referentiel-uai-siret@onisep.fr"
+                                    textDecoration="underline"
+                                    display="inline"
+                                  >
+                                    referentiel-uai-siret@onisep.fr
+                                  </Link>{" "}
+                                  avec la fiche UAI, afin qu’elle soit mise à jour. L&apos;absence de ce numéro bloque
+                                  l’enregistrement des contrats d’apprentissage. L&apos;UAI est recommandée pour être
+                                  reconnu OFA.
+                                </ListItem>
+                                <ListItem>
+                                  Si votre organisme ne possède pas encore d’UAI, veuillez vous adresser auprès des
+                                  services du rectorat de l’académie où se situe votre CFA. Plus d’informations dans la
+                                  page d’
+                                  <Link
+                                    isExternal
+                                    href={FAQ_REFERENCER_ETABLISSEMENT}
+                                    textDecoration="underline"
+                                    display="inline"
+                                  >
+                                    Aide et FAQ
+                                  </Link>
+                                  .
+                                </ListItem>
+                              </UnorderedList>
+                            </Box>
+                          )}
+                        />
+                      )}
+                    </Badge>
+                  </HStack>
+
+                  <HStack>
+                    <Text>SIRET&nbsp;:</Text>
+                    <Badge
+                      fontSize="epsilon"
+                      textColor="grey.800"
+                      paddingX="1w"
+                      paddingY="2px"
+                      backgroundColor="#ECEAE3"
+                      textTransform="none"
+                    >
+                      {formatSiretSplitted(organisme.siret)} ({organisme.ferme ? "fermé" : "en activité"})
+                    </Badge>
+                  </HStack>
+
+                  <HStack>
+                    <Text>Nature&nbsp;:</Text>
+                    <Badge
+                      fontSize="epsilon"
+                      textTransform="none"
+                      textColor="grey.800"
+                      paddingX="1w"
+                      paddingY="2px"
+                      backgroundColor="#ECEAE3"
+                    >
+                      {natureOrganismeDeFormationLabel[organisme.nature] || "Inconnue"}
+                      {natureOrganismeDeFormationLabel[organisme.nature] === "Inconnue" && (
+                        <InfoTooltip
+                          contentComponent={() => (
+                            <Box>
+                              <Text>
+                                <strong>Votre Nature est inconnue</strong>
+                              </Text>
+                              <Text mt="2w">
+                                Si votre organisme a pour nature «&nbsp;Inconnue&nbsp;», cela signifie que l’offre de
+                                formation n’est pas collectée ou mal référencée par le Carif-Oref. Adressez-vous auprès
+                                de votre Carif-Oref régional pour renseigner cette donnée. Veuillez noter que la
+                                modification de la nature d’un organisme impacte ses relations avec les autres
+                                organismes.
+                              </Text>
+                              <Link
+                                isExternal
+                                textDecoration="underline"
+                                display="inline"
+                                href="https://www.intercariforef.org/referencer-son-offre-de-formation"
+                              >
+                                En savoir plus sur la démarche.
+                              </Link>
+                            </Box>
+                          )}
+                        />
+                      )}
+                      {natureOrganismeDeFormationTooltip[organisme.nature] && (
+                        <InfoTooltip
+                          contentComponent={() => <Box>{natureOrganismeDeFormationTooltip[organisme.nature]}</Box>}
+                        />
+                      )}
+                    </Badge>
+                  </HStack>
+
+                  {modePublique && (
+                    <HStack>
+                      <Text>Certifié Qualiopi&nbsp;:</Text>
+                      <Badge
+                        fontSize="epsilon"
+                        textColor="grey.800"
+                        paddingX="1w"
+                        paddingY="2px"
+                        backgroundColor="#ECEAE3"
+                        textTransform="none"
+                      >
+                        {organisme.qualiopi ? "Oui" : "Non"}
+
+                        <InfoTooltip
+                          contentComponent={() => (
+                            <Box>
+                              La donnée Certifié qualiopi provient de la{" "}
+                              <Link
+                                isExternal
+                                href={LIST_PUBIC_ORGANISMES_DE_FORMATIONS}
+                                textDecoration="underline"
+                                display="inline"
+                              >
+                                Liste Publique des Organismes de Formations
+                              </Link>
+                              . Si cette information est erronée, merci de leur signaler.
+                            </Box>
+                          )}
+                        />
+                      </Badge>
+                      <Text>Prépa-apprentissage&nbsp;:</Text>
+                      <Badge
+                        fontSize="epsilon"
+                        textColor="grey.800"
+                        paddingX="1w"
+                        paddingY="2px"
+                        backgroundColor="#ECEAE3"
+                        textTransform="none"
+                      >
+                        {organisme.prepa_apprentissage ? "Oui" : "Non"}
+                        <InfoTooltip
+                          contentComponent={() => (
+                            <Box>
+                              La prépa-apprentissage, proposée (ou non) par un organisme de formation, est un parcours
+                              d’accompagnement, pouvant aller de quelques jours à plusieurs mois. Il aide le jeune
+                              bénéficiaire à définir son projet d’apprentissage. Si cette information est erronée et que
+                              votre établissement propose une prépa-apprentissage, veuillez nous écrire à{" "}
+                              <Link
+                                isExternal
+                                href="mailto:tableau-de-bord@apprentissage.gouv.fr"
+                                textDecoration="underline"
+                                display="inline"
+                              >
+                                tableau-de-bord@apprentissage.gouv.fr
+                              </Link>
+                            </Box>
+                          )}
+                        />
+                      </Badge>
+                    </HStack>
+                  )}
+                </Wrap>
+
+                {organisme.reseaux && organisme.reseaux?.length > 0 && (
+                  <HStack>
+                    <Text>
+                      Cet organisme fait partie {organisme.reseaux?.length === 1 ? "du réseau" : "des réseaux"}&nbsp;:
+                    </Text>
+                    {organisme.reseaux.map((reseau) => (
+                      <Badge
+                        fontSize="epsilon"
+                        textColor="grey.800"
+                        paddingX="1w"
+                        paddingY="2px"
+                        backgroundColor="#ECEAE3"
+                        textTransform="none"
+                        key={reseau}
+                      >
+                        {TETE_DE_RESEAUX_BY_ID[reseau]?.nom}
+                      </Badge>
+                    ))}
                   </HStack>
                 )}
-              </>
-            )}
 
-            {organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (
-              <HStack alignItems="flex-start">
-                <Text whiteSpace="nowrap">
-                  Organisme{organisme.organismesResponsables.length > 1 ? "s" : ""} responsable
-                  {organisme.organismesResponsables.length > 1 ? "s" : ""} identifié
-                  {organisme.organismesResponsables.length > 1 ? "s" : ""}&nbsp;:
-                </Text>
-                <VStack alignItems="start">
-                  {organisme.organismesResponsables.map((organisme) => (
-                    <Link
-                      key={organisme._id}
-                      href={`/organismes/${organisme._id}`}
-                      borderBottom="1px"
-                      color="action-high-blue-france"
-                      _hover={{ textDecoration: "none" }}
-                    >
-                      {organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"}
-                    </Link>
-                  ))}
-                </VStack>
+                <HStack>
+                  <Text>Raison sociale&nbsp;:</Text>
+                  <Text fontWeight="bold">{organisme.raison_sociale || "Inconnue"}</Text>
+                </HStack>
+
+                <HStack>
+                  <Text>Domiciliation&nbsp;:</Text>
+                  <Text fontWeight="bold">{organisme.adresse?.complete || "Inconnue"}</Text>
+                </HStack>
+
+                {modePublique && organisme.permissions?.viewContacts && (
+                  <>
+                    <Box>
+                      <Text display="inline-block">Responsable identifié de l’établissement&nbsp;:</Text>
+                      {contacts &&
+                        (contacts.length > 0 ? (
+                          <>
+                            <Text display="inline-block" ml={2} fontWeight="bold">
+                              {contacts[0].prenom}{" "}
+                              <Text as="span" textTransform="uppercase">
+                                {contacts[0].nom}
+                              </Text>
+                              , {contacts[0].fonction} - {contacts[0].telephone}
+                            </Text>
+                            <Link
+                              href={`mailto:${contacts[0].email}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              borderBottom="1px"
+                              _hover={{ textDecoration: "none" }}
+                              color="action-high-blue-france"
+                              display="inline-flex"
+                              alignItems="center"
+                              ml={6}
+                            >
+                              <ArrowForwardIcon mr={2} />
+                              Envoyer un courriel
+                            </Link>
+                            {contacts.length >= 2 && <ContactsModal contacts={contacts.slice(1)} ml={6} />}
+                          </>
+                        ) : (
+                          <Text display="inline-block" ml={2} fontWeight="bold">
+                            Inconnu - Compte tableau de bord non créé à ce jour
+                          </Text>
+                        ))}
+                    </Box>
+                    {contacts && contacts.length > 0 && (
+                      <HStack>
+                        <Text>Compte créé le&nbsp;:</Text>
+                        <Text fontWeight="bold">{formatDate(new Date(contacts[0].created_at), "dd/MM/yyyy")}</Text>
+                      </HStack>
+                    )}
+                  </>
+                )}
+
+                {organisme.organismesResponsables && organisme.organismesResponsables.length > 0 && (
+                  <HStack alignItems="flex-start">
+                    <Text whiteSpace="nowrap">
+                      Organisme{organisme.organismesResponsables.length > 1 ? "s" : ""} responsable
+                      {organisme.organismesResponsables.length > 1 ? "s" : ""} identifié
+                      {organisme.organismesResponsables.length > 1 ? "s" : ""}&nbsp;:
+                    </Text>
+                    <VStack alignItems="start">
+                      {organisme.organismesResponsables.map((organisme) => (
+                        <Link
+                          key={organisme._id}
+                          href={`/organismes/${organisme._id}`}
+                          borderBottom="1px"
+                          color="action-high-blue-france"
+                          _hover={{ textDecoration: "none" }}
+                        >
+                          {organisme.enseigne ?? organisme.raison_sociale ?? "Organisme inconnu"}
+                        </Link>
+                      ))}
+                    </VStack>
+                  </HStack>
+                )}
+              </VStack>
+              <HStack mt={3}>
+                <Text>Voir l&apos;établissement sur :</Text>
+                <ExternalLinks
+                  search={organisme.siret}
+                  siret={organisme.siret}
+                  fontSize={"omega"}
+                  display="inline-block"
+                  isAdmin={organisationType === "ADMINISTRATEUR"}
+                />
               </HStack>
+              {!isFiable && <FiabilisationInfo />}
+              {/* Infos Transmission / Paramétrage pour les administrateurs */}
+              {organisationType === "ADMINISTRATEUR" && (
+                <InfosTransmissionEtParametrageOFA mt="2w" organisme={organisme} />
+              )}
+            </Box>
+            {!modePublique && (
+              <Box flex={1}>
+                <CerfaLink organisme={organisme} />
+              </Box>
             )}
-            {!modePublique && <SupportLink href={GO_MODIFICATION_IDENTITE_ELEMENT_LINK}></SupportLink>}
-          </VStack>
-
-          {/* Infos Transmission / Paramétrage pour les administrateurs */}
-          {organisationType === "ADMINISTRATEUR" && <InfosTransmissionEtParametrageOFA mt="2w" organisme={organisme} />}
+          </HStack>
         </Container>
       </Box>
 
@@ -621,12 +691,14 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
         {organisme.permissions?.indicateursEffectifs ? (
           <>
             <Heading as="h1" color="#465F9D" fontSize="beta" fontWeight="700" mb={8}>
-              Aperçu de {modePublique ? "ses" : "vos"} effectifs
+              Aperçu de {modePublique ? "ses" : "vos"} indicateurs
               {hasOrganismesFormateurs && " et établissements"}
               <Text fontSize="gamma" as="span" ml="2">
                 (année scolaire 2023-2024)
               </Text>
             </Heading>
+
+            <NotificationTransmissionError organisme={organisme} />
 
             {indicateursEffectifsPartielsMessage && (
               <Ribbons variant="warning" mt="0.5rem">
@@ -639,9 +711,11 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               </Ribbons>
             )}
 
-            {aucunEffectifTransmis && (
-              <BandeauTransmission organisme={organisme} modePublique={modePublique} modeIndicateurs />
-            )}
+            {aucunEffectifTransmis &&
+              indicateursEffectifs &&
+              Object.values(indicateursEffectifs).every((value) => value === 0) && (
+                <BandeauTransmission organisme={organisme} modePublique={modePublique} modeIndicateurs />
+              )}
 
             {indicateursEffectifs && (
               <IndicateursGrid indicateursEffectifs={indicateursEffectifs} loading={indicateursEffectifsLoading} />

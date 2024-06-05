@@ -1,5 +1,7 @@
 import { Container, Heading, Text } from "@chakra-ui/react";
+import { useEffect } from "react";
 
+import { _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import SimplePage from "@/components/Page/SimplePage";
 import TransmissionByDayTable from "@/modules/transmissions/TransmissionByDayTable";
@@ -7,7 +9,18 @@ import TransmissionByDayTable from "@/modules/transmissions/TransmissionByDayTab
 interface ListeTransmissionsPage {
   organisme: Organisme;
 }
+
 const ListeTransmissionsPage = (props: ListeTransmissionsPage) => {
+  useEffect(() => {
+    const resetNotification = async () => {
+      if (props.organisme.has_transmission_errors) {
+        await _put(`/api/v1/organismes/${props.organisme._id}/transmission/reset-notification`, {});
+      }
+    };
+
+    resetNotification();
+  }, [props.organisme]);
+
   return (
     <SimplePage>
       <Container maxW="xl" p="8">

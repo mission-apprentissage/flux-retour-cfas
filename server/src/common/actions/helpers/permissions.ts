@@ -40,3 +40,14 @@ export function findOrganismeFormateursIds(organisme: IOrganisme, withResponsabi
       .map((organisme) => organisme._id as ObjectId)
   );
 }
+
+export async function findOrganismeResponsableIdsOfOrganisme(organismeId: ObjectId) {
+  const organisme = await getOrganismeById(organismeId);
+  return findOrganismeResponsablesIds(organisme);
+}
+
+export function findOrganismeResponsablesIds(organisme: IOrganisme): ObjectId[] {
+  return (organisme.organismesResponsables ?? [])
+    .filter((organisme) => !!organisme._id)
+    .map((organisme) => organisme._id as ObjectId);
+}

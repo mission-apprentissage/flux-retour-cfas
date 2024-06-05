@@ -5,12 +5,13 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { Paths } from "type-fest";
 
-import { effectifsDb } from "@/common/model/collections";
+import { effectifsArchiveDb, effectifsDECADb, effectifsDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 
 import { stripEmptyFields } from "../utils/miscUtils";
 
 import { legacySchema } from "./effectif.legacy_schema";
+import { createComputedStatutObject } from "./effectifs.statut.actions";
 
 /**
  * Méthode de build d'un effectif
@@ -122,23 +123,44 @@ export const lockEffectif = async (effectif: IEffectif) => {
   return updated.value;
 };
 
-export const addEffectifComputedFields = (organisme: IOrganisme): IEffectif["_computed"] => {
-  return {
-    organisme: {
-      ...(organisme.adresse?.region ? { region: organisme.adresse.region } : {}),
-      ...(organisme.adresse?.departement ? { departement: organisme.adresse.departement } : {}),
-      ...(organisme.adresse?.academie ? { academie: organisme.adresse.academie } : {}),
-      ...(organisme.adresse?.bassinEmploi ? { bassinEmploi: organisme.adresse.bassinEmploi } : {}),
-      ...(organisme.uai ? { uai: organisme.uai } : {}),
-      ...(organisme.siret ? { siret: organisme.siret } : {}),
-      ...(organisme.reseaux ? { reseaux: organisme.reseaux } : {}),
-      fiable: organisme.fiabilisation_statut === "FIABLE" && !organisme.ferme,
-    },
-  };
+export const addComputedFields = ({
+  organisme,
+  effectif,
+}: {
+  organisme?: IOrganisme;
+  effectif?: IEffectif;
+}): Partial<IEffectif["_computed"]> => {
+  const computedFields: Partial<IEffectif["_computed"]> = {};
+
+  if (organisme) {
+    const { adresse, uai, siret, reseaux, fiabilisation_statut, ferme } = organisme;
+    computedFields.organisme = {
+      ...(adresse?.region && { region: adresse?.region }),
+      ...(adresse?.departement && { departement: adresse?.departement }),
+      ...(adresse?.academie && { academie: adresse?.academie }),
+      ...(adresse?.bassinEmploi && { bassinEmploi: adresse?.bassinEmploi }),
+      ...(uai && { uai }),
+      ...(siret && { siret }),
+      ...(reseaux && { reseaux }),
+      fiable: fiabilisation_statut === "FIABLE" && !ferme,
+    };
+  }
+
+  if (effectif) {
+    const statut = createComputedStatutObject(effectif, new Date());
+    computedFields.statut = statut;
+  }
+
+  return computedFields;
 };
 
 export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
-  const effectif = await effectifsDb().findOne({ _id: effectifId });
+  let effectif = await effectifsDb().findOne({ _id: effectifId });
+
+  if (!effectif) {
+    effectif = await effectifsDECADb().findOne({ _id: effectifId });
+  }
+
   return buildEffectifResult(effectif);
 }
 
@@ -240,8 +262,40 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
   return buildEffectifResult(effectifUpdated);
 }
 
+export async function softDeleteEffectif(
+  effectifId: ObjectId,
+  userId: ObjectId,
+  {
+    motif,
+    description,
+  }: {
+    motif: string;
+    description: string | null | undefined;
+  }
+) {
+  const effectif: any = await effectifsDb().findOne({ _id: new ObjectId(effectifId) });
+  await effectifsArchiveDb().insertOne({
+    ...effectif,
+    _id: new ObjectId(),
+    suppression: {
+      user_id: userId,
+      motif,
+      description,
+      date: new Date(),
+    },
+  });
+  await effectifsDb().deleteOne({ _id: new ObjectId(effectifId) });
+}
+
 function buildEffectifResult(effectif) {
   const { properties: effectifSchema } = legacySchema;
+
+  if (!effectif.is_lock) {
+    effectif.is_lock = {
+      apprenant: {},
+      formation: {},
+    };
+  }
 
   function customizer(objValue, srcValue) {
     if (objValue !== undefined) {

@@ -2,7 +2,10 @@ import { FiabilisationUaiSiret } from "shared/models/data/@types";
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import bassinsEmploiDescriptor, { IBassinEmploi } from "shared/models/data/bassinsEmploi.model";
 import contratsDecaModelDescriptor, { IContratDeca } from "shared/models/data/contratsDeca.model";
+import decaRawModelDescriptor, { IDecaRaw } from "shared/models/data/decaRaw.model";
 import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
+import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
+import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import fiabilisationUaiSiretModelDescriptor from "shared/models/data/fiabilisationUaiSiret.model";
 import formationsModelDescriptor, { IFormation } from "shared/models/data/formations.model";
@@ -32,6 +35,7 @@ export const modelDescriptors = [
   jobEventsModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
+  decaRawModelDescriptor,
   MaintenanceMessagesModelDescriptor,
   invitationsModelDescriptor,
   organisationsModelDescriptor,
@@ -45,6 +49,8 @@ export const modelDescriptors = [
   contratsDecaModelDescriptor,
   romeModelDescriptor,
   rncpModelDescriptor,
+  effectifsDECAModelDescriptor,
+  effectifsArchiveModelDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
@@ -61,6 +67,9 @@ export const organismesReferentielDb = () =>
 export const maintenanceMessageDb = () =>
   getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<IEffectif>(effectifsModelDescriptor.collectionName);
+export const effectifsArchiveDb = () =>
+  getDbCollection<IEffectifArchive>(effectifsArchiveModelDescriptor.collectionName);
+export const effectifsDECADb = () => getDbCollection<IEffectifDECA>(effectifsDECAModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<IEffectifQueue>(effectifsQueueModelDescriptor.collectionName);
 export const fiabilisationUaiSiretDb = () =>
   getDbCollection<FiabilisationUaiSiret>(fiabilisationUaiSiretModelDescriptor.collectionName);
@@ -71,3 +80,4 @@ export const romeDb = () => getDbCollection<IRome>(romeModelDescriptor.collectio
 export const rncpDb = () => getDbCollection<IRncp>(rncpModelDescriptor.collectionName);
 export const contratsDecaDb = () => getDbCollection<IContratDeca>(contratsDecaModelDescriptor.collectionName);
 export const auditLogsDb = () => getDbCollection<IAuditLog>(auditLogsModelDescriptor.collectionName);
+export const decaRawDb = () => getDbCollection<IDecaRaw>(decaRawModelDescriptor.collectionName);

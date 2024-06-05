@@ -1,5 +1,6 @@
 import { Box, Skeleton } from "@chakra-ui/react";
 import React from "react";
+import { Statut } from "shared";
 
 import { EffectifForm } from "./effectifForm/EffectifForm";
 import { EffectifFormControllerContext } from "./formEngine/EffectifFormControllerContext";
@@ -11,9 +12,16 @@ import { useEffectifForm } from "./formEngine/useEffectifForm";
 interface EffectifProps {
   modeSifa: boolean;
   canEdit: boolean;
+  parcours: Statut["parcours"];
+  refetch: any;
 }
 
-const Effectif = React.memo(function EffectifMemo({ modeSifa = false, canEdit = false }: EffectifProps) {
+const Effectif = React.memo(function EffectifMemo({
+  modeSifa = false,
+  canEdit = false,
+  parcours,
+  refetch,
+}: EffectifProps) {
   const { controller: effectifFormController } = useEffectifForm({ schema: effectifFormSchema });
   const { isLoading } = useInitEffectifForm({
     controller: effectifFormController,
@@ -31,7 +39,7 @@ const Effectif = React.memo(function EffectifMemo({ modeSifa = false, canEdit = 
       {/* @ts-expect-error */}
       <EffectifFormControllerContext.Provider value={effectifFormController}>
         <Box my={12} px={5}>
-          <EffectifForm modeSifa={modeSifa} />
+          <EffectifForm modeSifa={modeSifa} parcours={parcours} refetch={refetch} />
         </Box>
       </EffectifFormControllerContext.Provider>
     </>
