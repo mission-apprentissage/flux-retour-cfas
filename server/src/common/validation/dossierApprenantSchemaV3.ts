@@ -28,8 +28,8 @@ export const dossierApprenantSchemaV3Base = () =>
     // nom_etablissement: primitivesV1.etablissement_responsable.nom,
     // id_formation: primitivesV1.formation.code_cfd,
     annee_scolaire: primitivesV1.formation.annee_scolaire,
-    statut_apprenant: primitivesV1.apprenant.statut,
-    date_metier_mise_a_jour_statut: primitivesV1.apprenant.date_metier_mise_a_jour_statut,
+    statut_apprenant: primitivesV1.apprenant.statut.nullish(),
+    date_metier_mise_a_jour_statut: primitivesV1.apprenant.date_metier_mise_a_jour_statut.nullish(),
     id_erp_apprenant: primitivesV1.apprenant.id_erp,
 
     // OPTIONAL FIELDS
