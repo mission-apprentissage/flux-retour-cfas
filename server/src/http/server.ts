@@ -93,7 +93,7 @@ import { changePassword, updateUserProfile } from "@/common/actions/users.action
 import { getCodePostalInfo } from "@/common/apis/apiTablesCorrespondances";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { apiRoles } from "@/common/roles";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
@@ -881,10 +881,26 @@ function setupRoutes(app: Application) {
             organisation = await organisationsDb().findOne(organisationBody);
           }
 
-          // génère une nouvelle session avec l'organisation usurpée
-          const sessionToken = await createSession(req.user.email, {
-            impersonatedOrganisation: organisation,
-          });
+          let sessionToken;
+          if (organisation?.type === "ORGANISME_FORMATION") {
+            const userOrganisme = await organismesDb().findOne({
+              siret: organisation.siret,
+              uai: organisation.uai as string,
+            });
+
+            if (userOrganisme) {
+              sessionToken = await createSession(req.user.email, {
+                impersonatedOrganisation: { ...organisation, organisme_id: userOrganisme._id },
+              });
+            } else {
+              throw new Error("User organisme not found.");
+            }
+          } else {
+            sessionToken = await createSession(req.user.email, {
+              impersonatedOrganisation: organisation,
+            });
+          }
+
           responseWithCookie(res, sessionToken);
         })
       )

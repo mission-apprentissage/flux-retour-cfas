@@ -35,6 +35,7 @@ const zOrganisationOrganismeCreate = z.object({
     })
     .regex(UAI_REGEX)
     .nullable(),
+  organisme_id: z.string({ description: "Identifiant de l'organisme" }).optional(),
 });
 
 const zOrganisationReaseauCreate = z.object({
