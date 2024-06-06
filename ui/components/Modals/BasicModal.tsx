@@ -35,7 +35,6 @@ export function BasicModal({
   handleClose,
   renderTrigger,
   renderFooter,
-  customWidth = "auto",
   ...modalProps
 }: BasicModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -70,7 +69,7 @@ export function BasicModal({
 
       <Modal isOpen={isOpen} onClose={customClose} {...modalProps}>
         <ModalOverlay />
-        <ModalContent p={6} borderRadius="0" w={customWidth} maxWidth={customWidth}>
+        <ModalContent p={6} borderRadius="0">
           <Button
             display={"flex"}
             alignSelf={"flex-end"}
