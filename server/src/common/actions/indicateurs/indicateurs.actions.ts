@@ -9,6 +9,7 @@ import {
   IndicateursOrganismesAvecDepartement,
   STATUT_APPRENANT,
   TypeEffectifNominatif,
+  shouldDisplayContactInEffectifNominatif,
 } from "shared";
 
 import {
@@ -658,7 +659,6 @@ export async function getEffectifsNominatifsGenerique(
           organisme_siret: "$organisme.siret",
           organisme_nom: "$organisme.nom",
           organisme_nature: "$organisme.nature",
-
           apprenant_statut: "$statut",
           apprenant_nom: "$apprenant.nom",
           apprenant_prenom: "$apprenant.prenom",
@@ -670,6 +670,12 @@ export async function getEffectifsNominatifsGenerique(
           formation_niveau: "$formation.niveau",
           formation_date_debut_formation: { $arrayElemAt: ["$formation.periode", 0] },
           formation_date_fin_formation: { $arrayElemAt: ["$formation.periode", 1] },
+          ...(shouldDisplayContactInEffectifNominatif(ctx.organisation.type)
+            ? {
+                apprenant_courriel: "$apprenant.courriel",
+                apprenant_telephone: "$apprenant.telephone",
+              }
+            : {}),
         },
       },
     ])
