@@ -472,6 +472,20 @@ export const updateOrganismesHasTransmittedWithHierarchy = async (
   );
 };
 
+export const updateDecaCompatibilityFromOrganismeId = async (organismeId: ObjectId, isDecaCompatible: boolean) => {
+  await effectifsDECADb().updateMany(
+    {
+      organisme_id: organismeId,
+    },
+    {
+      $set: {
+        is_deca_compatible: isDecaCompatible,
+      },
+    },
+    { bypassDocumentValidation: true }
+  );
+};
+
 /**
  * Génération d'une api key s'il n'existe pas
  */
