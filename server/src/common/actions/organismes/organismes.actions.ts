@@ -468,7 +468,8 @@ export const updateOrganismesHasTransmittedWithHierarchy = async (
       $set: {
         is_deca_compatible: !computedStatus,
       },
-    }
+    },
+    { bypassDocumentValidation: true }
   );
 };
 
