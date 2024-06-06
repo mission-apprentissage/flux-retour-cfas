@@ -893,7 +893,7 @@ function setupRoutes(app: Application) {
                 impersonatedOrganisation: { ...organisation, organisme_id: userOrganisme._id },
               });
             } else {
-              throw new Error("User organisme not found.");
+              throw new Error("Organisme non trouvé.");
             }
           } else {
             sessionToken = await createSession(req.user.email, {
