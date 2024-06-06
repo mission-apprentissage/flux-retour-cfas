@@ -1,6 +1,5 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
-import { IndicateursEffectifsAvecOrganisme } from "shared";
 
 import { createComputedStatutObject } from "@/common/actions/effectifs.statut.actions";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
@@ -300,7 +299,7 @@ describe("Route indicateurs", () => {
                   inscrits: 0,
                   rupturants: 0,
                   abandons: 0,
-                } satisfies IndicateursEffectifsAvecOrganisme,
+                },
               ]
             : []
         );
