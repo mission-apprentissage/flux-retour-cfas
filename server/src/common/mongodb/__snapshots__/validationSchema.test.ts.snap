@@ -11003,6 +11003,10 @@ exports[`validation-schema should create validation schema for organisations: or
           "bsonType": "date",
           "description": "Date de création en base de données",
         },
+        "organisme_id": {
+          "bsonType": "string",
+          "description": "Identifiant de l'organisme",
+        },
         "siret": {
           "bsonType": "string",
           "description": "N° SIRET",
@@ -13154,6 +13158,71 @@ exports[`validation-schema should create validation schema for rome: rome 1`] = 
     "label_domaine",
     "label_famille",
     "_id",
+  ],
+}
+`;
+
+exports[`validation-schema should create validation schema for telechargementListeNomLogs: telechargementListeNomLogs 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+      "description": "Identifiant MongoDB du log",
+    },
+    "effectifs": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "objectId",
+      },
+    },
+    "organisation_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant unique",
+    },
+    "organisme_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Identifiant unique",
+    },
+    "telechargement_date": {
+      "bsonType": "date",
+    },
+    "type": {
+      "bsonType": "string",
+      "enum": [
+        "apprenant",
+        "apprenti",
+        "inscritSansContrat",
+        "rupturant",
+        "abandon",
+        "inconnu",
+      ],
+    },
+    "user_id": {
+      "bsonType": "objectId",
+    },
+  },
+  "required": [
+    "_id",
+    "type",
+    "effectifs",
+    "telechargement_date",
+    "user_id",
   ],
 }
 `;

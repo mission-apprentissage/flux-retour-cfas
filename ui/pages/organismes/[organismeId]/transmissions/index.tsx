@@ -4,17 +4,15 @@ import { useRouter } from "next/router";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import SimplePage from "@/components/Page/SimplePage";
 import withAuth from "@/components/withAuth";
-import { useOrganisationOrganisme } from "@/hooks/organismes";
+import { useOrganisme } from "@/hooks/organismes";
 
-import ListeTransmissionsDetails from "../../modules/transmissions/ListeTransmissionsDetails";
+import ListeTransmissionsPage from "../../../../modules/transmissions/ListeTransmissionsPage";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const PageTransmissionsDeMonOrganismes = () => {
-  const { organisme } = useOrganisationOrganisme();
   const router = useRouter();
-
-  const date = router.query.date as string;
+  const { organisme } = useOrganisme(router.query.organismeId as string);
 
   if (!organisme) {
     return (
@@ -26,7 +24,7 @@ const PageTransmissionsDeMonOrganismes = () => {
     );
   }
 
-  return <ListeTransmissionsDetails organisme={organisme} date={date} />;
+  return <ListeTransmissionsPage organisme={organisme} />;
 };
 
 export default withAuth(PageTransmissionsDeMonOrganismes);

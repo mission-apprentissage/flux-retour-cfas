@@ -29,7 +29,10 @@ import { hydrateOrganismesOPCOs } from "./hydrate/hydrate-organismes-opcos";
 import { hydrateRNCP } from "./hydrate/hydrate-rncp";
 import { hydrateROME } from "./hydrate/hydrate-rome";
 import { hydrateOpenApi } from "./hydrate/open-api/hydrate-open-api";
-import { hydrateOrganismesEffectifsCountWithHierarchy } from "./hydrate/organismes/hydrate-effectifs-count-with-hierarchy";
+import {
+  hydrateOrganismesEffectifsCountWithHierarchy,
+  updateOrganismesDecaTransmitter,
+} from "./hydrate/organismes/hydrate-effectifs-count-with-hierarchy";
 import { hydrateOrganismesEffectifsCount } from "./hydrate/organismes/hydrate-effectifs_count";
 import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes";
 import { hydrateOrganismesBassinEmploi } from "./hydrate/organismes/hydrate-organismes-bassinEmploi";
@@ -305,6 +308,11 @@ export async function setupJobProcessor() {
       "update:organismes-with-apis": {
         handler: async () => {
           return updateAllOrganismesRelatedFormations();
+        },
+      },
+      "update:organismes-deca-transmitter": {
+        handler: async () => {
+          return updateOrganismesDecaTransmitter();
         },
       },
       "hydrate:opcos": {

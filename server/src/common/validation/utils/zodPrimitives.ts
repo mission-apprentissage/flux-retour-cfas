@@ -205,13 +205,10 @@ export const primitivesV1 = {
         description: "Code RNCP de la formation",
         examples: ["RNCP35316", "35316"],
       }),
-    code_cfd: z.preprocess(
-      (v: any) => (v ? String(v) : v),
-      z.string().trim().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
-        example: "50022141",
-        description: "Code Formation Diplôme (CFD)", // aussi appelé id_formation
-      })
-    ),
+    code_cfd: z.coerce.string().trim().toUpperCase().regex(CFD_REGEX, "Code CFD invalide").openapi({
+      example: "50022141",
+      description: "Code Formation Diplôme (CFD)", // aussi appelé id_formation
+    }),
     libelle_court: z.string().trim().min(2).describe("Libellé court de la formation").openapi({
       description: "Libellé court de la formation",
       example: "CAP PATISSIER",

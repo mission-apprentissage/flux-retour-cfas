@@ -460,6 +460,12 @@ program
   .action(createJobAction("hydrate:contrats-deca-raw"));
 
 program
+  .command("update:organismes-deca-transmitter")
+  .description("Mise a jour des effectifs DECA désynchronisé")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("update:organismes-deca-transmitter"));
+
+program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)
