@@ -41,6 +41,7 @@ const INPUT_FILES = [
   "reseaux/referentiel-reseau-cfa-ec.csv", // CFA EC
   "reseaux/referentiel-reseau-compagnons-du-devoir.csv", // Compagnons du devoir
   "reseaux/referentiel-reseau-eduservice.csv",
+  "reseaux/referentiel-reseau-afpa.csv",
 ];
 
 /**
