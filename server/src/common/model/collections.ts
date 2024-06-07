@@ -22,6 +22,9 @@ import OrganismesReferentielModelDescriptor, {
 import OrganismesSolteaModelDescriptor, { IOrganismeSoltea } from "shared/models/data/organismesSoltea.model";
 import rncpModelDescriptor, { IRncp } from "shared/models/data/rncp.model";
 import romeModelDescriptor, { IRome } from "shared/models/data/rome.model";
+import telechargementListesNominativesLogsDescriptor, {
+  ITelechargementListeNomLogs,
+} from "shared/models/data/telechargementListesNomLogs.model";
 import usersModelDescriptor, { IUser } from "shared/models/data/users.model";
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 
@@ -51,6 +54,7 @@ export const modelDescriptors = [
   rncpModelDescriptor,
   effectifsDECAModelDescriptor,
   effectifsArchiveModelDescriptor,
+  telechargementListesNominativesLogsDescriptor,
 ];
 
 export const formationsDb = () => getDbCollection<IFormation>(formationsModelDescriptor.collectionName);
@@ -81,3 +85,5 @@ export const rncpDb = () => getDbCollection<IRncp>(rncpModelDescriptor.collectio
 export const contratsDecaDb = () => getDbCollection<IContratDeca>(contratsDecaModelDescriptor.collectionName);
 export const auditLogsDb = () => getDbCollection<IAuditLog>(auditLogsModelDescriptor.collectionName);
 export const decaRawDb = () => getDbCollection<IDecaRaw>(decaRawModelDescriptor.collectionName);
+export const telechargementListesNominativesLogsDb = () =>
+  getDbCollection<ITelechargementListeNomLogs>(telechargementListesNominativesLogsDescriptor.collectionName);

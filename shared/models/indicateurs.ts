@@ -1,4 +1,4 @@
-import type { WithoutId } from "mongodb";
+import type { ObjectId, WithoutId } from "mongodb";
 
 import { IRncp } from "./data/rncp.model";
 
@@ -13,6 +13,7 @@ export interface IndicateursEffectifs {
 export type IndicateursEffectifsAvecDepartement = IndicateursEffectifs & { departement: string };
 
 export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & {
+  _id: ObjectId;
   organisme_id: string;
   nom: string;
   nature: string;

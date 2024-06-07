@@ -653,7 +653,7 @@ export async function getEffectifsNominatifsGenerique(
       },
       {
         $project: {
-          _id: 0,
+          _id: 1,
           organisme_uai: "$organisme.uai",
           organisme_siret: "$organisme.siret",
           organisme_nom: "$organisme.nom",
