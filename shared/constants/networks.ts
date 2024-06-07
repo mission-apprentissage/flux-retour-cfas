@@ -115,9 +115,14 @@ export const TETE_DE_RESEAUX = [
     responsable: false,
   },
   {
-    nom: "EDUSERVICES", // Réseau Education Nationale
+    nom: "EDUSERVICES",
     key: "EDUSERVICE",
     responsable: false,
+  },
+  {
+    nom: "AFPA",
+    key: "AFPA",
+    responsable: true,
   },
 ] as const satisfies ReadonlyArray<{ readonly nom: string; readonly key: string; readonly responsable: boolean }>;
 
