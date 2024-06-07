@@ -975,16 +975,6 @@
                     "annee_scolaire": {
                       "type": "string"
                     },
-                    "statut_apprenant": {
-                      "type": "integer",
-                      "description": "Valeurs possibles: 0,2,3",
-                      "enum": [0, 2, 3]
-                    },
-                    "date_metier_mise_a_jour_statut": {
-                      "type": "string",
-                      "description": "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
-                      "format": "YYYY-MM-DDT00:00:00Z"
-                    },
                     "id_erp_apprenant": {
                       "type": "string",
                       "description": "Identifiant de l'apprenant dans l'ERP"
@@ -1350,8 +1340,6 @@
                     "prenom_apprenant",
                     "date_de_naissance_apprenant",
                     "annee_scolaire",
-                    "statut_apprenant",
-                    "date_metier_mise_a_jour_statut",
                     "id_erp_apprenant",
                     "date_inscription_formation",
                     "date_entree_formation",
@@ -1414,16 +1402,6 @@
                           },
                           "annee_scolaire": {
                             "type": "string"
-                          },
-                          "statut_apprenant": {
-                            "type": "integer",
-                            "description": "Valeurs possibles: 0,2,3",
-                            "enum": [0, 2, 3]
-                          },
-                          "date_metier_mise_a_jour_statut": {
-                            "type": "string",
-                            "description": "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
-                            "format": "YYYY-MM-DDT00:00:00Z"
                           },
                           "id_erp_apprenant": {
                             "type": "string",
@@ -1850,8 +1828,6 @@
                           "prenom_apprenant",
                           "date_de_naissance_apprenant",
                           "annee_scolaire",
-                          "statut_apprenant",
-                          "date_metier_mise_a_jour_statut",
                           "id_erp_apprenant",
                           "date_inscription_formation",
                           "date_entree_formation",
