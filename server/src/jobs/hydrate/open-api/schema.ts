@@ -1,4 +1,5 @@
 import { OpenAPIRegistry, OpenApiGeneratorV3, RouteConfig } from "@asteasolutions/zod-to-openapi";
+import { TD_API_ELEMENT_LINK } from "shared/constants";
 import { z } from "zod";
 
 import dossierApprenantSchema from "@/common/validation/dossierApprenantSchemaV1V2";
@@ -85,11 +86,11 @@ const httpAuth = registry.registerComponent("securitySchemes", "httpAuth", {
   type: "http",
   scheme: "basic",
 });
-const apiKeyAuth = registry.registerComponent("securitySchemes", "apiKeyAuth", {
+
+const bearerAuth = registry.registerComponent("securitySchemes", "apiKeyAuth", {
   description: "Méthode d'authentification pour la V3 avec une clé d'API",
-  type: "apiKey",
-  name: "api_key",
-  in: "header",
+  type: "http",
+  scheme: "bearer",
 });
 
 registry.registerPath({
@@ -180,21 +181,22 @@ registry.registerPath({
   path: "/v3/dossiers-apprenants",
   summary: "Import des dossiers apprenants",
   description: "Permet la création ou la mise à jour de plusieurs dossiers apprenants",
-  security: [{ [apiKeyAuth.name]: [] }],
+  security: [{ [bearerAuth.name]: [] }],
   tags: ["v3"],
   request: {
     body: {
       required: true,
       content: {
         "application/json": {
-          schema: z.array(dossierApprenantSchemaV3Base()),
+          schema: z.array(dossierApprenantSchemaV3Base().omit({ has_nir: true })),
         },
       },
     },
   },
   responses: {
     "200": {
-      description: "les dossiers apprenants ont été mis en file d'attente.",
+      description:
+        "Les dossiers apprenants ont été mis en file d'attente.\nLa liste des données en erreurs peut être consultée dans le champ `validation_errors` ",
       content: {
         "application/json": {
           schema: z.object({
@@ -212,8 +214,25 @@ registry.registerPath({
         },
       },
     },
+    "403": {
+      description: "La clé d'API n'est pas valide.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.string().openapi({
+              description: "Forbidden",
+              enum: ["Forbidden"],
+            }),
+            message: z.string().openapi({
+              description: "La clé API n'est pas valide",
+              enum: ["Clé API manquante", "La clé API n'est pas valide", "La clé API doit etre au format Bearer"],
+            }),
+          }),
+        },
+      },
+    },
     "500": {
-      description: "Une erreur est survenue",
+      description: "Une erreur inattendue est survenue",
     },
   },
 });
@@ -228,13 +247,13 @@ export default generator.generateDocument({
     description:
       "L'API mission apprentissage est à disposition des ERPs et organismes de formation qui souhaitent envoyer leur donnnées effectifs au tableau de bord de l'apprentissage.",
     contact: {
-      name: "support",
-      email: "tableau-de-bord@apprentissage.beta.gouv.fr",
+      url: TD_API_ELEMENT_LINK,
+      name: "API Support",
     },
   },
   externalDocs: {
-    description: "Plus d'info sur le tableau de bord de l'apprentissage",
-    url: "https://beta.gouv.fr/startups/tdb-apprentissage.html",
+    description: "Télécharger le modèle OpenAPI",
+    url: "https://cfas.apprentissage.beta.gouv.fr/api/openapi-model",
   },
   servers: [{ url: "https://cfas.apprentissage.beta.gouv.fr/api" }],
   tags: [
