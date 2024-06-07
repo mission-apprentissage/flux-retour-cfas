@@ -61,14 +61,14 @@ const UserMenu = () => {
                 <UserFill mt="0.3rem" boxSize={4} />
                 <Box display={["none", "block"]} ml={2}>
                   <Text color="bluefrance" textStyle="sm" textOverflow="ellipsis" maxWidth="200px" overflow="hidden">
-                    {auth.email}
+                    Mon compte
                   </Text>
                 </Box>
               </Flex>
             </MenuButton>
             <MenuList>
               <MenuItem href="/mon-compte" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
-                Mon compte
+                Informations
               </MenuItem>
               <MenuItem href="/organisation/membres" icon={<Parametre boxSize={4} />}>
                 Rôles et habilitations
