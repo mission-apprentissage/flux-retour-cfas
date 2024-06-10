@@ -852,7 +852,7 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                     </Text>
 
                     <Link
-                      href="https://mission-apprentissage.notion.site/Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0"
+                      href="/docs/faq"
                       target="_blank"
                       rel="noopener noreferrer"
                       borderBottom="1px"
