@@ -126,6 +126,19 @@ export const effectifsExportColumns = [
   },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
+export const effectifsExportWithContactColumns = [
+  {
+    label: "apprenant_telephone",
+    key: "apprenant_telephone",
+    width: 20,
+  },
+  {
+    label: "apprenant_courriel",
+    key: "apprenant_courriel",
+    width: 20,
+  },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
 export const organismesExportColumns = [
   {
     label: "uai",

@@ -314,6 +314,7 @@ describe("Route indicateurs", () => {
     const anneeScolaire = "2022-2023";
 
     let effectifResult: any[] = [];
+    let effectifResultWithContact: any[] = [];
     const emptyResult = [];
 
     const effectif = {
@@ -342,8 +343,7 @@ describe("Route indicateurs", () => {
     beforeEach(async () => {
       await effectifsDb().insertOne(effectifGenerated);
 
-      // petit hack pour muter l'objet :-°
-      effectifResult.splice(0, 1, {
+      const data = {
         apprenant_date_de_naissance: effectif.apprenant.date_de_naissance?.toISOString().substring(0, 10),
         apprenant_nom: effectif.apprenant.nom,
         apprenant_prenom: effectif.apprenant.prenom,
@@ -359,6 +359,13 @@ describe("Route indicateurs", () => {
         organisme_nom: userOrganisme.raison_sociale,
         organisme_siret: userOrganisme.siret,
         organisme_uai: userOrganisme.uai,
+      };
+      // petit hack pour muter l'objet :-°
+      effectifResult.splice(0, 1, data);
+
+      effectifResultWithContact.splice(0, 1, {
+        ...data,
+        apprenant_courriel: effectif.apprenant.courriel,
       });
     });
 
@@ -378,7 +385,7 @@ describe("Route indicateurs", () => {
         "Tête de réseau même réseau": false,
         // "Tête de réseau Responsable": false,
         "Tête de réseau autre réseau": false,
-        "DREETS même région": effectifResult,
+        "DREETS même région": effectifResultWithContact,
         "DREETS autre région": emptyResult,
         "DRAFPIC régional même région": effectifResult,
         "DRAFPIC régional autre région": emptyResult,
@@ -388,9 +395,9 @@ describe("Route indicateurs", () => {
         "Conseil Régional autre région": false,
         "CARIF OREF régional même région": false,
         "CARIF OREF régional autre région": false,
-        "DDETS même département": effectifResult,
+        "DDETS même département": effectifResultWithContact,
         "DDETS autre département": emptyResult,
-        "Académie même académie": effectifResult,
+        "Académie même académie": effectifResultWithContact,
         "Académie autre académie": emptyResult,
         "Opérateur public national": false,
         "CARIF OREF national": false,
