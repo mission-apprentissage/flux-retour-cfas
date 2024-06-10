@@ -85,7 +85,7 @@
     "sha512crypt-node": "1.0.2",
     "shared": "workspace:*",
     "sinon": "15.0.2",
-    "swagger-ui-express": "4.6.2",
+    "swagger-ui-express": "5.0.0",
     "tsx": "3.12.6",
     "type-fest": "^4.10.2",
     "uuid": "8.3.2",

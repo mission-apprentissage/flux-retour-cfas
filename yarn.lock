@@ -17785,7 +17785,7 @@ __metadata:
     sha512crypt-node: 1.0.2
     shared: "workspace:*"
     sinon: 15.0.2
-    swagger-ui-express: 4.6.2
+    swagger-ui-express: 5.0.0
     ts-jest: ^29.1.2
     tsup: ^7.3.0
     tsx: 3.12.6
@@ -18630,21 +18630,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"swagger-ui-dist@npm:>=4.11.0":
-  version: 5.4.2
-  resolution: "swagger-ui-dist@npm:5.4.2"
-  checksum: eb80a699474b247800f7ce2594ecf75a3c92ee3da752d890fe6be7f358628f08b353ab403151826cb4a8010c055bccc1ccd8b6fe5c3673a9b1b126e7e6da599d
+"swagger-ui-dist@npm:>=5.0.0":
+  version: 5.11.8
+  resolution: "swagger-ui-dist@npm:5.11.8"
+  checksum: e2710e8fe4e0348da45edcdb435f5d617b5a47d3d5935c1af7ca9a7fc996c27967dc53dabd9199def8963e7877c6a3b75e785e90529894784650f81f3f041101
   languageName: node
   linkType: hard
 
-"swagger-ui-express@npm:4.6.2":
-  version: 4.6.2
-  resolution: "swagger-ui-express@npm:4.6.2"
+"swagger-ui-express@npm:5.0.0":
+  version: 5.0.0
+  resolution: "swagger-ui-express@npm:5.0.0"
   dependencies:
-    swagger-ui-dist: ">=4.11.0"
+    swagger-ui-dist: ">=5.0.0"
   peerDependencies:
-    express: ">=4.0.0"
-  checksum: 3883dc9243ef3fd050ea99edfa14c686dd3477b1ca81655d9c49347b71a540e266fc658b5b6f936c3f9192f224e4cff41bc3d17ab325e9e110a19f0abec551b6
+    express: ">=4.0.0 || >=5.0.0-beta"
+  checksum: 565b89717315577785edc6d2f4df8ce83207baa2b714264170ffa677522d2103c184091e146b7cce7baf254e96116c5bb2cb1ab907dc1152fdead3090690983b
   languageName: node
   linkType: hard
 

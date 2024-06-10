@@ -46,7 +46,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.sexe": {
-    required: false,
+    required: true,
     fieldType: "radio",
     label: "Sexe :",
     options: [
@@ -61,6 +61,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.date_de_naissance": {
+    required: true,
     fieldType: "date",
     label: "Date de naissance :",
     showInfo: true,
@@ -130,6 +131,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.courriel": {
+    required: true,
     fieldType: "email",
     label: "Courriel de l'apprenant(e) :",
     mask: "C",
@@ -180,6 +182,7 @@ export const apprenantSchema = {
     label: "Complément d'adresse :",
   },
   "apprenant.adresse.code_postal": {
+    required: true,
     label: "Code postal :",
     validateMessage: "n'est pas un code postal valide",
     pattern: "^[0-9]{5}$",

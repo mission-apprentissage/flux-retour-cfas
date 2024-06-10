@@ -247,7 +247,15 @@ function setupRoutes(app: Application) {
       })
     )
     .use("/api/emails", emails()) // No versionning to be sure emails links are always working
-    .use("/api/doc", swaggerUi.serve, swaggerUi.setup(openapiSpecs))
+    .use(
+      "/api/doc",
+      swaggerUi.serve,
+      swaggerUi.setup(openapiSpecs, {
+        customCss: ".swagger-ui .topbar { display: none }",
+        customSiteTitle: "API Mission Apprentissage",
+      })
+    )
+    .use("/api/openapi-model", (req, res) => res.download(openApiFilePath))
     .post(
       "/api/v1/auth/login",
       returnResult(async (req, res) => {

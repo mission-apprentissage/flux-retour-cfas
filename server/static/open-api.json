@@ -5,13 +5,13 @@
     "title": "API mission apprentissage",
     "description": "L'API mission apprentissage est à disposition des ERPs et organismes de formation qui souhaitent envoyer leur donnnées effectifs au tableau de bord de l'apprentissage.",
     "contact": {
-      "name": "support",
-      "email": "tableau-de-bord@apprentissage.beta.gouv.fr"
+      "url": "https://tableaudebord-apprentissage.atlassian.net/servicedesk/customer/portal/3/group/11/create/48",
+      "name": "API Support"
     }
   },
   "externalDocs": {
-    "description": "Plus d'info sur le tableau de bord de l'apprentissage",
-    "url": "https://beta.gouv.fr/startups/tdb-apprentissage.html"
+    "description": "Télécharger le modèle OpenAPI",
+    "url": "https://cfas.apprentissage.beta.gouv.fr/api/openapi-model"
   },
   "servers": [
     {
@@ -41,9 +41,8 @@
       },
       "apiKeyAuth": {
         "description": "Méthode d'authentification pour la V3 avec une clé d'API",
-        "type": "apiKey",
-        "name": "api_key",
-        "in": "header"
+        "type": "http",
+        "scheme": "bearer"
       }
     },
     "schemas": {},
@@ -204,7 +203,6 @@
                     },
                     "ine_apprenant": {
                       "type": "string",
-                      "pattern": "^(^[0-9]{9}[a-zA-Z]{2}$|^[0-9_]{10}[a-zA-Z]{1}$|^[0-9]{4}A[0-9]{5}[a-zA-Z]{1}$)$",
                       "description": "Identifiant National Élève de l'apprenant"
                     },
                     "email_contact": {
@@ -246,7 +244,7 @@
                     "periode_formation": {
                       "type": "string",
                       "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                      "example": "2021-2024"
+                      "example": "2022-2025"
                     },
                     "annee_formation": {
                       "type": "integer",
@@ -263,19 +261,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-06-08T11:08:59.201Z"
+                      "example": "2023-09-06T21:38:32.499Z"
                     },
                     "contrat_date_fin": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "contrat_date_rupture": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     }
                   },
                   "required": [
@@ -397,7 +395,6 @@
                           },
                           "ine_apprenant": {
                             "type": "string",
-                            "pattern": "^(^[0-9]{9}[a-zA-Z]{2}$|^[0-9_]{10}[a-zA-Z]{1}$|^[0-9]{4}A[0-9]{5}[a-zA-Z]{1}$)$",
                             "description": "Identifiant National Élève de l'apprenant"
                           },
                           "email_contact": {
@@ -439,7 +436,7 @@
                           "periode_formation": {
                             "type": "string",
                             "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                            "example": "2021-2024"
+                            "example": "2022-2025"
                           },
                           "annee_formation": {
                             "type": "integer",
@@ -456,19 +453,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-06-08T11:08:59.201Z"
+                            "example": "2023-09-06T21:38:32.499Z"
                           },
                           "contrat_date_fin": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "contrat_date_rupture": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "validation_errors": {
                             "type": "array",
@@ -623,7 +620,6 @@
                     },
                     "ine_apprenant": {
                       "type": "string",
-                      "pattern": "^(^[0-9]{9}[a-zA-Z]{2}$|^[0-9_]{10}[a-zA-Z]{1}$|^[0-9]{4}A[0-9]{5}[a-zA-Z]{1}$)$",
                       "description": "Identifiant National Élève de l'apprenant"
                     },
                     "email_contact": {
@@ -665,7 +661,7 @@
                     "periode_formation": {
                       "type": "string",
                       "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                      "example": "2021-2024"
+                      "example": "2022-2025"
                     },
                     "annee_formation": {
                       "type": "integer",
@@ -682,19 +678,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-06-08T11:08:59.201Z"
+                      "example": "2023-09-06T21:38:32.499Z"
                     },
                     "contrat_date_fin": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "contrat_date_rupture": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     }
                   },
                   "required": [
@@ -816,7 +812,6 @@
                           },
                           "ine_apprenant": {
                             "type": "string",
-                            "pattern": "^(^[0-9]{9}[a-zA-Z]{2}$|^[0-9_]{10}[a-zA-Z]{1}$|^[0-9]{4}A[0-9]{5}[a-zA-Z]{1}$)$",
                             "description": "Identifiant National Élève de l'apprenant"
                           },
                           "email_contact": {
@@ -858,7 +853,7 @@
                           "periode_formation": {
                             "type": "string",
                             "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                            "example": "2021-2024"
+                            "example": "2022-2025"
                           },
                           "annee_formation": {
                             "type": "integer",
@@ -875,19 +870,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-06-08T11:08:59.201Z"
+                            "example": "2023-09-06T21:38:32.499Z"
                           },
                           "contrat_date_fin": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "contrat_date_rupture": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "validation_errors": {
                             "type": "array",
@@ -980,23 +975,12 @@
                     "annee_scolaire": {
                       "type": "string"
                     },
-                    "statut_apprenant": {
-                      "type": "integer",
-                      "description": "Valeurs possibles: 0,2,3",
-                      "enum": [0, 2, 3]
-                    },
-                    "date_metier_mise_a_jour_statut": {
-                      "type": "string",
-                      "description": "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
-                      "format": "YYYY-MM-DDT00:00:00Z"
-                    },
                     "id_erp_apprenant": {
                       "type": "string",
                       "description": "Identifiant de l'apprenant dans l'ERP"
                     },
                     "ine_apprenant": {
                       "type": "string",
-                      "pattern": "^(^[0-9]{9}[a-zA-Z]{2}$|^[0-9_]{10}[a-zA-Z]{1}$|^[0-9]{4}A[0-9]{5}[a-zA-Z]{1}$)$",
                       "description": "Identifiant National Élève de l'apprenant"
                     },
                     "email_contact": {
@@ -1033,23 +1017,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-06-08T11:08:59.201Z"
+                      "example": "2023-09-06T21:38:32.499Z"
                     },
                     "contrat_date_fin": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "contrat_date_rupture": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
-                    },
-                    "nir_apprenant": {
-                      "type": "string",
-                      "pattern": "^[0-9]{13}([0-9]{2})?$"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "adresse_apprenant": {
                       "type": "string",
@@ -1069,7 +1049,6 @@
                       "type": "string",
                       "pattern": "^[MF]$",
                       "description": "Sexe de l'apprenant",
-                      "enum": ["M", "F"],
                       "example": "M"
                     },
                     "rqth_apprenant": {
@@ -1104,13 +1083,13 @@
                       "type": "string",
                       "description": "Date de l'obtention du diplôme de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "date_exclusion_formation": {
                       "type": "string",
                       "description": "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "cause_exclusion_formation": {
                       "type": "string",
@@ -1150,19 +1129,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-06-08T11:08:59.201Z"
+                      "example": "2023-09-06T21:38:32.499Z"
                     },
                     "contrat_date_fin_2": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "contrat_date_rupture_2": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "cause_rupture_contrat_2": {
                       "type": "string",
@@ -1180,19 +1159,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-06-08T11:08:59.201Z"
+                      "example": "2023-09-06T21:38:32.499Z"
                     },
                     "contrat_date_fin_3": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "contrat_date_rupture_3": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "cause_rupture_contrat_3": {
                       "type": "string",
@@ -1210,19 +1189,19 @@
                       "type": "string",
                       "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-06-08T11:08:59.201Z"
+                      "example": "2023-09-06T21:38:32.499Z"
                     },
                     "contrat_date_fin_4": {
                       "type": "string",
                       "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "contrat_date_rupture_4": {
                       "type": "string",
                       "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "cause_rupture_contrat_4": {
                       "type": "string",
@@ -1282,13 +1261,13 @@
                       "type": "string",
                       "description": "Date d'entrée de l'apprenant dans la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-06-08T11:08:59.201Z"
+                      "example": "2023-09-06T21:38:32.499Z"
                     },
                     "date_fin_formation": {
                       "type": "string",
                       "description": "Date de fin de la formation, au format ISO-8601",
                       "format": "YYYY-MM-DD",
-                      "example": "2023-11-05T12:08:59.201Z"
+                      "example": "2024-02-03T22:38:32.499Z"
                     },
                     "etablissement_responsable_uai": {
                       "type": "string",
@@ -1328,6 +1307,7 @@
                     },
                     "formation_cfd": {
                       "type": "string",
+                      "nullable": true,
                       "pattern": "^[A-Z0-9]{8}$",
                       "description": "Code Formation Diplôme (CFD)",
                       "example": "50022141"
@@ -1344,7 +1324,7 @@
                     },
                     "dernier_organisme_uai": {
                       "type": "string",
-                      "pattern": "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789]|[0-9]{7}[a-zA-Z])$",
+                      "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
                       "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
                       "example": "0123456A"
                     },
@@ -1360,8 +1340,6 @@
                     "prenom_apprenant",
                     "date_de_naissance_apprenant",
                     "annee_scolaire",
-                    "statut_apprenant",
-                    "date_metier_mise_a_jour_statut",
                     "id_erp_apprenant",
                     "date_inscription_formation",
                     "date_entree_formation",
@@ -1380,7 +1358,7 @@
         },
         "responses": {
           "200": {
-            "description": "les dossiers apprenants ont été mis en file d'attente.",
+            "description": "Les dossiers apprenants ont été mis en file d'attente.\nLa liste des données en erreurs peut être consultée dans le champ `validation_errors` ",
             "content": {
               "application/json": {
                 "schema": {
@@ -1425,23 +1403,12 @@
                           "annee_scolaire": {
                             "type": "string"
                           },
-                          "statut_apprenant": {
-                            "type": "integer",
-                            "description": "Valeurs possibles: 0,2,3",
-                            "enum": [0, 2, 3]
-                          },
-                          "date_metier_mise_a_jour_statut": {
-                            "type": "string",
-                            "description": "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
-                            "format": "YYYY-MM-DDT00:00:00Z"
-                          },
                           "id_erp_apprenant": {
                             "type": "string",
                             "description": "Identifiant de l'apprenant dans l'ERP"
                           },
                           "ine_apprenant": {
                             "type": "string",
-                            "pattern": "^(^[0-9]{9}[a-zA-Z]{2}$|^[0-9_]{10}[a-zA-Z]{1}$|^[0-9]{4}A[0-9]{5}[a-zA-Z]{1}$)$",
                             "description": "Identifiant National Élève de l'apprenant"
                           },
                           "email_contact": {
@@ -1478,23 +1445,22 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-06-08T11:08:59.201Z"
+                            "example": "2023-09-06T21:38:32.499Z"
                           },
                           "contrat_date_fin": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "contrat_date_rupture": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
-                          "nir_apprenant": {
-                            "type": "string",
-                            "pattern": "^[0-9]{13}([0-9]{2})?$"
+                          "has_nir": {
+                            "type": "boolean"
                           },
                           "adresse_apprenant": {
                             "type": "string",
@@ -1514,7 +1480,6 @@
                             "type": "string",
                             "pattern": "^[MF]$",
                             "description": "Sexe de l'apprenant",
-                            "enum": ["M", "F"],
                             "example": "M"
                           },
                           "rqth_apprenant": {
@@ -1549,13 +1514,13 @@
                             "type": "string",
                             "description": "Date de l'obtention du diplôme de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "date_exclusion_formation": {
                             "type": "string",
                             "description": "Date d'exclusion de l'apprenant de la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "cause_exclusion_formation": {
                             "type": "string",
@@ -1595,19 +1560,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-06-08T11:08:59.201Z"
+                            "example": "2023-09-06T21:38:32.499Z"
                           },
                           "contrat_date_fin_2": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "contrat_date_rupture_2": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "cause_rupture_contrat_2": {
                             "type": "string",
@@ -1625,19 +1590,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-06-08T11:08:59.201Z"
+                            "example": "2023-09-06T21:38:32.499Z"
                           },
                           "contrat_date_fin_3": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "contrat_date_rupture_3": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "cause_rupture_contrat_3": {
                             "type": "string",
@@ -1655,19 +1620,19 @@
                             "type": "string",
                             "description": "Date de début de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-06-08T11:08:59.201Z"
+                            "example": "2023-09-06T21:38:32.499Z"
                           },
                           "contrat_date_fin_4": {
                             "type": "string",
                             "description": "Date de fin de contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "contrat_date_rupture_4": {
                             "type": "string",
                             "description": "Date de rupture du contrat de l'apprenant, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "cause_rupture_contrat_4": {
                             "type": "string",
@@ -1727,13 +1692,13 @@
                             "type": "string",
                             "description": "Date d'entrée de l'apprenant dans la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-06-08T11:08:59.201Z"
+                            "example": "2023-09-06T21:38:32.499Z"
                           },
                           "date_fin_formation": {
                             "type": "string",
                             "description": "Date de fin de la formation, au format ISO-8601",
                             "format": "YYYY-MM-DD",
-                            "example": "2023-11-05T12:08:59.201Z"
+                            "example": "2024-02-03T22:38:32.499Z"
                           },
                           "etablissement_responsable_uai": {
                             "type": "string",
@@ -1773,6 +1738,7 @@
                           },
                           "formation_cfd": {
                             "type": "string",
+                            "nullable": true,
                             "pattern": "^[A-Z0-9]{8}$",
                             "description": "Code Formation Diplôme (CFD)",
                             "example": "50022141"
@@ -1790,7 +1756,7 @@
                           },
                           "dernier_organisme_uai": {
                             "type": "string",
-                            "pattern": "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789]|[0-9]{7}[a-zA-Z])$",
+                            "pattern": "^(0?[0-9][0-9]|0?2[AB]|0?9[012345]|97[1234678]|98[46789]|99[0135]|[0-9]{7}[a-zA-Z])$",
                             "description": "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou département",
                             "example": "0123456A"
                           },
@@ -1862,8 +1828,6 @@
                           "prenom_apprenant",
                           "date_de_naissance_apprenant",
                           "annee_scolaire",
-                          "statut_apprenant",
-                          "date_metier_mise_a_jour_statut",
                           "id_erp_apprenant",
                           "date_inscription_formation",
                           "date_entree_formation",
@@ -1889,8 +1853,35 @@
               }
             }
           },
+          "403": {
+            "description": "La clé d'API n'est pas valide.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Forbidden",
+                      "enum": ["Forbidden"]
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "La clé API n'est pas valide",
+                      "enum": [
+                        "Clé API manquante",
+                        "La clé API n'est pas valide",
+                        "La clé API doit etre au format Bearer"
+                      ]
+                    }
+                  },
+                  "required": ["error", "message"]
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Une erreur est survenue"
+            "description": "Une erreur inattendue est survenue"
           }
         }
       }
