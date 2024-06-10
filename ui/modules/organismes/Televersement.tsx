@@ -302,59 +302,63 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           </HStack>
         </Flex>
 
-        <Box mt={10} px={14} py={10} bg="galt">
-          <Grid templateColumns="1fr" gap={6}>
-            <Box>
-              <UnorderedList styleType="disc" spacing={3} pl={5}>
-                <ListItem>
-                  <Text>
-                    Déclarez tous vos apprenants <strong>en apprentissage</strong>, y compris les apprentis en contrat,
-                    ceux dont le contrat a été rompu, les jeunes sans contrat et les cas d&apos;abandon éventuels.
-                  </Text>
-                </ListItem>
-                <ListItem>
-                  <Text>
-                    Afin de garantir la fraîcheur des données et de permettre un soutien constant de vos apprenants,
-                    nous vous recommandons de nous transmettre les effectifs <strong>une fois par mois</strong>, de
-                    préférence entre le 1er et le 5 de chaque mois.
-                  </Text>
-                </ListItem>
-              </UnorderedList>
-              <Flex mt={4} gap="6" mb={5}>
-                <ButtonTeleversement href="/modele-import.xlsx">
-                  <DownloadSimple mr="2" />
-                  Télécharger le modèle Excel
-                </ButtonTeleversement>
-                <BasicModal
-                  renderTrigger={(onOpen) => (
-                    <ButtonTeleversement
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onOpen();
-                      }}
-                    >
-                      <Eye mr={2} />
-                      Les données obligatoires
-                    </ButtonTeleversement>
-                  )}
-                  title="Les données obligatoires à renseigner"
-                  size="4xl"
-                >
-                  <InfoTeleversement />
-                </BasicModal>
-                <ButtonTeleversement href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20">
-                  <Book mr={2} />
-                  Guide des données
-                </ButtonTeleversement>
-                <ButtonTeleversement href="https://www.canva.com/design/DAF0aDLacTk/ZxY16rI7C_vBzEuyrEpbIA/watch">
-                  <Video mr="2" />
-                  Tutoriel en vidéo
-                </ButtonTeleversement>
-              </Flex>
-              <InfoBetaPanel />
-            </Box>
-          </Grid>
-        </Box>
+        {status === null && (
+          <Box mt={10} px={14} py={10} bg="galt">
+            <Grid templateColumns="1fr" gap={6}>
+              <Box>
+                <UnorderedList styleType="disc" spacing={3} pl={5}>
+                  <ListItem>
+                    <Text>
+                      Déclarez tous vos apprenants <strong>en apprentissage</strong>, y compris les apprentis en
+                      contrat, ceux dont le contrat a été rompu, les jeunes sans contrat et les cas d&apos;abandon
+                      éventuels.
+                    </Text>
+                  </ListItem>
+                  <ListItem>
+                    <Text>
+                      Afin de garantir la fraîcheur des données et de permettre un soutien constant de vos apprenants,
+                      nous vous recommandons de nous transmettre les effectifs <strong>une fois par mois</strong>, de
+                      préférence entre le 1er et le 5 de chaque mois.
+                    </Text>
+                  </ListItem>
+                </UnorderedList>
+                <Flex mt={4} gap="6" mb={5}>
+                  <ButtonTeleversement href="/modele-import.xlsx">
+                    <DownloadSimple mr="2" />
+                    Télécharger le modèle Excel
+                  </ButtonTeleversement>
+                  <BasicModal
+                    renderTrigger={(onOpen) => (
+                      <ButtonTeleversement
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onOpen();
+                        }}
+                      >
+                        <Eye mr={2} />
+                        Les données obligatoires
+                      </ButtonTeleversement>
+                    )}
+                    title="Les données obligatoires à renseigner"
+                    size="4xl"
+                  >
+                    <InfoTeleversement />
+                  </BasicModal>
+                  <ButtonTeleversement href="https://mission-apprentissage.notion.site/Guide-des-donn-es-57bc2515bac34cee9359e517a504df20">
+                    <Book mr={2} />
+                    Guide des données
+                  </ButtonTeleversement>
+                  <ButtonTeleversement href="https://www.canva.com/design/DAF0aDLacTk/ZxY16rI7C_vBzEuyrEpbIA/watch">
+                    <Video mr="2" />
+                    Tutoriel en vidéo
+                  </ButtonTeleversement>
+                </Flex>
+                <InfoBetaPanel />
+              </Box>
+            </Grid>
+          </Box>
+        )}
+
         {status === "validation_success" && (
           <Ribbons variant="success" my={8}>
             <Box mb="8">
@@ -433,14 +437,6 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         )}
 
         <Box mt={10}>
-          <Text fontWeight="bold" fontSize={20}>
-            Sélectionner un document à importer
-          </Text>
-          <VStack align="start" mt={3} spacing={0}>
-            <Text>Sélectionner un fichier contenant vos effectifs à importer (maximum 2000).</Text>
-            <Text>Si vous utilisez plusieurs fichiers, merci d’importer vos documents un par un.</Text>
-          </VStack>
-
           {data && filteredHeaders && (
             <Box overflowX="auto" mb="8">
               <Table fontSize="sm">
@@ -527,6 +523,13 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
         )}
         {(status === "validation_failure" || status === null) && (
           <>
+            <Text fontWeight="bold" fontSize={20}>
+              Sélectionner un document à importer
+            </Text>
+            <VStack align="start" mt={3} spacing={0}>
+              <Text>Sélectionner un fichier contenant vos effectifs à importer (maximum 2000).</Text>
+              <Text>Si vous utilisez plusieurs fichiers, merci d’importer vos documents un par un.</Text>
+            </VStack>
             <Box {...getRootProps<any>({ style })} my={8} minH="200px">
               {isSubmitting ? (
                 <Box textAlign="center" flex="1" flexDirection="column">
